@@ -1,0 +1,33 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "barotrauma"
+    },
+    "edad": 29,
+    "sexo": "hombre",
+    "semilla": 3,
+    "anamnesis": {
+      "otros": "Ricardo tiene 29 años y trabaja en una faena minera en turnos de siete por siete, así que viaja en avión cada semana. Hace tres días volvió a Santiago resfriado y en el descenso sintió un dolor muy fuerte en el oído izquierdo que no se le pasó tragando ni bostezando. Desde entonces tiene ese oído tapado y oye \"apagado\". El dolor ya bajó. A ratos le zumba ese oído, con un ruido grave \"como de motor\" que va y viene. No ha tenido mareo ni vértigo, y no le ha salido líquido ni sangre del oído. Nunca había tenido problemas de oídos.",
+      "historia": "{{-3}} Servicio de urgencia: otalgia izquierda después de un vuelo. Tímpano izquierdo violáceo, con sangre detrás de la membrana (hemotímpano), sin perforación. Analgesia y descongestionante.\n{{-1}} Otorrinolaringólogo: hemotímpano izquierdo, sin nistagmo ni vértigo. Solicita audiometría e impedanciometría.",
+      "hist": [],
+      "medicamentos": "Paracetamol si hay dolor; descongestionante nasal por tres días",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

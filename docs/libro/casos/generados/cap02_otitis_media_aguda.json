@@ -1,0 +1,870 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "otitis_media_aguda",
+   "OI": "normal"
+  },
+  "edad": 8,
+  "sexo": "mujer",
+  "anamnesis": {
+   "otros": "Aurora tiene 8 años y está en tercero básico. La semana pasada se resfrió y hace cinco días, en la noche, se despertó llorando con dolor fuerte en el oído derecho y fiebre de 38,5 °C. La llevaron al servicio de urgencia y está con antibiótico desde ese día. El dolor y la fiebre se le pasaron al segundo día, pero sigue diciendo que por el derecho oye \"como dentro de una pecera\". No le zumban los oídos ni se ha mareado. Es la primera vez que tiene una otitis. Viene con su mamá, que quiere saber si va a poder dar la prueba de dictado del lunes.",
+   "historia": "{{-5}} Servicio de urgencia: otalgia derecha y fiebre. Tímpano derecho abombado y opaco, sin perforación. Otitis media aguda derecha; se indica amoxicilina por 10 días y paracetamol.\n{{-1}} Otorrinolaringólogo: ya sin dolor ni fiebre; tímpano derecho todavía abombado. Solicita audiometría e impedanciometría.",
+   "hist": [],
+   "medicamentos": "Amoxicilina (día 5 de 10); paracetamol si hay dolor",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1308825127,
+ "data": {
+  "gender": 1,
+  "id": 9127,
+  "Aerea": [
+   [
+    35,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Osea": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    15,
+    0
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    115,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    115,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    115,
+    100
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    35,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    15,
+    0
+   ],
+   [
+    15,
+    0
+   ]
+  ],
+  "Z_OD": "B",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "negativo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "negativo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 8,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.89,
+   0.57,
+   "N/D"
+  ],
+  "UMD": [
+   {
+    "int": 65,
+    "percentage": 100
+   },
+   {
+    "int": 35,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   30,
+   0
+  ],
+  "SRT": [
+   30,
+   0
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     85
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     110
+    ],
+    [
+     130,
+     105
+    ],
+    [
+     130,
+     100
+    ],
+    [
+     130,
+     100
+    ],
+    [
+     130,
+     105
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Disfunción tubaria",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Amoxicilina (día 5 de 10); paracetamol si hay dolor",
+   "cirugias": "",
+   "otros": "Aurora tiene 8 años y está en tercero básico. La semana pasada se resfrió y hace cinco días, en la noche, se despertó llorando con dolor fuerte en el oído derecho y fiebre de 38,5 °C. La llevaron al servicio de urgencia y está con antibiótico desde ese día. El dolor y la fiebre se le pasaron al segundo día, pero sigue diciendo que por el derecho oye \"como dentro de una pecera\". No le zumban los oídos ni se ha mareado. Es la primera vez que tiene una otitis. Viene con su mamá, que quiere saber si va a poder dar la prueba de dictado del lunes.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Aurora",
+     "edad": 8,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 63,
+     "confiabilidad": 83,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amv9xm65bqo",
+     "rol": "madre",
+     "nombre": "Marta Cardenas",
+     "edad": 37,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 42,
+     "conciencia": 80,
+     "confiabilidad": 83,
+     "version": "",
+     "comportamiento": "insistente, repite lo que le preocupa hasta que le contestan",
+     "disposicion": 2
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 40,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 50,
+     "tone_burst_2000Hz": 35,
+     "tone_burst_4000Hz": 35,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 45,
+     "nb_ce_chirp_ls_2000Hz": 30,
+     "nb_ce_chirp_ls_4000Hz": 35,
+     "click": 40,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 35,
+     "tone_burst_4000Hz": 35,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 30,
+     "nb_ce_chirp_ls_4000Hz": 35,
+     "click": 40,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.16,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2176,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.31,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.31,
+      "amp": -0.09
+     },
+     "onda_V": {
+      "lat": 0.31,
+      "amp": -0.14
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 10,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 10,
+     "tone_burst_4000Hz": 5,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 5,
+     "nb_ce_chirp_ls_4000Hz": 5,
+     "click": 10,
+     "ce_chirp": 5,
+     "ce_chirp_ls": 5
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 20,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 20,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1725,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.01,
+      "amp": 0
+     },
+     "onda_III": {
+      "lat": -0.01,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "child",
+    "baseline": {
+     "I": {
+      "lat": 1.48,
+      "amp": 0.239
+     },
+     "III": {
+      "lat": 3.5,
+      "amp": 0.282
+     },
+     "V": {
+      "lat": 5.5,
+      "amp": 0.41
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 34,
+     "1000": 24,
+     "1500": 18.2,
+     "2000": 14,
+     "3000": 24,
+     "4000": 14,
+     "6000": 24,
+     "8000": 14
+    },
+    "atten_db": 0,
+    "ruido_db": 1.6,
+    "sello_pct": 87,
+    "variabilidad_db": 2.9,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 1.7,
+    "sello_pct": 92,
+    "variabilidad_db": 2.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T19:28:40+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Aurora Gabriela",
+   "apellido": "Cardenas Guzmán",
+   "rut": "25768352",
+   "fecha_nac": "26-03-2018"
+  },
+  "historia_clinica": "{{-5}} Servicio de urgencia: otalgia derecha y fiebre. Tímpano derecho abombado y opaco, sin perforación. Otitis media aguda derecha; se indica amoxicilina por 10 días y paracetamol.\r\n{{-1}} Otorrinolaringólogo: ya sin dolor ni fiebre; tímpano derecho todavía abombado. Solicita audiometría e impedanciometría."
+ }
+}

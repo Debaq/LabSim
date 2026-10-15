@@ -1,0 +1,33 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "disfuncion_tubaria",
+      "OI": "disfuncion_tubaria"
+    },
+    "edad": 34,
+    "sexo": "mujer",
+    "semilla": 3,
+    "anamnesis": {
+      "otros": "Irene tiene 34 años y es profesora de básica. Tiene rinitis alérgica desde chica y vive con la nariz tapada. Hace unos cuatro meses, después de un resfrío, siente los dos oídos tapados, \"como al bajar del cerro en auto\", más el derecho. Al tragar le crujen y a veces se le destapan un rato si se sopla con la nariz apretada, pero vuelven a taparse. En la sala de clases le cuesta entender a los niños del fondo. No ha tenido dolor, secreción, zumbidos ni mareos. No escucha su propia voz más fuerte de lo normal.",
+      "historia": "{{-120}} Médico general: rinitis alérgica y sensación de oídos tapados. Tímpanos retraídos. Indica corticoide nasal.\n{{-20}} Otorrinolaringólogo: tímpanos retraídos en los dos lados, sin líquido visible; mucosa nasal pálida y edematosa. Solicita audiometría e impedanciometría con función tubaria.",
+      "hist": [],
+      "medicamentos": "Mometasona nasal, un disparo en cada fosa al día (la usa a ratos)",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}
