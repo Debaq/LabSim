@@ -475,6 +475,14 @@ salga de un simulador.
 
 ## 5. Decisiones que le tocan al autor
 
+> **Decidido (2026-10-15):** LabSim **no** se expande a lo vestibular. Las
+> figuras y la práctica vestibulares salen de **trainHIT** (vHIT) y
+> **labyrinthus3d** (VNG, posicionales, calórica, oculomotor, postural); el
+> VEMP sigue en LabSim. Es la opción (b) de la decisión 2: en esos capítulos
+> el bloque "En LabSim" pasa a ser "En el simulador" (trainHIT o
+> labyrinthus3d). Quedan abiertas la 3 (puente Node o port a Python del
+> modelo de labyrinthus3d) y las demás.
+
 1. **¿Parte IX o Volumen 2?** Si es volumen 2, ¿H12 y el cap. 20 se quedan en
    el 1 o se mudan?
 2. **¿De dónde pueden salir las figuras vestibulares?** Las opciones son:
