@@ -161,19 +161,19 @@ final class AudiometriaPaciente
 
     /**
      * _resolve_masked_threshold: umbral que muestra el oído $oe con
-     * $ruido dB de enmascaramiento en $on. Dentro del rango, el real;
-     * sobre el máximo, 130 (sobreenmascarado); bajo el mínimo, la sombra.
+     * $ruido dB de enmascaramiento en $on. El paciente contesta por el
+     * camino que primero oye el tono: por el oído estudiado (su umbral real,
+     * que sube dB a dB pasado el máximo: sobreenmascaramiento) o por cruce
+     * al no estudiado (la sombra, que sube dB a dB desde que el ruido
+     * empieza a taparlo: subenmascaramiento). Entre mínimo y máximo, el real.
      */
     public function umbralAparente(string $via, int $f, int $oe, int $on, int $ruido, int $ce): int
     {
         $m = $this->rangoEnmascaramiento($via, $f, $oe, $on, $ce);
-        if ($ruido >= $m['min'] && $ruido <= $m['max']) {
-            return $m['real'];
-        }
-        if ($ruido > $m['max']) {
-            return 130;
-        }
-        return $m['sombra'];
+        $inicio = $m['minimo'] - ($m['real'] - $m['cruce']);
+        $porCruce = $m['cruce'] + max(0, $ruido - $inicio);
+        $porEstudiado = $m['real'] + max(0, $ruido - $m['maximo']);
+        return min(130, $porCruce, $porEstudiado);
     }
 
     /** _masking_calc */
@@ -188,7 +188,8 @@ final class AudiometriaPaciente
             $min = $uae - $at - $uone + $uane + $ce;
             $max = $uoe + $at;
             $real = $uae;
-            $sombra = min($uae, $at + $uone);
+            $cruce = $at + $uone;
+            $sombra = min($uae, $cruce);
         } else {
             $uoe = $this->u('Osea_mkg', $f, $oe);
             $uone = $this->u('Osea_mkg', $f, $on);
@@ -196,9 +197,11 @@ final class AudiometriaPaciente
             $min = $uoe - $uone + $uane + $ce + $this->oclusion($f, $on);
             $max = $uoe + $at;
             $real = $uoe;
-            $sombra = min($uoe, $uone);
+            $cruce = $uone;
+            $sombra = min($uoe, $cruce);
         }
-        return ['min' => min($min, $max), 'max' => max($min, $max), 'real' => $real, 'sombra' => $sombra];
+        return ['min' => min($min, $max), 'max' => max($min, $max), 'real' => $real, 'sombra' => $sombra,
+                'cruce' => $cruce, 'minimo' => $min, 'maximo' => $max];
     }
 
     /** Umbral real del caso. */

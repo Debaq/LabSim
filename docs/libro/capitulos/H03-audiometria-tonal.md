@@ -140,11 +140,26 @@ Se empieza en 1 kHz porque es la frecuencia más estable y la más fácil de oí
 
 ### 4. Vía ósea
 
-Se toma **apenas termina la vía aérea**, antes de la logoaudiometría. El enmascaramiento de la vía aérea y de la logoaudiometría se calcula con la ósea del oído no evaluado: sin ella no se sabe cuánto ruido poner.
+En este libro la vía ósea va **al final de la batería**: después de la vía aérea, la logoaudiometría, la acufenometría y las pruebas supraliminares. Es el orden del laboratorio y el que espera LabSim.
 
-<!-- Protocolo ORL 2019: tomaba los umbrales óseos al final de la batería, después de logoaudiometría, tinnitumetría, LDL y supraliminares. Se corrigió a "inmediatamente después de la vía aérea" (ISO 8253-1:2010 §4.1: "air conduction measurements followed by bone conduction measurements"; ISP 2012 §2.2.2.1; ASHA 2005 y BSA 2018 la incluyen dentro de la audiometría tonal). Además, las reglas de enmascaramiento de la vía aérea y de la logo usan la ósea del oído no evaluado. -->
+**Por qué este orden.** Todo lo que se hace con fonos va primero y el cambio al vibrador se hace **una sola vez**. Cada cambio de transductor obliga a entrar a la cabina, sacar y volver a poner los fonos, mover al paciente y recolocar el vibrador. Eso son minutos de examen, fatiga del paciente y oportunidades de dejar un fono corrido. Con un solo cambio, la batería es más corta y más estable.
 
-<!-- Ojo autor: el indicador de técnica de LabSim (AudiometriaTecnica::orden, T00) todavía espera "aéreos → logo → tinnitumetría → supraliminares → óseos". Si el libro enseña la ósea después de la aérea, el indicador lo marca como incumplido. -->
+:::comentario Lo que dicen las normas
+Las normas y guías ponen la ósea **inmediatamente después de la aérea**:
+
+- La ISO 8253-1:2010 (§4.1) recomienda empezar por la conducción aérea, "seguida de" la ósea.
+- La guía técnica del ISP (2012) dice que, una vez terminada la aérea, "se realiza la evaluación por vía ósea".
+- La NTP 285 (INSST, 1992) dice lo mismo.
+- ASHA (2005) y la BSA (2018) la describen dentro de la misma audiometría tonal.
+
+Ninguna fuente que revisamos la deja al final de la batería. Su razón es práctica y tiene peso: las reglas para enmascarar la aérea y la logoaudiometría comparan contra la **ósea del oído no evaluado**, y con la ósea al final ese dato todavía no existe cuando lo necesitas.
+:::
+
+:::ojo Cómo se trabaja con la ósea al final
+Mientras no tengas la ósea, decide si enmascarar la aérea y la logoaudiometría comparando contra la **aérea del oído no evaluado**. La ósea nunca es peor que la aérea, así que esa comparación puede quedarse corta, pero nunca pide de más.
+
+Cuando ya tengas la ósea, **revisa**: donde la ósea del oído no evaluado salió mejor que su aérea (un gap), vuelve a esa frecuencia y comprueba si la aérea del otro oído necesitaba ruido (→ H4).
+:::
 
 - **Dónde**: el vibrador va en la **mastoides**, lo más cerca posible detrás del pabellón **sin tocarlo** y sin apoyarse en pelo (BSA, 2018). La diadema pasa por arriba de la cabeza hasta el otro lado. Si toca la oreja o queda flojo, la ósea sale peor de lo que es y aparece un gap que no existe.
 - **Qué oído primero**: el **peor** por vía aérea, porque es el que va a necesitar enmascaramiento (BSA, 2018; ISP, 2012).
@@ -168,7 +183,7 @@ Se repite la acumetría. Si sigue sin calzar, se hace un **Weber audiométrico**
 - **Responde: −10. No responde: +5.**
 - Umbral en ascenso: **2 de 3**.
 - 1-2-3-4-6-8 kHz, **repetir 1 kHz**, 500-250-125 Hz.
-- Ósea apenas termina la aérea: mastoides, sin tocar el pabellón, 250 a 4.000 Hz, oído peor primero.
+- Ósea al final de la batería (un solo cambio de transductor): mastoides, sin tocar el pabellón, 250 a 4.000 Hz, oído peor primero.
 :::
 
 ### Audiometría de screening
@@ -386,7 +401,7 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 
 :::pregunta Preguntas para practicar
 1. Un paciente responde a 30, no a 20, sí a 25, no a 15, no a 20 y sí a 25. ¿Cuántos ascensos llevas? ¿Te alcanza para dar 25 dB como umbral con el criterio de 2 de 3?
-2. ¿Por qué se toma la vía ósea antes de la logoaudiometría y no al final de la batería?
+2. Este libro toma la vía ósea al final de la batería y las normas la ponen justo después de la aérea. ¿Qué gana cada orden y qué tienes que revisar cuando la tomas al final?
 3. En el caso de Carolina, ¿qué pasaría con su gap si le pones el vibrador tocando el pabellón? ¿Y si dejas el fono puesto sobre el oído derecho mientras mides su ósea?
 4. Calcula el grado BIAP de Luis en el OI con los valores de la figura. ¿Cambia algo si usas el promedio de 500, 1.000 y 2.000 Hz?
 5. En una audiometría de seguimiento de Tomás, dentro de cinco años, 4 kHz está en 30 dB en los dos oídos y 8 kHz en 10. Compárala con su audiometría de base: ¿qué forma está empezando a aparecer?

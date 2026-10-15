@@ -678,7 +678,7 @@
    "esperado": true
   },
   {
-   "nombre": "ruido blanco suma CE: a 55 todavia submascara",
+   "nombre": "ruido blanco suma CE: a 15 el tono todavia cruza (con NBN ya no)",
    "caso": "anacusia_od",
    "estado": {
     "prueba": "Umbrales",
@@ -694,7 +694,7 @@
      },
      {
       "on": true,
-      "int": 55,
+      "int": 15,
       "output": 1,
       "trans": 0,
       "stim": 4
@@ -703,6 +703,33 @@
    },
    "previa": false,
    "esperado": true
+  },
+  {
+   "nombre": "NBN a 15: ya tapa el cruce y no oye",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 50,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 15,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": false
   },
   {
    "nombre": "NBN a 55 ya enmascara",
@@ -732,7 +759,7 @@
    "esperado": false
   },
   {
-   "nombre": "sobreenmascarado: no oye",
+   "nombre": "sobreenmascarado: el umbral sube con el ruido (90 de ruido, no oye 85)",
    "caso": "conductiva_od",
    "estado": {
     "prueba": "Umbrales",
@@ -741,7 +768,7 @@
     "canales": [
      {
       "on": true,
-      "int": 100,
+      "int": 85,
       "output": 0,
       "trans": 0,
       "stim": 0

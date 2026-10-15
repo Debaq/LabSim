@@ -2690,6 +2690,14 @@ final class CaseProfile
      */
     public static function discrimination(array $decomp, float $ccePct, array $retro): array
     {
+        // Sin respuesta en las frecuencias del habla (cófosis): no hay voz que
+        // oír ni al máximo del audiómetro, la discriminación es 0 %. Antes la
+        // cuenta general daba un porcentaje inventado (20 % a 110 dB en el
+        // paciente de práctica 42).
+        $sinHabla = array_intersect($decomp['sin_respuesta']['air'] ?? [], [500, 1000, 2000]);
+        if (count($sinHabla) >= 2) {
+            return ['pct' => 0, 'int' => (int) self::LOGO_MAX_DB];
+        }
         $ccePct = self::clamp($ccePct, 0.0, 100.0);
         // Para el porcentaje manda la banda de las consonantes; para la
         // intensidad a la que se alcanza, el promedio de Fletcher.

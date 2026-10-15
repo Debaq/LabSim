@@ -5410,3 +5410,44 @@ crea los que falten sin pisar nada. Recién nacidos y lactantes con
 `![qué muestra](ilustraciones/x.png)`: sale "pendiente" hasta que existe el
 archivo (BioRender publica solo con plan pagado; Servier Medical Art, CC BY
 4.0, es la alternativa de estilo parecido).
+
+## Enmascaramiento tonal: curva gradual en vez de escalones (2026-10-15)
+
+`_resolve_masked_threshold` (app) y su espejo `AudiometriaPaciente::umbralAparente`
+(backend) devolvían tres peldaños: la sombra fija bajo el mínimo, el umbral
+real entre mínimo y máximo, y 130 sobre el máximo. Con eso el método del
+plateau de Hood no se podía practicar: el umbral saltaba de golpe. Lo encontró
+la redacción de H4 del libro y lo confirmó el docente como error.
+
+Ahora el paciente contesta por el camino que primero oye el tono, el menor de:
+
+- por el oído estudiado: su umbral real, corrido dB a dB pasado el máximo
+  (sobreenmascaramiento: el ruido cruza y lo tapa);
+- por cruce al no estudiado: la sombra, corrida dB a dB desde que el ruido
+  empieza a tapar ese oído (`inicio = mínimo - (real - cruce)`).
+
+Entre mínimo y máximo queda la meseta. Con el mínimo sobre el máximo no hay
+meseta: el dilema sale solo, sin programarlo (el rango que muestra el panel
+de depuración sigue ordenado; ver TODO 10). Tests: `CurvaDeEnmascaramientoTest`
+en tests/test_masking_tonal.py; dos escenas del fixture compartido se
+reescribieron para el modelo nuevo (CE del ruido blanco por contraste con NBN,
+y el sobreenmascarado que sube en vez de desaparecer).
+
+## Cófosis: discriminación 0 %, no un número inventado (2026-10-15)
+
+`CaseProfile::discrimination` calculaba igual cualquier pérdida y a un oído
+sin respuesta le daba un porcentaje (el paciente de práctica 42 tenía 20 % a
+110 dB en su OD cofótico). Ahora, sin respuesta por aérea en dos o más de
+500/1000/2000 Hz, la discriminación es 0 % a 110 dB. Corregido el caso 42 en
+`docs/manual/capturas/casos_demo.json`; en producción, pendiente de token de
+consola.
+
+## Libro: la vía ósea al final, explicada (2026-10-15)
+
+El libro sigue el orden del laboratorio (ósea al final de la batería, un solo
+cambio de transductor; es lo que evalúa T00) con la lógica del porqué, un
+recuadro con lo que dicen ISO 8253-1:2010, ISP 2012, NTP 285, ASHA 2005 y BSA
+2018 (después de la aérea), y cómo se trabaja así: enmascarar comparando
+contra la aérea del no evaluado y revisar cuando aparece la ósea. Regla del
+libro: las decisiones docentes se respetan y se explican; solo los errores
+factuales se corrigen con bibliografía.

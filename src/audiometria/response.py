@@ -601,13 +601,11 @@ class ResponseAudiometry():
 
     def _masking_calc(self, via, frecuency, o_e, o_n, ce=0):
         """
-        Rango [mkg_min, mkg_max] de ruido de enmascaramiento valido y umbral
-        aparente resultante en cada zona:
-        - dentro del rango: umbral real del oido estudiado (bien enmascarado)
-        - sobre mkg_max: sobre-enmascarado, no responde (130)
-        - bajo mkg_min: sub-enmascarado / sin enmascarar -> "curva sombra":
-          el paciente responde por cruce hacia el oido NO estudiado, no por
-          su propio umbral real.
+        Rango [mkg_min, mkg_max] de ruido de enmascaramiento valido, umbral
+        real, curva sombra (umbral por cruce sin ruido) y los valores sin
+        ordenar. Lo que mide el alumno con cada nivel de ruido lo arma
+        _resolve_masked_threshold: sombra que sube dB a dB bajo el minimo,
+        el real en la meseta y el real corrido dB a dB sobre el maximo.
 
         En via osea la atenuacion interaural clinica es ~0dB (a diferencia
         de la via aerea, 35-50dB segun frecuencia), por eso no se usa
@@ -622,7 +620,8 @@ class ResponseAudiometry():
             mkg_min = uae - at - uone + uane + ce
             mkg_max = uoe + at
             real = uae
-            shadow = min(uae, at + uone)
+            cruce = at + uone
+            shadow = min(uae, cruce)
         elif via == 'osea':
             uoe = self.dbdata['Osea_mkg'][frecuency][o_e]
             uone = self.dbdata['Osea_mkg'][frecuency][o_n]
@@ -642,12 +641,16 @@ class ResponseAudiometry():
             # debajo del minimo, y el rango terminaba invertido.
             mkg_max = uoe + self.attenuations[frecuency]
             real = uoe
-            shadow = min(uoe, uone + at)
+            cruce = uone + at
+            shadow = min(uoe, cruce)
         else:
             raise ValueError(f"via desconocida: {via}")
 
         mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
-        return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi, 'real': real, 'shadow': shadow}
+        # Los valores SIN ordenar quedan para _resolve_masked_threshold: con
+        # el dilema (mínimo sobre el máximo) el rango ordenado lo esconde.
+        return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi, 'real': real, 'shadow': shadow,
+                'cruce': cruce, 'minimo': mkg_min, 'maximo': mkg_max}
 
     def _canal_ruido(self, o_n):
         """Canal encendido que esta entregando ruido en el oido `o_n`.
@@ -667,13 +670,29 @@ class ResponseAudiometry():
 
     def _resolve_masked_threshold(self, via, frecuency, o_e, o_n, int_mkg,
                                   ce=0):
+        """Umbral que mide el alumno con `int_mkg` de ruido en el oído no estudiado.
+
+        El paciente contesta por el camino que primero oye el tono, así que
+        el umbral es el menor de dos:
+
+        - por el oído estudiado: su umbral real, que sube dB a dB cuando el
+          ruido pasa el máximo (sobreenmascaramiento: el ruido cruza y lo tapa);
+        - por cruce al oído no estudiado: la curva sombra, que sube dB a dB
+          desde que el ruido empieza a tapar ese oído (subenmascaramiento).
+
+        Entre el mínimo y el máximo gana el umbral real: la meseta del método
+        de Hood. Antes era una escalera de tres peldaños (sombra fija, real,
+        130) y el plateau se veía como un salto. Con el mínimo sobre el máximo
+        no hay ruido que dé el umbral real: el dilema, sin programarlo aparte.
+        """
         calc = self._masking_calc(via, frecuency, o_e, o_n, ce)
-        if calc['mkg_min'] <= int_mkg <= calc['mkg_max']:
-            return calc['real']
-        elif int_mkg > calc['mkg_max']:
-            return 130
-        else:
-            return calc['shadow']
+        real, cruce = calc['real'], calc['cruce']
+        # El ruido empieza a tapar el oído no estudiado en `inicio`: el mínimo
+        # es justo el nivel en que el cruce sube hasta el umbral real.
+        inicio = calc['minimo'] - (real - cruce)
+        por_cruce = cruce + max(0, int_mkg - inicio)
+        por_estudiado = real + max(0, int_mkg - calc['maximo'])
+        return min(130, por_cruce, por_estudiado)
 
     def response_aerea_w_msk(self):
         """

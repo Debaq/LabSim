@@ -161,6 +161,55 @@ class MaskingAereoTest(unittest.TestCase):
         self.assertEqual(calc['shadow'], AT_1000 + 5)
 
 
+class CurvaDeEnmascaramientoTest(unittest.TestCase):
+    """El umbral que se mide al subir el ruido: lo que se ve con el método
+    de Hood. Antes era una escalera (sombra fija, real, 130) y el plateau
+    aparecía como un salto."""
+
+    def setUp(self):
+        # OD sensorioneural de 90 dB, OI normal (5 dB por las dos vías)
+        self.r = ResponseAudiometry(FakeAudio())
+        self.r.set_case(caso(tabla(90, 5), tabla(90, 5)))
+        self.calc = self.r._masking_calc('aerea', F1000, 0, 1)
+
+    def umbral(self, ruido):
+        return self.r._resolve_masked_threshold('aerea', F1000, 0, 1, ruido)
+
+    def test_sin_ruido_contesta_la_sombra(self):
+        self.assertEqual(self.umbral(0), self.calc['shadow'])
+
+    def test_subenmascarado_sube_db_a_db(self):
+        """Cada 10 dB de ruido sobre el oído sano corren la sombra 10 dB."""
+        bajo = self.calc['mkg_min'] - 30
+        self.assertEqual(self.umbral(bajo + 10) - self.umbral(bajo), 10)
+
+    def test_la_meseta_da_el_umbral_real(self):
+        for ruido in range(self.calc['mkg_min'], self.calc['mkg_max'] + 1, 5):
+            self.assertEqual(self.umbral(ruido), self.calc['real'])
+
+    def test_sobreenmascarado_sube_en_vez_de_desaparecer(self):
+        """Pasado el máximo, el ruido cruza y corre el umbral del oído
+        estudiado: no es 'no responde' de golpe."""
+        sobre = self.calc['mkg_max'] + 10
+        self.assertEqual(self.umbral(sobre), self.calc['real'] + 10)
+
+    def test_el_dilema_no_tiene_meseta(self):
+        """Mixta bilateral: con el mínimo sobre el máximo no hay meseta. El
+        umbral real puede coincidir en UN nivel de ruido (por cruce, no por
+        el oído estudiado), pero nunca se sostiene en niveles seguidos, que
+        es lo que el método de Hood exige para darlo por bueno."""
+        r = ResponseAudiometry(FakeAudio())
+        r.set_case(caso(tabla(60, 60), tabla(10, 10)))
+        real = r._masking_calc('aerea', F1000, 0, 1)['real']
+        con_real = [ruido for ruido in range(0, 121, 5)
+                    if r._resolve_masked_threshold('aerea', F1000, 0, 1, ruido) == real]
+        self.assertLessEqual(len(con_real), 1)
+
+    def test_sin_dilema_la_meseta_dura_varios_niveles(self):
+        self.assertGreaterEqual(
+            sum(self.umbral(n) == self.calc['real'] for n in range(0, 121, 5)), 3)
+
+
 if __name__ == "__main__":
     unittest.main()
 

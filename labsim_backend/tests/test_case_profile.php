@@ -590,6 +590,12 @@ t_eq($logoCond['pct'], 100, 'Conductiva: la discriminación máxima no cae, una 
 t_true($logoCond['int'] > $logoSano['int'] + 25,
     'Conductiva: el máximo se alcanza mucho más fuerte');
 
+// Cófosis: sin respuesta en las frecuencias del habla no hay discriminación.
+// Antes la cuenta general daba un número (20 % a 110 dB en el paciente 42).
+$dCofosis = CaseProfile::decompose(array_fill(0, 9, [130, 0]), array_fill(0, 9, [130, 0]), 0, 100.0);
+$logoCofosis = CaseProfile::discrimination($dCofosis, 100.0, $sinRetro);
+t_eq($logoCofosis['pct'], 0, 'Cófosis: 0 % de discriminación, no un porcentaje inventado');
+
 // ---------------------------------------------------------------------
 // LDL: el reclutamiento no se dibuja, cae de la física.
 // ---------------------------------------------------------------------
