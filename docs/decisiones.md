@@ -1101,9 +1101,8 @@ escribir sin mentir. Ordenado por cuántos cuadros desbloquea:
       abombado), `colesteatoma`, `perforacion`, `glomus_timpanico` (masa
       retrotimpánica) y `estenosis_atresia_cae` tienen hallazgo otoscópico
       obligado, y hoy se carga aparte del cuadro.
-- [ ] **Timpanograma "no registrable".** `Z_OPTIONS` no lo tiene. La
-      atresia de CAE se escribe hoy con `B`, que es lo menos falso
-      disponible pero sigue siendo falso: no hay dónde sellar la sonda.
+- [x] **Timpanograma "no registrable".** Hecho 2026-10-15 como `NR`, ver
+      "Impedanciometría no realizable (NR)".
 - [ ] **Eje no orgánico** (respuestas inconsistentes, SRT que no cuadra con
       el PTA, Stenger positivo). No hay nada de esto en el perfil y es un
       ejercicio entero.
@@ -5451,3 +5450,38 @@ recuadro con lo que dicen ISO 8253-1:2010, ISP 2012, NTP 285, ASHA 2005 y BSA
 contra la aérea del no evaluado y revisar cuando aparece la ósea. Regla del
 libro: las decisiones docentes se respetan y se explican; solo los errores
 factuales se corrigen con bibliografía.
+
+## Impedanciometría no realizable (NR) (2026-10-15)
+
+Había cuadros donde la impedanciometría no se hace y el sistema igual
+dibujaba una curva: la atresia salía con un `B` que nadie midió, y la otitis
+externa con una `A` medida a través de un conducto edematoso con secreción.
+El caso que lo destapó fue el herpes zóster ótico: con vesículas o secreción
+en el conducto la oliva no entra -- duele y se ensucia la sonda.
+
+**Decisión:** una opción más del timpanograma por oído, `NR` (no realizable,
+`CaseBuilder::Z_NO_REALIZABLE`). No es una curva: es la decisión de no meter
+nada a ese conducto.
+
+- En un oído NR no va la sonda **ni el auricular del estímulo
+  contralateral**. Quedan sin hacer: timpanograma, ipsi de ese oído, contra
+  con la sonda ahí, contra estimulado por ese oído, decay y ETF
+  (`CaseProfile::reflejoNoRealizable`). Los umbrales se guardan como
+  `REFLEX_ABSENT_DB` (el dato sigue siendo numérico) y quien los muestra
+  --ficha PDF, patrón del editor, libro-- los rotula "NR" mirando
+  `Z_OD`/`Z_OI`: no es un reflejo ausente, es uno que no se buscó.
+- La app no barre ni estimula en ese oído: si el alumno lo intenta, la
+  pantalla dice "NO REALIZABLE" y queda en el log (`z_no_realizable`), para
+  que el docente vea quién metió la sonda donde no iba. El aviso sale
+  recién al intentar, no al elegir el oído: decidir no medir es parte del
+  ejercicio y sale de la otoscopía y la anamnesis.
+- Cuadros que nacen NR: `estenosis_atresia_cae` (no hay dónde sellar),
+  `otitis_externa` (conducto edematoso, doloroso, con secreción) y
+  `cuerpo_extrano_cae` (se empuja hacia el tímpano). El docente puede
+  ponerlo a mano en cualquier otro caso -- herpes zóster ótico, otorrea
+  activa, cirugía reciente.
+- `tapon_cerumen` queda como estaba: el timpanograma con el tapón es un
+  hallazgo que se enseña.
+- No hay cuadro de herpes zóster ótico (Ramsay Hunt) en `SCENARIOS`; se arma
+  a mano con NR en el oído afectado.
+

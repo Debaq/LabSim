@@ -14,6 +14,20 @@ PROBE_1000_POSITIVE_PROB = {
 }
 
 
+# Impedanciometria NO REALIZABLE en ese oido (CaseBuilder::Z_NO_REALIZABLE en
+# el backend): la sonda no va -- atresia, otitis externa o herpes zoster
+# otico con secrecion, cuerpo extrano. No es una curva: el equipo no mide ahi,
+# ni con la sonda ni con el auricular del estimulo contralateral.
+Z_NO_REALIZABLE = 'NR'
+
+
+def oido_no_realizable(data, idx):
+    """True si el caso marca NR en ese oido (0 = OD, 1 = OI)."""
+    if not data:
+        return False
+    return data.get('Z_OD' if idx == 0 else 'Z_OI') == Z_NO_REALIZABLE
+
+
 # Edad hasta la cual la sonda de 226 Hz no sirve. Bajo los 6 meses la pared
 # del conducto todavia es cartilaginosa y blanda, y su movimiento DOMINA la
 # admitancia medida: el equipo dibuja un pico que es de la pared, no del

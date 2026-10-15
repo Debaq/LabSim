@@ -65,9 +65,22 @@ window.drawTympanogram = (function () {
         while (group.firstChild) group.removeChild(group.firstChild);
 
         var fueraDeEscala = 0;
+        var noRealizables = 0;
         [['z_od', window.sideColor('od')], ['z_oi', window.sideColor('oi')]].forEach(function (pair) {
             var node = document.getElementById(pair[0]);
             var type = node ? node.value : 'A';
+            // NR (CaseBuilder::Z_NO_REALIZABLE): la sonda no va en ese oído,
+            // no hay curva. Se rotula en vez de dibujar, igual que el PDF.
+            if (type === 'NR') {
+                var aviso = el('text', {
+                    x: 172, y: 140 + noRealizables * 14, 'text-anchor': 'middle',
+                    'font-size': '10', 'font-weight': 'bold', fill: pair[1]
+                });
+                aviso.textContent = (pair[0] === 'z_od' ? 'OD' : 'OI') + ': no realizable';
+                group.appendChild(aviso);
+                noRealizables++;
+                return;
+            }
             var v = values(type);
 
             // Ventana de la gradiente: rectángulo de 100 daPa centrado en el

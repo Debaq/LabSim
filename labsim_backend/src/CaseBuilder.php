@@ -46,7 +46,22 @@ final class CaseBuilder
     // alumno según su propio avance con ese paciente: TODO, ver TODO.md.
     public const OTOSCOPIA_MAX_FASES = 20;
 
-    public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
+    public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B', 'NR'];
+
+    /**
+     * 'NR' = impedanciometría NO REALIZABLE en ese oído: la sonda no va.
+     * No es una curva (no hay pico ni plano que dibujar): es la decisión
+     * clínica de no meter nada al conducto -- atresia (no hay dónde
+     * sellar), otitis externa o herpes zóster ótico con vesículas o
+     * secreción (duele y ensucia la oliva), cuerpo extraño (se empuja).
+     * En ese oído tampoco entra el auricular del estímulo contralateral:
+     * no hay reflejos con sonda ahí ni estimulados por ahí. El equipo de
+     * la app no mide en ese oído (ver Z.py, oido_no_realizable).
+     */
+    public const Z_NO_REALIZABLE = 'NR';
+    public const Z_LABELS = [
+        'NR' => 'NR · no realizable (no va la sonda)',
+    ];
 
     /**
      * Timpanograma de ALTA FRECUENCIA (sonda de 1000 Hz), el del lactante.

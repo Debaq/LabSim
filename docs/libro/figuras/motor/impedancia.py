@@ -11,6 +11,9 @@ from .svg import Svg
 FRECS_REFLEJO = ['500', '1000', '2000', '4000', 'NBN']
 ROTULO_FRECS = ['500', '1k', '2k', '4k', 'NBN']
 SIN_REFLEJO = 130
+# Impedanciometría no realizable en ese oído: la sonda no va (ver
+# CaseBuilder::Z_NO_REALIZABLE en el backend). No hay curva ni reflejos.
+NO_REALIZABLE = 'NR'
 
 
 def _curva(caso, lado, sonda=226):
@@ -58,6 +61,11 @@ def timpanograma(caso, oidos=('OD', 'OI'), escala_ml=2.0, sonda=226):
                 s.texto(x0 - 7, Y(v) + 3, f'{v:.1f}'.replace('.', ','), E.T_EJE, E.TENUE, 'end')
         s.texto(x0, mt - 12, E.NOMBRE_LADO[lado], E.T_TITULO, E.TINTA, 'start', 600)
 
+        if caso.get(f'Z_{lado}') == NO_REALIZABLE:
+            s.ancla(f'{lado} no realizable', x0 + pw / 2, mt + ph / 2)
+            s.texto(x0 + pw / 2, mt + ph / 2, 'No realizable', E.T_TITULO, col, peso=600)
+            s.texto(x0 + pw / 2, mt + ph / 2 + 16, 'la sonda no va en este oído', E.T_ROTULO, E.TENUE)
+            continue
         d = _curva(caso, lado, sonda)
         if d is None:
             s.texto(x0 + pw / 2, mt + ph / 2, 'Sin timpanograma en el caso', E.T_ROTULO, E.TENUE)
@@ -85,7 +93,7 @@ def timpanograma(caso, oidos=('OD', 'OI'), escala_ml=2.0, sonda=226):
 
 
 def reflejos(caso):
-    """Tabla de umbrales del reflejo estapedial (dB HL), por sonda.
+    """Tabla de umbrales del reflejo estapedial (dB SPL), por sonda.
 
     En el caso cada umbral está por SONDA (columna 0 = sonda OD): en el
     contralateral el tono entra por el otro oído, y eso se escribe en el
@@ -105,7 +113,9 @@ def reflejos(caso):
                         vals.append(float(datos[i][j]))
                     except (IndexError, TypeError, ValueError):
                         vals.append(None)
-                filas.append((nombre, sub, lado, vals))
+                # Un oído NR no recibe ni la sonda ni el auricular del tono
+                nr = NO_REALIZABLE in (caso.get(f'Z_{lado}'), caso.get(f'Z_{lado if modo == "ipsi" else otro}'))
+                filas.append((nombre, sub, lado, ['NR'] * len(vals) if nr else vals))
 
     cw, rh, ml, mt = 54, 26, 170, 34
     s = Svg(ml + cw * len(FRECS_REFLEJO) + 10, mt + rh * max(len(filas), 1) + 22)
@@ -125,13 +135,18 @@ def reflejos(caso):
             cx = ml + cw * i + cw / 2
             # al costado derecho del valor: el globo apunta al dato sin taparlo
             s.ancla(f"{'ipsi' if nombre == 'Ipsilateral' else 'contra'} {lado} {FRECS_REFLEJO[i]}", cx + 16, y + rh / 2)
-            if i == 4 and nombre == 'Ipsilateral' and v is None:
+            if i == 4 and nombre == 'Ipsilateral' and v in (None, 'NR'):
                 s.texto(cx, y + rh / 2 + 3, '·', E.T_ROTULO, E.MUY_TENUE)
+            elif v == 'NR':
+                s.texto(cx, y + rh / 2 + 3, 'NR', E.T_CHICO, E.TENUE)
             elif v is None or v >= SIN_REFLEJO:
                 s.texto(cx, y + rh / 2 + 3, 'Ausente', E.T_CHICO, E.TENUE)
             else:
                 s.texto(cx, y + rh / 2 + 3, f'{v:g}', E.T_ROTULO, E.TINTA, peso=600)
-    s.texto(ml, s.alto - 6, 'Umbral del reflejo en dB HL', E.T_CHICO, E.TENUE, 'start')
+    pie = 'Umbral del reflejo en dB SPL'
+    if any(v == 'NR' for *_, vals in filas for v in vals):
+        pie += ' · NR = no realizable (la sonda o el auricular no van en ese oído)'
+    s.texto(ml if len(pie) < 40 else 14, s.alto - 6, pie, E.T_CHICO, E.TENUE, 'start')
     return s.svg()
 
 

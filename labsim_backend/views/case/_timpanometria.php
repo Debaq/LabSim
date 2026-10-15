@@ -91,19 +91,19 @@
 <div class="audiometria-fields">
 <div class="card">
     <strong>Timpanometría (Z)</strong>
-    <p class="help">La letra de Jerger es la de la sonda de <strong>226 Hz</strong>. En el lactante esa sonda dibuja el pico de la pared del conducto y tapa un oído medio ocupado, por eso el equipo trae también la de <strong>1000 Hz</strong>, que no da letra sino positivo o negativo. Derivado la saca de la curva de 226 Hz; ponerla a mano es para el caso que NECESITA un resultado concreto y no puede quedar librado al sorteo.</p>
+    <p class="help">La letra de Jerger es la de la sonda de <strong>226 Hz</strong>. En el lactante esa sonda dibuja el pico de la pared del conducto y tapa un oído medio ocupado, por eso el equipo trae también la de <strong>1000 Hz</strong>, que no da letra sino positivo o negativo. Derivado la saca de la curva de 226 Hz; ponerla a mano es para el caso que NECESITA un resultado concreto y no puede quedar librado al sorteo. <strong>NR</strong> deja ese oído sin impedanciometría: el equipo no mide ahí (ni timpanograma, ni reflejos con la sonda en ese oído o estimulados por él, ni decay, ni ETF) y la ficha lo informa como no realizable.</p>
     <div class="two-col">
         <label>Z OD
             <select id="z_od" name="z_od">
                 <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
-                <option value="<?= $opt ?>" <?= ($v['z_od'] ?? 'A') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                <option value="<?= $opt ?>" <?= ($v['z_od'] ?? 'A') === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_LABELS[$opt] ?? $opt) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
         <label>Z OI
             <select id="z_oi" name="z_oi">
                 <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
-                <option value="<?= $opt ?>" <?= ($v['z_oi'] ?? 'A') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                <option value="<?= $opt ?>" <?= ($v['z_oi'] ?? 'A') === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_LABELS[$opt] ?? $opt) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>

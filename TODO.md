@@ -143,7 +143,6 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 42. Asimetría declarada por el cuadro (autoinmune, CMV).
 - [ ] 43. Otoscopia ligada al cuadro (OMA, colesteatoma, perforación, glomus,
       atresia).
-- [ ] 44. Timpanograma "no registrable" en `Z_OPTIONS`.
 - [ ] 45. Eje no orgánico (inconsistencias, SRT vs PTA, Stenger).
 - [ ] 46. Procesamiento auditivo central (pruebas dicóticas).
 - [ ] 47. Hiperacusia / misofonía como eje del perfil.

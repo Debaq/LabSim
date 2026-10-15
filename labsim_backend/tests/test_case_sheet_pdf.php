@@ -511,6 +511,10 @@ t_true(
 // una curva en el editor y otra en el PDF; si se desalinea con Z_225, ve
 // una curva distinta a la que le sale al alumno en el equipo.
 foreach (CaseBuilder::Z_OPTIONS as $tipo) {
+    if ($tipo === CaseBuilder::Z_NO_REALIZABLE) {
+        // NR no es una curva: la sonda no se puso (se comprueba abajo).
+        continue;
+    }
     $pts = CaseCharts::tympanogramPoints($tipo);
     t_true($pts[0][0] <= -400.0, "Timpanograma {$tipo}: el barrido arranca en el borde de la ventana");
     t_true(end($pts)[0] >= 190.0, "Timpanograma {$tipo}: el barrido llega al otro borde");
@@ -778,3 +782,9 @@ t_true(strpos($pdfBebe, 'prematuro de 30 semanas') !== false,
     'Y las circunstancias que lo mueven');
 t_true(strpos($pdfBebe, 'Citomegalovirus') !== false,
     'Y los indicadores de riesgo, que no lo mueven pero obligan a seguimiento');
+
+// NR: la ficha no inventa números para un oído donde la sonda no fue.
+$vNr = CaseCharts::valoresTimpanograma(CaseBuilder::Z_NO_REALIZABLE);
+t_true($vNr['no_realizable'] && $vNr['plana'] && $vNr['estatica'] == 0.0,
+    'Timpanograma NR: sin pico, sin compliance, marcado no realizable');
+t_true(!CaseCharts::valoresTimpanograma('B')['no_realizable'], 'Timpanograma B: no es no realizable');

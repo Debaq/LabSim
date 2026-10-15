@@ -253,8 +253,10 @@ TXT;
 
         $tymp = ['OD' => (string) ($data['Z_OD'] ?? 'A'), 'OI' => (string) ($data['Z_OI'] ?? 'A')];
         foreach ($tymp as $lado => $curva) {
-            if ($curva !== 'A') {
-                $oido = $lado === 'OD' ? 'derecho' : 'izquierdo';
+            $oido = $lado === 'OD' ? 'derecho' : 'izquierdo';
+            if ($curva === CaseBuilder::Z_NO_REALIZABLE) {
+                $lineas[] = "Oído {$oido}: no se le puede poner la sonda del impedanciómetro (el conducto no lo permite).";
+            } elseif ($curva !== 'A') {
                 $lineas[] = "Oído medio {$oido}: timpanograma tipo {$curva} (no es normal).";
             }
         }

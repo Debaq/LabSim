@@ -1167,3 +1167,30 @@ t_eq(CaseBuilder::reflexDecayDe(['tipo' => ['od' => 'off', 'oi' => 'normal']], '
 t_eq(CaseBuilder::reflexDecayDe(['tipo' => ['od' => 'off'], 'decay' => ['od' => false]], 'od'), false,
     'Con Reflex.decay, manda el dato nuevo y el off es solo la forma');
 t_eq(CaseBuilder::reflexDecayDe([], 'oi'), false, 'Sin reflejos: no decae');
+
+// --- Impedanciometría no realizable (Z = NR) ---------------------------------
+
+// Ningún oído sano: con dos oídos A los reflejos del OI sano aparecen.
+$sanos = [];
+foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
+    $sanos[] = [0, 0];
+}
+$pNr = CaseProfile::project($sanos, $sanos, $perfilCoclearOD, ['OD' => 'NR', 'OI' => 'A']);
+$ausentes = static function (array $filas): bool {
+    foreach ($filas as $db) {
+        if ($db < CaseProfile::REFLEX_ABSENT_DB) {
+            return false;
+        }
+    }
+    return true;
+};
+t_true($ausentes($pNr['reflex']['ipsi']['od']), 'NR: sin sonda en OD no hay ipsi OD');
+t_true($ausentes($pNr['reflex']['contra']['od']), 'NR: sin sonda en OD no hay contra con sonda OD');
+t_true($ausentes($pNr['reflex']['contra']['oi']), 'NR: el auricular no va en OD, sin contra estimulado por OD');
+t_true(!$ausentes($pNr['reflex']['ipsi']['oi']), 'NR: el ipsi del OI sano sigue presente');
+t_true(CaseProfile::reflejoNoRealizable('A', 'NR') && !CaseProfile::reflejoNoRealizable('B', 'A'),
+    'reflejoNoRealizable mira la sonda y el estímulo, y una B no es NR');
+t_true(in_array('NR', CaseBuilder::Z_OPTIONS, true), 'NR es una opción del timpanograma');
+foreach (['estenosis_atresia_cae', 'otitis_externa', 'cuerpo_extrano_cae'] as $sinSonda) {
+    t_eq(CaseProfile::SCENARIOS[$sinSonda]['z'], ['NR'], "$sinSonda: la sonda no va (NR)");
+}

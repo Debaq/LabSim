@@ -23,7 +23,8 @@ from impedanciometria.z_generator import (Z_225, Reflex_curve, decay_curve, edad
                                           reflex_decay_del_caso,
                                           etf_prueba_integra, etf_prueba_perforada,
                                           is_infant_ear, map_letter_for_probe,
-                                          z1000_del_caso)
+                                          oido_no_realizable, z1000_del_caso)
+from impedanciometria.aviso_grafico import AvisoGrafico
 from impedanciometria.ZDscreen import DECAY_FRECUENCIAS
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage, debug_print
@@ -49,6 +50,13 @@ class ZControl(QWidget, Ui_Z_control):
         for screen in self.screens:
             self.Screen_Layout.addWidget(screen)
             screen.setVisible(screen is self.Z)
+        # Oído NR: en vez de curva, el aviso de que ahí no se mide.
+        self.avisos = {
+            self.Z: AvisoGrafico(self.Z.pw1),
+            self.Z_reflex: AvisoGrafico(self.Z_reflex.pw1),
+            self.Z_decay: AvisoGrafico(self.Z_decay.pw),
+            self.Z_etf: AvisoGrafico(self.Z_etf.pw),
+        }
 
         # BUTTONS
         self.probe_freq = '226'
@@ -200,6 +208,39 @@ class ZControl(QWidget, Ui_Z_control):
         payload.setdefault("con_paciente", case_id is not None)
         self.log_queue.push(action, payload)
 
+    # ------------------------------------------------------------------
+    # Oído no realizable
+    # ------------------------------------------------------------------
+
+    def _no_realizable(self, con_estimulo_contra=False):
+        """Texto del aviso si la medición actual toca un oído NR, o None.
+
+        La sonda no va en un oído NR, y en CONTRA tampoco el auricular del
+        estímulo: un reflejo contra con la sonda en el oído sano y el tono
+        entrando por el NR tampoco se hace."""
+        side = self.Z.get_side()
+        idx = 0 if side == 'OD' else 1
+        if oido_no_realizable(self.data, idx):
+            return f"NO REALIZABLE\nla sonda no va en {side}"
+        if con_estimulo_contra and self.reflex_mode == 'CONTRA' and oido_no_realizable(self.data, 1 - idx):
+            otro = 'OI' if side == 'OD' else 'OD'
+            return f"NO REALIZABLE\nel auricular no va en {otro}"
+        return None
+
+    def _bloquear_si_no_realizable(self, screen, pantalla, con_estimulo_contra=False):
+        """Muestra el aviso y deja constancia si el alumno intenta medir en
+        un oído NR. Devuelve True si hay que cortar la medición."""
+        texto = self._no_realizable(con_estimulo_contra)
+        if texto is None:
+            return False
+        self._log("z_no_realizable", screen=pantalla, side=self.Z.get_side(), mode=self.reflex_mode)
+        self.avisos[screen].mostrar(texto)
+        return True
+
+    def _ocultar_avisos(self):
+        for aviso in self.avisos.values():
+            aviso.ocultar()
+
     def la_super(self, data, appointment_id=None):
         self.appointment_id = appointment_id
         # Cambio de paciente (o cierre): se corta lo que estuviera sonando o
@@ -241,9 +282,10 @@ class ZControl(QWidget, Ui_Z_control):
                     vol = self.data['volume'][side]
                 except (KeyError, IndexError, TypeError):
                     vol = None
-                if not zGerger or vol in (None, ''):
-                    # caso sin timpanograma cargado para este oido: el modulo
-                    # queda sin curva, no se inventa una
+                if not zGerger or vol in (None, '') or oido_no_realizable(self.data, side):
+                    # caso sin timpanograma cargado para este oido (o NR, donde
+                    # la sonda no va): el modulo queda sin curva, no se
+                    # inventa una
                     self.update_reflex_volume()
                     return
                 # La edad decide si la sonda elegida sirve: bajo los 6
@@ -350,6 +392,7 @@ class ZControl(QWidget, Ui_Z_control):
             except (ValueError, TypeError):
                 self.Z.set_gradient_box(None, None)
         self.Z.set_sonda_abierta(self.data is None)
+        self._ocultar_avisos()
 
     def timerAnimation(self):
         if self.time_ch0.isActive():
@@ -465,6 +508,7 @@ class ZControl(QWidget, Ui_Z_control):
         if self.current_screen in (self.Z_decay, self.Z_etf) and screen is not self.current_screen:
             self._parar_decay_y_etf()
         self.current_screen = screen
+        self._ocultar_avisos()
         if screen is self.Z_reflex:
             self.Z_reflex.set_side(self.Z.get_side())
             self.Z_reflex.clear_response()
@@ -537,6 +581,7 @@ class ZControl(QWidget, Ui_Z_control):
         self.reflex_tone.stop()
         self.Z_reflex.clear_response()
         self.refresh_reflex_table()
+        self._ocultar_avisos()
 
     def reflex_freqs_for_mode(self):
         if self.reflex_mode == 'CONTRA':
@@ -625,10 +670,14 @@ class ZControl(QWidget, Ui_Z_control):
                 # Sonda abierta: no hay barrido que hacer.
                 self.Z.set_sonda_abierta(True)
                 return
+            if self._bloquear_si_no_realizable(self.Z, 'tymp'):
+                return
             self.timerAnimation()
 
     def reflex_stimulus(self):
         if not hasattr(self, 'data') or self.data is None:
+            return
+        if self._bloquear_si_no_realizable(self.Z_reflex, 'reflex', con_estimulo_contra=True):
             return
         reflex = self.data.get('Reflex')
         # Sin reflejos cargados PHP lo manda como lista vacia, no como dict
@@ -718,6 +767,8 @@ class ZControl(QWidget, Ui_Z_control):
         es del nervio que recibe el tono, no del oído donde se mide."""
         if self.data is None:
             return
+        if self._bloquear_si_no_realizable(self.Z_decay, 'decay', con_estimulo_contra=True):
+            return
         side = self.Z.get_side()
         probe_idx = 0 if side == 'OD' else 1
         freq = DECAY_FRECUENCIAS[self.decay_freq_idx]
@@ -766,6 +817,8 @@ class ZControl(QWidget, Ui_Z_control):
         """Conducto presurizado (dial) y tres degluciones en 10 s."""
         if self.data is None:
             return
+        if self._bloquear_si_no_realizable(self.Z_etf, 'etf'):
+            return
         etf = self._etf_del_oido()
         x, y, final = etf_prueba_perforada(etf, self.etf_pressure)
         self._log("z_etf_test", prueba=PRUEBA_PERFORADA, side=self.Z.get_side(), pressure=self.etf_pressure)
@@ -787,6 +840,8 @@ class ZControl(QWidget, Ui_Z_control):
     def etf_maniobra(self, maniobra):
         """Timpanograma de la prueba de membrana íntegra tras la maniobra."""
         if self.data is None:
+            return
+        if self._bloquear_si_no_realizable(self.Z_etf, 'etf'):
             return
         side = self.Z.get_side()
         idx = 0 if side == 'OD' else 1

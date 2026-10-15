@@ -693,7 +693,8 @@ def _chk_timpano(case, avisos):
         curva = str(case.get(clave) or "")
         aerea, osea = case.get('Aerea_mkg') or [], case.get('Osea_mkg') or []
         pta_a, pta_o = _pta(aerea, side), _pta(osea, side)
-        if not curva or pta_a is None or pta_o is None:
+        # NR = impedanciometria no realizable: no hay curva que contrastar.
+        if not curva or curva == 'NR' or pta_a is None or pta_o is None:
             continue
         gap = pta_a - pta_o
         if curva.startswith('A') and gap >= 25 and curva not in ('Ad', 'As'):

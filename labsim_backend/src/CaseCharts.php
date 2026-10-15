@@ -509,6 +509,13 @@ final class CaseCharts
         $pdf->rect($px, $py, $pw, $ph, 0.7, self::COLOR_GRID_FUERTE);
         $pdf->text($x, $y + 6, 'mL / daPa', 5.0, false, self::COLOR_ROTULO);
 
+        if ($v['no_realizable']) {
+            // La grilla queda vacía a propósito: se ve que el examen estaba
+            // en la ficha y no se hizo, no que se olvidó.
+            $pdf->textCenter($px + $pw / 2, $py + $ph / 2, 'No realizable', 9.0, true, $color);
+            return;
+        }
+
         if ($marcarPico) {
             $pico = (float) $v['pico_dapa'];
             $izq = $fx($pico - self::GRADIENTE_DELTA_DAPA);
@@ -549,6 +556,16 @@ final class CaseCharts
      */
     public static function valoresTimpanograma(string $tipo): array
     {
+        if ($tipo === CaseBuilder::Z_NO_REALIZABLE) {
+            // No realizable: no hay curva de la que leer nada. Todo en cero
+            // y 'plana' para que nadie marque pico ni gradiente.
+            return [
+                'c_min' => 0.0, 'c_max' => 0.0, 'p_min' => 0.0, 'p_max' => 0.0,
+                'pico_dapa' => 0.0, 'estatica' => 0.0, 'ancho_dapa' => 0.0,
+                'gradiente' => 0.0, 'gradiente_equipo' => 0.0,
+                'plana' => true, 'no_realizable' => true,
+            ];
+        }
         $forma = self::FORMAS_TIMPANOGRAMA[$tipo] ?? self::FORMAS_TIMPANOGRAMA['A'];
         [$cMin, $cMax, $pMin, $pMax] = $forma;
         // Centro del rango: la curva hay que dibujarla con algún valor, y el
@@ -571,6 +588,7 @@ final class CaseCharts
             // Sin pico no hay presión que informar: el tipo B es plano por
             // definición y su "pico" sería el primer punto del barrido.
             'plana' => $estatica <= 0.0,
+            'no_realizable' => false,
         ];
     }
 

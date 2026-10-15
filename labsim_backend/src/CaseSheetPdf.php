@@ -689,7 +689,10 @@ final class CaseSheetPdf
             $margenLetra = 35.0;
             $tamanoLetra = 15.0;
             $yLetra = $yGrafico + $margenLetra + $tamanoLetra * self::ASCENDENTE;
-            if ($lado === 'od') {
+            $noRealizable = $tipo === CaseBuilder::Z_NO_REALIZABLE;
+            if ($noRealizable) {
+                // El rótulo ya va al centro del gráfico (CaseCharts).
+            } elseif ($lado === 'od') {
                 $this->pdf->text($x + $margenLetra, $yLetra, $tipo, $tamanoLetra, true, $color);
             } else {
                 $this->pdf->textRight($x + $ancho - $margenLetra, $yLetra, $tipo, $tamanoLetra, true, $color);
@@ -697,7 +700,7 @@ final class CaseSheetPdf
             $this->pdf->text(
                 $x,
                 $this->y + $alto + 20,
-                'Volumen del CAE: ' . $vol . ' mL',
+                $noRealizable ? 'Sin sonda en este oído' : 'Volumen del CAE: ' . $vol . ' mL',
                 7,
                 false,
                 self::GRIS_TEXTO
@@ -733,6 +736,20 @@ final class CaseSheetPdf
         $reflex = is_array($data['Reflex'] ?? null) ? $data['Reflex'] : [];
         $ipsi = self::desarmar($reflex['ipsi'] ?? [], count(CaseProfile::REFLEX_FREQS_IPSI));
         $contra = self::desarmar($reflex['contra'] ?? [], count(CaseProfile::REFLEX_FREQS_CONTRA));
+        // Un oído NR no recibe sonda ni auricular: esas celdas no son un
+        // reflejo ausente, son un reflejo que no se buscó.
+        $zOd = (string) ($data['Z_OD'] ?? 'A');
+        $zOi = (string) ($data['Z_OI'] ?? 'A');
+        $sinReflejo = [
+            'ipsi' => ['od' => CaseProfile::reflejoNoRealizable($zOd, $zOd), 'oi' => CaseProfile::reflejoNoRealizable($zOi, $zOi)],
+            'contra' => ['od' => CaseProfile::reflejoNoRealizable($zOd, $zOi), 'oi' => CaseProfile::reflejoNoRealizable($zOi, $zOd)],
+        ];
+        $celda = static function (string $modo, string $lado, array $filas, int $n) use ($sinReflejo): string {
+            return $sinReflejo[$modo][$lado]
+                ? 'NR'
+                : self::reflejo((float) ($filas[$lado][$n] ?? CaseProfile::REFLEX_ABSENT_DB));
+        };
+        $hayNr = in_array(CaseBuilder::Z_NO_REALIZABLE, [$zOd, $zOi], true);
 
         $this->subtitulo('Reflejos acústicos');
         $yTablasZ = $this->y;
@@ -741,11 +758,11 @@ final class CaseSheetPdf
             // La fila del ruido no tiene ipsi: ese dato no existe.
             $hayIpsi = isset(CaseProfile::REFLEX_FREQS_IPSI[$n]);
             $filas[] = [
-                self::reflejo((float) ($contra['od'][$n] ?? CaseProfile::REFLEX_ABSENT_DB)),
-                $hayIpsi ? self::reflejo((float) ($ipsi['od'][$n] ?? CaseProfile::REFLEX_ABSENT_DB)) : '',
+                $celda('contra', 'od', $contra, $n),
+                $hayIpsi ? $celda('ipsi', 'od', $ipsi, $n) : '',
                 is_int($hz) ? self::hz($hz) . ' Hz' : 'WN',
-                $hayIpsi ? self::reflejo((float) ($ipsi['oi'][$n] ?? CaseProfile::REFLEX_ABSENT_DB)) : '',
-                self::reflejo((float) ($contra['oi'][$n] ?? CaseProfile::REFLEX_ABSENT_DB)),
+                $hayIpsi ? $celda('ipsi', 'oi', $ipsi, $n) : '',
+                $celda('contra', 'oi', $contra, $n),
             ];
         }
         $anchoReflejos = $this->anchoContenido * 0.56;
@@ -787,6 +804,9 @@ final class CaseSheetPdf
         // arriba (CaseCharts::valoresTimpanograma) -- como leería el alumno
         // el número en la pantalla de un equipo real.
         $presion = static function (array $v) use ($estudio): string {
+            if ($v['no_realizable']) {
+                return '--';
+            }
             if ($v['plana']) {
                 return 'sin pico';
             }
@@ -798,6 +818,9 @@ final class CaseSheetPdf
         $compliance = static function (array $v) use ($estudio): string {
             // Un B queda por debajo de la resolución del equipo: "0,00 a
             // 0,00" se leería como un dato medido y no lo es.
+            if ($v['no_realizable']) {
+                return '--';
+            }
             if ($v['c_max'] < 0.01) {
                 return 'menor a 0.01 mL';
             }
@@ -807,10 +830,16 @@ final class CaseSheetPdf
                 : number_format($v['c_min'], 2) . ' a ' . number_format($v['c_max'], 2) . ' mL';
         };
         $gradiente = static function (array $v): string {
-            return number_format($v['gradiente'], 2);
+            return $v['no_realizable'] ? '--' : number_format($v['gradiente'], 2);
         };
         $gradienteEquipo = static function (array $v): string {
-            return number_format($v['gradiente_equipo'], 2);
+            return $v['no_realizable'] ? '--' : number_format($v['gradiente_equipo'], 2);
+        };
+        $tipoTexto = static function (string $tipo): string {
+            return $tipo === CaseBuilder::Z_NO_REALIZABLE ? 'No realizable' : $tipo;
+        };
+        $volTexto = static function (string $tipo, $vol): string {
+            return $tipo === CaseBuilder::Z_NO_REALIZABLE ? '--' : (string) ($vol ?? 'N/D') . ' mL';
         };
 
         $filasZ = [
@@ -818,7 +847,7 @@ final class CaseSheetPdf
             // La letra de Jerger no es una respuesta escondida: se lee
             // directo de la curva (y ahora también va impresa sobre el
             // gráfico), así que la tabla la trae en las dos versiones.
-            ['Tipo (Jerger)', $tipoOd, $tipoOi],
+            ['Tipo (Jerger)', $tipoTexto($tipoOd), $tipoTexto($tipoOi)],
         ];
         $filasZ[] = ['Compliance estática', $compliance($vOd), $compliance($vOi)];
         $filasZ[] = ['Presión del pico', $presion($vOd), $presion($vOi)];
@@ -829,12 +858,16 @@ final class CaseSheetPdf
         if (!$estudio) {
             $filasZ[] = ['Gradiente en el equipo', $gradienteEquipo($vOd), $gradienteEquipo($vOi)];
         }
-        $filasZ[] = ['Volumen del CAE', (string) ($volumen[0] ?? 'N/D') . ' mL', (string) ($volumen[1] ?? 'N/D') . ' mL'];
+        $filasZ[] = ['Volumen del CAE', $volTexto($tipoOd, $volumen[0] ?? null), $volTexto($tipoOi, $volumen[1] ?? null)];
         // "Función tubaria" es un veredicto cargado a mano (Normal/Disfunción
         // tubaria), no algo que se lea de una curva: en la ficha de estudio
         // no va.
         if (!$estudio) {
-            $filasZ[] = ['Función tubaria', (string) ($etf[0] ?? 'Normal'), (string) ($etf[1] ?? 'Normal')];
+            $filasZ[] = [
+                'Función tubaria',
+                $tipoOd === CaseBuilder::Z_NO_REALIZABLE ? '--' : (string) ($etf[0] ?? 'Normal'),
+                $tipoOi === CaseBuilder::Z_NO_REALIZABLE ? '--' : (string) ($etf[1] ?? 'Normal'),
+            ];
         }
         $finZ = $this->tablaEn(
             self::MARGEN + $anchoReflejos + 14,
@@ -852,14 +885,21 @@ final class CaseSheetPdf
         // que en la ficha de estudio no va, y con ella se cae el aviso de
         // "(-) = sin respuesta" (era la misma frase).
         if ($estudio) {
-            $this->parrafo('Umbrales en dB SPL; (-) = sin respuesta en toda la escala.', 7);
+            $this->parrafo('Umbrales en dB SPL; (-) = sin respuesta en toda la escala'
+                . ($hayNr ? '; NR = no realizable (no se pone la sonda ni el auricular en ese oído)' : '') . '.', 7);
         } else {
             $this->parrafo(
-                'Umbrales en dB SPL; (-) = sin respuesta en toda la escala. Morfología de la curva: OD '
-                . (CaseBuilder::REFLEX_CURVE_LABELS[$tipos['od'] ?? 'normal'] ?? (string) ($tipos['od'] ?? 'normal'))
-                . ', OI ' . (CaseBuilder::REFLEX_CURVE_LABELS[$tipos['oi'] ?? 'normal'] ?? (string) ($tipos['oi'] ?? 'normal'))
-                . '. Decay del reflejo (oído estimulado): OD ' . (CaseBuilder::reflexDecayDe($reflex, 'od') ? 'decae' : 'no decae')
-                . ', OI ' . (CaseBuilder::reflexDecayDe($reflex, 'oi') ? 'decae' : 'no decae') . '.',
+                'Umbrales en dB SPL; (-) = sin respuesta en toda la escala'
+                . ($hayNr ? '; NR = no realizable (no se pone la sonda ni el auricular en ese oído)' : '')
+                . '. Morfología de la curva: OD '
+                . ($zOd === CaseBuilder::Z_NO_REALIZABLE ? 'no realizable'
+                    : (CaseBuilder::REFLEX_CURVE_LABELS[$tipos['od'] ?? 'normal'] ?? (string) ($tipos['od'] ?? 'normal')))
+                . ', OI ' . ($zOi === CaseBuilder::Z_NO_REALIZABLE ? 'no realizable'
+                    : (CaseBuilder::REFLEX_CURVE_LABELS[$tipos['oi'] ?? 'normal'] ?? (string) ($tipos['oi'] ?? 'normal')))
+                . '. Decay del reflejo (oído estimulado): OD '
+                . ($zOd === CaseBuilder::Z_NO_REALIZABLE ? 'no realizable' : (CaseBuilder::reflexDecayDe($reflex, 'od') ? 'decae' : 'no decae'))
+                . ', OI '
+                . ($zOi === CaseBuilder::Z_NO_REALIZABLE ? 'no realizable' : (CaseBuilder::reflexDecayDe($reflex, 'oi') ? 'decae' : 'no decae')) . '.',
                 7
             );
             // Esto explica cómo arma la curva el generador (compliance y

@@ -922,7 +922,9 @@ final class CaseProfile
             'gap_shape' => [125 => 12, 250 => 14, 500 => 26, 1000 => 28, 2000 => 32, 3000 => 32, 4000 => 32, 6000 => 32, 8000 => 32],
             'gap_scale' => [0.3, 1.1],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            'z' => ['A'], 'etf' => 'Normal',
+            // Con el cuerpo extraño en el conducto la sonda no va: se lo
+            // empuja hacia el tímpano. Primero se extrae (no realizable).
+            'z' => ['NR'], 'etf' => 'Normal',
             // Gap ASCENDENTE: ocluir el conducto atenúa poco los graves y mucho
             // los agudos (Reis 2017: 10,7 dB en 250 Hz, 32,1 en 2 kHz). Con
             // curva A, eso lo separa de la otitis, que pierde sobre todo los
@@ -941,12 +943,15 @@ final class CaseProfile
             'sn_shape' => [125 => 0, 250 => 0, 500 => 0, 1000 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
             'sn_scale' => [0.0, 1.0],
             // El edema del conducto estrecha la luz sin tocar el oído medio:
-            // gap chico y parejo con curva A. La otoscopia y el dolor a la
-            // tracción del pabellón no salen del cuadro, se cargan aparte.
+            // gap chico y parejo. La otoscopia y el dolor a la tracción del
+            // pabellón no salen del cuadro, se cargan aparte.
             'gap_shape' => [125 => 26, 250 => 26, 500 => 25, 1000 => 24, 2000 => 22, 3000 => 22, 4000 => 22, 6000 => 24, 8000 => 24],
             'gap_scale' => [0.4, 1.1],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            'z' => ['A'], 'etf' => 'Normal',
+            // La oliva no entra a un conducto edematoso, doloroso y con
+            // secreción: se ensucia y duele. La impedanciometría se difiere
+            // hasta que el conducto sane (no realizable).
+            'z' => ['NR'], 'etf' => 'Normal',
             'grados' => ['leve'], 'max_db' => 35, 'gap_max_db' => 35,
             'vemp' => ['type' => 'normal', 'umbral_gap' => true],
             'conciencia' => [80, 100],
@@ -966,11 +971,10 @@ final class CaseProfile
             'gap_shape' => [125 => 50, 250 => 52, 500 => 54, 1000 => 54, 2000 => 52, 3000 => 50, 4000 => 50, 6000 => 50, 8000 => 50],
             'gap_scale' => [0.6, 1.0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            // El timpanograma de verdad es NO REGISTRABLE --no hay dónde
-            // sellar la sonda--, y eso no existe en Z_OPTIONS. 'B' es lo
-            // menos falso que se puede escribir hoy: plano, sin pico. Ver
-            // TODO.md, "Timpanograma no registrable".
-            'z' => ['B'], 'etf' => 'Normal',
+            // Sin conducto no hay dónde sellar la sonda: impedanciometría
+            // no realizable (CaseBuilder::Z_NO_REALIZABLE). Antes se escribía
+            // 'B', que dibujaba un plano que nadie midió.
+            'z' => ['NR'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada'], 'max_db' => 60, 'gap_max_db' => 60,
             'vemp' => ['type' => 'normal', 'umbral_gap' => true],
             // Nació así: no tiene con qué comparar, y ese es el punto.
@@ -2863,9 +2867,21 @@ final class CaseProfile
     /**
      * Timpanogramas del oído SONDA que abolen el reflejo registrable.
      * B (plano, ocupación) y As (rígido, otoesclerosis) no dejan ver el
-     * cambio de admitancia; Cs es la versión rígida y retraída.
+     * cambio de admitancia; Cs es la versión rígida y retraída. NR no es una
+     * curva: la sonda no se puso (ver reflejoNoRealizable).
      */
-    public const REFLEX_PROBE_TYMP_ABSENT = ['B', 'As', 'Cs'];
+    public const REFLEX_PROBE_TYMP_ABSENT = ['B', 'As', 'Cs', 'NR'];
+
+    /**
+     * ¿El reflejo con la sonda en un oído y el estímulo en otro no se hace?
+     * Un oído NR no recibe ni la sonda ni el auricular del estímulo
+     * contralateral. Queda guardado como REFLEX_ABSENT_DB (el dato sigue
+     * siendo numérico); quien lo muestra lo rotula "NR" mirando Z_OD/Z_OI.
+     */
+    public static function reflejoNoRealizable(string $tympProbe, string $tympStim): bool
+    {
+        return $tympProbe === CaseBuilder::Z_NO_REALIZABLE || $tympStim === CaseBuilder::Z_NO_REALIZABLE;
+    }
 
     /**
      * Umbral del reflejo acústico (dB HL) para una frecuencia, o
@@ -3108,8 +3124,9 @@ final class CaseProfile
             // contrario (ver reflex_stimulus() en Z.py, que indexa las filas
             // por el oído de la sonda).
             $contra = [];
+            $contraSinEstimulo = self::reflejoNoRealizable($tymp, (string) ($tympPorLado[$otro] ?? 'A'));
             foreach (self::REFLEX_FREQS_CONTRA as $hz) {
-                $contra[] = self::reflexThreshold(
+                $contra[] = $contraSinEstimulo ? self::REFLEX_ABSENT_DB : self::reflexThreshold(
                     $decomp[$lado], $decomp[$otro], $tymp,
                     (float) ($perfil[$otro]['cce_pct'] ?? self::DEFAULT_CCE_PCT),
                     self::normalizeRetro($perfil[$otro]['retro'] ?? []), $hz
@@ -3284,7 +3301,10 @@ final class CaseProfile
                             continue;
                         }
                         $estimulado = $modo === 'ipsi' ? $lado : $otro;
-                        $esperado = self::reflexThreshold(
+                        $esperado = self::reflejoNoRealizable(
+                            (string) ($tympPorLado[$lado] ?? 'A'),
+                            (string) ($tympPorLado[$estimulado] ?? 'A')
+                        ) ? self::REFLEX_ABSENT_DB : self::reflexThreshold(
                             $decomp,
                             $decompPorLado[$estimulado] ?? $decomp,
                             (string) ($tympPorLado[$lado] ?? 'A'),

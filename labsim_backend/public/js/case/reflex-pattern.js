@@ -4,15 +4,22 @@
 // oscuro fijo; el color del "+" marca el oído que recibió el estímulo: en
 // ipsi coincide con la columna (OD=rojo, OI=azul), en contra es el
 // cruzado (columna OD con estímulo en OI=azul, columna OI con estímulo en
-// OD=rojo). Ausente (130) queda vacía.
+// OD=rojo). Ausente (130) queda vacía. Si la sonda o el estímulo caen en
+// un oído NR (impedanciometría no realizable) la celda dice "NR": no es un
+// reflejo ausente, es uno que no se buscó (CaseProfile::reflejoNoRealizable).
 window.drawReflexPattern = function drawReflexPattern() {
+    function zDe(lado) {
+        var z = document.getElementById('z_' + lado);
+        return z ? z.value : 'A';
+    }
     document.querySelectorAll('.reflex-cell[data-mode]').forEach(function (cell) {
         var mode = cell.dataset.mode, side = cell.dataset.side, n = cell.dataset.n;
         var el = document.getElementById('reflex_' + mode + '_' + side + '_' + n);
         var val = el ? (parseInt(el.value, 10) || 0) : 130;
-        var present = val < 130;
         var stimulusSide = mode === 'ipsi' ? side : (side === 'od' ? 'oi' : 'od');
-        cell.textContent = present ? '+' : String.fromCharCode(8722);
+        var noRealizable = zDe(side) === 'NR' || zDe(stimulusSide) === 'NR';
+        var present = !noRealizable && val < 130;
+        cell.textContent = noRealizable ? 'NR' : (present ? '+' : String.fromCharCode(8722));
         cell.classList.toggle('present', present);
         cell.classList.toggle('mark-od', present && stimulusSide === 'od');
         cell.classList.toggle('mark-oi', present && stimulusSide === 'oi');
@@ -36,7 +43,10 @@ window.drawReflexPattern = function drawReflexPattern() {
     form.addEventListener('change', function (e) {
         if (e.target.classList && e.target.classList.contains('ldl-toggle')) window.drawAudiogram();
         if (e.target.classList && e.target.classList.contains('recruit-toggle')) window.drawLogogram();
-        if (e.target.id === 'z_od' || e.target.id === 'z_oi') window.drawTympanogram();
+        if (e.target.id === 'z_od' || e.target.id === 'z_oi') {
+            window.drawTympanogram();
+            window.drawReflexPattern();
+        }
     });
     window.drawAudiogram();
     window.drawLogogram();
