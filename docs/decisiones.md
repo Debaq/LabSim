@@ -5714,10 +5714,8 @@ En el PDF la curva era otra (SRT de la curva 17,5 dB en un oído sano, el
   con node contra la del PHP en todos los tramos, más los mismos puntos del
   36 OI que la app).
 
-Queda abierto (TODO 66): el SDT "auto" de la ficha es el mismo Fletcher que
-el SRT, cuando clínicamente va 5-10 dB más abajo. La curva no lo necesita
-(el pie va 10 dB bajo el SRT igual), pero la mano levantada del SDT
-(`response.py`) responde en el SRT.
+Lo que quedaba abierto (TODO 66, el SDT "auto" igual al SRT) se cerró el
+mismo día: ver "Logoaudiometría: el SDT auto 5 dB bajo el SRT", justo abajo.
 
 Fuentes:
 - American Speech-Language-Hearing Association. Guidelines for determining
@@ -5733,6 +5731,88 @@ Fuentes:
 - Wilson RH, Margolis RH. Measurements of auditory thresholds for speech
   stimuli. En: Konkle DF, Rintelmann WF, eds. Principles of Speech
   Audiometry. Baltimore: University Park Press; 1983:79-126.
+
+## Logoaudiometría: el SDT auto 5 dB bajo el SRT (2026-10-15)
+
+Cierra el TODO 66. El SDT "auto" de la ficha era el mismo Fletcher que el
+SRT (mejores 2 de 500/1000/2000 Hz, al piso de 5), así que la mano levantada
+del SDT (`response.py::_resolve_sdt_threshold`, que lee el SDT de la ficha)
+subía justo en el SRT: el alumno medía SDT = SRT.
+
+**Clínica.** ASHA (1988) espera el SDT 8-9 dB bajo el SRT (lo toma de
+Chaiklin 1959) y "consistente con el mejor umbral tonal entre 250 y
+4000 Hz".
+
+**Decisión: SDT auto = Fletcher - 5** (`CaseBuilder::SDT_BAJO_SRT_DB`,
+`sdtAuto()`; espejo en `public/js/case/live-preview.js`, que es quien
+escribe el campo en el editor, y en `CaseForm` como respaldo de un POST sin
+el campo). Por qué 5 y no 10: el Fletcher va al piso de 5, en promedio
+~2,5 dB bajo el PTA; menos 5 deja el SDT ~7,5 dB bajo el PTA, lo más cerca
+de los 8-9 dB que permite la grilla de 5 dB del audiómetro. Menos 10 lo
+dejaba ~12,5 dB abajo y, en un audiograma plano, 10 dB bajo el mejor tono,
+contra el segundo criterio de ASHA. Un oído sin respuesta (130) sigue en 130
+y el piso es -10 dB HL. Lo que escribe el docente no se toca: solo cambia
+el auto, y el campo sigue editable. El editor lo rotula "auto (Fletcher − 5)".
+
+**La curva de palabras no cambia:** su pie es `min(SDT, SRT - 10)`, y
+SRT - 5 nunca le gana a SRT - 10 (test en `tests/test_logo_sdt.py`, de -10 a
+120 dB en los diez pacientes).
+
+**Lo que sí había que mover para que bajar el SDT no cambiara otra cosa.**
+El motor usaba el SDT como "umbral aéreo de habla" para el gap del
+contralateral (SDT - óseo de Fletcher). Con el SDT 5 dB más abajo el gap
+salía 5 dB corto y el mínimo de enmascaramiento bajaba sin que el oído
+cambiara. Ahora usan el SRT (sin SRT, el SDT; sin ninguno, el Fletcher):
+
+- `CalculateLogo._air_bone_gap` y `_masking_range` (`_srt_aereo()`), y la
+  línea del panel `DebugMkg`;
+- `CaseMasking::logo` (el mkg de SDT/SRT/UMD del PDF) recibe el SRT del
+  oído contrario.
+
+Para los casos con SDT = SRT (todos los auto de antes) da lo mismo que
+antes; el test lo compara en los diez pacientes.
+
+**La mano del SDT** (`_resolve_sdt_threshold`): responde en el SDT del oído
+estudiado. La voz que cruza (curva sombra) la detecta el otro oído a su
+óseo + 45 menos lo que ese oído detecta bajo su SRT (`SRT - SDT`, 5 dB con
+el auto), y el mínimo de ruido sube esos mismos dB. Sin ruido, el cruce
+está tal cual: antes un ruido en 0 contaba como "en la meseta" cuando el
+mínimo daba 0 y la sombra aparecía un escalón (5 dB) tarde. Paciente 42
+(cófosis OD) sin enmascarar: la mano del OD sube a 40 dB (antes 50); con
+5 dB de ruido en el OI a 45 dB, ya no.
+
+**Pacientes de práctica** (`docs/manual/capturas/casos_demo.json`, todos
+con el SDT en auto), SDT [OD, OI] antes → ahora; el SRT no cambia:
+
+| Paciente | SDT antes | SDT ahora | SRT |
+|---|---|---|---|
+| 33 | 0 / 0 | -5 / -5 | 0 / 0 |
+| 34 | 40 / 0 | 35 / -5 | 40 / 0 |
+| 35 | 25 / 30 | 20 / 25 | 25 / 30 |
+| 36 | 20 / 25 | 15 / 20 | 20 / 25 |
+| 37 | 5 / 5 | 0 / 0 | 5 / 5 |
+| 38 | 5 / 35 | 0 / 30 | 5 / 35 |
+| 39 | 15 / 5 | 10 / 0 | 15 / 5 |
+| 40 | 35 / 35 | 30 / 30 | 35 / 35 |
+| 41 | 0 / 50 | -5 / 45 | 0 / 50 |
+| 42 | 130 / 0 | 130 / -5 | 130 / 0 |
+
+**Pendiente en producción:** los casos guardados conservan su SDT (al
+abrirlos para editar, las casillas auto quedan apagadas a propósito, ver
+`caseDataToForm`). Se corrigen reproyectando o reaplicando el auto en el
+editor.
+
+Tests: `tests/test_logo_sdt.py` (SDT de los pacientes demo, la mano en el
+SDT y bajo el SRT, la sombra de la cófosis, curva, gap y rango invariantes);
+`labsim_backend/tests/test_case_form.php` (`sdtAuto`, el auto del POST, lo
+posteado gana, constantes del JS iguales a las de `CaseBuilder`).
+
+Fuentes:
+- American Speech-Language-Hearing Association. Guidelines for determining
+  threshold level for speech. ASHA. 1988;30(3):85-89.
+- Chaiklin JB. The relation among three selected auditory speech
+  thresholds. J Speech Hear Res. 1959;2(3):237-243.
+  doi:10.1044/jshr.0203.237
 
 ## Impedanciometría: tapón y perforación se distinguen por el volumen del conducto (2026-10-15)
 
@@ -5876,3 +5956,8 @@ redondea a cero, y en el sentido clásico una plana es 0, así que ahora además
 es coherente). Koebsell y Margolis (1986) compararon ocho medidas de la forma
 cerca del pico y prefirieron el ancho a media altura (TW), que es el que fija
 `ANCHOS_JERGER`.
+
+**Aprobado (2026-10-15):** él aprobó el cambio de la ventana de UMD de la
+ficha PDF: en un oído con roll-over, el nivel que se agrega sobre el máximo
+es donde termina la caída (máximo + 25 dB o el techo de 100 dB), no +5 dB.
+Reemplaza la regla de +5 dB confirmada el 2026-09-14.
