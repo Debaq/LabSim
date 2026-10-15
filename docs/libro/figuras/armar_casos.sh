@@ -66,6 +66,12 @@ cat > "$TRABAJO/_libro/ultimo_caso.php" <<'PHP'
 // cases.data del último caso creado, tal como quedó en la base, con el
 // paciente al lado (mismo formato que docs/manual/capturas/casos_demo.json).
 $pdo = new PDO('sqlite:/app/data/labsim.sqlite');
+if (($argv[1] ?? '') === 'id') {
+    // Solo el id del último caso: armar_casos.py lo compara antes y después
+    // de guardar para no tomar el caso anterior si el guardado falló.
+    echo (int) $pdo->query('SELECT MAX(id) FROM cases')->fetchColumn();
+    exit;
+}
 $f = $pdo->query('SELECT c.data, p.nombre, p.apellido, p.rut, p.fecha_nac, p.historia_clinica
                   FROM cases c LEFT JOIN patients p ON p.id = c.patient_id
                   ORDER BY c.id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);

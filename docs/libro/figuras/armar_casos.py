@@ -141,8 +141,14 @@ def llenar_js(p):
 }})()"""
 
 
+def ultimo_id():
+    return int(subprocess.run(['podman', 'exec', CONTENEDOR, 'php', '/app/_libro/ultimo_caso.php', 'id'],
+                              check=True, capture_output=True, text=True).stdout.strip() or 0)
+
+
 async def armar(c, nombre, p):
     s = p.get('semilla', semilla(nombre))
+    antes = ultimo_id()
     ident = (await c.cmd('Page.addScriptToEvaluateOnNewDocument', source=AZAR % s))['identifier']
     try:
         await c.ir(f'{BASE}/fake_login_admin.php?uid={DOCENTE}')
@@ -176,6 +182,10 @@ async def armar(c, nombre, p):
             raise RuntimeError(f'{nombre}: no se guardó: {errores}')
     finally:
         await c.cmd('Page.removeScriptToEvaluateOnNewDocument', identifier=ident)
+    if ultimo_id() <= antes:
+        # Sin esto se guardaba en silencio el caso ANTERIOR con este nombre
+        # (p. ej. un aviso de coherencia del editor que frena el guardado).
+        raise RuntimeError(f'{nombre}: el editor no guardó el caso (¿aviso de coherencia sin confirmar?)')
     datos = subprocess.run(['podman', 'exec', CONTENEDOR, 'php', '/app/_libro/ultimo_caso.php'],
                            check=True, capture_output=True, text=True).stdout
     data = json.loads(datos)
