@@ -73,7 +73,6 @@ Todos los impedanciómetros tienen la misma lógica: una pantalla que cambia seg
 - @77.5,67.5 | **Control.** El oído (*OD/OI*) y la sonda (*226 Hz* o *1000 Hz*).
 :::
 
-<!-- verificar: la captura impedanciometro-timpanograma.png es anterior al cambio de la gradiente al sentido clásico (2026-10-15) y muestra Gradient 0,26; con la app actual el As da 0,58 (como la figura de Carolina más abajo). Conviene recapturarla. -->
 
 ### Paciente
 
