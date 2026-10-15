@@ -1,0 +1,877 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "normal",
+   "OI": "cmv_congenito"
+  },
+  "edad": 4,
+  "sexo": "mujer",
+  "grado": {
+   "OI": "severa"
+  },
+  "anamnesis": {
+   "otros": "Aurora tiene 4 años y va al jardín infantil. A los 2 años decía pocas palabras y la llevaron a una fonoaudióloga, que le hizo un examen de audición \"con parlantes y unos juguetes que se prendían\" y salió normal; hoy habla bien para su edad. Este año la educadora notó que, cuando la llaman desde su izquierda, mira hacia el lado contrario. Para hablar por teléfono con su abuela se pone el celular siempre en la oreja derecha. Nunca ha tenido otitis ni dolor de oídos. En el embarazo, a los tres meses, la mamá tuvo fiebre y mucho cansancio por unos días, \"como una gripe\".",
+   "historia": "{{-1460}} Tamizaje auditivo neonatal con emisiones otoacústicas: pasa en ambos oídos.\n{{-730}} Fonoaudióloga, por retraso del lenguaje: audiometría por refuerzo visual en campo libre, respuestas en 20 a 25 dB HL de 500 a 4.000 Hz. Se informa \"audición normal\".\n{{-45}} Pediatra, control sano: la educadora refiere que no localiza cuando la llaman por la izquierda. Deriva a evaluación auditiva.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1361938202,
+ "data": {
+  "gender": 1,
+  "id": 9202,
+  "Aerea": [
+   [
+    0,
+    55
+   ],
+   [
+    0,
+    60
+   ],
+   [
+    0,
+    70
+   ],
+   [
+    0,
+    75
+   ],
+   [
+    0,
+    80
+   ],
+   [
+    0,
+    85
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    85
+   ]
+  ],
+  "Osea": [
+   [
+    0,
+    55
+   ],
+   [
+    0,
+    60
+   ],
+   [
+    0,
+    70
+   ],
+   [
+    0,
+    75
+   ],
+   [
+    0,
+    80
+   ],
+   [
+    0,
+    85
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    85
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    0,
+    55
+   ],
+   [
+    0,
+    60
+   ],
+   [
+    0,
+    70
+   ],
+   [
+    0,
+    75
+   ],
+   [
+    0,
+    80
+   ],
+   [
+    0,
+    85
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    85
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    0,
+    55
+   ],
+   [
+    0,
+    60
+   ],
+   [
+    0,
+    70
+   ],
+   [
+    0,
+    75
+   ],
+   [
+    0,
+    80
+   ],
+   [
+    0,
+    85
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    85
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "falso_negativo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "falso_negativo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 4,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.56,
+   0.83,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 30,
+    "percentage": 100
+   },
+   {
+    "int": 105,
+    "percentage": 52
+   }
+  ],
+  "SDT": [
+   -5,
+   65
+  ],
+  "SRT": [
+   0,
+   70
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     100
+    ],
+    [
+     85,
+     100
+    ],
+    [
+     90,
+     110
+    ],
+    [
+     90,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     105,
+     95
+    ],
+    [
+     105,
+     90
+    ],
+    [
+     115,
+     95
+    ],
+    [
+     130,
+     95
+    ],
+    [
+     115,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Aurora tiene 4 años y va al jardín infantil. A los 2 años decía pocas palabras y la llevaron a una fonoaudióloga, que le hizo un examen de audición \"con parlantes y unos juguetes que se prendían\" y salió normal; hoy habla bien para su edad. Este año la educadora notó que, cuando la llaman desde su izquierda, mira hacia el lado contrario. Para hablar por teléfono con su abuela se pone el celular siempre en la oreja derecha. Nunca ha tenido otitis ni dolor de oídos. En el embarazo, a los tres meses, la mamá tuvo fiebre y mucho cansancio por unos días, \"como una gripe\".",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Aurora",
+     "edad": 4,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 23,
+     "confiabilidad": 93,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amva00xnv6a",
+     "rol": "madre",
+     "nombre": "Clara Pérez",
+     "edad": 34,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 85,
+     "conciencia": 80,
+     "confiabilidad": 87,
+     "version": "",
+     "comportamiento": "preocupada, trae fechas anotadas en el celular",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "normal",
+    "umbral": 10,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 10,
+     "tone_burst_4000Hz": 5,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 5,
+     "nb_ce_chirp_ls_4000Hz": 5,
+     "click": 10,
+     "ce_chirp": 5,
+     "ce_chirp_ls": 5
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 20,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 20,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.19,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1643,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.01,
+      "amp": -0.01
+     },
+     "onda_III": {
+      "lat": 0.02,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": -0.03,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 90,
+     "tone_burst_1000Hz": 90,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 95,
+     "nb_ce_chirp_ls_500Hz": 85,
+     "nb_ce_chirp_ls_1000Hz": 85,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 95,
+     "click": 95,
+     "ce_chirp": 85,
+     "ce_chirp_ls": 85
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.22,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2104,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.04,
+      "amp": -0.11
+     },
+     "onda_III": {
+      "lat": 0.14,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": 0.12,
+      "amp": -0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "child",
+    "baseline": {
+     "I": {
+      "lat": 1.48,
+      "amp": 0.239
+     },
+     "III": {
+      "lat": 3.5,
+      "amp": 0.282
+     },
+     "V": {
+      "lat": 5.5,
+      "amp": 0.41
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 0,
+    "sello_pct": 89,
+    "variabilidad_db": 2.4,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1.4,
+    "sello_pct": 81,
+    "variabilidad_db": 1.6,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T20:36:08+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Aurora Beatriz",
+   "apellido": "Pérez Mendoza",
+   "rut": "27094541",
+   "fecha_nac": "28-08-2022"
+  },
+  "historia_clinica": "{{-1460}} Tamizaje auditivo neonatal con emisiones otoacústicas: pasa en ambos oídos.\r\n{{-730}} Fonoaudióloga, por retraso del lenguaje: audiometría por refuerzo visual en campo libre, respuestas en 20 a 25 dB HL de 500 a 4.000 Hz. Se informa \"audición normal\".\r\n{{-45}} Pediatra, control sano: la educadora refiere que no localiza cuando la llaman por la izquierda. Deriva a evaluación auditiva."
+ }
+}

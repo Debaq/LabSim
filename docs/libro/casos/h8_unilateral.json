@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "cmv_congenito"
+    },
+    "edad": 4,
+    "sexo": "mujer",
+    "grado": {
+      "OI": "severa"
+    },
+    "anamnesis": {
+      "otros": "Aurora tiene 4 años y va al jardín infantil. A los 2 años decía pocas palabras y la llevaron a una fonoaudióloga, que le hizo un examen de audición \"con parlantes y unos juguetes que se prendían\" y salió normal; hoy habla bien para su edad. Este año la educadora notó que, cuando la llaman desde su izquierda, mira hacia el lado contrario. Para hablar por teléfono con su abuela se pone el celular siempre en la oreja derecha. Nunca ha tenido otitis ni dolor de oídos. En el embarazo, a los tres meses, la mamá tuvo fiebre y mucho cansancio por unos días, \"como una gripe\".",
+      "historia": "{{-1460}} Tamizaje auditivo neonatal con emisiones otoacústicas: pasa en ambos oídos.\n{{-730}} Fonoaudióloga, por retraso del lenguaje: audiometría por refuerzo visual en campo libre, respuestas en 20 a 25 dB HL de 500 a 4.000 Hz. Se informa \"audición normal\".\n{{-45}} Pediatra, control sano: la educadora refiere que no localiza cuando la llaman por la izquierda. Deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": false,
+      "sin_enmascarar": false
+    }
+  ]
+}
