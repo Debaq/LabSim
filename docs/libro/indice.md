@@ -1,4 +1,7 @@
-# Libro de casos LabSim — índice propuesto
+# Evaluación y rehabilitación en otorrinolaringología — índice propuesto
+
+*Un libro de casos clínicos.* Título elegido el 2026-10-15: un solo libro que
+crece por secciones; LabSim, trainHIT y labyrinthus3d son simuladores de apoyo.
 
 Borrador del índice (2026-10-15). Libro gratuito; licencia propuesta
 **CC BY-NC-SA 4.0** (la obliga OtitisMediaKPJ, la única fuente con colesteatoma
@@ -311,6 +314,24 @@ ASSR: estimación de umbral por frecuencia.
 Los diez pacientes de práctica (33-42) otra vez, sin título ni pistas: la ficha
 de estudio como la ve el alumno, y la resolución al final. Cada resolución remite
 al capítulo donde está su técnica.
+
+## Secciones de las próximas ediciones
+
+Un solo libro que crece. Esta edición es la sección de **audición** (Bases,
+Caja de herramientas y Partes I-VIII). Las que vienen, en este orden
+tentativo (plan en `investigacion/inventario_vestibular_nasal.md`):
+
+- **Equilibrio: evaluación.** VNG, oculomotor, posicionales y maniobras,
+  calórica, vHIT, posturografía (el VEMP ya está en H12). Figuras y práctica
+  con trainHIT y labyrinthus3d; LabSim no se expande a lo vestibular.
+- **Equilibrio: casos.** Vértigo agudo, VPPB, Ménière, migraña vestibular,
+  hipofunción bilateral, central, tercera ventana, compensación, PPPD.
+- **Nariz: evaluación y casos.** Rinomanometría, rinometría acústica y lo
+  que se defina (olfato, espirometría, SAHOS). Hoy no hay simulador ni
+  material propio.
+- **Rehabilitación auditiva.** Audífonos, implantes, entrenamiento auditivo.
+- **Rehabilitación vestibular.** Ejercicios, habituación, entrenamiento con
+  posturografía.
 
 ## Apéndices
 - A. Tablas normativas del ABR y la ECochG por población (las citas, en los caps. 11, 12, 9)

@@ -1,6 +1,8 @@
 # Cómo usar este libro
 
-Este libro enseña audiología y electrofisiología **a partir de pacientes**. No está pensado para leerse de corrido: cada capítulo se sostiene solo y remite a los demás cuando hace falta.
+Este libro enseña a **evaluar y rehabilitar en otorrinolaringología a partir de pacientes**. No está pensado para leerse de corrido: cada capítulo se sostiene solo y remite a los demás cuando hace falta.
+
+Es un solo libro que crece por **secciones**. Esta edición trae la audición: sus bases, cómo se hace cada examen y los casos clínicos. Las ediciones siguientes suman el equilibrio, la nariz y la rehabilitación auditiva y vestibular, sin cambiar lo que ya está.
 
 ## Tres tipos de capítulo
 
@@ -21,7 +23,14 @@ El razonamiento y el diagnóstico de cada caso están al final del capítulo, en
 
 Los resultados nunca van solos. Cada figura viene **relatada con globos**: un número sobre el gráfico señala el hallazgo y la observación con el mismo número, debajo, explica qué significa. Después viene el razonamiento y el diagnóstico.
 
-Los pacientes son ficticios. Sus exámenes los generó el simulador **LabSim** con los mismos modelos que usarás en el laboratorio, así que puedes atender a varios de ellos en el simulador. Los marcados con ★ son pacientes de práctica disponibles en tu curso.
+Los pacientes son ficticios. Sus exámenes los generaron los **simuladores de apoyo** con los mismos modelos que usarás en el laboratorio, así que puedes atender a varios de ellos. Los marcados con ★ son pacientes de práctica disponibles en tu curso.
+
+## Simuladores de apoyo
+
+El libro se puede usar sin ningún simulador: todo lo que necesitas para razonar un caso está en sus páginas. Los simuladores sirven para **practicar y entender**: hacer el examen tú mismo, equivocarte sin consecuencias y ver qué cambia cuando cambia el paciente.
+
+- **LabSim**: audiometría, impedanciometría, emisiones, potenciales evocados, electrococleografía y VEMP. Cada herramienta termina con un apartado *En LabSim*.
+- **trainHIT** y **labyrinthus3d**: el impulso cefálico (vHIT) y el resto de la evaluación vestibular, en la sección de equilibrio.
 
 ## Los recuadros
 

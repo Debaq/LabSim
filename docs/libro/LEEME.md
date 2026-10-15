@@ -1,4 +1,4 @@
-# Libro de casos LabSim
+# Evaluación y rehabilitación en otorrinolaringología (libro de casos)
 
 **El compilado es `libro.pdf`** (en esta carpeta). Se rearma solo cada vez
 que se arma un capítulo, así que siempre está al día.

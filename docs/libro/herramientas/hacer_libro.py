@@ -50,8 +50,11 @@ FORMATOS = {
 }
 FORMATO = FORMATOS['a4']
 
-TITULO = 'Casos clínicos en audiología y electrofisiología'
-BAJADA = 'Razonamiento clínico con LabSim'
+# Título elegido por él el 2026-10-15: un solo libro que crece por secciones
+# (audición, equilibrio, nariz, rehabilitación). Los simuladores (LabSim,
+# trainHIT, labyrinthus3d) son herramientas de apoyo, no el título.
+TITULO = 'Evaluación y rehabilitación en otorrinolaringología'
+BAJADA = 'Un libro de casos clínicos'
 # Autores: por ahora no van en el libro (decisión 2026-10-15). Los previstos,
 # para cuando se agreguen: pasarlos a AUTORES y vuelven a la portada, la
 # portada interior, los créditos, la página de autores y la contraportada.
@@ -527,7 +530,10 @@ body {{ margin: 0; }}
 /* portadilla, portada interior y créditos van sin número; el resto de las preliminares, en romanos */
 .portadilla, .interior, .creditos {{ page: inicial; }}
 .indice, .preliminar {{ page: frontal; }}
-.cuerpo {{ counter-reset: page 1; }}
+/* El cuerpo es un grupo de páginas que parte en 1. Con counter-reset en el
+   elemento WeasyPrint daba 1 en todo el índice (target-counter). */
+.cuerpo {{ page: cuerpo; }}
+@page cuerpo:nth(1 of cuerpo) {{ counter-reset: page 1; }}
 .portadilla, .interior, .indice, .preliminar {{ break-before: right; }}
 .creditos {{ break-before: left; }}
 .interior {{ text-align: center; padding-top: 28mm; height: 255mm; box-sizing: border-box; position: relative; }}
@@ -712,7 +718,7 @@ def paginas_iniciales(capitulos):
     presentación, índice, cómo usar y abreviaturas. Cada una empieza en
     página derecha; las hojas blancas de por medio las pone el paginado."""
     anio = __import__('datetime').date.today().year
-    portada = (f'<section class="portada"><div class="pt-banda-sup">LabSim</div>'
+    portada = (f'<section class="portada"><div class="pt-banda-sup">TecMedHub · Universidad Austral de Chile</div>'
                f'<div class="pt-centro"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p></div>'
                f'{trazos_portada()}'
                + (f'<p class="autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
@@ -731,13 +737,14 @@ def paginas_iniciales(capitulos):
                 f'<p>Esta obra se distribuye con licencia <strong>Creative Commons Atribución-NoComercial-'
                 f'CompartirIgual 4.0 Internacional ({LICENCIA})</strong>. Puedes copiarla, distribuirla y adaptarla '
                 f'sin fines comerciales, citando a los autores y compartiendo las obras derivadas con la misma licencia.</p>'
-                f'<p>Los pacientes de los casos son ficticios. Sus exámenes fueron generados con el simulador LabSim. '
+                f'<p>Los pacientes de los casos son ficticios. Sus exámenes fueron generados con simuladores de apoyo '
+                f'(LabSim y, en las secciones que los usan, trainHIT y labyrinthus3d). '
                 f'Las otoscopías provienen de bancos de imágenes de acceso libre, con su autoría y licencia en el pie '
                 f'de cada figura.</p>'
                 f'<p>La audiología avanza: las normas, valores de referencia y criterios de este libro se revisaron '
                 f'con la bibliografía citada en cada capítulo, pero quien atiende a un paciente debe contrastarlos '
                 f'con la normativa vigente y el protocolo de su lugar de trabajo.</p>'
-                f'<p>Diseño y diagramación: generados con las herramientas del proyecto LabSim.</p></section>')
+                f'<p>Diseño y diagramación: TecMedHub, con herramientas propias.</p></section>')
     autores = '' if not AUTORES else ('<section class="preliminar"><h1 class="prelim">Autores</h1>'
                + ''.join(f'<div class="autor"><p class="autor-n">{a}</p>'
                          f'<div class="pendiente"><span>Falta texto</span> nombre completo, título y afiliación</div></div>'
@@ -757,10 +764,11 @@ def paginas_iniciales(capitulos):
 
 def contraportada():
     return (f'<section class="contraportada"><p class="cp-titulo">{TITULO}</p>'
-            f'<p class="cp-texto">Un libro para aprender audiología y electrofisiología como se aprende en el box: '
-            f'con pacientes. Cada técnica se explica paso a paso y cada caso se razona desde la anamnesis hasta el '
-            f'diagnóstico, con los exámenes relatados sobre sus gráficos. Los pacientes y sus resultados salen del '
-            f'simulador LabSim, así que cada caso del libro se puede atender en el laboratorio.</p>'
+            f'<p class="cp-texto">Un libro para aprender a evaluar y rehabilitar en otorrinolaringología como se '
+            f'aprende en el box: con pacientes. Cada técnica se explica paso a paso y cada caso se razona desde la '
+            f'anamnesis hasta el diagnóstico, con los exámenes relatados sobre sus gráficos. Los simuladores de '
+            f'apoyo generan los pacientes y sus resultados, así que muchos casos se pueden atender en el '
+            f'laboratorio.</p>'
             + (f'<p class="cp-autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
             f'<div class="cp-logos">{logo("uach-pm-blanco.png")}{logo("tecmedhub-blanco.png", "tm")}</div>'
             f'<p class="cp-licencia">{LICENCIA}</p></section>')
