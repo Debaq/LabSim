@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../src/ReportVersions.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
 require_once __DIR__ . '/../../views/indicadores/tecnica.php';
+require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -178,6 +179,7 @@ $tecnicaCompleta = array_filter(AudiometriaTecnica::deAtenciones(
     array_map('intval', array_column($todasLasAtenciones, 'appointment_id')),
     $verRegistro ? $allLogs : null
 ));
+$faltasByAppt = FaltasGraves::deAtenciones($studentId, array_map('intval', array_column($todasLasAtenciones, 'appointment_id')));
 $tecnicaByAppt = array_map(static function (array $t): array {
     return $t['puntaje'];
 }, $tecnicaCompleta);
@@ -371,7 +373,8 @@ $tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAp
             <td class="nowrap"><a href="dashboard.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#student-<?= (int) $studentId ?>"><?= htmlspecialchars($a['fecha'] ?: '—') ?> <?= htmlspecialchars($a['hora'] ?: '') ?></a></td>
             <td><?= htmlspecialchars(trim("{$a['nombre']} {$a['apellido']}")) ?: '—' ?></td>
             <td><?= htmlspecialchars($a['procedimiento']) ?></td>
-            <td><span class="tag <?= $estadoClase ?>"><?= htmlspecialchars($estadoTexto) ?></span></td>
+            <td><span class="tag <?= $estadoClase ?>"><?= htmlspecialchars($estadoTexto) ?></span>
+                <?php if (!empty($faltasByAppt[(int) $a['appointment_id']])): ?><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#faltas-graves"><?= faltas_graves_etiqueta($faltasByAppt[(int) $a['appointment_id']]) ?></a><?php endif; ?></td>
             <td class="nowrap"><?= $durationS !== null ? htmlspecialchars(AlumnoIndicadores::minutos((int) $durationS)) : '—' ?></td>
             <td><?= $preguntasByAppt[(int) $a['appointment_id']] ?? '—' ?></td>
             <td><?php $tec = $tecnicaByAppt[(int) $a['appointment_id']] ?? null; ?>

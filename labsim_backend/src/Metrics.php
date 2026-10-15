@@ -53,7 +53,7 @@ final class Metrics
         'z_decay_freq_change' => 'Cambio de frecuencia del tone decay',
         'z_etf_prueba_change' => 'Cambio de prueba de función tubaria',
         'z_etf_test' => 'Prueba de función tubaria',
-        'z_no_realizable' => 'Intentó medir en un oído no realizable (sin sonda)',
+        'z_no_realizable' => 'FALTA GRAVE: impedanciómetro en un oído donde la sonda no iba',
         // Sistema
         'session_login' => 'Inicio de sesión',
         'session_logout' => 'Cierre de sesión',

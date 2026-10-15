@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
+require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 
 $me = Auth::requireAdminSession();
@@ -180,6 +181,8 @@ if ($attendance) {
     render_section_comments('procedimiento', 'Procedimiento', (string) $appointment['procedimiento'], $attendanceComments['procedimiento']);
 }
 ?>
+
+<?php faltas_graves_recuadro(FaltasGraves::deAtenciones($studentId, [$appointmentId])[$appointmentId] ?? [], true); ?>
 
 <?php $tecnica = AudiometriaTecnica::paraAtencion($appointmentId, $studentId); ?>
 <?php if ($tecnica !== null): ?>

@@ -187,6 +187,7 @@ class ZControl(QWidget, Ui_Z_control):
 
         self.side = 0
         self.test = 'Z_'
+        self.fuera_de_uso = False
         self.store_data = [Storage(2), Storage(2)]
         self.new = [True, True]
 
@@ -212,8 +213,9 @@ class ZControl(QWidget, Ui_Z_control):
     # Oído no realizable
     # ------------------------------------------------------------------
 
-    def _no_realizable(self, con_estimulo_contra=False):
-        """Texto del aviso si la medición actual toca un oído NR, o None.
+    def _oido_nr_tocado(self, con_estimulo_contra=False):
+        """('sonda'|'auricular', oído) si la medición actual mete algo en un
+        oído NR, o None.
 
         La sonda no va en un oído NR, y en CONTRA tampoco el auricular del
         estímulo: un reflejo contra con la sonda en el oído sano y el tono
@@ -221,20 +223,32 @@ class ZControl(QWidget, Ui_Z_control):
         side = self.Z.get_side()
         idx = 0 if side == 'OD' else 1
         if oido_no_realizable(self.data, idx):
-            return f"NO REALIZABLE\nla sonda no va en {side}"
+            return 'sonda', side
         if con_estimulo_contra and self.reflex_mode == 'CONTRA' and oido_no_realizable(self.data, 1 - idx):
-            otro = 'OI' if side == 'OD' else 'OD'
-            return f"NO REALIZABLE\nel auricular no va en {otro}"
+            return 'auricular', 'OI' if side == 'OD' else 'OD'
         return None
 
     def _bloquear_si_no_realizable(self, screen, pantalla, con_estimulo_contra=False):
-        """Muestra el aviso y deja constancia si el alumno intenta medir en
-        un oído NR. Devuelve True si hay que cortar la medición."""
-        texto = self._no_realizable(con_estimulo_contra)
-        if texto is None:
+        """Meter la sonda (o el auricular) en un oído NR es una FALTA GRAVE:
+        con secreción se ensucian la oliva y la sonda y se contagia el
+        próximo oído; con un cuerpo extraño se lo empuja. Queda en el log
+        (z_no_realizable, ver FaltasGraves en el backend) y el equipo queda
+        fuera de uso el resto de la atención, en los dos oídos.
+        Devuelve True si hay que cortar la medición."""
+        if self.fuera_de_uso:
+            self.avisos[screen].mostrar(
+                "FUERA DE USO\nel impedanciómetro quedó inutilizado\npor la falta grave de esta atención", grave=True)
+            return True
+        tocado = self._oido_nr_tocado(con_estimulo_contra)
+        if tocado is None:
             return False
-        self._log("z_no_realizable", screen=pantalla, side=self.Z.get_side(), mode=self.reflex_mode)
-        self.avisos[screen].mostrar(texto)
+        que, oido = tocado
+        self.fuera_de_uso = True
+        self._log("z_no_realizable", screen=pantalla, side=self.Z.get_side(), mode=self.reflex_mode,
+                  oido_nr=oido, que=que)
+        self.avisos[screen].mostrar(
+            f"FALTA GRAVE\n{'la sonda' if que == 'sonda' else 'el auricular'} no debía entrar en {oido}\n"
+            "impedanciómetro fuera de uso en esta atención", grave=True)
         return True
 
     def _ocultar_avisos(self):
@@ -260,6 +274,8 @@ class ZControl(QWidget, Ui_Z_control):
         }
         self.Z_reflex.clear_response()
         self.refresh_reflex_table()
+        # Paciente nuevo, equipo limpio: la falta grave es de esa atención.
+        self.fuera_de_uso = False
         self.data = data  # None limpia el caso anterior: sin esto el log seguía marcando al paciente ya cerrado
         self.refresh()
         if data is None:

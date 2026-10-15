@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
 require_once __DIR__ . '/../../src/CourseAvance.php';
 require_once __DIR__ . '/../../views/indicadores/tecnica.php';
+require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 
 /**
  * El resumen del alumno logueado (sesión propia, ver sso.php; nunca puede
@@ -42,6 +43,7 @@ $attendances = array_values(array_filter($todas, static fn (array $a): bool => $
 $practicas = array_values(array_filter($todas, static fn (array $a): bool => $a['practice_id'] !== null));
 
 $tecnicas = array_filter(AudiometriaTecnica::deAtenciones($uid, array_map('intval', array_column($todas, 'appointment_id'))));
+$faltas = FaltasGraves::deAtenciones($uid, array_map('intval', array_column($todas, 'appointment_id')));
 
 // Por cita: preguntas al paciente, informes, comentarios del docente y avisos.
 $porCita = static function (string $sql, array $args) use ($pdo): array {
@@ -160,6 +162,7 @@ $lista = static function (array $filas) use ($tecnicas, $preguntas, $informes, $
             </span>
             <span class="atencion-proc"><?= htmlspecialchars($a['procedimiento'] ?: '—') ?></span>
             <span class="atencion-datos">
+                <?= faltas_graves_etiqueta($faltas[$ap] ?? []) ?>
                 <?php if ($duracionS !== null): ?><span class="dato" title="Desde que apretaste Atender hasta que cerraste">⏱ <?= htmlspecialchars(AlumnoIndicadores::minutos($duracionS)) ?></span><?php endif; ?>
                 <?php if (isset($preguntas[$ap])): ?><span class="dato" title="Preguntas que le hiciste al paciente">💬 <?= $preguntas[$ap] ?> pregunta<?= $preguntas[$ap] === 1 ? '' : 's' ?></span><?php endif; ?>
                 <?php if ($tec !== null && $tec['pct'] !== null): ?><span class="dato dato--fuerte" style="color:<?= AudiometriaTecnicaVista::color($tec['pct']) ?>;" title="<?= (int) $tec['cumple'] ?> de <?= (int) $tec['total'] ?> pasos de la técnica">Técnica <?= (int) $tec['pct'] ?> %</span><?php endif; ?>

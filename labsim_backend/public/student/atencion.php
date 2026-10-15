@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../src/Oirs.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
+require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 
 /**
  * Detalle de una atención propia ya cerrada: datos de la atención, ficha
@@ -104,6 +105,7 @@ $reports = $stmt->fetchAll();
 // Pasos de la técnica de audiometría (ver AudiometriaTecnica): lo mismo que
 // ve el docente, sin los umbrales del paciente.
 $tecnica = AudiometriaTecnica::paraAtencion($appointmentId, (int) $me['id']);
+$faltas = FaltasGraves::deAtenciones((int) $me['id'], [$appointmentId])[$appointmentId] ?? [];
 
 $reportLabels = ReportFile::LABELS;
 
@@ -194,6 +196,8 @@ student_header($paciente, $me);
     <?php endif; ?>
 </div>
 <?php endif; ?>
+
+<?php faltas_graves_recuadro($faltas, false); ?>
 
 <?php if ($tecnica !== null): ?>
 <div class="card" id="tecnica">

@@ -5470,11 +5470,21 @@ nada a ese conducto.
   `REFLEX_ABSENT_DB` (el dato sigue siendo numérico) y quien los muestra
   --ficha PDF, patrón del editor, libro-- los rotula "NR" mirando
   `Z_OD`/`Z_OI`: no es un reflejo ausente, es uno que no se buscó.
-- La app no barre ni estimula en ese oído: si el alumno lo intenta, la
-  pantalla dice "NO REALIZABLE" y queda en el log (`z_no_realizable`), para
-  que el docente vea quién metió la sonda donde no iba. El aviso sale
-  recién al intentar, no al elegir el oído: decidir no medir es parte del
+- Intentarlo es una **falta grave**, no un aviso (lo pidió él: meter la
+  oliva en un oído con secreción es un error terrible y daña el equipo).
+  La app no mide, lo dice en rojo, lo registra (`z_no_realizable`) y deja
+  el impedanciómetro **fuera de uso el resto de la atención, en los dos
+  oídos**: la sonda que entró a un oído con secreción no puede ir al otro.
+  Con el paciente siguiente el equipo vuelve limpio. El aviso sale recién
+  al intentar, no al elegir el oído: decidir no medir es parte del
   ejercicio y sale de la otoscopía y la anamnesis.
+- La falta se muestra aparte de la técnica (`FaltasGraves`, no suma ni
+  resta al %): recuadro rojo en la atención (docente en chat_detail.php,
+  alumno en atencion.php) y etiqueta "⚠ Falta grave" en las listas
+  (admin/student.php, student/mis_pacientes.php).
+- **Perforación seca no es NR**: sigue siendo B con volumen alto y la ETF
+  con tímpano perforado se hace. NR es por lo que no debe entrar al
+  conducto (secreción, atresia, cuerpo extraño), no por la membrana.
 - Cuadros que nacen NR: `estenosis_atresia_cae` (no hay dónde sellar),
   `otitis_externa` (conducto edematoso, doloroso, con secreción) y
   `cuerpo_extrano_cae` (se empuja hacia el tímpano). El docente puede
