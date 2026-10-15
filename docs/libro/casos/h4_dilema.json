@@ -1,0 +1,22 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "otoesclerosis",
+      "OI": "otoesclerosis"
+    },
+    "edad": 38,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

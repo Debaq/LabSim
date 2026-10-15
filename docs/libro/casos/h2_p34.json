@@ -1,0 +1,14 @@
+{
+  "caso": "demo:34",
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": false,
+      "sin_enmascarar": false
+    }
+  ]
+}

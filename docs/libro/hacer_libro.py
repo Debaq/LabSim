@@ -133,7 +133,8 @@ def ficha(nombre, numero, cap):
     hc = historia(d.get('historia_clinica'))
     if hc:
         partes.append('<p class="rotulo-chico">Historia clínica</p>' + hc)
-    anamnesis = ''.join(partes) or '<p class="pendiente">✍ Motivo de consulta y anamnesis</p>'
+    # Sin anamnesis en el caso (los armados por cuadro): la cuenta el texto del capítulo
+    anamnesis = ''.join(partes)
 
     otos = []
     for lado in ('od', 'oi'):
@@ -162,6 +163,7 @@ def resultados(nombre, numero, cap):
             rot += ' sin enmascarar'
         if archivo.exists():
             svg = re.sub(r'<svg ', '<svg class="grafico" ', archivo.read_text(encoding='utf-8'), count=1)
+            svg = re.sub(r'<metadata id="anclas">.*?</metadata>', '', svg)
             figs.append(f'<figure class="fig">{svg}<figcaption>Figura {cap}.{numero}.{k}. {rot}.</figcaption></figure>')
         else:
             figs.append(f'<p class="pendiente">Falta la figura {archivo.name}: correr figuras/hacer_figuras.py {nombre}</p>')
@@ -278,6 +280,7 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
             obs.append(f'<li><span class="globo">{k}</span>{markdown.markdown(texto.strip())[3:-4]}</li>')
         else:
             obs.append(f'<li class="sin-globo">{markdown.markdown(linea)[3:-4]}</li>')
+    svg = re.sub(r'<metadata id="anclas">.*?</metadata>', '', svg)   # ya se usaron; ids repetidos en la página
     svg = svg.replace('</svg>', ''.join(globos) + '</svg>')
     svg = re.sub(r'<svg ', '<svg class="grafico" ', svg, count=1)
     rot = NOMBRE_FIGURA.get(tipo, tipo)
@@ -363,6 +366,9 @@ def capitulo(md_texto):
         pie = f'<figcaption>Ilustración {cap}.{nilu[0]}. {html.escape(alt)}</figcaption>'
         if ruta.exists():
             return f'<figure class="ilustracion"><img src="{ruta.as_uri()}">{pie}</figure>'
+        # pendiente: la descripción completa va en el recuadro; el pie, solo la primera frase
+        corto = re.split(r'(?<=[.:;])\s', alt, maxsplit=1)[0].rstrip('.:;')
+        pie = f'<figcaption>Ilustración {cap}.{nilu[0]}. {html.escape(corto)}.</figcaption>'
         return (f'<figure class="ilustracion"><div class="ilu-pendiente"><span>Ilustración pendiente</span>'
                 f'{html.escape(alt)}<br><small>{html.escape(src)}</small></div>{pie}</figure>')
 
@@ -423,6 +429,8 @@ h3 + ol li {{ font-size: 8.4pt; line-height: 1.4; }}
 .dos-col {{ column-count: 2; column-gap: 7mm; }}
 .dos-col h3 {{ break-after: avoid; }}
 .dos-col .ancho, .dos-col table.ancho {{ column-span: all; }}
+/* fichas y figuras relatadas van siempre a todo el ancho, aunque caigan en una sección a dos columnas */
+.dos-col .caso, .dos-col .figobs, .dos-col .caja-pregunta.ancho {{ column-span: all; }}
 .caja {{ break-inside: avoid; border-radius: 2mm; padding: 2.6mm 3.4mm 1.4mm; margin: 2mm 0 4mm; font-size: 8.9pt; line-height: 1.45; }}
 .caja p, .caja li {{ margin-bottom: 1.2mm; }}
 .caja ul, .caja ol {{ padding-left: 4.5mm; }}
