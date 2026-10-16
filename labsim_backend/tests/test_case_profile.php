@@ -701,6 +701,30 @@ $ldlCond = CaseProfile::ldlCurve($dCond, 100.0);
 t_true($ldlCond[3] > $ldlSano[3],
     'Conductiva: el oído medio atenúa también lo fuerte, el LDL sube con el gap');
 
+// Tolerancia del paciente: el LDL sano no es fijo.
+t_eq(CaseProfile::ldlCurve($dNormal, 100.0, 115.0)[3], 115, 'Oído sano: LDL en la tolerancia del paciente');
+t_eq(CaseProfile::ldlCurve($dNormal, 100.0, 120.0)[3], (int) CaseProfile::LDL_MAX_DB,
+    'Tolerancia 120: no marca molestia hasta el tope');
+t_eq(CaseProfile::ldlCurve($dCoclear40, 100.0, 110.0)[3], 110,
+    'Coclear: se queda en la tolerancia del paciente aunque el umbral suba');
+t_eq(CaseProfile::ldlTolerancia([]), CaseProfile::LDL_NORMAL_DB, 'Caso sin tolerancia: proyecta como antes');
+t_eq(CaseProfile::ldlTolerancia(['ldl_tolerancia_db' => '107']), 105.0, 'Tolerancia redondeada a 5 dB');
+t_eq(CaseProfile::ldlTolerancia(['ldl_tolerancia_db' => 50]), CaseProfile::LDL_TOLERANCIA_MIN_DB, 'Tolerancia con piso');
+$pTol = CaseProfile::project($paresAsim, $paresAsim, $perfilCoclearOD + ['ldl_tolerancia_db' => 115], ['OD' => 'A', 'OI' => 'A']);
+$pSin = CaseProfile::project($paresAsim, $paresAsim, $perfilCoclearOD, ['OD' => 'A', 'OI' => 'A']);
+t_true(max($pTol['recruit']['ldl']['oi']) >= 115 && max($pSin['recruit']['ldl']['oi']) < 115,
+    'project() usa la tolerancia del perfil');
+$sorteos = [];
+for ($i = 0; $i < 300; $i++) {
+    $sorteos[CaseProfile::sortearLdlTolerancia()] = true;
+}
+t_true(count(array_diff_key($sorteos, CaseProfile::LDL_TOLERANCIA_PESOS)) === 0 && count($sorteos) >= 5,
+    'El sorteo solo da valores de LDL_TOLERANCIA_PESOS, y de varios');
+$nTol = CaseProfile::normalize(['Perfil' => ['version' => 1, 'ldl_tolerancia_db' => 110]]);
+t_eq($nTol['ldl_tolerancia_db'] ?? null, 110.0, 'normalize() conserva la tolerancia');
+t_true(!array_key_exists('ldl_tolerancia_db', CaseProfile::normalize(['Perfil' => ['version' => 1]])),
+    'normalize() no inventa tolerancia en un caso viejo');
+
 // ---------------------------------------------------------------------
 // Decay del reflejo (no la forma de la curva, que la elige el docente).
 // ---------------------------------------------------------------------

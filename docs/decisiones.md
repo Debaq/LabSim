@@ -6075,3 +6075,32 @@ NO arreglados"). Lo que se decidió en cada uno:
   libre (fono o inserto con ruido en el oído no evaluado). El motor
   (`fig.campo_libre`) dibuja en verde y acepta `audifono: OD|OI`.
 - **H10:** tope de la vía ósea del ABR en 55 dB nHL, confirmado.
+
+## LDL: la tolerancia es del paciente, no un número fijo (2026-10-16)
+
+El simulador le ponía LDL 100 dB HL a todo oído sano o coclear
+(`LDL_NORMAL_DB`), y con la regla del STAT que él pidió ("si le molesta a
+100, a 105 le va a molestar más") el STAT no se le podía hacer a casi nadie.
+Él: un oído normal no siempre tiene LDL; puede marcar molestia o no hacerlo
+hasta 120 o más. Y el LDL no se hace a todos (protocolo: sensorioneural,
+mixta, adaptación de audífonos, algiacusia; más el STAT).
+
+- `Perfil.ldl_tolerancia_db`: el LDL de un oído sin pérdida, uno por paciente
+  (los dos oídos toleran parecido). Se sortea con
+  `CaseProfile::LDL_TOLERANCIA_PESOS` (90-120 dB HL, centro ~105; 120 = no
+  marca molestia) en un caso nuevo y en el armado rápido; el docente lo
+  cambia en la ficha Perfil. Coclear: el LDL se queda en la tolerancia aunque
+  suba el umbral (mínimo 10 dB de campo); retro y conductiva suben. Un caso
+  sin el dato proyecta con 100, como antes.
+- App: en el STAT, si el nivel llega al LDL de esa frecuencia el paciente
+  dice "molesta" y no hay resultado.
+- Regla del libro (H6): STAT solo donde el nivel de la prueba no molesta (LDL
+  sobre 100 dB HL; sobre 105 en 1 kHz).
+- Producción (backup `labsim_2026-10-16_104436.sqlite`): 17 casos con
+  supraliminares en automático y el LDL tal como lo había proyectado el
+  motor recibieron tolerancia y LDL nuevo; los 10-27 tienen el LDL "no
+  medido" (130) y los 4, 6 y 7 están en manual: no se tocaron. Tolerancias
+  de los pacientes de práctica elegidas para el libro: Raúl (39) y Patricia
+  (38) 110, así el STAT se hace (positivo y negativo); Hernán (36) 100, le
+  molesta y no hay STAT; 33: 95, 34: 105, 35: 110, 37: 115, 40: 105,
+  41: 100, 42: 120. El resto, sorteado con semilla por id.

@@ -113,13 +113,25 @@ class StatTest(Base):
             self.assertTrue(all(par[1] < ResponseAudiometry.STAT_POSITIVO_DB
                                 for par in caso[clave]), clave)
 
-    def test_demo_36_y_38_cocleares_negativos(self):
-        for caso_id in (36, 38):
-            caso = demo(caso_id)
-            for oido in (0, 1):
-                for f in STAT_FREQS:
-                    self.assertEqual(self.stat(caso, oido, f), "negativo",
-                                     (caso_id, oido, f))
+    def test_demo_38_coclear_negativo(self):
+        # Patricia tolera hasta 110 dB HL: el STAT se hace y lo sostiene
+        caso = demo(38)
+        for oido in (0, 1):
+            for f in STAT_FREQS:
+                self.assertEqual(self.stat(caso, oido, f), "negativo", (oido, f))
+
+    def test_le_molesta_no_hay_resultado(self):
+        # Hernán (36) tiene el LDL en 100: a 100-105 dB HL le molesta, lo
+        # dice y la prueba no corre
+        voces = []
+        for f in STAT_FREQS:
+            self.nuevo(demo(36))
+            self.r.other_response.create_voice_ = voces.append
+            self.presentar("ruido_blanco_contralateral", freq=f,
+                           stimOn=[True, True], stim=[0, 4], output=[0, 1],
+                           int=[ResponseAudiometry.STAT_LEVEL_DB[f], 90])
+            self.assertFalse(self.r.decay_timer.isActive(), f)
+        self.assertEqual(voces, ["molesta"] * len(STAT_FREQS))
 
     def test_retrococlear_con_umbral_normal_es_positivo(self):
         # schwannoma chico: umbral de 5 dB HL, deterioro de 30
@@ -140,10 +152,11 @@ class StatTest(Base):
     def test_coclear_sin_margen_a_100_db_sigue_positivo(self):
         # regla vieja intacta: deterioro coclear de 20 dB en un oído de
         # 90 dB HL -- a 105 dB HL (1 kHz) solo le quedan 15 dB y no le alcanza
-        caso = copy.deepcopy(demo(36))
+        caso = copy.deepcopy(demo(38))
         caso["Aerea_mkg"][3] = [90, 30]
         caso["Aerea"][3] = [90, 30]
         caso["Stat"][1] = [20, 5]
+        caso["LDL"][3] = [120, 120]
         self.assertEqual(self.stat(caso, 0, 3), "positivo")
 
     def test_fuera_de_nivel_sigue_sin_resultado(self):

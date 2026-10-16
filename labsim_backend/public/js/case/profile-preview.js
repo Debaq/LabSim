@@ -60,6 +60,8 @@
             });
             perfil[lado] = { cce_pct: cce ? cce.value : 100, retro: retro };
         });
+        var tol = campo('perfil[ldl_tolerancia_db]');
+        if (tol && tol.value !== '') { perfil.ldl_tolerancia_db = tol.value; }
         var auto = {};
         MODULOS.forEach(function (m) { auto[m] = autoOn(m); });
         var zOd = campo('z_od'), zOi = campo('z_oi');
@@ -318,7 +320,7 @@
     });
     document.addEventListener('change', function (e) {
         var name = e.target.getAttribute('name') || '';
-        if (/^perfil\[auto\]\[/.test(name) || /^igualar\[/.test(name)
+        if (/^perfil\[auto\]\[/.test(name) || /^igualar\[/.test(name) || name === 'perfil[ldl_tolerancia_db]'
             || name === 'z_od' || name === 'z_oi' || esDeEdad(name)
             || (e.target.classList && e.target.classList.contains('abr-neural-input'))) {
             // Debounce también acá: generar el cuadro enciende las cuatro casillas

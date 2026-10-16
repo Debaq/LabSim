@@ -73,6 +73,10 @@ foreach (CaseBuilder::LADOS as $ladoForm => $lado) {
         ),
     ];
 }
+$tolerancia = $payload['perfil']['ldl_tolerancia_db'] ?? null;
+if ($tolerancia !== null && $tolerancia !== '') {
+    $perfil['ldl_tolerancia_db'] = $tolerancia;
+}
 $perfil['auto'] = [];
 foreach (CaseProfile::AUTO_MODULES as $modulo) {
     $perfil['auto'][$modulo] = !empty($payload['auto'][$modulo]);

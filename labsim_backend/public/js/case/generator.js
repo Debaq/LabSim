@@ -648,6 +648,20 @@
      * alcanza con que un oído se haya instalado despacio para que el
      * paciente no lo note.
      */
+    // Tolerancia del paciente (LDL sin pérdida), con los pesos de
+    // CaseProfile::LDL_TOLERANCIA_PESOS: una por paciente, no por oído.
+    function sortearTolerancia() {
+        var pesos = window.CASE_CONST.ldlToleranciaPesos || {};
+        var claves = Object.keys(pesos);
+        var total = claves.reduce(function (s, k) { return s + pesos[k]; }, 0);
+        var r = Math.random() * total;
+        for (var i = 0; i < claves.length; i++) {
+            r -= pesos[claves[i]];
+            if (r < 0) { return claves[i]; }
+        }
+        return claves[claves.length - 1];
+    }
+
     function generarRasgosPaciente(escOd, escOi) {
         var rangos = [escOd.conciencia, escOi.conciencia].filter(Boolean);
         var rango = [55, 90];
@@ -662,6 +676,8 @@
         if (conc) { conc.value = Math.round(entre(rango[0], rango[1])); }
         var conf = document.querySelector('#case-form [name="paciente_confiabilidad"]');
         if (conf) { conf.value = Math.round(entre(55, 95)); }
+        var tol = document.querySelector('#case-form [name="perfil[ldl_tolerancia_db]"]');
+        if (tol) { tol.value = sortearTolerancia(); }
     }
 
     /**

@@ -57,7 +57,7 @@ No se hacen todas: se hacen las que contestan la pregunta del caso, según la p�
 | **IWA** | reclutamiento por vía ósea | los mismos del Fowler | 250 a 4.000 Hz |
 | **SISI** | reclutamiento | no pide asimetría: se hace en cada oído | las de la pérdida |
 | **Carhart y Rosenberg** | adaptación en el umbral | asimetría, acúfeno unilateral o discriminación que no calza; pérdida de hasta 70 dB HL | dos contiguas, de 500 a 4.000 Hz |
-| **STAT** | adaptación a nivel alto | los mismos; que el paciente tolere el nivel de la prueba (LDL de 100 dB HL o más) | 500, 1.000 y 2.000 Hz |
+| **STAT** | adaptación a nivel alto | los mismos; que el nivel de la prueba no le moleste (LDL sobre 100 dB HL; sobre 105 en 1.000 Hz) | 500, 1.000 y 2.000 Hz |
 | **Stenger** | pérdida no orgánica | pérdida de un solo oído o muy asimétrica | la de la asimetría |
 :::
 
@@ -206,7 +206,7 @@ El STAT (*suprathreshold adaptation test*) no busca nada en el umbral. Presenta 
 En dB HL, con fonos supraaurales, el tono va a **100 dB en 500 y 2.000 Hz y 105 dB en 1.000 Hz**, con **ruido blanco a 90 dB** en el oído contrario. Cada oído se evalúa por separado.
 
 :::ojo Ojo clínico
-En el STAT el oído contrario **siempre** va enmascarado: a 100-105 dB HL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo. Y mira el LDL antes: si el paciente marca molestia bajo 100 dB HL, el STAT no se hace.
+En el STAT el oído contrario **siempre** va enmascarado: a 100-105 dB HL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo. Y mira el LDL antes: si a ese nivel le molesta (LDL de 100 dB HL o menos; en 1.000 Hz, de 105 o menos), en esa frecuencia el STAT no se hace. Si le molesta a 100, a 105 le va a molestar más.
 :::
 
 ### Pérdida no orgánica
@@ -265,7 +265,7 @@ Ninguna prueba sola basta. Lo que da confianza es que varias apunten al mismo la
 :::figura h6_p38 audiograma
 - @OI 500 | En 500 Hz el OI está en 50 dB y el OD en 5: **45 dB de diferencia**, más de lo que admite el Fowler.
 - @OI 1000 | En 1 kHz la diferencia es de 35 dB, y en 2, 3 y 4 kHz de 25, 20 y 20 dB: ahí **sí se puede hacer**. La ósea va junto a la aérea: no hay gap.
-- Los triángulos son el LDL: 100 dB en el OI, igual que en el OD, con un umbral 45 dB peor en los graves. El **campo dinámico se estrecha**: calza con que los gritos del recreo le molesten.
+- Los triángulos son el LDL: 110 dB en el OI, igual que en el OD, con un umbral 45 dB peor en los graves. El **campo dinámico se estrecha**: calza con que los gritos del recreo le molesten. Y como no le molesta a 100-105 dB HL, el STAT se puede hacer.
 :::
 
 :::ayuda-ancho Lo que entrega Patricia sobre el umbral (OI en estudio, OD de referencia)
@@ -336,7 +336,7 @@ Cada prueba se hace con su instrucción de la figura H6.1, dada con *Talkback*, 
 - **SISI**: con el tono sonando, sube un clic de 1 dB y vuelve a bajarlo. Las subidas de 5 dB las nota siempre; con el portador bajo el umbral no nota ninguna.
 - **Fowler**: en una frecuencia que no cumple los requisitos, el paciente contesta como un oído sin reclutamiento.
 - **Deterioro tonal**: en el Carhart cada subida reinicia el minuto; en el Rosenberg el minuto es uno solo. El minuto es real: cronométralo. El Carhart se instruye con *Mano levantada* o, si quieres avisarle del ruido en el otro oído, con *Mano levantada en ruido*: es la misma prueba.
-- **STAT**: el tono va a 100 dB HL en 500 y 2.000 Hz y a 105 dB HL en 1.000 Hz, con ruido blanco a 90 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado. Un oído retrococlear baja la mano antes del minuto aunque le sobre margen sobre su umbral; uno coclear lo sostiene.
+- **STAT**: el tono va a 100 dB HL en 500 y 2.000 Hz y a 105 dB HL en 1.000 Hz, con ruido blanco a 90 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado. Si el nivel llega a su LDL, el paciente dice "molesta" y en esa frecuencia tampoco. Un oído retrococlear baja la mano antes del minuto aunque le sobre margen sobre su umbral; uno coclear lo sostiene.
 - **Stenger**: se instruye con *Colocar fonos*, como los umbrales. El paciente lo reconoce por el estímulo: el mismo tono, por vía aérea, en los dos oídos a la vez. Percibe el tono con más nivel de sensación sobre sus umbrales **verdaderos**, no sobre los que te dio.
 - **Orden**: el indicador de técnica espera las supraliminares entre la logoaudiometría y la vía ósea.
 

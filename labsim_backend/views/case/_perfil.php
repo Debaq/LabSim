@@ -71,6 +71,20 @@
         <p class="help">Lo que va a contestar el equipo de tamizaje con este caso. El alumno no ve un umbral sino PASA o REFIERE, así que esto es lo que él va a leer. En un recién nacido incluye el transitorio de las primeras horas, que cambia con la edad exacta y con el parto.</p>
     </div>
 </div>
+<div class="card">
+    <strong>Tolerancia a los sonidos fuertes</strong>
+    <div class="three-col">
+        <label>LDL sin pérdida (dB HL)
+            <select name="perfil[ldl_tolerancia_db]">
+                <option value="" <?= fv($v, ['perfil', 'ldl_tolerancia_db'], '') === '' ? 'selected' : '' ?>>Sin definir (<?= (int) CaseProfile::LDL_NORMAL_DB ?>)</option>
+                <?php foreach (array_keys(CaseProfile::LDL_TOLERANCIA_PESOS) as $db): ?>
+                <option value="<?= $db ?>" <?= (string) fv($v, ['perfil', 'ldl_tolerancia_db'], '') === (string) $db ? 'selected' : '' ?>><?= $db >= CaseProfile::LDL_MAX_DB ? $db . ' (no marca molestia)' : $db ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </div>
+    <p class="help">El nivel en que a este paciente le molestaría un tono en un oído sin pérdida. Es uno por paciente y vale para los dos oídos. Con "Supraliminares" encendido, el LDL de cada frecuencia sale de acá: un oído coclear se queda en este nivel aunque el umbral suba (el campo dinámico se achica, nunca a menos de <?= (int) CaseProfile::LDL_MIN_RANGE_DB ?> dB), y uno retrococlear o con gap sube por encima. <?= (int) CaseProfile::LDL_MAX_DB ?> es la salida máxima del audiómetro: el paciente no dice "molesta" en ninguna intensidad. Un caso nuevo y el armado rápido la sortean; un caso guardado antes de que existiera queda en "Sin definir", que proyecta <?= (int) CaseProfile::LDL_NORMAL_DB ?> como siempre.</p>
+</div>
 <div class="two-col">
 <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
 <div class="card">

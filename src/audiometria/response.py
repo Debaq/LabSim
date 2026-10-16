@@ -467,7 +467,8 @@ class ResponseAudiometry():
           respondiendo por audibilidad, pero la prueba no entrega resultado.
           A nivel, un deterioro de STAT_POSITIVO_DB o más (retrococlear) lo
           pierde antes del minuto; con menos, solo si a 100 dB HL no le
-          alcanza el margen sobre el umbral.
+          alcanza el margen sobre el umbral. Si el nivel llega a su LDL, dice
+          que le molesta y no hay resultado.
         """
         cfg = self.DECAY_TESTS[command]
         stim_on = self._tone_channel()
@@ -541,6 +542,18 @@ class ResponseAudiometry():
             debug_print(f"[Stat] {side} {self.frecuency[freq]}Hz: presentado a {int_}dB HL, "
                   f"el test se administra a {nivel_stat}dB HL "
                   f"(+-{self.STAT_LEVEL_TOL}); sin resultado válido")
+            return
+
+        if cfg.get('fixed_level') and int_ >= self.dbdata['LDL'][freq][ear]:
+            # el nivel del Stat le molesta (llega a su LDL): lo dice y en esa
+            # frecuencia la prueba no se hace. Mirar el LDL antes es parte
+            # del protocolo
+            self.decay_timer.stop()
+            self._decay_run = {}
+            self.upHand()
+            self.other_response.create_voice_('molesta')
+            debug_print(f"[Stat] {side} {self.frecuency[freq]}Hz: {int_}dB HL llega al LDL "
+                  f"({self.dbdata['LDL'][freq][ear]}dB HL); le molesta, sin resultado")
             return
 
         elapsed_ms = self._decay_elapsed_ms(cfg, command, ear, freq, int_)

@@ -205,7 +205,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['historia_clinica'] = $editPatient['historia_clinica'] ?? '';
     $v['comentario_docente'] = $editPatient['comentario_docente'] ?? '';
 } else {
-    $v = [];
+    // Caso nuevo: la tolerancia del paciente nace sorteada, no en un valor
+    // fijo (ver CaseProfile::LDL_TOLERANCIA_PESOS).
+    $v = ['perfil' => ['ldl_tolerancia_db' => (string) CaseProfile::sortearLdlTolerancia()]];
 }
 
 // Otoscopia: sin selector de modo -- 1 sola fase (índice 0, sin texto) ES
@@ -678,6 +680,7 @@ window.CASE_CONST = <?= json_encode([
     'iso7029' => CaseProfile::ISO7029_COEF,
     'iso7029EdadBase' => CaseProfile::ISO7029_EDAD_BASE,
     'autoModules' => CaseProfile::AUTO_MODULES,
+    'ldlToleranciaPesos' => CaseProfile::LDL_TOLERANCIA_PESOS,
     'decayModes' => array_keys(CaseProfile::DECAY_FREQ_IDX),
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) ?>;
 </script>

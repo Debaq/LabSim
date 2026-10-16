@@ -2311,6 +2311,10 @@ final class CaseProfile
             ];
         }
 
+        if (isset($perfil['ldl_tolerancia_db'])) {
+            $out['ldl_tolerancia_db'] = self::ldlTolerancia($perfil);
+        }
+
         $auto = is_array($perfil['auto'] ?? null) ? $perfil['auto'] : [];
         $out['auto'] = [];
         foreach (self::AUTO_MODULES as $modulo) {
@@ -2844,12 +2848,22 @@ final class CaseProfile
     // ---------------------------------------------------------------
 
     /**
-     * Nivel de disconfort en un oído sano (dB HL). Es casi constante: no
-     * sube con la pérdida coclear, y ESE es el punto -- el umbral sube, el
-     * LDL no, y el campo dinámico se estrecha solo. El reclutamiento no
+     * Nivel de disconfort de un oído sano (dB HL) en un caso guardado antes
+     * de que existiera la tolerancia del paciente (Perfil.ldl_tolerancia_db).
+     * Lo que no cambia con la pérdida coclear es ESE nivel: el umbral sube,
+     * el LDL no, y el campo dinámico se estrecha solo. El reclutamiento no
      * hay que dibujarlo, cae de la física.
      */
     public const LDL_NORMAL_DB = 100.0;
+    /**
+     * Tolerancia del paciente: el LDL de un oído sin pérdida no es un número
+     * fijo. Varía entre personas, y muchas no marcan molestia hasta la salida
+     * máxima del audiómetro (120 = sin LDL). El armado rápido la sortea con
+     * estos pesos (dB HL => peso), una por paciente, porque los dos oídos de
+     * una persona toleran parecido; el docente la puede cambiar.
+     */
+    public const LDL_TOLERANCIA_PESOS = [90 => 5, 95 => 10, 100 => 15, 105 => 20, 110 => 20, 115 => 15, 120 => 15];
+    public const LDL_TOLERANCIA_MIN_DB = 90.0;
     /** Campo dinámico mínimo que deja una cóclea dañada. */
     public const LDL_MIN_RANGE_DB = 10.0;
     /** Campo dinámico de un oído SIN reclutamiento (retrococlear). */
@@ -2860,7 +2874,8 @@ final class CaseProfile
     /**
      * Curva de LDL por frecuencia (dB HL).
      *
-     * Coclear: el LDL se queda donde está y el campo dinámico se cierra.
+     * Coclear: el LDL se queda en la tolerancia del paciente y el campo
+     * dinámico se cierra (nunca menos de LDL_MIN_RANGE_DB).
      * Retrococlear: el LDL sube con el umbral, el campo dinámico se
      * conserva y no hay reclutamiento. Conductiva: todo corrido por el
      * gap, porque el oído medio atenúa también lo fuerte.
@@ -2868,7 +2883,7 @@ final class CaseProfile
      * @param array $decomp Salida de decompose()
      * @return array<int,int> índice de CaseBuilder::FREQUENCIES -> dB HL
      */
-    public static function ldlCurve(array $decomp, float $ccePct): array
+    public static function ldlCurve(array $decomp, float $ccePct, float $tolerancia = self::LDL_NORMAL_DB): array
     {
         $fraccionRetro = 1.0 - self::clamp($ccePct, 0.0, 100.0) / 100.0;
         $rango = self::LDL_MIN_RANGE_DB
@@ -2878,10 +2893,43 @@ final class CaseProfile
         foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
             $sn = $decomp['sn'][$hz] ?? 0.0;
             $gap = $decomp['gap'][$hz] ?? 0.0;
-            $ldl = $gap + max(self::LDL_NORMAL_DB, $sn + $rango);
+            $ldl = $gap + max($tolerancia, $sn + $rango);
             $out[$i] = (int) self::clamp(round($ldl / 5) * 5, 0.0, self::LDL_MAX_DB);
         }
         return $out;
+    }
+
+    /**
+     * Una tolerancia al azar con LDL_TOLERANCIA_PESOS, para un caso nuevo
+     * (el armado rápido hace lo mismo en case/generator.js).
+     */
+    public static function sortearLdlTolerancia(): int
+    {
+        $total = array_sum(self::LDL_TOLERANCIA_PESOS);
+        $r = mt_rand(1, $total);
+        foreach (self::LDL_TOLERANCIA_PESOS as $db => $peso) {
+            $r -= $peso;
+            if ($r <= 0) {
+                return (int) $db;
+            }
+        }
+        return (int) self::LDL_NORMAL_DB;
+    }
+
+    /**
+     * Tolerancia (LDL sin pérdida) de un perfil: la guardada, acotada a
+     * LDL_TOLERANCIA_MIN_DB..LDL_MAX_DB, o LDL_NORMAL_DB si el caso no la
+     * tiene (así un caso viejo proyecta lo mismo que antes).
+     *
+     * @param array<string,mixed> $perfil
+     */
+    public static function ldlTolerancia(array $perfil): float
+    {
+        $t = $perfil['ldl_tolerancia_db'] ?? null;
+        if ($t === null || $t === '' || !is_numeric($t)) {
+            return self::LDL_NORMAL_DB;
+        }
+        return self::clamp(round((float) $t / 5) * 5, self::LDL_TOLERANCIA_MIN_DB, self::LDL_MAX_DB);
     }
 
     /**
@@ -3312,7 +3360,7 @@ final class CaseProfile
             // rollover en vivo (logogram.js), con o sin el módulo en auto.
             $logo[$lado] = self::discrimination($decomp[$lado], $ccePct, $retro)
                 + ['ri' => self::rolloverIndex($decomp[$lado], $ccePct, $retro)];
-            $ldl[$ladoForm] = self::ldlCurve($decomp[$lado], $ccePct);
+            $ldl[$ladoForm] = self::ldlCurve($decomp[$lado], $ccePct, self::ldlTolerancia($perfil));
         }
 
         // Fowler compara dos oídos: el patrón es el del oído EN ESTUDIO (el

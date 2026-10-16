@@ -18,7 +18,7 @@ Responde tres preguntas:
 2. **¿Cuánto entiende?** El porcentaje de palabras que repite con la voz a un nivel cómodo es la mejor medida de su rendimiento en conversación tranquila. Sirve para aconsejar, para indicar un audífono y para seguirlo en el tiempo.
 3. **¿Dónde está el problema?** La forma de la curva cambia con el sitio de la lesión. Una discriminación mucho peor de lo que predice el audiograma, o que empeora al subir la voz, obliga a descartar una lesión del nervio o del tronco (Jerger y Jerger, 1971).
 
-Se hace en toda audiometría diagnóstica, después de la vía aérea y antes de las pruebas supraliminares. El **LDL** se agrega en las pérdidas sensorioneurales y mixtas, cuando hay deterioro tonal (→ H6), cuando el paciente refiere molestia con los ruidos fuertes y antes de indicar un audífono.
+Se hace en toda audiometría diagnóstica, después de la vía aérea y antes de las pruebas supraliminares. El **LDL** no se hace a todos: se agrega en las pérdidas sensorioneurales y mixtas, en la adaptación de audífonos, cuando el paciente refiere molestia o dolor con los ruidos fuertes y cuando hay que hacer un STAT (→ H6).
 
 ## Fundamento
 
@@ -71,7 +71,7 @@ La voz **grabada** es la opción preferida: cada paciente oye las mismas palabra
 
 ### Campo dinámico
 
-El **campo dinámico** es el espacio entre el umbral y el umbral de molestia, frecuencia por frecuencia. En adultos con audición normal el LDL para tonos está alrededor de **100 dB HL** y el campo dinámico cerca de **95 dB** (Sherlock y Formby, 2005); la mayoría cae entre 90 y 105 dB HL (BSA, 2022).
+El **campo dinámico** es el espacio entre el umbral y el umbral de molestia, frecuencia por frecuencia. En un oído sin pérdida el LDL **no es un número fijo**: cambia mucho de una persona a otra, y hay quien no marca molestia hasta la salida máxima del audiómetro. Entonces se anota que no hubo molestia al máximo (por ejemplo, *LDL > 120 dB HL*). Lo que importa no es si el LDL de un oído "es normal", sino cuánto campo dinámico le queda y si se estrecha frente al otro oído. En los estudios, el LDL de adultos con audición normal promedia unos 100 dB HL, con mucha dispersión (Sherlock y Formby, 2005); la mayoría cae entre 90 y 105 dB HL (BSA, 2022).
 
 Cuando la cóclea pierde sus células ciliadas externas, el umbral sube y el LDL casi no se mueve: la sonoridad crece más rápido de lo normal y alcanza la de un oído sano a niveles altos. Es el **reclutamiento** (→ H6), y deja un campo dinámico **estrecho**: el audífono tiene que meter toda la voz, de la más suave a la más fuerte, en menos espacio, y las voces fuertes molestan aunque el paciente "no oiga". En una pérdida conductiva el umbral y el LDL suben juntos y el campo se conserva.
 

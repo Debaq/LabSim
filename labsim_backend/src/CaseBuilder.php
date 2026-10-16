@@ -1655,6 +1655,9 @@ final class CaseBuilder
         foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
             $v['perfil'][$ladoForm]['cce_pct'] = (string) $perfil[$ladoData]['cce_pct'];
         }
+        if (isset($perfil['ldl_tolerancia_db'])) {
+            $v['perfil']['ldl_tolerancia_db'] = (string) (int) $perfil['ldl_tolerancia_db'];
+        }
         $v['perfil']['auto'] = [];
         foreach ($perfil['auto'] as $moduloAuto => $activo) {
             if ($activo) {

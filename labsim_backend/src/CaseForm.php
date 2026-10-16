@@ -376,6 +376,12 @@ final class CaseForm
             'OI' => $perfilLados['OI'],
             'auto' => $perfilAuto,
         ];
+        // Tolerancia del paciente (LDL sin pérdida): solo si vino; sin ella
+        // el caso proyecta con CaseProfile::LDL_NORMAL_DB, como antes.
+        $tolPost = self::val($v, ['perfil', 'ldl_tolerancia_db'], null);
+        if ($tolPost !== null && $tolPost !== '') {
+            $perfil['ldl_tolerancia_db'] = CaseProfile::ldlTolerancia(['ldl_tolerancia_db' => $tolPost]);
+        }
 
         // Todo lo que el perfil proyecta, calculado de una pasada (ver
         // CaseProfile::project). La misma función alimenta la vista previa
@@ -680,6 +686,10 @@ final class CaseForm
             $osea[$l] = isset($v['igualar'][$l]) && !isset($v['osea'][$l]) ? $aerea[$l] : $curva('osea', $l);
         }
         $perfil = ['version' => CaseProfile::VERSION, 'auto' => $auto];
+        $tol = self::val($v, ['perfil', 'ldl_tolerancia_db'], null);
+        if ($tol !== null && $tol !== '') {
+            $perfil['ldl_tolerancia_db'] = $tol;
+        }
         foreach (CaseBuilder::LADOS as $l => $L) {
             $cce = self::val($v, ['perfil', $l, 'cce_pct'], null);
             $retro = [];
