@@ -28,10 +28,18 @@ def mini(x0, y0, valores, flechas=(), linea=None, rot=None, db_min=15, db_max=65
         out.append(f'<line x1="{x0}" y1="{Y(linea):.1f}" x2="{x0 + ancho}" y2="{Y(linea):.1f}" '
                    f'stroke="{PTP}" stroke-width="1.6" stroke-dasharray="4 3"/>')
     for i, a, b in flechas:
+        # Flecha dibujada a mano: sale del borde del círculo y la punta toca
+        # justo la línea de destino, donde queda un círculo punteado.
         color = BAJA if b > a else SUBE
-        y1, y2 = Y(a) + (4 if b > a else -4), Y(b) - (3 if b > a else -3)
-        out.append(f'<line x1="{xs[i]:.1f}" y1="{y1:.1f}" x2="{xs[i]:.1f}" y2="{y2:.1f}" stroke="{color}" '
-                   f'stroke-width="1.6" marker-end="url(#punta-{"b" if b > a else "s"})"/>')
+        sentido = 1 if b > a else -1
+        desde, hasta = Y(a) + sentido * 5, Y(b) - sentido * 4.6
+        out.append(f'<circle cx="{xs[i]:.1f}" cy="{Y(b):.1f}" r="4" fill="none" stroke="{color}" '
+                   f'stroke-width="1.1" stroke-dasharray="2 1.6"/>')
+        punta = hasta - sentido * 4.2
+        out.append(f'<line x1="{xs[i]:.1f}" y1="{desde:.1f}" x2="{xs[i]:.1f}" y2="{punta - sentido * 0.5:.1f}" '
+                   f'stroke="{color}" stroke-width="1.5"/>')
+        out.append(f'<path d="M{xs[i] - 3.2:.1f},{punta:.1f} L{xs[i] + 3.2:.1f},{punta:.1f} L{xs[i]:.1f},{hasta - sentido * 0.2:.1f} z" '
+                   f'fill="{color}"/>')
     for x, v in zip(xs, valores):
         out.append(f'<circle cx="{x:.1f}" cy="{Y(v):.1f}" r="4" fill="#fff" stroke="{PUNTO}" stroke-width="1.6"/>')
     if rot:
@@ -68,10 +76,7 @@ t(x0 + 75, 222, 'ancla 30 · neto +6 escalones', 8.5)
 t(x0 + 75, 236, '+6 ÷ 4 = 1,5 escalones = 7,5 dB', 8.5)
 t(x0 + 75, 254, 'PTP = 37,5 dB', 9, PTP, 'middle', 700)
 
-defs = (f'<defs><marker id="punta-b" markerWidth="5" markerHeight="5" refX="3.5" refY="3.5" markerUnits="userSpaceOnUse" orient="auto">'
-        f'<path d="M0,0 L7,3.5 L0,7 z" transform="scale(.75)" fill="{BAJA}"/></marker>'
-        f'<marker id="punta-s" markerWidth="5" markerHeight="5" refX="3.5" refY="3.5" markerUnits="userSpaceOnUse" orient="auto">'
-        f'<path d="M0,0 L7,3.5 L0,7 z" transform="scale(.75)" fill="{SUBE}"/></marker></defs>')
+defs = ''
 svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">{defs}'
        f'<rect width="{W}" height="{H}" fill="#fff"/>' + ''.join(out) + '</svg>')
 (pathlib.Path(__file__).parent / 'h03-ptp-nivelar.svg').write_text(svg, encoding='utf-8')

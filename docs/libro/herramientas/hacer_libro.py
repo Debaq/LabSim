@@ -214,7 +214,7 @@ def resultados(nombre, numero, cap):
 CAJAS = {
     'objetivos': 'En este capítulo', 'ayuda': 'Ayuda memoria', 'sabias': '¿Sabías que?',
     'ojo': 'Ojo clínico', 'pregunta': 'Pregunta abierta', 'comentario': 'Comentario',
-    'docente': 'Para el docente', 'mana': 'Maña del box',
+    'docente': 'Para el docente', 'truco': 'Truco del oficio',
 }
 SECCIONES_DOS_COLUMNAS = ('Técnica', 'Técnica en foco', 'Fisiología', 'Patología', 'Razonamiento',
                           'Para qué sirve', 'Fundamento', 'Antes de empezar', 'Paso a paso',
@@ -401,6 +401,7 @@ def capitulo(md_texto):
         # dentro de cada caso, en su recuadro verde, no en otra edición.
         ancho = tipo.endswith('-ancho')
         tipo = tipo.replace('-ancho', '')
+        tipo = {'mana': 'truco'}.get(tipo, tipo)      # nombre anterior del recuadro
         titulo = titulo or CAJAS.get(tipo, '')
         cuerpo_caja = markdown.markdown(dentro, extensions=['tables'])
         return guardar(f'<aside class="caja caja-{tipo}{" ancho" if ancho else ""}">'
@@ -698,9 +699,9 @@ table caption {{ caption-side: top; text-align: left; font-size: 8pt; color: #5c
 .caja-pregunta .caja-titulo {{ color: #9a7100; }}
 .caja-docente {{ background: #eaf6ef; border: 1pt solid #2e7d4f; }}
 .caja-docente .caja-titulo {{ color: #2e7d4f; }}
-.caja-mana {{ background: #f0f7f2; border: 1pt solid #2e8540; border-radius: 2mm; }}
-.caja-mana .caja-titulo {{ color: #2e8540; }}
-.caja-mana .caja-titulo::before {{ content: '✦ '; }}
+.caja-truco {{ background: #f0f7f2; border: 1pt solid #2e8540; border-radius: 2mm; }}
+.caja-truco .caja-titulo {{ color: #2e8540; }}
+.caja-truco .caja-titulo::before {{ content: '✦ '; }}
 .caja-comentario {{ background: #f3f3f1; border-left: 2.4pt solid #8a8a90; font-style: italic; }}
 .caja-comentario .caja-titulo {{ color: #55555b; font-style: normal; }}
 .figobs {{ break-inside: avoid; margin: 3mm 0 5mm; }}
