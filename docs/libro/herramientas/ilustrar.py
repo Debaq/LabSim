@@ -12,7 +12,8 @@ debajo del encabezado del bloque). La descripción dice QUÉ mostrar; el
 estilo lo pone este script. Los dibujos van SIN TEXTO: los rótulos los pone
 el libro con globos numerados, así no hay letras inventadas por la IA.
 
-La key se lee de GEMINI_API_KEY o de ~/.config/labsim/gemini_key; nunca va
+La key se lee de GEMINI_API_KEY o de ~/.kaggle/gemini_key (junto al token de
+Kaggle; también ~/.config/labsim/gemini_key); nunca va
 al repo. Cada dibujo queda registrado en ilustraciones/REGISTRO.md (modelo,
 fecha y descripción): toda ilustración generada se revisa antes de publicar,
 la IA se equivoca en anatomía.
@@ -43,11 +44,14 @@ ESTILO = (
 
 def clave():
     k = os.environ.get('GEMINI_API_KEY')
-    if not k:
-        f = pathlib.Path.home() / '.config' / 'labsim' / 'gemini_key'
+    # Junto al token de Kaggle (~/.kaggle/access_token); la ruta vieja sigue valiendo.
+    for f in (pathlib.Path.home() / '.kaggle' / 'gemini_key',
+              pathlib.Path.home() / '.config' / 'labsim' / 'gemini_key'):
+        if k:
+            break
         k = f.read_text().strip() if f.exists() else None
     if not k:
-        sys.exit('Falta la key: GEMINI_API_KEY=... o ~/.config/labsim/gemini_key')
+        sys.exit('Falta la key: GEMINI_API_KEY=... o ~/.kaggle/gemini_key')
     return k
 
 
