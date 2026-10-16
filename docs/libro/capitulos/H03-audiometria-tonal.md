@@ -160,7 +160,7 @@ Eso tiene dos consecuencias prácticas. La primera: una diferencia de 5 dB entre
 
 ### Equipo
 
-- **Audiómetro** con calibración objetiva vigente y una verificación subjetiva diaria: conexiones, cables, que salga tono por cada transductor y que un oyente conocido oiga donde siempre. En la vigilancia ocupacional, si el sujeto de control difiere en más de 10 dB HL, el equipo sale de servicio (ISP, 2018).
+- **Audiómetro** con calibración objetiva vigente y una verificación subjetiva diaria: conexiones, cables, que salga tono por cada transductor y que un oyente conocido oiga donde siempre. En la vigilancia ocupacional la verificación es semanal, con uno de al menos dos sujetos de audición conocida: si difiere en más de 10 dB HL en alguna frecuencia se repite con el otro, y si persiste el equipo sale de servicio (ISP, 2026).
 - **Fonos supraaurales** (por ejemplo, TDH-39) o **de inserción** (por ejemplo, ER-3A). Los de inserción aíslan más del ruido de la sala y dejan pasar menos sonido al otro oído (Munro y Agnew, 1999); eso pesa a la hora de enmascarar (→ H4).
 - **Vibrador óseo** (por ejemplo, B-71) con su diadema.
 - **Pulsador** de respuesta o una señal acordada (levantar la mano).
@@ -231,9 +231,6 @@ Se parte por el **oído que el paciente siente mejor**; si dice que oye igual, p
 
 :::sabias ¿Sabías que?
 Antes de este método, la audiometría usaba el método de límites: un tono continuo que se subía y se bajaba tres o cuatro veces, y el umbral era el punto medio entre los promedios; así lo describía Bunch en 1943. El tono corto contra silencio y el umbral tomado solo en ascenso lo reemplazaron en los años cuarenta, y desde Carhart y Jerger (1959) casi todas las normas conservan el esquema (Jerger, 2018).
-:::
-
-:::imagen ilustraciones/h03-metodo-ascendente.svg ancho=96% La escalera del método ascendente
 :::
 
 El ascendente no es la única forma de llegar al umbral. La **descendente** es el viejo método de límites de la psicofísica (Fechner, 1860), que Bunch (1943) llevó a la audiometría: baja de a 5 dB hasta que el paciente deja de responder. Es rápida, pero el paciente tiende a seguir respondiendo por inercia y el umbral sale más bajo de lo que es. La de **horquilla** es la otra que describe la ISO 8253-1 (1989): alterna series de 5 dB que suben y que bajan alrededor del umbral hasta completar tres de cada una, y el umbral es el promedio de los niveles más bajos que el paciente oyó en ellas; llega al mismo umbral que la ascendente, pero tarda más. La **combinada acortada** baja de a 10 mientras el paciente responde y sube de a 5 cuando deja de hacerlo, y en vez de repetir ascensos repite el tono al mismo nivel: el umbral es la mínima intensidad con 2 respuestas de 3 tonos.
@@ -312,7 +309,7 @@ En los **operativos en terreno** (colegios, faenas) se sigue la técnica complet
 
 ### Audiometría ocupacional (Chile)
 
-La vigilancia de los trabajadores expuestos a ruido la regula el **PREXOR** (MINSAL, 2013). El protocolo no describe la técnica: la delega en la guía técnica del ISP, que es la que exige la SUSESO (ISP, 2018; SUSESO).
+La vigilancia de los trabajadores expuestos a ruido la regula el **PREXOR** (MINSAL, 2013). El protocolo no describe la técnica: la delega en la guía técnica del ISP, que es la que exige la SUSESO (ISP, 2026; SUSESO).
 
 PREXOR distingue cuatro audiometrías:
 
@@ -327,11 +324,12 @@ Tabla: Las cuatro audiometrías de PREXOR
 | **Confirmación** | cuando el seguimiento sale alterado | aérea de 250 a 8.000 Hz, en cámara |
 | **Egreso** | al terminar la exposición | aérea de 250 a 8.000 Hz, en cámara |
 
-La técnica de la guía ISP sigue a la ISO 8253-1, con tres diferencias con la clínica:
+La técnica de la guía ISP (versión 3.0, 2026) sigue a la ISO 8253-1, con tres diferencias con la clínica:
 
 - **Familiarización**: 1 kHz a 40 dB; se baja de 20 en 20 hasta que no responda, se sube de 10 en 10 hasta que responda y se confirma al mismo nivel.
-- **Orden**: 1, 2, 3, 4, 6 y 8 kHz, y luego 500 y 250 Hz, sin repetir 1 kHz ni medir 125 Hz.
-- **Criterio**: el nivel donde responde **3 de 5** veces.
+- **Orden**: 1, 2, 3, 4, 6 y 8 kHz, y luego 500 y 250 Hz, sin medir 125 Hz. Se parte a 30 dB HL o más, y 1 kHz se repite solo si hay duda sobre la curva.
+- **Criterio**: método descendente-ascendente modificado de Carhart y Jerger; el umbral es el nivel más bajo donde responde **2 de 3** veces (ISP, 2026).
+<!-- Guía ISP v2.0 (2018) pedía 3 de 5; la v3.0 (2026) la reemplaza (leída en ispch.cl, 2026-10-16). -->
 
 Si una audiometría sale alterada, el trabajador va a la **evaluación audiológica médico-legal (EAML)**: vía aérea y ósea, logoaudiometría, diapasones e impedanciometría, más pruebas de adaptación, reclutamiento y simulación si hacen falta (ISP, 2018). La guía de 2012 describía su técnica, con la ósea de 250 a 4.000 Hz en cada oído (ISP, 2012).
 
@@ -355,10 +353,7 @@ Los umbrales de alta frecuencia varían mucho entre personas y con la edad. Por 
 
 Los símbolos del audiograma son los de la ASHA (1990). En Chile, el derecho va en **rojo** y el izquierdo en **azul**; si los dos oídos tienen el mismo umbral, el símbolo del izquierdo se dibuja dentro del derecho (ISP, 2018).
 
-:::imagen ilustraciones/h03-simbolos.svg ancho=100% Los símbolos del audiograma
-:::
-
-:::imagen ilustraciones/h03-simbolos-2.svg ancho=100% Los símbolos del Fowler y de la acumetría
+:::imagen ilustraciones/h03-simbolos.svg ancho=86% Los símbolos del audiograma, del Fowler y de la acumetría
 :::
 
 La aérea se une con línea continua; la ósea, cuando se une, con línea punteada, y el LDL con guiones. Los símbolos óseos del derecho van a la izquierda de la línea de frecuencia y los del izquierdo a la derecha: es el paciente mirándote de frente. Los de campo libre van en **verde** y centrados, porque no son de un oído: los oye el mejor. La lámina trae también los símbolos que se usan más adelante: el LDL (→ H5), la escalera del Fowler (→ H6) y el Weber y el Rinne de la acumetría (→ H2).
@@ -638,6 +633,7 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 
 ### Normativa chilena
 
+1. Instituto de Salud Pública de Chile. Guía Técnica para la Evaluación Auditiva de Vigilancia de la Salud de los Trabajadores Expuestos Ocupacionalmente a Ruido, v3.0. Santiago: ISP; 2026. Disponible en: https://www.ispch.cl/wp-content/uploads/2026/04/Evaluacion-Auditiva.pdf
 1. Instituto de Salud Pública de Chile. Guía Técnica para la Evaluación Auditiva de Vigilancia de la Salud de los Trabajadores Expuestos Ocupacionalmente a Ruido, v2.0. Aprobada por Res. Ex. N° 740 del 21-03-2018.
 1. Instituto de Salud Pública de Chile (2012). Guía Técnica para la Evaluación Auditiva de los Trabajadores Expuestos Ocupacionalmente a Ruido, v1.0. §2: Evaluación Audiológica Médico Legal.
 1. Ministerio de Salud de Chile (2013). Protocolo sobre normas mínimas para el desarrollo de programas de vigilancia de la pérdida auditiva por exposición a ruido en los lugares de trabajo (PREXOR). Norma Técnica N° 156, D.Ex. N° 1052.

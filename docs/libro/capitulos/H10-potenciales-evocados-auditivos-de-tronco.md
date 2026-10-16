@@ -47,7 +47,16 @@ Los registros intracraneales hechos durante cirugías permitieron asignar cada o
 
 Es un mapa útil, pero no literal: cada onda recibe aportes de varias poblaciones de neuronas, y una misma estación contribuye a más de una onda (Melcher y Kiang, 1996). Las ondas VI y VII son inconstantes y no se usan en la clínica.
 
-![Esquema de la vía auditiva de un lado, de la cóclea al colículo inferior, en vista coronal simplificada del tronco: cóclea, nervio auditivo (porción distal y proximal), núcleo coclear, complejo olivar superior, lemnisco lateral y colículo inferior. Al lado, un trazado de ABR normal con las ondas I a V, y una línea que une cada onda con su estación. Debajo del trazado, tres corchetes: I-III (nervio y protuberancia baja), III-V (protuberancia alta y mesencéfalo) e I-V (tiempo de conducción central).](ilustraciones/h10-generadores.png)
+:::imagen ilustraciones/h10-generadores.png ancho=100% La vía auditiva y el PEAT en labyrinthus3d, el simulador del autor (módulo Auditivo, pestañas Tronco y PEAT)
+- @-2,90 | **Cóclea y nervio VIII**: la onda I sale de la porción distal del nervio y la II de la proximal, donde entra al tronco.
+- @-2,68 | **Núcleo coclear**: la onda III.
+- @22,57 | **Complejo olivar superior** (MSO, LSO y MNTB): la onda IV. Desde aquí la vía cruza y los dos oídos se comparan.
+- @22,33 | **Lemnisco lateral** llegando al **colículo inferior**: la onda V.
+- @50,22 | Cada onda aparece cuando la señal llega a su estación, con el retardo de cada tramo.
+- @84,18 | La **V** es la más alta y la más estable: es la que se sigue al bajar la intensidad.
+- @98,70 | Los **interpicos** miden el viaje dentro de la vía: I-III, III-V e I-V.
+:::
+<!-- Imagen: capturas de labyrinthus3d (hacer_h10_peat.py, montaje en la conversación del 2026-10-16). Las latencias de la tabla son del modelo del simulador, órdenes de magnitud docentes, no valores de referencia. OJO: el panel del simulador asigna II = núcleo coclear, III = olivar, IV = lemnisco (esquema clásico); los globos siguen a Møller (I y II nervio, III núcleo coclear, IV olivar, V lemnisco/colículo), como el texto. -->
 
 De ese mapa sale la lectura clínica de los **interpicos**:
 

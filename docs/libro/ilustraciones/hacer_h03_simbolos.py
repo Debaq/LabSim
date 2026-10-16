@@ -19,7 +19,7 @@ from motor.svg import Svg  # noqa: E402
 
 W = 540
 C_ROT, C_OD, C_OI = 14, 290, 440        # columnas: rótulo, OD, OI
-FILA = 34
+FILA = 25
 s = Svg(W, 10)
 filas = []          # (rótulo, dibujo OD, dibujo OI, nota) ; dibujo = función(x, y)
 y = 50
@@ -31,6 +31,8 @@ def cabecera():
 
 
 def fila(rotulo, od=None, oi=None, ambos=None, nota=None, alto=FILA):
+    if nota and alto == FILA:
+        alto = FILA + 7     # la nota va en una segunda línea
     """ambos: un dibujo centrado entre las dos columnas (no es de un oído)."""
     global y
     top = y - FILA / 2
@@ -60,7 +62,7 @@ def seccion(titulo):
 
 filas_hechas = []
 cabecera()
-K = 1.7   # los símbolos más grandes que en el audiograma, para que se lean
+K = 1.3   # un poco más grandes que en el audiograma, para que se lean
 
 
 def grande(dibujo, x, yy):
@@ -89,12 +91,12 @@ def sin_resp(lado, f):
     return d
 
 
-def ldl(lado, flecha=False):
+def ldl(lado, flecha=False, algiacusia=False):
     col = E.COLOR_LADO[lado]
     signo = -1 if lado == 'OD' else 1
 
     def d(x, yy):
-        _ldl(s, x, yy - 3, col, signo)
+        _ldl(s, x, yy - 3, col, signo, algiacusia)
         if flecha:
             _flecha(s, x, yy - 3, col, signo)
     return d
@@ -126,9 +128,9 @@ def fowler(x, yy):
     líneas que se juntan hacia arriba son el reclutamiento."""
     xr, xe = x - 70, x + 70
     def Yd(db):
-        return yy - 52 + (db - 10) * 1.45
-    s.texto(xr - 16, Yd(10) + 3, 'referencia', E.T_CHICO, E.OD, 'end', 600)
-    s.texto(xe + 16, Yd(40) + 3, 'en estudio', E.T_CHICO, E.OI, 'start', 600)
+        return yy - 40 + (db - 10) * 1.1
+    s.texto(xr - 22, Yd(10) + 3, 'referencia', E.T_CHICO, E.OD, 'end', 600)
+    s.texto(xe + 22, Yd(40) + 3, 'en estudio', E.T_CHICO, E.OI, 'start', 600)
     for ref, est in ((10, 40), (30, 55), (50, 70), (70, 85)):
         s.linea(xr, Yd(ref), xe, Yd(est), E.TENUE, 1)
         grande(lambda a, b: _simbolo_aereo(s, 'OD', a, b, E.OD, False), xr, Yd(ref))
@@ -163,6 +165,8 @@ fila('Sin respuesta', sin_resp('OD', aereo('OD', False)), sin_resp('OI', aereo('
      nota='al máximo del equipo; flecha hacia abajo, hacia afuera')
 fila('Umbral de molestia (LDL)', ldl('OD'), ldl('OI'))
 fila('LDL: sin molestia al máximo', ldl('OD', True), ldl('OI', True))
+fila('Umbral de algiacusia (dolor)', ldl('OD', algiacusia=True), ldl('OI', algiacusia=True),
+     nota='el mismo triángulo, relleno')
 
 seccion('Líneas')
 fila('Aérea: continua', linea('OD', None, 1.4, lambda l: aereo(l, False)),
@@ -170,13 +174,11 @@ fila('Aérea: continua', linea('OD', None, 1.4, lambda l: aereo(l, False)),
 fila('Ósea: punteada', linea('OD', '1 2.5', 0.9, lambda l: oseo(l, False)),
      linea('OI', '1 2.5', 0.9, lambda l: oseo(l, False)))
 fila('LDL: guiones', linea('OD', '4 3', 0.9, lambda l: ldl(l)), linea('OI', '4 3', 0.9, lambda l: ldl(l)))
-fila('Campo libre', ambos=campo_libre, nota='no es de un oído: lo oye el mejor (→ H8)', alto=40)
-guardar('h03-simbolos.svg')
+fila('Campo libre', ambos=campo_libre, nota='no es de un oído: lo oye el mejor (→ H8)', alto=34)
 
-# Lámina 2: supraliminares y acumetría
-nueva()
+# Supraliminares y acumetría, en la misma lámina (una sola página)
 seccion('Supraliminares')
-fila('Fowler (ABLB)', ambos=fowler, nota='escalera entre los dos oídos (→ H6)', alto=136)
+fila('Fowler (ABLB)', ambos=fowler, nota='escalera entre los dos oídos (→ H6)', alto=104)
 
 seccion('Acumetría')
 
@@ -189,8 +191,8 @@ def cabeza(x, yy):
 
 def flecha_weber(x, yy, signo, col):
     x0, x1 = x + signo * 18, x + signo * 40
-    s.linea(x0, yy, x1, yy, col, 1.8)
-    s.camino(f'M{x1 - signo * 6:.1f},{yy - 4:.1f} L{x1:.1f},{yy:.1f} L{x1 - signo * 6:.1f},{yy + 4:.1f}', col, 1.8)
+    s.linea(x0, yy, x1, yy, col, 1.2)
+    s.camino(f'M{x1 - signo * 6:.1f},{yy - 4:.1f} L{x1:.1f},{yy:.1f} L{x1 - signo * 6:.1f},{yy + 4:.1f}', col, 1.2)
 
 
 def weber(x, yy):
@@ -205,7 +207,7 @@ def weber(x, yy):
         s.texto(cx, yy + 18, txt, E.T_CHICO, E.TENUE)
 
 
-fila('Weber', ambos=weber, nota='flecha roja = OD, azul = OI', alto=50)
+fila('Weber', ambos=weber, nota='flecha roja = OD, azul = OI', alto=42)
 
 
 def rinne(lado):
@@ -213,12 +215,12 @@ def rinne(lado):
 
     def d(x, yy):
         for dx, sim, txt in ((-52, '+', 'positivo'), (0, '−', 'negativo'), (52, '−*', 'falso neg.')):
-            s.circulo(x + dx, yy - 4, 10, col, E.PAPEL, 1.3)
+            s.circulo(x + dx, yy - 4, 9, col, E.PAPEL, 1.0)
             s.texto(x + dx, yy + 0.5, sim, 11, col, peso=700)
             s.texto(x + dx, yy + 18, txt, E.T_CHICO, E.TENUE)
     return d
 
 
 fila('Rinne', ambos=lambda x, yy: (rinne('OD')(C_OD, yy), rinne('OI')(C_OI, yy)),
-     nota='+ aérea mejor que ósea · − ósea mejor', alto=50)
-guardar('h03-simbolos-2.svg')
+     nota='+ aérea mejor que ósea · − ósea mejor', alto=42)
+guardar('h03-simbolos.svg')

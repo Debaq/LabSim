@@ -197,9 +197,12 @@ def _simbolo_oseo(s, lado, x, y, col, enmascarada):
     s.camino(d_, col)
 
 
-def _ldl(s, x, y, col, lado):
+def _ldl(s, x, y, col, lado, algiacusia=False):
+    # Umbral de molestia: triángulo VACÍO. El relleno es el umbral de
+    # algiacusia (dolor), otro símbolo; LabSim no lo mide.
     xc, xp = x + lado * 1.8, x + lado * 6.6
-    s.camino(f'M{xc:.2f},{y - 3:.2f} L{xc:.2f},{y + 3:.2f} L{xp:.2f},{y + 3:.2f} Z', col, 1, col)
+    s.camino(f'M{xc:.2f},{y - 3:.2f} L{xc:.2f},{y + 3:.2f} L{xp:.2f},{y + 3:.2f} Z', col, 1.1,
+             col if algiacusia else E.PAPEL)
 
 
 def _flecha(s, x, y, col, lado):

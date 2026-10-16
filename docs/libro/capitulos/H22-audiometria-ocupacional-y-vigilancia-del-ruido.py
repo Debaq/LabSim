@@ -14,6 +14,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramient
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [
+    # La base ideal: audición normal de un trabajador que todavía no entra a la faena
+    demo(33, [fig.audiograma(ldl=False)]),
+    # La muesca de veintidós años de ruido, para leer qué es un cambio y qué es una base
+    demo(37, [fig.audiograma(ldl=False)]),
 ]
 
 if __name__ == '__main__':

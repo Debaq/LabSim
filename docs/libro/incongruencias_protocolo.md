@@ -157,6 +157,27 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 83 | H18 | Lempert "para el apogeotrópico" | variante de partir al lado afectado | se quitó "apogeotrópico" (la guía la pone en el geotrópico) | Bhattacharyya 2017, tabla 13 | E · preguntar | |
 | 84 | H18 | "Epley modificado" (45/15/0/15/45/135°, 3-5 min) | maniobra propia | se mantiene; no se halló en la literatura | — | A · verificar | |
 
+## Rehabilitación, audífonos y ocupacional (H19-H22, 2026-10-16)
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 85 | H19 | Ejercicios oculomotores con la cabeza quieta | "estimulan los núcleos vestibulares" | se mantienen; recuadro: la guía APTA recomienda (evidencia fuerte) no ofrecerlos como estabilización de la mirada | Hall 2022 | P · revisar | |
+| 86 | H19 | Para qué sirven los cefalomotores | "movilizar los líquidos endolinfáticos" | se mantienen los ejercicios; el mecanismo es el deslizamiento retiniano como señal de error | Hall 2022 | E (fundamento) | |
+| 87 | H19 | Agudeza visual dinámica | a 3 Hz | el protocolo; recuadro con la versión clínica a 2 Hz | RehabMeasures (verificar) | P | |
+| 88 | H19 | Dosis del programa | 3 a 6 semanas, una sesión semanal, sin dosis en casa | el protocolo + tabla con los mínimos diarios y las semanas de la guía | Hall 2022 | P | |
+| 89 | H19 | Berg | un solo ítem | se describe; recuadro: sin corte propio | Berg 1992 | A | |
+| 90 | H19 | "Test de Norré" | en el flujograma | no se identificó; el texto no lo nombra | — | A · preguntar | |
+| 91 | H20 | Ajuste del audífono | por comodidad ("¿más o menos fuerza?") | el protocolo; recuadro: objetivo prescriptivo y medición en oído real | BSA 2018; AAA 2006 | P | |
+| 92 | H20 | Molestia | grito o ruido cerca del oído | el protocolo; lo medible es el LDL con estímulo calibrado (→ H5) | — | P | |
+| 93 | H20 | Palabras | voz viva sin nivel | el protocolo; recuadro: material grabado al mismo nivel con y sin audífono | ISO 8253-3:2022 | P | |
+| 94 | H20 | Cuestionarios | ninguno | COSI, IOI-HA y APHAB en recuadro | Dillon 1997; Cox 2002 | A · vacío | |
+| 95 | H20, H21 | Nombres comerciales e institucionales | modelos, software, GES56, "Auditron" | generalizados (libro mundial) | — | A | |
+| 96 | H21 | Funciones adaptativas en la medición | no pide desactivarlas | el protocolo; recuadro: ANSI S3.22 las pide desactivadas; anotar lo activo | ANSI/ASA S3.22 | P | |
+| 97 | H21 | Conclusión "audibilidad buena/regular/mala" | desde la medición en acoplador | el protocolo; recuadro: la norma es de control de calidad, no de verificación | IEC 60118-0:2022 | P | |
+| 98 | H21 | Tubo en la cámara | ~1,5 cm | el protocolo; longitud normativa del HA-2 sin verificar | — | A · verificar | |
+| 99 | H22 | Base del capítulo | "screening" y "operativo" son de salud, no ocupacionales | se enseña desde las normas (OSHA, NIOSH, ISO 1999, ISP 2026, PREXOR) | — | A · vacío | |
+| 100 | H3, H22 | Guía ISP | citada la v2.0 (2018): umbral "3 de 5" | ISP v3.0 (2026): Carhart-Jerger modificado, 2 de 3, inicio ≥ 30 dB HL, verificación subjetiva semanal con 2 sujetos | ISP 2026 | A · actualizado | hecho |
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |

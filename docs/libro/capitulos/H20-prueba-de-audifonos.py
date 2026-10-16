@@ -14,6 +14,9 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramient
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [
+    # Presbiacusia descendente: el campo libre con una ganancia funcional que declara el libro
+    # (ilustrativa, NO una prescripcion): 250:5, 500:10, 1000:20, 2000:30, 3000:35, 4000:35, 6000:30
+    demo(36, [fig.campo_libre(ganancia={250: 5, 500: 10, 1000: 20, 2000: 30, 3000: 35, 4000: 35, 6000: 30})]),
 ]
 
 if __name__ == '__main__':
