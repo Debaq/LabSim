@@ -660,6 +660,13 @@ RETURN_FRACTION = 0.10
 # se aceptan topes como final de la recuperación (después del N2).
 RETURN_SMOOTH_MS = 0.4
 RETURN_SEARCH_MS = 1.5
+# Un tope del trazo que queda a menos de esta fracción de la profundidad del
+# PA es el retorno, aunque no cruce el umbral de RETURN_FRACTION: con ruido
+# lento la línea de base queda corrida unas décimas y el trazo puede volver
+# al nivel del registro sin tocar esa base. Así se daba en un oído sano un
+# FIN a 7 ms (razón de áreas 3,7, un hidrops falso). En un hidrops el tope
+# del P1 queda sobre la meseta del PS, lejos de la base, y no entra.
+RETURN_NEAR_FRACTION = 0.15
 # Qué tan hondo tiene que ser un mínimo local para aceptarlo como el PA,
 # contra el más hondo de la ventana. Por debajo de esto es una ondulación
 # del ruido y se sigue buscando.
@@ -797,6 +804,14 @@ def auto_marks(t, y, ps_at=None):
     topes = np.where((subiendo[:-1] > 0) & (subiendo[1:] <= 0))[0]
     minimo = int(round(RETURN_SEARCH_MS / max(float(t[1] - t[0]), 1e-9)))
     topes = topes[topes >= minimo]
+    if ps_at is None:
+        # Con click: el primer tope después del N2 que ya volvió cerca de la
+        # base es el retorno si llega antes que el cruce (ver
+        # RETURN_NEAR_FRACTION).
+        cerca = RETURN_NEAR_FRACTION * (base - float(suave[desde]))
+        cercanos = [int(k) + 1 for k in topes if base - float(lento[desde + int(k) + 1]) <= cerca]
+        if cercanos and (fin is None or cercanos[0] < fin):
+            fin = cercanos[0]
     if len(topes) and fin is None:
         fin = int(topes[0]) + 1
     if fin is not None:

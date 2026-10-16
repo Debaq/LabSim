@@ -6133,3 +6133,26 @@ audiograma.
 Fuente: ISO 7029:2017 Acoustics — Statistical distribution of hearing
 thresholds related to age and gender, tabla 1 (vista previa pública de
 iTeh Standards).
+
+## ECochG: el retorno a la base aguanta una línea de base corrida (2026-10-16)
+
+Al escribir H11 apareció un falso hidrops en el paciente 33 (normal): OD con
+PS/PA 0,25 y razón de áreas 3,74. El marcado automático ponía el FIN a 7,6 ms:
+el ruido lento corrió la línea de base +0,18 µV (se estima en 0-0,35 ms, un
+tramo corto) y después una onda lenta negativa de 3,5 a 6,5 ms dejó el trazo
+lejos del umbral de RETURN_FRACTION hasta el final.
+
+- **Con click, un tope del trazo después del N2 que quede a menos de
+  `RETURN_NEAR_FRACTION` (0,15) de la profundidad del PA es el retorno**, si
+  llega antes que el cruce. Es lo que marca cualquiera mirando el trazo.
+- Medido con los datos del paciente 33, 80 capturas por punto (OD y OI):
+  sano 0,25 → falsos positivos de área 2 % → 0 %; hidrops 0,45 sensibilidad
+  de área 92 % → 92 %; 0,55: 99 % → 96 % (la de amplitudes sigue en 100 %).
+  Con 0,25 y sin esperar al N2 los falsos positivos también bajaban a 0, pero
+  la sensibilidad del 0,45 caía a 49 %: cortaba la cola del PS.
+- Paciente 33 OD: razón de áreas 3,74 → 1,81. Patricia (38) no cambia (0,60 /
+  3,61 y 0,31 / 1,19): las figuras del libro siguen valiendo.
+- No se tocó: el OI del 36 (presbiacusia, umbral 65 dB, declarado 0,25) mide
+  0,77 / 4,33 porque a 90 dB queda poca señal y la marca cae en el borde de la
+  ventana. Es la conducta buscada (con poca señal el marcado automático marca
+  mal, como el equipo real).
