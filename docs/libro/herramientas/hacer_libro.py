@@ -620,6 +620,11 @@ h2, h3, h4, .rotulo-chico, .caja-titulo {{ break-after: avoid; }}
 /* un título de sección no queda solo al pie de la página */
 h2 + p, h3 + p, h4 + p, h2 + ul, h3 + ul, h2 + ol, h3 + ol {{ break-before: avoid; }}
 .caja, .figobs, table {{ break-inside: avoid; }}
+/* una tabla larga de los preliminares (abreviaturas) se parte entre filas:
+   entera saltaba de página y dejaba el título solo */
+.preliminar table {{ break-inside: auto; }}
+.preliminar tr {{ break-inside: avoid; }}
+.preliminar thead {{ display: table-header-group; }}
 ol, ul {{ margin: 0 0 2.5mm; padding-left: 5mm; }}
 li {{ margin-bottom: .8mm; }}
 .pendiente {{ background: #fff6d6; border-left: 2pt solid #d9a400; padding: 2mm 3mm; margin: 1mm 0 3mm;

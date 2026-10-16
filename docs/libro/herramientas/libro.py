@@ -130,6 +130,21 @@ def cuadro(nombre, figuras, od='normal', oi='normal', grado_od=None, grado_oi=No
     return {'nombre': nombre, 'caso': pedido, 'figuras': list(figuras)}
 
 
+def python_figuras():
+    """El python de hacer_figuras.py, que necesita PySide6 y pyqtgraph (el ABR).
+    LIBRO_PY_FIGURAS manda; si no, el venv del libro
+    (~/.local/share/labsim/libro-venv: python del sistema + pyqtgraph), o el
+    env micromamba labsim si existe. El env labsim desapareció el 2026-10-16."""
+    if os.environ.get('LIBRO_PY_FIGURAS'):
+        return [os.environ['LIBRO_PY_FIGURAS']]
+    venv = pathlib.Path.home() / '.local' / 'share' / 'labsim' / 'libro-venv' / 'bin' / 'python'
+    if venv.exists():
+        return [str(venv)]
+    if (pathlib.Path(os.environ.get('MAMBA_ROOT_PREFIX', pathlib.Path.home() / 'micromamba')) / 'envs' / 'labsim').exists():
+        return ['micromamba', 'run', '-n', 'labsim', 'python']
+    return [sys.executable]
+
+
 class Capitulo:
     def __init__(self, numero):
         self.numero = numero
@@ -158,6 +173,6 @@ class Capitulo:
                 subprocess.run([str(LIBRO / 'figuras' / 'armar_casos.sh'), *rearmar], check=True, cwd=RAIZ)
             if '--sin-figuras' not in argv:
                 print('Figuras:', ', '.join(nombres))
-                subprocess.run(['micromamba', 'run', '-n', 'labsim', 'python', str(LIBRO / 'figuras' / 'hacer_figuras.py'),
+                subprocess.run([*python_figuras(), str(LIBRO / 'figuras' / 'hacer_figuras.py'),
                                 *nombres], check=True, cwd=RAIZ, env=dict(os.environ, QT_QPA_PLATFORM='offscreen'))
         subprocess.run([sys.executable, str(AQUI / 'hacer_libro.py'), str(self.numero)], check=True, cwd=RAIZ)
