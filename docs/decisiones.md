@@ -5961,3 +5961,14 @@ cerca del pico y prefirieron el ancho a media altura (TW), que es el que fija
 ficha PDF: en un oído con roll-over, el nivel que se agrega sobre el máximo
 es donde termina la caída (máximo + 25 dB o el techo de 100 dB), no +5 dB.
 Reemplaza la regla de +5 dB confirmada el 2026-09-14.
+
+## STAT a los niveles del protocolo del laboratorio (2026-10-15)
+
+El motor tenía el STAT a 100 dB HL en las tres frecuencias y aceptaba el
+ruido contralateral desde 80 dB. Él pidió seguir su protocolo: **100 dB HL en
+500 y 2000 Hz, 105 dB HL en 1000 Hz** (los 110 dB SPL de Jerger en fono
+supraaural) y **ruido blanco a 90 dB** en el oído no evaluado
+(`ResponseAudiometry.STAT_LEVEL_DB` por frecuencia, `STAT_NOISE_MIN_DB = 90`;
+tolerancia de ±5 dB igual que antes). Ayuda del editor, manual del libro (H6,
+cap. 11) y tests al día.
+

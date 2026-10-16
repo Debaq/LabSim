@@ -73,12 +73,14 @@ class Base(unittest.TestCase):
 
 class StatTest(Base):
     def stat(self, caso, oido, freq):
-        """Stat en `oido`: tono a 100 dB HL y ruido blanco a 90 en el otro.
-        Devuelve 'positivo' (se pierde antes del minuto) o 'negativo'."""
+        """Stat en `oido`: tono al nivel del protocolo (100/105/100 dB HL) y
+        ruido blanco a 90 en el otro. Devuelve 'positivo' (se pierde antes
+        del minuto) o 'negativo'."""
         self.nuevo(caso)
         self.presentar("ruido_blanco_contralateral", freq=freq,
                        stimOn=[True, True], stim=[0, 4],
-                       output=[oido, 1 - oido], int=[100, 90])
+                       output=[oido, 1 - oido],
+                       int=[ResponseAudiometry.STAT_LEVEL_DB[freq], 90])
         self.assertTrue(self.hand_up(), "a 100 dB HL el tono se oye al empezar")
         if self.r.decay_timer.isActive():
             self.assertLess(self.r.decay_timer.interval(), self.r.DECAY_HOLD_MS)
@@ -90,6 +92,16 @@ class StatTest(Base):
         for f in STAT_FREQS:
             self.assertEqual(self.stat(caso, 0, f), "positivo", f)
             self.assertEqual(self.stat(caso, 1, f), "negativo", f)
+
+    def test_niveles_del_protocolo_y_ruido_a_90(self):
+        # protocolo del laboratorio: 100 / 105 / 100 dB HL y ruido blanco a 90
+        self.assertEqual(ResponseAudiometry.STAT_LEVEL_DB, {2: 100, 3: 105, 4: 100})
+        self.assertEqual(ResponseAudiometry.STAT_NOISE_MIN_DB, 90)
+        # con el ruido bajo 90 no hay prueba: no corre el reloj del deterioro
+        self.nuevo(demo(39))
+        self.presentar("ruido_blanco_contralateral", freq=3,
+                       stimOn=[True, True], stim=[0, 4], output=[0, 1], int=[105, 85])
+        self.assertFalse(self.r.decay_timer.isActive())
 
     def test_demo_39_coherente_con_carhart_y_rosemberg(self):
         # el mismo oído que el Stat da positivo es el que deteriora en las
@@ -127,10 +139,10 @@ class StatTest(Base):
 
     def test_coclear_sin_margen_a_100_db_sigue_positivo(self):
         # regla vieja intacta: deterioro coclear de 20 dB en un oído de
-        # 85 dB HL -- a 100 dB HL solo le quedan 15 dB y no le alcanza
+        # 90 dB HL -- a 105 dB HL (1 kHz) solo le quedan 15 dB y no le alcanza
         caso = copy.deepcopy(demo(36))
-        caso["Aerea_mkg"][3] = [85, 30]
-        caso["Aerea"][3] = [85, 30]
+        caso["Aerea_mkg"][3] = [90, 30]
+        caso["Aerea"][3] = [90, 30]
         caso["Stat"][1] = [20, 5]
         self.assertEqual(self.stat(caso, 0, 3), "positivo")
 

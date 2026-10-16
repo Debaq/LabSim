@@ -563,7 +563,9 @@ h1.prelim {{ font: 700 24pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; pa
 .toc-parte {{ font: 700 8pt 'Plus Jakarta Sans'; letter-spacing: 1.2pt; text-transform: uppercase; color: #8e2a4a;
               margin: 5mm 0 1.5mm; break-after: avoid; }}
 a.toc {{ display: block; color: #2a1a20; text-decoration: none; font-size: 10pt; margin: 0 0 1.4mm; }}
-a.toc::after {{ content: leader('.') target-counter(attr(href), page); color: #8f7a83; }}
+/* El número lo escribe el armador en data-pag (dos pasadas): target-counter
+   de WeasyPrint daba 1 en todo con el cuerpo como grupo de páginas. */
+a.toc::after {{ content: leader('.') attr(data-pag); color: #8f7a83; }}
 .toc-n {{ display: inline-block; width: 11mm; font-weight: 700; color: #8e2a4a; }}
 .parte {{ page: parte; break-before: right; height: 297mm; position: relative; color: #fff; }}
 .pt-num {{ position: absolute; top: 95mm; left: 25mm; margin: 0; font: 700 13pt 'Plus Jakarta Sans'; letter-spacing: 3pt;
@@ -757,7 +759,7 @@ def paginas_iniciales(capitulos):
         if parte and parte != parte_actual:
             filas.append(f'<p class="toc-parte">{parte[0]}{" · " + parte[1] if parte[1] else ""}</p>')
             parte_actual = parte
-        filas.append(f'<a class="toc" href="#cap-{cap}"><span class="toc-n">{cap}</span>{titulo}</a>')
+        filas.append(f'<a class="toc" href="#cap-{cap}" data-pag="@@PAG-{cap}@@"><span class="toc-n">{cap}</span>{titulo}</a>')
     indice = f'<section class="indice"><h1 class="titulo-indice">Índice</h1>{"".join(filas)}</section>'
     return portada + portadilla + interior + creditos + autores + antes + indice + despues
 
@@ -778,6 +780,30 @@ def separador(parte):
     if not parte[1]:          # Bases, Caja de herramientas: el nombre va grande
         return f'<section class="parte"><p class="pt-titulo">{parte[0]}</p></section>'
     return f'<section class="parte"><p class="pt-num">{parte[0]}</p><p class="pt-titulo">{parte[1]}</p></section>'
+
+
+def escribir_con_indice(doc, destino):
+    """Libro completo en dos pasadas: la primera ubica la página de cada
+    capítulo (anclas cap-*), la segunda escribe esos números en el índice.
+    Los números del índice no cambian el largo de nada, así que la segunda
+    pasada pagina igual que la primera."""
+    import logging
+    from weasyprint import HTML
+    logging.getLogger('weasyprint').setLevel(logging.ERROR)
+    # '000' ocupa lo que un número real: el índice pagina igual en las dos pasadas
+    primera = HTML(string=re.sub(r'@@PAG-[^@]+@@', '000', doc), base_url=str(LIBRO) + '/').render()
+    pagina_de, inicio = {}, None
+    for i, pag in enumerate(primera.pages):
+        for ancla in pag.anchors:
+            if ancla == 'inicio-cuerpo' and inicio is None:
+                inicio = i
+            if ancla.startswith('cap-') and ancla not in pagina_de:
+                pagina_de[ancla] = i
+    inicio = inicio or 0
+    doc = re.sub(r'@@PAG-([A-Z]?\d+)@@',
+                 lambda m: str(pagina_de[f'cap-{m[1]}'] - inicio + 1) if f'cap-{m[1]}' in pagina_de else '',
+                 doc)
+    HTML(string=doc, base_url=str(LIBRO) + '/').write_pdf(str(destino))
 
 
 def main():
@@ -818,7 +844,7 @@ def main():
                 cuerpo_caps.append(separador(parte))
                 parte_actual = parte
             cuerpo_caps.append(capitulo(md))
-        cuerpo = (paginas_iniciales(capitulos) + '<div class="cuerpo">' + ''.join(cuerpo_caps) + '</div>'
+        cuerpo = (paginas_iniciales(capitulos) + '<div class="cuerpo" id="inicio-cuerpo">' + ''.join(cuerpo_caps) + '</div>'
                   + contraportada())
     doc = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{TITULO}</title><style>{css()}</style></head><body>{cuerpo}</body></html>'
     if pedido:
@@ -833,7 +859,10 @@ def main():
     # abierto (o dos armados a la vez) nunca ve un PDF a medio escribir.
     temporal = destino.with_name(f'.{destino.stem}.{os.getpid()}.pdf')
     try:
-        subprocess.run([weasy, '-u', str(LIBRO) + '/', f.name, str(temporal)], check=True)
+        if pedido:
+            subprocess.run([weasy, '-u', str(LIBRO) + '/', f.name, str(temporal)], check=True)
+        else:
+            escribir_con_indice(doc, temporal)
         os.replace(temporal, destino)
     finally:
         pathlib.Path(f.name).unlink()

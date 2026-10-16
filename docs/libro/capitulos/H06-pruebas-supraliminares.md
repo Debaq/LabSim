@@ -206,7 +206,7 @@ El STAT (*suprathreshold adaptation test*) no busca nada en el umbral. Presenta 
 En dB HL, con fonos supraaurales, el tono va a **100 dB en 500 y 2.000 Hz y 105 dB en 1.000 Hz**, con **ruido blanco a 90 dB** en el oído contrario. Cada oído se evalúa por separado.
 
 :::ojo Ojo clínico
-En el STAT el oído contrario **siempre** va enmascarado: a 100 dB HL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo. Y mira el LDL antes: si el paciente marca molestia bajo 100 dB HL, el STAT no se hace.
+En el STAT el oído contrario **siempre** va enmascarado: a 100-105 dB HL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo. Y mira el LDL antes: si el paciente marca molestia bajo 100 dB HL, el STAT no se hace.
 :::
 
 ### Pérdida no orgánica
@@ -248,7 +248,7 @@ Las pruebas que no dependen de la respuesta del paciente ponen el límite: emisi
 - **Carhart**: desde el umbral, +5 dB sin cortar, **el minuto se reinicia**.
 - **Rosenberg**: desde 5 dB sobre el umbral, **un solo minuto**.
 - **Deterioro de 30 dB o más: sospecha retrococlear.**
-- **STAT**: 100-105 dB HL, 60 s, ruido blanco contralateral siempre.
+- **STAT**: 100 dB HL en 500 y 2.000 Hz y 105 dB HL en 1.000 Hz, 60 s, ruido blanco a 90 dB en el otro oído siempre.
 - **Stenger**: bueno a +10, malo a −10 del umbral informado; **no responde = positivo**.
 :::
 
@@ -302,7 +302,7 @@ Igual que en la audiometría, el informe dice qué se midió y qué mostró, no 
 | STAT, 500, 1.000 y 2.000 Hz | **(+)**: baja la mano antes del minuto | (−) |
 :::
 
-No hay reclutamiento y el tono se apaga: en el umbral y también a 100 dB HL, donde a su OD le sobran 70 a 85 dB de margen. En el STAT el hallazgo es no llegar al minuto, no el segundo exacto en que baja la mano. Las supraliminares apuntan al nervio, y con eso Raúl va a PEAT y a resonancia (→ cap. 11).
+No hay reclutamiento y el tono se apaga: en el umbral y también al nivel del STAT (100-105 dB HL), donde a su OD le sobran 70 a 85 dB de margen. En el STAT el hallazgo es no llegar al minuto, no el segundo exacto en que baja la mano. Las supraliminares apuntan al nervio, y con eso Raúl va a PEAT y a resonancia (→ cap. 11).
 
 Lo de Patricia y Raúl se resume así, junto con lo que agrega el reflejo:
 
@@ -336,7 +336,7 @@ Cada prueba se hace con su instrucción de la figura H6.1, dada con *Talkback*, 
 - **SISI**: con el tono sonando, sube un clic de 1 dB y vuelve a bajarlo. Las subidas de 5 dB las nota siempre; con el portador bajo el umbral no nota ninguna.
 - **Fowler**: en una frecuencia que no cumple los requisitos, el paciente contesta como un oído sin reclutamiento.
 - **Deterioro tonal**: en el Carhart cada subida reinicia el minuto; en el Rosenberg el minuto es uno solo. El minuto es real: cronométralo. El Carhart se instruye con *Mano levantada* o, si quieres avisarle del ruido en el otro oído, con *Mano levantada en ruido*: es la misma prueba.
-- **STAT**: el tono va a 100 dB HL, con ruido blanco de al menos 80 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado. Un oído retrococlear baja la mano antes del minuto aunque le sobre margen sobre su umbral; uno coclear lo sostiene.
+- **STAT**: el tono va a 100 dB HL en 500 y 2.000 Hz y a 105 dB HL en 1.000 Hz, con ruido blanco a 90 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado. Un oído retrococlear baja la mano antes del minuto aunque le sobre margen sobre su umbral; uno coclear lo sostiene.
 - **Stenger**: se instruye con *Colocar fonos*, como los umbrales. El paciente lo reconoce por el estímulo: el mismo tono, por vía aérea, en los dos oídos a la vez. Percibe el tono con más nivel de sensación sobre sus umbrales **verdaderos**, no sobre los que te dio.
 - **Orden**: el indicador de técnica espera las supraliminares entre la logoaudiometría y la vía ósea.
 

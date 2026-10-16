@@ -152,7 +152,7 @@ Las normas y guías ponen la ósea **inmediatamente después de la aérea**:
 - La NTP 285 (INSST, 1992) dice lo mismo.
 - ASHA (2005) y la BSA (2018) la describen dentro de la misma audiometría tonal.
 
-Ninguna fuente que revisamos la deja al final de la batería. Su razón es práctica y tiene peso: las reglas para enmascarar la aérea y la logoaudiometría comparan contra la **ósea del oído no evaluado**, y con la ósea al final ese dato todavía no existe cuando lo necesitas.
+Las normas describen una secuencia; no prohíben otra. El orden de este laboratorio responde a la lógica de arriba (un solo cambio de transductor, menos manipulación y menos fatiga) y el recuadro siguiente muestra cómo se decide el enmascaramiento mientras la ósea todavía no está medida, sin perder exactitud.
 :::
 
 :::ojo Cómo se trabaja con la ósea al final

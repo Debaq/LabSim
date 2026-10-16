@@ -158,7 +158,7 @@ La voz cruza el cráneo igual que un tono, y la discriminación se mide 20 a 40 
 Cada nivel de la curva tiene su cálculo, porque el mínimo sube con la voz. El SDT y el SRT se enmascaran si cumplen la regla. El efecto de no hacerlo está en el caso de Luis, más adelante.
 
 :::comentario Lo que dicen las normas
-Este libro y LabSim usan **45 dB** de atenuación interaural para la voz con fono supraaural. ASHA (1988) pide enmascarar cuando el SRT de un oído supera en **40 dB** o más al SRT del otro o a cualquiera de sus umbrales óseos de 500 a 4.000 Hz. Es más prudente: menos dB y el mejor umbral óseo en vez del promedio. Ante la duda, enmascara: el ruido bien calculado no empeora el resultado.
+Este libro y LabSim usan **45 dB** de atenuación interaural para la voz con fono supraaural. ASHA (1988) pide enmascarar cuando el SRT de un oído supera en **40 dB** o más al SRT del otro o a cualquiera de sus umbrales óseos de 500 a 4.000 Hz. El laboratorio usa 45 dB porque la voz, que reparte su energía en un rango ancho de frecuencias, cruza el cráneo con más pérdida que un tono aislado con el mismo fono, y comparar contra el promedio del oído no evaluado sigue la misma lógica con que se lee el SRT. <!-- verificar: cifra de atenuación interaural del habla con fono supraaural (rango publicado ~45-55 dB) con fuente primaria. -->
 :::
 
 ### 6. Umbral de molestia (LDL)

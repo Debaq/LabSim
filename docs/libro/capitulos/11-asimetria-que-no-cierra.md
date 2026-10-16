@@ -42,7 +42,7 @@ Mide si el oído puede seguir oyendo un tono sostenido. Un oído normal o coclea
 | 10 a 25 dB | compatible con lesión coclear |
 | 30 dB o más | sospecha de lesión retrococlear |
 
-**STAT (deterioro supraliminar).** Un solo nivel alto y fijo: 110 dB SPL durante 60 segundos en 500, 1.000 y 2.000 Hz. Si el paciente no lo oye el minuto completo, la prueba es **positiva para el VIII par**. Al trabajar sobre el umbral evita los falsos positivos de las pruebas en el umbral (Jerger y Jerger, 1975). En dB HL equivale a unos 100 dB en 500 y 2.000 Hz y 105 dB en 1.000 Hz, con ruido en el oído contrario.
+**STAT (deterioro supraliminar).** Un solo nivel alto y fijo: 110 dB SPL durante 60 segundos en 500, 1.000 y 2.000 Hz. Si el paciente no lo oye el minuto completo, la prueba es **positiva para el VIII par**. Al trabajar sobre el umbral evita los falsos positivos de las pruebas en el umbral (Jerger y Jerger, 1975). En dB HL equivale a 100 dB en 500 y 2.000 Hz y 105 dB en 1.000 Hz, con ruido blanco a 90 dB en el oído contrario.
 
 :::ojo Ojo clínico
 En el STAT el oído contrario **siempre** va enmascarado: a 110 dB SPL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo.
@@ -247,7 +247,7 @@ Con una asimetría de agudos y un acúfeno de dos años en el mismo oído, ¿qu�
 | STAT, 500, 1.000 y 2.000 Hz | **(+)**: baja la mano antes del minuto | (−) |
 :::
 
-A 100 dB HL a su OD le sobran 70 a 85 dB sobre el umbral, y aun así no sostiene el tono: eso es lo que busca el STAT.
+Al nivel del STAT a su OD le sobran 70 a 85 dB sobre el umbral, y aun así no sostiene el tono: eso es lo que busca el STAT.
 :::figura cap11_p39 teoae
 - @OD 2000 | Las emisiones del OD están **presentes** en las cinco bandas, con reproducibilidad alta.
 - Un oído con 30 a 55 dB de pérdida en esas frecuencias y emisiones presentes: **las células ciliadas externas funcionan**. El problema está después de la cóclea.

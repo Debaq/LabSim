@@ -149,7 +149,7 @@ En el laboratorio se miden de **250 a 4.000 Hz entre los 4 y los 6 años**, y el
 :::comentario Lo que dicen las normas
 La guía de la AAA (2020) pide en el juego condicionado **250, 500, 1.000, 2.000, 4.000 y 8.000 Hz**, y puede agregar 3.000 y 6.000 Hz cuando se va a adaptar un audífono. Sobre el orden, deja la decisión a la pregunta clínica y propone **partir por los agudos**: si aparece una pérdida en agudos, se puede iniciar la adaptación del audífono aunque falten los graves. En los más chicos (2 a 3 años) sugiere **alternar los oídos** frecuencia por frecuencia, para tener datos de los dos aunque el niño se canse a mitad de camino.
 
-Su argumento: con un niño, lo que no se midió primero puede no medirse nunca.
+El orden del laboratorio prioriza otra cosa: un oído **completo y comparable** con sus controles, con el mismo orden de siempre, en vez de dos oídos a medias.
 :::
 
 Los diapasones, en el laboratorio, se agregan desde los 7 años (→ H2).
@@ -215,7 +215,7 @@ En el laboratorio se dibujan en verde o negro; cuando se evalúa un audífono po
 :::comentario Lo que dicen las normas
 En el laboratorio, los umbrales con audífono en campo libre son parte de la revisión del audífono: muestran, en el mismo audiograma que el paciente conoce, qué sonidos le devuelve.
 
-Las guías pediátricas les ponen un límite claro: **no sirven para verificar el audífono** (AAA, 2013). Un audífono moderno no amplifica igual todos los niveles: según su intensidad, el tono de prueba interactúa con el procesamiento del audífono, y el umbral con audífono puede sobrestimar o subestimar lo que entrega con la voz de conversación (AAA, 2013; Kuk y Ludvigsen, 2003). Además, el niño se mueve y la cabeza sale del punto calibrado, y si oye casi normal en los graves, el ruido de la sala esconde la ganancia en esa zona (AAA, 2013). Para verificar se usan las mediciones en oído real con micrófono sonda. La excepción son los audífonos de conducción ósea, donde no hay sonido en el conducto que medir: ahí el umbral con audífono puede ser la mejor medida disponible (AAA, 2013).
+Las guías pediátricas les ponen un límite claro: **no sirven para verificar el audífono** (AAA, 2013). Un audífono moderno no amplifica igual todos los niveles: según su intensidad, el tono de prueba interactúa con el procesamiento del audífono, y el umbral con audífono puede sobrestimar o subestimar lo que entrega con la voz de conversación (AAA, 2013; Kuk y Ludvigsen, 2003). Además, el niño se mueve y la cabeza sale del punto calibrado, y si oye casi normal en los graves, el ruido de la sala esconde la ganancia en esa zona (AAA, 2013). Para verificar se usan las mediciones en oído real con micrófono sonda. En el laboratorio, el umbral con audífono se usa como lo que es: una **medida funcional** de lo que el paciente detecta con su audífono puesto, útil en la revisión y para mostrarle a la familia el beneficio. La excepción son los audífonos de conducción ósea, donde no hay sonido en el conducto que medir: ahí el umbral con audífono puede ser la mejor medida disponible (AAA, 2013).
 :::
 
 ### 8. Cuándo la conducta no alcanza

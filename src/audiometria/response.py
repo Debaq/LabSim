@@ -73,9 +73,13 @@ class ResponseAudiometry():
     # supraaural queda alrededor de 100 dB HL -- durante un minuto, con ruido
     # blanco contralateral. No se busca umbral ni se sube de a 5 dB como en el
     # Carhart: o sostiene el minuto a ese nivel (negativo) o no (positivo).
-    STAT_LEVEL_DB = 100
+    # Niveles del protocolo del laboratorio (2026-10-15, pedido del docente):
+    # 100 dB HL en 500 y 2000 Hz, 105 dB HL en 1000 Hz -- los 110 dB SPL de
+    # Jerger en fono supraaural --, con ruido blanco a 90 dB en el otro oído.
+    # Indice de frecuencia del audiómetro -> dB HL.
+    STAT_LEVEL_DB = {2: 100, 3: 105, 4: 100}
     STAT_LEVEL_TOL = 5     # +-5 dB HL: sigue siendo "administrado a nivel"
-    STAT_NOISE_MIN_DB = 80  # ruido contralateral bajo este nivel no enmascara
+    STAT_NOISE_MIN_DB = 90  # el protocolo pone el ruido blanco a 90 dB
     # El valor del caso es el deterioro en la escala del Carhart (dB sobre el
     # umbral para sostener el minuto). Desde aca el oido es retrococlear y
     # tampoco sostiene el tono a 100 dB HL: es lo que el Stat busca (Jerger y
@@ -525,7 +529,8 @@ class ResponseAudiometry():
             return
 
         side = 'OD' if ear == 0 else 'OI'
-        if cfg.get('fixed_level') and abs(int_ - self.STAT_LEVEL_DB) > self.STAT_LEVEL_TOL:
+        nivel_stat = self.STAT_LEVEL_DB.get(freq, 100)
+        if cfg.get('fixed_level') and abs(int_ - nivel_stat) > self.STAT_LEVEL_TOL:
             # el Stat no se busca subiendo: administrado a otro nivel el
             # paciente oye el tono (está sobre su umbral) pero no se evalúa
             # adaptación, así el alumno no obtiene un resultado que no
@@ -534,7 +539,7 @@ class ResponseAudiometry():
             self._decay_run = {}
             self.upHand()
             debug_print(f"[Stat] {side} {self.frecuency[freq]}Hz: presentado a {int_}dB HL, "
-                  f"el test se administra a {self.STAT_LEVEL_DB}dB HL "
+                  f"el test se administra a {nivel_stat}dB HL "
                   f"(+-{self.STAT_LEVEL_TOL}); sin resultado válido")
             return
 
