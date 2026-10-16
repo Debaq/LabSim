@@ -162,7 +162,8 @@ window.drawAudiogram = (function () {
         var xc = x + lado * sep, xp = xc + lado * ancho;
         var t = document.createElementNS(NS, 'polygon');
         t.setAttribute('points', xc + ',' + (y - alto / 2) + ' ' + xc + ',' + (y + alto / 2) + ' ' + xp + ',' + (y + alto / 2));
-        t.setAttribute('fill', color); t.setAttribute('stroke', 'none');
+        // Vacío: el triángulo relleno es el umbral de algiacusia (dolor).
+        t.setAttribute('fill', '#fff'); t.setAttribute('stroke', color); t.setAttribute('stroke-width', '1.1');
         return t;
     }
 

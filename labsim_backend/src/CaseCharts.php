@@ -1469,6 +1469,7 @@ final class CaseCharts
 
         // Cateto vertical pegado (con su aire) a la línea; el ángulo recto
         // abajo y la hipotenusa cerrando hacia afuera y hacia arriba.
+        // VACÍO: el triángulo relleno es el umbral de algiacusia (dolor).
         $xCateto = $x + $lado * $separacion;
         $xPunta = $xCateto + $lado * $ancho;
         $pdf->polygon(
@@ -1477,8 +1478,9 @@ final class CaseCharts
                 [$xCateto, $y + $alto / 2],
                 [$xPunta, $y + $alto / 2],
             ],
-            null,
-            $color
+            $color,
+            '#ffffff',
+            1.1
         );
     }
 

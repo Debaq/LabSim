@@ -6156,3 +6156,21 @@ lejos del umbral de RETURN_FRACTION hasta el final.
   0,77 / 4,33 porque a 90 dB queda poca señal y la marca cae en el borde de la
   ventana. Es la conducta buscada (con poca señal el marcado automático marca
   mal, como el equipo real).
+
+## LDL: triángulo vacío; el relleno es la algiacusia (2026-10-16)
+
+El umbral de molestia (LDL) se dibujaba con el triángulo rectángulo
+RELLENO. En la simbología del curso (clase "Simbología en audiología", Unidad
+2) el **umbral de disconfort es el triángulo vacío** y el **relleno es el
+umbral de algiacusia** (dolor), con la flecha hacia abajo para "sin molestia
+al máximo". La ASHA (1990) no trae símbolo para el LDL: es convención local,
+y manda la del curso.
+
+- Vacío en los cuatro lugares que lo dibujan: ficha PDF (`CaseCharts::ldl`),
+  vista previa del editor (`audiogram.js`, `makeLdlMark`), motor del libro
+  (`figuras/motor/audiograma.py`, `_ldl`) y la lámina de símbolos de H3, que
+  ahora trae también la fila del umbral de algiacusia.
+- LabSim no mide algiacusia: no hay dato que dibujar con el relleno.
+- **Unión con guiones, pendiente de él:** la revisión del 2026-09-10 pidió el
+  LDL unido con guiones largos; el audiograma de ejemplo de la misma clase
+  lo deja sin unir. Se dejó como estaba hasta que lo decida.
