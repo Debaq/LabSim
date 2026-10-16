@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "neuropatia",
+      "OI": "neuropatia"
+    },
+    "edad": 0,
+    "sexo": "mujer",
+    "edad_valor": 120,
+    "edad_unidad": "horas",
+    "grado": {
+      "OD": "severa",
+      "OI": "severa"
+    },
+    "anamnesis": {
+      "otros": "Aurora nació hace cinco días, de término y por parto normal. Al segundo día se puso muy amarilla y la bilirrubina siguió subiendo pese a la fototerapia, así que la pasaron a la UCI neonatal y le hicieron una exanguinotransfusión. Hoy está estable, toma pecho y duerme bien. Antes del alta, la matrona pide el tamizaje auditivo. La mamá pregunta si \"lo de la amarilla\" le puede haber hecho algo en los oídos.",
+      "historia": "{{-3}} UCI neonatal: hiperbilirrubinemia grave sin respuesta a fototerapia; exanguinotransfusión.\n{{-0}} Neonatología: estable, en preparación para el alta. Solicita tamizaje auditivo.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    }
+  ]
+}

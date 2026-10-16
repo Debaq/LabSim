@@ -1,0 +1,900 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "neuropatia",
+   "OI": "neuropatia"
+  },
+  "edad": 0,
+  "sexo": "mujer",
+  "edad_valor": 120,
+  "edad_unidad": "horas",
+  "grado": {
+   "OD": "severa",
+   "OI": "severa"
+  },
+  "anamnesis": {
+   "otros": "Aurora nació hace cinco días, de término y por parto normal. Al segundo día se puso muy amarilla y la bilirrubina siguió subiendo pese a la fototerapia, así que la pasaron a la UCI neonatal y le hicieron una exanguinotransfusión. Hoy está estable, toma pecho y duerme bien. Antes del alta, la matrona pide el tamizaje auditivo. La mamá pregunta si \"lo de la amarilla\" le puede haber hecho algo en los oídos.",
+   "historia": "{{-3}} UCI neonatal: hiperbilirrubinemia grave sin respuesta a fototerapia; exanguinotransfusión.\n{{-0}} Neonatología: estable, en preparación para el alta. Solicita tamizaje auditivo.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 2379197514,
+ "data": {
+  "gender": 1,
+  "id": 9514,
+  "Aerea": [
+   [
+    85,
+    100
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    75
+   ],
+   [
+    65,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    70,
+    80
+   ]
+  ],
+  "Osea": [
+   [
+    85,
+    100
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    75
+   ],
+   [
+    65,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    70,
+    80
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    85,
+    100
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    75
+   ],
+   [
+    65,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    70,
+    80
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    85,
+    100
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    75
+   ],
+   [
+    65,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    70,
+    80
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 0,
+  "edad_horas": 120,
+  "nacimiento": {
+   "parto": "vaginal",
+   "semanas": null,
+   "peso_g": null,
+   "torch": null,
+   "torch_sintomatica": false,
+   "uci_dias": null,
+   "ototoxicos": false,
+   "exanguinotransfusion": false,
+   "peg": false,
+   "vernix_limpiado": false,
+   "liquido_persistente": false,
+   "cesarea": false,
+   "pretermino_tardio": false,
+   "pretermino": false,
+   "muy_bajo_peso": false,
+   "percentil": {
+    "OD": 0.4099,
+    "OI": 0.3432
+   }
+  },
+  "volume": [
+   0.88,
+   0.71,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 105,
+    "percentage": 0
+   },
+   {
+    "int": 110,
+    "percentage": 0
+   }
+  ],
+  "SDT": [
+   65,
+   75
+  ],
+  "SRT": [
+   70,
+   80
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   10,
+   10
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Stat": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Rosemberg": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": true
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Aurora nació hace cinco días, de término y por parto normal. Al segundo día se puso muy amarilla y la bilirrubina siguió subiendo pese a la fototerapia, así que la pasaron a la UCI neonatal y le hicieron una exanguinotransfusión. Hoy está estable, toma pecho y duerme bien. Antes del alta, la matrona pide el tamizaje auditivo. La mamá pregunta si \"lo de la amarilla\" le puede haber hecho algo en los oídos.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Aurora",
+     "edad": 0,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 0,
+     "confiabilidad": 69,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amva03qe0jn",
+     "rol": "madre",
+     "nombre": "Luisa Luna",
+     "edad": 25,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 100,
+     "conciencia": 80,
+     "confiabilidad": 76,
+     "version": "",
+     "comportamiento": "insistente, repite lo que le preocupa hasta que le contestan",
+     "disposicion": 1
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 10,
+    "retro": {
+     "i_iii_ms": 0,
+     "iii_v_ms": 0,
+     "global_delay_ms": 0,
+     "bloqueo": "total",
+     "v_i_factor": 0.45,
+     "microfonica": "amplificada",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 5,
+    "retro": {
+     "i_iii_ms": 0,
+     "iii_v_ms": 0,
+     "global_delay_ms": 0,
+     "bloqueo": "total",
+     "v_i_factor": 0.45,
+     "microfonica": "amplificada",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "neural",
+    "umbral": 75,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 100,
+     "tone_burst_1000Hz": 95,
+     "tone_burst_2000Hz": 75,
+     "tone_burst_4000Hz": 70,
+     "nb_ce_chirp_ls_500Hz": 95,
+     "nb_ce_chirp_ls_1000Hz": 90,
+     "nb_ce_chirp_ls_2000Hz": 70,
+     "nb_ce_chirp_ls_4000Hz": 70,
+     "click": 75,
+     "ce_chirp": 75,
+     "ce_chirp_ls": 75
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0,
+     "iii_v_ms": 0,
+     "global_delay_ms": 0,
+     "bloqueo": "total",
+     "v_i_factor": 0.45,
+     "microfonica": "amplificada",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.24,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "amplificada"
+    },
+    "average_objetivo": 2990,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.02,
+      "amp": -0.01
+     },
+     "onda_III": {
+      "lat": -0.04,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 85,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 105,
+     "tone_burst_1000Hz": 95,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 80,
+     "nb_ce_chirp_ls_500Hz": 100,
+     "nb_ce_chirp_ls_1000Hz": 90,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 80,
+     "click": 85,
+     "ce_chirp": 85,
+     "ce_chirp_ls": 85
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0,
+     "iii_v_ms": 0,
+     "global_delay_ms": 0,
+     "bloqueo": "total",
+     "v_i_factor": 0.45,
+     "microfonica": "amplificada",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.22,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "amplificada"
+    },
+    "average_objetivo": 3430,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": -0.01
+     },
+     "onda_III": {
+      "lat": 0.01,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0.03,
+      "amp": 0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "neonate",
+    "baseline": {
+     "I": {
+      "lat": 1.79,
+      "amp": 0.171
+     },
+     "III": {
+      "lat": 4.56,
+      "amp": 0.205
+     },
+     "V": {
+      "lat": 7,
+      "amp": 0.299
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 1.2,
+    "sello_pct": 87,
+    "variabilidad_db": 2.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 1.5,
+    "sello_pct": 85,
+    "variabilidad_db": 2.1,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 95,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 95,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T20:38:18+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Aurora Patricia",
+   "apellido": "Luna Navarro",
+   "rut": "28328759",
+   "fecha_nac": "10-10-2026"
+  },
+  "historia_clinica": "{{-3}} UCI neonatal: hiperbilirrubinemia grave sin respuesta a fototerapia; exanguinotransfusión.\r\n{{-0}} Neonatología: estable, en preparación para el alta. Solicita tamizaje auditivo."
+ }
+}
