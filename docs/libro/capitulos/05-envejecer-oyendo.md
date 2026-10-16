@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ tonotopía y codificación del habla ; umbrales por edad (el detalle está en B1)
+> ✍ tonotopía y codificación del habla ; umbrales por edad (el detalle está en B2)
 
 ## Patología
 

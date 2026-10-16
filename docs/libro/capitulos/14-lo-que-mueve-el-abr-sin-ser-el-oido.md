@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ mielinización y maduración de la vía (el detalle está en B1)
+> ✍ mielinización y maduración de la vía (el detalle está en B2)
 
 ## Patología
 

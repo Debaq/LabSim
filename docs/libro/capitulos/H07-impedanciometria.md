@@ -26,7 +26,7 @@ Tiene un límite que conviene tener claro: **no mide audición**. Un timpanogram
 
 ### Qué mide la sonda
 
-La sonda se sella en el conducto y lleva tres conductos: un parlante que emite un **tono de sonda** continuo, un micrófono que mide cuánto de ese tono queda en el conducto y una bomba que cambia la presión del aire. Si el tímpano se mueve con facilidad, absorbe energía y en el conducto queda poco sonido: la **admitancia** es alta. Si está rígido, el sonido rebota y la admitancia es baja. → B1.
+La sonda se sella en el conducto y lleva tres conductos: un parlante que emite un **tono de sonda** continuo, un micrófono que mide cuánto de ese tono queda en el conducto y una bomba que cambia la presión del aire. Si el tímpano se mueve con facilidad, absorbe energía y en el conducto queda poco sonido: la **admitancia** es alta. Si está rígido, el sonido rebota y la admitancia es baja. → B4.
 
 Con el tono de **226 Hz**, el oído medio del adulto se comporta casi solo como un resorte (rigidez), y la admitancia se puede expresar como el **volumen de aire equivalente**: a esa frecuencia los mL, los cm³ y los mmho son intercambiables (BSA, 2024). Por eso el equipo informa "compliancia" en mL. En rigor es admitancia, y en un oído enfermo o de lactante las dos cosas no son iguales.
 

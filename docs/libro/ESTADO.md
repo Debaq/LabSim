@@ -26,8 +26,9 @@ Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
 | Estado | Capítulos |
 |---|---|
 | Escritos y al día con los simuladores | H1-H10, 1, 2, 3, 4, 11 |
-| Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H13 vestibular (vol./sección futura), H14 PEAee, 5-10, 12-20 |
-| Lo escribe una colega | B1 Fisiología auditiva |
+| Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H14 PEAee, 5-10, 12-20 |
+| Esqueleto nuevo (2026-10-16) | B1 anatomía, B3 histología, B4 física (cada uno con "Qué tiene que tener"); equilibrio H13 y H15-H18; rehabilitación aural H19-H20; salud ocupacional H21; nariz H22-H24 |
+| Lo escribe una colega | B2 Fisiología auditiva y vestibular (con su lista de contenidos) |
 
 Cómo se escribe uno: un agente por capítulo con `herramientas/brief_agentes.md`
 (reglas, sintaxis, flujo) + el pedido del capítulo (casos del índice,

@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ no aplica; acá el bloque es la conducta del paciente (el detalle está en B1)
+> ✍ no aplica; acá el bloque es la conducta del paciente (el detalle está en B2)
 
 ## Patología
 

@@ -30,7 +30,7 @@ El artículo en que Fowler (1936) describió el balance de sonoridad se titulaba
 
 ### Reclutamiento: la sonoridad que se pone al día
 
-Las células ciliadas externas amplifican los sonidos suaves unos 40 a 50 dB y casi nada los fuertes. Esa **compresión** es la que permite que un oído sano maneje un rango enorme de intensidades (Robles y Ruggero, 2001; Dallos, 2008). → B1.
+Las células ciliadas externas amplifican los sonidos suaves unos 40 a 50 dB y casi nada los fuertes. Esa **compresión** es la que permite que un oído sano maneje un rango enorme de intensidades (Robles y Ruggero, 2001; Dallos, 2008). → B2.
 
 Cuando las células ciliadas externas se dañan, se pierde la ganancia de lo suave y el umbral sube, pero lo fuerte, que casi no se amplificaba, llega casi igual que antes. Entre el umbral y la molestia la sonoridad tiene que crecer en menos decibeles: **crece más rápido**. Eso es el reclutamiento.
 

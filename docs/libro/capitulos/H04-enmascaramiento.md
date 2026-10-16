@@ -35,7 +35,7 @@ De esta idea salen dos consecuencias que ordenan todo el capítulo:
 1. El tono cruzado **lo oye la cóclea**, no el oído medio. Por eso lo que importa del oído no evaluado es su **umbral óseo**, no el aéreo (BSA, 2018).
 2. El ruido que pones en el oído no evaluado **también cruza**, con la misma atenuación, y puede tapar al oído que estás midiendo. Ese es el límite de cuánto ruido puedes usar.
 
-La fisiología de la conducción ósea y del oído medio está en el capítulo B1.
+La fisiología de la conducción ósea y del oído medio está en el capítulo B2.
 
 ### Cuánto atenúa cada transductor
 

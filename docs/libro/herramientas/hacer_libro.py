@@ -121,6 +121,15 @@ def historia(texto):
     return f'<ul class="historia">{"".join(out)}</ul>' if out else ''
 
 
+def clave_rostro(nombre, spec):
+    """Un rostro por persona: el paciente de práctica (demo:NN) es el mismo en
+    todos los capítulos (rostros/demo-NN.png); un caso armado por cuadro usa
+    el nombre del caso. Los genera herramientas/rostros.py."""
+    if isinstance(spec['caso'], str) and spec['caso'].startswith('demo:'):
+        return 'demo-' + spec['caso'].split(':', 1)[1]
+    return nombre
+
+
 def ficha(nombre, numero, cap):
     spec, d = cargar(nombre)
     pac = d.get('paciente_snapshot') or {}
@@ -143,7 +152,8 @@ def ficha(nombre, numero, cap):
         edad_txt = ''
     sexo = 'mujer' if str(d.get('gender')) == '1' else 'hombre'
     iniciales = ''.join(p[0] for p in quien.split()[:2]).upper()
-    foto = next((p for p in (ROSTROS / f'{nombre}.png', ROSTROS / f'{nombre}.jpg') if p.exists()), None)
+    rostro_de = clave_rostro(nombre, spec)
+    foto = next((p for p in (ROSTROS / f'{rostro_de}.png', ROSTROS / f'{rostro_de}.jpg') if p.exists()), None)
     rostro = (f'<img class="rostro" src="{foto.as_uri()}">' if foto
               else f'<div class="rostro vacio">{html.escape(iniciales)}</div>')
     es_demo = isinstance(spec['caso'], str) and spec['caso'].startswith('demo:')
@@ -647,8 +657,14 @@ li {{ margin-bottom: .8mm; }}
 .caja p, .caja li {{ margin-bottom: 1.2mm; }}
 .caja ul, .caja ol {{ padding-left: 4.5mm; }}
 .caja-titulo {{ font: 700 7.6pt 'Plus Jakarta Sans'; letter-spacing: 1pt; text-transform: uppercase; margin: 0 0 1.5mm !important; }}
-.caja table {{ font-size: 8pt; width: 100%; border-collapse: collapse; }}
-.caja td, .caja th {{ padding: .9mm 1.4mm; border-bottom: .4pt solid rgba(0,0,0,.12); text-align: left; }}
+/* Tablas con grilla: sin líneas no se leían las filas ni las columnas. */
+table {{ width: 100%; border-collapse: collapse; font-size: 8.6pt; line-height: 1.4; margin: 1mm 0 3mm;
+         border: .7pt solid #b9a3ad; }}
+th, td {{ padding: 1mm 1.6mm; border: .5pt solid #cdbcc4; text-align: left; vertical-align: top; }}
+th {{ background: #f1e4e9; color: #24101a; font-weight: 700; }}
+tbody tr:nth-child(even) td {{ background: #faf6f8; }}
+.caja table {{ font-size: 8pt; }}
+.caja td, .caja th {{ padding: .9mm 1.4mm; }}
 .caja-objetivos {{ background: #24101a; color: #f8eef1; }}
 .caja-objetivos .caja-titulo {{ color: #E7A7BA; }}
 .caja-objetivos strong {{ color: #fff; }}

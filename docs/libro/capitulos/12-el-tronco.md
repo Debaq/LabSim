@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ generadores de las ondas I-VII y vía auditiva central (el detalle está en B1)
+> ✍ generadores de las ondas I-VII y vía auditiva central (el detalle está en B2)
 
 ## Patología
 

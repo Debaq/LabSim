@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ por qué la ósea cae en la otoesclerosis sin daño coclear (el detalle está en B1)
+> ✍ por qué la ósea cae en la otoesclerosis sin daño coclear (el detalle está en B2)
 
 ## Patología
 

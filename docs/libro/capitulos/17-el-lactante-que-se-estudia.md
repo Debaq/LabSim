@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ maduración del oído medio y del tronco (el detalle está en B1)
+> ✍ maduración del oído medio y del tronco (el detalle está en B2)
 
 ## Patología
 

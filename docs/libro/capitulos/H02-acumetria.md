@@ -20,7 +20,7 @@ Sirve **antes de la audiometría**, como hipótesis; **donde no hay audiómetro*
 
 ## Fundamento
 
-El sonido llega a la cóclea por dos caminos (ver B1). Por **vía aérea** recorre el conducto, el tímpano y la cadena de huesecillos, que lo amplifican. Por **vía ósea** la vibración del cráneo mueve directamente las dos cócleas, casi por igual.
+El sonido llega a la cóclea por dos caminos (ver B2). Por **vía aérea** recorre el conducto, el tímpano y la cadena de huesecillos, que lo amplifican. Por **vía ósea** la vibración del cráneo mueve directamente las dos cócleas, casi por igual.
 
 **El Rinne compara las dos vías en un mismo oído.** Un oído normal oye más fuerte el diapasón frente al conducto que apoyado en el hueso, porque el oído medio le suma ganancia a la vía aérea: Rinne **positivo**. Una pérdida sensorioneural baja las dos vías por igual, así que el Rinne sigue positivo. Solo cuando el oído medio pierde suficiente transmisión la vía ósea pasa a oírse más fuerte: Rinne **negativo**.
 

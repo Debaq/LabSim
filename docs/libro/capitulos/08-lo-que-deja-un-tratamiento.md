@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ por qué la base de la cóclea cae primero (el detalle está en B1)
+> ✍ por qué la base de la cóclea cae primero (el detalle está en B2)
 
 ## Patología
 

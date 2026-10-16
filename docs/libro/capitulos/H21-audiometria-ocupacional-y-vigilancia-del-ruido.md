@@ -1,10 +1,10 @@
-# H13. Evaluación vestibular
+# H21. Audiometría ocupacional y vigilancia del ruido
 
 :::objetivos En esta herramienta
 - ✍ Qué vas a saber hacer al terminar
 :::
 
-> ✍ Videonistagmografía, prueba calórica, maniobras de diagnóstico y reposición.
+> ✍ Audiometría de screening y de operativo, evaluación de trabajadores expuestos a ruido (PREXOR, guía del ISP), criterios de daño y de derivación, protección auditiva; la parte médico-legal (SUSESO).
 
 ## Para qué sirve
 
@@ -12,7 +12,7 @@
 
 ## Fundamento
 
-> ✍ la fisiología justa para entender por qué se hace así (remite a B1)
+> ✍ la fisiología justa para entender por qué se hace así (remite a Bases, B1-B4)
 
 ## Antes de empezar
 

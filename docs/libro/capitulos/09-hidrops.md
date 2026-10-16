@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ endolinfa, potencial endococlear, potencial de sumación (el detalle está en B1)
+> ✍ endolinfa, potencial endococlear, potencial de sumación (el detalle está en B2)
 
 ## Patología
 

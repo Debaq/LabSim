@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ células ciliadas externas, amplificador coclear, electromotilidad (el detalle está en B1)
+> ✍ células ciliadas externas, amplificador coclear, electromotilidad (el detalle está en B2)
 
 ## Patología
 

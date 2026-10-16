@@ -59,7 +59,7 @@ El diapasón casi siempre se puede usar. La sonda, solo en un conducto sano.
 
 ## Fisiología
 
-El detalle del oído externo está en B1. Aquí va lo que explica los casos.
+El detalle del oído externo está en B1 y B2. Aquí va lo que explica los casos.
 
 **El conducto amplifica los agudos.** Es un tubo abierto hacia afuera y cerrado por la membrana, y resuena: entre 2,5 y 3 kHz el sonido llega a la membrana unos 15 a 20 dB más fuerte que en el campo libre (Shaw, 1974). Cerrar el conducto quita esa ganancia, y por eso la oclusión pesa más en los agudos. Al ocluir con el dedo el conducto de oídos sanos, el umbral subió 10,7 dB en 250 Hz y 32,1 dB en 2 kHz (Reis y cols., 2017).
 

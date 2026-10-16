@@ -34,7 +34,7 @@ capítulo, con la misma secuencia:
    razonamiento y diagnóstico. Cada caso sale de los generadores de la app
 6. **Para cerrar** y **Referencias**
 
-Antes de todo va **Bases** (B1, fisiología auditiva, a cargo de una colega).
+Antes de todo va **Bases**: B1 anatomía, B2 fisiología auditiva y vestibular (a cargo de una colega), B3 histología y B4 física.
 
 Todos llevan recuadros: objetivos, ayuda memoria, ¿sabías que?, ojo clínico,
 preguntas abiertas y comentarios. Las ilustraciones (dibujos tipo BioRender)
@@ -67,8 +67,19 @@ que existe el archivo sale un recuadro "ilustración pendiente". Cada capítulo 
 
 ## Bases
 
-### B1. Fisiología auditiva *(la escribe una colega; se recibe más adelante)*
-Anatomía y fisiología del oído externo, medio e interno, la vía auditiva y el sistema vestibular. Es el capítulo de base: los bloques de **Fisiología** de los capítulos clínicos quedan cortos y remiten a él. Ilustraciones tipo BioRender.
+Los bloques de **Fisiología** de los capítulos clínicos y el **Fundamento** de las herramientas quedan cortos y remiten acá.
+
+### B1. Anatomía
+Oído externo (pabellón, conducto y sus dos tercios), oído medio (membrana, cadena, músculos, trompa, mastoides), oído interno (cóclea, vestíbulo, canales semicirculares), VIII par y vía auditiva y vestibular central; nariz, fosas nasales y senos paranasales. Ilustraciones de bancos libres (Servier, OpenStax), no IA.
+
+### B2. Fisiología auditiva y vestibular *(la escribe una colega; se recibe más adelante)*
+Transmisión del oído medio, conducción ósea, mecánica coclear y tonotopía, amplificador coclear, transducción y sinapsis, potenciales cocleares, vía auditiva central; reflejo estapedial; fisiología vestibular (aceleraciones, reflejo vestíbulo-ocular y vestíbulo-espinal, compensación); fisiología nasal (ciclo nasal, resistencia al flujo).
+
+### B3. Histología
+Órgano de Corti (células ciliadas internas y externas, células de sostén, membrana tectoria), estría vascular y homeostasis del potasio, ganglio espiral, máculas y crestas ampulares, epitelio de la mucosa del oído medio y respiratorio nasal; qué tejido daña cada cuadro.
+
+### B4. Física
+El sonido: onda, frecuencia, período, longitud de onda, intensidad y presión; decibeles y sus referencias (SPL, HL, SL, nHL, eHL); tonos, ruidos y filtros; impedancia y admitancia (rigidez, masa, resistencia); resonancia; señal, ruido y promediación; acústica de la sala y del campo libre; flujo y resistencia de la vía aérea nasal.
 
 ## Caja de herramientas
 
@@ -108,11 +119,49 @@ Electrodos, protocolo, PS/PA y razón de áreas; test de glicerol (✓ E01-E07).
 ### H12. VEMP
 cVEMP y oVEMP: montaje, estímulo, corrección por EMG, umbral, asimetría (`tecnica_b.md` §11).
 
-### H13. Evaluación vestibular *(propuesto, del protocolo)*
-Videonistagmografía, prueba calórica, maniobras de diagnóstico y reposición.
+### H13. Examen vestibular con lentes de Frenzel y videonistagmografía *(del protocolo)*
+Anamnesis del mareo; nistagmo espontáneo y evocado por la mirada con lentes de +20 dioptrías; videonistagmografía: pruebas oculomotoras (sacadas, seguimiento, optocinético) y posicionales. Simuladores: trainHIT y labyrinthus3d.
 
 ### H14. Potenciales de estado estable *(propuesto, del protocolo)*
 ASSR: estimación de umbral por frecuencia.
+
+**Equilibrio**
+
+### H15. Prueba calórica *(del protocolo)*
+Calórica mínima y bilateral con videonistagmografía: irrigación, velocidad de la fase lenta, paresia del canal y preponderancia direccional (fórmula de Jongkees), fijación visual.
+
+### H16. Video head impulse test (vHIT) *(del protocolo)*
+Impulsos cefálicos por canal: ganancia del reflejo vestíbulo-ocular, sacadas encubiertas y manifiestas; comparación con la calórica.
+
+### H17. Maniobras de diagnóstico y reposición *(del protocolo)*
+VPPB: Dix-Hallpike y prueba de giro supino, lectura del nistagmo por canal; reposición (Epley, Semont, Lempert/barbacoa) y liberación de partículas.
+
+### H18. Rehabilitación vestibular *(del protocolo)*
+Evaluación funcional (DHI, pruebas de equilibrio), ejercicios de adaptación, sustitución y habituación, progresión, control y alta.
+
+**Rehabilitación aural**
+
+### H19. Prueba de audífonos *(del protocolo)*
+Candidatura, selección y prueba del audífono: ganancia funcional en campo libre, discriminación con y sin audífono, molde y ventilación, entrega y control.
+
+### H20. Revisión y medición electroacústica del audífono *(del protocolo)*
+Revisión visoauditiva (molde, tubo, pila, micrófono, retroalimentación) y medición en acoplador: ganancia, salida máxima, distorsión y ruido interno.
+
+**Salud ocupacional**
+
+### H21. Audiometría ocupacional y vigilancia del ruido
+Audiometría de screening y de operativo, evaluación de trabajadores expuestos a ruido (PREXOR, guía del ISP), criterios de daño y de derivación, protección auditiva; la parte médico-legal (SUSESO).
+
+**Nariz**
+
+### H22. Anamnesis rinológica y rinoscopía *(del protocolo)*
+Motivo de consulta nasal, síntomas y antecedentes; rinoscopía anterior.
+
+### H23. Rinomanometría anterior *(del protocolo)*
+Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasoconstrictor e informe.
+
+### H24. Rinometría acústica *(del protocolo)*
+Áreas de sección transversal de la fosa nasal por reflexión acústica: técnica, curva, áreas mínimas y volumen, prueba con vasoconstrictor.
 
 ## Parte I — El oído que transmite
 

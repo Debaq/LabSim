@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ sincronía neural, sinapsis de la célula ciliada interna (el detalle está en B1)
+> ✍ sincronía neural, sinapsis de la célula ciliada interna (el detalle está en B2)
 
 ## Patología
 

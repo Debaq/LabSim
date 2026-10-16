@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ oído del recién nacido: vérnix, mesénquima, transitorio de las primeras horas (el detalle está en B1)
+> ✍ oído del recién nacido: vérnix, mesénquima, transitorio de las primeras horas (el detalle está en B2 y B3)
 
 ## Patología
 

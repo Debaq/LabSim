@@ -72,7 +72,7 @@ FIGURAS_POR_CAPITULO = {
 
 SECCIONES_HERRAMIENTA = [
     ('Para qué sirve', 'la pregunta clínica que responde y cuándo se pide'),
-    ('Fundamento', 'la fisiología justa para entender por qué se hace así (remite a B1)'),
+    ('Fundamento', 'la fisiología justa para entender por qué se hace así (remite a Bases, B1-B4)'),
     ('Antes de empezar', 'equipo, calibración, ambiente y preparación del paciente'),
     ('Paso a paso', 'el procedimiento, con el porqué de cada paso'),
     ('Cómo se informa', 'criterios, valores de referencia y un ejemplo de informe'),
@@ -279,7 +279,7 @@ def texto_clinico(n, cap, pedidos, figuras, sistema):
          f'> ✍ Qué mirar de la técnica en este problema{foco}: {sin_marcas(cap["tecnica"])}', '',
          ':::ayuda Ayuda memoria', '✍', ':::', '',
          '## Fisiología', '',
-         f'> ✍ {sin_marcas(cap["fisiologia"]) or "Lo justo del mecanismo"} (el detalle está en B1)', '',
+         f'> ✍ {sin_marcas(cap["fisiologia"]) or "Lo justo del mecanismo"} (el detalle está en Bases, B1-B4)', '',
          '## Patología', '', '> ✍ ' + '; '.join(cap['nombres'].get(c, c) for c in cuadros), '',
          ':::sabias ¿Sabías que?', '✍', ':::', '',
          '## Razonamiento', '', '> ✍ Texto del autor', '',

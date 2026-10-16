@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ atenuación interaural y curva sombra (el detalle está en B1)
+> ✍ atenuación interaural y curva sombra (el detalle está en B2)
 
 ## Patología
 

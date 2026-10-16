@@ -32,7 +32,7 @@ El umbral no es un punto fijo. Cerca de él, el paciente a veces oye y a veces n
 ### Dos vías, una comparación
 
 - **Vía aérea.** El tono entra por el conducto y pasa por el tímpano y la cadena hasta la cóclea. Evalúa el sistema completo.
-- **Vía ósea.** Un vibrador hace vibrar el cráneo y estimula la cóclea casi sin pasar por el oído externo ni el medio. Lo hace por varios mecanismos a la vez: la compresión de la cápsula ótica, la inercia de los líquidos y de la cadena, y la radiación del sonido hacia el conducto (Stenfelt y Goode, 2005). → B1.
+- **Vía ósea.** Un vibrador hace vibrar el cráneo y estimula la cóclea casi sin pasar por el oído externo ni el medio. Lo hace por varios mecanismos a la vez: la compresión de la cápsula ótica, la inercia de los líquidos y de la cadena, y la radiación del sonido hacia el conducto (Stenfelt y Goode, 2005). → B2.
 
 La diferencia entre las dos es el **gap aéreo-óseo**: lo que pierde el sonido en el camino de transmisión. Si la ósea es normal y la aérea no, el problema está en el oído externo o medio. Si las dos caen juntas, está en la cóclea o más allá. Si caen las dos pero queda un gap, hay de ambas cosas.
 

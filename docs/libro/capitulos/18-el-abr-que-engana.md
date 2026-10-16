@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ el EEG de fondo, el músculo, y por qué el promedio mejora con la raíz de los barridos (el detalle está en B1)
+> ✍ el EEG de fondo, el músculo, y por qué el promedio mejora con la raíz de los barridos (el detalle está en B4)
 
 ## Patología
 

@@ -26,7 +26,7 @@ Se hace en toda audiometría diagnóstica, después de la vía aérea y antes de
 
 Las vocales son fuertes y de frecuencia grave a media; las consonantes que distinguen una palabra de otra (*s*, *f*, *t*, *ch*) son débiles y agudas. Por eso quien tiene una pérdida en agudos dice "oigo que me hablan, pero no entiendo": las vocales llegan y las consonantes no (Young, 2008).
 
-Además del volumen importa la **calidad** de lo que llega. Una cóclea dañada no solo atenúa: separa peor las frecuencias y distorsiona, y aun con la voz fuerte se pierden palabras. Un nervio dañado codifica mal el tiempo de la señal y la voz llega todavía más desordenada. Una pérdida conductiva, en cambio, solo atenúa: con volumen suficiente, la cóclea sana entiende todo. La fisiología está en el capítulo B1.
+Además del volumen importa la **calidad** de lo que llega. Una cóclea dañada no solo atenúa: separa peor las frecuencias y distorsiona, y aun con la voz fuerte se pierden palabras. Un nervio dañado codifica mal el tiempo de la señal y la voz llega todavía más desordenada. Una pérdida conductiva, en cambio, solo atenúa: con volumen suficiente, la cóclea sana entiende todo. La fisiología está en el capítulo B2.
 
 ### Los cuatro umbrales
 

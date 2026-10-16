@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ homeostasis del potasio en la cóclea y conexina 26; estría vascular (el detalle está en B1)
+> ✍ homeostasis del potasio en la cóclea y conexina 26; estría vascular (el detalle está en B2 y B3)
 
 ## Patología
 

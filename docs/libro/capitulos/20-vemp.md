@@ -16,7 +16,7 @@
 
 ## Fisiología
 
-> ✍ vía vestíbulo-cólica y vestíbulo-ocular, sáculo y utrículo (el detalle está en B1)
+> ✍ vía vestíbulo-cólica y vestíbulo-ocular, sáculo y utrículo (el detalle está en B2)
 
 ## Patología
 

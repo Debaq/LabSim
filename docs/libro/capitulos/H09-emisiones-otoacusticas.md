@@ -24,7 +24,7 @@ Tienen un límite que conviene grabarse desde ya: **las OEA viajan por el oído 
 
 ### El amplificador coclear
 
-Las células ciliadas externas cambian de largo cuando se estimulan. Ese movimiento empuja la membrana basilar en el momento justo y amplifica la vibración de los sonidos suaves: es el **amplificador coclear**, el que nos da la sensibilidad y la sintonía fina. → B1.
+Las células ciliadas externas cambian de largo cuando se estimulan. Ese movimiento empuja la membrana basilar en el momento justo y amplifica la vibración de los sonidos suaves: es el **amplificador coclear**, el que nos da la sensibilidad y la sintonía fina. → B2.
 
 Parte de esa energía mecánica viaja de vuelta: sale de la cóclea, mueve la cadena y el tímpano al revés y se convierte en sonido dentro del conducto. Kemp (1978) la registró por primera vez con un micrófono en el conducto: un "eco" que llegaba milisegundos después del click y que no podía venir del oído medio.
 

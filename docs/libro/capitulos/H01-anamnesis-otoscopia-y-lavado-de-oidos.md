@@ -37,7 +37,7 @@ Antes de medir, tres preguntas:
 
 ## Fundamento
 
-El detalle de la fisiología del oído externo está en B1. Aquí va lo justo para entender la técnica.
+El detalle de la fisiología del oído externo está en B2. Aquí va lo justo para entender la técnica.
 
 ### El conducto se limpia solo
 

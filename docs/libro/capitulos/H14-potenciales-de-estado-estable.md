@@ -12,7 +12,7 @@
 
 ## Fundamento
 
-> ✍ la fisiología justa para entender por qué se hace así (remite a B1)
+> ✍ la fisiología justa para entender por qué se hace así (remite a Bases, B1-B4)
 
 ## Antes de empezar
 
