@@ -1,0 +1,44 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "metabolica",
+      "OI": "metabolica"
+    },
+    "edad": 56,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "semilla": 1,
+    "anamnesis": {
+      "otros": "Tiene 56 años y es secretaria en la oficina de un colegio. Tiene diabetes tipo 2 desde los 41 años; los primeros años no se cuidó mucho y hoy se pone insulina en la noche. Hace dos años le trataron la retina con láser y el año pasado el nefrólogo le dijo que los riñones le están funcionando \"a medias\". Desde hace unos dos años siente un siseo en los dos oídos, parejo, todo el día, que nota más en la noche. Le cuesta entender en las reuniones de apoderados y cuando hablan varios a la vez; por teléfono se arregla bien. Cree que \"es la edad\", porque su mamá usó audífonos desde los 80. Nunca ha trabajado con ruido, no ha tenido mareos ni otitis y no recuerda haber estado hospitalizada.",
+      "historia": "{{-730}} Oftalmólogo: retinopatía diabética no proliferativa en ambos ojos; fotocoagulación con láser.\n{{-300}} Nefrólogo: enfermedad renal crónica etapa 3a por nefropatía diabética. Ajusta la dosis de metformina y mantiene losartán.\n{{-60}} Médico de familia, control cardiovascular: refiere zumbido en ambos oídos y dificultad para entender en grupo. Otoscopía normal. Deriva a otorrinolaringología.\n{{-15}} Otorrinolaringólogo: otoscopía normal bilateral. Solicita audiometría con logoaudiometría y emisiones otoacústicas.",
+      "hist": [
+        "diabetes",
+        "hta"
+      ],
+      "medicamentos": "Metformina 850 mg al día; insulina glargina 22 unidades en la noche; losartán 50 mg cada 12 horas",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": false
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

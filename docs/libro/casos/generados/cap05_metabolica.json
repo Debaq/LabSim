@@ -1,0 +1,875 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "metabolica",
+   "OI": "metabolica"
+  },
+  "edad": 56,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "leve",
+   "OI": "leve"
+  },
+  "semilla": 1,
+  "anamnesis": {
+   "otros": "Tiene 56 años y es secretaria en la oficina de un colegio. Tiene diabetes tipo 2 desde los 41 años; los primeros años no se cuidó mucho y hoy se pone insulina en la noche. Hace dos años le trataron la retina con láser y el año pasado el nefrólogo le dijo que los riñones le están funcionando \"a medias\". Desde hace unos dos años siente un siseo en los dos oídos, parejo, todo el día, que nota más en la noche. Le cuesta entender en las reuniones de apoderados y cuando hablan varios a la vez; por teléfono se arregla bien. Cree que \"es la edad\", porque su mamá usó audífonos desde los 80. Nunca ha trabajado con ruido, no ha tenido mareos ni otitis y no recuerda haber estado hospitalizada.",
+   "historia": "{{-730}} Oftalmólogo: retinopatía diabética no proliferativa en ambos ojos; fotocoagulación con láser.\n{{-300}} Nefrólogo: enfermedad renal crónica etapa 3a por nefropatía diabética. Ajusta la dosis de metformina y mantiene losartán.\n{{-60}} Médico de familia, control cardiovascular: refiere zumbido en ambos oídos y dificultad para entender en grupo. Otoscopía normal. Deriva a otorrinolaringología.\n{{-15}} Otorrinolaringólogo: otoscopía normal bilateral. Solicita audiometría con logoaudiometría y emisiones otoacústicas.",
+   "hist": [
+    "diabetes",
+    "hta"
+   ],
+   "medicamentos": "Metformina 850 mg al día; insulina glargina 22 unidades en la noche; losartán 50 mg cada 12 horas",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1,
+ "data": {
+  "gender": 1,
+  "id": 9587,
+  "Aerea": [
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    25
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    50,
+    55
+   ],
+   [
+    55,
+    65
+   ],
+   [
+    65,
+    75
+   ]
+  ],
+  "Osea": [
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    25
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    50,
+    55
+   ],
+   [
+    55,
+    65
+   ],
+   [
+    65,
+    75
+   ]
+  ],
+  "LDL": [
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    25
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    50,
+    55
+   ],
+   [
+    55,
+    65
+   ],
+   [
+    65,
+    75
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    25
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    50,
+    55
+   ],
+   [
+    55,
+    65
+   ],
+   [
+    65,
+    75
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 56,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.1,
+   1.58,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 50,
+    "percentage": 96
+   },
+   {
+    "int": 55,
+    "percentage": 88
+   }
+  ],
+  "SDT": [
+   10,
+   15
+  ],
+  "SRT": [
+   15,
+   20
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     95,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     95,
+     90
+    ],
+    [
+     100,
+     95
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     100
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     100
+    ],
+    [
+     95,
+     100
+    ],
+    [
+     95,
+     100
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": true,
+    "hta": true
+   },
+   "medicamentos": "Metformina 850 mg al día; insulina glargina 22 unidades en la noche; losartán 50 mg cada 12 horas",
+   "cirugias": "",
+   "otros": "Tiene 56 años y es secretaria en la oficina de un colegio. Tiene diabetes tipo 2 desde los 41 años; los primeros años no se cuidó mucho y hoy se pone insulina en la noche. Hace dos años le trataron la retina con láser y el año pasado el nefrólogo le dijo que los riñones le están funcionando \"a medias\". Desde hace unos dos años siente un siseo en los dos oídos, parejo, todo el día, que nota más en la noche. Le cuesta entender en las reuniones de apoderados y cuando hablan varios a la vez; por teléfono se arregla bien. Cree que \"es la edad\", porque su mamá usó audífonos desde los 80. Nunca ha trabajado con ruido, no ha tenido mareos ni otitis y no recuerda haber estado hospitalizada.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Clara",
+     "edad": 56,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 47,
+     "confiabilidad": 78,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Siseo",
+   "frecuencia": 4000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 85,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 95
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 55,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": 55,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 50,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 45,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.16,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2423,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.15,
+      "amp": -0.18
+     },
+     "onda_III": {
+      "lat": 0.11,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.06,
+      "amp": 0.08
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 60,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 50,
+     "tone_burst_4000Hz": 60,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 45,
+     "nb_ce_chirp_ls_4000Hz": 60,
+     "click": 60,
+     "ce_chirp": 45,
+     "ce_chirp_ls": 45
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 50,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 45,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.28,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1576,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": -0.13
+     },
+     "onda_III": {
+      "lat": 0.06,
+      "amp": -0.03
+     },
+     "onda_V": {
+      "lat": 0.05,
+      "amp": 0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 9.2,
+     "2000": 17.7,
+     "3000": 27.9,
+     "4000": 33,
+     "6000": 38.1,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.4,
+    "sello_pct": 95,
+    "variabilidad_db": 1.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 10.5,
+     "1500": 20.5,
+     "2000": 27.6,
+     "3000": 44.7,
+     "4000": 44.7,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2,
+    "sello_pct": 90,
+    "variabilidad_db": 1.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T15:14:55+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Clara Laura",
+   "apellido": "Paredes Zamora",
+   "rut": "11470144",
+   "fecha_nac": "12-07-1970"
+  },
+  "historia_clinica": "{{-730}} Oftalmólogo: retinopatía diabética no proliferativa en ambos ojos; fotocoagulación con láser.\r\n{{-300}} Nefrólogo: enfermedad renal crónica etapa 3a por nefropatía diabética. Ajusta la dosis de metformina y mantiene losartán.\r\n{{-60}} Médico de familia, control cardiovascular: refiere zumbido en ambos oídos y dificultad para entender en grupo. Otoscopía normal. Deriva a otorrinolaringología.\r\n{{-15}} Otorrinolaringólogo: otoscopía normal bilateral. Solicita audiometría con logoaudiometría y emisiones otoacústicas."
+ }
+}

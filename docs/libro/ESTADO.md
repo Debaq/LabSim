@@ -56,6 +56,12 @@ Cerrados el 2026-10-16 (producción reproyectada, pacientes 34 y 41, H8, H10):
 STAT terminó en un cambio del modelo: "LDL: la tolerancia es del paciente".
 
 ### Errores del simulador detectados
+- **ISO 7029 (por verificar, 2026-10-16):** `CaseProfile::ISO7029_COEF`
+  (p. ej. 4 kHz hombre 11,3·10⁻³, 1 kHz 3,5·10⁻³) no coincide con la tabla de
+  ISO 7029:2000 que se recuerda (16·10⁻³ y 4,0·10⁻³). Sin fuente documentada
+  en decisiones.md. Es el piso de audición normal por edad de todo el
+  simulador: confirmar con la norma antes de tocarlo. El cap. 5 no da
+  medianas numéricas por esto.
 Los siete que había quedaron arreglados (2026-10-15); qué se decidió en cada
 uno está en `docs/decisiones.md`, "Errores del simulador detectados al
 escribir el libro". Para usar en los capítulos: `fig.abr()` ya elige
