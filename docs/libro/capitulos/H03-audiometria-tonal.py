@@ -19,7 +19,8 @@ CASOS = [
     # Las tres lecturas del gap: conductiva, sensorioneural y mixta
     demo(34, [fig.audiograma(ldl=False)]),
     demo(36, [fig.audiograma(ldl=False)]),
-    demo(41, [fig.audiograma(ldl=False)]),
+    # Luis va primero en el texto: el 2.º audiograma (con LDL) es la "radiografía de un audiograma"
+    demo(41, [fig.audiograma(ldl=False), fig.audiograma(ldl=True)]),
     # Sin respuesta y curva sombra (el porqué de H4)
     demo(42, [fig.audiograma(sin_enmascarar=True, ldl=False)]),
     # Ocupacional: la muesca
