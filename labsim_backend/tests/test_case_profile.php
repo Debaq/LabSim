@@ -1183,6 +1183,18 @@ t_eq(CaseProfile::SCENARIOS['normal']['sn_scale'], [0.0, 0.0],
     'Ni con escala: no hay variabilidad que sortear');
 t_close(array_sum(array_map('floatval', CaseProfile::ageNorm(17, 0))), 0.0, 0.001,
     'Bajo los 18 la mediana por edad es 0 en todas las frecuencias');
+// ISO 7029:2017, tabla 1: alfa * (edad - 18)^beta. Valores a los 70 años
+// calculados a mano desde la tabla.
+t_close(CaseProfile::ageNorm(70, 0)[4000], 33.2, 0.15, 'ISO 7029:2017: hombre de 70, 4 kHz ~33 dB');
+t_close(CaseProfile::ageNorm(70, 1)[4000], 27.0, 0.15, 'ISO 7029:2017: mujer de 70, 4 kHz ~27 dB');
+t_close(CaseProfile::ageNorm(70, 0)[8000], 50.0, 0.15, 'ISO 7029:2017: hombre de 70, 8 kHz ~50 dB');
+t_close(CaseProfile::ageNorm(70, 1)[1000], 14.4, 0.15, 'ISO 7029:2017: mujer de 70, 1 kHz ~14 dB');
+t_eq(CaseProfile::ageNorm(95, 0), CaseProfile::ageNorm(80, 0), 'Sobre los 80 se usa la mediana de los 80 (límite de la norma)');
+t_true(CaseProfile::ageNorm(40, 0)[4000] > CaseProfile::ageNorm(40, 1)[4000],
+    'Los agudos se deterioran antes en hombres');
+$genIso = (string) @file_get_contents(dirname(__DIR__) . '/public/js/case/generator.js');
+t_true(strpos($genIso, 'Math.pow(delta, c[idx][1])') !== false && strpos($genIso, 'ISO7029_EDAD_MAX') !== false,
+    'El generador JS usa la misma fórmula de potencia y el mismo tope de edad');
 
 // El ruido por frecuencia va solo donde hay lesión: con el ruido en todas,
 // el redondeo a 5 (que no baja de 0) dejaba 5-15 dB sueltos en oídos sanos.

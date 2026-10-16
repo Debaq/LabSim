@@ -679,6 +679,7 @@ window.CASE_CONST = <?= json_encode([
     'warnTympNoGapDb' => CaseProfile::WARN_TYMP_NO_GAP_DB,
     'iso7029' => CaseProfile::ISO7029_COEF,
     'iso7029EdadBase' => CaseProfile::ISO7029_EDAD_BASE,
+    'iso7029EdadMax' => CaseProfile::ISO7029_EDAD_MAX,
     'autoModules' => CaseProfile::AUTO_MODULES,
     'ldlToleranciaPesos' => CaseProfile::LDL_TOLERANCIA_PESOS,
     'decayModes' => array_keys(CaseProfile::DECAY_FREQ_IDX),

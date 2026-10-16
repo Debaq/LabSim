@@ -335,40 +335,53 @@ final class CaseProfile
     ];
 
     /**
-     * Umbral mediano por edad y sexo -- ISO 7029.
+     * Umbral mediano por edad y sexo -- ISO 7029:2017.
      *
-     * La norma da la desviación mediana del umbral respecto de un adulto
-     * joven otológicamente normal, como `a * (edad - 18)^2` con un
-     * coeficiente por frecuencia distinto para hombres y mujeres (los agudos
-     * se deterioran antes y más rápido en hombres). Debajo de los 18 la
-     * desviación es 0.
+     * La norma da la desviación mediana del umbral respecto de la mediana de
+     * los 18 años, en personas otológicamente normales, como
+     * `alfa * (edad - 18)^beta` (fórmula 1 y tabla 1 de ISO 7029:2017), con
+     * alfa y beta por frecuencia y distintos para hombres y mujeres. Debajo
+     * de los 18 la desviación es 0. La norma vale hasta los 80 años (a partir
+     * de 3 kHz, sobre los 70 es solo informativa); más allá se usa la de 80.
+     *
+     * POR QUÉ ESTA EDICIÓN (2026-10-16): hasta acá había coeficientes
+     * cuadráticos (`a * (edad - 18)^2`) que no eran de ninguna edición de la
+     * norma ni tenían fuente: a los 70 años daban menos pérdida que la
+     * ISO 7029:2000 y que la 2017 en todas las frecuencias (4 kHz mujer: 16 dB
+     * contra 27 de la 2017; 8 kHz hombre: 37 contra 50). La 2017 es la
+     * vigente (reemplazó a la 2000) y cambió el modelo cuadrático por esta
+     * potencia, con más datos y hasta los 80 años. Ver docs/decisiones.md,
+     * "ISO 7029:2017 para la audición normal por edad".
      *
      * Está acá porque "normal" no es un audiograma plano en 0 para todo el
      * mundo: un niño de 10 que oye bien da 0 dB en todas las frecuencias, y
      * un hombre de 70 que también oye bien --normal PARA SU EDAD-- llega a
-     * 30 dB en 4 kHz. Generar los dos iguales le enseñaba al alumno una
+     * unos 33 dB en 4 kHz. Generar los dos iguales le enseñaba al alumno una
      * normalidad que no existe, y hacía imposible el ejercicio de decidir si
      * una presbiacusia es más de lo esperable para la edad.
      *
      * Se suma como piso a TODOS los cuadros, no solo al normal: un señor de
      * 70 con una otitis media tiene la otitis Y su presbiacusia.
      *
-     * Coeficientes x10^-3, [hombre, mujer].
+     * Hz => [[alfa, beta] hombre, [alfa, beta] mujer]. La tabla también trae
+     * 750 y 1500 Hz; LabSim no las usa.
      */
     public const ISO7029_COEF = [
-        125  => [3.00,  3.00],
-        250  => [3.00,  3.00],
-        500  => [3.55,  3.55],
-        1000 => [3.50,  3.50],
-        2000 => [5.35,  4.40],
-        3000 => [8.60,  5.60],
-        4000 => [11.30, 6.00],
-        6000 => [11.90, 8.85],
-        8000 => [13.50, 10.50],
+        125  => [[2.50e-6, 3.841], [6.16e-4, 2.451]],
+        250  => [[1.39e-4, 2.832], [3.98e-4, 2.568]],
+        500  => [[4.59e-4, 2.537], [2.61e-4, 2.708]],
+        1000 => [[7.02e-4, 2.494], [2.21e-4, 2.805]],
+        2000 => [[1.56e-3, 2.404], [3.12e-4, 2.792]],
+        3000 => [[2.54e-3, 2.350], [4.88e-4, 2.728]],
+        4000 => [[3.40e-3, 2.325], [7.37e-4, 2.660]],
+        6000 => [[4.53e-3, 2.315], [1.47e-3, 2.539]],
+        8000 => [[5.06e-3, 2.328], [2.53e-3, 2.439]],
     ];
 
     /** Edad desde la cual ISO 7029 empieza a contar la desviación. */
     public const ISO7029_EDAD_BASE = 18;
+    /** Edad máxima de la norma (ISO 7029:2017): más allá se usa esta. */
+    public const ISO7029_EDAD_MAX = 80;
 
     /**
      * Umbral mediano esperable a esta edad, por frecuencia (dB HL).
@@ -379,13 +392,14 @@ final class CaseProfile
      */
     public static function ageNorm(int $edad, int $gender): array
     {
+        $edad = min($edad, self::ISO7029_EDAD_MAX);
         $delta = max(0, $edad - self::ISO7029_EDAD_BASE);
-        $cuadrado = $delta * $delta;
         $idx = $gender === 1 ? 1 : 0;
 
         $out = [];
         foreach (self::ISO7029_COEF as $hz => $coef) {
-            $out[$hz] = round($coef[$idx] * 0.001 * $cuadrado, 1);
+            [$alfa, $beta] = $coef[$idx];
+            $out[$hz] = $delta > 0 ? round($alfa * ($delta ** $beta), 1) : 0.0;
         }
         return $out;
     }

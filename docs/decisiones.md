@@ -6104,3 +6104,32 @@ mixta, adaptación de audífonos, algiacusia; más el STAT).
   (38) 110, así el STAT se hace (positivo y negativo); Hernán (36) 100, le
   molesta y no hay STAT; 33: 95, 34: 105, 35: 110, 37: 115, 40: 105,
   41: 100, 42: 120. El resto, sorteado con semilla por id.
+
+## ISO 7029:2017 para la audición normal por edad (2026-10-16)
+
+`CaseProfile::ageNorm()` (y su espejo `normaEdad()` en case/generator.js)
+usaba `a * (edad - 18)^2` con coeficientes que no eran de ninguna edición de
+ISO 7029 ni tenían fuente documentada. Comparados a los 70 años, daban menos
+pérdida que la norma en todas las frecuencias, sobre todo en mujeres y en
+agudos:
+
+| 70 años, dB | 1 kHz H/M | 2 kHz H/M | 4 kHz H/M | 8 kHz H/M |
+|---|---|---|---|---|
+| ISO 7029:2017 | 13 / 14 | 21 / 19 | 33 / 27 | 50 / 39 |
+| ISO 7029:2000 | 11 / 11 | 19 / 16 | 43 / 24 | 60 / 41 |
+| LabSim antes | 10 / 10 | 15 / 12 | 31 / 16 | 37 / 28 |
+
+Él pidió pasar a la norma vigente: **ISO 7029:2017**, fórmula 1 y tabla 1,
+`alfa * (edad - 18)^beta` con alfa y beta por frecuencia y sexo; válida de
+18 a 80 años (desde 3 kHz, sobre 70 es informativa); sobre 80 se usa la
+mediana de los 80. La razón queda también en el docblock de
+`ISO7029_COEF`. Tests: valores a los 70 calculados a mano desde la tabla y
+la misma fórmula en el JS.
+
+Alcance: solo los casos que se generen desde ahora. Los guardados
+(producción, pacientes de práctica, casos del libro ya armados) conservan su
+audiograma.
+
+Fuente: ISO 7029:2017 Acoustics — Statistical distribution of hearing
+thresholds related to age and gender, tabla 1 (vista previa pública de
+iTeh Standards).

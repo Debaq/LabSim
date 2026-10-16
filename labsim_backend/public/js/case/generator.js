@@ -18,6 +18,7 @@
     var GRADE_FREQS = window.CASE_CONST.gradeFreqs;
     var ISO7029 = window.CASE_CONST.iso7029;
     var ISO7029_EDAD_BASE = window.CASE_CONST.iso7029EdadBase;
+    var ISO7029_EDAD_MAX = window.CASE_CONST.iso7029EdadMax || 80;
     var FREQS = window.CASE_CONST.freqs;
     var AUTO_MODULES = window.CASE_CONST.autoModules;
     var VEMP_SUBTIPOS = window.CASE_CONST.vempSubtipos || [];
@@ -208,13 +209,14 @@
      * Misma fórmula que CaseProfile::ageNorm -- si se toca una, tocar la otra.
      */
     function normaEdad() {
-        var delta = Math.max(0, edadActual() - ISO7029_EDAD_BASE);
-        var cuadrado = delta * delta;
+        // ISO 7029:2017: alfa * (edad - 18)^beta, hasta los 80 años
+        var edad = Math.min(edadActual(), ISO7029_EDAD_MAX);
+        var delta = Math.max(0, edad - ISO7029_EDAD_BASE);
         var idx = generoActual() === 1 ? 1 : 0;
         var out = {};
         FREQS.forEach(function (hz) {
             var c = ISO7029[hz];
-            out[hz] = c ? c[idx] * 0.001 * cuadrado : 0;
+            out[hz] = c && delta > 0 ? c[idx][0] * Math.pow(delta, c[idx][1]) : 0;
         });
         return out;
     }
