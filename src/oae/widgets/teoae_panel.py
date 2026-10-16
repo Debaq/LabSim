@@ -1,18 +1,22 @@
 """Panel TEOAE.
 
-Izquierda: controles (nivel dB SPL, # promedios, oído OD/OI, botón Iniciar).
+Izquierda: controles (nivel dB SPL, modo del click, # promedios, oído
+OD/OI, botón Iniciar).
 Derecha: GraphicsLayoutWidget con 3 gráficos principales + 2 secundarios:
   - Respuesta: forma de onda promediada completa
   - A / B: buffers split para chequeo visual de reproducibilidad
   - Fourier: espectro FFT con bandas marcadas
   - SNR por banda + umbral, y resultado PASS/REFER
 """
+import random
+
 import numpy as np
 import pyqtgraph as pg
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QComboBox,
     QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
@@ -59,6 +63,7 @@ class TeoaePanel(QWidget):
         self.case_od = None
         self.case_oi = None
         self._last_level = None
+        self._last_mode = None
         self._last_n = None
         # Resumen + captura de pantalla POR OÍDO para el informe: el panel
         # muestra un oído a la vez, así que sin esto el informe solo podría
@@ -86,10 +91,18 @@ class TeoaePanel(QWidget):
         form = QFormLayout(params)
         self.spn_level = QDoubleSpinBox()
         self.spn_level.setRange(40.0, 90.0)
-        self.spn_level.setValue(float(self.generator.normative["default_level_db_spl"]))
+        # Nivel y modo arrancan al azar: elegirlos es parte del examen, y un
+        # valor fijo de fábrica es la respuesta regalada.
+        self.spn_level.setValue(float(random.randint(50, 88)))
         self.spn_level.setSuffix(" dB SPL")
         self.spn_level.setSingleStep(1.0)
         form.addRow("Nivel click:", self.spn_level)
+
+        self.cmb_mode = QComboBox()
+        self.cmb_mode.addItem("No lineal", "no_lineal")
+        self.cmb_mode.addItem("Lineal", "lineal")
+        self.cmb_mode.setCurrentIndex(random.randrange(self.cmb_mode.count()))
+        form.addRow("Modo click:", self.cmb_mode)
 
         self.spn_n = QSpinBox()
         self.spn_n.setRange(50, 2000)
@@ -323,7 +336,8 @@ class TeoaePanel(QWidget):
         ear, case = self._current_case()
         if case is None:
             return
-        self._pending = (ear, case, self.spn_level.value(), self.spn_n.value())
+        self._pending = (ear, case, self.spn_level.value(), self.spn_n.value(),
+                         self.cmb_mode.currentData())
         self.lbl_status.setText("Chequeando sonda...")
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
@@ -337,9 +351,10 @@ class TeoaePanel(QWidget):
     def _run_capture(self):
         if self._pending is None:
             return
-        ear, case, level, n = self._pending
+        ear, case, level, n, mode = self._pending
         self._pending = None
         self._last_level = level
+        self._last_mode = mode
         self._last_n = n
         self.probe.stop()
         # Duración = # barridos / tasa de clicks, con tope para no dejar al
@@ -347,7 +362,8 @@ class TeoaePanel(QWidget):
         duration_s = min(n / self.SWEEP_RATE_HZ, self.MAX_ANIM_S)
         n_frames = int(np.clip(duration_s * 1000 / self.ANIM_TICK_MS, 8, 400))
         result = self.generator.generate(
-            level_db=level, n_sweeps=n, ear=ear, case=case, n_frames=n_frames
+            level_db=level, n_sweeps=n, ear=ear, case=case, n_frames=n_frames,
+            mode=mode,
         )
         self._last_result = result
         self._anim_ear = ear
@@ -420,6 +436,7 @@ class TeoaePanel(QWidget):
             return mapa[i] if i < len(mapa) else None
         self._report[ear] = {
             "nivel_click_db_spl": self._last_level,
+            "modo_click": self._last_mode,
             "n_promedios": self._last_n,
             "n_barridos": int(frame.get("n_sweeps", 0)),
             "bandas": [

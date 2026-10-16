@@ -1,5 +1,5 @@
 {
-  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/soae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real. dpoae.normal_band_db es el rango normal (p5-p95 aprox.) del nivel DP por f2 que se dibuja como area verde en el DP-grama; dpoae.noise_floor_db_spl es el piso FINAL (con todos los promedios de averages_per_point): durante la captura de cada punto el piso arranca 10*log10(k_max) dB mas arriba y baja al promediar.",
+  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/soae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.expected_response_db es la respuesta a reference_level_db_spl con click no lineal (con otro nivel o en lineal la corre TeoaeGenerator.level_shift_db). teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real. dpoae.normal_band_db es el rango normal (p5-p95 aprox.) del nivel DP por f2 que se dibuja como area verde en el DP-grama; dpoae.noise_floor_db_spl es el piso FINAL (con todos los promedios de averages_per_point): durante la captura de cada punto el piso arranca 10*log10(k_max) dB mas arriba y baja al promediar.",
   "teoae": {
     "default": {
       "min_snr_db": 6,
@@ -18,7 +18,8 @@
       "window_ms": 20,
       "decay_ms": 8,
       "noise_floor_db_spl": 14,
-      "default_level_db_spl": 60,
+      "reference_level_db_spl": 80,
+      "analysis_start_ms": 2.5,
       "default_n_sweeps": 260,
       "stim_jitter_db": 0.3,
       "stim_jitter_tolerance_db": 3.0,

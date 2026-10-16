@@ -46,6 +46,36 @@ class TeoaeGenerator(OaeGeneratorBase):
     BANDPASS_LOW_HZ = 400.0
     BANDPASS_HIGH_HZ = 6000.0
 
+    # Modo del click. "no_lineal" es la secuencia de cuatro clicks (tres de
+    # una polaridad y uno invertido al triple de amplitud): todo lo que crece
+    # lineal con el estímulo --el click mismo y su resonancia en el conducto--
+    # se cancela, y queda la parte saturante, que es la cóclea. "lineal"
+    # promedia clicks iguales: conserva la emisión entera, pero también la
+    # cola del estímulo.
+    MODES = ("no_lineal", "lineal")
+    DEFAULT_MODE = "no_lineal"
+    # Con saturación completa la respuesta derivada por click es la mitad de
+    # la lineal ((3E - E) / 4 contra 4E / 4): 6 dB. Con una cóclea que
+    # todavía crece algo la pérdida es mayor, así que 6 es el mínimo.
+    NONLINEAR_LOSS_DB = 6.0
+    # Crecimiento de la emisión con el nivel del click (dB por dB). La
+    # TEOAE es compresiva: crece menos que el estímulo y casi se aplana
+    # arriba de la referencia. expected_response_db de la normativa es la
+    # respuesta a reference_level_db_spl en modo no lineal.
+    GROWTH_BELOW_REF = 0.4
+    GROWTH_ABOVE_REF = 0.15
+    REFERENCE_LEVEL_DB_SPL = 80.0
+    # Cola del click en modo lineal: resonancia del conducto que decae en
+    # ~0,4 ms con la sonda bien puesta y dura más con la sonda floja (el
+    # conducto abierto amortigua menos). Relativa a la presión pico.
+    RING_RATIO = 0.1
+    RING_TAU_MS = 0.4
+    RING_FREQ_HZ = 2500.0
+    # Inicio de la ventana de análisis: el equipo descarta los primeros ms,
+    # que son estímulo y no oído. Rampa coseno para no meter un escalón.
+    ANALYSIS_START_MS = 2.5
+    ANALYSIS_RAMP_MS = 0.5
+
     def __init__(self, seed: int | None = None):
         super().__init__("teoae", seed)
         self._rng = np.random.default_rng(self._seed)
@@ -86,6 +116,44 @@ class TeoaeGenerator(OaeGeneratorBase):
     # ------------------------------------------------------------------
     # Síntesis de la respuesta "limpia" (sin ruido)
     # ------------------------------------------------------------------
+    def level_shift_db(self, level_db: float, mode: str = DEFAULT_MODE,
+                       case: dict | None = None) -> float:
+        """dB que el nivel del click y el modo le suman a la emisión.
+
+        El nivel que cuenta es el que llega al conducto: con la sonda floja
+        entra menos (oae_probe_loss_db) y la cóclea responde a eso.
+        """
+        ref = float(self.normative.get("reference_level_db_spl",
+                                       self.REFERENCE_LEVEL_DB_SPL))
+        efectivo = float(level_db) - oae_probe_loss_db(case)
+        delta = efectivo - ref
+        shift = delta * (self.GROWTH_BELOW_REF if delta < 0 else self.GROWTH_ABOVE_REF)
+        if mode == "lineal":
+            shift += self.NONLINEAR_LOSS_DB
+        return shift
+
+    def _ringing(self, t: np.ndarray, level_db: float,
+                 case: dict | None) -> np.ndarray:
+        """Cola del click que el modo lineal no cancela.
+
+        Es la MISMA en los dos buffers (es el estímulo, no ruido), así que
+        sube la reproducibilidad sin que haya emisión: con la sonda floja
+        alcanza para un PASS falso en las bandas cercanas a su resonancia.
+        """
+        fit = oae_probe_fit(case)
+        fit = 1.0 if fit is None else fit
+        tau = self.RING_TAU_MS * (1.0 + 3.0 * (1.0 - fit)) * 1e-3
+        pico = 10 ** ((float(level_db) - oae_probe_loss_db(case) - 94) / 20)
+        return (pico * self.RING_RATIO * np.exp(-t / tau)
+                * np.sin(2 * np.pi * self.RING_FREQ_HZ * t))
+
+    def _analysis_gate(self, t: np.ndarray) -> np.ndarray:
+        start = float(self.normative.get("analysis_start_ms",
+                                         self.ANALYSIS_START_MS)) * 1e-3
+        ramp = self.ANALYSIS_RAMP_MS * 1e-3
+        u = np.clip((t - start) / ramp, 0.0, 1.0)
+        return 0.5 - 0.5 * np.cos(np.pi * u)
+
     def _component_levels_db(self, freqs_hz: np.ndarray,
                              case: dict | None) -> np.ndarray:
         """Nivel esperado (dB SPL) por componente, interpolado en log-frecuencia
@@ -105,13 +173,14 @@ class TeoaeGenerator(OaeGeneratorBase):
         atten = np.array([oae_attenuation_db(case, f) for f in freqs_hz])
         return interp - self.SKIRT_DB_PER_OCTAVE * (below + above) - atten
 
-    def _synth_clean(self, t: np.ndarray, case: dict | None, rng) -> np.ndarray:
+    def _synth_clean(self, t: np.ndarray, case: dict | None, rng,
+                     shift_db: float = 0.0) -> np.ndarray:
         lo = float(self.normative["spectrum_low_hz"])
         hi = float(self.normative["spectrum_high_hz"])
         n_comp = max(8, int(round(self.COMPONENTS_PER_OCTAVE * np.log2(hi / lo))))
         fc = np.logspace(np.log10(lo), np.log10(hi), n_comp)
 
-        amp = 10 ** ((self._component_levels_db(fc, case) - 94) / 20)
+        amp = 10 ** ((self._component_levels_db(fc, case) + shift_db - 94) / 20)
         fine_sd = oae_variability_db(case, self.FINE_STRUCTURE_SD_DB)
         amp = amp * 10 ** (rng.normal(0, fine_sd, n_comp) / 20)
         # N componentes de fase aleatoria dentro de una banda suman en potencia
@@ -167,7 +236,13 @@ class TeoaeGenerator(OaeGeneratorBase):
     # Análisis de un promedio parcial (un frame de la captura)
     # ------------------------------------------------------------------
     def _analyze(self, waveform, a, b, window, coherent_gain, freqs,
-                 spec_mask, clean, n_sweeps_done, noise_std, click_levels):
+                 spec_mask, clean, n_sweeps_done, noise_std, click_levels,
+                 gate=None):
+        # Lo que se muestra son los trazos enteros; lo que se analiza
+        # (espectro, SNR, reproducibilidad) arranca en la ventana del equipo.
+        shown = waveform, a, b
+        if gate is not None:
+            waveform, a, b, clean = waveform * gate, a * gate, b * gate, clean * gate
         # FFT. Ganancia coherente de la ventana Hann: para un tono puro
         # windowed, |FFT[bin]| ≈ amplitud_pa * sum(window)/2, así que hay que
         # deshacer ese factor para volver a Pascales reales antes de convertir
@@ -228,9 +303,9 @@ class TeoaeGenerator(OaeGeneratorBase):
         noise_rms_pa = noise_std / np.sqrt(max(n_sweeps_done, 1))
         return {
             "n_sweeps": int(n_sweeps_done),
-            "waveform": waveform,
-            "wave_a": a,
-            "wave_b": b,
+            "waveform": shown[0],
+            "wave_a": shown[1],
+            "wave_b": shown[2],
             "spectrum_db": spectrum_db,
             "noise_db": noise_db,
             "snr_per_band": snr_per_band,
@@ -246,14 +321,19 @@ class TeoaeGenerator(OaeGeneratorBase):
         }
 
     def generate(self, level_db: float, n_sweeps: int, ear: str = "OD",
-                 case: dict | None = None, n_frames: int = 40) -> dict:
+                 case: dict | None = None, n_frames: int = 40,
+                 mode: str = DEFAULT_MODE) -> dict:
         """Genera una 'medición' TEOAE completa.
 
         Devuelve el resultado final (mismas keys que antes: time_ms, waveform,
         wave_a/wave_b, spectrum_db, freqs, snr_per_band, ...) más "frames": la
         lista de promedios parciales, en orden, para animar la captura. El
         último frame ES el resultado final (no hay salto al terminar).
+
+        `mode`: "no_lineal" (default del protocolo) o "lineal" -- ver MODES.
         """
+        if mode not in self.MODES:
+            mode = self.DEFAULT_MODE
         # Re-seedear para que la misma (level, ear, n_sweeps) → misma curva
         # entre capturas (consistente visualmente), pero distinta entre oídos
         # y entre niveles.
@@ -267,7 +347,11 @@ class TeoaeGenerator(OaeGeneratorBase):
         t = np.arange(n_samples) / fs
         n_sweeps = max(2, int(n_sweeps))
 
-        clean = self._synth_clean(t, case, rng)
+        clean = self._synth_clean(t, case, rng,
+                                  self.level_shift_db(level_db, mode, case))
+        if mode == "lineal":
+            clean = clean + self._ringing(t, level_db, case)
+        gate = self._analysis_gate(t)
 
         # Ruido de canal por barrido. Al promediar k barridos baja ~1/sqrt(k):
         # eso es lo que hace que la captura "se construya" en pantalla. El
@@ -310,7 +394,7 @@ class TeoaeGenerator(OaeGeneratorBase):
             waveform = clean + cum_all[k - 1] / k
             frames.append(self._analyze(waveform, a, b, window, coherent_gain,
                                         freqs, spec_mask, clean, k, noise_std,
-                                        click_levels))
+                                        click_levels, gate))
 
         result = dict(frames[-1])
         result.update({
@@ -318,6 +402,7 @@ class TeoaeGenerator(OaeGeneratorBase):
             "freqs": freqs[spec_mask],
             "n_bands": len(self.normative["bands_hz"]),
             "n_sweeps_total": n_sweeps,
+            "mode": mode,
             "frames": frames,
         })
         return result

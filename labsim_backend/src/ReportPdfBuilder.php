@@ -435,8 +435,11 @@ final class ReportPdfBuilder
     private static function teoaeLines(array $r): array
     {
         $veredicto = !empty($r['overall_pass']) ? 'PASS' : 'REFER';
+        // Informes anteriores al selector no traen el modo.
+        $modo = ['no_lineal' => ' no lineal', 'lineal' => ' lineal'][$r['modo_click'] ?? ''] ?? '';
         $lineas = [sprintf(
-            'Click %s dB SPL | %s promedios (%s barridos) | %s: %d/%d bandas sobre criterio',
+            'Click%s %s dB SPL | %s promedios (%s barridos) | %s: %d/%d bandas sobre criterio',
+            $modo,
             self::num($r['nivel_click_db_spl'] ?? null),
             self::num($r['n_promedios'] ?? null),
             self::num($r['n_barridos'] ?? null),
