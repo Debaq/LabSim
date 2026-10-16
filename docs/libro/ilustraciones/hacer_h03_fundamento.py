@@ -6,6 +6,7 @@ no IA: son esquemas exactos, con los números de sus fuentes.
     h03-funcion-psicometrica.svg el umbral como probabilidad de detección
     h03-hl-spl.svg              el cero audiométrico: dB SPL contra dB HL
     h03-metodo-ascendente.svg   la escalera de 10 abajo / 5 arriba
+    h03-metodos-umbral.svg      las cuatro formas de buscar el umbral (D: la del laboratorio)
     h03-tonotopia.svg           dónde cae cada frecuencia del audiograma
 
 Fuentes de los números:
@@ -323,6 +324,70 @@ def ascendente():
     c.guardar('h03-metodo-ascendente.svg')
 
 
+def _escalera(c, x0, y0, ancho, alto, seq, umbral, titulo, sub, notas, db_min=10, db_max=40):
+    """Un panel de búsqueda de umbral: tonos en orden, respuesta o no, el
+    paso entre tonos y la línea del umbral."""
+    Y = lambda db: y0 + alto - (db - db_min) / (db_max - db_min) * alto
+    n = len(seq)
+    paso = (ancho - 60) / max(n - 1, 1)
+    X = lambda i: x0 + 40 + i * paso
+    c.t(x0, y0 - 30, titulo, 9.5, TINTA, 'start', 700)
+    c.t(x0, y0 - 17, sub, 7.4, TENUE, 'start')
+    for db in range(db_min, db_max + 1, 5):
+        c.linea(x0 + 26, Y(db), x0 + ancho, Y(db), FUERTE if db % 10 == 0 else GRILLA, 0.6)
+        if db % 10 == 0:
+            c.t(x0 + 20, Y(db) + 3, db, 7, TENUE, 'end')
+    c.linea(x0 + 26, Y(umbral), x0 + ancho, Y(umbral), VERDE, 1.3, '5 3')
+    for i in range(n - 1):
+        (a, _), (b, _) = seq[i], seq[i + 1]
+        if a == b:
+            c.t((X(i) + X(i + 1)) / 2, Y(a) - 7, 'otra vez', 6.4, TENUE, 'middle', 700)
+            continue
+        baja = b < a
+        col = OD if baja else AZUL
+        c.linea(X(i) + 4, Y(a) + (4 if baja else -4), X(i + 1) - 4, Y(b) - (5 if baja else -5), col, 1.2,
+                punta='p-od' if baja else 'p-azul')
+        c.t((X(i) + X(i + 1)) / 2 + (11 if baja else -9), (Y(a) + Y(b)) / 2 + (2 if baja else -3),
+            f'{b - a:+d}'.replace('-', '−'), 6.4, col, 'start' if baja else 'end', 700)
+    for i, (db, r) in enumerate(seq):
+        circulo(c, X(i), Y(db), 4, VERDE if r else TINTA, lleno=r)
+    for k, nota in enumerate(notas):
+        c.t(x0, y0 + alto + 18 + k * 12, nota, 7.4, VERDE if k == len(notas) - 1 else TINTA, 'start',
+            700 if k == len(notas) - 1 else 400)
+
+
+def metodos_umbral():
+    """Las cuatro formas de buscar el umbral, cada una con un ejemplo que
+    llega a 25 dB HL. La combinada acortada es la del laboratorio (ejemplo
+    de la experta del equipo, 2026-10-16)."""
+    c = Lienzo(680, 500)
+    w, h = 300, 120
+    _escalera(c, 20, 82, w, h,
+              [(40, True), (30, True), (20, False), (25, True), (15, False), (20, False), (25, True),
+               (15, False), (20, False), (25, True)], 25,
+              'A · Ascendente (Hughson-Westlake, ASHA/ISO)', 'baja 10 si responde, sube 5 si no',
+              ['el umbral se juzga solo subiendo', '25 dB: responde en 3 de 3 ascensos'])
+    _escalera(c, 360, 82, w, h,
+              [(40, True), (35, True), (30, True), (25, True), (20, False)], 25,
+              'B · Descendente', 'baja de 5 en 5 hasta que deja de responder',
+              ['riesgo: sigue respondiendo por inercia', 'umbral: la última respuesta, 25 dB'])
+    _escalera(c, 20, 318, w, h,
+              [(10, False), (15, False), (20, False), (25, True), (30, True), (25, True), (20, False),
+               (25, True)], 25,
+              'C · Horquilla', 'sube y baja de 5 en 5 alrededor del umbral',
+              ['se acerca desde abajo y desde arriba', 'umbral: donde coinciden, 25 dB'])
+    _escalera(c, 360, 318, w, h,
+              [(40, True), (30, True), (20, False), (20, False), (25, True), (25, True)], 25,
+              'D · Combinada acortada (la del laboratorio)', 'baja 10 si responde, sube 5 si no; repite al mismo nivel',
+              ['en 20, dos sin respuesta: ya no llega a 2 de 3', 'en 25, dos respuestas: umbral 25 dB'])
+    circulo(c, 470, 18, 4, VERDE, True)
+    c.t(479, 21, 'respondió', 7.6, TINTA, 'start')
+    circulo(c, 545, 18, 4, TINTA)
+    c.t(554, 21, 'no respondió', 7.6, TINTA, 'start')
+    c.t(20, 22, 'Cuatro formas de buscar el umbral', 10.5, TINTA, 'start', 700)
+    c.guardar('h03-metodos-umbral.svg')
+
+
 # ---------------------------------------------------------------------------
 # 5. Tonotopía (Greenwood)
 def desde_base(f):
@@ -380,4 +445,5 @@ if __name__ == '__main__':
     psicometrica()
     hl_spl()
     ascendente()
+    metodos_umbral()
     tonotopia()
