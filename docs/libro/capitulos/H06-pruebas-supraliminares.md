@@ -2,9 +2,11 @@
 
 :::objetivos En esta herramienta
 - Explicar qué es el reclutamiento y qué es la adaptación patológica, y por qué el primero apunta a la cóclea y la segunda al nervio.
+- Explicar, desde la fisiología de la cóclea y del nervio, por qué funciona cada prueba.
 - Elegir qué prueba hacer según el audiograma y comprobar que se cumplen sus requisitos.
 - Hacer el Fowler, el SISI, el Carhart, el Rosenberg y el STAT con la instrucción correcta y el oído contrario enmascarado cuando hace falta.
 - Sospechar una pérdida no orgánica con la concordancia SRT-PTA y confirmarla con el Stenger.
+- Hacer la acufenometría: tipo de sonido, frecuencia, intensidad, nivel mínimo de enmascaramiento e inhibición residual.
 - Anotar los resultados e interpretarlos en conjunto, nunca de a una prueba.
 :::
 
@@ -12,15 +14,18 @@ La audiometría tonal dice **cuánto** oye cada oído. Las pruebas supraliminare
 
 ## Para qué sirve
 
-Las pruebas supraliminares responden tres preguntas:
+Esta herramienta responde cuatro preguntas:
 
 1. **¿Hay reclutamiento?** ¿La sonoridad crece más rápido de lo normal? Apunta a la **cóclea**. Fowler, IWA y SISI.
 2. **¿Hay adaptación patológica?** ¿El oído deja de oír un tono que sigue sonando? Apunta al **VIII par**. Carhart, Rosenberg y STAT.
 3. **¿La pérdida es real?** Concordancia SRT-PTA y Stenger.
+4. **¿Cómo es el acúfeno?** Qué tipo de sonido es, en qué frecuencia, cuán fuerte, con cuánto ruido se tapa y si queda tapado un rato después. Acufenometría.
 
-No son de rutina. Se piden ante una **asimetría sensorioneural** (15 dB o más entre los oídos en una o más frecuencias, sin causa conocida), un **acúfeno unilateral** persistente o una **discriminación que no calza con la curva** (→ H5). También son parte de la evaluación médico-legal de los trabajadores: la guía del ISP incluye el Fowler (ABLB), el SISI, la IWA, el Carhart y el STAT como pruebas de sitio de lesión, y el Stenger entre las de pseudohipoacusia (ISP, 2012).
+Las supraliminares no son de rutina. Se piden ante una **asimetría sensorioneural** (15 dB o más entre los oídos en una o más frecuencias, sin causa conocida), un **acúfeno unilateral** persistente o una **discriminación que no calza con la curva** (→ H5). También son parte de la evaluación médico-legal de los trabajadores: la guía del ISP incluye el Fowler (ABLB), el SISI, la IWA, el Carhart y el STAT como pruebas de sitio de lesión, y el Stenger entre las de pseudohipoacusia (ISP, 2012).
 
-Tienen dos límites. Son **conductuales**: dependen de que el paciente entienda y coopere. Y ya no diagnostican: la resonancia ve tumores que todavía no alteran ninguna prueba. Su valor está en que se hacen en el box y ayudan a decidir **quién** necesita estudiarse más (→ cap. 11).
+La acufenometría tiene su propia indicación, el acúfeno, y va en esta herramienta porque se hace en el mismo momento de la batería, con los mismos mandos del audiómetro y con la misma lógica: comparar un sonido externo con lo que el paciente siente.
+
+Las pruebas supraliminares tienen dos límites. Son **conductuales**: dependen de que el paciente entienda y coopere. Y ya no diagnostican: la resonancia ve tumores que todavía no alteran ninguna prueba. Su valor está en que se hacen en el box y ayudan a decidir **quién** necesita estudiarse más (→ cap. 11).
 
 :::sabias ¿Sabías que?
 El artículo en que Fowler (1936) describió el balance de sonoridad se titulaba "Un método para la detección temprana de la otoesclerosis". Comparando sonidos muy por encima del umbral, vio que en algunos oídos con pérdida la sonoridad terminaba alcanzando a la del oído sano, y en otros no. Lo que buscaba para la otoesclerosis terminó separando la cóclea de todo lo demás.
@@ -28,21 +33,105 @@ El artículo en que Fowler (1936) describió el balance de sonoridad se titulaba
 
 ## Fundamento
 
-### Reclutamiento: la sonoridad que se pone al día
+Las pruebas supraliminares no buscan umbrales: miden **cómo responde el oído cuando ya oye**. Para entender por qué una cóclea dañada y un nervio comprimido se comportan al revés sobre el umbral hay que mirar cuatro cosas: cómo crece la sonoridad, qué hace el amplificador coclear, cómo sostiene el nervio su descarga y cómo junta el cerebro lo que llega por los dos oídos.
 
-Las células ciliadas externas amplifican los sonidos suaves unos 40 a 50 dB y casi nada los fuertes. Esa **compresión** es la que permite que un oído sano maneje un rango enorme de intensidades (Robles y Ruggero, 2001; Dallos, 2008). → B2.
+### La sonoridad: cuánto suena, no cuánto mide
 
-Cuando las células ciliadas externas se dañan, se pierde la ganancia de lo suave y el umbral sube, pero lo fuerte, que casi no se amplificaba, llega casi igual que antes. Entre el umbral y la molestia la sonoridad tiene que crecer en menos decibeles: **crece más rápido**. Eso es el reclutamiento.
+La **sonoridad** es lo fuerte que el paciente *siente* un sonido. No es la intensidad: es lo que la vía auditiva hace con ella, y no se lee en ningún instrumento. Solo se puede preguntar o **comparar**, que es lo que hacen el Fowler, la IWA y la acufenometría. En un oído sano la sonoridad crece con el nivel desde el umbral hasta la molestia, a lo largo de unos 100 dB; en el rango medio, unos 10 dB más suenan como "el doble de fuerte" (Stevens, 1957). → B4.
 
-Se nota en todo lo que se mide sobre el umbral: el **LDL** queda casi normal y el campo dinámico se estrecha (→ H5); el oído nota **cambios de 1 dB** (SISI); el **reflejo estapedial** aparece a poco nivel sobre el umbral (fenómeno de Metz, → H7). El paciente cuenta que los ruidos fuertes le molestan y que las voces suenan "raras" por ese oído.
+Cien decibeles son una razón de diez mil millones en energía, y ninguna fibra del nervio cubre ese rango: cada una pasa de su descarga espontánea a su descarga máxima en unas pocas decenas de decibeles (Pickles, 2013). El oído lo resuelve repartiendo el rango entre fibras de distinta sensibilidad y, antes de eso, **comprimiendo** el sonido en la cóclea.
 
-En una lesión del nervio, la cóclea amplifica bien y lo que falla es la transmisión. No hay compresión perdida que recuperar: **no hay reclutamiento**.
+### El amplificador coclear comprime
 
-### Adaptación: el tono que se apaga
+El órgano de Corti tiene una fila de células ciliadas internas y tres de externas (→ B3). Las **internas** transducen: de ellas sale casi toda la información que viaja por el nervio. Las **externas** casi no informan al cerebro; su trabajo es mecánico. Con la **prestina** de su membrana se acortan y se alargan al ritmo del sonido y empujan la membrana basilar justo en el lugar que corresponde a esa frecuencia (Zheng y cols., 2000; Dallos, 2008). → B2.
 
-Toda fibra del nervio auditivo **se adapta**: al empezar un tono descarga muy rápido y en milisegundos baja a un ritmo sostenido, que mantiene mientras el tono dure (Westerman y Smith, 1984). Esa adaptación normal no se percibe como pérdida del sonido (Pérez-González y Malmierca, 2014).
+Ese empuje es una ganancia que **depende del nivel**: a los sonidos suaves les suma unos 40 a 50 dB y a los fuertes casi nada (Robles y Ruggero, 2001; Dallos, 2008). Cerca del umbral la membrana se mueve casi tanto como sube el estímulo; en el rango medio, mucho menos. Eso es la **compresión**: hace que un rango enorme de intensidades quepa en el de las fibras y que la sonoridad crezca pareja desde el umbral hasta la molestia. El mismo mecanismo afina cada lugar de la cóclea a una banda estrecha de frecuencias.
 
-Cuando un tumor comprime el nervio, las fibras dañadas no logran sostener la descarga: la respuesta se agota y el tono **desaparece aunque siga sonando**. Eso es el **deterioro tonal** patológico. En la cóclea, en cambio, la fibra que recibe señal la sostiene: el tono se oye todo el minuto o se pierde poco.
+Cuando el amplificador se apaga, la respuesta de la membrana cae mucho con los estímulos suaves y poco con los fuertes. En la chinchilla, un diurético que bloquea la transducción de las células ciliadas redujo la vibración de la membrana sobre todo a niveles bajos (Ruggero y Rich, 1991). Esa asimetría es el reclutamiento.
+
+### Reclutamiento: cuando se pierde la compresión
+
+Las células ciliadas externas son las más vulnerables al ruido, a los ototóxicos y a la edad (→ B3). Cuando se dañan:
+
+- **El umbral sube**, porque los sonidos suaves pierden la ganancia que los hacía audibles.
+- **Lo fuerte llega casi igual**, porque a ese nivel el amplificador casi no aportaba.
+- Entre un umbral más alto y una molestia que casi no se movió, la sonoridad tiene que recorrer el mismo camino en menos decibeles: **crece más rápido**. Eso es el **reclutamiento** (Moore, 2007).
+
+:::imagen ilustraciones/h06-sonoridad.svg Cómo crece la sonoridad. A: el oído normal oye desde 10 dB y le molesta a 110; el coclear oye desde 45, sube empinado y alcanza al normal a 70 dB; el retrococlear sube paralelo y no lo alcanza. 50 dB en el normal, 65 en el coclear y 85 en el retrococlear suenan igual. B: las mismas curvas leídas como escaleras del Fowler. Esquema con las cifras de la tabla del Fowler, no datos de un paciente.
+:::
+
+Se nota en todo lo que se mide sobre el umbral. El **LDL** casi no se mueve y el campo dinámico se estrecha (→ H5): Patricia, más abajo, oye por el OI desde 50 dB en 500 Hz y le molesta a 110, igual que por el OD, que oye desde 5; le quedan 60 dB de campo contra 105. El oído nota **cambios de 1 dB** (SISI). El **reflejo estapedial** aparece a poco nivel sobre el umbral (fenómeno de Metz, → H7). Y como se pierde también la sintonía fina, el paciente cuenta que los ruidos fuertes le molestan, que entiende peor con ruido y que las voces suenan "raras" por ese oído.
+
+El LDL de un oído sano **no es un número fijo**: es la tolerancia de cada persona, y cambia mucho de una a otra (→ H5). El reclutamiento no lo baja; lo **conserva** aunque el umbral suba. Por eso se lee comparando los dos oídos del mismo paciente, no contra una cifra.
+
+La ganancia que se pierde con las células ciliadas externas es de unos 40 a 50 dB. Una pérdida mayor ya no se explica solo por ellas: suelen estar dañadas también las internas o las fibras, y el reclutamiento puede quedar incompleto (Moore, 2007).
+
+En una lesión del **nervio** la historia es otra. La cóclea amplifica y comprime bien; la señal sale normal y se pierde en el camino, como si pasara por un atenuador. La sonoridad crece al ritmo normal, pero desde un umbral más alto: **nunca alcanza** a la del oído sano, y el LDL sube junto con el umbral o no aparece (a Raúl, más abajo, el LDL del OD le sube a 120 dB en 3 y 4 kHz). **No hay reclutamiento.** Una pérdida conductiva hace algo parecido por otra razón: atenúa por igual lo suave y lo fuerte (→ H5).
+
+### Notar un cambio de 1 dB
+
+El SISI no pregunta cuánto suena, sino si el paciente nota que el sonido **cambió**. El menor cambio de intensidad que un oído sano detecta en un tono depende del nivel: cerca del umbral necesita más de 1 dB, y a niveles altos menos (Jesteadt y cols., 1977). Por eso a 20 dB SL un oído sano casi nunca nota 1 dB.
+
+En un oído coclear con 50 dB de pérdida, el portador de 20 dB SL queda en 70 dB HL. Ahí el cambio se nota mejor, y además cae sobre una sonoridad que crece rápido, donde 1 dB es un salto mayor. El SISI sale alto. No mide una habilidad "mejor" del oído coclear: aprovecha que su portador queda alto y en la zona empinada de la curva (Buus y cols., 1982).
+
+En el nervio, el portador alto no basta. Con menos fibras funcionando y una descarga menos sincrónica, los cambios pequeños llegan mal codificados y el SISI sale bajo.
+
+<!-- verificar: Buus y cols. 1982 para el efecto del nivel del portador sobre el puntaje (el resumen no lo dice); y la explicación del SISI bajo retrococlear por pérdida de fibras y de sincronía (Møller 2013, fisiopatología del nervio). -->
+
+### Adaptación normal y deterioro tonal
+
+Toda fibra del nervio auditivo **se adapta**: al empezar un tono descarga muy rápido y en milisegundos baja a un ritmo sostenido, que mantiene mientras el tono dure (Westerman y Smith, 1984). Esa adaptación normal no se percibe como pérdida del sonido: un tono continuo se sigue oyendo todo el minuto (Pérez-González y Malmierca, 2014). → B2.
+
+Cuando un tumor comprime el nervio, o la mielina está dañada, las fibras siguen conduciendo un impulso aislado, pero **no sostienen un tren de impulsos**: la descarga se agota, cae bajo lo que hace falta para percibir el tono y el tono **desaparece aunque siga sonando** (Møller, 2013). Eso es el **deterioro tonal** patológico. Si se sube el nivel, entran fibras de nuevo y el tono vuelve, pero también se agota.
+
+<!-- verificar: el agotamiento de la descarga en fibras comprimidas o desmielinizadas como mecanismo del deterioro tonal; confirmar el capítulo en Møller 2013. -->
+
+:::imagen ilustraciones/h06-adaptacion.svg La adaptación en el tiempo. A: durante un tono continuo, la fibra sana se adapta en pocos segundos y se sostiene; la del nervio comprimido se va agotando y, cuando cae bajo lo que hace falta para oír el tono, el paciente baja la mano. B: en el Carhart cada subida de 5 dB abre un minuto nuevo; en el Rosenberg hay un solo minuto y se cuenta cuánto se subió dentro de él.
+:::
+
+En la cóclea dañada, la fibra que recibe señal la sostiene. Cerca del umbral el tono depende de pocas fibras y puede apagarse algo: el Carhart de un oído coclear puede deteriorar hasta 10 a 25 dB. Pero 30 o 40 dB más arriba entra una franja ancha de la cóclea, con muchas fibras, y el tono se sostiene. Por eso el **STAT** trabaja alto (Jerger y Jerger, 1975): a 100 dB HL un oído coclear no deteriora, y un nervio enfermo se apaga igual.
+
+### Cóclea y nervio, al revés
+
+Se puede resumir así: la cóclea dañada **pierde ganancia pero transmite bien** lo que logra captar; el nervio comprimido **recibe bien pero transmite mal**. Por eso, con el mismo umbral, sobre él se comportan al revés:
+
+- La sonoridad del oído coclear **alcanza** a la del sano; la del nervio, no.
+- El oído coclear **nota** cambios de 1 dB; el del nervio, no.
+- El oído coclear **sostiene** el tono; el del nervio lo **pierde**, y más cuanto más se lo exige.
+
+:::ayuda-ancho Por qué funciona cada prueba
+| Prueba | Se apoya en | Cóclea | Nervio |
+|---|---|---|---|
+| **Fowler (ABLB)** | comparar la sonoridad del oído en estudio con la del sano | la alcanza: recluta | no la alcanza |
+| **IWA** | la ósea llega igual a las dos cócleas y el Weber va al oído que suena más fuerte | el Weber se centra al subir | sigue en el sano |
+| **SISI** | notar 1 dB depende del nivel real del portador y de qué tan rápido crece la sonoridad | portador alto, en la zona empinada: alto | cambios mal codificados: bajo |
+| **Carhart y Rosenberg** | sostener la descarga un minuto cerca del umbral | se apaga poco | se apaga: hay que subir mucho |
+| **STAT** | sostenerla a nivel alto, con muchas fibras | lo sostiene | se apaga antes del minuto |
+| **Stenger** | dos tonos iguales se funden y se oyen en el oído donde suenan más fuerte | no busca lesión | busca si la pérdida es real |
+| **Acufenometría** | comparar el acúfeno con un sonido externo | describe el acúfeno | no ubica la lesión |
+:::
+
+### Dos oídos, una sola imagen
+
+Cuando el mismo tono llega a los dos oídos, el cerebro no oye dos tonos: los **funde en uno** y lo ubica según cuál suena más fuerte. Con los dos iguales se oye al centro; si uno suena bastante más fuerte, el tono se oye **solo en ese oído**. Esa comparación entre oídos la hace el tronco, en el complejo olivar superior (→ B2). Tres pruebas se apoyan en ella:
+
+- **Fowler.** El paciente compara la sonoridad de un oído con la del otro. El oído sano hace de regla.
+- **IWA.** La vía ósea llega casi igual a las dos cócleas (→ H4), y el Weber se va al oído donde el tono **suena más fuerte**. En una pérdida sensorioneural, al sano. Si el oído dañado recluta, al subir el nivel su sonoridad alcanza a la del sano y el Weber se centra.
+- **Stenger.** El paciente oye el tono en el oído donde está **más fuerte sobre su umbral verdadero**, sin poder decidirlo (Kinstler y cols., 1972). Si ese oído es el que dice no oír, se delata no respondiendo.
+
+### El acúfeno: un sonido que arma la vía
+
+La mayoría de los acúfenos se asocia a una pérdida auditiva, por ruido o por edad (Eggermont y Roberts, 2004). Cuando una zona de la cóclea deja de mandar actividad, las neuronas centrales que la recibían no se quedan quietas: **suben su ganancia** y pierden inhibición. Su actividad espontánea aumenta y se sincroniza, y el cerebro la interpreta como un sonido (Eggermont y Roberts, 2004; Noreña, 2011). El acúfeno se genera en la vía, no en el oído que "suena".
+
+De ahí salen las reglas de la acufenometría:
+
+- **El tono del acúfeno cae casi siempre en la zona de la pérdida** (Noreña y cols., 2002). Por eso se busca en las frecuencias donde el audiograma baja.
+- **Un acúfeno con audiograma normal no contradice esto**: puede haber fibras perdidas que el audiograma no muestra (Schaette y McAlpine, 2011).
+- **Se iguala pocos dB sobre el umbral, pero eso no lo hace suave.** En un oído que recluta, pocos dB sobre el umbral ya suenan fuertes (Tyler y Conrad-Armes, 1983).
+- **Se puede tapar con ruido, incluso desde el oído contrario** (Tyler y Conrad-Armes, 1983): lo que se enmascara no es un sonido en el oído sino actividad en la vía.
+- **Puede quedar apagado un rato después del ruido.** Es la **inhibición residual**: el acúfeno queda suprimido, por lo general menos de un minuto, posiblemente porque el ruido interrumpe la actividad sincrónica anormal (Roberts, 2007).
+
+En una minoría de pacientes el acúfeno es una emisión otoacústica espontánea que el paciente oye (Penner, 1990; → H9). El acúfeno **pulsátil**, al ritmo del corazón, es otra cosa: es un sonido real, casi siempre vascular, y se deriva (→ cap. 3).
 
 ## Antes de empezar
 
@@ -59,6 +148,7 @@ No se hacen todas: se hacen las que contestan la pregunta del caso, según la p�
 | **Carhart y Rosenberg** | adaptación en el umbral | asimetría, acúfeno unilateral o discriminación que no calza; pérdida de hasta 70 dB HL | dos contiguas, de 500 a 4.000 Hz |
 | **STAT** | adaptación a nivel alto | los mismos; que el nivel de la prueba no le moleste (LDL sobre 100 dB HL; sobre 105 en 1.000 Hz) | 500, 1.000 y 2.000 Hz |
 | **Stenger** | pérdida no orgánica | pérdida de un solo oído o muy asimétrica | la de la asimetría |
+| **Acufenometría** | describir el acúfeno | acúfeno presente el día del examen y no pulsátil; en niños, desde los 12 años, con hipoacusia sensorioneural y acúfeno permanente | la del acúfeno |
 :::
 
 ### Umbrales, molestia y enmascaramiento
@@ -72,7 +162,7 @@ En este libro la batería sigue un orden fijo: vía aérea, logoaudiometría, ac
 
 ### Conoce tu equipo: el audiómetro y las instrucciones
 
-Las supraliminares no necesitan un equipo especial: usan los controles del audiómetro (→ H3) de otra manera. El **paso de 1 dB** es para el SISI; el de 5 dB, para todo lo demás. Para el deterioro tonal, el canal en *Continuo* (Pulsado apagado) y el tono encendido con **Invertir**, sin sostener el botón un minuto; el **cronómetro** (Iniciar, Detener, Borrar) mide ese minuto, y el **indicador de respuesta** queda lila mientras el paciente sostiene la mano. El Fowler usa **Alternado**, con un canal en cada oído, y el STAT, **ruido blanco (WN)** en el canal 2.
+Las supraliminares no necesitan un equipo especial: usan los controles del audiómetro (→ H3) de otra manera. El **paso de 1 dB** es para el SISI y para igualar el acúfeno; el de 5 dB, para todo lo demás. Para el deterioro tonal, el canal en *Continuo* (Pulsado apagado) y el tono encendido con **Invertir**, sin sostener el botón un minuto; el **cronómetro** (Iniciar, Detener, Borrar) mide ese minuto, y el **indicador de respuesta** queda lila mientras el paciente sostiene la mano. El Fowler usa **Alternado**, con un canal en cada oído, y el STAT, **ruido blanco (WN)** en el canal 2. La acufenometría usa el tipo de estímulo (tono, banda estrecha o ruido blanco) y la frecuencia.
 
 En LabSim el paciente responde según la **última instrucción** que le diste. Cada prueba tiene la suya en la ventana *Comandos de voz*.
 
@@ -89,9 +179,53 @@ En LabSim el paciente responde según la **última instrucción** que le diste. 
 
 ## Paso a paso
 
+### Acufenometría
+
+Va primero porque en la batería sigue a la logoaudiometría. Describe el acúfeno con los sonidos del audiómetro. No dice cuánto le molesta al paciente; eso se pregunta. Sirve para dejarlo registrado, para seguirlo en el tiempo, para explicarle al paciente lo que tiene y para planificar una terapia con sonido (Henry y cols., 2005).
+
+**Cuándo.** En el adulto, cuando el paciente tiene acúfeno **en el momento de la evaluación**: si es intermitente y ese día no está, no hay nada que igualar. En el niño, desde los 12 años, con hipoacusia sensorioneural y acúfeno permanente. Un acúfeno **pulsátil** no se iguala: se deriva para buscar su causa (→ cap. 3).
+
+**En qué oído.** Si el acúfeno es de un solo lado, los sonidos de comparación van al **oído contrario**. Si es de los dos lados pero asimétrico, al oído donde suena **más débil**. Así el sonido del audiómetro no se mezcla con el acúfeno que el paciente está escuchando, ni lo tapa. El enmascaramiento y la inhibición residual, en cambio, van al oído del acúfeno.
+
+1. **Tipo de sonido.** Primero se decide con qué se compara: **tono puro, ruido de banda estrecha, ruido blanco o ruido de habla**. La descripción del paciente orienta: un "pito" se busca con tono; un "siseo", un "soplido" o "como el mar", con ruido.
+2. **Frecuencia** (en tono o banda estrecha). Se presentan **tres estímulos de distinta frecuencia**, a un nivel que oiga cómodo, y el paciente elige el que más se parece en *tono*, en lo agudo o grave, a su acúfeno: "¿Cuál se parece más a su ruido: el primero, el segundo o el tercero?". Se afina con las frecuencias vecinas de la elegida, siempre comparando de a dos. Al final se presenta la frecuencia **una octava arriba y una abajo**: los pacientes confunden octavas con facilidad y a veces la de arriba se parece más.
+3. **Intensidad.** Con el estímulo elegido, se parte bajo el umbral y se sube **en pasos finos** hasta que el paciente diga que el sonido y su acúfeno se escuchan **igual de fuertes**. Se anota en **dB HL**. Después se calculan los **dB SL**: ese nivel menos el umbral del mismo estímulo en el mismo oído.
+4. **Nivel mínimo de enmascaramiento (NME).** Al **oído del acúfeno**, un ruido que cubra su frecuencia (banda estrecha centrada en ella, o ruido blanco). Se sube de a poco hasta que el paciente **deja de oír su acúfeno**. Ese nivel es el NME. Se anota en dB HL y en dB SL, sobre el umbral de ese mismo ruido.
+5. **Inhibición residual.** El mismo ruido, **10 dB sobre el NME**, durante **un minuto**, en el oído del acúfeno. Al apagarlo se pregunta cómo está el acúfeno:
+
+    - igual que al principio: inhibición residual **negativa**;
+    - cambió de tono o de intensidad: **parcial**;
+    - desapareció: **total**.
+
+    Se espera **un minuto más sin estímulo** y se vuelve a preguntar, para ver si el cambio se mantiene.
+
+<!-- Protocolo ORL 2019: en la versión infantil, decía que los "dB HL" se calculan restando el umbral a la intensidad del acúfeno. Lo que se calcula así son los dB SL (como dice la versión del adulto); se dejó dB SL. También usaba "dB HTL": es el mismo dB HL del audiómetro. -->
+<!-- Protocolo ORL 2019: para la inhibición residual decía un tono o ruido "en una 8ª perfecta superior o inferior a la frecuencia del tinnitus", a 10 dB sobre el nivel de enmascaramiento. Se corrigió a un ruido que cubra la frecuencia del acúfeno, el mismo con que se midió el NME, a NME + 10 dB durante 60 s (Roberts 2007; Henry y Meikle 2000): el NME vale para ese ruido, no para otro una octava más allá. verificar con el autor: si la octava era una decisión docente, se repone y se agrega su recuadro de normas. -->
+<!-- verificar: pasos de la igualación de intensidad (1 o 2 dB) y control de octava; la lógica está en Henry y Meikle 2000, que no se leyó completo. -->
+
+El NME más 10 dB **no puede pasar el LDL**. En un paciente que tolera poco, el ruido de la inhibición residual tiene que quedar bajo su molestia; si no cabe, no se hace y se anota por qué.
+
+:::ojo Pocos dB no es poco acúfeno
+El acúfeno suele igualarse a pocos dB sobre el umbral, y el paciente que lo igualó a 5 dB SL puede decir que no lo deja dormir. No se contradicen: en un oído que recluta, pocos dB sobre el umbral ya suenan fuertes (Tyler y Conrad-Armes, 1983), y la molestia depende de mucho más que de la sonoridad. Informa la cifra y no la conviertas en un grado de gravedad.
+:::
+
+:::comentario Lo que dicen las normas
+No hay una norma ISO para la acufenometría. Desde 1981 se aceptan cuatro medidas (tono, sonoridad, enmascaramiento e inhibición residual), y unificar su técnica sigue pendiente (Henry y Meikle, 2000). Lo que la literatura deja claro:
+
+- **Ninguna de ellas mide la gravedad.** No se relacionan de forma consistente con cuánto le afecta el acúfeno al paciente (Henry y Meikle, 2000).
+- **Tampoco prueban que exista.** No hay una medida objetiva del acúfeno: todo depende de lo que el paciente responde (Henry y cols., 2013).
+- **El tono varía de una vez a otra.** En la mitad de los pacientes, las igualaciones repetidas abarcaron más de dos octavas: conviene informar un rango más que una frecuencia única (Henry y cols., 2004).
+- **La inhibición residual** se mide con el ruido a NME + 10 dB durante un minuto, y por lo general dura menos de un minuto (Roberts, 2007).
+- **Cuándo estudiar.** La guía de la AAO-HNS pide un examen audiológico completo y pronto cuando el acúfeno es de un solo lado, dura seis meses o más o se acompaña de dificultad para oír, y desaconseja la imagen salvo que el acúfeno sea de un lado, pulsátil, con signos neurológicos o con una hipoacusia asimétrica (Tunkel y cols., 2014).
+
+En este libro se hacen las cuatro, en ese orden, después de igualar el tipo de sonido.
+:::
+
 ### Fowler o balance biauricular alternante (ABLB)
 
 Compara la sonoridad de los dos oídos en una misma frecuencia. El oído sano es la **referencia**: muestra cómo crece la sonoridad normal. El otro es el **oído en estudio**.
+
+**Por qué funciona.** La sonoridad no se mide: se compara. Cada par de niveles que el paciente iguala es un punto de las curvas de la figura H6.1. Si la sonoridad del oído en estudio alcanza a la del sano, la escalera se cierra; si crece a la par, queda abierta.
 
 **Requisitos.** En la frecuencia elegida, el oído de referencia tiene que estar en rango normal (hasta 20 dB HL) y el oído en estudio fuera de él, con una pérdida **sensorioneural** (sin gap) y una diferencia de **20 a 40 dB** entre los dos. La frecuencia, entre 250 y 4.000 Hz.
 
@@ -126,6 +260,8 @@ El requisito de fondo del Fowler es tener **un oído de referencia normal** en l
 
 La IWA busca la **inversión del Weber audiométrico** a medida que sube el nivel. Tiene los mismos requisitos del Fowler.
 
+**Por qué funciona.** Desde la frente, el vibrador estimula las dos cócleas casi por igual (→ H4), y el tono se oye en el oído donde suena más fuerte. Si la sonoridad del oído dañado alcanza a la del sano al subir el nivel, el Weber se centra.
+
 1. El **vibrador en la frente**, en la línea media.
 2. Un tono a nivel umbral, en la frecuencia elegida. Se pregunta dónde lo escucha: en una pérdida sensorioneural de un oído, lo oye en el **oído sano**.
 3. Se sube de 5 en 5 dB, preguntando cada vez dónde lo oye, hasta que el Weber se invierta o hasta el máximo de la vía ósea.
@@ -137,6 +273,8 @@ Si el sonido sigue en el oído sano, no hay reclutamiento. Si pasa al centro, ha
 ### SISI
 
 El SISI (*short increment sensitivity index*) mide si el oído nota aumentos de **1 dB** sobre un tono continuo. Un oído que recluta los nota; un oído normal o retrococlear, a ese nivel, casi no (Jerger y cols., 1959).
+
+**Por qué funciona.** A 20 dB SL, el portador de un oído coclear ya está a un nivel alto y en la parte empinada de su curva de sonoridad, donde 1 dB se nota. El de un oído sano está en la zona baja, donde no se nota. Y un nervio comprimido no codifica bien cambios tan chicos aunque el portador esté alto.
 
 1. **Portador.** Un tono continuo **20 dB sobre el umbral** del oído evaluado, en la frecuencia elegida.
 2. **Familiarización.** Ocho a diez incrementos de **5 dB**, que cualquier oído nota. Sirven para que el paciente entienda qué tiene que avisar.
@@ -160,7 +298,7 @@ El nivel importa: a niveles altos, incluso un oído sano nota incrementos de 1 d
 
 ### Deterioro tonal
 
-Mide si el oído puede seguir oyendo un tono sostenido. Las tres pruebas usan un **tono puro continuo por vía aérea** y la misma instrucción:
+Mide si el oído puede seguir oyendo un tono sostenido. Se apoya en que una fibra sana sostiene su descarga mientras el tono dure y una comprimida no (figura H6.2). Las tres pruebas usan un **tono puro continuo por vía aérea** y la misma instrucción:
 
 > "Va a escuchar un pito continuo. Mantenga la mano levantada todo el rato que lo escuche, **aunque se escuche más bajito**. Baje la mano solo si el pito desaparece del todo."
 
@@ -201,7 +339,7 @@ La diferencia está en el reloj. En el **Carhart**, cada subida de 5 dB abre un 
 
 #### STAT: un nivel alto y fijo
 
-El STAT (*suprathreshold adaptation test*) no busca nada en el umbral. Presenta **un solo nivel alto**, 110 dB SPL, durante 60 segundos en 500, 1.000 y 2.000 Hz. Si el paciente no oye el minuto completo, la prueba es **positiva** para el VIII par (Jerger y Jerger, 1975). Al trabajar tan por encima del umbral evita los falsos positivos de las pruebas en el umbral, donde un oído coclear también puede deteriorar algo.
+El STAT (*suprathreshold adaptation test*) no busca nada en el umbral. Presenta **un solo nivel alto**, 110 dB SPL, durante 60 segundos en 500, 1.000 y 2.000 Hz. Si el paciente no oye el minuto completo, la prueba es **positiva** para el VIII par (Jerger y Jerger, 1975). Al trabajar tan por encima del umbral evita los falsos positivos de las pruebas en el umbral, donde un oído coclear también puede deteriorar algo: a ese nivel el tono excita una franja ancha de la cóclea, con muchas fibras, y un oído coclear lo sostiene. Un nervio comprimido se agota igual.
 
 En dB HL, con fonos supraaurales, el tono va a **100 dB en 500 y 2.000 Hz y 105 dB en 1.000 Hz**, con **ruido blanco a 90 dB** en el oído contrario. Cada oído se evalúa por separado.
 
@@ -242,6 +380,7 @@ Las pruebas que no dependen de la respuesta del paciente ponen el límite: emisi
 :::
 
 :::ayuda Ayuda memoria
+- **Acufenometría** (si hay acúfeno ese día): se iguala en el oído contrario (o en el del acúfeno más débil). Tipo de sonido → frecuencia (tres estímulos, control de octava) → intensidad en dB HL y dB SL → NME en el oído del acúfeno → inhibición residual a NME + 10 dB por un minuto, y otro minuto sin estímulo.
 - **LDL primero**; oído contrario enmascarado cuando el tono puede cruzar.
 - **Fowler**: referencia normal, 20 a 40 dB de diferencia, sin gap; referencia +20 y se iguala de 5 en 5.
 - **SISI**: 20 dB sobre el umbral, 20 incrementos de 1 dB, 5 % cada uno. **70 % o más: coclear.**
@@ -255,6 +394,10 @@ Las pruebas que no dependen de la respuesta del paciente ponen el límite: emisi
 ## Cómo se informa
 
 Todo se anota con el color del oído, **rojo para el OD y azul para el OI**. Del Fowler, la escalera y su conclusión (y la diploacusia, si la hubo); del SISI, el porcentaje por frecuencia; del Rosenberg, los dB del minuto; del STAT, un signo entre paréntesis, (+) o (−). El Carhart lleva entre paréntesis el nivel en que partiste y luego *det.* con los dB que deterioró, o *no det.*; si llegaste al techo, *veloc. de det.* en dB por minuto.
+
+La acufenometría va en las **observaciones** del formulario de audiometría: el oído del acúfeno y el oído donde se igualó, el tipo de sonido, la frecuencia (mejor un rango), la intensidad en dB HL y en dB SL, el NME y la inhibición residual con lo que pasó al minuto siguiente. Por ejemplo, con cifras ilustrativas:
+
+> *Acufenometría.* Acúfeno OD permanente, igualado en OI: tono puro de 4.000 Hz (entre 3.000 y 6.000 Hz), 22 dB HL, 7 dB SL. NME con banda estrecha de 4 kHz en OD: 65 dB HL. Inhibición residual parcial (baja de intensidad), se mantiene al minuto.
 
 ### Coclear o retrococlear
 
@@ -324,6 +467,9 @@ Lo de Patricia y Raúl se resume así, junto con lo que agrega el reflejo:
 - **Cortar el tono al subir en el Carhart**, o partir sobre el umbral. Si se corta, el oído descansa; si se parte más arriba, esos dB se le restan al deterioro.
 - **STAT sin mirar el LDL o sin ruido contralateral.** Un tono que molesta o que oye el otro oído no mide adaptación.
 - **Concluir con una sola prueba.** Un SISI alto o un Carhart de 10 dB, solos, no ubican la lesión.
+- **Igualar el acúfeno en el oído que suena.** El sonido de comparación se mezcla con el acúfeno o lo tapa.
+- **Informar una sola frecuencia sin probar las octavas.** El paciente pudo elegir la octava equivocada.
+- **Leer los dB SL del acúfeno como su gravedad.** Pocos dB sobre el umbral pueden sonar fuertes en un oído que recluta.
 
 :::ojo Ojo clínico
 Las supraliminares ubican la lesión **en el oído que estás estudiando**, pero no la explican. Un oído coclear puede tener además un tumor, y un tumor que daña la irrigación de la cóclea puede dar algo de reclutamiento. Cuando los hallazgos se contradicen, la respuesta no la da otra prueba supraliminar: la dan el PEAT y la imagen (→ H10, cap. 11).
@@ -331,17 +477,18 @@ Las supraliminares ubican la lesión **en el oído que estás estudiando**, pero
 
 ## En LabSim
 
-Cada prueba se hace con su instrucción de la figura H6.1, dada con *Talkback*, y el paciente responde como uno real:
+Cada prueba se hace con su instrucción de la figura H6.3, dada con *Talkback*, y el paciente responde como uno real:
 
 - **SISI**: con el tono sonando, sube un clic de 1 dB y vuelve a bajarlo. Las subidas de 5 dB las nota siempre; con el portador bajo el umbral no nota ninguna.
 - **Fowler**: en una frecuencia que no cumple los requisitos, el paciente contesta como un oído sin reclutamiento.
 - **Deterioro tonal**: en el Carhart cada subida reinicia el minuto; en el Rosenberg el minuto es uno solo. El minuto es real: cronométralo. El Carhart se instruye con *Mano levantada* o, si quieres avisarle del ruido en el otro oído, con *Mano levantada en ruido*: es la misma prueba.
 - **STAT**: el tono va a 100 dB HL en 500 y 2.000 Hz y a 105 dB HL en 1.000 Hz, con ruido blanco a 90 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado. Si el nivel llega a su LDL, el paciente dice "molesta" y en esa frecuencia tampoco. Un oído retrococlear baja la mano antes del minuto aunque le sobre margen sobre su umbral; uno coclear lo sostiene.
 - **Stenger**: se instruye con *Colocar fonos*, como los umbrales. El paciente lo reconoce por el estímulo: el mismo tono, por vía aérea, en los dos oídos a la vez. Percibe el tono con más nivel de sensación sobre sus umbrales **verdaderos**, no sobre los que te dio.
-- **Orden**: el indicador de técnica espera las supraliminares entre la logoaudiometría y la vía ósea.
+- **Acufenometría**: todavía no está. El caso trae el acúfeno en su ficha (lado, tipo de sonido, si es permanente o pulsátil y una frecuencia aproximada) y el paciente lo cuenta en la anamnesis, pero no hay un acúfeno simulado que igualar con el audiómetro.
+- **Orden**: el indicador de técnica espera las supraliminares entre la logoaudiometría y la vía ósea. Como la acufenometría no existe, revisa el orden sin ella.
 
 :::comentario Lo que el simulador todavía no tiene
-La IWA no se practica en LabSim, y entre los pacientes de práctica no hay ninguno con pérdida no orgánica. El docente puede crear uno marcando el oído fingido (casilla Stenger del caso): sus umbrales son los que el paciente entrega, y el verdadero se supone igual al del otro oído, como en alguien que oye parejo y finge una pérdida de un lado. Lo que todavía no se puede es cargar el umbral verdadero del oído fingido, así que una pérdida real que el paciente exagera no se puede armar. El paciente simulado tampoco se cansa ni se confunde; uno real sí.
+La IWA y la acufenometría no se practican en LabSim, y entre los pacientes de práctica no hay ninguno con pérdida no orgánica. El docente puede crear uno marcando el oído fingido (casilla Stenger del caso): sus umbrales son los que el paciente entrega, y el verdadero se supone igual al del otro oído, como en alguien que oye parejo y finge una pérdida de un lado. Lo que todavía no se puede es cargar el umbral verdadero del oído fingido, así que una pérdida real que el paciente exagera no se puede armar. El paciente simulado tampoco se cansa ni se confunde; uno real sí.
 :::
 
 Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
@@ -352,6 +499,9 @@ Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
 3. Raúl tiene un SISI bajo en el OD. ¿Te basta para decir que no recluta? ¿Qué otra prueba de reclutamiento le puedes hacer y qué esperas de ella?
 4. Hernán (caso H3.3) tiene una presbiacusia simétrica y un LDL de 100 dB. ¿Por qué no le puedes hacer un Fowler y sí un SISI? ¿Está indicado un STAT?
 5. Un paciente informa 70 dB en el OD y 10 dB en el OI en 1 kHz. Presentas 20 dB al OI y 60 dB al OD a la vez, y no responde. ¿Cómo se llama esa prueba y qué te dice el resultado?
+6. ¿Por qué el STAT se hace a 100 dB HL y no cerca del umbral? ¿Qué le pasa a un oído coclear en cada caso, y qué a uno con el nervio comprimido?
+7. Raúl tiene un pito permanente en el OD. ¿En qué oído haces la acufenometría, con qué estímulo partes y en qué zona de frecuencias esperas que caiga? ¿Por qué ahí?
+8. Hernán siente un siseo en los dos oídos, parejo. ¿Con qué tipo de estímulo lo igualas? Si lo iguala a 5 dB SL, ¿es un acúfeno leve?
 :::
 
 ## Referencias
@@ -381,3 +531,25 @@ Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
 1. Dallos P. Cochlear amplification, outer hair cells and prestin. Curr Opin Neurobiol. 2008;18(4):370-6. doi:10.1016/j.conb.2008.08.016
 1. Westerman LA, Smith RL. Rapid and short-term adaptation in auditory nerve responses. Hear Res. 1984;15(3):249-60. doi:10.1016/0378-5955(84)90032-7
 1. Pérez-González D, Malmierca MS. Adaptation in the auditory system: an overview. Front Integr Neurosci. 2014;8:19. doi:10.3389/fnint.2014.00019
+1. Stevens SS. On the psychophysical law. Psychol Rev. 1957;64(3):153-81. doi:10.1037/h0046162
+1. Pickles JO. An introduction to the physiology of hearing. 4.ª ed. Leiden: Brill; 2013. ISBN 978-90-04-24377-4
+1. Møller AR. Hearing: anatomy, physiology, and disorders of the auditory system. 3.ª ed. San Diego: Plural Publishing; 2013. ISBN 978-1-59756-427-4
+1. Zheng J, Shen W, He DZ, Long KB, Madison LD, Dallos P. Prestin is the motor protein of cochlear outer hair cells. Nature. 2000;405(6783):149-55. doi:10.1038/35012009
+1. Ruggero MA, Rich NC. Furosemide alters organ of Corti mechanics: evidence for feedback of outer hair cells upon the basilar membrane. J Neurosci. 1991;11(4):1057-67. doi:10.1523/JNEUROSCI.11-04-01057.1991
+1. Moore BCJ. Cochlear hearing loss: physiological, psychological and technical issues. 2.ª ed. Chichester: John Wiley & Sons; 2007. ISBN 978-0-470-51633-1
+1. Jesteadt W, Wier CC, Green DM. Intensity discrimination as a function of frequency and sensation level. J Acoust Soc Am. 1977;61(1):169-77. doi:10.1121/1.381278
+
+### Acúfeno y acufenometría
+
+1. Eggermont JJ, Roberts LE. The neuroscience of tinnitus. Trends Neurosci. 2004;27(11):676-82. doi:10.1016/j.tins.2004.08.010
+1. Noreña AJ. An integrative model of tinnitus based on a central gain controlling neural sensitivity. Neurosci Biobehav Rev. 2011;35(5):1089-109. doi:10.1016/j.neubiorev.2010.11.003
+1. Noreña A, Micheyl C, Chéry-Croze S, Collet L. Psychoacoustic characterization of the tinnitus spectrum: implications for the underlying mechanisms of tinnitus. Audiol Neurootol. 2002;7(6):358-69. doi:10.1159/000066156
+1. Schaette R, McAlpine D. Tinnitus with a normal audiogram: physiological evidence for hidden hearing loss and computational model. J Neurosci. 2011;31(38):13452-7. doi:10.1523/JNEUROSCI.2156-11.2011
+1. Penner MJ. An estimate of the prevalence of tinnitus caused by spontaneous otoacoustic emissions. Arch Otolaryngol Head Neck Surg. 1990;116(4):418-23. doi:10.1001/archotol.1990.01870040040010
+1. Henry JA, Meikle MB. Psychoacoustic measures of tinnitus. J Am Acad Audiol. 2000;11(3):138-55. doi:10.1055/s-0042-1748040
+1. Henry JA, Flick CL, Gilbert A, Ellingson RM, Fausti SA. Comparison of manual and computer-automated procedures for tinnitus pitch-matching. J Rehabil Res Dev. 2004;41(2):121-38. doi:10.1682/jrrd.2004.02.0121
+1. Henry JA, McMillan GP, Thielman EJ, Galvez G, Zaugg TL, Porsov E, et al. Evaluating psychoacoustic measures for establishing presence of tinnitus. J Rehabil Res Dev. 2013;50(4):573-84. doi:10.1682/jrrd.2012.05.0090
+1. Henry JA, Zaugg TL, Schechter MA. Clinical guide for audiologic tinnitus management II: treatment. Am J Audiol. 2005;14(1):49-70. doi:10.1044/1059-0889(2005/005)
+1. Tyler RS, Conrad-Armes D. The determination of tinnitus loudness considering the effects of recruitment. J Speech Hear Res. 1983;26(1):59-72. doi:10.1044/jshr.2601.59
+1. Roberts LE. Residual inhibition. Prog Brain Res. 2007;166:487-95. doi:10.1016/S0079-6123(07)66047-6
+1. Tunkel DE, Bauer CA, Sun GH, Rosenfeld RM, Chandrasekhar SS, Cunningham ER Jr, et al. Clinical practice guideline: tinnitus. Otolaryngol Head Neck Surg. 2014;151(2 Suppl):S1-S40. doi:10.1177/0194599814545325
