@@ -19,6 +19,9 @@ LAVADO = '#f4f2ee'       # zona de referencia (normalidad)
 OD = '#c62f3a'
 OI = '#2c5cb0'
 COLOR_LADO = {'OD': OD, 'OI': OI}
+# Campo libre (S y A): el sonido llega a los dos oídos, así que no es rojo ni
+# azul. Verde, como en el laboratorio.
+CAMPO_LIBRE = '#2e8540'
 NOMBRE_LADO = {'OD': 'Oído derecho', 'OI': 'Oído izquierdo'}
 
 # Tipografía (la misma del manual: docs/manual/fuentes)

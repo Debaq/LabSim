@@ -6047,3 +6047,31 @@ NO arreglados"). Lo que se decidió en cada uno:
    `###`). La ficha del caso ya no abre página: no se parte y pasa entera a la
    siguiente si no cabe. `hacer_figuras.py` arma `figuras/salida/index.html`
    con todas las figuras de la carpeta, no solo las de la corrida.
+
+## Pendientes del libro cerrados con él (2026-10-16)
+
+- **Producción reproyectada** (consola remota, backup
+  `labsim_2026-10-16_101001.sqlite`). Se calculó con el código del backend
+  (`caseDataToForm` + `CaseForm::completarConProyeccion`, PHP 7.4) sobre los 38
+  casos y se aplicó en una transacción: reflejos en dB SPL en los casos con el
+  reflejo en automático (los 10-25, importados antes del arreglo del
+  importador, tenían todos los reflejos en 130 aunque el auto estaba
+  encendido: ahora tienen los del perfil); SDT 5 dB bajo el Fletcher **solo
+  donde había quedado el auto viejo** (SDT igual al Fletcher; lo escrito a
+  mano no se tocó); caso 42 UMD OD 20 -> 0 %. Los 33-42 quedaron idénticos a
+  `casos_demo.json`, que es la comprobación. No había tapones ni
+  perforaciones en producción. La UMD proyectada sale 5 dB más baja que la
+  guardada en casi todos; no se tocó (en el editor también gana lo guardado).
+- **Paciente 41 (Luis):** se corrigió la historia, no la impedanciometría. El
+  cap. 3 lo enseña con la membrana cerrada (B con volumen normal); lo que no
+  calzaba era "vuelve cuando le entra agua", que es de una perforación
+  abierta. Ahora la otorrea aparece con los resfríos y se seca con gotas, el
+  último episodio hace cuatro meses (`{{-120}}` en la historia).
+- **Paciente 34 (Carolina):** control de embarazo `{{-1300}}` -> `{{-1150}}`
+  (tres años, como dice la anamnesis).
+- **H8, campo libre (lo dijo él):** paciente **de frente** a los parlantes, a
+  1 m y con los parlantes a 45°. S y A en **verde**; si se quiere separar cada
+  audífono, la A en rojo (OD) o azul (OI). Se agregó cómo enmascarar en campo
+  libre (fono o inserto con ruido en el oído no evaluado). El motor
+  (`fig.campo_libre`) dibuja en verde y acepta `audifono: OD|OI`.
+- **H10:** tope de la vía ósea del ABR en 55 dB nHL, confirmado.

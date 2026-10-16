@@ -1680,7 +1680,7 @@
    "fecha_nac": "07-11-1992",
    "procedimiento": "Audiometría"
   },
-  "historia_clinica": "{{-1300}} Control de embarazo (segundo hijo) con ginecólogo; parto vaginal sin complicaciones.\n{{-900}} Consulta con médico general por sensación de oído derecho tapado; se indica lavado de oídos, sin tapón de cerumen, sin mejoría.\n{{-60}} Consulta con otorrinolaringólogo: conducto auditivo y tímpano derecho de aspecto normal; se deriva a evaluación auditiva completa."
+  "historia_clinica": "{{-1150}} Control de embarazo (segundo hijo) con ginecólogo; parto vaginal sin complicaciones.\n{{-900}} Consulta con médico general por sensación de oído derecho tapado; se indica lavado de oídos, sin tapón de cerumen, sin mejoría.\n{{-60}} Consulta con otorrinolaringólogo: conducto auditivo y tímpano derecho de aspecto normal; se deriva a evaluación auditiva completa."
  },
  "35": {
   "gender": 0,
@@ -7171,7 +7171,7 @@
    },
    "medicamentos": "",
    "cirugias": "Colocación de tubos de ventilación en ambos oídos a los 4 años.",
-   "otros": "Tiene 41 años y es chofer de micro. Desde niño tuvo problemas con los oídos y lo operaron para ponerle tubos. Hace unos cinco años le empezó a salir líquido amarillo y con mal olor del oído izquierdo, que se le pasa con gotas y vuelve cada algunos meses, sobre todo si le entra agua. Escucha cada vez menos por ese lado y tiene un zumbido intermitente. No ha tenido vértigo. Evita bañarse en el mar o la piscina y se tapa el oído con algodón para ducharse. Le preocupa que lo tengan que operar y perder días de trabajo.",
+   "otros": "Tiene 41 años y es chofer de micro. Desde niño tuvo problemas con los oídos y lo operaron para ponerle tubos. Hace unos cinco años, cada vez que se resfría, le empieza a salir líquido amarillo y con mal olor del oído izquierdo: con gotas se le seca en un par de semanas y vuelve a los meses. La última vez fue hace unos cuatro meses y desde entonces lo tiene seco. Escucha cada vez menos por ese lado y tiene un zumbido intermitente. No ha tenido vértigo. Igual se tapa el oído con algodón para ducharse, por si acaso. Le preocupa que lo tengan que operar y perder días de trabajo.",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -7635,7 +7635,7 @@
    "fecha_nac": "11-12-1985",
    "procedimiento": "Audiometría"
   },
-  "historia_clinica": "{{-13500}} Colocación de tubos de ventilación bilaterales por otitis media a repetición.\n{{-1800}} Consulta con médico general por otorrea izquierda; gotas óticas con antibiótico, mejora.\n{{-400}} Nueva consulta por otorrea izquierda de mal olor; gotas óticas, mejora parcial.\n{{-30}} Otorrinolaringólogo: otorrea izquierda recurrente, se solicita tomografía de oídos. Se deriva a evaluación auditiva completa antes de decidir cirugía."
+  "historia_clinica": "{{-13500}} Colocación de tubos de ventilación bilaterales por otitis media a repetición.\n{{-1800}} Consulta con médico general por otorrea izquierda; gotas óticas con antibiótico, mejora.\n{{-400}} Nueva consulta por otorrea izquierda de mal olor, con un resfrío; gotas óticas, mejora parcial.\n{{-120}} Otro episodio de otorrea izquierda con un resfrío; gotas óticas, se seca.\n{{-30}} Otorrinolaringólogo: otorrea izquierda recurrente, hoy oído seco; se solicita tomografía de oídos. Se deriva a evaluación auditiva completa antes de decidir cirugía."
  },
  "42": {
   "gender": 0,

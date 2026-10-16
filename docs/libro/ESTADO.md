@@ -1,4 +1,4 @@
-# Estado del libro y pendientes (traspaso 2026-10-15)
+# Estado del libro y pendientes (traspaso 2026-10-15, al día 2026-10-16)
 
 Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
 (carpetas y comandos) e `indice.md` (plan). Las decisiones de fondo están en
@@ -46,24 +46,15 @@ anatomía/esquemas (plan: Servier/OpenStax, SVG propio, capturas).
 ## Pendientes
 
 ### Para él (decisiones o datos)
-1. **Token de la consola remota** (`./scripts/labsim_token.sh lsc_...`) para
-   reproyectar en producción los casos guardados: reflejos ahora en dB SPL,
-   SDT auto, tapones (B volumen bajo), perforaciones (volumen alto + ETF
-   permeable) y corregir el caso 42 (UMD OD 20 → 0 %). Backup antes.
-2. **Corte de LDL para el STAT:** el texto quedó en "si marca molestia bajo
-   100 dB HL, no se hace", pero el STAT va a 105 dB HL en 1 kHz.
-3. **H8:** ¿el paciente se sienta "de espalda a los parlantes" en campo libre?
-   ¿y los colores con audífono por oído?
-4. **H10:** el tope de la vía ósea del ABR es 55 dB nHL en el código
-   (`BONE_MAX_OUTPUT_DB`, decisión docente); confirmar.
-5. **Paciente 41** tiene otorrea en la historia pero membrana cerrada (B con
-   volumen normal); ¿perforación abierta (volumen alto + ETF perforada) o se
-   corrige la historia?
-6. **Paciente 34 (Carolina):** la historia dice "hace 4 años control de
-   embarazo" y la anamnesis "oye menos hace unos 3 años" (detalle menor).
-7. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
-   licencia de simHit (Apache vs MIT), DOI para labyrinthus3d, coautorías de
-   colegas (Casanova, Poza, Uribe), alcance nasal.
+1. **Corte de LDL para el STAT:** el texto de H6 dice "si marca molestia bajo
+   100 dB HL, no se hace", pero el STAT va a 105 dB HL en 1 kHz. Ojo: Patricia
+   (H6, paciente 38) tiene LDL 100 en todo y el libro le hace el STAT
+   negativo; el motor no mira el LDL en el STAT.
+2. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
+   detalles menores (licencia de simHit, DOI de labyrinthus3d, coautorías).
+
+Cerrados el 2026-10-16 (producción reproyectada, pacientes 34 y 41, H8, H10):
+`docs/decisiones.md`, "Pendientes del libro cerrados con él".
 
 ### Errores del simulador detectados
 Los siete que había quedaron arreglados (2026-10-15); qué se decidió en cada
@@ -76,7 +67,7 @@ no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
 
 ### Libro, contenido
 - Ilustraciones pendientes (según el plan, no IA): H8 sala de VRA y banana
-  S/A, H9 sonda en el conducto, H10 generadores I-V, cap. 2 trompa niño vs
+  S/A (en verde), H9 sonda en el conducto, H10 generadores I-V, cap. 2 trompa niño vs
   adulto, cap. 4 formas del reflejo; `ilustraciones/*.png` actuales son de
   Gemini y él las dio por "llenas de errores".
 - Quedan comentarios `<!-- verificar -->` en todos los capítulos (citas sin

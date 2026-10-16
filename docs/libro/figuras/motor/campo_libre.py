@@ -9,8 +9,9 @@ Los umbrales con audífono NO salen del caso: dependen del audífono y de su
 ajuste. La ganancia funcional (dB por frecuencia) la declara el capítulo, y
 la figura solo la resta del umbral sin audífono.
 
-Símbolos ASHA: S sin audífono, A con audífono, en negro (binaurales, no son
-de un oído).
+Símbolos: S sin audífono y A con audífono, en verde como en el laboratorio
+(contesta el oído mejor, no uno en particular). Con un solo audífono puesto
+(audifono='OD' u 'OI'), la A va en rojo o azul según el lado del audífono.
 """
 import math
 
@@ -38,8 +39,11 @@ def umbrales_sin_audifono(caso):
     return out
 
 
-def dibujar(caso, ganancia=None):
-    """ganancia: {Hz: dB de ganancia funcional}; sin ella, solo la curva S."""
+def dibujar(caso, ganancia=None, audifono=None):
+    """ganancia: {Hz: dB de ganancia funcional}; sin ella, solo la curva S.
+    audifono: 'OD' u 'OI' si se evaluó un solo audífono (la A toma su color);
+    None, los dos o binaural (verde)."""
+    color_a = E.COLOR_LADO.get(audifono, E.CAMPO_LIBRE)
     sin = umbrales_sin_audifono(caso)
     con = None
     if ganancia:
@@ -49,7 +53,8 @@ def dibujar(caso, ganancia=None):
     db_px = OCTAVA_PX / 20
     x_min, x_max = 125, 8000
     pw, ph = math.log2(x_max / x_min) * OCTAVA_PX, 130 * db_px
-    ml, mt, mb = 36, 30, 40
+    # Con la curva A, la leyenda va en una segunda línea bajo el título.
+    ml, mt, mb = 36, (42 if con is not None else 30), 40
     s = Svg(ml + pw + 14, mt + ph + mb)
 
     def X(f):
@@ -70,25 +75,25 @@ def dibujar(caso, ganancia=None):
         s.linea(X(f), Y(-10), X(f), Y(120), E.GRILLA, 1 if mayor else 0.5)
         s.texto(X(f), Y(120) + 14, ROTULO.get(f, f), E.T_EJE if mayor else E.T_CHICO,
                 E.TENUE if mayor else E.MUY_TENUE)
-    s.texto(ml, mt - 12, 'Campo libre', E.T_TITULO, E.TINTA, 'start', 600)
+    s.texto(ml, (mt - 22) if con is not None else (mt - 12), 'Campo libre', E.T_TITULO, E.TINTA, 'start', 600)
 
-    for curva, letra, guiones in ((sin, 'S', None), (con, 'A', '4 3')):
+    for curva, letra, guiones, color in ((sin, 'S', None, E.CAMPO_LIBRE), (con, 'A', '4 3', color_a)):
         if curva is None:
             continue
         pts = [(X(f), Y(v)) if v is not None else None for f, v in sorted(curva.items())]
         for tramo in _tramos(pts):
-            s.trazo(tramo, E.TINTA, 1.2, guiones=guiones)
+            s.trazo(tramo, color, 1.2, guiones=guiones)
         for f, v in sorted(curva.items()):
             y = Y(NIVEL_MAXIMO if v is None else v)
             s.circulo(X(f), y, 5.2, E.PAPEL, E.PAPEL, 0)
-            s.texto(X(f), y + 3.2, letra, E.T_ROTULO, E.TINTA, peso=700)
+            s.texto(X(f), y + 3.2, letra, E.T_ROTULO, color, peso=700)
             s.ancla(f'{letra} {f}', X(f), y)
             if v is None:
-                _flecha(s, X(f), y, E.TINTA, 1)
+                _flecha(s, X(f), y, color, 1)
 
     if con is not None:
-        xl, yl = ml + pw - 4, mt - 12
-        s.texto(xl, yl, 'S sin audífono · A con audífono', E.T_CHICO, E.TENUE, 'end')
+        lado = {'OD': ' (audífono OD)', 'OI': ' (audífono OI)'}.get(audifono, '')
+        s.texto(ml, mt - 8, f'S sin audífono · A con audífono{lado}', E.T_CHICO, E.TENUE, 'start')
     s.texto(14, mt + ph / 2, 'dB HL', E.T_EJE, E.TENUE,
             extra=f'transform="rotate(-90 14 {mt + ph / 2:.1f})"')
     s.texto(s.ancho / 2, mt + ph + 34, 'Frecuencia (Hz)', E.T_EJE, E.TENUE)

@@ -353,7 +353,7 @@ Un oído con otorrea de años y una pérdida que crece. ¿Esperas una conductiva
 :::
 
 :::docente Guía del caso
-- **Datos clave:** otitis y tubos de niño; otorrea amarilla y fétida intermitente del OI desde hace cinco años, que vuelve cuando entra agua; pérdida progresiva y zumbido intermitente; sin vértigo; hoy el oído está seco.
+- **Datos clave:** otitis y tubos de niño; otorrea amarilla y fétida del OI desde hace cinco años, que aparece con los resfríos y se seca con gotas (el último episodio, hace cuatro meses); pérdida progresiva y zumbido intermitente; sin vértigo; hoy el oído está seco.
 - **Hipótesis esperables:** otitis media crónica con daño coclear; colesteatoma (la otorrea fétida obliga a pensarlo: lo descarta el otorrino); hipoacusia por ruido de chofer (no explica el gap).
 - **Qué pedir:** audiometría con ósea y logoaudiometría enmascaradas, impedanciometría solo si el oído está seco (→ H3, H4, H5, H7).
 - **Errores esperables:** informar "conductiva" sin mirar que la ósea cayó; meter la sonda un día con otorrea; leer el B con volumen normal como si fuera una perforación.

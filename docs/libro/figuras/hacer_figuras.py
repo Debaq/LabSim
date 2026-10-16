@@ -14,7 +14,7 @@ Cada caso es un JSON con el paciente y las figuras que lleva:
 
 Tipos: audiograma (estudio, sin_enmascarar), acumetria, timpanograma, reflejos, logoaudiometria (enmascarado),
 abr (niveles, estimulo, marcar, transductor, polaridad, tasa), ecochg (nivel), teoae, dpoae,
-vemp (subtipo cvemp|ovemp), campo_libre (ganancia: {Hz: dB} para la curva con audífono). Un caso por cuadro ("caso": {"cuadro": ...})
+vemp (subtipo cvemp|ovemp), campo_libre (ganancia: {Hz: dB} para la curva con audífono; audifono: OD|OI si es uno solo). Un caso por cuadro ("caso": {"cuadro": ...})
 se arma antes con armar_casos.sh.
 
 Salida: figuras/salida/<caso>_<tipo>.svg (con sufijo si un tipo se repite)
@@ -69,7 +69,7 @@ def figura(caso, f):
     if tipo == 'campo_libre':
         # Las claves vuelven del JSON como texto.
         ganancia = {int(k): v for k, v in (f.get('ganancia') or {}).items()}
-        return campo_libre.dibujar(caso, ganancia=ganancia or None)
+        return campo_libre.dibujar(caso, ganancia=ganancia or None, audifono=f.get('audifono'))
     if tipo == 'vemp':
         return vemp.dibujar(caso, subtipo=f.get('subtipo', 'cvemp'), intensidad=f.get('intensidad', 100),
                             promedios=f.get('promedios', 200))

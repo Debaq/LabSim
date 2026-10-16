@@ -54,7 +54,7 @@ Un fono le habla sobre todo a un oído. Un parlante le habla **a la cabeza**: el
 
 Tres consecuencias:
 
-1. **Un campo libre normal no descarta una hipoacusia unilateral**, ni siquiera una cofosis. Poner el parlante a la derecha y luego a la izquierda no lo arregla: los dos parlantes llegan a los dos oídos (BSA, 2025a). Que el niño localice bien tampoco descarta una asimetría (BSA, 2025a).
+1. **Un campo libre normal no descarta una hipoacusia unilateral**, ni siquiera una cofosis. Poner el parlante a la derecha y luego a la izquierda no lo arregla: los dos parlantes llegan a los dos oídos (BSA, 2025a). Para separar un oído en campo libre hay que **enmascarar el otro** (más abajo). Que el niño localice bien tampoco descarta una asimetría (BSA, 2025a).
 2. **No se usa tono puro.** En una sala, el tono puro rebota en las paredes y forma ondas estacionarias: en un punto el sonido se suma y a pocos centímetros se cancela. Por eso en campo libre solo se usan **tonos modulados** (*warble*, FM) o **ruido de banda estrecha** (NBN), que reparten la energía en una banda de frecuencias (ISO 8253-2, 2009; BSA, 2025b).
 3. **El nivel depende de dónde está la cabeza.** El cero de campo libre se fijó con oyentes escuchando con los dos oídos y el sonido de frente (ISO 389-7, 2019; BSA, 2025b). Si la cabeza se corre del punto calibrado, o el parlante queda de lado, el nivel en el oído cambia (BSA, 2025b).
 
@@ -172,21 +172,31 @@ El SRT debe quedar dentro de ±10 dB del promedio de 500, 1.000 y 2.000 Hz; si n
 
 Es la técnica del adulto, con el parlante como transductor.
 
-1. **Ubicar al paciente.** En el laboratorio, la silla va a 1 m de los dos parlantes, que quedan a 45°, con el paciente de espaldas a ellos.
+1. **Ubicar al paciente.** En el laboratorio, el paciente se sienta **frente a los parlantes**, a **1 m** de cada uno, con los parlantes a **45°** a cada lado de la línea de la nariz. La cabeza queda en el punto donde se calibró.
 2. **Configurar el audiómetro**: transductor de campo libre y estímulo FM (*warble*).
 3. **Instrucción**: avisar cada vez que oiga el sonido, por débil que sea y **sin importar por qué oído** lo oiga. Si usa audífono, **se lo saca después de recibir la instrucción**: la primera parte del examen va sin audífono.
 4. **Umbrales**: 1.000, 2.000, 3.000 y 4.000 Hz, y después 500 y 250 Hz. Se parte en 40 dB HL; si responde, se baja 10, si no, se sube 5; umbral con **2 de 3**. Tonos de 1 a 2 segundos con silencios variados, nunca menores a 1 segundo.
 5. **Si el equipo no hace sonar los dos parlantes a la vez**, se toman los umbrales con el derecho, luego con el izquierdo, y se informa el mejor.
 6. **Logoaudiometría**: solo la discriminación, con las listas de bisílabos de Palacio, al promedio tonal de 500, 1.000 y 2.000 Hz más 20 dB; si no llega a 92 %, se sube de a 5 dB, con un máximo de dos listas (→ H5).
 
+#### Enmascarar en campo libre
+
+El parlante no elige el oído, pero el otro oído sí se puede sacar del examen: se le pone un **fono o un inserto con ruido** (NBN de la frecuencia que se mide) y el oído que queda libre es el único que contesta. Es lo que se hace cuando hay que saber qué aporta **cada audífono** por separado, cuando un oído tiene un implante coclear y el otro oye, o cuando se sospecha una asimetría en alguien que tolera un fono en un solo oído.
+
+- El ruido entra por el fono o el inserto del oído que **no** se evalúa, por el otro canal del audiómetro, igual que en la audiometría tonal (→ H4). El parlante sigue sonando para el oído en estudio.
+- El nivel del ruido se calcula como siempre: lo bastante alto para tapar el oído no evaluado y no tanto como para que cruce al que se evalúa. El inserto cruza menos que el fono.
+- Se anota en el audiograma y en el informe: qué oído quedó enmascarado, con qué transductor y a qué nivel. Sin ese dato, el umbral vuelve a ser "el del oído mejor".
+
+<!-- verificar: la BSA (2025a) menciona tapar o enmascarar el oído no evaluado al medir un solo audífono; confirmar la cita textual antes de citarla. -->
+
 <!-- Protocolo ORL 2019: "El examen consiste en aplicar sonidos a distintas intensidades en ambos oídos por separado". En campo libre el estímulo llega a los dos oídos y el resultado es el del oído mejor en cada frecuencia (BSA 2025a §4.3.2; BSA 2025b §5.1). Se corrigió: el campo libre no separa los oídos. -->
 
-<!-- verificar: el protocolo sienta al paciente "de espalda hacia los parlantes" a 45°. Se asumió que es para que no vea al examinador ni anticipe el estímulo; confirmar con el autor. -->
+<!-- Protocolo ORL 2019: decía "de espalda hacia los parlantes". El autor lo corrigió (2026-10-16): el paciente va de frente, a 1 m y con los parlantes a 45°. -->
 
 :::comentario Lo que dicen las normas
 El cero de campo libre se fijó con el sonido llegando **de frente** (0°) y escuchando con los dos oídos (ISO 389-7, 2019). La ISO 8253-2 (2009) trae correcciones para parlantes a 45° o a 90°, pero la BSA no recomienda usarlas en la clínica habitual: cuando no se sabe cuál es el oído mejor, este puede estar del lado lejano al parlante, donde el sonido llega más débil (BSA, 2025b).
 
-Lo que las normas sí exigen es que el paciente quede **exactamente donde se calibró**: con la misma orientación, a la misma distancia y con la cabeza a la misma altura. Si en tu laboratorio se trabaja de espaldas a los parlantes, la calibración tiene que haberse hecho en esa posición.
+Lo que las normas sí exigen es que el paciente quede **exactamente donde se calibró**: con la misma orientación, a la misma distancia y con la cabeza a la misma altura.
 :::
 
 ### 7. Campo libre con audífono
@@ -209,7 +219,7 @@ La comparación entre los umbrales sin audífono (S) y con audífono (A) muestra
 | Campo libre, con audífono | **A** |
 | Sin respuesta a la salida máxima | flecha hacia abajo desde el símbolo |
 
-En el laboratorio se dibujan en verde o negro; cuando se evalúa un audífono por oído, en rojo el derecho y azul el izquierdo (ISO 8253-2, 2009; BSA, 2025a; BSA, 2025b).
+En el laboratorio se dibujan en **verde**: el campo libre no es de un oído, así que no lleva ni rojo ni azul. La **S** marca los umbrales sin audífono y la **A**, con audífono. Si quieres separar lo que aporta cada audífono por su cuenta, puedes escribir la A en **rojo** cuando el audífono está en el OD y en **azul** cuando está en el OI.
 :::
 
 :::comentario Lo que dicen las normas
@@ -238,7 +248,7 @@ Si la familia está preocupada, el lenguaje viene atrasado o el niño no localiz
 - **0 a 6 meses**: observar, no medir. Objetivas siempre.
 - **VRA**: 65 dB HL en campo libre para condicionar; 2 respuestas seguidas; 20 abajo y, cerca del MRL, 10 abajo y 5 arriba; 2 de 3; giro claro; falsos positivos ≤ 30 %.
 - **Juego**: canasta y juguetes; 2 respuestas sin ayuda; técnica del adulto; anotar "por juego".
-- **Campo libre**: FM o NBN, nunca tono puro; ≥ 1 m; cabeza en el punto calibrado; **oído mejor**.
+- **Campo libre**: FM o NBN, nunca tono puro; de frente, a 1 m, parlantes a 45°; cabeza en el punto calibrado; **oído mejor**, salvo que el otro vaya enmascarado con fono o inserto.
 - **Con audífono**: A frente a S, contra la banana; no verifica el audífono.
 :::
 
