@@ -25,8 +25,8 @@ Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
 
 | Estado | Capítulos |
 |---|---|
-| Escritos y al día con los simuladores | H1-H10, 1, 2, 3, 4, 11 |
-| Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H13 PEAee, 5-10, 12-20 |
+| Escritos y al día con los simuladores | H1-H10, 1-6, 11 (H3 y H6 ampliadas el 2026-10-16) |
+| Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H13 PEAee, 7-10, 12-20 |
 | Esqueleto nuevo (2026-10-16) | B1 anatomía, B3 histología, B4 física (cada uno con "Qué tiene que tener"); H14 procesamiento auditivo central (capturas de AudioPAC); equilibrio H15-H19; rehabilitación aural H20-H21; salud ocupacional H22; nariz H23-H25 |
 | Partes reservadas (esqueleto, 2026-10-16) | VIII equilibrio (21-27), IX rehabilitación auditiva (28-30), X rehabilitación vestibular (31-32), XI salud ocupacional (33-34), XII nariz (35-36); los integradores pasan a Parte XIII |
 | Lo escribe una colega | B2 Fisiología auditiva y vestibular (con su lista de contenidos) |
@@ -46,6 +46,20 @@ nombrar el protocolo en el texto visible. Nada de imágenes de IA para
 anatomía/esquemas (plan: Servier/OpenStax, SVG propio, capturas).
 
 ## Pendientes
+
+### Para retomar (2026-10-16)
+- Él pidió **no seguir con capítulos nuevos** por ahora.
+- Siguiente propuesto (espera su visto bueno): la pasada de "fundamento
+  fisiológico" en H1, H2, H4, H5, H7, H8, H9 y H10 (como se hizo en H3 y H6).
+- `incongruencias_protocolo.md`: él lo decide con su equipo. Regla: se
+  mantiene el protocolo y la literatura va en "Lo que dicen las normas"; solo
+  se corrige lo que es error. Los "P · revertir" esperan su decisión; el
+  método de búsqueda del umbral (13b) está en discusión.
+- Sin "el laboratorio" en el texto (distribución mundial).
+- Fotos de los pacientes 33-42 en LabSim: él las sube desde el panel con
+  `rostros/demo-NN.jpg`.
+- Práctica offline de los pacientes del libro (sin red ni cuenta): por
+  diseñar.
 
 ### Para él (decisiones o datos)
 1. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
