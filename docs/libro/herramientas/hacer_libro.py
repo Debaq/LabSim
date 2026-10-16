@@ -488,6 +488,19 @@ def capitulo(md_texto):
     # huecos del autor
     cuerpo = re.sub(r'<blockquote>\s*<p>✍\s*(.*?)</p>\s*</blockquote>',
                     r'<div class="pendiente"><span>Falta texto</span> \1</div>', cuerpo, flags=re.S)
+    # Tablas numeradas ("Tabla H3.2"), para poder nombrarlas. Un párrafo
+    # "Tabla: título" justo antes de la tabla se vuelve su título. Las de los
+    # preliminares (abreviaturas) no se numeran.
+    if cap != '0':
+        ntab = [0]
+
+        def tabla(m):
+            ntab[0] += 1
+            titulo = (m[1] or '').strip()
+            pie = f'<span class="tabla-n">Tabla {cap}.{ntab[0]}</span>' + (f' {titulo}' if titulo else '')
+            return f'<table><caption>{pie}</caption>'
+        cuerpo = re.sub(r'(?:<p>Tabla:\s*(.*?)</p>\s*)?<table>', tabla, cuerpo, flags=re.S)
+
     # Apertura del capítulo: bloque con el número y el título (estilo de libro de texto)
     m = re.search(r'<h1>\s*(?:[A-Z]?\d+\.\s*)?(.*?)</h1>', cuerpo, re.S)
     if m and cap == '0':                       # preliminares: Prólogo, Cómo usar...
@@ -668,6 +681,8 @@ table {{ width: 100%; border-collapse: collapse; font-size: 8.6pt; line-height: 
 th, td {{ padding: 1mm 1.6mm; border: .5pt solid #cdbcc4; text-align: left; vertical-align: top; }}
 th {{ background: #f1e4e9; color: #24101a; font-weight: 700; }}
 tbody tr:nth-child(even) td {{ background: #faf6f8; }}
+table caption {{ caption-side: top; text-align: left; font-size: 8pt; color: #5c4a52; padding: 0 0 1mm; }}
+.tabla-n {{ font-weight: 700; color: #8e2a4a; letter-spacing: .3pt; }}
 .caja table {{ font-size: 8pt; }}
 .caja td, .caja th {{ padding: .9mm 1.4mm; }}
 .caja-objetivos {{ background: #24101a; color: #f8eef1; }}
