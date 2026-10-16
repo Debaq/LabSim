@@ -1,0 +1,30 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "muesca_4k",
+      "OI": "muesca_4k"
+    },
+    "edad": 32,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 32 años y hace diez trabaja en la barra de una discoteca, cuatro noches por semana. No usa protección auditiva porque \"tiene que escuchar los pedidos\". Desde hace años sale del turno con los oídos silbando, pero antes se le pasaba al día siguiente. Hace como un año el silbido de los dos oídos ya no se le quita, y lo nota más al acostarse. Le cuesta entender a los clientes y a sus amigas cuando salen a comer a un lugar con ruido; conversando de a dos, en la casa, oye bien. No ha tenido mareos ni dolor de oídos. Su último turno fue hace tres días.",
+      "historia": "{{-365}} Médico general: acúfeno bilateral persistente; otoscopía normal. Se indica evitar el ruido y control.\n{{-20}} Otorrinolaringólogo: acúfeno bilateral y dificultad para entender en ruido; solicita evaluación audiológica con emisiones otoacústicas.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

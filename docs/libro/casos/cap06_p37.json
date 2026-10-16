@@ -1,0 +1,21 @@
+{
+  "caso": "demo:37",
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

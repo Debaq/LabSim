@@ -1,0 +1,17 @@
+{
+  "caso": "demo:33",
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

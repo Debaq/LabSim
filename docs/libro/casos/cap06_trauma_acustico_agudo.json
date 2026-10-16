@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "trauma_acustico_agudo"
+    },
+    "edad": 19,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 19 años y está haciendo el servicio militar. Hace cuatro días, en una práctica de tiro, un compañero disparó a su izquierda justo cuando él se estaba acomodando el protector auditivo. Desde ese momento siente el oído izquierdo \"tapado\", como con algodón, y tiene un pitido agudo de ese lado que no se le quita y que lo molesta más en la noche, cuando está todo en silencio. Conversa bien, pero dice que por la izquierda los sonidos le llegan \"como apagados\". No tuvo dolor, sangre ni mareos. Antes de esto nunca había tenido problemas de oído.",
+      "historia": "{{-4}} Enfermería del regimiento: oído izquierdo tapado y pitido tras práctica de tiro; otoscopía sin perforación. Se deriva a otorrinolaringología.\n{{-2}} Otorrinolaringólogo: trauma acústico agudo OI. Indica tratamiento y solicita audiometría y emisiones otoacústicas.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "Prednisona oral desde hace dos días, indicada por el otorrinolaringólogo",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}
