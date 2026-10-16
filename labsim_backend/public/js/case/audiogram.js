@@ -73,7 +73,14 @@ window.drawAudiogram = (function () {
         return !t || t.checked;
     }
     function airMasked(acSelf, bcOther, freqIndex) { return (acSelf - bcOther) >= AIR_ATTENUATION_BY_FREQ[freqIndex]; }
-    function boneMasked(acSelf, bcSelf) { return (acSelf - bcSelf) >= BONE_MASKING_GAP; }
+    // La ósea sin enmascarar la contesta la MEJOR cóclea (la atenuación
+    // interaural ósea es ~0): hay que enmascarar si el aéreo del oído queda
+    // 10 dB o más sobre la mejor de las dos óseas, no solo sobre la propia.
+    // Con la propia sola, la sensorioneural unilateral (gap propio 0) salía
+    // con "<" en el oído malo.
+    function boneMasked(acSelf, bcSelf, bcOther) {
+        return (acSelf - Math.min(bcSelf, bcOther)) >= BONE_MASKING_GAP;
+    }
 
     function makeCross(x, y, color) {
         var g = document.createElementNS(NS, 'g');
@@ -208,9 +215,9 @@ window.drawAudiogram = (function () {
             if (noResponse(aereaOi[n])) { group.appendChild(makeNoResponseArrow(x, yOi, window.sideColor('oi'), 1)); }
         }
 
-        // Vía ósea: unida con línea punteada, y enmascarada si hay gap
-        // aéreo-óseo >=10dB en el mismo oído. La línea se dibuja antes que
-        // los corchetes para que el símbolo quede encima.
+        // Vía ósea: unida con línea punteada, y enmascarada si el aéreo del
+        // oído queda >=10dB sobre la mejor ósea (ver boneMasked). La línea
+        // se dibuja antes que los corchetes para que el símbolo quede encima.
         drawLine(oseaOd, window.sideColor('od'), BONE_DASH, true, BONE_MAX_DB);
         drawLine(oseaOi, window.sideColor('oi'), BONE_DASH, true, BONE_MAX_DB);
         for (var m = 0; m < FREQS.length; m++) {
@@ -219,9 +226,9 @@ window.drawAudiogram = (function () {
             var yBOd = yPos(plotBoneDb(oseaOd[m])), yBOi = yPos(plotBoneDb(oseaOi[m]));
             // El símbolo (no la línea) se corre de la intersección: ver
             // BONE_OFFSET arriba.
-            group.appendChild(makeBracket(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
+            group.appendChild(makeBracket(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m], oseaOi[m])));
             if (boneNoResponse(oseaOd[m])) { group.appendChild(makeNoResponseArrow(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), -1)); }
-            group.appendChild(makeBracket(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
+            group.appendChild(makeBracket(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m], oseaOd[m])));
             if (boneNoResponse(oseaOi[m])) { group.appendChild(makeNoResponseArrow(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 1)); }
         }
 

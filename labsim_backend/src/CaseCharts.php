@@ -336,8 +336,11 @@ final class CaseCharts
                 self::flechaAbajo($pdf, $cx, $yAOi, self::COLOR_OI, 1);
             }
 
-            // Ósea enmascarada si hay gap >= 10 dB en el mismo oído (la
-            // atenuación interaural ósea es ~0). Solo donde se mide -- y,
+            // Ósea enmascarada si el aéreo del oído queda >= 10 dB sobre la
+            // MEJOR de las dos óseas: la atenuación interaural ósea es ~0,
+            // así que sin enmascarar contesta la mejor cóclea. Con el gap
+            // propio solo, la sensorioneural unilateral salía sin enmascarar
+            // en el oído malo. Solo donde se mide -- y,
             // en la ficha de estudio, solo del lado que de verdad la
             // tendría (ver freqsOseaPorLado más arriba): un oído puede
             // tener el aéreo normal y el otro no en la misma frecuencia.
@@ -355,13 +358,13 @@ final class CaseCharts
                 $cxOOi = $cx + self::DESPLAZAMIENTO_OSEA;
 
                 if ($mostrarOseaOd) {
-                    self::corchete($pdf, $cxOOd, $yOOd, self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
+                    self::corchete($pdf, $cxOOd, $yOOd, self::COLOR_OD, 'izq', ($aOd - min($oOd, $oOi)) >= self::GAP_ENMASCARA_OSEA);
                     if ($sinOseaOd) {
                         self::flechaAbajo($pdf, $cxOOd, $yOOd, self::COLOR_OD, -1);
                     }
                 }
                 if ($mostrarOseaOi) {
-                    self::corchete($pdf, $cxOOi, $yOOi, self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
+                    self::corchete($pdf, $cxOOi, $yOOi, self::COLOR_OI, 'der', ($aOi - min($oOi, $oOd)) >= self::GAP_ENMASCARA_OSEA);
                     if ($sinOseaOi) {
                         self::flechaAbajo($pdf, $cxOOi, $yOOi, self::COLOR_OI, 1);
                     }

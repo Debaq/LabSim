@@ -140,7 +140,10 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI'), sin_enmascarar=Fal
         for i in idx_osea:
             sin = o[i] > TOPE_OSEA
             x, y = X(FRECUENCIAS[i]) + desp, Y(TOPE_OSEA if sin else o[i])
-            enmascarada = not sin_enmascarar and a[i] is not None and (a[i] - o[i]) >= GAP_ENMASCARA_OSEA
+            # Contra la MEJOR ósea: sin enmascarar contesta la mejor cóclea
+            # (CaseCharts::audiogram, boneMasked en audiogram.js).
+            mejor = o[i] if o_otro[i] is None else min(o[i], o_otro[i])
+            enmascarada = not sin_enmascarar and a[i] is not None and (a[i] - mejor) >= GAP_ENMASCARA_OSEA
             _simbolo_oseo(s, lado, x, y, col, enmascarada)
             s.ancla(f'{lado} osea {FRECUENCIAS[i]}', x, y)
             if sin:
