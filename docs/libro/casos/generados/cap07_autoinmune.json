@@ -1,0 +1,863 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "autoinmune",
+   "OI": "autoinmune"
+  },
+  "edad": 41,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "severa"
+  },
+  "anamnesis": {
+   "otros": "Tiene 41 años y es contadora. Hace unos tres meses empezó a sentir el oído derecho tapado, con días mejores y días peores, y pensó que era por un resfrío. En pocas semanas dejó de oír el teléfono por ese lado. Con unos corticoides que le dio el otorrinolaringólogo mejoró un poco, pero al terminarlos volvió a empeorar, y hace un mes nota que el oído izquierdo también está más tapado. Ahora le cuesta seguir las reuniones de trabajo y les pide a todos que le hablen más fuerte. No tiene pitidos. A veces se siente un poco inestable al caminar rápido. Tiene hipotiroidismo por una tiroiditis de Hashimoto y toma levotiroxina. En su familia nadie es sordo. No ha tenido infecciones de oído ni ha trabajado con ruido.",
+   "historia": "{{-95}} Médico general: oído derecho tapado de una semana; otoscopía normal, sin tapón. Indica descongestionante nasal y control.\n{{-70}} Otorrinolaringólogo: audiometría con hipoacusia sensorioneural moderada del OD y OI normal. Indica prednisona oral por dos semanas.\n{{-40}} Control: mejoría parcial del OD con los corticoides, que empeora al suspenderlos. Empieza a notar el OI tapado.\n{{-6}} Otorrinolaringólogo: hipoacusia sensorioneural bilateral, asimétrica y rápidamente progresiva. Sospecha enfermedad autoinmune del oído interno; descartar otosífilis. Solicita serología (incluida la de sífilis), exámenes inmunológicos, resonancia magnética y nueva evaluación audiológica completa. Deriva a reumatología.",
+   "hist": [],
+   "medicamentos": "Levotiroxina 75 µg al día. Terminó hace casi dos meses un curso de prednisona de dos semanas.",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1295458399,
+ "data": {
+  "gender": 1,
+  "id": 9399,
+  "Aerea": [
+   [
+    60,
+    25
+   ],
+   [
+    65,
+    25
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    100,
+    45
+   ],
+   [
+    100,
+    40
+   ]
+  ],
+  "Osea": [
+   [
+    60,
+    25
+   ],
+   [
+    65,
+    25
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    100,
+    45
+   ],
+   [
+    100,
+    40
+   ]
+  ],
+  "LDL": [
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    60,
+    25
+   ],
+   [
+    65,
+    25
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    100,
+    45
+   ],
+   [
+    100,
+    40
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    60,
+    25
+   ],
+   [
+    65,
+    25
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    95,
+    40
+   ],
+   [
+    100,
+    45
+   ],
+   [
+    100,
+    40
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "falso_negativo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "falso_negativo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 41,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.6,
+   1.06,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 110,
+    "percentage": 52
+   },
+   {
+    "int": 60,
+    "percentage": 92
+   }
+  ],
+  "SDT": [
+   70,
+   20
+  ],
+  "SRT": [
+   75,
+   25
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     100,
+     95
+    ],
+    [
+     95,
+     90
+    ],
+    [
+     100,
+     90
+    ],
+    [
+     110,
+     95
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     105
+    ],
+    [
+     95,
+     105
+    ],
+    [
+     100,
+     105
+    ],
+    [
+     100,
+     115
+    ],
+    [
+     100,
+     105
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Levotiroxina 75 µg al día. Terminó hace casi dos meses un curso de prednisona de dos semanas.",
+   "cirugias": "",
+   "otros": "Tiene 41 años y es contadora. Hace unos tres meses empezó a sentir el oído derecho tapado, con días mejores y días peores, y pensó que era por un resfrío. En pocas semanas dejó de oír el teléfono por ese lado. Con unos corticoides que le dio el otorrinolaringólogo mejoró un poco, pero al terminarlos volvió a empeorar, y hace un mes nota que el oído izquierdo también está más tapado. Ahora le cuesta seguir las reuniones de trabajo y les pide a todos que le hablen más fuerte. No tiene pitidos. A veces se siente un poco inestable al caminar rápido. Tiene hipotiroidismo por una tiroiditis de Hashimoto y toma levotiroxina. En su familia nadie es sordo. No ha tenido infecciones de oído ni ha trabajado con ruido.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Pilar",
+     "edad": 41,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 96,
+     "confiabilidad": 69,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 85,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 100,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 90,
+     "tone_burst_1000Hz": 95,
+     "tone_burst_2000Hz": 95,
+     "tone_burst_4000Hz": 100,
+     "nb_ce_chirp_ls_500Hz": 85,
+     "nb_ce_chirp_ls_1000Hz": 90,
+     "nb_ce_chirp_ls_2000Hz": 90,
+     "nb_ce_chirp_ls_4000Hz": 100,
+     "click": 100,
+     "ce_chirp": 90,
+     "ce_chirp_ls": 90
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.22,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2086,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.15,
+      "amp": -0.2
+     },
+     "onda_III": {
+      "lat": 0.01,
+      "amp": -0.04
+     },
+     "onda_V": {
+      "lat": 0.13,
+      "amp": 0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 50,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 50,
+     "tone_burst_4000Hz": 45,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 45,
+     "nb_ce_chirp_ls_4000Hz": 45,
+     "click": 50,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 55,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.19,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1911,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.14,
+      "amp": -0.13
+     },
+     "onda_III": {
+      "lat": 0.06,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.4,
+    "sello_pct": 82,
+    "variabilidad_db": 3.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 9,
+     "1000": 14.4,
+     "1500": 20.7,
+     "2000": 25.2,
+     "3000": 25.2,
+     "4000": 25.2,
+     "6000": 30.6,
+     "8000": 25.2
+    },
+    "atten_db": 0,
+    "ruido_db": 3.5,
+    "sello_pct": 81,
+    "variabilidad_db": 3.4,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:14:20+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Pilar Cristina",
+   "apellido": "Valdez Estrada",
+   "rut": "16044059",
+   "fecha_nac": "15-10-1985"
+  },
+  "historia_clinica": "{{-95}} Médico general: oído derecho tapado de una semana; otoscopía normal, sin tapón. Indica descongestionante nasal y control.\r\n{{-70}} Otorrinolaringólogo: audiometría con hipoacusia sensorioneural moderada del OD y OI normal. Indica prednisona oral por dos semanas.\r\n{{-40}} Control: mejoría parcial del OD con los corticoides, que empeora al suspenderlos. Empieza a notar el OI tapado.\r\n{{-6}} Otorrinolaringólogo: hipoacusia sensorioneural bilateral, asimétrica y rápidamente progresiva. Sospecha enfermedad autoinmune del oído interno; descartar otosífilis. Solicita serología (incluida la de sífilis), exámenes inmunológicos, resonancia magnética y nueva evaluación audiológica completa. Deriva a reumatología."
+ }
+}

@@ -1,0 +1,870 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "ototoxica",
+   "OI": "ototoxica"
+  },
+  "edad": 31,
+  "sexo": "hombre",
+  "semilla": 3,
+  "anamnesis": {
+   "otros": "Tiene 31 años y es profesor de educación física. Hace cinco meses le encontraron un tumor en el testículo izquierdo; lo operaron y después recibió cuatro ciclos de quimioterapia, uno cada tres semanas. Antes del primer ciclo le hicieron una audiometría y le dijeron que oía bien. Fue al control de audición antes del segundo ciclo, pero no a los siguientes: vive lejos del hospital y se sentía bien. Durante el tercer ciclo empezó a sentir un siseo en los dos oídos, parejo, que ahora tiene todo el día. Terminó la quimioterapia hace diez semanas. Desde entonces le cuesta entender a los alumnos cuando hablan todos a la vez en el gimnasio, y ya no oye el pitido del microondas ni el canto de los pájaros en la mañana. Conversando de a dos, en silencio, se arregla bien. No ha tenido mareos ni dolor de oídos. Nunca ha trabajado con ruido y nadie en su familia es sordo.",
+   "historia": "{{-155}} Urólogo: tumor testicular izquierdo. Orquiectomía izquierda; biopsia: tumor germinal no seminomatoso. Deriva a oncología.\n{{-140}} Oncólogo: indica cuatro ciclos de bleomicina, etopósido y cisplatino, cada 21 días. Solicita evaluación audiológica de base antes del primer ciclo.\n{{-138}} Audiometría de base con alta frecuencia: umbrales de 0 a 10 dB HL de 125 a 8.000 Hz en ambos oídos, con respuesta hasta 16 kHz. DPOAE presentes de 1 a 8 kHz en ambos oídos.\n{{-116}} Control audiológico antes del segundo ciclo: sin cambio significativo respecto de la base.\n{{-95}} Tercer ciclo de quimioterapia. No asiste al control audiológico programado.\n{{-74}} Cuarto y último ciclo. Refiere siseo en ambos oídos desde el ciclo anterior. No asiste al control audiológico.\n{{-20}} Oncólogo, control al terminar el tratamiento: en remisión. Refiere siseo bilateral y dificultad para entender en grupo. Deriva a otorrinolaringología.\n{{-8}} Otorrinolaringólogo: otoscopía normal bilateral. Solicita audiometría con alta frecuencia y emisiones otoacústicas para comparar con la base.",
+   "hist": [
+    "ototoxicos"
+   ],
+   "medicamentos": "Ninguno. Terminó hace diez semanas cuatro ciclos de bleomicina, etopósido y cisplatino",
+   "cirugias": "Orquiectomía izquierda hace cinco meses"
+  }
+ },
+ "semilla": 3,
+ "data": {
+  "gender": 0,
+  "id": 9455,
+  "Aerea": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    75,
+    70
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "Osea": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    75,
+    70
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "LDL": [
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    75,
+    70
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    75,
+    70
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 31,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.09,
+   0.96,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 40,
+    "percentage": 88
+   },
+   {
+    "int": 40,
+    "percentage": 96
+   }
+  ],
+  "SDT": [
+   -5,
+   -5
+  ],
+  "SRT": [
+   0,
+   0
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     105,
+     95
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     95
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     100,
+     110
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": true,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Ninguno. Terminó hace diez semanas cuatro ciclos de bleomicina, etopósido y cisplatino",
+   "cirugias": "Orquiectomía izquierda hace cinco meses",
+   "otros": "Tiene 31 años y es profesor de educación física. Hace cinco meses le encontraron un tumor en el testículo izquierdo; lo operaron y después recibió cuatro ciclos de quimioterapia, uno cada tres semanas. Antes del primer ciclo le hicieron una audiometría y le dijeron que oía bien. Fue al control de audición antes del segundo ciclo, pero no a los siguientes: vive lejos del hospital y se sentía bien. Durante el tercer ciclo empezó a sentir un siseo en los dos oídos, parejo, que ahora tiene todo el día. Terminó la quimioterapia hace diez semanas. Desde entonces le cuesta entender a los alumnos cuando hablan todos a la vez en el gimnasio, y ya no oye el pitido del microondas ni el canto de los pájaros en la mañana. Conversando de a dos, en silencio, se arregla bien. No ha tenido mareos ni dolor de oídos. Nunca ha trabajado con ruido y nadie en su familia es sordo.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Ernesto",
+     "edad": 31,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 32,
+     "confiabilidad": 70,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Siseo",
+   "frecuencia": 8000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 65,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 80,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 80,
+     "click": 65,
+     "ce_chirp": 45,
+     "ce_chirp_ls": 45
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.24,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1966,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.12,
+      "amp": -0.12
+     },
+     "onda_III": {
+      "lat": 0.13,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.1,
+      "amp": 0.04
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 60,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 35,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 30,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 60,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 50,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 45,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.3,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1655,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.14,
+      "amp": -0.09
+     },
+     "onda_III": {
+      "lat": 0.1,
+      "amp": -0.07
+     },
+     "onda_V": {
+      "lat": 0.11,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_male",
+    "baseline": {
+     "I": {
+      "lat": 1.47,
+      "amp": 0.32
+     },
+     "III": {
+      "lat": 3.75,
+      "amp": 0.37
+     },
+     "V": {
+      "lat": 5.68,
+      "amp": 0.4
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 6.6,
+     "2000": 24,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.3,
+    "sello_pct": 79,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 10.5,
+     "3000": 44.7,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.6,
+    "sello_pct": 84,
+    "variabilidad_db": 2.6,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:11:32+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Ernesto Adrián",
+   "apellido": "Jiménez Romero",
+   "rut": "18941968",
+   "fecha_nac": "16-06-1995"
+  },
+  "historia_clinica": "{{-155}} Urólogo: tumor testicular izquierdo. Orquiectomía izquierda; biopsia: tumor germinal no seminomatoso. Deriva a oncología.\r\n{{-140}} Oncólogo: indica cuatro ciclos de bleomicina, etopósido y cisplatino, cada 21 días. Solicita evaluación audiológica de base antes del primer ciclo.\r\n{{-138}} Audiometría de base con alta frecuencia: umbrales de 0 a 10 dB HL de 125 a 8.000 Hz en ambos oídos, con respuesta hasta 16 kHz. DPOAE presentes de 1 a 8 kHz en ambos oídos.\r\n{{-116}} Control audiológico antes del segundo ciclo: sin cambio significativo respecto de la base.\r\n{{-95}} Tercer ciclo de quimioterapia. No asiste al control audiológico programado.\r\n{{-74}} Cuarto y último ciclo. Refiere siseo en ambos oídos desde el ciclo anterior. No asiste al control audiológico.\r\n{{-20}} Oncólogo, control al terminar el tratamiento: en remisión. Refiere siseo bilateral y dificultad para entender en grupo. Deriva a otorrinolaringología.\r\n{{-8}} Otorrinolaringólogo: otoscopía normal bilateral. Solicita audiometría con alta frecuencia y emisiones otoacústicas para comparar con la base."
+ }
+}

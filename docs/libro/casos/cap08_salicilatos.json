@@ -1,0 +1,38 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "salicilatos",
+      "OI": "salicilatos"
+    },
+    "edad": 57,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 57 años y es dueña de un almacén de barrio, donde pasa el día de pie. Tiene artrosis en las dos rodillas. Hace tres semanas el dolor empeoró y, como el antiinflamatorio que le habían dado le caía mal al estómago, empezó a tomar aspirina por su cuenta: dos comprimidos de 500 mg cada seis horas, todos los días. Hace unos diez días le apareció un silbido agudo en los dos oídos, parejo, que no se le quita en todo el día, y siente que oye \"como con algodones\": tiene que pedir que le repitan en el almacén y subió el volumen de la radio. No ha tenido mareos, dolor ni secreción de oídos. Antes de esto oía bien; nunca ha trabajado con ruido. Ayer el otorrinolaringólogo le suspendió la aspirina y se tomó la última dosis en la mañana.",
+      "historia": "{{-1095}} Medicina del trabajo, operativo preventivo: audiometría de tamizaje normal en ambos oídos.\n{{-400}} Traumatólogo: gonartrosis bilateral. Indica ibuprofeno y kinesiterapia; suspende el ibuprofeno por dolor epigástrico.\n{{-5}} Médico general: acúfeno bilateral y sensación de oído tapado de una semana. Otoscopía normal. Deriva a otorrinolaringología.\n{{-1}} Otorrinolaringólogo: otoscopía normal. Consumo de ácido acetilsalicílico de 4 g al día por tres semanas, sin indicación médica. Sospecha ototoxicidad por salicilatos: suspende la aspirina. Solicita audiometría y emisiones otoacústicas ahora y control en una semana.",
+      "hist": [
+        "ototoxicos",
+        "hta"
+      ],
+      "medicamentos": "Ácido acetilsalicílico 500 mg, dos comprimidos cada 6 horas por tres semanas, por su cuenta (suspendido ayer); losartán 50 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

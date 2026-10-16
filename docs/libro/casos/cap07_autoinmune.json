@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "autoinmune",
+      "OI": "autoinmune"
+    },
+    "edad": 41,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "severa"
+    },
+    "anamnesis": {
+      "otros": "Tiene 41 años y es contadora. Hace unos tres meses empezó a sentir el oído derecho tapado, con días mejores y días peores, y pensó que era por un resfrío. En pocas semanas dejó de oír el teléfono por ese lado. Con unos corticoides que le dio el otorrinolaringólogo mejoró un poco, pero al terminarlos volvió a empeorar, y hace un mes nota que el oído izquierdo también está más tapado. Ahora le cuesta seguir las reuniones de trabajo y les pide a todos que le hablen más fuerte. No tiene pitidos. A veces se siente un poco inestable al caminar rápido. Tiene hipotiroidismo por una tiroiditis de Hashimoto y toma levotiroxina. En su familia nadie es sordo. No ha tenido infecciones de oído ni ha trabajado con ruido.",
+      "historia": "{{-95}} Médico general: oído derecho tapado de una semana; otoscopía normal, sin tapón. Indica descongestionante nasal y control.\n{{-70}} Otorrinolaringólogo: audiometría con hipoacusia sensorioneural moderada del OD y OI normal. Indica prednisona oral por dos semanas.\n{{-40}} Control: mejoría parcial del OD con los corticoides, que empeora al suspenderlos. Empieza a notar el OI tapado.\n{{-6}} Otorrinolaringólogo: hipoacusia sensorioneural bilateral, asimétrica y rápidamente progresiva. Sospecha enfermedad autoinmune del oído interno; descartar otosífilis. Solicita serología (incluida la de sífilis), exámenes inmunológicos, resonancia magnética y nueva evaluación audiológica completa. Deriva a reumatología.",
+      "hist": [],
+      "medicamentos": "Levotiroxina 75 µg al día. Terminó hace casi dos meses un curso de prednisona de dos semanas.",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

@@ -75,7 +75,9 @@ def timpanograma(caso, oidos=('OD', 'OI'), escala_ml=2.0, sonda=226):
             s.texto(x0 + pw / 2, mt + ph / 2, 'Sin timpanograma en el caso', E.T_ROTULO, E.TENUE)
             continue
         pts = sorted(zip(d['x'], d['y']))
-        px, py = max(pts, key=lambda q: q[1])
+        # El pico se busca en lo dibujado: en una B plana el máximo puede caer fuera de -400..200 daPa
+        # y el globo terminaba en el panel del otro oído
+        px, py = max((q for q in pts if x_min <= q[0] <= x_max), key=lambda q: q[1], default=max(pts, key=lambda q: q[1]))
         s.ancla(f'{lado} pico', X(px), Y(py))
         s.trazo([(X(px), Y(py)) for px, py in pts if x_min <= px <= x_max], col, E.LINEA)
         if _f(d['compliancia']) and _f(d['compliancia']) > escala_ml:

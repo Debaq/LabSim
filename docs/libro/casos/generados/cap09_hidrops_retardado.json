@@ -1,0 +1,861 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "parotiditis",
+   "OI": "hidrops_retardado"
+  },
+  "edad": 54,
+  "sexo": "hombre",
+  "semilla": 3,
+  "anamnesis": {
+   "otros": "Tiene 54 años y atiende el mesón de una ferretería. Por el oído derecho no oye desde los seis años, cuando tuvo paperas; siempre se las arregló con el izquierdo y nunca usó audífono. Hace unos ocho meses tuvo la primera crisis: despertó con todo girando, vomitó y estuvo dos horas sin poder levantarse. Desde entonces ha tenido otras dos. Lo que más lo asusta es que, antes y después de cada crisis, el oído izquierdo se le tapa \"como en un avión\" y por unos días no entiende a los clientes ni el teléfono; después vuelve a oír, pero no sabe si tan bien como antes. No le zumba ningún oído. Entre crisis anda bien, pero ya no maneja de noche por miedo a que le dé una.",
+   "historia": "{{-240}} Servicio de urgencia: vértigo rotatorio de 2 horas con vómitos; se trata con antieméticos, alta al ceder.\n{{-150}} Médico general: oído izquierdo tapado de varios días y \"oye menos\"; otoscopía normal. Antecedente de sordera derecha desde la infancia (parotiditis). Se deriva a otorrinolaringología.\n{{-45}} Nueva crisis de vértigo de 3 horas, con el oído izquierdo tapado.\n{{-15}} Otorrinolaringólogo: otoscopía normal. Solicita evaluación auditiva completa, electrococleografía y evaluación vestibular.",
+   "hist": [],
+   "medicamentos": "Dimenhidrinato 50 mg cuando tiene crisis",
+   "cirugias": ""
+  }
+ },
+ "semilla": 3,
+ "data": {
+  "gender": 0,
+  "id": 9777,
+  "Aerea": [
+   [
+    90,
+    30
+   ],
+   [
+    90,
+    30
+   ],
+   [
+    95,
+    30
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    100,
+    25
+   ],
+   [
+    105,
+    30
+   ],
+   [
+    110,
+    30
+   ],
+   [
+    115,
+    35
+   ]
+  ],
+  "Osea": [
+   [
+    90,
+    30
+   ],
+   [
+    90,
+    30
+   ],
+   [
+    95,
+    30
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    100,
+    25
+   ],
+   [
+    105,
+    30
+   ],
+   [
+    110,
+    30
+   ],
+   [
+    115,
+    35
+   ]
+  ],
+  "LDL": [
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    115,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    90,
+    30
+   ],
+   [
+    90,
+    30
+   ],
+   [
+    95,
+    30
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    100,
+    25
+   ],
+   [
+    105,
+    30
+   ],
+   [
+    110,
+    30
+   ],
+   [
+    115,
+    35
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    90,
+    30
+   ],
+   [
+    90,
+    30
+   ],
+   [
+    95,
+    30
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    95,
+    20
+   ],
+   [
+    100,
+    25
+   ],
+   [
+    105,
+    30
+   ],
+   [
+    110,
+    30
+   ],
+   [
+    115,
+    35
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "falso_negativo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "falso_negativo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 54,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.08,
+   1.82,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 110,
+    "percentage": 36
+   },
+   {
+    "int": 55,
+    "percentage": 96
+   }
+  ],
+  "SDT": [
+   90,
+   15
+  ],
+  "SRT": [
+   95,
+   20
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     130
+    ],
+    [
+     90,
+     130
+    ],
+    [
+     95,
+     130
+    ],
+    [
+     95,
+     130
+    ],
+    [
+     95,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Dimenhidrinato 50 mg cuando tiene crisis",
+   "cirugias": "",
+   "otros": "Tiene 54 años y atiende el mesón de una ferretería. Por el oído derecho no oye desde los seis años, cuando tuvo paperas; siempre se las arregló con el izquierdo y nunca usó audífono. Hace unos ocho meses tuvo la primera crisis: despertó con todo girando, vomitó y estuvo dos horas sin poder levantarse. Desde entonces ha tenido otras dos. Lo que más lo asusta es que, antes y después de cada crisis, el oído izquierdo se le tapa \"como en un avión\" y por unos días no entiende a los clientes ni el teléfono; después vuelve a oír, pero no sabe si tan bien como antes. No le zumba ningún oído. Entre crisis anda bien, pero ya no maneja de noche por miedo a que le dé una.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Samuel",
+     "edad": 54,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 35,
+     "confiabilidad": 70,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 110,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 115,
+     "tone_burst_1000Hz": 110,
+     "tone_burst_2000Hz": 105,
+     "tone_burst_4000Hz": 110,
+     "nb_ce_chirp_ls_500Hz": 110,
+     "nb_ce_chirp_ls_1000Hz": 105,
+     "nb_ce_chirp_ls_2000Hz": 100,
+     "nb_ce_chirp_ls_4000Hz": 110,
+     "click": 110,
+     "ce_chirp": 105,
+     "ce_chirp_ls": 105
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.27,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2366,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.1,
+      "amp": -0.15
+     },
+     "onda_III": {
+      "lat": 0.14,
+      "amp": -0.07
+     },
+     "onda_V": {
+      "lat": 0.11,
+      "amp": 0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 35,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 50,
+     "tone_burst_1000Hz": 35,
+     "tone_burst_2000Hz": 30,
+     "tone_burst_4000Hz": 35,
+     "nb_ce_chirp_ls_500Hz": 45,
+     "nb_ce_chirp_ls_1000Hz": 30,
+     "nb_ce_chirp_ls_2000Hz": 25,
+     "nb_ce_chirp_ls_4000Hz": 35,
+     "click": 35,
+     "ce_chirp": 30,
+     "ce_chirp_ls": 30
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": 50,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": 45,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 50,
+     "ce_chirp": 45,
+     "ce_chirp_ls": 45
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.59,
+     "tasa": 2.3,
+     "rar_cond_ms": 0.45,
+     "mc": "normal"
+    },
+    "average_objetivo": 2314,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.15,
+      "amp": -0.1
+     },
+     "onda_III": {
+      "lat": 0.15,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0.15,
+      "amp": 0.06
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_male",
+    "baseline": {
+     "I": {
+      "lat": 1.47,
+      "amp": 0.32
+     },
+     "III": {
+      "lat": 3.75,
+      "amp": 0.37
+     },
+     "V": {
+      "lat": 5.68,
+      "amp": 0.4
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.6,
+    "sello_pct": 87,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 18,
+     "1000": 6,
+     "1500": 6,
+     "2000": 6,
+     "3000": 12,
+     "4000": 18,
+     "6000": 18,
+     "8000": 24
+    },
+    "atten_db": 0,
+    "ruido_db": 0.1,
+    "sello_pct": 86,
+    "variabilidad_db": 1.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 95,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 95,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "sacular",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 95,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:08:57+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Samuel Mario",
+   "apellido": "Arias Zamora",
+   "rut": "12048247",
+   "fecha_nac": "15-06-1972"
+  },
+  "historia_clinica": "{{-240}} Servicio de urgencia: vértigo rotatorio de 2 horas con vómitos; se trata con antieméticos, alta al ceder.\r\n{{-150}} Médico general: oído izquierdo tapado de varios días y \"oye menos\"; otoscopía normal. Antecedente de sordera derecha desde la infancia (parotiditis). Se deriva a otorrinolaringología.\r\n{{-45}} Nueva crisis de vértigo de 3 horas, con el oído izquierdo tapado.\r\n{{-15}} Otorrinolaringólogo: otoscopía normal. Solicita evaluación auditiva completa, electrococleografía y evaluación vestibular."
+ }
+}

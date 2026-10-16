@@ -1,0 +1,881 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "gjb2",
+   "OI": "gjb2"
+  },
+  "edad": 3,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "severa",
+   "OI": "severa"
+  },
+  "anamnesis": {
+   "otros": "Adrián tiene 3 años y viene con su mamá a su control de audición. Al nacer no pasó el tamizaje auditivo en ninguno de los dos oídos, y a los dos meses los potenciales confirmaron una hipoacusia en ambos. El estudio genético mostró dos copias de la misma variante del gen de la conexina 26 (GJB2). Usa audífonos en los dos oídos desde los 5 meses, va a un jardín infantil y tiene fonoaudióloga. Dice frases de dos palabras y entiende órdenes simples. La mamá y el papá oyen bien; un primo de la mamá es sordo desde niño. Hace unos dos meses la mamá nota que, con los audífonos puestos, ya no se da vuelta cuando lo llaman desde la cocina, y la educadora dice que en el jardín está \"más en su mundo\". No ha tenido otitis ni resfríos en el último mes. La mamá está embarazada de 14 semanas y quiere saber si su próximo hijo puede nacer igual.",
+   "historia": "{{-1125}} Tamizaje auditivo neonatal con emisiones otoacústicas: refiere en ambos oídos. Repetición al mes: refiere en ambos oídos.\n{{-1065}} PEAT con click y tone burst: umbral de la onda V en 70 dB nHL en ambos oídos; timpanometría con sonda de 1.000 Hz normal. Hipoacusia sensorioneural bilateral.\n{{-1040}} Genética: homocigoto para c.35delG en GJB2. Hipoacusia no sindrómica autosómica recesiva. Consejo genético a los padres.\n{{-980}} Adaptación de audífonos retroauriculares bilaterales.\n{{-365}} Audiometría por refuerzo visual con insertos: niveles mínimos de respuesta de 60 a 65 dB HL de 500 a 4.000 Hz en ambos oídos.\n{{-60}} Pediatra: la mamá nota que responde menos con los audífonos. Deriva a control audiológico.",
+   "hist": [
+    "hipoacusia_familiar"
+   ],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 3113995489,
+ "data": {
+  "gender": 0,
+  "id": 9489,
+  "Aerea": [
+   [
+    80,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    90
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    90,
+    90
+   ]
+  ],
+  "Osea": [
+   [
+    80,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    90
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    90,
+    90
+   ]
+  ],
+  "LDL": [
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    80,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    90
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    90,
+    90
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    80,
+    75
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    90
+   ],
+   [
+    85,
+    90
+   ],
+   [
+    90,
+    90
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 3,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.4,
+   0.84,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 110,
+    "percentage": 52
+   },
+   {
+    "int": 110,
+    "percentage": 52
+   }
+  ],
+  "SDT": [
+   75,
+   75
+  ],
+  "SRT": [
+   80,
+   80
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     105,
+     110
+    ],
+    [
+     100,
+     100
+    ],
+    [
+     105,
+     105
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     115,
+     115
+    ],
+    [
+     110,
+     110
+    ],
+    [
+     110,
+     110
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     115,
+     115
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": true,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Adrián tiene 3 años y viene con su mamá a su control de audición. Al nacer no pasó el tamizaje auditivo en ninguno de los dos oídos, y a los dos meses los potenciales confirmaron una hipoacusia en ambos. El estudio genético mostró dos copias de la misma variante del gen de la conexina 26 (GJB2). Usa audífonos en los dos oídos desde los 5 meses, va a un jardín infantil y tiene fonoaudióloga. Dice frases de dos palabras y entiende órdenes simples. La mamá y el papá oyen bien; un primo de la mamá es sordo desde niño. Hace unos dos meses la mamá nota que, con los audífonos puestos, ya no se da vuelta cuando lo llaman desde la cocina, y la educadora dice que en el jardín está \"más en su mundo\". No ha tenido otitis ni resfríos en el último mes. La mamá está embarazada de 14 semanas y quiere saber si su próximo hijo puede nacer igual.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Adrián",
+     "edad": 3,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 25,
+     "confiabilidad": 73,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amvb84dxirr",
+     "rol": "madre",
+     "nombre": "Rosa Salazar",
+     "edad": 40,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 40,
+     "conciencia": 80,
+     "confiabilidad": 64,
+     "version": "",
+     "comportamiento": "callada, deja hablar al paciente y solo corrige lo que sabe",
+     "disposicion": 1
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 105
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 100,
+     "tone_burst_1000Hz": 95,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 95,
+     "nb_ce_chirp_ls_500Hz": 95,
+     "nb_ce_chirp_ls_1000Hz": 90,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 95,
+     "click": 95,
+     "ce_chirp": 90,
+     "ce_chirp_ls": 90
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.27,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1997,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.01,
+      "amp": -0.11
+     },
+     "onda_III": {
+      "lat": 0.07,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.08,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 105,
+     "tone_burst_1000Hz": 95,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 95,
+     "nb_ce_chirp_ls_500Hz": 100,
+     "nb_ce_chirp_ls_1000Hz": 90,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 95,
+     "click": 95,
+     "ce_chirp": 90,
+     "ce_chirp_ls": 90
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.22,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2391,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.13,
+      "amp": -0.1
+     },
+     "onda_III": {
+      "lat": 0.01,
+      "amp": -0.04
+     },
+     "onda_V": {
+      "lat": 0.03,
+      "amp": -0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "child",
+    "baseline": {
+     "I": {
+      "lat": 1.48,
+      "amp": 0.239
+     },
+     "III": {
+      "lat": 3.5,
+      "amp": 0.282
+     },
+     "V": {
+      "lat": 5.5,
+      "amp": 0.41
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.9,
+    "sello_pct": 76,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.6,
+    "sello_pct": 72,
+    "variabilidad_db": 3.1,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:10:32+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Adrián Fernando",
+   "apellido": "Salazar Díaz",
+   "rut": "27408228",
+   "fecha_nac": "14-09-2023"
+  },
+  "historia_clinica": "{{-1125}} Tamizaje auditivo neonatal con emisiones otoacústicas: refiere en ambos oídos. Repetición al mes: refiere en ambos oídos.\r\n{{-1065}} PEAT con click y tone burst: umbral de la onda V en 70 dB nHL en ambos oídos; timpanometría con sonda de 1.000 Hz normal. Hipoacusia sensorioneural bilateral.\r\n{{-1040}} Genética: homocigoto para c.35delG en GJB2. Hipoacusia no sindrómica autosómica recesiva. Consejo genético a los padres.\r\n{{-980}} Adaptación de audífonos retroauriculares bilaterales.\r\n{{-365}} Audiometría por refuerzo visual con insertos: niveles mínimos de respuesta de 60 a 65 dB HL de 500 a 4.000 Hz en ambos oídos.\r\n{{-60}} Pediatra: la mamá nota que responde menos con los audífonos. Deriva a control audiológico."
+ }
+}

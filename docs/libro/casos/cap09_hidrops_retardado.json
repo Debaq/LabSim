@@ -1,0 +1,44 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "parotiditis",
+      "OI": "hidrops_retardado"
+    },
+    "edad": 54,
+    "sexo": "hombre",
+    "semilla": 3,
+    "anamnesis": {
+      "otros": "Tiene 54 años y atiende el mesón de una ferretería. Por el oído derecho no oye desde los seis años, cuando tuvo paperas; siempre se las arregló con el izquierdo y nunca usó audífono. Hace unos ocho meses tuvo la primera crisis: despertó con todo girando, vomitó y estuvo dos horas sin poder levantarse. Desde entonces ha tenido otras dos. Lo que más lo asusta es que, antes y después de cada crisis, el oído izquierdo se le tapa \"como en un avión\" y por unos días no entiende a los clientes ni el teléfono; después vuelve a oír, pero no sabe si tan bien como antes. No le zumba ningún oído. Entre crisis anda bien, pero ya no maneja de noche por miedo a que le dé una.",
+      "historia": "{{-240}} Servicio de urgencia: vértigo rotatorio de 2 horas con vómitos; se trata con antieméticos, alta al ceder.\n{{-150}} Médico general: oído izquierdo tapado de varios días y \"oye menos\"; otoscopía normal. Antecedente de sordera derecha desde la infancia (parotiditis). Se deriva a otorrinolaringología.\n{{-45}} Nueva crisis de vértigo de 3 horas, con el oído izquierdo tapado.\n{{-15}} Otorrinolaringólogo: otoscopía normal. Solicita evaluación auditiva completa, electrococleografía y evaluación vestibular.",
+      "hist": [],
+      "medicamentos": "Dimenhidrinato 50 mg cuando tiene crisis",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

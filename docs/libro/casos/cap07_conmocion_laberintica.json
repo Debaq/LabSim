@@ -1,0 +1,34 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "conmocion_laberintica",
+      "OI": "conmocion_laberintica"
+    },
+    "edad": 19,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 19 años y estudia diseño. Hace tres semanas se cayó de la bicicleta de montaña bajando un cerro y se golpeó fuerte la cabeza contra una roca, con el casco puesto. Perdió el conocimiento unos segundos. Desde que despertó en la ambulancia siente los dos oídos \"apagados\" y un zumbido parejo en ambos, que no se le quita. Los primeros días andaba algo mareado, pero eso se le pasó. Le cuesta entender a sus compañeros en la cafetería y en las clases con ruido; en la casa, conversando, oye bien. No le salió sangre ni líquido por los oídos. No trabaja con ruido, no usa audífonos a volumen alto y no dispara. El verano pasado le hicieron una audiometría para un trabajo de temporada y salió normal.",
+      "historia": "{{-21}} Servicio de urgencia: traumatismo encefalocraneano por caída en bicicleta, con pérdida de conciencia breve. Tomografía de cerebro y de peñascos sin fractura ni sangrado. Otoscopía sin sangre en el conducto ni detrás del tímpano. Observación por 24 horas.\n{{-8}} Médico general: oídos \"apagados\" y zumbido bilateral desde el accidente; otoscopía normal. Se deriva a otorrinolaringología.\n{{-2}} Otorrinolaringólogo: probable conmoción laberíntica bilateral. Solicita audiometría, impedanciometría y emisiones otoacústicas, y la audiometría del año pasado para comparar.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

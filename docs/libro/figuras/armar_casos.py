@@ -167,14 +167,24 @@ async def armar(c, nombre, p):
                                ".map(function(e){return e.name + ' (' + e.validationMessage + ')';}).join(', ')")
         if invalidos:
             raise RuntimeError(f'{nombre}: el formulario no valida: {invalidos}')
-        c.eventos.clear()
-        await c.js("document.querySelector('#case-form button[value=\"create_case\"]').click()")
-        try:
-            await c.esperar('Page.loadEventFired', 20)
-        except TimeoutError:
-            dialogo = next((e for e in c.eventos if e.get('method') == 'Page.javascriptDialogOpening'), None)
-            raise RuntimeError(f"{nombre}: no se envió el formulario"
-                               + (f" (diálogo: {dialogo['params'].get('message')})" if dialogo else ''))
+        # Con el equipo cargado (varios armados en paralelo) el editor sigue
+        # derivando campos un rato y el primer clic a veces no envía: se espera
+        # y, si no salió nada, se reintenta (solo si el caso no se creó).
+        await asyncio.sleep(3)
+        for intento in range(3):
+            c.eventos.clear()
+            await c.js("document.querySelector('#case-form button[value=\"create_case\"]').click()")
+            try:
+                await c.esperar('Page.loadEventFired', 30)
+                break
+            except TimeoutError:
+                if ultimo_id() > antes:
+                    break   # se guardó aunque la página no avisó
+                dialogo = next((e for e in c.eventos if e.get('method') == 'Page.javascriptDialogOpening'), None)
+                if dialogo or intento == 2:
+                    raise RuntimeError(f"{nombre}: no se envió el formulario"
+                                       + (f" (diálogo: {dialogo['params'].get('message')})" if dialogo else ''))
+                await asyncio.sleep(3)
         await asyncio.sleep(0.3)
         errores = await c.js("[].map.call(document.querySelectorAll('.error, .alert-error, .flash-error'),"
                              " function(e){return e.textContent.trim();}).join(' | ')")

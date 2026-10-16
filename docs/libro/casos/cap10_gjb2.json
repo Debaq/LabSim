@@ -1,0 +1,50 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "gjb2",
+      "OI": "gjb2"
+    },
+    "edad": 3,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "severa",
+      "OI": "severa"
+    },
+    "anamnesis": {
+      "otros": "Adrián tiene 3 años y viene con su mamá a su control de audición. Al nacer no pasó el tamizaje auditivo en ninguno de los dos oídos, y a los dos meses los potenciales confirmaron una hipoacusia en ambos. El estudio genético mostró dos copias de la misma variante del gen de la conexina 26 (GJB2). Usa audífonos en los dos oídos desde los 5 meses, va a un jardín infantil y tiene fonoaudióloga. Dice frases de dos palabras y entiende órdenes simples. La mamá y el papá oyen bien; un primo de la mamá es sordo desde niño. Hace unos dos meses la mamá nota que, con los audífonos puestos, ya no se da vuelta cuando lo llaman desde la cocina, y la educadora dice que en el jardín está \"más en su mundo\". No ha tenido otitis ni resfríos en el último mes. La mamá está embarazada de 14 semanas y quiere saber si su próximo hijo puede nacer igual.",
+      "historia": "{{-1125}} Tamizaje auditivo neonatal con emisiones otoacústicas: refiere en ambos oídos. Repetición al mes: refiere en ambos oídos.\n{{-1065}} PEAT con click y tone burst: umbral de la onda V en 70 dB nHL en ambos oídos; timpanometría con sonda de 1.000 Hz normal. Hipoacusia sensorioneural bilateral.\n{{-1040}} Genética: homocigoto para c.35delG en GJB2. Hipoacusia no sindrómica autosómica recesiva. Consejo genético a los padres.\n{{-980}} Adaptación de audífonos retroauriculares bilaterales.\n{{-365}} Audiometría por refuerzo visual con insertos: niveles mínimos de respuesta de 60 a 65 dB HL de 500 a 4.000 Hz en ambos oídos.\n{{-60}} Pediatra: la mamá nota que responde menos con los audífonos. Deriva a control audiológico.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": false,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "campo_libre",
+      "ganancia": {
+        "250": 25,
+        "500": 35,
+        "1000": 40,
+        "2000": 45,
+        "3000": 45,
+        "4000": 50,
+        "6000": 45
+      }
+    }
+  ]
+}

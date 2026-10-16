@@ -1,0 +1,863 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "post_radioterapia",
+   "OI": "normal"
+  },
+  "edad": 63,
+  "sexo": "hombre",
+  "semilla": 5,
+  "anamnesis": {
+   "otros": "Tiene 63 años y es jubilado; trabajó como chofer de micro. Hace dos años le operaron un cáncer de la parótida derecha y después recibió seis semanas de radioterapia en ese lado de la cara y el cuello. Hacia el final de la radioterapia empezó a sentir el oído derecho tapado, \"como en el avión\", y eso nunca se le pasó del todo. Desde hace unos meses siente que por ese oído oye cada vez menos: ya no contesta el celular por la derecha. No tiene pitidos ni mareos. Le quedó la boca seca y la piel del lado derecho del cuello más dura y oscura; la cara la mueve bien. Del oído izquierdo oye bien. Nunca tuvo otitis de adulto.",
+   "historia": "{{-760}} Cirujano de cabeza y cuello: carcinoma de parótida derecha. Parotidectomía total derecha con preservación del nervio facial.\n{{-700}} Radioterapeuta: radioterapia postoperatoria de la región parotídea y el cuello derechos, seis semanas. Sin quimioterapia.\n{{-660}} Control al terminar la radioterapia: radiodermitis cervical derecha, xerostomía. Refiere oído derecho tapado.\n{{-180}} Oncólogo, control semestral: sin recidiva. Refiere que oye menos por el oído derecho. Deriva a otorrinolaringología.\n{{-12}} Otorrinolaringólogo: membrana timpánica derecha opaca y retraída, sin perforación; nasofibroscopía sin lesiones. Solicita audiometría e impedanciometría.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Enalapril 10 mg cada 12 horas; saliva artificial",
+   "cirugias": "Parotidectomía total derecha hace dos años"
+  }
+ },
+ "semilla": 5,
+ "data": {
+  "gender": 0,
+  "id": 9976,
+  "Aerea": [
+   [
+    35,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    10
+   ],
+   [
+    55,
+    15
+   ],
+   [
+    65,
+    20
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    90,
+    35
+   ]
+  ],
+  "Osea": [
+   [
+    10,
+    5
+   ],
+   [
+    15,
+    5
+   ],
+   [
+    20,
+    5
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    40,
+    15
+   ],
+   [
+    45,
+    20
+   ],
+   [
+    60,
+    25
+   ],
+   [
+    65,
+    30
+   ],
+   [
+    75,
+    35
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    35,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    10
+   ],
+   [
+    55,
+    15
+   ],
+   [
+    65,
+    20
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    90,
+    35
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    10,
+    5
+   ],
+   [
+    15,
+    5
+   ],
+   [
+    20,
+    5
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    40,
+    15
+   ],
+   [
+    45,
+    20
+   ],
+   [
+    60,
+    25
+   ],
+   [
+    65,
+    30
+   ],
+   [
+    75,
+    35
+   ]
+  ],
+  "Z_OD": "B",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "negativo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "negativo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 63,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.97,
+   1.09,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 80,
+    "percentage": 84
+   },
+   {
+    "int": 40,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   40,
+   0
+  ],
+  "SRT": [
+   45,
+   5
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     120
+    ],
+    [
+     130,
+     110
+    ],
+    [
+     130,
+     110
+    ],
+    [
+     130,
+     105
+    ],
+    [
+     130,
+     110
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Disfunción tubaria",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Enalapril 10 mg cada 12 horas; saliva artificial",
+   "cirugias": "Parotidectomía total derecha hace dos años",
+   "otros": "Tiene 63 años y es jubilado; trabajó como chofer de micro. Hace dos años le operaron un cáncer de la parótida derecha y después recibió seis semanas de radioterapia en ese lado de la cara y el cuello. Hacia el final de la radioterapia empezó a sentir el oído derecho tapado, \"como en el avión\", y eso nunca se le pasó del todo. Desde hace unos meses siente que por ese oído oye cada vez menos: ya no contesta el celular por la derecha. No tiene pitidos ni mareos. Le quedó la boca seca y la piel del lado derecho del cuello más dura y oscura; la cara la mueve bien. Del oído izquierdo oye bien. Nunca tuvo otitis de adulto.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Pablo",
+     "edad": 63,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 59,
+     "confiabilidad": 80,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 75,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 65,
+     "tone_burst_1000Hz": 60,
+     "tone_burst_2000Hz": 65,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 60,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 60,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 75,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.2,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2112,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.34,
+      "amp": -0.1
+     },
+     "onda_III": {
+      "lat": 0.34,
+      "amp": -0.11
+     },
+     "onda_V": {
+      "lat": 0.34,
+      "amp": -0.12
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 30,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 25,
+     "tone_burst_1000Hz": 25,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 30,
+     "nb_ce_chirp_ls_500Hz": 20,
+     "nb_ce_chirp_ls_1000Hz": 20,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 30,
+     "click": 30,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 45,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 45,
+     "click": 45,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.24,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1621,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.02,
+      "amp": 0.02
+     },
+     "onda_III": {
+      "lat": 0,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0.04,
+      "amp": 0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 40,
+     "1000": 36,
+     "1500": 40.7,
+     "2000": 44,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 5.7,
+    "sello_pct": 61,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 6,
+     "4000": 12,
+     "6000": 18,
+     "8000": 24
+    },
+    "atten_db": 0,
+    "ruido_db": 1.9,
+    "sello_pct": 89,
+    "variabilidad_db": 2.9,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:11:36+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Pablo Gabriel",
+   "apellido": "Rojas García",
+   "rut": "9280084",
+   "fecha_nac": "22-03-1963"
+  },
+  "historia_clinica": "{{-760}} Cirujano de cabeza y cuello: carcinoma de parótida derecha. Parotidectomía total derecha con preservación del nervio facial.\r\n{{-700}} Radioterapeuta: radioterapia postoperatoria de la región parotídea y el cuello derechos, seis semanas. Sin quimioterapia.\r\n{{-660}} Control al terminar la radioterapia: radiodermitis cervical derecha, xerostomía. Refiere oído derecho tapado.\r\n{{-180}} Oncólogo, control semestral: sin recidiva. Refiere que oye menos por el oído derecho. Deriva a otorrinolaringología.\r\n{{-12}} Otorrinolaringólogo: membrana timpánica derecha opaca y retraída, sin perforación; nasofibroscopía sin lesiones. Solicita audiometría e impedanciometría."
+ }
+}

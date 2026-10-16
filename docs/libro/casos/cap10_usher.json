@@ -1,0 +1,37 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "usher",
+      "OI": "usher"
+    },
+    "edad": 17,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Carmen tiene 17 años y está en cuarto medio. Usa audífonos en los dos oídos desde los 5 años, cuando en el jardín notaron que no oía bien; donde nació no se hacía tamizaje auditivo. Le va bien en el colegio y se sienta adelante para leerles los labios a los profesores. Desde hace unos dos años le cuesta ver de noche: en una calle oscura o al entrar al cine queda \"ciega\" por un rato, y se ha golpeado con muebles y con gente que viene por el lado. El oftalmólogo le encontró una retinosis pigmentaria y le dijo que la audición y la vista podían ser \"parte de lo mismo\". Viene a control de audición. Sus papás y su hermano menor oyen y ven bien. Nunca ha tenido mareos; caminó al año y aprendió a andar en bicicleta a los 5 sin problemas.",
+      "historia": "{{-4380}} Audiometría: hipoacusia sensorioneural bilateral moderada, descendente. Adaptación de audífonos.\n{{-2190}} Control audiológico: sin cambios significativos respecto de la evaluación anterior.\n{{-60}} Oftalmología: ceguera nocturna y reducción del campo visual periférico; fondo de ojo con retinosis pigmentaria. Sospecha síndrome de Usher; deriva a otorrinolaringología y genética.\n{{-20}} Otorrinolaringólogo: solicita audiometría, logoaudiometría y evaluación de la función vestibular.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

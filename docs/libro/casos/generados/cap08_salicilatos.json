@@ -1,0 +1,870 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "salicilatos",
+   "OI": "salicilatos"
+  },
+  "edad": 57,
+  "sexo": "mujer",
+  "anamnesis": {
+   "otros": "Tiene 57 años y es dueña de un almacén de barrio, donde pasa el día de pie. Tiene artrosis en las dos rodillas. Hace tres semanas el dolor empeoró y, como el antiinflamatorio que le habían dado le caía mal al estómago, empezó a tomar aspirina por su cuenta: dos comprimidos de 500 mg cada seis horas, todos los días. Hace unos diez días le apareció un silbido agudo en los dos oídos, parejo, que no se le quita en todo el día, y siente que oye \"como con algodones\": tiene que pedir que le repitan en el almacén y subió el volumen de la radio. No ha tenido mareos, dolor ni secreción de oídos. Antes de esto oía bien; nunca ha trabajado con ruido. Ayer el otorrinolaringólogo le suspendió la aspirina y se tomó la última dosis en la mañana.",
+   "historia": "{{-1095}} Medicina del trabajo, operativo preventivo: audiometría de tamizaje normal en ambos oídos.\n{{-400}} Traumatólogo: gonartrosis bilateral. Indica ibuprofeno y kinesiterapia; suspende el ibuprofeno por dolor epigástrico.\n{{-5}} Médico general: acúfeno bilateral y sensación de oído tapado de una semana. Otoscopía normal. Deriva a otorrinolaringología.\n{{-1}} Otorrinolaringólogo: otoscopía normal. Consumo de ácido acetilsalicílico de 4 g al día por tres semanas, sin indicación médica. Sospecha ototoxicidad por salicilatos: suspende la aspirina. Solicita audiometría y emisiones otoacústicas ahora y control en una semana.",
+   "hist": [
+    "ototoxicos",
+    "hta"
+   ],
+   "medicamentos": "Ácido acetilsalicílico 500 mg, dos comprimidos cada 6 horas por tres semanas, por su cuenta (suspendido ayer); losartán 50 mg al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 2889521562,
+ "data": {
+  "gender": 1,
+  "id": 9562,
+  "Aerea": [
+   [
+    20,
+    25
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    20,
+    25
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    35
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    35,
+    40
+   ]
+  ],
+  "Osea": [
+   [
+    20,
+    25
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    20,
+    25
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    35
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    35,
+    40
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    20,
+    25
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    20,
+    25
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    35
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    35,
+    40
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    20,
+    25
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    20,
+    25
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    35
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    35,
+    40
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 57,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.09,
+   1.73,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 55,
+    "percentage": 96
+   },
+   {
+    "int": 55,
+    "percentage": 92
+   }
+  ],
+  "SDT": [
+   15,
+   20
+  ],
+  "SRT": [
+   20,
+   25
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     95,
+     90
+    ],
+    [
+     90,
+     85
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     95,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     100
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     100
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": true,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Ácido acetilsalicílico 500 mg, dos comprimidos cada 6 horas por tres semanas, por su cuenta (suspendido ayer); losartán 50 mg al día",
+   "cirugias": "",
+   "otros": "Tiene 57 años y es dueña de un almacén de barrio, donde pasa el día de pie. Tiene artrosis en las dos rodillas. Hace tres semanas el dolor empeoró y, como el antiinflamatorio que le habían dado le caía mal al estómago, empezó a tomar aspirina por su cuenta: dos comprimidos de 500 mg cada seis horas, todos los días. Hace unos diez días le apareció un silbido agudo en los dos oídos, parejo, que no se le quita en todo el día, y siente que oye \"como con algodones\": tiene que pedir que le repitan en el almacén y subió el volumen de la radio. No ha tenido mareos, dolor ni secreción de oídos. Antes de esto oía bien; nunca ha trabajado con ruido. Ayer el otorrinolaringólogo le suspendió la aspirina y se tomó la última dosis en la mañana.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Natalia",
+     "edad": 57,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 83,
+     "confiabilidad": 59,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Silbido",
+   "frecuencia": 4000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 120
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 40,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 35,
+     "tone_burst_4000Hz": 35,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 30,
+     "nb_ce_chirp_ls_4000Hz": 35,
+     "click": 40,
+     "ce_chirp": 30,
+     "ce_chirp_ls": 30
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": 50,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 45,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 55,
+     "ce_chirp": 45,
+     "ce_chirp_ls": 45
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.2,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1847,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.04,
+      "amp": -0.13
+     },
+     "onda_III": {
+      "lat": 0.1,
+      "amp": -0.06
+     },
+     "onda_V": {
+      "lat": 0.07,
+      "amp": 0.05
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 40,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 40,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 40,
+     "click": 40,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 55,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": null,
+     "ce_chirp": 50,
+     "ce_chirp_ls": 50
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2046,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.03,
+      "amp": -0.21
+     },
+     "onda_III": {
+      "lat": 0.07,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0.03,
+      "amp": 0.07
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 3.6,
+     "1000": 9,
+     "1500": 9,
+     "2000": 9,
+     "3000": 14.4,
+     "4000": 14.4,
+     "6000": 19.8,
+     "8000": 19.8
+    },
+    "atten_db": 0,
+    "ruido_db": 1.6,
+    "sello_pct": 89,
+    "variabilidad_db": 1.9,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 10.5,
+     "1000": 10.5,
+     "1500": 13.8,
+     "2000": 16.2,
+     "3000": 16.2,
+     "4000": 21.9,
+     "6000": 27.6,
+     "8000": 27.6
+    },
+    "atten_db": 0,
+    "ruido_db": 3.2,
+    "sello_pct": 89,
+    "variabilidad_db": 2.3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:11:40+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Natalia Patricia",
+   "apellido": "Luna Estrada",
+   "rut": "11300162",
+   "fecha_nac": "17-12-1969"
+  },
+  "historia_clinica": "{{-1095}} Medicina del trabajo, operativo preventivo: audiometría de tamizaje normal en ambos oídos.\r\n{{-400}} Traumatólogo: gonartrosis bilateral. Indica ibuprofeno y kinesiterapia; suspende el ibuprofeno por dolor epigástrico.\r\n{{-5}} Médico general: acúfeno bilateral y sensación de oído tapado de una semana. Otoscopía normal. Deriva a otorrinolaringología.\r\n{{-1}} Otorrinolaringólogo: otoscopía normal. Consumo de ácido acetilsalicílico de 4 g al día por tres semanas, sin indicación médica. Sospecha ototoxicidad por salicilatos: suspende la aspirina. Solicita audiometría y emisiones otoacústicas ahora y control en una semana."
+ }
+}

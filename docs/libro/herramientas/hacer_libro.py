@@ -71,7 +71,7 @@ NOMBRE_FIGURA = {
     'audiograma': 'Audiometría tonal', 'acumetria': 'Acumetría', 'logoaudiometria': 'Logoaudiometría', 'timpanograma': 'Timpanometría',
     'reflejos': 'Reflejos estapediales', 'teoae': 'Emisiones otoacústicas transitorias',
     'dpoae': 'Productos de distorsión', 'abr': 'Potenciales evocados auditivos de tronco',
-    'ecochg': 'Electrococleografía', 'vemp': 'VEMP',
+    'ecochg': 'Electrococleografía', 'vemp': 'VEMP', 'campo_libre': 'Campo libre',
 }
 ANTECEDENTES = {
     'hipoacusia_familiar': 'hipoacusia familiar', 'ototoxicos': 'ototóxicos', 'trauma_acustico': 'trauma acústico',
@@ -106,7 +106,7 @@ def hace(dias):
         return f'Hace {n} año{"s" if n > 1 else ""}'
     if d >= 60:
         return f'Hace {round(d / 30)} meses'
-    return f'Hace {d} días'
+    return f'Hace {d} día{"s" if d != 1 else ""}'
 
 
 def historia(texto):
@@ -418,7 +418,7 @@ def capitulo(md_texto):
 
     # En orden de aparición: la ficha numera el caso y sus figuras toman ese número
     patron = re.compile(r'\{\{caso\s+([a-z0-9_]+)\}\}|\{\{resultados\s+([a-z0-9_]+)\}\}'
-                        r'|^:::figura\s+([a-z0-9_]+)\s+([a-z]+)(?:\s+(\d+))?\s*\n(.*?)^:::\s*$', re.M | re.S)
+                        r'|^:::figura\s+([a-z0-9_]+)\s+([a-z_]+)(?:\s+(\d+))?\s*\n(.*?)^:::\s*$', re.M | re.S)
 
     def img(ruta, titulo, cuerpo_img):
         cuerpo_img = re.sub(r'<!--.*?-->', '', cuerpo_img, flags=re.S)   # notas internas (p. ej. el pedido del dibujo)

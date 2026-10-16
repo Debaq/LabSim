@@ -1,0 +1,38 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "pendred",
+      "OI": "pendred"
+    },
+    "edad": 6,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Andrés tiene 6 años y está en primero básico. Lo trae su mamá porque hace diez días se cayó de espaldas en el patio del colegio, se golpeó la cabeza, vomitó una vez y estuvo mareado esa tarde; desde entonces \"no oye nada\", aunque tenga puestos sus audífonos. Pasó el tamizaje auditivo al nacer. A los 3 años la educadora del jardín notó que no respondía cuando lo llamaban, le encontraron una hipoacusia en los dos oídos y usa audífonos desde los 4. La mamá cuenta que no es la primera vez: el año pasado, después de un resfrío fuerte, también oyó peor por unas semanas y se recuperó solo en parte. No ha tenido otitis. En la familia nadie es sordo. Camina y corre bien, y hace poco aprendió a andar en bicicleta sin rueditas.",
+      "historia": "{{-2165}} Tamizaje auditivo neonatal con emisiones otoacústicas: pasa en ambos oídos.\n{{-1080}} Audiometría condicionada por juego: hipoacusia sensorioneural moderada bilateral, 40 a 55 dB HL; gap aéreo-óseo de 20 dB en 250 Hz con timpanograma A, atribuido a la técnica. Se indican audífonos.\n{{-365}} Otorrinolaringólogo: baja auditiva después de un cuadro respiratorio; al mes, recuperación parcial.\n{{-10}} Servicio de urgencia: traumatismo craneano leve en el colegio, sin pérdida de conciencia; un vómito. Observación y alta.\n{{-3}} Otorrinolaringólogo: baja auditiva bilateral desde el golpe. Solicita audiometría e impedanciometría; pedirá imágenes de oídos.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": false,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

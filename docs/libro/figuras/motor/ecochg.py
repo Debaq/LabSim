@@ -57,6 +57,11 @@ def dibujar(caso, oidos=('OD', 'OI'), nivel=90, ms_max=5.0):
             s.texto(x0 + pw / 2, mt + ph / 2, 'Sin ECochG en el caso', E.T_ROTULO, E.TENUE)
             continue
         m = r['medida']
+        if 'base' not in m:
+            # Cófosis: hay trazo, pero no complejo que medir (measure_complex devuelve solo 'faltan')
+            s.trazo([(X(t), Y(v)) for t, v in zip(r['t'], r['y']) if t <= ms_max], col, E.LINEA)
+            s.texto(x0 + pw / 2, mt + ph + 48, 'Sin respuesta identificable', E.T_ROTULO, E.TENUE)
+            continue
         base = m['base']
         s.linea(x0, Y(base), x0 + pw, Y(base), E.TINTA_2, 0.8, 'stroke-dasharray="3 3"')
         s.trazo([(X(t), Y(v)) for t, v in zip(r['t'], r['y']) if t <= ms_max], col, E.LINEA)

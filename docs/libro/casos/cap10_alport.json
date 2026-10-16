@@ -1,0 +1,39 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "alport",
+      "OI": "alport"
+    },
+    "edad": 15,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "semilla": 7,
+    "anamnesis": {
+      "otros": "Javier tiene 15 años y está en segundo medio. Viene con su mamá porque desde hace un año le cuesta seguir las clases: entiende al profesor cuando está adelante, pero no a los compañeros que hablan desde atrás. Sus amigos le dicen que pone el volumen del celular muy alto. A veces siente un pitido en los dos oídos, sobre todo en la noche, que va y viene. Desde chico tiene sangre en la orina en los exámenes de rutina, y hace dos años el nefrólogo le encontró además proteínas en la orina; está en control y toma un remedio para proteger el riñón. Un tío por parte de la mamá se dializa desde los 30 años y usa audífonos. La mamá tiene \"un poco de sangre en la orina\" en los exámenes, pero el riñón le funciona bien y oye normal. Nunca ha tenido otitis ni ha estado expuesto a ruido fuerte.",
+      "historia": "{{-3650}} Pediatra: hematuria microscópica en examen de orina de rutina. Se deriva a nefrología.\n{{-730}} Nefrología: hematuria y proteinuria. Sospecha de síndrome de Alport por la historia familiar; inicia enalapril y solicita estudio genético.\n{{-30}} Nefrología: no oye bien en clases. Solicita evaluación audiológica y control oftalmológico.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "Enalapril, indicado por nefrología",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

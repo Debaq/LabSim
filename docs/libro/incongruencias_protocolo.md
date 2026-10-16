@@ -44,11 +44,11 @@ Estado: **libro** = lo que dice hoy el texto. **Decisión** = para el equipo.
 | 13 | H3 | Tolerancia al repetir 1 kHz | no la fija | 5 dB | ASHA 2005; BSA 2018 | A | |
 | 13b | H3 | Método de búsqueda del umbral | "método combinado": baja 10, sube 5; umbral = 2 de 3 tonos a la misma intensidad (ejemplo de la experta: 40 ✓, 30 ✓, 20 ✗, 20 ✗, 25 ✓, 25 ✓ → 25) | "método ascendente" de ASHA/ISO: mismos pasos, umbral = 2 de 3 ascensos (figura H3 actual) | ASHA 2005; ISO 8253-1 | P · revertir | en discusión: el texto sigue el ascendente; la Figura H3.8 muestra las cuatro formas (ascendente, descendente, horquilla y combinada acortada, la del laboratorio) |
 | 14 | H3 | Screening | "umbral si oye todos los estímulos a 20 dB" | pasa/no pasa a nivel fijo, no da umbral | ASHA 1997 | E | |
-| 15 | H4 | Atenuación interaural aérea | tabla por frecuencia 35-50 dB | regla de 40 dB (supraaural) y 55 (inserto); la tabla queda como convención de LabSim | BSA 2018; Munro y Agnew 1999 | P · revertir | |
+| 15 | H4, cap. 7 | Atenuación interaural aérea | tabla por frecuencia 35-50 dB | regla de 40 dB (supraaural) y 55 (inserto); la tabla queda como convención de LabSim | BSA 2018; Munro y Agnew 1999 | P · revertir | |
 | 16 | H4 | CE del ruido blanco | 15 dB | LabSim usa 10; sin fuente verificada para ninguno | — | A · verificar | |
 | 17 | H4 | Cuándo enmascarar la logo | diferencia mayor a 45 dB "de intensidad de evaluación" | contra el promedio óseo del no evaluado | BSA 2018 regla 3 | A | |
 | 18 | H4 | Máximo de enmascaramiento óseo | UO evaluado + AI ósea (0) | UO evaluado + AI del fono que da el ruido | BSA 2018 §8.9.4 | E | |
-| 19 | H4 | Meseta | pasos de 5 dB, 4 intensidades | pasos de 10, 4 mediciones con 3 iguales; 5 si se acorta | BSA 2018 §8.8 | P · revertir | |
+| 19 | H4 (cap. 7 la describe sin paso ni número) | Meseta | pasos de 5 dB, 4 intensidades | pasos de 10, 4 mediciones con 3 iguales; 5 si se acorta | BSA 2018 §8.8 | P · revertir | |
 | 20 | H4 | Corrimiento de 10 dB | sin indicación (corte en 15) | zona gris con ±5 dB | BSA 2018 §8.9.1 | A | |
 | 21 | H5 | Listas de palabras | "Palacio, 2010" | Palacio 2000 (tesis U. de Chile) | Burdiles 2024 | A | |
 
@@ -90,6 +90,24 @@ Estado: **libro** = lo que dice hoy el texto. **Decisión** = para el equipo.
 | 38 | H10, cap. 11 | Tasa 81,1/s | "en sospecha de neuropatía" | la tasa alta busca lo retrococlear; en la neuropatía, microfónica con polaridades separadas | Hood 1998 | E | |
 | 39 | H10 | Término del informe | "hipofunción sensorioneural" | hipoacusia sensorioneural | ASHA; BIAP | A | |
 | 40 | cap. 11 | Sueño en el PEAT neurootológico | sin sueño no se hace | en el adulto basta un registro quieto; el sueño es para el lactante | — | P · revertir | |
+
+## Monitoreo y cuadros cocleares (caps. 7-10, 2026-10-16)
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 43 | cap. 8 | Frecuencias de la audiometría de alta frecuencia | fijas: 10; 12,5; 16; 18; 19 y 20 kHz | el protocolo, con el "rango sensible a la ototoxicidad" en sextos de octava en el recuadro de normas | AAA 2009; Konrad-Martin 2010 | P | |
+| 44 | cap. 8 | Logoaudiometría en el monitoreo | solo con indicación médica | el protocolo; en el recuadro, la AAA la pide en toda base | AAA 2009 | P | |
+| 45 | cap. 8 | Cierre del examen de alta frecuencia | "informarle sus resultados al acompañante (sin entregar diagnóstico)" | no se usó: en un adulto parece copiado de la plantilla pediátrica | — | E · preguntar | |
+| 46 | cap. 8 | Acumetría dentro de la alta frecuencia | "a niños mayores de 7 años" | no se usó: mismo origen aparente | — | E · preguntar | |
+| 47 | cap. 8 | Calendario y criterios de cambio | no figuran | base, controles por ciclo y posterior; criterios ASHA (20 dB en una, 10 dB en dos vecinas, 3 sin respuesta) | ASHA 1994; AAA 2009 | A | |
+| 48 | cap. 9 | Prueba de glicerol: criterio de positivo | basta uno de cinco: una frecuencia ≥15 dB, logo ≥12 %, PTP ≥10 dB, menos acúfeno o menos plenitud | el protocolo; en el recuadro, la literatura usa la mejoría de graves o de la discriminación y no los síntomas | Klockhoff y Lindblom 1966 (sin texto original: verificar) | P | |
+| 49 | cap. 9 | Prueba de glicerol: dosis | 1,2 mL/kg | el protocolo (≈1,5 g/kg, la dosis clásica, con densidad 1,26) | Klockhoff y Lindblom 1966 (verificar) | A | |
+| 50 | cap. 9 | Electrococleografía | no está en el protocolo | la configuración que implementa LabSim (timpánico, click alternado 90 dB nHL, 11,1/s, 5-3000 Hz, 1500 barridos) | Margolis 1995; Ferraro y Durrant 2006 | A · vacío | |
+
+En los caps. 7 y 10 no aparecieron incongruencias nuevas: el 7 sigue a H4 en
+la atenuación interaural y la meseta (#15, #19; si el equipo vuelve a la
+tabla del protocolo hay que cambiar también el cap. 7), y el 10 solo amplía el
+ítem "antecedentes familiares" de la anamnesis.
 
 ## Encontradas fuera del texto de los capítulos
 

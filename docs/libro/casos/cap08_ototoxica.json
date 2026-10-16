@@ -1,0 +1,34 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "ototoxica",
+      "OI": "ototoxica"
+    },
+    "edad": 31,
+    "sexo": "hombre",
+    "semilla": 3,
+    "anamnesis": {
+      "otros": "Tiene 31 años y es profesor de educación física. Hace cinco meses le encontraron un tumor en el testículo izquierdo; lo operaron y después recibió cuatro ciclos de quimioterapia, uno cada tres semanas. Antes del primer ciclo le hicieron una audiometría y le dijeron que oía bien. Fue al control de audición antes del segundo ciclo, pero no a los siguientes: vive lejos del hospital y se sentía bien. Durante el tercer ciclo empezó a sentir un siseo en los dos oídos, parejo, que ahora tiene todo el día. Terminó la quimioterapia hace diez semanas. Desde entonces le cuesta entender a los alumnos cuando hablan todos a la vez en el gimnasio, y ya no oye el pitido del microondas ni el canto de los pájaros en la mañana. Conversando de a dos, en silencio, se arregla bien. No ha tenido mareos ni dolor de oídos. Nunca ha trabajado con ruido y nadie en su familia es sordo.",
+      "historia": "{{-155}} Urólogo: tumor testicular izquierdo. Orquiectomía izquierda; biopsia: tumor germinal no seminomatoso. Deriva a oncología.\n{{-140}} Oncólogo: indica cuatro ciclos de bleomicina, etopósido y cisplatino, cada 21 días. Solicita evaluación audiológica de base antes del primer ciclo.\n{{-138}} Audiometría de base con alta frecuencia: umbrales de 0 a 10 dB HL de 125 a 8.000 Hz en ambos oídos, con respuesta hasta 16 kHz. DPOAE presentes de 1 a 8 kHz en ambos oídos.\n{{-116}} Control audiológico antes del segundo ciclo: sin cambio significativo respecto de la base.\n{{-95}} Tercer ciclo de quimioterapia. No asiste al control audiológico programado.\n{{-74}} Cuarto y último ciclo. Refiere siseo en ambos oídos desde el ciclo anterior. No asiste al control audiológico.\n{{-20}} Oncólogo, control al terminar el tratamiento: en remisión. Refiere siseo bilateral y dificultad para entender en grupo. Deriva a otorrinolaringología.\n{{-8}} Otorrinolaringólogo: otoscopía normal bilateral. Solicita audiometría con alta frecuencia y emisiones otoacústicas para comparar con la base.",
+      "hist": [
+        "ototoxicos"
+      ],
+      "medicamentos": "Ninguno. Terminó hace diez semanas cuatro ciclos de bleomicina, etopósido y cisplatino",
+      "cirugias": "Orquiectomía izquierda hace cinco meses"
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

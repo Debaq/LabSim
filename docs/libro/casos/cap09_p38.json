@@ -1,0 +1,29 @@
+{
+  "caso": "demo:38",
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "waardenburg",
+      "OI": "waardenburg"
+    },
+    "edad": 0,
+    "sexo": "mujer",
+    "edad_valor": 8,
+    "edad_unidad": "meses",
+    "grado": {
+      "OD": "profunda",
+      "OI": "profunda"
+    },
+    "anamnesis": {
+      "otros": "Lorena tiene 8 meses y la trae su mamá. Nació de término, por parto normal, sin complicaciones ni días en neonatología. No pasó el tamizaje auditivo en ninguno de los dos oídos, ni al nacer ni en la repetición, y la derivaron a diagnóstico; por la lista de espera llega recién ahora. La mamá cuenta que Lorena no se asusta con los portazos ni con la aspiradora, y que despierta cuando la tocan pero no cuando la llaman. Balbucea menos que su hermano mayor a la misma edad. Se sienta sola desde hace un mes. Nació con un mechón de pelo blanco sobre la frente y con un ojo azul y el otro café. El papá tiene el mismo mechón blanco desde chico y oye bien; la abuela paterna era sorda de un oído y tenía canas desde los veinte años.",
+      "historia": "{{-240}} Tamizaje auditivo neonatal con emisiones otoacústicas: refiere en ambos oídos.\n{{-210}} Repetición del tamizaje con emisiones: refiere en ambos oídos. Se deriva a diagnóstico audiológico.\n{{-20}} Pediatra, control de los 8 meses: no reacciona a ruidos fuertes; heterocromía de iris y mechón blanco frontal. Solicita evaluación audiológica completa e interconsulta a genética.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        90
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

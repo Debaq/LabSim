@@ -1,0 +1,889 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "alport",
+   "OI": "alport"
+  },
+  "edad": 15,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada",
+   "OI": "moderada"
+  },
+  "semilla": 7,
+  "anamnesis": {
+   "otros": "Javier tiene 15 años y está en segundo medio. Viene con su mamá porque desde hace un año le cuesta seguir las clases: entiende al profesor cuando está adelante, pero no a los compañeros que hablan desde atrás. Sus amigos le dicen que pone el volumen del celular muy alto. A veces siente un pitido en los dos oídos, sobre todo en la noche, que va y viene. Desde chico tiene sangre en la orina en los exámenes de rutina, y hace dos años el nefrólogo le encontró además proteínas en la orina; está en control y toma un remedio para proteger el riñón. Un tío por parte de la mamá se dializa desde los 30 años y usa audífonos. La mamá tiene \"un poco de sangre en la orina\" en los exámenes, pero el riñón le funciona bien y oye normal. Nunca ha tenido otitis ni ha estado expuesto a ruido fuerte.",
+   "historia": "{{-3650}} Pediatra: hematuria microscópica en examen de orina de rutina. Se deriva a nefrología.\n{{-730}} Nefrología: hematuria y proteinuria. Sospecha de síndrome de Alport por la historia familiar; inicia enalapril y solicita estudio genético.\n{{-30}} Nefrología: no oye bien en clases. Solicita evaluación audiológica y control oftalmológico.",
+   "hist": [
+    "hipoacusia_familiar"
+   ],
+   "medicamentos": "Enalapril, indicado por nefrología",
+   "cirugias": ""
+  }
+ },
+ "semilla": 7,
+ "data": {
+  "gender": 0,
+  "id": 9583,
+  "Aerea": [
+   [
+    15,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    65,
+    65
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    55,
+    60
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    40,
+    45
+   ]
+  ],
+  "Osea": [
+   [
+    15,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    65,
+    65
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    55,
+    60
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    40,
+    45
+   ]
+  ],
+  "LDL": [
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    15,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    65,
+    65
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    55,
+    60
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    40,
+    45
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    15,
+    20
+   ],
+   [
+    15,
+    20
+   ],
+   [
+    25,
+    30
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    65,
+    65
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    55,
+    60
+   ],
+   [
+    45,
+    55
+   ],
+   [
+    40,
+    45
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 15,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.76,
+   0.62,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 75,
+    "percentage": 76
+   },
+   {
+    "int": 80,
+    "percentage": 72
+   }
+  ],
+  "SDT": [
+   30,
+   35
+  ],
+  "SRT": [
+   35,
+   40
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     95
+    ],
+    [
+     95,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     100
+    ],
+    [
+     90,
+     95
+    ],
+    [
+     100,
+     95
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": true,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Enalapril, indicado por nefrología",
+   "cirugias": "",
+   "otros": "Javier tiene 15 años y está en segundo medio. Viene con su mamá porque desde hace un año le cuesta seguir las clases: entiende al profesor cuando está adelante, pero no a los compañeros que hablan desde atrás. Sus amigos le dicen que pone el volumen del celular muy alto. A veces siente un pitido en los dos oídos, sobre todo en la noche, que va y viene. Desde chico tiene sangre en la orina en los exámenes de rutina, y hace dos años el nefrólogo le encontró además proteínas en la orina; está en control y toma un remedio para proteger el riñón. Un tío por parte de la mamá se dializa desde los 30 años y usa audífonos. La mamá tiene \"un poco de sangre en la orina\" en los exámenes, pero el riñón le funciona bien y oye normal. Nunca ha tenido otitis ni ha estado expuesto a ruido fuerte.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Javier",
+     "edad": 15,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 46,
+     "confiabilidad": 68,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amvb84a2d5a",
+     "rol": "madre",
+     "nombre": "Inés Campos",
+     "edad": 44,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": false,
+     "interrumpe": 28,
+     "conciencia": 80,
+     "confiabilidad": 84,
+     "version": "",
+     "comportamiento": "insistente, repite lo que le preocupa hasta que le contestan",
+     "disposicion": 1
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": false,
+   "ruido": "Pitido",
+   "frecuencia": 2000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 105
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 70,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 60,
+     "tone_burst_2000Hz": 75,
+     "tone_burst_4000Hz": 60,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 70,
+     "nb_ce_chirp_ls_4000Hz": 60,
+     "click": 70,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 55,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.2,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2460,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.1,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.14,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": 0.05
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 75,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 50,
+     "tone_burst_1000Hz": 70,
+     "tone_burst_2000Hz": 75,
+     "tone_burst_4000Hz": 65,
+     "nb_ce_chirp_ls_500Hz": 45,
+     "nb_ce_chirp_ls_1000Hz": 65,
+     "nb_ce_chirp_ls_2000Hz": 70,
+     "nb_ce_chirp_ls_4000Hz": 65,
+     "click": 75,
+     "ce_chirp": 60,
+     "ce_chirp_ls": 60
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.28,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2131,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.05,
+      "amp": -0.12
+     },
+     "onda_III": {
+      "lat": 0.04,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0,
+      "amp": 0.05
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "child",
+    "baseline": {
+     "I": {
+      "lat": 1.48,
+      "amp": 0.239
+     },
+     "III": {
+      "lat": 3.5,
+      "amp": 0.282
+     },
+     "V": {
+      "lat": 5.5,
+      "amp": 0.41
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 10.5,
+     "1000": 33.3,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 44.7,
+     "6000": 33.3,
+     "8000": 27.6
+    },
+    "atten_db": 0,
+    "ruido_db": 1.7,
+    "sello_pct": 86,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 18,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 36
+    },
+    "atten_db": 0,
+    "ruido_db": 0.6,
+    "sello_pct": 79,
+    "variabilidad_db": 1.9,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-16T17:10:27+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Javier Daniel",
+   "apellido": "Campos Ortega",
+   "rut": "23893621",
+   "fecha_nac": "23-12-2011"
+  },
+  "historia_clinica": "{{-3650}} Pediatra: hematuria microscópica en examen de orina de rutina. Se deriva a nefrología.\r\n{{-730}} Nefrología: hematuria y proteinuria. Sospecha de síndrome de Alport por la historia familiar; inicia enalapril y solicita estudio genético.\r\n{{-30}} Nefrología: no oye bien en clases. Solicita evaluación audiológica y control oftalmológico."
+ }
+}

@@ -47,8 +47,24 @@ anatomía/esquemas (plan: Servier/OpenStax, SVG propio, capturas).
 
 ## Pendientes
 
+### Cola de tandas (loop, decidido por él 2026-10-16)
+Un agente por capítulo, tanda de hasta 4 en paralelo, puertos 8811-8814,
+`LIBRO_SIN_COMPLETO=1` (cada agente arma solo su capítulo; libro.pdf lo
+rearma el coordinador al cerrar la tanda). Al cerrar una tanda: revisar los
+PDF, rostros nuevos (pedidos.json + `herramientas/rostros.py`), libro.pdf
+completo, incongruencias a `incongruencias_protocolo.md`, commit en main y
+marcar la tanda acá.
+
+- Material de clases: `fuentes/clases/LEEME.md` dice qué clase sirve a qué capítulo (alcance, no copiar ni citar ni nombrar a quien la dictó).
+- [x] Tanda 1 (2026-10-16): caps. 7, 8, 9, 10 escritos (Opus), referencias cotejadas con Crossref/PubMed, 13 rostros. Arreglos del armador: ECochG de un oído sin complejo, "Hace 1 día", ancla del pico en timpanograma B (rehechos cap02 OMA y p35, cap03 p41, h7 p35, cap08), `:::figura ... campo_libre`, pausa y reintento al guardar casos en armar_casos.py, `LIBRO_SIN_COMPLETO=1`. Incongruencias #43-50. Quedan `verificar` (cap. 7: 2, cap. 8: 1, cap. 9: 4, cap. 10: 10). Los dos "Samuel" (caps. 6 y 9) se dejan: el nombre lo sortea el editor y cuadro() no lo fija.
+- [ ] Tanda 2: H11 ECochG, H12 VEMP, H13 PEAee, H14 procesamiento central (AudioPAC, `~/Escritorio/Proyectos/audiopac`)
+- [ ] Tanda 3: H15 Frenzel/VNG, H16 calórica, H17 vHIT, H18 maniobras (simuladores: `~/Escritorio/Proyectos/labyrinthus3d`, `trainhit`, `simHit`; ver `investigacion/inventario_vestibular_nasal.md`; LabSim NO hace vestibular)
+- [ ] Tanda 4: H19 rehabilitación vestibular, H20 prueba de audífonos, H21 medición electroacústica, H22 audiometría ocupacional (él cambió el orden: H22 entra ya; material investigado con fuentes verificadas; normas chilenas PREXOR/ISP/SUSESO en "Lo que dicen las normas" junto a las internacionales, el libro es mundial)
+- [ ] Tanda 5: H23 anamnesis rinológica y rinoscopía, H24 rinomanometría, H25 rinometría acústica (sus clases de nasal están en fuentes/clases/nasal: marcan el alcance)
+- Fin del loop al cerrar la tanda 5. Los capítulos clínicos 12-36 NO entran.
+
 ### Para retomar (2026-10-16)
-- Él pidió **no seguir con capítulos nuevos** por ahora.
+- Él pidió **no seguir con capítulos nuevos** por ahora (reemplazado por la cola de tandas de arriba).
 - Siguiente propuesto (espera su visto bueno): la pasada de "fundamento
   fisiológico" en H1, H2, H4, H5, H7, H8, H9 y H10 (como se hizo en H3 y H6).
 - `incongruencias_protocolo.md`: él lo decide con su equipo. Regla: se
@@ -62,6 +78,7 @@ anatomía/esquemas (plan: Servier/OpenStax, SVG propio, capturas).
   diseñar.
 
 ### Para él (decisiones o datos)
+0. **Nota sobre el PEAT** que llegó a mitad de la tanda 1: "los potenciales se repiten por nivel dos veces: 80 dos veces, 60 dos veces". En las figuras del libro cada nivel trae el promedio y sus dos réplicas en tenue (lo esperable). ¿Se refería a eso, a la ficha PDF de LabSim (memoria "pila duplicada") o a otra cosa?
 1. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
    detalles menores (licencia de simHit, DOI de labyrinthus3d, coautorías).
 

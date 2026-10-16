@@ -1,0 +1,33 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "laberintitis",
+      "OI": "normal"
+    },
+    "edad": 34,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 34 años y es enfermera en un hospital. Hace tres semanas, unos días después de un resfrío fuerte, despertó con todo girando a su alrededor: no se podía levantar de la cama, vomitó toda la mañana y la llevaron a urgencias. Ese mismo día notó que el oído derecho no oía nada y que tenía un pitido de ese lado. El vértigo fuerte le duró unos tres días y fue pasando de a poco; hoy está mucho mejor, pero se siente insegura cuando gira rápido la cabeza o camina a oscuras. El pitido ahora va y viene. No tuvo dolor de oído, fiebre alta ni secreción, no le dolió la cabeza y no se le durmió ni se le debilitó ninguna parte de la cara o del cuerpo. Antes oía bien de los dos lados.",
+      "historia": "{{-21}} Servicio de urgencia: vértigo intenso con vómitos e hipoacusia del oído derecho desde la mañana. Nistagmo espontáneo horizontal hacia la izquierda. Otoscopía normal. Examen neurológico sin otros hallazgos. Se hospitaliza para hidratación y manejo sintomático.\n{{-19}} Alta: vértigo en disminución, camina sin ayuda. Se deriva a otorrinolaringología.\n{{-12}} Otorrinolaringólogo: probable laberintitis viral del OD. Indica tratamiento y solicita audiometría, impedanciometría y VEMP; evaluación vestibular completa en el control.",
+      "hist": [],
+      "medicamentos": "Tomó un medicamento para el mareo los primeros días; ya no lo usa.",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

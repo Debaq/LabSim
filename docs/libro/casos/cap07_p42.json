@@ -1,0 +1,21 @@
+{
+  "caso": "demo:42",
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

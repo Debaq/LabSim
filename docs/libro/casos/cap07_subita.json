@@ -1,0 +1,43 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "subita"
+    },
+    "edad": 52,
+    "sexo": "hombre",
+    "grado": {
+      "OI": "severa"
+    },
+    "anamnesis": {
+      "otros": "Tiene 52 años y es profesor de historia en un liceo. Hace cuatro días despertó con el oído izquierdo tapado, \"como con agua\", y con un pitido agudo de ese lado que no se le ha quitado. Pensó que era cera y se echó unas gotas que tenía en la casa, pero siguió igual. Por la izquierda no entiende el celular y tuvo que cambiárselo al otro oído; en la sala de clases le cuesta saber qué alumno le está hablando. No tuvo dolor, secreción ni mareos. La semana anterior estuvo resfriado. Es hipertenso desde hace seis años y toma su remedio todos los días. Antes de esto nunca había tenido problemas de oído.",
+      "historia": "{{-3}} Médico general: oído izquierdo tapado y pitido desde ayer. Otoscopía normal, sin tapón de cera. Weber con diapasón lateralizado a la derecha. Se sospecha hipoacusia súbita y se deriva con urgencia a otorrinolaringología.\n{{-1}} Otorrinolaringólogo: probable hipoacusia súbita del OI. Inicia prednisona oral y solicita audiometría con enmascaramiento, logoaudiometría e impedanciometría. Resonancia magnética en trámite.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día. Prednisona oral desde ayer, indicada por el otorrinolaringólogo.",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": true
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

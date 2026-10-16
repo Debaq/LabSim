@@ -1,0 +1,38 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "post_radioterapia",
+      "OI": "normal"
+    },
+    "edad": 63,
+    "sexo": "hombre",
+    "semilla": 5,
+    "anamnesis": {
+      "otros": "Tiene 63 años y es jubilado; trabajó como chofer de micro. Hace dos años le operaron un cáncer de la parótida derecha y después recibió seis semanas de radioterapia en ese lado de la cara y el cuello. Hacia el final de la radioterapia empezó a sentir el oído derecho tapado, \"como en el avión\", y eso nunca se le pasó del todo. Desde hace unos meses siente que por ese oído oye cada vez menos: ya no contesta el celular por la derecha. No tiene pitidos ni mareos. Le quedó la boca seca y la piel del lado derecho del cuello más dura y oscura; la cara la mueve bien. Del oído izquierdo oye bien. Nunca tuvo otitis de adulto.",
+      "historia": "{{-760}} Cirujano de cabeza y cuello: carcinoma de parótida derecha. Parotidectomía total derecha con preservación del nervio facial.\n{{-700}} Radioterapeuta: radioterapia postoperatoria de la región parotídea y el cuello derechos, seis semanas. Sin quimioterapia.\n{{-660}} Control al terminar la radioterapia: radiodermitis cervical derecha, xerostomía. Refiere oído derecho tapado.\n{{-180}} Oncólogo, control semestral: sin recidiva. Refiere que oye menos por el oído derecho. Deriva a otorrinolaringología.\n{{-12}} Otorrinolaringólogo: membrana timpánica derecha opaca y retraída, sin perforación; nasofibroscopía sin lesiones. Solicita audiometría e impedanciometría.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg cada 12 horas; saliva artificial",
+      "cirugias": "Parotidectomía total derecha hace dos años"
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}
