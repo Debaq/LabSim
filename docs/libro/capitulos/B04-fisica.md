@@ -13,7 +13,7 @@
 ### Decibeles
 - La escala logarítmica: sumar y restar dB; 3 dB es el doble de energía, 6 dB el doble de presión, 10 dB "el doble de sonoridad" (→ H4, H10).
 - Las referencias: dB SPL, dB HL (y por qué 0 dB HL no es 0 dB SPL), dB SL, dB nHL, dB eHL, dB EM; RETSPL y calibración (→ H3, H4, H7, H10).
-- Atenuación: interaural, del protector auditivo, del molde (→ H4, H19, H21).
+- Atenuación: interaural, del protector auditivo, del molde (→ H4, H20, H22).
 
 ### Impedancia y admitancia
 - Rigidez, masa y resistencia; frecuencia de resonancia; por qué la sonda de 226 Hz y la de 1000 Hz ven cosas distintas (→ H7, cap. 3, cap. 4).
@@ -24,13 +24,13 @@
 - Reproducibilidad entre dos promedios (→ H9, H10).
 
 ### Acústica de sala
-- Ondas estacionarias y por qué no se usa tono puro en campo libre; distancia y ángulo del parlante; ruido ambiente y cabina (→ H3, H8, H19).
+- Ondas estacionarias y por qué no se usa tono puro en campo libre; distancia y ángulo del parlante; ruido ambiente y cabina (→ H3, H8, H20).
 
 ### Electroacústica del audífono
-- Ganancia, salida máxima (OSPL90), distorsión, ruido interno; el acoplador de 2 cc (→ H19, H20).
+- Ganancia, salida máxima (OSPL90), distorsión, ruido interno; el acoplador de 2 cc (→ H20, H21).
 
 ### Ruido ocupacional
-- Nivel equivalente, dosis y tiempo de exposición; criterio de 85 dB(A) y regla de 3 dB (→ H21, cap. 6).
+- Nivel equivalente, dosis y tiempo de exposición; criterio de 85 dB(A) y regla de 3 dB (→ H22, cap. 6).
 
 ### Flujo de aire en la nariz
-- Presión, flujo y resistencia; por qué la rinomanometría mide a 150 Pa; reflexión acústica y área de sección transversal (→ H23, H24).
+- Presión, flujo y resistencia; por qué la rinomanometría mide a 150 Pa; reflexión acústica y área de sección transversal (→ H24, H25).

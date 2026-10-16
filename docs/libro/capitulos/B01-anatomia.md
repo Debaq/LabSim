@@ -23,15 +23,15 @@
 ### Oído interno
 - Laberinto óseo y membranoso; perilinfa y endolinfa (la composición va en B2).
 - Cóclea: vueltas, rampas vestibular, media y timpánica, base y ápice (→ H3, cap. 5, cap. 8).
-- Vestíbulo: utrículo y sáculo; tres canales semicirculares, su orientación y sus pares coplanares (→ H12, H13, H16, H17).
+- Vestíbulo: utrículo y sáculo; tres canales semicirculares, su orientación y sus pares coplanares (→ H12, H15, H17, H18).
 - Acueductos y saco endolinfático (→ cap. 9).
 
 ### Nervio y vía
 - VIII par: ramas coclear y vestibulares (superior e inferior: qué inerva cada una, → H12), conducto auditivo interno y ángulo pontocerebeloso (→ cap. 11).
-- Vía auditiva central: núcleos cocleares, complejo olivar superior, lemnisco lateral, colículo inferior, cuerpo geniculado medial, corteza; los generadores de las ondas del PEAT (→ H10, cap. 12).
-- Vía vestibular central: núcleos vestibulares, conexiones oculomotoras y espinales, cerebelo (→ H13, H18).
+- Vía auditiva central: núcleos cocleares, complejo olivar superior, lemnisco lateral, colículo inferior, cuerpo geniculado medial, corteza y cuerpo calloso; los generadores de las ondas del PEAT (→ H10, cap. 12) y lo que mide la batería de procesamiento central (→ H14).
+- Vía vestibular central: núcleos vestibulares, conexiones oculomotoras y espinales, cerebelo (→ H15, H19).
 - Irrigación: arteria laberíntica y AICA (→ cap. 12).
 
 ### Nariz
-- Pirámide nasal, vestíbulo, válvula nasal, tabique, cornetes y meatos, coanas (→ H22-H24).
+- Pirámide nasal, vestíbulo, válvula nasal, tabique, cornetes y meatos, coanas (→ H23-H25).
 - Senos paranasales y drenaje; relación de la rinofaringe con la trompa (→ cap. 2).

@@ -18,10 +18,10 @@
 - Qué tejido daña cada cuadro: ruido y ototóxicos (células ciliadas externas de la base), presbiacusia (sensorial, estrial, neural), hidrops (distensión de la rampa media), CMV y rubéola (→ cap. 5, 6, 8, 9, 17).
 
 ### Vestíbulo
-- Máculas (utrículo y sáculo) con otoconias y crestas ampulares con su cúpula; células tipo I y II (→ H12, H17).
+- Máculas (utrículo y sáculo) con otoconias y crestas ampulares con su cúpula; células tipo I y II (→ H12, H18).
 
 ### Desarrollo
 - Mesénquima y vérnix en el recién nacido; maduración del órgano de Corti y de la mielina (→ cap. 16, cap. 17).
 
 ### Nariz
-- Epitelio respiratorio, glándulas y tejido eréctil de los cornetes: la base de la respuesta al vasoconstrictor (→ H23, H24).
+- Epitelio respiratorio, glándulas y tejido eréctil de los cornetes: la base de la respuesta al vasoconstrictor (→ H24, H25).

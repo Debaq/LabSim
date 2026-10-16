@@ -26,8 +26,8 @@ Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
 | Estado | Capítulos |
 |---|---|
 | Escritos y al día con los simuladores | H1-H10, 1, 2, 3, 4, 11 |
-| Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H14 PEAee, 5-10, 12-20 |
-| Esqueleto nuevo (2026-10-16) | B1 anatomía, B3 histología, B4 física (cada uno con "Qué tiene que tener"); equilibrio H13 y H15-H18; rehabilitación aural H19-H20; salud ocupacional H21; nariz H22-H24 |
+| Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H13 PEAee, 5-10, 12-20 |
+| Esqueleto nuevo (2026-10-16) | B1 anatomía, B3 histología, B4 física (cada uno con "Qué tiene que tener"); H14 procesamiento auditivo central (capturas de AudioPAC); equilibrio H15-H19; rehabilitación aural H20-H21; salud ocupacional H22; nariz H23-H25 |
 | Lo escribe una colega | B2 Fisiología auditiva y vestibular (con su lista de contenidos) |
 
 Cómo se escribe uno: un agente por capítulo con `herramientas/brief_agentes.md`
@@ -64,11 +64,13 @@ no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
 (Paget/fijación con gap ya no salen A) o de fichas (cada caso no abre página).
 
 ### Libro, contenido
-- **Rostros de los pacientes** (pedido 2026-10-16): todas las fichas muestran
-  iniciales (`rostros/` no existe). Sintéticos realistas y coherentes con el
-  caso: edad, sexo y signos visibles (Ramsay Hunt con la parálisis del lado
-  que corresponde). Un paciente de práctica tiene la misma cara en todos los
-  capítulos. Ver `hacer_libro.py`, `ficha()`.
+- **Rostros** (hechos 2026-10-16): 38 personas en `rostros/` (JPG 512 px),
+  uno por persona (`demo-NN` para los de práctica), pedidos en
+  `rostros/pedidos.json`, generador `herramientas/rostros.py`. Gemini no
+  dibuja malformaciones: la microtia de Ramón (cap. 1) va tapada con un
+  gorro y el cráneo del Paget (cap. 4) sale apenas sugerido. El lado de un
+  signo se pide según la imagen ("lado derecho de la imagen"), no según el
+  paciente: así lo confundía.
 - Ilustraciones pendientes (según el plan, no IA): H8 sala de VRA y banana
   S/A (en verde), H9 sonda en el conducto, H10 generadores I-V, cap. 2 trompa niño vs
   adulto, cap. 4 formas del reflejo; `ilustraciones/*.png` actuales son de

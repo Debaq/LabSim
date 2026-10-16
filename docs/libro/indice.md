@@ -119,48 +119,51 @@ Electrodos, protocolo, PS/PA y razón de áreas; test de glicerol (✓ E01-E07).
 ### H12. VEMP
 cVEMP y oVEMP: montaje, estímulo, corrección por EMG, umbral, asimetría (`tecnica_b.md` §11).
 
-### H13. Examen vestibular con lentes de Frenzel y videonistagmografía *(del protocolo)*
-Anamnesis del mareo; nistagmo espontáneo y evocado por la mirada con lentes de +20 dioptrías; videonistagmografía: pruebas oculomotoras (sacadas, seguimiento, optocinético) y posicionales. Simuladores: trainHIT y labyrinthus3d.
-
-### H14. Potenciales de estado estable *(propuesto, del protocolo)*
+### H13. Potenciales de estado estable *(propuesto, del protocolo)*
 ASSR: estimación de umbral por frecuencia.
+
+### H14. Procesamiento auditivo central
+Cuándo sospecharlo y a quién evaluar; batería: patrones de frecuencia y duración (FPT, DPS), resolución temporal (GIN, gap detection), escucha dicótica (dígitos dicóticos), interacción binaural (MLD), habla en ruido (HINT, SinB, Matrix); umbrales diferenciales; interpretación por edad e informe. Simulador de apoyo: AudioPAC (software propio, MIT, doi:10.5281/zenodo.19663724), también para las capturas.
 
 **Equilibrio**
 
-### H15. Prueba calórica *(del protocolo)*
+### H15. Examen vestibular con lentes de Frenzel y videonistagmografía *(del protocolo)*
+Anamnesis del mareo; nistagmo espontáneo y evocado por la mirada con lentes de +20 dioptrías; videonistagmografía: pruebas oculomotoras (sacadas, seguimiento, optocinético) y posicionales. Simuladores: trainHIT y labyrinthus3d.
+
+### H16. Prueba calórica *(del protocolo)*
 Calórica mínima y bilateral con videonistagmografía: irrigación, velocidad de la fase lenta, paresia del canal y preponderancia direccional (fórmula de Jongkees), fijación visual.
 
-### H16. Video head impulse test (vHIT) *(del protocolo)*
+### H17. Video head impulse test (vHIT) *(del protocolo)*
 Impulsos cefálicos por canal: ganancia del reflejo vestíbulo-ocular, sacadas encubiertas y manifiestas; comparación con la calórica.
 
-### H17. Maniobras de diagnóstico y reposición *(del protocolo)*
+### H18. Maniobras de diagnóstico y reposición *(del protocolo)*
 VPPB: Dix-Hallpike y prueba de giro supino, lectura del nistagmo por canal; reposición (Epley, Semont, Lempert/barbacoa) y liberación de partículas.
 
-### H18. Rehabilitación vestibular *(del protocolo)*
+### H19. Rehabilitación vestibular *(del protocolo)*
 Evaluación funcional (DHI, pruebas de equilibrio), ejercicios de adaptación, sustitución y habituación, progresión, control y alta.
 
 **Rehabilitación aural**
 
-### H19. Prueba de audífonos *(del protocolo)*
+### H20. Prueba de audífonos *(del protocolo)*
 Candidatura, selección y prueba del audífono: ganancia funcional en campo libre, discriminación con y sin audífono, molde y ventilación, entrega y control.
 
-### H20. Revisión y medición electroacústica del audífono *(del protocolo)*
+### H21. Revisión y medición electroacústica del audífono *(del protocolo)*
 Revisión visoauditiva (molde, tubo, pila, micrófono, retroalimentación) y medición en acoplador: ganancia, salida máxima, distorsión y ruido interno.
 
 **Salud ocupacional**
 
-### H21. Audiometría ocupacional y vigilancia del ruido
+### H22. Audiometría ocupacional y vigilancia del ruido
 Audiometría de screening y de operativo, evaluación de trabajadores expuestos a ruido (PREXOR, guía del ISP), criterios de daño y de derivación, protección auditiva; la parte médico-legal (SUSESO).
 
 **Nariz**
 
-### H22. Anamnesis rinológica y rinoscopía *(del protocolo)*
+### H23. Anamnesis rinológica y rinoscopía *(del protocolo)*
 Motivo de consulta nasal, síntomas y antecedentes; rinoscopía anterior.
 
-### H23. Rinomanometría anterior *(del protocolo)*
+### H24. Rinomanometría anterior *(del protocolo)*
 Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasoconstrictor e informe.
 
-### H24. Rinometría acústica *(del protocolo)*
+### H25. Rinometría acústica *(del protocolo)*
 Áreas de sección transversal de la fosa nasal por reflexión acústica: técnica, curva, áreas mínimas y volumen, prueba con vasoconstrictor.
 
 ## Parte I — El oído que transmite

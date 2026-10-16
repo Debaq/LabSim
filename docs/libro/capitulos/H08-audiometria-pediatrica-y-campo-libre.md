@@ -6,7 +6,7 @@
 - Montar una audiometría de campo libre: parlantes, distancia, estímulo y calibración.
 - Explicar por qué el campo libre informa solo el oído mejor y qué no puede descartar.
 - Leer umbrales con audífono frente a umbrales sin audífono, y saber qué no dicen.
-- Reconocer cuándo la conducta no alcanza y hacen falta pruebas objetivas (→ H9, H10, H14).
+- Reconocer cuándo la conducta no alcanza y hacen falta pruebas objetivas (→ H9, H10, H13).
 :::
 
 Un adulto entiende "levanta la mano cuando escuches el pito"; un niño de un año no. La audiometría pediátrica es la misma pregunta de la audiometría tonal (→ H3), cuánto oye cada oído en cada frecuencia, hecha a alguien que todavía no puede contestar como un adulto. La técnica cambia con lo que el niño **sí** puede hacer a esa edad: quedarse quieto ante un sonido, girar la cabeza o meter un juguete en una canasta. El campo libre aparece en esta misma herramienta porque es el transductor de los que no aceptan fonos y de los que usan audífono, y porque tiene una trampa que hay que conocer antes de informarlo.
@@ -104,7 +104,7 @@ El audiómetro de LabSim tiene los mismos controles que uno clínico con campo l
 
 No es una audiometría: no da umbrales, no sirve como tamizaje y no permite indicar un audífono (AAA, 2020). Sirve para describir cómo responde el lactante: se presenta un estímulo calibrado y se anota **qué conducta** apareció (detenerse, abrir los ojos, sobresaltarse), **con qué estímulo** y **a qué nivel**.
 
-Una ausencia de sobresalto no significa sordera: puede tener hambre, sueño o estar demasiado entretenido. El informe la describe como observación, nunca como umbral, y siempre va con las pruebas objetivas: impedanciometría con sonda de 1.000 Hz (→ H7), emisiones (→ H9) y potenciales (→ H10, H14).
+Una ausencia de sobresalto no significa sordera: puede tener hambre, sueño o estar demasiado entretenido. El informe la describe como observación, nunca como umbral, y siempre va con las pruebas objetivas: impedanciometría con sonda de 1.000 Hz (→ H7), emisiones (→ H9) y potenciales (→ H10, H13).
 
 ### 2. Audiometría por refuerzo visual (VRA, 6 meses a 2½ años)
 
@@ -238,7 +238,7 @@ Se pasa a las pruebas objetivas, o se suman, cuando (AAA, 2020):
 - el campo libre salió "normal" pero la historia no calza;
 - las emisiones están presentes y la conducta o los potenciales no (sospecha de neuropatía).
 
-En ese caso se combinan emisiones (→ H9), PEAT por frecuencia (→ H10) y potenciales de estado estable (→ H14). Apenas el niño pueda responder, se vuelve a la conducta para cruzar los resultados (AAA, 2020).
+En ese caso se combinan emisiones (→ H9), PEAT por frecuencia (→ H10) y potenciales de estado estable (→ H13). Apenas el niño pueda responder, se vuelve a la conducta para cruzar los resultados (AAA, 2020).
 
 :::ojo Ojo clínico
 Si la familia está preocupada, el lenguaje viene atrasado o el niño no localiza cuando lo llaman, un campo libre normal **no da el alta**. Pide audiometría por oído (insertos o fonos) o pruebas objetivas antes de cerrar.

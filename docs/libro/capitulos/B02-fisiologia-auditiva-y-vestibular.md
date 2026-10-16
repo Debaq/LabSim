@@ -28,16 +28,17 @@
 - Codificación de frecuencia e intensidad; adaptación neural (→ H6, cap. 11).
 - Generadores de las ondas I a V del PEAT; latencias e interpicos; maduración y mielinización en el lactante (→ H10, cap. 14, cap. 17).
 - Procesamiento central del habla; por qué la discriminación cae más en lo retrococlear (→ H5, cap. 13).
+- Procesamiento auditivo central: resolución y ordenamiento temporal, interacción binaural, escucha dicótica, separación figura-fondo; maduración hasta la adolescencia (→ H14).
 
 ### Desarrollo
 - Oído del recién nacido: vérnix, mesénquima y líquido en el oído medio las primeras horas (→ cap. 16); maduración del oído medio y del tronco (→ cap. 17).
 
 ### Sistema vestibular
-- Canales semicirculares (aceleraciones angulares) y otolitos (lineales y gravedad); actividad de reposo y asimetría (→ H13).
-- Reflejo vestíbulo-ocular: ganancia, fase; por qué el nistagmo bate hacia el lado más activo (→ H13, H15, H16).
+- Canales semicirculares (aceleraciones angulares) y otolitos (lineales y gravedad); actividad de reposo y asimetría (→ H15).
+- Reflejo vestíbulo-ocular: ganancia, fase; por qué el nistagmo bate hacia el lado más activo (→ H15, H16, H17).
 - Vías vestíbulo-cólica (cVEMP) y vestíbulo-ocular (oVEMP); sáculo y utrículo (→ H12, cap. 20).
-- Mecanismo del VPPB: canalitiasis y cupulolitiasis (→ H17).
-- Compensación central, adaptación y sustitución: la base de la rehabilitación (→ H18).
+- Mecanismo del VPPB: canalitiasis y cupulolitiasis (→ H18).
+- Compensación central, adaptación y sustitución: la base de la rehabilitación (→ H19).
 
 ### Nariz
-- Ciclo nasal, resistencia al flujo y válvula nasal; mucosa y respuesta al vasoconstrictor (→ H22-H24).
+- Ciclo nasal, resistencia al flujo y válvula nasal; mucosa y respuesta al vasoconstrictor (→ H23-H25).

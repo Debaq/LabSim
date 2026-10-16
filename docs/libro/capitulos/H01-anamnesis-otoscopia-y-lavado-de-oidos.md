@@ -128,7 +128,7 @@ Empieza con una pregunta abierta y deja hablar. Las preguntas cerradas vienen de
 2. **Tiempo de evolución y forma de inicio.** Desde cuándo, y si empezó de golpe, fue avanzando o va y viene. ¿Un oído o los dos? Una pérdida que apareció de un día para otro no se estudia igual que una que avanza hace años (cap. 7).
 3. **Síntomas otológicos.**
     - **Acúfeno**: de qué lado, si es permanente u ocasional, y si lo tiene **ahora**. Un acúfeno unilateral persistente obliga a pensar más allá de la cóclea (cap. 11); un acúfeno presente durante el examen puede confundir al paciente cuando busca el umbral (H3).
-    - **Vértigo**: si gira todo o es inestabilidad, cuánto dura cada crisis, qué la gatilla y si viene con plenitud o cambios de audición (cap. 9, H13).
+    - **Vértigo**: si gira todo o es inestabilidad, cuánto dura cada crisis, qué la gatilla y si viene con plenitud o cambios de audición (cap. 9, H15).
     - **Otalgia, otorrea, plenitud aural**: dolor y secreción cambian lo que se puede hacer hoy.
 4. **Antecedentes otológicos.** Otitis (cuántas, de qué tipo), perforaciones, **cirugías de oído**, tubos de ventilación, audífonos, exámenes anteriores. La cirugía y la perforación contraindican el lavado.
 5. **Antecedentes mórbidos.** Diabetes, hipertensión, enfermedades crónicas, traumatismos de cráneo, meningitis, radioterapia de cabeza y cuello, cirugías.
