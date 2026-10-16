@@ -64,6 +64,13 @@ TEOAE del libro sale con click no lineal a 80 dB SPL. Los casos ya armados
 no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
 (Paget/fijación con gap ya no salen A) o de fichas (cada caso no abre página).
 
+### Orden y alcance (él, 2026-10-16)
+- **Salud ocupacional** (H22, Parte XI) se escribe al final de todo.
+- Falta una sección de **audiología aplicada**: definir con su material dónde
+  va (parte de casos propia o repartida en herramientas).
+- Él va a pasar sus clases de **nasal** y **auditivo parte I** como guía del
+  alcance de los contenidos (referencia, no para copiar).
+
 ### Armador
 - **Armado incremental** (propuesto 2026-10-16): cada capítulo en su PDF con
   caché por huella (md + figuras + rostros + CSS); el libro se pega con
