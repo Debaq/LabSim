@@ -287,6 +287,9 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
     """
     archivo = SALIDA_FIG / (f'{nombre}_{tipo}' + (f'_{n}' if n > 1 else '') + '.svg')
     if not archivo.exists():
+        # figuras del motor hechas a mano (versionadas): ilustraciones/
+        archivo = LIBRO / 'ilustraciones' / archivo.name
+    if not archivo.exists():
         return f'<p class="pendiente">Falta la figura {archivo.name}: correr figuras/hacer_figuras.py {nombre}</p>'
     svg = archivo.read_text(encoding='utf-8')
     m = re.search(r'<metadata id="anclas">(.*?)</metadata>', svg)
@@ -390,6 +393,12 @@ def capitulo(md_texto):
             return pendiente(nombre)
 
     def fig(nombre, tipo, n, cuerpo_fig):
+        if nombre not in actual:
+            # figura del motor que no es de un caso (p. ej. la radiografía de
+            # un audiograma de H3): se numera como las imágenes, H3.N
+            n_suelta = numeros['fig'].pop(0) if numeros['fig'] else 0
+            return guardar(figura_con_globos(nombre, tipo, int(n or 1), cuerpo_fig.splitlines(),
+                                             f'{cap}.{n_suelta}'))
         num = actual.get(nombre, 0)
         nfig[num] = nfig.get(num, 0) + 1
         return guardar(figura_con_globos(nombre, tipo, int(n or 1), cuerpo_fig.splitlines(),
@@ -413,13 +422,21 @@ def capitulo(md_texto):
 
     def img(ruta, titulo, cuerpo_img):
         cuerpo_img = re.sub(r'<!--.*?-->', '', cuerpo_img, flags=re.S)   # notas internas (p. ej. el pedido del dibujo)
-        nfig['img'] = nfig.get('img', 0) + 1
+        nfig['img'] = numeros['img'].pop(0) if numeros['img'] else nfig.get('img', 0) + 1
         # ':::imagen ruta ancho=60% Título': el tamaño va antes del título
         m = re.match(r'ancho=(\d+(?:\.\d+)?(?:%|mm))\s*(.*)', titulo or '')
         ancho, titulo = (m[1], m[2]) if m else (None, titulo)
         return guardar(imagen_con_globos(ruta, titulo or '', cuerpo_img.splitlines(), f'{cap}.{nfig["img"]}', ancho))
 
     texto_img = re.compile(r'^:::imagen\s+(\S+)(?:[ \t]+(.*?))?\s*\n(.*?)^:::\s*$', re.M | re.S)
+    # Imágenes y figuras del motor que no son de un caso comparten la serie
+    # "Figura H3.N" y se procesan en pasadas distintas: el número sale del
+    # orden en que aparecen en el texto, no del orden de proceso.
+    casos_md = set(re.findall(r'\{\{caso\s+([a-z0-9_]+)\}\}', md_texto))
+    serie = [('img' if m[1] else 'fig') for m in re.finditer(
+        r'^:::(imagen)\s|^:::figura\s+([a-z0-9_]+)\s', md_texto, re.M)
+        if m[1] or m[2] not in casos_md]
+    numeros = {k: [i for i, t in enumerate(serie, 1) if t == k] for k in ('img', 'fig')}
     md_texto = texto_img.sub(lambda m: img(m[1], m[2], m[3]), md_texto)
 
     def uno(m):
@@ -629,11 +646,22 @@ h2, h3, h4, .rotulo-chico, .caja-titulo {{ break-after: avoid; }}
 /* la ficha del caso no se parte y arrastra consigo la pregunta que la sigue. No
    abre página: si no cabe, pasa entera a la siguiente (con break-before: page
    cada caso dejaba media hoja en blanco y los capítulos llegaban a 24 págs.) */
-.caso {{ break-inside: avoid; break-after: avoid; }}
+.caso {{ break-after: avoid; }}
+/* la ficha puede partirse en la historia clínica (entera dejaba media hoja en
+   blanco); la cabecera y la anamnesis van juntas */
+.caso-cab, .anamnesis {{ break-inside: avoid; }}
+.historia li {{ break-inside: avoid; }}
 .caso + .caja-pregunta, .caso + p {{ break-before: avoid; }}
 /* un título de sección no queda solo al pie de la página */
 h2 + p, h3 + p, h4 + p, h2 + ul, h3 + ul, h2 + ol, h3 + ol {{ break-before: avoid; }}
-.caja, .figobs, table {{ break-inside: avoid; }}
+.caja {{ break-inside: avoid; }}
+/* figura con globos: la figura no se parte, pero la lista de globos puede
+   seguir en la página siguiente (entera saltaba y dejaba el hueco) */
+.figobs {{ break-inside: auto; }}
+.figobs .fig {{ break-after: avoid; }}
+table {{ break-inside: auto; }}
+tr {{ break-inside: avoid; }}
+thead {{ display: table-header-group; }}
 /* una tabla larga de los preliminares (abreviaturas) se parte entre filas:
    entera saltaba de página y dejaba el título solo */
 .preliminar table {{ break-inside: auto; }}
@@ -682,6 +710,10 @@ table {{ width: 100%; border-collapse: collapse; font-size: 8.6pt; line-height: 
 th, td {{ padding: 1mm 1.6mm; border: .5pt solid #cdbcc4; text-align: left; vertical-align: top; }}
 th {{ background: #f1e4e9; color: #24101a; font-weight: 700; }}
 tbody tr:nth-child(even) td {{ background: #faf6f8; }}
+/* símbolos y palabras del oído en el texto: <span class="od">○</span> */
+span.od {{ color: #c62f3a; font-weight: 700; }}
+span.oi {{ color: #2c5cb0; font-weight: 700; }}
+span.cl {{ color: #2e8540; font-weight: 700; }}
 table caption {{ caption-side: top; text-align: left; font-size: 8pt; color: #5c4a52; padding: 0 0 1mm; }}
 .tabla-n {{ font-weight: 700; color: #8e2a4a; letter-spacing: .3pt; }}
 .caja table {{ font-size: 8pt; }}
@@ -704,7 +736,7 @@ table caption {{ caption-side: top; text-align: left; font-size: 8pt; color: #5c
 .caja-truco .caja-titulo::before {{ content: '✦ '; }}
 .caja-comentario {{ background: #f3f3f1; border-left: 2.4pt solid #8a8a90; font-style: italic; }}
 .caja-comentario .caja-titulo {{ color: #55555b; font-style: normal; }}
-.figobs {{ break-inside: avoid; margin: 3mm 0 5mm; }}
+.figobs {{ margin: 3mm 0 5mm; }}
 .figobs .fig {{ margin: 0 0 1mm; }}
 ol.obs {{ list-style: none; padding: 2.4mm 3mm 1mm; margin: 0; background: #f7f3f4; border-radius: 2mm;
           column-count: 2; column-gap: 6mm; font-size: 8.7pt; line-height: 1.42; }}

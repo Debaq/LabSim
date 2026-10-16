@@ -23,7 +23,7 @@ Se pide frente a cualquier queja auditiva, acúfeno o vértigo; antes de indicar
 
 Tiene dos límites que conviene tener presentes desde el principio. Es una prueba **conductual**: depende de que el paciente entienda, coopere y responda con honestidad. Y mide **detección**, no comprensión ni sitio de lesión retrococlear. Por eso ningún audiograma se interpreta solo: se contrasta con la acumetría (→ H2), la logoaudiometría (→ H5) y la impedanciometría (→ H7).
 
-Para aprender a leer el audiograma desde el principio, este capítulo parte con el de Luis.
+Para aprender a leer el audiograma desde el principio, el capítulo parte con su radiografía y con Luis, el primer caso.
 
 {{caso h3_p41}}
 
@@ -31,17 +31,21 @@ Para aprender a leer el audiograma desde el principio, este capítulo parte con 
 
 ### Radiografía de un audiograma
 
-Todo lo que sigue termina en este gráfico. El de Luis tiene casi todos sus elementos: aquí solo se nombran; el resto del capítulo explica de dónde sale cada uno y *Cómo se informa* enseña a sacar de él el tipo, el grado y la configuración.
+Todo lo que sigue termina en este gráfico. No es el de un paciente: es un audiograma armado para que aparezcan **todos** sus elementos juntos. Aquí solo se nombran; el resto del capítulo explica de dónde sale cada uno, y *Cómo se informa* enseña a sacar de él el tipo, el grado y la configuración. El derecho va siempre en <span class="od">rojo</span> y el izquierdo en <span class="oi">azul</span>.
 
-:::figura h3_p41 audiograma 2
-- @OD 125 | **Frecuencias**: graves a la izquierda, agudos a la derecha, en octavas; las interoctavas (3 y 6 kHz) llevan un rótulo más chico.
-- @OD 1000 | **dB HL**: crecen hacia abajo; más abajo es oír peor. El 0 no es silencio, es lo que oye un joven normal. La franja gris (hasta 20) es lo normal.
-- @OD 4000 | **○ rojo**: aérea del OD sin enmascarar (normal, 0 a 5 dB). En el OI sería una **✕ azul**.
-- @OI 1000 | **□ azul**: aérea del OI **enmascarada**, 50 dB en 1 kHz. En el OD sería un **△ rojo**.
-- @OI osea 1000 | **] azul**: ósea del OI enmascarada, 25 dB. Sin enmascarar, **>**; en el OD, **[** y **<**. Línea punteada.
-- @OI 500 | **Gap aéreo-óseo**: la distancia entre aérea y ósea, 55 − 25 = 30 dB en 500 Hz.
-- **Triángulos de abajo**: umbral de molestia (LDL), 100 dB en el OD y 120 en el OI (→ H5).
-- **Sin respuesta** al máximo del equipo: flecha hacia abajo desde el símbolo (caso H3.5).
+:::figura h3radiografia audiograma
+- @OD 125 | **Frecuencias**: graves a la izquierda, agudos a la derecha, de octava en octava. Las interoctavas (3 y 6 kHz) llevan un rótulo más chico.
+- @OI 125 | **dB HL**: crecen hacia abajo; más abajo es oír peor. El 0 no es silencio, es lo que oye un joven normal. La franja gris, hasta 20 dB, es lo normal.
+- @OD 250 | <span class="od">○</span> **aérea del OD sin enmascarar**, 25 dB. Los puntos de la aérea se unen con línea continua.
+- @OD 1000 | <span class="od">△</span> **aérea del OD enmascarada**, 60 dB: con el tono tan fuerte, el OI podía oírlo por el OD y se le puso ruido (→ H4).
+- @OI 1000 | <span class="oi">✕</span> **aérea del OI sin enmascarar**, 20 dB.
+- @OI 2000 | <span class="oi">□</span> **aérea del OI enmascarada**, 60 dB.
+- @OD osea 1000 | <span class="od">[</span> **ósea del OD enmascarada**, 20 dB. La ósea se une con línea punteada.
+- @OD osea 4000 | <span class="od">&lt;</span> **ósea del OD sin enmascarar**, 65 dB: no hizo falta ruido porque la aérea y la ósea están juntas.
+- @OI osea 500 | <span class="oi">&gt;</span> **ósea del OI sin enmascarar**, 10 dB; en 2 kHz, <span class="oi">]</span> enmascarada.
+- @OD 500 | **Gap aéreo-óseo**: 55 − 20 = 35 dB en 500 Hz. En los agudos la aérea y la ósea van juntas: en el OD la pérdida es **mixta**.
+- @OD 8000 | **Sin respuesta**: no oyó ni a la salida máxima del equipo. El símbolo va en el tope con una **flecha** hacia abajo.
+- <span class="od">◢</span> <span class="oi">◣</span> **Triángulos rellenos de abajo**: el umbral de molestia (LDL), unidos con guiones (→ H5). En el OD, en 4 kHz no marcó molestia ni al máximo: lleva la misma flecha. En el OI, entre 95 y 105 dB.
 :::
 
 Para tomar bien un umbral hay que entender tres cosas: qué camino recorre el tono en cada vía, qué quiere decir "oír" justo en el límite de la audición y de dónde sale el cero del audiómetro. De esas tres sale casi todo el paso a paso: cada regla de la técnica responde a una de ellas. La anatomía está en B1, la fisiología en B2 y la física del decibel en B4. Aquí va lo justo para entender por qué la técnica es como es.
