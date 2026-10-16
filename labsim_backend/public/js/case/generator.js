@@ -59,6 +59,9 @@
     // pone piso a la aérea y el gap se para ahí. Cada cuadro declara el suyo,
     // más bajo; este es el tope y el que rige si no lo declara.
     var GAP_MAX_DB = window.CASE_CONST.gapMaxDb || 60;
+    var CORE_FREQS = window.CASE_CONST.coreFreqs || [500, 1000, 2000, 4000];
+    var WARN_TYMP_GAP_DB = window.CASE_CONST.warnTympGapDb || 20;
+    var WARN_TYMP_NO_GAP_DB = window.CASE_CONST.warnTympNoGapDb || 10;
 
     /** Hasta dónde puede llegar el gap de este cuadro, en dB. */
     function techoGap(esc) {
@@ -442,6 +445,28 @@
         return dano + entre(-JITTER_DB, JITTER_DB) + extra;
     }
 
+    /**
+     * Las curvas del cuadro que no contradicen el gap que acaba de salir,
+     * con la misma regla que CaseProfile::warnings: A con gap >= 20 dB o B
+     * con gap < 10 dB frenan el guardado. Un cuadro con ['A', 'As'] (Paget,
+     * fijación congénita) sorteaba A con 40 dB de gap y el caso no se podía
+     * guardar sin confirmar el aviso. Si ninguna pasa, la lista entera: el
+     * aviso queda para que el docente lo vea.
+     */
+    function curvasPosibles(lista, aerea, osea) {
+        var gapMax = 0;
+        CORE_FREQS.forEach(function (hz) {
+            var i = FREQS.indexOf(hz);
+            if (i !== -1) { gapMax = Math.max(gapMax, aerea[i] - osea[i]); }
+        });
+        var ok = lista.filter(function (c) {
+            if (c === 'A') { return gapMax < WARN_TYMP_GAP_DB; }
+            if (c === 'B') { return gapMax >= WARN_TYMP_NO_GAP_DB; }
+            return true;
+        });
+        return ok.length ? ok : lista;
+    }
+
     function generarLado(esc, lado, escalas, asimetria, norma) {
         // La curva final = umbral mediano por edad + forma del cuadro. Un
         // señor de 70 con una otitis tiene la otitis Y su presbiacusia.
@@ -477,7 +502,7 @@
         // Oído medio: el gap y el timpanograma tienen que contar la misma
         // historia. Sin esto una conductiva salía con 35 dB de gap y curva A.
         var z = document.getElementById('z_' + lado);
-        if (z) { z.value = alAzar(esc.z && esc.z.length ? esc.z : ['A']); }
+        if (z) { z.value = alAzar(curvasPosibles(esc.z && esc.z.length ? esc.z : ['A'], aerea, osea)); }
         var etf = document.querySelector('select[name="etf_' + lado + '"]');
         if (etf) { etf.value = esc.etf || 'Normal'; }
         // Volumen del conducto que lee la sonda: bajo con un tapón que ocluye,
@@ -904,7 +929,26 @@
     function completarRecienNacido() {
         if (edadActual() !== 0) { return; }
         var valor = document.getElementById('patient-edad-valor');
-        if (!valor || valor.value !== '') { return; }
+        if (!valor) { return; }
+        if (valor.value === '') { sortearTurno(valor); }
+        // Cuánto líquido le tocó a CADA oído, sorteado acá y no al guardar:
+        // la vista previa proyecta con lo que hay en el formulario, así que
+        // si el percentil no está escrito, case_project.php sortea uno por
+        // viaje y CaseForm otro al guardar -- la EOA quedaba calculada con un
+        // percentil y el caso guardado con otro. Va también cuando las horas
+        // las puso el docente (antes solo con el turno sorteado). Cada Generar
+        // es un bebé nuevo, así que se vuelve a sortear.
+        ['OD', 'OI'].forEach(function (lado) {
+            var el = document.querySelector(
+                '#case-form [name="nacimiento[percentil][' + lado + ']"]');
+            if (el) {
+                el.value = Math.random().toFixed(4);
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    }
+
+    function sortearTurno(valor) {
         var unidad = document.getElementById('patient-edad-unidad');
         // Entre 6 y 36 horas: la ventana del tamizaje antes del alta, que
         // es donde la EOA y el AABR dicen cosas distintas.
@@ -925,19 +969,6 @@
             peso.value = String(Math.round(entre(2700, 3900) / 10) * 10);
             peso.dispatchEvent(new Event('change', { bubbles: true }));
         }
-        // Cuánto líquido le tocó a CADA oído, sorteado acá y no al guardar:
-        // la vista previa proyecta con lo que hay en el formulario, así que
-        // si el percentil no está escrito, proyecta con el default (0,5) y
-        // ese valor termina guardado. Con 0,5 a las catorce horas la EOA
-        // pasa siempre, y el turno del tamizaje deja de tener sorpresa.
-        ['OD', 'OI'].forEach(function (lado) {
-            var el = document.querySelector(
-                '#case-form [name="nacimiento[percentil][' + lado + ']"]');
-            if (el) {
-                el.value = Math.random().toFixed(4);
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
     }
 
     boton.addEventListener('click', function () {

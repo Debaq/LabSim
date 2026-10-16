@@ -669,6 +669,12 @@ window.CASE_CONST = <?= json_encode([
     'grades' => CaseProfile::GRADES,
     'gradeFreqs' => CaseProfile::GRADE_FREQS,
     'gapMaxDb' => CaseProfile::GAP_MAX_DB,
+    // La regla de CaseProfile::warnings que cruza gap y timpanograma: el
+    // armado rápido elige la curva con ella para no armar lo que el
+    // guardado después frena.
+    'coreFreqs' => CaseProfile::CORE_FREQS,
+    'warnTympGapDb' => CaseProfile::WARN_TYMP_GAP_DB,
+    'warnTympNoGapDb' => CaseProfile::WARN_TYMP_NO_GAP_DB,
     'iso7029' => CaseProfile::ISO7029_COEF,
     'iso7029EdadBase' => CaseProfile::ISO7029_EDAD_BASE,
     'autoModules' => CaseProfile::AUTO_MODULES,

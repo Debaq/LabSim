@@ -1757,7 +1757,7 @@ final class CaseProfile
             // se usa 1-2 DE de la normativa neonatal del mismo grupo (Erbek
             // 2007: p13 13,7 ± 1,1 ms, n23 20,5 ± 1,6 ms). El oVEMP no se
             // midió y queda normal.
-            'vemp' => ['type' => 'normal',
+            'vemp' => ['type' => 'central',
                        'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]],
                        'lat_ms' => ['CVEMP' => ['p13' => [1.1, 2.2], 'n23' => [1.6, 3.2]],
                                     'MVEMP' => ['p13' => [1.1, 2.2], 'n23' => [1.6, 3.2]]]],
@@ -1847,7 +1847,7 @@ final class CaseProfile
             // alargadas la p13 y las ondas del oVEMP. Ninguno publica la
             // media en el resumen: 2-4,5 ms deja la onda fuera del límite
             // normal (media + 2,5 DE, ~2 ms) sin volverla otro cuadro.
-            'vemp' => ['type' => 'normal',
+            'vemp' => ['type' => 'central',
                        'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]],
                        'lat_ms' => ['CVEMP' => ['p13' => [2.0, 4.5], 'n23' => [1.5, 4.0]],
                                     'MVEMP' => ['p13' => [2.0, 4.5], 'n23' => [1.5, 4.0]],
@@ -1983,7 +1983,7 @@ final class CaseProfile
             // normativa en 13 y 23 ms eso es +7 a +11 en la p13 y +3,5 a +7
             // en la n23; el intervalo se acorta, como en la serie. El oVEMP
             // no se midió y queda normal.
-            'vemp' => ['type' => 'normal',
+            'vemp' => ['type' => 'central',
                        'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]],
                        'lat_ms' => ['CVEMP' => ['p13' => [7.0, 11.0], 'n23' => [3.5, 7.0]],
                                     'MVEMP' => ['p13' => [7.0, 11.0], 'n23' => [3.5, 7.0]]]],

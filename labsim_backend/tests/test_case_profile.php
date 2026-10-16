@@ -1356,3 +1356,30 @@ t_eq(CaseBuilder::volumenCaeDe(['ETF' => ['Permeable', 'Normal']], 0), 'alto', '
 t_eq(CaseBuilder::volumenCaeDe(['ETF' => ['Permeable', 'Normal']], 1), 'normal', 'Caso viejo con ETF íntegra: normal');
 t_eq(CaseBuilder::volumenCaeDe(['volume_cae' => ['bajo', 'normal'], 'ETF' => ['Normal', 'Normal']], 0), 'bajo',
     'La categoría guardada manda');
+
+// VEMP presente y tarde (EM, kernícterus, CMT): el cuadro declara la latencia
+// en `lat_ms` y el armado la escribe en las desviaciones. Con type 'normal'
+// el editor lo rechazaba (más de 0,5 ms no es variabilidad normal) y el
+// cuadro no se podía guardar: va con type 'central'.
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    $vemp = $esc['vemp'] ?? null;
+    if (!is_array($vemp)) {
+        continue;
+    }
+    t_true(in_array($vemp['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true),
+        "VEMP de $clave: type '{$vemp['type']}' existe en el editor");
+    if (empty($vemp['lat_ms'])) {
+        continue;
+    }
+    $subtipos = [];
+    foreach ($vemp['lat_ms'] as $subtipo => $picos) {
+        foreach ($picos as $pico => $rango) {
+            $subtipos[$subtipo]['desviaciones'][$pico] = ['lat' => max($rango), 'amp' => 0];
+        }
+    }
+    t_eq(CaseBuilder::vempCoherenceError(['type' => $vemp['type'], 'subtipos' => $subtipos], 'OD'), null,
+        "VEMP de $clave: la latencia del cuadro pasa el editor");
+}
+t_true(CaseBuilder::vempCoherenceError(['type' => 'normal', 'subtipos' => [
+    'CVEMP' => ['desviaciones' => ['p13' => ['lat' => 2.0]]]]], 'OD') !== null,
+    'VEMP normal con 2 ms de más sigue frenando: lo que se abrió es el type central, no la tolerancia');

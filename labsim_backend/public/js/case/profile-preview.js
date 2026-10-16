@@ -172,6 +172,12 @@
                 var lo = lado.toUpperCase();
                 setVal('eoas[' + lado + '][type]', p.eoas[lo].type);
                 setVal('eoas[' + lado + '][umbral]', p.eoas[lo].umbral);
+                // El transitorio neonatal viaja en atten_db. Sin escribirlo
+                // acá el POST mandaba el 0 del campo y CaseForm (gana lo
+                // posteado) lo guardaba en 0: un bebé de 20 h que debía
+                // referir pasaba. En 0 cuando no hay transitorio, para no
+                // dejar el de una edad anterior.
+                setVal('eoas[' + lado + '][atten_db]', p.eoas[lo].atten_db || 0);
                 EOAS_FREQS.forEach(function (hz) {
                     setVal('eoas[' + lado + '][desv][' + hz + ']', p.eoas[lo].desviaciones[hz]);
                 });
@@ -269,10 +275,31 @@
         var body = new URLSearchParams();
         body.set('csrf_token', CSRF);
         body.set('payload', JSON.stringify(estado()));
+        // Edad y parto van como campos sueltos, con el mismo nombre que en el
+        // formulario: case_project.php los lee con CaseForm::parseNacimiento,
+        // igual que al guardar. Sin ellos la vista previa nunca veía las horas
+        // de vida y proyectaba sin transitorio: el bebé de 20 h quedaba con la
+        // EOA en 0 dB de atenuación y pasaba un tamizaje que debía referir.
+        // El percentil de líquido de cada oído se fija en el formulario antes
+        // de proyectar: vacío, el servidor sortearía uno distinto en cada
+        // viaje y otro más al guardar (caso armado a mano, sin Generar).
+        ['OD', 'OI'].forEach(function (lado) {
+            var pct = campo('nacimiento[percentil][' + lado + ']');
+            if (pct && pct.value === '') { pct.value = Math.random().toFixed(4); }
+        });
+        document.querySelectorAll('#case-form [name]').forEach(function (el) {
+            if (!esDeEdad(el.name)) { return; }
+            if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) { return; }
+            body.append(el.name, el.value);
+        });
         return fetch('case_project.php', { method: 'POST', body: body })
             .then(function (r) { return r.json(); })
             .then(function (data) { if (data.ok) { hidratar(data.proyeccion); } })
             .catch(function () { /* sin conexión el formulario sigue usable a mano */ });
+    }
+    function esDeEdad(name) {
+        return name === 'age' || name === 'edad_valor' || name === 'edad_unidad'
+            || name.indexOf('nacimiento[') === 0;
     }
     function proyectarPronto() {
         clearTimeout(pendiente);
@@ -292,7 +319,7 @@
     document.addEventListener('change', function (e) {
         var name = e.target.getAttribute('name') || '';
         if (/^perfil\[auto\]\[/.test(name) || /^igualar\[/.test(name)
-            || name === 'z_od' || name === 'z_oi'
+            || name === 'z_od' || name === 'z_oi' || esDeEdad(name)
             || (e.target.classList && e.target.classList.contains('abr-neural-input'))) {
             // Debounce también acá: generar el cuadro enciende las cuatro casillas
             // de un saque y no hacen falta cuatro viajes al servidor.

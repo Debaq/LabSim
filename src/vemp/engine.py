@@ -222,6 +222,8 @@ class MotorVemp:
         if tipo == 'neural':
             lat = mods.get('interpeak_prolongation_ms', 1.5) if indice == len(nombres) - 1 else 0.0
             return lat, mods.get('amplitude_reduction_uniform', 0.40)
+        # 'central' (EM, kernícterus, CMT): la respuesta está y llega tarde.
+        # El retraso viene en las desviaciones del caso, no acá.
         return 0.0, 1.0
 
     def plantilla(self, ajustes, emg_uv, jitter_ms=0.0):

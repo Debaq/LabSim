@@ -463,8 +463,12 @@ final class CaseBuilder
     // Patología VEMP por oído -- categorías vestibulares. 'sacular' afecta
     // CVEMP (P13/N23 sobre SCM), 'utricular' afecta OVEMP (N10/P16 sobre
     // oblicuo inferior), 'neural' afecta ambos (neuropatía vestibular).
-    // Ver VEMP_generator_v1.py::calculate_wave_parameters.
-    public const VEMP_TYPE_OPTIONS = ['normal', 'sacular', 'utricular', 'neural'];
+    // 'central' es la lesión de la vía (núcleos, vía vestibuloespinal: EM,
+    // kernícterus, CMT): VEMP PRESENTE, umbral normal y TARDE. El motor no le
+    // agrega nada; la latencia la cargan las desviaciones del subtipo. Con
+    // 'normal' el validador las rechazaba (más de 0,5 ms no es variabilidad).
+    // Ver src/vemp/engine.py::_patologia.
+    public const VEMP_TYPE_OPTIONS = ['normal', 'sacular', 'utricular', 'neural', 'central'];
     public const VEMP_SUBTIPOS = ['CVEMP', 'OVEMP', 'MVEMP'];
 
     // Picos por subtipo (orden de aparición en curva/tabla/PDF).
