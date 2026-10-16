@@ -6,7 +6,7 @@ no IA: son esquemas exactos, con los números de sus fuentes.
     h03-funcion-psicometrica.svg el umbral como probabilidad de detección
     h03-hl-spl.svg              el cero audiométrico: dB SPL contra dB HL
     h03-metodo-ascendente.svg   la escalera de 10 abajo / 5 arriba
-    h03-metodos-umbral.svg      las cuatro formas de buscar el umbral (D: la del laboratorio)
+    h03-metodos-umbral.svg      las cuatro formas de buscar el umbral
     h03-tonotopia.svg           dónde cae cada frecuencia del audiograma
 
 Fuentes de los números:
@@ -358,8 +358,8 @@ def _escalera(c, x0, y0, ancho, alto, seq, umbral, titulo, sub, notas, db_min=10
 
 def metodos_umbral():
     """Las cuatro formas de buscar el umbral, cada una con un ejemplo que
-    llega a 25 dB HL. La combinada acortada es la del laboratorio (ejemplo
-    de la experta del equipo, 2026-10-16)."""
+    llega a 25 dB HL. El ejemplo de la combinada acortada lo dio una
+    audióloga del equipo (2026-10-16)."""
     c = Lienzo(680, 500)
     w, h = 300, 120
     _escalera(c, 20, 82, w, h,
@@ -378,7 +378,7 @@ def metodos_umbral():
               ['se acerca desde abajo y desde arriba', 'umbral: donde coinciden, 25 dB'])
     _escalera(c, 360, 318, w, h,
               [(40, True), (30, True), (20, False), (20, False), (25, True), (25, True)], 25,
-              'D · Combinada acortada (la del laboratorio)', 'baja 10 si responde, sube 5 si no; repite al mismo nivel',
+              'D · Combinada acortada', 'baja 10 si responde, sube 5 si no; repite al mismo nivel',
               ['en 20, dos sin respuesta: ya no llega a 2 de 3', 'en 25, dos respuestas: umbral 25 dB'])
     circulo(c, 470, 18, 4, VERDE, True)
     c.t(479, 21, 'respondió', 7.6, TINTA, 'start')

@@ -236,7 +236,7 @@ Antes de este método, la audiometría usaba el método de límites: un tono con
 :::imagen ilustraciones/h03-metodo-ascendente.svg ancho=96% La escalera del método ascendente
 :::
 
-El ascendente no es la única forma de llegar al umbral. La **descendente** baja de a 5 dB hasta que el paciente deja de responder; es rápida, pero el paciente tiende a seguir respondiendo por inercia y el umbral sale más bajo de lo que es. La de **horquilla** sube y baja de a 5 dB alrededor del umbral y lo toma donde coinciden las dos direcciones. La **combinada acortada**, la que usa el laboratorio, baja de a 10 mientras el paciente responde y sube de a 5 cuando deja de hacerlo, y en vez de repetir ascensos repite el tono al mismo nivel: el umbral es la mínima intensidad con 2 respuestas de 3 tonos.
+El ascendente no es la única forma de llegar al umbral. La **descendente** baja de a 5 dB hasta que el paciente deja de responder; es rápida, pero el paciente tiende a seguir respondiendo por inercia y el umbral sale más bajo de lo que es. La de **horquilla** sube y baja de a 5 dB alrededor del umbral y lo toma donde coinciden las dos direcciones. La **combinada acortada** baja de a 10 mientras el paciente responde y sube de a 5 cuando deja de hacerlo, y en vez de repetir ascensos repite el tono al mismo nivel: el umbral es la mínima intensidad con 2 respuestas de 3 tonos.
 
 <!-- verificar: la descripción del método de horquilla (bracketing) de la ISO 8253-1 se escribió sin leer la norma; confirmar pasos y criterio. Método en discusión con el equipo: docs/libro/incongruencias_protocolo.md, punto 13b. -->
 
