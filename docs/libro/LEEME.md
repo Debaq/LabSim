@@ -35,5 +35,7 @@ python3 docs/libro/herramientas/hacer_libro.py 11 --sin-completo   # solo el cap
 python3 docs/libro/herramientas/nuevo_capitulo.py H8
 ```
 
+**Estado y pendientes: ver `ESTADO.md`.**
+
 Las guías del docente (`:::docente`) van siempre dentro de cada caso: hay
 **una sola edición** del libro.
