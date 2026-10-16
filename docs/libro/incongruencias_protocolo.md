@@ -42,6 +42,7 @@ Estado: **libro** = lo que dice hoy el texto. **Decisión** = para el equipo.
 |---|---|---|---|---|---|---|---|
 | 12 | H3 | Norma de la verificación diaria | ISO 8253-1:1989 | ISO 8253-1:2010 (vigente) | ISO 8253-1:2010 | A | |
 | 13 | H3 | Tolerancia al repetir 1 kHz | no la fija | 5 dB | ASHA 2005; BSA 2018 | A | |
+| 13b | H3 | Método de búsqueda del umbral | "método combinado": baja 10, sube 5; umbral = 2 de 3 tonos a la misma intensidad (ejemplo de la experta: 40 ✓, 30 ✓, 20 ✗, 20 ✗, 25 ✓, 25 ✓ → 25) | "método ascendente" de ASHA/ISO: mismos pasos, umbral = 2 de 3 ascensos (figura H3 actual) | ASHA 2005; ISO 8253-1 | P · revertir | en discusión: por ahora queda como el dibujo actual |
 | 14 | H3 | Screening | "umbral si oye todos los estímulos a 20 dB" | pasa/no pasa a nivel fijo, no da umbral | ASHA 1997 | E | |
 | 15 | H4 | Atenuación interaural aérea | tabla por frecuencia 35-50 dB | regla de 40 dB (supraaural) y 55 (inserto); la tabla queda como convención de LabSim | BSA 2018; Munro y Agnew 1999 | P · revertir | |
 | 16 | H4 | CE del ruido blanco | 15 dB | LabSim usa 10; sin fuente verificada para ninguno | — | A · verificar | |
