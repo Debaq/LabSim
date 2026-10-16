@@ -72,11 +72,11 @@ no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
   otras) como guía del alcance de los contenidos (referencia, no para copiar).
 
 ### Armador
-- **Armado incremental** (propuesto 2026-10-16): cada capítulo en su PDF con
-  caché por huella (md + figuras + rostros + CSS); el libro se pega con
-  pypdf, se estampan los números de página, el índice y las portadillas se
-  rehacen y los marcadores se arman igual. Hoy son ~9 min y dos pasadas de
-  WeasyPrint por cualquier cambio; con caché, ~1 min si se toca un capítulo.
+- **Armado incremental** (hecho 2026-10-16): `armado_incremental.py`, lo usa
+  `hacer_libro.py` para el libro completo. Capítulos con caché en
+  salida/cache/ (huella = HTML + CSS + imágenes), compuestos en paralelo;
+  números de página estampados, índice y marcadores rehechos. Desde cero
+  ~2,5 min; sin cambios ~1,3 min. `--de-una-pieza` = el armado viejo.
 
 ### Libro, contenido
 - **Rostros** (hechos 2026-10-16): 38 personas en `rostros/` (JPG 512 px),

@@ -864,7 +864,16 @@ def main():
         i = args.index('--formato')
         FORMATO = FORMATOS[args[i + 1]]
         del args[i:i + 2]
+    una_pieza = '--de-una-pieza' in args
+    if una_pieza:
+        args.remove('--de-una-pieza')
     pedido = args
+    if not pedido and not una_pieza:
+        # Libro completo: por capítulos con caché (armado_incremental.py).
+        # --de-una-pieza compone las ~500 páginas juntas, en dos pasadas.
+        import armado_incremental
+        armado_incremental.armar()
+        return
 
     def clave(x):
         # 'H04' -> 'H4', '011' -> '11'
