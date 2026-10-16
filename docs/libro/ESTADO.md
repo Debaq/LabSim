@@ -63,6 +63,13 @@ TEOAE del libro sale con click no lineal a 80 dB SPL. Los casos ya armados
 no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
 (Paget/fijación con gap ya no salen A) o de fichas (cada caso no abre página).
 
+### Armador
+- **Armado incremental** (propuesto 2026-10-16): cada capítulo en su PDF con
+  caché por huella (md + figuras + rostros + CSS); el libro se pega con
+  pypdf, se estampan los números de página, el índice y las portadillas se
+  rehacen y los marcadores se arman igual. Hoy son ~9 min y dos pasadas de
+  WeasyPrint por cualquier cambio; con caché, ~1 min si se toca un capítulo.
+
 ### Libro, contenido
 - **Rostros** (hechos 2026-10-16): 38 personas en `rostros/` (JPG 512 px),
   uno por persona (`demo-NN` para los de práctica), pedidos en
