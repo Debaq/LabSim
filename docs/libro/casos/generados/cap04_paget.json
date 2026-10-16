@@ -1,0 +1,873 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "paget",
+   "OI": "paget"
+  },
+  "edad": 71,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada",
+   "OI": "moderada"
+  },
+  "semilla": 1,
+  "anamnesis": {
+   "otros": "Adrián tiene 71 años y es contador jubilado. Hace unos diez años empezó a oír menos de los dos oídos, de a poco, y ahora le cuesta seguir la conversación en la mesa cuando están todos los nietos; su señora dice que pone la tele demasiado fuerte. A ratos le zumban los dos oídos, con un ruido grave. Hace seis años consultó por dolor en la cadera derecha y dolores de cabeza, y el internista le encontró una enfermedad de Paget en la pelvis y en el cráneo; por esos años se dio cuenta de que los sombreros ya no le quedaban. Lo trataron con una infusión de ácido zoledrónico y el dolor mejoró. No ha tenido vértigo ni otitis, no ha trabajado en ruido y nunca ha usado audífonos. Viene porque su hija insistió.",
+   "historia": "{{-2190}} Medicina interna: dolor de cadera derecha y cefalea. Fosfatasa alcalina elevada; cintigrafía ósea con captación en pelvis y cráneo. Enfermedad de Paget ósea; se indica ácido zoledrónico endovenoso.\n{{-30}} Otorrinolaringólogo: hipoacusia bilateral lentamente progresiva. Conductos y tímpanos normales. Solicita audiometría e impedanciometría.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Losartán 50 mg al día. Ácido zoledrónico endovenoso, una dosis hace seis años.",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1,
+ "data": {
+  "gender": 0,
+  "id": 9939,
+  "Aerea": [
+   [
+    40,
+    40
+   ],
+   [
+    45,
+    35
+   ],
+   [
+    40,
+    45
+   ],
+   [
+    50,
+    40
+   ],
+   [
+    55,
+    50
+   ],
+   [
+    65,
+    55
+   ],
+   [
+    70,
+    70
+   ],
+   [
+    75,
+    70
+   ],
+   [
+    80,
+    80
+   ]
+  ],
+  "Osea": [
+   [
+    30,
+    20
+   ],
+   [
+    30,
+    20
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    40,
+    30
+   ],
+   [
+    40,
+    40
+   ],
+   [
+    55,
+    45
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    70,
+    70
+   ]
+  ],
+  "LDL": [
+   [
+    110,
+    120
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    110,
+    115
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    115,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    40,
+    40
+   ],
+   [
+    45,
+    35
+   ],
+   [
+    40,
+    45
+   ],
+   [
+    50,
+    40
+   ],
+   [
+    55,
+    50
+   ],
+   [
+    65,
+    55
+   ],
+   [
+    70,
+    70
+   ],
+   [
+    75,
+    70
+   ],
+   [
+    80,
+    80
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    30,
+    20
+   ],
+   [
+    30,
+    20
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    40,
+    30
+   ],
+   [
+    40,
+    40
+   ],
+   [
+    55,
+    45
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    70,
+    70
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "negativo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 71,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.98,
+   1.11,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 80,
+    "percentage": 84
+   },
+   {
+    "int": 75,
+    "percentage": 84
+   }
+  ],
+  "SDT": [
+   40,
+   35
+  ],
+  "SRT": [
+   45,
+   40
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Losartán 50 mg al día. Ácido zoledrónico endovenoso, una dosis hace seis años.",
+   "cirugias": "",
+   "otros": "Adrián tiene 71 años y es contador jubilado. Hace unos diez años empezó a oír menos de los dos oídos, de a poco, y ahora le cuesta seguir la conversación en la mesa cuando están todos los nietos; su señora dice que pone la tele demasiado fuerte. A ratos le zumban los dos oídos, con un ruido grave. Hace seis años consultó por dolor en la cadera derecha y dolores de cabeza, y el internista le encontró una enfermedad de Paget en la pelvis y en el cráneo; por esos años se dio cuenta de que los sombreros ya no le quedaban. Lo trataron con una infusión de ácido zoledrónico y el dolor mejoró. No ha tenido vértigo ni otitis, no ha trabajado en ruido y nunca ha usado audífonos. Viene porque su hija insistió.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Adrián",
+     "edad": 71,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 60,
+     "confiabilidad": 84,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": false,
+   "ruido": "Zumbido",
+   "frecuencia": 500
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 75,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 60,
+     "tone_burst_1000Hz": 65,
+     "tone_burst_2000Hz": 65,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 55,
+     "nb_ce_chirp_ls_1000Hz": 60,
+     "nb_ce_chirp_ls_2000Hz": 60,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 75,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2084,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.33,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.33,
+      "amp": -0.09
+     },
+     "onda_V": {
+      "lat": 0.33,
+      "amp": -0.09
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 70,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 65,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": 60,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 60,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 70,
+     "ce_chirp": 60,
+     "ce_chirp_ls": 60
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.17,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1872,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.21,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.21,
+      "amp": -0.09
+     },
+     "onda_V": {
+      "lat": 0.21,
+      "amp": -0.1
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 18.4,
+     "1000": 29.2,
+     "1500": 35,
+     "2000": 39.2,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.6,
+    "sello_pct": 72,
+    "variabilidad_db": 2.3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 28.4,
+     "1000": 18.4,
+     "1500": 24.7,
+     "2000": 29.2,
+     "3000": 34.6,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.2,
+    "sello_pct": 82,
+    "variabilidad_db": 2.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T20:38:11+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Adrián Sergio",
+   "apellido": "Navarro Solís",
+   "rut": "7003801",
+   "fecha_nac": "17-08-1955"
+  },
+  "historia_clinica": "{{-2190}} Medicina interna: dolor de cadera derecha y cefalea. Fosfatasa alcalina elevada; cintigrafía ósea con captación en pelvis y cráneo. Enfermedad de Paget ósea; se indica ácido zoledrónico endovenoso.\r\n{{-30}} Otorrinolaringólogo: hipoacusia bilateral lentamente progresiva. Conductos y tímpanos normales. Solicita audiometría e impedanciometría."
+ }
+}

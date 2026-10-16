@@ -1,0 +1,879 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "fijacion_congenita_estribo",
+   "OI": "fijacion_congenita_estribo"
+  },
+  "edad": 9,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada",
+   "OI": "leve"
+  },
+  "semilla": 2,
+  "anamnesis": {
+   "otros": "Pepe tiene 9 años y está en cuarto básico. Viene con su papá, porque en el control de audición que hicieron en el colegio no pasó por ninguno de los dos oídos. La profesora jefe dice que se distrae cuando le hablan desde atrás y que siempre pide que le repitan. En la casa ven la tele fuerte desde que el papá se acuerda: dice que Pepe \"siempre ha sido así\", desde chiquito, y que no lo ha notado peor con los años. Empezó a hablar a la misma edad que su hermana, pero en el kínder fue a fonoaudiólogo porque le costaban algunos sonidos. Nunca ha tenido otitis ni le ha salido líquido de los oídos, y no se queja de zumbidos ni de mareos. Nació de término, sin complicaciones; los papás no recuerdan si le hicieron un examen de audición al nacer. En la familia nadie usa audífonos ni se ha operado de los oídos.",
+   "historia": "{{-60}} Control de audición escolar: no pasa en el oído derecho ni en el izquierdo. Se deriva a otorrinolaringología.\n{{-14}} Otorrinolaringólogo: conductos limpios y tímpanos de aspecto normal en los dos lados. Solicita audiometría e impedanciometría.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 2,
+ "data": {
+  "gender": 0,
+  "id": 9611,
+  "Aerea": [
+   [
+    40,
+    20
+   ],
+   [
+    50,
+    25
+   ],
+   [
+    50,
+    25
+   ],
+   [
+    55,
+    30
+   ],
+   [
+    65,
+    35
+   ],
+   [
+    55,
+    25
+   ],
+   [
+    45,
+    25
+   ],
+   [
+    45,
+    20
+   ],
+   [
+    45,
+    20
+   ]
+  ],
+  "Osea": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    15,
+    10
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    40,
+    20
+   ],
+   [
+    50,
+    25
+   ],
+   [
+    50,
+    25
+   ],
+   [
+    55,
+    30
+   ],
+   [
+    65,
+    35
+   ],
+   [
+    55,
+    25
+   ],
+   [
+    45,
+    25
+   ],
+   [
+    45,
+    20
+   ],
+   [
+    45,
+    20
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    15,
+    10
+   ],
+   [
+    10,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Z_OD": "As",
+  "Z_OI": "As",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "negativo",
+    "oi": "negativo"
+   },
+   "1000": {
+    "od": "negativo",
+    "oi": "negativo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 9,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.99,
+   0.41,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 85,
+    "percentage": 100
+   },
+   {
+    "int": 60,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   45,
+   20
+  ],
+  "SRT": [
+   50,
+   25
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Pepe tiene 9 años y está en cuarto básico. Viene con su papá, porque en el control de audición que hicieron en el colegio no pasó por ninguno de los dos oídos. La profesora jefe dice que se distrae cuando le hablan desde atrás y que siempre pide que le repitan. En la casa ven la tele fuerte desde que el papá se acuerda: dice que Pepe \"siempre ha sido así\", desde chiquito, y que no lo ha notado peor con los años. Empezó a hablar a la misma edad que su hermana, pero en el kínder fue a fonoaudiólogo porque le costaban algunos sonidos. Nunca ha tenido otitis ni le ha salido líquido de los oídos, y no se queja de zumbidos ni de mareos. Nació de término, sin complicaciones; los papás no recuerdan si le hicieron un examen de audición al nacer. En la familia nadie usa audífonos ni se ha operado de los oídos.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Pepe",
+     "edad": 9,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 49,
+     "confiabilidad": 58,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amva03igm1f",
+     "rol": "madre",
+     "nombre": "Mónica Ruiz",
+     "edad": 46,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 75,
+     "conciencia": 80,
+     "confiabilidad": 76,
+     "version": "",
+     "comportamiento": "insistente, repite lo que le preocupa hasta que le contestan",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 65,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 70,
+     "tone_burst_1000Hz": 70,
+     "tone_burst_2000Hz": 75,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 65,
+     "nb_ce_chirp_ls_1000Hz": 65,
+     "nb_ce_chirp_ls_2000Hz": 70,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 65,
+     "ce_chirp": 60,
+     "ce_chirp_ls": 60
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 25,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 25,
+     "click": 35,
+     "ce_chirp": 30,
+     "ce_chirp_ls": 30
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.18,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1949,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.29,
+      "amp": -0.05
+     },
+     "onda_III": {
+      "lat": 0.29,
+      "amp": -0.06
+     },
+     "onda_V": {
+      "lat": 0.29,
+      "amp": -0.08
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 40,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 30,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 30,
+     "click": 40,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 35,
+     "tone_burst_2000Hz": 35,
+     "tone_burst_4000Hz": 25,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 30,
+     "nb_ce_chirp_ls_2000Hz": 30,
+     "nb_ce_chirp_ls_4000Hz": 25,
+     "click": 30,
+     "ce_chirp": 25,
+     "ce_chirp_ls": 25
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.15,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1999,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.19,
+      "amp": -0.06
+     },
+     "onda_III": {
+      "lat": 0.19,
+      "amp": -0.08
+     },
+     "onda_V": {
+      "lat": 0.19,
+      "amp": -0.11
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "child",
+    "baseline": {
+     "I": {
+      "lat": 1.48,
+      "amp": 0.239
+     },
+     "III": {
+      "lat": 3.5,
+      "amp": 0.282
+     },
+     "V": {
+      "lat": 5.5,
+      "amp": 0.41
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 5.3,
+    "sello_pct": 83,
+    "variabilidad_db": 2.4,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 24,
+     "1000": 34,
+     "1500": 34,
+     "2000": 34,
+     "3000": 24,
+     "4000": 24,
+     "6000": 24,
+     "8000": 24
+    },
+    "atten_db": 0,
+    "ruido_db": 5.9,
+    "sello_pct": 66,
+    "variabilidad_db": 1.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 100,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 100,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 100,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 95,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T20:38:08+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Pepe Víctor",
+   "apellido": "Ruiz Vega",
+   "rut": "25619720",
+   "fecha_nac": "26-09-2017"
+  },
+  "historia_clinica": "{{-60}} Control de audición escolar: no pasa en el oído derecho ni en el izquierdo. Se deriva a otorrinolaringología.\r\n{{-14}} Otorrinolaringólogo: conductos limpios y tímpanos de aspecto normal en los dos lados. Solicita audiometría e impedanciometría."
+ }
+}

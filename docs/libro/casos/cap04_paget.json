@@ -1,0 +1,39 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "paget",
+      "OI": "paget"
+    },
+    "edad": 71,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "semilla": 1,
+    "anamnesis": {
+      "otros": "Adrián tiene 71 años y es contador jubilado. Hace unos diez años empezó a oír menos de los dos oídos, de a poco, y ahora le cuesta seguir la conversación en la mesa cuando están todos los nietos; su señora dice que pone la tele demasiado fuerte. A ratos le zumban los dos oídos, con un ruido grave. Hace seis años consultó por dolor en la cadera derecha y dolores de cabeza, y el internista le encontró una enfermedad de Paget en la pelvis y en el cráneo; por esos años se dio cuenta de que los sombreros ya no le quedaban. Lo trataron con una infusión de ácido zoledrónico y el dolor mejoró. No ha tenido vértigo ni otitis, no ha trabajado en ruido y nunca ha usado audífonos. Viene porque su hija insistió.",
+      "historia": "{{-2190}} Medicina interna: dolor de cadera derecha y cefalea. Fosfatasa alcalina elevada; cintigrafía ósea con captación en pelvis y cráneo. Enfermedad de Paget ósea; se indica ácido zoledrónico endovenoso.\n{{-30}} Otorrinolaringólogo: hipoacusia bilateral lentamente progresiva. Conductos y tímpanos normales. Solicita audiometría e impedanciometría.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día. Ácido zoledrónico endovenoso, una dosis hace seis años.",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}
