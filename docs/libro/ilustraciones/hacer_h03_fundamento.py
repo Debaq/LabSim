@@ -324,14 +324,16 @@ def ascendente():
     c.guardar('h03-metodo-ascendente.svg')
 
 
-def _escalera(c, x0, y0, ancho, alto, seq, umbral, titulo, sub, notas, db_min=10, db_max=40):
+def _escalera(c, x0, y0, ancho, alto, seq, umbral, titulo, sub, notas, db_min=10, db_max=40, autores=''):
     """Un panel de búsqueda de umbral: tonos en orden, respuesta o no, el
     paso entre tonos y la línea del umbral."""
     Y = lambda db: y0 + alto - (db - db_min) / (db_max - db_min) * alto
     n = len(seq)
     paso = (ancho - 60) / max(n - 1, 1)
     X = lambda i: x0 + 40 + i * paso
-    c.t(x0, y0 - 30, titulo, 9.5, TINTA, 'start', 700)
+    c.t(x0, y0 - 44, titulo, 9.5, TINTA, 'start', 700)
+    if autores:
+        c.t(x0, y0 - 31, autores, 7.4, TINTA, 'start', estilo='italic')
     c.t(x0, y0 - 17, sub, 7.4, TENUE, 'start')
     for db in range(db_min, db_max + 1, 5):
         c.linea(x0 + 26, Y(db), x0 + ancho, Y(db), FUERTE if db % 10 == 0 else GRILLA, 0.6)
@@ -360,26 +362,30 @@ def metodos_umbral():
     """Las cuatro formas de buscar el umbral, cada una con un ejemplo que
     llega a 25 dB HL. El ejemplo de la combinada acortada lo dio una
     audióloga del equipo (2026-10-16)."""
-    c = Lienzo(680, 500)
+    c = Lienzo(680, 530)
     w, h = 300, 120
-    _escalera(c, 20, 82, w, h,
+    _escalera(c, 20, 100, w, h,
               [(40, True), (30, True), (20, False), (25, True), (15, False), (20, False), (25, True),
                (15, False), (20, False), (25, True)], 25,
-              'A · Ascendente (Hughson-Westlake, ASHA/ISO)', 'baja 10 si responde, sube 5 si no',
-              ['el umbral se juzga solo subiendo', '25 dB: responde en 3 de 3 ascensos'])
-    _escalera(c, 360, 82, w, h,
+              'A · Ascendente', 'baja 10 si responde, sube 5 si no',
+              ['el umbral se juzga solo subiendo', '25 dB: responde en 3 de 3 ascensos'],
+              autores='Hughson y Westlake (1944); Carhart y Jerger (1959)')
+    _escalera(c, 360, 100, w, h,
               [(40, True), (35, True), (30, True), (25, True), (20, False)], 25,
               'B · Descendente', 'baja de 5 en 5 hasta que deja de responder',
-              ['riesgo: sigue respondiendo por inercia', 'umbral: la última respuesta, 25 dB'])
-    _escalera(c, 20, 318, w, h,
+              ['riesgo: sigue respondiendo por inercia', 'umbral: la última respuesta, 25 dB'],
+              autores='método de límites (Fechner, 1860); en audiometría, Bunch (1943)')
+    _escalera(c, 20, 348, w, h,
               [(10, False), (15, False), (20, False), (25, True), (30, True), (25, True), (20, False),
                (25, True)], 25,
-              'C · Horquilla', 'sube y baja de 5 en 5 alrededor del umbral',
-              ['se acerca desde abajo y desde arriba', 'umbral: donde coinciden, 25 dB'])
-    _escalera(c, 360, 318, w, h,
+              'C · Horquilla', 'series de 5 dB que suben y bajan alrededor del umbral',
+              ['3 series ascendentes y 3 descendentes', 'umbral: promedio de los niveles más bajos oídos'],
+              autores='ISO 8253-1 (1989)')
+    _escalera(c, 360, 348, w, h,
               [(40, True), (30, True), (20, False), (20, False), (25, True), (25, True)], 25,
               'D · Combinada acortada', 'baja 10 si responde, sube 5 si no; repite al mismo nivel',
-              ['en 20, dos sin respuesta: ya no llega a 2 de 3', 'en 25, dos respuestas: umbral 25 dB'])
+              ['en 20, dos sin respuesta: ya no llega a 2 de 3', 'en 25, dos respuestas: umbral 25 dB'],
+              autores='variante clínica: 2 de 3 tonos al mismo nivel')
     circulo(c, 470, 18, 4, VERDE, True)
     c.t(479, 21, 'respondió', 7.6, TINTA, 'start')
     circulo(c, 545, 18, 4, TINTA)
