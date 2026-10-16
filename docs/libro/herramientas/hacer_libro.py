@@ -752,7 +752,7 @@ ol.obs li.sin-globo {{ padding-left: 0; }}
                        color: #8e2a4a; margin-bottom: 1.5mm; }}
 .img-centro {{ text-align: center; }}
 .img-globos {{ position: relative; display: inline-block; max-width: 100%; text-align: left; }}
-.img-globos img {{ display: block; width: 100%; max-height: 120mm; border-radius: 1.5mm; }}
+.img-globos img {{ display: block; width: 100%; max-height: 170mm; border-radius: 1.5mm; }}
 .img-globos:not([style]) img {{ width: auto; max-width: 100%; }}
 .globo-img {{ position: absolute; transform: translate(-50%, -50%); width: 5.4mm; height: 5.4mm; border-radius: 50%;
               background: #24101a; color: #fff; border: .5mm solid #fff; font: 700 7.6pt/5.4mm 'Plus Jakarta Sans';

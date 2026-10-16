@@ -348,18 +348,14 @@ Los umbrales de alta frecuencia varían mucho entre personas y con la edad. Por 
 
 Los símbolos del audiograma son los de la ASHA (1990). En Chile, el derecho va en **rojo** y el izquierdo en **azul**; si los dos oídos tienen el mismo umbral, el símbolo del izquierdo se dibuja dentro del derecho (ISP, 2018).
 
-:::ayuda-ancho Símbolos del audiograma
-| | Oído derecho (rojo) | Oído izquierdo (azul) |
-|---|---|---|
-| Aérea sin enmascarar | <span style="color:#c62f3a;font-weight:700;font-size:1.3em">○</span> | <span style="color:#2c5cb0;font-weight:700;font-size:1.3em">✕</span> |
-| Aérea enmascarada | <span style="color:#c62f3a;font-weight:700;font-size:1.3em">△</span> | <span style="color:#2c5cb0;font-weight:700;font-size:1.3em">□</span> |
-| Ósea en mastoides, sin enmascarar | <span style="color:#c62f3a;font-weight:700;font-size:1.3em">&lt;</span> | <span style="color:#2c5cb0;font-weight:700;font-size:1.3em">&gt;</span> |
-| Ósea en mastoides, enmascarada | <span style="color:#c62f3a;font-weight:700;font-size:1.3em">[</span> | <span style="color:#2c5cb0;font-weight:700;font-size:1.3em">]</span> |
-| Sin respuesta al máximo del equipo | <span style="color:#c62f3a;font-weight:700;font-size:1.3em">○↙</span> flecha hacia abajo desde el símbolo, hacia la izquierda | <span style="color:#2c5cb0;font-weight:700;font-size:1.3em">✕↘</span> flecha hacia abajo desde el símbolo, hacia la derecha |
-| Campo libre (no es de un oído; → H8) | <span style="color:#2e8540;font-weight:700;font-size:1.3em">S</span> sin audífono | <span style="color:#2e8540;font-weight:700;font-size:1.3em">A</span> con audífono |
-
-La aérea se une con línea continua. La ósea, cuando se une, con línea discontinua. Los símbolos óseos del derecho van a la izquierda de la línea de frecuencia y los del izquierdo a la derecha: es el paciente mirándote de frente. Los de campo libre van en **verde**, porque los oye el mejor oído, sea cual sea.
+:::imagen ilustraciones/h03-simbolos.svg ancho=100% Los símbolos del audiograma
 :::
+
+:::imagen ilustraciones/h03-simbolos-2.svg ancho=100% Los símbolos del Fowler y de la acumetría
+:::
+
+La aérea se une con línea continua; la ósea, cuando se une, con línea punteada, y el LDL con guiones. Los símbolos óseos del derecho van a la izquierda de la línea de frecuencia y los del izquierdo a la derecha: es el paciente mirándote de frente. Los de campo libre van en **verde** y centrados, porque no son de un oído: los oye el mejor. La lámina trae también los símbolos que se usan más adelante: el LDL (→ H5), la escalera del Fowler (→ H6) y el Weber y el Rinne de la acumetría (→ H2).
+
 
 {{caso h3_p33}}
 
