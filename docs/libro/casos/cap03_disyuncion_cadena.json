@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "disyuncion_cadena",
+      "OI": "normal"
+    },
+    "edad": 23,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "semilla": 16,
+    "anamnesis": {
+      "otros": "Diego tiene 23 años y estudia ingeniería. Hace cuatro meses se cayó de la bicicleta y se golpeó el lado derecho de la cabeza; estuvo inconsciente unos minutos y le salió sangre por el oído derecho. Lo hospitalizaron dos días. Le dijeron que tenía una fisura en el hueso del oído y que oiría mejor cuando se reabsorbiera la sangre, pero sigue oyendo \"como con algodón\" por el derecho. A veces le zumba ese oído, un ruido grave que va y viene. No ha tenido vértigo, la cara se le mueve bien y no le ha vuelto a salir nada del oído.",
+      "historia": "{{-120}} Servicio de urgencia: traumatismo encefalocraneano con pérdida de conciencia breve y otorragia derecha. TC: fractura longitudinal del temporal derecho que respeta la cápsula ótica; hemotímpano. Sin parálisis facial.\n{{-90}} Otorrinolaringólogo: hemotímpano derecho en reabsorción. Control en dos meses.\n{{-14}} Otorrinolaringólogo: membrana derecha íntegra, sin sangre detrás. Persiste la hipoacusia derecha. Solicita audiometría e impedanciometría.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    }
+  ]
+}

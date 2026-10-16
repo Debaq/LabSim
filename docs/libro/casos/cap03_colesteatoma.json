@@ -1,0 +1,32 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "colesteatoma"
+    },
+    "edad": 19,
+    "sexo": "hombre",
+    "semilla": 14,
+    "anamnesis": {
+      "otros": "Sergio tiene 19 años y trabaja como garzón. Desde los 15 años le sale de vez en cuando una secreción del oído izquierdo, espesa y con muy mal olor, que se le pasa con gotas y vuelve a los meses. La última vez fue hace tres semanas y ya está seco. Siente que cada año oye un poco menos por ese lado, y a veces le zumba, un ruido grave que va y viene. No le duele, no ha tenido vértigo y la cara se le mueve bien. Le da vergüenza el olor y por eso nunca había consultado en serio.",
+      "historia": "{{-21}} Médico general: otorrea fétida izquierda. Gotas óticas con antibiótico; deriva a otorrinolaringología.\n{{-7}} Otorrinolaringólogo: oído izquierdo seco; costra y material blanco en el ático, con el resto de la membrana retraído. Membrana derecha normal. Solicita audiometría, impedanciometría y TC de oídos.",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    }
+  ]
+}

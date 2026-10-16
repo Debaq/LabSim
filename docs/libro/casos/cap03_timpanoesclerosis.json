@@ -1,0 +1,32 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "timpanoesclerosis"
+    },
+    "edad": 31,
+    "sexo": "mujer",
+    "semilla": 12,
+    "anamnesis": {
+      "otros": "Daniela tiene 31 años y trabaja en un call center con un audífono de diadema. Hace dos o tres años se dio cuenta de que por el oído izquierdo oye \"más lejos\", y por eso se pone el auricular en el derecho. No sabe decir cuándo empezó: cree que ha ido de a poco. De niña tuvo otitis a repetición y le pusieron tubos en los dos oídos a los 4 años. Desde entonces no ha tenido dolor ni secreción. No le zumban los oídos ni se marea.",
+      "historia": "{{-60}} Otorrinolaringólogo: membrana derecha normal; membrana izquierda íntegra, con una placa blanca extensa en su mitad posterior. Solicita audiometría e impedanciometría.",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": "Tubos de ventilación en los dos oídos a los 4 años."
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    }
+  ]
+}

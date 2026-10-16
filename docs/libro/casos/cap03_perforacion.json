@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "perforacion",
+      "OI": "normal"
+    },
+    "edad": 36,
+    "sexo": "mujer",
+    "semilla": 11,
+    "anamnesis": {
+      "otros": "Lucía tiene 36 años y es técnica en enfermería en un CESFAM. De niña tuvo muchas otitis y el oído derecho le \"supuraba\" cada invierno. De adulta le ha supurado tres o cuatro veces, siempre después de que le entra agua; la última fue hace más de un año y se le pasó con gotas. Desde entonces el oído está seco. Siente que por el derecho oye menos, sobre todo cuando le hablan bajo o por teléfono, que siempre se pone en el izquierdo. No le zumban los oídos, no le duelen y no se ha mareado. Viene porque el otorrino le propuso operarse para cerrar el tímpano y quiere saber cuánto oye antes de decidir. Le gustaría volver a nadar con sus hijos.",
+      "historia": "{{-400}} Médico general: otorrea derecha después de bañarse en piscina. Gotas óticas con antibiótico por siete días.\n{{-30}} Otorrinolaringólogo: perforación central amplia de la membrana derecha, seca, sin colesteatoma. Membrana izquierda normal. Plantea timpanoplastia; solicita audiometría e impedanciometría con función tubaria.",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

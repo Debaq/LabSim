@@ -1,0 +1,872 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "disyuncion_cadena",
+   "OI": "normal"
+  },
+  "edad": 23,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada"
+  },
+  "semilla": 16,
+  "anamnesis": {
+   "otros": "Diego tiene 23 años y estudia ingeniería. Hace cuatro meses se cayó de la bicicleta y se golpeó el lado derecho de la cabeza; estuvo inconsciente unos minutos y le salió sangre por el oído derecho. Lo hospitalizaron dos días. Le dijeron que tenía una fisura en el hueso del oído y que oiría mejor cuando se reabsorbiera la sangre, pero sigue oyendo \"como con algodón\" por el derecho. A veces le zumba ese oído, un ruido grave que va y viene. No ha tenido vértigo, la cara se le mueve bien y no le ha vuelto a salir nada del oído.",
+   "historia": "{{-120}} Servicio de urgencia: traumatismo encefalocraneano con pérdida de conciencia breve y otorragia derecha. TC: fractura longitudinal del temporal derecho que respeta la cápsula ótica; hemotímpano. Sin parálisis facial.\n{{-90}} Otorrinolaringólogo: hemotímpano derecho en reabsorción. Control en dos meses.\n{{-14}} Otorrinolaringólogo: membrana derecha íntegra, sin sangre detrás. Persiste la hipoacusia derecha. Solicita audiometría e impedanciometría.",
+   "hist": [
+    "tce"
+   ],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 16,
+ "data": {
+  "gender": 0,
+  "id": 9550,
+  "Aerea": [
+   [
+    55,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    55,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    50,
+    0
+   ]
+  ],
+  "Osea": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    55,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    55,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    50,
+    0
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Z_OD": "Ad",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "negativo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "negativo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 23,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.96,
+   1.3,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 80,
+    "percentage": 100
+   },
+   {
+    "int": 30,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   40,
+   -5
+  ],
+  "SRT": [
+   45,
+   0
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": true,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Diego tiene 23 años y estudia ingeniería. Hace cuatro meses se cayó de la bicicleta y se golpeó el lado derecho de la cabeza; estuvo inconsciente unos minutos y le salió sangre por el oído derecho. Lo hospitalizaron dos días. Le dijeron que tenía una fisura en el hueso del oído y que oiría mejor cuando se reabsorbiera la sangre, pero sigue oyendo \"como con algodón\" por el derecho. A veces le zumba ese oído, un ruido grave que va y viene. No ha tenido vértigo, la cara se le mueve bien y no le ha vuelto a salir nada del oído.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Diego",
+     "edad": 23,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 80,
+     "confiabilidad": 87,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "unilateral",
+   "oido": "od",
+   "predominio": null,
+   "pulsatil": false,
+   "permanente": false,
+   "ruido": "Zumbido",
+   "frecuencia": 500
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 55,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 75,
+     "tone_burst_1000Hz": 65,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 70,
+     "nb_ce_chirp_ls_1000Hz": 60,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 55,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 20,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 20,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.2,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2069,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.25,
+      "amp": -0.12
+     },
+     "onda_III": {
+      "lat": 0.25,
+      "amp": -0.13
+     },
+     "onda_V": {
+      "lat": 0.25,
+      "amp": -0.14
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 10,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 10,
+     "tone_burst_4000Hz": 5,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 5,
+     "nb_ce_chirp_ls_4000Hz": 5,
+     "click": 10,
+     "ce_chirp": 5,
+     "ce_chirp_ls": 5
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 20,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 20,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.3,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1700,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.01,
+      "amp": 0
+     },
+     "onda_III": {
+      "lat": -0.01,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": 0.04,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_male",
+    "baseline": {
+     "I": {
+      "lat": 1.47,
+      "amp": 0.32
+     },
+     "III": {
+      "lat": 3.75,
+      "amp": 0.37
+     },
+     "V": {
+      "lat": 5.68,
+      "amp": 0.4
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1.7,
+    "sello_pct": 76,
+    "variabilidad_db": 1.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 1.9,
+    "sello_pct": 87,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 100,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 100,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 100,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T20:32:04+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Diego Rodrigo",
+   "apellido": "Contreras Vega",
+   "rut": "21392338",
+   "fecha_nac": "19-08-2003"
+  },
+  "historia_clinica": "{{-120}} Servicio de urgencia: traumatismo encefalocraneano con pérdida de conciencia breve y otorragia derecha. TC: fractura longitudinal del temporal derecho que respeta la cápsula ótica; hemotímpano. Sin parálisis facial.\r\n{{-90}} Otorrinolaringólogo: hemotímpano derecho en reabsorción. Control en dos meses.\r\n{{-14}} Otorrinolaringólogo: membrana derecha íntegra, sin sangre detrás. Persiste la hipoacusia derecha. Solicita audiometría e impedanciometría."
+ }
+}
