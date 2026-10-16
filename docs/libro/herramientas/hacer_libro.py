@@ -588,15 +588,16 @@ h4 {{ font: 700 8.5pt 'Plus Jakarta Sans'; letter-spacing: .8pt; text-transform:
 p {{ margin: 0 0 2.4mm; orphans: 3; widows: 3; }}
 li {{ orphans: 2; widows: 2; }}
 h2, h3, h4, .rotulo-chico, .caja-titulo {{ break-after: avoid; }}
-/* la ficha del caso no se parte y arrastra consigo la pregunta que la sigue */
-.caso {{ break-before: page; break-inside: avoid; break-after: avoid; }}
+/* la ficha del caso no se parte y arrastra consigo la pregunta que la sigue. No
+   abre página: si no cabe, pasa entera a la siguiente (con break-before: page
+   cada caso dejaba media hoja en blanco y los capítulos llegaban a 24 págs.) */
+.caso {{ break-inside: avoid; break-after: avoid; }}
 .caso + .caja-pregunta, .caso + p {{ break-before: avoid; }}
 /* un título de sección no queda solo al pie de la página */
 h2 + p, h3 + p, h4 + p, h2 + ul, h3 + ul, h2 + ol, h3 + ol {{ break-before: avoid; }}
 .caja, .figobs, table {{ break-inside: avoid; }}
 ol, ul {{ margin: 0 0 2.5mm; padding-left: 5mm; }}
 li {{ margin-bottom: .8mm; }}
-h3 + ol li {{ font-size: 8.4pt; line-height: 1.4; }}
 .pendiente {{ background: #fff6d6; border-left: 2pt solid #d9a400; padding: 2mm 3mm; margin: 1mm 0 3mm;
               font-size: 8.8pt; color: #5c4a00; border-radius: 0 1.5mm 1.5mm 0; }}
 .pendiente span {{ font-weight: 700; text-transform: uppercase; letter-spacing: .6pt; font-size: 7.5pt; margin-right: 2mm; }}

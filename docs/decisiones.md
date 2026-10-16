@@ -5972,3 +5972,78 @@ supraaural) y **ruido blanco a 90 dB** en el oído no evaluado
 tolerancia de ±5 dB igual que antes). Ayuda del editor, manual del libro (H6,
 cap. 11) y tests al día.
 
+
+## Errores del simulador detectados al escribir el libro (2026-10-15)
+
+Los siete de `docs/libro/ESTADO.md` ("Errores del simulador detectados y aún
+NO arreglados"). Lo que se decidió en cada uno:
+
+1. **Curva A con gap (Paget, fijación congénita).** El generador sorteaba la
+   curva de la lista del cuadro sin mirar el gap que acababa de salir, y
+   `CaseProfile::warnings` frena A con gap >= 20 dB. Se corrigió el generador,
+   no la regla: `curvasPosibles()` (case/generator.js) descarta A con gap >=
+   `WARN_TYMP_GAP_DB` y B con gap < `WARN_TYMP_NO_GAP_DB`, con los mismos
+   umbrales y las mismas frecuencias (`CORE_FREQS`) que el aviso, que ahora
+   viajan en `CASE_CONST`. Si ninguna curva del cuadro pasa, sortea entre
+   todas y el aviso queda para el docente. Resultado: el Paget con gap chico
+   sigue pudiendo salir A (lo que dice Monsell 2004) y la fijación, con su
+   gap de 25-45 dB, sale As.
+2. **VEMP presente y tarde (kernícterus, EM, neuropatía hereditaria).** Los
+   tres declaraban `type normal` con `lat_ms` de +1 a +11 ms, y el validador
+   de "Normal" no deja pasar más de 0,5 ms. Ninguno se podía guardar (el
+   ESTADO solo nombraba el kernícterus). Se agregó el tipo **`central`** a
+   `VEMP_TYPE_OPTIONS`: la vía está lesionada pero el órgano no, así que el
+   motor (src/vemp/engine.py) no baja la amplitud ni corre la latencia por su
+   cuenta; el retraso lo cargan las desviaciones del subtipo, que es lo que ya
+   escribía el armado. No se aflojó la tolerancia de "Normal".
+3. **Transitorio neonatal en cero.** Dos fallas encadenadas: la vista previa
+   (profile-preview.js) le mandaba a `case_project.php` solo el `payload`, sin
+   la edad ni el parto, así que proyectaba sin horas de vida; y nunca escribía
+   `eoas[..][atten_db]`, con lo que el POST mandaba el 0 del campo y ganaba lo
+   posteado. Además, con las horas ya cargadas el generador no sorteaba el
+   percentil de líquido: el servidor sorteaba uno por viaje y CaseForm otro al
+   guardar. Ahora la vista previa manda `age`, `edad_valor`, `edad_unidad` y
+   `nacimiento[...]`, fija el percentil en el formulario si está vacío,
+   escribe `atten_db` (0 sin transitorio) y vuelve a proyectar cuando cambia
+   la edad o el parto; el generador sortea el percentil en cada Generar
+   aunque las horas las haya puesto el docente. Verificado con el armado real:
+   un RN de 20 h guarda exactamente 2 x `neonatalTransientDb` de su percentil.
+4. **TEOAE: nivel y modo del click.** El nivel no movía la emisión (solo la
+   estabilidad) y no había modo. Ahora `expected_response_db` es la respuesta
+   a **80 dB SPL con click no lineal** (`reference_level_db_spl`), que es el
+   protocolo; con otro nivel la emisión crece compresiva (0,4 dB/dB debajo de
+   la referencia, 0,15 arriba), sobre el nivel que llega al conducto (descuenta
+   el sello). **Lineal** suma 6 dB a la emisión --la secuencia no lineal
+   (3 clicks + 1 invertido al triple) deja la mitad por click con saturación
+   completa, (3E - E)/4 contra E: 6 dB es el mínimo-- y no cancela la cola del
+   click, una resonancia del conducto que dura más con la sonda floja. Como es
+   igual en A y en B sube la reproducibilidad, y con la sonda floja da PASS
+   falso en un oído sin emisiones: es la razón clínica para medir en no
+   lineal. El análisis (espectro, SNR, reproducibilidad) arranca a los 2,5 ms
+   como en un equipo; el trazo que se ve es el entero. En el panel el nivel y
+   el modo arrancan **al azar** (regla de no regalar el valor correcto), y el
+   informe guarda `modo_click`. El libro dibuja la TEOAE con el protocolo.
+5. **Motor de figuras.** (a) La ósea enmascarada se decidía con el gap del
+   propio oído, y en una sensorioneural unilateral el oído malo salía con "<".
+   La regla correcta compara la aérea del oído con la **mejor** de las dos
+   óseas (sin enmascarar contesta la mejor cóclea): corregida en el motor, en
+   `CaseCharts` (PDF) y en audiogram.js (editor), que comparten regla.
+   (b) La "V" sobre el ruido: una onda se rotula si su amplitud supera 3 veces
+   el ruido residual del promedio (RMS de (A-B)/2) y nunca bajo 0,05 µV.
+   (c) `fig.abr()` acepta `transductor` (insercion/copa/oseo), `polaridad` y
+   `tasa`; lo que queda en el valor de siempre no entra al JSON, así los casos
+   ya armados no se rehacen. (d) `fig.campo_libre(ganancia=...)`: el campo
+   libre se calcula del caso (oído mejor por frecuencia, 250-6000 Hz) porque
+   LabSim no lo mide; la curva con audífono resta una ganancia funcional que
+   declara el capítulo, no la inventa el motor. Símbolos S y A en negro
+   (binaurales); los colores por oído con audífono siguen siendo pregunta
+   para él (ESTADO, pendiente 3).
+6. **Código muerto.** `response_A.py` quedó con lo único que se usa (voz del
+   paciente y Fowler, vía `other_response`); se fueron las respuestas viejas a
+   umbrales, SDT, LDL y Carhart, y `CalculateLogo.sdt_calcule`, que solo
+   alimentaba ese SDT viejo. `CreatePatient.ear_volume` (copia sin uso de
+   `CaseBuilder::earVolume`) eliminado.
+7. **Armador.** Sin la regla `h3 + ol li` (listas en letra chica después de un
+   `###`). La ficha del caso ya no abre página: no se parte y pasa entera a la
+   siguiente si no cabe. `hacer_figuras.py` arma `figuras/salida/index.html`
+   con todas las figuras de la carpeta, no solo las de la corrida.

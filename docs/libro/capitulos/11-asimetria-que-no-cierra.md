@@ -299,9 +299,9 @@ La pérdida del OD es mayor que en el caso anterior y no hay acúfeno. ¿Cambia 
 - @contra OI 1000 | Sin reflejo con el tono en el OD: otra vez el **patrón diagonal**.
 :::
 :::figura cap11_schwannoma abr
-- @OD 80 V | A 80 dB el OD apenas insinúa una onda V tardía. No hay I ni III.
+- @OD 80 | A 80 dB el OD no muestra ninguna onda que se separe del ruido: ni I ni III, y tampoco una V que se pueda marcar.
 - @OI 80 V | El OI tiene todas sus ondas bien formadas.
-- Ojo con la lectura: con 70 a 95 dB de pérdida entre 2 y 4 kHz, un click a 80 dB queda casi en el umbral de las frecuencias que usa. La falta de I y III **no basta sola** para hablar de nervio.
+- Ojo con la lectura: con 70 a 95 dB de pérdida entre 2 y 4 kHz, un click a 80 dB queda casi en el umbral de las frecuencias que usa. Un PEAT sin ondas **no basta solo** para hablar de nervio.
 :::
 :::figura cap11_schwannoma vemp
 - @OD P13 | El VEMP cervical del OD es pequeño.

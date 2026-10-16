@@ -1,7 +1,7 @@
 """Emisiones otoacústicas con los generadores de la app (src/oae/generators).
 
-Se llaman con los mismos argumentos que usan los paneles (nivel, barridos,
-L1/L2 por defecto de la normativa) y con cases.data['EOAS'][oído]: la
+Se llaman con los parámetros del protocolo (TEOAE no lineal a 80 dB SPL,
+barridos y L1/L2 de la normativa) y con cases.data['EOAS'][oído]: la
 semilla es la de la app (stable_seed + huella del caso), así que el libro
 muestra lo mismo que el equipo con ese paciente.
 """
@@ -17,8 +17,10 @@ def teoae(caso, lado):
     with en_raiz():
         g = TeoaeGenerator()
         n = g.normative
-        return g.generate(level_db=n['default_level_db_spl'], n_sweeps=n['default_n_sweeps'],
-                          ear=lado, case=caso['EOAS'][lado])
+        # Como manda el protocolo: click no lineal a 80 dB SPL.
+        return g.generate(level_db=n.get('reference_level_db_spl', g.REFERENCE_LEVEL_DB_SPL),
+                          n_sweeps=n['default_n_sweeps'], ear=lado,
+                          case=caso['EOAS'][lado], mode='no_lineal')
 
 
 def dpoae(caso, lado):

@@ -300,7 +300,7 @@ Además del umbral, mira la **forma** de la deflexión. La normal baja al empeza
 
 :::figura h7_p34 reflejos
 - @ipsi OD 1000 | Con la sonda en el OD rígido faltan el ipsilateral y el contralateral que se registra ahí, aunque el tono entre por el OI sano.
-- @contra OI 2000 | Con el **tono en el OD** el reflejo sube lo que pierde en el oído medio: 110 dB SPL en 2 kHz, 120 en 4 kHz, y ausente en 500 y 1000 Hz, donde el gap es de 45 dB.
+- @contra OI 2000 | Con el **tono en el OD** el reflejo sube lo que pierde en el oído medio: 110 dB SPL en 2 kHz, 120 en 4 kHz, y ausente en 500 y 1000 Hz, donde el gap es de 40 y 30 dB.
 - @ipsi OI 1000 | Solo el ipsilateral del OI sale normal. Tres filas alteradas en torno al OD: **L invertida**, conductivo.
 :::
 

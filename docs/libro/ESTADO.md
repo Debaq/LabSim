@@ -65,33 +65,16 @@ anatomía/esquemas (plan: Servier/OpenStax, SVG propio, capturas).
    licencia de simHit (Apache vs MIT), DOI para labyrinthus3d, coautorías de
    colegas (Casanova, Poza, Uribe), alcance nasal.
 
-### Errores del simulador detectados y aún NO arreglados
-1. `paget` y `fijacion_congenita_estribo` traen `z ['A','As']` y la regla de
-   coherencia (`CaseProfile::warnings`: curva A con gap ≥ 20) frena el
-   guardado con la mayoría de las semillas: el generador y la regla se
-   contradicen.
-2. `kernicterus` no se puede armar: VEMP `type normal` con latencias
-   alargadas, el editor lo rechaza.
-3. El transitorio neonatal (`EOAS.atten_db`) no llega al caso guardado por el
-   editor/armado (20 h y percentil 0,63 deberían referir y queda en 0).
-4. TEOAE: el click viene a 60 dB SPL (protocolo: 80, no lineal), sin selector
-   lineal/no lineal.
-5. Motor de figuras del libro: la vía ósea del oído malo en una
-   sensorioneural unilateral sale sin símbolo de enmascarada
-   (`figuras/motor/audiograma.py`, `GAP_ENMASCARA_OSEA`); el rótulo del ABR
-   marca una "V" sobre el ruido con amplitudes ~0,02 µV; `fig.abr()` no
-   elige transductor, polaridad ni tasa; no hay figura de campo libre ni de
-   umbrales con audífono.
-6. `response_A.py` (ruta vieja, sin uso) conserva el SDT viejo; `CreatePatient.ear_volume`
-   en `src/core/helpers.py` es una copia sin uso.
-7. Armador: una lista numerada justo después de un `###` sale en letra chica
-   (`h3 + ol li`); `hacer_figuras.py` reescribe `figuras/salida/index.html`
-   compartido; cada `{{caso}}` abre página nueva (los capítulos quedan
-   largos: 19-24 págs.).
+### Errores del simulador detectados
+Los siete que había quedaron arreglados (2026-10-15); qué se decidió en cada
+uno está en `docs/decisiones.md`, "Errores del simulador detectados al
+escribir el libro". Para usar en los capítulos: `fig.abr()` ya elige
+`transductor`, `polaridad` y `tasa`; hay `fig.campo_libre(ganancia=...)`; la
+TEOAE del libro sale con click no lineal a 80 dB SPL. Los casos ya armados
+no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
+(Paget/fijación con gap ya no salen A) o de fichas (cada caso no abre página).
 
 ### Libro, contenido
-- Globo de H7 (`h7_p34`, reflejos): dice "gap de 45 dB" en 500-1000 Hz; los
-  gaps de Carolina son 40 y 30.
 - Ilustraciones pendientes (según el plan, no IA): H8 sala de VRA y banana
   S/A, H9 sonda en el conducto, H10 generadores I-V, cap. 2 trompa niño vs
   adulto, cap. 4 formas del reflejo; `ilustraciones/*.png` actuales son de

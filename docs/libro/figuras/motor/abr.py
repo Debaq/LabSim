@@ -14,14 +14,32 @@ os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 _VENTANA = {}
 
+# Nombre corto del libro -> valor del equipo (AbrAdvanceSettings.TRANSDUCERS
+# y el combo de polaridad de la ventana).
+TRANSDUCTORES = {'insercion': 'insert_earphone', 'copa': 'TDH39_headphone',
+                 'oseo': 'bone_vibrator'}
+POLARIDADES = {'alternada': 'Alternada', 'condensacion': 'Condensación',
+               'rarefaccion': 'Rarefacción'}
 
-def _ventana(caso, promediaciones):
+# Una onda se rotula si sobresale del ruido residual del promedio (el de la
+# diferencia A-B): con el umbral fijo de 0,02 µV se marcaba una "V" donde
+# solo había ruido. Y nunca debajo de AMP_MIN_UV, aunque el ruido sea bajo.
+SNR_ROTULO = 3.0
+AMP_MIN_UV = 0.05
+
+
+def _ventana(caso, promediaciones, transductor='insercion', tasa=21.1):
     from core.base import context  # noqa: F401  (crea el QApplication)
     from abr.AbrMainWindow import AbrMainWindow
     w = AbrMainWindow({'name': 'Libro', 'user': 'libro', 'permission': 'admin'})
     w.la_super(caso, caso.get('id'))
+    if transductor not in TRANSDUCTORES:
+        raise ValueError(f'Transductor {transductor!r}; hay: ' + ', '.join(TRANSDUCTORES))
+    # Lo mismo que hace Aceptar en Parámetros avanzados (active_advance_setting).
+    w.technical = dict(w.technical, transducer=TRANSDUCTORES[transductor])
+    w.apply_window()
     w.control.sb_prom.setValue(promediaciones)
-    w.control.sb_rate.setValue(21.1)
+    w.control.sb_rate.setValue(tasa)
     # Banda de rutina: el equipo arranca abierto a propósito (lo configura
     # el alumno); para el libro se registra ya bien puesto.
     for combo, texto in ((w.control.cb_filter_up, '100'), (w.control.cb_filter_down, '3000')):
@@ -42,26 +60,37 @@ def _elegir(combo, texto):
                      + ', '.join(combo.itemText(i) for i in range(combo.count())))
 
 
-def capturar(caso, lados, niveles, estimulo=None, promediaciones=2000):
-    """Devuelve {lado: [{'db', 'x', 'y', 'a', 'b', 'ondas', 'visibles'}]}."""
+def capturar(caso, lados, niveles, estimulo=None, promediaciones=2000,
+             transductor='insercion', polaridad='alternada', tasa=21.1):
+    """Devuelve {lado: [{'db', 'x', 'y', 'a', 'b', 'ondas', 'visibles'}]}.
+
+    transductor: 'insercion', 'copa' u 'oseo' (el vibrador llega a 55 dB nHL);
+    polaridad: 'alternada', 'condensacion' o 'rarefaccion'; tasa en estímulos/s.
+    """
     # La app abre sus recursos (resources/) con rutas relativas a la raíz
     antes = os.getcwd()
     os.chdir(RAIZ)
     try:
-        return _capturar(caso, lados, niveles, estimulo, promediaciones)
+        return _capturar(caso, lados, niveles, estimulo, promediaciones,
+                         transductor, polaridad, tasa)
     finally:
         os.chdir(antes)
 
 
-def _capturar(caso, lados, niveles, estimulo, promediaciones):
-    w = _ventana(caso, promediaciones)
+def _capturar(caso, lados, niveles, estimulo, promediaciones, transductor, polaridad, tasa):
+    if polaridad not in POLARIDADES:
+        raise ValueError(f'Polaridad {polaridad!r}; hay: ' + ', '.join(POLARIDADES))
+    w = _ventana(caso, promediaciones, transductor, tasa)
     _elegir(w.control.cb_stim, estimulo)
+    _elegir(w.control.cb_pol, POLARIDADES[polaridad])
     out = {}
     for lado in lados:
         g = w.graph_r if lado == 'OD' else w.graph_l
         out[lado] = []
         for db in niveles:
-            fijar_azar('abr', caso.get('id'), lado, db, estimulo)
+            fijar_azar('abr', caso.get('id'), lado, db, estimulo,
+                       *(() if (transductor, polaridad, tasa) == ('insercion', 'alternada', 21.1)
+                         else (transductor, polaridad, tasa)))
             i = w.control.cb_side.findText(lado)
             if i >= 0:
                 w.control.cb_side.setCurrentIndex(i)
@@ -146,10 +175,19 @@ def dibujar(curvas, marcar=('I', 'III', 'V'), ms_max=12.0, uv_px=80):
     return s.svg()
 
 
+def _ruido(c):
+    """Ruido residual del promedio (µV RMS): la mitad de la diferencia A-B."""
+    d = [(a - b) / 2 for a, b in zip(c['a'], c['b'])]
+    if not d:
+        return 0.0
+    m = sum(d) / len(d)
+    return (sum((v - m) ** 2 for v in d) / len(d)) ** 0.5
+
+
 def _pico(c, onda, ventana_ms=0.35):
     """Máximo de la curva promediada cerca de la latencia que usó el generador."""
     o = c['ondas'].get(onda)
-    if not o or o.get('amp', 0) <= 0.02:
+    if not o or o.get('amp', 0) < max(AMP_MIN_UV, SNR_ROTULO * _ruido(c)):
         return None
     lat, xs, ys = o['lat'], c['x'], c['y']
     # Solo un máximo local de verdad: el borde de la ventana sobre una

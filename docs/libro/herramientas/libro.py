@@ -62,10 +62,29 @@ class fig:
         return {'tipo': 'dpoae'}
 
     @staticmethod
-    def abr(niveles=(80, 60, 40), estimulo=None, marcar=('I', 'III', 'V')):
+    def abr(niveles=(80, 60, 40), estimulo=None, marcar=('I', 'III', 'V'),
+            transductor='insercion', polaridad='alternada', tasa=21.1):
+        """transductor: insercion/copa/oseo; polaridad: alternada/condensacion/
+        rarefaccion; tasa en estímulos/s. Lo que no cambia no entra al JSON,
+        así los casos ya armados no se rehacen."""
         f = {'tipo': 'abr', 'niveles': list(niveles), 'marcar': list(marcar)}
         if estimulo:
             f['estimulo'] = estimulo
+        if transductor != 'insercion':
+            f['transductor'] = transductor
+        if polaridad != 'alternada':
+            f['polaridad'] = polaridad
+        if tasa != 21.1:
+            f['tasa'] = tasa
+        return f
+
+    @staticmethod
+    def campo_libre(ganancia=None):
+        """Campo libre calculado del caso (oído mejor). ganancia: {Hz: dB} de
+        ganancia funcional para dibujar también la curva con audífono."""
+        f = {'tipo': 'campo_libre'}
+        if ganancia:
+            f['ganancia'] = {str(k): v for k, v in ganancia.items()}
         return f
 
     @staticmethod
