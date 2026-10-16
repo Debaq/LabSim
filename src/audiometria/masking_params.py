@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parametros de enmascaramiento, en un solo lugar.
 
-Vive aparte de response.py y de logoaudiometry.py porque los usan los dos y
-response.py ya importa (via response_A) a logoaudiometry: importarlo al
-reves cerraria el ciclo.
+Vive aparte de response.py y de logoaudiometry.py porque los usan los dos:
+que uno importe al otro para leerlos ata dos motores que no se necesitan.
 
 Es tambien el lugar donde deberian aterrizar estos valores cuando se hagan
 configurables por curso desde la plataforma (app_config / AppConfig.php, el

@@ -20,10 +20,8 @@ class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
         self.logo_attenuation = 45
-        # Mejores 2 de 250-4000 Hz: solo lo usa response_A.logo_sdt (ruta
-        # vieja); la mano del SDT de la app es response.py con el SDT de la
-        # ficha, y el gap/enmascaramiento usan el SRT (_srt_aereo).
-        self.sdt = self.sdt_calcule(self.thr)
+        # Sin SDT acá: la mano del SDT es response.py con el SDT de la ficha,
+        # y el gap/enmascaramiento usan el SRT (_srt_aereo).
         datos = dict(thr)
         datos['UMD'] = umd
         self.ri = rollover_de_caso(datos)
@@ -33,25 +31,6 @@ class CalculateLogo():
             for cfg in self.cfg
         ]
 
-    def sdt_calcule(self, data):
-        # Extraer los elementos de la lista desde el índice 1 hasta el 6 (inclusive)
-        sublista = data["Aerea_mkg"][1:7]
-        # Calcular el promedio para a y b
-        minimos_a = sorted(item[0] for item in sublista)[:2]
-        minimos_b = sorted(item[1] for item in sublista)[:2]
-
-        # Calcular el promedio de los dos números más bajos
-        promedio_minimos_a = sum(minimos_a) / len(minimos_a)
-        promedio_minimos_b = sum(minimos_b) / len(minimos_b)
-
-        # Redondear hacia abajo al múltiplo de 5 más cercano
-        promedio_minimos_a_redondeado = (promedio_minimos_a // 5) * 5
-        promedio_minimos_b_redondeado = (promedio_minimos_b // 5) * 5
-
-        return [promedio_minimos_a_redondeado, promedio_minimos_b_redondeado]
-
-
-    
     def get(self, side, mkg, intensity, int_mkg=None, stim_mkg=None):
         """
         Devuelve el % de discriminacion que responde el paciente simulado.
