@@ -59,10 +59,10 @@ TIPOS = {
     'serif10': {'familia': "'Source Serif 4', Georgia, serif", 'tam': '10pt', 'interlinea': '1.32', 'gap': '6mm'},
     'serif95': {'familia': "'Source Serif 4', Georgia, serif", 'tam': '9.5pt', 'interlinea': '1.3', 'gap': '6mm'},
 }
-TIPO = TIPOS[os.environ.get('LIBRO_TIPO', 'actual')]
+TIPO = TIPOS[os.environ.get('LIBRO_TIPO', 'serif95')]   # elegido por él el 2026-10-16
 # Orden de las figuras del motor: 'actual' (figura arriba, globos abajo, a todo
 # el ancho) o 'lado' (figura y globos lado a lado: usa el blanco a los costados).
-ORDEN = os.environ.get('LIBRO_ORDEN', 'actual')
+ORDEN = os.environ.get('LIBRO_ORDEN', 'lado')   # elegido por él el 2026-10-16
 
 # Título elegido por él el 2026-10-15: un solo libro que crece por secciones
 # (audición, equilibrio, nariz, rehabilitación). Los simuladores (LabSim,
