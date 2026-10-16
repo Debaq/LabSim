@@ -28,6 +28,7 @@ Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
 | Escritos y al día con los simuladores | H1-H10, 1, 2, 3, 4, 11 |
 | Esqueleto (por escribir) | H11 ECochG, H12 VEMP, H13 PEAee, 5-10, 12-20 |
 | Esqueleto nuevo (2026-10-16) | B1 anatomía, B3 histología, B4 física (cada uno con "Qué tiene que tener"); H14 procesamiento auditivo central (capturas de AudioPAC); equilibrio H15-H19; rehabilitación aural H20-H21; salud ocupacional H22; nariz H23-H25 |
+| Partes reservadas (esqueleto, 2026-10-16) | VIII equilibrio (21-27), IX rehabilitación auditiva (28-30), X rehabilitación vestibular (31-32), XI salud ocupacional (33-34), XII nariz (35-36); los integradores pasan a Parte XIII |
 | Lo escribe una colega | B2 Fisiología auditiva y vestibular (con su lista de contenidos) |
 
 Cómo se escribe uno: un agente por capítulo con `herramientas/brief_agentes.md`

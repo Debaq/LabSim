@@ -362,28 +362,138 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
   - Infarto de la AICA [`infarto_aica`]
   - Vía ósea del VEMP en la conductiva [`otoesclerosis`]
 
-## Parte VIII — Casos integradores
+## Parte VIII — El equilibrio
+
+### 21. Vértigo agudo
+- **Técnica en foco** (→ H15, H17): nistagmo espontáneo con Frenzel, HINTS, vHIT al lado de la cama
+- **Fisiología:** reflejo vestíbulo-ocular, asimetría de tono y compensación
+- **Casos:**
+  - Neuritis vestibular
+  - Laberintitis
+  - Vértigo agudo central que imita una neuritis
+
+### 22. Gira al acostarse
+- **Técnica en foco** (→ H18): Dix-Hallpike, giro supino, lectura del nistagmo por canal y maniobras de reposición
+- **Fisiología:** canalitiasis y cupulolitiasis
+- **Casos:**
+  - VPPB del canal posterior
+  - VPPB del canal horizontal (geotrópico y ageotrópico)
+
+### 23. Crisis que vuelven
+- **Técnica en foco** (→ H15, H16, H12): VNG entre crisis, calórica, VEMP y audiometría seriada
+- **Fisiología:** hidrops y migraña vestibular
+- **Casos:**
+  - Ménière en etapa avanzada
+  - Migraña vestibular
+
+### 24. Cuando fallan los dos lados
+- **Técnica en foco** (→ H16, H17): calórica y vHIT bilaterales
+- **Fisiología:** oscilopsia y pérdida del reflejo vestíbulo-ocular
+- **Casos:**
+  - Hipofunción vestibular bilateral por ototóxicos
+
+### 25. Lo que viene de arriba
+- **Técnica en foco** (→ H15): oculomotor (sacadas, seguimiento, optocinético) y nistagmo central
+- **Fisiología:** cerebelo y vías vestibulares centrales
+- **Casos:**
+  - Vértigo de origen central (cerebelo, tronco)
+
+### 26. Una tercera ventana
+- **Técnica en foco** (→ H12, H3): VEMP de umbral bajo y gap con ósea supranormal
+- **Fisiología:** tercera ventana del laberinto
+- **Casos:**
+  - Dehiscencia del canal semicircular superior
+
+### 27. Mareo que no se va
+- **Técnica en foco** (→ H19): evaluación funcional y cuestionarios
+- **Fisiología:** compensación central y dependencia visual
+- **Casos:**
+  - Mareo postural perceptual persistente (PPPD)
+
+## Parte IX — Rehabilitación auditiva
+
+### 28. El primer audífono
+- **Técnica en foco** (→ H20, H21, H5): candidatura, prueba, ganancia funcional y control
+- **Fisiología:** campo dinámico y reclutamiento en el ajuste
+- **Casos:**
+  - Presbiacusia: el primer audífono
+  - Hipoacusia unilateral: CROS o audífono
+
+### 29. Cuando el audífono no alcanza
+- **Técnica en foco** (→ H20, H5): discriminación con audífono y criterios de derivación a implante
+- **Fisiología:** estimulación eléctrica del nervio
+- **Casos:**
+  - Candidato a implante coclear
+  - Prótesis de conducción ósea en una conductiva que no se opera
+
+### 30. Oír y no entender
+- **Técnica en foco** (→ H14): batería de procesamiento central y entrenamiento auditivo
+- **Fisiología:** plasticidad de la vía auditiva central
+- **Casos:**
+  - Niño con trastorno del procesamiento auditivo
+  - Adulto mayor que no entiende en ruido con audiograma leve
+
+## Parte X — Rehabilitación vestibular
+
+### 31. Compensar una neuritis
+- **Técnica en foco** (→ H19): ejercicios de adaptación y progresión
+- **Fisiología:** adaptación del reflejo vestíbulo-ocular
+- **Casos:**
+  - Hipofunción unilateral después de una neuritis
+
+### 32. Volver a caminar sin miedo
+- **Técnica en foco** (→ H19): equilibrio, marcha y prevención de caídas
+- **Fisiología:** sustitución visual y somatosensorial
+- **Casos:**
+  - Adulto mayor con caídas y mareo multifactorial
+
+## Parte XI — Salud ocupacional
+
+### 33. El trabajador expuesto a ruido
+- **Técnica en foco** (→ H22): audiometría de vigilancia, comparación con la basal y derivación
+- **Fisiología:** daño por ruido y desplazamiento temporal del umbral
+- **Casos:**
+  - Trabajador en vigilancia con cambio significativo del umbral
+  - Trabajador nuevo con audiometría de ingreso alterada
+
+### 34. El caso médico-legal
+- **Técnica en foco** (→ H22, H6): evaluación de la pérdida no orgánica y del grado de daño
+- **Fisiología:** lo que el ruido no explica
+- **Casos:**
+  - Exageración de la pérdida en una evaluación laboral
+
+## Parte XII — La nariz
+
+### 35. Nariz tapada
+- **Técnica en foco** (→ H23, H24, H25): rinoscopía, rinomanometría y rinometría acústica
+- **Fisiología:** válvula nasal y resistencia al flujo
+- **Casos:**
+  - Desviación septal
+  - Colapso de la válvula nasal
+
+### 36. Rinitis y vasoconstrictor
+- **Técnica en foco** (→ H24, H25): prueba con vasoconstrictor
+- **Fisiología:** tejido eréctil de los cornetes y ciclo nasal
+- **Casos:**
+  - Rinitis alérgica
+  - Hipertrofia de cornetes
+
+## Parte XIII — Casos integradores
 Los diez pacientes de práctica (33-42) otra vez, sin título ni pistas: la ficha
 de estudio como la ve el alumno, y la resolución al final. Cada resolución remite
 al capítulo donde está su técnica.
 
 ## Secciones de las próximas ediciones
 
-Un solo libro que crece. Esta edición es la sección de **audición** (Bases,
-Caja de herramientas y Partes I-VIII). Las que vienen, en este orden
-tentativo (plan en `investigacion/inventario_vestibular_nasal.md`):
-
-- **Equilibrio: evaluación.** VNG, oculomotor, posicionales y maniobras,
-  calórica, vHIT, posturografía (el VEMP ya está en H12). Figuras y práctica
-  con trainHIT y labyrinthus3d; LabSim no se expande a lo vestibular.
-- **Equilibrio: casos.** Vértigo agudo, VPPB, Ménière, migraña vestibular,
-  hipofunción bilateral, central, tercera ventana, compensación, PPPD.
-- **Nariz: evaluación y casos.** Rinomanometría, rinometría acústica y lo
-  que se defina (olfato, espirometría, SAHOS). Hoy no hay simulador ni
-  material propio.
-- **Rehabilitación auditiva.** Audífonos, implantes, entrenamiento auditivo.
-- **Rehabilitación vestibular.** Ejercicios, habituación, entrenamiento con
-  posturografía.
+Un solo libro que crece. Esta edición escribe la sección de **audición**
+(Bases, Caja de herramientas H1-H14 y Partes I-VII). Las demás ya tienen su
+lugar reservado en esqueleto, para que el libro crezca sin reordenarse:
+equilibrio (H15-H19, Parte VIII), rehabilitación auditiva (H20-H21,
+Parte IX), rehabilitación vestibular (Parte X), salud ocupacional (H22,
+Parte XI) y nariz (H23-H25, Parte XII). Plan y fuentes en
+`investigacion/inventario_vestibular_nasal.md`. Simuladores: trainHIT y
+labyrinthus3d para lo vestibular (LabSim no se expande ahí), AudioPAC para
+el procesamiento central; para la nariz todavía no hay.
 
 ## Apéndices
 - A. Tablas normativas del ABR y la ECochG por población (las citas, en los caps. 11, 12, 9)
