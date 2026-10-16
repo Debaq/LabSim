@@ -1,0 +1,20 @@
+{
+  "caso": "demo:40",
+  "figuras": [
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "teoae"
+    }
+  ]
+}

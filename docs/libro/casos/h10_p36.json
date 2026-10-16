@@ -1,0 +1,29 @@
+{
+  "caso": "demo:36",
+  "figuras": [
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        60,
+        40,
+        20
+      ],
+      "marcar": [
+        "V"
+      ],
+      "estimulo": "Burst 1"
+    }
+  ]
+}
