@@ -191,7 +191,7 @@ Va primero porque en la batería sigue a la logoaudiometría. Describe el acúfe
 2. **Frecuencia** (en tono o banda estrecha). Se presentan **tres estímulos de distinta frecuencia**, a un nivel que oiga cómodo, y el paciente elige el que más se parece en *tono*, en lo agudo o grave, a su acúfeno: "¿Cuál se parece más a su ruido: el primero, el segundo o el tercero?". Se afina con las frecuencias vecinas de la elegida, siempre comparando de a dos. Al final se presenta la frecuencia **una octava arriba y una abajo**: los pacientes confunden octavas con facilidad y a veces la de arriba se parece más.
 3. **Intensidad.** Con el estímulo elegido, se parte bajo el umbral y se sube **en pasos finos** hasta que el paciente diga que el sonido y su acúfeno se escuchan **igual de fuertes**. Se anota en **dB HL**. Después se calculan los **dB SL**: ese nivel menos el umbral del mismo estímulo en el mismo oído.
 4. **Nivel mínimo de enmascaramiento (NME).** Al **oído del acúfeno**, un ruido que cubra su frecuencia (banda estrecha centrada en ella, o ruido blanco). Se sube de a poco hasta que el paciente **deja de oír su acúfeno**. Ese nivel es el NME. Se anota en dB HL y en dB SL, sobre el umbral de ese mismo ruido.
-5. **Inhibición residual.** El mismo ruido, **10 dB sobre el NME**, durante **un minuto**, en el oído del acúfeno. Al apagarlo se pregunta cómo está el acúfeno:
+5. **Inhibición residual.** Un tono o un ruido, según cómo sea el acúfeno, **una octava por encima o por debajo** de su frecuencia, **10 dB sobre el NME**, durante **un minuto**, en el oído del acúfeno. Al apagarlo se pregunta cómo está el acúfeno:
 
     - igual que al principio: inhibición residual **negativa**;
     - cambió de tono o de intensidad: **parcial**;
@@ -200,7 +200,7 @@ Va primero porque en la batería sigue a la logoaudiometría. Describe el acúfe
     Se espera **un minuto más sin estímulo** y se vuelve a preguntar, para ver si el cambio se mantiene.
 
 <!-- Protocolo ORL 2019: en la versión infantil, decía que los "dB HL" se calculan restando el umbral a la intensidad del acúfeno. Lo que se calcula así son los dB SL (como dice la versión del adulto); se dejó dB SL. También usaba "dB HTL": es el mismo dB HL del audiómetro. -->
-<!-- Protocolo ORL 2019: para la inhibición residual decía un tono o ruido "en una 8ª perfecta superior o inferior a la frecuencia del tinnitus", a 10 dB sobre el nivel de enmascaramiento. Se corrigió a un ruido que cubra la frecuencia del acúfeno, el mismo con que se midió el NME, a NME + 10 dB durante 60 s (Roberts 2007; Henry y Meikle 2000): el NME vale para ese ruido, no para otro una octava más allá. verificar con el autor: si la octava era una decisión docente, se repone y se agrega su recuadro de normas. -->
+<!-- Protocolo ORL 2019: la inhibición residual con un tono o ruido "en una 8ª perfecta superior o inferior a la frecuencia del tinnitus", a 10 dB sobre el nivel de enmascaramiento, un minuto. Se mantiene el protocolo (regla del autor, 2026-10-16) y la literatura va en "Lo que dicen las normas". Para decidir con el equipo: docs/libro/incongruencias_protocolo.md. -->
 <!-- verificar: pasos de la igualación de intensidad (1 o 2 dB) y control de octava; la lógica está en Henry y Meikle 2000, que no se leyó completo. -->
 
 El NME más 10 dB **no puede pasar el LDL**. En un paciente que tolera poco, el ruido de la inhibición residual tiene que quedar bajo su molestia; si no cabe, no se hace y se anota por qué.
@@ -215,7 +215,7 @@ No hay una norma ISO para la acufenometría. Desde 1981 se aceptan cuatro medida
 - **Ninguna de ellas mide la gravedad.** No se relacionan de forma consistente con cuánto le afecta el acúfeno al paciente (Henry y Meikle, 2000).
 - **Tampoco prueban que exista.** No hay una medida objetiva del acúfeno: todo depende de lo que el paciente responde (Henry y cols., 2013).
 - **El tono varía de una vez a otra.** En la mitad de los pacientes, las igualaciones repetidas abarcaron más de dos octavas: conviene informar un rango más que una frecuencia única (Henry y cols., 2004).
-- **La inhibición residual** se mide con el ruido a NME + 10 dB durante un minuto, y por lo general dura menos de un minuto (Roberts, 2007).
+- **La inhibición residual** se mide en la literatura con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto, y por lo general dura menos de un minuto (Roberts, 2007; Henry y Meikle, 2000). En el laboratorio el estímulo va una octava por encima o por debajo del acúfeno.
 - **Cuándo estudiar.** La guía de la AAO-HNS pide un examen audiológico completo y pronto cuando el acúfeno es de un solo lado, dura seis meses o más o se acompaña de dificultad para oír, y desaconseja la imagen salvo que el acúfeno sea de un lado, pulsátil, con signos neurológicos o con una hipoacusia asimétrica (Tunkel y cols., 2014).
 
 En este libro se hacen las cuatro, en ese orden, después de igualar el tipo de sonido.
