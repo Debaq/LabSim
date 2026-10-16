@@ -46,15 +46,12 @@ anatomía/esquemas (plan: Servier/OpenStax, SVG propio, capturas).
 ## Pendientes
 
 ### Para él (decisiones o datos)
-1. **Corte de LDL para el STAT:** el texto de H6 dice "si marca molestia bajo
-   100 dB HL, no se hace", pero el STAT va a 105 dB HL en 1 kHz. Ojo: Patricia
-   (H6, paciente 38) tiene LDL 100 en todo y el libro le hace el STAT
-   negativo; el motor no mira el LDL en el STAT.
-2. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
+1. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
    detalles menores (licencia de simHit, DOI de labyrinthus3d, coautorías).
 
 Cerrados el 2026-10-16 (producción reproyectada, pacientes 34 y 41, H8, H10):
-`docs/decisiones.md`, "Pendientes del libro cerrados con él".
+`docs/decisiones.md`, "Pendientes del libro cerrados con él". El corte del
+STAT terminó en un cambio del modelo: "LDL: la tolerancia es del paciente".
 
 ### Errores del simulador detectados
 Los siete que había quedaron arreglados (2026-10-15); qué se decidió en cada
@@ -66,6 +63,11 @@ no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
 (Paget/fijación con gap ya no salen A) o de fichas (cada caso no abre página).
 
 ### Libro, contenido
+- **Rostros de los pacientes** (pedido 2026-10-16): todas las fichas muestran
+  iniciales (`rostros/` no existe). Sintéticos realistas y coherentes con el
+  caso: edad, sexo y signos visibles (Ramsay Hunt con la parálisis del lado
+  que corresponde). Un paciente de práctica tiene la misma cara en todos los
+  capítulos. Ver `hacer_libro.py`, `ficha()`.
 - Ilustraciones pendientes (según el plan, no IA): H8 sala de VRA y banana
   S/A (en verde), H9 sonda en el conducto, H10 generadores I-V, cap. 2 trompa niño vs
   adulto, cap. 4 formas del reflejo; `ilustraciones/*.png` actuales son de

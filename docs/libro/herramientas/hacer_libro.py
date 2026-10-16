@@ -446,8 +446,13 @@ def capitulo(md_texto):
 
     partes = re.split(r'(<h2>.*?</h2>)', cuerpo)
     for i in range(1, len(partes) - 1, 2):
-        if re.sub(r'<.*?>', '', partes[i]).strip() in SECCIONES_DOS_COLUMNAS:
+        titulo = re.sub(r'<.*?>', '', partes[i]).strip()
+        if titulo in SECCIONES_DOS_COLUMNAS:
             partes[i + 1] = dos_columnas(partes[i + 1])
+        elif titulo == 'Referencias':
+            # a dos columnas y en letra más chica que el texto: ocupaban
+            # páginas enteras
+            partes[i + 1] = f'<div class="referencias">{partes[i + 1]}</div>'
     cuerpo = ''.join(partes)
     for clave, h in marcas.items():
         cuerpo = cuerpo.replace(f'<p>{clave}</p>', h)
@@ -480,8 +485,10 @@ def capitulo(md_texto):
         return f'<section class="preliminar">{cuerpo}</section>'
     if m:
         tipo = {'H': 'Herramienta', 'B': 'Bases'}.get(cap[:1], 'Capítulo')
+        # data-marca: el marcador del PDF lleva el número ("H2. Acumetría")
+        marca = html.escape(f"{cap}. {re.sub(r'<.*?>', '', m[1]).strip()}", quote=True)
         apertura = (f'<header class="apertura" id="cap-{cap}"><div class="ap-num"><span class="ap-tipo">{tipo}</span>'
-                    f'<span class="ap-n">{cap}</span></div><h1 class="capitulo">{m[1]}</h1></header>')
+                    f'<span class="ap-n">{cap}</span></div><h1 class="capitulo" data-marca="{marca}">{m[1]}</h1></header>')
         cuerpo = cuerpo[:m.start()] + apertura + cuerpo[m.end():]
     return cuerpo
 
@@ -582,6 +589,13 @@ a.toc::after {{ content: leader('.') attr(data-pag); color: #8f7a83; }}
 h1.capitulo {{ break-before: page; font: 700 26pt/1.1 Fraunces, serif; color: #24101a; margin: 0 0 6mm;
               padding-bottom: 3mm; border-bottom: 2pt solid #8e2a4a; }}
 h2 {{ font: 600 15pt/1.2 Fraunces, serif; color: #24101a; margin: 8mm 0 2.5mm; break-after: avoid; }}
+/* Índice del PDF (marcadores): parte > capítulo > sección. Los h3/h4 no
+   entran: con ellos el panel era una mazamorra. */
+.pt-titulo {{ bookmark-level: 1; bookmark-label: attr(data-marca); }}
+h1.capitulo {{ bookmark-level: 2; bookmark-label: attr(data-marca); }}
+h2 {{ bookmark-level: 3; }}
+.preliminar h2 {{ bookmark-level: 2; }}
+h3, h4, h5, h6 {{ bookmark-level: none; }}
 h3 {{ font: 600 12pt/1.25 Fraunces, serif; color: #641c34; margin: 5mm 0 1.5mm; break-after: avoid; }}
 h4 {{ font: 700 8.5pt 'Plus Jakarta Sans'; letter-spacing: .8pt; text-transform: uppercase; color: #7a2341;
       margin: 4mm 0 1mm; break-after: avoid; }}
@@ -621,6 +635,10 @@ li {{ margin-bottom: .8mm; }}
 .oto.vacia {{ height: 38mm; border-radius: 50%; border: .8pt dashed #c9b3bc; color: #a8939b; font-size: 8pt;
               display: flex; align-items: center; justify-content: center; }}
 .dos-col {{ column-count: 2; column-gap: 7mm; }}
+.referencias {{ column-count: 2; column-gap: 6mm; font-size: 7.6pt; line-height: 1.38; color: #3a2a30; }}
+.referencias h3 {{ font-size: 9pt; margin: 2.5mm 0 1mm; }}
+.referencias ol {{ padding-left: 4.5mm; margin-bottom: 1.5mm; }}
+.referencias li {{ margin-bottom: .5mm; overflow-wrap: anywhere; }}
 .dos-col h3 {{ break-after: avoid; }}
 .dos-col .ancho, .dos-col table.ancho {{ column-span: all; }}
 /* fichas y figuras relatadas van siempre a todo el ancho, aunque caigan en una sección a dos columnas */
@@ -778,9 +796,14 @@ def contraportada():
 
 
 def separador(parte):
+    # data-marca: el separador es el primer nivel del índice del PDF y los
+    # capítulos cuelgan de él
     if not parte[1]:          # Bases, Caja de herramientas: el nombre va grande
-        return f'<section class="parte"><p class="pt-titulo">{parte[0]}</p></section>'
-    return f'<section class="parte"><p class="pt-num">{parte[0]}</p><p class="pt-titulo">{parte[1]}</p></section>'
+        marca = html.escape(parte[0], quote=True)
+        return f'<section class="parte"><p class="pt-titulo" data-marca="{marca}">{parte[0]}</p></section>'
+    marca = html.escape(f'{parte[0]} · {parte[1]}', quote=True)
+    return (f'<section class="parte"><p class="pt-num">{parte[0]}</p>'
+            f'<p class="pt-titulo" data-marca="{marca}">{parte[1]}</p></section>')
 
 
 def escribir_con_indice(doc, destino):
