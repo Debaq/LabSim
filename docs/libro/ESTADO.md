@@ -66,10 +66,10 @@ no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
 
 ### Orden y alcance (él, 2026-10-16)
 - **Salud ocupacional** (H22, Parte XI) se escribe al final de todo.
-- Falta una sección de **audiología aplicada**: definir con su material dónde
-  va (parte de casos propia o repartida en herramientas).
-- Él va a pasar sus clases de **nasal** y **auditivo parte I** como guía del
-  alcance de los contenidos (referencia, no para copiar).
+- **Audiología aplicada** = casos clínicos (no audífonos): ya es el cuerpo
+  del libro, Partes I-VII y los integradores (Parte XIII).
+- Él va a pasar sus clases de **nasal** y **auditivo parte I** (no hay
+  otras) como guía del alcance de los contenidos (referencia, no para copiar).
 
 ### Armador
 - **Armado incremental** (propuesto 2026-10-16): cada capítulo en su PDF con
