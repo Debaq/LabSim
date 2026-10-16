@@ -23,7 +23,7 @@ El razonamiento y el diagnóstico de cada caso están al final del capítulo, en
 
 Los resultados nunca van solos. Cada figura viene **relatada con globos**: un número sobre el gráfico señala el hallazgo y la observación con el mismo número, debajo, explica qué significa. Después viene el razonamiento y el diagnóstico.
 
-Los pacientes son ficticios. Sus exámenes los generaron los **simuladores de apoyo** con los mismos modelos que usarás en el laboratorio, así que puedes atender a varios de ellos. Los marcados con ★ son pacientes de práctica disponibles en tu curso.
+Los pacientes son ficticios. Sus exámenes los generaron los **simuladores de apoyo** con los mismos modelos que usarás en el simulador, así que puedes atender a varios de ellos. Los marcados con ★ son pacientes de práctica disponibles en tu curso.
 
 ## Simuladores de apoyo
 
@@ -59,7 +59,7 @@ Para pensar o discutir en clases; no siempre tiene una sola respuesta.
 :::
 
 :::comentario Comentario
-Lo que la experiencia agrega a la técnica: la práctica del laboratorio y lo que dicen las normas cuando no coinciden.
+Lo que la experiencia agrega a la técnica: la práctica que enseña este libro y lo que dicen las normas cuando no coinciden.
 :::
 
 ## Para el docente
@@ -68,4 +68,4 @@ Cada caso trae su **guía para el docente** en un recuadro verde, «Para el doce
 
 ## Las referencias
 
-Cada capítulo trae sus propias referencias al final, separadas en técnica, fisiología y patología. Cuando la práctica de nuestro laboratorio difiere de una norma o guía, el texto explica las dos y por qué hacemos lo que hacemos.
+Cada capítulo trae sus propias referencias al final, separadas en técnica, fisiología y patología. Cuando la práctica que enseña este libro difiere de una norma o guía, el texto explica las dos y por qué hacemos lo que hacemos.

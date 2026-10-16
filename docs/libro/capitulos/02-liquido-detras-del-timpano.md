@@ -36,7 +36,7 @@ El timpanograma muestra cuánto se deja mover el sistema tímpano-cadena (la **c
 | **B** | sin pico | plana | caja ocupada, perforación o sonda tapada: **lo decide el volumen** |
 :::
 
-La clasificación es la de Jerger (1970). El tipo **Cs** no es de Jerger: es la curva C de baja compliancia que usan el formulario del laboratorio y LabSim. Los rangos de compliancia del A son los del adulto; en un niño de 5 a 7 años el rango normal es más bajo, de 0,2 a 1,0 mL (BSA, 2024). El corte de presión del tipo C también varía entre autores (−100 a −150 daPa), y los equipos y las poblaciones dan normas distintas (Shahnaz y Davies, 2006).
+La clasificación es la de Jerger (1970). El tipo **Cs** no es de Jerger: es la curva C de baja compliancia que usan este libro y LabSim. Los rangos de compliancia del A son los del adulto; en un niño de 5 a 7 años el rango normal es más bajo, de 0,2 a 1,0 mL (BSA, 2024). El corte de presión del tipo C también varía entre autores (−100 a −150 daPa), y los equipos y las poblaciones dan normas distintas (Shahnaz y Davies, 2006).
 
 ### Tres tipos B que no son lo mismo
 
@@ -87,7 +87,7 @@ Se mide **solo cuando sirve**: con un tímpano entero que tiene pico (A o C), o 
 
 
 :::comentario Toynbee y Valsalva
-El formulario del laboratorio describe también las maniobras clásicas: **Toynbee** (tragar con la nariz tapada, que corre el pico a presión negativa) y **Valsalva** (soplar con la nariz y la boca cerradas, que lo corre a positiva). Se repite el timpanograma después de cada una: si vuelve solo al de reposo, la función es buena; si vuelve tras tragar varias veces, regular; si no vuelve, mala. Como dependen de que el paciente sepa hacer la maniobra, LabSim usa la de presión-deglución, que hace el equipo y tiene valores de referencia.
+Existen también las maniobras clásicas: **Toynbee** (tragar con la nariz tapada, que corre el pico a presión negativa) y **Valsalva** (soplar con la nariz y la boca cerradas, que lo corre a positiva). Se repite el timpanograma después de cada una: si vuelve solo al de reposo, la función es buena; si vuelve tras tragar varias veces, regular; si no vuelve, mala. Como dependen de que el paciente sepa hacer la maniobra, LabSim usa la de presión-deglución, que hace el equipo y tiene valores de referencia.
 :::
 
 :::comentario Lo que dice la literatura

@@ -236,9 +236,9 @@ Antes de este método, la audiometría usaba el método de límites: un tono con
 :::imagen ilustraciones/h03-metodo-ascendente.svg ancho=96% La escalera del método ascendente
 :::
 
-El ascendente no es la única forma de llegar al umbral. La **descendente** baja de a 5 dB hasta que el paciente deja de responder; es rápida, pero el paciente tiende a seguir respondiendo por inercia y el umbral sale más bajo de lo que es. La de **horquilla** sube y baja de a 5 dB alrededor del umbral y lo toma donde coinciden las dos direcciones. La **combinada acortada** baja de a 10 mientras el paciente responde y sube de a 5 cuando deja de hacerlo, y en vez de repetir ascensos repite el tono al mismo nivel: el umbral es la mínima intensidad con 2 respuestas de 3 tonos.
+El ascendente no es la única forma de llegar al umbral. La **descendente** es el viejo método de límites de la psicofísica (Fechner, 1860), que Bunch (1943) llevó a la audiometría: baja de a 5 dB hasta que el paciente deja de responder. Es rápida, pero el paciente tiende a seguir respondiendo por inercia y el umbral sale más bajo de lo que es. La de **horquilla** es la otra que describe la ISO 8253-1 (1989): alterna series de 5 dB que suben y que bajan alrededor del umbral hasta completar tres de cada una, y el umbral es el promedio de los niveles más bajos que el paciente oyó en ellas; llega al mismo umbral que la ascendente, pero tarda más. La **combinada acortada** baja de a 10 mientras el paciente responde y sube de a 5 cuando deja de hacerlo, y en vez de repetir ascensos repite el tono al mismo nivel: el umbral es la mínima intensidad con 2 respuestas de 3 tonos.
 
-<!-- verificar: la descripción del método de horquilla (bracketing) de la ISO 8253-1 se escribió sin leer la norma; confirmar pasos y criterio. Método en discusión con el equipo: docs/libro/incongruencias_protocolo.md, punto 13b. -->
+<!-- verificar: horquilla según resúmenes de la ISO 8253-1 (tres series ascendentes y tres descendentes; promedio de los niveles más bajos oídos), no según la norma leída; la referencia de Hughson y Westlake (1944) va de memoria. Método en discusión con el equipo: docs/libro/incongruencias_protocolo.md, punto 13b. -->
 
 :::imagen ilustraciones/h03-metodos-umbral.svg ancho=100% Cuatro formas de buscar el umbral, con el mismo umbral de 25 dB HL
 :::
@@ -256,7 +256,7 @@ Se empieza en 1 kHz porque es la frecuencia más estable y la más fácil de oí
 
 ### 4. Vía ósea
 
-En este libro la vía ósea va **al final de la batería**: después de la vía aérea, la logoaudiometría, la acufenometría y las pruebas supraliminares. Es el orden del laboratorio y el que espera LabSim.
+En este libro la vía ósea va **al final de la batería**: después de la vía aérea, la logoaudiometría, la acufenometría y las pruebas supraliminares. Es el orden que espera LabSim.
 
 **Por qué este orden.** Todo lo que se hace con fonos va primero y el cambio al vibrador se hace **una sola vez**. Cada cambio de transductor obliga a entrar a la cabina, sacar y volver a poner los fonos, mover al paciente y recolocar el vibrador. Eso son minutos de examen, fatiga del paciente y oportunidades de dejar un fono corrido. Con un solo cambio, la batería es más corta y más estable.
 
@@ -268,7 +268,7 @@ Las normas y guías ponen la ósea **inmediatamente después de la aérea**:
 - La NTP 285 (INSST, 1992) dice lo mismo.
 - ASHA (2005) y la BSA (2018) la describen dentro de la misma audiometría tonal.
 
-Las normas describen una secuencia; no prohíben otra. El orden de este laboratorio responde a la lógica de arriba (un solo cambio de transductor, menos manipulación y menos fatiga) y el recuadro siguiente muestra cómo se decide el enmascaramiento mientras la ósea todavía no está medida, sin perder exactitud.
+Las normas describen una secuencia; no prohíben otra. El orden de este libro responde a la lógica de arriba (un solo cambio de transductor, menos manipulación y menos fatiga) y el recuadro siguiente muestra cómo se decide el enmascaramiento mientras la ósea todavía no está medida, sin perder exactitud.
 :::
 
 :::ojo Cómo se trabaja con la ósea al final
@@ -625,6 +625,9 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. INSST. NTP 285: Audiometría tonal liminar: vía ósea y enmascaramiento. Madrid: Instituto Nacional de Seguridad e Higiene en el Trabajo; 1992.
 1. Munro KJ, Agnew N. A comparison of inter-aural attenuation with the Etymotic ER-3A insert earphone and the Telephonics TDH-39 supra-aural earphone. Br J Audiol. 1999;33(4):259-62. doi:10.3109/03005369909090106
 1. Mahomed F, Swanepoel DW, Eikelboom RH, Soer M. Validity of automated threshold audiometry: a systematic review and meta-analysis. Ear Hear. 2013;34(6):745-52.
+1. Fechner GT. Elemente der Psychophysik. Leipzig: Breitkopf und Härtel; 1860.
+1. Bunch CC. Clinical audiometry. St. Louis: Mosby; 1943.
+1. Hughson W, Westlake HD. Manual for program outline for rehabilitation of aural casualties both military and civilian. Trans Am Acad Ophthalmol Otolaryngol. 1944;48(Suppl):1-15.
 1. Carhart R, Jerger JF. Preferred method for clinical determination of pure-tone thresholds. J Speech Hear Disord. 1959;24(4):330-45. doi:10.1044/jshd.2404.330
 1. Jerger J. The evolution of the audiometric pure-tone technique. Hearing Review. 2018;25(9):12-8. Disponible en: https://hearingreview.com/hearing-products/testing-equipment/testing-diagnostics-equipment/evolution-audiometric-pure-tone-technique
 1. Burk MH, Wiley TL. Continuous versus pulsed tones in audiometry. Am J Audiol. 2004;13(1):54-61. doi:10.1044/1059-0889(2004/008)

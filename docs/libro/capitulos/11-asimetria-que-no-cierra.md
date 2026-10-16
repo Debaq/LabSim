@@ -80,7 +80,7 @@ Se miden:
 :::ayuda Valores orientativos del adulto
 - Interpico **I-V**: alrededor de 4 ms.
 - **Diferencia interaural de V**: más de 0,3 a 0,4 ms es sospechosa.
-- Mandan los valores normativos del laboratorio (Apéndice A), no estos números.
+- Mandan los valores normativos del Apéndice A, no estos números.
 :::
 
 **Tasa alta como prueba de esfuerzo.** Al subir la tasa todas las ondas se alargan un poco en un oído normal: de 10 a 90 estímulos por segundo, la I un 8 %, la III un 11 % y la V un 14 % (Jiang y cols.). Una vía comprometida se alarga mucho más o pierde la onda V.

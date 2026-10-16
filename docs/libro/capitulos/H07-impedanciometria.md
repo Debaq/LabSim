@@ -248,7 +248,7 @@ En una **hipoacusia coclear** el reflejo no sube en proporción a la pérdida: s
 
 <!-- Protocolo ORL 2019: Metz "a intensidades iguales o menores a 60 dB sobre el umbral". La BSA 2024 dice "menos de 60 dB SL"; se dejó el criterio de la guía. -->
 
-En nuestro laboratorio, el umbral del reflejo se **anota en dB SPL**, y así lo muestran el equipo y la ficha de LabSim. La razón es que el reflejo responde a la energía que realmente llega al oído, y lo que el equipo controla dentro de un conducto sellado, sobre todo en el ipsilateral, donde el tono sale de la misma sonda, es una presión sonora.
+En este libro, el umbral del reflejo se **anota en dB SPL**, y así lo muestran el equipo y la ficha de LabSim. La razón es que el reflejo responde a la energía que realmente llega al oído, y lo que el equipo controla dentro de un conducto sellado, sobre todo en el ipsilateral, donde el tono sale de la misma sonda, es una presión sonora.
 
 Para pasar de dB HL a dB SPL se suma la **corrección del transductor** que suena (su nivel de referencia, el RETSPL). En el ipsilateral el tono sale de la sonda; en el contralateral, de un fono supraaural, que necesita más presión para el mismo dB HL (Interacoustics, AT235):
 

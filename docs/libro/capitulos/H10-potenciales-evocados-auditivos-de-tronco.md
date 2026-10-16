@@ -108,7 +108,7 @@ Lo demás está en **Archivo → Parámetros avanzados**: el transductor, el mon
 
 ### Preparar al paciente
 
-**La quietud es todo.** El ABR no cambia con el sueño, pero el músculo tenso sí ensucia el registro. Por eso en el laboratorio el examen se hace con el paciente **dormido**, y si no duerme, no se hace. Las indicaciones se dan al citarlo:
+**La quietud es todo.** El ABR no cambia con el sueño, pero el músculo tenso sí ensucia el registro. Por eso aquí el examen se hace con el paciente **dormido**, y si no duerme, no se hace. Las indicaciones se dan al citarlo:
 
 - **Lactantes y niños pequeños**: dormir no más de 5 horas la noche anterior, no dejarlos dormir en el camino ni en la sala de espera y alimentarlos justo antes del examen (hay que traer la comida).
 - **Adultos**: dormir no más de 5 horas la noche anterior, venir con ropa cómoda y no tomar café, bebidas estimulantes ni alcohol antes del examen.
@@ -272,7 +272,7 @@ Cuando el ABR por vía aérea sale elevado, la vía ósea responde lo mismo que 
 - **El lactante es distinto**: su onda V por vía ósea llega **antes** que por vía aérea, al revés que en el adulto (Yang y cols., 1987).
 
 :::comentario Por qué 55 dB en LabSim
-El tope del vibrador no es un error del simulador: es el límite físico del transductor. La revisión de Seo y cols. (2018) lo ubica entre 45 y 55 dB nHL según el equipo, y hay series normativas que solo miden hasta 50 dB nHL porque su vibrador no entrega más. LabSim toma el extremo alto, 55 dB nHL. Si el equipo de tu laboratorio llega solo a 45 o 50, la ventana útil de la vía ósea es todavía más angosta: un ABR óseo "sin respuesta" a su tope no es lo mismo que una cóclea sin función.
+El tope del vibrador no es un error del simulador: es el límite físico del transductor. La revisión de Seo y cols. (2018) lo ubica entre 45 y 55 dB nHL según el equipo, y hay series normativas que solo miden hasta 50 dB nHL porque su vibrador no entrega más. LabSim toma el extremo alto, 55 dB nHL. Si tu equipo llega solo a 45 o 50, la ventana útil de la vía ósea es todavía más angosta: un ABR óseo "sin respuesta" a su tope no es lo mismo que una cóclea sin función.
 :::
 
 <!-- verificar: Cobb y Stuart 2016 (Ear Hear 37(6), partes I y II): autores, año y diseño confirmados en Bibliografia.php (A03); volumen y páginas sin confirmar en el original. -->
@@ -336,7 +336,7 @@ El nivel del tamizaje es fijo por una razón: 35 dB nHL separa un oído que oye 
 
 - **Latencias absolutas** de las ondas I, III y V a 80 dB nHL, por oído.
 - **Interpicos** I-III, III-V e I-V.
-- **Diferencia interaural de la onda V** al mismo nivel. En normoyentes es de apenas 0,08 ms en promedio (Sanfins y cols., 2026); según el laboratorio se considera anormal sobre 0,2 a 0,4 ms. LabSim usa 0,4 ms.
+- **Diferencia interaural de la onda V** al mismo nivel. En normoyentes es de apenas 0,08 ms en promedio (Sanfins y cols., 2026); según el centro, se considera anormal sobre 0,2 a 0,4 ms. LabSim usa 0,4 ms.
 - **Razón de amplitudes V/I**. En un oído normal la V es más grande que la I. Una V proporcionalmente chica (en LabSim, V/I menor que 1) es un hallazgo retrococlear.
 - **Morfología y replicabilidad**: si las ondas son claras y se repiten.
 - **Umbral de la onda V** por estímulo, en dB nHL, y su estimación en dB eHL.
@@ -466,7 +466,7 @@ El ABR de LabSim se maneja como un equipo real, y por eso se puede equivocar com
 El informe se guarda solo, con las curvas y sus marcas. Si el paciente tiene un ABR de una atención anterior, aparece en *Sesión* para mirarlo, pero no se puede editar.
 
 :::comentario Lo que el simulador no tiene
-En LabSim el paciente ya está acostado, con los electrodos puestos y casi siempre dormido cuando abres el equipo. En la clínica, conseguir ese sueño es la mitad del examen. Además, los filtros de LabSim no corren las ondas: los filtros de un equipo real, sobre todo con el pasa alto subido, pueden cambiar un poco las latencias y agregar oscilaciones (Picton, 2010). Por eso la norma de tu laboratorio tiene que estar medida con los mismos filtros.
+En LabSim el paciente ya está acostado, con los electrodos puestos y casi siempre dormido cuando abres el equipo. En la clínica, conseguir ese sueño es la mitad del examen. Además, los filtros de LabSim no corren las ondas: los filtros de un equipo real, sobre todo con el pasa alto subido, pueden cambiar un poco las latencias y agregar oscilaciones (Picton, 2010). Por eso tu norma tiene que estar medida con los mismos filtros.
 :::
 
 Para practicar, los pacientes de este capítulo están entre los de práctica (★): Tomás, Hernán, Carolina, Raúl y Valentina.

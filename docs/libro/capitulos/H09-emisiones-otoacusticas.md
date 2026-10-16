@@ -133,7 +133,7 @@ Se registra el conducto **en silencio**, sin estímulo, por unos 30 segundos o m
 ### 5. DPOAE
 
 - **Dos tonos a la vez**, con **f2/f1 = 1,22** y **L1/L2 = 65/55 dB SPL**: la combinación de los estudios de referencia (Gorga y cols., 1997).
-- **El DP-grama** recorre f2 de 1 a 8 kHz: 1, 2, 3, 4, 6 y 8 kHz como mínimo; muchos equipos agregan las intermedias. En el laboratorio se parte por 8 kHz y se baja.
+- **El DP-grama** recorre f2 de 1 a 8 kHz: 1, 2, 3, 4, 6 y 8 kHz como mínimo; muchos equipos agregan las intermedias. Aquí se parte por 8 kHz y se baja.
 - **Por qué f2 y no 2f1−f2:** el producto de distorsión se genera donde se superponen las ondas de los dos tonos, cerca del lugar de **f2**. Por eso cada punto del DP-grama se lee como el estado de la cóclea en f2, aunque el tono medido esté más abajo.
 - **La función de entrada/salida** (DP I/O) baja L2 de a 5 dB en una f2 fija. En un oído normal el DP crece de a poco y aparece con L2 bajos; con daño coclear aparece recién con L2 altos y crece más empinado.
 

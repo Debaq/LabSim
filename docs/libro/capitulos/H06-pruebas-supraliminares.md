@@ -215,7 +215,7 @@ No hay una norma ISO para la acufenometría. Desde 1981 se aceptan cuatro medida
 - **Ninguna de ellas mide la gravedad.** No se relacionan de forma consistente con cuánto le afecta el acúfeno al paciente (Henry y Meikle, 2000).
 - **Tampoco prueban que exista.** No hay una medida objetiva del acúfeno: todo depende de lo que el paciente responde (Henry y cols., 2013).
 - **El tono varía de una vez a otra.** En la mitad de los pacientes, las igualaciones repetidas abarcaron más de dos octavas: conviene informar un rango más que una frecuencia única (Henry y cols., 2004).
-- **La inhibición residual** se mide en la literatura con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto, y por lo general dura menos de un minuto (Roberts, 2007; Henry y Meikle, 2000). En el laboratorio el estímulo va una octava por encima o por debajo del acúfeno.
+- **La inhibición residual** se mide en la literatura con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto, y por lo general dura menos de un minuto (Roberts, 2007; Henry y Meikle, 2000). En este libro el estímulo va una octava por encima o por debajo del acúfeno.
 - **Cuándo estudiar.** La guía de la AAO-HNS pide un examen audiológico completo y pronto cuando el acúfeno es de un solo lado, dura seis meses o más o se acompaña de dificultad para oír, y desaconseja la imagen salvo que el acúfeno sea de un lado, pulsátil, con signos neurológicos o con una hipoacusia asimétrica (Tunkel y cols., 2014).
 
 En este libro se hacen las cuatro, en ese orden, después de igualar el tipo de sonido.
@@ -253,7 +253,7 @@ Las cifras son ilustrativas. Lo que se lee es qué pasa con la diferencia entre 
 Cada par se dibuja como una escalera: dos columnas de dB HL, una por oído, y una línea entre los niveles que sonaron iguales. Sin reclutamiento las líneas quedan paralelas; con reclutamiento convergen.
 
 :::comentario Lo que dice la literatura
-El requisito de fondo del Fowler es tener **un oído de referencia normal** en la frecuencia que se prueba: la prueba compara contra él (Fowler, 1936). En las fuentes que revisamos no encontramos un tope de 40 dB para la diferencia entre los oídos. Es una regla práctica del laboratorio, para que la prueba alcance a mostrar su resultado dentro de la salida del audiómetro y bajo la molestia del paciente.
+El requisito de fondo del Fowler es tener **un oído de referencia normal** en la frecuencia que se prueba: la prueba compara contra él (Fowler, 1936). En las fuentes que revisamos no encontramos un tope de 40 dB para la diferencia entre los oídos. Es una regla práctica de este libro, para que la prueba alcance a mostrar su resultado dentro de la salida del audiómetro y bajo la molestia del paciente.
 :::
 
 ### IWA: el reclutamiento por vía ósea

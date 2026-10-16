@@ -22,7 +22,7 @@ Un sonido intenso contrae el músculo del estribo de los dos lados, y la contrac
 2. **Contralateral** después, en las mismas frecuencias más un ruido: el tono entra por un fono en el otro oído y la sonda registra en este.
 3. Se parte en **80 dB** y se sube de **5 en 5** hasta ver una deflexión de al menos 0,02 mL que **crece** al subir 5 dB más. La menor intensidad con una deflexión repetible es el **umbral del reflejo**.
 
-En LabSim, como en nuestro laboratorio, el umbral se anota en **dB SPL**. Un oído sano da el ipsilateral en **90, 85, 90 y 90 dB SPL** (500 a 4000 Hz) y el contralateral en **95, 90, 95 y 95**, con el ruido contralateral en 95 (→ H7, "El reflejo: umbral y Metz").
+En LabSim, como en este libro, el umbral se anota en **dB SPL**. Un oído sano da el ipsilateral en **90, 85, 90 y 90 dB SPL** (500 a 4000 Hz) y el contralateral en **95, 90, 95 y 95**, con el ruido contralateral en 95 (→ H7, "El reflejo: umbral y Metz").
 
 :::comentario Lo que dicen las normas
 La BSA prefiere expresar el estímulo del reflejo en **dB HL** y acepta dB SPL si se corrige antes de comparar con los valores normales, que están en HL (BSA, 2024; Wiley y cols., 1987). También recomienda no pasar de **105 dB HL** con tonos. En dB SPL eso equivale a 105-110 en el ipsilateral y a 112-117 en el contralateral, según la frecuencia. El dial de LabSim llega a 120 dB SPL: el tope lo pones tú.

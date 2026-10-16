@@ -861,7 +861,7 @@ def contraportada():
             f'aprende en el box: con pacientes. Cada técnica se explica paso a paso y cada caso se razona desde la '
             f'anamnesis hasta el diagnóstico, con los exámenes relatados sobre sus gráficos. Los simuladores de '
             f'apoyo generan los pacientes y sus resultados, así que muchos casos se pueden atender en el '
-            f'laboratorio.</p>'
+            f'simulador.</p>'
             + (f'<p class="cp-autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
             f'<div class="cp-logos">{logo("uach-pm-blanco.png")}{logo("tecmedhub-blanco.png", "tm")}</div>'
             f'<p class="cp-licencia">{LICENCIA}</p></section>')

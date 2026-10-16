@@ -34,7 +34,7 @@ El diapasón se apoya en la frente, en la mastoides o frente al pabellón. Por e
 - **Rinne.** Sale **negativo** en el oído ocluido si el componente conductivo alcanza el umbral del diapasón. Con gaps chicos sigue positivo (BSA, 2022).
 
 :::comentario Lo que dicen las normas
-En LabSim el Rinne se da vuelta con **15 dB** de gap: es el umbral del laboratorio, y tu docente puede calibrarlo. La guía británica pone el límite entre **17,5 y 30 dB** con el diapasón de 512 Hz (BSA, 2022), y entre estudios va de 13 a 40 dB (Kelly y cols., 2018). El laboratorio usa un umbral bajo para que el diapasón se dé vuelta en las conductivas leves, que son justamente las del conducto. En la clínica no esperes esa nitidez: un Rinne positivo **no descarta** una conductiva leve (→ H2).
+En LabSim el Rinne se da vuelta con **15 dB** de gap: es el umbral que usa LabSim, y tu docente puede calibrarlo. La guía británica pone el límite entre **17,5 y 30 dB** con el diapasón de 512 Hz (BSA, 2022), y entre estudios va de 13 a 40 dB (Kelly y cols., 2018). LabSim usa un umbral bajo para que el diapasón se dé vuelta en las conductivas leves, que son justamente las del conducto. En la clínica no esperes esa nitidez: un Rinne positivo **no descarta** una conductiva leve (→ H2).
 :::
 
 ### Por qué no se mide a través de un tapón

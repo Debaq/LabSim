@@ -61,7 +61,7 @@ Muchos pacientes dañados por ruido tienen acúfeno, y varios consultan por él 
 5. **Inhibición residual.** Se presenta un tono o un ruido **una octava por encima o por debajo** de la frecuencia del acúfeno, **10 dB sobre el NME**, durante **un minuto** en el oído del acúfeno; se apaga y se pregunta qué pasó con el acúfeno: igual (negativa), más suave (parcial) o desaparecido (total). Se espera otro minuto para ver si el efecto se mantiene.
 
 :::comentario Lo que dicen las normas
-En la literatura, la inhibición residual se mide con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto (Roberts, 2007; Henry y Meikle, 2000). La comparación una octava arriba y abajo aparece en otro paso: al igualar el tono, para descartar la confusión de octava (Henry y cols., 2004). En el laboratorio, el estímulo de la inhibición residual va una octava por encima o por debajo del acúfeno.
+En la literatura, la inhibición residual se mide con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto (Roberts, 2007; Henry y Meikle, 2000). La comparación una octava arriba y abajo aparece en otro paso: al igualar el tono, para descartar la confusión de octava (Henry y cols., 2004). En este libro, el estímulo de la inhibición residual va una octava por encima o por debajo del acúfeno.
 :::
 
 <!-- Protocolo ORL 2019: la inhibición residual "en una 8ª perfecta superior o inferior a la frecuencia del tinnitus". Se mantiene el protocolo (regla del autor, 2026-10-16) y la literatura va en el recuadro. Para decidir con el equipo: docs/libro/incongruencias_protocolo.md. -->

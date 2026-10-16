@@ -37,7 +37,7 @@ Una **perforación seca se mide**: da su B con volumen alto y su función tubari
 :::
 
 :::comentario Lo que dicen las normas
-La BSA (2024) no recomienda hacer timpanometría cuando la perforación se ve en la otoscopía: no agrega nada al diagnóstico, y su utilidad está en los oídos donde la membrana no se ve bien. En el laboratorio y en LabSim **se hace igual**, a propósito: el volumen alto de una perforación que sí ves es lo que te va a permitir reconocerla el día que no la veas, y con esa misma sonda se hace la función tubaria de membrana perforada, que el otorrino pide antes de operar.
+La BSA (2024) no recomienda hacer timpanometría cuando la perforación se ve en la otoscopía: no agrega nada al diagnóstico, y su utilidad está en los oídos donde la membrana no se ve bien. En este libro y en LabSim **se hace igual**, a propósito: el volumen alto de una perforación que sí ves es lo que te va a permitir reconocerla el día que no la veas, y con esa misma sonda se hace la función tubaria de membrana perforada, que el otorrino pide antes de operar.
 :::
 
 ### La función tubaria con membrana perforada

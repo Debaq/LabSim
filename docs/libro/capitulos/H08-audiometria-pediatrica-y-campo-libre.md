@@ -136,7 +136,7 @@ En VRA por parlantes, el niño gira hacia el juguete de cualquiera de los dos la
 
 ### 3. Audiometría condicionada por juego (2½ a 5 años)
 
-El niño ya puede hacer una tarea **voluntaria** cada vez que oye. En el laboratorio se usa una canasta y juguetes pequeños: cada vez que escucha el sonido, guarda un juguete en la canasta. También sirven clavijas, cubos o una torre (AAA, 2020).
+El niño ya puede hacer una tarea **voluntaria** cada vez que oye. Aquí se usa una canasta y juguetes pequeños: cada vez que escucha el sonido, guarda un juguete en la canasta. También sirven clavijas, cubos o una torre (AAA, 2020).
 
 1. **Enseñar el juego.** "Cada vez que escuches el pito, pones un juguete en la canasta." Se muestra con un tono bien audible y, si hace falta, guiándole la mano. Con **dos respuestas seguidas sin ayuda**, empieza la prueba (AAA, 2020).
 2. **Si no responde** a la vía aérea, se lo condiciona con el vibrador en la mano o en la cabeza. Si así juega, se toman umbrales óseos y se vuelve a la aérea; si no juega ni con la vibración, se baja a la VRA (AAA, 2020).
@@ -144,15 +144,15 @@ El niño ya puede hacer una tarea **voluntaria** cada vez que oye. En el laborat
 4. **Reforzar siempre.** El elogio constante lo mantiene atento a la tarea.
 5. **Anotar** en las observaciones que la audiometría fue **condicionada por juego**.
 
-En el laboratorio se miden de **250 a 4.000 Hz entre los 4 y los 6 años**, y el rango completo desde los 7. El orden es el de la audiometría convencional: 1.000, 2.000, 3.000 y 4.000 Hz, y después 500 y 250 Hz. Al final se repite 1.000 Hz, y recién entonces se pasa al otro oído. **Por qué así.** Un niño de esa edad mantiene la atención poco tiempo, y cada frecuencia de más le resta confiabilidad a las demás. Con un rango corto y el mismo orden de siempre, el examen se termina y se puede comparar con los controles siguientes.
+En este libro se miden de **250 a 4.000 Hz entre los 4 y los 6 años**, y el rango completo desde los 7. El orden es el de la audiometría convencional: 1.000, 2.000, 3.000 y 4.000 Hz, y después 500 y 250 Hz. Al final se repite 1.000 Hz, y recién entonces se pasa al otro oído. **Por qué así.** Un niño de esa edad mantiene la atención poco tiempo, y cada frecuencia de más le resta confiabilidad a las demás. Con un rango corto y el mismo orden de siempre, el examen se termina y se puede comparar con los controles siguientes.
 
 :::comentario Lo que dicen las normas
 La guía de la AAA (2020) pide en el juego condicionado **250, 500, 1.000, 2.000, 4.000 y 8.000 Hz**, y puede agregar 3.000 y 6.000 Hz cuando se va a adaptar un audífono. Sobre el orden, deja la decisión a la pregunta clínica y propone **partir por los agudos**: si aparece una pérdida en agudos, se puede iniciar la adaptación del audífono aunque falten los graves. En los más chicos (2 a 3 años) sugiere **alternar los oídos** frecuencia por frecuencia, para tener datos de los dos aunque el niño se canse a mitad de camino.
 
-El orden del laboratorio prioriza otra cosa: un oído **completo y comparable** con sus controles, con el mismo orden de siempre, en vez de dos oídos a medias.
+El orden de este libro prioriza otra cosa: un oído **completo y comparable** con sus controles, con el mismo orden de siempre, en vez de dos oídos a medias.
 :::
 
-Los diapasones, en el laboratorio, se agregan desde los 7 años (→ H2).
+Los diapasones se agregan desde los 7 años (→ H2).
 
 ### 4. Audiometría convencional (desde los 5 años)
 
@@ -172,7 +172,7 @@ El SRT debe quedar dentro de ±10 dB del promedio de 500, 1.000 y 2.000 Hz; si n
 
 Es la técnica del adulto, con el parlante como transductor.
 
-1. **Ubicar al paciente.** En el laboratorio, el paciente se sienta **frente a los parlantes**, a **1 m** de cada uno, con los parlantes a **45°** a cada lado de la línea de la nariz. La cabeza queda en el punto donde se calibró.
+1. **Ubicar al paciente.** El paciente se sienta **frente a los parlantes**, a **1 m** de cada uno, con los parlantes a **45°** a cada lado de la línea de la nariz. La cabeza queda en el punto donde se calibró.
 2. **Configurar el audiómetro**: transductor de campo libre y estímulo FM (*warble*).
 3. **Instrucción**: avisar cada vez que oiga el sonido, por débil que sea y **sin importar por qué oído** lo oiga. Si usa audífono, **se lo saca después de recibir la instrucción**: la primera parte del examen va sin audífono.
 4. **Umbrales**: 1.000, 2.000, 3.000 y 4.000 Hz, y después 500 y 250 Hz. Se parte en 40 dB HL; si responde, se baja 10, si no, se sube 5; umbral con **2 de 3**. Tonos de 1 a 2 segundos con silencios variados, nunca menores a 1 segundo.
@@ -219,13 +219,13 @@ La comparación entre los umbrales sin audífono (S) y con audífono (A) muestra
 | Campo libre, con audífono | **A** |
 | Sin respuesta a la salida máxima | flecha hacia abajo desde el símbolo |
 
-En el laboratorio se dibujan en **verde**: el campo libre no es de un oído, así que no lleva ni rojo ni azul. La **S** marca los umbrales sin audífono y la **A**, con audífono. Si quieres separar lo que aporta cada audífono por su cuenta, puedes escribir la A en **rojo** cuando el audífono está en el OD y en **azul** cuando está en el OI.
+En este libro se dibujan en **verde**: el campo libre no es de un oído, así que no lleva ni rojo ni azul. La **S** marca los umbrales sin audífono y la **A**, con audífono. Si quieres separar lo que aporta cada audífono por su cuenta, puedes escribir la A en **rojo** cuando el audífono está en el OD y en **azul** cuando está en el OI.
 :::
 
 :::comentario Lo que dicen las normas
-En el laboratorio, los umbrales con audífono en campo libre son parte de la revisión del audífono: muestran, en el mismo audiograma que el paciente conoce, qué sonidos le devuelve.
+En este libro, los umbrales con audífono en campo libre son parte de la revisión del audífono: muestran, en el mismo audiograma que el paciente conoce, qué sonidos le devuelve.
 
-Las guías pediátricas les ponen un límite claro: **no sirven para verificar el audífono** (AAA, 2013). Un audífono moderno no amplifica igual todos los niveles: según su intensidad, el tono de prueba interactúa con el procesamiento del audífono, y el umbral con audífono puede sobrestimar o subestimar lo que entrega con la voz de conversación (AAA, 2013; Kuk y Ludvigsen, 2003). Además, el niño se mueve y la cabeza sale del punto calibrado, y si oye casi normal en los graves, el ruido de la sala esconde la ganancia en esa zona (AAA, 2013). Para verificar se usan las mediciones en oído real con micrófono sonda. En el laboratorio, el umbral con audífono se usa como lo que es: una **medida funcional** de lo que el paciente detecta con su audífono puesto, útil en la revisión y para mostrarle a la familia el beneficio. La excepción son los audífonos de conducción ósea, donde no hay sonido en el conducto que medir: ahí el umbral con audífono puede ser la mejor medida disponible (AAA, 2013).
+Las guías pediátricas les ponen un límite claro: **no sirven para verificar el audífono** (AAA, 2013). Un audífono moderno no amplifica igual todos los niveles: según su intensidad, el tono de prueba interactúa con el procesamiento del audífono, y el umbral con audífono puede sobrestimar o subestimar lo que entrega con la voz de conversación (AAA, 2013; Kuk y Ludvigsen, 2003). Además, el niño se mueve y la cabeza sale del punto calibrado, y si oye casi normal en los graves, el ruido de la sala esconde la ganancia en esa zona (AAA, 2013). Para verificar se usan las mediciones en oído real con micrófono sonda. Aquí, el umbral con audífono se usa como lo que es: una **medida funcional** de lo que el paciente detecta con su audífono puesto, útil en la revisión y para mostrarle a la familia el beneficio. La excepción son los audífonos de conducción ósea, donde no hay sonido en el conducto que medir: ahí el umbral con audífono puede ser la mejor medida disponible (AAA, 2013).
 :::
 
 ### 8. Cuándo la conducta no alcanza
@@ -284,7 +284,7 @@ El informe de un niño es más largo que el de un adulto, porque el lector neces
 - @OD 1000 | Cada símbolo es un umbral por juego: el nivel más bajo en que Benjamín guardó un juguete en 2 de 3 presentaciones. 25 dB en 1 kHz en el OD.
 - @OI 2000 | El OI está en 35 dB en 2 kHz, con un umbral por oído: a los 5 años, con fonos, ya se separan los oídos.
 - @OD osea 1000 | Ósea enmascarada en 0 dB. Exige que el niño ignore el ruido y solo juegue con el pito: se le explica antes, y si no lo logra se anota.
-- @OI 125 | A esta edad el laboratorio mide de 250 a 4.000 Hz. Los puntos de 125, 6.000 y 8.000 Hz están porque el simulador guarda la curva completa.
+- @OI 125 | A esta edad se mide de 250 a 4.000 Hz. Los puntos de 125, 6.000 y 8.000 Hz están porque el simulador guarda la curva completa.
 - **Informe:** *audiometría condicionada por juego, con fonos; confiabilidad buena. Hipoacusia conductiva leve bilateral, de configuración plana, con vía ósea enmascarada normal.* Se correlaciona con la impedanciometría (→ H7).
 :::
 
@@ -315,7 +315,7 @@ El niño de LabSim responde al audiómetro como un adulto colaborador: levanta l
 2. ¿Por qué el campo libre de Aurora a los 2 años salió normal? ¿Qué examen lo habría evitado a esa edad?
 3. Con insertos, un lactante de 10 meses tiene un nivel mínimo de 30 dB HL en 500 Hz. ¿A qué umbral adulto equivale? ¿Por qué esa corrección no sirve en un niño de 2 años?
 4. En una VRA hiciste 10 ensayos sin sonido y el niño giró en 4. ¿Es válida la prueba? ¿Qué harías?
-5. ¿Qué frecuencias y en qué orden le medirías a Benjamín según el laboratorio? ¿Qué cambiaría con la guía de la AAA, y qué ganas y qué pierdes en cada caso?
+5. ¿Qué frecuencias y en qué orden le medirías a Benjamín según este libro? ¿Qué cambiaría con la guía de la AAA, y qué ganas y qué pierdes en cada caso?
 6. Un niño con audífonos tiene S en 65 dB y A en 30 dB en 2 kHz. ¿Qué te dice esa diferencia y qué no te dice sobre su audífono?
 :::
 
