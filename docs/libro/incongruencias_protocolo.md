@@ -132,6 +132,31 @@ H11 (ECochG) y H14 (procesamiento central) no tienen sección en el protocolo: l
 que enseñan es la configuración de LabSim (ECochG) y la guía AAA 2010 con
 AudioPAC (procesamiento central), con las normas en sus recuadros.
 
+## Vestibular (H15-H18, 2026-10-16)
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 65 | H15 | Antecedentes familiares | "de vértigo" (Frenzel) y "de hipoacusia" (VNG) | se juntan los dos | — | A | |
+| 66 | H15 | Mirada vertical | arriba y abajo solo en la versión Frenzel; VNG solo derecha e izquierda | el protocolo, cada versión | — | A | |
+| 67 | H15 | Oculomotor en la VNG | no trae sacadas, seguimiento ni optocinético | se enseñan desde la bibliografía y se dice | Fife 2000; Leigh y Zee 2015 | A · vacío | |
+| 68 | H15, H16 | Cortes de la calórica | Frenzel: hipoexcitabilidad ≥ 20 % y preponderancia ≥ 25 % (frecuencia o duración); calórica VNG: ≥ 25 % y ≥ 30 % (VFL) | H16 sigue la sección de calórica y nombra la otra en el recuadro | Shepard y Jacobson 2016 | E · contradicción interna | |
+| 69 | H15, H18 | Lado de inicio del giro supino (McClure) | Frenzel parte a la derecha; VNG a la izquierda | el orden no cambia la lectura: se comparan las intensidades | Bhattacharyya 2017 | A | |
+| 70 | H15 | Lo que no trae el protocolo | sin HINTS, skew, head-shake ni oclusión alternada | recuadro de normas | Kattah 2009; Halmagyi 1979; Hain 1987 | A · vacío | |
+| 71 | H16 | Calórica mínima | 2 mL de agua a 2 °C, 20 s | el protocolo; en el recuadro, la bitérmica (30/44 °C, 40 s; o aire 24/50 °C) | Shepard y Jacobson 2016 | P | |
+| 72 | H16 | Explicación al paciente | "estructuras no evaluadas en la prueba calórica clásica" (copiado del vHIT) | reescrita | — | E | |
+| 73 | H16 | Canal posterior en anteroflexión 30°, criterio ≥ 15 s | dato complementario | se mantiene con recuadro; sin norma publicada hallada | — | A · verificar | |
+| 74 | H16 | "Período de Török" (45 s a 1 min 15 s) | ventana de medición | se mantiene; sin respaldo hallado | — | A · verificar | |
+| 75 | H17 | Método de la ganancia | a 60 ms | el protocolo; en el recuadro, área en ventana ancha (Halmagyi) y que ningún método es superior | Halmagyi 2017; Zamaro 2020 | P | |
+| 76 | H17 | Alcance del informe | "indemnidad... función vestibular conservada" | se precisa: mide el canal a alta frecuencia | Halmagyi 2017 | A | |
+| 77 | H17 | Planos verticales | solo el lateral | se agregan LARP y RALP | MacDougall 2013; McGarvie 2015 | A · vacío | |
+| 78 | H18 | Lempert | "flexionamos la cabeza 90° al oído sano" | "gira la cabeza" (plano horizontal) | Bhattacharyya 2017, tabla 13 | E | |
+| 79 | H18 | Dix-Hallpike | cabeza unos 30° bajo la camilla | el protocolo; en el recuadro, 20° | Bhattacharyya 2017 | P | |
+| 80 | H18 | Tiempo por postura | Epley 2 min, modificado 3-5, Semont 2-3, Gufoni 2 | el protocolo; en el recuadro, 20-30 s o hasta que cese el nistagmo | Bhattacharyya 2017 | P | |
+| 81 | H18 | Indicaciones después de la maniobra | dormir semisentado 2 noches, sin movimientos bruscos | el protocolo; en el recuadro, la AAO-HNS recomienda con fuerza NO indicar restricciones (grado A) | Bhattacharyya 2017, 4b | P · revisar | |
+| 82 | H18 | Control | a los 7 días | el protocolo; en el recuadro, reevaluar dentro del mes | Bhattacharyya 2017 | P | |
+| 83 | H18 | Lempert "para el apogeotrópico" | variante de partir al lado afectado | se quitó "apogeotrópico" (la guía la pone en el geotrópico) | Bhattacharyya 2017, tabla 13 | E · preguntar | |
+| 84 | H18 | "Epley modificado" (45/15/0/15/45/135°, 3-5 min) | maniobra propia | se mantiene; no se halló en la literatura | — | A · verificar | |
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |
