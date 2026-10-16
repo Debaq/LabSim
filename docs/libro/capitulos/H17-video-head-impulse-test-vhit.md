@@ -269,14 +269,14 @@ LabSim **no simula el vHIT** (ni ninguna otra prueba vestibular, salvo el VEMP, 
 
 **Lo que hace trainHIT.** Mide un vHIT con la **cámara web** del computador (a 30 cuadros por segundo, con un tope deliberado para que no se use con pacientes), con tres métodos de ganancia a la vista (área, instantánea a 60 ms y cociente de picos), la detección de sacadas, el motivo de rechazo de cada impulso, la calibración del paralaje, y los planos laterales y verticales. Trae un paciente de ejemplo, cinco **casos a ciegas** (normal, déficit derecho, bilateral, un déficit izquierdo cuyas sacadas encubiertas hacen que la media se lea normal, y un registro casi todo rechazado) y un **paciente simulado**: un compañero sano hace de paciente y el simulador le agrega un déficit sobre sus propios impulsos.
 
-:::imagen ilustraciones/h17-trainhit-seis-canales.png ancho=60% Los seis canales en trainHIT, aquí con el plano RALP
+:::imagen ilustraciones/h17-trainhit-seis-canales.png ancho=42% Los seis canales en trainHIT, aquí con el plano RALP
 - @30,-7 | **Lateral, LARP y RALP**: el plano que se examina.
 - @80,-7 | **La posición de la cabeza** que alinea la mirada con el plano (45° a la izquierda para RALP).
 - @46,69 | **El plano del par** dibujado sobre la cabeza: la nariz abajo activa el anterior derecho, la nariz arriba el posterior izquierdo.
 - @76,44 | **Cada canal tiene su casilla** con la ganancia y el número de impulsos; en rojo los que están bajo el corte.
 :::
 
-:::imagen ilustraciones/h17-trainhit-ralp.png Paciente simulado de trainHIT con una neuritis derecha, en el plano RALP
+:::imagen ilustraciones/h17-trainhit-ralp.png ancho=80% Paciente simulado de trainHIT con una neuritis derecha, en el plano RALP
 - @47,11 | **El plano en examen**: a la izquierda el canal anterior derecho (nariz abajo), a la derecha el posterior izquierdo.
 - @44,16 | **Sacadas manifiestas**, de lo que el canal anterior derecho no alcanza a compensar.
 - @28,64 | **Ganancia baja** del canal afectado.

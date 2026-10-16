@@ -50,6 +50,20 @@ FORMATOS = {
 }
 FORMATO = FORMATOS['a4']
 
+# Tipografía del texto corrido. 'actual' es la de siempre; las otras se
+# prueban con LIBRO_TIPO=<clave> para comparar páginas (2026-10-16: él pidió
+# bajar el total de páginas sin dejar el A4).
+TIPOS = {
+    'actual': None,
+    'sans9': {'familia': "'Plus Jakarta Sans', sans-serif", 'tam': '9pt', 'interlinea': '1.42', 'gap': '6mm'},
+    'serif10': {'familia': "'Source Serif 4', Georgia, serif", 'tam': '10pt', 'interlinea': '1.32', 'gap': '6mm'},
+    'serif95': {'familia': "'Source Serif 4', Georgia, serif", 'tam': '9.5pt', 'interlinea': '1.3', 'gap': '6mm'},
+}
+TIPO = TIPOS[os.environ.get('LIBRO_TIPO', 'actual')]
+# Orden de las figuras del motor: 'actual' (figura arriba, globos abajo, a todo
+# el ancho) o 'lado' (figura y globos lado a lado: usa el blanco a los costados).
+ORDEN = os.environ.get('LIBRO_ORDEN', 'actual')
+
 # Título elegido por él el 2026-10-15: un solo libro que crece por secciones
 # (audición, equilibrio, nariz, rehabilitación). Los simuladores (LabSim,
 # trainHIT, labyrinthus3d) son herramientas de apoyo, no el título.
@@ -330,7 +344,7 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
     rot = NOMBRE_FIGURA.get(tipo, tipo)
     if 'sin enmascarar' in svg and 'sin enmascarar' not in rot:
         rot += ' sin enmascarar'
-    return (f'<div class="figobs"><figure class="fig">{svg}<figcaption>Figura {numero_fig}. {rot}.</figcaption></figure>'
+    return (f'<div class="figobs figobs-motor"><figure class="fig">{svg}<figcaption>Figura {numero_fig}. {rot}.</figcaption></figure>'
             f'<ol class="obs">{"".join(obs)}</ol></div>')
 
 
@@ -534,9 +548,36 @@ def capitulo(md_texto):
     return cuerpo
 
 
+def fuentes_serif():
+    out = []
+    for peso, estilo in (('400', 'normal'), ('400', 'italic'), ('600', 'normal'), ('700', 'normal')):
+        for sub in ('latin', 'latin-ext'):
+            f = FUENTES / f'source-serif-4-{sub}-{peso}-{estilo}.woff2'
+            if f.exists():
+                out.append(f"@font-face {{ font-family: 'Source Serif 4'; font-weight: {peso}; font-style: {estilo}; "
+                           f"src: url('{f.as_uri()}'); }}")
+    return '\n'.join(out)
+
+
+def tipo_css():
+    """El texto corrido según TIPO: tamaño, interlínea, justificado con partición."""
+    orden = ''
+    if ORDEN == 'lado':
+        orden = (".figobs-motor { display: flex; align-items: flex-start; gap: 4mm; }\n"
+                 ".figobs-motor .fig { flex: 0 0 60%; margin: 0; }\n"
+                 ".figobs-motor ol.obs { flex: 1 1 auto; column-count: 1; }\n")
+    if not TIPO:
+        return orden
+    return (f"html {{ font-family: {TIPO['familia']}; font-size: {TIPO['tam']}; line-height: {TIPO['interlinea']}; }}\n"
+            f".dos-col {{ column-gap: {TIPO['gap']}; }}\n"
+            "p, li { text-align: justify; hyphens: auto; }\n"
+            ".caja p, .caja li, td p, figcaption, ol.obs li { text-align: left; hyphens: manual; }\n" + orden)
+
+
 def css():
     return f"""
 @font-face {{ font-family: Fraunces; src: url('{(FUENTES / 'fraunces-latin.woff2').as_uri()}'); }}
+{fuentes_serif()}
 @font-face {{ font-family: 'Plus Jakarta Sans'; src: url('{(FUENTES / 'plus-jakarta-sans-latin.woff2').as_uri()}'); }}
 @font-face {{ font-family: 'Plus Jakarta Sans'; src: url('{(FUENTES / 'plus-jakarta-sans-latin-ext.woff2').as_uri()}'); }}
 @page {{ size: {FORMATO['tamano']}; margin: {FORMATO['arriba']} {FORMATO['exterior']} {FORMATO['abajo']} {FORMATO['interior']};
@@ -761,6 +802,7 @@ ol.obs li.sin-globo {{ padding-left: 0; }}
 .fig svg.grafico {{ display: block; max-width: 100%; height: auto; margin: 0 auto; }}
 figcaption {{ font-size: 7.8pt; color: #7d6670; margin-top: 1.2mm; text-align: center; }}
 strong {{ color: #24101a; }}
+{tipo_css()}
 """
 
 

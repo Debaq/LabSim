@@ -210,7 +210,12 @@ El paciente vuelve a la misma silla, ahora con su audífono:
 
 La comparación entre los umbrales sin audífono (S) y con audífono (A) muestra cuánto le acerca el audífono los sonidos suaves. Se lee contra la **zona del habla**, la "banana" que dibujan en el audiograma los sonidos del habla a intensidad de conversación: las vocales y los sonidos graves, más intensos, arriba a la izquierda; las consonantes agudas y suaves como /s/ y /f/, abajo a la derecha. Un umbral A que queda **por encima de la banana** dice que esos sonidos ahora son audibles.
 
-![Audiograma de campo libre de un niño con audífonos. Zona del habla conversacional sombreada en forma de banana, de 250 a 6.000 Hz, más intensa en los graves que en los agudos. Símbolos S (sin audífono) unidos por una línea, por debajo de la banana en todas las frecuencias. Símbolos A (con audífono) unidos por otra línea, dentro o por encima de la banana. Una flecha vertical entre S y A en 2.000 Hz rotulada "lo que aporta el audífono".](ilustraciones/h08-campo-libre-audifono.png)
+:::imagen ilustraciones/h08-campo-libre-audifono.svg ancho=55% Campo libre de un niño con audífonos sobre la zona del habla
+- @104,64 | **S**, sin audífonos: todos los umbrales quedan bajo la zona del habla. La voz conversacional no le llega.
+- @104,39 | **A**, con audífonos: los umbrales suben a la zona del habla o quedan muy cerca. En 2 kHz, de 80 a 35 dB: eso es lo que aporta el audífono.
+- @62,22 | La **zona del habla** es aproximada: un esquema para ubicar los umbrales, no una norma.
+- S y A van en **verde** y centrados: en campo libre contesta el oído mejor, no uno en particular.
+:::
 
 :::ayuda Símbolos de campo libre
 | Condición | Símbolo |

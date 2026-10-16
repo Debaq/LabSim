@@ -56,7 +56,7 @@ Es un mapa útil, pero no literal: cada onda recibe aportes de varias poblacione
 - @84,18 | La **V** es la más alta y la más estable: es la que se sigue al bajar la intensidad.
 - @98,70 | Los **interpicos** miden el viaje dentro de la vía: I-III, III-V e I-V.
 :::
-<!-- Imagen: capturas de labyrinthus3d (hacer_h10_peat.py, montaje en la conversación del 2026-10-16). Las latencias de la tabla son del modelo del simulador, órdenes de magnitud docentes, no valores de referencia. OJO: el panel del simulador asigna II = núcleo coclear, III = olivar, IV = lemnisco (esquema clásico); los globos siguen a Møller (I y II nervio, III núcleo coclear, IV olivar, V lemnisco/colículo), como el texto. -->
+<!-- Imagen: capturas de labyrinthus3d (hacer_h10_peat.py, montaje en la conversación del 2026-10-16). Las latencias de la tabla son del modelo del simulador, órdenes de magnitud docentes, no valores de referencia. Desde el 2026-10-16 labyrinthus3d usa la misma asignación de Møller que el texto (I y II nervio, III núcleo coclear, IV olivar, V lemnisco/colículo). -->
 
 De ese mapa sale la lectura clínica de los **interpicos**:
 

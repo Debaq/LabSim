@@ -69,7 +69,8 @@ def figura(caso, f):
     if tipo == 'campo_libre':
         # Las claves vuelven del JSON como texto.
         ganancia = {int(k): v for k, v in (f.get('ganancia') or {}).items()}
-        return campo_libre.dibujar(caso, ganancia=ganancia or None, audifono=f.get('audifono'))
+        return campo_libre.dibujar(caso, ganancia=ganancia or None, audifono=f.get('audifono'),
+                                   banana=f.get('banana', False))
     if tipo == 'vemp':
         return vemp.dibujar(caso, subtipo=f.get('subtipo', 'cvemp'), intensidad=f.get('intensidad', 100),
                             promedios=f.get('promedios', 200))

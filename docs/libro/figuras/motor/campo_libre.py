@@ -39,7 +39,13 @@ def umbrales_sin_audifono(caso):
     return out
 
 
-def dibujar(caso, ganancia=None, audifono=None):
+# Zona aproximada del habla conversacional (la "banana"): solo un esquema
+# para ubicar los umbrales; no es una norma ni sale del caso.
+BANANA = [(250, 25, 55), (500, 22, 55), (1000, 20, 50), (2000, 18, 45),
+          (3000, 18, 42), (4000, 18, 40), (6000, 20, 38)]
+
+
+def dibujar(caso, ganancia=None, audifono=None, banana=False):
     """ganancia: {Hz: dB de ganancia funcional}; sin ella, solo la curva S.
     audifono: 'OD' u 'OI' si se evaluó un solo audífono (la A toma su color);
     None, los dos o binaural (verde)."""
@@ -76,6 +82,13 @@ def dibujar(caso, ganancia=None, audifono=None):
         s.texto(X(f), Y(120) + 14, ROTULO.get(f, f), E.T_EJE if mayor else E.T_CHICO,
                 E.TENUE if mayor else E.MUY_TENUE)
     s.texto(ml, (mt - 22) if con is not None else (mt - 12), 'Campo libre', E.T_TITULO, E.TINTA, 'start', 600)
+    if banana:
+        arriba = [(X(f), Y(a)) for f, a, _ in BANANA]
+        abajo = [(X(f), Y(b)) for f, _, b in reversed(BANANA)]
+        d = 'M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in arriba + abajo) + ' Z'
+        s.crudo(f'<path d="{d}" fill="#f3e3b5" fill-opacity="0.75" stroke="#d9b44a" stroke-width="0.8"/>')
+        s.texto(X(620), Y(29) + 3, 'habla conversacional', E.T_CHICO, '#8a6a12', peso=600)
+        s.ancla('banana', X(1000), Y(35))
 
     for curva, letra, guiones, color in ((sin, 'S', None, E.CAMPO_LIBRE), (con, 'A', '4 3', color_a)):
         if curva is None:
