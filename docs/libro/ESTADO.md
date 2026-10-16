@@ -80,6 +80,13 @@ no se rehicieron: un capítulo que se vuelva a armar puede cambiar de curva
   números de página estampados, índice y marcadores rehechos. Desde cero
   ~2,5 min; sin cambios ~1,3 min. `--de-una-pieza` = el armado viejo.
 
+- **Huecos al pie de página** (para la pasada final, él lo pidió así): ~85
+  páginas con más de un tercio vacío, por figuras y recuadros que no caben y
+  saltan enteros. `herramientas/acomodar.py` (sube el texto siguiente cuando
+  una figura salta; acepta solo movidas que bajan el hueco) está hecho pero
+  DESCONECTADO: es lento (H3: ~45 s) y en H3 bajó de 7 a 4 huecos; en otros
+  capítulos los huecos son de recuadros. Retomar en la versión cerrada.
+
 ### Libro, contenido
 - **Rostros** (hechos 2026-10-16): 38 personas en `rostros/` (JPG 512 px),
   uno por persona (`demo-NN` para los de práctica), pedidos en
