@@ -14,6 +14,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramient
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [
+    # Ménière del OI: PS crecido, cola larga; el OD de la misma paciente es la referencia
+    demo(38, [fig.ecochg()]),
 ]
 
 if __name__ == '__main__':

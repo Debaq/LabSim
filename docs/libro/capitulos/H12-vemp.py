@@ -14,6 +14,14 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramient
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [
+    # Normal: cVEMP y oVEMP de los dos oídos, simétricos
+    demo(33, [fig.vemp(), fig.vemp(subtipo='ovemp')]),
+    # Ménière del OI: el cVEMP (sáculo) cae y el oVEMP (utrículo) se conserva
+    demo(38, [fig.vemp(), fig.vemp(subtipo='ovemp')]),
+    # Cófosis del OD tras parotiditis: VEMP del OD casi plano
+    demo(42, [fig.vemp()]),
+    # Otoesclerosis del OD: el gap aéreo-óseo apaga el VEMP por vía aérea
+    demo(34, [fig.vemp(), fig.audiograma()]),
 ]
 
 if __name__ == '__main__':

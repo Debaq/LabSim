@@ -56,9 +56,11 @@ completo, incongruencias a `incongruencias_protocolo.md`, commit en main y
 marcar la tanda acá.
 
 - Material de clases: `fuentes/clases/LEEME.md` dice qué clase sirve a qué capítulo (alcance, no copiar ni citar ni nombrar a quien la dictó).
+- Secciones del protocolo (líneas de fuentes/protocolo.txt): H11 y H14 no tienen; H12 4342-4628 (cVEMP y oVEMP); H13 5567-5677; H15 3239-3666 (Frenzel 3239, VNG 3463); H16 3667-3820; H17 4629-4753; H18 4105-4341; H19 3821-4104; H20 2795-3176; H21 3177-3238; H22 1490-1830 (screening y operativo; "operativo" = operativo de salud, no ocupacional) más el ítem de ruido de la anamnesis (~178); H23 2452-2535; H24 2536-2652; H25 2653-2794.
+- Instrucciones comunes de los agentes: `herramientas/tanda_comun.md` (cada pedido la nombra).
 - [x] Tanda 1 (2026-10-16): caps. 7, 8, 9, 10 escritos (Opus), referencias cotejadas con Crossref/PubMed, 13 rostros. Arreglos del armador: ECochG de un oído sin complejo, "Hace 1 día", ancla del pico en timpanograma B (rehechos cap02 OMA y p35, cap03 p41, h7 p35, cap08), `:::figura ... campo_libre`, pausa y reintento al guardar casos en armar_casos.py, `LIBRO_SIN_COMPLETO=1`. Incongruencias #43-50. Quedan `verificar` (cap. 7: 2, cap. 8: 1, cap. 9: 4, cap. 10: 10). Los dos "Samuel" (caps. 6 y 9) se dejan: el nombre lo sortea el editor y cuadro() no lo fija.
-- [ ] Tanda 2: H11 ECochG, H12 VEMP, H13 PEAee, H14 procesamiento central (AudioPAC, `~/Escritorio/Proyectos/audiopac`)
-- [ ] Tanda 3: H15 Frenzel/VNG, H16 calórica, H17 vHIT, H18 maniobras (simuladores: `~/Escritorio/Proyectos/labyrinthus3d`, `trainhit`, `simHit`; ver `investigacion/inventario_vestibular_nasal.md`; LabSim NO hace vestibular)
+- [x] Tanda 2 (2026-10-16, agentes Sonnet + revisión y verificación de referencias): H11 ECochG (15 págs., 4 esquemas propios), H12 VEMP (21), H13 estado estable (12, sin LabSim: 2 esquemas propios), H14 procesamiento central (22, capturas de AudioPAC corrido local con datos inventados y rotulados). Incongruencias #51-64. Placeholder pendiente: `ilustraciones/h12-vias.png` (vías cVEMP/oVEMP). Huecos al pie en H14 pp. 13-14 (pasada final). Cap. 9 dice "el detalle estará en H11": pasar a "(→ H11)" cuando se toque. Quedan `verificar`: H11 2, H12 4, H13 2, H14 5.
+- [ ] Tanda 3 (en curso desde 2026-10-16): H15 Frenzel/VNG, H16 calórica, H17 vHIT, H18 maniobras (simuladores: `~/Escritorio/Proyectos/labyrinthus3d`, `trainhit`, `simHit`; ver `investigacion/inventario_vestibular_nasal.md`; LabSim NO hace vestibular)
 - [ ] Tanda 4: H19 rehabilitación vestibular, H20 prueba de audífonos, H21 medición electroacústica, H22 audiometría ocupacional (él cambió el orden: H22 entra ya; material investigado con fuentes verificadas; normas chilenas PREXOR/ISP/SUSESO en "Lo que dicen las normas" junto a las internacionales, el libro es mundial)
 - [ ] Tanda 5: H23 anamnesis rinológica y rinoscopía, H24 rinomanometría, H25 rinometría acústica (sus clases de nasal están en fuentes/clases/nasal: marcan el alcance)
 - Fin del loop al cerrar la tanda 5. Los capítulos clínicos 12-36 NO entran.
@@ -78,7 +80,10 @@ marcar la tanda acá.
   diseñar.
 
 ### Para él (decisiones o datos)
-0. **Nota sobre el PEAT** que llegó a mitad de la tanda 1: "los potenciales se repiten por nivel dos veces: 80 dos veces, 60 dos veces". En las figuras del libro cada nivel trae el promedio y sus dos réplicas en tenue (lo esperable). ¿Se refería a eso, a la ficha PDF de LabSim (memoria "pila duplicada") o a otra cosa?
+- **H13: ¿ABR antes del estado estable?** El protocolo no lo pide; BSA 2023 lo exige (descartar neuropatía). Hoy va en recuadro de normas (#61).
+- **LabSim, hallado al escribir H11/H12** (no se tocó el simulador): ECochG del paciente 33 (normal) da razón de áreas 3,74 en el OD con PS/PA 0,25 (falso positivo) y la línea de base del OI corrida; VEMP con escala aérea propia en dB SPL (50-125, umbral normal ~60) en vez de nHL, banda de EMG 30-150 µV (la literatura pide ≥ 80), `resources/vemp/normative_data.json` sin fuente ni DE, sin impedancias y un solo umbral por tipo.
+- **ABR según Hood (1998):** aprobado por él; plan en `ROADMAP_ABR.md` (caps. 11-19, para después del loop de las H). Falta el índice completo del libro de Hood antes de citarlo.
+0. **PEAT "cada nivel dos veces"** (nota de él, 2026-10-16): es la pila duplicada del simulador (memoria labsim_abr_pila_duplicada), anotada en `ROADMAP_ABR.md` entre los pendientes del simulador.
 1. **Inventario vestibular/nasal** (`investigacion/inventario_vestibular_nasal.md`):
    detalles menores (licencia de simHit, DOI de labyrinthus3d, coautorías).
 

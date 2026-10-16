@@ -1,0 +1,15 @@
+{
+  "caso": "demo:34",
+  "figuras": [
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

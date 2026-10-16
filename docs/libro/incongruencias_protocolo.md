@@ -109,6 +109,29 @@ la atenuación interaural y la meseta (#15, #19; si el equipo vuelve a la
 tabla del protocolo hay que cambiar también el cap. 7), y el 10 solo amplía el
 ítem "antecedentes familiares" de la anamnesis.
 
+## VEMP y estado estable (H12, H13, 2026-10-16)
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 51 | H12 | Fórmula de asimetría | sin valor absoluto; "amplitud" sin decir si es cruda | valor absoluto y amplitud corregida por el EMG (como LabSim y los caps. 7 y 9) | Rosengren 2019 | A | |
+| 52 | H12 | Límite de asimetría | 35 % cVEMP, 33 % oVEMP | el protocolo; en el recuadro, 35 % corregida / 46 % cruda (cVEMP); el 33 % del oVEMP sin fuente hallada | Rosengren 2019; McCaslin 2014 | P | |
+| 53 | H12 | Nombre de los electrodos | "activo" = común (esternón o mentón); "referencia" = el del músculo | se explica como convención del equipo; la literatura lo nombra al revés | Rosengren 2019 | A | |
+| 54 | H12 | Referencia del oVEMP | en el mentón | el protocolo; en el recuadro, la clásica infraorbitaria + mejilla (el mentón da más amplitud y menos especificidad) | Todd 2007; Rosengren 2019 | P | |
+| 55 | H12 | Nivel del estímulo | 100 dB nHL | el protocolo; en el recuadro, 95 dB nHL como partida y la seguridad en SPL | Rosengren 2019 | P | |
+| 56 | H12 | Conductiva como contraindicación | contraindica el VEMP | solo el aéreo; se agrega la vía ósea como alternativa | Rosengren 2019 | A | |
+| 57 | H12 | Impedancias | < 5 kΩ y Δ < 2 (cVEMP); < 3 y Δ < 1 (oVEMP) | el protocolo; la literatura les da menos peso que en un potencial cortical | Rosengren 2019 | P | |
+| 58 | H12 | Registro antes del estímulo | −10 ms solo en el oVEMP | 10 a 20 ms antes en los dos | Rosengren 2019 | A | |
+| 59 | H13 | Impedancias | "idealmente < 3 kΩ" | el protocolo como meta; en el recuadro, BSA < 5 kΩ y Δ ≤ 2 (H10 usa < 5) | BSA 2023 | P | |
+| 60 | H13 | Adulto despierto | protocolo de 90 Hz | el protocolo; en el recuadro, BSA usa 40 Hz en vigilia | BSA 2023 | P | |
+| 61 | H13 | ABR antes del estado estable | no lo pide | recuadro, ojo clínico y ayuda memoria con la regla de BSA (ABR primero; no hacer ASSR si el ABR falta o es anormal) | BSA 2023; JCIH 2019 | A · preguntar | |
+| 62 | H13 | "Presentarse en cansado" | errata | "cansado" | — | E | |
+| 63 | H13 | Rojo en pantalla | "sin respuesta confiable" | el protocolo; en el recuadro, ausente frente a no concluyente (notación ≤ y >) | BSA 2023 | P | |
+| 64 | H13 | Sedación | solo sueño fisiológico | el protocolo; en el recuadro, BSA admite sedación o anestesia | BSA 2023 | P | |
+
+H11 (ECochG) y H14 (procesamiento central) no tienen sección en el protocolo: lo
+que enseñan es la configuración de LabSim (ECochG) y la guía AAA 2010 con
+AudioPAC (procesamiento central), con las normas en sus recuadros.
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |

@@ -1,0 +1,9 @@
+{
+  "caso": "demo:42",
+  "figuras": [
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}
