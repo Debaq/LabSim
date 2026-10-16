@@ -46,6 +46,10 @@ Lo esencial, para repasar en un minuto.
 Un dato de contexto que ayuda a entender o a recordar.
 :::
 
+:::mana Maña del box
+Un atajo del oficio para hacerlo más rápido o comprobarlo a ojo. No reemplaza el método: lo acompaña.
+:::
+
 :::ojo Ojo clínico
 Una trampa frecuente o algo que no se puede pasar por alto con un paciente.
 :::

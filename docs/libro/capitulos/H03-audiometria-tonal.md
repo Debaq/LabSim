@@ -319,6 +319,26 @@ En el caso de Hernán (caso H3.3): el OD promedia (20 + 25 + 40 + 60) / 4 = **36
 
 El grado no es lo mismo que el **promedio tonal** de 500, 1.000 y 2.000 Hz que se usa para comparar con la logoaudiometría (→ H5). En una curva descendente, el promedio de tres frecuencias deja fuera los 4 kHz y da un número más bajo.
 
+:::mana-ancho Maña del box: el promedio a ojo
+Los umbrales van de 5 en 5 dB, así que el promedio se puede sacar sin sumar ni dividir: se trabaja en **escalones de 5 dB**. Ojo con la orientación: en el audiograma los dB crecen hacia abajo, así que bajar un punto es sumarle dB y subirlo es restarle.
+
+![El promedio tonal a ojo. A la izquierda, nivelar: 30, 40 y 50 dB pasan a 35, 40 y 45 y luego a 40, 40 y 40, y esa línea es el promedio. A la derecha, el anclaje: 20, 30, 40 y 60 dB contados en escalones desde 30.](ilustraciones/h03-ptp-nivelar.svg)
+
+- **Nivelar.** Sube un escalón el punto más bajo del gráfico y baja un escalón el más alto: el total no cambia. Repite hasta que queden en la misma línea; esa línea es el promedio. 30, 40 y 50 dan **40 dB**.
+- **Anclar.** Elige una línea (la del medio o la que más se repite) y cuenta los escalones de cada punto: hacia abajo suman, hacia arriba restan. Reparte el neto entre las frecuencias. 20, 30, 40 y 60 con ancla en 30: −2, 0, +2 y +6 dan +6 escalones; entre 4 son 1,5 escalones (7,5 dB): **37,5 dB**.
+- **Si no se nivela del todo**, quedan *k* puntos un escalón más abajo que el resto. Se suma a la línea:
+
+| Puntos que sobran (*k*) | Promedio de 3 frecuencias | Promedio de 4 frecuencias |
+|---|---|---|
+| 1 | +1,67 | +1,25 |
+| 2 | +3,33 | +2,5 |
+| 3 | — | +3,75 |
+
+Por ejemplo, 25, 35 y 55 se nivelan a 35, 40 y 40: línea 35 y dos que sobran, **38,33 dB**.
+
+**Para comprobar:** con 3 frecuencias el resultado termina siempre en ,00, ,33 o ,67, y con 4 en ,00, ,25, ,5 o ,75; otro decimal es un error. Y si los puntos son simétricos alrededor del central (30, 40, 50), el promedio es el central.
+:::
+
 ### La configuración
 
 Se describe con palabras: **plana**, **descendente** (pierde hacia los agudos), **ascendente** (pierde en los graves), **en muesca** (cae en una frecuencia y se recupera) o **en cubeta** (cae en los medios). Junto con el tipo y el grado, la configuración orienta la causa.

@@ -214,7 +214,7 @@ def resultados(nombre, numero, cap):
 CAJAS = {
     'objetivos': 'En este capítulo', 'ayuda': 'Ayuda memoria', 'sabias': '¿Sabías que?',
     'ojo': 'Ojo clínico', 'pregunta': 'Pregunta abierta', 'comentario': 'Comentario',
-    'docente': 'Para el docente',
+    'docente': 'Para el docente', 'mana': 'Maña del box',
 }
 SECCIONES_DOS_COLUMNAS = ('Técnica', 'Técnica en foco', 'Fisiología', 'Patología', 'Razonamiento',
                           'Para qué sirve', 'Fundamento', 'Antes de empezar', 'Paso a paso',
@@ -678,6 +678,9 @@ tbody tr:nth-child(even) td {{ background: #faf6f8; }}
 .caja-pregunta .caja-titulo {{ color: #9a7100; }}
 .caja-docente {{ background: #eaf6ef; border: 1pt solid #2e7d4f; }}
 .caja-docente .caja-titulo {{ color: #2e7d4f; }}
+.caja-mana {{ background: #f0f7f2; border: 1pt solid #2e8540; border-radius: 2mm; }}
+.caja-mana .caja-titulo {{ color: #2e8540; }}
+.caja-mana .caja-titulo::before {{ content: '✦ '; }}
 .caja-comentario {{ background: #f3f3f1; border-left: 2.4pt solid #8a8a90; font-style: italic; }}
 .caja-comentario .caja-titulo {{ color: #55555b; font-style: normal; }}
 .figobs {{ break-inside: avoid; margin: 3mm 0 5mm; }}
