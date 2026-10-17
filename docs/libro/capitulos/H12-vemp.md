@@ -46,7 +46,25 @@ Cada órgano otolítico tiene su nervio: el **sáculo** manda sus fibras por el 
 - **cVEMP, reflejo vestíbulo-cólico.** Sáculo, nervio vestibular inferior, núcleos vestibulares y, por la vía vestibuloespinal, las motoneuronas del nervio accesorio que mueven el **esternocleidomastoideo (ECM) del mismo lado** (Colebatch y cols., 1994). Es una vía corta e **ipsilateral**: el oído derecho se registra en el cuello derecho.
 - **oVEMP, reflejo vestíbulo-ocular.** Utrículo y parte anterior del sáculo, nervio vestibular superior, núcleos vestibulares, un cruce hacia el lado opuesto y los núcleos de los músculos del ojo. La respuesta más clara se registra en el **músculo oblicuo inferior del ojo contrario** al oído estimulado (Iwasaki y cols., 2007; Curthoys y cols., 2012). Es una vía **cruzada**: el oído derecho se registra bajo el ojo izquierdo.
 
-![Esquema de las dos vías del VEMP en vista frontal simplificada: del oído interno salen el sáculo (nervio vestibular inferior) y el utrículo (nervio vestibular superior) hacia los núcleos vestibulares del tronco. De ahí, una vía desciende sin cruzar hacia el músculo esternocleidomastoideo del mismo lado (cVEMP, reflejo inhibitorio) y otra cruza la línea media y asciende hasta el músculo oblicuo inferior del ojo opuesto (oVEMP, reflejo excitatorio). Los electrodos de registro se dibujan sobre cada músculo.](ilustraciones/h12-vias.png)
+Para ver las dos vías juntas se usa **labyrinthus3d**, un simulador gratuito y libre del autor de este libro. En su pestaña "Vía", con la opción "utrículo y sáculo", dibuja el esquema de frente: a la izquierda de la figura queda el lado derecho del paciente. Aquí se sigue el **oído derecho** (figura siguiente).
+
+:::imagen ilustraciones/h12-vias.png Captura de labyrinthus3d, software libre del autor: las vías del VEMP del oído derecho. Del sáculo y el utrículo salen las dos ramas del nervio vestibular hacia los núcleos vestibulares; de ahí, una vía baja al ECM del mismo lado (cVEMP) y otra sube por el fascículo longitudinal medial y cruza hacia el oblicuo inferior del ojo contrario (oVEMP).
+- @14,88 | **Sáculo**: se atribuye a él el cVEMP (Curthoys, 2010).
+- @46,92 | **Utrículo**: se atribuye a él el oVEMP (Curthoys, 2010).
+- @15,79 | **Nervio vestibular inferior**: lleva las fibras del sáculo.
+- @46,79 | **Nervio vestibular superior**: lleva las fibras del utrículo.
+- @38,73 | **Núcleos vestibulares**: relevo de las dos ramas, en el tronco.
+- @12,72 | **ECM del mismo lado**: aquí se registra el cVEMP; la vía es corta y no cruza (Colebatch y cols., 1994).
+- @50,29 | **Fascículo longitudinal medial (FLM)**: por aquí sube la vía del oVEMP después de cruzar la línea media.
+- @65,27 | **Oblicuo inferior del ojo contrario** (izquierdo, si se estimula el oído derecho): aquí se registra el oVEMP (Iwasaki y cols., 2007).
+:::
+
+Con esta misma figura se entiende por qué la neuritis de una rama deja normal el VEMP de la otra. En la figura siguiente, el simulador marca con una cruz el nervio vestibular **superior** derecho perdido: el utrículo queda sin camino hacia los núcleos y el oVEMP de ese oído se apaga, mientras que el sáculo y el nervio inferior siguen intactos y el cVEMP se conserva (→ tabla de interpretación, más abajo).
+
+:::imagen ilustraciones/h12-vias-neuritis.png Captura de labyrinthus3d, software libre del autor: neuritis del nervio vestibular superior derecho. La cruz verde marca la rama perdida; la rama inferior, con el sáculo, no está tocada.
+- @32,78 | **Rama superior interrumpida**: ninguna señal del utrículo llega a los núcleos; es la vía del oVEMP.
+- @14,88 | **Sáculo y rama inferior intactos**: el cVEMP de este oído se conserva.
+:::
 
 <!-- verificar: "vía vestibuloespinal" y "motoneuronas del nervio accesorio" son descripción de libro de texto; las fuentes leídas (Rosengren 2019, Colebatch 1994) dan el trayecto sáculo-ECM sin nombrar cada relevo. Confirmar con Curthoys 2010 o con un tratado antes de la edición final. -->
 

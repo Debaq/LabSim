@@ -1,23 +1,21 @@
-# Rostros que no muestran el signo pedido
+# Rostros con signos clínicos
 
-El modelo de imágenes no dibujó el rasgo clínico que el caso necesita (revisado el 2026-10-17). La cara sirve igual para la ficha, pero no enseña el signo. Rehacer con un modelo mejor cuando se quiera:
+El modelo económico (`gemini-3.1-flash-lite-image`) y el normal (`gemini-3.1-flash-image`) no dibujan signos clínicos sutiles. El 2026-10-17 se rehicieron con **`gemini-3-pro-image`** (Nano Banana Pro) y pedidos que ponen el signo como "KEY CLINICAL SIGN"; cada uno se revisó a mano:
 
-    LIBRO_MODELO_IMAGEN=gemini-3.1-flash-image python3 docs/libro/herramientas/rostros.py <clave> [<clave> ...]
-
-(Si tampoco alcanza, probar el modelo Pro de imagen; cuesta más.)
-
-| Clave | Signo que falta | Hecho con |
+| Clave | Signo | Resultado |
 |---|---|---|
-| cap17_rubeola_congenita | cataratas congénitas (pupilas blanquecinas) | flash-lite |
-| cap35_desviacion | dorso nasal desviado (fractura antigua) | flash-lite |
-| cap36_mixta | dorso nasal desviado | flash-lite |
-| cap35_valvula | narinas angostas tras rinoplastia de reducción | flash-lite |
-| cap36_alergica | ojeras alérgicas, pliegue nasal transversal, punta de la nariz roja | flash-lite |
-| cap36_medicamentosa | piel irritada alrededor de las narinas, labios secos, boca entreabierta | flash-lite |
-| cap30_nino_otitis | boca entreabierta (respiradora bucal), ojeras | flash-lite |
-| cap29_autoinmune | audífonos retroauriculares en ambos oídos | flash-lite |
-| cap29_aun_no | audífonos retroauriculares en ambos oídos | flash-lite |
-| cap12_glioma_tronco | ojo desviado hacia adentro (esotropía) | flash (no Lite) |
-| cap12_infarto_aica | caída de la comisura bucal (paresia facial) | flash (no Lite) |
+| cap17_rubeola_congenita | cataratas congénitas (pupilas blanquecinas) | se ve |
+| cap36_alergica | ojeras alérgicas, pliegue nasal, punta roja | se ve |
+| cap36_medicamentosa | narinas irritadas, labios secos, boca abierta | se ve |
+| cap30_nino_otitis | respiradora bucal, ojeras | se ve |
+| cap29_autoinmune | audífono retroauricular | se ve |
+| cap29_aun_no | audífono retroauricular | se ve |
+| cap35_valvula | nariz estrecha tras rinoplastia de reducción | sutil, aceptable |
+| cap12_infarto_aica | parálisis facial de un lado | se ve (dos intentos) |
+| cap12_glioma_tronco | esotropía | se ve (tres intentos; los dos primeros salieron con el ojo hacia afuera) |
+| cap35_desviacion | nariz desviada por fractura | se ve, sutil (el primer intento salió con un marco antiguo) |
+| cap36_mixta | nariz desviada | sutil |
 
-Ya se sabía (ESTADO.md, Rostros): Gemini no dibuja malformaciones; la microtia del cap. 1 va tapada con un gorro y el Paget del cap. 4 sale apenas sugerido.
+Regla para lo que venga: rostros comunes con el modelo por defecto (Lite); si el caso necesita un signo visible, pedirlo explícito y generar con
+`LIBRO_MODELO_IMAGEN=gemini-3-pro-image python3 docs/libro/herramientas/rostros.py <clave>`, y mirarlo de cerca (los lados y las direcciones se confunden: describir el lado "de la imagen").
+Gemini sigue sin dibujar malformaciones (microtia del cap. 1 con gorro, Paget del cap. 4 apenas sugerido).
