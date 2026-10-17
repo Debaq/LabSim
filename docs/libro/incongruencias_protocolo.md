@@ -178,6 +178,32 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 99 | H22 | Base del capítulo | "screening" y "operativo" son de salud, no ocupacionales | se enseña desde las normas (OSHA, NIOSH, ISO 1999, ISP 2026, PREXOR) | — | A · vacío | |
 | 100 | H3, H22 | Guía ISP | citada la v2.0 (2018): umbral "3 de 5" | ISP v3.0 (2026): Carhart-Jerger modificado, 2 de 3, inicio ≥ 30 dB HL, verificación subjetiva semanal con 2 sujetos | ISP 2026 | A · actualizado | hecho |
 
+## Nariz
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 101 | H23 | Síntoma de la anamnesis | "sufre descongestión y/o prurito nasal" | "congestión" | — | E | |
+| 102 | H23 | Aclimatación | 15 min en la preparación; "desde los 10 min" en la rinoscopía | ambos: la rinoscopía desde 10 min, para medir (H24, H25) completar 15 | Clement 2005 (tiempo sin verificar) | P | |
+| 103 | H23 | Limpieza del espéculo | alcohol y algodón | el protocolo; recuadro: instrumento semicrítico, pide desinfección de alto nivel o desechable | Rutala 2008 (CDC) | P | |
+| 104 | H23 | Síntomas | anamnesis cualitativa | el protocolo; recuadro: NOSE, SNOT-22 y escala visual análoga | Stewart 2004; Hopkins 2009 | A · vacío | |
+| 105 | H23 | Palpación de senos | se palpan | el protocolo; recuadro: poco valor diagnóstico por sí sola | EPOS 2020; AAO-HNS 2015 | P | |
+| 106 | H23 | Rinoscopía anterior frente a endoscopia | solo rinoscopía anterior | el protocolo; recuadro: la endoscopia la hace el especialista | EPOS 2020 | A | |
+| 107 | H23 | Maniobra de Cottle y vasoconstrictor en la rinoscopía | no los pide | recuadro (Cottle no es la rinomanometría de Cottle) | Rhee 2010 | A · vacío | |
+| 108 | H25 | Repetibilidad | 3 registros con diferencia ≤ 0,03 en MCA1 y MCA2 | el protocolo; recuadro: límites de error probados en una fosa estándar | Hilberg y Pedersen 2000 | P | |
+| 109 | H25 | Volúmenes | Vol 1 narina-segundo mínimo, Vol 2 primeros 5 cm (la clase da 32 y 64 mm: no calza con el protocolo) | el protocolo; recuadro: publicar volumen 0-5 cm (2-5 cm para mucosa) y los dos mínimos con su distancia | Hilberg y Pedersen 2000; Clement 2005 | P | |
+| 110 | H25 | Vasoconstrictor | solo si el reposo sale fuera de rango; 2 pulverizaciones y 15 min (la clase: 2 + 2 con 5 min) | el protocolo; recuadro: en estudios de referencia se descongestiona a todos; estandarizar | Corey 1998; Clement 2005 | P | |
+| 111 | H25 | "Disminuidos respecto del reposo" | resultado normal | poco habitual: revisar la técnica antes de informar | — (criterio del redactor) | P · revertir | |
+| 112 | H25 | Errata | "1.7" suelto | omitido | — | E | |
+| 113 | H25 | Valores de referencia de la clase | MCA1 0,4 cm², distancias ~0,22 cm, "30 %" con vasoconstrictor, CPAP 0,6 cm², "CSA1 = escotadura C" | no se usan: mezclan mm y cm y contradicen MCA1 = válvula; el libro dice que no hay norma universal | Corey 1998; Millqvist 1998 | E (clase) | |
+| 114 | H24 | Unidad de la resistencia | "Pa/seg/cm" | Pa/(cm³/s) | física: presión / flujo volumétrico | E | |
+| 115 | H24 | Valor de referencia | unilateral ≤ 0,4 Pa/(cm³/s) a 150 Pa | el protocolo; recuadro: Ren 2018 da 0,51 unilateral y 0,24 total en sanos; 4PR propone log Reff por percentiles | Ren 2018; Vogt 2016 | P | |
+| 116 | H24 | Espera tras el vasoconstrictor | 15 min | el protocolo; recuadro: 4PR mide a los 10 min con xilometazolina 0,1 %; el consenso pide estandarizar | Vogt 2016; Clement 2005 | P | |
+| 117 | H24 | Resistencia que sube tras el vasoconstrictor | "efecto rebote" | el protocolo; recuadro: el rebote es por uso crónico, primero descartar ciclo nasal, fuga o respiración distinta | — (verificar) | P | |
+| 118 | H24 | Plazos previos | 48 h sin fármacos, 24 h sin tabaco ni alcohol, 15 min de aclimatación | el protocolo; recuadro: los plazos varían entre fuentes | Clement 2005 | P | |
+| 119 | H24 | Vasoconstrictor en qué fosa | solo en la fosa que supera la referencia | el protocolo (4PR descongestiona ambas en la mayoría) | Vogt 2016 | P | |
+| 120 | H24 | "150 Pa = radio 2" (clase) | — | no se usa: el radio de Broms (200) no equivale a 150 Pa | Broms 1982 | E (clase) | |
+| 121 | H24 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |

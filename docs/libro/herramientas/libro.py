@@ -171,7 +171,8 @@ class Capitulo:
             if rearmar:
                 print('Armando casos:', ', '.join(rearmar))
                 subprocess.run([str(LIBRO / 'figuras' / 'armar_casos.sh'), *rearmar], check=True, cwd=RAIZ)
-            if '--sin-figuras' not in argv:
+            # sin casos no hay figuras: hacer_figuras.py sin nombres rehace las de todo el libro
+            if nombres and '--sin-figuras' not in argv:
                 print('Figuras:', ', '.join(nombres))
                 subprocess.run([*python_figuras(), str(LIBRO / 'figuras' / 'hacer_figuras.py'),
                                 *nombres], check=True, cwd=RAIZ, env=dict(os.environ, QT_QPA_PLATFORM='offscreen'))
