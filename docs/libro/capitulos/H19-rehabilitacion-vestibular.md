@@ -349,7 +349,7 @@ Muchos pacientes se hacen gradualmente **independientes**: pierden la insegurida
 
 Se informa el **antes y el después** con las mismas pruebas, y qué se hizo en el medio.
 
-:::ayuda Ejemplo de redacción (no es un paciente; cifras de ejemplo)
+:::ayuda Ejemplo de redacción
 **Motivo:** hipofunción vestibular izquierda por neuritis, examen vestibular de hace 3 meses. **Inicio:** DHI 58 (moderado). DVA: pierde 3 líneas con giro horizontal de cabeza y 2 con vertical. Alcance funcional 18 cm. Apoyo monopodal 4 s. TUG 14 s. DGI de 4 ítems 8/12, con mayor dificultad en los giros de cabeza. **Programa:** 6 sesiones semanales; estabilización de la mirada (VOR x1 con blanco cerca y lejos, luego x2), 3 a 5 veces al día, 20 min; equilibrio en espuma con ojos cerrados y marcha con giros de cabeza. **Final:** DHI 24 (leve). DVA: pierde 1 línea. Alcance funcional 28 cm. Apoyo monopodal 20 s. TUG 9 s. DGI de 4 ítems 11/12. **Conclusión:** mejoría funcional; se deriva al médico tratante para evaluación y alta.
 :::
 

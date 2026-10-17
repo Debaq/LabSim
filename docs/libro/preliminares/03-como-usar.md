@@ -23,7 +23,7 @@ El razonamiento y el diagnóstico de cada caso están al final del capítulo, en
 
 Los resultados nunca van solos. Cada figura viene **relatada con globos**: un número sobre el gráfico señala el hallazgo y la observación con el mismo número, debajo, explica qué significa. Después viene el razonamiento y el diagnóstico.
 
-Los pacientes son ficticios. Sus exámenes los generaron los **simuladores de apoyo** con los mismos modelos que usarás en el simulador, así que puedes atender a varios de ellos. Los marcados con ★ son pacientes de práctica disponibles en tu curso.
+**Todos los pacientes de este libro son simulados.** Sus historias, sus exámenes y sus gráficos salen de LabSim y de los otros simuladores de apoyo, así que cada caso se puede atender en la aplicación de escritorio de LabSim: haces tú los exámenes y comparas con lo que trae el libro. Las cifras de los casos, los esquemas y los ejemplos están para enseñar; los valores de referencia son los de las tablas de cada capítulo. Los marcados con ★ son pacientes de práctica disponibles en tu curso.
 
 ## Simuladores de apoyo
 

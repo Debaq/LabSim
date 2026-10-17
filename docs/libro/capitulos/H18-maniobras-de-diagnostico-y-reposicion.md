@@ -334,7 +334,7 @@ La guía de la AAO-HNS **recomienda con fuerza no indicar restricciones de postu
 
 Se informa **qué postura provocó qué**. Una línea por prueba y por lado, con los cuatro datos que importan: dirección, latencia, duración y vértigo, y el diagnóstico de canal y lado que se desprende de ellos.
 
-:::ayuda Ejemplo de redacción (no es un paciente)
+:::ayuda Ejemplo de redacción
 **Dix-Hallpike derecho:** tras una latencia de unos 5 segundos aparece un nistagmo vertical hacia arriba y torsional con el polo superior hacia el oído derecho, crescendo-decrescendo, que dura unos 20 segundos, con vértigo intenso. Al sentarse, nistagmo de dirección contraria, más débil. **Dix-Hallpike izquierdo:** sin nistagmo ni vértigo. **Giro supino:** sin nistagmo. **Conclusión:** VPPB del canal posterior derecho, canalitiasis. Se realiza maniobra de Epley derecha.
 :::
 

@@ -31,7 +31,7 @@ Para aprender a leer el audiograma desde el principio, el capítulo parte con su
 
 ### Radiografía de un audiograma
 
-Todo lo que sigue termina en este gráfico. No es el de un paciente: es un audiograma de ejemplo, con **todos** sus elementos juntos. Aquí solo se nombran; el resto del capítulo explica de dónde sale cada uno, y *Cómo se informa* enseña a sacar de él el tipo, el grado y la configuración. El derecho va siempre en <span class="od">rojo</span> y el izquierdo en <span class="oi">azul</span>.
+Todo lo que sigue termina en este gráfico. Es un audiograma con **todos** sus elementos juntos. Aquí solo se nombran; el resto del capítulo explica de dónde sale cada uno, y *Cómo se informa* enseña a sacar de él el tipo, el grado y la configuración. El derecho va siempre en <span class="od">rojo</span> y el izquierdo en <span class="oi">azul</span>.
 
 :::figura h3radiografia audiograma
 - @OD 125 | **Frecuencias**: graves a la izquierda, agudos a la derecha, de octava en octava. Las interoctavas (3 y 6 kHz) llevan un rótulo más chico.

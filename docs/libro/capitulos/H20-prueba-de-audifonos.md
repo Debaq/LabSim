@@ -181,7 +181,7 @@ Es un dato útil para mostrarle al paciente y a su familia, en el mismo gráfico
 - @S 2000 | Sin audífono (S), el campo libre es el del oído mejor: 40 dB en 2 kHz.
 - @A 2000 | Con audífono (A), 10 dB en 2 kHz: una ganancia funcional de **30 dB**.
 - @A 250 | En 250 Hz el audífono casi no le da: es lo esperable en una presbiacusia, donde los graves están cerca de lo normal.
-- Los valores de ganancia de esta figura son **de ejemplo**: ilustrativos, no una prescripción ni el resultado de un audífono real. LabSim no mide ni simula audífonos.
+- LabSim no mide ni simula audífonos.
 :::
 
 :::comentario Lo que dicen las normas

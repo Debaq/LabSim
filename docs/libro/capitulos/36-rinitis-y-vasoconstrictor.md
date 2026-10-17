@@ -54,7 +54,7 @@ La prueba con vasoconstrictor no es un detector de enfermedad: una nariz sana se
 
 ### El mismo vaivén, otro efecto: el ciclo nasal en una nariz congestionada
 
-La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el paso (→ H24, B4; en el modelo de las figuras, el término laminar crece con el cubo del angostamiento). Por eso **un vaivén de la mucosa** pesa poco en una nariz amplia y mucho en una que parte estrecha. La figura lo muestra con un modelo que da a la congestión de la mucosa un valor de 0 (retraída) a 1 (al máximo). La nariz normal del modelo parte de 0,4 y oscila 0,3 hacia cada lado; la de cornetes congestionados parte de 0,8 y oscila la mitad (0,15). En la normal, cada fosa varía entre 0,29 y 0,35 Pa/(cm³/s) a lo largo del ciclo; en la congestionada, con un vaivén **menor**, una fosa pasa de poco más de 0,4 a unos 30 (casi se cierra) mientras la otra queda cerca del valor de trabajo, y la resistencia total se mueve poco. Son constantes del modelo, no valores de personas.
+La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el paso (→ H24, B4; en el modelo de las figuras, el término laminar crece con el cubo del angostamiento). Por eso **un vaivén de la mucosa** pesa poco en una nariz amplia y mucho en una que parte estrecha. La figura lo muestra con un modelo que da a la congestión de la mucosa un valor de 0 (retraída) a 1 (al máximo). La nariz normal parte de 0,4 y oscila 0,3 hacia cada lado; la de cornetes congestionados parte de 0,8 y oscila la mitad (0,15). En la normal, cada fosa varía entre 0,29 y 0,35 Pa/(cm³/s) a lo largo del ciclo; en la congestionada, con un vaivén **menor**, una fosa pasa de poco más de 0,4 a unos 30 (casi se cierra) mientras la otra queda cerca del valor de trabajo, y la resistencia total se mueve poco.
 
 :::imagen ilustraciones/cap36-rs-ciclo.svg ancho=92% Ciclo nasal: resistencia a 150 Pa de cada fosa y total, cada 5 minutos durante 300. A: nariz normal. B: nariz con los cornetes congestionados (parte de una mucosa mucho más hinchada y oscila la mitad que A); el eje es logarítmico. Compara A con B: con un vaivén menor, en B cada fosa se cierra por turnos mientras el total casi no se mueve, y una sola medición puede caer en cualquier punto de la curva. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @50,22 | **A: nariz normal.** Cada fosa se mueve entre 0,29 y 0,35: apenas cruza la raya del valor de trabajo (0,4). El total, en gris, queda en 0,16.
@@ -191,7 +191,7 @@ Sofía (36.1) y Álvaro (36.2) dan casi la misma respuesta al vasoconstrictor: l
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. Las **curvas y las cifras nasales** son de **pacientes simulados**, no de pacientes reales. Los valores que aparecen son órdenes de magnitud del modelo, no normas; el único valor de referencia que se usa es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24). La sensación de obstrucción se anota con el cuestionario NOSE, que va de 0 a 100 y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Stewart y cols., 2004; Lipan y Most, 2013; → H23). Hay dos límites del modelo que importan aquí: el vasoconstrictor **actúa entero e instantáneamente** (no tiene curso en el tiempo, ni rebote, ni taquifilaxia) y el modelo **no mide la sensación** de obstrucción. En el caso 36.2 eso se dice cuando importa.
+Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. El valor de referencia es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24). La sensación de obstrucción se anota con el cuestionario NOSE, que va de 0 a 100 y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Stewart y cols., 2004; Lipan y Most, 2013; → H23). Hay dos límites del modelo que importan aquí: el vasoconstrictor **actúa entero e instantáneamente** (no tiene curso en el tiempo, ni rebote, ni taquifilaxia) y el modelo **no mide la sensación** de obstrucción. En el caso 36.2 eso se dice cuando importa.
 
 {{caso cap36_alergica}}
 
@@ -237,7 +237,7 @@ Antes de medir, ¿qué mirarías en la rinoscopía? Si las dos fosas salen sobre
 
 :::imagen ilustraciones/cap36-rs-alergica-ra.svg ancho=78% Rinometría acústica de Sofía. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. Con vasoconstrictor las dos curvas se superponen y el segundo mínimo, el del cornete, casi desaparece: no queda nada estructural. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @53,66 | **MCA2** (el cornete inferior): 0,31 cm² en la derecha y 0,44 en la izquierda; con la mucosa congestionada el cornete casi tapa el paso.
-- @11,58 | **MCA1** (la válvula): 0,44 y 0,46 cm²; con vasoconstrictor sube a 0,67 en las dos. En la nariz normal del modelo es 0,61 (no es una norma).
+- @11,58 | **MCA1** (la válvula): 0,44 y 0,46 cm²; con vasoconstrictor sube a 0,67 en las dos. En la nariz normal es 0,61.
 - @38,28 | Con vasoconstrictor (rayas) las dos curvas se **superponen** y el segundo mínimo casi desaparece: 1,92 y 1,91 cm². No queda nada estructural.
 :::
 
@@ -292,7 +292,7 @@ Anota las causas de una obstrucción bilateral y constante que empezó con un re
 :::
 
 :::imagen ilustraciones/cap36-rs-medic-ra.svg ancho=78% Rinometría acústica de Álvaro. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. En reposo los cornetes casi cierran el paso; con vasoconstrictor las dos fosas se superponen: se abrió todo lo mucoso. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
-- @27,76 | **MCA2**: 0,13 cm² (derecha) y 0,17 (izquierda), la quinta parte de lo que dan Sofía y la nariz normal del modelo (1,52): los cornetes casi cierran el paso.
+- @27,76 | **MCA2**: 0,13 cm² (derecha) y 0,17 (izquierda), la quinta parte de lo que dan Sofía y la nariz normal (1,52): los cornetes casi cierran el paso.
 - @9,60 | **MCA1**: 0,44 y 0,47 cm² en reposo; con vasoconstrictor sube a 0,69 y 0,71.
 - @40,20 | Con vasoconstrictor (rayas) las dos fosas se **superponen** y MCA2 pasa a 1,88 y 1,86: se abrió todo lo mucoso. Es la misma curva que la de la nariz de Sofía.
 - @75,62 | En reposo ni siquiera pasados los 5 cm la fosa se abre del todo: a 10 cm la curva sigue muy por debajo de la de rayas. El equipo avisó que, en la fosa derecha con vasoconstrictor, los registros **no se parecían** (MCA2 ±0,03 cm²): en un caso real se repetirían.

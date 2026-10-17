@@ -178,7 +178,7 @@ Las tolerancias son del resumen citado; si la ficha del fabricante o el manual d
 - **La distorsión alta** (sobre lo que declara la ficha) y **el ruido de entrada alto** son las dos señales de un audífono cansado, aun cuando la ganancia siga pareciendo normal.
 - **El consumo** alto respecto de la ficha acorta la vida de la pila y suele acompañar a una falla del circuito.
 
-### Un ejemplo de informe (inventado, no es de un paciente)
+### Un ejemplo de informe
 
 > **Revisión visoauditiva.** Usuario de audífono retroauricular derecho, uso diario. Maneja bien el cambio de pila y la limpieza del molde; al pedirle que lo haga, no limpia el tubo. Molde bien adaptado, tubo duro con un pequeño depósito de cerumen, carcasa sin daño. Pila sin carga en el probador; se cambia. Con estetoclip, sonido nítido y sin ruidos agregados.
 >
@@ -213,7 +213,7 @@ Cuando un usuario dice que "el audífono ya no sirve", antes de cambiar nada pre
 ## En LabSim
 
 :::comentario Lo que el simulador no tiene
-LabSim **no simula audífonos ni cámaras de medida**: no hay estetoclip, ni acoplador, ni analizador. Los dibujos de esta herramienta son esquemas, con curvas de ejemplo para explicar los términos; no corresponden a ningún equipo.
+LabSim **no simula audífonos ni cámaras de medida**: no hay estetoclip, ni acoplador, ni analizador.
 :::
 
 Lo que sí puedes practicar en LabSim es lo que rodea a estas revisiones: la otoscopía previa (→ H1), la audiometría tonal y la logoaudiometría que dicen cuánta ganancia necesita el paciente (→ H3, H5) y la audiometría en campo libre, donde se compara al paciente con y sin audífono (→ H8, H20). La adaptación completa se trabaja en los capítulos 28 y 29 del libro.

@@ -293,7 +293,7 @@ Tabla: Hallazgos de la rinoscopía anterior y qué orientan
 
 Lo más importante no está en la tabla: **los hallazgos de un solo lado**, la **masa**, el **sangrado** que no cede o la pérdida del olfato de un lado no se explican con el ciclo nasal ni con una alergia, y son una razón para derivar. EPOS 2020 reúne esas señales de alarma (síntomas unilaterales, secreción con sangre, costras, alteración del olfato, entre otras) como razón de estudio especializado (Fokkens y cols., 2020). <!-- verificar: lista exacta de señales de alarma de EPOS 2020 (red flags). -->
 
-**Ejemplo de informe** (inventado, para mostrar la forma):
+**Ejemplo de informe**:
 
 > **Anamnesis.** Mujer de 28 años. Obstrucción nasal bilateral, peor en la noche, desde hace 3 años; estornudos y prurito en primavera. Sin golpes ni cirugías nasales. Sin epistaxis. Usa un descongestionante nasal desde hace 6 meses, la última vez ayer. Hiposmia leve. Sin asma. No fuma. Trabaja en una panadería. NOSE 55.
 >

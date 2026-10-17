@@ -102,7 +102,7 @@ Y descarta antes de empezar las **contraindicaciones**: ceguera, fractura de nar
 
 ### Conoce tu equipo: cómo muestra el examen
 
-Los equipos de vHIT presentan el resultado de una manera parecida: un panel por lado con los impulsos superpuestos, la velocidad de la cabeza y la del ojo (invertida, para que las dos curvas se superpongan cuando el reflejo compensa), las sacadas marcadas sobre la curva del ojo y, debajo, la ganancia de cada lado. La figura muestra esa lectura en un paciente simulado con el canal lateral derecho sano y el izquierdo con déficit.
+Los equipos de vHIT presentan el resultado de una manera parecida: un panel por lado con los impulsos superpuestos, la velocidad de la cabeza y la del ojo (invertida, para que las dos curvas se superpongan cuando el reflejo compensa), las sacadas marcadas sobre la curva del ojo y, debajo, la ganancia de cada lado. La figura muestra esa lectura en un paciente con el canal lateral derecho sano y el izquierdo con déficit.
 
 :::imagen ilustraciones/h17-impulsos.svg ancho=100% Impulsos del canal lateral de un paciente: lado derecho sano, izquierdo con déficit. Hacia la derecha las dos curvas se superponen; hacia la izquierda el ojo se queda corto y las sacadas corrigen lo que el reflejo no alcanzó. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @17,38 | **La cabeza (azul) y el ojo invertido (naranja)** se superponen en los impulsos hacia la derecha: el reflejo sigue a la cabeza.

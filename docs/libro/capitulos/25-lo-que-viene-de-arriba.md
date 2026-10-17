@@ -240,7 +240,7 @@ Un paciente tiene un nistagmo evocado por la mirada simétrico, un seguimiento n
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Lo vestibular de estos casos (la mirada, el seguimiento, las sacadas y los valores del impulso cefálico y de la calórica) **no sale de LabSim**: son trazas de un modelo y **datos de ejemplo** que coinciden con ellas. De LabSim salen la ficha, la historia y el audiograma.
+Lo vestibular de estos casos (la mirada, el seguimiento, las sacadas y los valores del impulso cefálico y de la calórica) **no sale de LabSim**: va en las figuras y en las tablas de cada caso. De LabSim salen la ficha, la historia y el audiograma.
 
 {{caso cap25_canvas}}
 
@@ -276,7 +276,7 @@ La audición es la de su edad. Además del examen del cerebelo, ¿qué mirarías
 - @20,31 | Con luz (gris ancho) el nistagmo **sigue igual**: la fijación no lo frena.
 - @51,20 | Mirando al frente no hay nistagmo horizontal.
 - @71,67 | **Seguimiento sacádico**: ganancia de 0,55 y 1,7 sacadas de alcance por segundo.
-- @29,66 | Un seguimiento sin lesión, en la misma escala, tiene ganancia 0,91 y casi ninguna sacada de alcance (no es una norma).
+- @29,66 | Un seguimiento sin lesión, en la misma escala, tiene ganancia 0,91 y casi ninguna sacada de alcance.
 :::
 :::figura cap25_canvas audiograma
 - @OD 4000 | Pérdida descendente en agudos, **simétrica**: 55 dB en 4 kHz en los dos oídos. Es la forma de una presbiacusia.

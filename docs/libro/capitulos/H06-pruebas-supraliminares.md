@@ -247,7 +247,7 @@ Compara la sonoridad de los dos oídos en una misma frecuencia. El oído sano es
 | 70 | 105 | 85 | 70 | 65 |
 | **Al final** | la diferencia se mantiene | se acorta, pero no se cierra | los dos suenan igual al mismo nivel | el oído en estudio suena más fuerte |
 
-Las cifras son ilustrativas. Lo que se lee es qué pasa con la diferencia entre las dos columnas a medida que sube el nivel.
+Lo que se lee es qué pasa con la diferencia entre las dos columnas a medida que sube el nivel.
 :::
 
 Cada par se dibuja como una escalera: dos columnas de dB HL, una por oído, y una línea entre los niveles que sonaron iguales. Sin reclutamiento las líneas quedan paralelas; con reclutamiento convergen.
@@ -395,7 +395,7 @@ Las pruebas que no dependen de la respuesta del paciente ponen el límite: emisi
 
 Todo se anota con el color del oído, **rojo para el OD y azul para el OI**. Del Fowler, la escalera y su conclusión (y la diploacusia, si la hubo); del SISI, el porcentaje por frecuencia; del Rosenberg, los dB del minuto; del STAT, un signo entre paréntesis, (+) o (−). El Carhart lleva entre paréntesis el nivel en que partiste y luego *det.* con los dB que deterioró, o *no det.*; si llegaste al techo, *veloc. de det.* en dB por minuto.
 
-La acufenometría va en las **observaciones** del formulario de audiometría: el oído del acúfeno y el oído donde se igualó, el tipo de sonido, la frecuencia (mejor un rango), la intensidad en dB HL y en dB SL, el NME y la inhibición residual con lo que pasó al minuto siguiente. Por ejemplo, con cifras ilustrativas:
+La acufenometría va en las **observaciones** del formulario de audiometría: el oído del acúfeno y el oído donde se igualó, el tipo de sonido, la frecuencia (mejor un rango), la intensidad en dB HL y en dB SL, el NME y la inhibición residual con lo que pasó al minuto siguiente. Por ejemplo:
 
 > *Acufenometría.* Acúfeno OD permanente, igualado en OI: tono puro de 4.000 Hz (entre 3.000 y 6.000 Hz), 22 dB HL, 7 dB SL. NME con banda estrecha de 4 kHz en OD: 65 dB HL. Inhibición residual parcial (baja de intensidad), se mantiene al minuto.
 

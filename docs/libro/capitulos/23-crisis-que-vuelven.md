@@ -44,7 +44,7 @@ El VEMP de este libro se hace con una sola frecuencia, la de 500 Hz (→ H12). E
 
 ## En LabSim
 
-LabSim da el lado auditivo de estos pacientes: audiograma, logoaudiometría, electrococleografía y VEMP. **No hace** examen vestibular. Lo que cada caso entrega de VNG, calórica y vHIT está **escrito** en la ficha de resultados del caso, con cifras de ejemplo.
+LabSim da el lado auditivo de estos pacientes: audiograma, logoaudiometría, electrococleografía y VEMP. **No hace** examen vestibular. Lo que cada caso entrega de VNG, calórica y vHIT está **escrito** en la ficha de resultados del caso.
 
 ## Fisiología
 

@@ -184,7 +184,7 @@ Con las cuatro velocidades máximas (OD tibia = DT, OD fría = DF, OI tibia = IT
 
 La paresia dice **qué laberinto** responde menos. La preponderancia dice **hacia dónde** tiende el nistagmo, y sola es de poca ayuda para localizar la lesión: puede deberse a un nistagmo espontáneo, a una lesión central o a una lesión periférica compensada. Un resultado con preponderancia y sin paresia no se informa como "hipofunción".
 
-Un ejemplo con números inventados para practicar la cuenta: DT 24, DF 20, IT 10, IF 8 °/s. La suma es 62. Paresia = (44 − 18) / 62 × 100 = **42 %**, del lado izquierdo. Preponderancia = (24 + 8 − 10 − 20) / 62 × 100 = **3 %**, es decir, nula. El izquierdo responde menos, y no hay tendencia a una dirección.
+Un ejemplo para practicar la cuenta: DT 24, DF 20, IT 10, IF 8 °/s. La suma es 62. Paresia = (44 − 18) / 62 × 100 = **42 %**, del lado izquierdo. Preponderancia = (24 + 8 − 10 − 20) / 62 × 100 = **3 %**, es decir, nula. El izquierdo responde menos, y no hay tendencia a una dirección.
 
 Con la **mínima**, el protocolo usa la fórmula de asimetría de una sola temperatura: **(Derecho − Izquierdo) / (Derecho + Izquierdo) × 100**, con las velocidades de la fase lenta de las dos irrigaciones. Si el resultado es **25 % o más** (la bitérmica usa 25 % para la paresia y 30 % para la preponderancia), se informa una hipofunción vestibular del lado de la velocidad menor.
 
@@ -215,7 +215,7 @@ Con las fórmulas del protocolo, las frases son:
 - **Canal lateral.** *Según parámetro de VFL: hipoexcitabilidad vestibular derecha/izquierda de xx % (valor significativo/no significativo).* Y, si corresponde, *hipoexcitabilidad vestibular severa en el oído derecho/izquierdo* o *arreflexia vestibular en oído derecho/izquierdo/bilateral*.
 - **Canal posterior.** *Según parámetro de duración: hipoexcitabilidad vestibular derecha/izquierda (≥ 15 s de diferencia)* o *respuesta vestibular simétrica*.
 
-Con la bitérmica, se agregan los dos porcentajes con su valor de referencia y se dice si hubo nistagmo espontáneo. Ejemplo ilustrativo:
+Con la bitérmica, se agregan los dos porcentajes con su valor de referencia y se dice si hubo nistagmo espontáneo. Por ejemplo:
 
 > *Calórica bitérmica (30 y 44 °C). Sin nistagmo espontáneo. Paresia canalicular izquierda de 42 % (valor significativo). Preponderancia direccional de 3 % (no significativa). Sin falla de supresión con la fijación.*
 

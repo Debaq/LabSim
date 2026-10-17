@@ -305,7 +305,7 @@ Si el estímulo se repite *N* veces y se promedian los tramos que siguen a cada 
 :::imagen ilustraciones/b4-promedio.svg ancho=100% Al promediar, el ruido residual cae con √N y aparece la señal
 :::
 
-Tabla: Una onda V de 0,5 µV con un ruido de 5 µV por barrido (valores de ejemplo)
+Tabla: Una onda V de 0,5 µV con un ruido de 5 µV por barrido
 
 | Barridos (N) | Ruido residual | Señal / ruido | Mejora sobre un barrido | Tiempo a 21,1 estímulos/s |
 |---|---|---|---|---|
@@ -451,7 +451,7 @@ El número de Reynolds dice dónde cambia el régimen: *Re* = ρ *v* *d* / μ. C
 :::
 
 :::ayuda-ancho Ejemplo resuelto: separar lo laminar de lo turbulento con los números de H24
-La fosa derecha del paciente simulado de H24 tiene una resistencia de 0,26 Pa/(cm³/s) a 75 Pa y de 0,35 a 150 Pa. Los flujos son 75 / 0,26 = 288 cm³/s y 150 / 0,35 = 429 cm³/s (26 L/min). Como *R* = *k*₁ + *k*₂ V̇, restando las dos resistencias: *k*₂ = (0,35 − 0,26) / (429 − 288) = 6,4 × 10⁻⁴, y *k*₁ = 0,26 − 6,4 × 10⁻⁴ × 288 = **0,075**. La parte laminar es 0,075 / 0,26 = **29 %** de la resistencia a 75 Pa y 0,075 / 0,35 = **21 %** a 150 Pa. A medida que la presión sube, el componente turbulento pesa más, y por eso la resistencia **sube** con la presión.
+La fosa derecha del paciente de H24 tiene una resistencia de 0,26 Pa/(cm³/s) a 75 Pa y de 0,35 a 150 Pa. Los flujos son 75 / 0,26 = 288 cm³/s y 150 / 0,35 = 429 cm³/s (26 L/min). Como *R* = *k*₁ + *k*₂ V̇, restando las dos resistencias: *k*₂ = (0,35 − 0,26) / (429 − 288) = 6,4 × 10⁻⁴, y *k*₁ = 0,26 − 6,4 × 10⁻⁴ × 288 = **0,075**. La parte laminar es 0,075 / 0,26 = **29 %** de la resistencia a 75 Pa y 0,075 / 0,35 = **21 %** a 150 Pa. A medida que la presión sube, el componente turbulento pesa más, y por eso la resistencia **sube** con la presión.
 :::
 
 Un valor de referencia solo sirve si todos lo leen en el mismo punto, y 150 Pa es un compromiso: suficientemente alto para tener señal (con presiones muy bajas el flujo recién se pone en marcha y el ruido pesa), y suficientemente bajo para que casi todos los pacientes lleguen, con 75 Pa como alternativa (Clement, 1984; Clement y Gordts, 2005; Wong y Eccles, 2014; Vogt y cols., 2016; → H24).

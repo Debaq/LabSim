@@ -280,7 +280,7 @@ Hace un año, la VRA con insertos dio niveles mínimos de 60 a 65 dB. El nivel m
 - **Hipótesis esperables:** progresión de la hipoacusia (Kenna y cols., 2010); otitis media con efusión sumada; audífono con falla, tubo tapado o ajuste insuficiente; menos atención o cambio de conducta.
 - **Qué pedir:** otoscopía, timpanograma, audiometría condicionada por juego con fonos o insertos, ósea, emisiones como prueba cruzada; revisión del audífono y campo libre con audífono (→ H7, H8, H9).
 - **Errores esperables:** comparar el nivel mínimo de la VRA con el umbral por juego como si fueran iguales; atribuir la baja a la conducta sin medir; responderle a la mamá el riesgo del embarazo en vez de derivar a genética.
-- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *No sindrómica GJB2 (conexina 26)*, grado severo, en los dos oídos. El niño responde como un adulto y el campo libre no se practica: la curva con audífono de la figura no sale del simulador.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *No sindrómica GJB2 (conexina 26)*, grado severo, en los dos oídos. El niño responde como un adulto y el campo libre no se practica.
 :::
 
 {{caso cap10_waardenburg}}

@@ -30,7 +30,7 @@ Este capítulo no pide pruebas nuevas. Pide **leer con otra pregunta** las de si
 
 La paresia canalicular es un cociente: la diferencia entre lo que responde un oído y el otro, dividida por la suma de las dos respuestas (→ H16). Cuando los dos oídos responden igual de poco, el numerador es casi cero y el resultado es "sin paresia", **sea cual sea** la altura a la que están los dos. Con velocidades pequeñas, además, el cociente se mueve mucho por una diferencia de un solo grado por segundo: la misma suma de 7 °/s da 14 % si un oído lee 3 y el otro 4, y daría 43 % si leyeran 2 y 5.
 
-Un ejemplo con las cuatro irrigaciones de un paciente de ejemplo: tibia derecha 1, fría derecha 2, tibia izquierda 1, fría izquierda 3 °/s. La paresia es (3 − 4) / 7 × 100 = **−14 %**, bajo el 25 % del protocolo: "valor no significativo". Y sin embargo la suma de cada oído (3 y 4 °/s) está **bajo 6**: la prueba dice a la vez "sin asimetría" y "sin respuesta". Las dos cosas son verdad y solo la segunda importa.
+Un ejemplo con las cuatro irrigaciones: tibia derecha 1, fría derecha 2, tibia izquierda 1, fría izquierda 3 °/s. La paresia es (3 − 4) / 7 × 100 = **−14 %**, bajo el 25 % del protocolo: "valor no significativo". Y sin embargo la suma de cada oído (3 y 4 °/s) está **bajo 6**: la prueba dice a la vez "sin asimetría" y "sin respuesta". Las dos cosas son verdad y solo la segunda importa.
 
 :::imagen ilustraciones/cap24-cociente.svg ancho=82% Los cuatro pacientes del capítulo en un mismo plano: la suma tibia + fría de cada oído. Los cuatro caen dentro de la cuña donde la paresia es menor de 25 %, que es la que la fórmula llama "no significativa"; tres de los cuatro caen además en el cuadro verde, donde los dos oídos suman menos de 6 °/s
 :::
@@ -55,7 +55,7 @@ La silla rotatoria, que es la tercera forma que reconoce el consenso, no está e
 
 ## En LabSim
 
-LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el audiograma, la logoaudiometría y las emisiones de estos pacientes. Lo vestibular de cada caso, la calórica, el vHIT y la agudeza dinámica, está **escrito** en la ficha de resultados del caso, con **cifras de ejemplo**. La figura muestra cómo se ve en el vHIT una ganancia baja de los dos lados.
+LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el audiograma, la logoaudiometría y las emisiones de estos pacientes. Lo vestibular de cada caso, la calórica, el vHIT y la agudeza dinámica, está **escrito** en la ficha de resultados del caso. La figura muestra cómo se ve en el vHIT una ganancia baja de los dos lados.
 
 :::imagen ilustraciones/cap24-vhit-bilateral.svg ancho=100% Impulsos del canal lateral de un paciente con los dos lados caídos: hacia la derecha y hacia la izquierda, con la cabeza en azul y el ojo, invertido, en naranja. No hay un lado bueno con el que comparar: el déficit se lee en el tamaño de cada ganancia, no en la asimetría. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @16,52 | **Ojo**: llega a menos de la mitad de la velocidad de la cabeza. Si el reflejo funcionara, las dos curvas se superpondrían.
@@ -200,7 +200,7 @@ El paciente oye "igual que siempre". ¿Pedirías el audiograma? ¿Qué pruebas d
 - @OD 8000 | Solo un descenso leve en 8 kHz (20 dB), esperable a los 52 años. Ni el fármaco ni la edad dejaron aquí nada visible.
 :::
 
-:::ayuda-ancho Lo que entrega Enrique del examen vestibular (cifras de ejemplo; → H15, H16, H17, H19)
+:::ayuda-ancho Lo que entrega Enrique del examen vestibular (→ H15, H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | sin nistagmo con ni sin fijación; seguimiento y sacádicos normales | |
@@ -248,7 +248,7 @@ Además del estudio auditivo, ¿qué pruebas vestibulares agregarías aunque el 
 - @OD 1000 | El OD responde en **3 de 5 bandas** (hasta 2 kHz) y el OI en **2 de 5** (hasta 1,5 kHz), con reproducibilidad de 72 y 33 %: no hay emisiones donde el audiograma cae.
 :::
 
-:::ayuda-ancho Lo que entrega Verónica del examen vestibular (cifras de ejemplo; → H16, H17, H19)
+:::ayuda-ancho Lo que entrega Verónica del examen vestibular (→ H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG | sin nistagmo espontáneo; seguimiento y sacádicos normales | |
@@ -266,7 +266,7 @@ Además del estudio auditivo, ¿qué pruebas vestibulares agregarías aunque el 
 - **La trampa:** la **mínima** da 25 %, "significativo" a la izquierda, y lleva a informar una hipofunción **izquierda**. El oído derecho está a 5 °/s: con una respuesta tan baja no es "el lado sano". La bitérmica (OI 5, **OD 8 °/s**) y sobre todo el vHIT (**las dos ganancias bajo 0,6**) completan el cuadro.
 - **Lo que enseña:** que la queja auditiva **y** la vestibular pueden venir juntas y que la paciente solo menciona una. Y que el consenso admite que se cumpla **una** de las pruebas: aquí la calórica la cumple solo el OI (suma 5), y el vHIT los dos lados.
 - **Errores esperables:** informar una "paresia izquierda"; no preguntar por el equilibrio a quien consulta por acúfeno; creer que el vHIT bilateral "contradice" la mínima.
-- **En LabSim:** cuadro *Ototóxica* en los dos oídos. El vHIT de la sección "En LabSim" es de un paciente simulado con las mismas ganancias de la ficha (cifras del modelo).
+- **En LabSim:** cuadro *Ototóxica* en los dos oídos. El vHIT de la sección "En LabSim" es de un paciente con las mismas ganancias de la ficha.
 :::
 
 {{caso cap24_sin_causa}}
@@ -289,7 +289,7 @@ Con ese informe previo y la audición normal, ¿repetirías las pruebas? ¿Cuál
 - @OD 1000 | Audición **normal** en los dos oídos, con la leve caída de agudos de los 58 años (15 a 20 dB en 6 y 8 kHz).
 :::
 
-:::ayuda-ancho Lo que entrega Pilar del examen vestibular (cifras de ejemplo; → H16, H17, H19)
+:::ayuda-ancho Lo que entrega Pilar del examen vestibular (→ H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG | sin nistagmo espontáneo; seguimiento y sacádicos normales | |
@@ -333,7 +333,7 @@ Pide la hoja de resultados de la neurología. ¿Qué parte del estudio vestibula
 - @OD max | Discriminación de 92 % en el OD y 96 % en el OI, acorde a la curva: el oído se explica por sí solo.
 :::
 
-:::ayuda-ancho Lo que entrega Jorge del examen vestibular (cifras de ejemplo; → H15, H16, H17, H19)
+:::ayuda-ancho Lo que entrega Jorge del examen vestibular (→ H15, H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo | sin nistagmo | |

@@ -184,7 +184,7 @@ Un niño de 8 años tiene un rendimiento muy bajo en una prueba dicótica de dí
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Las pruebas centrales de estos casos (dígitos dicóticos, patrones, gaps, habla en ruido) **no las genera LabSim**: son **datos de ejemplo**, en tablas y gráficos propios. Se informan en la unidad de la prueba y como desviaciones estándar respecto de una norma de su versión y de su edad que aquí no se da. La parte periférica sí sale del simulador.
+Las pruebas centrales de estos casos (dígitos dicóticos, patrones, gaps, habla en ruido) **no las genera LabSim**: van en tablas y gráficos propios. Se informan en la unidad de la prueba y como desviaciones estándar respecto de una norma de su versión y de su edad que aquí no se da. La parte periférica sí sale del simulador.
 
 {{caso cap30_nino_tpa}}
 

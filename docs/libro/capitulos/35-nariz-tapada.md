@@ -155,7 +155,7 @@ En el caso 2, la fosa derecha da 0,61 al inspirar y 0,36 al espirar. Si el exame
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. Las **curvas y las cifras nasales** de los tres casos son de **pacientes simulados**, no de pacientes reales. Los valores que aparecen son órdenes de magnitud del modelo, no normas; el único valor de referencia que se usa es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24; Ren y cols., 2018; Vogt y cols., 2016).
+Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. El valor de referencia es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24; Ren y cols., 2018; Vogt y cols., 2016).
 
 {{caso cap35_desviacion}}
 
@@ -186,7 +186,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 :::imagen ilustraciones/cap35-rs-desv-rm.svg ancho=78% Rinomanometría de Carlos. Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV. Las rayas verticales marcan 75 y 150 Pa. La fosa derecha es la más cerrada y casi no cambia ni con el vasoconstrictor ni con la fase: un obstáculo mecánico. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @78,38 | **FND (rojo)**: a 150 Pa pasan unos 280 cm³/s, lo que da **0,53 Pa/(cm³/s)**: sobre el valor de trabajo (0,4).
 - @20,38 | **FNI (azul)**: a 150 Pa pasan unos 450 cm³/s, **0,33**: dentro del valor de trabajo.
-- @74,9 | Con vasoconstrictor (rayas) la FND casi no se mueve: **0,48**, una baja de 9 %. Con menos del 15 % se lee como "igual que en reposo" (un umbral del modelo, no una norma).
+- @74,9 | Con vasoconstrictor (rayas) la FND casi no se mueve: **0,48**, una baja de 9 %. Con menos del 15 % se lee como "igual que en reposo".
 - @16,60 | Espirando, la FND da **0,50**: casi lo mismo que inspirando. El obstáculo no depende de la fase.
 :::
 

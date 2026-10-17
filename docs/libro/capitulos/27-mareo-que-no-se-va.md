@@ -54,7 +54,7 @@ Los cuestionarios sirven para **seguir** al paciente, no para diagnosticar. Un N
 
 ## En LabSim
 
-LabSim da el lado auditivo de estos pacientes (audiograma, logoaudiometría, reflejos, PEAT y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo que cada caso entrega de calórica, vHIT, equilibrio y cuestionarios está **escrito** en la ficha de resultados, con cifras de ejemplo.
+LabSim da el lado auditivo de estos pacientes (audiograma, logoaudiometría, reflejos, PEAT y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo que cada caso entrega de calórica, vHIT, equilibrio y cuestionarios está **escrito** en la ficha de resultados.
 
 ## Fisiología
 
@@ -75,7 +75,7 @@ La Sociedad Bárány describe tres cambios que se mantienen aunque el vestíbulo
 2. **La vista pesa de más.** Se vio en la neuritis: los pacientes que seguían mareados tenían una mayor dependencia visual (Cousins y cols., 2014) <!-- Cousins 2014 (PMID 25233234), resumen: ~50 % con síntomas a largo plazo; el tercio con peor resultado tuvo más dependencia visual (6,35° vs 3,39°). -->. Y en el "vértigo visual", quienes lo refieren se desordenan más con un entorno visual en movimiento (Guerraz y cols., 2001; Bronstein, 1995). Es la misma lógica de la repesada sensorial de H19: el cerebro reparte la confianza entre vista, pies y vestíbulo, y aquí la vista queda con demasiado peso.
 3. **La integración central amplifica.** Las señales del cuerpo y del entorno se interpretan con más alarma. En un estudio con resonancia, los pacientes con mareo crónico subjetivo respondían distinto a un estímulo vestibular en regiones que integran el equilibrio con la emoción (Indovina y cols., 2015) <!-- verificar: Indovina 2015, hallazgo exacto (DOI confirmado en Crossref: 10.3389/fnbeh.2015.00334). -->.
 
-El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente simulado con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. -->. El modelo muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y sus cifras no son normativas ni un criterio diagnóstico: en los pacientes reales la posturografía puede salir normal o con un patrón variable <!-- verificar: hallazgos de la posturografía dinámica en PPPD; no hay un patrón diagnóstico establecido (revisar Trinidade y Goebel, 2018). --> y por eso no se usa para decidir.
+El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. -->. La figura muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y no es un criterio diagnóstico: en la clínica la posturografía puede salir normal o con un patrón variable <!-- verificar: hallazgos de la posturografía dinámica en PPPD; no hay un patrón diagnóstico establecido (revisar Trinidade y Goebel, 2018). --> y por eso no se usa para decidir.
 
 :::imagen ilustraciones/cap27-sot-sano-pppd.svg ancho=100% Posturografía de seis condiciones de dos pacientes: a la izquierda, sano; a la derecha, con el vestíbulo sano y la dependencia visual marcada. Fíjate en que el de la derecha se desordena justo donde la vista miente (condiciones 3 y 6), aunque su vestíbulo esté intacto. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @95,46 | **Condición 6, la vista y la plataforma engañan a la vez.** El paciente sano la sostiene; el de la dependencia visual cae. Con el vestíbulo intacto.
@@ -229,7 +229,7 @@ Ya tiene una resonancia de cerebro normal. ¿Qué agregarías para ver si el lab
 - @OI P13 | El del OI, el lado de la neuritis, mide **343 µV** (6,82). La asimetría es de **0 %**: el sáculo del lado enfermo responde igual. En una neuritis superior, el cVEMP suele conservarse (→ cap. 21).
 :::
 
-:::ayuda-ancho Lo que entrega Victoria del examen vestibular y de los cuestionarios (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Victoria del examen vestibular y de los cuestionarios (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | normales |
@@ -278,7 +278,7 @@ La paciente dice que la llamaron "ansiosa" y que no está de acuerdo. ¿Qué har
 - @OI max | El OI llega al **96 %**: discriminación buena, acorde a la pérdida, y casi igual en los dos oídos. No hay nada asimétrico ni retrococlear.
 :::
 
-:::ayuda-ancho Lo que entrega Eva del examen vestibular y de los cuestionarios (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Eva del examen vestibular y de los cuestionarios (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | normales |
@@ -342,7 +342,7 @@ Tiene un pitido en el oído izquierdo y dificultad para oír por teléfono con e
 - @OI P13 | El del OI mide **38 µV** (0,75 corregida). La asimetría es de **76 %**, sobre el corte de 35 % de LabSim (→ H12): el sáculo del OI responde muy poco.
 :::
 
-:::ayuda-ancho Lo que entrega Joaquín del examen vestibular y de los cuestionarios (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Joaquín del examen vestibular y de los cuestionarios (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Supraliminares (→ H6) | Carhart en el OI: **30 dB** de deterioro. SISI en el OI: **10 %** |

@@ -36,7 +36,7 @@ Este capítulo no agrega ninguna prueba nueva. Usa las de siempre, con otra preg
 
 ## En LabSim
 
-LabSim da el **lado auditivo** de estos pacientes: el audiograma y la logoaudiometría, que salen del cuadro *Presbiacusia*. **No** hace examen vestibular, postural ni rehabilitación, y no tiene tensiómetro ni cuestionarios. Lo vestibular, lo funcional, la presión y los cuestionarios de cada caso están **escritos** en la ficha de resultados, con **cifras de ejemplo**.
+LabSim da el **lado auditivo** de estos pacientes: el audiograma y la logoaudiometría, que salen del cuadro *Presbiacusia*. **No** hace examen vestibular, postural ni rehabilitación, y no tiene tensiómetro ni cuestionarios. Lo vestibular, lo funcional, la presión y los cuestionarios de cada caso están **escritos** en la ficha de resultados.
 
 ## Fisiología
 
@@ -206,7 +206,7 @@ Piensa en el lado del vértigo, en la presión, en la marcha y en el miedo. ¿Qu
 - @OD max | Discriminación del **92 %**, acorde con la pérdida y casi igual en los dos oídos.
 :::
 
-:::ayuda-ancho Lo que entrega Eva del equilibrio y de las posturas (cifras de ejemplo; → H18, H19)
+:::ayuda-ancho Lo que entrega Eva del equilibrio y de las posturas (→ H18, H19)
 | Prueba | Resultado |
 |---|---|
 | Presión arterial | acostada **138/78**; de pie al 1.er minuto **134/80** y a los 3 minutos **132/78**: sin caída |
@@ -252,7 +252,7 @@ Agrupa lo que podría explicar sus caídas por sistemas: cardiovascular, sensori
 - @OD max | Discriminación máxima del **64 %** en el OD y del **68 %** en el OI, a 70 dB: baja, pero parecida entre los dos oídos y acorde con una pérdida de agudos tan grande.
 :::
 
-:::ayuda-ancho Lo que entrega Hugo de la evaluación (cifras de ejemplo; → H15, H18, H19)
+:::ayuda-ancho Lo que entrega Hugo de la evaluación (→ H15, H18, H19)
 | Prueba | Resultado |
 |---|---|
 | Presión arterial | acostado 5 min **142/84**; de pie al minuto **118/70**, con "se me nubla"; a los 3 minutos **112/68** |
@@ -305,7 +305,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 - @OD max | Discriminación del **88 %**, buena y simétrica: nada retrococlear.
 :::
 
-:::ayuda-ancho Lo que entrega Isabel de la evaluación (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Isabel de la evaluación (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Neurología (informe) | polineuropatía sensitiva distal simétrica; **sin sensibilidad** al monofilamento ni a la vibración en ambos pies; reflejos aquíleos ausentes; sin dismetría, sin disartria; resonancia sin atrofia cerebelosa |

@@ -60,7 +60,7 @@ El eje oculomotor con la cabeza quieta (seguir una luz con los ojos) se puede co
 
 ## En LabSim
 
-LabSim da el lado auditivo de estos pacientes (audiograma y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo vestibular de cada caso, es decir el vHIT, el DHI y la batería funcional, está en **tablas con cifras de ejemplo** y en **hojas de seguimiento** con impulsos sintéticos como los de H17.
+LabSim da el lado auditivo de estos pacientes (audiograma y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo vestibular de cada caso, es decir el vHIT, el DHI y la batería funcional, está en **tablas** y en **hojas de seguimiento** con impulsos como los de H17.
 
 ## Fisiología
 
@@ -70,10 +70,10 @@ Cuando falla un laberinto, el desequilibrio de reposo entre los dos lados se cor
 
 En qué se nota esa diferencia lo mostró un ensayo con pacientes con neuritis, con y sin ejercicios vestibulares: la torsión ocular y la vertical visual subjetiva se normalizaron igual en los dos grupos, pero el balanceo del cuerpo, medido a los 30 días, fue de 3,2 m/min con ejercicios y 16,9 m/min sin ellos (Strupp y cols., 1998). Lo que no se compensa solo es lo que el paciente tiene que **usar**: el equilibrio, la marcha y la visión al mover la cabeza.
 
-La misma diferencia, en un paciente simulado con una pérdida unilateral: con los ojos cerrados sobre espuma, el balanceo de pie pasa de caerse a sostenerse con los meses. El modelo compensa solo con el **tiempo**, no con ejercicios, y sus días no son los de un paciente.
+La misma diferencia, en un paciente con una pérdida unilateral: con los ojos cerrados sobre espuma, el balanceo de pie pasa de caerse a sostenerse con los meses. El modelo compensa solo con el **tiempo**, no con ejercicios, y sus días no son los de un paciente.
 
 :::imagen ilustraciones/cap31-balanceo-simulador.svg ancho=100% Balanceo lateral de pie, ojos cerrados sobre espuma, a 1 día, 1 semana, 1 mes y 3 meses de una pérdida unilateral en un paciente. Al día cae enseguida, a la semana aguanta unos segundos y desde el mes se sostiene: es la parte dinámica, la que se compensa con el tiempo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
-- @17.6,70 | **A un día de la lesión** el paciente simulado no se sostiene ni un segundo: sin vista y con los pies sobre una superficie que miente, solo le queda el vestíbulo.
+- @17.6,70 | **A un día de la lesión** el paciente no se sostiene ni un segundo: sin vista y con los pies sobre una superficie que miente, solo le queda el vestíbulo.
 - @40.8,70 | **A la semana** aguanta unos segundos y cae: la parte del reposo ya está compensada, la del movimiento no.
 - @87,76 | **A los tres meses** se sostiene, con un balanceo parecido al del mes: es la parte dinámica que se fue ajustando.
 :::
@@ -166,7 +166,7 @@ Una paciente de 63 años tiene una neuritis de hace cinco semanas, toma un antih
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
 :::comentario Lo vestibular de los casos
-LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente salen del editor de casos. El **vHIT, el DHI y la batería funcional** están en tablas y en **hojas de seguimiento** propias, con cifras **de ejemplo**, que no son valores de referencia. Cada hoja muestra las tres visitas: lo que llega el paciente, y cómo sigue.
+LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente salen del editor de casos. El **vHIT, el DHI y la batería funcional** están en tablas y en **hojas de seguimiento** propias. Cada hoja muestra las tres visitas: lo que llega el paciente, y cómo sigue.
 :::
 
 {{caso cap31_buena}}
@@ -194,7 +194,7 @@ El vértigo ya pasó y sigue con síntomas al mover la cabeza. ¿Qué parte de l
 - @OI P13 | El del OI mide **290 µV** (5,74). La asimetría es de **0 %**: el sáculo del lado enfermo responde. Es lo esperable si el daño fue de la rama superior del nervio (→ cap. 21).
 :::
 
-:::ayuda-ancho Lo que entrega Martín del examen y de la batería, a las dos semanas (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Martín del examen y de la batería, a las dos semanas (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | Bate hacia la izquierda, **2 °/s**, casi apagado |
@@ -247,7 +247,7 @@ Además de la batería de H19, ¿qué harías con el fármaco y con el reposo? �
 - @OI 1000 | El OI es igual al OD: 10 dB en 1 kHz.
 :::
 
-:::ayuda-ancho Lo que entrega Lucía del examen y de la batería, a las cinco semanas (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Lucía del examen y de la batería, a las cinco semanas (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | No hay |
@@ -299,7 +299,7 @@ Si el reflejo ya volvió, ¿qué más puede explicar el mareo? Separa lo que dep
 - @OD 4000 | La audición es normal: 0 dB hasta 6 kHz y 5 dB en 8 kHz, en los dos oídos.
 :::
 
-:::ayuda-ancho Lo que entrega Ignacio del examen y de la batería, a las diez semanas (cifras de ejemplo; → H15 a H19)
+:::ayuda-ancho Lo que entrega Ignacio del examen y de la batería, a las diez semanas (→ H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | No hay |

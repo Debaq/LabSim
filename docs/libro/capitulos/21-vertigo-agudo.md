@@ -54,7 +54,7 @@ El impulso manual se ve, pero no se guarda y es fácil pasar por alto las sacada
 La preparación del protocolo para el examen vestibular y el vHIT es la de un paciente que **puede esperar**: ayuno de 4 horas, suspender 48 horas antes los antivertiginosos, antieméticos y ansiolíticos, y una hora de examen. Un paciente con vértigo agudo no cumple nada de eso: vomita y ya recibió un antiemético. Los supresores vestibulares bajan el nistagmo y pueden **esconder** un hallazgo, por eso lo que se hace es **anotar qué recibió y a qué hora**, no negar el examen. La calórica, que pide las mismas condiciones y además provoca vómitos (→ H16), no es parte del examen agudo. Y el protocolo no trae el HINTS completo: mira el nistagmo en las cinco posiciones de la mirada, pero pide el impulso cefálico solo con equipo y no incluye la oclusión alternada ni la regla de que un nistagmo que cambia de sentido o un impulso normal son signos centrales. Los criterios de la Sociedad Bárány aceptan para el reflejo disminuido tanto el impulso cefálico como la calórica (Strupp y cols., 2022).
 :::
 
-Un ejemplo de cómo se informa lo de cabecera, con cifras ilustrativas:
+Un ejemplo de cómo se informa lo de cabecera:
 
 > *Síndrome vestibular agudo, 2.º día. Nistagmo espontáneo horizontal con componente torsional que bate a la izquierda, sin cambiar de sentido con la mirada. Impulso cefálico anormal hacia la derecha, con sacada correctiva. Test de skew sin desviación vertical. Audición sin pérdida nueva. Marcha: desequilibrio leve a moderado, camina sin apoyo. Hallazgos periféricos hacia el lado derecho; sin signos centrales en la exploración. El diagnóstico lo establece el médico tratante.*
 
@@ -162,7 +162,7 @@ Un paciente tiene vértigo agudo, un nistagmo que bate a la izquierda sin cambia
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
 :::comentario Lo vestibular de los casos
-LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente son los del simulador, y **la hoja de cabecera** (nistagmo, impulso cefálico y oclusión alternada) es un esquema con las cifras del paciente. Son datos de ejemplo para enseñar, no valores de referencia.
+LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente son los del simulador, y **la hoja de cabecera** (nistagmo, impulso cefálico y oclusión alternada) va con las cifras del paciente.
 :::
 
 {{caso cap21_neuritis}}

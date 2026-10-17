@@ -141,7 +141,7 @@ El resultado es la curva de las dos fosas y una tabla con los registros, su prom
 - @80,25 | **Zona poco fiable.** La parte de la curva más allá de unos 5 cm.
 - @-3,66 | **Promedio de los tres registros** de la fosa derecha en reposo: Dist 1 y MCA1, Dist 2 y MCA2, Vol 1, Vol 0-5 (el «Vol 2» de la tabla de este capítulo) y Vol 2-5. Debajo, lo mismo con vasoconstrictor y, después, la fosa izquierda.
 - @103,66 | **Repetición.** «sí» si los tres registros cumplen el criterio del libro: MCA1 y MCA2 a 0,03 cm² o menos entre sí.
-- @-3,92 | **Normal del modelo (no es norma).** Una fosa normal del mismo modelo, para tener contra qué mirar. Los valores de referencia de verdad son los de la tabla de tu servicio.
+- @-3,92 | **Fosa normal**, para tener contra qué mirar. Los valores de referencia de verdad son los de la tabla de tu servicio.
 - @103,97 | **Cambio con vasoconstrictor.** En porcentaje respecto del reposo: el segundo mínimo se multiplica por cinco.
 :::
 

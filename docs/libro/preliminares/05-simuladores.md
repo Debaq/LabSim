@@ -1,6 +1,6 @@
 # Simuladores
 
-Varias figuras de este libro son **imágenes propias hechas con simuladores** libres y de código abierto, escritos por el editor del libro. Los pacientes que aparecen en ellas son simulados, y las cifras que dan son las de cada modelo, que sirve para enseñar: no son valores normativos ni reemplazan a un equipo clínico.
+Varias figuras de este libro son **imágenes propias hechas con simuladores** libres y de código abierto, escritos por el editor del libro.
 
 Todos se pueden descargar, usar y modificar libremente. Sirven para practicar lo que el libro explica: hacer el examen, equivocarse sin consecuencias y ver qué cambia cuando cambia el paciente. Escanea el código con el teléfono para abrir cada uno.
 

@@ -190,7 +190,6 @@ Además de la audiometría, ¿qué logoaudiometría y qué LDL? ¿Qué pruebas h
 - @S 2000 | Sin audífono, el campo libre (el oído mejor) está en 60 dB en 2 kHz.
 - @A 2000 | Con una ganancia funcional de **30 dB**, queda en 30.
 - @A 4000 | En 4 kHz la misma ayuda deja el umbral en 60 dB: las consonantes agudas siguen casi fuera de alcance.
-- Las ganancias de esta figura son un **ejemplo** (→ H20): no son una prescripción ni lo que mediría un audífono real.
 :::
 
 :::docente Guía del caso

@@ -145,7 +145,7 @@ Un paciente tiene emisiones presentes, reflejos a 90 dB SPL y un PEAT con onda V
 
 LabSim arma cada paciente con su **audición verdadera**: sus emisiones, sus reflejos y su PEAT salen de ella. Lo que no puede hacer hoy es cargar encima un audiograma **informado** distinto del verdadero, ni el umbral verdadero de un oído que el paciente dice tener sordo: el caso que fuera de verdad no orgánico (una pérdida que se informa y un oído que oye) no se puede armar completo. Lo que el docente sí puede hacer es marcar un oído con la casilla **Stenger** del caso: sus umbrales serán los que el paciente entrega y el verdadero se supone igual al del otro oído, como en alguien que oye parejo y dice una pérdida de un solo lado. El paciente simulado tampoco se cansa ni se confunde, así que no reproduce las variaciones de un paciente real (→ H6).
 
-Por eso los casos de este capítulo muestran la **audición verdadera** del paciente con las pruebas que no dependen de su mano, y lo que el paciente informó va en una tabla, dato por dato, como un registro de la consulta. Los números de esas tablas son datos de ejemplo; los de las figuras son los que mide el simulador.
+Por eso los casos de este capítulo muestran la **audición verdadera** del paciente con las pruebas que no dependen de su mano, y lo que el paciente informó va en una tabla, dato por dato, como un registro de la consulta.
 
 ## Casos
 

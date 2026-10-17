@@ -177,7 +177,7 @@ Con el mismo trabajador, ¿qué pedirías antes de dar por cerrado el caso, adem
 
 #### Paso 4 · Los resultados
 
-La ficha del control de fin de turno (valores de ejemplo, porque LabSim no simula el desplazamiento temporal) y el resultado de la confirmación en cámara se leen juntos:
+La ficha del control de fin de turno (LabSim no simula el desplazamiento temporal) y el resultado de la confirmación en cámara se leen juntos:
 
 :::imagen ilustraciones/cap33-reposo.svg ancho=100% El control del final del turno y la confirmación tras 14 horas de reposo, contra la base: el cambio que en la tarde cumplía los criterios ya no está en la mañana.
 :::
@@ -196,7 +196,7 @@ El control del final del turno cumplía los criterios de OSHA (promedios de 16,7
 - **Qué pedir:** confirmación en cámara con reposo documentado; revisión de cómo usa la protección y, si el programa lo tiene, un ensayo de ajuste; adelantar el siguiente control; las emisiones otoacústicas pueden agregar información (→ H9, cap. 6).
 - **Lo que enseña:** un cambio que **no se confirma** no es un resultado tranquilizador: el oído se desplaza 30 dB cada turno, lo que quiere decir que lo que llega a la cóclea es más de lo que la protección debería dejar pasar. La medida es sobre el puesto, no sobre el oído (→ H22).
 - **Errores esperables:** llamarlo permanente; llamarlo "normal" y cerrar; olvidar que el acúfeno nuevo es un dato (puede haber daño que el umbral no ve, → cap. 6); no anotar la hora del último turno.
-- **En LabSim:** el simulador no modela desplazamiento temporal ni reposo: el paciente responde con su umbral permanente, sin importar cuándo fue su última exposición (→ H22). El control del final del turno son números de ejemplo; la confirmación es el audiograma del paciente en el simulador.
+- **En LabSim:** el simulador no modela desplazamiento temporal ni reposo: el paciente responde con su umbral permanente, sin importar cuándo fue su última exposición (→ H22). La confirmación es el audiograma del paciente en el simulador.
 :::
 
 {{caso cap33_ingreso}}

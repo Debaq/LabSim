@@ -274,7 +274,7 @@ La curva dice más que el número. Una curva normal es regular, simétrica entre
 
 ### Ejercicios: de los números al informe
 
-Estos ejercicios no son de pacientes: son números inventados para practicar el cálculo. Todos se leen a **150 Pa**.
+Todos se leen a **150 Pa**.
 
 **Ejercicio 1. Una fosa.** Fosa derecha: 150 Pa y 250 cm³/s. R = 150 / 250 = **0,60**. Fosa izquierda: 150 Pa y 500 cm³/s. R = 150 / 500 = **0,30**.
 

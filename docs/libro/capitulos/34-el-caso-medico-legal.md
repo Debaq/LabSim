@@ -164,7 +164,7 @@ El umbral conductual de un trabajador es de 70 dB en todas las frecuencias y el 
 
 ## En LabSim
 
-LabSim arma cada paciente con su **audición verdadera**, y de ella salen sus emisiones, sus reflejos y sus umbrales con burst. No puede cargar encima el audiograma que el paciente **informa**: por eso, en el caso 34.1, lo que él entrega va en una tabla, dato por dato, como un registro de la consulta, y esos números son de ejemplo; los de las figuras salen del simulador. Tampoco existe en LabSim el estado estable (→ H13), ni cálculo de porcentajes de daño: las cuentas de este capítulo están hechas a mano con las fórmulas de arriba, y puedes rehacerlas con los umbrales de cada figura.
+LabSim arma cada paciente con su **audición verdadera**, y de ella salen sus emisiones, sus reflejos y sus umbrales con burst. No puede cargar encima el audiograma que el paciente **informa**: por eso, en el caso 34.1, lo que él entrega va en una tabla, dato por dato, como un registro de la consulta. Tampoco existe en LabSim el estado estable (→ H13), ni cálculo de porcentajes de daño: las cuentas de este capítulo están hechas a mano con las fórmulas de arriba, y puedes rehacerlas con los umbrales de cada figura.
 
 ## Casos
 
@@ -231,7 +231,7 @@ Con los dos tonos a la vez, el paciente dejó de responder en las tres frecuenci
 - @OI 40 V | El OI da lo mismo.
 :::
 
-Tabla: Umbrales del PEAT con burst por frecuencia (valores del simulador, → H10) y audiograma estimado (dB)
+Tabla: Umbrales del PEAT con burst por frecuencia (→ H10) y audiograma estimado (dB)
 
 | | 500 | 1.000 | 2.000 | 4.000 |
 |---|---|---|---|---|

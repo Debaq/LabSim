@@ -67,7 +67,7 @@ Los tiempos son el cociente entre los barridos y la tasa; el ruido relativo es 1
 
 ### Rechazo de artefactos
 
-Algunos barridos son tan ruidosos (el paciente tragó, se movió, se tensó) que llevan el promedio al desastre. Por eso el equipo **rechaza** cualquier barrido cuyo voltaje supera un límite y no lo suma. El límite es un parámetro del equipo (en LabSim, ±25 µV; un valor de trabajo del simulador, no una norma). Si es muy estricto, casi ningún barrido entra y el examen no avanza; si es muy laxo, entran barridos sucios y el promedio se contamina. Rechazar protege, pero no hace milagros: un paciente que se mueve sigue siendo un registro lento. El remedio es antes del examen: dormido, acostado, con el cuello suelto (→ H10).
+Algunos barridos son tan ruidosos (el paciente tragó, se movió, se tensó) que llevan el promedio al desastre. Por eso el equipo **rechaza** cualquier barrido cuyo voltaje supera un límite y no lo suma. El límite es un parámetro del equipo (en LabSim, ±25 µV). Si es muy estricto, casi ningún barrido entra y el examen no avanza; si es muy laxo, entran barridos sucios y el promedio se contamina. Rechazar protege, pero no hace milagros: un paciente que se mueve sigue siendo un registro lento. El remedio es antes del examen: dormido, acostado, con el cuello suelto (→ H10).
 
 ### Filtros, polaridad y ventana: lo que el equipo hace antes de dibujar
 

@@ -314,7 +314,7 @@ El nistagmo se informa con **lo mismo de siempre**, en este orden:
 - **Efecto de la fijación:** si baja o no.
 - **Evolución con la mirada:** si cambia de intensidad o de sentido.
 
-La clasificación de la Sociedad Bárány pide además nombrarlo **por su condición** ("espontáneo", "evocado por la mirada", "posicional") y describirlo **sin interpretar** hasta tener todos los datos (Eggers y cols., 2019). Por ejemplo, con cifras ilustrativas:
+La clasificación de la Sociedad Bárány pide además nombrarlo **por su condición** ("espontáneo", "evocado por la mirada", "posicional") y describirlo **sin interpretar** hasta tener todos los datos (Eggers y cols., 2019). Por ejemplo:
 
 > *Nistagmo espontáneo.* Sin fijación, mirando al frente: nistagmo horizontal con componente torsional que bate hacia la derecha, VFL de 4 °/s. Aumenta al mirar a la derecha y disminuye al mirar a la izquierda, sin cambiar de sentido (Alexander grado II). Con fijación disminuye a menos de la mitad. Seguimiento y sacadas sin hallazgos. Equilibrio: Romberg con desvío hacia la izquierda. Hallazgos compatibles con un nistagmo de origen periférico.
 
