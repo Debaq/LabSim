@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 86,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 86 años, es electricista jubilado y vive solo desde que enviudó hace tres años; una hija lo llama cada noche. En el último año se ha caído tres veces. Dos fueron en la casa: de noche, camino al baño, y al pararse del excusado. La tercera fue en el jardín, hace dos meses: se cayó al agacharse a arrancar una maleza y no pudo levantarse por unas dos horas, hasta que un vecino lo oyó. No perdió el conocimiento que él recuerde. Cuenta que \"se le nubla la vista y se le va la fuerza de las piernas\" cuando se pone de pie, sobre todo en la mañana y en la noche, y que tiene que esperar agarrado a algo. Ya casi no sale: el vecino le hace las compras y desde la última caída le tiene miedo al jardín y a la calle. Ve mal por cataratas en los dos ojos, en lista de espera hace dos años, y usa anteojos bifocales. Oye mal desde hace muchos años: dice que \"todos murmuran\", pide repetir por teléfono y no escucha el timbre; probó un audífono hace tiempo y lo dejó en el cajón porque \"silbaba\". Tiene un pitido en los dos oídos. Toma siete remedios y de algunos no sabe para qué son. Dice que no es vértigo: \"es que el cuerpo ya no me responde\".",
+      "historia": "{{-400}} Control de hipertensión: se agrega furosemida por edema de tobillos.\n{{-60}} Urgencia: caída en el jardín con erosiones; permaneció dos horas en el suelo; alta sin estudio.\n{{-30}} Médico de familia: \"caídas a repetición\"; se deriva a evaluación audiológica y del equilibrio.",
+      "hist": [
+        "hta",
+        "diabetes"
+      ],
+      "medicamentos": "Amlodipino 5 mg, enalapril 10 mg y furosemida 20 mg en la mañana; tamsulosina 0,4 mg y clonazepam 0,5 mg en la noche; metformina 850 mg dos veces al día; paracetamol cuando le duele la rodilla",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

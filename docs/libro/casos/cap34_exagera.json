@@ -1,0 +1,69 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "nihl_cronica",
+      "OI": "nihl_cronica"
+    },
+    "edad": 51,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 51 años y hace 24 opera una chancadora en una cantera. Hasta hace unos años usó protección auditiva solo a ratos. Cuenta que hace tres meses, durante una tronadura, \"se le fue el oído derecho\" y desde entonces dice no oír nada por ese lado y muy poco por el izquierdo. En la sala de espera contestó sin dificultad cuando lo llamaron de espaldas y en la entrevista no pide que le repitan las preguntas. Tiene un siseo en los dos oídos, que viene y va desde hace años. No tiene mareo, dolor ni secreción. Su caso está en trámite en la mutual y el médico laboral solicitó una evaluación audiológica médico-legal.",
+      "historia": "{{-2200}} Audiometría de ingreso al programa de vigilancia: caída en agudos bilateral compatible con ruido.\n{{-90}} Urgencia de la mutual tras una tronadura: otoscopía normal bilateral, sin otorragia; se indica control.\n{{-20}} Médico laboral: refiere sordera total derecha; se solicita evaluación audiológica médico-legal.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40,
+        20
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        60,
+        40,
+        20
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "estimulo": "Burst 500 Hz"
+    }
+  ]
+}

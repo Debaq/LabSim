@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 74,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 74 años, trabajó como costurera y vive con su marido. Hace unos ocho meses empezó a sentirse insegura al caminar: \"voy sobre algodón\", dice, y no siente bien el piso. No tiene vértigo ni lo ha tenido. De noche, para ir al baño, se agarra de las murallas, y en esos ocho meses se cayó tres veces, siempre a oscuras o con poca luz: en el pasillo, y en el jardín al anochecer, la última con una costilla fracturada. En la micro, cuando el vehículo va saltando, \"la calle se me mueve\" y no puede leer los letreros; sentada, leyendo, no tiene problema. Hace años tiene hormigueo y ardor en los pies, peor de noche. No recuerda haber recibido gentamicina ni haber tenido meningitis. Ve bien con sus lentes y la oftalmóloga le controla la retina cada año. Oye menos los agudos desde hace años y no usa audífono; no tiene pitido. No ha notado temblor ni dificultad para hablar. Está muy asustada: desde la costilla casi no camina sola.",
+      "historia": "{{-240}} Médico de familia: neuropatía diabética sensitiva; se indica gabapentina para el ardor de los pies.\n{{-90}} Urgencia: caída en el jardín al anochecer con fractura de costilla; alta con analgesia.\n{{-30}} Neurólogo: polineuropatía sensitiva distal simétrica compatible con diabética; resonancia de cerebro sin atrofia cerebelosa; sugiere evaluación vestibular por inestabilidad y oscilopsia.",
+      "hist": [
+        "diabetes",
+        "hta"
+      ],
+      "medicamentos": "Metformina 850 mg dos veces al día; enalapril 10 mg al día; atorvastatina 20 mg; gabapentina 300 mg en la noche",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

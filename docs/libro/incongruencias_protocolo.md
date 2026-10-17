@@ -260,6 +260,10 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 160 | 31 | Cuándo medir en la rehabilitación | DHI y batería solo al inicio y al final | se repite al subir de fase (detecta la meseta) | Hall 2022 | A | |
 | 161 | 31, H19 | Velocidad de los ejercicios de estabilización | "tan rápido como se pueda mantener el blanco nítido" | el protocolo como techo; recuadro: empezar lento | Strupp 2001 | P | |
 | 162 | 31 | Supresores e inactividad | no los menciona | se agregan (frenan la compensación) | Rascol 1995; Strupp 1998 | A · vacío | |
+| 163 | 32, H19 | Velocidad de marcha | no la mide | el protocolo; recuadro: < 0,8 m/s (o TUG > 15 s) marca riesgo; los 6 m del DGI permiten cronometrarla | Montero-Odasso 2022 (WFG) | A · vacío | |
+| 164 | 32, H19 | Examen vestibular previo (< 6 meses) | exigido antes de rehabilitar | vale para rehabilitación vestibular, no para un programa general de fuerza y equilibrio | WFG 2022 | P | |
+| 165 | H19, 32 | Corte del TUG | 13,5 s en H19 (fuente sin cotejar) | WFG usa > 15 s; unificar | WFG 2022 | A · verificar | |
+| 166 | 35 | Lectura del vasoconstrictor | "igual que en reposo = mecánica" | se aclara que es estructural, no necesariamente tabique (también la válvula); se leen las dos fases | Rhee 2010 | A | |
 <!-- tanda 10: -->
 
 ## Encontradas fuera del texto de los capítulos

@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 33,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 33 años, es repartidor y juega fútbol los fines de semana. Desde que se quebró la nariz en una jugada, a los 19 años, siente la fosa derecha tapada casi siempre; la izquierda \"a veces\", sobre todo cuando se resfría o cuando duerme de ese lado. De noche ronca si duerme de espaldas y despierta con la boca seca. No tiene estornudos ni picazón, no hay una estación del año peor que otra y no ha tenido sangrados. Hace diez días usó por última vez un descongestionante en spray: \"esa noche se abrió un poco, pero la derecha nunca pasa del todo\". Quiere saber si su problema se arregla con remedios o con una operación.",
+      "historia": "{{-5000}} Fractura nasal jugando fútbol; no consultó ni se redujo.\n{{-200}} Atención primaria: \"desvío de tabique\"; se indica solución salina, sin mejoría. Se pide evaluación funcional de la nariz.",
+      "hist": [],
+      "medicamentos": "Oximetazolina en spray de forma ocasional; la última vez hace diez días",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

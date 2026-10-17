@@ -1,0 +1,860 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "normal",
+   "OI": "normal"
+  },
+  "edad": 52,
+  "sexo": "mujer",
+  "anamnesis": {
+   "otros": "Tiene 52 años y es profesora de educación física. Le hicieron una rinoplastia de reducción a los 27 años. Desde hace unos tres años siente que \"la nariz se le pega por los lados\" cuando respira fuerte: al correr, al subir cuestas en bicicleta y en las noches, cuando se da vuelta en la cama. Sentada y tranquila respira bien. Descubrió que si se jala la mejilla hacia el lado con un dedo, entra más aire, y que una tira nasal le ayuda de noche. No tiene estornudos ni picazón ni secreción, y no varía con las estaciones. Un corticoide nasal por dos meses no le cambió nada.",
+   "historia": "{{-9500}} Rinoplastia de reducción del dorso, sin complicaciones.\n{{-150}} Médico general: rinitis, corticoide nasal por 8 semanas sin cambios; se deriva a otorrinolaringología.",
+   "hist": [],
+   "medicamentos": "Corticoide nasal (lo dejó por no notar cambios)",
+   "cirugias": "Rinoplastia de reducción a los 27 años"
+  }
+ },
+ "semilla": 2710120653,
+ "data": {
+  "gender": 1,
+  "id": 9653,
+  "Aerea": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ]
+  ],
+  "Osea": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ]
+  ],
+  "LDL": [
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 52,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.81,
+   0.94,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 35,
+    "percentage": 100
+   },
+   {
+    "int": 35,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   0,
+   0
+  ],
+  "SRT": [
+   5,
+   5
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     90,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     95
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Corticoide nasal (lo dejó por no notar cambios)",
+   "cirugias": "Rinoplastia de reducción a los 27 años",
+   "otros": "Tiene 52 años y es profesora de educación física. Le hicieron una rinoplastia de reducción a los 27 años. Desde hace unos tres años siente que \"la nariz se le pega por los lados\" cuando respira fuerte: al correr, al subir cuestas en bicicleta y en las noches, cuando se da vuelta en la cama. Sentada y tranquila respira bien. Descubrió que si se jala la mejilla hacia el lado con un dedo, entra más aire, y que una tira nasal le ayuda de noche. No tiene estornudos ni picazón ni secreción, y no varía con las estaciones. Un corticoide nasal por dos meses no le cambió nada.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Mónica",
+     "edad": 52,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 80,
+     "confiabilidad": 69,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 95
+  },
+  "ABR": {
+   "OD": {
+    "type": "normal",
+    "umbral": 15,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 25,
+     "tone_burst_1000Hz": 20,
+     "tone_burst_2000Hz": 15,
+     "tone_burst_4000Hz": 15,
+     "nb_ce_chirp_ls_500Hz": 20,
+     "nb_ce_chirp_ls_1000Hz": 15,
+     "nb_ce_chirp_ls_2000Hz": 10,
+     "nb_ce_chirp_ls_4000Hz": 15,
+     "click": 15,
+     "ce_chirp": 10,
+     "ce_chirp_ls": 10
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 35,
+     "tone_burst_2000Hz": 30,
+     "tone_burst_4000Hz": 30,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 30,
+     "nb_ce_chirp_ls_2000Hz": 25,
+     "nb_ce_chirp_ls_4000Hz": 30,
+     "click": 30,
+     "ce_chirp": 25,
+     "ce_chirp_ls": 25
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.23,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1715,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": 0.03
+     },
+     "onda_III": {
+      "lat": 0,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": -0.02,
+      "amp": 0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 15,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 25,
+     "tone_burst_1000Hz": 20,
+     "tone_burst_2000Hz": 15,
+     "tone_burst_4000Hz": 15,
+     "nb_ce_chirp_ls_500Hz": 20,
+     "nb_ce_chirp_ls_1000Hz": 15,
+     "nb_ce_chirp_ls_2000Hz": 10,
+     "nb_ce_chirp_ls_4000Hz": 15,
+     "click": 15,
+     "ce_chirp": 10,
+     "ce_chirp_ls": 10
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 35,
+     "tone_burst_2000Hz": 30,
+     "tone_burst_4000Hz": 30,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 30,
+     "nb_ce_chirp_ls_2000Hz": 25,
+     "nb_ce_chirp_ls_4000Hz": 30,
+     "click": 30,
+     "ce_chirp": 25,
+     "ce_chirp_ls": 25
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.22,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1647,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": -0.03
+     },
+     "onda_III": {
+      "lat": 0.01,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.01,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 1.4,
+    "sello_pct": 96,
+    "variabilidad_db": 1.5,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 0.6,
+    "sello_pct": 96,
+    "variabilidad_db": 1.5,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T04:28:25+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Mónica Olga",
+   "apellido": "Estrada Rodríguez",
+   "rut": "12657555",
+   "fecha_nac": "28-06-1974"
+  },
+  "historia_clinica": "{{-9500}} Rinoplastia de reducción del dorso, sin complicaciones.\r\n{{-150}} Médico general: rinitis, corticoide nasal por 8 semanas sin cambios; se deriva a otorrinolaringología."
+ }
+}

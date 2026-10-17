@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 79,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 79 años, es profesora básica jubilada y vive con su hija. En los últimos cuatro meses se ha caído dos veces. La primera fue de noche: se levantó de la cama para ir al baño, \"se me fue el piso\", se agarró del velador y terminó sentada en el suelo, sin golpe. La segunda fue hace cuatro semanas, en la cocina, al estirar el cuello para mirar una repisa alta: cayó de lado y se fracturó la muñeca izquierda. Insiste en que no gira nada: \"no es vértigo, es que se me va el piso un ratito\"; son unos segundos y después queda bien. Le pasa también al agacharse a atarse los zapatos y al darse vuelta en la cama, donde a veces se marea sin caerse. Sentada o caminando no se siente mareada. No ha perdido el conocimiento ni tiene palpitaciones ni dolor de pecho. Oye menos desde hace años, sobre todo en grupos y con la televisión, y tiene un siseo en los dos oídos que va y viene; nunca ha usado audífono. Desde la fractura no sale sola: \"me da miedo que me pase en la calle\". Su médico le dijo que era \"la edad\".",
+      "historia": "{{-28}} Urgencia: caída en la cocina con fractura de radio distal izquierdo; yeso por seis semanas; alta.\n{{-10}} Médico de familia: \"caída por mareo, propio de la edad\". Se solicita evaluación audiológica y del equilibrio.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg al día; alendronato 70 mg a la semana; carbonato de calcio con vitamina D",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

@@ -1,0 +1,874 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "presbiacusia",
+   "OI": "presbiacusia"
+  },
+  "edad": 86,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada",
+   "OI": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 86 años, es electricista jubilado y vive solo desde que enviudó hace tres años; una hija lo llama cada noche. En el último año se ha caído tres veces. Dos fueron en la casa: de noche, camino al baño, y al pararse del excusado. La tercera fue en el jardín, hace dos meses: se cayó al agacharse a arrancar una maleza y no pudo levantarse por unas dos horas, hasta que un vecino lo oyó. No perdió el conocimiento que él recuerde. Cuenta que \"se le nubla la vista y se le va la fuerza de las piernas\" cuando se pone de pie, sobre todo en la mañana y en la noche, y que tiene que esperar agarrado a algo. Ya casi no sale: el vecino le hace las compras y desde la última caída le tiene miedo al jardín y a la calle. Ve mal por cataratas en los dos ojos, en lista de espera hace dos años, y usa anteojos bifocales. Oye mal desde hace muchos años: dice que \"todos murmuran\", pide repetir por teléfono y no escucha el timbre; probó un audífono hace tiempo y lo dejó en el cajón porque \"silbaba\". Tiene un pitido en los dos oídos. Toma siete remedios y de algunos no sabe para qué son. Dice que no es vértigo: \"es que el cuerpo ya no me responde\".",
+   "historia": "{{-400}} Control de hipertensión: se agrega furosemida por edema de tobillos.\n{{-60}} Urgencia: caída en el jardín con erosiones; permaneció dos horas en el suelo; alta sin estudio.\n{{-30}} Médico de familia: \"caídas a repetición\"; se deriva a evaluación audiológica y del equilibrio.",
+   "hist": [
+    "hta",
+    "diabetes"
+   ],
+   "medicamentos": "Amlodipino 5 mg, enalapril 10 mg y furosemida 20 mg en la mañana; tamsulosina 0,4 mg y clonazepam 0,5 mg en la noche; metformina 850 mg dos veces al día; paracetamol cuando le duele la rodilla",
+   "cirugias": ""
+  }
+ },
+ "semilla": 2990932005,
+ "data": {
+  "gender": 0,
+  "id": 9005,
+  "Aerea": [
+   [
+    20,
+    20
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Osea": [
+   [
+    20,
+    20
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "LDL": [
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    20,
+    20
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    20,
+    20
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 86,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.73,
+   1.44,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 70,
+    "percentage": 64
+   },
+   {
+    "int": 70,
+    "percentage": 68
+   }
+  ],
+  "SDT": [
+   20,
+   20
+  ],
+  "SRT": [
+   25,
+   25
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     95,
+     90
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     95
+    ],
+    [
+     95,
+     90
+    ],
+    [
+     95,
+     100
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": true,
+    "hta": true
+   },
+   "medicamentos": "Amlodipino 5 mg, enalapril 10 mg y furosemida 20 mg en la mañana; tamsulosina 0,4 mg y clonazepam 0,5 mg en la noche; metformina 850 mg dos veces al día; paracetamol cuando le duele la rodilla",
+   "cirugias": "",
+   "otros": "Tiene 86 años, es electricista jubilado y vive solo desde que enviudó hace tres años; una hija lo llama cada noche. En el último año se ha caído tres veces. Dos fueron en la casa: de noche, camino al baño, y al pararse del excusado. La tercera fue en el jardín, hace dos meses: se cayó al agacharse a arrancar una maleza y no pudo levantarse por unas dos horas, hasta que un vecino lo oyó. No perdió el conocimiento que él recuerde. Cuenta que \"se le nubla la vista y se le va la fuerza de las piernas\" cuando se pone de pie, sobre todo en la mañana y en la noche, y que tiene que esperar agarrado a algo. Ya casi no sale: el vecino le hace las compras y desde la última caída le tiene miedo al jardín y a la calle. Ve mal por cataratas en los dos ojos, en lista de espera hace dos años, y usa anteojos bifocales. Oye mal desde hace muchos años: dice que \"todos murmuran\", pide repetir por teléfono y no escucha el timbre; probó un audífono hace tiempo y lo dejó en el cajón porque \"silbaba\". Tiene un pitido en los dos oídos. Toma siete remedios y de algunos no sabe para qué son. Dice que no es vértigo: \"es que el cuerpo ya no me responde\".",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Hugo",
+     "edad": 86,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 45,
+     "confiabilidad": 67,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Pitido",
+   "frecuencia": 8000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 105
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 50,
+     "tone_burst_2000Hz": 75,
+     "tone_burst_4000Hz": 115,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 45,
+     "nb_ce_chirp_ls_2000Hz": 70,
+     "nb_ce_chirp_ls_4000Hz": 115,
+     "click": 95,
+     "ce_chirp": 75,
+     "ce_chirp_ls": 75
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.28,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2027,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": -0.11
+     },
+     "onda_III": {
+      "lat": 0.07,
+      "amp": -0.06
+     },
+     "onda_V": {
+      "lat": 0.1,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 50,
+     "tone_burst_2000Hz": 70,
+     "tone_burst_4000Hz": 110,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 45,
+     "nb_ce_chirp_ls_2000Hz": 65,
+     "nb_ce_chirp_ls_4000Hz": 110,
+     "click": 95,
+     "ce_chirp": 70,
+     "ce_chirp_ls": 70
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.18,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2193,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.09,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.11,
+      "amp": -0.04
+     },
+     "onda_V": {
+      "lat": 0.07,
+      "amp": 0.04
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 6,
+     "1000": 24,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.7,
+    "sello_pct": 79,
+    "variabilidad_db": 1.6,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 4.8,
+     "1000": 21.9,
+     "1500": 38.6,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1,
+    "sello_pct": 83,
+    "variabilidad_db": 2.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T04:33:16+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Hugo Álvaro",
+   "apellido": "Gómez Herrera",
+   "rut": "2491473",
+   "fecha_nac": "27-07-1940"
+  },
+  "historia_clinica": "{{-400}} Control de hipertensión: se agrega furosemida por edema de tobillos.\r\n{{-60}} Urgencia: caída en el jardín con erosiones; permaneció dos horas en el suelo; alta sin estudio.\r\n{{-30}} Médico de familia: \"caídas a repetición\"; se deriva a evaluación audiológica y del equilibrio."
+ }
+}

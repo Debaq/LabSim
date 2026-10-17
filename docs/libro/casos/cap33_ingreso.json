@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "muesca_4k"
+    },
+    "edad": 27,
+    "sexo": "hombre",
+    "semilla": 3303,
+    "anamnesis": {
+      "otros": "Tiene 27 años y postula a un puesto de mecánico en una faena minera. Es tirador deportivo desde los 17 y sale a cazar con escopeta un par de veces al año; durante años disparó sin protección, y ahora usa tapones \"a veces\". Es diestro. Hace cinco años, tras una temporada de tiro, quedó con un pitido agudo en el oído izquierdo que no se le ha ido; nunca consultó. Dice que oye perfecto: en conversación no tiene problemas, aunque por teléfono usa el oído derecho. No ha tenido mareos, dolor ni secreción. En el examen de ingreso de hoy, hecho con reposo de más de doce horas, el oído izquierdo salió muy distinto del derecho.",
+      "historia": "{{-1825}} Temporada de tiro con pitido persistente en el oído izquierdo; no consultó.\n{{-1}} Examen de ingreso a la faena: audiometría de vía aérea con diferencia marcada entre los dos oídos; se deriva a evaluación diagnóstica.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 29,
+    "sexo": "hombre",
+    "semilla": 3302,
+    "anamnesis": {
+      "otros": "Tiene 29 años y hace tres es operador de un molino de bolas en una planta de molienda. Su audiometría de ingreso fue normal. Usa orejeras y tapones juntos \"cuando el jefe pasa\", y a veces solo las orejeras. En el control de este mes, tomado en la sala de la planta al terminar el turno, salió con cambio en los dos oídos; se repitió al tiro, reinstruido y con los fonos recolocados, y el cambio siguió. Hoy vuelve a la cámara a las 8 de la mañana: su último turno terminó anoche a las 18 horas y desde entonces estuvo en su casa, sin ruido. Hace unos meses le apareció un siseo en los dos oídos que antes se le iba en la noche; ahora lo nota también en la mañana. Entiende bien en silencio, pero en la planta, con todo andando, le cuesta seguir a los compañeros.",
+      "historia": "{{-1095}} Audiometría de ingreso: 0 dB HL en todas las frecuencias, los dos oídos.\n{{-365}} Control anual en cámara: sin cambios respecto de la base.\n{{-14}} Control en terreno al final del turno: cambio en 2, 3, 4 y 6 kHz de los dos oídos; se repite y persiste. Se cita a confirmación en cámara con reposo.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

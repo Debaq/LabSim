@@ -1,0 +1,58 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "meniere"
+    },
+    "edad": 54,
+    "sexo": "hombre",
+    "grado": {
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 54 años y hace 26 trabaja como operador de prensa en una metalmecánica, con protección auditiva a ratos. Desde hace año y medio tiene episodios de vértigo con náuseas que duran horas, con sensación de oído tapado y un zumbido grave, siempre en el oído izquierdo; entre episodios la audición de ese lado \"sube y baja\". El derecho lo oye bien. Atribuye todo al ruido de la planta: \"la empresa me dejó sordo de este oído\", y solicita que se le califique como enfermedad profesional.",
+      "historia": "{{-1100}} Audiometría de vigilancia: umbrales normales en ambos oídos con leve caída en 6 y 8 kHz.\n{{-120}} Primera crisis de vértigo con náuseas, unas tres horas; urgencia sin focalidad neurológica.\n{{-30}} Audiometría de control con pérdida de graves en el OI; se solicita evaluación audiológica médico-legal.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

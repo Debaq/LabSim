@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 41,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 41 años y es contadora. Hace ocho meses tuvo un resfrío fuerte, con fiebre, y desde entonces siente la nariz tapada \"las veinticuatro horas, de los dos lados\". Dice que no entra aire y que es lo peor que le ha pasado, aunque no respira por la boca, duerme sin ronquidos y trota tres veces por semana sin problema. Nota que los olores le llegan menos que antes. No tiene estornudos ni picazón, no ha tenido golpes ni cirugías de la nariz y no usa ningún spray nasal. Ha dejado de ir a reuniones por la incomodidad.",
+      "historia": "{{-240}} Cuadro respiratorio alto febril; recuperación completa salvo la sensación de nariz tapada.\n{{-60}} Médico general: examen sin hallazgos; se indican lavados nasales, sin mejoría. Se solicita evaluación funcional de la nariz.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

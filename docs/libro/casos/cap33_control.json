@@ -1,0 +1,32 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "muesca_4k",
+      "OI": "muesca_4k"
+    },
+    "edad": 41,
+    "sexo": "hombre",
+    "semilla": 3301,
+    "anamnesis": {
+      "otros": "Tiene 41 años y hace ocho trabaja de operario en un aserradero, en la línea de corte. Entró a los 33 y su audiometría de ingreso fue normal. El primer año lo controlaron, pero después cambió de empresa contratista y de turno, y nadie más le pidió el examen hasta ahora. Usa tapones de espuma, \"cuando se acuerda\": a veces se los saca para hablar con el compañero o porque le pican. Fuera del trabajo no tiene ruido: no dispara, no va a recitales y no escucha música con audífonos. No tiene pitido ni mareos, y dice que oye bien; su señora le comenta que sube la tele. La audiometría de hoy se tomó en cámara, con más de doce horas sin ruido y la última exposición anotada en la ficha.",
+      "historia": "{{-2920}} Audiometría de ingreso a la empresa: umbrales de 0 dB HL en todas las frecuencias, los dos oídos.\n{{-2555}} Control anual: sin cambios respecto de la base.\n{{-30}} Control periódico en terreno: cambio en 3, 4 y 6 kHz de los dos oídos; se cita a confirmación en cámara.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    }
+  ]
+}

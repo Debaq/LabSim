@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 52,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 52 años y es profesora de educación física. Le hicieron una rinoplastia de reducción a los 27 años. Desde hace unos tres años siente que \"la nariz se le pega por los lados\" cuando respira fuerte: al correr, al subir cuestas en bicicleta y en las noches, cuando se da vuelta en la cama. Sentada y tranquila respira bien. Descubrió que si se jala la mejilla hacia el lado con un dedo, entra más aire, y que una tira nasal le ayuda de noche. No tiene estornudos ni picazón ni secreción, y no varía con las estaciones. Un corticoide nasal por dos meses no le cambió nada.",
+      "historia": "{{-9500}} Rinoplastia de reducción del dorso, sin complicaciones.\n{{-150}} Médico general: rinitis, corticoide nasal por 8 semanas sin cambios; se deriva a otorrinolaringología.",
+      "hist": [],
+      "medicamentos": "Corticoide nasal (lo dejó por no notar cambios)",
+      "cirugias": "Rinoplastia de reducción a los 27 años"
+    }
+  },
+  "figuras": []
+}

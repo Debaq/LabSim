@@ -1,0 +1,45 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "nihl_cronica",
+      "OI": "nihl_cronica"
+    },
+    "edad": 63,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 63 años y trabajó 31 años en una fundición, junto a los hornos y las moldeadoras, hasta que se jubiló hace ocho. Usó protección auditiva de forma irregular. Dice que ahora entiende mal en reuniones familiares y en la televisión, y que nunca ha usado audífonos. No tiene pitido, mareo, dolor ni secreción de oídos. Pide una reevaluación de su audición porque su mutual le reconoció una incapacidad al jubilar y quiere saber si hoy es mayor.",
+      "historia": "{{-2920}} Audiometría de egreso al jubilar: caída bilateral en agudos, compatible con ruido.\n{{-1500}} Sin controles audiológicos desde entonces.\n{{-30}} Solicitud de reevaluación a la mutual: se pide audiometría con estudio objetivo.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}
