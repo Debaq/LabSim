@@ -362,8 +362,9 @@
     // escrito la patología de este oído (ver case/generator.js).
     window.abrAutofill = autofillAbr;
 
-    // Vista previa en vivo: serie 100->0 dBnHL, version limpia (sin ruido,
-    // sin promediacion, sin filtros) de ABRGenerator.calculate_wave_parameters
+    // Vista previa en vivo: serie 100->0 dBnHL, version limpia (sin
+    // promediacion ni filtros; solo un ruido de fondo leve para que las dos
+    // replicas de cada nivel no salgan identicas) de ABRGenerator.calculate_wave_parameters
     // + build_target_curve (ver src/abr/ABR_generator.py) restringida a
     // I/III/V -- las mismas ondas que el formulario deja editar. Solo para
     // que el docente vea el efecto de sus valores, no reemplaza al generador
@@ -473,6 +474,45 @@
         return 1.0 - Math.exp(-slEff / tau);
     }
 
+    // Cada nivel se dibuja dos veces, como en la ficha PDF
+    // (CaseSheetPdf::nivelesAbr): el equipo repite la intensidad para
+    // confirmar que la V es reproducible y no un artefacto de una pasada.
+    // Las dos pasadas llevan un ruido de fondo distinto pero fijo (semilla
+    // por oido, nivel y replica): sin el, saldrian pixel a pixel iguales, y
+    // si fuera aleatorio la previa temblaria con cada tecla. Es la misma
+    // textura que CaseWaveforms::ruidoDeFondo (suma de senos de fase
+    // sorteada), en proporcion a la onda mas grande de la serie.
+    var ABR_PREVIEW_REPLICAS = 2;
+    var ABR_RUIDO_FRACCION = 0.07;
+    var ABR_RUIDO_COMPONENTES = [
+        { ciclos: 0.6, peso: 1.00 }, { ciclos: 1.3, peso: 0.80 },
+        { ciclos: 2.4, peso: 0.55 }, { ciclos: 4.5, peso: 0.35 },
+        { ciclos: 8.0, peso: 0.20 }
+    ];
+    function ruidoDeFondo(semilla) {
+        var estado = semilla >>> 0;
+        var fases = ABR_RUIDO_COMPONENTES.map(function () {
+            estado = (Math.imul(estado, 1664525) + 1013904223) >>> 0;
+            return estado / 4294967296 * 2 * Math.PI;
+        });
+        var pesoTotal = ABR_RUIDO_COMPONENTES.reduce(function (a, c) { return a + c.peso; }, 0);
+        // t en ms sobre la ventana de 12 ms; devuelve -1..1 aprox.
+        return function (t) {
+            var v = 0;
+            ABR_RUIDO_COMPONENTES.forEach(function (c, i) {
+                v += c.peso * Math.sin(2 * Math.PI * c.ciclos * t / 12 + fases[i]);
+            });
+            return v / pesoTotal;
+        };
+    }
+    function semillaReplica(lado, intensity, replica) {
+        var texto = lado + '|' + intensity + '|' + replica, h = 2166136261;
+        for (var i = 0; i < texto.length; i++) {
+            h = Math.imul(h ^ texto.charCodeAt(i), 16777619);
+        }
+        return h >>> 0;
+    }
+
     function gaussian(t, center, amp, sigma) {
         var z = (t - center) / sigma;
         return amp * Math.exp(-0.5 * z * z);
@@ -518,9 +558,9 @@
     // Traza la suma de las 3 gaussianas y, de paso, devuelve la altura del
     // trazo en la latencia de cada onda: ahi va el marcador, asi la marca
     // toca la curva en vez de flotar.
-    function buildRow(values, xPos, rowBaseY, ampScale) {
+    function buildRow(values, xPos, rowBaseY, ampScale, ruido) {
         function yAt(t) {
-            var y = 0;
+            var y = ruido ? ruido(t) : 0;
             ['I', 'III', 'V'].forEach(function (wave) {
                 var v = values[wave];
                 // Una onda por debajo del umbral de visibilidad no se
@@ -582,7 +622,10 @@
         // Piso: sin esto, una serie sin respuesta amplificaria el residuo
         // hasta llenar la fila y una linea plana pareceria una onda.
         if (ampMax < AMP_SCALE_FLOOR_UV) { ampMax = AMP_SCALE_FLOOR_UV; }
-        var ampScale = (rowHeight * 0.62) / ampMax;
+        // Las dos replicas comparten la fila: cada una tiene menos alto que
+        // cuando habia un solo trazo.
+        var ampScale = (rowHeight * 0.42) / ampMax;
+        var ruidoUv = ampMax * ABR_RUIDO_FRACCION;
 
         var svg = '<svg viewBox="0 0 ' + totalWidth + ' ' + totalHeight + '" xmlns="http://www.w3.org/2000/svg">';
 
@@ -630,7 +673,9 @@
         var trazos = '';
         intensidades.forEach(function (intensity, i) {
             var rowTop = plotTop + i * rowHeight;
-            var rowBaseY = rowTop + rowHeight * 0.72;
+            // Base de la primera replica; la segunda va pegada debajo.
+            var rowBaseY = rowTop + rowHeight * 0.52;
+            var gapReplica = rowHeight * 0.34;
             var isThresholdRow = Math.abs(intensity - Math.round(threshold / 10) * 10) < 0.01;
             if (isThresholdRow) {
                 svg += '<rect x="0" y="' + rowTop + '" width="' + totalWidth + '" height="' + rowHeight +
@@ -658,8 +703,17 @@
                 }
             }
 
-            var fila = buildRow(serie[i], xPos, rowBaseY, ampScale);
-            trazos += '<polyline points="' + fila.points + '" fill="none" stroke="' + color + '" stroke-width="1"></polyline>';
+            var fila = null;
+            for (var r = 0; r < ABR_PREVIEW_REPLICAS; r++) {
+                var ruidoBase = ruidoDeFondo(semillaReplica(lado, intensity, r));
+                var replica = buildRow(serie[i], xPos, rowBaseY + r * gapReplica, ampScale,
+                    function (t) { return ruidoBase(t) * ruidoUv; });
+                trazos += '<polyline points="' + replica.points + '" fill="none" stroke="' + color +
+                    '" stroke-width="' + (r === 0 ? 1 : 0.8) + '"' + (r === 0 ? '' : ' stroke-opacity="0.75"') + '></polyline>';
+                // Marcas y seguimiento sobre la primera pasada: la segunda
+                // esta para comparar a ojo, no para leer latencias dos veces.
+                if (r === 0) { fila = replica; }
+            }
             ['I', 'III', 'V'].forEach(function (wave) {
                 var pico = fila.picos[wave];
                 if (!pico.visible) { return; }
