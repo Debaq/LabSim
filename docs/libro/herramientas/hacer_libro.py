@@ -74,15 +74,28 @@ BAJADA = 'Un libro de casos clínicos'
 # editor destacado en la portada); el editor va primero y rotulado en la
 # portada interior y los créditos. El nombre
 # completo, en la portada interior, los créditos y la página de autores.
+# Títulos (él, 2026-10-17: "todos tecnólogos médicos"); grados y afiliación
+# leídos de cada ORCID público. falta = lo que todavía no se sabe.
+UACH_PM = 'Escuela de Tecnología Médica, Universidad Austral de Chile, Sede Puerto Montt'
 AUTORES = {
     'baier': dict(nombre='Nicolás', apellidos='Baier-Quezada', rol='Editor',
-                  areas='Electrofisiología, física acústica y salud ocupacional', orcid='0000-0003-2818-0990'),
-    'casanova': dict(nombre='Geovana', apellidos='Casanova-Torres', areas='Audífonos y procesamiento auditivo central'),
-    'catipillan': dict(nombre='Benjamín', apellidos='Catipillán-Ulloa', rol='Revisor general de los casos clínicos'),
-    'lopez': dict(nombre='Fernanda', apellidos='López-Moncada', areas='Fisiología e histología'),
-    'poza': dict(nombre='Pablo', apellidos='Poza-Nauto', areas='Evaluación y rehabilitación vestibular'),
-    'uribe': dict(nombre='Vanessa', apellidos='Uribe-Hernández', areas='Audiología y rinología'),
-    'vargas': dict(nombre='Cristina', apellidos='Vargas-Bustamante', areas='Audiología y electrofisiología'),
+                  areas='Electrofisiología, física acústica y salud ocupacional',
+                  titulo=['Tecnólogo Médico', 'Magíster en Neurociencias Cognitivas', 'Doctor (c) en Bioingeniería'],
+                  afiliacion=UACH_PM, orcid='0000-0003-2818-0990'),
+    'casanova': dict(nombre='Geovana', apellidos='Casanova-Torres', areas='Audífonos y procesamiento auditivo central',
+                     titulo=['Tecnóloga Médica'], afiliacion=UACH_PM, orcid='0009-0009-7163-8099'),
+    'catipillan': dict(nombre='Benjamín', apellidos='Catipillán-Ulloa', rol='Revisor general de los casos clínicos',
+                       titulo=['Tecnólogo Médico'], orcid='0009-0007-1411-3638', falta='afiliación'),
+    'lopez': dict(nombre='Fernanda', apellidos='López-Moncada', areas='Fisiología e histología',
+                  titulo=['Tecnóloga Médica', 'Doctora en Ciencias Biomédicas'],
+                  afiliacion=UACH_PM, orcid='0000-0002-0810-7684'),
+    'poza': dict(nombre='Pablo', apellidos='Poza-Nauto', areas='Evaluación y rehabilitación vestibular',
+                 titulo=['Tecnólogo Médico'], afiliacion=UACH_PM, orcid='0009-0006-1364-4990'),
+    'uribe': dict(nombre='Vanessa', apellidos='Uribe-Hernández', areas='Audiología y rinología',
+                  titulo=['Tecnóloga Médica', 'Magíster'], afiliacion=UACH_PM, orcid='0009-0003-0795-7921',
+                  falta='área del magíster'),
+    'vargas': dict(nombre='Cristina', apellidos='Vargas-Bustamante', areas='Audiología y electrofisiología',
+                   titulo=['Tecnóloga Médica'], falta='afiliación y ORCID'),
 }
 EDITOR = 'baier'
 REVISOR_CASOS = 'catipillan'   # firma la revisión de los casos de los capítulos clínicos
@@ -753,6 +766,10 @@ h1.prelim {{ font: 700 24pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; pa
 .autor {{ margin: 0 0 6mm; break-inside: avoid; padding-left: 3mm; border-left: 1.5pt solid #E7A7BA; }}
 .autor-n {{ font: 400 13pt Fraunces, serif; color: #24101a; margin: 0 0 1mm; }}
 .autor-n span {{ font-weight: 700; }}
+.autor p {{ text-align: left; hyphens: none; }}
+.autor p {{ text-align: left; hyphens: none; }}
+.autor-t {{ font: italic 8.6pt/1.4 'Plus Jakarta Sans'; color: #2a1a20; margin: 0; }}
+.autor-a {{ font: 8.2pt/1.4 'Plus Jakarta Sans'; color: #6f5a63; margin: 0 0 1.2mm; }}
 .autor-d {{ font: 600 8.6pt/1.4 'Plus Jakarta Sans'; color: #8e2a4a; margin: 0; }}
 .autor-c {{ font: 8.2pt/1.4 'Plus Jakarta Sans'; color: #6f5a63; margin: .8mm 0 0; }}
 .autor .pendiente {{ margin-top: 1.5mm; }}
@@ -1017,11 +1034,14 @@ def paginas_iniciales(capitulos):
         datos = [x for x in (a.get('rol'), a.get('areas')) if x]
         caps = capitulos_de(k)
         return (f'<div class="autor"><p class="autor-n">{a["nombre"]} <span>{a["apellidos"]}</span></p>'
+                + f'<p class="autor-t">{". ".join(a.get("titulo", []))}</p>'
+                + (f'<p class="autor-a">{a["afiliacion"]}</p>' if a.get('afiliacion') else '')
                 + ''.join(f'<p class="autor-d">{x}</p>' for x in datos)
                 + (f'<p class="autor-c">Capítulos: {caps}</p>' if caps else '')
                 + (f'<p class="autor-c">Revisó los casos de los capítulos 1 a 36</p>' if k == REVISOR_CASOS else '')
                 + (f'<p class="autor-c">ORCID {a["orcid"]}</p>' if a.get('orcid') else '')
-                + '<div class="pendiente"><span>Falta texto</span> título profesional y afiliación</div></div>')
+                + (f'<div class="pendiente"><span>Falta texto</span> {a["falta"]}</div>' if a.get('falta') else '')
+                + '</div>')
     autores = ('<section class="preliminar"><h1 class="prelim">Autoras y autores</h1><div class="autores-lista">'
                + ''.join(ficha_autor(k) for k in orden_autores()) + '</div></section>')
     prelim = {f.stem: capitulo(f.read_text(encoding='utf-8')) for f in sorted(PRELIMINARES.glob('*.md'))}

@@ -21,7 +21,8 @@ Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
   interior, créditos y página de autores con nombre completo, áreas y
   capítulos; firma bajo el título de cada capítulo, autores en el índice y
   "Cómo citar este capítulo" al final. Falta: título profesional y afiliación
-  de cada uno (sale como "Falta texto" en la página de autores).
+  sacados de los ORCID (2026-10-17). Faltan: afiliación de Catipillán-Ulloa, afiliación
+  y ORCID de Vargas-Bustamante, área del magíster de Uribe-Hernández.
 - **Una sola edición:** la guía del docente (`:::docente`) va dentro de cada
   caso.
 - **Simuladores de apoyo:** LabSim (audición, VEMP); trainHIT y labyrinthus3d
