@@ -167,7 +167,8 @@ En el hidrops la endolinfa aumenta y la rampa media se **distiende**: la membran
 
 <!-- verificar: el desplazamiento de la membrana basilar hacia la rampa timpánica como causa del PS aumentado, y que el ápice se distiende primero; confirmar en el texto de Salt y Plontke 2010 y de Ferraro y Durrant 2006. -->
 
-![Corte de una espira de la cóclea en dos situaciones. A la izquierda, normal: rampa vestibular arriba, rampa media triangular con la membrana de Reissner recta, órgano de Corti sobre la membrana basilar y rampa timpánica abajo; la estría vascular en la pared lateral. A la derecha, hidrops: la membrana de Reissner abombada hacia la rampa vestibular, la rampa media agrandada y la membrana basilar levemente desplazada hacia la rampa timpánica. Endolinfa en un color y perilinfa en otro, rotulados.](ilustraciones/cap09-hidrops.png)
+:::imagen ilustraciones/cap09-hidrops.svg ancho=92% Corte de una espira de la cóclea. A, normal: la rampa media (endolinfa) es un triángulo entre la membrana de Reissner, la membrana basilar y la estría vascular. B, hidrops: la endolinfa aumenta, la membrana de Reissner se abomba hacia la rampa vestibular y la rampa media se agranda. Esquema propio, no a escala.
+:::
 
 El hidrops empieza y pesa más en el **ápice**, que es donde se codifican los graves. Por eso la primera pérdida es **ascendente**: graves peores que agudos (→ H3). La cóclea sigue comportándose como cóclea, con reclutamiento, y la discriminación se mantiene más o menos acorde a la curva mientras la pérdida no avance. Del laberinto posterior, el primero en comprometerse suele ser el sáculo, y después el utrículo y los canales (Young, 2013).
 

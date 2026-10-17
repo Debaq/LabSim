@@ -16,8 +16,10 @@ Las normales se eligieron con el triángulo luminoso hacia abajo y a la
 izquierda (las 7), como corresponde a un oído izquierdo. El banco no registra
 el lado de cada foto: es una elección por el aspecto, no un dato del banco.
 
-Sin foto: cuerpo extraño, atresia y carcinoma del conducto (ningún banco
-abierto los trae); la otoscopía se describe en el texto del caso.
+Sin foto de otoscopía: cuerpo extraño, atresia y carcinoma del conducto (ningún
+banco abierto los trae); la otoscopía se describe en el texto del caso. La
+atresia tiene fotos clínicas del pabellón (vista externa) en la sección y en el
+caso: ver `ilustraciones/CREDITOS_IMG_MALFORMACIONES.md`.
 
 - **Polat** — Polat K. eardrum. figshare; 2021. doi:10.6084/m9.figshare.13648166.v1. CC BY 4.0.
 - **Viscaino** — Viscaino M, Auat Cheein F. Ear imagery database. figshare; 2020. doi:10.6084/m9.figshare.11886630.v1. CC0 1.0.

@@ -40,7 +40,10 @@ El pabellón es una lámina de **cartílago elástico** cubierta de piel, que se
 - La **concha** es la cavidad que rodea la entrada del conducto.
 - El **trago** (adelante) y el **antitrago** (atrás y abajo) son dos salientes que acotan la entrada.
 
-**La microtia** es un pabellón pequeño o malformado, y casi siempre se acompaña de un conducto estrecho o ausente (atresia; → cap. 1). Va de alteraciones leves hasta la ausencia total del pabellón (Luquetti y cols., 2012) y se gradúa según cuánto queda de las estructuras: en el grado más leve el pabellón es pequeño pero conserva casi todos sus relieves; en los intermedios queda un remanente de cartílago con lóbulo; y en el extremo no hay pabellón (anotia)<!-- verificar: la descripción de los 4 grados (clasificación de Marx, 1926) no se pudo confirmar en una fuente verificable; Luquetti 2012 solo respalda el rango leve-anotia -->. Mira siempre los dos pabellones juntos: su asimetría dice más que cada uno por separado.
+**La microtia** es un pabellón pequeño o malformado, y casi siempre se acompaña de un conducto estrecho o ausente (atresia; → cap. 1). Va de alteraciones leves hasta la ausencia total del pabellón (Luquetti y cols., 2012) y se gradúa en cuatro grados según cuánto queda de las estructuras (Truong y cols., 2022): en el grado I, el más leve, el pabellón es pequeño pero conserva sus relieves; en el III, la forma más frecuente, queda solo un remanente de cartílago con el lóbulo; y en el IV no hay pabellón (anotia). Mira siempre los dos pabellones juntos: su asimetría dice más que cada uno por separado.
+
+:::imagen ilustraciones/b1-microtia-grados.jpg ancho=60% Los grados de la microtia, frente a un pabellón normal. Rótulos originales en inglés (Class, grado). Ilustración: Truong MT, Liu YC, Kohn J y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, Fig. 1, CC BY 4.0, sin modificar.
+:::
 
 ### El conducto auditivo externo
 
@@ -477,6 +480,7 @@ Los tres huesecillos del oído medio ya tienen casi su tamaño de adulto al nace
 1. Standring S, ed. Gray's Anatomy: the anatomical basis of clinical practice. 42.ª ed. Elsevier; 2020. ISBN 978-0-7020-7705-0
 1. Gray H. Anatomy of the human body. Lewis WH, ed. 20.ª ed. Philadelphia: Lea & Febiger; 1918 (láminas en dominio público).
 1. Luquetti DV, Heike CL, Hing AV, Cunningham ML, Cox TC. Microtia: epidemiology and genetics. Am J Med Genet A. 2012;158A(1):124-39. doi:10.1002/ajmg.a.34352
+1. Truong MT, Liu YC, Kohn J, Chinnadurai S, Zopf DA, Tribble M, et al. Integrated microtia and aural atresia management. Front Surg. 2022;9:944223. doi:10.3389/fsurg.2022.944223
 1. Pickles JO. An introduction to the physiology of hearing. 4.ª ed. Leiden: Brill; 2013. ISBN 978-90-04-24377-4
 1. Ishijima K, Sando I, Suzuki C, Balaban C, Takasaki K. Length of the Eustachian tube and its postnatal development: computer-aided three-dimensional reconstruction and measurement study. Ann Otol Rhinol Laryngol. 2000;109(6):542-8. doi:10.1177/000348940010900603
 1. Leuwer R. Anatomy of the Eustachian tube. Otolaryngol Clin North Am. 2016;49(5):1097-106. doi:10.1016/j.otc.2016.05.002
