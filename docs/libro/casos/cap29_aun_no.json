@@ -1,0 +1,45 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "coclear_plana",
+      "OI": "coclear_plana"
+    },
+    "edad": 74,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 74 años y es jubilado de la minería. Hace unos diez años le dijeron que oía menos y hace tres meses se compró un par de audífonos en una óptica. Dice que \"no le sirven\": en casa, con su señora, se las arregla, pero en el restaurante con los hijos no sigue la conversación y el volumen del televisor no se arregla con el audífono. Le dijeron que \"ya no hay nada más fuerte\". No tiene acúfeno ni vértigo y no ha tenido secreción de oídos. Quiere saber si tiene que operarse de algo. Las gafas y la dentadura le quedan bien; se pone y se saca el audífono sin problema.",
+      "historia": "{{-90}} Adaptación de audífonos retroauriculares bilaterales en un comercio; ajuste por comodidad, sin medición en oído real.",
+      "hist": [],
+      "medicamentos": "Atorvastatina 20 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "campo_libre",
+      "ganancia": {
+        "250": 15,
+        "500": 25,
+        "1000": 30,
+        "2000": 30,
+        "3000": 25,
+        "4000": 20,
+        "6000": 10
+      }
+    }
+  ]
+}

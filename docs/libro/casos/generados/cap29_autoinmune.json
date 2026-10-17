@@ -1,0 +1,864 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "autoinmune",
+   "OI": "autoinmune"
+  },
+  "edad": 58,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "severa",
+   "OI": "severa"
+  },
+  "anamnesis": {
+   "otros": "Tiene 58 años y era profesora de enseñanza básica; hoy está con licencia. Hace tres años notó que oía menos por los dos oídos, y en pocas semanas ya no entendía a los alumnos del fondo de la sala. El otorrinolaringólogo le indicó corticoides por vía oral y mejoró un poco, pero la pérdida siguió bajando durante el año siguiente. Usa audífonos retroauriculares potentes en los dos oídos desde hace catorce meses, controlados con medición en oído real, y los usa todo el día. Aun así no sigue una conversación sin mirar la cara de quien le habla, no puede usar el teléfono y en la mesa familiar \"se queda afuera\". Dejó de ir a las reuniones del colegio. No tiene acúfeno ni vértigo, y nunca tuvo secreción de oídos. Su hermana mayor también perdió la audición en la adultez. Pregunta si existe algo más que un audífono más fuerte.",
+   "historia": "{{-1100}} Hipoacusia sensorioneural bilateral de progresión rápida; se solicita estudio y se indican corticoides orales en pauta decreciente.\n{{-1000}} Control: mejoría parcial de umbrales; se mantiene observación.\n{{-420}} Adaptación de audífonos retroauriculares bilaterales, con verificación en oído real.",
+   "hist": [],
+   "medicamentos": "Levotiroxina 75 mcg al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1912500590,
+ "data": {
+  "gender": 1,
+  "id": 9590,
+  "Aerea": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    70,
+    65
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    100,
+    100
+   ]
+  ],
+  "Osea": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    70,
+    65
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    100,
+    100
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    105
+   ],
+   [
+    105,
+    110
+   ],
+   [
+    110,
+    120
+   ],
+   [
+    110,
+    120
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    70,
+    65
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    100,
+    100
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    65,
+    60
+   ],
+   [
+    70,
+    65
+   ],
+   [
+    80,
+    80
+   ],
+   [
+    90,
+    85
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    95,
+    95
+   ],
+   [
+    100,
+    100
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 58,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.22,
+   1.71,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 100,
+    "percentage": 56
+   },
+   {
+    "int": 100,
+    "percentage": 60
+   }
+  ],
+  "SDT": [
+   60,
+   55
+  ],
+  "SRT": [
+   65,
+   60
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     95,
+     100
+    ],
+    [
+     90,
+     95
+    ],
+    [
+     105,
+     100
+    ],
+    [
+     130,
+     110
+    ]
+   ],
+   "contra": [
+    [
+     105,
+     100
+    ],
+    [
+     100,
+     100
+    ],
+    [
+     105,
+     110
+    ],
+    [
+     115,
+     130
+    ],
+    [
+     105,
+     110
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Levotiroxina 75 mcg al día",
+   "cirugias": "",
+   "otros": "Tiene 58 años y era profesora de enseñanza básica; hoy está con licencia. Hace tres años notó que oía menos por los dos oídos, y en pocas semanas ya no entendía a los alumnos del fondo de la sala. El otorrinolaringólogo le indicó corticoides por vía oral y mejoró un poco, pero la pérdida siguió bajando durante el año siguiente. Usa audífonos retroauriculares potentes en los dos oídos desde hace catorce meses, controlados con medición en oído real, y los usa todo el día. Aun así no sigue una conversación sin mirar la cara de quien le habla, no puede usar el teléfono y en la mesa familiar \"se queda afuera\". Dejó de ir a las reuniones del colegio. No tiene acúfeno ni vértigo, y nunca tuvo secreción de oídos. Su hermana mayor también perdió la audición en la adultez. Pregunta si existe algo más que un audífono más fuerte.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Andrea",
+     "edad": 58,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 84,
+     "confiabilidad": 56,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 85,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 100
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 100,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 85,
+     "tone_burst_1000Hz": 85,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 100,
+     "nb_ce_chirp_ls_500Hz": 80,
+     "nb_ce_chirp_ls_1000Hz": 80,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 100,
+     "click": 100,
+     "ce_chirp": 85,
+     "ce_chirp_ls": 85
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.31,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2234,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.12,
+      "amp": -0.16
+     },
+     "onda_III": {
+      "lat": 0.05,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": 0.01,
+      "amp": 0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 80,
+     "tone_burst_1000Hz": 80,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 100,
+     "nb_ce_chirp_ls_500Hz": 75,
+     "nb_ce_chirp_ls_1000Hz": 75,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 100,
+     "click": 95,
+     "ce_chirp": 85,
+     "ce_chirp_ls": 85
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.24,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1526,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.08,
+      "amp": -0.19
+     },
+     "onda_III": {
+      "lat": 0.05,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0.09,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1,
+    "sello_pct": 89,
+    "variabilidad_db": 1.5,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 43.2,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.6,
+    "sello_pct": 84,
+    "variabilidad_db": 3.1,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T04:15:25+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Andrea Natalia",
+   "apellido": "Rivas García",
+   "rut": "10997971",
+   "fecha_nac": "13-12-1968"
+  },
+  "historia_clinica": "{{-1100}} Hipoacusia sensorioneural bilateral de progresión rápida; se solicita estudio y se indican corticoides orales en pauta decreciente.\r\n{{-1000}} Control: mejoría parcial de umbrales; se mantiene observación.\r\n{{-420}} Adaptación de audífonos retroauriculares bilaterales, con verificación en oído real."
+ }
+}

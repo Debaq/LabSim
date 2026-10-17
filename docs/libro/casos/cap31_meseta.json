@@ -1,0 +1,25 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 33,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 33 años y es diseñador de software; trabaja frente a dos pantallas. Hace diez semanas tuvo un vértigo muy intenso con vómitos, que le diagnosticaron como neuritis vestibular derecha. Empezó los ejercicios a las dos semanas y al principio mejoró bastante. Pero desde hace unas cuatro semanas siente que no avanza: un mareo suave y constante, \"como flotando\", que no gira. Es peor frente a las pantallas, en el supermercado, en el metro lleno y en una calle con mucho tráfico, y mejora acostado o cuando se concentra en algo. Dejó de tomar el metro, trabaja desde la casa y cada vez que se marea piensa que va a volver el vértigo. Hace los ejercicios \"cuando me siento bien\", porque los días malos lo marean más. Duerme mal. Oye igual que siempre, sin pitido.",
+      "historia": "{{-70}} Servicio de urgencia: vértigo intenso con vómitos y nistagmo; diagnóstico de neuritis vestibular derecha. Antiemético por tres días.\n{{-56}} Inicia rehabilitación vestibular con ejercicios en la casa.\n{{-10}} Otorrinolaringólogo: sin vértigo; refiere mareo persistente; solicita control del examen vestibular.",
+      "hist": [],
+      "medicamentos": "Ninguno",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "disfuncion_tubaria",
+      "OI": "disfuncion_tubaria"
+    },
+    "edad": 7,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "semilla": 7,
+    "anamnesis": {
+      "otros": "Tiene 7 años y está en segundo básico. La profesora jefe la describe como \"en las nubes\": no responde cuando se le habla desde lejos, pide repetir y se distrae en las clases. Sugiere evaluar si tiene un trastorno de procesamiento auditivo. La madre cuenta que en la casa sube el volumen de la tele, que ronca y duerme con la boca abierta, y que se resfría seguido; en los últimos dos meses está peor. Habla bien, con alguna \"s\" poco clara. Nunca le han hecho una audiometría.",
+      "historia": "{{-60}} Consulta por resfrío: tímpanos \"opacos\", sin antibiótico; se indica control que no se hizo.\n{{-20}} Profesora jefe: sugiere evaluación auditiva y de \"procesamiento\".",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

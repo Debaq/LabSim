@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "parotiditis",
+      "OI": "normal"
+    },
+    "edad": 47,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "profunda"
+    },
+    "semilla": 1263824184,
+    "anamnesis": {
+      "otros": "Tiene 47 años y maneja un taxi. A los nueve años tuvo paperas con fiebre alta y desde entonces no oye por el oído derecho: \"siempre fue así\". Con el izquierdo la vida en casa no le cuesta. Lo que sí le cuesta es oír al pasajero que va a su derecha, las conversaciones en una mesa con ruido si la gente está de ese lado, y saber de dónde viene una bocina o quién lo llama en la calle. Gira la cabeza para poner el oído sano y al final del día termina agotado. No tiene pitidos, mareos ni dolor. Un colega le contó que \"hay audífonos para el que oye de un solo oído\" y quiere saber si le servirían.",
+      "historia": "{{-13700}} Parotiditis (paperas) con fiebre alta; desde entonces no oye por el oído derecho.\n{{-60}} Médico general: hipoacusia OD antigua, otoscopía normal. Se deriva a evaluación audiológica y de audífonos.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "campo_libre"
+    }
+  ]
+}

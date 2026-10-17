@@ -1,0 +1,42 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 71,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "semilla": 2,
+    "anamnesis": {
+      "otros": "Tiene 71 años, es profesora jubilada y vive con su marido. Desde hace unos tres años le cuesta seguir las conversaciones en los almuerzos familiares y en el almacén. En silencio, en una conversación de a dos y por teléfono se las arregla. Dice: \"oigo, pero no entiendo\", y que sus nietos \"hablan muy rápido\". Se cansa al final del día de tanto esforzarse y ya evita las reuniones. Tiene un pitido leve en los dos oídos, a ratos. No ha tenido mareos ni asimetría. El marido nota que olvida más los nombres, aunque ella lo atribuye a la edad.",
+      "historia": "{{-90}} Médico general: otoscopía normal; audiometría de pesquisa con \"audición casi normal\". Se deriva a evaluación audiológica completa.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "dpoae"
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

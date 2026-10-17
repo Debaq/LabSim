@@ -1,0 +1,48 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 73,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "semilla": 4213838778,
+    "anamnesis": {
+      "otros": "Tiene 73 años, es viuda desde hace tres y vive con su hija y su nieta de nueve años. Fue secretaria hasta jubilar. Hace unos cinco años sube el volumen de la tele y pide que le repitan, sobre todo en la mesa familiar y en el consultorio, donde \"hablan muy bajito\". Por teléfono entiende si está tranquila. Vino porque su hija le dijo \"abuela, no me escuchas\". Quiere probar, pero duda: su hermana tiene audífonos y \"no los usa\". Lo que más desea es entender a su nieta cuando le cuenta del colegio. No tiene pitidos ni mareos, ni ha tenido dolor ni secreción de oídos.",
+      "historia": "{{-500}} Médico general: \"hipoacusia de la edad\"; otoscopía normal, se sugiere observar.\n{{-45}} Otorrinolaringólogo: otoscopía normal bilateral. Se solicita audiometría y prueba de audífonos.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "campo_libre",
+      "ganancia": {
+        "250": 5,
+        "500": 10,
+        "1000": 20,
+        "2000": 30,
+        "3000": 35,
+        "4000": 30,
+        "6000": 15
+      }
+    }
+  ]
+}

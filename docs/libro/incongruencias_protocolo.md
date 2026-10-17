@@ -249,6 +249,19 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 154 | 25 | Fármacos antes de la VNG | suspender 48 h antivertiginosos, antieméticos y ansiolíticos; nada de anticonvulsivantes ni alcohol | el protocolo; recuadro: anotar anticonvulsivantes y alcohol, suspender es decisión del médico | — (verificar) | P | |
 | 155 | 25 | Errata | "Otra forma desensibilizar esta prueba" (Frenzel) | "sensibilizar" | — | E | |
 
+## Rehabilitación
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 156 | 28, H20 | Uno o dos audífonos | se adapta "el oído" y su preferencia | el protocolo; recuadro: dos audífonos si la pérdida es audible en ambos | NICE NG98 1.6.2, 1.7.3 | P | |
+| 157 | 28 | Control posterior | revisión visoauditiva a 1-2 años | el protocolo; recuadro: control presencial a las 6-12 semanas | NICE NG98 1.7.1 | P | |
+| 158 | 28, 29 | Alternativas al audífono | no contempla CROS, BiCROS, conducción ósea ni implante | se enseñan desde la literatura | NICE NG98; NICE TA566; Reinfeldt 2015 | A · vacío | |
+| 159 | 29 | Materiales de discriminación con audífono | bisílabos en voz viva | el protocolo; recuadro: los criterios de implante usan CNC/AzBio y no hay corte validado en español | Zwolan 2020; Zeitler 2024 | P | |
+| 160 | 31 | Cuándo medir en la rehabilitación | DHI y batería solo al inicio y al final | se repite al subir de fase (detecta la meseta) | Hall 2022 | A | |
+| 161 | 31, H19 | Velocidad de los ejercicios de estabilización | "tan rápido como se pueda mantener el blanco nítido" | el protocolo como techo; recuadro: empezar lento | Strupp 2001 | P | |
+| 162 | 31 | Supresores e inactividad | no los menciona | se agregan (frenan la compensación) | Rascol 1995; Strupp 1998 | A · vacío | |
+<!-- tanda 10: -->
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |

@@ -1,0 +1,864 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "coclear_plana",
+   "OI": "coclear_plana"
+  },
+  "edad": 74,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada",
+   "OI": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 74 años y es jubilado de la minería. Hace unos diez años le dijeron que oía menos y hace tres meses se compró un par de audífonos en una óptica. Dice que \"no le sirven\": en casa, con su señora, se las arregla, pero en el restaurante con los hijos no sigue la conversación y el volumen del televisor no se arregla con el audífono. Le dijeron que \"ya no hay nada más fuerte\". No tiene acúfeno ni vértigo y no ha tenido secreción de oídos. Quiere saber si tiene que operarse de algo. Las gafas y la dentadura le quedan bien; se pone y se saca el audífono sin problema.",
+   "historia": "{{-90}} Adaptación de audífonos retroauriculares bilaterales en un comercio; ajuste por comodidad, sin medición en oído real.",
+   "hist": [],
+   "medicamentos": "Atorvastatina 20 mg al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 2790828964,
+ "data": {
+  "gender": 0,
+  "id": 9964,
+  "Aerea": [
+   [
+    40,
+    40
+   ],
+   [
+    40,
+    40
+   ],
+   [
+    45,
+    35
+   ],
+   [
+    45,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    70,
+    70
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "Osea": [
+   [
+    40,
+    40
+   ],
+   [
+    40,
+    40
+   ],
+   [
+    45,
+    35
+   ],
+   [
+    45,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    70,
+    70
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    105
+   ],
+   [
+    110,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    40,
+    40
+   ],
+   [
+    40,
+    40
+   ],
+   [
+    45,
+    35
+   ],
+   [
+    45,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    70,
+    70
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    40,
+    40
+   ],
+   [
+    40,
+    40
+   ],
+   [
+    45,
+    35
+   ],
+   [
+    45,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    60,
+    55
+   ],
+   [
+    70,
+    70
+   ],
+   [
+    85,
+    85
+   ],
+   [
+    95,
+    90
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 74,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.67,
+   1.19,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 80,
+    "percentage": 72
+   },
+   {
+    "int": 75,
+    "percentage": 76
+   }
+  ],
+  "SDT": [
+   40,
+   35
+  ],
+  "SRT": [
+   45,
+   40
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     95,
+     95
+    ],
+    [
+     85,
+     90
+    ],
+    [
+     90,
+     95
+    ],
+    [
+     95,
+     100
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     100
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     100,
+     95
+    ],
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Atorvastatina 20 mg al día",
+   "cirugias": "",
+   "otros": "Tiene 74 años y es jubilado de la minería. Hace unos diez años le dijeron que oía menos y hace tres meses se compró un par de audífonos en una óptica. Dice que \"no le sirven\": en casa, con su señora, se las arregla, pero en el restaurante con los hijos no sigue la conversación y el volumen del televisor no se arregla con el audífono. Le dijeron que \"ya no hay nada más fuerte\". No tiene acúfeno ni vértigo y no ha tenido secreción de oídos. Quiere saber si tiene que operarse de algo. Las gafas y la dentadura le quedan bien; se pone y se saca el audífono sin problema.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Raúl",
+     "edad": 74,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 65,
+     "confiabilidad": 71,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 100
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 70,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 65,
+     "tone_burst_1000Hz": 60,
+     "tone_burst_2000Hz": 65,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 60,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 60,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 70,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.17,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1976,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": -0.12
+     },
+     "onda_III": {
+      "lat": 0.05,
+      "amp": -0.05
+     },
+     "onda_V": {
+      "lat": 0.09,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 70,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 60,
+     "tone_burst_2000Hz": 65,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 60,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 70,
+     "ce_chirp": 60,
+     "ce_chirp_ls": 60
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.24,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1501,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.09,
+      "amp": -0.11
+     },
+     "onda_III": {
+      "lat": 0.04,
+      "amp": -0.07
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": 0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 33.3,
+     "1000": 33.3,
+     "1500": 40,
+     "2000": 44.7,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1.7,
+    "sello_pct": 75,
+    "variabilidad_db": 1.9,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 19.8,
+     "1000": 30.6,
+     "1500": 36.9,
+     "2000": 41.4,
+     "3000": 41.4,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.5,
+    "sello_pct": 83,
+    "variabilidad_db": 1.6,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T04:15:19+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Raúl Juan",
+   "apellido": "Castro Salazar",
+   "rut": "6107905",
+   "fecha_nac": "20-08-1952"
+  },
+  "historia_clinica": "{{-90}} Adaptación de audífonos retroauriculares bilaterales en un comercio; ajuste por comodidad, sin medición en oído real."
+ }
+}

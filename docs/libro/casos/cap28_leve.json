@@ -1,0 +1,34 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 64,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "semilla": 2453875140,
+    "anamnesis": {
+      "otros": "Tiene 64 años y es profesora de enseñanza media: todavía trabaja. Su pareja le insistió en venir porque \"a veces no escucha\" cuando le habla de espaldas. Ella cree que oye bien: solo le cuesta en los restaurantes con mucho ruido y cuando un alumno habla bajito al fondo de la sala. En casa no se pierde las conversaciones ni sube la tele. No tiene pitidos ni mareos, y nunca ha tenido infecciones de oído.",
+      "historia": "{{-60}} Médico general, control de salud: dificultad referida en ambientes ruidosos; otoscopía normal. Se solicita audiometría.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

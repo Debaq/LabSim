@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 68,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "semilla": 4084779212,
+    "anamnesis": {
+      "otros": "Tiene 68 años y es mecánico jubilado: 35 años en un taller con herramientas neumáticas. Lo trajo su señora: \"le tengo que repetir todo dos veces\". Él dice que oye bien, que \"ahora todos hablan bajito\", y que los audífonos \"son para viejos\" y \"suenan a lata\": su cuñado tiene unos y se la pasa ajustándolos. Lo que sí le molesta son los ruidos fuertes: \"se me clava el oído\" con el golpe de una olla o cuando gritan los nietos. Tiene un pitido agudo en los dos oídos que va y viene, más en la noche, y teme que \"algo en el oído\" se lo empeore.",
+      "historia": "{{-200}} Médico general: hipoacusia bilateral referida por la esposa; otoscopía normal. Se deriva a otorrinolaringología.\n{{-30}} Otorrinolaringólogo: solicita audiometría con umbral de molestia y prueba de audífonos.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

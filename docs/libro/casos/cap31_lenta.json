@@ -1,0 +1,27 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 63,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 63 años y es costurera jubilada. Hace cinco semanas despertó con la pieza girando y vomitando; en urgencia le dijeron que era un problema del nervio del equilibrio del lado izquierdo, le dieron unas pastillas para el mareo y le recomendaron reposo. Las sigue tomando tres veces al día \"porque si no, me marea\", y casi no sale del sillón: su hijo hace las compras, y para ir al baño usa un bastón que era de su marido. Cuando tiene que mirar hacia un lado, gira todo el cuerpo. Hace unos diez días se cayó de noche al levantarse al baño, sin lesión, y desde entonces tiene más miedo. Dice que ya no gira nada, pero que \"no se siente firme\" y que ver la televisión con la cabeza movida la marea. Oye igual que siempre, sin pitido ni dolor.",
+      "historia": "{{-35}} Servicio de urgencia: vértigo con vómitos; diagnóstico de neuritis vestibular izquierda. Se indican dimenhidrinato cada 8 horas y reposo.\n{{-10}} Caída nocturna sin lesión.\n{{-5}} Médico de familia: persiste inestabilidad; solicita examen vestibular y deriva a rehabilitación vestibular.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Dimenhidrinato 50 mg cada 8 horas (desde hace cinco semanas); losartán 50 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

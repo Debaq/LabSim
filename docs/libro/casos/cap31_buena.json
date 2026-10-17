@@ -1,0 +1,29 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 41,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 41 años y es conductor de un camión de reparto de bebidas. Hace dos semanas despertó con la pieza girando, vomitó cuatro veces y no pudo ponerse de pie sin agarrarse. En urgencia le dijeron que era un cuadro del nervio del equilibrio del lado derecho. El giro se fue en cuatro días; hoy, en reposo, no gira nada. Pero al mover la cabeza rápido \"las cosas se corren\", camina como \"pisando algodón\", se marea al agacharse y no se atreve a subir la escalerilla del camión. Lo primero que quiere saber es cuándo puede volver a manejar. Hizo reposo los primeros tres días y desde el quinto camina por la casa y por la cuadra. No ha tenido pitido ni cambio de la audición, ni dolor de cabeza, ni visión doble.",
+      "historia": "{{-14}} Servicio de urgencia: vértigo con vómitos, nistagmo hacia la izquierda; diagnóstico de neuritis vestibular derecha. Antiemético por tres días.\n{{-4}} Otorrinolaringólogo: confirma la hipofunción vestibular derecha con el examen y lo deriva a rehabilitación vestibular.",
+      "hist": [],
+      "medicamentos": "Ninguno (el antiemético lo terminó a los tres días)",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

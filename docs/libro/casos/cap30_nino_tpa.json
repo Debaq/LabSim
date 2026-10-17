@@ -1,0 +1,39 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 9,
+    "sexo": "hombre",
+    "semilla": 3,
+    "anamnesis": {
+      "otros": "Tiene 9 años y está en cuarto básico. La profesora dice que \"se va\" cuando hay ruido en la sala, que pide repetir las instrucciones largas y que en el dictado cambia palabras parecidas. En el recreo y en el comedor del colegio casi no entiende lo que le dicen. En la casa, con la tele baja, se las arregla bien. Es bueno para armar cosas y para los juegos de mesa. La madre cuenta que \"oye cuando quiere\", pero que en el auto no entiende a quien le habla desde atrás. Lee más lento que sus compañeros. No ha tenido dolor de oídos desde los 3 años.",
+      "historia": "{{-300}} Fonoaudióloga: lenguaje comprensivo y expresivo en rango esperado; conciencia fonológica algo baja para la edad.\n{{-200}} Psicóloga: capacidad cognitiva en rango medio; atención sin hallazgos importantes.\n{{-30}} Médico general: otoscopía normal bilateral. Se deriva a audiología por sospecha de trastorno de procesamiento auditivo.",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

@@ -32,7 +32,7 @@ La batería de procesamiento central responde tres preguntas:
 
 Las pruebas son **conductuales**: dependen de que el paciente atienda, entienda la instrucción, recuerde y responda. Lo que sale de ellas no es un diagnóstico de lesión: es un patrón de rendimiento que se cruza con el resto de la historia. Hoy no hay una prueba única que valga por sí sola y el consenso es usar una batería (Jerger y Musiek, 2000; AAA, 2010).
 
-Esta herramienta explica la técnica. El caso clínico completo (qué pedir, cómo se razona con un paciente que "oye pero no entiende") está en el cap. 13.
+Esta herramienta explica la técnica. El caso clínico completo (qué pedir, cómo se razona con un paciente que "oye pero no entiende") está en el cap. 30; el patrón de la neuropatía auditiva, en el cap. 13.
 
 :::sabias ¿Sabías que?
 Kimura (1961) hizo oír a cada oído un dígito distinto al mismo tiempo y comprobó que los dígitos del **oído derecho** se repetían mejor. Lo explicó por las vías auditivas: bajo competencia, el oído derecho llega directo al hemisferio izquierdo, que es el del lenguaje en la mayoría de las personas. Esa ventaja es el fundamento de toda la escucha dicótica clínica, y se inventó para estudiar cerebros, no oídos.

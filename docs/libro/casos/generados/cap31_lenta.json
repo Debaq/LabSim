@@ -1,0 +1,862 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "normal",
+   "OI": "normal"
+  },
+  "edad": 63,
+  "sexo": "mujer",
+  "anamnesis": {
+   "otros": "Tiene 63 años y es costurera jubilada. Hace cinco semanas despertó con la pieza girando y vomitando; en urgencia le dijeron que era un problema del nervio del equilibrio del lado izquierdo, le dieron unas pastillas para el mareo y le recomendaron reposo. Las sigue tomando tres veces al día \"porque si no, me marea\", y casi no sale del sillón: su hijo hace las compras, y para ir al baño usa un bastón que era de su marido. Cuando tiene que mirar hacia un lado, gira todo el cuerpo. Hace unos diez días se cayó de noche al levantarse al baño, sin lesión, y desde entonces tiene más miedo. Dice que ya no gira nada, pero que \"no se siente firme\" y que ver la televisión con la cabeza movida la marea. Oye igual que siempre, sin pitido ni dolor.",
+   "historia": "{{-35}} Servicio de urgencia: vértigo con vómitos; diagnóstico de neuritis vestibular izquierda. Se indican dimenhidrinato cada 8 horas y reposo.\n{{-10}} Caída nocturna sin lesión.\n{{-5}} Médico de familia: persiste inestabilidad; solicita examen vestibular y deriva a rehabilitación vestibular.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Dimenhidrinato 50 mg cada 8 horas (desde hace cinco semanas); losartán 50 mg al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 3596032122,
+ "data": {
+  "gender": 1,
+  "id": 9122,
+  "Aerea": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    25
+   ]
+  ],
+  "Osea": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    25
+   ]
+  ],
+  "LDL": [
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    25
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    25,
+    25
+   ],
+   [
+    25,
+    25
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 63,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.66,
+   0.81,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 40,
+    "percentage": 100
+   },
+   {
+    "int": 40,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   5,
+   5
+  ],
+  "SRT": [
+   10,
+   10
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     90,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     95
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Dimenhidrinato 50 mg cada 8 horas (desde hace cinco semanas); losartán 50 mg al día",
+   "cirugias": "",
+   "otros": "Tiene 63 años y es costurera jubilada. Hace cinco semanas despertó con la pieza girando y vomitando; en urgencia le dijeron que era un problema del nervio del equilibrio del lado izquierdo, le dieron unas pastillas para el mareo y le recomendaron reposo. Las sigue tomando tres veces al día \"porque si no, me marea\", y casi no sale del sillón: su hijo hace las compras, y para ir al baño usa un bastón que era de su marido. Cuando tiene que mirar hacia un lado, gira todo el cuerpo. Hace unos diez días se cayó de noche al levantarse al baño, sin lesión, y desde entonces tiene más miedo. Dice que ya no gira nada, pero que \"no se siente firme\" y que ver la televisión con la cabeza movida la marea. Oye igual que siempre, sin pitido ni dolor.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Lucía",
+     "edad": 63,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 78,
+     "confiabilidad": 74,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 115
+  },
+  "ABR": {
+   "OD": {
+    "type": "normal",
+    "umbral": 25,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 25,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 25,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 20,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 25,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 40,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 40,
+     "click": 40,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.32,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1645,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.05,
+      "amp": 0.02
+     },
+     "onda_III": {
+      "lat": 0.03,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": -0.01,
+      "amp": -0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 25,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 25,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 25,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 20,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 25,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 40,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 40,
+     "click": 40,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.23,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1332,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.04,
+      "amp": -0.02
+     },
+     "onda_III": {
+      "lat": 0.01,
+      "amp": -0.03
+     },
+     "onda_V": {
+      "lat": 0,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_female",
+    "baseline": {
+     "I": {
+      "lat": 1.84,
+      "amp": 0.396
+     },
+     "III": {
+      "lat": 3.84,
+      "amp": 0.423
+     },
+     "V": {
+      "lat": 5.84,
+      "amp": 0.486
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 6,
+     "6000": 12,
+     "8000": 12
+    },
+    "atten_db": 0,
+    "ruido_db": 0.4,
+    "sello_pct": 89,
+    "variabilidad_db": 2.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 6,
+     "6000": 12,
+     "8000": 12
+    },
+    "atten_db": 0,
+    "ruido_db": 1.9,
+    "sello_pct": 93,
+    "variabilidad_db": 2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T04:09:39+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Lucía Laura",
+   "apellido": "López Luna",
+   "rut": "9257091",
+   "fecha_nac": "22-02-1963"
+  },
+  "historia_clinica": "{{-35}} Servicio de urgencia: vértigo con vómitos; diagnóstico de neuritis vestibular izquierda. Se indican dimenhidrinato cada 8 horas y reposo.\r\n{{-10}} Caída nocturna sin lesión.\r\n{{-5}} Médico de familia: persiste inestabilidad; solicita examen vestibular y deriva a rehabilitación vestibular."
+ }
+}

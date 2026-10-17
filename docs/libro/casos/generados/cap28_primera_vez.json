@@ -1,0 +1,867 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "presbiacusia",
+   "OI": "presbiacusia"
+  },
+  "edad": 73,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "moderada",
+   "OI": "moderada"
+  },
+  "semilla": 4213838778,
+  "anamnesis": {
+   "otros": "Tiene 73 años, es viuda desde hace tres y vive con su hija y su nieta de nueve años. Fue secretaria hasta jubilar. Hace unos cinco años sube el volumen de la tele y pide que le repitan, sobre todo en la mesa familiar y en el consultorio, donde \"hablan muy bajito\". Por teléfono entiende si está tranquila. Vino porque su hija le dijo \"abuela, no me escuchas\". Quiere probar, pero duda: su hermana tiene audífonos y \"no los usa\". Lo que más desea es entender a su nieta cuando le cuenta del colegio. No tiene pitidos ni mareos, ni ha tenido dolor ni secreción de oídos.",
+   "historia": "{{-500}} Médico general: \"hipoacusia de la edad\"; otoscopía normal, se sugiere observar.\n{{-45}} Otorrinolaringólogo: otoscopía normal bilateral. Se solicita audiometría y prueba de audífonos.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Losartán 50 mg al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 4213838778,
+ "data": {
+  "gender": 1,
+  "id": 9778,
+  "Aerea": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    90,
+    95
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "Osea": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    90,
+    95
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    90,
+    95
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    20,
+    20
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    90,
+    95
+   ],
+   [
+    110,
+    105
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 73,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.7,
+   0.87,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 65,
+    "percentage": 76
+   },
+   {
+    "int": 65,
+    "percentage": 72
+   }
+  ],
+  "SDT": [
+   20,
+   20
+  ],
+  "SRT": [
+   25,
+   25
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     95,
+     90
+    ],
+    [
+     90,
+     85
+    ],
+    [
+     95,
+     90
+    ],
+    [
+     110,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     100
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     100
+    ],
+    [
+     130,
+     115
+    ],
+    [
+     95,
+     100
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Losartán 50 mg al día",
+   "cirugias": "",
+   "otros": "Tiene 73 años, es viuda desde hace tres y vive con su hija y su nieta de nueve años. Fue secretaria hasta jubilar. Hace unos cinco años sube el volumen de la tele y pide que le repitan, sobre todo en la mesa familiar y en el consultorio, donde \"hablan muy bajito\". Por teléfono entiende si está tranquila. Vino porque su hija le dijo \"abuela, no me escuchas\". Quiere probar, pero duda: su hermana tiene audífonos y \"no los usa\". Lo que más desea es entender a su nieta cuando le cuenta del colegio. No tiene pitidos ni mareos, ni ha tenido dolor ni secreción de oídos.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Marta",
+     "edad": 73,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 52,
+     "confiabilidad": 74,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 120
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 85,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 70,
+     "tone_burst_4000Hz": 95,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 65,
+     "nb_ce_chirp_ls_4000Hz": 95,
+     "click": 85,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.26,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2342,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.14,
+      "amp": -0.17
+     },
+     "onda_III": {
+      "lat": 0.05,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0.05,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 90,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 70,
+     "tone_burst_4000Hz": 100,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 65,
+     "nb_ce_chirp_ls_4000Hz": 100,
+     "click": 90,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2289,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.08,
+      "amp": -0.17
+     },
+     "onda_III": {
+      "lat": 0.1,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": 0.03,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_female",
+    "baseline": {
+     "I": {
+      "lat": 1.84,
+      "amp": 0.396
+     },
+     "III": {
+      "lat": 3.84,
+      "amp": 0.423
+     },
+     "V": {
+      "lat": 5.84,
+      "amp": 0.486
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 3.6,
+     "1000": 14.4,
+     "1500": 33.4,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.9,
+    "sello_pct": 81,
+    "variabilidad_db": 3.3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 4.8,
+     "1000": 16.2,
+     "1500": 36.2,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1,
+    "sello_pct": 91,
+    "variabilidad_db": 2.6,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T04:13:57+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Marta Inés",
+   "apellido": "López Ramírez",
+   "rut": "6391209",
+   "fecha_nac": "01-08-1953"
+  },
+  "historia_clinica": "{{-500}} Médico general: \"hipoacusia de la edad\"; otoscopía normal, se sugiere observar.\r\n{{-45}} Otorrinolaringólogo: otoscopía normal bilateral. Se solicita audiometría y prueba de audífonos."
+ }
+}

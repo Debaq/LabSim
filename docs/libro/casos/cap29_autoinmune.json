@@ -1,0 +1,51 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "autoinmune",
+      "OI": "autoinmune"
+    },
+    "edad": 58,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "severa",
+      "OI": "severa"
+    },
+    "anamnesis": {
+      "otros": "Tiene 58 años y era profesora de enseñanza básica; hoy está con licencia. Hace tres años notó que oía menos por los dos oídos, y en pocas semanas ya no entendía a los alumnos del fondo de la sala. El otorrinolaringólogo le indicó corticoides por vía oral y mejoró un poco, pero la pérdida siguió bajando durante el año siguiente. Usa audífonos retroauriculares potentes en los dos oídos desde hace catorce meses, controlados con medición en oído real, y los usa todo el día. Aun así no sigue una conversación sin mirar la cara de quien le habla, no puede usar el teléfono y en la mesa familiar \"se queda afuera\". Dejó de ir a las reuniones del colegio. No tiene acúfeno ni vértigo, y nunca tuvo secreción de oídos. Su hermana mayor también perdió la audición en la adultez. Pregunta si existe algo más que un audífono más fuerte.",
+      "historia": "{{-1100}} Hipoacusia sensorioneural bilateral de progresión rápida; se solicita estudio y se indican corticoides orales en pauta decreciente.\n{{-1000}} Control: mejoría parcial de umbrales; se mantiene observación.\n{{-420}} Adaptación de audífonos retroauriculares bilaterales, con verificación en oído real.",
+      "hist": [],
+      "medicamentos": "Levotiroxina 75 mcg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "campo_libre",
+      "ganancia": {
+        "250": 30,
+        "500": 35,
+        "1000": 35,
+        "2000": 30,
+        "3000": 25,
+        "4000": 20,
+        "6000": 10
+      }
+    }
+  ]
+}
