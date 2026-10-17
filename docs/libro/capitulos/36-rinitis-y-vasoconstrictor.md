@@ -137,12 +137,18 @@ En cuanto a la pauta, el consenso brasileño recomienda no pasar de 5 días y su
 
 Algunas obstrucciones que parecen de mucosa no se explican por ella y se derivan (→ cap. 35):
 
-- **Pólipos nasales.** Masas blandas que se ven a la rinoscopía o con endoscopia (→ H23). En el simulador los pólipos no responden al vasoconstrictor: lo que baja es la mucosa de los cornetes que los rodea, por eso el resultado suele salir mixto.
+- **Pólipos nasales.** Masas blandas que se ven a la rinoscopía o con endoscopia (→ H23). En el simulador los pólipos no responden al vasoconstrictor: lo que baja es la mucosa de los cornetes que los rodea, por eso el resultado suele salir mixto. En la tomografía, que pide el médico, la rinosinusitis con pólipos puede llenar los senos y las fosas (figura).
 - **Síntomas de un solo lado, sangrado o pérdida del olfato de un lado.** No se explican por el ciclo ni por una alergia y se derivan (Fokkens y cols., 2020).
 
 :::imagen ilustraciones/cap36-rs-polipos-ra.svg ancho=62% Rinometría acústica de la fosa derecha de una nariz con pólipos (cuadro *pólipos* de RinoSim; no es un paciente). El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor.
 - @58,70 | **El segundo mínimo no es el cornete**: MCA2 0,42 cm² a 4,9 cm de la narina, y no a unos 3,2 cm como en las otras figuras de este capítulo. Ya está en la zona poco fiable (más allá de ~5 cm).
 - @30,28 | Con vasoconstrictor (rayas) sube solo a 0,68 cm²: lo que se abre es la mucosa de alrededor, no el pólipo.
+:::
+
+:::imagen ilustraciones/cap36-tc-polipos.jpg ancho=80% Tomografías coronales de senos paranasales de dos personas con rinosinusitis crónica con pólipos y asma. Son otras personas, no pacientes de este capítulo: la tomografía la pide y la informa el médico, y se muestra para que se vea la forma de lo que las curvas miden. El aire se ve negro. Izquierda: compromiso leve (puntaje de Lund-Mackay de 0 a 10 sobre 24). Derecha: opacificación total de todos los senos y de los complejos osteomeatales, 24 sobre 24. Imagen: Al-Ahmad M, Ali A, Dawood HA, Beshreda GM. J Asthma Allergy 2024 (doi:10.2147/JAA.S478040), Fig. 1, un corte del panel A y uno del panel C, CC BY-NC 3.0; recortada y unida.
+- @14,58 | **Seno maxilar con aire** y, al medio, los cornetes rodeados de aire.
+- @58,74 | **Seno maxilar lleno**: tiene la misma densidad que los tejidos blandos.
+- @71,66 | **Fosa nasal ocupada**: casi no queda aire entre los cornetes.
 :::
 
 ## Razonamiento

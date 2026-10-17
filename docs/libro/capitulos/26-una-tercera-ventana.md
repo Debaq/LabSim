@@ -72,6 +72,13 @@ La audiometría es el primer lugar donde asoma:
 
 La dehiscencia **se confirma con la tomografía** de alta resolución de los huesos temporales y la decide el médico. Lo que hace el audiólogo es sospecharla, porque una combinación de síntomas, audiometría con gap sin oído medio, y VEMP, junto con la tomografía, es lo que da el diagnóstico (Zhou y cols., 2007).
 
+:::imagen ilustraciones/cap26-tc-dehiscencia.jpg ancho=95% Tomografía de alta resolución de los huesos temporales de otra persona (no es un paciente de este capítulo), con una dehiscencia del conducto superior derecho. Los cortes se reconstruyen en dos planos: el de Pöschl va paralelo al conducto superior y lo muestra como un anillo; el de Stenvers va perpendicular a él (Noij y Rauch, 2020, Front Neurol, doi:10.3389/fneur.2020.00695). La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Reddy YM y Pandey AK (2025), Cureus, doi:10.7759/cureus.84477, Fig. 2 (paneles B, C y D), CC BY 4.0, recortada.
+- @22,24 | **Stenvers, oído derecho**: el techo óseo del conducto superior falta (flecha).
+- @61,32 | **Pöschl, oído derecho**: el anillo del conducto queda abierto arriba, contra la fosa media.
+- @94,33 | **Pöschl, oído izquierdo**: el mismo conducto con su techo óseo grueso.
+- RT y LT son los rótulos del original: oído derecho e izquierdo.
+:::
+
 :::ojo Ojo clínico
 LabSim todavía **no puede armar una dehiscencia**: su motor recorta la vía ósea en 0 dB y apaga el reflejo cuando hay un gap. El caso 26.1 de este capítulo se resuelve con un esquema dibujado con las cifras de la literatura, no con registros del simulador.
 :::
@@ -80,7 +87,7 @@ LabSim todavía **no puede armar una dehiscencia**: su motor recorta la vía ós
 
 La dehiscencia del conducto superior es la más conocida, pero no es la única. Merchant y Rosowski (2008) agrupan las lesiones del laberinto que actúan así: dehiscencia del conducto **superior, lateral o posterior**, del **vestíbulo óseo** (acueducto vestibular dilatado y otras malformaciones del oído interno), de la **cóclea** (comunicación entre la carótida y la cóclea, sordera ligada al X con *stapes gusher*) y lesiones **difusas**, como la enfermedad de Paget.
 
-El **acueducto vestibular dilatado**, que en LabSim es el cuadro *Pendred / acueducto vestibular dilatado* (→ cap. 10), es la tercera ventana de los niños. En 25 niños con 37 oídos y acueducto dilatado, 36 oídos tenían hipoacusia, todas las pérdidas tenían gap con el oído medio normal y el **VEMP salió con umbral anormalmente bajo y amplitud alta en 34 de 37 oídos**; en tres, que tenían síntomas vestibulares, el VEMP faltaba de un lado (Zhou y Gopen, 2011). En 98 oídos de pacientes con síndrome de Pendred, 60 tenían gap en graves, y los acueductos más anchos tenían más gap (Seo y cols., 2016).
+El **acueducto vestibular dilatado**, que en LabSim es el cuadro *Pendred / acueducto vestibular dilatado* (→ cap. 10, donde está su tomografía), es la tercera ventana de los niños. En 25 niños con 37 oídos y acueducto dilatado, 36 oídos tenían hipoacusia, todas las pérdidas tenían gap con el oído medio normal y el **VEMP salió con umbral anormalmente bajo y amplitud alta en 34 de 37 oídos**; en tres, que tenían síntomas vestibulares, el VEMP faltaba de un lado (Zhou y Gopen, 2011). En 98 oídos de pacientes con síndrome de Pendred, 60 tenían gap en graves, y los acueductos más anchos tenían más gap (Seo y cols., 2016).
 
 Tabla: Tres oídos con gap aéreo-óseo y tímpano normal a la otoscopía
 

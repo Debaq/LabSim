@@ -137,6 +137,12 @@ El signo clínico característico es un **reflejo vestíbulo-ocular "visualmente
 
 La audición no es parte del cuadro y el audiograma suele ser el de la edad: lo que lleva al paciente a la consulta es el equilibrio.
 
+:::imagen ilustraciones/cap25-rm-canvas.jpg ancho=100% Resonancias sagitales en la línea media de tres personas con la enfermedad por RFC1, la causa genética más frecuente del CANVAS. Son otras personas, no pacientes de este capítulo: la resonancia la pide y la informa el médico, y se muestra para que se vea la forma de lo que los ojos del paciente anuncian. Bajo cada imagen, la edad y los años de ataxia al hacerla. B y C: atrofia del vermis (flechas del original), con los surcos abiertos y llenos de líquido; marcada en C a los 42 años. D: sin atrofia a los 62 años, tras 20 años de ataxia. En la serie, la atrofia del vermis figuraba en el informe de 48 de 55 pacientes. Imagen: Traschütz A, Cortese A, Reich S y cols. Neurology 2021 (doi:10.1212/WNL.0000000000011528), Fig. 5, paneles B a D, CC BY 4.0; recortada.
+- @25,52 | **Vermis atrófico**: las hojas se ven finas y separadas por surcos anchos.
+- @63,52 | **Vermis atrófico** en una persona más joven y con menos años de ataxia que la de B.
+- @90,48 | **Vermis de forma conservada**: la atrofia no siempre está, aun con años de enfermedad.
+:::
+
 ### Esclerosis múltiple
 
 Una enfermedad desmielinizante cuyas placas pueden caer en el tronco, donde están los fascículos y los núcleos que mueven los ojos. En el cap. 12 se vio su ABR; aquí importa lo que **hace a los ojos**.
@@ -157,6 +163,11 @@ Descenso de las amígdalas cerebelosas por el foramen magno (→ cap. 12). Hay *
 
 :::ojo Ojo clínico
 **El nistagmo hacia abajo es el signo clásico y el menos frecuente**: 4 de 77 pacientes con Chiari I (Kumar y cols., 2002). Una VNG sin hallazgos **no descarta** un Chiari: con una cefalea occipital que empeora al toser, el audiólogo informa lo que vio y sugiere completar con el médico.
+:::
+
+:::imagen ilustraciones/cap25-rm-chiari.jpg ancho=62% Malformación de Chiari tipo I en una resonancia sagital (T1) de una niña de 13 años con mareo e inestabilidad al caminar desde hacía 18 meses, sin cefalea y con examen neurológico normal. Las amígdalas cerebelosas bajan 19 mm por debajo de la línea de McRae (la que une los bordes del agujero magno). Imagen: Sahuquillo J, Moncho D, Ferré A, López-Bermeo D, Sahuquillo-Muxi A, Poca MA. J Clin Med 2023 (doi:10.3390/jcm12144626), Fig. 2, panel izquierdo, CC BY 4.0; recortada (sin el corte coronal).
+- @79,58 | **Amígdalas cerebelosas** herniadas, detrás de la médula, muy por debajo del agujero magno.
+- @61,70 | **Siringe** pequeña (flecha roja del original): una cavidad de líquido dentro de la médula, justo bajo la punta de las amígdalas.
 :::
 
 ### Fármacos y alcohol

@@ -425,6 +425,11 @@ Audiograma normal, reflejos ausentes en los cuatro registros, interpico III-V la
 
 ABR **con patrón retrococlear de tronco**, bilateral, con audición normal. Se informa así, sin poner nombre al diagnóstico. La resonancia y el neurólogo lo deciden; el ABR aporta que la vía auditiva del tronco está comprometida aunque ella no lo note, y sirve de base para el seguimiento.
 
+:::imagen ilustraciones/cap12-rm-esclerosis-multiple.jpg ancho=80% Resonancia FLAIR de otra persona con esclerosis múltiple; no es la paciente de este caso. La imagen la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Cortes axiales en orientación radiológica: la derecha de la persona queda a la izquierda. Imagen: cortes propios del dataset MSLesSeg, paciente P57 (Guarnera F, Rondinella A y cols., 2025, Sci Data 12:920, doi:10.1038/s41597-025-05250-y; datos doi:10.6084/m9.figshare.27919209), CC BY 4.0; imágenes llevadas a un espacio estándar por el dataset, recortadas y con ventana ajustada.
+- @31,40 | **Placas en la protuberancia**: las manchas blancas de su lado derecho. Es el tramo del tronco por donde pasa la vía auditiva.
+- @90,72 | **La misma persona, un corte más arriba**: placas alrededor de los ventrículos. Las lesiones están repartidas.
+:::
+
 :::ojo Ojo clínico
 Un ABR normal no descarta la enfermedad: en la serie de Robinson y Rudge (1977), la V fue anormal en el 51 % de los pacientes **sin** signos clínicos de lesión del tronco.
 :::
@@ -438,6 +443,12 @@ Faltan la onda I y la pérdida es coclear (sin gap, con reclutamiento y VEMP ca�
 #### Diagnóstico y qué sigue
 
 Hipoacusia sensorioneural moderada del OD, **de inicio súbito y con signos cocleares**, VEMP disminuido del mismo lado y conducción central conservada. La audiometría sola no separa lo viral de lo vascular; en un infarto de la AICA, la sordera súbita puede ser la primera señal (Lee y cols., 2002). Se avisa **el mismo día** al médico tratante para que la evalúe como un posible evento vascular y se solicite imagen.
+
+:::imagen ilustraciones/cap12-rm-infarto-aica.jpg ancho=100% Infarto de la AICA derecha en otra persona; no es el paciente de este caso. Rótulos originales en inglés. Imagen: Kim SH, Kim H, Lee SU y cols. (2024), Front Neurol 15:1448989, doi:10.3389/fneur.2024.1448989, Fig. 1, CC BY 4.0, sin modificar.
+- @53,20 | **vHIT**: ganancia baja en los canales horizontal y posterior de los **dos** lados (0,64 y 0,65 a la derecha; 0,76 y 0,67 a la izquierda).
+- @20,70 | **Audiometría**: hipoacusia sensorioneural de 73 dB en el OD.
+- @66,43 | **Difusión**: el infarto agudo, blanco, en el territorio de la AICA derecha (la derecha queda a la izquierda de la imagen).
+:::
 
 :::comentario Comentario
 El ABR puede tranquilizar sobre el tronco y aun así el paciente necesitar una evaluación neurológica urgente: lo que lo pone en riesgo no está en la señal que llega al colículo, sino en la arteria.

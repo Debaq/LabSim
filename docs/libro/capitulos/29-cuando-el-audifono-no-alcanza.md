@@ -63,6 +63,11 @@ Cuando la pérdida es **conductiva o mixta** y no se opera (porque el paciente n
 - **De conducción por la piel**: el vibrador va apoyado en la piel, con banda elástica (*softband*) o con imanes en un implante bajo la piel.
 - **De conducción directa**: el vibrador mueve el hueso sin atravesar la piel. Pueden ser **percutáneos** (un pilar que sale por la piel, la prótesis ancla ósea clásica) o **transcutáneos activos** (el transductor va implantado bajo la piel intacta).
 
+:::imagen ilustraciones/cap29-tc-baha.jpg ancho=42% Tomografía axial de cráneo de otra persona con una prótesis ósea anclada percutánea en el lado derecho. Se ve la pieza de titanio fija en el hueso detrás del oído, que lleva la vibración al cráneo. Las imágenes de este capítulo las pide y las informa el médico; se muestran para que se vea la forma de lo que el audiólogo indica y programa. Imagen: Mock JA y cols. (2022), Cureus, doi:10.7759/cureus.27436, Fig. 2, CC BY, recortada.
+- @13,68 | **Implante** de titanio fijo en el hueso, detrás del oído derecho (la derecha del paciente queda a la izquierda de la imagen).
+- @31,79 | Las líneas que salen del metal son **artefacto** de la tomografía, no hueso.
+:::
+
 Lo que decide si un paciente es candidato es el **umbral óseo**: el dispositivo solo puede aportar lo que la cóclea de ese lado, o la del otro, es capaz de oír por hueso. Por eso cada dispositivo tiene un **tope de umbral óseo** (en general, un promedio de vía ósea entre 500 y 3.000 Hz) por encima del cual no rinde, y el tope sube con la potencia del procesador. <!-- verificar: los topes de umbral óseo cambian entre fabricantes y modelos (en general alrededor de 45 dB HL para los de potencia estándar y 55 dB HL o algo más para los potentes), y la edad mínima; consultar la ficha vigente de cada dispositivo. Reinfeldt y cols. (2015) describen las categorías, no los topes. -->
 
 :::ayuda Ayuda memoria
@@ -74,6 +79,11 @@ Lo que decide si un paciente es candidato es el **umbral óseo**: el dispositivo
 ### Cómo un implante estimula al nervio
 
 Una cóclea sana convierte el movimiento de la membrana basilar en descargas del nervio: cada región de la cóclea responde a una frecuencia (la **tonotopía**, con los agudos en la base y los graves en el ápice). Cuando las células ciliadas faltan, el audífono ya no tiene dónde entregar la señal por mucho que la amplifique. El implante **se salta** esa etapa: un conjunto de electrodos, introducido en la rampa timpánica, entrega pulsos de corriente directamente a las neuronas del ganglio espiral y a sus fibras (Wilson y Dorman, 2008).
+
+:::imagen ilustraciones/cap29-rx-implante-coclear.jpg ancho=52% Radiografía transorbitaria anteroposterior de otra persona con un implante coclear (no es la paciente de este capítulo): el electrodo se ve enrollado dentro de la cóclea, proyectado en la órbita. Esta placa se toma en el pabellón, recién puesto el electrodo, para ver su posición y que esté entero. Imagen: Molezini FD y cols. (2012), Braz J Otorhinolaryngol, doi:10.1590/S1808-86942012000100005, Fig. 3, CC BY 4.0, recortada y en escala de grises.
+- @38,66 | **Electrodo** enrollado dentro de la cóclea, de la base hacia el ápice.
+- @18,22 | **Receptor-estimulador**, bajo la piel, con la antena y el imán arriba.
+:::
 
 El procesador, detrás de la oreja, divide el sonido en bandas de frecuencia, extrae la **envolvente** de cada una (cuánto sube y baja el sonido en el tiempo) y la convierte en pulsos que van al electrodo de la zona que le corresponde por tonotopía. Un electrodo cerca de la base (la entrada de la cóclea) se oye agudo, y uno cerca del ápice, grave. Es un código muy distinto del natural, y tiene límites que explican lo que el paciente va a decir después de la cirugía:
 

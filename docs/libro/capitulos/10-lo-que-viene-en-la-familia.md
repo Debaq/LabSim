@@ -138,6 +138,14 @@ Como es coclear, las emisiones están ausentes y el oído medio es normal. Una f
 
 El **acueducto vestibular** es un canal óseo fino que lleva el conducto endolinfático desde el vestíbulo hasta el saco endolinfático. Cuando está dilatado, se ve en la tomografía o la resonancia, y es la malformación del oído interno más frecuente en los niños con hipoacusia. <!-- verificar: "la más frecuente" y los criterios de imagen (diámetro) no están en la bibliografía verificada. --> Muchos de estos niños tienen variantes de la **pendrina** (SLC26A4), de herencia recesiva; cuando además desarrollan **bocio**, es el **síndrome de Pendred** (Forli y cols., 2021).
 
+:::imagen ilustraciones/cap10-tc-acueducto.jpg ancho=78% Tomografía axial de alta resolución del hueso temporal de otras personas (no son pacientes de este capítulo). Izquierda: un oído control. Derecha: un oído con síndrome del acueducto vestibular dilatado. Arriba se mide el ancho del acueducto en su punto medio y abajo en el opérculo, su salida hacia la fosa posterior; son los dos puntos de los criterios de Cincinnati, que lo llaman dilatado con más de 0,9 mm en el punto medio o más de 1,9 mm en el opérculo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Weiss NM y cols. (2023), Eur Arch Otorhinolaryngol, doi:10.1007/s00405-022-07681-4, Fig. 4 (paneles a, b, g y h), CC BY 4.0, recortada.
+- @11,33 | **Punto medio** del acueducto normal (línea verde): un canal fino.
+- @58,40 | **Punto medio** del oído dilatado: 1,0 mm.
+- @14,82 | **Opérculo** normal (línea celeste).
+- @60,77 | **Opérculo** dilatado: 2,1 mm, una boca ancha hacia la fosa posterior.
+- Rótulos del original: hSCC, conducto semicircular lateral; pSCC, conducto semicircular posterior. La barra blanca mide 5 mm.
+:::
+
 Su hipoacusia se reconoce por cómo **se comporta**:
 
 - Puede ser congénita, progresiva, de aparición tardía, a escalones, fluctuante o mixta (Forli y cols., 2021). Un niño puede **pasar el tamizaje** y caerse después.

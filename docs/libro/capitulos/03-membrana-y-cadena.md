@@ -412,6 +412,12 @@ Otorrea fétida a repetición desde la adolescencia, una pérdida que crece y un
 
 Hipoacusia conductiva moderada del OI, con timpanograma B de volumen normal y ósea normal: compatible con **colesteatoma del oído izquierdo sin compromiso coclear**, que el otorrino confirma con la otoscopía y la TC. El tratamiento es quirúrgico (Stankovic, 2008). Se le explica a Sergio que no debe esperar a que el oído vuelva a supurar para controlarse, y que el vértigo o la debilidad de la cara son motivo de urgencia.
 
+:::imagen ilustraciones/cap03-tc-colesteatoma.jpg ancho=100% Tomografía coronal de los dos oídos de otra persona, no de Sergio: a la izquierda de la imagen está su oído derecho, con colesteatoma; a la derecha, el izquierdo, sano. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Gulati M, Gupta S, Prakash A, Garg A, Dixit R (2019), Insights Imaging, doi:10.1186/s13244-019-0782-y, Fig. 2, CC BY 4.0, sin modificar.
+- @88,46 | **Escudo sano** (flecha amarilla): la punta de hueso donde se apoya el borde de arriba de la membrana.
+- @79,70 | En el oído sano, la caja y el conducto tienen aire (negro).
+- @15,60 | En el oído enfermo el escudo se borró, y la caja y el conducto están ocupados por partes blandas (gris) en vez de aire.
+:::
+
 ### Caso 3.5
 
 #### Razonamiento

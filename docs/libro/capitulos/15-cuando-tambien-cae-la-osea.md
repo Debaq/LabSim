@@ -79,7 +79,12 @@ Una perforación o una otorrea de años dejan un oído medio húmedo y una caden
 
 ### Otoesclerosis avanzada
 
-La otoesclerosis es una enfermedad del hueso que rodea la cóclea y fija el estribo (→ cap. 4). En su fase avanzada, además del gap, la ósea baja: en parte por la muesca de Carhart (mecánica) y en parte por una lesión real de la cóclea. No hay forma de separar las dos con la audiometría; el pronóstico se conoce **después** de la cirugía, cuando el gap se cierra y la ósea vuelve a subir. En la serie de Xue y Sun (2025), el gap fue máximo en graves y mínimo en 2 kHz, y subía de nuevo en 4 kHz. La curva timpanométrica A o As y los reflejos ausentes son lo habitual (Forli y cols., 2025).
+La otoesclerosis es una enfermedad del hueso que rodea la cóclea y fija el estribo (→ cap. 4). En su fase avanzada, además del gap, la ósea baja: en parte por la muesca de Carhart (mecánica) y en parte por una lesión real de la cóclea. No hay forma de separar las dos con la audiometría; el pronóstico se conoce **después** de la cirugía, cuando el gap se cierra y la ósea vuelve a subir. En la serie de Xue y Sun (2025), el gap fue máximo en graves y mínimo en 2 kHz, y subía de nuevo en 4 kHz. La curva timpanométrica A o As y los reflejos ausentes son lo habitual (Forli y cols., 2025). Cuando la enfermedad toma la cóclea, la tomografía puede mostrarla como un anillo oscuro alrededor de ella.
+
+:::imagen ilustraciones/cap15-tc-otoesclerosis-coclear.jpg ancho=80% Tomografía axial de los oídos derecho (a) e izquierdo (b) de otra persona, un adulto con hipoacusia sensorioneural severa bilateral por otoesclerosis coclear, no de los pacientes de este capítulo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Purohit B, Hermans R, Op de Beeck K (2014), Insights Imaging, doi:10.1007/s13244-014-0313-9, Fig. 12, CC BY; se borró un rótulo técnico del equipo.
+- @20,22 | **Doble anillo** (flecha): una banda oscura de hueso desmineralizado rodea la cóclea por fuera.
+- @69,12 | El mismo anillo en el otro oído: la enfermedad es bilateral.
+:::
 
 :::sabias ¿Sabías que?
 En una pérdida bilateral "pareja" la ósea sin enmascarar repite la misma curva en los dos oídos, porque es la de la mejor cóclea. Por eso en la otoesclerosis, que suele ser simétrica, la ósea se enmascara en cada oído.

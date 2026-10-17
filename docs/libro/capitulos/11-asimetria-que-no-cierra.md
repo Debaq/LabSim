@@ -140,6 +140,17 @@ Tumor benigno de las células de Schwann de la porción vestibular del VIII par.
 
 Aunque nace en el nervio vestibular, el síntoma vestibular es tardío y discreto: el cerebelo compensa el déficit que se instala lento. El VEMP, en cambio, suele estar alterado: el cervical en cerca del 65 % y el ocular en cerca del 76 % de los tumores sin operar. En un 16 % es la única prueba alterada, con audición normal (Chiarovano y cols., 2014).
 
+El diagnóstico lo da la resonancia con gadolinio, que pide el médico. Un tumor pequeño puede caber entero dentro del conducto auditivo interno; uno grande sale al ángulo y empuja el tronco.
+
+:::imagen ilustraciones/cap11-rm-schwannoma.jpg ancho=100% Resonancia de dos personas con schwannoma vestibular; no son pacientes de este capítulo. La imagen la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Arriba, un tumor intracanalicular pequeño en el conducto auditivo interno (CAI) izquierdo; abajo, uno grande y quístico en el ángulo pontocerebeloso derecho. A la izquierda, T1 con gadolinio; a la derecha, T2 de alta resolución (CISS), al mismo nivel. Cortes axiales en orientación radiológica: la derecha del paciente queda a la izquierda. Imagen: cortes propios del dataset Vestibular-Schwannoma-SEG (Shapey y cols., 2021, Sci Data 8:286, doi:10.1038/s41597-021-01064-w; TCIA, doi:10.7937/TCIA.9YTJ-5Q73), CC BY 4.0; recortados y con ventana ajustada.
+- @42,12 | **Tumor pequeño con gadolinio**: un nódulo blanco en el fondo del CAI izquierdo: el tumor realza.
+- @91,28 | **El mismo tumor en CISS**: una mancha gris donde debería haber líquido blanco.
+- @57,25 | **El CAI derecho sano**, en el mismo corte: líquido blanco con los nervios como líneas oscuras que van a la cóclea.
+- @21,53 | **Tumor grande con gadolinio**: masa del ángulo con realce desparejo y zonas quísticas.
+- @72,62 | **El mismo tumor en CISS**, con sus quistes blancos.
+- @83,85 | **El tronco y el cuarto ventrículo** quedan deformados por la masa.
+:::
+
 :::ojo Ojo clínico
 Una audición **normal** no descarta un schwannoma: en la serie de Chiarovano solo un tercio tenía hipoacusia tonal. Si el acúfeno es unilateral y persistente, se estudia igual.
 :::
@@ -152,9 +163,22 @@ Enfermedad genética en la que crecen **schwannomas vestibulares en los dos lado
 
 El **meningioma** del ángulo y el **epidermoide** dan un cuadro parecido. En 51 meningiomas del hueso petroso, el 65 % tenía hipoacusia y en el 41 % fue el primer síntoma (Bassiouni y cols., 2004). El PEAT está alterado o ausente en la mayoría de los tumores del ángulo: en 309 casos, 31,4 % patológico y 50,2 % sin respuesta (Marangos y cols.).
 
+:::imagen ilustraciones/cap11-rm-epidermoide.jpg ancho=100% Quiste epidermoide del ángulo pontocerebeloso derecho en otra persona: T2 (A), T1 con gadolinio (B) y difusión (C). Imagen: Chon KH, Lee JM, Koh EJ, Choi HY (2012), J Korean Neurosurg Soc 52:148, doi:10.3340/jkns.2012.52.2.148, Fig. 1 A-C, CC BY-NC 3.0; recortada, sin el panel de histología.
+- @12,62 | **En T2 es blanco**, como el líquido que lo rodea.
+- @44,66 | **Con gadolinio no realza**: queda oscuro. El schwannoma de la figura anterior, en cambio, realza.
+- @79,63 | **En difusión brilla mucho**: es el signo que hace pensar en un epidermoide.
+:::
+
 ### Compresión microvascular del VIII par
 
 Un asa vascular, casi siempre la arteria cerebelosa anteroinferior, contacta el nervio en el ángulo o el conducto. Da **acúfeno unilateral**, a veces episodios de vértigo, y una pérdida leve y de frecuencia específica, con los graves conservados (De Ridder y cols.). El PEAT muestra lo que se espera de una lesión proximal del nervio: **la onda II se reduce y el interpico I-III se alarga**, y la frecuencia del acúfeno coincide con la de máxima pérdida.
+
+:::imagen ilustraciones/cap11-rm-asa-aica.jpg ancho=40% Asa de la arteria cerebelosa anteroinferior (flecha amarilla) en T2 de alta resolución de otras personas, según cómo toca el VIII par (clasificación de Gorrie). Imagen: Kim SH y cols. (2019), PeerJ 7:e6582, doi:10.7717/peerj.6582, Fig. 2, CC BY 4.0, sin modificar.
+- @42,8 | **Tipo 1**: el asa va separada del nervio.
+- @88,22 | **Tipo 2**: el asa corre junto al nervio.
+- @12,92 | **Tipo 3**: el asa desvía el VIII par.
+- @84,90 | **Tipo 4**: el asa pasa entre el VII y el VIII par.
+:::
 
 ### Coclear con componente retrococlear
 

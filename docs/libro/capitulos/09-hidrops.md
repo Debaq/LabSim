@@ -204,6 +204,13 @@ Lo que se espera encontrar en un Ménière típico, de un lado:
 - **VEMP cervical**: reducido o ausente del lado enfermo (Young, 2013).
 - **Emisiones**: reducidas en la zona de la pérdida, que en el Ménière son los graves.
 
+El hidrops también se puede ver en vivo, con una resonancia hecha horas después de inyectar gadolinio. No es parte de los criterios de 2015: la pide y la informa el médico.
+
+:::imagen ilustraciones/cap09-rm-hidrops.jpg ancho=90% Resonancia para hidrops de un hombre de 31 años con Ménière del oído derecho; no es un paciente de este capítulo. Se muestra para que se vea la forma de lo que miden la ECochG y el VEMP. El espacio endolinfático agrandado se ve negro dentro de la perilinfa blanca. Rótulos originales: C, cóclea; S, sáculo; U, utrículo; *Right* y *Left*, oído derecho e izquierdo. Imagen: Young YH, Lin KT (2024), J Otolaryngol Head Neck Surg, doi:10.1177/19160216241250350, Fig. 2, CC BY-NC 4.0, sin modificar.
+- @13,22 | **Oído con Ménière**: hidrops coclear grado II y sacular y utricular grado III (flechas continuas). Las manchas negras son la endolinfa agrandada.
+- @91,48 | **El otro oído, de control**: sin hidrops (flechas punteadas). La perilinfa queda blanca alrededor de la cóclea y el vestíbulo.
+:::
+
 :::comentario Lo que dicen las normas
 Los casos de LabSim muestran el Ménière **típico**: el de la etapa ascendente, con la ECochG y el VEMP alterados. En la clínica no siempre es así. Entre un cuarto y la mitad de los Ménière tienen la ECochG **normal** (Lamounier y cols., 2014); con electrodo extratimpánico, la sensibilidad fue de alrededor de 48 % y la especificidad de 84 % (Ayub y cols., 2019). En el hidrops retardado, el VEMP cervical salió normal en casi la mitad de los pacientes (Young y cols., 2002). Una ECochG o un VEMP normales **no descartan** el hidrops; uno alterado lo apoya.
 :::

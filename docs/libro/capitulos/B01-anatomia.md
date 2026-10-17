@@ -126,6 +126,13 @@ Tabla: Las paredes de la caja timpánica
 
 La caja se divide en tres alturas respecto de la membrana: el **epitímpano** o **ático** (arriba, donde está la cabeza del martillo y el cuerpo del yunque), el **mesotímpano** (frente a la membrana, donde está la mayor parte de la cadena) y el **hipotímpano** (abajo, cerca del piso). El **ático** se comunica por atrás con las celdillas mastoideas y se ventila por un paso estrecho: por eso las bolsas de retracción y el colesteatoma suelen nacer allí.
 
+:::imagen ilustraciones/b1-tc-coronal.jpg ancho=55% Tomografía coronal de un oído derecho sano, a la altura del ático; afuera queda a la izquierda. Es la imagen de una persona real, no de un paciente de este libro; la tomografía la pide y la informa el médico, y aquí se muestra para que se vea la forma de lo que miden las pruebas. En la tomografía el aire es negro y el hueso, blanco. Imagen: Touska P, Connor SEJ (2025), Eur Radiol, doi:10.1007/s00330-024-11021-x, Fig. 1A, CC BY 4.0, recortada.
+- @36,22 | **Ático** (epitímpano), con aire.
+- @25,57 | **Escudo** (flecha hueca): el borde de hueso donde se apoya la parte alta de la membrana. El colesteatoma del ático lo erosiona (→ cap. 3).
+- @43,58 | **Articulación del yunque con el estribo** (flecha chica).
+- @12,58 | **Conducto auditivo externo**, con aire.
+:::
+
 ### La cadena osicular
 
 Tres huesecillos transmiten la vibración desde la membrana hasta la ventana oval:
@@ -197,6 +204,19 @@ El laberinto tiene una parte **anterior**, la cóclea (audición), y una **poste
 - @80,58 | **Cóclea**.
 :::
 
+:::imagen ilustraciones/b1-tc-axial.jpg ancho=100% Dos cortes axiales de tomografía de alta resolución (0,625 mm) de un oído normal: a la izquierda, uno más bajo; a la derecha, uno más alto. Adelante queda arriba y afuera, a la izquierda. Rótulos originales en inglés; ICA es la carótida interna. Imagen: Feraco P, Piccinini S, Gagliardo C (2021), Radiol Med, doi:10.1007/s11547-021-01387-z, Fig. 3 (cortes b y c), CC BY 4.0, recortada y con los dos cortes lado a lado.
+- @8.5,51 | **Nervio facial**, segmento mastoideo (*VII-MS*): baja por la mastoides.
+- @17,76 | **Celdillas mastoideas**: hueso lleno de aire, negro.
+- @25,81 | **Canal semicircular lateral** (*LSCC*).
+- @38.3,72 | **Vestíbulo** (*V*).
+- @45.6,54 | **Vuelta basal de la cóclea** (*BTC*).
+- @70.5,12 | **Nervio facial**, segmento timpánico (*VII-TS*), en la pared de la caja.
+- @93.8,15 | **Trompa de Eustaquio**, su entrada (*ET*).
+- @90.6,58 | **Cóclea**: vueltas basal (*BTC*), media (*MTC*) y apical (*ATC*).
+- @86,61 | **Conducto auditivo interno** (*IAC*).
+- @84.5,81 | **Canal semicircular superior** (*SSCC*).
+:::
+
 ### La cóclea
 
 La cóclea es un tubo enrollado en espiral de **dos vueltas y media** alrededor de un eje de hueso, el **modiolo**. Mide cerca de **33 a 35 mm** de largo si se la desenrollara (Standring, 2020). Su **base** es la vuelta más ancha, que sobresale en la caja como el promontorio y recibe los sonidos agudos; su **ápice**, en el extremo, los graves (la tonotopía, → B2, H3).
@@ -250,6 +270,24 @@ El VIII par lleva la información de la cóclea y del vestíbulo al tronco encef
 - **Anteroinferior:** coclear.
 - **Posterosuperior:** nervio vestibular **superior**.
 - **Posteroinferior:** nervio vestibular **inferior**.
+
+Una resonancia en T2 con un corte perpendicular al CAI muestra los cuatro nervios en su lugar.
+
+:::imagen ilustraciones/b1-rm-cai.jpg ancho=90% Resonancia en T2 del CAI de un lactante, en un corte sagital oblicuo (perpendicular al conducto), del oído que oye normal. A la izquierda, el corte completo; a la derecha, ampliado. Adelante queda a la izquierda. Rótulos originales en inglés. Imagen: Johansson M, Karltorp E, Edholm K, Drott M, Berninger E (2022), J Clin Med, doi:10.3390/jcm11143966, Fig. 4 a-b, CC BY 4.0, recortada (se omite el otro oído).
+- @32,72 | El **CAI**, cortado de través, dentro del círculo.
+- @64.5,18 | **Nervio facial** (*facial nerve*): arriba y adelante.
+- @82,22 | **Ramas vestibulares**, superior e inferior (*vestibular branches*): atrás.
+- @81.5,78 | **Nervio coclear** (*cochlear branch*): abajo y adelante. En el otro oído de este niño, sordo, no se ve: aplasia del nervio coclear.
+:::
+
+:::imagen ilustraciones/b1-rm-cai-plano.jpg ancho=100% Cómo se saca ese corte, en una resonancia de 7 teslas de un voluntario con audición normal: el plano sobre el corte axial, el esquema de los cuatro nervios en el fondo del CAI y el corte real. Rótulos originales en inglés (S, superior; A, anterior). Imagen: Aphiwatthanasumet K y cols. (2025), MAGMA, doi:10.1007/s10334-024-01213-3, Fig. 5c, CC BY 4.0, recortada.
+- @12,8 | **Plano del corte**: la línea blanca larga, perpendicular al CAI.
+- @39,17 | **Facial** (*facial nerve*): anterosuperior.
+- @60,12 | **Vestibular superior**: posterosuperior.
+- @32,72 | **Coclear** (*cochlear nerve*): anteroinferior.
+- @60,88 | **Vestibular inferior**: posteroinferior.
+- @96,88 | El **corte real** a 7 teslas.
+:::
 
 Más allá del CAI, los nervios entran a la fosa posterior por el **ángulo pontocerebeloso**, el espacio entre el peñasco, el cerebelo y la protuberancia. Allí están el VII y el VIII, la arteria cerebelosa anteroinferior (AICA) y su asa. Un tumor en el ángulo (schwannoma vestibular, meningioma) comprime el VIII y se ve en la asimetría y en las pruebas retrococleares (→ cap. 11).
 
@@ -429,6 +467,7 @@ Los tres huesecillos del oído medio ya tienen casi su tamaño de adulto al nace
 - Servier Medical Art (smart.servier.com), CC BY 4.0: figuras del oído, del oído interno, de la nariz y de los senos.
 - OpenStax, Anatomy and Physiology 2e: corte de la cóclea. El archivo figura como CC BY 4.0 en Wikimedia Commons; el sitio de OpenStax declara hoy para el libro CC BY-NC-SA 4.0, que es compatible con la licencia de este libro.
 - Gray H. Anatomy of the Human Body (1918), láminas 854, 856, 907, 911 y 920, dominio público.
+- Tomografías y resonancias del oído: figuras de artículos de acceso abierto (Feraco y cols., 2021; Touska y Connor, 2025; Johansson y cols., 2022; Aphiwatthanasumet y cols., 2025), CC BY 4.0; detalle en `docs/libro/ilustraciones/CREDITOS_IMG_OIDO.md`.
 - Esquemas propios (pabellón, membrana timpánica, trompa, vías auditiva y vestibular, irrigación y válvula nasal): hechos para este libro con `docs/libro/ilustraciones/hacer_b1.py`.
 - Detalle (origen, autor, licencia y si se modificó): `docs/libro/ilustraciones/CREDITOS_B1.md`.
 

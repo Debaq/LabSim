@@ -105,7 +105,19 @@ La neuritis y la laberintitis se distinguen en un dato que el audiólogo mide: l
 
 Entre 240 infartos cerebelosos consecutivos, 25 (10,4 %) se presentaron como un cuadro de neuritis, y en 24 de ellos el territorio era la rama medial de la PICA (Lee y cols., 2006). Se llaman **pseudoneuritis**. Con vértigo, vómitos y un nistagmo que a veces parece periférico, el único dato nuevo puede ser un impulso cefálico **normal**, un skew o una marcha imposible. Los signos neurológicos clásicos faltan con frecuencia: en 15 ictus pequeños solo el 27 % tenía signos neurológicos focales (Saber Tehrani y cols., 2014). Los factores de riesgo vascular (hipertensión, diabetes, tabaco, edad) pesan, pero no son un filtro: en la serie de 101 pacientes todos los incluidos los tenían, y aun así 25 eran periféricos (Kattah y cols., 2009).
 
+En la resonancia, un infarto reciente se ve brillante en la secuencia de difusión y oscuro en el mapa ADC.
+
+:::imagen ilustraciones/cap21-rm-infarto-cerebeloso.jpg ancho=80% Resonancia de un infarto en el hemisferio derecho del cerebelo, en un corte axial de la fosa posterior. Es otra persona, no un paciente de este capítulo: la resonancia la pide y la informa el médico, y se muestra para que se vea la forma de lo que el examen de cabecera sospecha. Izquierda: difusión (b = 1000). Derecha: mapa ADC del mismo corte. Convención radiológica: la derecha del paciente queda a la izquierda de la imagen. Según la máscara del dataset, el infarto mide unos 3,5 mL. Imagen: corte propio del caso sub-strokecase0157 de ISLES 2022 (Hernandez Petzsche y cols., Sci Data 2022, doi:10.1038/s41597-022-01875-5; datos doi:10.5281/zenodo.7153326), CC BY 4.0; recortado y con ventana ajustada.
+- @7,82 | **Difusión**: el infarto es la mancha blanca, en la parte posterior del hemisferio derecho.
+- @55,84 | **ADC**: en el mismo lugar el tejido se ve más oscuro que el resto del cerebelo: el agua se mueve menos ahí (difusión restringida).
+:::
+
 La imagen tampoco es infalible. La resonancia con difusión fue falsamente normal en el 12 % de los pacientes dentro de las 48 horas (Kattah y cols., 2009), y en los ictus pequeños en el 53 % entre las 6 y las 48 horas (Saber Tehrani y cols., 2014). Una imagen temprana normal **no cierra** un HINTS con un signo central.
+
+:::imagen ilustraciones/cap21-rm-difusion-negativa.jpg ancho=100% Una difusión normal que tres días después ya no lo es. Paciente con vértigo recurrente e hipoacusia fluctuante del oído derecho con acúfeno; la calórica mostraba una paresia derecha de 65 %. A: resonancia con difusión al día 1, normal (dos cortes axiales). D: tres días después, con más vértigo y más hipoacusia, la difusión repetida muestra focos brillantes en el cerebelo anterior derecho, flóculo incluido: un infarto en el territorio de la arteria cerebelosa anteroinferior (AICA), no de la PICA. Imagen: Kim HA, Lee H. J Stroke 2017 (doi:10.5853/jos.2016.00857), Fig. 1, paneles A y D, CC BY-NC 4.0; recortada (sin el audiograma ni la calórica).
+- @12,72 | **Día 1**: difusión sin lesiones.
+- @77,82 | **Día 4**: los focos brillantes del infarto, en el cerebelo anterior derecho.
+:::
 
 :::ojo Ojo clínico
 Si el examen de cabecera muestra **un solo signo central**, o el paciente **no puede mantenerse de pie**, no se manda a la casa con un informe de "alteración vestibular periférica". Se informa lo que se vio y se avisa al médico o al servicio de urgencia **en el momento**. Lo mismo vale para un paciente con una pérdida auditiva nueva y factores de riesgo vascular: el audiograma de una laberintitis y el de una AICA **son el mismo**.

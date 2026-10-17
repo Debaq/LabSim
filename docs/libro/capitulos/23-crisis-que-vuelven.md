@@ -88,6 +88,14 @@ Con los años, el cuadro cambia de forma en tres sentidos.
 
 **Aparecen cosas nuevas.** Las **caídas de Tumarkin** y, en una parte de los pacientes, el **otro oído**. Qué proporción termina con los dos oídos comprometidos varía mucho de una serie a otra, y no es un dato para citar sin su fuente <!-- verificar: porcentaje de Ménière bilateral (House 2006 y otras series) -->. Lo que importa en la sala es que **un paciente con un oído "malo" y uno "bueno" puede tener los dos enfermos**: la comparación entre oídos, que en un Ménière unilateral dice casi todo, deja de servir. Esto pesa en dos decisiones. Para el diagnóstico, porque el criterio audiométrico se escribió comparando con el otro oído <!-- verificar: cómo define el criterio de 2015 la pérdida cuando el oído contrario también está afectado -->. Y para el tratamiento: un procedimiento que apague un laberinto es una decisión médica, y quien evalúa entrega lo que el **otro** laberinto todavía hace.
 
+La resonancia con gadolinio tardío también gradúa el hidrops, oído por oído, por lo que ocupa en el vestíbulo y la cóclea (→ cap. 9). La pide y la informa el médico.
+
+:::imagen ilustraciones/cap23-rm-hidrops-grados.jpg ancho=58% Resonancia 3D-FLAIR cuatro horas después del gadolinio intravenoso, en oídos de otras personas, con el esquema de cada corte a la derecha. En rojo, la superficie del vestíbulo que se midió. Se muestra para que se vea la forma de lo que miden las pruebas. Rótulos originales en inglés. Imagen: Diorflar S, Guigou C, Daguet E, Bensimon JL, Toupet M, Bozorg-Grayeli A (2023), Front Neurol 14:1105461, doi:10.3389/fneur.2023.1105461, Fig. 2, CC BY 4.0, sin modificar.
+- @46,4 | **Grado 0**: sin hidrops. Sáculo y utrículo chicos y separados.
+- @46,37 | **Grado I**: hidrops moderado del vestíbulo y de la cóclea.
+- @46,70 | **Grado II**: hidrops importante del vestíbulo, que ya no deja separar el sáculo del utrículo, y grado I de la cóclea.
+:::
+
 ### Migraña vestibular
 
 Los criterios de la Sociedad Bárány y de la Sociedad Internacional de Cefaleas piden (Lempert y cols., 2012, 2022):

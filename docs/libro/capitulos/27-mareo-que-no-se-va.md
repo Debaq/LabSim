@@ -411,7 +411,7 @@ El relato **no** calza con el PPPD: no hay un evento que lo dispare (C), empeora
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural del OI de grado leve con **signos retrococleares** e hipofunción vestibular izquierda. **No** se informa como mareo funcional. Se sugiere evaluación por otorrinolaringología con **resonancia magnética de conductos auditivos internos con gadolinio**. El PPPD, si lo hubiera, se considera **después**, y puede coexistir (Staab y cols., 2017).
+Hipoacusia sensorioneural del OI de grado leve con **signos retrococleares** e hipofunción vestibular izquierda. **No** se informa como mareo funcional. Se sugiere evaluación por otorrinolaringología con **resonancia magnética de conductos auditivos internos con gadolinio** (→ cap. 11). El PPPD, si lo hubiera, se considera **después**, y puede coexistir (Staab y cols., 2017).
 
 :::ojo Ojo clínico
 Etiquetar a un paciente de "funcional" sin haber mirado la audición y el vestíbulo cierra la puerta al diagnóstico que sí se trata. El audiograma y los reflejos son los primeros que dicen "esto no es PPPD".

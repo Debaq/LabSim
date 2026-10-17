@@ -90,7 +90,14 @@ Los signos que el consenso acepta son: el colapso visible de la pared o del ala 
 La maniobra de Cottle es una **señal**, no una prueba definitiva: en 106 voluntarios, la versión modificada mejoró la respiración incluso en quienes no tenían insuficiencia de pared lateral (falsos positivos); una variante que solo sostiene pasivamente la pared lateral mejoró únicamente a los que sí la tenían (Pak y cols., 2025). El examen físico se interpreta junto al relato, no solo.
 :::
 
-¿Y los equipos? Ni la rinometría acústica ni la rinomanometría son, hoy, un estándar para este diagnóstico (Rhee y cols., 2010). La rinometría en apnea no ve una pared que solo cede con flujo. La rinomanometría puede mostrar el comportamiento distinto de las dos fases: en una serie de 55 pacientes, la diferencia entre el flujo inspiratorio y el espiratorio fue mayor en los que tenían colapso de válvula, y con un punto de corte el examen tuvo una sensibilidad del 82 % y una especificidad del 59 %; se hizo con rinomanometría posterior, no con la anterior que usa este libro (Maalouf y cols., 2016). Es una pista, no un diagnóstico.
+¿Y los equipos? Ni la rinometría acústica ni la rinomanometría son, hoy, un estándar para este diagnóstico (Rhee y cols., 2010). La rinometría en apnea no ve una pared que solo cede con flujo. La rinomanometría puede mostrar el comportamiento distinto de las dos fases: en una serie de 55 pacientes, la diferencia entre el flujo inspiratorio y el espiratorio fue mayor en los que tenían colapso de válvula, y con un punto de corte el examen tuvo una sensibilidad del 82 % y una especificidad del 59 %; se hizo con rinomanometría posterior, no con la anterior que usa este libro (Maalouf y cols., 2016). Es una pista, no un diagnóstico. La tomografía tampoco lo resuelve: mira la válvula quieta.
+
+:::imagen ilustraciones/cap35-tc-valvula.jpg ancho=90% La válvula nasal interna en tomografía, en un corte coronal reformateado perpendicular al eje del flujo, justo delante de la cabeza del cornete inferior. Es otra persona, no un paciente de este capítulo, operada por obstrucción nasal (rinoplastía); los dos cortes son de antes de la cirugía. A: el ángulo entre el tabique y el cartílago lateral superior (los autores dan 10 a 15° en personas sin síntomas). C: el área de aire de cada lado, contorneada. En 20 pacientes operados, el NOSE bajó de 67,5 a 39,0 en promedio, y ni el ángulo ni el área medidos así cambiaron de forma significativa. Imagen: Shafik AG, Alkady HA, Tawfik GM y cols. Braz J Otorhinolaryngol 2020 (doi:10.1016/j.bjorl.2019.08.009), Fig. 2, paneles A y C, CC BY 4.0; recortada.
+- @15,56 | **Ángulo derecho: 6,0°** (izquierda de la imagen), entre el tabique y el cartílago lateral superior.
+- @35,56 | **Ángulo izquierdo: 10,7°**.
+- @63,76 | **Área derecha: 115,3 mm²**.
+- @85,76 | **Área izquierda: 159,4 mm²**.
+:::
 
 ### Cuando lo que se siente y lo que se mide no coinciden
 

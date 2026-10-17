@@ -87,7 +87,14 @@ Infección de la piel del conducto, favorecida por la humedad (piscina, ducha) y
 
 ### Estenosis y atresia congénita
 
-El conducto no se formó (atresia) o quedó muy estrecho (estenosis). Suele acompañarse de **microtia**, un pabellón pequeño o malformado, y casi siempre es de un solo lado. La cóclea es sana y la pérdida es una conductiva grande y estable: en series quirúrgicas el gap ronda los 50 dB antes de operar (Dobratz y cols., 2008), y<!-- verificar: los ~50 dB se deducen del gap posoperatorio más la mejora que informa Dobratz; no es una cifra preoperatoria publicada tal cual. --> la cirugía mejora la aérea en unos 26 dB, sin normalizarla (Jonas y cols., 2022). La audiometría con **vía ósea enmascarada** es el examen que decide: confirma la reserva coclear antes de cualquier tratamiento.
+El conducto no se formó (atresia) o quedó muy estrecho (estenosis). Suele acompañarse de **microtia**, un pabellón pequeño o malformado, y casi siempre es de un solo lado. La cóclea es sana y la pérdida es una conductiva grande y estable: en series quirúrgicas el gap ronda los 50 dB antes de operar (Dobratz y cols., 2008), y<!-- verificar: los ~50 dB se deducen del gap posoperatorio más la mejora que informa Dobratz; no es una cifra preoperatoria publicada tal cual. --> la cirugía mejora la aérea en unos 26 dB, sin normalizarla (Jonas y cols., 2022). La audiometría con **vía ósea enmascarada** es el examen que decide: confirma la reserva coclear antes de cualquier tratamiento. El otorrinolaringólogo estudia el oído con una tomografía, que muestra si el conducto está estrecho o si no existe.
+
+:::imagen ilustraciones/cap01-tc-atresia.jpg ancho=100% Tomografía axial de tres oídos derechos, en el mismo plano: normal (A), con estenosis (B) y con atresia (C). Son otras personas, no los pacientes de este capítulo; la tomografía la pide y la informa el médico, y se muestra para que se vea qué hay detrás de la conductiva que mide la audiometría. Imagen: Qin FH, Zhang TY, Dai P, Yang L (2015), Clin Exp Otorhinolaryngol, doi:10.3342/ceo.2015.8.4.320, Fig. 2, CC BY-NC 3.0, sin modificar.
+- @5,50 | **Normal**: el conducto, con aire (negro), llega hasta la caja.
+- @36,37 | **Estenosis**: el conducto, bajo el globo, queda reducido a un hilo de aire.
+- @70,47 | **Atresia**: a la derecha del globo, donde debería abrirse el conducto, hay solo hueso.
+- La línea blanca y la punteada son la medida del artículo (el diámetro del conducto en su parte medial); la flecha marca el segmento vertical del nervio facial.
+:::
 
 ### Carcinoma del conducto
 

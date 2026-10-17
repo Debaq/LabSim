@@ -332,7 +332,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 
 :::docente Guía del caso
 - **Datos clave:** tres caídas en ocho meses, **siempre a oscuras**, una con fractura de costilla; "voy sobre algodón"; oscilopsia en la micro, **sin vértigo**; hormigueo y ardor en los pies; diabetes de larga data; sin signos cerebelosos; audición acorde con su edad.
-- **Hipótesis esperables:** polineuropatía; hipofunción vestibular bilateral; CANVAS (no calza: no hay ataxia ni signos cerebelosos, y la resonancia no muestra atrofia); causa central; hipotensión ortostática (la presión sale normal, aunque la diabetes obliga a pensarla); fármacos (gabapentina de noche); miedo proporcionado.
+- **Hipótesis esperables:** polineuropatía; hipofunción vestibular bilateral; CANVAS (no calza: no hay ataxia ni signos cerebelosos, y la resonancia no muestra la atrofia del vermis, → cap. 25); causa central; hipotensión ortostática (la presión sale normal, aunque la diabetes obliga a pensarla); fármacos (gabapentina de noche); miedo proporcionado.
 - **Qué pedir:** calórica bitérmica y vHIT de los dos lados; DVA; batería de H19 con mCTSIB; presión de pie; sensibilidad de los pies; ABC y DHI (→ H15 a H19, cap. 24).
 - **Lo que enseña:** que **dos sentidos caídos no se compensan** y que el tercero tiene que alcanzar solo, con luz; que el caso no se explica con una sola enfermedad; y que su miedo es **realista**.
 - **Errores esperables:** quedarse con la neuropatía y no pedir el examen vestibular; informar "calórica sin asimetría" (→ cap. 24); suponer que es un PPPD por el miedo; dejar el programa sin cambios en la casa.

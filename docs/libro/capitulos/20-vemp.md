@@ -346,7 +346,7 @@ Con 25 dB en las frecuencias del habla, pocos pensarían en el nervio. Pero la a
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural leve del OD, de agudos, con el **VEMP del OD disminuido** (cVEMP y oVEMP) y el oído medio sano: signos de compromiso del nervio vestibular de ese lado. Se sugiere ABR y la resonancia de los conductos auditivos internos con gadolinio; el diagnóstico de tumor lo hace la imagen.
+Hipoacusia sensorioneural leve del OD, de agudos, con el **VEMP del OD disminuido** (cVEMP y oVEMP) y el oído medio sano: signos de compromiso del nervio vestibular de ese lado. Se sugiere ABR y la resonancia de los conductos auditivos internos con gadolinio; el diagnóstico de tumor lo hace la imagen (→ cap. 11).
 
 :::comentario Comentario
 Si el VEMP hubiera salido normal, la resonancia igual se pediría: en las series, entre una cuarta parte y un tercio de los schwannomas tienen el VEMP normal (Chiarovano y cols., 2014).

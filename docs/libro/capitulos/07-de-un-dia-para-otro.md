@@ -133,7 +133,12 @@ En el caso típico de este libro, el laberinto inflamado se lleva también el s�
 
 Es el daño de la cóclea por un **golpe en la cabeza sin fractura**. El golpe no pasa por el oído medio: el tímpano está sano y la curva es A. La pérdida es sensorioneural y, en más de la mitad de los pacientes, de los **dos oídos** (22 de 40) (Choi y cols., 2013). En esa serie de 62 oídos predominó la forma **descendente** (54,8 %), seguida de la plana (38,7 %) y de la ascendente (6,5 %) (Choi y cols., 2013). Su signo típico es una pérdida de agudos con **muesca en 4 kHz**, como la del ruido, a menudo con acúfeno (Brusis, 2011).
 
-Esa semejanza con el ruido es lo que más se discute: un audiograma con muesca después de un accidente puede ser del golpe o de años de exposición. La historia de ruido y, si existe, una **audiometría anterior** al accidente son las que lo deciden. Si el golpe rompió el hueso, el cuadro es otro: la fractura longitudinal daña el oído medio (→ cap. 3) y la que viola la cápsula ótica destruye la cóclea (→ cap. 15).
+Esa semejanza con el ruido es lo que más se discute: un audiograma con muesca después de un accidente puede ser del golpe o de años de exposición. La historia de ruido y, si existe, una **audiometría anterior** al accidente son las que lo deciden. Si el golpe rompió el hueso, el cuadro es otro: la fractura longitudinal daña el oído medio (→ cap. 3) y la que viola la cápsula ótica destruye la cóclea (→ cap. 15). Eso lo dice la tomografía: si hay un trazo de fractura y si toca la cápsula. Una tomografía "sin fractura" quiere decir que no se vio ningún trazo como estos.
+
+:::imagen ilustraciones/cap07-tc-fractura.jpg ancho=80% Tomografía axial del hueso temporal, en ventana de hueso, de otras personas, no del paciente de este capítulo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Trojanowska A y cols. (2012), Insights Imaging, doi:10.1007/s13244-011-0126-z, Fig. 11, CC BY-NC, sin modificar.
+- @20,24 | **Respeta la cápsula** (a, flecha): el trazo queda en la mastoides y no toca el oído interno.
+- @93,72 | **Viola la cápsula** (b, flecha): el trazo cruza el canal semicircular lateral y el vestíbulo.
+:::
 
 ### Parotiditis: la cófosis que llega de niño
 

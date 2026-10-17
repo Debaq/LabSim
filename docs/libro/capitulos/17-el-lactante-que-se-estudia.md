@@ -110,6 +110,22 @@ Entre los bebés que refieren, la causa más común no es una pérdida sensorion
 
 La revisión de Goderis y cols. (2014), de 37 estudios, encontró hipoacusia en 1 de cada 3 niños **sintomáticos** (mayormente bilateral) y en 1 de cada 10 **asintomáticos** (mayormente unilateral), más a menudo severa a profunda, con inicio tardío, fluctuación y progresión. En 307 niños con infección asintomática, Fowler y cols. (1997) hallaron hipoacusia en el 7,2 %, que progresó en el 50 %, fue de inicio tardío en el 18,2 % y fluctuó en el 22,7 %. De ahí sale la lección central: **un bebé con CMV puede haber pasado el tamizaje y perder la audición después**, y el seguimiento no termina con la primera evaluación. El audiograma del CMV es de forma variable: en los asintomáticos suele comprometer los agudos y fluctuar (Cohen y cols., 2014). El programa de Columbia Británica cita a todo niño con CMV a un primer ABR a las 4 a 8 semanas de edad corregida, **sin importar el resultado del tamizaje**, y lo mantiene en control prolongado (Hatton y cols., 2022).
 
+:::imagen ilustraciones/cap17-rm-cmv.jpg ancho=92% Resonancia de un niño de 17 meses con CMV congénito y una sordera que apareció después del nacimiento (es otra persona, no un bebé de este capítulo). Izquierda, corte axial FLAIR: alteración de la sustancia blanca alrededor de los ventrículos, en los dos lados. Derecha, corte coronal T2: quistes en la parte medial de los lóbulos temporales. La resonancia la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Lucignani G y cols. (2022), Children, doi:10.3390/children9081210, Fig. 7 (paneles E y F), CC BY 4.0, recortada.
+- @12,58 | **Sustancia blanca alterada** junto a los ventrículos (más clara de lo normal).
+- @89,64 | **Quiste temporal**, en la cara medial del lóbulo.
+:::
+
+Una pérdida de un oído desde el nacimiento no siempre viene del CMV. La resonancia, que también pide el médico, puede mostrar que el nervio coclear de ese lado no se formó.
+
+:::imagen ilustraciones/cap17-rm-nervio-coclear.jpg ancho=70% Resonancia sagital oblicua del conducto auditivo interno de un lactante con hipoacusia de un oído desde el nacimiento (otra persona). Izquierda: el oído que oye, con sus cuatro nervios. Derecha: el oído sordo, donde falta la rama coclear (aplasia o hipoplasia severa). En la serie de donde viene, 20 lactantes con hipoacusia unilateral congénita, ninguno tenía CMV y la mitad de las 14 resonancias mostró un nervio coclear ausente o muy delgado. Imagen: Johansson M y cols. (2022), J Clin Med, doi:10.3390/jcm11143966, Fig. 4 (paneles b y d), CC BY 4.0, recortada (se dejaron fuera los rótulos en inglés; las flechas son del original).
+- @26,16 | **Nervio facial**.
+- @45,30 | **Ramas vestibulares** del VIII.
+- @15,87 | **Rama coclear**, abajo y adelante.
+- @72,14 | Oído sordo: **nervio facial**.
+- @89,91 | **Ramas vestibulares**, presentes.
+- @69,71 | **Sin rama coclear**: el lugar donde debería estar queda vacío.
+:::
+
 <!-- verificar: intervalos de seguimiento audiológico del CMV congénito según JCIH 2019 (no se pudo leer el texto completo; no se citan cifras). -->
 
 ### Rubéola y toxoplasmosis congénitas
