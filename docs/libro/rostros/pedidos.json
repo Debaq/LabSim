@@ -29,8 +29,8 @@
   "cap11_retrococlear": "Chilean man, 66, retired sawmill worker who tends his vegetable garden, weathered skin, grey stubble, straw hat pushed back, frustrated expression.",
   "cap11_schwannoma": "Chilean woman, 52, court secretary, greying hair in a short bob, reading glasses on a chain, formal blouse, mildly concerned expression.",
   "cap17_asfixia_perinatal": "Chilean baby boy, 4 months old, lying on a light blanket, looking up, slightly hypotonic floppy posture, calm, soft daylight.",
-  "cap17_cmv_congenito": "Chilean baby boy, 4 months old, small head for his age, lying on a light blanket, calm, soft daylight.",
-  "cap17_rubeola_congenita": "Chilean baby boy, 4 months old, both pupils look cloudy whitish (congenital cataracts), lying on a light blanket, calm, soft daylight.",
+  "cap17_cmv_congenito": "Chilean baby boy, 4 months old, alert and healthy-looking, normal head size, lying on a light blanket, calm, soft daylight.",
+  "cap17_rubeola_congenita": "Chilean baby girl, 4 months old, small for her age, both pupils look cloudy whitish (congenital cataracts), lying on a light blanket, calm, soft daylight.",
   "h4_dilema": "Chilean woman, 38, dark wavy hair, tired attentive expression, knitted sweater.",
   "h7_disyuncion": "Chilean man, 33, motorcycle delivery rider, short hair, a faint healed scar on the RIGHT side of the forehead (viewer's left), delivery jacket, calm expression.",
   "h7_lactante": "Chilean baby girl, 2 months old, held in her mother's arms (only the mother's arms visible), slightly congested little nose from a recent cold, calm, soft daylight.",
@@ -69,5 +69,13 @@
   "cap12_infarto_aica": "Chilean man, 63, taxi driver, slight droop of the mouth corner on the LEFT side of the image (his right side, mild peripheral facial weakness), tired, slightly sweaty, short grey hair, plain shirt.",
   "cap12_glioma_tronco": "Chilean girl, 7, second-grader, pale and serious, the eye on the LEFT side of the image slightly turned inward (mild esotropia), hair in a ponytail, school uniform.",
   "cap12_siderosis": "Chilean man, 58, accountant, glasses, slightly rigid posture, greying hair, plain sweater, otherwise unremarkable.",
-  "cap12_hic_idiopatica": "Chilean woman, 29, graphic designer, overweight, tired eyes, long dark hair, casual top."
+  "cap12_hic_idiopatica": "Chilean woman, 29, graphic designer, overweight, tired eyes, long dark hair, casual top.",
+  "cap19_unilateral": "Chilean construction foreman, 44, weathered face, short dark hair, light stubble, neutral guarded expression, work jacket, no visible signs of illness or trauma.",
+  "cap19_sobre_real": "Chilean man, 52, sawmill forklift operator, heavy build, greying short hair and mustache, tired but alert expression, work fleece, no hearing aid.",
+  "cap19_nina": "Chilean girl, 11, long dark hair tied back, school uniform collar, worried and slightly sad eyes, healthy appearance.",
+  "cap16_normal": "Newborn baby girl, 10 hours old, asleep and swaddled in a pastel blanket in a maternity ward crib, slightly puffy eyelids, no medical devices on the face; the mother's forearm in a hospital gown sleeve holds the blanket edge.",
+  "cap16_uci": "Newborn baby boy, 7 days old, late preterm, mild yellowish skin tone from recent jaundice, asleep in an open hospital crib, small pulse-oximeter strap on his foot; a nurse's gloved hand and blue scrub sleeve at the edge.",
+  "cap16_riesgo": "Newborn baby boy, 2 days old, calm with eyes half open, white cotton onesie and knit hat, held against a parent's chest (only a beige cardigan and an arm visible).",
+  "cap16_efusion": "Infant girl, 3 weeks old, alert, light-yellow sleeper and pale knitted hat, held in the crook of her mother's arm (grey sweater sleeve visible), healthy look.",
+  "cap17_efusion_neonatal": "Chilean baby girl, 4 months old, awake and calm, slightly congested nose, lying on a light blanket, soft daylight, healthy look."
 }

@@ -217,6 +217,16 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 128 | 14 | Datos previos al ABR | no pide edad corregida, temperatura ni fármacos | se anotan antes de interpretar (el sueño del lactante sigue como #35 y #64, con recuadro de sedación) | Markand 1987; Stipdonk 2016; Knaus 2019 | A · vacío | |
 | 129 | 12 | Tasa 81,1 | "en sospecha de neuropatía" | se mantiene la tasa alta, redactada como prueba de esfuerzo de la vía (igual que H10 y #122) | Jiang 1991; ACNS 2008 | P | |
 
+| 130 | 18 | Ganancia del amplificador | 10.000 | LabSim usa 100.000; el capítulo no da cifra | — | A · verificar | |
+| 131 | 16 | Lactante que no duerme | "si no duerme, el examen NO PUEDE realizarse" | el protocolo; recuadro: el equipo mide el EEG y rechaza el ruido; privación de sueño solo en lactantes ambulatorios (→ cap. 17) | — | P | |
+| 132 | 16 | Límite de impedancias | 12 kΩ (GSI) y 5 kΩ (Eclipse) | se sigue el manual de cada equipo (LabSim 20 kΩ) | — | A | |
+| 133 | 16 | Nombre del examen | mezcla PEAAT, PEAT y PEATC | AABR para el tamizaje automatizado | — | A | |
+| 134 | 19 | Pérdida no orgánica | no está en el protocolo | se enseña desde la literatura (Stenger → H6) | Austen 2004 | A · vacío | |
+| 135 | 17 | Orden del examen del lactante | parte con click a 80 dB nHL y baja de 20 en 20, sin vía ósea | el protocolo; recuadro: Columbia Británica parte de 2 kHz al nivel mínimo, cambia de oído pronto y pasa a vía ósea apenas el aéreo sale elevado | Hatton 2022 | P | |
+| 136 | 17 | ABR por vía ósea del lactante | no está | se enseña (referencia de cero propia, tope del vibrador) | Hatton 2012; Seo 2018 | A · vacío | |
+| 137 | 17 | Corrección nHL → eHL | LabSim: −20/−15/−10/−5 (burst 0,5-4 kHz) | la de LabSim; recuadro con la de Columbia Británica (−10/−10/−5/0) | Hatton 2022; Stapells 2000 | P | |
+| 138 | 17 | Conclusión de ejemplo | "rango frecuencial estudiado de 2-4 kHz" (lo del click) | en el lactante hacen falta estímulos por frecuencia | Stapells 2000 | A | |
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |

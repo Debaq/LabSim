@@ -7,7 +7,17 @@
   "edad": 0,
   "sexo": "hombre",
   "edad_valor": 4,
-  "edad_unidad": "meses"
+  "edad_unidad": "meses",
+  "grado": {
+   "OD": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 4 meses y viene con su papá y su mamá. Nació a las 38 semanas, con 3.100 g, sin ningún signo al examen. Durante el embarazo la mamá tuvo, a las 14 semanas, unos días de fiebre y dolor de garganta que se estudiaron con exámenes de sangre compatibles con una infección reciente por citomegalovirus (CMV). En la maternidad se confirmó la infección congénita: PCR de CMV positiva en orina en la primera semana. El tamizaje automático del alta (AABR) pasó en los dos oídos, y por la infección lo citan a un control audiológico a los 4 meses. Mama bien, sigue la mirada y sonríe. Los papás no han notado que oiga peor de un lado. Nadie en la familia tiene problemas de audición.",
+   "historia": "{{-115}} Nacimiento a las 38 semanas; AABR del alta: pasa OD y OI.\n{{-108}} PCR de CMV en orina positiva: infección congénita sin síntomas. Se indica seguimiento audiológico y del desarrollo.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
  },
  "semilla": 2695929844,
  "data": {
@@ -15,191 +25,191 @@
   "id": 9844,
   "Aerea": [
    [
+    40,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
     55,
     0
    ],
    [
-    60,
-    0
-   ],
-   [
-    70,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    95,
+    55,
     0
    ]
   ],
   "Osea": [
    [
+    40,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
     55,
     0
    ],
    [
-    60,
-    0
-   ],
-   [
-    70,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    95,
+    55,
     0
    ]
   ],
   "LDL": [
    [
-    100,
-    100
-   ],
-   [
-    100,
-    100
-   ],
-   [
-    100,
-    100
-   ],
-   [
-    100,
-    100
-   ],
-   [
-    100,
-    100
-   ],
-   [
-    105,
-    100
-   ],
-   [
-    105,
-    100
-   ],
-   [
-    105,
-    100
+    110,
+    110
    ],
    [
     110,
-    100
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
    ]
   ],
   "Aerea_mkg": [
+   [
+    40,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
    [
     55,
     0
    ],
    [
-    60,
-    0
-   ],
-   [
-    70,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    95,
+    55,
     0
    ]
   ],
   "Osea_mkg": [
    [
+    40,
+    0
+   ],
+   [
+    35,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    45,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
+    50,
+    0
+   ],
+   [
     55,
     0
    ],
    [
-    60,
-    0
-   ],
-   [
-    70,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    80,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    90,
-    0
-   ],
-   [
-    95,
+    55,
     0
    ]
   ],
@@ -209,11 +219,11 @@
   "Z1000_OI": "auto",
   "Rinne": {
    "500": {
-    "od": "falso_negativo",
+    "od": "positivo",
     "oi": "positivo"
    },
    "1000": {
-    "od": "falso_negativo",
+    "od": "positivo",
     "oi": "positivo"
    }
   },
@@ -241,36 +251,42 @@
    "pretermino": false,
    "muy_bajo_peso": false,
    "percentil": {
-    "OD": 0.7987,
-    "OI": 0.0213
+    "OD": 0.4333,
+    "OI": 0.7203
    }
   },
   "volume": [
-   0.68,
-   0.79,
+   0.81,
+   0.33,
    "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
   ],
   "UMD": [
    {
-    "int": 110,
-    "percentage": 56
+    "int": 75,
+    "percentage": 76
    },
    {
-    "int": 35,
+    "int": 30,
     "percentage": 100
    }
   ],
   "SDT": [
-   75,
-   0
+   40,
+   -5
   ],
   "SRT": [
-   75,
+   45,
    0
   ],
   "Fowler": {
-   "enabled": false,
-   "patterns": [],
+   "enabled": true,
+   "patterns": {
+    "1": "complete"
+   },
    "diplacusia": false
   },
   "Stenger": [
@@ -346,41 +362,41 @@
    "ipsi": [
     [
      90,
-     85
-    ],
-    [
-     100,
-     85
-    ],
-    [
-     100,
-     85
-    ],
-    [
-     130,
-     85
-    ]
-   ],
-   "contra": [
-    [
-     85,
      90
     ],
     [
      85,
-     100
+     85
     ],
     [
-     85,
-     100
+     90,
+     90
     ],
     [
-     85,
-     130
+     90,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     95
     ],
     [
-     85,
-     100
+     90,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
     ]
    ],
    "tipo": {
@@ -409,7 +425,7 @@
    },
    "medicamentos": "",
    "cirugias": "",
-   "otros": "",
+   "otros": "Tiene 4 meses y viene con su papá y su mamá. Nació a las 38 semanas, con 3.100 g, sin ningún signo al examen. Durante el embarazo la mamá tuvo, a las 14 semanas, unos días de fiebre y dolor de garganta que se estudiaron con exámenes de sangre compatibles con una infección reciente por citomegalovirus (CMV). En la maternidad se confirmó la infección congénita: PCR de CMV positiva en orina en la primera semana. El tamizaje automático del alta (AABR) pasó en los dos oídos, y por la infección lo citan a un control audiológico a los 4 meses. Mama bien, sigue la mirada y sonríe. Los papás no han notado que oiga peor de un lado. Nadie en la familia tiene problemas de audición.",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -426,32 +442,32 @@
     {
      "id": "p1",
      "rol": "paciente",
-     "nombre": "Pepe",
+     "nombre": "Rodrigo",
      "edad": 0,
      "genero": 0,
      "es_paciente": true,
      "informante": false,
      "interrumpe": 20,
      "conciencia": 0,
-     "confiabilidad": 69,
+     "confiabilidad": 78,
      "version": "",
      "comportamiento": "",
      "disposicion": 0
     },
     {
-     "id": "amv9qv4s0pb",
+     "id": "amvbqk7s2ev",
      "rol": "madre",
-     "nombre": "Beatriz Alvarez",
-     "edad": 29,
+     "nombre": "Raquel Cortés",
+     "edad": 31,
      "genero": 1,
      "es_paciente": false,
      "informante": true,
      "interrumpe": 100,
      "conciencia": 80,
-     "confiabilidad": 77,
+     "confiabilidad": 94,
      "version": "",
      "comportamiento": "desconfiada, pregunta para qué sirve cada cosa",
-     "disposicion": 0
+     "disposicion": 1
     }
    ]
   },
@@ -468,7 +484,7 @@
   "Perfil": {
    "version": 1,
    "OD": {
-    "cce_pct": 95,
+    "cce_pct": 100,
     "retro": {
      "i_iii_ms": 0.2,
      "iii_v_ms": 0.2,
@@ -499,37 +515,38 @@
     "reflex": true,
     "recruit": true,
     "logo": true
-   }
+   },
+   "ldl_tolerancia_db": 110
   },
   "ABR": {
    "OD": {
     "type": "coclear",
-    "umbral": 95,
+    "umbral": 60,
     "umbral_por_estimulo": {
-     "tone_burst_500Hz": 90,
-     "tone_burst_1000Hz": 95,
-     "tone_burst_2000Hz": 90,
-     "tone_burst_4000Hz": 95,
-     "nb_ce_chirp_ls_500Hz": 85,
-     "nb_ce_chirp_ls_1000Hz": 90,
-     "nb_ce_chirp_ls_2000Hz": 85,
-     "nb_ce_chirp_ls_4000Hz": 95,
-     "click": 95,
-     "ce_chirp": 90,
-     "ce_chirp_ls": 90
+     "tone_burst_500Hz": 65,
+     "tone_burst_1000Hz": 60,
+     "tone_burst_2000Hz": 60,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 60,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": 60,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
     },
     "umbral_por_estimulo_oseo": {
      "tone_burst_500Hz": null,
      "tone_burst_1000Hz": null,
      "tone_burst_2000Hz": null,
-     "tone_burst_4000Hz": null,
+     "tone_burst_4000Hz": 55,
      "nb_ce_chirp_ls_500Hz": null,
-     "nb_ce_chirp_ls_1000Hz": null,
-     "nb_ce_chirp_ls_2000Hz": null,
-     "nb_ce_chirp_ls_4000Hz": null,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": 55,
      "click": null,
-     "ce_chirp": null,
-     "ce_chirp_ls": null
+     "ce_chirp": 50,
+     "ce_chirp_ls": 50
     },
     "neural": {
      "i_iii_ms": 0.2,
@@ -558,19 +575,19 @@
      "rar_cond_ms": 0.1,
      "mc": "normal"
     },
-    "average_objetivo": 2411,
+    "average_objetivo": 1703,
     "desviaciones": {
      "onda_I": {
-      "lat": 0.15,
-      "amp": -0.11
+      "lat": 0.08,
+      "amp": -0.09
      },
      "onda_III": {
-      "lat": 0.08,
-      "amp": -0.02
+      "lat": 0.1,
+      "amp": -0.05
      },
      "onda_V": {
-      "lat": 0.09,
-      "amp": 0.03
+      "lat": 0.14,
+      "amp": 0.04
      }
     },
     "nivel_referencia": null,
@@ -633,24 +650,24 @@
      "mitad": "auto"
     },
     "ecochg": {
-     "sp_ap": 0.29,
+     "sp_ap": 0.21,
      "tasa": 1,
      "rar_cond_ms": 0.1,
      "mc": "normal"
     },
-    "average_objetivo": 1280,
+    "average_objetivo": 1697,
     "desviaciones": {
      "onda_I": {
-      "lat": -0.05,
+      "lat": 0.04,
       "amp": 0
      },
      "onda_III": {
       "lat": 0.02,
-      "amp": 0.02
+      "amp": 0
      },
      "onda_V": {
       "lat": -0.04,
-      "amp": 0.01
+      "amp": 0
      }
     },
     "nivel_referencia": null,
@@ -687,19 +704,19 @@
     "type": "coclear",
     "umbral": 0,
     "desviaciones": {
-     "500": 45,
-     "1000": 45,
-     "1500": 45,
-     "2000": 45,
-     "3000": 45,
-     "4000": 45,
+     "500": 36,
+     "1000": 36,
+     "1500": 39.5,
+     "2000": 42,
+     "3000": 42,
+     "4000": 42,
      "6000": 45,
      "8000": 45
     },
     "atten_db": 0,
-    "ruido_db": 3.5,
-    "sello_pct": 76,
-    "variabilidad_db": 2.7,
+    "ruido_db": 0.1,
+    "sello_pct": 91,
+    "variabilidad_db": 1.6,
     "soae_mode": "auto",
     "soae_peaks": []
    },
@@ -717,9 +734,9 @@
      "8000": 0
     },
     "atten_db": 0,
-    "ruido_db": 1.4,
-    "sello_pct": 88,
-    "variabilidad_db": 1.7,
+    "ruido_db": 0.3,
+    "sello_pct": 97,
+    "variabilidad_db": 3.1,
     "soae_mode": "auto",
     "soae_peaks": []
    }
@@ -733,7 +750,7 @@
        "p13",
        "n23"
       ],
-      "umbral": 60,
+      "umbral": 70,
       "repro": true,
       "repro_var": 0.2,
       "average_objetivo": 200,
@@ -753,7 +770,7 @@
        "n10",
        "p16"
       ],
-      "umbral": 70,
+      "umbral": 65,
       "repro": true,
       "repro_var": 0.2,
       "average_objetivo": 300,
@@ -773,7 +790,7 @@
        "p13",
        "n23"
       ],
-      "umbral": 70,
+      "umbral": 65,
       "repro": true,
       "repro_var": 0.2,
       "average_objetivo": 300,
@@ -798,7 +815,7 @@
        "p13",
        "n23"
       ],
-      "umbral": 65,
+      "umbral": 55,
       "repro": true,
       "repro_var": 0.2,
       "average_objetivo": 200,
@@ -838,7 +855,7 @@
        "p13",
        "n23"
       ],
-      "umbral": 75,
+      "umbral": 70,
       "repro": true,
       "repro_var": 0.2,
       "average_objetivo": 300,
@@ -870,16 +887,16 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T16:19:41+00:00",
+   "at": "2026-10-17T01:46:47+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
   "paciente_snapshot": {
-   "nombre": "Pepe Antonio",
-   "apellido": "Alvarez Herrera",
-   "rut": "28234325",
-   "fecha_nac": "17-06-2026"
+   "nombre": "Rodrigo Pedro",
+   "apellido": "Cortés Romero",
+   "rut": "28235146",
+   "fecha_nac": "18-06-2026"
   },
-  "historia_clinica": ""
+  "historia_clinica": "{{-115}} Nacimiento a las 38 semanas; AABR del alta: pasa OD y OI.\r\n{{-108}} PCR de CMV en orina positiva: infección congénita sin síntomas. Se indica seguimiento audiológico y del desarrollo."
  }
 }

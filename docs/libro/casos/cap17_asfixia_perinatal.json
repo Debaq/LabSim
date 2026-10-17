@@ -7,7 +7,18 @@
     "edad": 0,
     "sexo": "hombre",
     "edad_valor": 4,
-    "edad_unidad": "meses"
+    "edad_unidad": "meses",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 4 meses y viene con su mamá. Nació a las 39 semanas, con 3.200 g, por un parto vaginal con fórceps, tras un sufrimiento fetal agudo en el período expulsivo. Al nacer no respiraba: Apgar 2 al minuto y 4 a los 5 minutos, pH del cordón 6,9; lo intubaron y lo reanimaron. Por encefalopatía hipóxico-isquémica moderada recibió hipotermia terapéutica durante 72 horas, tuvo convulsiones que se trataron con fenobarbital y estuvo 14 días en neonatología, 7 de ellos con gentamicina. El tamizaje automático (AABR) refirió en los dos oídos. Hoy toma pecho, sostiene la cabeza con dificultad y lo controla neurología por el tono muscular. La mamá dice que se sobresalta con los ruidos fuertes, pero que \"a veces parece no escuchar\". Nadie en la familia tiene problemas de audición.",
+      "historia": "{{-118}} Nacimiento por parto con fórceps tras sufrimiento fetal agudo; Apgar 2/4; hipotermia terapéutica 72 h; fenobarbital por convulsiones.\n{{-100}} Alta de neonatología; AABR refiere OD y OI.",
+      "hist": [],
+      "medicamentos": "Ninguno actual",
+      "cirugias": ""
+    }
   },
   "figuras": [
     {
@@ -20,16 +31,39 @@
     {
       "tipo": "abr",
       "niveles": [
+        90,
         80,
-        60,
-        40,
-        20
+        60
       ],
       "marcar": [
         "I",
         "III",
         "V"
       ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "polaridad": "condensacion"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "polaridad": "rarefaccion"
     }
   ]
 }

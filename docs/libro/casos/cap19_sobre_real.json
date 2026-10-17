@@ -1,0 +1,55 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "nihl_cronica",
+      "OI": "nihl_cronica"
+    },
+    "edad": 52,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 52 años y desde hace 25 maneja una grúa horquilla en una planta de aserrío, sin protección auditiva constante hasta hace unos años. Hace dos meses la empresa inició un proceso de reevaluación de su puesto y desde entonces dice oír \"casi nada\" por los dos oídos: pide que le escriban las indicaciones y no contesta si no lo miran de frente. En la sala de espera, sin embargo, atendió una llamada de su señora con el celular en el oído izquierdo. No tiene pitido ni mareo.",
+      "historia": "{{-2200}} Audiometría de ingreso a la empresa: caída en agudos bilateral compatible con ruido.\n{{-60}} Médico laboral: refiere empeoramiento rápido de la audición bilateral; se solicita audiometría y estudio objetivo.",
+      "hist": [
+        "trauma_acustico"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40,
+        20
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

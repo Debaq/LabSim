@@ -7,7 +7,17 @@
     "edad": 0,
     "sexo": "hombre",
     "edad_valor": 4,
-    "edad_unidad": "meses"
+    "edad_unidad": "meses",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 4 meses y viene con su papá y su mamá. Nació a las 38 semanas, con 3.100 g, sin ningún signo al examen. Durante el embarazo la mamá tuvo, a las 14 semanas, unos días de fiebre y dolor de garganta que se estudiaron con exámenes de sangre compatibles con una infección reciente por citomegalovirus (CMV). En la maternidad se confirmó la infección congénita: PCR de CMV positiva en orina en la primera semana. El tamizaje automático del alta (AABR) pasó en los dos oídos, y por la infección lo citan a un control audiológico a los 4 meses. Mama bien, sigue la mirada y sonríe. Los papás no han notado que oiga peor de un lado. Nadie en la familia tiene problemas de audición.",
+      "historia": "{{-115}} Nacimiento a las 38 semanas; AABR del alta: pasa OD y OI.\n{{-108}} PCR de CMV en orina positiva: infección congénita sin síntomas. Se indica seguimiento audiológico y del desarrollo.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
   },
   "figuras": [
     {
@@ -30,6 +40,30 @@
         "III",
         "V"
       ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        60,
+        40,
+        20
+      ],
+      "marcar": [
+        "V"
+      ],
+      "estimulo": "Burst 500 Hz"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "V"
+      ],
+      "estimulo": "Burst 2 kHz"
     }
   ]
 }

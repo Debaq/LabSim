@@ -1,0 +1,42 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "kernicterus",
+      "OI": "kernicterus"
+    },
+    "edad": 0,
+    "sexo": "hombre",
+    "edad_valor": 168,
+    "edad_unidad": "horas",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Recién nacido de 7 días, hospitalizado en la unidad de cuidados intensivos neonatales desde su segundo día de vida. Nació a las 34 semanas, con 2.280 g. A los tres días tuvo una ictericia muy intensa que no cedió con fototerapia y se le hizo una exanguinotransfusión. Recibió gentamicina por una sospecha de infección, que se descartó. Hoy está estable, se alimenta bien y está en la cuna por primera vez, a dos días del alta. La madre, de 31 años, pregunta si el examen \"duele\".",
+      "historia": "{{-7}} Nacimiento a las 34 semanas, 2.280 g, ingreso a UCI neonatal.\n{{-4}} Hiperbilirrubinemia severa: exanguinotransfusión.",
+      "hist": [
+        "ototoxicos"
+      ],
+      "medicamentos": "Gentamicina por 7 días, ya suspendida",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        35
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

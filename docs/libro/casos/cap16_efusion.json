@@ -1,0 +1,40 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "efusion_neonatal",
+      "OI": "efusion_neonatal"
+    },
+    "edad": 0,
+    "sexo": "mujer",
+    "edad_valor": 480,
+    "edad_unidad": "horas",
+    "anamnesis": {
+      "otros": "Lactante de 20 días que viene de su casa con su madre. Nació a las 38 semanas por cesárea, sin complicaciones, y se fue de alta a los dos días. En la maternidad el tamizaje con emisiones otoacústicas \"no pasó\" en el oído derecho y le dijeron que volviera. Hace una semana la ven en el consultorio: tuvo congestión nasal, pero sin fiebre ni secreción por los oídos. Se alimenta bien y se sobresalta con los ruidos fuertes. No hay sordera en la familia.",
+      "historia": "{{-18}} Alta de la maternidad; tamizaje con OEA: refiere en el oído derecho.\n{{-7}} Control en consultorio: congestión nasal leve, sin fiebre.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        35
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 1000
+    }
+  ]
+}

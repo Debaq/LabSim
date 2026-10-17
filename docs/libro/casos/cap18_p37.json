@@ -1,0 +1,24 @@
+{
+  "caso": "demo:37",
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        100,
+        80,
+        60
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

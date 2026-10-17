@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 0,
+    "sexo": "mujer",
+    "edad_valor": 10,
+    "edad_unidad": "horas",
+    "anamnesis": {
+      "otros": "Recién nacida de 10 horas, primera hija de una mujer de 28 años, en la sala de maternidad. Embarazo controlado de 39 semanas, parto vaginal sin complicaciones, 3.350 g, Apgar 9 y 9. La madre no tuvo fiebre ni infecciones en el embarazo y no tomó medicamentos. No hay sordera en la familia. La enfermera cuenta que la niña lleva un rato tranquila después de mamar y que el equipo de tamizaje está listo en la sala.",
+      "historia": "",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        35
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

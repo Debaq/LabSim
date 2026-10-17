@@ -1,0 +1,32 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 11,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 11 años y va en sexto básico. La profesora jefe avisó a los padres que \"no oye\" en la sala: no responde cuando le hablan desde atrás y pide repetir todo. En el tamizaje del colegio no respondió a ningún tono. Los padres cuentan que desde hace unas semanas ella está muy angustiada: sus padres se están separando y cambió de curso en marzo. En la casa responde cuando la llaman desde la cocina y se ríe con los dibujos de la tele a volumen bajo. Nunca ha tenido dolor de oídos ni secreción; no tiene pitido.",
+      "historia": "{{-25}} Tamizaje escolar de audición: sin respuesta bilateral.\n{{-10}} Pediatra: otoscopía normal, sin fiebre ni otitis; se deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "dpoae"
+    }
+  ]
+}

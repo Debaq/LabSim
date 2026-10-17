@@ -35,7 +35,6 @@ Personas ficticias. Cada retrato: modelo, fecha y lo que se pidió.
 - **cap11_schwannoma.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean woman, 52, court secretary, greying hair in a short bob, reading glasses on a chain, formal blouse, mildly concerned expression.
 - **cap17_asfixia_perinatal.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean baby boy, 4 months old, lying on a light blanket, looking up, slightly hypotonic floppy posture, calm, soft daylight.
 - **cap17_cmv_congenito.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean baby boy, 4 months old, small head for his age, lying on a light blanket, calm, soft daylight.
-- **cap17_rubeola_congenita.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean baby boy, 4 months old, both pupils look cloudy whitish (congenital cataracts), lying on a light blanket, calm, soft daylight.
 - **h4_dilema.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean woman, 38, dark wavy hair, tired attentive expression, knitted sweater.
 - **h7_disyuncion.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean man, 33, motorcycle delivery rider, short hair, a faint healed scar on the RIGHT side of the forehead (viewer's left), delivery jacket, calm expression.
 - **h7_lactante.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean baby girl, 2 months old, held in her mother's arms (only the mother's arms visible), slightly congested little nose from a recent cold, calm, soft daylight.
@@ -82,3 +81,10 @@ Personas ficticias. Cada retrato: modelo, fecha y lo que se pidió.
 - **cap12_glioma_tronco.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean girl, 7, second-grader, pale and serious, the eye on the LEFT side of the image slightly turned inward (mild esotropia), hair in a ponytail, school uniform.
 - **cap12_siderosis.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean man, 58, accountant, glasses, slightly rigid posture, greying hair, plain sweater, otherwise unremarkable.
 - **cap12_hic_idiopatica.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean woman, 29, graphic designer, overweight, tired eyes, long dark hair, casual top.
+- **cap19_unilateral.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean construction foreman, 44, weathered face, short dark hair, light stubble, neutral guarded expression, work jacket, no visible signs of illness or trauma.
+- **cap19_sobre_real.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean man, 52, sawmill forklift operator, heavy build, greying short hair and mustache, tired but alert expression, work fleece, no hearing aid.
+- **cap19_nina.jpg** · gemini-3.1-flash-image · 2026-10-16 · Chilean girl, 11, long dark hair tied back, school uniform collar, worried and slightly sad eyes, healthy appearance.
+- **cap16_normal.jpg** · gemini-3.1-flash-image · 2026-10-16 · Newborn baby girl, 10 hours old, asleep and swaddled in a pastel blanket in a maternity ward crib, slightly puffy eyelids, no medical devices on the face; the mother's forearm in a hospital gown sleeve holds the blanket edge.
+- **cap16_uci.jpg** · gemini-3.1-flash-image · 2026-10-16 · Newborn baby boy, 7 days old, late preterm, mild yellowish skin tone from recent jaundice, asleep in an open hospital crib, small pulse-oximeter strap on his foot; a nurse's gloved hand and blue scrub sleeve at the edge.
+- **cap16_riesgo.jpg** · gemini-3.1-flash-image · 2026-10-16 · Newborn baby boy, 2 days old, calm with eyes half open, white cotton onesie and knit hat, held against a parent's chest (only a beige cardigan and an arm visible).
+- **cap16_efusion.jpg** · gemini-3.1-flash-image · 2026-10-16 · Infant girl, 3 weeks old, alert, light-yellow sleeper and pale knitted hat, held in the crook of her mother's arm (grey sweater sleeve visible), healthy look.

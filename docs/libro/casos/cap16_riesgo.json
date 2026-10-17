@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 0,
+    "sexo": "hombre",
+    "edad_valor": 50,
+    "edad_unidad": "horas",
+    "anamnesis": {
+      "otros": "Recién nacido de 50 horas, listo para el alta. Nació a las 40 semanas, parto vaginal, 3.620 g, sin problemas. Su madre, de 26 años, tuvo una infección por citomegalovirus en el segundo trimestre, documentada con una seroconversión en los exámenes del embarazo. A él se le tomó hoy una muestra de saliva para buscar el virus; el resultado todavía no llega. Está tranquilo y mamó hace una hora.",
+      "historia": "{{-0}} Muestra de saliva para PCR de citomegalovirus, resultado pendiente.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        35
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}
