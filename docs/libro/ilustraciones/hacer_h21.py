@@ -60,7 +60,7 @@ def punta(id_, color):
 
 def caja():
     c = Lienzo(700, 330)
-    c.t(14, 20, 'Montaje de la medición: cámara de medida, audífono y acoplador de 2 cc (esquema)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Montaje de la medición: cámara de medida, audífono y acoplador de 2 cc', 10.5, TINTA, 'start', 700)
     # camara
     c.r(20, 40, 400, 250, '#f6f5f2', FUERTE, 1.5, 8)
     c.t(30, 58, 'cámara de medida (aislada del ruido)', 8.5, TENUE, 'start', 600)
@@ -110,7 +110,6 @@ def caja():
     c.r(500, 188, 150, 62, '#f6f5f2', FUERTE, 1, 4)
     c.poli([(508, 238), (530, 228), (548, 214), (565, 204), (585, 210), (610, 224), (640, 240)], COCLEAR, 1.6)
     c.t(575, 262, 'pantalla: curva e informe', 8, TENUE)
-    c.t(20, 312, 'Esquema para explicar la disposición; no representa un equipo en particular.', 8.5, TENUE, 'start')
     c.guardar('h21-caja-acoplador.svg')
 
 
@@ -126,7 +125,7 @@ def curva():
     def Y(d):
         return y1 - (d - dmin) / (dmax - dmin) * (y1 - y0)
 
-    c.t(14, 20, 'Ejemplo de salida de un audífono en el acoplador de 2 cc', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Salida de un audífono en el acoplador de 2 cc', 10.5, TINTA, 'start', 700)
     for d in range(40, 131, 10):
         c.l(x0, Y(d), x1, Y(d), GRILLA, 0.8)
         c.t(x0 - 8, Y(d) + 3, str(d), 8.5, TENUE, 'end')
@@ -170,7 +169,6 @@ def curva():
     c.t(xg - 8, (Y(60) + Y(rta(1600))) / 2 + 3, 'ganancia', 8.5, RETRO, 'end', 700)
     c.t(130, Y(rta(250)) + 20, 'respuesta con 60 dB de entrada', 9, RETRO, 'start', 700)
     c.t(100, Y(88), 'OSPL90: salida con 90 dB de entrada', 9, AVISO, 'start', 700)
-    c.t(14, 352, 'Curvas de ejemplo para explicar los términos: no son de ningún audífono ni tienen valores de referencia.', 8.5, TENUE, 'start')
     c.guardar('h21-curva-ejemplo.svg', punta('gp', RETRO))
 
 
@@ -213,7 +211,6 @@ def distorsion():
     c.t(380, 213, 'de un audífono perfecto que daría ese mismo siseo.', 8.5, TINTA, 'start')
     c.t(380, 233, 'Ese número es el que se puede comparar entre audífonos', 8.5, TENUE, 'start')
     c.t(380, 246, 'de distinta ganancia.', 8.5, TENUE, 'start')
-    c.t(14, 282, 'Esquema: las alturas y los niveles son ilustrativos, no mediciones.', 8.5, TENUE, 'start')
     c.guardar('h21-distorsion-ruido.svg', punta('pa', TINTA))
 
 

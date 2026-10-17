@@ -57,7 +57,7 @@ Las células ciliadas externas son las más vulnerables al ruido, a los ototóxi
 - **Lo fuerte llega casi igual**, porque a ese nivel el amplificador casi no aportaba.
 - Entre un umbral más alto y una molestia que casi no se movió, la sonoridad tiene que recorrer el mismo camino en menos decibeles: **crece más rápido**. Eso es el **reclutamiento** (Moore, 2007).
 
-:::imagen ilustraciones/h06-sonoridad.svg Cómo crece la sonoridad. A: el oído normal oye desde 10 dB y le molesta a 110; el coclear oye desde 45, sube empinado y alcanza al normal a 70 dB; el retrococlear sube paralelo y no lo alcanza. 50 dB en el normal, 65 en el coclear y 85 en el retrococlear suenan igual. B: las mismas curvas leídas como escaleras del Fowler. Esquema con las cifras de la tabla del Fowler, no datos de un paciente.
+:::imagen ilustraciones/h06-sonoridad.svg Cómo crece la sonoridad. A: el oído normal oye desde 10 dB y le molesta a 110; el coclear oye desde 45, sube empinado y alcanza al normal a 70 dB; el retrococlear sube paralelo y no lo alcanza. 50 dB en el normal, 65 en el coclear y 85 en el retrococlear suenan igual. B: las mismas curvas leídas como escaleras del Fowler. Cifras de la tabla del Fowler.
 :::
 
 Se nota en todo lo que se mide sobre el umbral. El **LDL** casi no se mueve y el campo dinámico se estrecha (→ H5): Patricia, más abajo, oye por el OI desde 50 dB en 500 Hz y le molesta a 110, igual que por el OD, que oye desde 5; le quedan 60 dB de campo contra 105. El oído nota **cambios de 1 dB** (SISI). El **reflejo estapedial** aparece a poco nivel sobre el umbral (fenómeno de Metz, → H7). Y como se pierde también la sintonía fina, el paciente cuenta que los ruidos fuertes le molestan, que entiende peor con ruido y que las voces suenan "raras" por ese oído.

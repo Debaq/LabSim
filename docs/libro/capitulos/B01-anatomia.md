@@ -32,7 +32,7 @@ El oído externo recoge el sonido y lo lleva hasta la membrana timpánica. Lo fo
 
 El pabellón es una lámina de **cartílago elástico** cubierta de piel, que se prolonga hacia abajo en el **lóbulo**, hecho solo de grasa y piel. Sus relieves tienen nombre porque se usan al describir la otoscopía y al tirar del oído para enderezar el conducto (→ H1):
 
-:::imagen ilustraciones/b1-pabellon.svg ancho=48% Los relieves del pabellón derecho: son los nombres que usarás para describir una malformación y para saber de dónde tomar el pabellón en la otoscopía. Esquema propio.
+:::imagen ilustraciones/b1-pabellon.svg ancho=48% Los relieves del pabellón derecho: son los nombres que usarás para describir una malformación y para saber de dónde tomar el pabellón en la otoscopía.
 :::
 
 - El **hélix** es el borde enrollado. Nace dentro de la concha como un pliegue (la cruz del hélix) y rodea todo el pabellón.
@@ -78,7 +78,7 @@ Por eso el cerumen se produce afuera y **no debe manipularse adentro** sin ver: 
 
 La membrana timpánica separa el oído externo del medio. Es una lámina casi circular, de cerca de **1 cm** de diámetro y muy delgada, **inclinada**: su borde superior queda más afuera que el inferior, de modo que el piso del conducto es más largo que el techo. Se ve por otoscopía, y todo lo que se describe en ella tiene un nombre fijo.
 
-:::imagen ilustraciones/b1-membrana.svg ancho=100% Referencias de la membrana timpánica derecha y dónde cae cada hallazgo. Ubica primero el mango y el umbo: desde ellos se trazan los cuadrantes que usarás para dar la posición de una perforación. Esquema propio.
+:::imagen ilustraciones/b1-membrana.svg ancho=100% Referencias de la membrana timpánica derecha y dónde cae cada hallazgo. Ubica primero el mango y el umbo: desde ellos se trazan los cuadrantes que usarás para dar la posición de una perforación.
 :::
 
 - **Pars tensa.** Es casi toda la membrana. Tiene tres capas (piel por fuera, mucosa por dentro y, en medio, fibras de colágeno), y se sostiene en el **anillo timpánico**, un borde fibrocartilaginoso encajado en el hueso (→ B3).
@@ -173,7 +173,7 @@ La trompa comunica la caja con la **rinofaringe**. Su trabajo es **igualar la pr
 
 Tiene dos porciones: una **ósea**, cercana al oído medio, y otra **cartilaginosa y membranosa**, que se abre en la pared lateral de la rinofaringe, detrás del cornete inferior, rodeada por un reborde (el *torus tubario*) y, detrás de él, un surco, el **receso faríngeo** (fosa de Rosenmüller).
 
-:::imagen ilustraciones/b1-trompa.svg ancho=100% La trompa del lactante y del adulto. En el lactante es más corta y más horizontal: por eso lo que pasa en la rinofaringe llega con facilidad al oído medio. Esquema propio, con las medidas de Ishijima y cols. (2000).
+:::imagen ilustraciones/b1-trompa.svg ancho=100% La trompa del lactante y del adulto. En el lactante es más corta y más horizontal: por eso lo que pasa en la rinofaringe llega con facilidad al oído medio. Con las medidas de Ishijima y cols. (2000).
 :::
 
 **El niño no es un adulto pequeño.** En un estudio con reconstrucción tridimensional de huesos temporales, el largo de la trompa de un lactante de 3 meses fue de unos **21 mm**, contra unos **37 mm** del adulto; la porción cartilaginosa y de transición es 8 veces más larga que la ósea en el lactante y 4 veces en el adulto. Además, en el niño las dos porciones están alineadas, y en el adulto la cartilaginosa se inclina hacia abajo y afuera (Ishijima y cols., 2000). Una trompa más corta y más horizontal se abre peor y drena peor, y por eso el niño pequeño tiene más otitis media con efusión (→ cap. 2).
@@ -309,7 +309,7 @@ La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recib
 
 Desde el nervio coclear, la señal pasa por una cadena de estaciones en el tronco, el mesencéfalo, el tálamo y la corteza. Casi todas están **repetidas a cada lado**, y casi todas reciben información de **los dos oídos**; por eso una lesión central de un lado rara vez produce una pérdida de umbral: altera, en cambio, la localización, la comprensión en ruido o la integración entre los oídos (→ H14, cap. 13).
 
-:::imagen ilustraciones/b1-via-auditiva.svg ancho=100% La vía auditiva central y la estación que se asocia habitualmente a cada onda del PEAT (→ H10). Fíjate en que desde el complejo olivar la vía ya lleva información de los dos oídos. La asignación de las ondas es una guía, no un mapa literal. Esquema propio.
+:::imagen ilustraciones/b1-via-auditiva.svg ancho=100% La vía auditiva central y la estación que se asocia habitualmente a cada onda del PEAT (→ H10). Fíjate en que desde el complejo olivar la vía ya lleva información de los dos oídos. La asignación de las ondas es una guía, no un mapa literal.
 :::
 
 1. **Núcleos cocleares** (ventral y dorsal), en el bulbo, donde termina el nervio. Cada fibra hace sinapsis aquí.
@@ -329,7 +329,7 @@ Además de esta vía ascendente hay una **descendente**, con eferentes olivococl
 
 La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupaciones (superior, medial, lateral e inferior) en el tronco, en el límite entre la protuberancia y el bulbo. De ahí salen conexiones hacia cuatro destinos:
 
-:::imagen ilustraciones/b1-via-vestibular.svg ancho=100% Las vías vestibulares centrales: desde los núcleos vestibulares la señal sale hacia los ojos, la médula, el cerebelo y la corteza. Esquema propio.
+:::imagen ilustraciones/b1-via-vestibular.svg ancho=100% Las vías vestibulares centrales: desde los núcleos vestibulares la señal sale hacia los ojos, la médula, el cerebelo y la corteza.
 :::
 
 - **Núcleos oculomotores** (III, IV y VI), por el fascículo longitudinal medial: es el arco del **reflejo vestíbulo-ocular**, que mantiene la mirada fija mientras la cabeza se mueve. Solo tres neuronas separan el canal del ojo, y por eso el reflejo es tan rápido (→ H15, H17).
@@ -341,7 +341,7 @@ La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupac
 
 El oído interno recibe sangre de una arteria sola, la **arteria laberíntica** (auditiva interna), casi siempre una rama de la **AICA**, que a su vez sale de la arteria basilar (Mazzoni, 1972). Se divide en:
 
-:::imagen ilustraciones/b1-irrigacion.svg ancho=100% Las arterias del laberinto: una sola arteria, terminal, que se reparte entre la cóclea y el vestíbulo. Por eso una falla de irrigación puede quitar audición y equilibrio a la vez. Esquema propio, según Mazzoni (1972).
+:::imagen ilustraciones/b1-irrigacion.svg ancho=100% Las arterias del laberinto: una sola arteria, terminal, que se reparte entre la cóclea y el vestíbulo. Por eso una falla de irrigación puede quitar audición y equilibrio a la vez. Según Mazzoni (1972).
 :::
 
 - La **arteria vestibular anterior**, que irriga el utrículo, los canales lateral y superior y parte del sáculo: el territorio del nervio vestibular superior.
@@ -360,7 +360,7 @@ La nariz externa tiene forma de pirámide: la **raíz** arriba, el **dorso** has
 - La parte **ósea**, arriba: los **huesos nasales** y las ramas frontales de los maxilares.
 - La parte **cartilaginosa**, abajo: los **cartílagos laterales superiores**, que forman el dorso y se unen al tabique; los **cartílagos alares** (mayores), que forman la punta y las narinas; y el **cartílago del tabique**.
 
-:::imagen ilustraciones/b1-valvula.svg ancho=100% A: la pirámide nasal vista de lado, con su parte ósea y su parte cartilaginosa. B: la válvula nasal interna en un corte frontal, el punto más estrecho de la vía aérea. Esquema propio, con las cifras de Pirola y cols. (2025).
+:::imagen ilustraciones/b1-valvula.svg ancho=100% A: la pirámide nasal vista de lado, con su parte ósea y su parte cartilaginosa. B: la válvula nasal interna en un corte frontal, el punto más estrecho de la vía aérea. Con las cifras de Pirola y cols. (2025).
 :::
 
 ### El vestíbulo y la válvula nasal

@@ -56,7 +56,7 @@ def coclea(c, x0, y0, tercera):
 
 def ventanas():
     c = Lienzo(700, 330)
-    c.t(14, 20, 'Una cóclea con dos ventanas y con tres (esquema, cóclea desenrollada)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Una cóclea con dos ventanas y con tres (cóclea desenrollada)', 10.5, TINTA, 'start', 700)
     coclea(c, 90, 76, False)
     coclea(c, 420, 76, True)
     c.t(215, 50, 'A · Oído sano', 9.5, TINTA, 'middle', 700)
@@ -70,14 +70,13 @@ def ventanas():
     c.l(14, 244, 686, 244, GRILLA, 1)
     c.t(14, 262, 'Lo que sigue por la ventana de arriba: el vestíbulo comparte líquido con la cóclea, así que el tercer orificio', 8.5, TINTA, 'start')
     c.t(14, 275, 'también deja que el sonido y la presión muevan la endolinfa de los conductos y del sáculo (Tullio, Hennebert, VEMP).', 8.5, TINTA, 'start')
-    c.t(14, 318, 'Esquema, no datos. Mecánica de la tercera ventana: Merchant y Rosowski (2008).', 8, TENUE, 'start')
+    c.t(14, 318, 'Mecánica de la tercera ventana: Merchant y Rosowski (2008).', 8, TENUE, 'start')
     c.guardar('cap26-ventanas.svg', punta('p-a', TINTA) + punta('p-r', AVISO))
 
 
 def dehiscencia():
     c = Lienzo(700, 420)
-    c.t(14, 20, 'Dehiscencia del conducto superior derecho: esquema construido con cifras de la literatura', 10.5, TINTA, 'start', 700)
-    c.t(14, 34, 'No es un registro de LabSim ni de un paciente.', 9, AVISO, 'start', 700)
+    c.t(14, 20, 'Dehiscencia del conducto superior derecho', 10.5, TINTA, 'start', 700)
     # ---- Panel 1: audiograma (OD)
     x0, y0, ancho, alto = 62, 84, 215, 200
     frs = [250, 500, 1000, 2000, 4000]
@@ -105,9 +104,9 @@ def dehiscencia():
     c.t(X(0) + 2, Y(aerea[0]) + 22, 'gap 19 dB', 8, TINTA, 'start', 700)
     c.t(x0 + ancho / 2, y0 + alto + 16, 'frecuencia (Hz)', 8, TENUE)
     c.t(x0 - 40, y0 + alto + 38, 'Gap medio de Minor (2005): 19, 15, 11 y 4 dB', 8, TENUE, 'start')
-    c.t(x0 - 40, y0 + alto + 50, 'en 250 a 2.000 Hz. La ósea es ilustrativa:', 8, TENUE, 'start')
-    c.t(x0 - 40, y0 + alto + 62, 'en 60 % de los oídos pasaba de 0 dB en', 8, TENUE, 'start')
-    c.t(x0 - 40, y0 + alto + 74, '250 o 500 Hz (Zhou y cols., 2007).', 8, TENUE, 'start')
+    c.t(x0 - 40, y0 + alto + 50, 'en 250 a 2.000 Hz. Ósea bajo 0 dB HL', 8, TENUE, 'start')
+    c.t(x0 - 40, y0 + alto + 62, 'en 250 o 500 Hz en el 60 % de los oídos', 8, TENUE, 'start')
+    c.t(x0 - 40, y0 + alto + 74, '(Zhou y cols., 2007).', 8, TENUE, 'start')
     # ---- Panel 2: reflejo
     px = 318
     c.t(px, y0 - 38, '2 · Reflejo estapedial', 10, TINTA, 'start', 700)
@@ -145,7 +144,7 @@ def dehiscencia():
     c.t(vx, y0 + 174, 'cada servicio necesita su normativa.', 8.5, TENUE, 'start')
     # ---- Trazas esquemáticas (forma, sin escala)
     ty = y0 + 205
-    c.t(vx, ty - 6, 'Forma (sin escala de µV):', 8, TENUE, 'start')
+    c.t(vx, ty - 6, 'Forma de la respuesta:', 8, TENUE, 'start')
     for k, (amp, col, nom) in enumerate([(14, RETRO, 'normal'), (38, AVISO, 'dehiscencia')]):
         bx = vx + k * 108
         c.l(bx, ty + 40, bx + 95, ty + 40, GRILLA, 1)

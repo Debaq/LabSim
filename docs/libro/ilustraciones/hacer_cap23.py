@@ -106,7 +106,7 @@ def evolucion():
             c.c(xs[i], Y(v), 3.4, '#fff', OD, 1.6)
         pta = round((vals[2] + vals[3] + vals[4] + vals[5]) / 4)
         c.t(ox + pw / 2, top + ph + 34, f'promedio 500-3.000 Hz: {pta:g} dB · {etapa}', 10, TINTA)
-    c.t(370, 318, 'dB HL, vía aérea. Cifras de ejemplo; el de hoy es el audiograma del caso.', 9.5, TENUE)
+    c.t(370, 318, 'dB HL, vía aérea. El de hoy es el audiograma del caso.', 9.5, TENUE)
     c.guardar('cap23-evolucion.svg')
 
 

@@ -49,10 +49,10 @@ El primer término es lo laminar; el segundo, lo turbulento. Dividiendo por V̇ 
 
 Hay un segundo fenómeno que dobla la curva. Cuando el aire acelera por la válvula nasal, la presión de las paredes baja (principio de Bernoulli) y el tejido blando de la válvula puede cerrarse un poco. A mayor esfuerzo, el flujo deja de crecer: la curva forma una **meseta**. Por eso la curva normal tiene forma de S aplanada y no de recta.
 
-:::imagen ilustraciones/h24-rs-colapso.svg ancho=100% Una válvula blanda, con inspiración forzada. La rama inspiratoria (la fosa derecha, en rojo, en el cuadrante I; la izquierda, en azul, en el II) se aplana en una meseta: por más presión que se haga, el flujo ya no sube. La espiratoria (cuadrantes III y IV) sigue creciendo. A 150 Pa, la resistencia de la fosa derecha es cerca de 0,6 Pa/(cm³/s) al inspirar y 0,36 al espirar. Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h24-rs-colapso.svg ancho=100% Una válvula blanda, con inspiración forzada. La rama inspiratoria (la fosa derecha, en rojo, en el cuadrante I; la izquierda, en azul, en el II) se aplana en una meseta: por más presión que se haga, el flujo ya no sube. La espiratoria (cuadrantes III y IV) sigue creciendo. A 150 Pa, la resistencia de la fosa derecha es cerca de 0,6 Pa/(cm³/s) al inspirar y 0,36 al espirar. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
-:::imagen ilustraciones/h24-rs-curvas.svg ancho=100% La relación presión-flujo de cada fosa. A: las curvas en los cuatro cuadrantes; la derecha (rojo) pasa por I y III, la izquierda (azul) por II y IV; las líneas verticales de rayas marcan 75 y 150 Pa y la diagonal punteada es la recta de la resistencia de referencia (0,4): una curva que pasa por encima de ella tiene menos resistencia que esa. B: la misma información como resistencia contra presión, en inspiración: sube a medida que la presión crece. A 150 Pa la fosa derecha da 0,35 y la izquierda 0,29 Pa/(cm³/s); el total, 0,16. Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h24-rs-curvas.svg ancho=100% La relación presión-flujo de cada fosa. A: las curvas en los cuatro cuadrantes; la derecha (rojo) pasa por I y III, la izquierda (azul) por II y IV; las líneas verticales de rayas marcan 75 y 150 Pa y la diagonal punteada es la recta de la resistencia de referencia (0,4): una curva que pasa por encima de ella tiene menos resistencia que esa. B: la misma información como resistencia contra presión, en inspiración: sube a medida que la presión crece. A 150 Pa la fosa derecha da 0,35 y la izquierda 0,29 Pa/(cm³/s); el total, 0,16. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 ### De ahí salen los cuatro cuadrantes
@@ -69,7 +69,7 @@ Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto 
 
 Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en la bibliografía, el "radio 200"). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
 
-:::imagen ilustraciones/h24-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Paciente simulado. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h24-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 ¿Qué se gana? Con un radio, cada nariz se mide a **una distancia similar del origen**, aunque el punto caiga a otra presión. Una nariz muy obstruida se lee a una presión más alta (en el dibujo, la fosa derecha, unos 118 Pa) y una muy abierta a una más baja (la izquierda, unos 43 Pa): la medición no depende de que el paciente alcance una presión fija. Es lo que hace el gráfico polar de los equipos que lo traen. El valor numérico del radio estándar depende de la escala con que el equipo dibuje los ejes. <!-- verificar: escala de ejes del "radio 200" de Broms y cols. (1982), no leída en el original. -->
@@ -137,7 +137,7 @@ Primero, el montaje. El dibujo muestra lo que se arma sobre el paciente: la más
 
 Después, el resultado. Lo que entrega el equipo es la curva de las dos fosas y una tabla con la resistencia de cada una; los equipos reales lo dibujan con otra disposición, pero con los mismos elementos.
 
-:::imagen ilustraciones/h24-rs-equipo.png ancho=96% El resultado de una rinomanometría anterior: curva de las dos fosas, resistencia según la presión y tabla. Paciente simulado con desviación y cornetes congestionados, 4 ciclos por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua); las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h24-rs-equipo.png ancho=96% El resultado de una rinomanometría anterior: curva de las dos fosas, resistencia según la presión y tabla. Paciente con desviación y cornetes congestionados, 4 ciclos por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @84,19 | **Curva en reposo** de la fosa derecha (roja, continua): el promedio de los ciclos. Las líneas finas son cada ciclo.
 - @75,11 | **Con vasoconstrictor** (discontinua): la misma fosa después de la prueba. Más flujo con la misma presión es menos resistencia.
 - @80,69 | **Cuadrantes.** La fosa derecha (roja) va en I y III; la izquierda (azul), en II y IV. Presión en el eje horizontal, flujo en el vertical.
@@ -256,7 +256,7 @@ Tabla: Qué indica la resistencia después del vasoconstrictor (PVC)
 | Baja del todo, hasta el valor de referencia | **Vasomotora** (mucosa) | Todo era mucosa |
 | Sube respecto del reposo | **Vasomotora**, sin descartar un componente mecánico ("efecto rebote") | Ver el recuadro |
 
-:::imagen ilustraciones/h24-rs-vasoconstrictor.svg ancho=86% Las tres respuestas al vasoconstrictor en la fosa derecha, como resistencia según la presión: reposo (línea continua) y con vasoconstrictor (discontinua). La raya horizontal punteada es el valor de referencia (0,4) y las verticales, 75 y 150 Pa. A: vasomotora, a 150 Pa baja de 0,57 a 0,29 y queda bajo la referencia. B: mixta, baja de 0,80 a 0,46 sin llegar a la referencia. C: mecánica, 0,53 y 0,48: casi no cambia. Pacientes simulados; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h24-rs-vasoconstrictor.svg ancho=86% Las tres respuestas al vasoconstrictor en la fosa derecha, como resistencia según la presión: reposo (línea continua) y con vasoconstrictor (discontinua). La raya horizontal punteada es el valor de referencia (0,4) y las verticales, 75 y 150 Pa. A: vasomotora, a 150 Pa baja de 0,57 a 0,29 y queda bajo la referencia. B: mixta, baja de 0,80 a 0,46 sin llegar a la referencia. C: mecánica, 0,53 y 0,48: casi no cambia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 :::comentario Lo que dicen las normas
@@ -269,7 +269,7 @@ Tabla: Qué indica la resistencia después del vasoconstrictor (PVC)
 
 La curva dice más que el número. Una curva normal es regular, simétrica entre la inspiración y la espiración, y de forma de S aplanada: sube casi recta al principio y luego se aplana. Una curva empinada, pegada al eje del flujo, es una fosa muy amplia (también la de una nariz atrófica); una curva baja, pegada al eje de la presión, que casi no despega, es una fosa obstruida. <!-- Protocolo ORL 2019 / borrador: decía "muy plana y baja" para la fosa amplia, lo que contradice el Fundamento (fosa abierta = curva empinada, pegada al eje del flujo). Se corrigió al sentido del Fundamento. --> Una curva con **pausas** o saltos suele ser del paciente: respira a tirones, traga, o la máscara se mueve. En ese caso no se informa: se repite.
 
-:::imagen ilustraciones/h24-rs-irregular.svg ancho=100% Una respiración irregular. Los ciclos sueltos (las líneas finas) no se parecen entre sí, tienen pausas y saltos, y el promedio (la línea gruesa) se quiebra. Los ciclos varían 15 % en la fosa derecha y 18 % en la izquierda: no son reproducibles y se repite la medición. Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h24-rs-irregular.svg ancho=100% Una respiración irregular. Los ciclos sueltos (las líneas finas) no se parecen entre sí, tienen pausas y saltos, y el promedio (la línea gruesa) se quiebra. Los ciclos varían 15 % en la fosa derecha y 18 % en la izquierda: no son reproducibles y se repite la medición. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 ### Ejercicios: de los números al informe

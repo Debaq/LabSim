@@ -161,7 +161,7 @@ def equipo():
     c.t(540, y2 - 4, 'un eco más tardío viene de más adentro', 9, TINTA, 'middle', 600)
     c.t(540, y2 + 12, 'un eco más fuerte o más débil dice si la sección', 9, TINTA, 'middle', 600)
     c.t(540, y2 + 28, 'se estrechó o se ensanchó', 9, TINTA, 'middle', 600)
-    c.t(14, 322, 'Esquema, no a escala: F es la fuente del pulso, M el micrófono. La fosa dibujada usa la misma forma que la curva de la figura siguiente.', 8, TENUE, 'start')
+    c.t(14, 322, 'F es la fuente del pulso, M el micrófono. La fosa dibujada usa la misma forma que la curva de la figura siguiente.', 8, TENUE, 'start')
     defs = punta('pa', AZUL) + punta('pr', AVISO) + punta('pt', TINTA)
     c.guardar('h25-equipo.svg', defs)
 
@@ -170,7 +170,7 @@ def equipo():
 def curva():
     c = Lienzo(700, 400)
     x0, y0, w, h = 70, 40, 560, 230
-    c.t(14, 20, 'La curva área-distancia de una fosa nasal (esquema)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'La curva área-distancia de una fosa nasal', 10.5, TINTA, 'start', 700)
     X = ejes(c, x0, y0, w, h)
     Y = lambda a: y0 + h - a * h * 0.9
     c.t(34, y0 + h / 2, 'área de la sección', 8.5, TENUE, 'middle', 400)
@@ -201,14 +201,14 @@ def curva():
     c.l(X(0), yv + 24, X(5), yv + 24, COCLEAR, 2)
     c.l(X(0), yv + 20, X(0), yv + 28, COCLEAR, 2); c.l(X(5), yv + 20, X(5), yv + 28, COCLEAR, 2)
     c.t(X(2.5), yv + 38, 'Vol 2: los primeros 5 cm', 8.5, COCLEAR, 'middle', 700)
-    c.t(14, 392, 'Esquema: la forma es típica, no es de un paciente ni lleva escala de área. Las distancias de los mínimos varían entre personas.', 8, TENUE, 'start')
+    c.t(14, 392, 'Las distancias de los mínimos varían entre personas.', 8, TENUE, 'start')
     c.guardar('h25-curva.svg')
 
 
 # ---------------------------------------------------------------- vasoconstrictor
 def vasoconstrictor():
     c = Lienzo(700, 470)
-    c.t(14, 20, 'Reposo y después del vasoconstrictor (esquemas)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Reposo y después del vasoconstrictor', 10.5, TINTA, 'start', 700)
     paneles = [
         ('A · Sin estrechamiento', 'el descongestionante cambia poco', NORMAL, [(a, min(1, b + (.03 if .3 < a < 5 else 0))) for a, b in NORMAL]),
         ('B · Vasomotora (mucosa)', 'sube hasta la curva normal', VASOMOTOR_REPOSO, NORMAL),
@@ -232,14 +232,14 @@ def vasoconstrictor():
     c.l(54, ly - 3, 84, ly - 3, COCLEAR, 2.2); c.t(90, ly, 'reposo', 8.5, TINTA, 'start')
     c.l(150, ly - 3, 180, ly - 3, RETRO, 2.2, '6 3'); c.t(186, ly, 'después del vasoconstrictor', 8.5, TINTA, 'start')
     c.l(340, ly - 3, 370, ly - 3, FUERTE, 1.4, '4 3'); c.t(376, ly, 'curva normal de comparación (B, C y D)', 8.5, TINTA, 'start')
-    c.t(54, 466, 'Esquemas, no datos. Cuánto es "mejora" o "casi no se mueve" lo define el criterio de cada servicio (→ Cómo se informa).', 8, TENUE, 'start')
+    c.t(54, 466, 'Cuánto es "mejora" o "casi no se mueve" lo define el criterio de cada servicio (→ Cómo se informa).', 8, TENUE, 'start')
     c.guardar('h25-vasoconstrictor.svg')
 
 
 # ---------------------------------------------------------------- limites
 def limites():
     c = Lienzo(700, 300)
-    c.t(14, 20, 'Lo que la curva puede no ver (esquema)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Lo que la curva puede no ver', 10.5, TINTA, 'start', 700)
     anchos, altos = 290, 140
     verdadera = [(0, .34), (.5, .52), (1.0, .56), (1.7, .26), (2.4, .50), (2.9, .58), (3.4, .40), (4.2, .66), (5.0, .86), (6.0, .95), (7.0, 1.0)]
     # A: detras de una valvula muy estrecha
@@ -269,7 +269,7 @@ def limites():
     c.t(x0 + anchos / 2, y0 + altos + 29, 'senos y fosa contraria suman área: la curva sobreestima', 8, TENUE)
     c.l(54, 262, 84, 262, FUERTE, 2, '4 3'); c.t(90, 265, 'anatomía real', 8.5, TINTA, 'start')
     c.l(190, 262, 220, 262, COCLEAR, 2.2); c.t(226, 265, 'lo que dibuja el equipo', 8.5, TINTA, 'start')
-    c.t(54, 288, 'Esquemas para ver el sentido del error; la magnitud real depende de cada nariz (Cakmak y cols., 2005; Hilberg y Pedersen, 1996).', 8, TENUE, 'start')
+    c.t(54, 288, 'La magnitud del error depende de cada nariz (Cakmak y cols., 2005; Hilberg y Pedersen, 1996).', 8, TENUE, 'start')
     c.guardar('h25-limites.svg')
 
 

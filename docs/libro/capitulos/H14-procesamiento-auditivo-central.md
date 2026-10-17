@@ -78,14 +78,14 @@ Cuando los dos oídos oyen **cosas distintas al mismo tiempo**, las dos vías co
 
 Por eso una pequeña **ventaja del oído derecho** es lo esperable en diestros con habla y lenguaje normales. Un oído que rinde claramente peor que el otro, sobre todo el izquierdo, hace pensar en un problema de esa ruta; si falla en los dos, hay que pensar en atención y memoria antes que en el cuerpo calloso.
 
-:::imagen ilustraciones/h14-via-dicotica.svg Escucha dicótica. Cada oído manda su mensaje a los dos hemisferios, pero con competencia gana la vía cruzada (gruesa) y se suprime la del mismo lado (discontinua). El dígito del oído derecho llega directo al hemisferio del lenguaje; el del izquierdo llega al derecho y tiene que cruzar el cuerpo calloso. Esquema, no datos de un paciente.
+:::imagen ilustraciones/h14-via-dicotica.svg Escucha dicótica. Cada oído manda su mensaje a los dos hemisferios, pero con competencia gana la vía cruzada (gruesa) y se suprime la del mismo lado (discontinua). El dígito del oído derecho llega directo al hemisferio del lenguaje; el del izquierdo llega al derecho y tiene que cruzar el cuerpo calloso.
 :::
 
 ### Interacción binaural: lo que el tronco hace con la diferencia entre oídos
 
 Un tono enterrado en un ruido se detecta mal cuando el tono y el ruido llegan **idénticos a los dos oídos**: los dos se oyen en el mismo lugar de la imagen. Si el ruido sigue igual pero el tono llega **invertido de fase** a un oído, el tono pasa a ocupar *otro lugar* en la imagen auditiva y el sistema lo separa del ruido. El tono se detecta con **menos nivel**. Esa diferencia en dB entre las dos condiciones es la **diferencia de nivel de enmascaramiento (MLD)**. Se escribe SoNo cuando el tono (S) y el ruido (N) son iguales en los dos oídos, y SπNo cuando el tono tiene fase invertida (π) y el ruido sigue igual (Hirsh, 1948; Wilson y cols., 2003).
 
-:::imagen ilustraciones/h14-mld.svg Interacción binaural. A: tono y ruido iguales en los dos oídos; se oyen en el mismo lugar y el tono cuesta separarlo. B: el ruido igual y el tono con fase invertida en un oído; el tono ocupa otro lugar en la imagen y se detecta con menos nivel. La diferencia entre A y B, en dB, es el MLD. Esquema con formas de onda dibujadas, no una medición.
+:::imagen ilustraciones/h14-mld.svg Interacción binaural. A: tono y ruido iguales en los dos oídos; se oyen en el mismo lugar y el tono cuesta separarlo. B: el ruido igual y el tono con fase invertida en un oído; el tono ocupa otro lugar en la imagen y se detecta con menos nivel. La diferencia entre A y B, en dB, es el MLD.
 :::
 
 La comparación de fase entre los oídos la hace el tronco bajo. Por eso un MLD reducido se ha descrito en lesiones del tronco (Olsen y cols., 1976), y por eso la prueba se hace solo cuando la audición periférica es lo bastante simétrica como para no dar una diferencia artificial entre los oídos.
@@ -157,7 +157,7 @@ Antes de cualquier prueba: **audición periférica revisada, fonos calibrados y 
 
 Se presentan tres tonos seguidos que combinan dos posibilidades: **grave o agudo** (patrones de frecuencia) o **largo o corto** (patrón de duración). Con dos opciones en tres posiciones hay ocho secuencias; sin las dos que repiten el mismo tono, quedan **seis**. El paciente dice el orden que oyó.
 
-:::imagen ilustraciones/h14-patrones.svg ancho=96% Cómo se arma un patrón. A: tres tonos del mismo largo, dos graves y uno agudo. B: tres tonos de la misma frecuencia, dos largos y uno corto. Abajo, las seis secuencias posibles y los dos tipos de error sobre una de ellas. Esquema, no datos.
+:::imagen ilustraciones/h14-patrones.svg ancho=96% Cómo se arma un patrón. A: tres tonos del mismo largo, dos graves y uno agudo. B: tres tonos de la misma frecuencia, dos largos y uno corto. Abajo, las seis secuencias posibles y los dos tipos de error sobre una de ellas.
 - @-3,82 | **Las seis secuencias.** Las que repiten el mismo tono (GGG, AAA) no se usan: no tienen orden que reconocer.
 - @103,82 | **El error es informativo.** Decir los mismos tonos en otro lugar no es lo mismo que invertirlos todos.
 :::
@@ -204,7 +204,7 @@ Dos dígitos distintos llegan **a la vez**, uno por cada oído, y el paciente lo
 
 El resultado es **por oído**: el puntaje total esconde justo lo que importa. Un puntaje total normal no excluye un oído claramente peor que el otro, y un oído izquierdo por debajo del derecho es esperable en pequeña medida en diestros.
 
-:::imagen ilustraciones/h14-dicotico-oidos.svg ancho=92% Dos pacientes con el mismo puntaje total en dígitos dicóticos (78 %). En el primero los dos oídos rinden parecido; en el segundo el oído izquierdo rinde 36 puntos menos que el derecho. El total esconde la asimetría: mira siempre cada oído por separado. Datos de ejemplo, no normas.
+:::imagen ilustraciones/h14-dicotico-oidos.svg ancho=92% Dos pacientes con el mismo puntaje total en dígitos dicóticos (78 %). En el primero los dos oídos rinden parecido; en el segundo el oído izquierdo rinde 36 puntos menos que el derecho. El total esconde la asimetría: mira siempre cada oído por separado.
 :::
 
 ### Interacción binaural: MLD
@@ -229,7 +229,7 @@ Se presentan frases con **ruido de fondo** y se busca de forma adaptativa el **S
 - **QuickSIN / SinB** (*speech in babble*): frases con ruido de varias voces. Se informa la **pérdida de SNR** respecto de un oyente normal (Killion y cols., 2004).
 - **Matrix**: cada frase se arma con una palabra de cada columna (nombre, verbo, número, objeto y adjetivo), así que las frases son nuevas cada vez y no se pueden memorizar. Hay una versión en español (Hochmuth y cols., 2012). El paciente repite o elige las palabras en una grilla.
 
-:::imagen ilustraciones/h14-matrix.svg ancho=96% La prueba Matrix. A: cada frase toma una palabra de cada columna, así que la estructura es siempre la misma y el contenido no se puede adivinar. B: el recorrido adaptativo de una lista; el SNR baja cuando el paciente acierta la mayoría de las palabras y sube cuando no, hasta oscilar alrededor del SRT. La regla de pasos es genérica (cada versión trae la suya). Datos de ejemplo, no normas.
+:::imagen ilustraciones/h14-matrix.svg ancho=96% La prueba Matrix. A: cada frase toma una palabra de cada columna, así que la estructura es siempre la misma y el contenido no se puede adivinar. B: el recorrido adaptativo de una lista; el SNR baja cuando el paciente acierta la mayoría de las palabras y sube cuando no, hasta oscilar alrededor del SRT. La regla de pasos es genérica (cada versión trae la suya).
 - @19,57 | **Primeras frases.** Parte fácil y baja rápido: aquí todavía no se mide nada.
 - @80,80 | **SRT.** El SNR en que repite la mitad de las palabras; se estima con las últimas frases, cuando el recorrido ya oscila.
 :::
@@ -285,7 +285,7 @@ El informe de una prueba de procesamiento central dice **qué se hizo, con qué 
 | Detalle ítem por ítem | cada secuencia presentada y respondida |
 :::
 
-:::imagen ilustraciones/h14-patron-resultado.svg ancho=96% Una sesión de patrón de duración leída por partes. El mismo 77 % puede esconder problemas muy distintos: aquí los errores se concentran en el segundo y el tercer tono y casi todos son los mismos tonos en otro orden. Datos de ejemplo, no normas.
+:::imagen ilustraciones/h14-patron-resultado.svg ancho=96% Una sesión de patrón de duración leída por partes. El mismo 77 % puede esconder problemas muy distintos: aquí los errores se concentran en el segundo y el tercer tono y casi todos son los mismos tonos en otro orden.
 - @50,6 | **El total.** 77 % no dice dónde está la dificultad.
 - @-3,20 | **Ítem por ítem.** En rojo, lo presentado y lo que respondió. Los errores se parecen entre sí.
 - @-3,70 | **Acierto por posición.** El primer tono casi no falla; los errores están en el segundo y el tercero.

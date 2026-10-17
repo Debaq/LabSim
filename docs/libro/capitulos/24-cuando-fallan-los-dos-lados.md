@@ -57,7 +57,7 @@ La silla rotatoria, que es la tercera forma que reconoce el consenso, no está e
 
 LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el audiograma, la logoaudiometría y las emisiones de estos pacientes. Lo vestibular de cada caso, la calórica, el vHIT y la agudeza dinámica, está **escrito** en la ficha de resultados del caso, con **cifras de ejemplo**. La figura muestra cómo se ve en el vHIT una ganancia baja de los dos lados.
 
-:::imagen ilustraciones/cap24-vhit-bilateral.svg ancho=100% Impulsos del canal lateral de un paciente simulado con los dos lados caídos: hacia la derecha y hacia la izquierda, con la cabeza en azul y el ojo, invertido, en naranja. No hay un lado bueno con el que comparar: el déficit se lee en el tamaño de cada ganancia, no en la asimetría. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap24-vhit-bilateral.svg ancho=100% Impulsos del canal lateral de un paciente con los dos lados caídos: hacia la derecha y hacia la izquierda, con la cabeza en azul y el ojo, invertido, en naranja. No hay un lado bueno con el que comparar: el déficit se lee en el tamaño de cada ganancia, no en la asimetría. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @16,52 | **Ojo**: llega a menos de la mitad de la velocidad de la cabeza. Si el reflejo funcionara, las dos curvas se superpondrían.
 - @37,30 | **Sacadas manifiestas** (triángulos): el ojo corrige a saltos, cuando la cabeza ya se detuvo. Hacia los dos lados.
 - @4,87 | **Ganancia derecha** de 0,45, con cinco impulsos aceptados.

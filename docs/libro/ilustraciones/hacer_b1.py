@@ -123,7 +123,6 @@ def pabellon():
     rotulo(c, 246, 250, 330, 212, 'Trago', 'start')
     rotulo(c, 214, 312, 290, 372, 'Antitrago', 'start')
     rotulo(c, 170, 384, 20, 430, 'Lóbulo (sin cartílago)', 'start')
-    c.t(500, 452, 'Esquema, no a escala', 9, TENUE, 'end')
     c.guardar('b1-pabellon.svg')
 
 
@@ -206,7 +205,6 @@ def membrana():
         for j, ln in enumerate(sub.split('\n')):
             c.t(x, 326 + j * 11.5, ln, 8.5, TENUE)
     c.t(570, 375, '→ cap. 2 y cap. 3', 10, TENUE)
-    c.t(570, 395, 'Esquema, no a escala', 9, TENUE)
     c.guardar('b1-membrana.svg')
 
 
@@ -237,14 +235,14 @@ def trompa():
     c.t(42, 259, 'porción ósea (la más corta; relativamente más corta aún en el lactante)', 10, TINTA, 'start')
     c.add('<rect x="22" y="268" width="14" height="10" fill="#7fb3d5"/>')
     c.t(42, 277, 'porción de transición y cartilaginosa-membranosa (hacia la rinofaringe)', 10, TINTA, 'start')
-    c.t(22, 300, 'Esquema. Largos y proporciones de Ishijima y cols. (2000); el ángulo está exagerado para que se vea.', 9, TENUE, 'start')
+    c.t(22, 300, 'Largos y proporciones de Ishijima y cols. (2000); el ángulo está exagerado para que se vea.', 9, TENUE, 'start')
     c.guardar('b1-trompa.svg')
 
 
 # ---------------------------------------------------------------- vía auditiva
 def via_auditiva():
     c = L(720, 600)
-    c.t(14, 22, 'Vía auditiva central (esquema frontal, simplificado)', 12.5, TINTA, 'start', 700)
+    c.t(14, 22, 'Vía auditiva central (vista frontal)', 12.5, TINTA, 'start', 700)
     xi, xd = 170, 400            # columna izquierda y derecha del esquema
     niveles = [(60, 'Corteza auditiva\n(giro de Heschl)'), (140, 'Cuerpo geniculado\nmedial'),
                (220, 'Colículo inferior'), (300, 'Lemnisco lateral\n(y sus núcleos)'),
@@ -296,7 +294,7 @@ def via_auditiva():
 # ---------------------------------------------------------------- vía vestibular
 def via_vestibular():
     c = L(720, 470)
-    c.t(14, 22, 'Vías vestibulares centrales (esquema)', 12.5, TINTA, 'start', 700)
+    c.t(14, 22, 'Vías vestibulares centrales', 12.5, TINTA, 'start', 700)
     c.caja(10, 190, 150, 56, 'Laberinto\n(3 canales, utrículo,\nsáculo)', '#fff', AZUL, 10, AZUL)
     c.caja(190, 190, 110, 56, 'Nervio\nvestibular\n(VIII par)', '#fff', AZUL, 10, AZUL)
     c.linea(160, 218, 190, 218, AZUL, 2, flecha=True)
@@ -323,7 +321,6 @@ def via_vestibular():
     for i, ln in enumerate(['Rama superior del nervio: utrículo y canales superior y lateral.',
                             'Rama inferior: sáculo y canal posterior.']):
         c.t(20, 392 + i * 14, ln, 9.5, TENUE, 'start')
-    c.t(20, 456, 'Esquema simplificado, no a escala', 9, TENUE, 'start')
     c.guardar('b1-via-vestibular.svg')
 
 
@@ -405,7 +402,6 @@ def valvula():
     c.t(X + 100, 143, '(40–60 mm²), la mayor', 10, TENUE, 'start')
     c.t(X + 100, 156, 'parte de la resistencia', 10, TENUE, 'start')
     c.t(X + 12, Y1 + 18, 'piso', 10, TENUE, 'start')
-    c.t(14, 408, 'Esquemas, no a escala.', 9, TENUE, 'start')
     c.guardar('b1-valvula.svg')
 
 

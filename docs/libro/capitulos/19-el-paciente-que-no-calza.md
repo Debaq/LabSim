@@ -72,7 +72,7 @@ Una audiometría tonal registra una **conducta**: el paciente decide en cada ton
 
 **Por qué funciona el Stenger.** Cuando dos tonos iguales llegan a los dos oídos a la vez, el sistema auditivo los funde en **una sola imagen** y la ubica en el oído donde el tono suena más fuerte. El paciente no oye "uno en cada oído y decido": oye uno solo, en el oído más sensibilizado. Si el oído "sordo" recibe el tono con más nivel de sensación que el sano, la imagen queda de ese lado y el sano, aunque suene, no se oye. La técnica compara siempre sobre los **umbrales verdaderos**, no sobre los que el paciente informó (→ H6).
 
-:::imagen ilustraciones/cap19-stenger.svg Efecto Stenger con dos tonos iguales a los dos oídos. Izquierda, pérdida real: el tono del oído malo queda bajo su umbral, la imagen se oye en el oído sano y el paciente responde. Derecha, pérdida no orgánica: el tono del oído malo queda sobre su umbral verdadero y es el más fuerte, la imagen se oye de ese lado y, como el paciente dice no oír por él, no responde. Los niveles son de esquema.
+:::imagen ilustraciones/cap19-stenger.svg Efecto Stenger con dos tonos iguales a los dos oídos. Izquierda, pérdida real: el tono del oído malo queda bajo su umbral, la imagen se oye en el oído sano y el paciente responde. Derecha, pérdida no orgánica: el tono del oído malo queda sobre su umbral verdadero y es el más fuerte, la imagen se oye de ese lado y, como el paciente dice no oír por él, no responde.
 :::
 
 :::sabias ¿Sabías que?

@@ -101,7 +101,7 @@ def catalogo(d):
     panel(c, 470, y, 180, h, 0, 1.5, -6, 6, 'F · Pendular adquirido (grados)', [(pen, AVISO, 1.5, None)], dv=5, dt=0.5, etiqueta_v=True)
     c.t(470 + 90, y + h + 25, 'segundos · sin fase rápida: va y viene', 7.5, TENUE)
     c.t(14, y + 48, '°/s', 8, TENUE, 'start')
-    c.par(14, 572, 'Trazas del modelo, sin luz salvo donde se indica (órdenes de magnitud docentes, no valores de referencia).', 8, TENUE)
+    c.par(14, 572, 'Sin luz salvo donde se indica.', 8, TENUE)
     c.guardar('cap25-nistagmos-centrales.svg')
 
 
@@ -137,7 +137,6 @@ def caso_canvas(d):
         c.t(x0 + 142, 384, f"ganancia {co(g['mas']['ganancia'])} · sacadas de alcance {co(g['sacadas'], 1)} por segundo", 8, TINTA, 'middle')
     c.t(14, 300, 'grados', 8, TENUE, 'start')
     y = c.par(14, 418, 'En la mirada excéntrica la fase lenta se va hacia el centro y la rápida vuelve: es el nistagmo evocado por la mirada. Con luz sigue ahí. El seguimiento que no alcanza al blanco se arregla con sacadas pequeñas: seguimiento sacádico.')
-    y = c.par(14, y + 8, 'Trazas del modelo con los dos flóculos a medias y los dos laberintos perdidos (órdenes de magnitud docentes). El «sin lesión» que se dibuja no es una norma: cada equipo trae la suya.', 8, TENUE)
     c.guardar('cap25-caso1-canvas.svg')
 
 
@@ -162,7 +161,6 @@ def caso_ino(d):
     c.t(14, 130, 'grados', 8, TENUE, 'start')
     y = c.par(14, 285, 'El blanco (gris ancho) salta cada segundo entre 10° a la derecha y 10° a la izquierda. Hacia la derecha el ojo izquierdo es el que aduce: sale a tiempo (la misma latencia que el derecho) pero se queda a la mitad del camino. Hacia la izquierda, los dos llegan.')
     y = c.par(14, y, 'Si el equipo solo registra el ojo derecho, el examen sale normal.', 8.5, AVISO, 700)
-    y = c.par(14, y + 12, 'Trazas del modelo con el fascículo longitudinal medial izquierdo perdido (órdenes de magnitud docentes). El modelo deja corta la aducción, pero no la enlentece ni agrega el nistagmo del ojo que abduce, dos rasgos de la oftalmoplejía internuclear real.', 8, TENUE)
     c.guardar('cap25-caso2-ino.svg')
 
 
@@ -199,7 +197,6 @@ def caso_chiari(d):
     c.t(14, 300, 'grados', 8, TENUE, 'start')
     y = c.par(14, 408, 'Mirando al frente el canal horizontal está plano y el vertical bate hacia abajo. El nistagmo crece al mirar abajo y a un lado, y la luz casi no lo cambia.')
     y = c.par(14, y, 'Con un registro solo horizontal el paciente sale «sin nistagmo».', 8.5, AVISO, 700)
-    y = c.par(14, y + 8, 'Trazas del modelo con los dos flóculos a medias (órdenes de magnitud docentes). Las velocidades son medidas sobre estas trazas.', 8, TENUE)
     c.guardar('cap25-caso3-chiari.svg')
 
 
@@ -239,7 +236,7 @@ def caso_farmaco(d):
     s = d['farmaco']['sacadas']['saltos']['der']
     c.t(392 + 130, 384, f"latencia {s['mas']['latencia']:.0f} ms · precisión {co(s['mas']['precision'])}", 8, TINTA, 'middle')
     y = c.par(14, 418, 'La fase lenta vuelve hacia el centro a los dos lados y la rápida lo devuelve; con luz sigue. Seguimiento y sacadas salen casi sin cambios.')
-    y = c.par(14, y + 8, 'Trazas del modelo con el integrador de la mirada a medias, como con anticonvulsivantes o alcohol (órdenes de magnitud docentes). En fármacos reales el seguimiento y las sacadas también suelen alterarse (Remler y cols., 1990): el modelo solo altera el mantenimiento de la mirada.', 8, TENUE)
+    y = c.par(14, y + 8, 'Con anticonvulsivantes o alcohol, el seguimiento y las sacadas también suelen alterarse (Remler y cols., 1990).', 8, TENUE)
     c.guardar('cap25-caso4-farmaco.svg')
 
 

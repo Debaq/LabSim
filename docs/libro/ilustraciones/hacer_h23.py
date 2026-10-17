@@ -185,7 +185,7 @@ def ciclo_corte():
     c.t(150, 306, 'flujo grueso = fosa más abierta', 8, TENUE, 'middle')
     c.t(520, 306, 'flujo fino = fosa más cerrada', 8, TENUE, 'middle')
     c.t(335, 160, '⇄', 22, TENUE, 'middle', 700)
-    c.t(14, 322, 'Esquema: la alternancia ocurre en el tejido eréctil del cornete inferior. Proporciones ilustrativas.', 8, TENUE, 'start')
+    c.t(14, 322, 'La alternancia ocurre en el tejido eréctil del cornete inferior.', 8, TENUE, 'start')
     c.t(150, 74, 'tabique', 8, TINTA, 'middle', 600)
     c.t(335, 200, 'cornetes en naranja:', 8, COCLEAR, 'middle', 600)
     c.t(335, 212, 'medio arriba, inferior abajo', 8, COCLEAR, 'middle', 600)
@@ -211,7 +211,7 @@ def valvula():
     c.t(ex + 8, ey + 4, 'cartílago lateral superior', 8.5, COCLEAR, 'start', 600)
     c.t(ax + 4, ay + 18, 'aire', 8.5, TENUE, 'start')
     c.l(ax + 30, ay + 12, ax + 30, ay - 10, RETRO, 2)
-    c.t(14, 290, 'Corte frontal, esquema.', 8, TENUE, 'start')
+    c.t(14, 290, 'Corte frontal.', 8, TENUE, 'start')
     c.t(14, 302, 'Si el ángulo se cierra, el pasaje se estrecha.', 8, TENUE, 'start')
     # Panel B: resistencia contra radio
     bx, by, bw, bh = 300, 52, 200, 190
@@ -241,7 +241,6 @@ def valvula():
     c.t(X(0.5) + 10, Y(16) + 14, 'mitad del radio: 16 veces', 8.5, AVISO, 'start', 700)
     c.t(X(1.0) + 6, Y(1) - 8, 'punto de partida', 8.5, TINTA, 'start', 600)
     c.t(bx - 20, 300, 'Tubo rígido de flujo laminar: R crece como 1/r⁴.', 8, TENUE, 'start')
-    c.t(bx - 20, 312, 'La nariz real es más compleja; la tendencia es la misma.', 8, TENUE, 'start')
     # Panel C: Bernoulli
     cx, cy = 545, 120
     c.t(cx - 10, 20, 'C · Estrechez y presión', 10.5, TINTA, 'start', 700)
@@ -265,7 +264,7 @@ def valvula():
     c.t(cx - 10, cy + 136, 'colapso inspiratorio.', 8.5, TINTA, 'start', 600)
     c.t(cx - 10, cy + 155, 'Solo la idea: la nariz es más compleja y su', 8, TENUE, 'start')
     c.t(cx - 10, cy + 167, 'flujo es en parte turbulento.', 8, TENUE, 'start')
-    c.t(14, 352, 'Tres ideas de física sobre un mismo punto, la válvula nasal. Esquemas, no mediciones.', 8, TENUE, 'start')
+    c.t(14, 352, 'Tres ideas de física sobre un mismo punto, la válvula nasal.', 8, TENUE, 'start')
     c.guardar('h23-valvula.svg', punta('p-flujo', AVISO))
 
 
@@ -311,7 +310,6 @@ def equipo():
     c.t(lx + 35, ly + 266, 'Lámpara de cuello flexible', 9.5, TINTA, 'middle', 700)
     c.t(lx + 35, ly + 280, 'A un lado del paciente; el cuello flexible', 8.2, TENUE, 'middle')
     c.t(lx + 35, ly + 292, 'deja la luz apuntada sin sostenerla.', 8.2, TENUE, 'middle')
-    c.t(14, 392, 'Esquema de los tres elementos; los modelos reales varían de forma y tamaño.', 8, TENUE, 'start')
     c.guardar('h23-equipo.svg')
 
 
@@ -338,7 +336,7 @@ def posiciones():
         c.circ(x0, y0, 3.4, AVISO, AVISO)
         c.t(ox + 120, 222, tit, 9.2, TINTA, 'middle', 700)
         c.t(ox + 120, 236, que, 8, TENUE, 'middle')
-    c.t(14, 280, 'Esquema: la luz y la mirada entran por el vestíbulo; al extender la cabeza la línea de visión sube dentro de la nariz.', 8, TENUE, 'start')
+    c.t(14, 280, 'La luz y la mirada entran por el vestíbulo; al extender la cabeza la línea de visión sube dentro de la nariz.', 8, TENUE, 'start')
     c.guardar('h23-posiciones.svg')
 
 

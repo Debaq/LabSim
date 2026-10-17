@@ -95,7 +95,6 @@ def curso():
     c.t(x0 + 270 + (ox + w - 8 - x0 - 270) / 2, oy + h + 26, 'meses: el criterio A pide al menos 3', 10, TINTA, 'middle', 700)
     c.out.append(f'<text transform="translate(22,{oy + h / 2}) rotate(-90)" {F} font-size="11" fill="{TINTA}" text-anchor="middle">'
                  f'molestia por mareo e inestabilidad</text>')
-    c.t(380, 318, 'Esquema sin cifras a propósito: ilustra el principio, no el tiempo ni el nivel de un paciente.', 9.5, TENUE)
     c.guardar('cap27-curso.svg')
 
 
@@ -123,7 +122,7 @@ def ciclo():
     c.t(360, 196, 'cada vez que marea,', 10.5, TINTA, 'middle', 700)
     c.t(360, 211, 'la vigilancia sube', 10.5, TINTA, 'middle', 700)
     c.t(360, 232, 'y el círculo se cierra', 10, TENUE)
-    c.t(360, 366, 'Esquema didáctico, basado en la fisiopatología que describen Staab y cols. (2017) y Popkirov y cols. (2018); el orden de los pasos es didáctico.', 9.5, TENUE)
+    c.t(360, 366, 'Según la fisiopatología que describen Staab y cols. (2017) y Popkirov y cols. (2018).', 9.5, TENUE)
     c.guardar('cap27-ciclo.svg')
 
 

@@ -183,7 +183,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 | Con vasoconstrictor, inspiración | **0,48** | 0,29 | 0,18 |
 :::
 
-:::imagen ilustraciones/cap35-rs-desv-rm.svg ancho=78% Rinomanometría de Carlos (paciente simulado). Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV. Las rayas verticales marcan 75 y 150 Pa. La fosa derecha es la más cerrada y casi no cambia ni con el vasoconstrictor ni con la fase: un obstáculo mecánico. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap35-rs-desv-rm.svg ancho=78% Rinomanometría de Carlos. Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV. Las rayas verticales marcan 75 y 150 Pa. La fosa derecha es la más cerrada y casi no cambia ni con el vasoconstrictor ni con la fase: un obstáculo mecánico. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @78,38 | **FND (rojo)**: a 150 Pa pasan unos 280 cm³/s, lo que da **0,53 Pa/(cm³/s)**: sobre el valor de trabajo (0,4).
 - @20,38 | **FNI (azul)**: a 150 Pa pasan unos 450 cm³/s, **0,33**: dentro del valor de trabajo.
 - @74,9 | Con vasoconstrictor (rayas) la FND casi no se mueve: **0,48**, una baja de 9 %. Con menos del 15 % se lee como "igual que en reposo" (un umbral del modelo, no una norma).

@@ -34,7 +34,7 @@ Lo último es lo que más cuesta aceptar. La explicación clásica junta dos efe
 
 <!-- verificar: la explicación del Weber conductivo (oclusión y enmascaramiento por ruido ambiente) es la clásica de los textos, pero ninguna de las referencias de este capítulo la desarrolla. -->
 
-:::imagen ilustraciones/h02-weber-conductivo.svg ancho=100% Por qué el Weber se va al oído con pérdida conductiva, en un corte frontal de la cabeza visto de frente (el OD queda a la izquierda). A: con los dos oídos sanos, la vibración del diapasón llega por el hueso igual a las dos cócleas y se oye al centro. B: con el conducto derecho tapado, la energía que llega por el hueso no se escapa por ese conducto y el ruido del ambiente no lo enmascara: el sonido se oye en el oído tapado. Esquema propio.
+:::imagen ilustraciones/h02-weber-conductivo.svg ancho=100% Por qué el Weber se va al oído con pérdida conductiva, en un corte frontal de la cabeza visto de frente (el OD queda a la izquierda). A: con los dos oídos sanos, la vibración del diapasón llega por el hueso igual a las dos cócleas y se oye al centro. B: con el conducto derecho tapado, la energía que llega por el hueso no se escapa por ese conducto y el ruido del ambiente no lo enmascara: el sonido se oye en el oído tapado.
 :::
 
 **El falso negativo nace de lo mismo.** La vibración apoyada en la mastoides llega también a la cóclea del otro lado. Si el oído examinado tiene una pérdida sensorioneural **severa**, frente al conducto no oye nada, pero en la mastoides el diapasón lo oye la **otra** cóclea. El paciente dice, con razón, que lo oye más fuerte "atrás": el Rinne sale negativo sin que haya ningún problema conductivo (BSA, 2022).

@@ -58,7 +58,7 @@ def cruz(c, x, y, s=9):
 # ---------------------------------------------------------------- 11.1 arco del reflejo
 def arco_reflejo():
     c = Lienzo(900, 432)
-    c.t(14, 20, 'Arco del reflejo estapedial (corte frontal del tronco, esquema)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Arco del reflejo estapedial (corte frontal del tronco)', 10.5, TINTA, 'start', 700)
     c.t(70, 50, 'lado derecho (OD)', 8.5, OD, 'start', 700)
     c.t(590, 50, 'lado izquierdo (OI)', 8.5, OI, 'end', 700)
 
@@ -164,7 +164,7 @@ def arco_reflejo():
                            'se registre donde se registre.')):
         c.t(bx + 12, yb + 18 + 12 * i, s, 8, AVISO if i == 0 else TINTA, 'start', 700 if i == 0 else 400)
 
-    c.t(14, 424, 'Esquema, no a escala. A la izquierda queda el lado derecho del paciente.', 7.8, TENUE, 'start')
+    c.t(14, 424, 'A la izquierda queda el lado derecho del paciente.', 7.8, TENUE, 'start')
     c.guardar('cap11-arco-reflejo.svg')
 
 
@@ -190,7 +190,7 @@ def generadores_peat():
     defs = punta('p-v', AVISO)
 
     # ---- Panel A: la vía en línea
-    c.t(14, 20, 'A · Dónde nace cada onda (de la cóclea al colículo, esquema)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'A · Dónde nace cada onda (de la cóclea al colículo)', 10.5, TINTA, 'start', 700)
     yv = 118
     x_coc, x_poro, x_tronco, x_fin = 64, 286, 404, 736
     # hueso temporal con el CAI
@@ -289,7 +289,7 @@ def generadores_peat():
         c.l(X(t), ye, X(t), ye + 4, FUERTE, 1)
         c.t(X(t), ye + 15, t, 8, TENUE)
     c.t(x1, ye + 28, 'tiempo desde el click (ms)', 8.2, TENUE, 'end')
-    c.t(14, 532, 'Esquema: el trazo normal usa medias del adulto redondeadas (H10); el del tumor es un ejemplo.',
+    c.t(14, 532, 'El trazo normal usa las medias del adulto (H10).',
         7.8, TENUE, 'start')
     c.guardar('cap11-generadores-peat.svg', defs)
 

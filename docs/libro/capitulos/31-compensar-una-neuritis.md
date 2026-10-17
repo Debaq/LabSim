@@ -72,7 +72,7 @@ En qué se nota esa diferencia lo mostró un ensayo con pacientes con neuritis, 
 
 La misma diferencia, en un paciente simulado con una pérdida unilateral: con los ojos cerrados sobre espuma, el balanceo de pie pasa de caerse a sostenerse con los meses. El modelo compensa solo con el **tiempo**, no con ejercicios, y sus días no son los de un paciente.
 
-:::imagen ilustraciones/cap31-balanceo-simulador.svg ancho=100% Balanceo lateral de pie, ojos cerrados sobre espuma, a 1 día, 1 semana, 1 mes y 3 meses de una pérdida unilateral en un paciente simulado. Al día cae enseguida, a la semana aguanta unos segundos y desde el mes se sostiene: es la parte dinámica, la que se compensa con el tiempo. Trazas del modelo, no de un paciente. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap31-balanceo-simulador.svg ancho=100% Balanceo lateral de pie, ojos cerrados sobre espuma, a 1 día, 1 semana, 1 mes y 3 meses de una pérdida unilateral en un paciente. Al día cae enseguida, a la semana aguanta unos segundos y desde el mes se sostiene: es la parte dinámica, la que se compensa con el tiempo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @17.6,70 | **A un día de la lesión** el paciente simulado no se sostiene ni un segundo: sin vista y con los pies sobre una superficie que miente, solo le queda el vestíbulo.
 - @40.8,70 | **A la semana** aguanta unos segundos y cae: la parte del reposo ya está compensada, la del movimiento no.
 - @87,76 | **A los tres meses** se sostiene, con un balanceo parecido al del mes: es la parte dinámica que se fue ajustando.

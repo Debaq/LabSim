@@ -269,7 +269,7 @@ def onda():
         c.t(bx, y - 36, tit, 8.5, TINTA, 'start', 700)
         c.t(bx + bw, y - 36, res, 8.5, COCLEAR, 'end', 700)
     c.t(bx, 300, 'gris y azul: los dos tonos · naranja: la suma', 8, TENUE, 'start')
-    c.t(14, 322, 'Esquema: la fase es el punto del ciclo en que está la onda; un click o un ruido se suman de otra manera.', 8, TENUE, 'start')
+    c.t(14, 322, 'La fase es el punto del ciclo en que está la onda; un click o un ruido se suman de otra manera.', 8, TENUE, 'start')
     c.guardar('b4-onda.svg')
 
 
@@ -334,7 +334,7 @@ def estimulos():
     c = Lienzo(700, 660)
     c.t(14, 20, 'Forma de onda (izquierda) y espectro (derecha) de cada estímulo', 10.5, TINTA, 'start', 700)
     filas = ['Tono puro, 1 kHz', 'Tono modulado (warble), 1 kHz ± 5 %', 'Click de 100 µs',
-             'Tone burst 2-1-2, 500, 1.000 y 4.000 Hz', 'Chirp (esquema)']
+             'Tone burst 2-1-2, 500, 1.000 y 4.000 Hz', 'Chirp']
     alto, y00 = 112, 34
     xl, wl = 46, 262
     xr, wr = 392, 270
@@ -418,8 +418,8 @@ def estimulos():
             td, ch, _ = S['chirp']
             f, X = _espectro(ch, n=2 ** 18)
             ax.curva(f[::20], np.maximum(X[::20], -50), COCLEAR, 1.2)
-    c.t(14, 640, 'Esquemas calculados. El click, el burst y el chirp son ideales: el transductor y el equipo los modifican.', 7.5, TENUE, 'start')
-    c.t(14, 653, 'El chirp es una forma de ejemplo (la de cada equipo es otra); el eje de frecuencias de los espectros es logarítmico.', 7.5, TENUE, 'start')
+    c.t(14, 640, 'El click, el burst y el chirp son ideales: el transductor y el equipo los modifican.', 7.5, TENUE, 'start')
+    c.t(14, 653, 'Cada equipo usa su propio chirp; el eje de frecuencias de los espectros es logarítmico.', 7.5, TENUE, 'start')
     c.guardar('b4-estimulos.svg')
 
 
@@ -540,7 +540,7 @@ def filtros():
     c.l(330, 206, 356, 206, COCLEAR, 2.8)
     c.t(362, 209, 'filtros de 2.º orden (12 dB por octava)', 8, TINTA, 'start')
     g50 = 20 * math.log10(butter_hp(50, 100, 2))
-    c.t(14, 362, f'La red de 50 Hz queda {num_es(abs(g50), 1)} dB abajo con el pasa altos de 2.º orden; las bandas de abajo son órdenes de magnitud, no mediciones.', 8, TENUE, 'start')
+    c.t(14, 362, f'La red de 50 Hz queda {num_es(abs(g50), 1)} dB abajo con el pasa altos de 2.º orden.', 8, TENUE, 'start')
     NUM['g50_hp2'] = g50
     c.guardar('b4-filtros.svg')
 
@@ -586,7 +586,7 @@ def decibel():
         v = 10 * math.log10(1 + 10 ** (-d / 10))
         c.circ(ax.X(d), ax.Y(v), 3.5, '#fff', COCLEAR, 1.6)
         c.t(ax.X(d) + 8, ax.Y(v) - 6, f'+{num_es(v, 2)}', 8, COCLEAR, 'start', 700)
-    c.t(14, 410, 'Cifras calculadas: dB = 20 log(p / 20 µPa) = 10 log(I / I0). Los ejemplos de la escala son órdenes de magnitud.', 8, TENUE, 'start')
+    c.t(14, 410, 'dB = 20 log(p / 20 µPa) = 10 log(I / I0).', 8, TENUE, 'start')
     c.guardar('b4-decibel.svg')
 
 
@@ -606,7 +606,7 @@ def escalas():
         sl = hl - umbral_hl
         NUM['escalas'][f] = (spl, hl, sl)
         c.t(x0, 46, f'{tit}, a {spl} dB SPL', 9.5, TINTA, 'start', 700)
-        c.t(x0, 60, f'umbral del paciente de ejemplo: {umbral_hl} dB HL', 8, TENUE, 'start')
+        c.t(x0, 60, f'umbral del paciente: {umbral_hl} dB HL', 8, TENUE, 'start')
         escala = [('dB SPL', 0, lambda v: v), ('dB HL', 1, lambda v: v - ret), ('dB SL', 2, lambda v: v - ret - umbral_hl)]
         for nombre, j, fn in escala:
             xx = x0 + 40 + j * 90
@@ -629,7 +629,7 @@ def escalas():
         xs_ = x0 + 220
         c.l(xs_ - 12, Y(ret + umbral_hl), xs_ + 12, Y(ret + umbral_hl), AZUL, 2.4)
         c.t(xs_ + 18, Y(ret + umbral_hl) + 3, 'umbral', 8, AZUL, 'start', 700)
-    c.t(14, 352, 'Mismo sonido, tres números. Los umbrales del paciente son de ejemplo (40 dB HL en 1.000 Hz y 10 dB HL en 125 Hz).', 8, TENUE, 'start')
+    c.t(14, 352, 'Mismo sonido, tres números.', 8, TENUE, 'start')
     c.t(14, 365, 'RETSPL del TDH-39 (ISO 389-1, 2017): 45 dB SPL en 125 Hz y 7 dB SPL en 1.000 Hz, los mismos valores que usa H3.', 8, TENUE, 'start')
     c.guardar('b4-escalas.svg')
 
@@ -707,7 +707,7 @@ def resonancia():
         c.l(300, yy, 322, yy, col, w)
         c.t(328, yy + 3, f'{corto} (f₀ {res[nom][0]:.0f} Hz)'.replace('.', ','), 8, TINTA, 'start')
     c.t(14, 340, 'Modelo de masa, resorte y roce en serie: la masa y el roce son los mismos en los tres; solo cambia la rigidez.', 8, TENUE, 'start')
-    c.t(14, 353, 'Es un esquema: las cifras no son de un oído real. La admitancia está en unidades relativas (el oído normal vale 1 en 226 Hz).', 8, TENUE, 'start')
+    c.t(14, 353, 'Admitancia en unidades relativas (el oído normal vale 1 en 226 Hz).', 8, TENUE, 'start')
     c.guardar('b4-resonancia.svg')
 
 
@@ -765,11 +765,11 @@ def promedio():
     c.l(ax.x0, ax.Y(0.5), ax.x0 + ax.w, ax.Y(0.5), AZUL, 1.2, '5 3')
     c.t(ax.x0 + 4, ax.Y(0.5) - 5, 'onda V: 0,5 µV', 8, AZUL, 'start', 700)
     c.t(436, 50, 'se divide por 2 cada vez que N se multiplica por 4', 8, COCLEAR, 'start', 700)
-    c.t(436, 322, 'círculos: ruido medido en esta simulación', 8, TENUE, 'start')
+    c.t(436, 322, 'círculos: ruido residual medido', 8, TENUE, 'start')
     c.t(436, 335, 'línea: 5 / √N', 8, TENUE, 'start')
     c.t(436, 360, f'N = 2.000: 5 / √2000 = {num_es(5 / math.sqrt(2000), 2)} µV', 8.5, TINTA, 'start', 700)
     c.t(436, 374, f'razón señal/ruido: {num_es(20 * math.log10(0.5 / (5 / math.sqrt(2000))), 0)} dB', 8.5, TINTA, 'start', 700)
-    c.t(14, 508, 'Simulación: ruido aleatorio suavizado de 5 µV RMS por barrido y una señal artificial con forma de ABR. No es un registro.', 8, TENUE, 'start')
+    c.t(14, 508, 'Ruido de 5 µV RMS por barrido.', 8, TENUE, 'start')
     c.guardar('b4-promedio.svg')
 
 
@@ -850,7 +850,7 @@ def audifono():
     ax.curva(xs, comp, AZUL, 2.4)
     assert lineal[60 - 20] - 60 == 30 and lineal[90 - 20] == 115 and abs(comp[90 - 20] - 97.5) < 1e-9
     c.t(ax.X(52), ax.Y(24) - 6, 'sin amplificar (salida = entrada)', 7.5, TENUE, 'start')
-    c.t(ax.X(21), ax.Y(ospl) - 6, 'tope de salida (OSPL90, ejemplo 115 dB)', 8, COCLEAR, 'start', 700)
+    c.t(ax.X(21), ax.Y(ospl) - 6, 'tope de salida (OSPL90, 115 dB)', 8, COCLEAR, 'start', 700)
     c.l(ax.X(60), ax.Y(60), ax.X(60), ax.Y(90), COCLEAR, 1.2, '3 2')
     c.t(ax.X(58), ax.Y(100), 'ganancia 30 dB', 8, COCLEAR, 'end', 700)
     c.t(ax.X(62), ax.Y(comp[62 - 20]) + 28, 'comprimido 2:1', 8, AZUL, 'start', 700)
@@ -888,7 +888,7 @@ def audifono():
         c.rect(ax2.X(k + 1) - 6, ax2.Y(h), 12, ax2.Y(-60) - ax2.Y(h), COCLEAR if k else TINTA, COCLEAR if k else TINTA, 0, 1, op=0.8)
     c.t(x0 + 125, 296, 'nivel de cada armónico respecto del tono (dB)', 8, TENUE)
     c.t(x0 + 125, 314, f'distorsión armónica total: {num_es(thd * 100, 0)} % ({num_es(20 * math.log10(thd), 0)} dB)', 8.5, COCLEAR, 'middle', 700)
-    c.t(14, 340, 'Curvas calculadas: ganancia lineal de 30 dB con tope de 115 dB; compresor de 2:1 desde 45 dB de entrada (cifras de ejemplo, no de un audífono).', 8, TENUE, 'start')
+    c.t(14, 340, 'Ganancia lineal de 30 dB con tope de 115 dB; compresor de 2:1 desde 45 dB de entrada.', 8, TENUE, 'start')
     c.guardar('b4-audifono.svg')
 
 
@@ -925,7 +925,7 @@ def nariz():
         c.circ(ax2.X(r), ax2.Y(v), 3.6, '#fff', COCLEAR, 1.8)
         c.t(ax2.X(r) + 8, ax2.Y(v) - 6, f'×{num_es(v, 1)}' if v < 10 else f'×{v:.0f}', 8, COCLEAR, 'start', 700)
     c.t(14, 322, f'A: curva de la forma ΔP = k₁ V̇ + k₂ V̇², ajustada a las dos resistencias de H24 (0,26 a 75 Pa y 0,35 a 150 Pa): k₁ = {num_es(k1, 3)}, k₂ = {num_es(k2 * 1000, 2)}·10⁻³.', 8, TENUE, 'start')
-    c.t(14, 335, 'B: ley de Poiseuille, R proporcional a 1 / r⁴ (tubo recto y liso; la nariz real es solo una guía).', 8, TENUE, 'start')
+    c.t(14, 335, 'B: ley de Poiseuille, R proporcional a 1 / r⁴ (tubo recto y liso).', 8, TENUE, 'start')
     c.guardar('b4-nariz.svg')
 
 

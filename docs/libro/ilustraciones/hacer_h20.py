@@ -95,7 +95,7 @@ def rango():
     c.t(30, top - 4, 'fuerte', 8, TENUE, 'middle')
     c.t(30, bot + 10, 'suave', 8, TENUE, 'middle')
     c.l(30, top + 4, 30, bot - 4, TENUE, 1, extra=' marker-end="url(#p-r)"')
-    c.t(360, 322, 'Esquema de un oído y una frecuencia: sin cifras clínicas. El rango entre el umbral y la molestia se achica; el habla no.', 8.5, TENUE)
+    c.t(360, 322, 'Un oído y una frecuencia. El rango entre el umbral y la molestia se achica; el habla no.', 8.5, TENUE)
     c.guardar('h20-rango-dinamico.svg', punta('p-r', TENUE))
 
 
@@ -134,7 +134,7 @@ def ventilacion():
         else:
             c.t(gx + 4, gy + gh + 32, 'parte de los graves se escapa:', 8, RETRO, 'start', 700)
             c.t(gx + 4, gy + gh + 44, 'menos ganancia grave, menos oclusión', 8, RETRO, 'start', 700)
-    c.t(360, 322, 'Esquema cualitativo: el efecto real depende del largo y el diámetro de la ventilación y del conducto.', 8.5, TENUE)
+    c.t(360, 322, 'El efecto depende del largo y el diámetro de la ventilación y del conducto.', 8.5, TENUE)
     c.guardar('h20-ventilacion.svg')
 
 

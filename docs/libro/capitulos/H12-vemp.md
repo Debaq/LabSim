@@ -48,7 +48,7 @@ Cada órgano otolítico tiene su nervio: el **sáculo** manda sus fibras por el 
 
 La figura siguiente dibuja las dos vías juntas, de frente: a la izquierda de la figura queda el lado derecho del paciente. Aquí se sigue el **oído derecho**.
 
-:::imagen ilustraciones/h12-vias.png Las vías del VEMP en un paciente simulado sano, siguiendo el oído derecho. Del sáculo y el utrículo salen las dos ramas del nervio vestibular hacia los núcleos vestibulares; de ahí, una vía baja al ECM del mismo lado (cVEMP) y otra sube por el fascículo longitudinal medial y cruza hacia el oblicuo inferior del ojo contrario (oVEMP). Los puntos son los impulsos que corren por cada vía. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h12-vias.png Las vías del VEMP en un paciente sano, siguiendo el oído derecho. Del sáculo y el utrículo salen las dos ramas del nervio vestibular hacia los núcleos vestibulares; de ahí, una vía baja al ECM del mismo lado (cVEMP) y otra sube por el fascículo longitudinal medial y cruza hacia el oblicuo inferior del ojo contrario (oVEMP). Los puntos son los impulsos que corren por cada vía. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @14,88 | **Sáculo**: se atribuye a él el cVEMP (Curthoys, 2010).
 - @46,92 | **Utrículo**: se atribuye a él el oVEMP (Curthoys, 2010).
 - @15,79 | **Nervio vestibular inferior**: lleva las fibras del sáculo.
@@ -61,7 +61,7 @@ La figura siguiente dibuja las dos vías juntas, de frente: a la izquierda de la
 
 Con esta misma figura se entiende por qué la neuritis de una rama deja normal el VEMP de la otra. En la figura siguiente, una cruz marca el nervio vestibular **superior** derecho perdido: el utrículo queda sin camino hacia los núcleos y el oVEMP de ese oído se apaga, mientras que el sáculo y el nervio inferior siguen intactos y el cVEMP se conserva (→ tabla de interpretación, más abajo).
 
-:::imagen ilustraciones/h12-vias-neuritis.png Neuritis del nervio vestibular superior derecho, en el mismo paciente simulado. La cruz verde marca la rama perdida, por la que ya no corren impulsos; la rama inferior, con el sáculo, no está tocada. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h12-vias-neuritis.png Neuritis del nervio vestibular superior derecho, en el mismo paciente. La cruz verde marca la rama perdida, por la que ya no corren impulsos; la rama inferior, con el sáculo, no está tocada. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @32,78 | **Rama superior interrumpida**: ninguna señal del utrículo llega a los núcleos; es la vía del oVEMP.
 - @14,88 | **Sáculo y rama inferior intactos**: el cVEMP de este oído se conserva.
 :::

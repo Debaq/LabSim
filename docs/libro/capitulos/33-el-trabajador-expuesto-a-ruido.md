@@ -36,7 +36,7 @@ El oído que trabaja en ruido no sufre un solo daño sino **dos tiempos** (→ c
 - **Desplazamiento temporal del umbral (TTS).** Al terminar el turno el umbral está peor que al empezar. Con reposo vuelve a la base en horas, días o, tras exposiciones muy intensas, semanas (Ryan y cols., 2016).
 - **Desplazamiento permanente del umbral (PTS).** La parte que no vuelve. Aparece cuando la exposición fue muy intensa o se repitió muchas veces sin que el oído terminara de recuperarse (Ryan y cols., 2016).
 
-:::imagen ilustraciones/cap33-ttspts.svg ancho=100% Cada turno sube el umbral y cada noche de reposo lo baja. Al principio el oído vuelve a la base; con los años puede quedar un resto que ya no vuelve: el desplazamiento permanente. Esquema sin cifras.
+:::imagen ilustraciones/cap33-ttspts.svg ancho=100% Cada turno sube el umbral y cada noche de reposo lo baja. Al principio el oído vuelve a la base; con los años puede quedar un resto que ya no vuelve: el desplazamiento permanente.
 :::
 
 ¿Qué pasa por dentro? Las revisiones coinciden en que no hay un solo mecanismo. Con sonidos de muy alta energía hay daño **mecánico**: se rompen o se desordenan los estereocilios y las uniones de las células de sostén. Con exposiciones menos extremas pesa el daño **metabólico**: la transducción trabaja al máximo, las mitocondrias producen radicales de oxígeno y el calcio se acumula en la célula, y a eso se suma el exceso de glutamato en la sinapsis con el nervio (Henderson y cols., 2006; Kurabi y cols., 2017). Una parte de esto es reversible y otra no: la célula ciliada externa que muere no se reemplaza.

@@ -116,7 +116,7 @@ def reposo():
 
 def ttspts():
     c = Lienzo(700, 300)
-    c.t(14, 18, 'Esquema (sin cifras): lo que sube en el turno y lo que queda', 10.5, TINTA, 'start', 700)
+    c.t(14, 18, 'Lo que sube en el turno y lo que queda', 10.5, TINTA, 'start', 700)
     for x0, titulo, resto in ((50, 'Primeros meses: el oído vuelve a la base', 0), (390, 'Años después: queda un resto', 1)):
         y0, alto, ancho = 60, 160, 270
         c.t(x0, y0 - 14, titulo, 10, TINTA, 'start', 700)
@@ -143,7 +143,7 @@ def ttspts():
             c.t(x0 + ancho - 38, y0 + alto - 7, 'resto que no vuelve (permanente)', 8.5, ROJO, 'end', 700)
         c.t(x0 + 40, y0 + 12, 'sube en el turno', 8.5, NARANJA, 'start')
         c.t(x0 + 40, y0 + 24, 'y baja en el reposo', 8.5, NARANJA, 'start')
-    c.t(14, 285, 'Cada onda es un turno (sube) y la noche siguiente (baja). Esquema cualitativo, no son datos de ninguna persona.', 8.5, TENUE, 'start')
+    c.t(14, 285, 'Cada onda es un turno (sube) y la noche siguiente (baja).', 8.5, TENUE, 'start')
     c.guardar('cap33-ttspts.svg', punta('fl', ROJO))
 
 

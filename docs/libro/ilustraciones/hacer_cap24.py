@@ -95,7 +95,7 @@ def cociente():
     c.t(ox + w / 2, oy + h + 36, 'oído derecho: suma de la velocidad de la fase lenta, tibia + fría (°/s)', 11, TINTA)
     c.out.append(f'<text transform="translate(26,{oy + h / 2}) rotate(-90)" {F} font-size="11" fill="{TINTA}" text-anchor="middle">'
                  f'oído izquierdo: suma tibia + fría (°/s)</text>')
-    c.t(375, 430, 'Cifras de ejemplo. Entre paréntesis, la paresia canalicular con la fórmula de Jongkees; el eje llega solo a 14 °/s.', 9.5, TENUE)
+    c.t(375, 430, 'Entre paréntesis, la paresia canalicular con la fórmula de Jongkees; el eje llega solo a 14 °/s.', 9.5, TENUE)
     c.guardar('cap24-cociente.svg')
 
 
@@ -154,7 +154,7 @@ def oscilopsia():
     c.l(70, 340, 94, 340, OI, 2.4); c.t(100, 343, 'cabeza', 9.5, TINTA, 'start')
     c.l(160, 340, 184, 340, VERDE, 2.4); c.t(190, 343, 'ojo (invertido)', 9.5, TINTA, 'start')
     c.r(300, 334, 14, 10, NARANJA, 0.35); c.t(320, 343, 'lo que resbala en la retina = (1 − ganancia) × cabeza', 9.5, TINTA, 'start')
-    c.t(700, 366, 'Esquema: 2 ciclos por segundo, pico de 90 °/s (ilustrativo).', 8.5, TENUE, 'end')
+    c.t(700, 366, '2 ciclos por segundo, pico de 90 °/s.', 8.5, TENUE, 'end')
     c.guardar('cap24-oscilopsia.svg')
 
 

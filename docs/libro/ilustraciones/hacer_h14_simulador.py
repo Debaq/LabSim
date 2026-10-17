@@ -98,7 +98,7 @@ def patrones():
     c.t(400, 272, 'Dos errores distintos sobre GAG:', 8.5, TINTA, 'start', 700)
     c.t(400, 290, 'GGA → cambio de lugar («dónde»)', 8, AVISO, 'start', 400, mono=False)
     c.t(400, 306, 'AGA → inversión de todo («qué»)', 8, AVISO, 'start')
-    c.t(14, 324, 'Esquema, no datos. G: grave; A: agudo; L: largo; C: corto. Frecuencias, duraciones y pausas son las de cada versión.',
+    c.t(14, 324, 'G: grave; A: agudo; L: largo; C: corto. Frecuencias, duraciones y pausas son las de cada versión.',
         7.3, TENUE, 'start')
     c.guardar('h14-patrones.svg')
 
@@ -128,7 +128,6 @@ def dicotico():
             AVISO if od - oi > 10 else TINTA, 'middle', 700)
     c.t(14, 286, 'Aciertos por oído en recuerdo libre. El total es el mismo (78 %); solo el resultado por oído muestra la asimetría.',
         8, TINTA, 'start')
-    c.t(14, 306, 'Datos de ejemplo, no normas.', 7.5, TENUE, 'start')
     c.guardar('h14-dicotico-oidos.svg')
 
 
@@ -207,8 +206,7 @@ def matrix():
         if i % 2 == 0 or i == len(pts) - 1:
             c.t(i2x(i), y1 + 16, str(i + 1), 7.5, TENUE)
     c.t((x0 + x1) / 2, y1 + 32, 'frase', 8, TENUE)
-    c.t(14, 458, 'En cada círculo, cuántas de las cinco palabras acertó: 3 o más baja el SNR; menos de 3 lo sube (en rojo). '
-        'Datos de ejemplo, no normas.', 7.5, TENUE, 'start')
+    c.t(14, 458, 'En cada círculo, cuántas de las cinco palabras acertó: 3 o más baja el SNR; menos de 3 lo sube (en rojo).', 7.5, TENUE, 'start')
     c.guardar('h14-matrix.svg')
 
 
@@ -259,7 +257,7 @@ def patron_resultado():
     c.t(14, 372, f'Falla en el segundo y el tercer tono, y en {cambia_lugar} de los {len(SESION) - aciertos} errores dijo los mismos tonos en otro orden:',
         8, TINTA, 'start')
     c.t(14, 388, 'distingue el largo del corto, pero no los ordena. El total solo no lo dice.', 8, TINTA, 'start')
-    c.t(14, 410, 'Datos de ejemplo, no normas. L: largo; C: corto.', 7.5, TENUE, 'start')
+    c.t(14, 410, 'L: largo; C: corto.', 7.5, TENUE, 'start')
     c.guardar('h14-patron-resultado.svg')
 
 

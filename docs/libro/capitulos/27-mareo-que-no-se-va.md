@@ -62,7 +62,7 @@ LabSim da el lado auditivo de estos pacientes (audiograma, logoaudiometría, ref
 
 Después de una pérdida vestibular o de un cuadro que marea, el sistema **compensa** (→ H19, B2). El reposo se reequilibra primero, la función con el movimiento después, y la persona vuelve a confiar en lo que siente. El mareo del primer mes es parte de eso y no es un problema.
 
-:::imagen ilustraciones/cap27-curso.svg Dos caminos del mismo síntoma después de un evento agudo: el mareo que se apaga a medida que el sistema compensa, y el que baja un poco, se queda en una meseta y sube cada vez que el paciente se expone. Esquema sin cifras: ilustra el principio, no los tiempos de un paciente.
+:::imagen ilustraciones/cap27-curso.svg Dos caminos del mismo síntoma después de un evento agudo: el mareo que se apaga a medida que el sistema compensa, y el que baja un poco, se queda en una meseta y sube cada vez que el paciente se expone.
 :::
 
 El PPPD es cuando el **segundo camino** se instala: el mareo baja un poco y se queda en una meseta, que sube cada vez que el paciente se expone a lo que lo marea. Pasados los meses, ya no es lo esperable de una compensación en curso.
@@ -77,14 +77,14 @@ La Sociedad Bárány describe tres cambios que se mantienen aunque el vestíbulo
 
 El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente simulado con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. -->. El modelo muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y sus cifras no son normativas ni un criterio diagnóstico: en los pacientes reales la posturografía puede salir normal o con un patrón variable <!-- verificar: hallazgos de la posturografía dinámica en PPPD; no hay un patrón diagnóstico establecido (revisar Trinidade y Goebel, 2018). --> y por eso no se usa para decidir.
 
-:::imagen ilustraciones/cap27-sot-sano-pppd.svg ancho=100% Posturografía de seis condiciones de dos pacientes simulados: a la izquierda, sano; a la derecha, con el vestíbulo sano y la dependencia visual marcada. Fíjate en que el de la derecha se desordena justo donde la vista miente (condiciones 3 y 6), aunque su vestíbulo esté intacto. Cifras y límites del modelo, no normativos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap27-sot-sano-pppd.svg ancho=100% Posturografía de seis condiciones de dos pacientes: a la izquierda, sano; a la derecha, con el vestíbulo sano y la dependencia visual marcada. Fíjate en que el de la derecha se desordena justo donde la vista miente (condiciones 3 y 6), aunque su vestíbulo esté intacto. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @95,46 | **Condición 6, la vista y la plataforma engañan a la vez.** El paciente sano la sostiene; el de la dependencia visual cae. Con el vestíbulo intacto.
 - @72,40 | **Condición 3, el entorno visual en movimiento con los pies firmes.** La barra en rojo: no alcanza el límite. El que depende de la vista se desordena con lo que ve moverse.
 - @88,82 | **La razón de preferencia visual** baja (barra roja): mide cuánto cae el paciente cuando se le falsea la vista, en comparación con cuando se le cierran los ojos.
 - @30,83 | **En el sano**, la misma razón está dentro de lo normal: **deja de lado** lo que miente.
 :::
 
-:::imagen ilustraciones/cap27-ciclo.svg El círculo que mantiene el mareo: un evento que mareó deja al paciente vigilante, la vigilancia endurece la postura y le da peso de más a la vista, y cada síntoma vuelve a subir la vigilancia. Esquema didáctico.
+:::imagen ilustraciones/cap27-ciclo.svg El círculo que mantiene el mareo: un evento que mareó deja al paciente vigilante, la vigilancia endurece la postura y le da peso de más a la vista, y cada síntoma vuelve a subir la vigilancia.
 :::
 
 ### Por qué el supermercado

@@ -47,7 +47,7 @@ Lo importante es que los nervios vestibulares **no están en silencio cuando la 
 
 El tronco no lee un nervio, **compara los dos**. Con la cabeza quieta, los dos lados descargan igual, la diferencia es cero y los ojos no se mueven. Si la cabeza gira a la derecha, el lado derecho sube y el izquierdo baja: la diferencia manda los ojos a la izquierda, a la misma velocidad.
 
-:::imagen ilustraciones/h15-vor-pushpull.svg Lo que el tronco lee es la diferencia entre los dos lados. A: con la cabeza quieta los dos descargan igual y los ojos no se mueven. B: al girar a la derecha, el conducto derecho sube y el izquierdo baja. C: si el lado izquierdo deja de descargar, la diferencia es la misma que en B, aunque la cabeza esté quieta. Esquema, sin cifras.
+:::imagen ilustraciones/h15-vor-pushpull.svg Lo que el tronco lee es la diferencia entre los dos lados. A: con la cabeza quieta los dos descargan igual y los ojos no se mueven. B: al girar a la derecha, el conducto derecho sube y el izquierdo baja. C: si el lado izquierdo deja de descargar, la diferencia es la misma que en B, aunque la cabeza esté quieta.
 :::
 
 ### Una pérdida de un lado: el nistagmo
@@ -66,7 +66,7 @@ Hay otro detalle que cambia cómo se examina: **un nistagmo periférico se apaga
 
 La consecuencia práctica es doble. En un paciente con una lesión periférica, el nistagmo se ve **con fijación quitada** y se pierde o se reduce con la luz y un punto que mirar. En una lesión que toca el cerebelo, en cambio, la fijación **no frena** el nistagmo o lo frena poco. Por eso el mismo examen se hace dos veces, con y sin fijación, y se compara.
 
-:::imagen ilustraciones/h15-nistagmo-trazas.svg Nistagmo espontáneo de una neuritis del lado izquierdo en fase aguda, visto como posición horizontal del ojo en el tiempo. A: sin fijación; el diente de sierra es evidente. B: con fijación, la fase lenta se frena. La velocidad de la fase lenta es la pendiente de cada tramo lento. Trazas de un paciente simulado: órdenes de magnitud del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h15-nistagmo-trazas.svg Nistagmo espontáneo de una neuritis del lado izquierdo en fase aguda, visto como posición horizontal del ojo en el tiempo. A: sin fijación; el diente de sierra es evidente. B: con fijación, la fase lenta se frena. La velocidad de la fase lenta es la pendiente de cada tramo lento. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 Las **lentes de Frenzel** (+20 dioptrías) sirven justamente para esto. Al paciente lo dejan casi sin visión nítida, de modo que no puede fijar; al examinador le agrandan los ojos y le dan luz para verlos. La VNG logra lo mismo de otra manera: una cámara infrarroja registra el ojo **en oscuridad total**, donde no hay nada que fijar.
@@ -81,7 +81,7 @@ Con un integrador **sano**, el ojo se queda donde se lo deja. Con un integrador 
 - **Grado II**: también aparece mirando al frente.
 - **Grado III**: aparece en las tres posiciones, incluso mirando hacia la fase lenta.
 
-:::imagen ilustraciones/h15-mirada.svg Desviación del ojo respecto de la posición pedida al mirar a la izquierda, al frente y a la derecha. A: un nistagmo periférico mantiene su dirección y cambia de intensidad (ley de Alexander). B: un nistagmo evocado por la mirada cambia de dirección con ella. Trazas de un paciente simulado, sin fijación. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h15-mirada.svg Desviación del ojo respecto de la posición pedida al mirar a la izquierda, al frente y a la derecha. A: un nistagmo periférico mantiene su dirección y cambia de intensidad (ley de Alexander). B: un nistagmo evocado por la mirada cambia de dirección con ella. Sin fijación. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 Lo que separa a los dos es la **dirección**. El periférico **no cambia de sentido** al cambiar la mirada: sube o baja de intensidad. El evocado por la mirada **cambia de sentido**: bate a la derecha cuando se mira a la derecha y a la izquierda cuando se mira a la izquierda. Esa diferencia es la que se examina en la mirada excéntrica del examen. En una persona sana puede haber unas pocas sacudidas con la mirada **extrema**: es el nistagmo de fin de rango y no es patológico, por eso no se mira más allá de lo que el protocolo pide (Leigh y Zee, 2015).
@@ -141,7 +141,7 @@ Los centros difieren en cuántas horas de ayuno piden y en qué fármacos suspen
 - **Videonistagmógrafo.** Unas gafas cerradas con una **cámara infrarroja** frente a cada ojo (o frente a uno). La cámara sigue la pupila, el programa la convierte en grados y la muestra en el tiempo. Trae un **pedal** para marcar eventos sin soltar al paciente y un software donde se ingresan los datos y se corrigen los trazos.
 - **Una sala con luz controlada.** Con las lentes, luz **frontal atenuada**; con la VNG, una sala que se pueda oscurecer, y un punto o una luz que se mire **a 30 o 40 cm** a la altura de los ojos.
 
-:::imagen ilustraciones/h15-simulador-frenzel.png ancho=80% Un paciente simulado con una neuritis vestibular superior izquierda, a las 6 horas, sin fijación. A la izquierda, con las lentes de Frenzel puestas; a la derecha, su ojo derecho de cerca. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h15-simulador-frenzel.png ancho=80% Un paciente con una neuritis vestibular superior izquierda, a las 6 horas, sin fijación. A la izquierda, con las lentes de Frenzel puestas; a la derecha, su ojo derecho de cerca. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @40,29 | **Lentes de Frenzel.** Agrandan los ojos para quien mira y no dejan fijar al paciente.
 - @97,21 | **El ojo de cerca**, como lo ve la cámara infrarroja de la VNG: el programa sigue la pupila y la convierte en grados.
 :::
@@ -254,7 +254,7 @@ El examen es el mismo, pero lo **registra el equipo**.
 
 Con fijación se mira un punto. **Sin fijación**, las gafas quedan **en oscuridad** y el paciente mantiene los ojos **abiertos** (con los párpados cerrados no se ve la pupila) mientras imagina el objeto en cada posición.
 
-:::imagen ilustraciones/h15-calibracion.svg Por qué la calibración importa. A: con una calibración buena, el trazo del ojo llega a donde está el blanco. B: con una ganancia de 0,7, todos los movimientos se registran un 30 % más chicos, también la velocidad de la fase lenta. Esquema, no datos.
+:::imagen ilustraciones/h15-calibracion.svg Por qué la calibración importa. A: con una calibración buena, el trazo del ojo llega a donde está el blanco. B: con una ganancia de 0,7, todos los movimientos se registran un 30 % más chicos, también la velocidad de la fase lenta.
 :::
 
 ### 7. Medir la velocidad de la fase lenta
@@ -277,7 +277,7 @@ El protocolo de VNG **no incluye** las pruebas oculomotoras, pero la VNG de uso 
 - **Seguimiento lento.** El blanco **va y viene** con un movimiento suave. Se mide la **ganancia**, y se mira si el ojo alcanza al blanco con **sacadas de alcance**. Un seguimiento suave y de ganancia alta es normal.
 - **Optocinético.** Un campo de **barras corre** frente al paciente. Se mira si la **fase lenta** sigue las barras y si es **simétrica** entre un lado y el otro.
 
-:::imagen ilustraciones/h15-oculomotor.svg Pruebas oculomotoras. A: el blanco salta 20°; normal, hipométrica (vermis), con una dirección hipermétrica y otra hipométrica (fastigio) y tardía hacia un lado (campo frontal y colículo). B: seguimiento normal y con los dos flóculos lesionados, que sale sacádico y de ganancia baja. C: optocinético normal. Trazas de un paciente simulado: órdenes de magnitud del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h15-oculomotor.svg Pruebas oculomotoras. A: el blanco salta 20°; normal, hipométrica (vermis), con una dirección hipermétrica y otra hipométrica (fastigio) y tardía hacia un lado (campo frontal y colículo). B: seguimiento normal y con los dos flóculos lesionados, que sale sacádico y de ganancia baja. C: optocinético normal. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 :::comentario Lo que dicen las normas

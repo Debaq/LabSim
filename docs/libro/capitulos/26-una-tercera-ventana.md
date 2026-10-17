@@ -68,7 +68,7 @@ La audiometría es el primer lugar donde asoma:
 - **VEMP con umbral bajo**: 81 ± 9 dB nHL en los oídos afectados, contra 99 ± 7 en los oídos sanos de los mismos pacientes y 98 ± 4 en los controles (Minor, 2005). Con el estímulo en dB SPL, la diferencia fue de 20 a 30 dB: 84 dB SPL en el cVEMP y 85 en el oVEMP de los oídos con dehiscencia (Welgampola y cols., 2008). Los números cambian de un equipo a otro, y por eso cada servicio necesita su propia normativa.
 - **VEMP de amplitud grande.** En el oVEMP la amplitud de la n10 llegó a 25 µV con el estímulo más alto y a 40 µV con la mirada hacia arriba, y su amplitud y su umbral separaron a los pacientes de los controles (Rosengren y cols., 2008).
 
-![Lo que deja una dehiscencia del conducto superior derecho en tres pruebas. Audiograma con la ósea bajo 0 dB y la aérea entre 9 y 11 dB: un gap sin oído medio enfermo. Reflejo presente a pesar del gap. Umbral del cVEMP de 81 dB nHL en el oído con dehiscencia contra 99 en el sano. Esquema con cifras promedio de la literatura, no un paciente.](ilustraciones/cap26-dehiscencia.svg)
+![Lo que deja una dehiscencia del conducto superior derecho en tres pruebas. Audiograma con la ósea bajo 0 dB y la aérea entre 9 y 11 dB: un gap sin oído medio enfermo. Reflejo presente a pesar del gap. Umbral del cVEMP de 81 dB nHL en el oído con dehiscencia contra 99 en el sano. Cifras promedio de la literatura.](ilustraciones/cap26-dehiscencia.svg)
 
 La dehiscencia **se confirma con la tomografía** de alta resolución de los huesos temporales y la decide el médico. Lo que hace el audiólogo es sospecharla, porque una combinación de síntomas, audiometría con gap sin oído medio, y VEMP, junto con la tomografía, es lo que da el diagnóstico (Zhou y cols., 2007).
 

@@ -47,7 +47,7 @@ Los registros intracraneales hechos durante cirugías permitieron asignar cada o
 
 Es un mapa útil, pero no literal: cada onda recibe aportes de varias poblaciones de neuronas, y una misma estación contribuye a más de una onda (Melcher y Kiang, 1996). Las ondas VI y VII son inconstantes y no se usan en la clínica.
 
-:::imagen ilustraciones/h10-generadores.svg ancho=100% La vía auditiva y el PEAT de un paciente simulado sano. A: la vía de la cóclea a la corteza, de frente (a la izquierda queda el lado derecho del paciente). B: el PEAT del oído derecho con un clic a 80 dB, con las ondas I a V y los interpicos; las latencias son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h10-generadores.svg ancho=100% La vía auditiva y el PEAT de un paciente sano. A: la vía de la cóclea a la corteza, de frente (a la izquierda queda el lado derecho del paciente). B: el PEAT del oído derecho con un clic a 80 dB, con las ondas I a V y los interpicos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @12,84 | **Cóclea y nervio VIII**: la onda I sale de la porción distal del nervio y la II de la proximal, donde entra al tronco.
 - @1,68 | **Núcleo coclear**: la onda III.
 - @22,57 | **Complejo olivar superior** (MSO, LSO y MNTB): la onda IV. Desde aquí la vía cruza y los dos oídos se comparan.

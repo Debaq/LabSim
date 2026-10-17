@@ -154,7 +154,7 @@ En todas se observa con los **ojos abiertos y la mirada al frente**, y se pregun
 5. **Repite hacia el otro lado** (*E-CCI* y *CCI-E*). Se empieza por el oído que se sospecha afectado y, si no hay sospecha, por el derecho.
 6. Si hace falta decidir qué canal está afectado o cuál predomina, haz la **cabeza colgando al frente (E-CC)**, sin girar, con los mismos tiempos.
 
-:::imagen ilustraciones/h18-dix-hallpike.png Dix-Hallpike hacia la derecha en un paciente simulado con canalitiasis del posterior derecho. De izquierda a derecha: sentado, con la cabeza girada 45°; acostado y colgando, con las partículas ya cayendo en el canal; sentado otra vez, cuando el nistagmo se invierte. A la derecha de cada postura, el canal con sus partículas y la flecha roja que dice dónde queda "abajo"; debajo, el ojo derecho y su traza. Los tiempos y las velocidades son del modelo, no normativos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h18-dix-hallpike.png Dix-Hallpike hacia la derecha en un paciente con canalitiasis del posterior derecho. De izquierda a derecha: sentado, con la cabeza girada 45°; acostado y colgando, con las partículas ya cayendo en el canal; sentado otra vez, cuando el nistagmo se invierte. A la derecha de cada postura, el canal con sus partículas y la flecha roja que dice dónde queda "abajo"; debajo, el ojo derecho y su traza. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @58,20 | **El canal en 2D**: las partículas (amarillas) caen hacia el punto más bajo, que marca la flecha roja de "abajo".
 - @41,62 | **El paciente en la camilla**, visto desde la cabecera, con la cabeza colgando fuera del borde.
 - @58,78 | **Traza del ojo** en sus tres componentes: horizontal, vertical y torsional. Aquí sube y gira: es el nistagmo del posterior.
@@ -179,7 +179,7 @@ La guía de la AAO-HNS describe el mismo procedimiento: el paciente pasa de sent
 4. Anota en cada lado la **dirección** del nistagmo (hacia el suelo o hacia el techo) y su **intensidad**. Con eso decides el tipo y el lado (tabla siguiente).
 5. Devuelve al paciente a decúbito supino. En el protocolo de evaluación vestibular completa, la calórica se hace en la postura siguiente (→ H16).
 
-:::imagen ilustraciones/h18-lateral.png Giro supino (1 y 2) y maniobra de Gufoni geotrópica (3 a 6) en un paciente simulado con canalitiasis del canal lateral derecho. Al lado de cada postura, el canal visto desde arriba, con sus partículas y la flecha de "abajo". En el giro supino, con el oído enfermo abajo las partículas caen hacia la ampolla y el nistagmo sale más fuerte; en el Gufoni, cada cambio de postura corre el "abajo" hasta que, en la última, las partículas ya están en el utrículo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h18-lateral.png Giro supino (1 y 2) y maniobra de Gufoni geotrópica (3 a 6) en un paciente con canalitiasis del canal lateral derecho. Al lado de cada postura, el canal visto desde arriba, con sus partículas y la flecha de "abajo". En el giro supino, con el oído enfermo abajo las partículas caen hacia la ampolla y el nistagmo sale más fuerte; en el Gufoni, cada cambio de postura corre el "abajo" hasta que, en la última, las partículas ya están en el utrículo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 Tabla: Cómo decidir el lado en un nistagmo lateral
@@ -211,7 +211,7 @@ Aquí se llama a esta prueba "maniobra de McClure"; en la literatura se llama **
 Fuentes: Bhattacharyya y cols., 2017; von Brevern y cols., 2015.
 :::
 
-:::imagen ilustraciones/h18-nistagmo-por-canal.svg Qué se ve en los ojos en cada caso. Esquema propio, no datos de un paciente: las flechas muestran la fase rápida del nistagmo; el arco verde, hacia dónde gira el polo superior del ojo.
+:::imagen ilustraciones/h18-nistagmo-por-canal.svg Qué se ve en los ojos en cada caso. Las flechas muestran la fase rápida del nistagmo; el arco verde, hacia dónde gira el polo superior del ojo.
 :::
 
 El **orden de lectura** es siempre el mismo: primero **¿hay nistagmo?** (sin nistagmo, el vértigo solo no basta); después, **¿en qué postura salió?** (eso dice el canal); luego **¿hacia dónde bate?** (eso dice el canal y el lado); y al final **¿cómo se comporta en el tiempo?** (latencia, crescendo-decrescendo, duración, fatiga: eso dice canalitiasis, cupulolitiasis o algo que no es VPPB).
@@ -237,7 +237,7 @@ Cada una es un **protocolo cerrado**: mismo orden, misma dirección y mismos tie
 3. **Gira al paciente otros 90° hacia el mismo lado**, hasta quedar de costado, con la cara hacia el suelo, y mantén **2 minutos**. Las partículas pasan a la cruz común.
 4. **Siéntalo despacio**, con la cabeza inclinada unos 20°. Las partículas caen al utrículo, donde ya no molestan.
 
-:::imagen ilustraciones/h18-epley.png Maniobra de Epley para un canal posterior derecho en un paciente simulado, paso a paso. En cada postura, a la derecha, el canal con sus partículas. Cada giro corre el punto más bajo del canal y las partículas lo siguen: hacia el final llegan a la cruz común y salen al utrículo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h18-epley.png Maniobra de Epley para un canal posterior derecho en un paciente, paso a paso. En cada postura, a la derecha, el canal con sus partículas. Cada giro corre el punto más bajo del canal y las partículas lo siguen: hacia el final llegan a la cruz común y salen al utrículo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 #### Epley modificado
@@ -258,7 +258,7 @@ El protocolo tiene una variante, con **más posiciones y más lentas**, en la qu
 4. **Siéntalo despacio.**
 5. Se recomienda **repetir dos o tres veces**.
 
-:::imagen ilustraciones/h18-semont.png Maniobra de Semont para un canal posterior derecho en un paciente simulado. El paso del lado enfermo al lado sano es el movimiento brusco: la inercia despega las partículas de la cúpula, que después caen hacia la salida. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h18-semont.png Maniobra de Semont para un canal posterior derecho en un paciente. El paso del lado enfermo al lado sano es el movimiento brusco: la inercia despega las partículas de la cúpula, que después caen hacia la salida. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 El movimiento **brusco** no es descuido: la inercia de un giro rápido despega las partículas pegadas a la cúpula, cosa que la gravedad sola, con las posturas lentas del Epley, no hace (Semont y cols., 1988). La guía de la AAO-HNS describe la maniobra casi igual, con menos tiempo en cada postura (20 segundos después de que cese el nistagmo en la primera, unos 30 segundos en la segunda) y reconoce que no hay diferencia de eficacia frente al Epley (Bhattacharyya y cols., 2017).

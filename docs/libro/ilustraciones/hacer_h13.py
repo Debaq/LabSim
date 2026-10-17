@@ -106,7 +106,7 @@ def modulacion():
         c.t(X(p), by + bh - 78, f'{p}', 8, COCLEAR, 'middle', 700)
         c.t(X(p), by + bh - 88, nombre.replace('ej. ', ''), 7.5, TENUE, 'middle')
     c.t(bx + bw / 2, by - 12, 'un oído, cuatro portadores, cuatro moduladores distintos', 8.5, TINTA, 'middle', 600)
-    c.t(14, 282, 'Esquema, no datos: las frecuencias de modulación son un ejemplo; cada equipo usa las suyas.', 8, TENUE, 'start')
+    c.t(14, 282, 'Cada equipo usa sus propias frecuencias de modulación.', 8, TENUE, 'start')
     c.guardar('h13-modulacion-espectro.svg')
 
 
@@ -145,7 +145,7 @@ def correccion():
     c.t(lx - 6, 196, 'Correcciones de BSA (2023), recién nacido', 8.5, TENUE, 'start')
     c.t(lx - 6, 208, 'hasta 12 semanas, fonos de inserción:', 8.5, TENUE, 'start')
     c.t(lx - 6, 220, '500 y 1000 Hz: −20 · 2000 y 4000 Hz: −15.', 8.5, TENUE, 'start')
-    c.t(14, 292, 'Esquema con umbrales de ejemplo. Valen solo para umbrales sobre 30 dB eHL.', 8, TENUE, 'start')
+    c.t(14, 292, 'Las correcciones valen solo para umbrales sobre 30 dB eHL.', 8, TENUE, 'start')
     c.guardar('h13-correccion.svg', punta('p-corr', AVISO))
 
 

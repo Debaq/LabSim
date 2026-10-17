@@ -210,7 +210,7 @@ def psicometrica():
         if s:
             c.t(tx, yy, s, 8, TINTA, 'start', peso)
         yy += 14.5
-    c.t(tx, 246, 'Esquema: la pendiente real cambia con la persona.', 6.6, TENUE, 'start', 400, 'italic')
+    c.t(tx, 246, 'La pendiente cambia con la persona.', 6.6, TENUE, 'start', 400, 'italic')
     c.guardar('h03-funcion-psicometrica.svg')
 
 

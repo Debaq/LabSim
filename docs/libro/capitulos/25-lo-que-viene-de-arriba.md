@@ -84,7 +84,7 @@ El protocolo pide al paciente **suspender 48 horas antes** los antivertiginosos,
 
 La figura reúne las formas que más se ven. Un nistagmo se nombra por su fase **rápida**, y cada uno tiene su manera de lucir en el registro (Eggers y cols., 2019).
 
-:::imagen ilustraciones/cap25-nistagmos-centrales.svg ancho=100% Los nistagmos centrales y cómo reconocer cada uno: posición del ojo en el tiempo (A, B, C, D, F) y velocidad de la fase lenta (E). En cada panel mira hacia dónde bate la fase rápida, si la luz lo frena y si cambia con la dirección de la mirada. Trazas de un modelo, no de un paciente. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap25-nistagmos-centrales.svg ancho=100% Los nistagmos centrales y cómo reconocer cada uno: posición del ojo en el tiempo (A, B, C, D, F) y velocidad de la fase lenta (E). En cada panel mira hacia dónde bate la fase rápida, si la luz lo frena y si cambia con la dirección de la mirada. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @30,25 | **Hacia abajo**: la fase lenta sube y la rápida baja, mirando al frente, y la luz (gris ancho) casi no lo cambia.
 - @80,12 | **Hacia arriba**: la fase lenta baja y la rápida sube. Se lo atribuye a lesiones del puente y del bulbo.
 - @28,51 | **Evocado por la mirada**: mirando a la derecha, el ojo se va hacia el centro y vuelve de un salto.
@@ -271,7 +271,7 @@ La audición es la de su edad. Además del examen del cerebelo, ¿qué mirarías
 | Calórica bitermal | sin respuesta a 30 y a 44 °C en los dos oídos, y sin respuesta a 17 °C: **arreflexia vestibular bilateral** |
 :::
 
-:::imagen ilustraciones/cap25-caso1-canvas.svg ancho=100% VNG de Rafael: mirada excéntrica y seguimiento. Lo que hay que ver es el cerebelo en los ojos: un nistagmo evocado por la mirada que la luz no frena y un seguimiento sacádico. Unos laberintos perdidos no explican ninguna de las dos cosas. Trazas de un modelo; las cifras de las notas no son normativas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap25-caso1-canvas.svg ancho=100% VNG de Rafael: mirada excéntrica y seguimiento. Lo que hay que ver es el cerebelo en los ojos: un nistagmo evocado por la mirada que la luz no frena y un seguimiento sacádico. Unos laberintos perdidos no explican ninguna de las dos cosas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @82,15 | Mirando a la derecha, el ojo se va hacia el centro (**fase lenta de 1 a 2 °/s**) y vuelve de un salto: nistagmo evocado por la mirada.
 - @20,31 | Con luz (gris ancho) el nistagmo **sigue igual**: la fijación no lo frena.
 - @51,20 | Mirando al frente no hay nistagmo horizontal.
@@ -317,7 +317,7 @@ No hay síntomas auditivos. ¿Pedirías igual la audiometría? ¿Qué cuidado te
 | Impulso cefálico y calórica | sin hallazgos |
 :::
 
-:::imagen ilustraciones/cap25-caso2-ino.svg ancho=100% Sacadas de 20° en cada ojo de Inés. Mira los dos ojos por separado: hacia la derecha, el ojo derecho llega al blanco y el izquierdo se queda a mitad de camino. Un equipo que registra un solo ojo no lo ve. Trazas de un modelo con el fascículo longitudinal medial izquierdo perdido. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap25-caso2-ino.svg ancho=100% Sacadas de 20° en cada ojo de Inés. Mira los dos ojos por separado: hacia la derecha, el ojo derecho llega al blanco y el izquierdo se queda a mitad de camino. Un equipo que registra un solo ojo no lo ve. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @30,32 | El **ojo derecho**, el que registran muchos equipos, llega a donde está el blanco hacia los dos lados: precisión 1,00. Con solo este ojo, el examen sale normal.
 - @70,24 | El **ojo izquierdo** hacia la derecha se queda en 0° y el blanco está en 10°: sale a tiempo, pero no llega.
 - @72,63 | Precisión de 0,50 hacia la derecha: la mitad del camino. Hacia la izquierda es 1,00.
@@ -361,7 +361,7 @@ La VNG anterior salió normal. ¿Qué tendrías que preguntar sobre cómo se hiz
 | Marcha | de base ancha; la marcha en tándem es difícil |
 :::
 
-:::imagen ilustraciones/cap25-caso3-chiari.svg ancho=100% VNG de Silvia: canal horizontal y canal vertical. El canal horizontal está plano; el nistagmo hacia abajo solo aparece en el vertical, y crece al mirar abajo y a los lados. Trazas de un modelo con los dos flóculos a medias. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap25-caso3-chiari.svg ancho=100% VNG de Silvia: canal horizontal y canal vertical. El canal horizontal está plano; el nistagmo hacia abajo solo aparece en el vertical, y crece al mirar abajo y a los lados. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @29,17 | El canal horizontal está **plano**: con este registro solo, la paciente sale "sin nistagmo".
 - @80,30 | El canal vertical bate hacia abajo, de 2,2 °/s, y la luz (gris ancho) casi no cambia.
 - @29,68 | Mirando 20° abajo, la fase lenta sube a 5,8 °/s.
@@ -407,7 +407,7 @@ El protocolo pide suspender los ansiolíticos 48 horas antes del examen. ¿Qué 
 | Calórica bitermal | respuestas simétricas |
 :::
 
-:::imagen ilustraciones/cap25-caso4-farmaco.svg ancho=100% VNG de Álvaro: mirada excéntrica, seguimiento y sacadas. Compara los dos lados: el nistagmo evocado por la mirada es simétrico, y el seguimiento y las sacadas están casi normales. Trazas de un modelo con el integrador de la mirada a medias; las cifras no son normativas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap25-caso4-farmaco.svg ancho=100% VNG de Álvaro: mirada excéntrica, seguimiento y sacadas. Compara los dos lados: el nistagmo evocado por la mirada es simétrico, y el seguimiento y las sacadas están casi normales. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @82,15 | Mirando a la derecha, el ojo se va hacia el centro a **3 a 5 °/s** y vuelve de un salto. A la izquierda es igual: **simétrico**.
 - @20,31 | Con luz (gris ancho) sigue.
 - @29,67 | El seguimiento es casi normal: ganancia de 0,89.

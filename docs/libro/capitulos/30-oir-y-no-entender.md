@@ -40,7 +40,7 @@ Los criterios de diagnóstico varían entre guías. La ASHA (2005) y la AAA (201
 
 Esa precaución no es timidez. Una prueba central no mide solo una vía: mide una persona escuchando, y esa persona pone en juego varias cosas a la vez.
 
-:::imagen ilustraciones/cap30-que-mide-el-puntaje.svg ancho=96% El puntaje de una prueba central suma cinco cosas, y solo una es la que se quiere medir. Un puntaje bajo no dice cuál falló: las otras cuatro son confusores que hay que cerrar o describir. Esquema, no datos.
+:::imagen ilustraciones/cap30-que-mide-el-puntaje.svg ancho=96% El puntaje de una prueba central suma cinco cosas, y solo una es la que se quiere medir. Un puntaje bajo no dice cuál falló: las otras cuatro son confusores que hay que cerrar o describir.
 :::
 
 ### Manejo y entrenamiento auditivo

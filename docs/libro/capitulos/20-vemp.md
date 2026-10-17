@@ -67,7 +67,7 @@ Las dos son un vértigo agudo y prolongado. Se separan por **qué órgano toca e
 
 También hay que decir lo contrario: en 47 pacientes con neurolabirintitis aguda, el cVEMP faltó solo en un tercio (34 %), sin relación con la calórica, la audiometría ni el ABR (Murofushi y cols., 1996). El VEMP **no reemplaza** a la calórica ni al vHIT (→ H16 y H17): agrega lo que ellos no miran, el sáculo.
 
-:::imagen ilustraciones/cap20-ramas.svg ancho=92% El mismo montaje con la lesión en cada nivel del oído derecho: el OI es el mismo, normal, en las tres filas. Mira qué VEMP cae en cada fila: el cVEMP sigue a la rama inferior y el oVEMP a la superior, y cuando caen los dos el daño es del laberinto o del nervio entero. Son registros simulados para mostrar el patrón, no un paciente.
+:::imagen ilustraciones/cap20-ramas.svg ancho=92% El mismo montaje con la lesión en cada nivel del oído derecho: el OI es el mismo, normal, en las tres filas. Mira qué VEMP cae en cada fila: el cVEMP sigue a la rama inferior y el oVEMP a la superior, y cuando caen los dos el daño es del laberinto o del nervio entero.
 - @101,19 | **Rama superior.** El cVEMP del OD (282 µV, 5,69 corregida) es igual al del OI; el oVEMP del OD casi no sale del ruido (5 µV, 0,12 contra 0,52 del OI). Es la huella de la neuritis superior, sin hipoacusia.
 - @101,48 | **Rama inferior.** Al revés: el cVEMP del OD cae (17 µV, 0,33) y el oVEMP se conserva (20 µV, 0,48). Es el patrón sacular del hidrops, o de una neuritis inferior.
 - @101,78 | **Laberinto o nervio.** Caen los dos (0,41 y 0,16). En la laberintitis la hipoacusia sensorioneural lo separa de las filas de arriba.
@@ -293,7 +293,7 @@ Su médico pidió un VEMP por la inestabilidad, sin audiometría reciente. ¿Qu�
 - Los dos VEMP aéreos caídos y simétricos, con un gap de 50 dB en los dos oídos: no hay forma de saber, con esta vía, si el vestíbulo está sano.
 :::
 
-:::imagen ilustraciones/cap20-oseo.svg ancho=92% Los mismos oídos de la paciente por vía aérea (arriba) y por vía ósea, con el vibrador en la mastoides (abajo). Por aire los VEMP parecen ausentes porque el oído medio no transmite; por hueso aparecen: el vestíbulo estaba sano. Las escalas de intensidad (100 dB SPL y 70 dB FL) son las del simulador, no valores de la literatura.
+:::imagen ilustraciones/cap20-oseo.svg ancho=92% Los mismos oídos de la paciente por vía aérea (arriba) y por vía ósea, con el vibrador en la mastoides (abajo). Por aire los VEMP parecen ausentes porque el oído medio no transmite; por hueso aparecen: el vestíbulo estaba sano.
 - @101,26 | **Vía aérea.** Los cuatro VEMP están casi planos: 37 y 35 µV en el cuello, 6 y 5 µV bajo el ojo (corregidas, 0,73 y 0,68; 0,14 y 0,12).
 - @101,68 | **Vía ósea.** Los cuatro aparecen con tamaño normal: 342 y 344 µV (6,82 y 6,86) en el cuello, 25 y 26 µV (0,60 y 0,60) bajo el ojo. El vestíbulo de los dos oídos responde.
 :::

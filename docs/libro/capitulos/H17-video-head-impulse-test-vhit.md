@@ -56,7 +56,7 @@ Imagina un oído izquierdo sin función. Con la cabeza quieta, el núcleo vestib
 
 Girar hacia el lado sano es distinto. El canal derecho se excita y entrega la parte principal de la señal, con la ayuda de la desinhibición que le llega desde el núcleo opuesto. A esa señal le falta esa ayuda, así que la ganancia puede bajar un poco, pero no se hunde (Halmagyi y cols., 2017).
 
-:::imagen ilustraciones/h17-ewald.svg ancho=100% Por qué el impulso hacia el lado enfermo muestra el déficit. A: cada canal sube su descarga cuando se excita y la baja cuando se inhibe, pero no puede bajar de cero (el canal que se inhibe llega al silencio con un giro rápido); la excitación da más respuesta que la inhibición (Ewald II). B: con el oído izquierdo dañado, hacia el lado sano el ojo casi alcanza al estímulo; hacia el lado dañado, solo hasta que el oído sano queda en silencio, y después ya no crece. Esquema sin unidades, no datos de pacientes.
+:::imagen ilustraciones/h17-ewald.svg ancho=100% Por qué el impulso hacia el lado enfermo muestra el déficit. A: cada canal sube su descarga cuando se excita y la baja cuando se inhibe, pero no puede bajar de cero (el canal que se inhibe llega al silencio con un giro rápido); la excitación da más respuesta que la inhibición (Ewald II). B: con el oído izquierdo dañado, hacia el lado sano el ojo casi alcanza al estímulo; hacia el lado dañado, solo hasta que el oído sano queda en silencio, y después ya no crece.
 :::
 
 La consecuencia práctica es la regla que gobierna todo el examen: **el impulso tiene que ser rápido**. Con impulsos de baja aceleración el oído sano puede dirigir el reflejo hacia los dos lados y el déficit se esconde; con aceleraciones altas, el oído sano ya no alcanza y el déficit aparece (Weber y cols., 2008; Halmagyi y cols., 2017). En pacientes después de una neuritis o una pérdida unilateral, la ganancia hacia el lado afectado bajó de 0,59 a 0,29 y de 0,47 a 0,13 (según el grupo) al subir la aceleración de 750 a 6.000 °/s² (Weber y cols., 2008).
@@ -70,7 +70,7 @@ Si el ojo no acompaña a la cabeza, la mirada se sale del blanco y el cerebro la
 - **Manifiesta** (*overt*): ocurre **después** de que la cabeza se detuvo. Es la que ve el clínico al lado de la cama.
 - **Encubierta** (*covert*): ocurre **durante** el giro, cuando la cabeza todavía se mueve. Es tan breve que el ojo humano no la ve y solo un registro la muestra (Weber y cols., 2008).
 
-:::imagen ilustraciones/h17-trazas.svg ancho=100% Velocidad de la cabeza y del ojo (invertida) en un impulso. A: con un reflejo normal el ojo copia a la cabeza. B: con ganancia baja, la sacada cae mientras la cabeza todavía gira (encubierta). C: la misma ganancia con la sacada al final, cuando la cabeza ya se detuvo (manifiesta). Lo que clasifica la sacada no es su tamaño sino cuándo cae respecto de la curva de la cabeza. Esquema con cifras de ejemplo, no datos de pacientes.
+:::imagen ilustraciones/h17-trazas.svg ancho=100% Velocidad de la cabeza y del ojo (invertida) en un impulso. A: con un reflejo normal el ojo copia a la cabeza. B: con ganancia baja, la sacada cae mientras la cabeza todavía gira (encubierta). C: la misma ganancia con la sacada al final, cuando la cabeza ya se detuvo (manifiesta). Lo que clasifica la sacada no es su tamaño sino cuándo cae respecto de la curva de la cabeza.
 :::
 
 Lo que importa de las encubiertas es lo que **esconden**. Una sacada encubierta devuelve el ojo al blanco justo antes de que termine el giro, así que al lado de la cama no se ve ninguna corrección y, si el cálculo de la ganancia incluye la sacada como si fuera reflejo, la ganancia sale **más alta de lo que es**. En un examen de cabecera, las sacadas encubiertas pueden pasar inadvertidas; en pacientes con pérdida unilateral aparecen hasta en cerca del 70 % de los impulsos rápidos, y por eso se recomienda repetir los impulsos (Weber y cols., 2008). En una serie de 117 pacientes con trastornos vestibulares periféricos, el 13,7 % de los que tenían un VOR anormal mostraba solo sacadas encubiertas, algo que únicamente se ve con registro (Blödow y cols., 2013).
@@ -104,7 +104,7 @@ Y descarta antes de empezar las **contraindicaciones**: ceguera, fractura de nar
 
 Los equipos de vHIT presentan el resultado de una manera parecida: un panel por lado con los impulsos superpuestos, la velocidad de la cabeza y la del ojo (invertida, para que las dos curvas se superpongan cuando el reflejo compensa), las sacadas marcadas sobre la curva del ojo y, debajo, la ganancia de cada lado. La figura muestra esa lectura en un paciente simulado con el canal lateral derecho sano y el izquierdo con déficit.
 
-:::imagen ilustraciones/h17-impulsos.svg ancho=100% Impulsos del canal lateral de un paciente simulado: lado derecho sano, izquierdo con déficit. Hacia la derecha las dos curvas se superponen; hacia la izquierda el ojo se queda corto y las sacadas corrigen lo que el reflejo no alcanzó. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h17-impulsos.svg ancho=100% Impulsos del canal lateral de un paciente: lado derecho sano, izquierdo con déficit. Hacia la derecha las dos curvas se superponen; hacia la izquierda el ojo se queda corto y las sacadas corrigen lo que el reflejo no alcanzó. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @17,38 | **La cabeza (azul) y el ojo invertido (naranja)** se superponen en los impulsos hacia la derecha: el reflejo sigue a la cabeza.
 - @4,87 | **Ganancia media ± desviación** del lado, en verde si es normal y en rojo si no lo es. Los impulsos rechazados no entran en la media.
 - @72,31 | **Sacadas encubiertas** (triángulos violetas): caen mientras la cabeza todavía se mueve.
@@ -139,7 +139,7 @@ Los equipos de vHIT presentan el resultado de una manera parecida: un panel por 
 6. **Registra al menos 20 impulsos por oído.** Pocos impulsos dejan una media poco confiable, y un registro anormal debe repetirse para confirmarlo (Zamaro y cols., 2020). <!-- verificar: número mínimo de impulsos por lado en la literatura; el protocolo pide 20 por oído -->
 7. Al terminar, el programa genera el informe de forma automática. Puedes cerrarlo con la «x» roja para volver al menú, y recuperarlo después con *Generar informe* en la vista previa.
 
-:::imagen ilustraciones/h17-rechazos.svg ancho=100% Dos impulsos rechazados de un paciente simulado, sobre los aceptados del mismo lado (en gris): uno por un parpadeo dentro de la ventana y otro porque la cabeza no llegó a la velocidad mínima. Antes de leer la ganancia, revisa qué impulsos sacó el equipo y por qué. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h17-rechazos.svg ancho=100% Dos impulsos rechazados de un paciente, sobre los aceptados del mismo lado (en gris): uno por un parpadeo dentro de la ventana y otro porque la cabeza no llegó a la velocidad mínima. Antes de leer la ganancia, revisa qué impulsos sacó el equipo y por qué. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @37,16 | **La ventana del impulso**: el parpadeo cayó dentro de ella.
 - @20,76 | **Cuadros con el ojo cerrado**: el párpado tapó la pupila y la velocidad del ojo ya no es confiable.
 - @78,52 | **Velocidad mínima**: un impulso que no la alcanza no es un estímulo suficiente para el canal.
@@ -160,7 +160,7 @@ El procedimiento es el mismo, pero se cambia la orientación de la cabeza y de l
 
 La razón del giro de 45° es que el video solo registra la posición horizontal y vertical de la pupila, no la torsión del ojo. Los canales verticales mueven al ojo en torsión y en vertical, y la torsión solo se evita si la **mirada** está en el plano del canal. Si la mirada se aleja del plano, la ganancia vertical medida baja y aparece un falso retraso en la respuesta (McGarvie y cols., 2015b; Halmagyi y cols., 2017). Con el vHIT se detectan déficits de los canales verticales tan bien como con bobinas esclerales (MacDougall y cols., 2013).
 
-:::imagen ilustraciones/h17-ralp.svg ancho=100% Paciente simulado con una neuritis de la rama superior del nervio vestibular derecho: bajan el lateral y el anterior derechos, y el posterior derecho queda sano. Es el patrón por canal, y no el lateral solo, el que dice qué rama del nervio se afectó. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h17-ralp.svg ancho=100% Paciente con una neuritis de la rama superior del nervio vestibular derecho: bajan el lateral y el anterior derechos, y el posterior derecho queda sano. Es el patrón por canal, y no el lateral solo, el que dice qué rama del nervio se afectó. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @34,31 | **Cada canal con su ganancia**, en rojo los que están bajo el corte.
 - @13,63 | **El plano RALP** dibujado sobre la cabeza: une el anterior derecho con el posterior izquierdo.
 - @40,15 | **La posición de la cabeza** que alinea la mirada con el plano: 45° a la izquierda para el RALP.
@@ -188,14 +188,14 @@ La **ganancia** es el cociente entre lo que giró el ojo y lo que giró la cabez
 - **Ganancia instantánea**: el cociente de las velocidades en un solo instante, por ejemplo **a los 60 ms** del inicio del impulso. Es la que se pide en el informe de este protocolo.
 - **Ganancia de regresión**: la pendiente de la recta que mejor une la velocidad del ojo con la de la cabeza, en la parte de subida del impulso. En 60 sujetos con cuatro registros cada uno resultó más reproducible que la instantánea, y entre las instantáneas no hubo diferencia significativa entre 60 y 80 ms (Jacobsen y cols., 2021).
 
-:::imagen ilustraciones/h17-ganancia.svg ancho=100% Una misma traza leída de tres maneras. A: el cociente de las áreas hasta que la cabeza vuelve a cero. B: la velocidad del ojo sobre la de la cabeza en un solo instante, aquí a los 60 ms. C: la pendiente de la recta que une ojo y cabeza en la subida. Un reflejo de ganancia 0,6 con una latencia de 8 ms da 0,59, 0,52 y 0,61 según el método. Esquema con cifras de ejemplo.
+:::imagen ilustraciones/h17-ganancia.svg ancho=100% Una misma traza leída de tres maneras. A: el cociente de las áreas hasta que la cabeza vuelve a cero. B: la velocidad del ojo sobre la de la cabeza en un solo instante, aquí a los 60 ms. C: la pendiente de la recta que une ojo y cabeza en la subida. Un reflejo de ganancia 0,6 con una latencia de 8 ms da 0,59, 0,52 y 0,61 según el método.
 :::
 
 Sobre la misma traza los métodos pueden dar entre 0,73 y 1,10 cuando no hay artefactos, y entre 0,39 y 1,13 si un artefacto deforma la curva (Zamaro y cols., 2020). Por eso conviene que los valores de referencia sean **del equipo y del método**. <!-- verificar: diferencias sistemáticas entre equipos en sanos (comparación entre fabricantes) -->
 
 La traza de la figura enseña una de las razones: con una latencia de 8 ms, la ganancia a 60 ms sale más baja que la de área o la de regresión, porque el ojo todavía va subiendo. Con sacadas encubiertas la diferencia crece: si el cálculo no las retira, la sacada infla la ganancia de área, y el cociente de picos divide máximos que no ocurren al mismo tiempo (figura siguiente).
 
-:::imagen ilustraciones/h17-ganancias.svg ancho=100% Los mismos impulsos del paciente simulado de "Conoce tu equipo", con tres maneras de calcular la ganancia y sin retirar las sacadas encubiertas. Fíjate en el lado izquierdo: según el método, queda bajo o sobre el corte de 0,80. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h17-ganancias.svg ancho=100% Los mismos impulsos del paciente de "Conoce tu equipo", con tres maneras de calcular la ganancia y sin retirar las sacadas encubiertas. Fíjate en el lado izquierdo: según el método, queda bajo o sobre el corte de 0,80. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
 - @22,57 | **El lado izquierdo**: cada impulso con una ganancia distinta, según cuándo cayó su sacada.
 - @30,46 | **Línea de corte** de 0,80.
 - @11,40 | **Un impulso rechazado** por lento: no entra en la media.
@@ -206,7 +206,7 @@ La traza de la figura enseña una de las razones: con una latencia de 8 ms, la g
 
 La velocidad de muestreo es otra razón. A los 30 fotogramas por segundo de una cámara común hay solo un cuadro cada 33 ms: el instante de los 60 ms cae entre dos cuadros, y una sacada encubierta, que es breve, puede quedar entera entre ellos. Por eso los equipos clínicos registran el ojo con cámaras mucho más rápidas.
 
-:::imagen ilustraciones/h17-muestreo.svg ancho=100% El mismo impulso de un paciente simulado, con ganancia 0,5 y una sacada encubierta, registrado a 200 muestras por segundo y a 30. Con pocos cuadros la sacada desaparece y un déficit claro pasa por un reflejo apenas bajo. Cifras del modelo, no normativas. Imagen propia hecha con simHit (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h17-muestreo.svg ancho=100% El mismo impulso de un paciente, con ganancia 0,5 y una sacada encubierta, registrado a 200 muestras por segundo y a 30. Con pocos cuadros la sacada desaparece y un déficit claro pasa por un reflejo apenas bajo. Imagen propia hecha con simHit (→ Simuladores, en las preliminares).
 - @20,35 | **La sacada encubierta** lleva al ojo por encima de la cabeza en pleno impulso.
 - @71,44 | **A 30 cuadros por segundo** la sacada cae entre dos cuadros: el ojo parece solo un reflejo algo bajo.
 :::

@@ -61,7 +61,7 @@ def mctsib(d):
     W, H = 760, 420
     g = Dib(W, H)
     g.t(14, 22, 'Balanceo adelante-atrás en las cuatro condiciones del mCTSIB', 12.5, TINTA, 'start', 700)
-    g.t(14, 38, 'Misma escala en todos los cuadros (20 s cada uno). Arriba, un laberinto sano; abajo, sin función vestibular en los dos oídos. Paciente simulado, no real.', 8.5, TENUE, 'start')
+    g.t(14, 38, 'Misma escala en todos los cuadros (20 s cada uno). Arriba, un laberinto sano; abajo, sin función vestibular en los dos oídos.', 8.5, TENUE, 'start')
     conds = [('firme_abiertos', 'Firme, ojos abiertos'), ('firme_cerrados', 'Firme, ojos cerrados'),
              ('espuma_abiertos', 'Espuma, ojos abiertos'), ('espuma_cerrados', 'Espuma, ojos cerrados')]
     filas = [('sano', 'Vestíbulo sano', AZUL), ('bilateral', 'Sin vestíbulo (bilateral)', ROJO)]
@@ -99,7 +99,7 @@ def compensacion(d):
     W, H = 760, 310
     g = Dib(W, H)
     g.t(14, 22, 'Compensación después de perder un laberinto: lo estático y lo dinámico', 12.5, TINTA, 'start', 700)
-    g.t(14, 38, 'Paciente simulado; los tiempos reales varían de un paciente a otro y los ejercicios los adelantan. Sin cifras a propósito.', 8.5, TENUE, 'start')
+    g.t(14, 38, 'Los tiempos varían de un paciente a otro y los ejercicios los adelantan.', 8.5, TENUE, 'start')
     x0, y0, w, h = 70, 60, 520, 220
     g.rect(x0, y0, w, h, '#faf9f6')
     marcas = [(1, '1 día'), (7, '1 semana'), (30, '1 mes'), (90, '3 meses')]

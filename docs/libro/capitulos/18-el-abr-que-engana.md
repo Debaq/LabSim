@@ -42,7 +42,7 @@ Al dividir por N para obtener el promedio, la respuesta conserva su tamaño y el
 - Para dejar el ruido residual a **la mitad** hay que promediar **cuatro veces más** barridos. De 250 a 1.000 el ruido baja a la mitad; de 1.000 a 4.000, otra vez a la mitad.
 - Cada mejora cuesta más que la anterior. A 21,1 estímulos por segundo, 2.000 barridos toman unos 95 segundos y 4.000 toman unos 190, sin contar los barridos rechazados, que no cuentan y alargan el examen.
 
-:::imagen ilustraciones/cap18-raiz.svg ancho=80% Cuánto cae el ruido residual al aumentar los barridos, con la regla de 1/√N desde 250 barridos. Mira cómo se aplana la curva: cada mitad de ruido que ganas cuesta cuatro veces más barridos. Es la curva teórica, no datos de un paciente.
+:::imagen ilustraciones/cap18-raiz.svg ancho=80% Cuánto cae el ruido residual al aumentar los barridos, con la regla de 1/√N desde 250 barridos. Mira cómo se aplana la curva: cada mitad de ruido que ganas cuesta cuatro veces más barridos.
 :::
 
 El argumento vale mientras el ruido sea **aleatorio y sin relación con el estímulo**. Lo que **sí** guarda relación con cada estímulo (un artefacto eléctrico del transductor, un músculo que se contrae reflejamente con cada click) se suma como la respuesta y no se promedia hacia abajo. Ese es el hilo del resto del capítulo: el promedio limpia el ruido, pero no distingue una respuesta auditiva de cualquier otra cosa que se repita con cada estímulo.
@@ -152,7 +152,7 @@ Antes de repetir nada, ¿qué dos números del equipo te dirían si el registro 
 - @OD 10 V | A 10 dB la V sigue ahí, a unos 8 ms, en las dos réplicas: el **umbral del paciente es 10 dB nHL**, tal como dice su audiograma.
 :::
 
-:::imagen ilustraciones/cap18-promedio.svg ancho=92% El mismo oído a 20 dB nHL, de 250 a 4.000 barridos, con la mitad A del promedio en azul y la mitad B en rojo. Mira en qué fila empiezan a coincidir las dos mitades: recién ahí se puede decir que hay respuesta, y antes tampoco se podía decir que no la había. Los valores de FSP y de ruido residual son del simulador y solo ilustran.
+:::imagen ilustraciones/cap18-promedio.svg ancho=92% El mismo oído a 20 dB nHL, de 250 a 4.000 barridos, con la mitad A del promedio en azul y la mitad B en rojo. Mira en qué fila empiezan a coincidir las dos mitades: recién ahí se puede decir que hay respuesta, y antes tampoco se podía decir que no la había.
 - @92,13 | **250 barridos:** FSP cerca de 1 y las dos mitades no se parecen. Los picos de ruido son del tamaño de lo que se busca: aquí no se puede decir ni que hay ni que no hay respuesta.
 - @92,40 | **1.000 barridos:** el ruido residual ya es la mitad, pero las mitades todavía no se pegan.
 - @92,77 | **4.000 barridos:** el FSP pasa el criterio. La onda de 8 ms está en las dos mitades.

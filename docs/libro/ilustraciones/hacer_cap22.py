@@ -108,7 +108,7 @@ def pct(w, h, x, y):
 def trazas_posterior():
     W = 760
     d = Dibujo(W, 330)
-    d.t(14, 20, 'Caso 22.1 · Dix-Hallpike, vistos en los ojos del paciente (esquema)', 12.5, TINTA, 'start', 700)
+    d.t(14, 20, 'Caso 22.1 · Dix-Hallpike, vistos en los ojos del paciente', 12.5, TINTA, 'start', 700)
     d.t(14, 35, 'Fase rápida: arriba = hacia arriba; torsión arriba = polo superior del ojo hacia el oído derecho. Mismo tiempo en los tres paneles.', 8.5, TENUE, 'start')
     vert = lambda fn: ('vertical', fn, ROJO, 'arriba', 'abajo')
     tors = lambda fn: ('torsión', fn, VERDE, 'hacia OD', 'hacia OI')
@@ -192,20 +192,20 @@ if __name__ == '__main__':
     print('posterior', W, H, [tuple(round(v) for v in p) for p in (p1, p2, p3)])
     geo_der = lambda t: campana(t, 4, 22, 0.36)
     geo_izq = lambda t: -campana(t, 4, 24, 0.8)
-    r = roll('cap22-trazas-geotropico.svg', 'Caso 22.2 · Giro supino, lateral geotrópico (esquema)',
+    r = roll('cap22-trazas-geotropico.svg', 'Caso 22.2 · Giro supino, lateral geotrópico',
              'Trazas en el marco del paciente. Geotrópico: el nistagmo bate hacia el oído de abajo, a los dos lados.',
              geo_izq, geo_der, ('Bate hacia el suelo, más débil', 'Bate hacia el suelo, más fuerte'), False)
     print('geotropico', [tuple(round(v) for v in p) for p in r[2:]])
     ap_der = lambda t: -meseta(t, 0, 30, 0.36, 0.25)
     ap_izq = lambda t: meseta(t, 0, 30, 0.8, 0.25)
-    r = roll('cap22-trazas-apogeotropico.svg', 'Caso 22.3 · Giro supino, lateral apogeotrópico (esquema)',
+    r = roll('cap22-trazas-apogeotropico.svg', 'Caso 22.3 · Giro supino, lateral apogeotrópico',
              'Trazas en el marco del paciente. Apogeotrópico: el nistagmo bate hacia el oído de arriba, a los dos lados.',
              ap_izq, ap_der, ('Bate hacia el techo, más débil', 'Bate hacia el techo, más fuerte'), True)
     print('apogeotropico', [tuple(round(v) for v in p) for p in r[2:]])
     # central
     W, H = 760, 215
     d = Dibujo(W, H)
-    d.t(14, 20, 'Caso 22.4 · Cabeza colgando (esquema): lo que NO encaja en un canal', 12.5, TINTA, 'start', 700)
+    d.t(14, 20, 'Caso 22.4 · Cabeza colgando: lo que NO encaja en un canal', 12.5, TINTA, 'start', 700)
     d.t(14, 35, 'Fase rápida hacia abajo, vertical puro, sin latencia, sin torsión. Mismo tiempo en los tres paneles.', 8.5, TENUE, 'start')
     fila = lambda fn: ('vertical', fn, ROJO, 'arriba', 'abajo')
     cen = lambda t: -meseta(t, 0, 60, 0.65, 0.0)

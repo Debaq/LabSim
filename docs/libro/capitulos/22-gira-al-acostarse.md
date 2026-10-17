@@ -73,7 +73,7 @@ Ante un "me mareo al moverme", la entrevista decide si vale la pena mirar los oj
 3. **¿Hay algo que no encaje?** Síntomas auditivos nuevos, cefalea, visión doble, dificultad para hablar, inestabilidad al caminar, un golpe en la cabeza reciente. Cualquiera de estos cambia la pregunta.
 4. **¿Se ve en los ojos?** Sin nistagmo, el vértigo solo no basta. Un Dix-Hallpike negativo no descarta el VPPB: la guía cita una sensibilidad de 82 % y una especificidad de 71 % entre especialistas, y sugiere repetirlo en otra visita antes de darlo por negativo (Bhattacharyya y cols., 2017).
 
-:::imagen ilustraciones/cap22-decision.svg Del hallazgo a la maniobra, o a la derivación. Recorre las preguntas en orden: cualquier dato que no encaje te saca del camino de la maniobra y te lleva a derivar. Esquema propio; las maniobras se enseñan en H18.
+:::imagen ilustraciones/cap22-decision.svg Del hallazgo a la maniobra, o a la derivación. Recorre las preguntas en orden: cualquier dato que no encaje te saca del camino de la maniobra y te lleva a derivar. Las maniobras se enseñan en H18.
 :::
 
 ### Lo que más se equivoca
@@ -117,7 +117,7 @@ Plantea al menos tres causas posibles de un vértigo que aparece al girar en la 
 | Giro supino | sin nistagmo |
 :::
 
-:::imagen ilustraciones/cap22-trazas-posterior.svg Trazas esquemáticas del Dix-Hallpike de Luisa. Fíjate en la latencia, en el crescendo-decrescendo y en la inversión al sentarse: las tres señas del canal posterior. Esquema propio con los criterios de la guía, no datos medidos.
+:::imagen ilustraciones/cap22-trazas-posterior.svg Trazas esquemáticas del Dix-Hallpike de Luisa. Fíjate en la latencia, en el crescendo-decrescendo y en la inversión al sentarse: las tres señas del canal posterior.
 - @7,36 | El vértigo **empieza después de una latencia**, no al llegar a la postura.
 - @15,30 | **Crescendo-decrescendo**: sube a un máximo y baja solo, en menos de un minuto.
 - @47,43 | Al sentarse, la traza **se invierte** y es más débil.
@@ -162,7 +162,7 @@ Si el Dix-Hallpike del lado ya tratado ya no da el nistagmo de antes, ¿qué pru
 | Giro supino, cabeza a la **derecha** | nistagmo horizontal hacia la **derecha** (también hacia el suelo), **más débil** |
 :::
 
-:::imagen ilustraciones/cap22-trazas-geotropico.svg Trazas esquemáticas del giro supino de Rafael. El nistagmo bate hacia el suelo a los dos lados; el lado afectado es el que da el más fuerte. Esquema propio con los criterios de la guía, no datos medidos.
+:::imagen ilustraciones/cap22-trazas-geotropico.svg Trazas esquemáticas del giro supino de Rafael. El nistagmo bate hacia el suelo a los dos lados; el lado afectado es el que da el más fuerte.
 - @21,44 | A la derecha, el nistagmo bate hacia la **derecha**, o sea hacia el suelo, pero **débil**.
 - @66,68 | A la izquierda bate hacia la **izquierda**, también hacia el suelo, y **más fuerte**: ese es el lado afectado.
 :::
@@ -203,12 +203,12 @@ Con estos antecedentes, ¿qué prueba harías? ¿Y qué verías si las partícul
 | Giro supino, cabeza a la **izquierda** | nistagmo horizontal hacia la **derecha** (hacia el techo), **intenso**, sin latencia; dura más de un minuto |
 :::
 
-:::imagen ilustraciones/cap22-apogeotropico-sim.png Giro supino de una paciente simulada con cupulolitiasis del canal lateral derecho, vista desde arriba. En cada postura, a la derecha, ese canal en su plano, con las partículas pegadas a la cúpula y la flecha de hacia dónde queda abajo. Mira hacia dónde se dobla la cúpula cargada en cada postura: eso explica que el nistagmo bata siempre hacia el techo. Constantes del modelo, no normativas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap22-apogeotropico-sim.png Giro supino de una paciente con cupulolitiasis del canal lateral derecho, vista desde arriba. En cada postura, a la derecha, ese canal en su plano, con las partículas pegadas a la cúpula y la flecha de hacia dónde queda abajo. Mira hacia dónde se dobla la cúpula cargada en cada postura: eso explica que el nistagmo bata siempre hacia el techo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @36,11 | Las partículas (amarillas) están **pegadas a la cúpula**: no caen, la pesan.
 - @80,70 | Al girar la cabeza al otro lado, **abajo** queda del lado contrario: la cúpula cargada se dobla al revés y el nistagmo cambia de sentido, siempre hacia el techo.
 :::
 
-:::imagen ilustraciones/cap22-trazas-apogeotropico.svg Trazas esquemáticas del giro supino de Rosa. Aquí bate hacia el techo y la regla se invierte: el lado más fuerte es el sano. Esquema propio con los criterios de la guía, no datos medidos.
+:::imagen ilustraciones/cap22-trazas-apogeotropico.svg Trazas esquemáticas del giro supino de Rosa. Aquí bate hacia el techo y la regla se invierte: el lado más fuerte es el sano.
 - @16,58 | A la derecha el nistagmo bate hacia la **izquierda**: hacia el techo, y **débil**.
 - @59,36 | A la izquierda bate hacia la **derecha**, otra vez hacia el techo, y **más fuerte**. El lado de mayor nistagmo es el **sano**; el afectado es el contrario: el **derecho**.
 - @79,74 | **Sigue** al terminar la ventana: no se apaga solo.
@@ -251,7 +251,7 @@ Hay tres datos en su relato que **no** son de un VPPB. ¿Cuáles son? ¿Qué sig
 | Examen neurológico mínimo | marcha de base ancha, torpeza al llevar el dedo a la nariz |
 :::
 
-:::imagen ilustraciones/cap22-trazas-central.svg Trazas esquemáticas del Dix-Hallpike de Felipe. Hacia abajo, sin latencia, sin fin y sin cansarse: nada de eso lo da un canal. Esquema propio con los criterios de la guía, no datos medidos.
+:::imagen ilustraciones/cap22-trazas-central.svg Trazas esquemáticas del Dix-Hallpike de Felipe. Hacia abajo, sin latencia, sin fin y sin cansarse: nada de eso lo da un canal.
 - @8,70 | Hacia **abajo**, sin torsión y **sin latencia**: ningún canal da eso.
 - @26,70 | **Sigue** mientras dure la postura.
 - @75,70 | Repetido, **no se cansa**.

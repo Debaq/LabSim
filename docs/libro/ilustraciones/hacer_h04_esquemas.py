@@ -50,8 +50,7 @@ def copa(c, xp, y, sg, activa):
 def cruce():
     c = Lienzo(840, 418)
     defs = (punta('g-od', OD, 11) + punta('f-od', OD, 7) + punta('f-oi', OI, 7) + punta('g-oi', OI, 11))
-    c.t(14, 20, 'Cuánto llega a la otra cóclea según el transductor (corte frontal, de frente al paciente; '
-        'esquema)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Cuánto llega a la otra cóclea según el transductor (corte frontal, de frente al paciente)', 10.5, TINTA, 'start', 700)
     cy, s = 214, 0.82
     paneles = ((145, 'A · Fono supraaural en el OD', 'supra'),
                (425, 'B · Vibrador en la mastoides derecha', 'vibra'),
@@ -148,7 +147,7 @@ def conducto(c, x0, y0, tapado):
 def oclusion():
     c = Lienzo(860, 292)
     defs = punta('p-c', COCLEAR, 6) + punta('p-cg', COCLEAR, 12)
-    c.t(14, 20, 'El efecto de oclusión (conducto en corte, de afuera hacia el tímpano; esquema)',
+    c.t(14, 20, 'El efecto de oclusión (conducto en corte, de afuera hacia el tímpano)',
         10.5, TINTA, 'start', 700)
     # A: abierto
     c.t(150, 52, 'A · Conducto abierto', 9.5, TINTA, 'middle', 700)

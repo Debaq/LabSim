@@ -60,8 +60,7 @@ def tonotopia_habla():
         c.t((xa + xz) / 2, y + 3.6, texto, 8.6, col, 'middle', 700)
     c.t(x1, ym - 92 + 8, 'vocales y voz: graves y medios', 7.6, GRAVE, 'end', 700)
     c.t(14, 18, 'Dónde caen los sonidos del habla en la cóclea', 10.5, TINTA, 'start', 700)
-    c.t(14, 35, 'Cóclea desenrollada como en la figura H3.4 (Greenwood, 1990). Bandas de energía principal, '
-        'aproximadas.', 7.5, TENUE, 'start')
+    c.t(14, 35, 'Cóclea desenrollada como en la figura H3.4 (Greenwood, 1990).', 7.5, TENUE, 'start')
     c.guardar('05-tonotopia-habla.svg')
 
 

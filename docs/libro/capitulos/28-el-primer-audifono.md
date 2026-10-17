@@ -78,7 +78,7 @@ Hay dos consecuencias que explican gran parte de lo que se le dice al paciente:
 
 Con dos oídos sanos el cerebro compara lo que llega a cada uno. La cabeza hace **sombra acústica**: un sonido que viene de un lado llega más débil, sobre todo en los agudos, al oído de enfrente, del orden de 10 a 20 dB. <!-- verificar: magnitud de la sombra de la cabeza en agudos (Dillon 2012, cap. sobre efectos binaurales) --> Esa diferencia de nivel y la diferencia de tiempo entre los oídos sirven para **localizar** y para separar la voz que importa del ruido. Con un solo oído que oye, el paciente pierde esa comparación (→ B2). Los sonidos del lado sordo le llegan desde lejos, atenuados por la cabeza; los del lado sano le llegan completos, y el ruido y la voz se mezclan. Lo que hará un CROS no es devolverle la comparación entre oídos, sino **superar la sombra**: llevar al oído que oye lo que pasa en el lado sordo.
 
-:::imagen ilustraciones/cap28-cros.svg ancho=100% A: la cabeza hace sombra, y la voz que llega por el lado sordo le llega débil al oído sano. B: el CROS no devuelve la comparación entre los oídos; lleva al oído que oye lo que capta un micrófono en el lado sordo. Esquema.
+:::imagen ilustraciones/cap28-cros.svg ancho=100% A: la cabeza hace sombra, y la voz que llega por el lado sordo le llega débil al oído sano. B: el CROS no devuelve la comparación entre los oídos; lleva al oído que oye lo que capta un micrófono en el lado sordo.
 :::
 
 ## Patología

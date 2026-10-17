@@ -85,7 +85,7 @@ def rotulo(c, x, y, xa, ya, texto, color=TINTA, anchor='start', peso=600):
 
 def hidrops():
     c = Lienzo(720, 372)
-    c.t(14, 20, 'Corte de una espira de la cóclea (esquema, no a escala)', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Corte de una espira de la cóclea', 10.5, TINTA, 'start', 700)
     cy = 190
     for cx, titulo, h in ((190, 'A · Normal', False), (540, 'B · Hidrops endolinfático', True)):
         c.t(cx, 46, titulo, 9.5, TINTA, 'middle', 700)
@@ -119,7 +119,7 @@ def hidrops():
     c.l(cx + 44, 312, cx + 44, cy + 16, AVISO, 0.8)
     c.l(14, 340, 706, 340, GRILLA, 1)
     c.t(14, 356, 'En el hidrops crece el volumen de endolinfa: la rampa media se agranda a costa de la vestibular.', 7.8, TENUE, 'start')
-    c.t(14, 367, 'Esquema; hallazgo histológico descrito por Hallpike y Cairns (1938).', 7.8, TENUE, 'start')
+    c.t(14, 367, 'Hallazgo histológico descrito por Hallpike y Cairns (1938).', 7.8, TENUE, 'start')
     c.guardar('cap09-hidrops.svg')
 
 

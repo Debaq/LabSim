@@ -203,7 +203,6 @@ def adaptacion():
     c.t(XB(60) + 5, 168, 'fin', 8.5, TINTA, 'start', 700)
     c.t(bx, 199, 'subió 10 dB en el minuto = deterioro 10 dB', 8.5, TINTA, 'start', 700)
 
-    c.t(14, 256, 'Esquema, no datos: la forma de la descarga y los segundos son ilustrativos.', 8, TENUE, 'start')
     defs = punta('p-c', RELOJ) + (f'<marker id="p-c-ini" markerWidth="6" markerHeight="6" refX="3" refY="3.5" '
                                     f'markerUnits="userSpaceOnUse" orient="auto-start-reverse">'
                                     f'<path d="M0,0 L7,3.5 L0,7 z" transform="scale(.8)" fill="{RELOJ}"/></marker>')

@@ -58,7 +58,7 @@ t(px(36), py(3.4), 'Normotermia', 10, TENUE)
 t(px(26), py(8.7), 'El I-V se duplica', 10, ROJO)
 t(px(30.5), py(3.55), 'Sobre 23 °C siguen todas las ondas;', 10, AZUL, 'start')
 t(px(30.5), py(3.2), 'bajo 20 °C no queda ninguna.', 10, AZUL, 'start')
-t(X0, 24, 'Esquema: regla de ~7 % por °C desde 4,1 ms a 36 °C (Markand y cols., 1987)', 10.5, TINTA, 'start', 600)
+t(X0, 24, 'Regla de ~7 % por °C desde 4,1 ms a 36 °C (Markand y cols., 1987)', 10.5, TINTA, 'start', 600)
 
 svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">'
        f'<rect width="{W}" height="{H}" fill="#fff"/>' + ''.join(o) + '</svg>')

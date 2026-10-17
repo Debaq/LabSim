@@ -199,7 +199,7 @@ export function panelesLado(trials, nombre, titulo, conEncubierta = true) {
 // ── figuras
 function impulsos() {
   const tr = pulsosDe(null);
-  const r = panelesLado(tr, 'h17-impulsos.svg', 'Paciente simulado: canal lateral derecho sano, izquierdo con déficit');
+  const r = panelesLado(tr, 'h17-impulsos.svg', 'Canal lateral derecho sano, izquierdo con déficit');
   console.log('  der', r.der, 'izq', r.izq, 'asim', r.asim.toFixed(1));
   return tr;
 }
@@ -261,7 +261,7 @@ function ralp() {
     'posterior izq.': [g(ra, 'izquierda'), 'v'], 'posterior der.': [g(la, 'derecha'), 'v'],
   };
   const c = new Lienzo(720, 330);
-  c.t(14, 18, 'Paciente simulado con una neuritis derecha (rama superior): los seis canales y el plano RALP', 10, TINTA, 'start', 700);
+  c.t(14, 18, 'Neuritis derecha (rama superior): los seis canales y el plano RALP', 10, TINTA, 'start', 700);
   // A: la cabeza vista desde arriba
   c.t(14, 48, 'A · Los seis canales', 9.5, TINTA, 'start', 700);
   const cx = 120, cy = 178;

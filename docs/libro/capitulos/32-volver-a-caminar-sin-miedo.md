@@ -46,7 +46,7 @@ Para estar de pie, el cerebro recibe información de tres fuentes: la **vista**,
 
 Lo importante es que esas fuentes no pesan igual en todo momento. El cerebro **reparte la confianza** según qué tan confiable es cada una en esa situación: en terreno firme y con luz se apoya sobre todo en los pies; si la superficie se vuelve blanda o inestable, o se cierran los ojos, aumenta el peso de las otras (Peterka, 2002). Es lo que la prueba clínica de interacción sensorial aprovecha al quitar los sentidos de a uno (→ H19). Y es también lo que permite **sustituir**: si un sentido falla, los otros suben su peso y el equilibrio se mantiene, con menos margen (Horak, 2006).
 
-:::imagen ilustraciones/cap32-sustitucion.svg ancho=100% La sustitución sensorial: cuando un sentido falla los otros suben su peso, y con dos caídos queda uno solo. Si además se apaga la luz, no queda ninguno: es el baño de noche. Esquema sin cifras.
+:::imagen ilustraciones/cap32-sustitucion.svg ancho=100% La sustitución sensorial: cuando un sentido falla los otros suben su peso, y con dos caídos queda uno solo. Si además se apaga la luz, no queda ninguno: es el baño de noche.
 :::
 
 ### Lo que pierde la edad, sentido por sentido
@@ -151,7 +151,7 @@ Frente a un mayor que cae o se marea, el razonamiento sigue cinco preguntas, en 
 4. **¿Qué se puede mejorar ya?** Un VPPB con una maniobra; una presión o un fármaco con el médico; una catarata con la cirugía; la audición con un audífono.
 5. **¿Qué lo mantiene?** El miedo, la debilidad, la casa.
 
-:::imagen ilustraciones/cap32-riesgo.svg ancho=100% La estratificación del riesgo de caída de las Guías Mundiales de Caídas (2022): con unas pocas preguntas y una medida de la marcha se decide si basta la prevención, si hace falta ejercicio o si corresponde una evaluación multifactorial. Esquema resumen: ante la duda se mira el texto de la guía.
+:::imagen ilustraciones/cap32-riesgo.svg ancho=100% La estratificación del riesgo de caída de las Guías Mundiales de Caídas (2022): con unas pocas preguntas y una medida de la marcha se decide si basta la prevención, si hace falta ejercicio o si corresponde una evaluación multifactorial. Ante la duda se mira el texto de la guía.
 :::
 
 El riesgo **alto** pide una evaluación multifactorial, que la guía recomienda ofrecer a quienes lo tienen, con intervenciones de varios frentes guiadas por esa evaluación (Montero-Odasso y cols., 2022). Es un punto con matices: la actualización de 2026 de la revisión Cochrane de intervenciones multifactoriales encontró que **podrían** reducir la tasa de caídas (razón de tasas 0,76) y las caídas repetidas, pero con evidencia de baja certeza, poco o ningún cambio en el número de personas que se caen, y ningún beneficio adicional frente a dar solo consejos sobre caídas (Swarnalatha y cols., 2026). El esfuerzo vale, pero no promete tanto como el ejercicio.
@@ -320,7 +320,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 | Cuestionarios | ABC **44 %**; DHI **58** (moderado) |
 :::
 
-:::imagen ilustraciones/cap32-mctsib-perfiles.svg ancho=100% El mCTSIB de cuatro perfiles simulados. El tercero es el de Isabel, con neuropatía y pérdida vestibular bilateral: se sostiene mientras ve y se cae al cerrar los ojos sobre espuma, porque la vista es su último apoyo. Trazas de un modelo que no considera la edad, el miedo ni los fármacos; no son datos de una persona ni valores normativos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap32-mctsib-perfiles.svg ancho=100% El mCTSIB de cuatro perfiles. El tercero es el de Isabel, con neuropatía y pérdida vestibular bilateral: se sostiene mientras ve y se cae al cerrar los ojos sobre espuma, porque la vista es su último apoyo. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @85.8,21.6 | **Referencia, sin déficit.** Con ojos cerrados sobre espuma el balanceo es el mayor de todas las condiciones, pero se sostiene.
 - @85.8,42.6 | **Solo neuropatía.** Se sostiene, con más balanceo: con los pies caídos le quedan la vista y el vestíbulo.
 - @63.2,63.6 | **Neuropatía y pérdida vestibular.** Con ojos abiertos sobre espuma se sostiene: **la vista la está sosteniendo**.

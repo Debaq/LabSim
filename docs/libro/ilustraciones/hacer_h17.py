@@ -141,7 +141,6 @@ def trazas():
     c.t(80, 300, 'cabeza', 8.5, TINTA, 'start')
     c.l(140, 297, 164, 297, OJO, 2.4)
     c.t(170, 300, 'ojo (invertido)', 8.5, TINTA, 'start')
-    c.t(700, 300, 'Esquema con cifras de ejemplo, no datos de pacientes.', 7.5, TENUE, 'end')
     c.guardar('h17-trazas.svg')
 
 
@@ -231,7 +230,7 @@ def ewald():
     c.t(e.X(-180), e.Y(0) - 28, 'baja de cero', 7.5, TINTA, 'start')
     c.t(e.px + e.w / 2, 271, 'giro a la derecha  ←   → giro a la izquierda', 8, TENUE)
     c.t(e.px, 296, 'Excitar da más respuesta que inhibir (Ewald II), y a la inhibición le', 8, TINTA, 'start')
-    c.t(e.px, 307, 'queda poco recorrido: el reposo es el piso. Esquema, sin unidades.', 8, TINTA, 'start')
+    c.t(e.px, 307, 'queda poco recorrido: el reposo es el piso.', 8, TINTA, 'start')
 
     # B: ganancia según la velocidad del impulso, con el oído izquierdo dañado
     sat = 70.0                                       # tope del impulso hacia el lado enfermo (eje arbitrario)
@@ -255,7 +254,7 @@ def ewald():
     c.t(e2.X(110) - 4, e2.Y(300) + 9, 'el oído sano', 7.5, TENUE, 'end')
     c.t(e2.X(110) - 4, e2.Y(300) + 18, 'queda en silencio', 7.5, TENUE, 'end')
     c.t(e2.px, 296, 'A baja velocidad el oído sano todavía alcanza a mover el ojo;', 8, TINTA, 'start')
-    c.t(e2.px, 307, 'con un impulso rápido, ya no. Esquema, sin cifras clínicas.', 8, TINTA, 'start')
+    c.t(e2.px, 307, 'con un impulso rápido, ya no.', 8, TINTA, 'start')
     c.guardar('h17-ewald.svg')
 
 

@@ -37,7 +37,7 @@ El canal semicircular lateral es un tubo en anillo, lleno de endolinfa, con una 
 
 Aquí empieza la física. La endolinfa que se calienta se dilata y pesa menos, y **sube**; la que se enfría pesa más y **baja**. Si el canal está en un plano **vertical**, esa diferencia de peso entre el lado del oído y el lado interno del anillo mueve el líquido por todo el canal, como una corriente de convección. La cúpula se dobla (Fitzgerald y Hallpike, 1942; Shepard y Jacobson, 2016).
 
-:::imagen ilustraciones/h16-conveccion.svg Convección de la endolinfa en el canal lateral puesto de pie (visto de costado, con el oído a la derecha de cada dibujo). A: con agua tibia, la endolinfa del lado del oído se calienta y sube hacia la ampolla, que está arriba: el estímulo es excitatorio. B: con agua fría baja, se aleja de la ampolla: inhibe. Esquema, no datos de un paciente.
+:::imagen ilustraciones/h16-conveccion.svg Convección de la endolinfa en el canal lateral puesto de pie (visto de costado, con el oído a la derecha de cada dibujo). A: con agua tibia, la endolinfa del lado del oído se calienta y sube hacia la ampolla, que está arriba: el estímulo es excitatorio. B: con agua fría baja, se aleja de la ampolla: inhibe.
 :::
 
 El sentido de la corriente tiene una consecuencia: en el canal **lateral**, el movimiento de la endolinfa **hacia la ampolla** (ampulípeto) excita, y el movimiento **alejándose de ella** (ampulífugo) inhibe. Por eso el agua **tibia excita** al canal del oído irrigado y la **fría lo inhibe**.
@@ -46,7 +46,7 @@ El sentido de la corriente tiene una consecuencia: en el canal **lateral**, el m
 
 La convección necesita que el canal quede **vertical**. Con la cabeza erguida, el canal lateral está inclinado unos 30° sobre la horizontal, con el extremo de la ampolla hacia adelante y hacia arriba. Para llevarlo a 90° hay que echar la cabeza **60° hacia atrás**, o, lo que es lo mismo, acostar al paciente y **levantarle la cabeza 30°** (Fitzgerald y Hallpike, 1942). Las dos posturas dan el mismo ángulo. En esa posición, el lado del anillo que da al oído y el lado interno quedan a distinta altura, y la diferencia de peso entre la endolinfa tibia y la fría mueve el líquido. Con el canal horizontal los dos lados quedan a la misma altura y esa corriente no se forma.
 
-:::imagen ilustraciones/h16-simulador-calorica.png ancho=70% Un paciente simulado en la posición de la calórica: acostado, con la cabeza 30° arriba, visto del lado del oído derecho, que se irriga. El laberinto derecho está dibujado agrandado junto a la oreja. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h16-simulador-calorica.png ancho=70% Un paciente en la posición de la calórica: acostado, con la cabeza 30° arriba, visto del lado del oído derecho, que se irriga. El laberinto derecho está dibujado agrandado junto a la oreja. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @48,86 | **Canal lateral**, visto de canto: con la cabeza 30° arriba queda vertical, y la endolinfa que se calienta del lado del oído puede subir.
 - @66,11 | **Gafas de VNG**: desde que se abre el agua, se registra sin fijación.
 :::
@@ -172,7 +172,7 @@ Antes de calcular, mira el trazo: borra los parpadeos, los artefactos de la pupi
 
 Para cada irrigación se toma el **pico** de la velocidad de la fase lenta, en grados por segundo, sin signo. Con la bitérmica salen cuatro valores; con la mínima, uno por oído.
 
-:::imagen ilustraciones/h16-mariposa.svg Las cuatro irrigaciones en el tiempo, dibujadas con la velocidad de la fase lenta de cada una (arriba: bate a la derecha; abajo: a la izquierda). A: en un oído sano las cuatro curvas llegan casi a la misma altura y a la misma hora; el agua tibia del derecho coincide con la fría del izquierdo (las dos baten a la derecha). B: con el laberinto izquierdo hipofuncionante, las dos respuestas del izquierdo (azules) son menores; la derecha no cambia. La respuesta no empieza al abrir el agua: el frío o el calor demoran en cruzar el hueso, culminan después de cerrarla y decaen. Curvas de un modelo docente, solo para mostrar la forma: las cifras del eje son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h16-mariposa.svg Las cuatro irrigaciones en el tiempo, dibujadas con la velocidad de la fase lenta de cada una (arriba: bate a la derecha; abajo: a la izquierda). A: en un oído sano las cuatro curvas llegan casi a la misma altura y a la misma hora; el agua tibia del derecho coincide con la fría del izquierdo (las dos baten a la derecha). B: con el laberinto izquierdo hipofuncionante, las dos respuestas del izquierdo (azules) son menores; la derecha no cambia. La respuesta no empieza al abrir el agua: el frío o el calor demoran en cruzar el hueso, culminan después de cerrarla y decaen. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 ### Paresia canalicular y preponderancia direccional

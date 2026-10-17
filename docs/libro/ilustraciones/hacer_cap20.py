@@ -138,7 +138,7 @@ def ramas():
         for j, (clave, lado) in enumerate(columnas):
             regs[(i, j)] = registrar(d, lado, clave, etiqueta=f'ramas{i}')
     s = lienzo(3, columnas, [e[0] for e in escenas], cab, regs,
-               fuera='Registros simulados; las líneas verticales marcan cada 10 ms.')
+               fuera='Las líneas verticales marcan cada 10 ms.')
     return s, regs
 
 
@@ -153,7 +153,7 @@ def oseo():
         regs[(0, j)] = registrar(d, lado, clave, 'aereo', 100, etiqueta='oseo')
         regs[(1, j)] = registrar(d, lado, clave, 'oseo', 70, etiqueta='oseo')
     s = lienzo(2, columnas, filas, cab, regs,
-               fuera='Registros simulados; las escalas de intensidad son las del simulador.')
+               fuera='')
     return s, regs
 
 

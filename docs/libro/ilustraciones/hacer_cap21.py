@@ -107,7 +107,7 @@ def ficha(nombre, d):
         c.t(x0 + (w - 6) / 2, 288, t1, 8.5, TENUE)
         c.t(x0 + (w - 6) / 2, 304, t2, 8.5, col, 'middle', 700)
         x0 += w
-    c.t(262, 328, 'Verde: lo que se espera de una lesión periférica. Rojo: signo central. Cifras de ejemplo.',
+    c.t(262, 328, 'Verde: lo que se espera de una lesión periférica. Rojo: signo central.',
         7.5, TENUE, 'start')
     c.guardar(f'cap21-ficha-{nombre}.svg')
 
@@ -147,7 +147,7 @@ def compensacion():
     ys = [0.12 + 0.76 * (1 - math.exp(-f / 0.22)) for f in fs]
     c.poli([(X(f), Y(y)) for f, y in zip(fs, ys)], OK, 2.4)
     c.t(X(1.0), Y(0.99), 'equilibrio en la vida diaria (compensación central)', 8.5, OK, 'end', 700)
-    c.t(14, 280, 'Esquema cualitativo, sin cifras: importa la forma de las curvas. La compensación central y la '
+    c.t(14, 280, 'La compensación central y la '
         'recuperación del laberinto son procesos distintos.', 7.5, TENUE, 'start')
     c.guardar('cap21-compensacion.svg')
 

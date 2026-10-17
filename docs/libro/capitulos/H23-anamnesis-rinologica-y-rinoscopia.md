@@ -70,7 +70,7 @@ La física de ese punto cabe en dos ideas:
 - **El radio manda, y manda mucho.** En un tubo rígido con flujo laminar, la ley de Poiseuille dice que la resistencia crece con la **inversa del radio a la cuarta**: si el radio baja a la mitad, la resistencia se multiplica por 16. La nariz no es un tubo rígido ni su flujo es del todo laminar (en la nariz real, la relación entre presión y flujo tiene un término lineal y otro cuadrático), pero la **tendencia** es la misma: un pasaje que se estrecha un poco cuesta mucho más aire (Cole, 2000). Por eso una desviación pequeña **en la zona valvular** molesta más que una grande al fondo de la fosa.
 - **El aire rápido tira de las paredes blandas.** Cuando un fluido pasa por un estrechamiento, su velocidad sube y su presión lateral baja (efecto Bernoulli o Venturi). En la inspiración forzada, esa presión baja actúa sobre la pared lateral de la nariz: si el cartílago es débil o está debilitado (por una cirugía, un golpe o la edad), la pared se **colapsa hacia dentro** y cierra el pasaje (Rhee y cols., 2010). Es lo que le pasa a algunos pacientes cuando hacen ejercicio o inspiran fuerte.
 
-:::imagen ilustraciones/h23-valvula.svg ancho=100% La válvula nasal en tres miradas. A: el ángulo que forman el tabique y el cartílago lateral superior (10 a 15° en una nariz normal). B: resistencia contra radio en un tubo rígido de flujo laminar; el punto rojo de la izquierda es el pasaje reducido a la mitad (16 veces más resistencia). C: en un estrechamiento el aire se acelera y su presión lateral baja; si la pared es blanda, se colapsa en la inspiración. Esquemas, no mediciones.
+:::imagen ilustraciones/h23-valvula.svg ancho=100% La válvula nasal en tres miradas. A: el ángulo que forman el tabique y el cartílago lateral superior (10 a 15° en una nariz normal). B: resistencia contra radio en un tubo rígido de flujo laminar; el punto rojo de la izquierda es el pasaje reducido a la mitad (16 veces más resistencia). C: en un estrechamiento el aire se acelera y su presión lateral baja; si la pared es blanda, se colapsa en la inspiración.
 :::
 
 Dos consecuencias para el examen:
@@ -153,7 +153,7 @@ Sobre la **limpieza del espéculo**: las guías de desinfección clasifican como
 
 El equipo de la rinoscopía anterior son tres elementos, todos de uso manual.
 
-:::imagen ilustraciones/h23-equipo.svg ancho=100% Espéculo nasal bivalvo, espejo frontal y lámpara de cuello flexible. A la izquierda, el espéculo con las valvas abiertas y, abajo, visto de frente. En el centro, el espejo frontal, cóncavo y con un orificio. A la derecha, la lámpara. Esquema de los tres elementos; los modelos reales varían.
+:::imagen ilustraciones/h23-equipo.svg ancho=100% Espéculo nasal bivalvo, espejo frontal y lámpara de cuello flexible. A la izquierda, el espéculo con las valvas abiertas y, abajo, visto de frente. En el centro, el espejo frontal, cóncavo y con un orificio. A la derecha, la lámpara. 
 - @9,22 | **Valvas.** Entran en el vestíbulo y se abren apenas: lo justo para ver. Si las apoyas en el tabique, duele.
 - @27,31 | **Resorte y mangos.** Quedan en la mano izquierda; al soltar, las valvas se cierran.
 - @47,15 | **Espejo frontal.** Mira por el agujero central; la luz de la lámpara rebota en el espejo y cae en la nariz, en el mismo eje que tu vista.

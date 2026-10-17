@@ -110,7 +110,7 @@ def panel(c, x0, titulo, d, normal, an_normal):
 def main():
     datos = json.loads(subprocess.check_output(['node', str(AQUI / 'hacer_cap27_simulador.mjs')], text=True))
     c = Lienzo(760, 500)
-    panel(c, 15, 'Paciente simulado sano', datos['sano'], datos['normal'], datos['analisis_normal'])
+    panel(c, 15, 'Paciente sano', datos['sano'], datos['normal'], datos['analisis_normal'])
     c.l(385, 14, 385, 455, GRILLA, 1)
     panel(c, 400, 'Vestíbulo sano, dependencia visual marcada', datos['pppd'], datos['normal'], datos['analisis_normal'])
     c.t(15, 476, 'Barras: puntaje de equilibrio (100: quieto; 0: se cae). Rayado rojo: límite inferior del modelo.',

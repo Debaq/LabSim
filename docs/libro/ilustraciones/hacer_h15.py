@@ -146,7 +146,7 @@ def vor():
     c.t(20 + (ancho + 12) * 2 + ancho / 2, 293, '→ lenta a la izquierda, rápida a la derecha', 8.5, AVISO, 'middle', 700)
     c.t(20 + (ancho + 12) + ancho / 2, 293, '(el ojo compensa el giro que cree sentir)', 8, TENUE, 'middle')
     c.t(20 + ancho / 2, 293, '(sin movimiento ocular)', 8, TENUE, 'middle')
-    c.t(14, 322, 'Esquema, no datos: sin cifras de descarga. En el reposo cada lado descarga y la diferencia entre los dos es nula.', 8, TENUE, 'start')
+    c.t(14, 322, 'En el reposo cada lado descarga y la diferencia entre los dos es nula.', 8, TENUE, 'start')
     c.guardar('h15-vor-pushpull.svg', punta('p-vor', AVISO))
 
 
@@ -186,7 +186,7 @@ def trazas(d):
     c.t(14, 206, f'En este trazo: {abs(spv["A"]):.1f} °/s sin fijar y {abs(spv["B"]):.1f} °/s fijando. Con la misma lesión, la fijación frena la fase lenta.', 8.5, TINTA, 'start', 600)
     c.t(14, 378, 'La velocidad de la fase lenta (VFL, °/s) es la pendiente de los tramos lentos, sin contar las fases rápidas.', 8.5, TINTA, 'start', 600)
     c.t(14, 393, 'En las lentes de Frenzel se estima a ojo; en la VNG, el programa la calcula tramo por tramo.', 8.5, TINTA, 'start')
-    c.t(14, 418, 'Trazas del modelo de labyrinthus3d (órdenes de magnitud docentes, no valores de referencia). Positivo = derecha del paciente.', 8, TENUE, 'start')
+    c.t(14, 418, 'Positivo = derecha del paciente.', 8, TENUE, 'start')
     c.guardar('h15-nistagmo-trazas.svg', punta('p-nis', AVISO) + punta('p-nis2', TINTA))
     return spv
 
@@ -217,7 +217,7 @@ def mirada(d):
     c.t(14, 412, 'A · el nistagmo periférico mantiene su dirección en las tres posiciones y se ve más mirando hacia su fase rápida (ley de Alexander).', 8.5, TINTA, 'start')
     c.t(14, 427, 'B · el central evocado por la mirada cambia de dirección: a la derecha el ojo vuelve a la izquierda y bate a la derecha; a la izquierda, al revés.', 8.5, TINTA, 'start')
     c.t(14, 442, 'Al frente no hay nistagmo. Positivo = derecha del paciente.', 8.5, TENUE, 'start')
-    c.t(14, 460, 'Trazas del modelo de labyrinthus3d, sin fijación; órdenes de magnitud docentes, no valores de referencia.', 8, TENUE, 'start')
+    c.t(14, 460, 'Sin fijación.', 8, TENUE, 'start')
     c.guardar('h15-mirada.svg')
 
 
@@ -272,8 +272,7 @@ def oculomotor(d):
     e.traza([(t, h) for t, h, _ in okn], RETRO, 1.4)
     c.t(569, 385, 'lenta con las barras, rápida contra', 7.5, TINTA, 'middle')
     c.t(14, 420, 'Sacada: latencia y precisión. Seguimiento: ganancia y sacadas de alcance. Optocinético: la fase lenta sigue a las barras.', 8.5, TINTA, 'start')
-    c.t(14, 436, 'Medidas tomadas sobre cada traza: ilustran qué se lee, no son valores de referencia.', 8.5, TENUE, 'start')
-    c.t(14, 458, 'Trazas del modelo de labyrinthus3d (órdenes de magnitud docentes). El normal que se dibuja no es una norma: cada equipo trae la suya.', 8, TENUE, 'start')
+    c.t(14, 436, 'Medidas tomadas sobre cada traza.', 8.5, TENUE, 'start')
     c.guardar('h15-oculomotor.svg')
 
 
@@ -307,7 +306,7 @@ def calibracion():
                            '2. Si la ganancia sale baja, la velocidad de la fase lenta (°/s) sale baja en la misma proporción: un nistagmo puede quedar bajo el límite.',
                            '3. Se rehace si el paciente movió la cabeza, el párpado tapa la pupila o las gafas se corrieron.')):
         c.t(14, 262 + j * 15, s, 8.5, TINTA, 'start')
-    c.t(14, 322, 'Esquema, no datos: blanco que salta 10° a cada lado; el ojo es un modelo simple que llega a la ganancia indicada.', 8, TENUE, 'start')
+    c.t(14, 322, 'Blanco que salta 10° a cada lado.', 8, TENUE, 'start')
     c.guardar('h15-calibracion.svg')
 
 

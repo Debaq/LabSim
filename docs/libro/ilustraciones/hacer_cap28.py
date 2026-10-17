@@ -125,7 +125,6 @@ def cros():
     s.texto(cxb - r - 28, cy + 4, 'receptor', TC, E.OI, 'end', 600)
     s.texto(cxb, cy + r + 40, 'el sonido del lado sordo se oye', TC, E.TENUE)
     s.texto(cxb, cy + r + 50, 'por el oído sano (conducto abierto)', TC, E.TENUE)
-    s.texto(590, 244, 'Esquema de principio, sin escala.', TC, E.TENUE, 'end')
     return s
 
 

@@ -10,5 +10,5 @@
 
 import { panelesLado, pulsosDe } from './hacer_h17_simulador.mjs';
 
-const r = panelesLado(pulsosDe('C'), 'cap24-vhit-bilateral.svg', 'Paciente simulado: los dos canales laterales con ganancia baja', false);
+const r = panelesLado(pulsosDe('C'), 'cap24-vhit-bilateral.svg', 'Los dos canales laterales con ganancia baja', false);
 console.log('  der', r.der, 'izq', r.izq, 'asim', r.asim.toFixed(1));

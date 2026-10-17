@@ -147,7 +147,7 @@ def escala_lateral(c, cx, y, donde):
 def weber():
     c = Lienzo(820, 470)
     defs = punta('p-c', COCLEAR) + punta('p-t', TENUE) + punta('p-g', TINTA_2)
-    c.t(14, 20, 'El Weber en un corte frontal de la cabeza (de frente al paciente; esquema, no a escala)',
+    c.t(14, 20, 'El Weber en un corte frontal de la cabeza (de frente al paciente)',
         10.5, TINTA, 'start', 700)
     cy = 290
     paneles = ((215, 'A · Los dos oídos sanos', False), (615, 'B · Conducto derecho tapado', True))

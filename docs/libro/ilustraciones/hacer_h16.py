@@ -139,7 +139,7 @@ def mariposa():
         sy = lambda v: yc - v * (h / 2) / ymax
         c.t(x0 - 54, y0 + 8, titulo, 12, TINTA, 'start', 700)
         c.raw(f'<rect x="{sx(0):.1f}" y="{top}" width="{sx(datos["irriga"]) - sx(0):.1f}" height="{h}" fill="#f0eee9"/>')
-        c.t((sx(0) + sx(datos['irriga'])) / 2, top + h / 2 - 24, 'agua (simulada)', 10, TENUE)
+        c.t((sx(0) + sx(datos['irriga'])) / 2, top + h / 2 - 24, 'agua', 10, TENUE)
         for v in range(-30, 31, 10):
             c.l(x0, sy(v), x1, sy(v), GRILLA if v else TINTA, 1 if v else 1.4)
             c.t(x0 - 8, sy(v) + 4, str(abs(v)), 10, TENUE, 'end')
