@@ -1,0 +1,25 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 46,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 46 años y es profesora de básica. Hace dos días, al levantarse, sintió que la pieza giraba, vomitó tres veces y no pudo ponerse de pie sin agarrarse de la pared. Con los ojos cerrados y acostada de lado mejora; al mover la cabeza, el giro vuelve. Camina \"yéndose hacia la derecha\". Una semana antes tuvo un resfrío con tos. Oye igual que siempre: sin pitido, sin oído tapado, sin dolor. No ha tenido dolor de cabeza, visión doble, dificultad para hablar o tragar, ni debilidad en brazos o piernas. Nunca había tenido un episodio así.",
+      "historia": "{{-2}} Servicio de urgencia: examen neurológico sin focalidad, antiemético. Se indica reposo y evaluación vestibular.\n{{-9}} Resfrío con tos y fiebre baja, sin tratamiento.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

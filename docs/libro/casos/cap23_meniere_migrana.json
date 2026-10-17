@@ -1,0 +1,40 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "meniere"
+    },
+    "edad": 45,
+    "sexo": "mujer",
+    "grado": {
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 45 años y es contadora. Desde los 20 tiene migraña con aura visual: unas luces que se corren por el campo de visión y después dolor pulsátil de un lado. Hace dos años y medio empezó a tener dos clases de crisis. La primera es corta: dura dos o tres horas, con todo girando y vómitos; antes se le tapa el oído izquierdo y le aparece un zumbido grave, y oye menos por ese lado unos días. Ha tenido cuatro. La segunda es larga: uno o dos días de inestabilidad, \"como caminar sobre goma\", con dolor de cabeza que late, luz y ruido insoportables, y casi siempre cerca de la regla. De esas ha tenido más de diez y nunca le cambia el oído.",
+      "historia": "{{-900}} Urgencia: vértigo de dos horas con vómitos y oído izquierdo tapado.\n{{-400}} Otorrinolaringología: audiometría con hipoacusia sensorioneural OI de graves; se sospecha Ménière.\n{{-120}} Neurología: migraña con aura; se plantea que parte de las crisis largas son migraña vestibular.\n{{-25}} Otorrinolaringología: solicita evaluación audiológica completa y vestibular.",
+      "hist": [],
+      "medicamentos": "Sumatriptán 50 mg en las jaquecas",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

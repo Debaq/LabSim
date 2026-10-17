@@ -1,0 +1,31 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 58,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 58 años y es profesora de básica. Hace seis días, al acostarse en la noche y girar hacia el lado derecho, sintió que la pieza le daba vueltas por unos 20 segundos, con náuseas, y le pasó otra vez al levantarse a media noche y al mirar hacia arriba para sacar un pañuelo de un estante. Cuando está sentada o caminando se siente bien. Hace años oye menos en los lugares con ruido y tiene un siseo parejo en los dos oídos que no ha cambiado; no ha tenido dolor de cabeza intenso, visión doble ni dificultad para hablar. No se golpeó la cabeza. Dejó de agacharse a recoger cosas del suelo \"por si acaso\".",
+      "historia": "{{-6}} Primer episodio de giro al acostarse sobre el lado derecho.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

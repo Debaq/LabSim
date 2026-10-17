@@ -1,0 +1,876 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "coclear_plana",
+   "OI": "normal"
+  },
+  "edad": 63,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 63 años y es jubilado de una empresa de buses, donde fue jefe de taller. Hace seis años tuvo su primera crisis: de un momento a otro todo giró, vomitó y estuvo cuatro horas sin poder levantarse; antes sintió el oído derecho \"tapado\" y un zumbido grave. Siguieron varias crisis iguales en los meses siguientes, con la audición del derecho que subía y bajaba. Hoy las crisis son más espaciadas, una cada dos o tres meses, pero la audición ya no vuelve: oye menos por el derecho todo el tiempo y el zumbido, que antes era un motor lejano, es hoy más bien un pito agudo que va y viene. Hace catorce meses, sin aviso, cayó dos veces al suelo estando de pie en la cocina: \"como si me tiraran de las piernas\", sin perder el conocimiento, sin mareo antes ni después y sin dolor de cabeza. Se levantó solo a los segundos. Desde entonces camina pendiente del piso y ya no sube a escalas. Le han indicado dieta baja en sal y no ha recibido tratamientos en el oído.",
+   "historia": "{{-2190}} Urgencia: primera crisis de vértigo con vómitos y oído derecho tapado; se trata con antieméticos.\n{{-1800}} Otorrinolaringología: audiometría con hipoacusia sensorioneural OD ascendente, promedio de 500 a 3.000 Hz de 24 dB. Se diagnostica enfermedad de Ménière y se indica dieta baja en sal y betahistina.\n{{-1100}} Control: crisis frecuentes; audiometría con la curva aplanada, promedio de 40 dB.\n{{-420}} Urgencia: dos caídas bruscas sin pérdida de conciencia; tomografía de cerebro sin hallazgos.\n{{-30}} Otorrinolaringología: audiometría con promedio de 55 dB en el OD. Se solicita evaluación audiológica completa y vestibular.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Betahistina 24 mg cada 12 horas; hidroclorotiazida 25 mg al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 3019884131,
+ "data": {
+  "gender": 0,
+  "id": 9131,
+  "Aerea": [
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    55,
+    10
+   ],
+   [
+    55,
+    15
+   ],
+   [
+    60,
+    20
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    35
+   ]
+  ],
+  "Osea": [
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    55,
+    10
+   ],
+   [
+    55,
+    15
+   ],
+   [
+    60,
+    20
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    35
+   ]
+  ],
+  "LDL": [
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ],
+   [
+    105,
+    105
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    55,
+    10
+   ],
+   [
+    55,
+    15
+   ],
+   [
+    60,
+    20
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    35
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    45,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    55,
+    10
+   ],
+   [
+    55,
+    15
+   ],
+   [
+    60,
+    20
+   ],
+   [
+    70,
+    25
+   ],
+   [
+    80,
+    30
+   ],
+   [
+    85,
+    35
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 63,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.58,
+   1.74,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 85,
+    "percentage": 68
+   },
+   {
+    "int": 40,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   45,
+   0
+  ],
+  "SRT": [
+   50,
+   5
+  ],
+  "Fowler": {
+   "enabled": true,
+   "patterns": {
+    "1": "complete",
+    "4": "complete",
+    "5": "complete"
+   },
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ],
+   [
+    5,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     100,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     95
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     105
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Betahistina 24 mg cada 12 horas; hidroclorotiazida 25 mg al día",
+   "cirugias": "",
+   "otros": "Tiene 63 años y es jubilado de una empresa de buses, donde fue jefe de taller. Hace seis años tuvo su primera crisis: de un momento a otro todo giró, vomitó y estuvo cuatro horas sin poder levantarse; antes sintió el oído derecho \"tapado\" y un zumbido grave. Siguieron varias crisis iguales en los meses siguientes, con la audición del derecho que subía y bajaba. Hoy las crisis son más espaciadas, una cada dos o tres meses, pero la audición ya no vuelve: oye menos por el derecho todo el tiempo y el zumbido, que antes era un motor lejano, es hoy más bien un pito agudo que va y viene. Hace catorce meses, sin aviso, cayó dos veces al suelo estando de pie en la cocina: \"como si me tiraran de las piernas\", sin perder el conocimiento, sin mareo antes ni después y sin dolor de cabeza. Se levantó solo a los segundos. Desde entonces camina pendiente del piso y ya no sube a escalas. Le han indicado dieta baja en sal y no ha recibido tratamientos en el oído.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Ignacio",
+     "edad": 63,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 57,
+     "confiabilidad": 76,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "unilateral",
+   "oido": "od",
+   "predominio": null,
+   "pulsatil": false,
+   "permanente": false,
+   "ruido": "Zumbido",
+   "frecuencia": 4000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 105
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 70,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 70,
+     "tone_burst_1000Hz": 70,
+     "tone_burst_2000Hz": 65,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 65,
+     "nb_ce_chirp_ls_1000Hz": 65,
+     "nb_ce_chirp_ls_2000Hz": 60,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 70,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1833,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.08,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.04,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.14,
+      "amp": 0.05
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 30,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 25,
+     "tone_burst_1000Hz": 25,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 30,
+     "nb_ce_chirp_ls_500Hz": 20,
+     "nb_ce_chirp_ls_1000Hz": 20,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 30,
+     "click": 30,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 45,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 45,
+     "click": 45,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.16,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1654,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": -0.01
+     },
+     "onda_III": {
+      "lat": -0.01,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": -0.01,
+      "amp": -0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 42,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1.1,
+    "sello_pct": 88,
+    "variabilidad_db": 2.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 6,
+     "4000": 12,
+     "6000": 18,
+     "8000": 24
+    },
+    "atten_db": 0,
+    "ruido_db": 1.6,
+    "sello_pct": 96,
+    "variabilidad_db": 2.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T02:18:03+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Ignacio Óscar",
+   "apellido": "Herrera Molina",
+   "rut": "9308004",
+   "fecha_nac": "25-04-1963"
+  },
+  "historia_clinica": "{{-2190}} Urgencia: primera crisis de vértigo con vómitos y oído derecho tapado; se trata con antieméticos.\r\n{{-1800}} Otorrinolaringología: audiometría con hipoacusia sensorioneural OD ascendente, promedio de 500 a 3.000 Hz de 24 dB. Se diagnostica enfermedad de Ménière y se indica dieta baja en sal y betahistina.\r\n{{-1100}} Control: crisis frecuentes; audiometría con la curva aplanada, promedio de 40 dB.\r\n{{-420}} Urgencia: dos caídas bruscas sin pérdida de conciencia; tomografía de cerebro sin hallazgos.\r\n{{-30}} Otorrinolaringología: audiometría con promedio de 55 dB en el OD. Se solicita evaluación audiológica completa y vestibular."
+ }
+}

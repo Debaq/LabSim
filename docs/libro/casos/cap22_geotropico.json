@@ -1,0 +1,25 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 44,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 44 años y trabaja como técnico de refrigeración. Hace diez días lo trataron en un centro por un vértigo posicional \"de oído izquierdo\" con una maniobra de acostarlo y girarlo; esa noche mejoró. Hace tres días volvió a molestarle: ya no le pasa al mirar hacia arriba, sino al darse vuelta en la cama, y sobre todo cuando se da vuelta hacia el lado izquierdo, que le da un giro intenso de casi un minuto con náuseas, aunque ahora no vomitó. Sentado está bien. No oye menos ni tiene pitido.",
+      "historia": "{{-10}} Vértigo posicional del oído izquierdo; tratado con una maniobra de reposición, mejoría esa noche.\n{{-3}} Reaparece el vértigo al darse vuelta en la cama, sobre todo hacia la izquierda.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

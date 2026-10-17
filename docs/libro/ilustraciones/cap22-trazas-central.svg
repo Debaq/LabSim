@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 215" width="760" height="215">
+<rect width="760" height="215" fill="#fff"/>
+<defs><marker id="pf" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8a8a90"/></marker></defs>
+<text x="14.0" y="20.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="12.5" fill="#24101a" text-anchor="start" font-weight="700">Caso 22.4 · Cabeza colgando (esquema): lo que NO encaja en un canal</text>
+<text x="14.0" y="35.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" fill="#8a8a90" text-anchor="start" font-weight="400">Fase rápida hacia abajo, vertical puro, sin latencia, sin torsión. Mismo tiempo en los tres paneles.</text>
+<rect x="22.0" y="52.0" width="268.0" height="148.0" rx="6" fill="#fcfbf9" stroke="#e7e5e0" stroke-width="1"/>
+<text x="156.0" y="67.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" fill="#24101a" text-anchor="middle" font-weight="700">Colgando (primera vez)</text>
+<line x1="30.0" y1="120.0" x2="282.0" y2="120.0" stroke="#e7e5e0" stroke-width="1" stroke-linecap="round"/>
+<line x1="30.0" y1="74.0" x2="30.0" y2="166.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="34.0" y="83.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="start" font-weight="400">arriba</text>
+<text x="34.0" y="164.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="start" font-weight="400">abajo</text>
+<path fill="none" stroke="#c62f3a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" d="M30.0,120.0 L32.1,123.1 L34.2,130.5 L36.3,139.4 L38.4,146.8 L40.5,149.9 L282.0,149.9"/>
+<text x="280.0" y="83.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" fill="#c62f3a" text-anchor="end" font-weight="700">vertical</text>
+<line x1="30.0" y1="178.0" x2="282.0" y2="178.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<line x1="30.0" y1="178.0" x2="30.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="30.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">0 s</text>
+<line x1="72.0" y1="178.0" x2="72.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="72.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">10 s</text>
+<line x1="114.0" y1="178.0" x2="114.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="114.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">20 s</text>
+<line x1="156.0" y1="178.0" x2="156.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="156.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">30 s</text>
+<line x1="198.0" y1="178.0" x2="198.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="198.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">40 s</text>
+<line x1="240.0" y1="178.0" x2="240.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="240.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">50 s</text>
+<line x1="282.0" y1="178.0" x2="282.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="282.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">60 s</text>
+<text x="278.0" y="174.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#c62f3a" text-anchor="end" font-weight="700">sigue ▶</text>
+<rect x="314.0" y="52.0" width="142.0" height="148.0" rx="6" fill="#fcfbf9" stroke="#e7e5e0" stroke-width="1"/>
+<text x="385.0" y="67.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" fill="#24101a" text-anchor="middle" font-weight="700">Sentado otra vez</text>
+<line x1="322.0" y1="120.0" x2="448.0" y2="120.0" stroke="#e7e5e0" stroke-width="1" stroke-linecap="round"/>
+<line x1="322.0" y1="74.0" x2="322.0" y2="166.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="326.0" y="83.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="start" font-weight="400">arriba</text>
+<text x="326.0" y="164.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="start" font-weight="400">abajo</text>
+<path fill="none" stroke="#c62f3a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" d="M322.0,120.0 L324.1,121.1 L326.2,123.2 L328.3,125.2 L330.4,126.2 L332.5,125.8 L334.6,124.6 L336.7,123.5 L338.8,122.3 L340.9,121.2 L343.0,120.0 L448.0,120.0"/>
+<text x="446.0" y="83.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" fill="#c62f3a" text-anchor="end" font-weight="700">vertical</text>
+<line x1="322.0" y1="178.0" x2="448.0" y2="178.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<line x1="322.0" y1="178.0" x2="322.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="322.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">0 s</text>
+<line x1="364.0" y1="178.0" x2="364.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="364.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">10 s</text>
+<line x1="406.0" y1="178.0" x2="406.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="406.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">20 s</text>
+<line x1="448.0" y1="178.0" x2="448.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="448.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">30 s</text>
+<rect x="480.0" y="52.0" width="184.0" height="148.0" rx="6" fill="#fcfbf9" stroke="#e7e5e0" stroke-width="1"/>
+<text x="572.0" y="67.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" fill="#24101a" text-anchor="middle" font-weight="700">Colgando, repetido</text>
+<line x1="488.0" y1="120.0" x2="656.0" y2="120.0" stroke="#e7e5e0" stroke-width="1" stroke-linecap="round"/>
+<line x1="488.0" y1="74.0" x2="488.0" y2="166.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="492.0" y="83.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="start" font-weight="400">arriba</text>
+<text x="492.0" y="164.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="start" font-weight="400">abajo</text>
+<path fill="none" stroke="#c62f3a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" d="M488.0,120.0 L490.1,123.1 L492.2,130.5 L494.3,139.4 L496.4,146.8 L498.5,149.9 L656.0,149.9"/>
+<text x="654.0" y="83.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" fill="#c62f3a" text-anchor="end" font-weight="700">vertical</text>
+<line x1="488.0" y1="178.0" x2="656.0" y2="178.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<line x1="488.0" y1="178.0" x2="488.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="488.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">0 s</text>
+<line x1="530.0" y1="178.0" x2="530.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="530.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">10 s</text>
+<line x1="572.0" y1="178.0" x2="572.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="572.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">20 s</text>
+<line x1="614.0" y1="178.0" x2="614.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="614.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">30 s</text>
+<line x1="656.0" y1="178.0" x2="656.0" y2="182.0" stroke="#8a8a90" stroke-width="1" stroke-linecap="round"/>
+<text x="656.0" y="192.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8a8a90" text-anchor="middle" font-weight="400">40 s</text>
+<text x="652.0" y="174.0" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#c62f3a" text-anchor="end" font-weight="700">sigue ▶</text>
+</svg>

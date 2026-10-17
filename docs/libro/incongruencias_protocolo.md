@@ -227,6 +227,17 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 137 | 17 | Corrección nHL → eHL | LabSim: −20/−15/−10/−5 (burst 0,5-4 kHz) | la de LabSim; recuadro con la de Columbia Británica (−10/−10/−5/0) | Hatton 2022; Stapells 2000 | P | |
 | 138 | 17 | Conclusión de ejemplo | "rango frecuencial estudiado de 2-4 kHz" (lo del click) | en el lactante hacen falta estímulos por frecuencia | Stapells 2000 | A | |
 
+## Capítulos clínicos vestibulares
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 139 | 20 | VEMP en la hipoacusia conductiva | contraindicado, sin vibrador óseo | el protocolo; recuadro: VEMP por vía ósea como alternativa | Rosengren 2019; Yang 2007 | P | |
+| 140 | 20 | Pérdida bilateral simétrica | la razón de asimetría concluye "hipofunción" | el protocolo; el texto enseña a mirar la amplitud de cada oído | Rosengren 2019 | A | |
+| 141 | 21 | Preparación en el vértigo agudo | ayuno 4 h, suspender antivertiginosos 48 h | no aplica en el agudo: anotar qué recibió y cuándo | — | P | |
+| 142 | 21 | HINTS | nistagmo en cinco posiciones; impulso solo con equipo; sin oclusión alternada | se enseña el HINTS completo (complementa #70) | Kattah 2009 | A · vacío | |
+| 143 | 22 | Apogeotrópico persistente | no lo distingue de un nistagmo central | recuadro: si persiste, evaluar causa central | Bhattacharyya 2017 | A | |
+<!-- tanda 8: -->
+
 ## Encontradas fuera del texto de los capítulos
 
 | # | Dónde | Tema | Qué pasaba | Estado |

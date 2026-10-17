@@ -77,5 +77,21 @@
   "cap16_uci": "Newborn baby boy, 7 days old, late preterm, mild yellowish skin tone from recent jaundice, asleep in an open hospital crib, small pulse-oximeter strap on his foot; a nurse's gloved hand and blue scrub sleeve at the edge.",
   "cap16_riesgo": "Newborn baby boy, 2 days old, calm with eyes half open, white cotton onesie and knit hat, held against a parent's chest (only a beige cardigan and an arm visible).",
   "cap16_efusion": "Infant girl, 3 weeks old, alert, light-yellow sleeper and pale knitted hat, held in the crook of her mother's arm (grey sweater sleeve visible), healthy look.",
-  "cap17_efusion_neonatal": "Chilean baby girl, 4 months old, awake and calm, slightly congested nose, lying on a light blanket, soft daylight, healthy look."
+  "cap17_efusion_neonatal": "Chilean baby girl, 4 months old, awake and calm, slightly congested nose, lying on a light blanket, soft daylight, healthy look.",
+  "cap21_neuritis": "Chilean woman, 46, primary school teacher, tired and pale after two days of vomiting, symmetric face, neutral expression, plain sweater.",
+  "cap21_laberintitis": "Chilean man, 39, warehouse worker, tired, slightly dishevelled, head turned a little as if listening with one ear, symmetric face, work fleece.",
+  "cap21_pseudoneuritis": "Chilean man, 67, retired construction worker, ex-smoker, weathered skin, visibly unwell and nauseous, eyes half closed against the light.",
+  "cap21_aica": "Chilean woman, 58, supermarket cashier, anxious and nauseous, symmetric face, hand gripping a stretcher rail at the edge of the frame.",
+  "cap22_posterior": "Chilean woman, 58, primary school teacher, calm but slightly worried, shoulder-length greying hair, reading glasses on a cord, no visible signs of illness.",
+  "cap22_geotropico": "Chilean man, 44, refrigeration technician, short dark hair, light stubble, slightly pale and tired, work polo shirt.",
+  "cap22_apogeotropico": "Chilean woman, 67, homemaker, short white-grey hair, kind but cautious expression, cardigan, holding her head slightly stiff.",
+  "cap22_central": "Chilean man, 54, truck driver, heavyset, thinning grey-black hair, mustache, tired and slightly dazed look, symmetric face.",
+  "cap20_meniere": "Chilean man, 45, intercity bus driver, tired expression, short dark hair, light stubble, no visible signs.",
+  "cap20_laberintitis": "Chilean woman, 34, accountant, pale and slightly tired, shoulder-length dark hair, head slightly tilted as if unsteady.",
+  "cap20_schwannoma": "Chilean woman, 41, primary school teacher, calm friendly face, brown hair in a ponytail, no visible signs.",
+  "cap20_otoesclerosis": "Chilean woman, 38, supermarket cashier, tidy hair tied back, neutral expression, no visible signs.",
+  "cap23_meniere_avanzado": "Chilean man, 63, retired bus-company workshop foreman, short grey hair, weathered tired face, careful cautious expression, work-style jacket.",
+  "cap23_meniere_bilateral": "Chilean woman, 58, primary school teacher, shoulder-length grey-brown hair, worried but composed expression, cardigan and glasses.",
+  "cap23_migrana_vestibular": "Chilean woman, 34, graphic designer, dark hair tied up, tired eyes, slightly squinting as if bothered by light, simple dark sweater.",
+  "cap23_meniere_migrana": "Chilean woman, 45, accountant, shoulder-length dark hair, tired and slightly wary expression, office blouse."
 }

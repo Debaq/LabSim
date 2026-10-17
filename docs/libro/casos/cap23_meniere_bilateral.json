@@ -1,0 +1,42 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "meniere",
+      "OI": "coclear_plana"
+    },
+    "edad": 58,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "moderada"
+    },
+    "semilla": 5,
+    "anamnesis": {
+      "otros": "Tiene 58 años y es profesora de básica. Desde hace doce años tiene crisis de vértigo con el oído izquierdo tapado y un zumbido grave; con los años ese oído oye cada vez menos y ya no se recupera. Hace dos años empezó a notar lo mismo en el derecho: plenitud, un zumbido grave que ahora es permanente y días en que \"se apaga\" la audición. Las crisis duran entre dos y cuatro horas y en el último año han vuelto a ser más frecuentes. Hace tres meses cayó de golpe al suelo en el patio del colegio, sin aviso y sin perder el conocimiento. En otro centro le propusieron una inyección de gentamicina en el oído izquierdo y ella no sabe si aceptar: \"si ya oigo poco por ese lado, ¿qué me pasa si me lo apagan?\". Le molestan los ruidos fuertes en los dos oídos.",
+      "historia": "{{-4380}} Otorrinolaringología: Ménière OI; hipoacusia sensorioneural OI de graves y medias.\n{{-730}} Control: fluctuación de la audición también en el OD; audiometría con 30 a 40 dB en el OD.\n{{-90}} Urgencia: caída brusca sin pérdida de conciencia; sin hallazgos neurológicos.\n{{-20}} Otorrinolaringología: se plantea gentamicina intratimpánica OI; solicita evaluación audiológica y vestibular antes de decidir.",
+      "hist": [],
+      "medicamentos": "Betahistina 24 mg cada 12 horas",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

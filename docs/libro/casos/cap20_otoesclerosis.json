@@ -1,0 +1,39 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "otoesclerosis",
+      "OI": "otoesclerosis"
+    },
+    "edad": 38,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 38 años y es cajera de supermercado. Hace unos cuatro años, poco después de su segundo embarazo, empezó a oír menos por los dos oídos, un poco más por el derecho; con ruido de fondo se defiende mejor que en silencio. Tiene un zumbido constante en los dos oídos. Desde hace unos meses, al agacharse y levantarse rápido o al caminar entre mucha gente, se siente \"inestable\" por unos segundos. No ha tenido crisis de vértigo ni secreción de oídos. Su madre usa audífonos desde los 40 años.",
+      "historia": "{{-1500}} Primera vez que nota que oye menos, después del segundo embarazo.\n{{-30}} Médico general: por la inestabilidad se solicita un VEMP; no hay audiometría reciente.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "ovemp"
+    }
+  ]
+}

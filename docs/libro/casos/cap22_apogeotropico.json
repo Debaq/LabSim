@@ -1,0 +1,31 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 67,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 67 años y es dueña de casa. Hace dos semanas, al darse vuelta en la cama, empezó a sentir que todo gira y le dura todo el tiempo que se queda de lado: si se queda mirando hacia la derecha o la izquierda la sensación sigue por uno o dos minutos y solo cede cuando se pone boca arriba. Dice que \"es peor para el lado izquierdo\". Oye menos desde hace años y tiene un pitido parejo en los dos oídos que no ha cambiado con el mareo. Se levanta con cuidado y ya no duerme de costado.",
+      "historia": "{{-14}} Primer episodio al darse vuelta en la cama.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

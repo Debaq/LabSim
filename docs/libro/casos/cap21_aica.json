@@ -1,0 +1,38 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "infarto_aica"
+    },
+    "edad": 58,
+    "sexo": "mujer",
+    "grado": {
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 58 años y es cajera de un supermercado. Hace dos días, en plena atención, sintió que todo giraba y vomitó. Dice que el oído izquierdo \"se le apagó de golpe\". Desde entonces no puede caminar sin que la sostengan: si suelta la camilla, se cae hacia la izquierda. No tiene pitido, dolor de oído ni fiebre. Tiene la presión alta, que controla \"cuando se acuerda\" de tomar el remedio, y fuma una cajetilla al día. En urgencia le dijeron que era un cuadro del oído interno y la derivaron a estudio auditivo.",
+      "historia": "{{-2}} Servicio de urgencia: presión 190/100, antiemético y derivación a estudio auditivo.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg al día (irregular)",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

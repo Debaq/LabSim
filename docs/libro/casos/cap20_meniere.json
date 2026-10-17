@@ -1,0 +1,34 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "meniere",
+      "OI": "normal"
+    },
+    "edad": 45,
+    "sexo": "hombre",
+    "semilla": 3,
+    "anamnesis": {
+      "otros": "Tiene 45 años y es chofer de buses interurbanos. Hace cinco meses empezó con crisis: primero siente el oído derecho \"tapado\" y un zumbido grave, como de motor; después todo gira, con náuseas y vómitos, durante unas tres horas. Al terminar queda agotado y el oído derecho oye menos; en los días siguientes mejora en parte. Lleva cuatro crisis y la última fue hace tres semanas. Entre una y otra oye casi igual, pero el zumbido grave no se le ha ido. No tiene dolor ni secreción de oídos, no ha tenido golpes en la cabeza y le da miedo manejar por si una crisis lo pilla en la ruta.",
+      "historia": "{{-150}} Primera crisis: tapazón y zumbido del oído derecho, giro de unas tres horas con vómitos.\n{{-21}} Cuarta crisis, la última; el oído derecho quedó más sordo unos días.\n{{-14}} Otorrinolaringólogo: otoscopía normal; se piden audiometría y VEMP entre crisis.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "ovemp"
+    }
+  ]
+}

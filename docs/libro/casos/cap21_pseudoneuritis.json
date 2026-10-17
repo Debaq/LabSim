@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 67,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 67 años y es jubilado de la construcción. Ayer a media tarde, viendo televisión, sintió un mareo intenso con vómitos. Esta mañana no pudo sentarse en la cama sin irse hacia la derecha y su hija lo trajo al servicio de urgencia. Tiene un dolor de cabeza leve en la nuca desde ayer. No ha notado cambio en la audición ni pitido. Fumó 30 años y dejó hace cinco. Está en tratamiento por presión alta y diabetes.",
+      "historia": "{{-1}} Mareo súbito con vómitos, sin pérdida de conciencia ni traumatismo.",
+      "hist": [
+        "hta",
+        "diabetes"
+      ],
+      "medicamentos": "Losartán 50 mg cada 12 horas; metformina 850 mg cada 12 horas; atorvastatina 20 mg en la noche",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

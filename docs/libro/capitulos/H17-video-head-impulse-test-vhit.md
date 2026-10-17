@@ -227,7 +227,7 @@ La calórica y el vHIT miran el mismo canal lateral de dos maneras muy distintas
 
 No son redundantes. En 115 pacientes con mareo, la ganancia del vHIT bajaba al crecer la paresia calórica, pero hacía falta una asimetría calórica de unos 40 % para que el vHIT saliera alterado, y los autores concluyeron que son pruebas **complementarias** y no una reemplaza a la otra (McCaslin y cols., 2014). La calórica no es el "patrón de oro" del canal lateral: es una prueba más del canal, con un estímulo artificial (Halmagyi y cols., 2017).
 
-La discrepancia más conocida: una **calórica asimétrica con un vHIT lateral normal**. En 644 pacientes, 570 coincidieron; de los 36 que no, todos tenían vHIT normal y calórica alterada, y el diagnóstico final fue enfermedad de Ménière en 27 de ellos. Ningún paciente con vHIT lateral anormal tuvo una calórica normal (Hannigan y cols., 2021). Una explicación propuesta es que el hidrops dilata el laberinto y altera la forma en que el calor activa los receptores, pero casi no cambia la respuesta de la cúpula al giro (Halmagyi y cols., 2017). → H16, cap. 24.
+La discrepancia más conocida: una **calórica asimétrica con un vHIT lateral normal**. En 644 pacientes, 570 coincidieron; de los 36 que no, todos tenían vHIT normal y calórica alterada, y el diagnóstico final fue enfermedad de Ménière en 27 de ellos. Ningún paciente con vHIT lateral anormal tuvo una calórica normal (Hannigan y cols., 2021). Una explicación propuesta es que el hidrops dilata el laberinto y altera la forma en que el calor activa los receptores, pero casi no cambia la respuesta de la cúpula al giro (Halmagyi y cols., 2017). → H16, cap. 23.
 
 ### Un ejemplo de informe
 

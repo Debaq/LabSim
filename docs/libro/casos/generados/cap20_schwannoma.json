@@ -1,0 +1,867 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "schwannoma",
+   "OI": "normal"
+  },
+  "edad": 41,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "leve"
+  },
+  "anamnesis": {
+   "otros": "Tiene 41 años y es profesora de enseñanza básica. Hace más de un año nota que por el oído derecho la voz del teléfono \"suena menos nítida\" y se cambia de lado. De noche, o al girar rápido en el patio del colegio, se siente \"un poco inestable\", sin giros ni vómitos. No tiene zumbido, ni plenitud, ni dolor de oídos. Nunca ha tenido crisis de vértigo, golpes en la cabeza ni exposición a ruido.",
+   "historia": "{{-400}} Primera vez que nota la voz menos nítida por el oído derecho.\n{{-45}} Médico general: otoscopía normal; se solicita audiometría.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 4270287954,
+ "data": {
+  "gender": 1,
+  "id": 9954,
+  "Aerea": [
+   [
+    10,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    20,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    40,
+    0
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    60,
+    5
+   ],
+   [
+    60,
+    5
+   ]
+  ],
+  "Osea": [
+   [
+    10,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    20,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    40,
+    0
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    60,
+    5
+   ],
+   [
+    60,
+    5
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    105,
+    100
+   ],
+   [
+    110,
+    100
+   ],
+   [
+    115,
+    100
+   ],
+   [
+    120,
+    100
+   ],
+   [
+    120,
+    100
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    10,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    20,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    40,
+    0
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    60,
+    5
+   ],
+   [
+    60,
+    5
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    10,
+    0
+   ],
+   [
+    10,
+    0
+   ],
+   [
+    20,
+    0
+   ],
+   [
+    25,
+    0
+   ],
+   [
+    40,
+    0
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    50,
+    5
+   ],
+   [
+    60,
+    5
+   ],
+   [
+    60,
+    5
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 41,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.61,
+   1.45,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 60,
+    "percentage": 56
+   },
+   {
+    "int": 30,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   15,
+   -5
+  ],
+  "SRT": [
+   20,
+   0
+  ],
+  "Fowler": {
+   "enabled": true,
+   "patterns": {
+    "3": "none",
+    "4": "none",
+    "5": "none"
+   },
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   10,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     130
+    ],
+    [
+     90,
+     130
+    ],
+    [
+     95,
+     130
+    ],
+    [
+     95,
+     130
+    ],
+    [
+     95,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Tiene 41 años y es profesora de enseñanza básica. Hace más de un año nota que por el oído derecho la voz del teléfono \"suena menos nítida\" y se cambia de lado. De noche, o al girar rápido en el patio del colegio, se siente \"un poco inestable\", sin giros ni vómitos. No tiene zumbido, ni plenitud, ni dolor de oídos. Nunca ha tenido crisis de vértigo, golpes en la cabeza ni exposición a ruido.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Cecilia",
+     "edad": 41,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 70,
+     "confiabilidad": 70,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 35,
+    "retro": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 100
+  },
+  "ABR": {
+   "OD": {
+    "type": "neural",
+    "umbral": 55,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 50,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 45,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": 55,
+     "ce_chirp": 45,
+     "ce_chirp_ls": 45
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.28,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3014,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.03,
+      "amp": 0.02
+     },
+     "onda_III": {
+      "lat": -0.03,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 15,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 10,
+     "tone_burst_4000Hz": 10,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 5,
+     "nb_ce_chirp_ls_4000Hz": 10,
+     "click": 15,
+     "ce_chirp": 5,
+     "ce_chirp_ls": 5
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 25,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 25,
+     "click": 30,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.28,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1604,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0,
+      "amp": 0.01
+     },
+     "onda_III": {
+      "lat": -0.03,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0.9,
+     "4000": 3,
+     "6000": 7.2,
+     "8000": 7.2
+    },
+    "atten_db": 0,
+    "ruido_db": 1.3,
+    "sello_pct": 83,
+    "variabilidad_db": 1.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 0.3,
+    "sello_pct": 96,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T02:17:46+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Cecilia Elena",
+   "apellido": "Ruiz García",
+   "rut": "16034205",
+   "fecha_nac": "03-10-1985"
+  },
+  "historia_clinica": "{{-400}} Primera vez que nota la voz menos nítida por el oído derecho.\r\n{{-45}} Médico general: otoscopía normal; se solicita audiometría."
+ }
+}

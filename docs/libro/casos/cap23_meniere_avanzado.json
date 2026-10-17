@@ -1,0 +1,42 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "coclear_plana",
+      "OI": "normal"
+    },
+    "edad": 63,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 63 años y es jubilado de una empresa de buses, donde fue jefe de taller. Hace seis años tuvo su primera crisis: de un momento a otro todo giró, vomitó y estuvo cuatro horas sin poder levantarse; antes sintió el oído derecho \"tapado\" y un zumbido grave. Siguieron varias crisis iguales en los meses siguientes, con la audición del derecho que subía y bajaba. Hoy las crisis son más espaciadas, una cada dos o tres meses, pero la audición ya no vuelve: oye menos por el derecho todo el tiempo y el zumbido, que antes era un motor lejano, es hoy más bien un pito agudo que va y viene. Hace catorce meses, sin aviso, cayó dos veces al suelo estando de pie en la cocina: \"como si me tiraran de las piernas\", sin perder el conocimiento, sin mareo antes ni después y sin dolor de cabeza. Se levantó solo a los segundos. Desde entonces camina pendiente del piso y ya no sube a escalas. Le han indicado dieta baja en sal y no ha recibido tratamientos en el oído.",
+      "historia": "{{-2190}} Urgencia: primera crisis de vértigo con vómitos y oído derecho tapado; se trata con antieméticos.\n{{-1800}} Otorrinolaringología: audiometría con hipoacusia sensorioneural OD ascendente, promedio de 500 a 3.000 Hz de 24 dB. Se diagnostica enfermedad de Ménière y se indica dieta baja en sal y betahistina.\n{{-1100}} Control: crisis frecuentes; audiometría con la curva aplanada, promedio de 40 dB.\n{{-420}} Urgencia: dos caídas bruscas sin pérdida de conciencia; tomografía de cerebro sin hallazgos.\n{{-30}} Otorrinolaringología: audiometría con promedio de 55 dB en el OD. Se solicita evaluación audiológica completa y vestibular.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Betahistina 24 mg cada 12 horas; hidroclorotiazida 25 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

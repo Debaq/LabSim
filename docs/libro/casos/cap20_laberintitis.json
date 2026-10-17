@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "laberintitis",
+      "OI": "normal"
+    },
+    "edad": 34,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "severa"
+    },
+    "anamnesis": {
+      "otros": "Tiene 34 años y es contadora. Hace doce días tuvo un resfrío con fiebre baja. Al quinto día despertó con el cuarto girando y vómitos, y no pudo levantarse por dos días. Desde esa mañana oye muy poco por el oído derecho, \"como si lo tuviera tapado con algodón\", y el teléfono por ese lado no le sirve. El giro cedió, pero camina \"como en un barco\" y se marea si gira rápido la cabeza. No tiene dolor ni secreción de oídos, no tiene zumbido, y no ha tenido dolor de cabeza intenso, visión doble ni dificultad para hablar o para tragar. Nunca había tenido algo parecido.",
+      "historia": "{{-12}} Resfrío con fiebre baja durante tres días.\n{{-7}} Servicio de urgencia: vértigo intenso con vómitos y sordera del oído derecho; se trata el síntoma y se indica reposo.\n{{-3}} Control: persiste la sordera; se deriva a otorrinolaringología con audiometría y VEMP.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "ovemp"
+    }
+  ]
+}

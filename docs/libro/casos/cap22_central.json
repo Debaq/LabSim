@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 54,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 54 años y es transportista. Hace tres meses siente un mareo que empieza apenas se acuesta y dura mientras está acostado, como si la cama \"se hundiera\"; no se le pasa en 20 segundos como a su cuñado, que tiene \"vértigo de oído\". Camina abriendo las piernas para no irse de lado, ha notado que la letra le sale temblorosa y esta semana le dolió la parte de atrás de la cabeza. Es hipertenso y diabético, con control irregular. No oye menos ni tiene pitido.",
+      "historia": "{{-90}} Mareo al acostarse; consultó por urgencia, se le indicó betahistina sin mejoría.",
+      "hist": [
+        "hta",
+        "diabetes"
+      ],
+      "medicamentos": "Enalapril 20 mg, metformina 850 mg, betahistina",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

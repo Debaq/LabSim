@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "laberintitis",
+      "OI": "normal"
+    },
+    "edad": 39,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "severa"
+    },
+    "anamnesis": {
+      "otros": "Tiene 39 años y trabaja en una bodega. Hace tres días, después de una semana con resfrío, se despertó con el oído derecho \"tapado, como con agua\" y un zumbido a ratos. A las pocas horas empezó un vértigo intenso con vómitos. Hoy el giro bajó, pero por el derecho \"es como si hablaran lejos\": en el teléfono no entiende nada. No ha tenido fiebre alta, dolor ni secreción del oído, dolor de cabeza, visión doble ni trastornos del habla. No fuma y no toma medicamentos. Nunca había tenido vértigo ni problemas de oído.",
+      "historia": "{{-3}} Servicio de urgencia: otoscopía normal, sin signos neurológicos; antiemético y reposo.\n{{-10}} Resfrío con congestión y tos, sin tratamiento.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "ovemp"
+    }
+  ]
+}

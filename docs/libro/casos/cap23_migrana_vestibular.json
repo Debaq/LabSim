@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 34,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 34 años y es diseñadora gráfica. Desde los 16 años tiene jaquecas que le laten de un lado, con luz y ruido que le molestan, y a veces ve luces en zigzag antes. Hace cinco años empezó con otro tipo de crisis: una sensación de mareo, como estar en un barco, a veces con giro, que dura desde una hora hasta dos días y se acompaña de náuseas. En algunas le duele la cabeza y en otras no, pero en todas le molesta la luz y no soporta el ruido. Las desencadenan la falta de sueño, la regla y los olores fuertes; los pasillos del supermercado y las pantallas con movimiento le dan malestar entre crisis. En los episodios no ha notado pérdida de audición, tapón ni zumbido. Tres veces le dijeron \"laberintitis\" y le dieron antivertiginosos, sin efecto. Ha tenido unas veinte crisis en total.",
+      "historia": "{{-1800}} Urgencia: mareo intenso con vómitos, tratado como laberintitis; alta con dimenhidrinato.\n{{-700}} Médico general: nuevo episodio de mareo; otoscopía normal.\n{{-60}} Neurólogo: jaqueca recurrente; deriva a evaluación auditiva y vestibular por los episodios de mareo.",
+      "hist": [],
+      "medicamentos": "Ibuprofeno 400 mg cuando tiene jaqueca",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "ecochg",
+      "nivel": 90
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "schwannoma",
+      "OI": "normal"
+    },
+    "edad": 41,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 41 años y es profesora de enseñanza básica. Hace más de un año nota que por el oído derecho la voz del teléfono \"suena menos nítida\" y se cambia de lado. De noche, o al girar rápido en el patio del colegio, se siente \"un poco inestable\", sin giros ni vómitos. No tiene zumbido, ni plenitud, ni dolor de oídos. Nunca ha tenido crisis de vértigo, golpes en la cabeza ni exposición a ruido.",
+      "historia": "{{-400}} Primera vez que nota la voz menos nítida por el oído derecho.\n{{-45}} Médico general: otoscopía normal; se solicita audiometría.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "ovemp"
+    }
+  ]
+}
