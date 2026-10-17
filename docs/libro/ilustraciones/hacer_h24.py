@@ -282,7 +282,7 @@ def broms():
                            '    comparan en una misma "distancia" del',
                            '    origen, aunque el punto caiga a otra presión.']):
         c.t(tx, 90 + i * 14, s, 8.5, TINTA, 'start')
-    c.t(tx, 250, 'Esquema: las dos curvas son inventadas (R a 150 Pa de', 8, TENUE, 'start')
+    c.t(tx, 250, 'Esquema: las dos curvas son de ejemplo (R a 150 Pa de', 8, TENUE, 'start')
     c.t(tx, 262, '0,50 y 0,25). Los ejes se dibujan a la escala del equipo;', 8, TENUE, 'start')
     c.t(tx, 274, 'el valor numérico del radio estándar depende de ella.', 8, TENUE, 'start')
     c.guardar('h24-broms.svg')

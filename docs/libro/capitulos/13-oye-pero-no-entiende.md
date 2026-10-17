@@ -244,7 +244,7 @@ Si el audiograma saliera normal, ¿darías de alta? ¿Qué agregarías para cuan
 - **Hipótesis esperables:** coclear leve (no: audiograma normal), problema de procesamiento central (→ H14), **neuropatía periférica con compromiso del VIII par**.
 - **Qué pedir:** logoaudiometría, reflejos, emisiones, ABR y, si hay equipo, logoaudiometría en ruido y VEMP. Coordinar con neurología.
 - **Errores esperables:** dar de alta por audiograma normal; llamarla "fingida"; no relacionarlo con el cuadro neurológico.
-- **En LabSim:** caso armado para el libro con el cuadro *neuropatía hereditaria*, sin grado (audiograma normal).
+- **En LabSim:** cuadro *neuropatía hereditaria*, sin grado (audiograma normal).
 :::
 
 {{caso cap13_kernicterus}}
@@ -286,7 +286,7 @@ No se le puede pedir que levante la mano de forma fiable durante una hora. ¿Qu�
 - **Hipótesis esperables:** hipoacusia coclear profunda (no: emisiones presentes), **neuropatía auditiva por bilirrubina**, trastorno global del lenguaje.
 - **Qué pedir:** emisiones, reflejos, microfónica en dos polaridades, ABR a alto nivel; logoaudiometría o lista adaptada a su edad.
 - **Errores esperables:** poner un audífono por el audiograma sin saber que la discriminación es 0 %; llamarlo "sordo coclear" por el ABR; no registrar la microfónica.
-- **En LabSim:** caso armado con el cuadro *kernícterus* en grado moderado en los dos oídos.
+- **En LabSim:** cuadro *kernícterus* en grado moderado en los dos oídos.
 :::
 
 {{caso cap13_leucodistrofia}}
@@ -329,7 +329,7 @@ Si el audiograma sale normal, ¿qué prueba objetiva te dice si el problema est�
 - **Qué pedir:** audiometría, logoaudiometría, emisiones, reflejos, ABR. Y, de inmediato, **derivación a neurología pediátrica**.
 - **Errores esperables:** llamarlo "distraído"; concluir "oído normal" y cerrar; no ver que un ABR alterado con audiograma normal es una alarma.
 - **Para discutir en clases:** el audiólogo no hace el diagnóstico etiológico, pero puede ser quien lo sospeche primero. El caso muestra que la neuropatía auditiva del niño en edad escolar es un signo, no un diagnóstico.
-- **En LabSim:** caso armado con el cuadro *leucodistrofia*, sin grado (audiograma normal). Electrofisiológicamente es parecido al caso anterior: lo que separa los casos es la historia.
+- **En LabSim:** cuadro *leucodistrofia*, sin grado (audiograma normal). Electrofisiológicamente es parecido al caso anterior: lo que separa los casos es la historia.
 :::
 
 ## Resolución de los casos

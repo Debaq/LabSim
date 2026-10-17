@@ -66,7 +66,7 @@ Hay otro detalle que cambia cómo se examina: **un nistagmo periférico se apaga
 
 La consecuencia práctica es doble. En un paciente con una lesión periférica, el nistagmo se ve **con fijación quitada** y se pierde o se reduce con la luz y un punto que mirar. En una lesión que toca el cerebelo, en cambio, la fijación **no frena** el nistagmo o lo frena poco. Por eso el mismo examen se hace dos veces, con y sin fijación, y se compara.
 
-:::imagen ilustraciones/h15-nistagmo-trazas.svg Nistagmo espontáneo de una neuritis del lado izquierdo en fase aguda, visto como posición horizontal del ojo en el tiempo. A: sin fijación; el diente de sierra es evidente. B: con fijación, la fase lenta se frena. La velocidad de la fase lenta es la pendiente de cada tramo lento. Trazas del simulador labyrinthus3d; son órdenes de magnitud docentes, no valores de referencia.
+:::imagen ilustraciones/h15-nistagmo-trazas.svg Nistagmo espontáneo de una neuritis del lado izquierdo en fase aguda, visto como posición horizontal del ojo en el tiempo. A: sin fijación; el diente de sierra es evidente. B: con fijación, la fase lenta se frena. La velocidad de la fase lenta es la pendiente de cada tramo lento. Trazas de un paciente simulado: órdenes de magnitud del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 Las **lentes de Frenzel** (+20 dioptrías) sirven justamente para esto. Al paciente lo dejan casi sin visión nítida, de modo que no puede fijar; al examinador le agrandan los ojos y le dan luz para verlos. La VNG logra lo mismo de otra manera: una cámara infrarroja registra el ojo **en oscuridad total**, donde no hay nada que fijar.
@@ -81,7 +81,7 @@ Con un integrador **sano**, el ojo se queda donde se lo deja. Con un integrador 
 - **Grado II**: también aparece mirando al frente.
 - **Grado III**: aparece en las tres posiciones, incluso mirando hacia la fase lenta.
 
-:::imagen ilustraciones/h15-mirada.svg Desviación del ojo respecto de la posición pedida al mirar a la izquierda, al frente y a la derecha. A: un nistagmo periférico mantiene su dirección y cambia de intensidad (ley de Alexander). B: un nistagmo evocado por la mirada cambia de dirección con ella. Trazas del simulador labyrinthus3d, sin fijación.
+:::imagen ilustraciones/h15-mirada.svg Desviación del ojo respecto de la posición pedida al mirar a la izquierda, al frente y a la derecha. A: un nistagmo periférico mantiene su dirección y cambia de intensidad (ley de Alexander). B: un nistagmo evocado por la mirada cambia de dirección con ella. Trazas de un paciente simulado, sin fijación. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 Lo que separa a los dos es la **dirección**. El periférico **no cambia de sentido** al cambiar la mirada: sube o baja de intensidad. El evocado por la mirada **cambia de sentido**: bate a la derecha cuando se mira a la derecha y a la izquierda cuando se mira a la izquierda. Esa diferencia es la que se examina en la mirada excéntrica del examen. En una persona sana puede haber unas pocas sacudidas con la mirada **extrema**: es el nistagmo de fin de rango y no es patológico, por eso no se mira más allá de lo que el protocolo pide (Leigh y Zee, 2015).
@@ -135,20 +135,15 @@ El examen con lentes de Frenzel toma **una hora**, y el de VNG, **una hora y vei
 Los centros difieren en cuántas horas de ayuno piden y en qué fármacos suspender. Lo que importa es el principio: los **supresores vestibulares** (antihistamínicos, benzodiacepinas, algunos antieméticos) bajan la respuesta, y es el médico quien decide si el paciente puede dejarlos. Si no puede, se anota qué toma y a qué hora, y se interpreta con eso a la vista. <!-- verificar: criterios de ayuno y de suspensión de fármacos en la guía de la AAN (Fife y cols. 2000) y en los protocolos de VNG; el libro conserva los del protocolo sin una cifra respaldada. -->
 :::
 
-### Conoce tu equipo: lentes de Frenzel, videonistagmógrafo y el simulador
+### Conoce tu equipo: lentes de Frenzel y videonistagmógrafo
 
 - **Lentes de Frenzel.** Gafas con lentes de **+20 dioptrías** y luz propia. Impiden la fijación del paciente y agrandan sus ojos para quien los mira. Se usan **con la luz de la sala atenuada**. No registran nada: lo que ves se anota a ojo, con tu criterio.
 - **Videonistagmógrafo.** Unas gafas cerradas con una **cámara infrarroja** frente a cada ojo (o frente a uno). La cámara sigue la pupila, el programa la convierte en grados y la muestra en el tiempo. Trae un **pedal** para marcar eventos sin soltar al paciente y un software donde se ingresan los datos y se corrigen los trazos.
 - **Una sala con luz controlada.** Con las lentes, luz **frontal atenuada**; con la VNG, una sala que se pueda oscurecer, y un punto o una luz que se mire **a 30 o 40 cm** a la altura de los ojos.
 
-En el libro, los exámenes se practican con el simulador **Labyrinthus 3D**, un software libre y de código abierto del autor, que modela los laberintos, los ojos y los circuitos del tronco y el cerebelo en el navegador. No es un videonistagmógrafo: no tiene cámara, pupila ni calibración, pero muestra los ojos de cerca y sus trazos como lo haría una VNG, y deja **quitar la fijación** como lo hacen las lentes.
-
-:::imagen ilustraciones/h15-simulador-frenzel.png ancho=80% Labyrinthus 3D, pestaña Patología, con una neuritis vestibular superior izquierda a las 6 horas y la fijación quitada
-- @20.5,22 | **El ojo de cerca y sus trazos.** Arriba, el ojo como lo vería una cámara; abajo, su posición en horizontal, vertical y torsional. Un nistagmo se ve como un diente de sierra.
-- @26,13 | **Fijando / Ocluido.** *Fijando* da luz y un punto que mirar; *Ocluido* lo quita. Con *Ocluido* la cabeza lleva las lentes de Frenzel.
-- @49,43 | **Las lentes de Frenzel.** Solo aparecen cuando la fijación está quitada.
-- @61,3 | **El caso.** El simulador trae casos armados (neuritis, Ménière, evocado por la mirada, lesiones del cerebelo y otros).
-- @76.5,92 | **Los sitios de la lesión.** Cada sitio de la vía puede estar normal, con hipofunción o perdido; al cambiarlos el caso pasa a "a medida".
+:::imagen ilustraciones/h15-simulador-frenzel.png ancho=80% Un paciente simulado con una neuritis vestibular superior izquierda, a las 6 horas, sin fijación. A la izquierda, con las lentes de Frenzel puestas; a la derecha, su ojo derecho de cerca. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @40,29 | **Lentes de Frenzel.** Agrandan los ojos para quien mira y no dejan fijar al paciente.
+- @97,21 | **El ojo de cerca**, como lo ve la cámara infrarroja de la VNG: el programa sigue la pupila y la convierte en grados.
 :::
 
 ### Ordenar la sala y al paciente
@@ -282,7 +277,7 @@ El protocolo de VNG **no incluye** las pruebas oculomotoras, pero la VNG de uso 
 - **Seguimiento lento.** El blanco **va y viene** con un movimiento suave. Se mide la **ganancia**, y se mira si el ojo alcanza al blanco con **sacadas de alcance**. Un seguimiento suave y de ganancia alta es normal.
 - **Optocinético.** Un campo de **barras corre** frente al paciente. Se mira si la **fase lenta** sigue las barras y si es **simétrica** entre un lado y el otro.
 
-:::imagen ilustraciones/h15-oculomotor.svg Pruebas oculomotoras. A: el blanco salta 20°; normal, hipométrica (vermis), con una dirección hipermétrica y otra hipométrica (fastigio) y tardía hacia un lado (campo frontal y colículo). B: seguimiento normal y con los dos flóculos lesionados, que sale sacádico y de ganancia baja. C: optocinético normal. Trazas del simulador labyrinthus3d; órdenes de magnitud docentes, no valores de referencia.
+:::imagen ilustraciones/h15-oculomotor.svg Pruebas oculomotoras. A: el blanco salta 20°; normal, hipométrica (vermis), con una dirección hipermétrica y otra hipométrica (fastigio) y tardía hacia un lado (campo frontal y colículo). B: seguimiento normal y con los dos flóculos lesionados, que sale sacádico y de ganancia baja. C: optocinético normal. Trazas de un paciente simulado: órdenes de magnitud del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 :::comentario Lo que dicen las normas
@@ -356,31 +351,6 @@ Y en cuanto a las **pruebas de equilibrio**: la prueba de Fukuda (marcha en el p
 Un vértigo continuo con un nistagmo que **parece periférico** no es siempre una neuritis. Un ataque cerebrovascular de la fosa posterior puede dar un nistagmo mixto y una buena fijación, y las pruebas que lo separan (el impulso cefálico, el cambio de sentido en la mirada, el *skew*) hay que **hacerlas todas**. Ante un paciente con factores de riesgo vascular, una cefalea o un cuadro neurológico nuevo, un examen vestibular tranquilizador **no cierra** el estudio (→ cap. 21).
 :::
 
-## En el simulador
-
-Todo el examen se practica con **Labyrinthus 3D**, un simulador del autor, libre y de código abierto, que corre en el navegador. Modela cada **sitio** de la vía (conductos, otolitos, ramas del nervio, núcleos vestibulares, flóculo, integrador, generadores de sacadas) y deja ponerlos **normales, con hipofunción o perdidos**. Lo que llega al ojo es el efecto del conjunto, y los ojos se ven de cerca, con trazos horizontal, vertical y torsional, como en una VNG.
-
-- **Nistagmo espontáneo.** En la pestaña **Patología**, elige un caso (por ejemplo, una neuritis vestibular superior), el lado y el **tiempo desde la lesión**. *Ocluido* quita la fijación, como las lentes de Frenzel; *Fijando* la devuelve. El nistagmo sale en tres dimensiones: horizontal con componente vertical y torsional. El panel entrega la **ley de Alexander** (grado I, II o III) y el **índice de fijación ocular**.
-- **Compensación.** Con el tiempo desde la lesión, el nistagmo baja solo. Si agregas el flóculo del mismo lado a la lesión, **la fijación no frena** y la compensación se pierde.
-- **Mirada excéntrica.** El panel deja elegir **adónde mira** el paciente (al centro, 20° a cada lado, arriba, abajo). El caso **Evocado por la mirada** muestra un nistagmo que cambia de sentido; el **periférico**, uno que sube y baja de intensidad.
-- **Pruebas oculomotoras.** En la pestaña **Oculomotor**, un estímulo de **sacadas**, de **seguimiento** o **optocinético** y las medidas al lado de las trazas: latencia, velocidad pico y precisión; ganancia y sacadas de alcance; fase lenta con las barras. Las lesiones de **Patología** se ven aquí: dismetría (núcleo fastigio), hipometría (vermis), campo frontal y colículo, y los dos flóculos.
-- **Paciente a ciegas.** Con el botón de **paciente al azar**, el simulador esconde el diagnóstico: quedan los ojos y sus trazos, el estudiante examina, propone un sitio y revela.
-
-:::imagen ilustraciones/h15-simulador-oculomotor.png ancho=80% Labyrinthus 3D, pestaña Oculomotor, con un blanco que salta 20° de lado a lado
-- @45.3,20 | **Lo que ve el paciente.** El blanco que salta (o que va y viene, o las barras del optocinético).
-- @88,20.5 | **El estímulo y su amplitud**, en el panel de arriba: sacadas, seguimiento, optocinético, silla y otros.
-- @50,41 | **La posición horizontal.** El blanco en gris y cada ojo en color: la latencia es lo que tarda el ojo en seguir el salto.
-- @50,70 | **La velocidad horizontal.** Cada sacada es un pico; su altura es la velocidad pico.
-:::
-
-El simulador **no** es una VNG ni modela todo:
-
-- **No tiene cámara, pupila ni calibración**, ni los artefactos del registro (párpado, pestañas, gafas corridas).
-- **Sus constantes son órdenes de magnitud docentes**, no valores de referencia: no sirven para fijar un límite normal.
-- **No hay variabilidad entre personas ni efecto de la edad**, la sedación o el cansancio, que en un paciente real cambian el examen.
-- **No modela la técnica del examinador** (la posición del blanco, la luz de la sala, el paciente que se duerme).
-- **Las lentes de Frenzel** son un efecto de la fijación quitada, no una óptica simulada.
-
 :::pregunta Preguntas para practicar
 1. Un paciente tiene una pérdida vestibular izquierda reciente. ¿Hacia dónde bate el nistagmo y hacia dónde va la fase lenta? ¿Por qué el ojo hace esa deriva?
 2. El mismo paciente, examinado con luz y mirando un punto, no tiene nistagmo. ¿Qué dice eso de su cerebelo? ¿Y de la elección de las lentes de Frenzel?
@@ -388,7 +358,6 @@ El simulador **no** es una VNG ni modela todo:
 4. Otro paciente bate a la derecha cuando mira a la derecha y a la izquierda cuando mira a la izquierda, y no hay nada al frente. ¿Qué estructura sospechas y por qué?
 5. Una calibración sale con una ganancia de 0,7. ¿Cómo cambia la velocidad de la fase lenta que lees? ¿Qué puede pasar con un nistagmo débil?
 6. En la anamnesis, un paciente dice que "todo gira" durante segundos al acostarse y al girar en la cama. ¿En qué herramienta sigues y qué examen de esta no es el principal?
-7. En Labyrinthus 3D, pon una neuritis aguda y alterna *Fijando* y *Ocluido*. ¿Qué cambia? Agrega el flóculo del mismo lado y repite: ¿qué te dice la diferencia?
 :::
 
 ## Referencias

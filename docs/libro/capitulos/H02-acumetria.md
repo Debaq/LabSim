@@ -34,7 +34,7 @@ Lo último es lo que más cuesta aceptar. La explicación clásica junta dos efe
 
 <!-- verificar: la explicación del Weber conductivo (oclusión y enmascaramiento por ruido ambiente) es la clásica de los textos, pero ninguna de las referencias de este capítulo la desarrolla. -->
 
-![Dos cabezas de frente con el diapasón en la frente. A la izquierda, oído medio sano en los dos lados: las ondas óseas llegan igual a ambas cócleas y el sonido se percibe al centro. A la derecha, el oído derecho con el conducto ocluido (tapón): flechas que muestran la energía ósea que no se escapa por ese conducto y el ruido ambiente que entra solo al oído izquierdo; el sonido se percibe en el oído derecho.](ilustraciones/h02-weber-conductivo.png)
+![{IA} Por qué el Weber se va al oído con pérdida conductiva. Con los dos oídos sanos, el diapasón se oye al centro. Con un conducto tapado, la energía que llega por el hueso no se escapa por ese conducto y el ruido del ambiente no lo enmascara: el sonido se oye en el oído tapado.](ilustraciones/h02-weber-conductivo.png)
 
 **El falso negativo nace de lo mismo.** La vibración apoyada en la mastoides llega también a la cóclea del otro lado. Si el oído examinado tiene una pérdida sensorioneural **severa**, frente al conducto no oye nada, pero en la mastoides el diapasón lo oye la **otra** cóclea. El paciente dice, con razón, que lo oye más fuerte "atrás": el Rinne sale negativo sin que haya ningún problema conductivo (BSA, 2022).
 
@@ -67,7 +67,7 @@ Se empieza por el Weber porque su resultado es el que permite no pasar por alto 
 <!-- Protocolo ORL 2019: Rinne primero y después Weber. Se cambió al orden de la BSA 2022: Weber primero, y el Rinne empieza por el oído al que lateralizó el Weber. -->
 <!-- Protocolo ORL 2019: hueso nasal como primera opción, triquion como alternativa y "nunca en los senos frontales". La BSA 2022 da la frente como sitio habitual (también vértex, puente nasal o mentón). Sobre los senos: Ungar 2021 muestra que la sinusitis puede lateralizar el Weber, apoyado tanto en la frente como en los incisivos. -->
 
-![Tres viñetas. Weber: base del diapasón en la línea media de la frente y la otra mano del examinador en la parte posterior de la cabeza; sitios alternativos marcados con puntos: vértex, puente nasal y mentón. Rinne aéreo: las ramas a unos 25 mm de la entrada del conducto, paralelas a su eje (flecha del eje acústico apuntando hacia adentro). Rinne óseo: la base apoyada en la mastoides y la otra mano en el lado opuesto de la cabeza; una flecha entre las dos viñetas del Rinne indica que el cambio se hace sin tocar las ramas.](ilustraciones/h02-tecnica.png)
+![{IA} Cómo se aplica el diapasón. Weber: la base en la línea media de la frente. Rinne: las ramas frente al conducto, paralelas a su eje, y luego la base en la mastoides; el cambio se hace sin tocar las ramas, para no apagar la vibración.](ilustraciones/h02-tecnica.png)
 
 ### 2. Rinne, oído por oído
 

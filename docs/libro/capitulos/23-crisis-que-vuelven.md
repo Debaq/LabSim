@@ -42,9 +42,9 @@ La mínima del protocolo, con agua a 2 °C, compara los dos oídos con una sola 
 
 El VEMP de este libro se hace con una sola frecuencia, la de 500 Hz (→ H12). En el Ménière, el sáculo afectado tiene además una **sintonía alterada**: responde peor a 500 Hz y relativamente mejor a frecuencias más altas, con lo cual un VEMP de 500 Hz subestima el problema y uno con varias frecuencias lo muestra mejor (Rauch y cols., 2004) <!-- verificar: dirección exacta del cambio de sintonía en Rauch 2004 (no se leyó el texto completo) -->.
 
-## En el simulador
+## En LabSim
 
-LabSim da el lado auditivo de estos pacientes: audiograma, logoaudiometría, electrococleografía y VEMP. **No hace** examen vestibular. Lo que cada caso entrega de VNG, calórica y vHIT está **escrito** en la ficha de resultados del caso, con cifras inventadas para el libro. Para ver cómo se produce una calórica o un impulso cefálico se usan **Labyrinthus 3D** y **trainHIT**, los simuladores del propio autor, software libre (→ H15, H16, H17); Labyrinthus 3D trae además un caso de hidrops con la calórica caída, que es el de la figura B de H16. Ninguno modela la fluctuación en el tiempo, ni las caídas bruscas, ni la migraña.
+LabSim da el lado auditivo de estos pacientes: audiograma, logoaudiometría, electrococleografía y VEMP. **No hace** examen vestibular. Lo que cada caso entrega de VNG, calórica y vHIT está **escrito** en la ficha de resultados del caso, con cifras de ejemplo.
 
 ## Fisiología
 
@@ -54,7 +54,7 @@ La calórica y el vHIT estimulan **el mismo canal lateral**, pero de dos maneras
 
 En un hidrops pasa algo curioso: una calórica caída con un vHIT normal. En 644 pacientes con ambas pruebas, 570 coincidieron; de los 36 que no coincidieron, todos tenían el vHIT normal y la calórica alterada, y en 27 el diagnóstico final fue enfermedad de Ménière. Ningún paciente con vHIT lateral anormal tuvo una calórica normal (Hannigan y cols., 2021). Una explicación propuesta es que el hidrops dilata el laberinto y altera la forma en que el calor activa los receptores, pero casi no cambia la respuesta de la cúpula al giro rápido (Halmagyi y cols., 2017); qué revela esa disociación sobre el oído enfermo es lo que discuten McGarvie y cols. (2015).
 
-:::imagen ilustraciones/cap23-disociacion.svg Calórica y vHIT de los cuatro casos del capítulo. El cuadrante verde (calórica alterada y vHIT normal) es el de la disociación
+:::imagen ilustraciones/cap23-disociacion.svg Calórica y vHIT de los cuatro casos del capítulo. El cuadrante verde (calórica alterada y vHIT normal) es el de la disociación: el canal falla ante el estímulo lento y responde al rápido, como en el hidrops. Fíjate en quiénes caen ahí y quiénes no.
 :::
 
 Dos cosas se desprenden de ese hallazgo. La primera: **que el vHIT salga normal no tranquiliza** sobre el laberinto; solo dice que la parte rápida del reflejo funciona. La segunda: cuando el daño avanza y el vHIT también cae, el cuadro deja de ser el del hidrops que fluctúa y pasa a ser el de un canal que ya no responde.
@@ -81,7 +81,7 @@ Con los años, el cuadro cambia de forma en tres sentidos.
 
 **La audición deja de fluctuar.** Al principio es ascendente y vuelve; después se aplana y desciende, y ya no se recupera. El audiograma se agrupa por **etapas** según el promedio de 500, 1.000, 2.000 y 3.000 Hz del peor audiograma de los últimos seis meses: la etapa 1 llega hasta 25 dB, la 2 de 26 a 40, la 3 de 41 a 70 y la 4 sobre 70 dB (Comité de Audición y Equilibrio de la AAO-HNS, 1995) <!-- verificar: el límite entre las etapas 1 y 2 aparece como 25 o 26 dB según la fuente; confirmar en el original -->. Esa clasificación es **solo audiométrica**: no dice nada de las crisis ni del vestíbulo.
 
-:::imagen ilustraciones/cap23-evolucion.svg El mismo oído en tres momentos. El del año 0 y el del año 3 son parte de la historia del caso 23.1; el de hoy es el que el paciente trae a la evaluación
+:::imagen ilustraciones/cap23-evolucion.svg El mismo oído en tres momentos. El del año 0 y el del año 3 son parte de la historia del caso 23.1; el de hoy es el que el paciente trae a la evaluación. Sigue la forma: de ascendente a plana y descendente, y de una etapa a la siguiente.
 :::
 
 **El vestíbulo deja de responder.** La calórica cae; con la enfermedad avanzada, el vHIT también puede caer, y entonces ya no hay disociación. Con la pérdida llegan los síntomas de la persona sin crisis: inestabilidad, miedo a caminar en la oscuridad.
@@ -90,7 +90,7 @@ Con los años, el cuadro cambia de forma en tres sentidos.
 
 La resonancia con gadolinio tardío también gradúa el hidrops, oído por oído, por lo que ocupa en el vestíbulo y la cóclea (→ cap. 9). La pide y la informa el médico.
 
-:::imagen ilustraciones/cap23-rm-hidrops-grados.jpg ancho=58% Resonancia 3D-FLAIR cuatro horas después del gadolinio intravenoso, en oídos de otras personas, con el esquema de cada corte a la derecha. En rojo, la superficie del vestíbulo que se midió. Se muestra para que se vea la forma de lo que miden las pruebas. Rótulos originales en inglés. Imagen: Diorflar S, Guigou C, Daguet E, Bensimon JL, Toupet M, Bozorg-Grayeli A (2023), Front Neurol 14:1105461, doi:10.3389/fneur.2023.1105461, Fig. 2, CC BY 4.0, sin modificar.
+:::imagen ilustraciones/cap23-rm-hidrops-grados.jpg ancho=58% Resonancia 3D-FLAIR cuatro horas después del gadolinio intravenoso, en oídos de otras personas, con el esquema de cada corte a la derecha. En rojo, la superficie del vestíbulo que se midió. Baja por los grados: el espacio oscuro del sáculo y el utrículo ocupa cada vez más vestíbulo, hasta que ya no se separan. Rótulos en inglés, del original. Imagen: Diorflar S, Guigou C, Daguet E, Bensimon JL, Toupet M, Bozorg-Grayeli A (2023), Front Neurol 14:1105461, doi:10.3389/fneur.2023.1105461, Fig. 2, CC BY 4.0.
 - @46,4 | **Grado 0**: sin hidrops. Sáculo y utrículo chicos y separados.
 - @46,37 | **Grado I**: hidrops moderado del vestíbulo y de la cóclea.
 - @46,70 | **Grado II**: hidrops importante del vestíbulo, que ya no deja separar el sáculo del utrículo, y grado I de la cóclea.
@@ -197,7 +197,7 @@ Tienes tres audiogramas de la historia. ¿Qué te falta para decidir si el vest�
 - @OI P13 | El del OI mide **511 µV** (10,20 corregida). La asimetría es de **28 %**, bajo el corte de 35 % de LabSim (→ H12): **el sáculo del OD responde**.
 :::
 
-:::ayuda-ancho Lo que entrega Ignacio del examen vestibular (cifras inventadas para el libro; → H15, H16, H17)
+:::ayuda-ancho Lo que entrega Ignacio del examen vestibular (→ H15, H16, H17)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | sin nistagmo con ni sin fijación; seguimiento y sacádicos normales |
@@ -212,7 +212,7 @@ Tienes tres audiogramas de la historia. ¿Qué te falta para decidir si el vest�
 - **Qué pedir:** audiometría con fecha y relación con la última crisis, logoaudiometría, cVEMP, calórica y vHIT. La ECochG sirve poco en este oído.
 - **Lo que enseña:** la calórica caída con el vHIT normal, en un oído con la audición ya fija; y que el cVEMP normal no cambia el diagnóstico.
 - **Errores esperables:** repetir "audición ascendente" cuando la curva hoy desciende; leer la ECochG de un oído sin respuesta; informar la asimetría de 28 % del cVEMP como alterada.
-- **En LabSim:** caso armado para el libro con el cuadro *Coclear plana* moderado en el OD (el motor no modela el hidrops en esa etapa; la ECochG y el VEMP salen de un oído coclear sin patrón propio). La historia lleva las dos audiometrías anteriores.
+- **En LabSim:** cuadro *Coclear plana* moderado en el OD (LabSim no modela el hidrops en esa etapa: la ECochG y el VEMP son los de un oído coclear sin patrón propio). La historia lleva las dos audiometrías anteriores.
 :::
 
 {{caso cap23_meniere_bilateral}}
@@ -249,7 +249,7 @@ Se plantea apagar el laberinto izquierdo. ¿Qué necesitas saber del derecho ant
 - @OI P13 | El del OI mide **346 µV**, **6,84** corregida: la asimetría es de **65 %**, y el lado más débil es el **de mejor audición**. El sáculo y la cóclea no caen en paralelo.
 :::
 
-:::ayuda-ancho Lo que entrega Clara del examen vestibular (cifras inventadas para el libro)
+:::ayuda-ancho Lo que entrega Clara del examen vestibular
 | Prueba | Resultado |
 |---|---|
 | VNG | sin nistagmo espontáneo ni posicional; seguimiento y sacádicos normales |
@@ -263,7 +263,7 @@ Se plantea apagar el laberinto izquierdo. ¿Qué necesitas saber del derecho ant
 - **Qué pedir:** audiograma seriado de los dos oídos, ECochG, cVEMP, calórica y vHIT. Lo que importa es lo que el OD **todavía hace**.
 - **Lo que enseña:** una calórica con asimetría pequeña no es normal si los **dos** oídos responden poco; hay que mirar las velocidades. Y un cVEMP muy asimétrico puede estar en el oído que mejor oye.
 - **Errores esperables:** informar la calórica de 12 % como "normal"; asumir que el oído de peor audiograma tiene el peor sáculo; opinar sobre el tratamiento: el informe describe el estado del otro laberinto, la decisión es médica.
-- **En LabSim:** caso armado con el cuadro *Ménière* leve en el OD y *Coclear plana* moderado en el OI.
+- **En LabSim:** cuadro *Ménière* leve en el OD y *Coclear plana* moderado en el OI.
 :::
 
 {{caso cap23_migrana_vestibular}}
@@ -296,7 +296,7 @@ No hay síntomas del oído. ¿Para qué sirve el audiograma, entonces? ¿Qué es
 - @OI P13 | El del OI mide **336 µV** (6,82 corregida). La asimetría es de **29 %**, bajo el corte de 35 %: una diferencia así es variabilidad, no enfermedad.
 :::
 
-:::ayuda-ancho Lo que entrega Patricia del examen vestibular (cifras inventadas para el libro)
+:::ayuda-ancho Lo que entrega Patricia del examen vestibular
 | Prueba | Resultado |
 |---|---|
 | VNG | sin nistagmo espontáneo ni posicional; seguimiento y sacádicos normales |
@@ -310,7 +310,7 @@ No hay síntomas del oído. ¿Para qué sirve el audiograma, entonces? ¿Qué es
 - **Qué pedir:** audiometría y emisiones para documentar el oído sano, VEMP y calórica entre crisis. Todo normal es **lo esperable**; el diagnóstico es clínico.
 - **Lo que enseña:** un estudio normal no cierra el caso ni lo niega; y una asimetría pequeña del VEMP no hace un diagnóstico.
 - **Errores esperables:** repetir antivertiginosos; interpretar la asimetría de 29 % del cVEMP; informar "estudio normal, sin patología vestibular" sin decir que el diagnóstico es clínico.
-- **En LabSim:** caso armado para el libro con audición normal en los dos oídos (el motor no tiene un cuadro de migraña vestibular). El nombre de la paciente lo sortea el editor.
+- **En LabSim:** audición normal en los dos oídos (LabSim no tiene un cuadro de migraña vestibular). El nombre de la paciente lo sortea el editor de casos.
 :::
 
 {{caso cap23_meniere_migrana}}
@@ -346,7 +346,7 @@ Tiene un oído sano para comparar. ¿Qué te aporta eso para el criterio audiom�
 - @OI P13 | El del OI mide **80 µV** (1,57 corregida): **62 %** de asimetría, con el sáculo del lado enfermo reducido.
 :::
 
-:::ayuda-ancho Lo que entrega Marina del examen vestibular (cifras inventadas para el libro)
+:::ayuda-ancho Lo que entrega Marina del examen vestibular
 | Prueba | Resultado |
 |---|---|
 | VNG | sin nistagmo espontáneo ni posicional; seguimiento y sacádicos normales |
@@ -360,7 +360,7 @@ Tiene un oído sano para comparar. ¿Qué te aporta eso para el criterio audiom�
 - **Qué pedir:** audiometría con fecha de la última crisis, ECochG, cVEMP, calórica y vHIT.
 - **Lo que enseña:** cada crisis se clasifica por lo que trae; los hallazgos del oído (curva ascendente, ECochG, cVEMP, calórica con vHIT normal) apoyan el Ménière, y no dicen nada sobre las crisis largas.
 - **Errores esperables:** quedarse con un solo diagnóstico; atribuir todas las crisis al oído porque el estudio del oído salió alterado.
-- **En LabSim:** caso armado con el cuadro *Ménière* leve en el OI y audición normal en el OD. El motor da un OI con el aspecto del Ménière típico de las primeras etapas.
+- **En LabSim:** cuadro *Ménière* leve en el OI y audición normal en el OD; el OI sale con el aspecto del Ménière típico de las primeras etapas.
 :::
 
 ## Resolución de los casos

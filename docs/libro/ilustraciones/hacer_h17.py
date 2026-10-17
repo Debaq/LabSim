@@ -141,7 +141,7 @@ def trazas():
     c.t(80, 300, 'cabeza', 8.5, TINTA, 'start')
     c.l(140, 297, 164, 297, OJO, 2.4)
     c.t(170, 300, 'ojo (invertido)', 8.5, TINTA, 'start')
-    c.t(700, 300, 'Esquema con la lógica del generador sintético de trainHIT; cifras de ejemplo.', 7.5, TENUE, 'end')
+    c.t(700, 300, 'Esquema con cifras de ejemplo, no datos de pacientes.', 7.5, TENUE, 'end')
     c.guardar('h17-trazas.svg')
 
 

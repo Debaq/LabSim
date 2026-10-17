@@ -45,7 +45,7 @@ El resultado es la **curva área-distancia**: en el eje horizontal, los centíme
 
 ### La curva normal y sus dos mínimos
 
-:::imagen ilustraciones/h25-rs-curva.svg ancho=96% La curva área-distancia de la fosa derecha de un paciente simulado sano, en reposo (el eje del área es logarítmico). Dos mínimos, MCA1 y MCA2, y la zona de más allá de unos 5 cm, que el equipo marca como poco fiable. Registro simulado con RinoSim (software libre del autor); no es un paciente.
+:::imagen ilustraciones/h25-rs-curva.svg ancho=96% La curva área-distancia de la fosa derecha de un paciente simulado sano, en reposo (el eje del área es logarítmico). Dos mínimos, MCA1 y MCA2, y la zona de más allá de unos 5 cm, que el equipo marca como poco fiable. Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @24.3,60.2 | **MCA1.** El primer mínimo: el valle de la válvula nasal. Aquí, unos 0,6 cm² a 1,3 cm de la narina. Su área y su distancia son el primer dato que se anota.
 - @40.7,43.1 | **MCA2.** El segundo mínimo, que corresponde al cornete inferior: aquí, unos 1,5 cm² a 3,1 cm. Su cambio después del vasoconstrictor dice cuánto de la mucosa se mueve.
 - @86.6,7.3 | **Zona poco fiable.** Más allá de unos 5 cm la curva ya no se lee como medida de áreas.
@@ -91,7 +91,7 @@ El método de la reflexión es muy repetible en la zona anterior: en el trabajo 
 
 El primer límite, visto en una fosa simulada con la válvula muy cerrada:
 
-:::imagen ilustraciones/h25-rs-limite.svg ancho=96% Una válvula muy cerrada. En reposo (línea continua) el equipo mide MCA1 de 0,12 cm² y, detrás, un MCA2 de 0,19 cm²; pero el valor verdadero del modelo en ese lugar (que el botón del docente de RinoSim muestra) es 0,59 cm². Con vasoconstrictor (discontinua) la válvula se abre un poco (MCA1 de 0,33 cm²) y recién entonces aparece lo de atrás (MCA2 de 1,82 cm²). Registro simulado con RinoSim (software libre del autor); no es un paciente.
+:::imagen ilustraciones/h25-rs-limite.svg ancho=96% Una válvula muy cerrada. En reposo (línea continua) el equipo mide MCA1 de 0,12 cm² y, detrás, un MCA2 de 0,19 cm²; pero el área verdadera del modelo en ese lugar es 0,59 cm². Con vasoconstrictor (discontinua) la válvula se abre un poco (MCA1 de 0,33 cm²) y recién entonces aparece lo de atrás (MCA2 de 1,82 cm²). Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 Por eso este libro enseña a **creer la curva en los primeros 5 cm** y a decir en el informe cuando la válvula está tan cerrada que lo de atrás no se puede evaluar.
@@ -132,19 +132,17 @@ Lo que tienen todos los equipos del mercado, con distinto aspecto:
 - Un **adaptador nasal** (a veces llamado oliva o *nosepiece*) que se coloca en el extremo del tubo, contra la narina.
 - Una pantalla con **calibración**, **adquisición** de la medición y el **gráfico** de la curva. Los nombres de los botones cambian de un fabricante a otro: aquí se nombran por lo que hacen.
 
-La captura es la pantalla del rinómetro simulado de RinoSim (→ *En el simulador*), con las dos fosas de un paciente simulado ya medidas, en reposo y con vasoconstrictor.
+El resultado es la curva de las dos fosas y una tabla con los registros, su promedio y el cambio con el vasoconstrictor.
 
-:::imagen ilustraciones/h25-rs-equipo.png ancho=96% La pantalla de un rinómetro acústico simulado (RinoSim, software libre del autor): paciente simulado del cuadro «Hipertrofia de cornetes inferiores», tres registros por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Las dos fosas son iguales en este cuadro, por eso las curvas se superponen. No es un paciente.
-- @37.9,3.8 | **Barra de mando.** *Calibrar* (con el tubo calibrador, antes de medir), *Medir FND* y *Medir FNI* (tres registros por fosa, en apnea) y *Borrar*.
-- @57,6.0 | **Errores de técnica.** Solo existen en el simulador: fuga en el adaptador, adaptador que aprieta la narina, respira o traga en el registro. Son los de *Errores frecuentes*, para provocarlos a propósito.
-- @30.5,7.9 | **Vista.** El área en escala logarítmica y los tres registros de cada fosa superpuestos (las líneas finas).
-- @25.5,44.0 | **MCA1.** El primer mínimo de cada fosa: la válvula, a 1,3 cm de la narina.
-- @42.5,46.3 | **MCA2.** El segundo mínimo: el cornete inferior, a unos 3,2 cm. En reposo es mucho más angosto que MCA1.
-- @30.3,25.8 | **Con vasoconstrictor** (discontinua). El segundo mínimo se abre casi del todo y el primero un poco: era mucosa.
-- @85.8,14.9 | **Zona poco fiable.** La parte de la curva más allá de unos 5 cm.
-- @21.7,72.0 | **Promedio de los tres registros** de la fosa derecha en reposo: Dist 1 y MCA1, Dist 2 y MCA2, Vol 1, Vol 0-5 (el «Vol 2» de la tabla de este capítulo) y Vol 2-5. Debajo, lo mismo con vasoconstrictor y, después, la fosa izquierda.
-- @95.2,72.0 | **Repetición.** «sí» si los tres registros cumplen el criterio del libro: MCA1 y MCA2 a 0,03 cm² o menos entre sí.
-- @19.6,96.3 | **Normal del modelo (no es norma).** La fosa normal del simulador, para tener contra qué mirar. Los valores de referencia de verdad son los de la tabla de tu servicio.
+:::imagen ilustraciones/h25-rs-equipo.png ancho=96% El resultado de una rinometría acústica: curva área-distancia y tabla. Paciente simulado con hipertrofia de cornetes inferiores, tres registros por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Las dos fosas son iguales en este paciente, por eso las curvas se superponen. Las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+- @15,34 | **MCA1.** El primer mínimo de cada fosa: la válvula, a 1,3 cm de la narina.
+- @32,37 | **MCA2.** El segundo mínimo: el cornete inferior, a unos 3,2 cm. En reposo es mucho más angosto que MCA1.
+- @42,15 | **Con vasoconstrictor** (discontinua). El segundo mínimo se abre casi del todo y el primero un poco: era mucosa.
+- @80,25 | **Zona poco fiable.** La parte de la curva más allá de unos 5 cm.
+- @-3,66 | **Promedio de los tres registros** de la fosa derecha en reposo: Dist 1 y MCA1, Dist 2 y MCA2, Vol 1, Vol 0-5 (el «Vol 2» de la tabla de este capítulo) y Vol 2-5. Debajo, lo mismo con vasoconstrictor y, después, la fosa izquierda.
+- @103,66 | **Repetición.** «sí» si los tres registros cumplen el criterio del libro: MCA1 y MCA2 a 0,03 cm² o menos entre sí.
+- @-3,92 | **Normal del modelo (no es norma).** Una fosa normal del mismo modelo, para tener contra qué mirar. Los valores de referencia de verdad son los de la tabla de tu servicio.
+- @103,97 | **Cambio con vasoconstrictor.** En porcentaje respecto del reposo: el segundo mínimo se multiplica por cinco.
 :::
 
 ### Preparar el equipo, la sala y al paciente
@@ -227,12 +225,12 @@ Tabla: Cómo se describe el cambio con el vasoconstrictor
 | **Aumento total** | Mejoran hasta alcanzar la referencia | El estrechamiento era de la mucosa |
 | **Disminuidos respecto del reposo** | La obstrucción es aún mayor | Poco habitual: revisa la técnica antes de interpretar |
 
-:::imagen ilustraciones/h25-rs-vasoconstrictor.svg ancho=88% Dos respuestas frente al vasoconstrictor en la fosa derecha (el eje del área es logarítmico). Línea continua: reposo; discontinua: con vasoconstrictor. A: la mucosa explica el estrechamiento: el segundo mínimo pasa de 0,38 a 1,91 cm² y el primero, de 0,45 a 0,67. B: el obstáculo es estructural, un tabique desviado en la válvula: MCA1 pasa de 0,36 a 0,39 cm² y MCA2, de 1,78 a 1,98; casi nada cambia. Registros simulados con RinoSim (software libre del autor); no son pacientes.
+:::imagen ilustraciones/h25-rs-vasoconstrictor.svg ancho=88% Dos respuestas frente al vasoconstrictor en la fosa derecha (el eje del área es logarítmico). Línea continua: reposo; discontinua: con vasoconstrictor. A: la mucosa explica el estrechamiento: el segundo mínimo pasa de 0,38 a 1,91 cm² y el primero, de 0,45 a 0,67. B: el obstáculo es estructural, un tabique desviado en la válvula: MCA1 pasa de 0,36 a 0,39 cm² y MCA2, de 1,78 a 1,98; casi nada cambia. Pacientes simulados; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 Y la mezcla de los dos, como en la fila «Aumento parcial» de la tabla:
 
-:::imagen ilustraciones/h25-rs-mixta.svg ancho=88% Una desviación septal con cornetes congestionados. En reposo (continua), MCA1 de 0,26 y MCA2 de cerca de 0,7 cm²; con vasoconstrictor (discontinua), el segundo mínimo se abre casi del todo (1,94 cm²) pero el primero solo sube a 0,41 cm²: lo mucoso se fue y lo estructural queda. Registro simulado con RinoSim (software libre del autor); no es un paciente.
+:::imagen ilustraciones/h25-rs-mixta.svg ancho=88% Una desviación septal con cornetes congestionados. En reposo (continua), MCA1 de 0,26 y MCA2 de cerca de 0,7 cm²; con vasoconstrictor (discontinua), el segundo mínimo se abre casi del todo (1,94 cm²) pero el primero solo sube a 0,41 cm²: lo mucoso se fue y lo estructural queda. Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 El renglón "mejoría total / parcial / ninguna" es lo que ordena el resto del informe. La rinometría **dice cuánto de la estrechez es reversible**, y eso es lo que más le sirve al médico que decide entre un tratamiento médico y una cirugía. En un estudio con fenilefrina, el área del primer mínimo de los alérgicos cambió más que la de los sanos (Corey y cols., 1997), y por eso la prueba interesa en la rinitis.
@@ -263,7 +261,7 @@ Antes de informar, mira la curva, no solo los números. Una curva con un mínimo
 
 ## Errores frecuentes
 
-:::imagen ilustraciones/h25-rs-fuga.svg ancho=96% El error de un sello deficiente. Los tres registros (las líneas finas) no se parecen: MCA1 se separa 0,17 cm² entre un registro y otro y MCA2, 0,40, lejos del 0,03 que pide el criterio de repetición. Y las áreas salen sobreestimadas: MCA1 de 0,93 y MCA2 de 2,29 cm², cuando en la misma fosa sin fuga son cerca de 0,6 y de 1,5. Registro simulado con RinoSim (software libre del autor); no es un paciente.
+:::imagen ilustraciones/h25-rs-fuga.svg ancho=96% El error de un sello deficiente. Los tres registros (las líneas finas) no se parecen: MCA1 se separa 0,17 cm² entre un registro y otro y MCA2, 0,40, lejos del 0,03 que pide el criterio de repetición. Y las áreas salen sobreestimadas: MCA1 de 0,93 y MCA2 de 2,29 cm², cuando en la misma fosa sin fuga son cerca de 0,6 y de 1,5. Paciente simulado; las cifras son del modelo, no normas. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 - **Adaptador del tamaño equivocado.** Uno chico se escapa y uno grande abre la narina y deforma la entrada.
@@ -278,33 +276,6 @@ Antes de informar, mira la curva, no solo los números. Una curva con un mínimo
 - **Leer áreas pasados los 5 cm como si fueran de la fosa.** Ya incluyen senos y rinofaringe.
 - **Medir con perforación del tabique o con cirugía previa de senos sin avisar.** Cambian el camino del sonido y la curva se lee distinto.
 - **Interpretar el cambio con el vasoconstrictor sin considerar el ciclo nasal** o la técnica de aplicación (el paciente se sonó, el producto escurrió).
-
-## En el simulador
-
-Para esta herramienta hay un simulador propio: **RinoSim**, un programa libre hecho por el autor de este libro. Corre en el navegador, sin instalar nada y sin conexión a internet, y reproduce la rinometría acústica descrita en este capítulo (y la rinomanometría de H24) sobre **pacientes simulados**. Las curvas y la pantalla del equipo de las figuras de este capítulo salen de él. Las dos pruebas comparten la misma nariz: lo que mides con una lo puedes cruzar con la otra.
-
-Para practicar:
-
-- **Calibra y mide.** *Calibrar*, *Medir FND* y *Medir FNI*: cada botón toma tres registros de la fosa. Mira la curva, los dos mínimos con sus distancias, la tabla con Dist 1, MCA1, Dist 2, MCA2 y los volúmenes, el promedio y si los tres registros cumplen el criterio de repetición.
-- **Elige un cuadro**: *normal*, *desviación derecha* e *izquierda*, *cornetes*, *colapso valvular*, *pólipos*, *mixta* o *perforación*. Con una **semilla** cada cuadro se vuelve una variante individual (siempre la misma para esa semilla), y «Otro paciente de este cuadro» sortea una. Intenta decir **dónde** se estrecha cada uno antes de aplicar el vasoconstrictor.
-- **Haz la prueba con vasoconstrictor** y clasifica cada fosa con la tabla de este capítulo: *cornetes* se abre (mucosa), *desviación* no (estructura), *mixta* se abre a medias. Compara también con la rinomanometría del mismo paciente (→ H24): la rinometría dice dónde, la rinomanometría, cuánto cuesta respirar.
-- **Provoca los errores de técnica.** La *fuga en el adaptador* sobreestima las áreas y los registros dejan de parecerse; el *adaptador que aprieta la narina* achica la entrada y la válvula; *respira o traga en el registro* varía sobre todo detrás de unos 4,5 cm.
-- **Prueba los límites.** En la pestaña *Paciente* se puede cargar un paciente desde un archivo. Hay dos de ejemplo: una **válvula muy cerrada**, donde lo de atrás no se ve, y un **espolón frente al cornete**, donde la geometría es estrecha pero la resistencia es casi normal. Con el cuadro *perforación* la rinometría sobreestima lo que hay detrás de la perforación.
-- **Mira lo que el equipo no sabe.** El botón del docente *Mostrar lo que el equipo no sabe* muestra las áreas verdaderas del modelo, sin errores de técnica ni deformación del eco, para comparar contra lo que midió el alumno.
-- **Con el equipo real**, en parejas, practica la colocación del adaptador y la postura sobre un compañero, sin aplicar el vasoconstrictor, hasta lograr tres registros parecidos. El orden y las instrucciones al paciente son los de este capítulo. **Sin equipo**, dibuja la curva de un caso que te inventes y predice cómo se verá después del vasoconstrictor; compara con las figuras de este capítulo.
-
-:::comentario Lo que el simulador no es
-**RinoSim es un modelo para enseñar, no un equipo médico ni una norma.** Sus cifras son órdenes de magnitud del modelo, y por eso este capítulo no las usa como valores de referencia: la tabla muestra una fila «normal del modelo (no es norma)» y el criterio de repetición es el del libro (0,03 cm²). Lo que **no** hace:
-
-- **No resuelve la acústica.** No hay pulso, reflexión ni inversión de la impedancia: la curva del equipo es el perfil verdadero de la fosa deformado en el sentido de los errores que la literatura describe (el sello, la válvula cerrada, los senos). El tamaño de esos errores es del modelo; el sentido, el del capítulo.
-- No simula la temperatura ni la velocidad del sonido (la calibración es un botón) ni el ruido de la sala.
-- No depende de edad, sexo, talla ni grupo étnico (Corey y cols., 1998), no hay niños, y no están la atresia coanal, las costras, las cirugías previas ni la rinitis atrófica.
-- El vasoconstrictor actúa entero, como a los 15 minutos: no hay curso en el tiempo ni rebote. En el cuadro *cornetes* el primer mínimo también sube un poco, porque la cabeza del cornete forma parte de la válvula.
-- Los pólipos no responden al vasoconstrictor; lo que se abre en ese cuadro es la mucosa de los cornetes que los rodea.
-- No mide la **sensación** de obstrucción (Larsson y cols., 2001; Roithmann y cols., 1994).
-
-Las figuras son **registros simulados**, no pacientes.
-:::
 
 :::pregunta Preguntas para practicar
 1. Explica con tus palabras por qué un eco que vuelve más tarde viene de más adentro, y qué dice su intensidad.

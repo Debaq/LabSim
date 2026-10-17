@@ -81,7 +81,7 @@ Una perforación o una otorrea de años dejan un oído medio húmedo y una caden
 
 La otoesclerosis es una enfermedad del hueso que rodea la cóclea y fija el estribo (→ cap. 4). En su fase avanzada, además del gap, la ósea baja: en parte por la muesca de Carhart (mecánica) y en parte por una lesión real de la cóclea. No hay forma de separar las dos con la audiometría; el pronóstico se conoce **después** de la cirugía, cuando el gap se cierra y la ósea vuelve a subir. En la serie de Xue y Sun (2025), el gap fue máximo en graves y mínimo en 2 kHz, y subía de nuevo en 4 kHz. La curva timpanométrica A o As y los reflejos ausentes son lo habitual (Forli y cols., 2025). Cuando la enfermedad toma la cóclea, la tomografía puede mostrarla como un anillo oscuro alrededor de ella.
 
-:::imagen ilustraciones/cap15-tc-otoesclerosis-coclear.jpg ancho=80% Tomografía axial de los oídos derecho (a) e izquierdo (b) de otra persona, un adulto con hipoacusia sensorioneural severa bilateral por otoesclerosis coclear, no de los pacientes de este capítulo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Purohit B, Hermans R, Op de Beeck K (2014), Insights Imaging, doi:10.1007/s13244-014-0313-9, Fig. 12, CC BY; se borró un rótulo técnico del equipo.
+:::imagen ilustraciones/cap15-tc-otoesclerosis-coclear.jpg ancho=80% Tomografía axial de los oídos derecho (a) e izquierdo (b) de un adulto con hipoacusia sensorioneural severa bilateral por otoesclerosis coclear (otra persona, no un paciente de este capítulo). Busca el anillo oscuro que rodea la cóclea: es la enfermedad que ya no se queda en el estribo y toca la cápsula de la cóclea, la parte que hace caer también la ósea. La tomografía la pide y la informa el médico. Imagen: Purohit B, Hermans R, Op de Beeck K (2014), Insights Imaging, doi:10.1007/s13244-014-0313-9, Fig. 12, CC BY, adaptada.
 - @20,22 | **Doble anillo** (flecha): una banda oscura de hueso desmineralizado rodea la cóclea por fuera.
 - @69,12 | El mismo anillo en el otro oído: la enfermedad es bilateral.
 :::
@@ -177,7 +177,7 @@ Además de la audiometría con ósea enmascarada, ¿qué más agregarías? Piens
 - **Hipótesis esperables:** mixta por otitis crónica contra conductiva pura de una perforación. La respuesta separa la **ósea**: normal en una conductiva pura, caída en una mixta.
 - **Qué pedir:** audiometría con ósea enmascarada en el OD y acumetría; timpanograma, con el oído seco (→ H2, H3, H4, H7). No hay razón para un ABR óseo en un adulto que contesta.
 - **Errores esperables:** anotar una ósea sin enmascarar y concluir "conductiva pura"; leer el ABR óseo sin respuesta como cóclea muerta.
-- **En LabSim:** caso armado para el libro con el cuadro *mixta_otitis_cronica* moderada en el OD; el docente puede crearlo igual. El ABR óseo se elige en Parámetros avanzados, con el vibrador.
+- **En LabSim:** cuadro *mixta_otitis_cronica*, grado moderado en el OD. El ABR óseo se elige en Parámetros avanzados, con el vibrador.
 :::
 
 {{caso cap15_mixta_otoesclerosis}}
@@ -220,7 +220,7 @@ Los dos oídos oyen casi igual. ¿Hace falta enmascarar la ósea? ¿Qué ocurre 
 - **Qué pedir:** audiometría con vía ósea enmascarada en cada oído, impedanciometría con reflejos (→ H3, H4, H7).
 - **Errores esperables:** anotar la ósea sin enmascarar y repetir la misma en los dos oídos; concluir que toda la caída ósea es daño coclear.
 - **Ejercicio de enmascaramiento:** en 1 kHz, para la ósea del OI: mínimo = 40 − 35 + 60 = **65 dB**, sin efecto de oclusión porque el OD tiene gap; máximo = 40 + AI del fono que lleva el ruido: con un supraaural (40 dB) da **80 dB** y con un inserto (55 dB) da **95 dB**. Hay ventana, pero angosta con supraaural (→ H4, "El dilema de enmascaramiento").
-- **En LabSim:** caso armado para el libro con el cuadro *mixta_otoesclerosis* moderada en los dos oídos.
+- **En LabSim:** cuadro *mixta_otoesclerosis*, grado moderado en los dos oídos.
 :::
 
 {{caso cap15_colesteatoma_fistula}}
@@ -258,7 +258,7 @@ Otorrea fétida de años y un mareo con la presión: ¿qué estructura puede est
 - **Hipótesis esperables:** otitis crónica colesteatomatosa con **fístula laberíntica**. El vértigo con la presión es la pista.
 - **Qué pedir:** audiometría con ósea enmascarada (→ H3, H4) y derivar el mismo día. **No** se presuriza el oído: la prueba de presión puede provocar el vértigo, y con otorrea la timpanometría no se hace (→ cap. 3). <!-- verificar: la timpanometría como desencadenante de vértigo en fístula; práctica prudente, no se encontró una cifra publicada. -->
 - **Errores esperables:** hacer una timpanometría o una maniobra de Valsalva; leer la ósea como "normal" sin compararla con la del OI; tratar el cuadro como una otitis más.
-- **En LabSim:** caso armado para el libro con el cuadro *colesteatoma_fistula* moderada en el OD.
+- **En LabSim:** cuadro *colesteatoma_fistula*, grado moderado en el OD.
 :::
 
 {{caso cap15_trauma_craneal_completo}}
@@ -296,7 +296,7 @@ Un golpe en la cabeza puede dañar el oído medio y el interno. ¿Cómo se verí
 - **Hipótesis esperables:** hemotímpano o cadena luxada (gap) y conmoción laberíntica (caída coclear en agudos); ambos en el mismo oído.
 - **Qué pedir:** audiometría con ósea enmascarada, acumetría, timpanometría y repetir la audiometría a las semanas, cuando el hemotímpano se resuelva (→ H3, H4, H7).
 - **Errores esperables:** quedarse con "conductiva por hemotímpano" sin mirar que la ósea cae en los agudos.
-- **En LabSim:** caso armado para el libro con el cuadro *trauma_craneal_completo* moderada en el OD. La ósea en 4 kHz es la que dice si hay conmoción.
+- **En LabSim:** cuadro *trauma_craneal_completo*, grado moderado en el OD. La ósea en 4 kHz es la que dice si hay conmoción.
 :::
 
 {{caso cap15_fractura_transversal}}
@@ -343,7 +343,7 @@ Un oído sin audición no contesta ningún tono. ¿Cómo sabes que no estás mid
 - **Hipótesis esperables:** fractura de peñasco que atraviesa el laberinto, laberintitis, conmoción grave. La TAC dice si hay violación de la cápsula ótica; la audiometría solo dice que no hay cóclea.
 - **Qué pedir:** audiometría con ósea enmascarada (→ H4), acumetría, reflejos y ABR con **enmascaramiento al oído contrario** (→ H10, paso 5). Para el pronóstico vestibular, el VEMP (→ cap. 20).
 - **Errores esperables:** leer la aérea sombra como umbral y la ósea sin enmascarar como cóclea normal, es decir, informar una conductiva de 40 dB operable; leer la onda del OI como V del OD en el ABR.
-- **En LabSim:** caso armado para el libro con el cuadro *fractura_transversal* profunda en el OD.
+- **En LabSim:** cuadro *fractura_transversal*, grado profundo en el OD.
 :::
 
 ## Resolución de los casos

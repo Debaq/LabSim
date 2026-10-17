@@ -126,7 +126,7 @@ def curva():
     def Y(d):
         return y1 - (d - dmin) / (dmax - dmin) * (y1 - y0)
 
-    c.t(14, 20, 'Ejemplo inventado de salida de un audífono en el acoplador de 2 cc', 10.5, TINTA, 'start', 700)
+    c.t(14, 20, 'Ejemplo de salida de un audífono en el acoplador de 2 cc', 10.5, TINTA, 'start', 700)
     for d in range(40, 131, 10):
         c.l(x0, Y(d), x1, Y(d), GRILLA, 0.8)
         c.t(x0 - 8, Y(d) + 3, str(d), 8.5, TENUE, 'end')
@@ -170,7 +170,7 @@ def curva():
     c.t(xg - 8, (Y(60) + Y(rta(1600))) / 2 + 3, 'ganancia', 8.5, RETRO, 'end', 700)
     c.t(130, Y(rta(250)) + 20, 'respuesta con 60 dB de entrada', 9, RETRO, 'start', 700)
     c.t(100, Y(88), 'OSPL90: salida con 90 dB de entrada', 9, AVISO, 'start', 700)
-    c.t(14, 352, 'Curvas inventadas para explicar los términos: no son de ningún audífono ni tienen valores de referencia.', 8.5, TENUE, 'start')
+    c.t(14, 352, 'Curvas de ejemplo para explicar los términos: no son de ningún audífono ni tienen valores de referencia.', 8.5, TENUE, 'start')
     c.guardar('h21-curva-ejemplo.svg', punta('gp', RETRO))
 
 

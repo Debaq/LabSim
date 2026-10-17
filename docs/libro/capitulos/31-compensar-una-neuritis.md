@@ -58,21 +58,9 @@ El eje oculomotor con la cabeza quieta (seguir una luz con los ojos) se puede co
 - **Cuánto.** La dosis mínima por día y por semana está en H19; según el tiempo desde el inicio, el paciente con neuritis cae en el grupo de hipofunción **aguda o subaguda** o en el de **crónica**, y la guía da una dosis distinta para cada uno (Hall y cols., 2022).
 :::
 
-## En el simulador
+## En LabSim
 
-LabSim da el lado auditivo de estos pacientes (audiograma y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo vestibular de cada caso, es decir el vHIT, el DHI y la batería funcional, está en **tablas con cifras inventadas para el libro** y en **hojas de seguimiento** hechas con el generador sintético de impulsos de H17.
-
-Para ver el principio del capítulo se usa **labyrinthus3d**, el simulador 3D del autor de este libro, libre y que corre en el navegador (→ H19). Su modelo de pérdida unilateral hace pasar el tiempo desde la lesión y muestra cómo el balanceo de pie, con los ojos cerrados sobre espuma, pasa de caerse a sostenerse:
-
-:::imagen ilustraciones/cap31-balanceo-simulador.svg ancho=100% Balanceo lateral de pie, ojos cerrados sobre espuma, a 1 día, 1 semana, 1 mes y 3 meses de una pérdida unilateral. Trazas del modelo de labyrinthus3d, no de un paciente.
-- @17.6,70 | **A un día de la lesión** el paciente simulado no se sostiene ni un segundo: sin vista y con los pies sobre una superficie que miente, solo le queda el vestíbulo.
-- @40.8,70 | **A la semana** aguanta unos segundos y cae: la parte del reposo ya está compensada, la del movimiento no.
-- @87,76 | **A los tres meses** se sostiene, con un balanceo parecido al del mes: es la parte dinámica que se fue ajustando.
-:::
-
-:::comentario Lo que el simulador no tiene
-No tiene **rehabilitación**: no hay ejercicios, ni dosis, ni un paciente que mejore con ellos, ni el DHI ni la batería. Modela la compensación **con el tiempo**, no con el entrenamiento. Sus **constantes son órdenes de magnitud para enseñar, no valores normativos**: los días de la figura no son los de un paciente. Un ejemplo: en su modelo las sacadas se hacen **encubiertas** con las semanas; en pacientes con neuritis seguidos con vHIT, **tanto las encubiertas como las manifiestas se hacen menos** a medida que sube la ganancia (Sjögren y cols., 2026). Ningún número de este capítulo sale del simulador.
-:::
+LabSim da el lado auditivo de estos pacientes (audiograma y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo vestibular de cada caso, es decir el vHIT, el DHI y la batería funcional, está en **tablas con cifras de ejemplo** y en **hojas de seguimiento** con impulsos sintéticos como los de H17.
 
 ## Fisiología
 
@@ -81,6 +69,14 @@ No tiene **rehabilitación**: no hay ejercicios, ni dosis, ni un paciente que me
 Cuando falla un laberinto, el desequilibrio de reposo entre los dos lados se corrige solo y rápido; eso apaga el vértigo y el nistagmo (→ cap. 21 y H19). Lo que queda después es la función **con el movimiento**, y esa se recupera con las semanas y con la ayuda de lo que el paciente haga. La imagen actual separa dos procesos: en lo **estático**, los núcleos vestibulares del lado dañado se reequilibran con el impulso del lado sano; en lo **dinámico** pesa más la **sustitución**, sensorial y de comportamiento (Lacour y cols., 2016).
 
 En qué se nota esa diferencia lo mostró un ensayo con pacientes con neuritis, con y sin ejercicios vestibulares: la torsión ocular y la vertical visual subjetiva se normalizaron igual en los dos grupos, pero el balanceo del cuerpo, medido a los 30 días, fue de 3,2 m/min con ejercicios y 16,9 m/min sin ellos (Strupp y cols., 1998). Lo que no se compensa solo es lo que el paciente tiene que **usar**: el equilibrio, la marcha y la visión al mover la cabeza.
+
+La misma diferencia, en un paciente simulado con una pérdida unilateral: con los ojos cerrados sobre espuma, el balanceo de pie pasa de caerse a sostenerse con los meses. El modelo compensa solo con el **tiempo**, no con ejercicios, y sus días no son los de un paciente.
+
+:::imagen ilustraciones/cap31-balanceo-simulador.svg ancho=100% Balanceo lateral de pie, ojos cerrados sobre espuma, a 1 día, 1 semana, 1 mes y 3 meses de una pérdida unilateral en un paciente simulado. Al día cae enseguida, a la semana aguanta unos segundos y desde el mes se sostiene: es la parte dinámica, la que se compensa con el tiempo. Trazas del modelo, no de un paciente. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @17.6,70 | **A un día de la lesión** el paciente simulado no se sostiene ni un segundo: sin vista y con los pies sobre una superficie que miente, solo le queda el vestíbulo.
+- @40.8,70 | **A la semana** aguanta unos segundos y cae: la parte del reposo ya está compensada, la del movimiento no.
+- @87,76 | **A los tres meses** se sostiene, con un balanceo parecido al del mes: es la parte dinámica que se fue ajustando.
+:::
 
 ### Qué cambia en la recuperación del reflejo
 
@@ -170,7 +166,7 @@ Una paciente de 63 años tiene una neuritis de hace cinco semanas, toma un antih
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
 :::comentario Lo vestibular de los casos
-LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente salen del editor de casos. El **vHIT, el DHI y la batería funcional** están en tablas y en **hojas de seguimiento** propias, con cifras **inventadas para el libro**, que no son valores de referencia. Cada hoja muestra las tres visitas: lo que llega el paciente, y cómo sigue.
+LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente salen del editor de casos. El **vHIT, el DHI y la batería funcional** están en tablas y en **hojas de seguimiento** propias, con cifras **de ejemplo**, que no son valores de referencia. Cada hoja muestra las tres visitas: lo que llega el paciente, y cómo sigue.
 :::
 
 {{caso cap31_buena}}
@@ -198,7 +194,7 @@ El vértigo ya pasó y sigue con síntomas al mover la cabeza. ¿Qué parte de l
 - @OI P13 | El del OI mide **290 µV** (5,74). La asimetría es de **0 %**: el sáculo del lado enfermo responde. Es lo esperable si el daño fue de la rama superior del nervio (→ cap. 21).
 :::
 
-:::ayuda-ancho Lo que entrega Martín del examen y de la batería, a las dos semanas (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Martín del examen y de la batería, a las dos semanas (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | Bate hacia la izquierda, **2 °/s**, casi apagado |
@@ -215,7 +211,7 @@ El vértigo ya pasó y sigue con síntomas al mover la cabeza. ¿Qué parte de l
 
 Con eso se arma el programa (fase 1 y 2 de la Técnica en foco, con el desafío creciente). Así siguió, visita a visita:
 
-:::imagen ilustraciones/cap31-seguimiento-martin.svg ancho=100% Hoja de seguimiento de Martín: el impulso hacia la derecha y la batería en tres visitas
+:::imagen ilustraciones/cap31-seguimiento-martin.svg ancho=100% Hoja de seguimiento de Martín: el impulso hacia la derecha y la batería en tres visitas. Mira cómo la sacada pasa de manifiesta a encubierta y el DHI baja a 12, con una ganancia que no llega a 1.
 - @22.6,25.7 | A la **semana 2** el reflejo es corto (**0,45**) y la sacada llega **después** de que la cabeza se detuvo: es una sacada manifiesta.
 - @45.4,28.8 | A la **semana 6** la ganancia sube a **0,62** y la sacada ya cae **dentro del giro**: encubierta, que el paciente no nota.
 - @99.5,59 | El DHI baja de 58 a **12** en tres meses, con una ganancia que **no llegó a 1** (0,74): se está bien con un reflejo que no se normalizó.
@@ -227,7 +223,7 @@ Con eso se arma el programa (fase 1 y 2 de la Técnica en foco, con el desafío 
 - **Qué pedir:** DHI, DVA, batería funcional de H19 y el vHIT que ya tiene del examen; repetir a la semana 6 y al tercer mes (→ H17, H19).
 - **Qué enseña:** el curso típico de una neuritis que compensa, con una ganancia que sube pero **no se normaliza** y un alta por función.
 - **Errores esperables:** dar el alta por llevar la ganancia a 1; empezar el VOR x2 antes de que el x1 se haga sin síntomas; no pedir el registro de ejercicios en la casa.
-- **En LabSim:** caso armado para el libro (audición normal, VEMP normal). El nombre del paciente lo sortea el editor.
+- **En LabSim:** audición normal y VEMP normal. El nombre del paciente lo sortea el editor.
 :::
 
 {{caso cap31_lenta}}
@@ -251,7 +247,7 @@ Además de la batería de H19, ¿qué harías con el fármaco y con el reposo? �
 - @OI 1000 | El OI es igual al OD: 10 dB en 1 kHz.
 :::
 
-:::ayuda-ancho Lo que entrega Lucía del examen y de la batería, a las cinco semanas (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Lucía del examen y de la batería, a las cinco semanas (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | No hay |
@@ -268,7 +264,7 @@ Además de la batería de H19, ¿qué harías con el fármaco y con el reposo? �
 
 El médico que la deriva acuerda con ella **retirar el antihistamínico de a poco** y le explica por qué; se arma un programa sentada, de pocos minutos y varias veces al día, con alguien de la familia al lado. Así siguió:
 
-:::imagen ilustraciones/cap31-seguimiento-lucia.svg ancho=100% Hoja de seguimiento de Lucía: el impulso hacia la izquierda y la batería en tres visitas
+:::imagen ilustraciones/cap31-seguimiento-lucia.svg ancho=100% Hoja de seguimiento de Lucía: el impulso hacia la izquierda y la batería en tres visitas. Va más lento que Martín, pero en el mismo sentido: la ganancia sube y la sacada se vuelve encubierta.
 - @22.6,20.5 | A la **semana 5** la ganancia es **0,30**: la más baja de los tres casos, con una sacada manifiesta grande que cae mucho después del giro.
 - @34,59.1 | El DHI parte en **74**, en el tramo grave.
 - @77.8,26.8 | A la **semana 17** la ganancia sube a **0,55** y la sacada ya es encubierta: más lento que Martín, **en el mismo sentido**.
@@ -280,7 +276,7 @@ El médico que la deriva acuerda con ella **retirar el antihistamínico de a poc
 - **Qué pedir:** batería completa, y **un aviso al médico** con los datos: el fármaco retrasa la compensación y hay una caída; el retiro lo decide él.
 - **Qué enseña:** que **lento no es fracaso**: la curva va en el mismo sentido que la de Martín, con unas semanas más. Y quién hace qué.
 - **Errores esperables:** suspender el fármaco por cuenta propia; dar un programa largo y exigente a alguien con miedo a caerse; no medir el riesgo de caída.
-- **En LabSim:** caso armado para el libro (audición simétrica propia de la edad, hipertensión controlada).
+- **En LabSim:** audición simétrica propia de la edad; hipertensión controlada en la ficha.
 :::
 
 {{caso cap31_meseta}}
@@ -303,7 +299,7 @@ Si el reflejo ya volvió, ¿qué más puede explicar el mareo? Separa lo que dep
 - @OD 4000 | La audición es normal: 0 dB hasta 6 kHz y 5 dB en 8 kHz, en los dos oídos.
 :::
 
-:::ayuda-ancho Lo que entrega Ignacio del examen y de la batería, a las diez semanas (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Ignacio del examen y de la batería, a las diez semanas (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | No hay |
@@ -318,13 +314,13 @@ Si el reflejo ya volvió, ¿qué más puede explicar el mareo? Separa lo que dep
 
 Esta es la hoja de sus tres visitas:
 
-:::imagen ilustraciones/cap31-seguimiento-ignacio.svg ancho=100% Hoja de seguimiento de Ignacio: el impulso hacia la derecha y la batería en tres visitas
+:::imagen ilustraciones/cap31-seguimiento-ignacio.svg ancho=100% Hoja de seguimiento de Ignacio: el impulso hacia la derecha y la batería en tres visitas. El reflejo ya está casi normal y el DHI no baja: función y síntomas dejaron de ir juntos.
 - @75.4,33.6 | A la **semana 10** el reflejo está **casi en lo normal**: ganancia **0,90** y sin sacadas.
 - @67,59.1 | El DHI de la semana 6 era **46**.
 - @99.5,59.1 | A la semana 10 es **52**: la función subió y el DHI también. **Función y síntomas dejaron de ir juntos.**
 :::
 
-:::imagen ilustraciones/cap31-trayectorias.svg ancho=100% Los tres casos en una sola vista: el DHI y la ganancia del vHIT, semana a semana
+:::imagen ilustraciones/cap31-trayectorias.svg ancho=100% Los tres casos en una sola vista: el DHI (A) y la ganancia del vHIT (B), semana a semana. Compara las curvas: los dos que mejoran bajan el DHI aunque la ganancia no llegue a 1; Ignacio tiene la mejor ganancia y el único DHI que no baja.
 - @26,41 | Ignacio es el único cuyo **DHI no baja**.
 - @74,19 | Y el único cuya ganancia **ya está cerca de 1**.
 :::
@@ -335,7 +331,7 @@ Esta es la hoja de sus tres visitas:
 - **Qué pedir:** repetir el vHIT y la batería, preguntar lo que dejó de hacer, y **avisar al médico**: la meseta con la función recuperada es un motivo de derivación en la guía (Hall y cols., 2022).
 - **Qué enseña:** que **más ejercicio de VOR no lo arregla** y que la función normal no es la misma cosa que "estar bien". La historia ya era la de Cousins y cols. (2017): evitación, miedo y dependencia visual.
 - **Errores esperables:** subir la dosis; decir "su examen está normal"; ponerle nombre de PPPD a las diez semanas, cuando el criterio de tiempo todavía no se cumple.
-- **En LabSim:** caso armado para el libro (audición normal en los dos oídos). Es el mismo camino del paciente del cap. 27, **antes** de los nueve meses.
+- **En LabSim:** audición normal en los dos oídos. Es el mismo camino del paciente del cap. 27, **antes** de los nueve meses.
 :::
 
 ## Resolución de los casos
@@ -352,7 +348,7 @@ La parte del reposo se compensó: ya no hay vértigo y el nistagmo casi no está
 
 Hipofunción vestibular derecha en compensación. Se informa así, con el antes y el después:
 
-:::ayuda Ejemplo de redacción (cifras inventadas)
+:::ayuda Ejemplo de redacción
 **Motivo:** neuritis vestibular derecha de dos semanas. **Inicio:** DHI 58; vHIT del canal lateral derecho 0,45 con sacada manifiesta; DVA con pérdida de 3 líneas; apoyo en un pie 8 s; TUG 10 s; DGI de 4 ítems 9/12. **Programa:** estabilización de la mirada (x1 cerca y lejos; x2 desde la semana 4) tres veces al día; equilibrio sobre espuma; marcha con giros de cabeza. **Semana 6:** DHI 30; ganancia 0,62; DVA 1 línea. **Mes 3:** DHI 12; ganancia 0,74 con sacadas encubiertas; DVA sin pérdida; apoyo 30 s; TUG 7 s; DGI 12/12. **Conclusión:** mejoría funcional; se deriva al médico tratante para el alta.
 :::
 

@@ -49,7 +49,7 @@ Eso fija las dos reglas de un buen audífono:
 - **Ganancia distinta en cada frecuencia.** La mayoría de las pérdidas no es plana: en una presbiacusia, los graves están casi normales y los agudos muy caídos. Amplificar todo por igual subiría los graves, que no lo necesitan, hasta molestar, y no alcanzaría los agudos, que son donde están las consonantes. Las vocales y los sonidos graves son más fuertes y llevan la energía de la voz; las consonantes agudas, como /s/ y /f/, son suaves y llevan buena parte de la información que distingue una palabra de otra (→ H8).
 - **Compresión.** Una ganancia lineal, que suba todo igual, deja las voces suaves audibles y empuja las fuertes sobre el umbral de molestia. El audífono comprime: da **más ganancia a lo suave** y menos a lo fuerte, para meter el habla entera en el campo dinámico que queda.
 
-:::imagen ilustraciones/h20-rango-dinamico.svg ancho=100% Por qué la ganancia lineal no alcanza y la compresión sí
+:::imagen ilustraciones/h20-rango-dinamico.svg ancho=100% Por qué la ganancia lineal no alcanza y la compresión sí. En una pérdida coclear el umbral sube pero la molestia no, y el rango que queda es más angosto que el habla. Subir todo igual deja el habla fuerte sobre la molestia; la compresión sube más lo suave y la hace caber entera.
 :::
 
 Los métodos de ajuste que se describen enseguida son, en buena parte, reglas para decidir cuánta ganancia dar a cada frecuencia y a cada nivel de entrada.
@@ -71,7 +71,7 @@ El sonido amplificado entra al conducto por un **molde** (a medida) o por una **
 - Una **ventilación** (un canal que atraviesa el molde) deja salir parte de ese sonido y reduce la oclusión. A cambio, parte de los graves amplificados también se escapa, y el audífono da **menos ganancia grave**; y el sonido que se escapa puede volver al micrófono. Un molde abierto es, por eso, una buena solución cuando los graves están casi normales (el caso típico de la presbiacusia): el audífono no tiene que dar graves, y el oído los oye directamente.
 - La **retroalimentación** (el silbido) ocurre cuando el sonido amplificado se escapa del conducto, vuelve al micrófono y se amplifica otra vez en un círculo que crece. Más ganancia, más ventilación y peor sello la favorecen. Por eso el pitido del audífono mal puesto avisa de un molde mal adaptado o de una ganancia pasada de largo, y por eso una pérdida **profunda**, que pide mucha ganancia, necesita un molde bien cerrado (Dillon, 2012).
 
-:::imagen ilustraciones/h20-ventilacion.svg ancho=100% Lo que pasa con los graves según el molde
+:::imagen ilustraciones/h20-ventilacion.svg ancho=100% Lo que pasa con los graves según el molde. Cerrado, los graves quedan atrapados: más ganancia grave, pero también oclusión. Con ventilación, parte de los graves se escapa: menos ganancia grave y menos oclusión.
 :::
 
 La elección del molde, entonces, es un compromiso entre **ganancia** (cerrar), **comodidad y voz natural** (abrir) y **retroalimentación** (cerrar). No se resuelve en abstracto: se decide con el audiograma y con la queja del paciente.
@@ -181,7 +181,7 @@ Es un dato útil para mostrarle al paciente y a su familia, en el mismo gráfico
 - @S 2000 | Sin audífono (S), el campo libre es el del oído mejor: 40 dB en 2 kHz.
 - @A 2000 | Con audífono (A), 10 dB en 2 kHz: una ganancia funcional de **30 dB**.
 - @A 250 | En 250 Hz el audífono casi no le da: es lo esperable en una presbiacusia, donde los graves están cerca de lo normal.
-- Los valores de ganancia de esta figura los **declara el libro como ejemplo**: son ilustrativos, no una prescripción ni el resultado de un audífono real. LabSim no mide ni simula audífonos.
+- Los valores de ganancia de esta figura son **de ejemplo**: ilustrativos, no una prescripción ni el resultado de un audífono real. LabSim no mide ni simula audífonos.
 :::
 
 :::comentario Lo que dicen las normas
@@ -260,10 +260,10 @@ LabSim **no tiene un módulo de audífonos**: no hay software de adaptación, ni
 - La **logoaudiometría**, con listas de bisílabos, para el porcentaje de discriminación, y el **LDL** para el umbral de molestia (→ H5).
 - La **conversación con el paciente**: la anamnesis de la prueba, qué le cuesta, qué espera, qué piensa de los audífonos.
 
-Y el libro trae una figura de campo libre con audífono calculada a partir del paciente, con una **ganancia que declara el libro como ejemplo**, no una que el simulador mida: el campo libre todavía no se practica en el audiómetro, y el audífono no existe.
+La figura de campo libre con audífono del caso parte de los umbrales del paciente con una **ganancia de ejemplo**, no una que el simulador mida: el campo libre todavía no se practica en el audiómetro, y el audífono no existe.
 
 :::comentario Lo que el simulador no tiene
-El paciente de LabSim no usa un audífono ni responde con uno: el audiograma que ves es siempre sin amplificación. La curva con audífono de la figura sale de restar a los umbrales del paciente una ganancia que escribió el libro y que **no es una prescripción**. Para una adaptación real hay que usar el programa del fabricante, los objetivos de un método prescriptivo y la medición en oído real.
+El paciente de LabSim no usa un audífono ni responde con uno: el audiograma que ves es siempre sin amplificación. La curva con audífono de la figura sale de restar a los umbrales del paciente una ganancia de ejemplo, que **no es una prescripción**. Para una adaptación real hay que usar el programa del fabricante, los objetivos de un método prescriptivo y la medición en oído real.
 :::
 
 El paciente de este capítulo (★, el 36 de la práctica) llega diciendo que oye bien y que la gente "habla para adentro". Lo que se aprende con él es la **candidatura**: oye casi normal los graves y pierde los agudos, no quiere audífonos "porque son para viejos", y hay una esposa que lo trajo. Antes de hablar de modelos, hay que escuchar qué le cuesta y qué le gustaría poder hacer.

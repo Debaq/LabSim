@@ -73,7 +73,7 @@ def seguimiento(clave):
             c.t(x + 206, yy, val, 9, TINTA, 'end', 700)
             if i < len(filas) - 1:
                 c.l(x + 18, yy + 7, x + 208, yy + 7, GRILLA, 1)
-    c.t(16, 360, 'Cifras de un paciente inventado para el libro. Trazas con el generador sintético de H17; la batería es la de H19.',
+    c.t(16, 360, 'Cifras de un paciente de ejemplo; la batería es la de H19.',
         7.5, TENUE, 'start')
     c.guardar(f'cap31-seguimiento-{clave}.svg')
 
@@ -104,7 +104,7 @@ def trayectorias():
     e2 = panel(404, 56, 300, 200, 'B · Ganancia del vHIT, lado enfermo (0 a 1)', 0, 1, [0, 0.5, 1], 'gain')
     c.l(e2.px, e2.Y(1), e2.px + e2.w, e2.Y(1), FUERTE, 1, '4 3')
     c.t(e2.px + 4, e2.Y(1) + 11, 'reflejo normal: cerca de 1', 7.5, TENUE, 'start')
-    c.t(16, 318, 'Cifras inventadas para el libro. Ignacio: la ganancia sigue subiendo y el DHI no.', 7.5, TENUE, 'start')
+    c.t(16, 318, 'Cifras de ejemplo. Ignacio: la ganancia sigue subiendo y el DHI no.', 7.5, TENUE, 'start')
     c.guardar('cap31-trayectorias.svg')
 
 
@@ -112,8 +112,8 @@ def balanceo():
     r = subprocess.run(['node', str(AQUI / 'hacer_cap31.mjs')], capture_output=True, text=True, check=True)
     d = json.loads(r.stdout)
     c = Lienzo(740, 250)
-    c.t(16, 20, 'Balanceo lateral de pie, ojos cerrados sobre espuma, tras perder un laberinto (modelo del simulador)', 10, TINTA, 'start', 700)
-    c.t(16, 33, '20 s por cuadro, misma escala; el eje va de un lado al otro. Esquema de enseñanza: los días del simulador no son tiempos de un paciente.',
+    c.t(16, 20, 'Balanceo lateral de pie, ojos cerrados sobre espuma, tras perder un laberinto (paciente simulado)', 10, TINTA, 'start', 700)
+    c.t(16, 33, '20 s por cuadro, misma escala; el eje va de un lado al otro. Esquema de enseñanza: los días del modelo no son tiempos de un paciente.',
         7.5, TENUE, 'start')
     ph, cw, gap, x0, y0 = 150, 160, 12, 50, 62
     for k, (dia, rot) in enumerate((('1', '1 día'), ('7', '1 semana'), ('30', '1 mes'), ('90', '3 meses'))):
@@ -135,7 +135,7 @@ def balanceo():
             c.t(x + cw / 2, y0 + ph + 14, 'se sostiene', 9, OK, 'middle', 700)
     c.t(x0 - 6, y0 + 10, 'a un lado', 8, TENUE, 'end')
     c.t(x0 - 6, y0 + ph - 2, 'al otro', 8, TENUE, 'end')
-    c.t(16, 238, 'Modelo de labyrinthus3d (software libre del autor): pérdida unilateral, sin otro déficit.', 7.5, TENUE, 'start')
+    c.t(16, 238, 'Modelo de pérdida unilateral, sin otro déficit.', 7.5, TENUE, 'start')
     c.guardar('cap31-balanceo-simulador.svg')
 
 

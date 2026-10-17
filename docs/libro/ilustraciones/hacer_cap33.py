@@ -98,7 +98,7 @@ def reposo():
     base = [0] * 7
     r_od, r_oi = criterios(base, OD_TURNO), criterios(base, OI_TURNO)
     c = Lienzo(700, 360)
-    c.t(14, 18, 'El mismo trabajador: al final del turno (valores inventados) y tras 14 horas de reposo (motor)', 10.5, TINTA, 'start', 700)
+    c.t(14, 18, 'El mismo trabajador: al final del turno y tras 14 horas de reposo', 10.5, TINTA, 'start', 700)
     panel(c, 60, 56, 250, 110, 'Oído derecho', ROJO, base,
           [(OD_TURNO, NARANJA, None, None), (od, VERDE, '2 3', None)], maxdb=60, cambio=r_od[0])
     panel(c, 390, 56, 250, 110, 'Oído izquierdo', AZUL, base,

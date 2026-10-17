@@ -107,7 +107,7 @@ La adaptación no es exclusiva del nervio: aparece en todos los niveles de la v�
 
 El reflejo tiene una rama **aferente** (cóclea y VIII par), un relevo en el tronco (núcleo coclear y complejo olivar superior, de los dos lados) y una rama **eferente** (núcleo y nervio facial hasta el músculo del estribo). Por eso un estímulo en un oído contrae los dos estapedios.
 
-![Arco del reflejo estapedial: cóclea y VIII par (aferente), núcleo coclear y complejo olivar superior de ambos lados, núcleo y nervio facial hasta el músculo del estribo (eferente). Marcar con una X dónde corta una lesión del VIII par derecho.](ilustraciones/arco-reflejo.png)
+![{IA} El arco del reflejo estapedial. La rama aferente va de la cóclea por el VIII par al núcleo coclear; el relevo pasa al complejo olivar superior de los dos lados, y la rama eferente baja por el núcleo y el nervio facial al músculo del estribo de cada oído. Una lesión del VIII par derecho corta la entrada derecha: falla el reflejo cada vez que se estimula ese oído, se registre donde se registre.](ilustraciones/arco-reflejo.png)
 
 Con una lesión del VIII par, el reflejo falla **cada vez que se estimula el oído enfermo**, se registre donde se registre: ipsilateral de ese oído y contralateral con el tono en ese oído (Jerger y cols., 1974). Es el patrón "diagonal" de la tabla de reflejos.
 
@@ -126,7 +126,7 @@ Cada onda del PEAT es la suma de la actividad sincrónica de una región de la v
 - La onda **III** sale del núcleo coclear y del tronco bajo.
 - La onda **V** sale del lemnisco lateral y del colículo inferior.
 
-![Vía auditiva del nervio al colículo inferior, con cada onda del PEAT ubicada en su región: I en el nervio distal, II en el nervio proximal, III en el núcleo coclear, V en el lemnisco lateral y colículo inferior. Sombrear el tramo que mide el interpico I-III.](ilustraciones/generadores-peat.png)
+![{IA} Dónde nacen las ondas del PEAT. La I sale de la porción distal del nervio auditivo y la II de la proximal; la III, del núcleo coclear, y la V, del lemnisco lateral al llegar al colículo inferior. El interpico I-III abarca el tramo del nervio que recorre el conducto auditivo interno: por eso se alarga cuando un tumor lo comprime.](ilustraciones/generadores-peat.png)
 
 Asignar "una onda, un núcleo" es una simplificación útil: cada onda tiene aportes de varias poblaciones (Melcher y Kiang, 1996).
 
@@ -142,7 +142,7 @@ Aunque nace en el nervio vestibular, el síntoma vestibular es tardío y discret
 
 El diagnóstico lo da la resonancia con gadolinio, que pide el médico. Un tumor pequeño puede caber entero dentro del conducto auditivo interno; uno grande sale al ángulo y empuja el tronco.
 
-:::imagen ilustraciones/cap11-rm-schwannoma.jpg ancho=100% Resonancia de dos personas con schwannoma vestibular; no son pacientes de este capítulo. La imagen la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Arriba, un tumor intracanalicular pequeño en el conducto auditivo interno (CAI) izquierdo; abajo, uno grande y quístico en el ángulo pontocerebeloso derecho. A la izquierda, T1 con gadolinio; a la derecha, T2 de alta resolución (CISS), al mismo nivel. Cortes axiales en orientación radiológica: la derecha del paciente queda a la izquierda. Imagen: cortes propios del dataset Vestibular-Schwannoma-SEG (Shapey y cols., 2021, Sci Data 8:286, doi:10.1038/s41597-021-01064-w; TCIA, doi:10.7937/TCIA.9YTJ-5Q73), CC BY 4.0; recortados y con ventana ajustada.
+:::imagen ilustraciones/cap11-rm-schwannoma.jpg ancho=100% Resonancia de dos personas con schwannoma vestibular; no son pacientes de este capítulo. La imagen la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Arriba, un tumor intracanalicular pequeño en el conducto auditivo interno (CAI) izquierdo; abajo, uno grande y quístico en el ángulo pontocerebeloso derecho. A la izquierda, T1 con gadolinio; a la derecha, T2 de alta resolución (CISS), al mismo nivel. Cortes axiales en orientación radiológica: la derecha del paciente queda a la izquierda. Imagen: dataset Vestibular-Schwannoma-SEG (Shapey y cols., 2021, Sci Data 8:286, doi:10.1038/s41597-021-01064-w; TCIA, doi:10.7937/TCIA.9YTJ-5Q73), CC BY 4.0, adaptada.
 - @42,12 | **Tumor pequeño con gadolinio**: un nódulo blanco en el fondo del CAI izquierdo: el tumor realza.
 - @91,28 | **El mismo tumor en CISS**: una mancha gris donde debería haber líquido blanco.
 - @57,25 | **El CAI derecho sano**, en el mismo corte: líquido blanco con los nervios como líneas oscuras que van a la cóclea.
@@ -163,7 +163,7 @@ Enfermedad genética en la que crecen **schwannomas vestibulares en los dos lado
 
 El **meningioma** del ángulo y el **epidermoide** dan un cuadro parecido. En 51 meningiomas del hueso petroso, el 65 % tenía hipoacusia y en el 41 % fue el primer síntoma (Bassiouni y cols., 2004). El PEAT está alterado o ausente en la mayoría de los tumores del ángulo: en 309 casos, 31,4 % patológico y 50,2 % sin respuesta (Marangos y cols.).
 
-:::imagen ilustraciones/cap11-rm-epidermoide.jpg ancho=100% Quiste epidermoide del ángulo pontocerebeloso derecho en otra persona: T2 (A), T1 con gadolinio (B) y difusión (C). Imagen: Chon KH, Lee JM, Koh EJ, Choi HY (2012), J Korean Neurosurg Soc 52:148, doi:10.3340/jkns.2012.52.2.148, Fig. 1 A-C, CC BY-NC 3.0; recortada, sin el panel de histología.
+:::imagen ilustraciones/cap11-rm-epidermoide.jpg ancho=100% Quiste epidermoide del ángulo pontocerebeloso derecho en otra persona: T2 (A), T1 con gadolinio (B) y difusión (C). Imagen: Chon KH, Lee JM, Koh EJ, Choi HY (2012), J Korean Neurosurg Soc 52:148, doi:10.3340/jkns.2012.52.2.148, Fig. 1 A-C, CC BY-NC 3.0, adaptada.
 - @12,62 | **En T2 es blanco**, como el líquido que lo rodea.
 - @44,66 | **Con gadolinio no realza**: queda oscuro. El schwannoma de la figura anterior, en cambio, realza.
 - @79,63 | **En difusión brilla mucho**: es el signo que hace pensar en un epidermoide.
@@ -173,7 +173,7 @@ El **meningioma** del ángulo y el **epidermoide** dan un cuadro parecido. En 51
 
 Un asa vascular, casi siempre la arteria cerebelosa anteroinferior, contacta el nervio en el ángulo o el conducto. Da **acúfeno unilateral**, a veces episodios de vértigo, y una pérdida leve y de frecuencia específica, con los graves conservados (De Ridder y cols.). El PEAT muestra lo que se espera de una lesión proximal del nervio: **la onda II se reduce y el interpico I-III se alarga**, y la frecuencia del acúfeno coincide con la de máxima pérdida.
 
-:::imagen ilustraciones/cap11-rm-asa-aica.jpg ancho=40% Asa de la arteria cerebelosa anteroinferior (flecha amarilla) en T2 de alta resolución de otras personas, según cómo toca el VIII par (clasificación de Gorrie). Imagen: Kim SH y cols. (2019), PeerJ 7:e6582, doi:10.7717/peerj.6582, Fig. 2, CC BY 4.0, sin modificar.
+:::imagen ilustraciones/cap11-rm-asa-aica.jpg ancho=40% Asa de la arteria cerebelosa anteroinferior (flecha amarilla) en T2 de alta resolución de otras personas, según cómo toca el VIII par (clasificación de Gorrie). Imagen: Kim SH y cols. (2019), PeerJ 7:e6582, doi:10.7717/peerj.6582, Fig. 2, CC BY 4.0.
 - @42,8 | **Tipo 1**: el asa va separada del nervio.
 - @88,22 | **Tipo 2**: el asa corre junto al nervio.
 - @12,92 | **Tipo 3**: el asa desvía el VIII par.
@@ -338,7 +338,7 @@ La pérdida del OD es mayor que en el caso anterior y no hay acúfeno. ¿Cambia 
 - **Hipótesis:** coclear unilateral contra **retrococlear**. El mareo posicional breve puede ser un VPPB que coexiste, no tiene por qué ser el tumor; que no haya acúfeno no descarta nada.
 - **Qué pedir:** lo mismo que en el caso anterior, más **VEMP**: con una pérdida severa en agudos el PEAT pierde poder y el VEMP no depende de la audición (→ H12).
 - **Errores esperables:** concluir "coclear" porque el PEAT no muestra I ni III, cuando la causa es la pérdida.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *schwannoma* moderado en el OD.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *schwannoma* moderado en el OD.
 :::
 
 {{caso cap11_nf2}}

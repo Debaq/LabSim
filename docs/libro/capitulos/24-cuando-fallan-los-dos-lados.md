@@ -30,7 +30,7 @@ Este capítulo no pide pruebas nuevas. Pide **leer con otra pregunta** las de si
 
 La paresia canalicular es un cociente: la diferencia entre lo que responde un oído y el otro, dividida por la suma de las dos respuestas (→ H16). Cuando los dos oídos responden igual de poco, el numerador es casi cero y el resultado es "sin paresia", **sea cual sea** la altura a la que están los dos. Con velocidades pequeñas, además, el cociente se mueve mucho por una diferencia de un solo grado por segundo: la misma suma de 7 °/s da 14 % si un oído lee 3 y el otro 4, y daría 43 % si leyeran 2 y 5.
 
-Un ejemplo con las cuatro irrigaciones de un paciente inventado: tibia derecha 1, fría derecha 2, tibia izquierda 1, fría izquierda 3 °/s. La paresia es (3 − 4) / 7 × 100 = **−14 %**, bajo el 25 % del protocolo: "valor no significativo". Y sin embargo la suma de cada oído (3 y 4 °/s) está **bajo 6**: la prueba dice a la vez "sin asimetría" y "sin respuesta". Las dos cosas son verdad y solo la segunda importa.
+Un ejemplo con las cuatro irrigaciones de un paciente de ejemplo: tibia derecha 1, fría derecha 2, tibia izquierda 1, fría izquierda 3 °/s. La paresia es (3 − 4) / 7 × 100 = **−14 %**, bajo el 25 % del protocolo: "valor no significativo". Y sin embargo la suma de cada oído (3 y 4 °/s) está **bajo 6**: la prueba dice a la vez "sin asimetría" y "sin respuesta". Las dos cosas son verdad y solo la segunda importa.
 
 :::imagen ilustraciones/cap24-cociente.svg ancho=82% Los cuatro pacientes del capítulo en un mismo plano: la suma tibia + fría de cada oído. Los cuatro caen dentro de la cuña donde la paresia es menor de 25 %, que es la que la fórmula llama "no significativa"; tres de los cuatro caen además en el cuadro verde, donde los dos oídos suman menos de 6 °/s
 :::
@@ -53,15 +53,15 @@ Entre las dos fuentes hay una diferencia de criterio. La herramienta H19 de este
 
 La silla rotatoria, que es la tercera forma que reconoce el consenso, no está en el protocolo ni en LabSim. El VEMP (→ H12), que sí está, mide los otolitos y sirve de **complemento**: el consenso lo menciona como prueba adicional sin incluirlo en la definición (Strupp y cols., 2017). Un VEMP caído en una persona con reflejo canalicular caído sugiere que el daño llegó también al utrículo y al sáculo.
 
-## En el simulador
+## En LabSim
 
-LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el audiograma, la logoaudiometría y las emisiones de estos pacientes. Lo vestibular de cada caso, la calórica, el vHIT y la agudeza dinámica, está **escrito** en la ficha de resultados del caso, con **cifras inventadas para el libro**. Para ver cómo se produce una ganancia baja se usa **trainHIT**, un simulador de vHIT en el navegador que es software libre del autor (→ H17); trae un caso a ciegas con las dos ganancias bajas y sacadas hacia los dos lados, y de ahí sale la captura de este capítulo. **Labyrinthus 3D**, también del autor, trae dos estados con todos los canales periféricos caídos, uno de hipofunción (rotulado como ototoxicidad) y otro de arreflexia, con los que se repite la calórica de H16. Ninguno modela el curso en el tiempo de una pérdida ni la compensación.
+LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el audiograma, la logoaudiometría y las emisiones de estos pacientes. Lo vestibular de cada caso, la calórica, el vHIT y la agudeza dinámica, está **escrito** en la ficha de resultados del caso, con **cifras de ejemplo**. La figura muestra cómo se ve en el vHIT una ganancia baja de los dos lados.
 
-:::imagen ilustraciones/cap24-trainhit-bilateral.png ancho=100% Un caso bilateral en trainHIT: los impulsos a la derecha (izquierda de la figura) y a la izquierda, con la cabeza en azul y el ojo, invertido, en naranja
-- @19,47 | **Ojo**: llega a menos de la mitad de la velocidad de la cabeza. Si el reflejo funcionara, las dos curvas se superpondrían.
-- @40,26 | **Sacadas manifiestas** (triángulos): el ojo corrige a saltos, cuando la cabeza ya se detuvo. Hacia los dos lados.
-- @22,77 | **Ganancia derecha** de 0,45, con cinco impulsos aceptados.
-- @72,77 | **Ganancia izquierda** de 0,46: bajo 0,6 de los dos lados.
+:::imagen ilustraciones/cap24-vhit-bilateral.svg ancho=100% Impulsos del canal lateral de un paciente simulado con los dos lados caídos: hacia la derecha y hacia la izquierda, con la cabeza en azul y el ojo, invertido, en naranja. No hay un lado bueno con el que comparar: el déficit se lee en el tamaño de cada ganancia, no en la asimetría. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+- @16,52 | **Ojo**: llega a menos de la mitad de la velocidad de la cabeza. Si el reflejo funcionara, las dos curvas se superpondrían.
+- @37,30 | **Sacadas manifiestas** (triángulos): el ojo corrige a saltos, cuando la cabeza ya se detuvo. Hacia los dos lados.
+- @4,87 | **Ganancia derecha** de 0,45, con cinco impulsos aceptados.
+- @53,87 | **Ganancia izquierda** de 0,46: bajo 0,6 de los dos lados.
 :::
 
 ## Fisiología
@@ -70,7 +70,7 @@ LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el au
 
 El reflejo vestíbulo-ocular mueve el ojo en sentido contrario a la cabeza y con casi la misma velocidad, de modo que la imagen quede **quieta en la retina** mientras uno se mueve (→ H17). Su ganancia es el cociente entre la velocidad del ojo y la de la cabeza. Con ganancia 1 la imagen no resbala; con ganancia 0,2, resbala lo que el ojo no alcanzó a compensar: el 80 % de la velocidad de la cabeza.
 
-:::imagen ilustraciones/cap24-oscilopsia.svg ancho=100% Lo que la retina recibe en un segundo de marcha, con el reflejo íntegro y con ganancia 0,2
+:::imagen ilustraciones/cap24-oscilopsia.svg ancho=100% Lo que la retina recibe en un segundo de marcha, con el reflejo íntegro y con ganancia 0,2. Con el reflejo íntegro la imagen queda quieta; con ganancia 0,2 resbala en cada paso: es lo que el paciente describe como "el mundo salta".
 :::
 
 ¿Cuánto se mueve la cabeza al caminar? Mucho más rápido y más a menudo de lo que supone una prueba de silla lenta. En 20 sujetos sanos con bobinas magnéticas, la velocidad máxima mediana de la cabeza al caminar o correr no pasó de 90 °/s, la frecuencia de los giros hacia arriba y abajo fue al menos el doble que la de los giros laterales, y las frecuencias que aparecen al caminar son **mucho mayores** que las que se usan en los estudios del reflejo (Grossman y cols., 1988). Ahí se origina la **oscilopsia**: la sensación de que el mundo salta o se mueve cada vez que la cabeza lo hace, que aparece al caminar, al correr y sobre un camino de tierra, y que se calma en cuanto el paciente se detiene.
@@ -200,7 +200,7 @@ El paciente oye "igual que siempre". ¿Pedirías el audiograma? ¿Qué pruebas d
 - @OD 8000 | Solo un descenso leve en 8 kHz (20 dB), esperable a los 52 años. Ni el fármaco ni la edad dejaron aquí nada visible.
 :::
 
-:::ayuda-ancho Lo que entrega Enrique del examen vestibular (cifras inventadas para el libro; → H15, H16, H17, H19)
+:::ayuda-ancho Lo que entrega Enrique del examen vestibular (cifras de ejemplo; → H15, H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | sin nistagmo con ni sin fijación; seguimiento y sacádicos normales | |
@@ -217,7 +217,7 @@ El paciente oye "igual que siempre". ¿Pedirías el audiograma? ¿Qué pruebas d
 - **Qué pedir:** audiometría (puede ser normal), calórica mínima y, como las dos velocidades son bajas, la bitérmica; vHIT de los dos lados; DVA (→ H3, H16, H17, H19).
 - **Lo que enseña:** el "no significativo" de la mínima que, leído solo, cierra el caso en falso; y que **el audiograma normal no resta nada**.
 - **Errores esperables:** cerrar con "calórica sin asimetría"; pedir solo el audiograma por tratarse de "ototoxicidad"; no preguntar por el antibiótico porque el paciente no lo recuerda: hay que mirar la epicrisis.
-- **En LabSim:** caso armado para el libro con el cuadro *Normal* en los dos oídos; la audición y la logoaudiometría salen normales, por eso el caso no lleva más figuras auditivas.
+- **En LabSim:** cuadro *Normal* en los dos oídos; la audición y la logoaudiometría salen normales, y lo vestibular se entrega con la tabla de resultados.
 :::
 
 {{caso cap24_tuberculosis}}
@@ -248,14 +248,14 @@ Además del estudio auditivo, ¿qué pruebas vestibulares agregarías aunque el 
 - @OD 1000 | El OD responde en **3 de 5 bandas** (hasta 2 kHz) y el OI en **2 de 5** (hasta 1,5 kHz), con reproducibilidad de 72 y 33 %: no hay emisiones donde el audiograma cae.
 :::
 
-:::ayuda-ancho Lo que entrega Verónica del examen vestibular (cifras inventadas para el libro; → H16, H17, H19)
+:::ayuda-ancho Lo que entrega Verónica del examen vestibular (cifras de ejemplo; → H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG | sin nistagmo espontáneo; seguimiento y sacádicos normales | |
 | Calórica mínima (agua a 2 °C), fase lenta | **5 °/s** | **3 °/s** |
 | Asimetría de la mínima | hipoexcitabilidad OI de **25 %** (valor **significativo**) | |
 | Calórica bitérmica (30 y 44 °C): tibia + fría | 3 + 5 = **8 °/s** | 2 + 3 = **5 °/s** |
-| vHIT lateral (ganancia de área, la que informa trainHIT) | **0,45**, con sacadas manifiestas | **0,46**, con sacadas manifiestas |
+| vHIT lateral (ganancia de área) | **0,45**, con sacadas manifiestas | **0,46**, con sacadas manifiestas |
 | Agudeza visual dinámica, giro horizontal a 3 Hz | pierde **4 líneas** | |
 :::
 
@@ -266,7 +266,7 @@ Además del estudio auditivo, ¿qué pruebas vestibulares agregarías aunque el 
 - **La trampa:** la **mínima** da 25 %, "significativo" a la izquierda, y lleva a informar una hipofunción **izquierda**. El oído derecho está a 5 °/s: con una respuesta tan baja no es "el lado sano". La bitérmica (OI 5, **OD 8 °/s**) y sobre todo el vHIT (**las dos ganancias bajo 0,6**) completan el cuadro.
 - **Lo que enseña:** que la queja auditiva **y** la vestibular pueden venir juntas y que la paciente solo menciona una. Y que el consenso admite que se cumpla **una** de las pruebas: aquí la calórica la cumple solo el OI (suma 5), y el vHIT los dos lados.
 - **Errores esperables:** informar una "paresia izquierda"; no preguntar por el equilibrio a quien consulta por acúfeno; creer que el vHIT bilateral "contradice" la mínima.
-- **En LabSim:** caso armado para el libro con el cuadro *Ototóxica* en los dos oídos; la captura del vHIT de la sección "En el simulador" es del caso bilateral de trainHIT (cifras de simulador, que coinciden con las de la ficha).
+- **En LabSim:** cuadro *Ototóxica* en los dos oídos. El vHIT de la sección "En LabSim" es de un paciente simulado con las mismas ganancias de la ficha (cifras del modelo).
 :::
 
 {{caso cap24_sin_causa}}
@@ -289,7 +289,7 @@ Con ese informe previo y la audición normal, ¿repetirías las pruebas? ¿Cuál
 - @OD 1000 | Audición **normal** en los dos oídos, con la leve caída de agudos de los 58 años (15 a 20 dB en 6 y 8 kHz).
 :::
 
-:::ayuda-ancho Lo que entrega Pilar del examen vestibular (cifras inventadas para el libro; → H16, H17, H19)
+:::ayuda-ancho Lo que entrega Pilar del examen vestibular (cifras de ejemplo; → H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG | sin nistagmo espontáneo; seguimiento y sacádicos normales | |
@@ -306,7 +306,7 @@ Con ese informe previo y la audición normal, ¿repetirías las pruebas? ¿Cuál
 - **Qué pedir:** repetir la calórica con la bitérmica, vHIT de los dos lados y DVA.
 - **Lo que enseña:** que el informe anterior **no estaba equivocado en lo que decía** (la asimetría es de 11 %), sino en lo que **no decía**. Una calórica con velocidades de 4 y 5 °/s es baja con cualquier criterio; y que la causa quede sin explicar es lo más frecuente.
 - **Errores esperables:** repetir "sin alteración vestibular"; buscar la causa en las pruebas auditivas; dar de alta con un "normal".
-- **En LabSim:** caso armado para el libro con el cuadro *Normal* en los dos oídos, sin más figuras auditivas.
+- **En LabSim:** cuadro *Normal* en los dos oídos; lo vestibular se entrega con la tabla de resultados.
 :::
 
 {{caso cap24_canvas}}
@@ -333,7 +333,7 @@ Pide la hoja de resultados de la neurología. ¿Qué parte del estudio vestibula
 - @OD max | Discriminación de 92 % en el OD y 96 % en el OI, acorde a la curva: el oído se explica por sí solo.
 :::
 
-:::ayuda-ancho Lo que entrega Jorge del examen vestibular (cifras inventadas para el libro; → H15, H16, H17, H19)
+:::ayuda-ancho Lo que entrega Jorge del examen vestibular (cifras de ejemplo; → H15, H16, H17, H19)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo | sin nistagmo | |
@@ -352,7 +352,7 @@ Pide la hoja de resultados de la neurología. ¿Qué parte del estudio vestibula
 - **Qué pedir:** audiometría, calórica y vHIT; DVA; y la parte que corresponde al neurólogo, la video-oculografía del reflejo potenciado visualmente.
 - **Lo que enseña:** qué **no** se atribuye al oído. La hipoacusia es la de la edad y el acúfeno también; lo vestibular es bilateral y la clínica apunta al sistema nervioso. El audiólogo informa el **patrón** y **la discordancia con la audición**.
 - **Errores esperables:** explicar la inestabilidad por la presbiacusia; informar "hipofunción vestibular bilateral" como si fuera un diagnóstico; decir que el cerebelo "se compensa" y que la rehabilitación va a resolverlo.
-- **En LabSim:** caso armado para el libro con el cuadro *Presbiacusia* leve en los dos oídos; el motor no modela la neuropatía ni la ataxia, que van en el relato.
+- **En LabSim:** cuadro *Presbiacusia*, grado leve, en los dos oídos. El simulador no modela la neuropatía ni la ataxia: van en el relato del caso.
 :::
 
 ## Resolución de los casos

@@ -34,11 +34,9 @@ Este capítulo no agrega ninguna prueba nueva. Usa las de siempre, con otra preg
 - **El examen vestibular previo.** H19 pide un examen vestibular de menos de 6 meses antes de rehabilitar. Eso vale para un **programa de rehabilitación vestibular**. Un programa general de fuerza y equilibrio para prevenir caídas es otra cosa: la guía mundial lo recomienda a todos los mayores, sin tener en cuenta su riesgo ni su edad, y no pide examen vestibular para ofrecerlo (Montero-Odasso y cols., 2022).
 :::
 
-## En el simulador
+## En LabSim
 
-LabSim da el **lado auditivo** de estos pacientes: el audiograma y la logoaudiometría, que salen del cuadro *Presbiacusia*. **No** hace examen vestibular, postural ni rehabilitación, y no tiene tensiómetro ni cuestionarios. Lo vestibular, lo funcional, la presión y los cuestionarios de cada caso están **escritos** en la ficha de resultados, con **cifras inventadas para el libro**.
-
-Para ver el principio del capítulo se usa el modelo postural de **labyrinthus3d**, el simulador 3D del autor de este libro, libre y de solo lectura aquí (→ H19). Tiene perfiles con los nervios de las piernas, la vista y el laberinto por separado, y permite hacer el mCTSIB en las cuatro condiciones. De ahí salen las trazas de uno de los esquemas. No modela la edad, el miedo, los fármacos ni la presión de pie, ni tiene un módulo de ejercicio. Y sus **constantes son órdenes de magnitud para enseñar**, no valores normativos: ningún número de este capítulo sale del simulador.
+LabSim da el **lado auditivo** de estos pacientes: el audiograma y la logoaudiometría, que salen del cuadro *Presbiacusia*. **No** hace examen vestibular, postural ni rehabilitación, y no tiene tensiómetro ni cuestionarios. Lo vestibular, lo funcional, la presión y los cuestionarios de cada caso están **escritos** en la ficha de resultados, con **cifras de ejemplo**.
 
 ## Fisiología
 
@@ -48,7 +46,7 @@ Para estar de pie, el cerebro recibe información de tres fuentes: la **vista**,
 
 Lo importante es que esas fuentes no pesan igual en todo momento. El cerebro **reparte la confianza** según qué tan confiable es cada una en esa situación: en terreno firme y con luz se apoya sobre todo en los pies; si la superficie se vuelve blanda o inestable, o se cierran los ojos, aumenta el peso de las otras (Peterka, 2002). Es lo que la prueba clínica de interacción sensorial aprovecha al quitar los sentidos de a uno (→ H19). Y es también lo que permite **sustituir**: si un sentido falla, los otros suben su peso y el equilibrio se mantiene, con menos margen (Horak, 2006).
 
-:::imagen ilustraciones/cap32-sustitucion.svg ancho=100% La sustitución sensorial: cuando un sentido falla los otros suben su peso, y con dos caídos queda uno solo. Esquema sin cifras.
+:::imagen ilustraciones/cap32-sustitucion.svg ancho=100% La sustitución sensorial: cuando un sentido falla los otros suben su peso, y con dos caídos queda uno solo. Si además se apaga la luz, no queda ninguno: es el baño de noche. Esquema sin cifras.
 :::
 
 ### Lo que pierde la edad, sentido por sentido
@@ -89,7 +87,7 @@ En 1087 personas de 72 años o más, el 24 % refería mareo de al menos un mes. 
 
 Lo mismo ocurre con la caída. En 336 personas de 75 años o más seguidas un año, el 32 % se cayó al menos una vez, el 24 % de los que se cayeron tuvo una lesión grave y el 6 %, una fractura; el uso de sedantes, el deterioro cognitivo, la discapacidad de las piernas, las anomalías del equilibrio y la marcha y los problemas de los pies se asociaron cada uno con el riesgo, que subió en línea recta con el número de factores (Tinetti y cols., 1988). Esa suma es la que dibuja la figura siguiente: no hay "la causa", hay un **perfil**.
 
-:::imagen ilustraciones/cap32-factores.svg ancho=100% Los dominios de la evaluación multifactorial. En azul, lo que mide quien evalúa la audición y el equilibrio; en naranja, lo que se pregunta, se mide a pie de cama o se deriva.
+:::imagen ilustraciones/cap32-factores.svg ancho=100% Los dominios de la evaluación multifactorial: una caída casi nunca tiene una sola causa, y ningún dominio basta solo. En azul, lo que mide quien evalúa la audición y el equilibrio; en naranja, lo que se pregunta, se mide a pie de cama o se deriva.
 :::
 
 ### Lo que se busca, dominio por dominio
@@ -153,7 +151,7 @@ Frente a un mayor que cae o se marea, el razonamiento sigue cinco preguntas, en 
 4. **¿Qué se puede mejorar ya?** Un VPPB con una maniobra; una presión o un fármaco con el médico; una catarata con la cirugía; la audición con un audífono.
 5. **¿Qué lo mantiene?** El miedo, la debilidad, la casa.
 
-:::imagen ilustraciones/cap32-riesgo.svg ancho=100% La estratificación del riesgo de caída de las Guías Mundiales de Caídas (2022). Esquema resumen: ante la duda se mira el texto de la guía.
+:::imagen ilustraciones/cap32-riesgo.svg ancho=100% La estratificación del riesgo de caída de las Guías Mundiales de Caídas (2022): con unas pocas preguntas y una medida de la marcha se decide si basta la prevención, si hace falta ejercicio o si corresponde una evaluación multifactorial. Esquema resumen: ante la duda se mira el texto de la guía.
 :::
 
 El riesgo **alto** pide una evaluación multifactorial, que la guía recomienda ofrecer a quienes lo tienen, con intervenciones de varios frentes guiadas por esa evaluación (Montero-Odasso y cols., 2022). Es un punto con matices: la actualización de 2026 de la revisión Cochrane de intervenciones multifactoriales encontró que **podrían** reducir la tasa de caídas (razón de tasas 0,76) y las caídas repetidas, pero con evidencia de baja certeza, poco o ningún cambio en el número de personas que se caen, y ningún beneficio adicional frente a dar solo consejos sobre caídas (Swarnalatha y cols., 2026). El esfuerzo vale, pero no promete tanto como el ejercicio.
@@ -208,7 +206,7 @@ Piensa en el lado del vértigo, en la presión, en la marcha y en el miedo. ¿Qu
 - @OD max | Discriminación del **92 %**, acorde con la pérdida y casi igual en los dos oídos.
 :::
 
-:::ayuda-ancho Lo que entrega Eva del equilibrio y de las posturas (cifras inventadas para el libro; → H18, H19)
+:::ayuda-ancho Lo que entrega Eva del equilibrio y de las posturas (cifras de ejemplo; → H18, H19)
 | Prueba | Resultado |
 |---|---|
 | Presión arterial | acostada **138/78**; de pie al 1.er minuto **134/80** y a los 3 minutos **132/78**: sin caída |
@@ -227,7 +225,7 @@ Piensa en el lado del vértigo, en la presión, en la marcha y en el miedo. ¿Qu
 - **Qué pedir:** Dix-Hallpike a los dos lados y giro supino; presión acostada y de pie; batería de H19; ABC; audiometría y logoaudiometría para la audición (→ H3, H5, H18, H19).
 - **Lo que enseña:** que el diagnóstico aparece con la **posición**, no con la palabra "vértigo"; y que tratar la causa **no termina** el caso: tiene una fractura reciente y un riesgo que no se agotó.
 - **Errores esperables:** no hacer el Dix-Hallpike porque "no gira"; hacerlo solo del lado derecho; atribuirlo a la presbiacusia; dar el caso por cerrado después de la maniobra.
-- **En LabSim:** caso armado para el libro con el cuadro *Presbiacusia* leve en los dos oídos; el motor no modela el vértigo posicional. El nombre de la paciente lo sortea el editor.
+- **En LabSim:** cuadro *Presbiacusia* leve en los dos oídos; el simulador no modela el vértigo posicional. El nombre de la paciente lo sortea el editor.
 :::
 
 {{caso cap32_fragil}}
@@ -254,7 +252,7 @@ Agrupa lo que podría explicar sus caídas por sistemas: cardiovascular, sensori
 - @OD max | Discriminación máxima del **64 %** en el OD y del **68 %** en el OI, a 70 dB: baja, pero parecida entre los dos oídos y acorde con una pérdida de agudos tan grande.
 :::
 
-:::ayuda-ancho Lo que entrega Hugo de la evaluación (cifras inventadas para el libro; → H15, H18, H19)
+:::ayuda-ancho Lo que entrega Hugo de la evaluación (cifras de ejemplo; → H15, H18, H19)
 | Prueba | Resultado |
 |---|---|
 | Presión arterial | acostado 5 min **142/84**; de pie al minuto **118/70**, con "se me nubla"; a los 3 minutos **112/68** |
@@ -268,7 +266,7 @@ Agrupa lo que podría explicar sus caídas por sistemas: cardiovascular, sensori
 | Durante la prueba | en el primer TUG no entendió la orden "ahora"; se repitió de frente y despacio |
 :::
 
-:::imagen ilustraciones/cap32-ortostatismo.svg ancho=80% La presión de Hugo acostado y de pie, con los cortes de la hipotensión ortostática. Cifras inventadas para el libro.
+:::imagen ilustraciones/cap32-ortostatismo.svg ancho=80% La presión de Hugo acostado y de pie, con los cortes de la hipotensión ortostática: ya al minuto cruza los dos, y lo hace con síntomas.
 - @18.7,30.9 | **Acostado**: 142/84.
 - @42,45.5 | **Al minuto**: 118/70. Ya cruzó los dos cortes: bajó 24 la sistólica y 14 la diastólica. Dijo que se le nubló la vista.
 - @72,49.1 | **A los 3 minutos**: 112/68. **30** menos la sistólica y **16** menos la diastólica: cumple el criterio y, además, **tiene síntomas**.
@@ -280,7 +278,7 @@ Agrupa lo que podría explicar sus caídas por sistemas: cardiovascular, sensori
 - **Qué pedir:** presión acostado y de pie; la lista de remedios para el médico; batería de H19; mCTSIB; Dix-Hallpike; ABC o FES-I; audiometría y logoaudiometría (→ H3, H6, H19).
 - **Lo que enseña:** que el caso **no es vestibular** y que la mayor parte de lo que se arregla está fuera del oído; que un laberinto "normal para la edad" no cierra nada; y que la audición es parte de las condiciones de la evaluación.
 - **Errores esperables:** pedirle una calórica; empezar el entrenamiento sin que el médico vea la presión y los fármacos; cambiar los anteojos sin pensar en la cirugía de cataratas; dar la consigna sin comprobar que entendió.
-- **En LabSim:** caso armado para el libro con el cuadro *Presbiacusia* moderada en los dos oídos, con acúfeno. El nombre del paciente lo sortea el editor.
+- **En LabSim:** cuadro *Presbiacusia* moderada en los dos oídos, con acúfeno. El nombre del paciente lo sortea el editor.
 :::
 
 {{caso cap32_bilateral}}
@@ -307,7 +305,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 - @OD max | Discriminación del **88 %**, buena y simétrica: nada retrococlear.
 :::
 
-:::ayuda-ancho Lo que entrega Isabel de la evaluación (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Isabel de la evaluación (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Neurología (informe) | polineuropatía sensitiva distal simétrica; **sin sensibilidad** al monofilamento ni a la vibración en ambos pies; reflejos aquíleos ausentes; sin dismetría, sin disartria; resonancia sin atrofia cerebelosa |
@@ -322,7 +320,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 | Cuestionarios | ABC **44 %**; DHI **58** (moderado) |
 :::
 
-:::imagen ilustraciones/cap32-mctsib-perfiles.svg ancho=100% El mCTSIB con cuatro perfiles, hechos con el modelo postural de labyrinthus3d. El tercero es el de Isabel: neuropatía y pérdida vestibular bilateral. No son datos de una persona.
+:::imagen ilustraciones/cap32-mctsib-perfiles.svg ancho=100% El mCTSIB de cuatro perfiles simulados. El tercero es el de Isabel, con neuropatía y pérdida vestibular bilateral: se sostiene mientras ve y se cae al cerrar los ojos sobre espuma, porque la vista es su último apoyo. Trazas de un modelo que no considera la edad, el miedo ni los fármacos; no son datos de una persona ni valores normativos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @85.8,21.6 | **Referencia, sin déficit.** Con ojos cerrados sobre espuma el balanceo es el mayor de todas las condiciones, pero se sostiene.
 - @85.8,42.6 | **Solo neuropatía.** Se sostiene, con más balanceo: con los pies caídos le quedan la vista y el vestíbulo.
 - @63.2,63.6 | **Neuropatía y pérdida vestibular.** Con ojos abiertos sobre espuma se sostiene: **la vista la está sosteniendo**.
@@ -336,7 +334,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 - **Qué pedir:** calórica bitérmica y vHIT de los dos lados; DVA; batería de H19 con mCTSIB; presión de pie; sensibilidad de los pies; ABC y DHI (→ H15 a H19, cap. 24).
 - **Lo que enseña:** que **dos sentidos caídos no se compensan** y que el tercero tiene que alcanzar solo, con luz; que el caso no se explica con una sola enfermedad; y que su miedo es **realista**.
 - **Errores esperables:** quedarse con la neuropatía y no pedir el examen vestibular; informar "calórica sin asimetría" (→ cap. 24); suponer que es un PPPD por el miedo; dejar el programa sin cambios en la casa.
-- **En LabSim:** caso armado para el libro con el cuadro *Presbiacusia* leve en los dos oídos, sin acúfeno. El nombre de la paciente lo sortea el editor.
+- **En LabSim:** cuadro *Presbiacusia* leve en los dos oídos, sin acúfeno. El nombre de la paciente lo sortea el editor.
 :::
 
 ## Resolución de los casos

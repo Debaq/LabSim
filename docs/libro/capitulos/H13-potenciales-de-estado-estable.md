@@ -76,7 +76,7 @@ La amplitud de la respuesta crece con la intensidad y con la profundidad de la m
 
 ### Conoce el examen: la pantalla de un ASSR
 
-LabSim no simula este examen (→ "En LabSim"), así que aquí no hay una captura del simulador. Estas son las partes de la pantalla de un equipo real, que son prácticamente las mismas en todos:
+LabSim no simula este examen (→ "En LabSim"). Estas son las partes de la pantalla de un equipo real, que son prácticamente las mismas en todos:
 
 :::ayuda-ancho Qué muestra la pantalla de un ASSR
 | Parte | Qué es | Cómo se lee |
@@ -296,7 +296,7 @@ Para saber si una respuesta es del oído o del equipo, se repite el registro al 
 
 ## En LabSim
 
-**LabSim no simula el ASSR.** El combo de pruebas de la ventana del ABR nombra el ASSR junto con otros potenciales que se planean, pero está **deshabilitado**: no genera una respuesta y no se puede registrar. Por eso esta herramienta no trae capturas del simulador ni figuras del motor, y lo que aquí se describe lo vas a ver recién en un equipo real.
+**LabSim no simula el ASSR.** El combo de pruebas de la ventana del ABR nombra el ASSR junto con otros potenciales que se planean, pero está **deshabilitado**: no genera una respuesta y no se puede registrar. Lo que aquí se describe lo vas a ver recién en un equipo real.
 
 Lo que sí practica LabSim y que sirve directamente para este examen:
 

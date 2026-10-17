@@ -42,7 +42,7 @@ Al dividir por N para obtener el promedio, la respuesta conserva su tamaño y el
 - Para dejar el ruido residual a **la mitad** hay que promediar **cuatro veces más** barridos. De 250 a 1.000 el ruido baja a la mitad; de 1.000 a 4.000, otra vez a la mitad.
 - Cada mejora cuesta más que la anterior. A 21,1 estímulos por segundo, 2.000 barridos toman unos 95 segundos y 4.000 toman unos 190, sin contar los barridos rechazados, que no cuentan y alargan el examen.
 
-:::imagen ilustraciones/cap18-raiz.svg ancho=80% Cuánto cae el ruido residual al aumentar los barridos, con la regla de 1/√N tomada de 250 barridos como punto de partida. Es la curva teórica, no datos de un paciente.
+:::imagen ilustraciones/cap18-raiz.svg ancho=80% Cuánto cae el ruido residual al aumentar los barridos, con la regla de 1/√N desde 250 barridos. Mira cómo se aplana la curva: cada mitad de ruido que ganas cuesta cuatro veces más barridos. Es la curva teórica, no datos de un paciente.
 :::
 
 El argumento vale mientras el ruido sea **aleatorio y sin relación con el estímulo**. Lo que **sí** guarda relación con cada estímulo (un artefacto eléctrico del transductor, un músculo que se contrae reflejamente con cada click) se suma como la respuesta y no se promedia hacia abajo. Ese es el hilo del resto del capítulo: el promedio limpia el ruido, pero no distingue una respuesta auditiva de cualquier otra cosa que se repita con cada estímulo.
@@ -127,7 +127,7 @@ Obtienes un trazo con una onda perfecta a 5,6 ms a 40 dB nHL en un oído que el 
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los pacientes son de práctica corriente: sus oídos son los de siempre. En cada caso hay dos tipos de figura. El **ABR limpio** del paciente, tal como lo toma el equipo bien puesto, es la referencia. El **registro que engaña** está calculado con el generador de LabSim con el artefacto o el ajuste equivocado activado; no es un registro de un paciente real.
+Los pacientes son de práctica corriente: sus oídos son los de siempre. En cada caso hay dos tipos de figura. El **ABR limpio** del paciente, tal como lo toma el equipo bien puesto, es la referencia. El **registro que engaña** es el mismo oído con el artefacto o el ajuste equivocado, simulado en LabSim: no es el registro de un paciente real.
 
 {{caso cap18_p33}}
 
@@ -152,7 +152,7 @@ Antes de repetir nada, ¿qué dos números del equipo te dirían si el registro 
 - @OD 10 V | A 10 dB la V sigue ahí, a unos 8 ms, en las dos réplicas: el **umbral del paciente es 10 dB nHL**, tal como dice su audiograma.
 :::
 
-:::imagen ilustraciones/cap18-promedio.svg ancho=92% El mismo oído a 20 dB nHL, de 250 a 4.000 barridos, con la mitad A del promedio en azul y la mitad B en rojo. Los valores de FSP y de ruido residual son los del simulador y solo ilustran.
+:::imagen ilustraciones/cap18-promedio.svg ancho=92% El mismo oído a 20 dB nHL, de 250 a 4.000 barridos, con la mitad A del promedio en azul y la mitad B en rojo. Mira en qué fila empiezan a coincidir las dos mitades: recién ahí se puede decir que hay respuesta, y antes tampoco se podía decir que no la había. Los valores de FSP y de ruido residual son del simulador y solo ilustran.
 - @92,13 | **250 barridos:** FSP cerca de 1 y las dos mitades no se parecen. Los picos de ruido son del tamaño de lo que se busca: aquí no se puede decir ni que hay ni que no hay respuesta.
 - @92,40 | **1.000 barridos:** el ruido residual ya es la mitad, pero las mitades todavía no se pegan.
 - @92,77 | **4.000 barridos:** el FSP pasa el criterio. La onda de 8 ms está en las dos mitades.
@@ -192,7 +192,7 @@ Un operador de chancador de 47 años, con acúfeno bilateral y un audiograma con
 - @OD 60 V | A 60 dB la V sigue ahí, más tarde (6,6 ms): la V migra.
 :::
 
-:::imagen ilustraciones/cap18-estimulo.svg ancho=92% El mismo oído a 100 dB nHL con distintas condiciones del estímulo. Arriba, la referencia: inserción y polaridad alternada. Segunda fila: fono supraaural en condensación. Tercera: supraaural alternada. Abajo: inserción con el tubo pinzado.
+:::imagen ilustraciones/cap18-estimulo.svg ancho=92% El mismo oído a 100 dB nHL con distintas condiciones del estímulo. Arriba, la referencia: inserción y polaridad alternada. Segunda fila: fono supraaural en condensación. Tercera: supraaural alternada. Abajo: inserción con el tubo pinzado. Compara el primer milisegundo de cada fila: lo que aparece antes de que el sonido pueda llegar a la cóclea es el estímulo, no una onda.
 - @92,19 | **Referencia.** Inserción y alternada: el primer milisegundo está limpio; la V cae cerca de 5,5 ms.
 - @92,42 | **Supraaural, condensación.** Una deflexión grande **desde 0 ms**, antes de que el sonido pueda llegar a la cóclea: es el estímulo, no una onda. Se lee como una "I" temprana y enorme.
 - @92,65 | **Supraaural, alternada.** El artefacto casi desaparece, pero la V llega unos 0,8 ms antes que con inserción: sin el tubo, el sonido llega antes.
@@ -228,7 +228,7 @@ Sin cambiar de paciente, ¿qué mirarías al bajar la intensidad para saber si e
 - @OD 70 V | A 70 dB la V se atrasa a 6,5 ms y se achica.
 :::
 
-:::imagen ilustraciones/cap18-pam.svg ancho=92% El oído derecho con una respuesta postauricular activada y la ventana abierta a 25 ms, de 100 a 60 dB nHL. Las dos mitades del promedio coinciden en todo el trazo.
+:::imagen ilustraciones/cap18-pam.svg ancho=92% El oído derecho con una respuesta postauricular y la ventana abierta a 25 ms, de 100 a 60 dB nHL. Las dos mitades del promedio coinciden en todo el trazo, así que replicar no basta: lo que delata a la onda muscular es que no se atrasa al bajar la intensidad, como sí lo hace la V.
 - @92,11 | **100 dB.** Una onda grande y ancha a 13 ms, mucho más que cualquier onda del ABR. Con una ventana de 12 ms solo se vería su comienzo.
 - @92,27 | **90 dB.** La V verdadera (verde, a unos 6 ms) es chica; la de 13 ms es varias veces mayor. Y las dos mitades **coinciden**: replicar no la descarta.
 - @92,66 | **70 dB.** La onda tardía ya casi no está; la V de 6,5 ms está atrasada y chica, como corresponde.
@@ -268,7 +268,7 @@ Mira solo la latencia de esa onda en cuatro niveles seguidos. ¿Qué esperarías
 - @OD 100 | A 100 dB el trazo del **oído derecho** muestra una onda con réplicas, hacia los 7 ms: es real, pero **no es del derecho**. Es la respuesta del oído izquierdo, que el estímulo alcanza por vía ósea a través del cráneo (la curva sombra; → H10 y H4). Se enmascara y desaparece.
 :::
 
-:::imagen ilustraciones/cap18-falsa-v.svg ancho=92% El oído derecho cofótico, de 70 a 40 dB nHL, con una falsa onda V activada. En azul la mitad A del promedio, en rojo la mitad B.
+:::imagen ilustraciones/cap18-falsa-v.svg ancho=92% El oído derecho cofótico, de 70 a 40 dB nHL, con una falsa onda V. En azul la mitad A del promedio, en rojo la mitad B. Dos cosas la delatan: vive en una sola mitad y no se mueve al bajar la intensidad.
 - @92,19 | **70 dB.** Una "V" perfecta a 5,6 ms, pero solo en la **mitad A**; la B está plana. El FSP no la confirma.
 - @92,42 | **60 dB.** Misma latencia, misma altura: bajó 10 dB y la onda no se movió. Una V verdadera se atrasa y se achica.
 - @92,64 | **50 dB.** Idéntica otra vez. Un artefacto se queda quieto.
@@ -305,7 +305,7 @@ Sin cambiar de oído, ¿qué parámetros del equipo pudieron esconder una onda q
 - @OI 30 | A 30 dB, a 8,0 ms, muy cerca del umbral. Un umbral buscado con la ventana corta se detiene en el nivel donde la V todavía cabe.
 :::
 
-:::imagen ilustraciones/cap18-polaridad.svg ancho=92% El oído izquierdo con distintas polaridades a 80 dB nHL y con ventana de 12 y de 6 ms a 50 dB nHL.
+:::imagen ilustraciones/cap18-polaridad.svg ancho=92% El oído izquierdo con distintas polaridades a 80 dB nHL y con ventana de 12 y de 6 ms a 50 dB nHL. Arriba, otra polaridad cambia la forma y deja de valer la norma de rutina; abajo, la ventana corta deja la V afuera y el oído parece no responder.
 - @92,19 | **Alternada.** Es la referencia de rutina: V clara cerca de 5,7 ms.
 - @92,33 | **Rarefacción.** La forma cambia un poco (las ondas tempranas salen antes y más claras en rarefacción; Stockard y cols., 1979); la V se mantiene.
 - @92,47 | **Condensación.** Más chica la onda I y distinta la forma. Con otra polaridad, la norma de rutina no vale.
@@ -313,7 +313,7 @@ Sin cambiar de oído, ¿qué parámetros del equipo pudieron esconder una onda q
 - @92,84 | **Ventana de 6 ms, 50 dB.** El mismo oído: aquí no hay nada. La onda no se fue; se cortó.
 :::
 
-:::imagen ilustraciones/cap18-filtros.svg ancho=92% El mismo oído a 80 dB nHL con cuatro bandas de filtro.
+:::imagen ilustraciones/cap18-filtros.svg ancho=92% El mismo oído a 80 dB nHL con cuatro bandas de filtro. Solo la de rutina deja las ondas como las espera la norma: las otras achican, ensucian o redondean el trazo.
 - @92,17 | **100-3.000 Hz**, la rutina.
 - @92,38 | **Pasa alto de 300 Hz.** El trazo se aplana y se achica: se le quitó parte de la energía de la respuesta, y con un equipo real, además, se correrían las latencias.
 - @92,60 | **Pasa alto de 30 Hz.** Entra la deriva lenta y las mitades A y B se separan: hay más ruido y el promedio tarda más en ser confiable.

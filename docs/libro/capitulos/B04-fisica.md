@@ -44,7 +44,7 @@ Cinco números describen un tono puro:
 - **Amplitud**: cuánto sube y baja la presión. Se puede dar de pico, de pico a pico o **RMS** (*root mean square*, la raíz del promedio de los cuadrados). El RMS mide la potencia del sonido y es el que usan los decibeles; para un tono puro vale 0,707 veces el pico.
 - **Fase**: en qué punto del ciclo está la onda en un instante dado, de 0° a 360°.
 
-:::imagen ilustraciones/b4-onda.svg ancho=96% Período, amplitud y fase de un tono puro
+:::imagen ilustraciones/b4-onda.svg ancho=96% Período, amplitud y fase de un tono puro. El período se lee en el eje del tiempo y la amplitud en el de la presión; la fase dice en qué punto del ciclo está la onda en cada instante.
 :::
 
 Tabla: Período y longitud de onda de las frecuencias del audiograma (aire, 20 °C)
@@ -66,7 +66,7 @@ Tabla: Período y longitud de onda de las frecuencias del audiograma (aire, 20 �
 
 Todo sonido, por irregular que sea, se puede armar sumando tonos puros de distintas frecuencias y amplitudes. La lista de cuánto hay de cada frecuencia es su **espectro**. Hay una regla que lo gobierna todo: **cuanto más corto es un sonido en el tiempo, más ancho es su espectro** (el ancho de banda es del orden de 1 / duración). Un tono puro, que dura "para siempre", tiene una sola línea; un click, que dura una fracción de milisegundo, tiene energía en casi todas las frecuencias.
 
-:::imagen ilustraciones/b4-estimulos.svg ancho=100% Forma de onda y espectro de los estímulos de los exámenes
+:::imagen ilustraciones/b4-estimulos.svg ancho=100% Forma de onda y espectro de los estímulos de los exámenes. Compara cada par: cuanto más corto es el estímulo en el tiempo, más ancho es su espectro.
 :::
 
 Tabla: Qué energía lleva cada estímulo y dónde se usa
@@ -95,12 +95,12 @@ Un **ruido** es un sonido sin pauta: no se puede predecir su siguiente valor, as
 - **Ruido de habla** (*speech noise*, SN): un ruido con el espectro promedio de la voz, con más energía en graves y medios y menos en agudos. Enmascara bien la palabra porque ocupa el mismo lugar que ella (→ H4, H5).
 - **Ruido de banda estrecha** (*narrow band noise*, NBN): ruido filtrado a una banda alrededor de una frecuencia, de un tercio de octava o algo más según el equipo. Es el enmascarante de la audiometría y un estímulo de campo libre (→ H4, H8). <!-- verificar: ancho de banda del NBN que fijan IEC 60645-1 e ISO 389-4. -->
 
-:::imagen ilustraciones/b4-ruidos.svg ancho=96% Ruido blanco y rosa, por hercio y por banda de un tercio de octava
+:::imagen ilustraciones/b4-ruidos.svg ancho=96% Ruido blanco y rosa, por hercio y por banda de un tercio de octava. El mismo ruido se ve plano o inclinado según cómo se mida: fíjate en qué eje usa cada panel antes de compararlos.
 :::
 
 **Banda crítica.** Un tono no es enmascarado por todo el ruido que suene, sino solo por el que cae **cerca de su frecuencia**. Fletcher (1940) lo mostró así: si se ensancha un ruido alrededor de un tono, el enmascaramiento sube hasta cierto ancho y después ya no sube más. Ese ancho es la **banda crítica**, el equivalente en frecuencia de un filtro de la cóclea. Es de unos 100 Hz bajo 500 Hz y crece desde ahí, cerca de un quinto de octava. A 1.000 Hz es de unos 160 Hz (Zwicker, 1961; Zwicker y Terhardt, 1980); con otra forma de medirla, el ancho rectangular equivalente (ERB) da 133 Hz (Glasberg y Moore, 1990).
 
-:::imagen ilustraciones/b4-banda-critica.svg ancho=96% La banda crítica comparada con la banda de un tercio de octava
+:::imagen ilustraciones/b4-banda-critica.svg ancho=96% La banda crítica comparada con la banda de un tercio de octava: bajo 500 Hz el tercio de octava es más angosto que la banda crítica y sobre 500 Hz, más ancho.
 :::
 
 Dos consecuencias que se usan en el libro. Primera: **bajo 500 Hz un ruido de tercio de octava es más angosto que la banda crítica y sobre 500 Hz es más ancho**, así que el ruido de un enmascarante se cuenta por la energía que cae dentro de una banda crítica y no por el nivel total. Segunda: lo que enmascara es la **potencia dentro de la banda**, que se calcula sumando el nivel por hercio y 10 log del ancho (→ Decibeles). Un ruido de 20 dB SPL por hercio entrega en 160 Hz de ancho 20 + 10 log 160 = 42 dB SPL. Además, un ruido de graves enmascara más a los agudos que al revés, porque la cóclea filtra de forma asimétrica (Gelfand, 2017).
@@ -111,7 +111,7 @@ Un **filtro** deja pasar unas frecuencias y atenúa otras. Hay cuatro formas: **
 
 El electrodo del PEAT recoge, mezcladas, tres cosas. La respuesta del tronco mide menos de 1 µV y su energía está sobre todo entre 100 y 3.000 Hz. El EEG de fondo es 10 o 100 veces más grande y su energía está en las frecuencias bajas. El músculo y la red eléctrica meten ruido en otras bandas. Un pasa altos de 100 Hz y un pasa bajos de 3.000 Hz dejan la banda de la respuesta y sacan buena parte de lo demás, y con eso el promedio necesita menos barridos para mostrar la onda (→ Señal y ruido). Con un pasa altos de 2.º orden, la red de 50 Hz queda 12 dB más abajo. <!-- verificar: banda de energía del PEAT y del EEG, tomadas como órdenes de magnitud de Picton (2010) y Hall (2007). -->
 
-:::imagen ilustraciones/b4-filtros.svg ancho=96% Los filtros del PEAT: lo que dejan pasar y lo que sacan
+:::imagen ilustraciones/b4-filtros.svg ancho=96% Los filtros del PEAT: lo que dejan pasar y lo que sacan. La banda de la respuesta queda adentro; el EEG de fondo, en los graves, y buena parte del ruido muscular y de la red quedan afuera.
 :::
 
 Filtrar tiene un costo. Un filtro cambia la forma de la onda: subir el pasa altos achica y adelanta las ondas, y un filtro muy angosto agrega oscilaciones (Picton, 2010). Por eso **no se filtra para embellecer**, y una norma de latencias solo sirve con los mismos filtros con que se midió (→ H10). Un filtro además es una pieza de muchos otros instrumentos: la **ponderación A** del sonómetro es un filtro (→ Ruido ocupacional), el audífono tiene un filtro por canal y el equipo de emisiones filtra por banda de frecuencia.
@@ -133,7 +133,7 @@ Un número en dB solo significa algo si se dice **respecto de qué** (*re* en in
 Una presión sonora RMS de 0,2 Pa: 20 × log (0,2 / 0,00002) = 20 × log 10.000 = 20 × 4 = **80 dB SPL**. De vuelta: 60 dB SPL son 20 µPa × 10^(60/20) = 20 µPa × 1.000 = 20.000 µPa = **0,02 Pa**. En la figura siguiente: cada +20 dB multiplica la presión por 10.
 :::
 
-:::imagen ilustraciones/b4-decibel.svg ancho=100% La escala de dB SPL, las reglas de cada paso y cómo suben dos fuentes al sumarse
+:::imagen ilustraciones/b4-decibel.svg ancho=100% La escala de dB SPL, las reglas de cada paso y cómo suben dos fuentes al sumarse. Cada +20 dB multiplica la presión por 10, y dos fuentes iguales suman solo 3 dB, no el doble de decibeles.
 :::
 
 ### Las reglas de 3, 6 y 10 dB
@@ -203,7 +203,7 @@ Tabla: RETSPL de dos fonos (dB SPL; ISO 389-1 e ISO 389-2)
 
 <!-- verificar: valores de ER-3A en 125 y 250 Hz (leídos de memoria de la ISO 389-2). Los de 500 a 4.000 Hz son los que usa LabSim para el reflejo ipsilateral, y los del TDH-39 son los de H3. -->
 
-:::imagen ilustraciones/b4-escalas.svg ancho=96% El mismo tono de 60 dB SPL en dB SPL, dB HL y dB SL
+:::imagen ilustraciones/b4-escalas.svg ancho=96% El mismo tono de 60 dB SPL en dB SPL, dB HL y dB SL. El sonido no cambia: cambia contra qué se compara, un micrófono, el oído normal o el umbral de este paciente.
 :::
 
 :::ayuda-ancho Ejemplo resuelto: qué pasa si se calibra para un fono y se usa otro
@@ -267,7 +267,7 @@ La **impedancia acústica** (*Z*) es cuánto se **opone** un sistema al paso del
 
 A una frecuencia el resorte y la masa se **anulan entre sí**: la oposición de uno compensa la del otro y solo queda el roce. Es la **frecuencia de resonancia**, *f*₀ = 1 / (2π √(*M* × *C*)), con *M* la masa y *C* la compliancia. En ella la admitancia es máxima. Un oído medio normal de adulto resuena en torno a 1.000 Hz (Margolis y Goycoolea, 1993). <!-- verificar: valor de la frecuencia de resonancia del oído medio normal del adulto (se cita de memoria entre 800 y 1.200 Hz). --> Un oído **más rígido** (otosclerosis, líquido) sube su resonancia; uno **más laxo** (una cadena interrumpida) la baja.
 
-:::imagen ilustraciones/b4-resonancia.svg ancho=100% Masa, rigidez y roce, y la admitancia de tres oídos de juguete
+:::imagen ilustraciones/b4-resonancia.svg ancho=100% Masa, rigidez y roce, y la admitancia de tres oídos de juguete: uno normal, uno rígido y uno laxo. Mira cómo cambia el orden entre los tres al pasar de la sonda de 226 Hz a la de 1.000 Hz.
 :::
 
 La figura es un modelo de juguete con los mismos valores de masa y roce, para que se vea la idea, y no un oído real. Con la sonda de **226 Hz**, que queda bajo la resonancia, el oído se comporta casi como un resorte, y lo que se mide es la compliancia: el oído rígido da menos (0,4 veces el normal en el modelo), el laxo da más (2,3 veces). Son los timpanogramas tipo As y tipo Ad (→ H7). A **1.000 Hz**, cerca de la resonancia, el orden es otro: el normal queda en su máximo y el laxo, casi a su altura (3,7 contra 4,3), así que los tipos ya no se leen igual. Cada sonda ve algo distinto porque **mide otra parte de la curva**.
@@ -392,7 +392,7 @@ La **cabina** resuelve el problema con dos paredes separadas por aire y con **ma
 
 **Salida máxima (OSPL90).** Ningún audífono puede dar más que cierto nivel, por más entrada que reciba. La **OSPL90** es el nivel de salida con 90 dB SPL de entrada, un sonido lo bastante fuerte para llevar al audífono a su techo (→ H21). El techo importa porque el oído del paciente también tiene uno (el nivel que le molesta, → H5).
 
-:::imagen ilustraciones/b4-audifono.svg ancho=100% Entrada y salida de un audífono, y lo que agrega el recorte
+:::imagen ilustraciones/b4-audifono.svg ancho=100% Entrada y salida de un audífono, y lo que agrega el recorte. El lineal sigue la recta hasta su techo y ahí recorta; el de compresión baja la ganancia antes de llegar a él.
 :::
 
 En el dibujo, un audífono **lineal** con 30 dB de ganancia sigue la recta hasta su techo y desde ahí **recorta**: a 90 dB de entrada daría 120 dB, y entrega 115. Uno con **compresión** baja su ganancia cuando sube la entrada: con una razón de compresión de 2:1 y desde una entrada de 45 dB, cada 2 dB de entrada dan solo 1 dB de salida, y con 90 dB de entrada la ganancia es de 7,5 dB.
@@ -447,7 +447,7 @@ Con flujos bajos el aire va en capas y ΔP crece con V̇. Con flujos altos apare
 
 El número de Reynolds dice dónde cambia el régimen: *Re* = ρ *v* *d* / μ. Con aire (ρ = 1,2 kg/m³, μ = 1,8 × 10⁻⁵ Pa·s), una válvula nasal de 0,6 cm² de área (cerca de un diámetro de 0,87 cm) y un flujo de 250 cm³/s, la velocidad es 4,2 m/s y *Re* ≈ **2.400**; con 430 cm³/s, *Re* ≈ 4.200. Por sobre unos 2.000 un flujo en un tubo recto ya no es ordenado (cálculo de orden de magnitud: la válvula real no es un tubo redondo). Con los flujos de la rinomanometría, entonces, la turbulencia ya cuenta.
 
-:::imagen ilustraciones/b4-nariz.svg ancho=100% Presión contra flujo en una fosa nasal, y la resistencia de un tubo según su radio
+:::imagen ilustraciones/b4-nariz.svg ancho=100% Presión contra flujo en una fosa nasal, y la resistencia de un tubo según su radio. La curva se dobla porque, al subir el flujo, la turbulencia pesa más; y basta achicar un poco el radio para que la resistencia se dispare.
 :::
 
 :::ayuda-ancho Ejemplo resuelto: separar lo laminar de lo turbulento con los números de H24
@@ -466,7 +466,7 @@ Un sonido que viaja por un tubo "siente" su sección. La impedancia de una onda 
 
 Si el tubo se **estrecha** (*A*₂ < *A*₁), *R* es positivo: el eco vuelve del mismo signo. Si se **ensancha**, *R* es negativo: el eco vuelve invertido (→ H25). Y la distancia sale del tiempo: el eco que vuelve demora *t* = 2*x* / *c* en ir y volver desde una distancia *x*.
 
-:::imagen ilustraciones/b4-reflexion.svg ancho=100% Ecos de un tubo con un estrechamiento, y cuánto del pulso llega hasta lo de atrás
+:::imagen ilustraciones/b4-reflexion.svg ancho=100% Ecos de un tubo con un estrechamiento, y cuánto del pulso llega hasta lo de atrás. El estrechamiento devuelve un eco del mismo signo y el ensanchamiento, uno invertido; el tiempo del eco dice a qué distancia está cada cambio.
 :::
 
 :::ayuda-ancho Ejemplo resuelto: de un eco a un área

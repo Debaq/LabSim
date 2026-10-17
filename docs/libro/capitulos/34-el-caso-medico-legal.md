@@ -164,7 +164,7 @@ El umbral conductual de un trabajador es de 70 dB en todas las frecuencias y el 
 
 ## En LabSim
 
-LabSim arma cada paciente con su **audición verdadera**, y de ella salen sus emisiones, sus reflejos y sus umbrales con burst. No puede cargar encima el audiograma que el paciente **informa**: por eso, en el caso 34.1, lo que él entrega va en una tabla, dato por dato, como un registro de la consulta, y esos números son inventados para el caso; los de las figuras salen del simulador. Tampoco existe en LabSim el estado estable (→ H13), ni cálculo de porcentajes de daño: las cuentas de este capítulo están hechas a mano con las fórmulas de arriba, y puedes rehacerlas con los umbrales de cada figura.
+LabSim arma cada paciente con su **audición verdadera**, y de ella salen sus emisiones, sus reflejos y sus umbrales con burst. No puede cargar encima el audiograma que el paciente **informa**: por eso, en el caso 34.1, lo que él entrega va en una tabla, dato por dato, como un registro de la consulta, y esos números son de ejemplo; los de las figuras salen del simulador. Tampoco existe en LabSim el estado estable (→ H13), ni cálculo de porcentajes de daño: las cuentas de este capítulo están hechas a mano con las fórmulas de arriba, y puedes rehacerlas con los umbrales de cada figura.
 
 ## Casos
 
@@ -188,7 +188,7 @@ Se pide una evaluación médico-legal. ¿Qué pruebas separarías en las que dep
 
 Esto es lo que Ismael **entregó** en la audiometría:
 
-Tabla: Umbrales aéreos que entrega Ismael (dB HL, inventados para el caso)
+Tabla: Umbrales aéreos que entrega Ismael (dB HL)
 
 | | 500 | 1.000 | 2.000 | 3.000 |
 |---|---|---|---|---|
@@ -197,7 +197,7 @@ Tabla: Umbrales aéreos que entrega Ismael (dB HL, inventados para el caso)
 
 Sus repeticiones del OI en 1.000 Hz dieron 60, 45 y 65 dB. Con el Stenger, usando la misma instrucción de los umbrales (→ H6):
 
-Tabla: Stenger de Ismael (dB HL, inventado para el caso)
+Tabla: Stenger de Ismael (dB HL)
 
 | | 500 | 1.000 | 2.000 |
 |---|---|---|---|
@@ -242,7 +242,7 @@ Tabla: Umbrales del PEAT con burst por frecuencia (valores del simulador, → H1
 
 Falta 3.000 Hz, que no tiene burst en LabSim. Se interpola entre 2.000 y 4.000 Hz: unos 52 dB en el OD y 50 en el OI. Con eso:
 
-Tabla: Cálculo con la fórmula de la AMA según qué umbral se use (inventado el informado, estimado del simulador)
+Tabla: Cálculo con la fórmula de la AMA según qué umbral se use: el que informa Ismael o el estimado con el PEAT
 
 | | Promedio 500-3.000 Hz | % monoaural (OD / OI) | % binaural |
 |---|---|---|---|
@@ -257,7 +257,7 @@ El informe dice la segunda fila, y dice por qué no la primera. Con ±5 dB en el
 - **Qué pedir:** audiometría con repeticiones y SRT; Stenger; reflejos; emisiones; PEAT con click y con burst; ASSR si hay. Aquí se pasa el umbral estimado al cálculo (→ H10, H13).
 - **Errores esperables:** calcular el 60 % con lo informado; informar "normal" por las emisiones (en 3 y 4 kHz no pasan y hay pérdida real); escribir "simula".
 - **Para discutir en clases:** el informe en el apartado de resultados y en el de límites; qué se le dice a Ismael y qué a la mutual.
-- **En LabSim:** caso armado para el libro con el cuadro *pérdida por ruido crónica* leve en los dos oídos; lo que el paciente entrega va en las tablas, que son inventadas.
+- **En LabSim:** cuadro *pérdida por ruido crónica* leve en los dos oídos. Lo que el paciente entrega no sale del simulador: va en las tablas.
 :::
 
 {{caso cap34_hidrops}}
@@ -309,7 +309,7 @@ Con el criterio chileno, el promedio de 1.000, 2.000, 3.000, 4.000 y 6.000 Hz es
 - **Hipótesis:** hidrops endolinfático (Ménière), pérdida por ruido, lesión retrococlear.
 - **Qué pedir:** audiometría con ósea y logo, emisiones, ECochG, PEAT; el estudio de oído medio descarta lo conductivo (→ H3, H5, H9, H10, H11).
 - **Errores esperables:** calcular el porcentaje y entregarlo como "daño laboral"; concluir "no es del trabajo" sin decir qué sí es; no mencionar la fluctuación.
-- **En LabSim:** caso armado para el libro: OD normal, OI *Ménière* moderada.
+- **En LabSim:** OD normal, OI *Ménière* moderada.
 :::
 
 {{caso cap34_honesto}}
@@ -330,7 +330,7 @@ Víctor colabora. ¿Necesitas pruebas objetivas para estimar su umbral? ¿Qué p
 
 Víctor trae la audiometría de egreso:
 
-Tabla: Umbrales aéreos de Víctor, egreso (hace 8 años, inventados) y hoy (dB HL)
+Tabla: Umbrales aéreos de Víctor, egreso (hace 8 años) y hoy (dB HL)
 
 | | 500 | 1.000 | 2.000 | 3.000 | 4.000 | 6.000 |
 |---|---|---|---|---|---|---|
@@ -377,7 +377,7 @@ La misma audiometría da **0,3 %** con la AMA y un promedio de **42 y 45 dB** co
 - **Qué pedir:** audiometría con ósea y logo, impedanciometría, emisiones; **no** se necesita PEAT, porque colabora y sus respuestas son confiables.
 - **Errores esperables:** decir que "no tiene nada" por el 0,3 %; calcular solo con la AMA; escribir que "empeoró" sin comparar con el egreso.
 - **Para discutir en clases:** qué le dices sobre el audífono y qué sobre la reevaluación; qué parte de su pérdida actual es del ruido.
-- **En LabSim:** caso armado para el libro con el cuadro *pérdida por ruido crónica* leve en los dos oídos, a los 63 años; la audiometría de egreso es un dato inventado.
+- **En LabSim:** cuadro *pérdida por ruido crónica* leve en los dos oídos, a los 63 años. La audiometría de egreso no sale del simulador: es un dato del caso.
 :::
 
 ## Resolución de los casos

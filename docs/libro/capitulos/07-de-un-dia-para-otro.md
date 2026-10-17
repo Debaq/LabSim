@@ -135,7 +135,7 @@ Es el daño de la cóclea por un **golpe en la cabeza sin fractura**. El golpe n
 
 Esa semejanza con el ruido es lo que más se discute: un audiograma con muesca después de un accidente puede ser del golpe o de años de exposición. La historia de ruido y, si existe, una **audiometría anterior** al accidente son las que lo deciden. Si el golpe rompió el hueso, el cuadro es otro: la fractura longitudinal daña el oído medio (→ cap. 3) y la que viola la cápsula ótica destruye la cóclea (→ cap. 15). Eso lo dice la tomografía: si hay un trazo de fractura y si toca la cápsula. Una tomografía "sin fractura" quiere decir que no se vio ningún trazo como estos.
 
-:::imagen ilustraciones/cap07-tc-fractura.jpg ancho=80% Tomografía axial del hueso temporal, en ventana de hueso, de otras personas, no del paciente de este capítulo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Trojanowska A y cols. (2012), Insights Imaging, doi:10.1007/s13244-011-0126-z, Fig. 11, CC BY-NC, sin modificar.
+:::imagen ilustraciones/cap07-tc-fractura.jpg ancho=80% Tomografía axial del hueso temporal, en ventana de hueso, de otras personas, no del paciente de este capítulo: dos fracturas, una que respeta la cápsula ótica y otra que la cruza. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Trojanowska A y cols. (2012), Insights Imaging, doi:10.1007/s13244-011-0126-z, Fig. 11, CC BY-NC.
 - @20,24 | **Respeta la cápsula** (a, flecha): el trazo queda en la mastoides y no toca el oído interno.
 - @93,72 | **Viola la cápsula** (b, flecha): el trazo cruza el canal semicircular lateral y el vestíbulo.
 :::
@@ -240,7 +240,7 @@ El OD oye bien. ¿Qué vas a tener que hacer en el OI para que su audiograma sea
 - **Hipótesis esperables:** hipoacusia súbita del OI; tapón de cera u otitis media con efusión (descartadas por la otoscopía y el Weber); un tumor del VIII par que debuta como súbita (→ cap. 11).
 - **Qué pedir:** otoscopía, acumetría, audiometría con enmascaramiento, logoaudiometría enmascarada e impedanciometría (→ H2, H3, H4, H5, H7). Acufenometría si el pitido sigue.
 - **Errores esperables:** informar la curva sin enmascarar como una conductiva; olvidar la oclusión al enmascarar la ósea grave; no tratar el examen como la base del seguimiento.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Hipoacusia súbita* en el OI, grado severa, y el OD normal. El audiómetro responde con la curva sombra hasta que el ruido alcance el mínimo.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Hipoacusia súbita* en el OI, grado severa, y el OD normal. El audiómetro responde con la curva sombra hasta que el ruido alcance el mínimo.
 :::
 
 {{caso cap07_laberintitis}}
@@ -281,7 +281,7 @@ Además de medir la audición, ¿qué prueba de las que tienes en el box te dice
 - **Hipótesis esperables:** laberintitis viral del OD; neuritis vestibular (no explica la pérdida auditiva); infarto de la arteria cerebelosa anteroinferior (vértigo + pérdida brusca, Lee 2012); súbita con vértigo.
 - **Qué pedir:** audiometría con enmascaramiento, impedanciometría, VEMP (→ H3, H4, H7, H12). La evaluación vestibular completa (→ cap. 21) la pide el médico.
 - **Errores esperables:** quedarse con "neuritis" porque el vértigo domina el relato; no enmascarar el OD; no preguntar por síntomas neurológicos.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *Laberintitis (viral / bacteriana)* en el OD y el OI normal. La evaluación vestibular de pasillo (nistagmo, impulso cefálico) no está en LabSim: se discute aparte.
+- **En LabSim:** cuadro *Laberintitis (viral / bacteriana)* en el OD y el OI normal. La evaluación vestibular de pasillo (nistagmo, impulso cefálico) no está en LabSim: se discute aparte.
 :::
 
 {{caso cap07_conmocion_laberintica}}
@@ -324,7 +324,7 @@ Un golpe en la cabeza y los dos oídos "apagados". Plantea una causa conductiva 
 - **Hipótesis esperables:** conmoción laberíntica bilateral; hemotímpano o luxación de la cadena (conductivas, descartadas por la otoscopía y el timpanograma); hipoacusia por ruido (la descarta la historia y la audiometría previa).
 - **Qué pedir:** audiometría, impedanciometría con reflejos, emisiones (→ H3, H7, H9); la audiometría del año pasado para compararla. Acufenometría.
 - **Errores esperables:** ver la muesca y concluir "ruido"; olvidar que un accidente puede terminar en un juicio y que la base anterior vale oro (→ cap. 34).
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *Conmoción laberíntica (TEC sin fractura)* en los dos oídos.
+- **En LabSim:** cuadro *Conmoción laberíntica (TEC sin fractura)* en los dos oídos.
 :::
 
 {{caso cap07_p42}}
@@ -413,7 +413,7 @@ Tiene una audiometría de hace dos meses. ¿Qué tiene que tener la de hoy para 
 - **Hipótesis esperables:** enfermedad autoinmune del oído interno; otosífilis; menos probable, un Ménière bilateral (→ cap. 9) o un proceso retrococlear bilateral.
 - **Qué pedir:** audiometría con enmascaramiento, logoaudiometría, impedanciometría, emisiones (→ H3, H4, H5, H7, H9), con la misma técnica que la anterior para poder comparar. Audiometrías seriadas durante el tratamiento.
 - **Errores esperables:** tratarla como una "súbita del OD" y no ver que el OI también cae; no comparar con la audiometría anterior; no enmascarar el OD.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *Autoinmune del oído interno / otosífilis* en los dos oídos, grado severa en el OD. El simulador guarda una foto: la progresión y la fluctuación están en la historia, no en el audiómetro, y la asimetría depende del grado que se elija en cada oído.
+- **En LabSim:** cuadro *Autoinmune del oído interno / otosífilis* en los dos oídos, grado severa en el OD. El simulador guarda una foto: la progresión y la fluctuación están en la historia, no en el audiómetro, y la asimetría depende del grado que se elija en cada oído.
 :::
 
 ## Resolución de los casos

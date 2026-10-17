@@ -141,52 +141,12 @@ La guía de la AAA para el trastorno de procesamiento auditivo central pide una 
 - **Sala silenciosa** y **transductores estables**: fonos supraaurales o de inserción, siempre **calibrados**. Las pruebas de gaps de pocos milisegundos y de fase entre oídos son sensibles a la calidad de la reproducción: un dispositivo con retardo variable, o una conexión Bluetooth, las deforma.
 - **Fonos bien orientados** (izquierdo en el oído izquierdo). En el MLD y en la escucha dicótica un fono invertido cambia el resultado.
 - **Nivel de presentación** el que indica el manual de cada prueba. Puede ser en dB HL o sobre el umbral del paciente, según la prueba: no lo improvises.
-- **Verificar la cadena de audio** antes de empezar y tras cualquier cambio de equipo, volumen o fonos.
+- **Verificar la cadena de audio** antes de empezar y tras cualquier cambio de equipo, volumen o fonos. Una comprobación rápida (dos tonos con 6 dB de diferencia: ¿cuál suena más fuerte?) detecta un cambio grosero de volumen, de dispositivo o un silenciamiento, pero **no reemplaza al sonómetro**.
+- **Calibración atada al montaje.** Si las pruebas corren en un computador con fonos comunes y se calibran con un sonómetro externo, sin acoplador, la calibración vale solo para ese par de fonos, ese dispositivo de salida y ese volumen del sistema, y no cumple las normas de audiómetros (ANSI S3.6, IEC 60645-1). Sirve para investigar y para enseñar; no convierte al computador en un equipo clínico.
 - **Instrucción** clara, con un ejemplo y **práctica con retroalimentación** antes de la prueba. Una instrucción mal entendida es la causa más común de un resultado malo.
 
 :::ojo Los estímulos hechos en casa
 Es posible grabar ruidos, silencios y listas de palabras con un programa de audio y armar pruebas propias. La guía de la AAA advierte que estos estímulos **no deben usarse con fines diagnósticos** hasta que haya investigación suficiente sobre su eficiencia y utilidad clínica (AAA, 2010). Sirven para practicar, para enseñar y para investigar. Para un diagnóstico hacen falta el estímulo validado, la calibración y las normas.
-:::
-
-### Conoce tu equipo: AudioPAC
-
-LabSim no tiene un módulo de procesamiento central. Para practicar esta herramienta se usa **AudioPAC**, software libre del autor de este libro (licencia MIT; Baier Quezada y Uribe, 2026). Corre en Linux y Windows, usa fonos comunes conectados al computador y organiza las pruebas en **paquetes** que se instalan desde la misma aplicación (pestaña *Catálogos*): patrones, límenes diferenciales, resolución temporal, interacción binaural, ruido, MLD, dígitos dicóticos, HINT, SinB y Matrix en español, entre otros.
-
-AudioPAC es una herramienta de **investigación y enseñanza**, no un equipo clínico certificado: su propia pantalla de calibración lo dice (figura H14.3). Úsala para aprender cómo se arma, se presenta y se lee cada prueba, no para informar pacientes reales.
-
-Todas las capturas de esta herramienta están hechas sin paciente (vista previa) o con una paciente inventada ("Ana Ejemplo"), y los resultados no corresponden a ninguna persona.
-
-:::imagen ilustraciones/h14-calibracion.png La calibración de AudioPAC. Dice qué es y qué no es: una calibración con sonómetro externo, válida para un par de fonos, un dispositivo y un volumen fijos.
-- @103,19 | **Advertencia.** "Uso investigativo / screening": sin acoplador no cumple ANSI S3.6 ni IEC 60645-1. Es la frase que manda sobre cualquier cifra del software.
-- @103,36 | **Dispositivo de salida.** La calibración se ata al dispositivo. Si cambia la tarjeta de sonido o el volumen del sistema, hay que recalibrar.
-- @103,60 | **Crear una calibración.** Una curva completa por frecuencia y por oído; los fonos comunes pueden diferir unos decibeles entre izquierdo y derecho.
-- @103,92 | **Calibraciones guardadas.** Sin ninguna, el motor usa un nivel de referencia fijo por defecto, que no equivale a una calibración.
-:::
-
-La pantalla de **Evaluación** es donde se arma cada sesión. Se elige la persona y la prueba, y el programa muestra los parámetros con que se va a presentar.
-
-:::imagen ilustraciones/h14-evaluacion.png Armar una evaluación en AudioPAC (paciente inventada). Se elige paciente y prueba (aquí el GIN), el oído y el modo de respuesta, y debajo aparecen los parámetros que usará la prueba.
-- @103,17 | **Paciente.** Registro propio de cada persona evaluada, con edad: la edad importa para elegir pruebas y para interpretarlas.
-- @103,29 | **Test.** El catálogo trae las pruebas de los paquetes instalados.
-- @-3,60 | **Oído.** Binaural, derecho o izquierdo. Las pruebas de patrones y de gaps pueden hacerse por oído si se sospecha una asimetría.
-- @103,60 | **Modo de respuesta.** *Manual*: marca el evaluador. *Verbal*: el paciente repite. *Tarareo*: tararea el patrón.
-- @-3,84 | **Parámetros del test.** Duración del ruido (3.000 ms), separación entre ítems, nivel (65 dB), ítems de práctica (6) y de prueba (30).
-:::
-
-Antes de empezar, el programa hace una **verificación de nivel**: reproduce dos tonos con 6 dB de diferencia y pide indicar cuál suena más fuerte. No reemplaza al sonómetro; detecta cambios groseros de volumen, de dispositivo o de silenciamiento.
-
-:::imagen ilustraciones/h14-verificacion.png Verificación de nivel previa a la sesión.
-- @72,34 | **Aviso de calibración.** Sin una calibración activa se usa un nivel por defecto: la sesión queda marcada como no calibrada.
-- @72,53 | **Reproducir A + B.** Dos tonos con 6 dB de diferencia; se indica cuál suena más fuerte para confirmar que la cadena de audio no cambió.
-:::
-
-Cada prueba tiene su **ficha**, con para qué sirve, cómo funciona, el protocolo, la población a la que se dirige, las contraindicaciones y las referencias. Léela antes de aplicarla.
-
-:::imagen ilustraciones/h14-ficha-gin.png La ficha del GIN en AudioPAC.
-- @70,24 | **Iniciar evaluación o Vista previa.** La vista previa recorre la prueba sin paciente y sin guardar nada, ideal para practicar.
-- @20,55 | **Paquete y edad mínima.** Dice a qué paquete pertenece, desde qué edad se recomienda y cuánto dura.
-- @20,65 | **Para qué sirve.** El propósito clínico de la prueba y su base de evidencia.
-- @20,83 | **Cómo funciona.** El estímulo exacto: aquí, ruido blanco de 3 segundos con o sin silencio en el medio.
 :::
 
 ## Paso a paso
@@ -196,6 +156,11 @@ Antes de cualquier prueba: **audición periférica revisada, fonos calibrados y 
 ### Patrones de frecuencia y de duración (FPT, PPS, DPS)
 
 Se presentan tres tonos seguidos que combinan dos posibilidades: **grave o agudo** (patrones de frecuencia) o **largo o corto** (patrón de duración). Con dos opciones en tres posiciones hay ocho secuencias; sin las dos que repiten el mismo tono, quedan **seis**. El paciente dice el orden que oyó.
+
+:::imagen ilustraciones/h14-patrones.svg ancho=96% Cómo se arma un patrón. A: tres tonos del mismo largo, dos graves y uno agudo. B: tres tonos de la misma frecuencia, dos largos y uno corto. Abajo, las seis secuencias posibles y los dos tipos de error sobre una de ellas. Esquema, no datos.
+- @-3,82 | **Las seis secuencias.** Las que repiten el mismo tono (GGG, AAA) no se usan: no tienen orden que reconocer.
+- @103,82 | **El error es informativo.** Decir los mismos tonos en otro lugar no es lo mismo que invertirlos todos.
+:::
 
 **Por qué funciona.** Para responder hay que percibir el patrón completo, retener el orden y nombrarlo. Las pruebas de patrones tienen sensibilidad y especificidad documentadas para lesiones del sistema nervioso auditivo central (Pinheiro y Ptacek, 1971; Musiek y Pinheiro, 1987; Musiek y cols., 1990; AAA, 2010). Una de las pruebas más informativas es pedir la respuesta de dos maneras: **nombrando** los tonos y **tarareándolos**. Tararear no necesita ponerle nombre al sonido: si la persona tararea bien lo que no logra nombrar, el problema está en el paso de reconocer a nombrar, y eso se asocia con la comunicación entre hemisferios. <!-- verificar: la disociación nombrar/tararear y su lectura callosa, tomada de la lógica de Musiek y Pinheiro 1987; no se leyó el artículo completo. -->
 
@@ -209,7 +174,7 @@ El nivel, la duración de cada tono y la separación entre ellos son los de la v
 
 ### Resolución temporal: GIN y detección de gaps
 
-Se presenta un ruido continuo, a veces con un **silencio muy breve** en el medio, y el paciente avisa cuando lo oye. En el **GIN** el ruido es de banda ancha y los silencios van de pocos milisegundos hasta 20 ms; el resultado clave es el **umbral de gap**, el silencio más corto que el paciente detecta de forma consistente (Musiek y cols., 2005). <!-- verificar: criterio exacto de consistencia del GIN comercial y número de ítems; AudioPAC usa una versión adaptada de 30 ítems y no la lista original. -->
+Se presenta un ruido continuo, a veces con un **silencio muy breve** en el medio, y el paciente avisa cuando lo oye. En el **GIN** el ruido es de banda ancha y los silencios van de pocos milisegundos hasta 20 ms; el resultado clave es el **umbral de gap**, el silencio más corto que el paciente detecta de forma consistente (Musiek y cols., 2005). <!-- verificar: criterio exacto de consistencia del GIN comercial y número de ítems. -->
 
 **Por qué funciona.** Notar un silencio de unos pocos milisegundos dentro de un ruido depende de qué tan bien el sistema siga los cambios rápidos de intensidad. Como el silencio va dentro de un ruido de banda ancha, no hay otra pista que el tiempo. Es una de las pruebas con **menos carga de lenguaje y de memoria** (AAA, 2010).
 
@@ -239,6 +204,9 @@ Dos dígitos distintos llegan **a la vez**, uno por cada oído, y el paciente lo
 
 El resultado es **por oído**: el puntaje total esconde justo lo que importa. Un puntaje total normal no excluye un oído claramente peor que el otro, y un oído izquierdo por debajo del derecho es esperable en pequeña medida en diestros.
 
+:::imagen ilustraciones/h14-dicotico-oidos.svg ancho=92% Dos pacientes con el mismo puntaje total en dígitos dicóticos (78 %). En el primero los dos oídos rinden parecido; en el segundo el oído izquierdo rinde 36 puntos menos que el derecho. El total esconde la asimetría: mira siempre cada oído por separado. Datos de ejemplo, no normas.
+:::
+
 ### Interacción binaural: MLD
 
 Se mide cuánto mejor se detecta un tono de 500 Hz en ruido cuando el tono llega **invertido de fase** a un oído que cuando llega igual a los dos, con el ruido siempre igual (SoNo frente a SπNo). El **MLD** es la diferencia entre los dos umbrales, en dB.
@@ -260,6 +228,11 @@ Se presentan frases con **ruido de fondo** y se busca de forma adaptativa el **S
 - **HINT** (*Hearing in Noise Test*): frases cortas en ruido con el espectro del habla (Nilsson y cols., 1994). Hay una versión en español castellano (Huarte, 2008).
 - **QuickSIN / SinB** (*speech in babble*): frases con ruido de varias voces. Se informa la **pérdida de SNR** respecto de un oyente normal (Killion y cols., 2004).
 - **Matrix**: cada frase se arma con una palabra de cada columna (nombre, verbo, número, objeto y adjetivo), así que las frases son nuevas cada vez y no se pueden memorizar. Hay una versión en español (Hochmuth y cols., 2012). El paciente repite o elige las palabras en una grilla.
+
+:::imagen ilustraciones/h14-matrix.svg ancho=96% La prueba Matrix. A: cada frase toma una palabra de cada columna, así que la estructura es siempre la misma y el contenido no se puede adivinar. B: el recorrido adaptativo de una lista; el SNR baja cuando el paciente acierta la mayoría de las palabras y sube cuando no, hasta oscilar alrededor del SRT. La regla de pasos es genérica (cada versión trae la suya). Datos de ejemplo, no normas.
+- @19,57 | **Primeras frases.** Parte fácil y baja rápido: aquí todavía no se mide nada.
+- @80,80 | **SRT.** El SNR en que repite la mitad de las palabras; se estima con las últimas frases, cuando el recorrido ya oscila.
+:::
 
 **Por qué funciona.** Exige separar la voz del ruido con todo lo que la vía hace: resolución temporal, comparación entre oídos y atención. Por eso es sensible a los problemas centrales **y a muchos otros**.
 
@@ -288,45 +261,6 @@ Se presentan **pares de sonidos** que difieren muy poco en frecuencia, duración
 - **Un resultado es un rendimiento**, no un diagnóstico.
 :::
 
-### Las pruebas en AudioPAC
-
-La mayoría de estas pruebas están en los paquetes de AudioPAC. Cada una se ve distinta en pantalla, según lo que pida.
-
-**Patrones (FPT, PPS, DPS).** El evaluador presiona *Reproducir* y marca la respuesta del paciente con *Correcto* o *Incorrecto* (teclas **K** y **J**), después de escribir lo que dijo.
-
-:::imagen ilustraciones/h14-patrones-fpt.png Un patrón de frecuencia en AudioPAC (vista previa, sin paciente). Aparecen las tres letras del patrón: L grave, H agudo.
-- @24,63 | **Reproducir.** Presenta los tres tonos; el paciente no ve las letras, que son para el evaluador. **Repetir** (tecla R) vuelve a presentarlo.
-- @22,45 | **El patrón.** L = grave, H = agudo, en el orden en que sonaron. Se compara con lo que dice el paciente.
-- @79,78 | **Respuesta del paciente.** Se puede escribir (por ejemplo LHL) para que quede en el informe.
-- @19,88 | **Incorrecto.** Marca el error (tecla J).
-- @79,88 | **Correcto.** Marca el acierto (tecla K).
-:::
-
-La prueba de duración se ve igual, con L = largo y C = corto sobre un mismo tono de 1.000 Hz.
-
-**Dígitos dicóticos.** Cada par se presenta con *Presentar par dicótico* y el evaluador marca qué dígitos repitió: ninguno, solo el izquierdo, solo el derecho o ambos.
-
-:::imagen ilustraciones/h14-dicotico.png Los dígitos dicóticos en AudioPAC (vista previa). Los dígitos del par quedan ocultos hasta presentarlos.
-- @-3,47 | **Oído izquierdo.** El panel azul es el oído izquierdo, como en el resto del libro.
-- @103,47 | **Oído derecho.** El panel violeta es el derecho (aquí no es rojo, como en el audiograma).
-- @27,65 | **Presentar par dicótico.** Los dos dígitos suenan a la vez, uno por oído.
-- @-3,79 | **Marcar aciertos por oído.** *Solo L* o *Solo R* anotan qué oído acertó: de ahí salen los resultados por oído.
-- @103,79 | **Ambos / Ninguno.** Si repitió los dos dígitos o ninguno.
-- @103,22 | **Asimetría R-L.** La diferencia entre el oído derecho y el izquierdo, calculada con los pares marcados.
-:::
-
-**Habla en ruido (Matrix).** El paciente escucha una frase y marca las palabras en la grilla de cinco columnas.
-
-:::imagen ilustraciones/h14-matrix.png La prueba Matrix en español en AudioPAC (vista previa).
-- @-3,16 | **SNR actual.** El cociente voz/ruido de la frase que viene; se ajusta según los aciertos.
-- @103,16 | **SRT-SNR.** El resultado, que aparece al terminar.
-- @-3,45 | **Una columna por posición.** Nombre, verbo, número, objeto y adjetivo: cada frase toma una palabra de cada columna.
-- @25,97 | **Reproducir frase.** Presenta la frase con el ruido.
-- @75,97 | **Confirmar.** Cierra la respuesta y el programa decide si el siguiente SNR sube o baja.
-:::
-
-La **MLD** de AudioPAC es una versión de *screening*: presenta el tono con y sin inversión de fase a niveles fijos y cuenta aciertos, pero **no mide el umbral en dB**, de modo que no entrega un MLD cuantitativo (su propia ficha lo dice). Sirve para ver cómo se arma la condición; no para informar un MLD. Y el **GIN** de AudioPAC es una versión **adaptada** (30 ítems, silencios de 2 a 20 ms) y no la lista original del GIN comercial.
-
 ## Cómo se informa
 
 El informe de una prueba de procesamiento central dice **qué se hizo, con qué material, cómo respondió el paciente y qué patrón se ve**, y **no** dice "tiene un trastorno de procesamiento" si eso no se puede sostener.
@@ -342,26 +276,24 @@ El informe de una prueba de procesamiento central dice **qué se hizo, con qué 
 
 **Qué se concluye.** Se describe el **perfil**: por ejemplo, "rendimiento bajo en las pruebas de secuencia temporal con resolución temporal conservada", o "diferencia entre oídos en la prueba dicótica". Un resultado aislado no se interpreta: pesa la **coincidencia entre pruebas del mismo proceso** y la coherencia con la historia (AAA, 2010). Y se escribe qué **no** se pudo descartar: lenguaje, atención, memoria.
 
-:::ayuda-ancho Qué se ve en el informe de AudioPAC
-| Parte del informe | Qué muestra |
+:::ayuda-ancho Qué mirar en el registro de una prueba de patrones
+| Parte del registro | Qué muestra |
 |---|---|
-| Paciente y sesión | datos de la persona, fecha, oído, modo de respuesta y quién evaluó |
-| Veredicto | un porcentaje con una etiqueta "dentro" o "bajo" una norma |
 | Práctica frente a prueba | cuánto cambió el rendimiento entre la práctica y la prueba |
-| Acierto por posición, confusiones, precisión por patrón | en qué parte de la secuencia y con qué cambio falla |
+| Acierto por posición | si falla el primero, el segundo o el tercer tono de la secuencia |
+| Confusiones | qué tono toma por otro, y si dice los mismos tonos en otro orden |
 | Detalle ítem por ítem | cada secuencia presentada y respondida |
 :::
 
-:::imagen ilustraciones/h14-informe.png Informe de AudioPAC de una sesión de patrón de duración. Datos inventados de una paciente inventada, solo para mostrar cómo se lee la pantalla.
-- @103,17 | **Veredicto.** Compara con un umbral que fija el paquete del software, no una norma publicada: ver el cuadro de más abajo.
-- @-3,30 | **Práctica frente a prueba.** Si el rendimiento mejora o cae entre ambas fases.
-- @-3,44 | **Análisis automático.** Texto orientativo; la misma pantalla aclara que el juicio clínico es del profesional.
-- @-3,70 | **Acierto por posición.** Muestra si falla el primero, el segundo o el tercer tono de la secuencia.
-- @103,60 | **Detalle ítem por ítem.** Cada secuencia con lo que se presentó y lo que respondió el paciente.
+:::imagen ilustraciones/h14-patron-resultado.svg ancho=96% Una sesión de patrón de duración leída por partes. El mismo 77 % puede esconder problemas muy distintos: aquí los errores se concentran en el segundo y el tercer tono y casi todos son los mismos tonos en otro orden. Datos de ejemplo, no normas.
+- @50,6 | **El total.** 77 % no dice dónde está la dificultad.
+- @-3,20 | **Ítem por ítem.** En rojo, lo presentado y lo que respondió. Los errores se parecen entre sí.
+- @-3,70 | **Acierto por posición.** El primer tono casi no falla; los errores están en el segundo y el tercero.
+- @103,62 | **Qué confunde.** Seis de los siete errores tienen los mismos tonos en otro orden: el problema es el orden, no distinguir largo de corto.
 :::
 
 :::ojo El "dentro de norma" de un software
-La etiqueta "dentro de norma" o "bajo la norma" del informe de AudioPAC viene de un umbral fijo que trae cada paquete, por edad, y esos valores **no son normas publicadas ni validadas** (sus propios autores lo declaran en el plan de desarrollo, donde la validación regional queda pendiente). En un informe real no se transcribe ese veredicto: se informa el resultado de la prueba y se compara con las normas publicadas de su versión.
+Algunos programas de evaluación imprimen una etiqueta "dentro de norma" o "bajo la norma". Antes de usarla, averigua de dónde sale el corte: muchas veces es un umbral fijo del programa, por edad, que **no es una norma publicada ni validada** para esa versión y esa población. En ese caso no se transcribe el veredicto: se informa el resultado de la prueba y se compara con las normas publicadas de su versión.
 :::
 
 ### Valores de referencia: por edad, por lengua y de dónde salen
@@ -373,7 +305,7 @@ Esta herramienta **no entrega valores de corte**. Hay tres razones:
 3. **Las normas dependen de la lengua.** Casi todas las normas publicadas son de pruebas **en inglés**. Las pruebas con **habla** (dígitos dicóticos, HINT, SinB, Matrix) usan palabras y frases de una lengua y una variedad, y una norma en inglés no sirve para un paciente que habla español. Las pruebas **sin habla** (patrones, gaps, MLD) dependen menos de la lengua, pero la guía de la AAA reconoce que aún no hay una batería no verbal internacional con normas comunes (AAA, 2010).
 
 :::comentario Lo que dicen las normas
-**Para el español.** Hay materiales de habla en ruido desarrollados y normados en español de España: el HINT castellano (Huarte, 2008) y la prueba de frases Matrix en español (Hochmuth y cols., 2012), y un banco de frases equilibradas en fonemas para audiología, el corpus Sharvard (Aubanel y cols., 2014). Son del español peninsular. El plan de desarrollo de AudioPAC señala el problema sin resolverlo: el seseo, la /s/ aspirada, el yeísmo y el léxico de cada país pueden hacer que una persona de otra variedad falle por la forma de las palabras y no por su audición central.
+**Para el español.** Hay materiales de habla en ruido desarrollados y normados en español de España: el HINT castellano (Huarte, 2008) y la prueba de frases Matrix en español (Hochmuth y cols., 2012), y un banco de frases equilibradas en fonemas para audiología, el corpus Sharvard (Aubanel y cols., 2014). Son del español peninsular. Queda un problema sin resolver: el seseo, la /s/ aspirada, el yeísmo y el léxico de cada país pueden hacer que una persona de otra variedad falle por la forma de las palabras y no por su audición central.
 
 **Para las otras pruebas** (patrones, gaps, dígitos dicóticos, MLD) no encontramos normas en español publicadas y verificadas para adultos o niños, y por eso **no se dan cifras**. <!-- verificar: normas en español (chilenas o de otros países) de FPT, GIN, dígitos dicóticos y MLD; la revisión de Cañete 2006 (Rev Otorrinolaringol Cir Cabeza Cuello 66:263-73) es una lectura en español sobre el tema, no se revisó su contenido. --> La guía de la AAA dice que, si una prueba está **traducida, con sensibilidad y especificidad documentadas y normada en la lengua del paciente**, se puede usar; si no, hay que limitar las pruebas o no se puede hacer un diagnóstico confiable (AAA, 2010). Así lo adopta este libro.
 
@@ -405,16 +337,6 @@ Un mal resultado en estas pruebas **no dice dónde está el problema**. Dice que
 ## En LabSim
 
 **LabSim no tiene módulo de procesamiento central**: no hay pacientes simulados con rendimiento alterado en gaps, patrones o dígitos dicóticos, ni pruebas centrales dentro del simulador. Lo que sí hace LabSim es la parte **periférica** que esta herramienta exige primero: audiometría tonal (→ H3), logoaudiometría (→ H5), impedanciometría (→ H7), emisiones (→ H9) y PEAT (→ H10).
-
-Para practicar el procedimiento de las pruebas se usa **AudioPAC** (descarga en github.com/Debaq/audiopac; ver las referencias). Una forma de usarlo sin paciente: en *Tests*, abre una prueba y usa **Vista previa**, que recorre la prueba completa sin guardar nada. Para practicar el informe, crea un paciente de práctica en *Pacientes* y haz una sesión completa.
-
-:::comentario Lo que AudioPAC todavía no tiene
-- **No está calibrado contra un acoplador**: no cumple ANSI S3.6 ni IEC 60645-1 (lo dice su pantalla de calibración).
-- **No trae normas validadas**: los umbrales de cada paquete son de referencia del software, y la validación por región queda pendiente en su plan.
-- **Los paquetes de habla en español** (HINT, SinB, Matrix) usan grabaciones del evaluador y, en el caso del corpus Sharvard, español peninsular.
-- **El MLD es de *screening***: no mide el umbral en dB.
-- **El GIN es una versión adaptada**, no la lista comercial.
-:::
 
 :::pregunta Preguntas para practicar
 1. Un adulto de 50 años con audiograma normal dice que no entiende en reuniones ruidosas. ¿Qué pruebas periféricas necesitas antes de hacer una batería central y por qué?
@@ -474,7 +396,3 @@ Para practicar el procedimiento de las pruebas se usa **AudioPAC** (descarga en 
 
 1. Pickles JO. An introduction to the physiology of hearing. 4.ª ed. Leiden: Brill; 2013. ISBN 978-90-04-24377-4
 1. Møller AR. Hearing: anatomy, physiology, and disorders of the auditory system. 3.ª ed. San Diego: Plural Publishing; 2013. ISBN 978-1-59756-427-4
-
-### Simulador de apoyo
-
-1. Baier Quezada N, Uribe V. AudioPAC: open-source software for central auditory processing assessment and speech audiometry. Software, licencia MIT. Zenodo; 2026. doi:10.5281/zenodo.19663724

@@ -175,6 +175,16 @@ def como_citar(cap, titulo):
             f'{TITULO}. {BAJADA}. 1.ª ed. {CIUDAD}: TecMedHub, Universidad Austral de Chile; {anio}.</p>')
 
 
+MARCA_IA = '{IA}'   # al inicio del pie: dibujo hecho con IA, a reemplazar (sale en rojo)
+
+
+def aviso_ia(titulo):
+    """Quita la marca {IA} del pie y devuelve (pie, aviso en rojo)."""
+    if titulo.startswith(MARCA_IA):
+        return titulo[len(MARCA_IA):].lstrip(), '<span class="aviso-ia">Hecha con IA: cambiar</span> '
+    return titulo, ''
+
+
 def capitulos_de(clave):
     """Lista compacta de los capítulos de un autor, en el orden del libro."""
     def orden(c):
@@ -472,6 +482,7 @@ def imagen_con_globos(ruta, titulo, lineas, numero, ancho=None):
     '- texto' sin globo. La ruta es relativa a docs/libro/ (o absoluta al
     repo con '/docs/...'). `ancho` (p. ej. '60%' o '80mm') achica la imagen;
     sin él ocupa lo que dé la columna."""
+    titulo, ia = aviso_ia(titulo)
     archivo = (RAIZ / ruta.lstrip('/')) if ruta.startswith('/') else (LIBRO / ruta)
     if not archivo.exists():
         return f'<p class="pendiente"><span>Falta la imagen</span> {html.escape(ruta)}</p>'
@@ -493,7 +504,7 @@ def imagen_con_globos(ruta, titulo, lineas, numero, ancho=None):
     # no entiende width: fit-content).
     estilo = f' style="width:{ancho}"' if ancho else ''
     return (f'<div class="figobs"><figure class="fig"><div class="img-centro"><div class="img-globos"{estilo}>'
-            f'<img src="{archivo.as_uri()}">{"".join(globos)}</div></div><figcaption>Figura {numero}. {html.escape(titulo)}</figcaption></figure>{lista}</div>')
+            f'<img src="{archivo.as_uri()}">{"".join(globos)}</div></div><figcaption>{ia}Figura {numero}. {html.escape(titulo)}</figcaption></figure>{lista}</div>')
 
 
 def capitulo(md_texto):
@@ -625,9 +636,10 @@ def capitulo(md_texto):
 
     def ilustracion(m):
         alt, src = html.unescape(m[1]), m[2]
+        alt, ia = aviso_ia(alt)
         nilu[0] += 1
         ruta = LIBRO / src
-        pie = f'<figcaption>Ilustración {cap}.{nilu[0]}. {html.escape(alt)}</figcaption>'
+        pie = f'<figcaption>{ia}Ilustración {cap}.{nilu[0]}. {html.escape(alt)}</figcaption>'
         if ruta.exists():
             return f'<figure class="ilustracion"><img src="{ruta.as_uri()}">{pie}</figure>'
         # pendiente: la descripción completa va en el recuadro; el pie, solo la primera frase
@@ -780,6 +792,17 @@ h1.prelim {{ font: 700 24pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; pa
                font: 7.8pt/1.45 'Plus Jakarta Sans'; color: #4a3a40; }}
 .como-citar span {{ display: block; font: 700 6.8pt 'Plus Jakarta Sans'; letter-spacing: 1.2pt; text-transform: uppercase;
                     color: #8e2a4a; margin-bottom: .8mm; }}
+.simuladores {{ display: grid; grid-template-columns: 1fr 1fr; gap: 5mm 7mm; margin: 6mm 0; }}
+.sim {{ display: flex; gap: 4mm; align-items: flex-start; break-inside: avoid; padding: 3mm; border: .6pt solid #e7dde1;
+        border-radius: 2.5mm; }}
+.sim-qr {{ flex: none; width: 26mm; height: 26mm; }}
+.sim-txt p {{ margin: 0; text-align: left; hyphens: none; }}
+.sim-n {{ font: 700 12pt Fraunces, serif; color: #24101a; margin-bottom: 1mm !important; }}
+.sim-d {{ font: 8.4pt/1.4 'Plus Jakarta Sans'; color: #4a3a40; }}
+.sim-u {{ font: 600 8.2pt 'Plus Jakarta Sans'; color: #8e2a4a; margin-top: 1.5mm !important; }}
+.sim-l {{ font: 7.6pt 'Plus Jakarta Sans'; color: #8f7a83; }}
+.aviso-ia {{ display: inline-block; background: #c62f3a; color: #fff; font: 700 7pt 'Plus Jakarta Sans';
+             letter-spacing: .6pt; text-transform: uppercase; padding: .4mm 1.6mm; border-radius: 1mm; margin-right: 1.5mm; }}
 .toc-aut {{ font: italic 7.8pt/1.2 'Plus Jakarta Sans'; color: #8f7a83; margin: -1mm 0 1.6mm 11mm; }}
 .contraportada {{ page: portada; break-before: left; position: relative; height: 297mm; color: #F8F1F3; }}
 .cp-titulo {{ position: absolute; top: 40mm; left: 25mm; right: 25mm; margin: 0; font: 700 22pt/1.15 Fraunces, serif; }}

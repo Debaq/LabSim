@@ -82,7 +82,7 @@ La neuritis vestibular suele ser **parcial**. En 16 pacientes estudiados entre l
 
 En pocos días los núcleos vestibulares y el cerebelo **igualan los reposos** y el vértigo y el nistagmo desaparecen, aunque el laberinto siga sin funcionar. Eso es la **compensación central**. El laberinto o el nervio pueden además recuperarse en forma **variable**: en un ensayo con 141 pacientes con neuritis, la función calórica mejoró en 12 meses 39,6 puntos porcentuales en promedio con placebo y 62,4 con metilprednisolona (Strupp y cols., 2004). Son procesos distintos: se puede estar compensado con un laberinto que no volvió. En el seguimiento de 43 pacientes con neuritis, la ganancia y el patrón de las sacadas cambiaron con los meses (Sjögren y cols., 2026). Cómo se ayuda a que se compense está en el cap. 31.
 
-:::imagen ilustraciones/cap21-compensacion.svg ancho=100% Qué cambia con el tiempo tras una pérdida vestibular unilateral aguda
+:::imagen ilustraciones/cap21-compensacion.svg ancho=100% Qué cambia con el tiempo tras una pérdida vestibular unilateral aguda. Compara las curvas: el vértigo y el nistagmo se apagan en días, el equilibrio se compensa en semanas, y la ganancia del lado enfermo se recupera de forma variable. Que el paciente ya no tenga vértigo no quiere decir que su laberinto se recuperó.
 :::
 
 ## Patología
@@ -107,14 +107,14 @@ Entre 240 infartos cerebelosos consecutivos, 25 (10,4 %) se presentaron como un 
 
 En la resonancia, un infarto reciente se ve brillante en la secuencia de difusión y oscuro en el mapa ADC.
 
-:::imagen ilustraciones/cap21-rm-infarto-cerebeloso.jpg ancho=80% Resonancia de un infarto en el hemisferio derecho del cerebelo, en un corte axial de la fosa posterior. Es otra persona, no un paciente de este capítulo: la resonancia la pide y la informa el médico, y se muestra para que se vea la forma de lo que el examen de cabecera sospecha. Izquierda: difusión (b = 1000). Derecha: mapa ADC del mismo corte. Convención radiológica: la derecha del paciente queda a la izquierda de la imagen. Según la máscara del dataset, el infarto mide unos 3,5 mL. Imagen: corte propio del caso sub-strokecase0157 de ISLES 2022 (Hernandez Petzsche y cols., Sci Data 2022, doi:10.1038/s41597-022-01875-5; datos doi:10.5281/zenodo.7153326), CC BY 4.0; recortado y con ventana ajustada.
+:::imagen ilustraciones/cap21-rm-infarto-cerebeloso.jpg ancho=80% Resonancia de un infarto en el hemisferio derecho del cerebelo, en un corte axial de la fosa posterior. Es otra persona, no un paciente de este capítulo. La resonancia la pide y la informa el médico; esto es lo que el examen de cabecera tiene que sospechar antes de que haya imagen. Izquierda: difusión (b = 1000). Derecha: mapa ADC del mismo corte. Convención radiológica: la derecha del paciente queda a la izquierda de la imagen. El infarto mide unos 3,5 mL. Imagen: dataset ISLES 2022 (Hernandez Petzsche y cols., 2022, Sci Data, doi:10.1038/s41597-022-01875-5), CC BY 4.0, adaptada.
 - @7,82 | **Difusión**: el infarto es la mancha blanca, en la parte posterior del hemisferio derecho.
 - @55,84 | **ADC**: en el mismo lugar el tejido se ve más oscuro que el resto del cerebelo: el agua se mueve menos ahí (difusión restringida).
 :::
 
 La imagen tampoco es infalible. La resonancia con difusión fue falsamente normal en el 12 % de los pacientes dentro de las 48 horas (Kattah y cols., 2009), y en los ictus pequeños en el 53 % entre las 6 y las 48 horas (Saber Tehrani y cols., 2014). Una imagen temprana normal **no cierra** un HINTS con un signo central.
 
-:::imagen ilustraciones/cap21-rm-difusion-negativa.jpg ancho=100% Una difusión normal que tres días después ya no lo es. Paciente con vértigo recurrente e hipoacusia fluctuante del oído derecho con acúfeno; la calórica mostraba una paresia derecha de 65 %. A: resonancia con difusión al día 1, normal (dos cortes axiales). D: tres días después, con más vértigo y más hipoacusia, la difusión repetida muestra focos brillantes en el cerebelo anterior derecho, flóculo incluido: un infarto en el territorio de la arteria cerebelosa anteroinferior (AICA), no de la PICA. Imagen: Kim HA, Lee H. J Stroke 2017 (doi:10.5853/jos.2016.00857), Fig. 1, paneles A y D, CC BY-NC 4.0; recortada (sin el audiograma ni la calórica).
+:::imagen ilustraciones/cap21-rm-difusion-negativa.jpg ancho=100% Una difusión normal que tres días después ya no lo es. Paciente con vértigo recurrente e hipoacusia fluctuante del oído derecho con acúfeno; la calórica mostraba una paresia derecha de 65 %. A: resonancia con difusión al día 1, normal (dos cortes axiales). D: tres días después, con más vértigo y más hipoacusia, la difusión repetida muestra focos brillantes en el cerebelo anterior derecho, flóculo incluido: un infarto en el territorio de la arteria cerebelosa anteroinferior (AICA), no de la PICA. Por eso una resonancia temprana normal no cierra un signo central. Imagen: Kim HA, Lee H (2017), J Stroke, doi:10.5853/jos.2016.00857, Fig. 1 (paneles A y D), CC BY-NC 4.0, adaptada.
 - @12,72 | **Día 1**: difusión sin lesiones.
 - @77,82 | **Día 4**: los focos brillantes del infarto, en el cerebelo anterior derecho.
 :::
@@ -162,7 +162,7 @@ Un paciente tiene vértigo agudo, un nistagmo que bate a la izquierda sin cambia
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
 :::comentario Lo vestibular de los casos
-LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente salen del editor de casos, y **la hoja de cabecera** (nistagmo, impulso cefálico y oclusión alternada) es un dibujo propio con las cifras del paciente. Las cifras son inventadas para enseñar, no son valores de referencia.
+LabSim no tiene vértigo, nistagmo ni vHIT: la ficha, la anamnesis, el audiograma y el VEMP de cada paciente son los del simulador, y **la hoja de cabecera** (nistagmo, impulso cefálico y oclusión alternada) es un esquema con las cifras del paciente. Son datos de ejemplo para enseñar, no valores de referencia.
 :::
 
 {{caso cap21_neuritis}}
@@ -181,7 +181,7 @@ Además del audiograma, ¿qué mirarías de cabecera y con qué equipo? ¿Qué e
 
 #### Paso 4 · Los resultados
 
-:::imagen ilustraciones/cap21-ficha-neuritis.svg ancho=100% Hoja de cabecera de Ana
+:::imagen ilustraciones/cap21-ficha-neuritis.svg ancho=100% Hoja de cabecera de Ana: nistagmo en las tres miradas, impulso cefálico a cada lado y oclusión alternada, los tres pasos del HINTS.
 - @35.5,25 | Mirando a la izquierda, hacia donde bate, el nistagmo es el más intenso: **9 °/s** (ley de Alexander).
 - @35.5,66 | Mirando a la derecha baja a **3 °/s** pero **no cambia de sentido**: es un nistagmo periférico.
 - @58,24 | El impulso hacia la derecha tiene una ganancia de **0,38** y una sacada manifiesta: el reflejo del lado derecho falla.
@@ -199,7 +199,6 @@ Además del audiograma, ¿qué mirarías de cabecera y con qué equipo? ¿Qué e
 - **Hipótesis esperables:** neuritis vestibular, laberintitis, ictus de fosa posterior. La audición normal y la ausencia de riesgo vascular inclinan a lo primero, pero no cierran lo último.
 - **Qué pedir:** audiometría, examen de nistagmo con Frenzel o VNG, vHIT de los seis canales; si aparece cualquier signo central, derivar (→ H3, H15, H17).
 - **Errores esperables:** concluir "normal" por la audición sin mirar el reflejo; no dar los impulsos de la derecha y de la izquierda por separado; informar el nistagmo con fijación, donde casi no se ve.
-- **En el simulador:** Labyrinthus 3D, pestaña Patología, caso *Neuritis vestibular superior* del lado derecho; con *Ocluido* y *Fijando* se ve cómo la fijación frena el nistagmo (→ H15). trainHIT trae el patrón de un déficit derecho (→ H17). Ninguno modela la compensación en el tiempo de un paciente real.
 :::
 
 {{caso cap21_laberintitis}}
@@ -218,7 +217,7 @@ Además del examen del reflejo y del nistagmo, ¿qué agregarías para saber si 
 
 #### Paso 4 · Los resultados
 
-:::imagen ilustraciones/cap21-ficha-laberintitis.svg ancho=100% Hoja de cabecera de Javier
+:::imagen ilustraciones/cap21-ficha-laberintitis.svg ancho=100% Hoja de cabecera de Javier. Compárala con la de Ana: el examen de los ojos no separa a estos dos pacientes.
 - @35.5,25 | El nistagmo bate a la izquierda, como en una neuritis derecha: **10 °/s** al mirar a la izquierda y **4 °/s** a la derecha, sin cambiar de sentido.
 - @58,24 | Impulso hacia la derecha con ganancia **0,30** y sacada manifiesta.
 - @57,59 | Hacia la izquierda, **0,98**.
@@ -245,7 +244,7 @@ Además del examen del reflejo y del nistagmo, ¿qué agregarías para saber si 
 - **Qué pedir:** audiometría, impedanciometría (curva A, sin otitis), HINTS, VEMP de los dos tipos, vHIT (→ H3, H5, H12, H17).
 - **La trampa:** el audiograma de este paciente sería idéntico en una AICA. Se descarta con el examen del tronco, el contexto y la imagen del médico, **no** con la audiometría.
 - **Errores esperables:** llamarlo "neuritis" sin explicar la hipoacusia; leer un VEMP caído como lesión del tronco (es del laberinto).
-- **En LabSim:** caso armado para el libro con el cuadro *laberintitis* en el OD, grado severo; el docente puede crearlo. Del lado vestibular: Labyrinthus 3D, caso *Pérdida vestibular unilateral* (los canales y los otolitos del lado, con el nervio completo).
+- **En LabSim:** cuadro *laberintitis* en el OD, grado severo.
 :::
 
 {{caso cap21_pseudoneuritis}}
@@ -264,7 +263,7 @@ El paciente no puede sentarse sin caerse. ¿Cuál es la prioridad: completar el 
 
 #### Paso 4 · Los resultados
 
-:::imagen ilustraciones/cap21-ficha-pseudoneuritis.svg ancho=100% Hoja de cabecera de Martín
+:::imagen ilustraciones/cap21-ficha-pseudoneuritis.svg ancho=100% Hoja de cabecera de Martín. Busca en cada paso lo que una neuritis no daría.
 - @35.5,25 | Mirando a la izquierda, el nistagmo bate a la **izquierda**: 8 °/s.
 - @35.5,46 | Al frente **no hay nistagmo**.
 - @35.5,66 | Mirando a la derecha bate a la **derecha**: 8 °/s. **Cambia de sentido con la mirada**: es un nistagmo evocado por la mirada, central.
@@ -284,7 +283,6 @@ El paciente no puede sentarse sin caerse. ¿Cuál es la prioridad: completar el 
 - **Qué pedir:** HINTS (impulso, nistagmo con mirada excéntrica, skew) y marcha; **aviso al médico antes de seguir**. La audiometría puede esperar (→ H15, H17).
 - **La trampa:** el nistagmo parece periférico cuando se lo mira al frente, y el audiograma es normal para la edad. Lo que lo delata es **la mirada excéntrica**, el impulso normal y el skew.
 - **Errores esperables:** mirar solo el nistagmo al frente; leer el impulso normal como "sin problema vestibular"; dar un informe de alta con la resonancia pendiente.
-- **En el simulador:** Labyrinthus 3D, casos *Evocado por la mirada* o *Lesión de los núcleos vestibulares (bulbar lateral)*, que muestran un nistagmo que cambia de sentido o un impulso conservado con un reflejo central (→ H15); no hay un caso de infarto cerebeloso puro, y en el simulador el flóculo es el sitio más cercano.
 :::
 
 {{caso cap21_aica}}
@@ -303,7 +301,7 @@ Si el impulso cefálico sale anormal y el nistagmo es unidireccional, ¿estás t
 
 #### Paso 4 · Los resultados
 
-:::imagen ilustraciones/cap21-ficha-aica.svg ancho=100% Hoja de cabecera de Inés
+:::imagen ilustraciones/cap21-ficha-aica.svg ancho=100% Hoja de cabecera de Inés. Casi todo parece de una neuritis: busca el paso que no calza.
 - @35.5,25 | Al mirar a la izquierda el nistagmo baja a **3 °/s** y no cambia de sentido; al mirar a la derecha sube a **8 °/s**: parece periférico.
 - @58,24 | El impulso hacia la derecha es normal (**0,97**).
 - @57,59 | Hacia la izquierda la ganancia es **0,45** con sacada: el reflejo del lado izquierdo falla. Hasta aquí, **una neuritis**.
@@ -329,7 +327,6 @@ Si el impulso cefálico sale anormal y el nistagmo es unidireccional, ¿estás t
 - **Qué pedir:** HINTS completo, marcha, audiometría con logo, VEMP y, **antes que todo, avisar** (→ H3, H12, H15, H17, cap. 12).
 - **La trampa:** dos de tres pasos del HINTS salen periféricos y el audiograma es el de una laberintitis. Lo que cambia la conducta es el **skew**, la marcha y el **riesgo vascular**. Es el mismo patrón que el caso 21.2, con una explicación opuesta.
 - **Errores esperables:** quedarse con el impulso anormal y el nistagmo unidireccional ("neuritis con hipoacusia"); atribuir el skew a un vicio de refracción; esperar la resonancia para avisar.
-- **En el simulador:** Labyrinthus 3D, caso *Infarto de la AICA (laberinto y flóculo)* del lado izquierdo: un nistagmo de aspecto periférico que la fijación frena poco (→ H15). El simulador no modela la marcha ni la audición.
 :::
 
 ## Resolución de los casos

@@ -87,7 +87,7 @@ Hay además un factor de tamaño: antes de las 42 semanas posconcepcionales, ent
 
 Un nervio frío conduce más lento y una sinapsis fría transmite más lento. El estudio de Markand y cols. (1987) lo midió en 10 adultos enfriados en cirugía cardíaca: a medida que bajaba la temperatura, las latencias de I, III y V crecían, y **más las de las ondas tardías**, de modo que los interpicos también se alargaban; cada grado que bajaba sumaba cerca de 7 % y a unos 26 °C el I-V se había duplicado. Todas las ondas estaban presentes sobre 23 °C y faltaban bajo 20 °C; al recalentar, el trazo volvía al de antes (Figura 14.1). Un estudio posterior con circulación extracorpórea llegó a lo mismo: bajo los 25 °C la latencia seguía creciendo hasta que el trazo se aplanaba entre 21 y 19 °C, y todo era reversible (Hett y cols., 1995). <!-- verificar: la explicación "cada sinapsis suma retraso" es la habitual en los textos; Markand describe el hecho (más prolongación en componentes tardíos) pero no se leyó su discusión completa. -->
 
-:::imagen ilustraciones/cap14-temperatura.svg ancho=80% Cuánto se alarga el I-V al enfriarse el cuerpo, con la regla de 7 % por grado desde un I-V de 4,1 ms a 36 °C. Es un esquema calculado con esa regla, no datos de un paciente.
+:::imagen ilustraciones/cap14-temperatura.svg ancho=80% Cuánto se alarga el I-V al enfriarse el cuerpo, con la regla de 7 % por grado desde un I-V de 4,1 ms a 36 °C. Fíjate en que bastan unos pocos grados para que un I-V normal parezca el de una lesión del tronco: por eso la temperatura se anota antes de leer los interpicos. Es la regla llevada a un gráfico, no datos de un paciente.
 :::
 
 El efecto es tan general que ocurre dentro de la normalidad: la variación diaria de la temperatura corporal alcanza a mover la latencia de la onda V (Marshall y Donchin, 1981). En sentido contrario, el calor acorta: en un paciente llevado de 38 a 42 °C, la III y la V llegaron antes y el I-V se acortó entre 0,5 y 0,6 ms (Hall y cols., 1988).
@@ -200,7 +200,7 @@ Además de la audiometría, ¿qué pruebas de oído medio y de cóclea agregarí
 - **Hipótesis esperables:** presbiacusia (a los 45 sería precoz), ruido (sin exposición), genética (sin familia), causa sistémica: **hipotiroidismo**, diabetes, ototóxicos; y, solo si hubiera asimetría, retrococlear.
 - **Qué pedir:** audiometría, impedanciometría (descarta oído medio), emisiones (confirman lo coclear) y un ABR de tronco: **no para el hipotiroidismo** sino para dejar documentado que no hay asimetría ni signos retrococleares. Y avisar al médico.
 - **Errores esperables:** leer una V a 5,7 ms como "retrococlear" sin mirar los interpicos; creer que un ABR dentro de límites descarta el hipotiroidismo; atribuir la pérdida a la edad.
-- **En LabSim:** caso armado para el libro con el cuadro *Hipotiroidismo* en grado leve en los dos oídos, mujer de 45 años. En LabSim las latencias del cuadro quedan en el límite superior: es un cuadro sutil a propósito (Anand y cols., 1989 muestran el efecto en el grupo, no en cada paciente).
+- **En LabSim:** cuadro *Hipotiroidismo* en grado leve en los dos oídos, mujer de 45 años. En LabSim las latencias del cuadro quedan en el límite superior: es un cuadro sutil a propósito (Anand y cols., 1989 muestran el efecto en el grupo, no en cada paciente).
 :::
 
 {{caso cap14_hipotermia_farmacos}}
@@ -235,7 +235,7 @@ Se pide un ABR a la cama para ver si el tronco está sano. ¿Qué dato le pedir�
 - **Hipótesis esperables:** lesión del tronco por la hipoxia, efecto de fármacos, **efecto de la temperatura**. Con la I atrasada y los interpicos largos en los dos oídos, la hipotermia es la explicación que cierra.
 - **Qué pedir:** la **temperatura central** (y la hora), la lista de fármacos y la hora de la última dosis, emisiones para confirmar la cóclea y, cuando se recaliente, **repetir el ABR** en normotermia.
 - **Errores esperables:** informar "lesión del tronco" por el I-V largo; "corregir" las latencias con una fórmula en vez de anotar la temperatura; atribuirlo al propofol.
-- **En LabSim:** caso armado para el libro con el cuadro *Hipotermia / depresores del SNC* (valores de unos 33 °C). LabSim no tiene un campo de temperatura: la temperatura está en la historia y el cuadro la representa en el ABR. El I-V de 5,2 ms calza con la regla de Markand (4,2 ms × 1,07³ ≈ 5,2 ms).
+- **En LabSim:** cuadro *Hipotermia / depresores del SNC* (valores de unos 33 °C). LabSim no tiene un campo de temperatura: la temperatura está en la historia y el cuadro la representa en el ABR. El I-V de 5,2 ms calza con la regla de Markand (4,2 ms × 1,07³ ≈ 5,2 ms).
 :::
 
 {{caso cap14_bloqueo_proximal}}
@@ -269,7 +269,7 @@ Si el ABR muestra solo una onda, ¿qué te dice cada posibilidad: sordera, lesi�
 - **Hipótesis esperables:** el trazo con una onda puede ser una **sordera**, un **error de registro** o la **lesión proximal del tronco**. Lo que decide es que la **I existe, tiene su latencia y su amplitud**, y que hay emisiones: el oído funciona y la vía no responde después.
 - **Qué pedir:** descartar temperatura y fármacos, emisiones, ABR a 80 dB y varios niveles, y si no aparece la I, la ECochG para ver si la cóclea responde (→ H11).
 - **Errores esperables:** leer "sin ondas" como "tronco muerto" cuando no se vio la I; no preguntar por sedantes ni temperatura; dar un diagnóstico que no es del audiólogo.
-- **En LabSim:** caso armado para el libro con el cuadro *Bloqueo proximal del VIII (coma)*. El generador no atrasa la I (en la serie de Starr, 1976, cuando la I estaba venía con latencia prolongada).
+- **En LabSim:** cuadro *Bloqueo proximal del VIII (coma)*. LabSim no atrasa la I (en la serie de Starr, 1976, cuando la I estaba venía con latencia prolongada).
 :::
 
 {{caso cap14_prematuro}}
@@ -307,7 +307,7 @@ Antes de mirar los valores, ¿con qué fila los compararás? ¿Qué pasaría si 
 - **Hipótesis esperables:** pérdida de transmisión (efusión), coclear, neural o **maduración propia de la prematurez**. El timpanograma de 1.000 Hz y las emisiones descartan lo conductivo y lo coclear.
 - **Qué pedir:** edad corregida, timpanometría con sonda de 1.000 Hz, emisiones y ABR con **la fila que corresponde a su edad corregida** (→ cap. 16, cap. 17 para el umbral por frecuencia).
 - **Errores esperables:** comparar con la tabla del adulto; usar los días de vida y no la edad corregida; informar el I-V levemente largo como un problema neural.
-- **En LabSim:** caso armado para el libro con el cuadro *Retraso madurativo del prematuro* y edad de 1.344 horas (56 días). LabSim elige la fila por la **edad cronológica**: por eso aquí cae en la de recién nacido (menos de 3 meses). El cuadro corre toda la curva unos 0,6 ms y suma 0,1 ms al III-V (Stipdonk y cols., 2016); la literatura describe el alargamiento sobre todo en el III-V y atribuye parte del retraso de la I y la V al oído medio (Eggermont y Salamy, 1988). El cuadro no guarda las semanas de gestación: están en el relato.
+- **En LabSim:** cuadro *Retraso madurativo del prematuro* y edad de 1.344 horas (56 días). LabSim elige la fila por la **edad cronológica**: por eso aquí cae en la de recién nacido (menos de 3 meses). El cuadro corre toda la curva unos 0,6 ms y suma 0,1 ms al III-V (Stipdonk y cols., 2016); la literatura describe el alargamiento sobre todo en el III-V y atribuye parte del retraso de la I y la V al oído medio (Eggermont y Salamy, 1988). El cuadro no guarda las semanas de gestación: están en el relato.
 :::
 
 ## Resolución de los casos

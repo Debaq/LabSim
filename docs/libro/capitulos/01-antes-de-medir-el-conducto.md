@@ -89,12 +89,12 @@ Infección de la piel del conducto, favorecida por la humedad (piscina, ducha) y
 
 El conducto no se formó (atresia) o quedó muy estrecho (estenosis). Suele acompañarse de **microtia**, un pabellón pequeño o malformado, y casi siempre es de un solo lado. La cóclea es sana y la pérdida es una conductiva grande y estable: en series quirúrgicas el gap ronda los 50 dB antes de operar (Dobratz y cols., 2008), y<!-- verificar: los ~50 dB se deducen del gap posoperatorio más la mejora que informa Dobratz; no es una cifra preoperatoria publicada tal cual. --> la cirugía mejora la aérea en unos 26 dB, sin normalizarla (Jonas y cols., 2022). La audiometría con **vía ósea enmascarada** es el examen que decide: confirma la reserva coclear antes de cualquier tratamiento. Por fuera, la atresia con microtia salta a la vista; la estenosis, en cambio, puede mostrar la entrada del conducto abierta y estrecharse más adentro, en el hueso. El otorrinolaringólogo estudia el oído con una tomografía, que muestra si el conducto está estrecho o si no existe.
 
-:::imagen ilustraciones/cap01-foto-estenosis-atresia.jpg ancho=100% El oído derecho de dos niños, visto por fuera. A: el conducto se abre, pero la tomografía mostró una estenosis ósea severa. B: microtia con atresia completa del conducto. Son otras personas, no los pacientes de este capítulo. Imagen: Truong MT, Liu YC, Kohn J y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, Fig. 2, CC BY 4.0, recortada (solo las fotos, sin las tomografías).
+:::imagen ilustraciones/cap01-foto-estenosis-atresia.jpg ancho=100% El oído derecho de dos niños, visto por fuera. A: el conducto se abre, pero la tomografía mostró una estenosis ósea severa; mirado desde afuera, no se adivina. B: microtia con atresia completa del conducto. Son otras personas, no los pacientes de este capítulo. Imagen: Truong MT, Liu YC, Kohn J y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, Fig. 2, CC BY 4.0, adaptada.
 - @23,30 | **A · Estenosis**: el pabellón está formado y el conducto se abre bajo el globo; la estrechez está más adentro, en el hueso, y no se ve por fuera.
 - @88,40 | **B · Atresia**: a la izquierda del globo, un remanente de pabellón (microtia) y ninguna entrada al conducto.
 :::
 
-:::imagen ilustraciones/cap01-tc-atresia.jpg ancho=100% Tomografía axial de tres oídos derechos, en el mismo plano: normal (A), con estenosis (B) y con atresia (C). Son otras personas, no los pacientes de este capítulo; la tomografía la pide y la informa el médico, y se muestra para que se vea qué hay detrás de la conductiva que mide la audiometría. Imagen: Qin FH, Zhang TY, Dai P, Yang L (2015), Clin Exp Otorhinolaryngol, doi:10.3342/ceo.2015.8.4.320, Fig. 2, CC BY-NC 3.0, sin modificar.
+:::imagen ilustraciones/cap01-tc-atresia.jpg ancho=100% Tomografía axial de tres oídos derechos, en el mismo plano: normal (A), con estenosis (B) y con atresia (C). Es lo que hay detrás de la conductiva que mide la audiometría; la tomografía la pide y la informa el médico. Imagen: Qin FH, Zhang TY, Dai P, Yang L (2015), Clin Exp Otorhinolaryngol, doi:10.3342/ceo.2015.8.4.320, Fig. 2, CC BY-NC 3.0.
 - @5,50 | **Normal**: el conducto, con aire (negro), llega hasta la caja.
 - @36,37 | **Estenosis**: el conducto, bajo el globo, queda reducido a un hilo de aire.
 - @70,47 | **Atresia**: a la derecha del globo, donde debería abrirse el conducto, hay solo hueso.
@@ -193,7 +193,7 @@ Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas
 - **Hipótesis esperables:** tapón de cerumen (la foto lo muestra); conductiva de oído medio detrás del tapón (no se puede descartar sin ver la membrana); pérdida por edad bilateral.
 - **Qué pedir:** acumetría hoy; revisar contraindicaciones del lavado; lavado y otoscopía de control; recién entonces audiometría e impedanciometría (→ H1, H2, H3, H7).
 - **Errores esperables:** aceptar la audiometría que trae; hacer la timpanometría con el tapón; olvidar preguntar por perforación o cirugía antes de lavar.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *Tapón de cerumen* en el OD y cargar la foto en la ficha Otoscopia. El tapón no es "no realizable": si el alumno hace la timpanometría, el equipo mide y da la curva del tapón (plana, con volumen bajo), que no sirve para informar el oído medio. No cuenta como falta grave; el error es haberla hecho y, peor, informarla como un tipo B.
+- **En LabSim:** cuadro *Tapón de cerumen* en el OD, con la foto cargada en la ficha Otoscopia. El tapón no es "no realizable": si el alumno hace la timpanometría, el equipo mide y da la curva del tapón (plana, con volumen bajo), que no sirve para informar el oído medio. No cuenta como falta grave; el error es haberla hecho y, peor, informarla como un tipo B.
 :::
 
 {{caso cap01_cuerpo_extrano_cae}}
@@ -232,7 +232,7 @@ Expuesto a ruido y con el OI alterado en la audiometría anual: ¿qué causas pl
 - **Hipótesis esperables:** cuerpo extraño (resto de tapón), tapón de cerumen empujado por el cotonito, daño por ruido (no explica un gap ni la sensación de oído lleno).
 - **Qué pedir:** otoscopía; acumetría; derivación a otorrinolaringología para extracción bajo visión; audiometría completa cuando el conducto esté libre.
 - **Errores esperables:** lavar (el agua puede empujar el objeto hacia la membrana); poner la sonda; informar una "hipoacusia conductiva del OI" en un examen laboral.
-- **En LabSim:** caso armado para el libro con el cuadro *Cuerpo extraño en CAE* en el OI. El informe de otoscopía no tiene una opción para cuerpo extraño: el alumno lo escribe en las observaciones y deja su conducta en la evolución. El OI viene como no realizable: intentar medir en él (sonda, o fono de un contralateral) es una falta grave y deja el impedanciómetro fuera de uso en los dos oídos el resto de la atención.
+- **En LabSim:** cuadro *Cuerpo extraño en CAE* en el OI. El informe de otoscopía no tiene una opción para cuerpo extraño: el alumno lo escribe en las observaciones y deja su conducta en la evolución. El OI viene como no realizable: intentar medir en él (sonda, o fono de un contralateral) es una falta grave y deja el impedanciómetro fuera de uso en los dos oídos el resto de la atención.
 :::
 
 {{caso cap01_otitis_externa}}
@@ -264,7 +264,7 @@ Es todo lo que se hace hoy.
 - **Hipótesis esperables:** otitis externa difusa (dolor a la tracción y al trago), otitis media aguda con otorrea (dolor previo, fiebre, sin dolor a la tracción), forúnculo del conducto.
 - **Qué pedir:** otoscopía cuidadosa, acumetría y nada más. Sin sonda ni fonos de inserción. La audiometría se reprograma para cuando la piel esté sana, después del control médico.
 - **Errores esperables:** hacer la audiometría "porque ya vino"; poner la sonda en un conducto con secreción; usar el mismo espéculo en el otro oído.
-- **En LabSim:** caso armado para el libro con el cuadro *Otitis externa difusa* en el OD. Marcar edema y otorrea en el informe de otoscopía. El OD viene como no realizable: intentar medir en él es una falta grave, y como el impedanciómetro queda fuera de uso en los dos oídos, el alumno pierde también la impedanciometría del OI sano.
+- **En LabSim:** cuadro *Otitis externa difusa* en el OD. Marcar edema y otorrea en el informe de otoscopía. El OD viene como no realizable: intentar medir en él es una falta grave, y como el impedanciómetro queda fuera de uso en los dos oídos, el alumno pierde también la impedanciometría del OI sano.
 :::
 
 {{caso cap01_estenosis_atresia_cae}}
@@ -285,7 +285,7 @@ Sin conducto, ¿qué tipo de pérdida esperas en el OD? ¿Qué podría hacer que
 
 **Inspección y otoscopía.** OD: pabellón pequeño y malformado; en lugar del conducto, una depresión ciega de piel. OI: normal. La timpanometría del OD **no es realizable**: no hay dónde sellar la sonda.
 
-:::imagen ilustraciones/cap01-foto-atresia-rn.jpg ancho=45% Otra persona, no el paciente del caso: un recién nacido con atresia del oído derecho. Imagen: CDC / Dr. James W. Hanson, Public Health Image Library, vía Wikimedia Commons (Ear-VACTERL.jpg), dominio público, recortada.
+:::imagen ilustraciones/cap01-foto-atresia-rn.jpg ancho=45% Un recién nacido con atresia del oído derecho. Es otra persona, no el paciente del caso. Imagen: CDC / Dr. James W. Hanson, Public Health Image Library, vía Wikimedia Commons, dominio público.
 - @20,28 | **Microtia**: a la derecha del globo, un pabellón pequeño y malformado, sin entrada al conducto. Es lo que se ve en el OD de Ramón.
 :::
 
@@ -306,7 +306,7 @@ Sin conducto, ¿qué tipo de pérdida esperas en el OD? ¿Qué podría hacer que
 - **Hipótesis esperables:** conductiva máxima del OD por atresia; malformación del oído medio asociada; menos probable, compromiso coclear (por eso importa la ósea).
 - **Qué pedir:** acumetría, audiometría con vía ósea **enmascarada** (→ H4) e impedanciometría solo del OI. En el lactante, el mismo dato lo da el PEAT por vía ósea (cap. 17).
 - **Errores esperables:** no enmascarar la ósea; intentar timpanometría en el OD; informar "hipoacusia moderada" sin decir que la cóclea está sana.
-- **En LabSim:** caso armado para el libro con el cuadro *Estenosis / atresia congénita de CAE* moderado en el OD, que viene como no realizable: intentar la timpanometría o un contralateral por el OD es una falta grave y deja el impedanciómetro fuera de uso, también para el OI.
+- **En LabSim:** cuadro *Estenosis / atresia congénita de CAE* moderado en el OD, que viene como no realizable: intentar la timpanometría o un contralateral por el OD es una falta grave y deja el impedanciómetro fuera de uso, también para el OI.
 - **Para discutir en clases:** por qué un niño con un oído normal igual puede necesitar apoyo en la sala de clases.
 :::
 
@@ -347,7 +347,7 @@ Plantea al menos tres causas para una otorrea con sangre que no mejora con gotas
 - **Hipótesis esperables:** otitis externa resistente, otitis externa necrotizante, otitis media crónica con colesteatoma, **carcinoma del conducto**. No le toca al estudiante decidir entre ellas: le toca reconocer que no es una otitis externa común.
 - **Qué pedir:** otoscopía sin manipular, acumetría y audiometría con fonos supraaurales y ósea enmascarada; ninguna sonda. La derivación no espera el examen.
 - **Errores esperables:** limpiar o aspirar el conducto; hacer timpanometría; informar "otitis externa" y citar a control.
-- **En LabSim:** caso armado para el libro con el cuadro *Carcinoma de CAE / tumor temporal* moderado en el OI. Ese cuadro no nace como no realizable: para que meter la sonda en el OI cuente como falta grave, el docente elige **NR** (no realizable) en el timpanograma del OI, en la ficha Timpanometría, al crear el caso.
+- **En LabSim:** cuadro *Carcinoma de CAE / tumor temporal* moderado en el OI. Ese cuadro no nace como no realizable: para que meter la sonda en el OI cuente como falta grave, el docente elige **NR** (no realizable) en el timpanograma del OI, en la ficha Timpanometría, al crear el caso.
 :::
 
 ## Resolución de los casos

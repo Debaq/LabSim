@@ -84,7 +84,7 @@ El protocolo pide al paciente **suspender 48 horas antes** los antivertiginosos,
 
 La figura reúne las formas que más se ven. Un nistagmo se nombra por su fase **rápida**, y cada uno tiene su manera de lucir en el registro (Eggers y cols., 2019).
 
-:::imagen ilustraciones/cap25-nistagmos-centrales.svg ancho=100% Los nistagmos centrales: posición del ojo en el tiempo (A, B, C, D, F) y velocidad de la fase lenta (E). Trazas del simulador labyrinthus3d; no son datos de un paciente.
+:::imagen ilustraciones/cap25-nistagmos-centrales.svg ancho=100% Los nistagmos centrales y cómo reconocer cada uno: posición del ojo en el tiempo (A, B, C, D, F) y velocidad de la fase lenta (E). En cada panel mira hacia dónde bate la fase rápida, si la luz lo frena y si cambia con la dirección de la mirada. Trazas de un modelo, no de un paciente. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @30,25 | **Hacia abajo**: la fase lenta sube y la rápida baja, mirando al frente, y la luz (gris ancho) casi no lo cambia.
 - @80,12 | **Hacia arriba**: la fase lenta baja y la rápida sube. Se lo atribuye a lesiones del puente y del bulbo.
 - @28,51 | **Evocado por la mirada**: mirando a la derecha, el ojo se va hacia el centro y vuelve de un salto.
@@ -137,7 +137,7 @@ El signo clínico característico es un **reflejo vestíbulo-ocular "visualmente
 
 La audición no es parte del cuadro y el audiograma suele ser el de la edad: lo que lleva al paciente a la consulta es el equilibrio.
 
-:::imagen ilustraciones/cap25-rm-canvas.jpg ancho=100% Resonancias sagitales en la línea media de tres personas con la enfermedad por RFC1, la causa genética más frecuente del CANVAS. Son otras personas, no pacientes de este capítulo: la resonancia la pide y la informa el médico, y se muestra para que se vea la forma de lo que los ojos del paciente anuncian. Bajo cada imagen, la edad y los años de ataxia al hacerla. B y C: atrofia del vermis (flechas del original), con los surcos abiertos y llenos de líquido; marcada en C a los 42 años. D: sin atrofia a los 62 años, tras 20 años de ataxia. En la serie, la atrofia del vermis figuraba en el informe de 48 de 55 pacientes. Imagen: Traschütz A, Cortese A, Reich S y cols. Neurology 2021 (doi:10.1212/WNL.0000000000011528), Fig. 5, paneles B a D, CC BY 4.0; recortada.
+:::imagen ilustraciones/cap25-rm-canvas.jpg ancho=100% Resonancias sagitales en la línea media de tres personas con la enfermedad por RFC1, la causa genética más frecuente del CANVAS. Son otras personas, no pacientes de este capítulo. La resonancia la pide y la informa el médico; aquí sirve para ver lo que los ojos del paciente anuncian: un vermis que se achica. Bajo cada imagen, la edad y los años de ataxia al hacerla. B y C: atrofia del vermis (flechas), con los surcos abiertos y llenos de líquido; marcada en C a los 42 años. D: sin atrofia a los 62 años, tras 20 años de ataxia: la atrofia no siempre está. En la serie, la atrofia del vermis figuraba en el informe de 48 de 55 pacientes. Imagen: Traschütz A y cols. (2021), Neurology, doi:10.1212/WNL.0000000000011528, CC BY 4.0, adaptada.
 - @25,52 | **Vermis atrófico**: las hojas se ven finas y separadas por surcos anchos.
 - @63,52 | **Vermis atrófico** en una persona más joven y con menos años de ataxia que la de B.
 - @90,48 | **Vermis de forma conservada**: la atrofia no siempre está, aun con años de enfermedad.
@@ -165,9 +165,9 @@ Descenso de las amígdalas cerebelosas por el foramen magno (→ cap. 12). Hay *
 **El nistagmo hacia abajo es el signo clásico y el menos frecuente**: 4 de 77 pacientes con Chiari I (Kumar y cols., 2002). Una VNG sin hallazgos **no descarta** un Chiari: con una cefalea occipital que empeora al toser, el audiólogo informa lo que vio y sugiere completar con el médico.
 :::
 
-:::imagen ilustraciones/cap25-rm-chiari.jpg ancho=62% Malformación de Chiari tipo I en una resonancia sagital (T1) de una niña de 13 años con mareo e inestabilidad al caminar desde hacía 18 meses, sin cefalea y con examen neurológico normal. Las amígdalas cerebelosas bajan 19 mm por debajo de la línea de McRae (la que une los bordes del agujero magno). Imagen: Sahuquillo J, Moncho D, Ferré A, López-Bermeo D, Sahuquillo-Muxi A, Poca MA. J Clin Med 2023 (doi:10.3390/jcm12144626), Fig. 2, panel izquierdo, CC BY 4.0; recortada (sin el corte coronal).
+:::imagen ilustraciones/cap25-rm-chiari.jpg ancho=62% Malformación de Chiari tipo I en una resonancia sagital (T1) de una niña de 13 años con mareo e inestabilidad al caminar desde hacía 18 meses, sin cefalea y con examen neurológico normal. Las amígdalas cerebelosas bajan 19 mm por debajo de la línea de McRae (la que une los bordes del agujero magno). Fíjate en que el mareo y la inestabilidad eran toda la queja: un Chiari no siempre trae la cefalea clásica. Imagen: Sahuquillo J y cols. (2023), J Clin Med, doi:10.3390/jcm12144626, CC BY 4.0, adaptada.
 - @79,58 | **Amígdalas cerebelosas** herniadas, detrás de la médula, muy por debajo del agujero magno.
-- @61,70 | **Siringe** pequeña (flecha roja del original): una cavidad de líquido dentro de la médula, justo bajo la punta de las amígdalas.
+- @61,70 | **Siringe** pequeña (flecha roja): una cavidad de líquido dentro de la médula, justo bajo la punta de las amígdalas.
 :::
 
 ### Fármacos y alcohol
@@ -240,7 +240,7 @@ Un paciente tiene un nistagmo evocado por la mirada simétrico, un seguimiento n
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Lo vestibular de estos casos (la mirada, el seguimiento, las sacadas y los valores del impulso cefálico y de la calórica) **no sale de LabSim**: son las trazas de Labyrinthus 3D, un simulador libre del autor, y datos de pacientes **inventados** que coinciden con ellas. De LabSim salen la ficha, la historia y el audiograma.
+Lo vestibular de estos casos (la mirada, el seguimiento, las sacadas y los valores del impulso cefálico y de la calórica) **no sale de LabSim**: son trazas de un modelo y **datos de ejemplo** que coinciden con ellas. De LabSim salen la ficha, la historia y el audiograma.
 
 {{caso cap25_canvas}}
 
@@ -271,7 +271,7 @@ La audición es la de su edad. Además del examen del cerebelo, ¿qué mirarías
 | Calórica bitermal | sin respuesta a 30 y a 44 °C en los dos oídos, y sin respuesta a 17 °C: **arreflexia vestibular bilateral** |
 :::
 
-:::imagen ilustraciones/cap25-caso1-canvas.svg ancho=100% VNG de Rafael: mirada excéntrica y seguimiento. Trazas del simulador labyrinthus3d con los dos flóculos a medias y los dos laberintos perdidos; los valores de las notas se midieron sobre estas trazas.
+:::imagen ilustraciones/cap25-caso1-canvas.svg ancho=100% VNG de Rafael: mirada excéntrica y seguimiento. Lo que hay que ver es el cerebelo en los ojos: un nistagmo evocado por la mirada que la luz no frena y un seguimiento sacádico. Unos laberintos perdidos no explican ninguna de las dos cosas. Trazas de un modelo; las cifras de las notas no son normativas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @82,15 | Mirando a la derecha, el ojo se va hacia el centro (**fase lenta de 1 a 2 °/s**) y vuelve de un salto: nistagmo evocado por la mirada.
 - @20,31 | Con luz (gris ancho) el nistagmo **sigue igual**: la fijación no lo frena.
 - @51,20 | Mirando al frente no hay nistagmo horizontal.
@@ -289,7 +289,6 @@ La audición es la de su edad. Además del examen del cerebelo, ¿qué mirarías
 - **Hipótesis esperables:** vestibulopatía bilateral por ototóxicos (no hay antecedente), presbiataxia, degeneración cerebelosa, **CANVAS**. Lo que separa a las dos primeras es que en los ojos hay **cerebelo**: nistagmo evocado por la mirada y seguimiento sacádico.
 - **Qué pedir:** audiometría, VNG con mirada excéntrica, seguimiento y sacadas, examen neurocerebeloso, calórica y vHIT (→ H3, H15, H16, H17).
 - **Errores esperables:** informar "arreflexia vestibular bilateral" y cerrar; atribuir todo a los laberintos; no preguntar por la tos ni por los pies.
-- **En el simulador:** Labyrinthus 3D, pestaña Patología, con los dos flóculos en *hipofunción* y todos los canales *perdidos*; con *Ocluido* y *Fijando* se ve que la fijación no frena el nistagmo (→ H15). El simulador no modela la neuropatía.
 :::
 
 {{caso cap25_esclerosis}}
@@ -318,11 +317,12 @@ No hay síntomas auditivos. ¿Pedirías igual la audiometría? ¿Qué cuidado te
 | Impulso cefálico y calórica | sin hallazgos |
 :::
 
-:::imagen ilustraciones/cap25-caso2-ino.svg ancho=100% Sacadas de 20° en cada ojo de Inés. Trazas del simulador labyrinthus3d con el fascículo longitudinal medial izquierdo perdido; las precisiones se midieron sobre estas trazas.
+:::imagen ilustraciones/cap25-caso2-ino.svg ancho=100% Sacadas de 20° en cada ojo de Inés. Mira los dos ojos por separado: hacia la derecha, el ojo derecho llega al blanco y el izquierdo se queda a mitad de camino. Un equipo que registra un solo ojo no lo ve. Trazas de un modelo con el fascículo longitudinal medial izquierdo perdido. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @30,32 | El **ojo derecho**, el que registran muchos equipos, llega a donde está el blanco hacia los dos lados: precisión 1,00. Con solo este ojo, el examen sale normal.
 - @70,24 | El **ojo izquierdo** hacia la derecha se queda en 0° y el blanco está en 10°: sale a tiempo, pero no llega.
 - @72,63 | Precisión de 0,50 hacia la derecha: la mitad del camino. Hacia la izquierda es 1,00.
 :::
+<!-- verificar: aducción lenta y nistagmo del ojo que abduce en la INO (Leigh y Zee 2015, capítulo de movimientos conjugados); el resumen de Strupp 2014 solo cita la aducción alterada. -->
 :::figura cap25_esclerosis audiograma
 - @OD 4000 | La audición es **normal** en los dos oídos: 0 dB en 4 kHz. No es lo que se esperaba de un cuadro de ojos, pero la esclerosis múltiple casi no da hipoacusia.
 - @OI 4000 | El OI tiene el mismo valor.
@@ -333,7 +333,6 @@ No hay síntomas auditivos. ¿Pedirías igual la audiometría? ¿Qué cuidado te
 - **Hipótesis esperables:** parálisis del VI, miastenia, **oftalmoplejía internuclear** por esclerosis múltiple. La doble imagen solo en una mirada y el ojo que no aduce apuntan a lo último.
 - **Qué pedir:** conjugación a la cabecera; VNG con **los dos ojos**; audiometría y, si se pide, ABR (→ H3, H10, H15, cap. 12).
 - **Errores esperables:** registrar solo el ojo derecho y concluir "sin hallazgos"; no mirar el paso de la conjugación; buscar en el audiograma lo que no está.
-- **En el simulador:** Labyrinthus 3D, caso *Oftalmoplejía internuclear (FLM)*, con dos ojos separados (→ H15). El simulador deja corta la aducción, pero no la enlentece ni agrega el nistagmo del ojo que abduce, dos rasgos que se describen en la oftalmoplejía internuclear real. <!-- verificar: aducción lenta y nistagmo del ojo que abduce en la INO (Leigh y Zee 2015, capítulo de movimientos conjugados); el resumen de Strupp 2014 solo cita la aducción alterada. -->
 :::
 
 {{caso cap25_chiari}}
@@ -362,7 +361,7 @@ La VNG anterior salió normal. ¿Qué tendrías que preguntar sobre cómo se hiz
 | Marcha | de base ancha; la marcha en tándem es difícil |
 :::
 
-:::imagen ilustraciones/cap25-caso3-chiari.svg ancho=100% VNG de Silvia: canal horizontal y canal vertical. Trazas del simulador labyrinthus3d con los dos flóculos a medias; las velocidades se midieron sobre estas trazas.
+:::imagen ilustraciones/cap25-caso3-chiari.svg ancho=100% VNG de Silvia: canal horizontal y canal vertical. El canal horizontal está plano; el nistagmo hacia abajo solo aparece en el vertical, y crece al mirar abajo y a los lados. Trazas de un modelo con los dos flóculos a medias. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @29,17 | El canal horizontal está **plano**: con este registro solo, la paciente sale "sin nistagmo".
 - @80,30 | El canal vertical bate hacia abajo, de 2,2 °/s, y la luz (gris ancho) casi no cambia.
 - @29,68 | Mirando 20° abajo, la fase lenta sube a 5,8 °/s.
@@ -378,7 +377,6 @@ La VNG anterior salió normal. ¿Qué tendrías que preguntar sobre cómo se hiz
 - **Hipótesis esperables:** cuadro del oído interno (hipoacusia unilateral), migraña, **Chiari**, compresión del tronco. La cefalea con la maniobra de Valsalva y la VNG horizontal sin nistagmo son el hallazgo.
 - **Qué pedir:** audiometría, VNG con canal vertical y mirada abajo, arriba y a los lados; sugerir al médico la resonancia de la unión craneocervical (→ H3, H15, cap. 12).
 - **Errores esperables:** repetir la VNG con un solo canal; atribuir el mareo a la hipoacusia; concluir "normal" por una calórica simétrica.
-- **En el simulador:** Labyrinthus 3D, caso *Degeneración cerebelosa (los dos flóculos)* con los flóculos en *hipofunción*; el panel deja elegir hacia dónde mira el paciente (→ H15). No modela el Chiari.
 :::
 
 {{caso cap25_farmaco}}
@@ -409,7 +407,7 @@ El protocolo pide suspender los ansiolíticos 48 horas antes del examen. ¿Qué 
 | Calórica bitermal | respuestas simétricas |
 :::
 
-:::imagen ilustraciones/cap25-caso4-farmaco.svg ancho=100% VNG de Álvaro: mirada excéntrica, seguimiento y sacadas. Trazas del simulador labyrinthus3d con el integrador de la mirada a medias; los valores se midieron sobre estas trazas.
+:::imagen ilustraciones/cap25-caso4-farmaco.svg ancho=100% VNG de Álvaro: mirada excéntrica, seguimiento y sacadas. Compara los dos lados: el nistagmo evocado por la mirada es simétrico, y el seguimiento y las sacadas están casi normales. Trazas de un modelo con el integrador de la mirada a medias; las cifras no son normativas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @82,15 | Mirando a la derecha, el ojo se va hacia el centro a **3 a 5 °/s** y vuelve de un salto. A la izquierda es igual: **simétrico**.
 - @20,31 | Con luz (gris ancho) sigue.
 - @29,67 | El seguimiento es casi normal: ganancia de 0,89.
@@ -425,7 +423,6 @@ El protocolo pide suspender los ansiolíticos 48 horas antes del examen. ¿Qué 
 - **Hipótesis esperables:** causa del oído interno (se descarta: el reflejo está intacto), degeneración cerebelosa, **fármacos y alcohol**.
 - **Qué pedir:** VNG con mirada excéntrica, seguimiento y sacadas, y vHIT (→ H15, H17); **avisar al médico tratante** de lo que se vio.
 - **Errores esperables:** tratar el cuadro con un antivertiginoso; suspender los fármacos por seguir el protocolo; informar "alteración vestibular".
-- **En el simulador:** Labyrinthus 3D, caso *Evocado por la mirada (fármacos, alcohol)*; el seguimiento y las sacadas salen casi sin cambios (→ H15). En un paciente real también suelen alterarse (Remler y cols., 1990); el simulador solo modela el mantenimiento de la mirada.
 :::
 
 ## Resolución de los casos

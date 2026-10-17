@@ -181,7 +181,7 @@ def riesgo():
 def ortostatismo():
     W, H = 600, 300
     g = Dib(W, H)
-    g.t(14, 22, 'Presión arterial acostado y de pie (cifras inventadas para el libro)', 12, TINTA, 'start', 700)
+    g.t(14, 22, 'Presión arterial acostado y de pie (cifras de ejemplo)', 12, TINTA, 'start', 700)
     g.t(14, 37, 'Hugo, caso 32.2. Los cortes son los del consenso de hipotensión ortostática: baja de 20 en la sistólica o de 10 en la diastólica.', 8.3, TENUE, 'start')
     x0, y0, w, h = 70, 60, 440, 200
     g.rect(x0, y0, w, h, '#faf9f6', GRILLA)
@@ -227,7 +227,7 @@ def mctsib():
     W, H = 760, 686
     g = Dib(W, H)
     g.t(14, 22, 'Balanceo adelante-atrás en las cuatro condiciones del mCTSIB, con cuatro perfiles', 12.5, TINTA, 'start', 700)
-    g.t(14, 38, 'Misma escala en todos los cuadros (20 s cada uno). Esquema del modelo de labyrinthus3d, no pacientes: los sentidos que se quitan se suman hacia abajo.',
+    g.t(14, 38, 'Misma escala en todos los cuadros (20 s cada uno). Esquema de un modelo, no pacientes: los sentidos que se quitan se suman hacia abajo.',
         8.5, TENUE, 'start')
     conds = [('firme_abiertos', 'Firme, ojos abiertos'), ('firme_cerrados', 'Firme, ojos cerrados'),
              ('espuma_abiertos', 'Espuma, ojos abiertos'), ('espuma_cerrados', 'Espuma, ojos cerrados')]

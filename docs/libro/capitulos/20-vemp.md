@@ -67,7 +67,7 @@ Las dos son un vértigo agudo y prolongado. Se separan por **qué órgano toca e
 
 También hay que decir lo contrario: en 47 pacientes con neurolabirintitis aguda, el cVEMP faltó solo en un tercio (34 %), sin relación con la calórica, la audiometría ni el ABR (Murofushi y cols., 1996). El VEMP **no reemplaza** a la calórica ni al vHIT (→ H16 y H17): agrega lo que ellos no miran, el sáculo.
 
-:::imagen ilustraciones/cap20-ramas.svg ancho=92% El mismo montaje con la lesión en cada nivel del oído derecho: el OI es el mismo, normal, en las tres filas. Los registros salen del motor del VEMP de LabSim con la lesión cambiada: LabSim no trae la neuritis como cuadro y esta figura no es un paciente.
+:::imagen ilustraciones/cap20-ramas.svg ancho=92% El mismo montaje con la lesión en cada nivel del oído derecho: el OI es el mismo, normal, en las tres filas. Mira qué VEMP cae en cada fila: el cVEMP sigue a la rama inferior y el oVEMP a la superior, y cuando caen los dos el daño es del laberinto o del nervio entero. Son registros simulados para mostrar el patrón, no un paciente.
 - @101,19 | **Rama superior.** El cVEMP del OD (282 µV, 5,69 corregida) es igual al del OI; el oVEMP del OD casi no sale del ruido (5 µV, 0,12 contra 0,52 del OI). Es la huella de la neuritis superior, sin hipoacusia.
 - @101,48 | **Rama inferior.** Al revés: el cVEMP del OD cae (17 µV, 0,33) y el oVEMP se conserva (20 µV, 0,48). Es el patrón sacular del hidrops, o de una neuritis inferior.
 - @101,78 | **Laberinto o nervio.** Caen los dos (0,41 y 0,16). En la laberintitis la hipoacusia sensorioneural lo separa de las filas de arriba.
@@ -175,7 +175,7 @@ Además de la audiometría, ¿qué examen te diría si el equilibrio del oído d
 - **Hipótesis esperables:** Ménière, migraña vestibular, VPPB, neuritis. Las crisis de horas con síntomas auditivos fluctuantes en un solo oído orientan al hidrops; la duración excluye al VPPB, que dura segundos.
 - **Qué pedir:** audiometría con vía ósea, impedanciometría, **cVEMP y oVEMP** entre crisis y, como complemento, ECochG (→ H3, H5, H11, H12 y cap. 9). Anotar cuánto hace de la última crisis.
 - **Errores esperables:** pedir solo el cVEMP; leer el VEMP normal como "no es Ménière"; olvidar que el momento cambia lo que se ve; hacer el diagnóstico con el VEMP.
-- **En LabSim:** caso armado para el libro con el cuadro *meniere* en el OD (sin grado fijo). El VEMP se atiende desde el box de electrofisiología; las intensidades del simulador no son las del protocolo.
+- **En LabSim:** cuadro *meniere* en el OD (sin grado fijo). El VEMP se atiende desde el box de electrofisiología; las intensidades del simulador no son las del protocolo.
 :::
 
 {{caso cap20_laberintitis}}
@@ -215,7 +215,7 @@ Con un vértigo agudo de días y una sordera de un oído, ¿qué piensas primero
 - **Hipótesis esperables:** neuritis vestibular, laberintitis, infarto de la AICA, sordera súbita con vértigo. La sordera que acompaña al vértigo descarta la neuritis, que no tiene hipoacusia.
 - **Qué pedir:** audiometría con vía ósea, impedanciometría y los dos VEMP; calórica o vHIT como complemento (→ H3, H12, H16, H17 y cap. 21). Y pedir al médico la imagen si hay factores vasculares o signos del tronco.
 - **Errores esperables:** decir "neuritis" con una sordera; creer que el VEMP descarta el infarto de la AICA; pedir el VEMP en pleno vértigo, cuando el paciente no puede sostener la contracción del cuello.
-- **En LabSim:** caso armado para el libro con el cuadro *laberintitis* en el OD, grado severo. Los dos VEMP se apagan por regla del cuadro.
+- **En LabSim:** cuadro *laberintitis* en el OD, grado severo. Los dos VEMP se apagan por regla del cuadro.
 :::
 
 {{caso cap20_schwannoma}}
@@ -256,7 +256,7 @@ Si el oído medio está sano y la pérdida es leve, ¿qué agrega el VEMP? ¿Qu�
 - **Hipótesis esperables:** presbiacusia temprana, daño por ruido, hipoacusia coclear unilateral, lesión del VIII par. La asimetría de agudos sin causa y la inestabilidad obligan a descartar el nervio.
 - **Qué pedir:** audiometría con vía ósea, logoaudiometría, impedanciometría con reflejos, ABR y los dos VEMP (→ H3, H5, H10, H12 y cap. 11). La resonancia con gadolinio la decide el médico.
 - **Errores esperables:** atribuir todo a la edad; leer el VEMP caído como un problema coclear; concluir "no hay tumor" porque el VEMP está normal.
-- **En LabSim:** caso armado para el libro con el cuadro *schwannoma* en el OD, grado leve; los dos VEMP se apagan por regla del cuadro. El mismo cuadro, en grado moderado, es el segundo caso del cap. 11.
+- **En LabSim:** cuadro *schwannoma* en el OD, grado leve; los dos VEMP se apagan por regla del cuadro. El mismo cuadro, en grado moderado, es el segundo caso del cap. 11.
 :::
 
 {{caso cap20_otoesclerosis}}
@@ -293,7 +293,7 @@ Su médico pidió un VEMP por la inestabilidad, sin audiometría reciente. ¿Qu�
 - Los dos VEMP aéreos caídos y simétricos, con un gap de 50 dB en los dos oídos: no hay forma de saber, con esta vía, si el vestíbulo está sano.
 :::
 
-:::imagen ilustraciones/cap20-oseo.svg ancho=92% Los mismos oídos de la paciente por vía aérea (arriba) y por vía ósea (abajo). Los registros salen del motor del VEMP de LabSim con el vibrador de la mastoides; las escalas de intensidad (100 dB SPL y 70 dB FL) son las del simulador, no valores de la literatura.
+:::imagen ilustraciones/cap20-oseo.svg ancho=92% Los mismos oídos de la paciente por vía aérea (arriba) y por vía ósea, con el vibrador en la mastoides (abajo). Por aire los VEMP parecen ausentes porque el oído medio no transmite; por hueso aparecen: el vestíbulo estaba sano. Las escalas de intensidad (100 dB SPL y 70 dB FL) son las del simulador, no valores de la literatura.
 - @101,26 | **Vía aérea.** Los cuatro VEMP están casi planos: 37 y 35 µV en el cuello, 6 y 5 µV bajo el ojo (corregidas, 0,73 y 0,68; 0,14 y 0,12).
 - @101,68 | **Vía ósea.** Los cuatro aparecen con tamaño normal: 342 y 344 µV (6,82 y 6,86) en el cuello, 25 y 26 µV (0,60 y 0,60) bajo el ojo. El vestíbulo de los dos oídos responde.
 :::
@@ -303,7 +303,7 @@ Su médico pidió un VEMP por la inestabilidad, sin audiometría reciente. ¿Qu�
 - **Hipótesis esperables:** otoesclerosis, presbiacusia temprana, hipofunción vestibular bilateral. La inestabilidad llevó al VEMP, y el VEMP aéreo caído en los dos oídos puede sugerir, mal leído, una pérdida vestibular bilateral.
 - **Qué pedir:** **audiometría con vía ósea e impedanciometría antes del VEMP**; después, el VEMP por vía ósea (→ H3, H7, H12). El estudio completo de la otoesclerosis está en los caps. 3 y 4.
 - **Errores esperables:** interpretar el VEMP aéreo sin mirar el gap; fiarse de la razón de asimetría con los dos oídos igual de caídos; decir "hipofunción vestibular bilateral".
-- **En LabSim:** caso armado para el libro con el cuadro *otoesclerosis* en los dos oídos (sin grado fijo). El vibrador está en "Estímulo → Transductor", en la escala de dB FL del simulador; con el gap del audiograma, la vía aérea cae y la ósea la recupera.
+- **En LabSim:** cuadro *otoesclerosis* en los dos oídos (sin grado fijo). El vibrador está en "Estímulo → Transductor", en la escala de dB FL del simulador; con el gap del audiograma, la vía aérea cae y la ósea la recupera.
 :::
 
 ## Resolución de los casos

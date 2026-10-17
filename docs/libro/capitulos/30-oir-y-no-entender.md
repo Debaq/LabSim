@@ -40,7 +40,7 @@ Los criterios de diagnóstico varían entre guías. La ASHA (2005) y la AAA (201
 
 Esa precaución no es timidez. Una prueba central no mide solo una vía: mide una persona escuchando, y esa persona pone en juego varias cosas a la vez.
 
-:::imagen ilustraciones/cap30-que-mide-el-puntaje.svg ancho=96% El puntaje de una prueba central es la suma de varias cosas. Solo una de las cinco cajas es la que se quiere medir; las demás son confusores que hay que cerrar o describir. Esquema, no datos.
+:::imagen ilustraciones/cap30-que-mide-el-puntaje.svg ancho=96% El puntaje de una prueba central suma cinco cosas, y solo una es la que se quiere medir. Un puntaje bajo no dice cuál falló: las otras cuatro son confusores que hay que cerrar o describir. Esquema, no datos.
 :::
 
 ### Manejo y entrenamiento auditivo
@@ -184,7 +184,7 @@ Un niño de 8 años tiene un rendimiento muy bajo en una prueba dicótica de dí
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Las pruebas centrales de estos casos (dígitos dicóticos, patrones, gaps, habla en ruido) **no las genera LabSim**: son **datos inventados para el libro**, en tablas y gráficos propios. Se informan en la unidad de la prueba y como desviaciones estándar respecto de una norma de su versión y de su edad que aquí no se da. La parte periférica sí sale del simulador.
+Las pruebas centrales de estos casos (dígitos dicóticos, patrones, gaps, habla en ruido) **no las genera LabSim**: son **datos de ejemplo**, en tablas y gráficos propios. Se informan en la unidad de la prueba y como desviaciones estándar respecto de una norma de su versión y de su edad que aquí no se da. La parte periférica sí sale del simulador.
 
 {{caso cap30_nino_tpa}}
 
@@ -216,9 +216,9 @@ Antes de cualquier prueba central, ¿qué debe estar cerrado? Y si lo está, ¿q
 - @OD 2000 | Productos de distorsión presentes en todas las bandas: las células ciliadas externas funcionan.
 :::
 
-Con la periferia cerrada, se hace una batería corta. **Datos inventados para el libro** (AudioPAC o equivalente; el z supone una norma de cada versión).
+Con la periferia cerrada, se hace una batería corta (el z supone una norma de cada versión).
 
-Tabla: Alejandro · batería de procesamiento central (datos inventados)
+Tabla: Alejandro · batería de procesamiento central
 
 | Proceso | Prueba | Resultado | z |
 |---|---|---|---|
@@ -228,7 +228,7 @@ Tabla: Alejandro · batería de procesamiento central (datos inventados)
 | Resolución temporal | GIN | umbral de 7 ms (OD) y 8 ms (OI) | −1,6 |
 | Habla en ruido | Matrix en español, SNR de 50 % | −4,6 dB | −0,6 |
 
-:::imagen ilustraciones/cap30-perfil-nino.svg ancho=96% Perfil de rendimiento de Alejandro. La banda rosada marca lo que cae bajo 2 DE respecto de la norma de la versión. Datos inventados para el libro.
+:::imagen ilustraciones/cap30-perfil-nino.svg ancho=96% Perfil de rendimiento de Alejandro, en desviaciones estándar respecto de la norma de cada versión. La banda rosada marca lo que cae bajo 2 DE: fíjate en que no cae todo el perfil, sino el OI en dígitos dicóticos y el patrón de frecuencia.
 - @39,34 | Un solo oído bajo la banda: el **OI en dígitos dicóticos**, con el OD normal. Es una diferencia entre oídos, no una pérdida general.
 - @41,44 | El **patrón de frecuencia** también cae. Cruzar dos pruebas que exigen cosas distintas es lo que da peso.
 - @77,60 | Habla en ruido, gaps y duración dentro de lo esperable: el perfil es **parcial**, no global.
@@ -241,7 +241,7 @@ Durante la prueba, atendió bien las cuatro, sin cansarse. Las evaluaciones de o
 - **Lo que enseña:** es el caso **limpio**, el que cumple los criterios de las guías (rendimiento bajo en dos pruebas, con queja documentada y periferia normal). Aun así el perfil es **parcial** (un oído, una prueba de secuencia) y la conciencia fonológica algo baja impide separar "procesamiento auditivo" de "procesamiento fonológico". Es el caso en que se escribe con cuidado.
 - **Qué pedir:** lo periférico, cuestionario de conducta de escucha a la familia y al docente, batería corta que cubra procesos distintos (→ H14).
 - **Errores esperables:** llamarlo "trastorno de procesamiento auditivo" con una causa; olvidar escribir lo que no se pudo descartar; prometer que el entrenamiento lo resolverá.
-- **En LabSim:** la parte periférica se puede armar como cuadro *normal* de 9 años; las pruebas centrales no están en el simulador (→ H14, AudioPAC).
+- **En LabSim:** la parte periférica se puede armar como cuadro *normal* de 9 años; las pruebas centrales no están en el simulador (→ H14).
 :::
 
 {{caso cap30_mayor_ruido}}
@@ -275,9 +275,9 @@ Con la queja de ruido y un audiograma que no parece suficiente para explicarla, 
 - @ipsi OD 1000 | Reflejos presentes en niveles esperables: sin signos de lesión retrococlear.
 :::
 
-Se completa con pruebas de la lengua y de la edad de la paciente. **Datos inventados para el libro.**
+Se completa con pruebas de la lengua y de la edad de la paciente.
 
-Tabla: Daniela · habla en ruido y pruebas centrales (datos inventados)
+Tabla: Daniela · habla en ruido y pruebas centrales
 
 | Proceso | Prueba | Resultado | z (norma de su edad) |
 |---|---|---|---|
@@ -286,7 +286,7 @@ Tabla: Daniela · habla en ruido y pruebas centrales (datos inventados)
 | Resolución temporal | GIN | umbral de 8 ms | −1,2 |
 | Secuencia temporal | Patrón de duración, nombrado | 66 % | −1,4 |
 
-:::imagen ilustraciones/cap30-perfil-mayor.svg ancho=96% Perfil de rendimiento de Daniela contra normas de su edad. Datos inventados para el libro.
+:::imagen ilustraciones/cap30-perfil-mayor.svg ancho=96% Perfil de rendimiento de Daniela contra normas de su edad. Bajo la banda de 2 DE quedan el OI en dígitos dicóticos y el habla en ruido, la prueba más parecida a su queja; lo temporal está dentro de su rango.
 - @40,36 | El **oído izquierdo en dígitos dicóticos** queda bajo 2 DE. La ventaja del oído derecho es habitual con la edad; lo que pesa es la distancia respecto de su grupo.
 - @44,73 | El **habla en ruido** también queda bajo la banda: es la prueba más parecida a la queja.
 - @66,50 | Gaps y patrón de duración están dentro del rango de su edad: no hay un déficit temporal global.
@@ -333,9 +333,9 @@ Plantea al menos tres causas posibles para una niña de 7 años que parece distr
 - @ipsi OD 1000 | Sin reflejos en ninguna combinación: coherente con una conducción alterada.
 :::
 
-Si se hubiera hecho la batería central igual, ese día los resultados habrían sido estos. **Datos inventados para el libro.**
+Si se hubiera hecho la batería central igual, ese día los resultados habrían sido estos.
 
-Tabla: Pilar · batería hecha con el oído medio alterado (datos inventados)
+Tabla: Pilar · batería hecha con el oído medio alterado
 
 | Proceso | Prueba | Resultado | z |
 |---|---|---|---|

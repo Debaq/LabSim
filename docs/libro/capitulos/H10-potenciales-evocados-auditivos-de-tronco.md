@@ -47,16 +47,16 @@ Los registros intracraneales hechos durante cirugías permitieron asignar cada o
 
 Es un mapa útil, pero no literal: cada onda recibe aportes de varias poblaciones de neuronas, y una misma estación contribuye a más de una onda (Melcher y Kiang, 1996). Las ondas VI y VII son inconstantes y no se usan en la clínica.
 
-:::imagen ilustraciones/h10-generadores.png ancho=100% La vía auditiva y el PEAT en labyrinthus3d, el simulador del autor (módulo Auditivo, pestañas Tronco y PEAT)
-- @-2,90 | **Cóclea y nervio VIII**: la onda I sale de la porción distal del nervio y la II de la proximal, donde entra al tronco.
-- @-2,68 | **Núcleo coclear**: la onda III.
+:::imagen ilustraciones/h10-generadores.svg ancho=100% La vía auditiva y el PEAT de un paciente simulado sano. A: la vía de la cóclea a la corteza, de frente (a la izquierda queda el lado derecho del paciente). B: el PEAT del oído derecho con un clic a 80 dB, con las ondas I a V y los interpicos; las latencias son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @12,84 | **Cóclea y nervio VIII**: la onda I sale de la porción distal del nervio y la II de la proximal, donde entra al tronco.
+- @1,68 | **Núcleo coclear**: la onda III.
 - @22,57 | **Complejo olivar superior** (MSO, LSO y MNTB): la onda IV. Desde aquí la vía cruza y los dos oídos se comparan.
-- @22,33 | **Lemnisco lateral** llegando al **colículo inferior**: la onda V.
-- @50,22 | Cada onda aparece cuando la señal llega a su estación, con el retardo de cada tramo.
-- @84,18 | La **V** es la más alta y la más estable: es la que se sigue al bajar la intensidad.
-- @98,70 | Los **interpicos** miden el viaje dentro de la vía: I-III, III-V e I-V.
+- @21,40 | **Lemnisco lateral** llegando al **colículo inferior**: la onda V.
+- @57,22 | Cada onda aparece cuando la señal llega a su estación, con el retardo de cada tramo.
+- @88,16 | La **V** es la más alta y la más estable: es la que se sigue al bajar la intensidad.
+- @88,72 | Los **interpicos** miden el viaje dentro de la vía: I-III, III-V e I-V.
 :::
-<!-- Imagen: capturas de labyrinthus3d (hacer_h10_peat.py, montaje en la conversación del 2026-10-16). Las latencias de la tabla son del modelo del simulador, órdenes de magnitud docentes, no valores de referencia. Desde el 2026-10-16 labyrinthus3d usa la misma asignación de Møller que el texto (I y II nervio, III núcleo coclear, IV olivar, V lemnisco/colículo). -->
+<!-- Imagen: hacer_h10_simulador.py (A, esquema de la vía de labyrinthus3d recortado sin interfaz; B, dibujo propio con las latencias y amplitudes del modelo). Desde el 2026-10-16 labyrinthus3d usa la misma asignación de Møller que el texto (I y II nervio, III núcleo coclear, IV olivar, V lemnisco/colículo). -->
 
 De ese mapa sale la lectura clínica de los **interpicos**:
 

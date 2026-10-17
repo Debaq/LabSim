@@ -70,7 +70,7 @@ Si el ojo no acompaña a la cabeza, la mirada se sale del blanco y el cerebro la
 - **Manifiesta** (*overt*): ocurre **después** de que la cabeza se detuvo. Es la que ve el clínico al lado de la cama.
 - **Encubierta** (*covert*): ocurre **durante** el giro, cuando la cabeza todavía se mueve. Es tan breve que el ojo humano no la ve y solo un registro la muestra (Weber y cols., 2008).
 
-:::imagen ilustraciones/h17-trazas.svg ancho=100% Velocidad de la cabeza y del ojo (invertida) en un impulso. A: con un reflejo normal el ojo copia a la cabeza. B: con ganancia baja, la sacada cae mientras la cabeza todavía gira (encubierta). C: la misma ganancia con la sacada al final, cuando la cabeza ya se detuvo (manifiesta). Esquema con la lógica del generador sintético de trainHIT, no datos de pacientes.
+:::imagen ilustraciones/h17-trazas.svg ancho=100% Velocidad de la cabeza y del ojo (invertida) en un impulso. A: con un reflejo normal el ojo copia a la cabeza. B: con ganancia baja, la sacada cae mientras la cabeza todavía gira (encubierta). C: la misma ganancia con la sacada al final, cuando la cabeza ya se detuvo (manifiesta). Lo que clasifica la sacada no es su tamaño sino cuándo cae respecto de la curva de la cabeza. Esquema con cifras de ejemplo, no datos de pacientes.
 :::
 
 Lo que importa de las encubiertas es lo que **esconden**. Una sacada encubierta devuelve el ojo al blanco justo antes de que termine el giro, así que al lado de la cama no se ve ninguna corrección y, si el cálculo de la ganancia incluye la sacada como si fuera reflejo, la ganancia sale **más alta de lo que es**. En un examen de cabecera, las sacadas encubiertas pueden pasar inadvertidas; en pacientes con pérdida unilateral aparecen hasta en cerca del 70 % de los impulsos rápidos, y por eso se recomienda repetir los impulsos (Weber y cols., 2008). En una serie de 117 pacientes con trastornos vestibulares periféricos, el 13,7 % de los que tenían un VOR anormal mostraba solo sacadas encubiertas, algo que únicamente se ve con registro (Blödow y cols., 2013).
@@ -100,19 +100,17 @@ Y descarta antes de empezar las **contraindicaciones**: ceguera, fractura de nar
 - Una **silla fija con respaldo**, que impida que el tronco se mueva con la cabeza.
 - Un **blanco visual** en la pared, a **1,5 m**, a la altura de los ojos. La distancia importa: la ganancia aumenta cuando el blanco se acerca, y en sujetos con pérdida vestibular no (Judge y cols., 2018). Con el blanco a menos de 1 m, una ganancia de 1,0 ya no quiere decir lo mismo (Halmagyi y cols., 2017).
 
-### Conoce tu equipo: trainHIT, un vHIT en el navegador
+### Conoce tu equipo: cómo muestra el examen
 
-LabSim no tiene un módulo de vHIT. Para ver cómo se ve el examen sin necesitar un equipo clínico se usa **trainHIT**, un simulador del autor que corre en el navegador (→ "En el simulador"). Su pantalla sigue el reparto de los equipos reales: el video con los ojos ampliados a la izquierda, un panel por lado con los impulsos superpuestos y, abajo, la velocidad contra el tiempo. La imagen muestra el paciente de ejemplo que trae: lado derecho sano, lado izquierdo con un déficit que tiene sacadas.
+Los equipos de vHIT presentan el resultado de una manera parecida: un panel por lado con los impulsos superpuestos, la velocidad de la cabeza y la del ojo (invertida, para que las dos curvas se superpongan cuando el reflejo compensa), las sacadas marcadas sobre la curva del ojo y, debajo, la ganancia de cada lado. La figura muestra esa lectura en un paciente simulado con el canal lateral derecho sano y el izquierdo con déficit.
 
-:::imagen ilustraciones/h17-trainhit-pantalla.png trainHIT con su paciente de ejemplo (sintético)
-- @36,24 | **La cabeza (azul) y el ojo invertido (naranja)** se superponen en los impulsos hacia la derecha: el reflejo sigue a la cabeza.
-- @41,62 | **Ganancia media ± desviación** del lado, en verde si es normal y en rojo si no lo es.
-- @75,23 | **Sacadas encubiertas** (triángulos violetas): caen mientras la cabeza todavía se mueve.
-- @83,31 | **Sacada manifiesta** (triángulo rojo): llega cuando la cabeza ya se detuvo.
-- @79,62 | **El lado izquierdo**: ganancia baja y mucha dispersión, porque cada impulso tiene un déficit distinto.
-- @47,75 | **Impulsos rechazados**, con el motivo: aquí un parpadeo en la ventana. El motor no los cuenta.
-- @91,81 | **Asimetría** entre los dos lados.
-- @27,49 | **Calibrar**: la calibración previa del equipo.
+:::imagen ilustraciones/h17-impulsos.svg ancho=100% Impulsos del canal lateral de un paciente simulado: lado derecho sano, izquierdo con déficit. Hacia la derecha las dos curvas se superponen; hacia la izquierda el ojo se queda corto y las sacadas corrigen lo que el reflejo no alcanzó. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+- @17,38 | **La cabeza (azul) y el ojo invertido (naranja)** se superponen en los impulsos hacia la derecha: el reflejo sigue a la cabeza.
+- @4,87 | **Ganancia media ± desviación** del lado, en verde si es normal y en rojo si no lo es. Los impulsos rechazados no entran en la media.
+- @72,31 | **Sacadas encubiertas** (triángulos violetas): caen mientras la cabeza todavía se mueve.
+- @86,36 | **Sacadas manifiestas** (triángulos rojos): llegan cuando la cabeza ya se detuvo.
+- @53,87 | **El lado izquierdo**: ganancia baja y mucha dispersión, porque cada impulso tiene un déficit distinto.
+- @83,5 | **Asimetría** entre los dos lados.
 :::
 
 ## Paso a paso
@@ -137,9 +135,16 @@ LabSim no tiene un módulo de vHIT. Para ver cómo se ve el examen sin necesitar
 2. **Pósate detrás del paciente**, con las manos firmes a los lados de la cabeza, sin tocar las gafas ni mover la piel que está bajo ellas. La piel que se desplaza arrastra las gafas.
 3. **Gira la cabeza de golpe, unos 15°, en cerca de 100 ms, hasta superar los 150 °/s.** Es un giro corto, rápido, que se frena solo y que el paciente no puede anticipar (Halmagyi y cols., 2017). → "Por qué el impulso es corto".
 4. **Que sea imprevisible**: varía la dirección (derecha e izquierda mezcladas), el momento (con pausas distintas) y evita cualquier pista, como una cuenta, un movimiento previo o una respiración marcada. Un paciente que sabe hacia dónde viene el giro puede adelantar una sacada y falsear el registro (Halmagyi y cols., 2017).
-5. Cada impulso **correcto** suma un número, que aparece entre paréntesis, con una marca verde. Los que el programa rechaza (velocidad insuficiente, plano equivocado, parpadeo) llevan una cruz roja y no se cuentan. El informe final usa solo los aceptados, y el algoritmo puede sacar además los trazos con ruido.
+5. Cada impulso **correcto** suma un número, que aparece entre paréntesis, con una marca verde. Los que el programa rechaza (velocidad insuficiente, plano equivocado, parpadeo) llevan una cruz roja y no se cuentan (figura siguiente). El informe final usa solo los aceptados, y el algoritmo puede sacar además los trazos con ruido.
 6. **Registra al menos 20 impulsos por oído.** Pocos impulsos dejan una media poco confiable, y un registro anormal debe repetirse para confirmarlo (Zamaro y cols., 2020). <!-- verificar: número mínimo de impulsos por lado en la literatura; el protocolo pide 20 por oído -->
 7. Al terminar, el programa genera el informe de forma automática. Puedes cerrarlo con la «x» roja para volver al menú, y recuperarlo después con *Generar informe* en la vista previa.
+
+:::imagen ilustraciones/h17-rechazos.svg ancho=100% Dos impulsos rechazados de un paciente simulado, sobre los aceptados del mismo lado (en gris): uno por un parpadeo dentro de la ventana y otro porque la cabeza no llegó a la velocidad mínima. Antes de leer la ganancia, revisa qué impulsos sacó el equipo y por qué. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+- @37,16 | **La ventana del impulso**: el parpadeo cayó dentro de ella.
+- @20,76 | **Cuadros con el ojo cerrado**: el párpado tapó la pupila y la velocidad del ojo ya no es confiable.
+- @78,52 | **Velocidad mínima**: un impulso que no la alcanza no es un estímulo suficiente para el canal.
+- @67,58 | **Muy lento**: la cabeza no llegó a la velocidad mínima.
+:::
 
 ### Por qué el impulso es corto
 
@@ -154,6 +159,15 @@ El procedimiento es el mismo, pero se cambia la orientación de la cabeza y de l
 3. Da el impulso **en ese plano**: hacia abajo (con la nariz bajando) activa el canal anterior de un lado, y hacia arriba (nariz arriba) el posterior del lado contrario.
 
 La razón del giro de 45° es que el video solo registra la posición horizontal y vertical de la pupila, no la torsión del ojo. Los canales verticales mueven al ojo en torsión y en vertical, y la torsión solo se evita si la **mirada** está en el plano del canal. Si la mirada se aleja del plano, la ganancia vertical medida baja y aparece un falso retraso en la respuesta (McGarvie y cols., 2015b; Halmagyi y cols., 2017). Con el vHIT se detectan déficits de los canales verticales tan bien como con bobinas esclerales (MacDougall y cols., 2013).
+
+:::imagen ilustraciones/h17-ralp.svg ancho=100% Paciente simulado con una neuritis de la rama superior del nervio vestibular derecho: bajan el lateral y el anterior derechos, y el posterior derecho queda sano. Es el patrón por canal, y no el lateral solo, el que dice qué rama del nervio se afectó. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+- @34,31 | **Cada canal con su ganancia**, en rojo los que están bajo el corte.
+- @13,63 | **El plano RALP** dibujado sobre la cabeza: une el anterior derecho con el posterior izquierdo.
+- @40,15 | **La posición de la cabeza** que alinea la mirada con el plano: 45° a la izquierda para el RALP.
+- @57,46 | **Sacadas manifiestas** de lo que el canal anterior derecho no alcanza a compensar.
+- @39,85 | **Ganancia baja** del canal afectado.
+- @71,85 | **Ganancia normal** del posterior izquierdo, el otro canal del mismo par.
+:::
 
 :::ayuda Ayuda memoria
 - **Gafas firmes**: lo primero que se revisa, y lo primero que se cae durante el examen.
@@ -179,13 +193,22 @@ La **ganancia** es el cociente entre lo que giró el ojo y lo que giró la cabez
 
 Sobre la misma traza los métodos pueden dar entre 0,73 y 1,10 cuando no hay artefactos, y entre 0,39 y 1,13 si un artefacto deforma la curva (Zamaro y cols., 2020). Por eso conviene que los valores de referencia sean **del equipo y del método**. <!-- verificar: diferencias sistemáticas entre equipos en sanos (comparación entre fabricantes) -->
 
-La traza de la figura enseña una de las razones: con una latencia de 8 ms, la ganancia a 60 ms sale más baja que la de área o la de regresión, porque el ojo todavía va subiendo. Y a los 30 fotogramas por segundo de una cámara común hay solo un cuadro cada 33 ms, así que ese instante cae entre dos cuadros. Es una de las razones por las que trainHIT informa el área y deja la de 60 ms como comparación (→ "En el simulador").
+La traza de la figura enseña una de las razones: con una latencia de 8 ms, la ganancia a 60 ms sale más baja que la de área o la de regresión, porque el ojo todavía va subiendo. Con sacadas encubiertas la diferencia crece: si el cálculo no las retira, la sacada infla la ganancia de área, y el cociente de picos divide máximos que no ocurren al mismo tiempo (figura siguiente).
 
-:::imagen ilustraciones/h17-trainhit-ganancias.png ancho=55% Los tres métodos de trainHIT sobre los mismos pulsos del paciente de ejemplo
-- @38,62 | **Área**: la que informa trainHIT. 0,96 a la derecha y 0,69 a la izquierda.
-- @38,66 | **60 ms**: con las mismas sacadas encubiertas, 0,47 a la izquierda.
-- @38,70 | **Picos**: divide máximos que no ocurren al mismo tiempo; aquí lee 0,87 a la izquierda y no delata el déficit.
-- @80,29 | **Línea de corte** de 0,80 dibujada en el gráfico de ganancia contra velocidad pico.
+:::imagen ilustraciones/h17-ganancias.svg ancho=100% Los mismos impulsos del paciente simulado de "Conoce tu equipo", con tres maneras de calcular la ganancia y sin retirar las sacadas encubiertas. Fíjate en el lado izquierdo: según el método, queda bajo o sobre el corte de 0,80. Cifras del modelo, no normativas. Imagen propia hecha con trainHIT (→ Simuladores, en las preliminares).
+- @22,57 | **El lado izquierdo**: cada impulso con una ganancia distinta, según cuándo cayó su sacada.
+- @30,46 | **Línea de corte** de 0,80.
+- @11,40 | **Un impulso rechazado** por lento: no entra en la media.
+- @77,27 | **Área**: 0,96 a la derecha y 0,69 a la izquierda; las sacadas encubiertas la suben.
+- @71,50 | **60 ms**: 0,47 a la izquierda; mira un instante anterior a las sacadas.
+- @82,69 | **Picos**: 0,87 a la izquierda; divide máximos que no ocurren al mismo tiempo y no delata el déficit.
+:::
+
+La velocidad de muestreo es otra razón. A los 30 fotogramas por segundo de una cámara común hay solo un cuadro cada 33 ms: el instante de los 60 ms cae entre dos cuadros, y una sacada encubierta, que es breve, puede quedar entera entre ellos. Por eso los equipos clínicos registran el ojo con cámaras mucho más rápidas.
+
+:::imagen ilustraciones/h17-muestreo.svg ancho=100% El mismo impulso de un paciente simulado, con ganancia 0,5 y una sacada encubierta, registrado a 200 muestras por segundo y a 30. Con pocos cuadros la sacada desaparece y un déficit claro pasa por un reflejo apenas bajo. Cifras del modelo, no normativas. Imagen propia hecha con simHit (→ Simuladores, en las preliminares).
+- @20,35 | **La sacada encubierta** lleva al ojo por encima de la cabeza en pleno impulso.
+- @71,44 | **A 30 cuadros por segundo** la sacada cae entre dos cuadros: el ojo parece solo un reflejo algo bajo.
 :::
 
 :::comentario Lo que dicen las normas
@@ -262,50 +285,6 @@ Tres cuidados al redactarlo, que el protocolo no escribe pero la literatura sost
 :::ojo Ojo clínico
 Dos cosas al revés de lo que parece. **Una ganancia normal no descarta un déficit**: si las sacadas encubiertas cubren el déficit y el cálculo no las retira, la ganancia sale alta. Y **una ganancia baja sin sacadas ni historia clínica no es una lesión**: primero descarta el artefacto (gafas, párpado, pupila, mirada).
 :::
-
-## En el simulador
-
-LabSim **no simula el vHIT** (ni ninguna otra prueba vestibular, salvo el VEMP, → H12). Esta herramienta no trae capturas de LabSim: las imágenes salen de **trainHIT**, un simulador de vHIT en el navegador que es **software libre del autor** (con DOI en Zenodo, 10.5281/zenodo.23106742), y los esquemas son dibujos propios, hechos con la misma lógica que su generador sintético.
-
-**Lo que hace trainHIT.** Mide un vHIT con la **cámara web** del computador (a 30 cuadros por segundo, con un tope deliberado para que no se use con pacientes), con tres métodos de ganancia a la vista (área, instantánea a 60 ms y cociente de picos), la detección de sacadas, el motivo de rechazo de cada impulso, la calibración del paralaje, y los planos laterales y verticales. Trae un paciente de ejemplo, cinco **casos a ciegas** (normal, déficit derecho, bilateral, un déficit izquierdo cuyas sacadas encubiertas hacen que la media se lea normal, y un registro casi todo rechazado) y un **paciente simulado**: un compañero sano hace de paciente y el simulador le agrega un déficit sobre sus propios impulsos.
-
-:::imagen ilustraciones/h17-trainhit-seis-canales.png ancho=42% Los seis canales en trainHIT, aquí con el plano RALP
-- @30,-7 | **Lateral, LARP y RALP**: el plano que se examina.
-- @80,-7 | **La posición de la cabeza** que alinea la mirada con el plano (45° a la izquierda para RALP).
-- @46,69 | **El plano del par** dibujado sobre la cabeza: la nariz abajo activa el anterior derecho, la nariz arriba el posterior izquierdo.
-- @76,44 | **Cada canal tiene su casilla** con la ganancia y el número de impulsos; en rojo los que están bajo el corte.
-:::
-
-:::imagen ilustraciones/h17-trainhit-ralp.png ancho=80% Paciente simulado de trainHIT con una neuritis derecha, en el plano RALP
-- @47,11 | **El plano en examen**: a la izquierda el canal anterior derecho (nariz abajo), a la derecha el posterior izquierdo.
-- @44,16 | **Sacadas manifiestas**, de lo que el canal anterior derecho no alcanza a compensar.
-- @28,64 | **Ganancia baja** del canal afectado.
-- @84,64 | **Ganancia normal** del posterior izquierdo del mismo par.
-- @46,39 | **«SIMULADO»**: lo simulado nunca se hace pasar por real.
-:::
-
-Para practicar con él:
-
-- **Ver el patrón.** Abre el paciente de ejemplo y mira cómo se superponen la cabeza y el ojo hacia el lado sano y cómo se separan hacia el lado con déficit.
-- **Un pulso, tres cuentas.** En el panel de ganancias, compara el área, los 60 ms y los picos sobre los mismos impulsos. En el paciente de ejemplo el lado con déficit da 0,69 con el área, 0,47 con la instantánea y 0,87 con los picos: es la figura "una misma traza" hecha con datos de simulador.
-- **El caso del falso negativo.** El caso a ciegas con el déficit izquierdo y sacadas encubiertas hace que la media se lea normal. Averigua por qué.
-- **Examinar de verdad.** Con la cámara o con el teléfono como cabeza, da impulsos y mira por qué el programa rechaza cada uno (muy lento, parpadeo en la ventana).
-
-:::imagen ilustraciones/h17-trainhit-rechazado.png ancho=60% Un impulso rechazado por parpadeo en la ventana, y otro por lento
-- @32,9 | **La ventana del impulso** (rojo punteado) con el motivo del rechazo.
-- @76,93 | **MUY LENTO**: no llegó a la velocidad mínima.
-- @58,96 | **PARPADEO**: el párpado tapó la pupila en la ventana.
-:::
-
-:::comentario Lo que el simulador no tiene
-- **No hay gafas.** Sin gafas, no hay deslizamiento, que es el artefacto más frecuente con un equipo real; pero sí hay **paralaje** (el ojo no gira en el centro de la imagen), y hay que calibrarlo. Sin esa calibración, un reflejo normal se lee cerca de 2 (el simulador lo muestra con *k* = 0).
-- **No es un equipo clínico.** La cámara de 30 cuadros por segundo es varias veces más lenta que las de un equipo real, y sus constantes son órdenes de magnitud para enseñar, no valores de referencia. Los valores de este capítulo salen de la literatura, no del simulador.
-- **No simula la compensación en el tiempo** de un paciente real, ni la discrepancia con la calórica, ni los otolitos.
-:::
-
-**simHit**, otro simulador del autor, usa unas gafas con sensor de movimiento (a 200 muestras por segundo) del mismo peso y forma que unas clínicas, y genera la respuesta ocular del caso que se cargue en el software, con ganancia, sacadas encubiertas o manifiestas y artefactos típicos. Se menciona aquí solo como referencia: sus capturas no se usan en este capítulo.
-
-En **labyrinthus3d**, otro simulador del autor, se puede ver el mismo modelo del reflejo con la cabeza y los laberintos en 3D (→ H15, H16).
 
 :::pregunta Preguntas para practicar
 1. Un paciente tiene el oído izquierdo sin función. ¿Por qué un giro lento de la cabeza hacia la izquierda puede dar una ganancia casi normal y uno rápido no? ¿Qué canal hace el trabajo en cada caso?

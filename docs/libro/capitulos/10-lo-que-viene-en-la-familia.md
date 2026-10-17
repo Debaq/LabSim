@@ -138,7 +138,7 @@ Como es coclear, las emisiones están ausentes y el oído medio es normal. Una f
 
 El **acueducto vestibular** es un canal óseo fino que lleva el conducto endolinfático desde el vestíbulo hasta el saco endolinfático. Cuando está dilatado, se ve en la tomografía o la resonancia, y es la malformación del oído interno más frecuente en los niños con hipoacusia. <!-- verificar: "la más frecuente" y los criterios de imagen (diámetro) no están en la bibliografía verificada. --> Muchos de estos niños tienen variantes de la **pendrina** (SLC26A4), de herencia recesiva; cuando además desarrollan **bocio**, es el **síndrome de Pendred** (Forli y cols., 2021).
 
-:::imagen ilustraciones/cap10-tc-acueducto.jpg ancho=78% Tomografía axial de alta resolución del hueso temporal de otras personas (no son pacientes de este capítulo). Izquierda: un oído control. Derecha: un oído con síndrome del acueducto vestibular dilatado. Arriba se mide el ancho del acueducto en su punto medio y abajo en el opérculo, su salida hacia la fosa posterior; son los dos puntos de los criterios de Cincinnati, que lo llaman dilatado con más de 0,9 mm en el punto medio o más de 1,9 mm en el opérculo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Weiss NM y cols. (2023), Eur Arch Otorhinolaryngol, doi:10.1007/s00405-022-07681-4, Fig. 4 (paneles a, b, g y h), CC BY 4.0, recortada.
+:::imagen ilustraciones/cap10-tc-acueducto.jpg ancho=78% Tomografía axial de alta resolución del hueso temporal de otras personas (no son pacientes de este capítulo). Izquierda: un oído control. Derecha: un oído con síndrome del acueducto vestibular dilatado. Arriba se mide el ancho del acueducto en su punto medio y abajo en el opérculo, su salida hacia la fosa posterior; son los dos puntos de los criterios de Cincinnati, que lo llaman dilatado con más de 0,9 mm en el punto medio o más de 1,9 mm en el opérculo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Weiss NM y cols. (2023), Eur Arch Otorhinolaryngol, doi:10.1007/s00405-022-07681-4, Fig. 4, CC BY 4.0, adaptada.
 - @11,33 | **Punto medio** del acueducto normal (línea verde): un canal fino.
 - @58,40 | **Punto medio** del oído dilatado: 1,0 mm.
 - @14,82 | **Opérculo** normal (línea celeste).
@@ -280,7 +280,7 @@ Hace un año, la VRA con insertos dio niveles mínimos de 60 a 65 dB. El nivel m
 - **Hipótesis esperables:** progresión de la hipoacusia (Kenna y cols., 2010); otitis media con efusión sumada; audífono con falla, tubo tapado o ajuste insuficiente; menos atención o cambio de conducta.
 - **Qué pedir:** otoscopía, timpanograma, audiometría condicionada por juego con fonos o insertos, ósea, emisiones como prueba cruzada; revisión del audífono y campo libre con audífono (→ H7, H8, H9).
 - **Errores esperables:** comparar el nivel mínimo de la VRA con el umbral por juego como si fueran iguales; atribuir la baja a la conducta sin medir; responderle a la mamá el riesgo del embarazo en vez de derivar a genética.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *No sindrómica GJB2 (conexina 26)*, grado severo, en los dos oídos. El niño responde como un adulto y el campo libre no se practica; la curva con audífono de la figura la declara el libro.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *No sindrómica GJB2 (conexina 26)*, grado severo, en los dos oídos. El niño responde como un adulto y el campo libre no se practica: la curva con audífono de la figura no sale del simulador.
 :::
 
 {{caso cap10_waardenburg}}
@@ -326,7 +326,7 @@ Tiene 8 meses y se sienta sola. ¿Qué método conductual le corresponde? ¿Qué
 - **Hipótesis esperables:** hipoacusia sensorioneural profunda bilateral congénita, sindrómica (Waardenburg); otitis media con efusión (descartada por el timpanograma); neuropatía auditiva (descartada por las emisiones ausentes).
 - **Qué pedir:** VRA en campo libre y, si no condiciona, con vibrador; timpanograma y reflejos; emisiones; PEAT con click y por frecuencia (→ H7, H8, H9, H10, H13). Interconsulta a genética.
 - **Errores esperables:** insistir con el mismo estímulo sin subir ni cambiarlo; dar por "no colaboradora" a una niña que no oye; anotar niveles mínimos que no se obtuvieron; no registrar los signos de la cara en la anamnesis.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Waardenburg (profunda congénita)*, grado profundo, en los dos oídos, con edad de 8 meses. En el simulador el audiómetro le daría un audiograma; a los 8 meses, en la vida real, no.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Waardenburg (profunda congénita)*, grado profundo, en los dos oídos, con edad de 8 meses. En el simulador el audiómetro le daría un audiograma; a los 8 meses, en la vida real, no.
 :::
 
 {{caso cap10_pendred}}
@@ -370,7 +370,7 @@ Andrés sostuvo la instrucción convencional (levantar la mano) en la aérea; pa
 - **Hipótesis esperables:** acueducto vestibular dilatado o Pendred; CMV congénito (también pasa el tamizaje y progresa; → cap. 17); otitis media con efusión sumada; conmoción laberíntica por el golpe.
 - **Qué pedir:** otoscopía, timpanograma y reflejos, audiometría con ósea enmascarada, logoaudiometría si el lenguaje lo permite; comparar con la audiometría anterior. Sugerir imágenes de oído interno (las pide el otorrinolaringólogo) y, más adelante, VEMP (→ H4, H7, H12).
 - **Errores esperables:** leer el gap con timpanograma A como error de técnica, como hace tres años; leerlo como otitis; no comparar con el examen anterior; no preguntar por golpes y resfríos.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Pendred / acueducto vestibular dilatado*, grado moderado, en los dos oídos. El simulador todavía no reproduce dos rasgos de la tercera ventana: la ósea **mejor que lo normal** en graves y el reflejo presente justo en la frecuencia del gap.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Pendred / acueducto vestibular dilatado*, grado moderado, en los dos oídos. El simulador todavía no reproduce dos rasgos de la tercera ventana: la ósea **mejor que lo normal** en graves y el reflejo presente justo en la frecuencia del gap.
 :::
 
 {{caso cap10_alport}}
@@ -412,7 +412,7 @@ Un adolescente con sangre en la orina, un tío materno dializado que usa audífo
 - **Hipótesis esperables:** síndrome de Alport; ototoxicidad por fármacos recibidos (→ cap. 8); hipoacusia por ruido (sin exposición).
 - **Qué pedir:** audiometría, logoaudiometría, impedanciometría, DPOAE, acufenometría si el acúfeno está presente (→ H3, H5, H7, H9, cap. 6); los fármacos recibidos según la ficha de nefrología.
 - **Errores esperables:** no preguntar por el riñón ni por la familia de la mamá; llamar "plana" o "descendente" a una cubeta; informar solo el grado.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Alport (en surco de frecuencias medias, adolescencia)*, grado moderado, en los dos oídos. Su acúfeno queda en la ficha (pitido de 2 kHz, bilateral, intermitente).
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Alport (en surco de frecuencias medias, adolescencia)*, grado moderado, en los dos oídos. Su acúfeno queda en la ficha (pitido de 2 kHz, bilateral, intermitente).
 :::
 
 {{caso cap10_usher}}
@@ -454,7 +454,7 @@ Hipoacusia desde chica, ceguera nocturna desde la adolescencia y una marcha norm
 - **Hipótesis esperables:** Usher tipo 2; Usher tipo 1 (descartado por la marcha, el grado y el VEMP); otro síndrome con ojos y oído (Stickler, Alport).
 - **Qué pedir:** audiometría, logoaudiometría con material grabado o sin que vea la cara del examinador, impedanciometría, VEMP (→ H3, H5, H7, H12). Genética y oftalmología.
 - **Errores esperables:** tomar la logoaudiometría con voz en vivo y la cara a la vista: mide la lectura labial, no el oído; no preguntar por la vista a un adulto joven con hipoacusia congénita; no informar que la lectura labial se va a perder con la luz y con los años.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Usher tipo 2 (descendente + retinosis)*, grado moderado, en los dos oídos.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Usher tipo 2 (descendente + retinosis)*, grado moderado, en los dos oídos.
 :::
 
 ## Resolución de los casos

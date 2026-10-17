@@ -73,7 +73,7 @@ Se le explica al paciente (o a sus padres) en qué consiste: "Te voy a poner est
 
 Todo equipo de OEA diagnóstico tiene las mismas piezas: un **chequeo de sonda** antes de medir, los **parámetros** del estímulo, la **respuesta** a medida que se promedia, una medida de **calidad** del registro y el **resultado por banda**. La figura muestra la pantalla de TEOAE de LabSim al terminar un oído izquierdo normal.
 
-:::imagen /docs/manual/img/estudiante/eoa-teoae.png La pantalla de TEOAE de LabSim
+:::imagen /docs/manual/img/estudiante/eoa-teoae.png La pantalla de TEOAE de LabSim al terminar un registro. Lee primero la calidad (sonda, reproducibilidad, estabilidad) y recién después el resultado por banda: si la calidad está en rojo, el registro no es confiable, diga PASS o REFER.
 - @11,28 | **Chequeo de sonda.** Antes de medir, el equipo dispara clicks y muestra cómo los recoge el micrófono. Un click limpio y repetido es una sonda bien puesta.
 - @22.5,57 | **Sello.** Qué tan bien cierra la oliva. Con la sonda floja entra menos estímulo y el registro sale peor sin que la cóclea tenga nada.
 - @22.5,68 | **Parámetros.** Nivel del click (en dB SPL) y número de promedios (barridos).
@@ -91,7 +91,7 @@ Todo equipo de OEA diagnóstico tiene las mismas piezas: un **chequeo de sonda**
 
 La DPOAE se mide punto por punto: el equipo presenta dos tonos (f1 y f2) a la vez y busca el producto de distorsión en 2f1−f2. Al terminar arma el **DP-grama**, con el nivel del producto de distorsión en cada f2.
 
-:::imagen /docs/manual/img/estudiante/eoa-dpoae.png La pantalla de DPOAE de LabSim, con los dos oídos superpuestos
+:::imagen /docs/manual/img/estudiante/eoa-dpoae.png La pantalla de DPOAE de LabSim, con los dos oídos superpuestos: el OI dentro de la franja normal y el OD pegado al piso de ruido. La comparación entre los dos oídos se ve de un vistazo.
 - @92,18 | **Rango normal.** La franja verde es donde cae la DPOAE de un oído normal en cada f2.
 - @68,22 | **DP del OI.** Dentro de la franja y muy por encima del ruido en todas las frecuencias: presente.
 - @45,31 | **DP del OD.** Pegado al piso de ruido (NF, la zona gris) en todas las frecuencias: ausente.

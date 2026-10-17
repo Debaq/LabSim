@@ -47,7 +47,7 @@ El acoplador de uso universal es el de **2 cm³ (2 cc)**. Hay dos cosas que debe
 
 En la práctica, los audífonos retroauriculares con gancho y molde se miden en un acoplador (el HA-2) y los intracanales y los de tubo fino con punta (el HA-1), con la ventilación tapada por fuera; para los audífonos abiertos no hay acoplador estándar (resumen de la ANSI S3.22 en Cole, 2006).
 
-:::imagen ilustraciones/h21-caja-acoplador.svg ancho=96% La cámara de medida: altavoz, micrófono de referencia, audífono y acoplador
+:::imagen ilustraciones/h21-caja-acoplador.svg ancho=96% La cámara de medida: altavoz, micrófono de referencia, audífono y acoplador. El analizador mantiene el tono al nivel pedido con el micrófono de referencia y mide lo que llega al micrófono del acoplador; la ganancia es la salida menos la entrada.
 :::
 
 ### Por qué la salida se mide con tonos puros a 90 dB SPL
@@ -63,7 +63,7 @@ La medición usa **tonos puros** que barren las frecuencias, porque un tono puro
 - **Distorsión armónica.** Si le entregas al audífono un tono puro y a la salida aparecen además tonos en el doble, el triple, el cuádruple de esa frecuencia, el audífono está **agregando sonido que no estaba en el original**. La *distorsión armónica total* es la potencia de esos armónicos respecto de la del tono (ANSI S3.22; Cole, 2006). Se produce cuando el amplificador o el receptor se saturan, o cuando la pila está en las últimas. Para el usuario, la distorsión es un sonido áspero, sucio o "vibrado", y puede ser la razón por la que entiende peor con el audífono que sin él aunque el volumen sea el adecuado.
 - **Ruido equivalente de entrada.** Todo circuito produce un siseo propio, incluso en silencio. Medir ese siseo a la salida no sirve para comparar, porque depende de cuánto amplifique el audífono. Por eso se expresa **como si viniera de afuera**: es el nivel del ruido que habría que poner a la entrada de un audífono perfecto para que diera ese mismo siseo (la salida sin señal menos la ganancia; Cole, 2006). Para el usuario es el fondo de siseo que oye en una habitación silenciosa. Pesa más en quien tiene una pérdida leve, que oye bien los sonidos suaves y por lo tanto también oye ese fondo.
 
-:::imagen ilustraciones/h21-distorsion-ruido.svg ancho=96% Qué son la distorsión armónica y el ruido equivalente de entrada
+:::imagen ilustraciones/h21-distorsion-ruido.svg ancho=96% Qué son la distorsión armónica y el ruido equivalente de entrada. A: con un tono puro a la entrada, todo lo que sale en 2f, 3f y 4f lo agregó el audífono. B: el siseo propio se expresa como si viniera de afuera (nivel de salida menos ganancia), para poder comparar audífonos que amplifican distinto.
 :::
 
 ### El audífono en el acoplador y en el oído real
@@ -167,7 +167,7 @@ Estas son las magnitudes y las tolerancias que fija la edición 2003, según un 
 
 Las tolerancias son del resumen citado; si la ficha del fabricante o el manual del analizador dan otras, mandan esas.
 
-:::imagen ilustraciones/h21-curva-ejemplo.svg ancho=96% Qué mide cada curva: OSPL90, ganancia y promedio de alta frecuencia
+:::imagen ilustraciones/h21-curva-ejemplo.svg ancho=96% Qué mide cada curva: OSPL90, ganancia y promedio de alta frecuencia. La curva roja es el techo del audífono; la verde, lo que entrega con una entrada de 60 dB SPL, y su distancia a la línea de la entrada es la ganancia. El HFA promedia 1.000, 1.600 y 2.500 Hz.
 :::
 
 ### Cómo se lee
@@ -213,7 +213,7 @@ Cuando un usuario dice que "el audífono ya no sirve", antes de cambiar nada pre
 ## En LabSim
 
 :::comentario Lo que el simulador no tiene
-LabSim **no simula audífonos ni cámaras de medida**: no hay estetoclip, ni acoplador, ni analizador, y por eso este capítulo no trae capturas del programa. Los dibujos de esta herramienta son esquemas propios, con curvas inventadas para explicar los términos; no corresponden a ningún equipo.
+LabSim **no simula audífonos ni cámaras de medida**: no hay estetoclip, ni acoplador, ni analizador. Los dibujos de esta herramienta son esquemas, con curvas de ejemplo para explicar los términos; no corresponden a ningún equipo.
 :::
 
 Lo que sí puedes practicar en LabSim es lo que rodea a estas revisiones: la otoscopía previa (→ H1), la audiometría tonal y la logoaudiometría que dicen cuánta ganancia necesita el paciente (→ H3, H5) y la audiometría en campo libre, donde se compara al paciente con y sin audífono (→ H8, H20). La adaptación completa se trabaja en los capítulos 28 y 29 del libro.

@@ -207,7 +207,7 @@ Lo que se espera encontrar en un Ménière típico, de un lado:
 
 El hidrops también se puede ver en vivo, con una resonancia hecha horas después de inyectar gadolinio. No es parte de los criterios de 2015: la pide y la informa el médico.
 
-:::imagen ilustraciones/cap09-rm-hidrops.jpg ancho=90% Resonancia para hidrops de un hombre de 31 años con Ménière del oído derecho; no es un paciente de este capítulo. Se muestra para que se vea la forma de lo que miden la ECochG y el VEMP. El espacio endolinfático agrandado se ve negro dentro de la perilinfa blanca. Rótulos originales: C, cóclea; S, sáculo; U, utrículo; *Right* y *Left*, oído derecho e izquierdo. Imagen: Young YH, Lin KT (2024), J Otolaryngol Head Neck Surg, doi:10.1177/19160216241250350, Fig. 2, CC BY-NC 4.0, sin modificar.
+:::imagen ilustraciones/cap09-rm-hidrops.jpg ancho=90% Resonancia para hidrops de un hombre de 31 años con Ménière del oído derecho; no es un paciente de este capítulo. Se muestra para que se vea la forma de lo que miden la ECochG y el VEMP. El espacio endolinfático agrandado se ve negro dentro de la perilinfa blanca. Rótulos originales: C, cóclea; S, sáculo; U, utrículo; *Right* y *Left*, oído derecho e izquierdo. Imagen: Young YH, Lin KT (2024), J Otolaryngol Head Neck Surg, doi:10.1177/19160216241250350, Fig. 2, CC BY-NC 4.0.
 - @13,22 | **Oído con Ménière**: hidrops coclear grado II y sacular y utricular grado III (flechas continuas). Las manchas negras son la endolinfa agrandada.
 - @91,48 | **El otro oído, de control**: sin hidrops (flechas punteadas). La perilinfa queda blanca alrededor de la cóclea y el vestíbulo.
 :::
@@ -408,7 +408,7 @@ La electrococleografía, con el mismo protocolo del caso anterior, da:
 - **Hipótesis esperables:** hidrops endolinfático retardado contralateral; Ménière del OI (sin el antecedente, sería el diagnóstico); hipoacusia súbita del único oído; schwannoma del OI.
 - **Qué pedir:** audiometría con enmascaramiento de los dos lados, logoaudiometría, SISI y deterioro tonal en el OI, impedanciometría con reflejos, ECochG y VEMP cervical (→ H3, H4, H6, H7, H11, H12). Controles seriados.
 - **Errores esperables:** intentar el Fowler; anotar el Rinne del OD como conductivo; leer el VEMP como normal por la asimetría baja; tranquilizar al paciente porque el audiograma de hoy está "casi normal".
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Hidrops endolinfático retardado (contralateral)* en el OI. El editor propone solo el oído contrario, entre parotiditis, laberintitis y fractura transversal: aquí quedó *Parotiditis* en el OD.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Hidrops endolinfático retardado (contralateral)* en el OI. El editor propone solo el oído contrario, entre parotiditis, laberintitis y fractura transversal: para este caso, *Parotiditis* en el OD.
 :::
 
 ## Resolución de los casos

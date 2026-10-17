@@ -62,7 +62,7 @@ Una cóclea sana no responde de forma lineal. Sus células ciliadas externas amp
 
 Es lo que muestra el OD del caso 28.2. Con un LDL de 110 dB HL en casi todas las frecuencias, el campo dinámico es de 95 dB en 500 Hz y de 85 dB en 1.000, pero cae a 55 dB en 2.000 y a 30 dB en 3.000, y solo se puede decir que son al menos 20 dB en 4.000 Hz, donde ni a 120 dB hubo molestia.
 
-:::imagen ilustraciones/cap28-campo-dinamico.svg ancho=95% El campo dinámico del OD del caso 28.2, calculado de su audiograma y su LDL
+:::imagen ilustraciones/cap28-campo-dinamico.svg ancho=95% El campo dinámico del OD del caso 28.2: el espacio entre el umbral y el LDL. Es ancho en los graves y se angosta en los agudos; en 4.000 Hz ya es más estrecho que los 30 dB que ocupa el habla.
 :::
 
 ### Por qué un audífono comprime
@@ -78,7 +78,7 @@ Hay dos consecuencias que explican gran parte de lo que se le dice al paciente:
 
 Con dos oídos sanos el cerebro compara lo que llega a cada uno. La cabeza hace **sombra acústica**: un sonido que viene de un lado llega más débil, sobre todo en los agudos, al oído de enfrente, del orden de 10 a 20 dB. <!-- verificar: magnitud de la sombra de la cabeza en agudos (Dillon 2012, cap. sobre efectos binaurales) --> Esa diferencia de nivel y la diferencia de tiempo entre los oídos sirven para **localizar** y para separar la voz que importa del ruido. Con un solo oído que oye, el paciente pierde esa comparación (→ B2). Los sonidos del lado sordo le llegan desde lejos, atenuados por la cabeza; los del lado sano le llegan completos, y el ruido y la voz se mezclan. Lo que hará un CROS no es devolverle la comparación entre oídos, sino **superar la sombra**: llevar al oído que oye lo que pasa en el lado sordo.
 
-:::imagen ilustraciones/cap28-cros.svg ancho=100% La sombra de la cabeza y el encaminamiento de la señal del CROS (esquema)
+:::imagen ilustraciones/cap28-cros.svg ancho=100% A: la cabeza hace sombra, y la voz que llega por el lado sordo le llega débil al oído sano. B: el CROS no devuelve la comparación entre los oídos; lleva al oído que oye lo que capta un micrófono en el lado sordo. Esquema.
 :::
 
 ## Patología
@@ -190,7 +190,7 @@ Además de la audiometría, ¿qué logoaudiometría y qué LDL? ¿Qué pruebas h
 - @S 2000 | Sin audífono, el campo libre (el oído mejor) está en 60 dB en 2 kHz.
 - @A 2000 | Con una ganancia funcional de **30 dB**, queda en 30.
 - @A 4000 | En 4 kHz la misma ayuda deja el umbral en 60 dB: las consonantes agudas siguen casi fuera de alcance.
-- Las ganancias de esta figura las **declara el libro como ejemplo** (→ H20): no son una prescripción ni lo que mediría un audífono real.
+- Las ganancias de esta figura son un **ejemplo** (→ H20): no son una prescripción ni lo que mediría un audífono real.
 :::
 
 :::docente Guía del caso
@@ -198,7 +198,7 @@ Además de la audiometría, ¿qué logoaudiometría y qué LDL? ¿Qué pruebas h
 - **Hipótesis:** presbiacusia bilateral simétrica; sin banderas rojas, no hay por qué demorar la prueba.
 - **Qué pedir:** audiometría con enmascaramiento, logoaudiometría en varios niveles, LDL y la prueba de audífonos con las cuatro tareas (→ H3, H5, H20). El COSI antes de entregar nada.
 - **Errores esperables:** quedarse con la comodidad como criterio de ajuste; prometer que "volverá a oír como antes"; no averiguar por qué su hermana abandonó el suyo.
-- **En LabSim:** caso armado para el libro (cuadro *presbiacusia* moderada); el simulador no tiene audífono: la curva con audífono de la figura la calcula el libro.
+- **En LabSim:** cuadro *presbiacusia* moderada. El simulador no tiene audífono: la curva con audífono de la figura es un ejemplo, no una medición.
 :::
 
 {{caso cap28_reacio}}
@@ -232,7 +232,7 @@ Hablar de audífonos con alguien que no los quiere, ¿por dónde empiezas? ¿Qu�
 - **Hipótesis:** presbiacusia con componente de ruido; campo dinámico estrecho en agudos.
 - **Qué pedir:** audiometría, logoaudiometría y **LDL** (→ H5); en la prueba de audífonos, mirar con atención la molestia ante lo fuerte (→ H20).
 - **Errores esperables:** discutir con él en vez de preguntarle por qué piensa así; empezar por el modelo; dar mucha ganancia en agudos para "que oiga", sin mirar el techo; negarle que el pitido existe.
-- **En LabSim:** caso armado para el libro (cuadro *presbiacusia* moderada). El LDL es del paciente (se sortea entre 90 y 120 dB): aquí quedó en 110.
+- **En LabSim:** cuadro *presbiacusia* moderada. El LDL es del paciente (se sortea entre 90 y 120 dB): en este caso es de 110.
 :::
 
 {{caso cap28_leve}}
@@ -266,7 +266,7 @@ Con una queja leve y situacional, ¿qué es lo que decide si le ofreces un audí
 - **Qué pedir:** audiometría y logoaudiometría; si hay duda sobre el ruido, discriminación con ruido (→ H5).
 - **Errores esperables:** indicar un audífono porque "hay pérdida"; decirle "no tiene nada" por el promedio normal.
 - **Para discutir en clases:** una pérdida leve con dificultad real no se descarta por el promedio; y una pérdida moderada sin dificultad tampoco obliga a un audífono. La decisión es compartida (NICE, 2018).
-- **En LabSim:** caso armado para el libro (cuadro *presbiacusia* leve).
+- **En LabSim:** cuadro *presbiacusia* leve.
 :::
 
 {{caso cap28_un_oido}}
@@ -305,7 +305,7 @@ Una pérdida unilateral de décadas con causa conocida: ¿qué tendrías que des
 - **Qué pedir:** audiometría con enmascaramiento, logoaudiometría y LDL del oído que oye, y revisión del especialista (→ H3, H5).
 - **Errores esperables:** probar un audífono convencional en el OD; leer el campo libre como "oído normal"; prometer que el CROS devuelve la localización.
 - **Para discutir en clases:** la prueba de audífonos del protocolo asume un audífono en "el oído a adaptar"; para un CROS o un audífono óseo hay que decidir cómo probarlo (→ cap. 29).
-- **En LabSim:** caso armado para el libro (cuadro *parotiditis* profunda en el OD).
+- **En LabSim:** cuadro *parotiditis* profunda en el OD.
 :::
 
 ## Resolución de los casos
@@ -323,7 +323,7 @@ La entrevista no tiene banderas rojas: simétrica, sin acúfeno, sin vértigo, s
 Hipoacusia sensorioneural bilateral simétrica moderada, descendente. Se sugiere adaptación **bilateral** con cúpula abierta, a indicación del especialista. Se acuerdan por escrito dos o tres objetivos con el COSI ("entender a mi nieta en la mesa"). Después de la entrega, un control a las semanas para ajustar y revisar los objetivos, y la revisión visoauditiva más adelante (→ H21). En 4 kHz el audífono deja el umbral en 60 dB: se le dice que algunas consonantes seguirán costándole.
 
 :::comentario Comentario
-En la figura la ganancia está declarada por el libro. En un caso real, esa ganancia se prescribe con un método (NAL-NL2 o DSL), se verifica en el oído de la paciente con un micrófono sonda y se confirma con ella, tareas que pertenecen a la entrega, no a esta prueba (→ H20).
+En la figura la ganancia es un ejemplo. En un caso real, esa ganancia se prescribe con un método (NAL-NL2 o DSL), se verifica en el oído de la paciente con un micrófono sonda y se confirma con ella, tareas que pertenecen a la entrega, no a esta prueba (→ H20).
 :::
 
 ### Caso 28.2

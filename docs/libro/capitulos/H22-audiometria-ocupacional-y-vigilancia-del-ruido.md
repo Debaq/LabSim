@@ -46,7 +46,7 @@ Un oído no se daña por "un ruido fuerte", sino por **cuánta energía sonora r
 
 donde *C* es el tiempo real a cada nivel y *T* el tiempo permitido a ese nivel (NIOSH, 1998). La dosis se vuelve a convertir en un nivel con *LEX,8h* = 85 + 10 · log₁₀(*D*/100) para la regla de 3 dB. Un ejemplo con la tabla chilena: 4 horas a 88 dB(A) (permitidas 4) más 4 horas a 82 dB(A) (permitidas 16) dan 4/4 + 4/16 = 1,25: una dosis de **125 %**, o 86 dB(A) para ocho horas. Un turno que parece "tranquilo" porque la mitad del día es suave igual se pasó del límite.
 
-:::imagen ilustraciones/h22-intercambio.svg ancho=90% Dos reglas para el tiempo permitido: 3 dB y 5 dB
+:::imagen ilustraciones/h22-intercambio.svg ancho=90% Dos reglas para el tiempo permitido: 3 dB y 5 dB. Las dos dan 8 horas en su nivel de partida (85 y 90 dB(A)), pero a 100 dB(A) la de 3 dB permite 15 minutos y la de 5 dB, 2 horas: cuanto más fuerte el ruido, más se separan.
 :::
 
 :::ayuda Dos números para recordar
@@ -233,7 +233,7 @@ Fuentes: OSHA (29 CFR 1910.95, (g)(7), (g)(8) y (g)(10)); NIOSH (1998, secciones
 
 El criterio de NIOSH es el más sensible y el de OSHA el menos: el propio NIOSH lo señala, por haber mirado cómo identifican los distintos criterios a los trabajadores que realmente se dañan, y por eso agregó 6.000 Hz (donde el ruido suele cambiar el umbral primero) y quitó la corrección por edad (NIOSH, 1998). La figura muestra qué pasa con dos controles inventados de un trabajador cuya base es la de Tomás:
 
-:::imagen ilustraciones/h22-cambio-umbral.svg ancho=100% Dos controles contra la misma base, y qué dice cada criterio
+:::imagen ilustraciones/h22-cambio-umbral.svg ancho=100% Dos controles contra la misma base, y qué dice cada criterio. Con la muesca ya formada (A) los tres criterios coinciden; con la muesca incipiente (B) solo NIOSH, que mira una frecuencia sola, marca el cambio.
 :::
 
 En el control **A**, los tres criterios coinciden: el cambio ya es grande en 4 kHz. En el **B**, que es una muesca incipiente, el promedio de 2, 3 y 4 kHz da 8,3 dB, bajo el criterio de OSHA; el cambio en una sola frecuencia llega a 20 dB y cumple el de NIOSH; y como el umbral resultante queda en 20 dB HL, bajo 25, PREXOR no lo tomaría como alterado. Un mismo oído, tres respuestas distintas. Por eso **lo primero que se anota** en un informe es qué criterio se usó.
@@ -273,7 +273,7 @@ La edad explica unos **9 dB** del promedio, y el cambio corregido sigue siendo c
 
 ### Qué hacer con un cambio confirmado
 
-:::imagen ilustraciones/h22-flujo.svg ancho=100% Del control periódico al cambio confirmado
+:::imagen ilustraciones/h22-flujo.svg ancho=100% Del control periódico al cambio confirmado. Un cambio no se informa en el primer control: se reexplica, se repite y se confirma en condiciones de base antes de mandarlo a revisión.
 :::
 
 La revisión **no la hace quien examina**: la hace un médico o un audiólogo, que mira las audiometrías, la ficha y la historia ocupacional y decide si el cambio es de origen laboral, no laboral o mixto. NIOSH dice que, si sospecha otra causa, el trabajador recibe consejería y se le deriva a su médico (NIOSH, 1998). Los datos que cambian la conversación son los que ya aparecen en H3 y en el cap. 6: una **asimetría** que la exposición no explica, un **gap** aéreo-óseo (el ruido no lo da), una discriminación **peor** que el audiograma, un acúfeno unilateral, una pérdida que **sigue avanzando** sin exposición. Cualquiera de ellos va a otorrinolaringología.

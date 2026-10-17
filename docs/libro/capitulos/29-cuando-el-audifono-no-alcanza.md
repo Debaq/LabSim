@@ -63,7 +63,7 @@ Cuando la pérdida es **conductiva o mixta** y no se opera (porque el paciente n
 - **De conducción por la piel**: el vibrador va apoyado en la piel, con banda elástica (*softband*) o con imanes en un implante bajo la piel.
 - **De conducción directa**: el vibrador mueve el hueso sin atravesar la piel. Pueden ser **percutáneos** (un pilar que sale por la piel, la prótesis ancla ósea clásica) o **transcutáneos activos** (el transductor va implantado bajo la piel intacta).
 
-:::imagen ilustraciones/cap29-tc-baha.jpg ancho=42% Tomografía axial de cráneo de otra persona con una prótesis ósea anclada percutánea en el lado derecho. Se ve la pieza de titanio fija en el hueso detrás del oído, que lleva la vibración al cráneo. Las imágenes de este capítulo las pide y las informa el médico; se muestran para que se vea la forma de lo que el audiólogo indica y programa. Imagen: Mock JA y cols. (2022), Cureus, doi:10.7759/cureus.27436, Fig. 2, CC BY, recortada.
+:::imagen ilustraciones/cap29-tc-baha.jpg ancho=42% Tomografía axial de cráneo de otra persona con una prótesis ósea anclada percutánea en el lado derecho. Fíjate en la pieza de titanio fija en el hueso detrás del oído: por ahí entra el sonido, como vibración del cráneo, y se salta el oído externo y el medio. Las imágenes de este capítulo las pide y las informa el médico; aquí sirven para ver lo que el audiólogo indica y programa. Imagen: Mock JA y cols. (2022), Cureus, doi:10.7759/cureus.27436, CC BY, adaptada.
 - @13,68 | **Implante** de titanio fijo en el hueso, detrás del oído derecho (la derecha del paciente queda a la izquierda de la imagen).
 - @31,79 | Las líneas que salen del metal son **artefacto** de la tomografía, no hueso.
 :::
@@ -80,7 +80,7 @@ Lo que decide si un paciente es candidato es el **umbral óseo**: el dispositivo
 
 Una cóclea sana convierte el movimiento de la membrana basilar en descargas del nervio: cada región de la cóclea responde a una frecuencia (la **tonotopía**, con los agudos en la base y los graves en el ápice). Cuando las células ciliadas faltan, el audífono ya no tiene dónde entregar la señal por mucho que la amplifique. El implante **se salta** esa etapa: un conjunto de electrodos, introducido en la rampa timpánica, entrega pulsos de corriente directamente a las neuronas del ganglio espiral y a sus fibras (Wilson y Dorman, 2008).
 
-:::imagen ilustraciones/cap29-rx-implante-coclear.jpg ancho=52% Radiografía transorbitaria anteroposterior de otra persona con un implante coclear (no es la paciente de este capítulo): el electrodo se ve enrollado dentro de la cóclea, proyectado en la órbita. Esta placa se toma en el pabellón, recién puesto el electrodo, para ver su posición y que esté entero. Imagen: Molezini FD y cols. (2012), Braz J Otorhinolaryngol, doi:10.1590/S1808-86942012000100005, Fig. 3, CC BY 4.0, recortada y en escala de grises.
+:::imagen ilustraciones/cap29-rx-implante-coclear.jpg ancho=52% Radiografía transorbitaria anteroposterior de otra persona con un implante coclear (no es la paciente de este capítulo): el electrodo se ve enrollado dentro de la cóclea, proyectado en la órbita, de la base hacia el ápice: cada contacto queda frente a una zona de distinta frecuencia. Esta placa se toma en el pabellón, recién puesto el electrodo, para ver su posición y que esté entero. Imagen: Molezini FD y cols. (2012), Braz J Otorhinolaryngol, doi:10.1590/S1808-86942012000100005, CC BY 4.0, adaptada.
 - @38,66 | **Electrodo** enrollado dentro de la cóclea, de la base hacia el ápice.
 - @18,22 | **Receptor-estimulador**, bajo la piel, con la antena y el imán arriba.
 :::
@@ -216,7 +216,7 @@ Además del audiograma, ¿qué mirarías para decidir si es candidata a evaluaci
 - **Hipótesis esperables:** hipoacusia sensorioneural autoinmune, genética tardía, ototóxica; en el alumno aparece el reflejo de "subirle la ganancia", y la respuesta es que el problema ya no es de volumen.
 - **Qué pedir:** logoaudiometría por oído, discriminación con audífono por oído y bilateral, emisiones y reflejos, y derivación a un equipo de implantes con la batería (→ H3, H5, H9, H20).
 - **Errores esperables:** decir que "no es candidata" porque tiene resto auditivo en graves; leer el campo libre con audífono sin mirar la discriminación; pedir ABR como si fuera sospechosa de tumor.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *autoinmune* severa bilateral, edad 58, mujer. La discriminación con audífono la declara el caso; LabSim no la mide todavía.
+- **En LabSim:** no está en la práctica del curso; el docente lo crea con el cuadro *autoinmune* severa bilateral, edad 58, mujer. La discriminación con audífono la declara el caso; LabSim no la mide todavía.
 :::
 
 {{caso cap29_aun_no}}
@@ -262,7 +262,7 @@ Dice que el audífono "no le sirve" a los tres meses. ¿Cómo se adaptaron? ¿Cu
 - **Hipótesis esperables:** pérdida demasiado grande para el audífono (error: no lo es), ajuste insuficiente, expectativas frente al ruido, falta de tiempo de adaptación.
 - **Qué pedir:** medición en oído real, discriminación con y sin audífono, cuestionarios (→ H20, COSI), consejería sobre ruido. **No** derivar a implante.
 - **Errores esperables:** responder "ya no hay nada más" sin verificar; derivar por la queja y no por los datos; confundir "no sirve" con "no alcanza".
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *coclear plana* moderada, edad 74, hombre. La discriminación con audífono la declara el caso.
+- **En LabSim:** no está en la práctica del curso; el docente lo crea con el cuadro *coclear plana* moderada, edad 74, hombre. La discriminación con audífono la declara el caso.
 :::
 
 {{caso cap29_p41}}

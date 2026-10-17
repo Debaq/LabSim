@@ -29,8 +29,8 @@ Los pacientes son ficticios. Sus exámenes los generaron los **simuladores de ap
 
 El libro se puede usar sin ningún simulador: todo lo que necesitas para razonar un caso está en sus páginas. Los simuladores sirven para **practicar y entender**: hacer el examen tú mismo, equivocarte sin consecuencias y ver qué cambia cuando cambia el paciente.
 
-- **LabSim**: audiometría, impedanciometría, emisiones, potenciales evocados, electrococleografía y VEMP. Cada herramienta termina con un apartado *En LabSim*.
-- **trainHIT** y **labyrinthus3d**: el impulso cefálico (vHIT) y el resto de la evaluación vestibular, en la sección de equilibrio.
+- **LabSim**: audiometría, impedanciometría, emisiones, potenciales evocados, electrococleografía y VEMP. Cada herramienta auditiva termina con un apartado *En LabSim*.
+- Para el equilibrio, la nariz y el procesamiento central, las figuras se hicieron con otros simuladores libres del editor. Dónde descargarlos está en la página **Simuladores**, al final de estas preliminares.
 
 ## Los recuadros
 

@@ -46,6 +46,11 @@ El sentido de la corriente tiene una consecuencia: en el canal **lateral**, el m
 
 La convección necesita que el canal quede **vertical**. Con la cabeza erguida, el canal lateral está inclinado unos 30° sobre la horizontal, con el extremo de la ampolla hacia adelante y hacia arriba. Para llevarlo a 90° hay que echar la cabeza **60° hacia atrás**, o, lo que es lo mismo, acostar al paciente y **levantarle la cabeza 30°** (Fitzgerald y Hallpike, 1942). Las dos posturas dan el mismo ángulo. En esa posición, el lado del anillo que da al oído y el lado interno quedan a distinta altura, y la diferencia de peso entre la endolinfa tibia y la fría mueve el líquido. Con el canal horizontal los dos lados quedan a la misma altura y esa corriente no se forma.
 
+:::imagen ilustraciones/h16-simulador-calorica.png ancho=70% Un paciente simulado en la posición de la calórica: acostado, con la cabeza 30° arriba, visto del lado del oído derecho, que se irriga. El laberinto derecho está dibujado agrandado junto a la oreja. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @48,86 | **Canal lateral**, visto de canto: con la cabeza 30° arriba queda vertical, y la endolinfa que se calienta del lado del oído puede subir.
+- @66,11 | **Gafas de VNG**: desde que se abre el agua, se registra sin fijación.
+:::
+
 La convección no es el único mecanismo: el nistagmo calórico persiste, más débil, en ingravidez (Scherer y cols., 1986), por lo que el cambio de temperatura actúa también directamente sobre el canal y su nervio. Para la clínica basta lo que sí se sabe: con la cabeza en la posición de Hallpike la respuesta es máxima, y si el paciente está **boca abajo** en lugar de boca arriba, el sentido del nistagmo **se invierte** (la prueba de la inversión, que confirma que la respuesta es calórica).
 
 ### De la cúpula al ojo, y COWS
@@ -167,7 +172,7 @@ Antes de calcular, mira el trazo: borra los parpadeos, los artefactos de la pupi
 
 Para cada irrigación se toma el **pico** de la velocidad de la fase lenta, en grados por segundo, sin signo. Con la bitérmica salen cuatro valores; con la mínima, uno por oído.
 
-:::imagen ilustraciones/h16-mariposa.svg Las cuatro irrigaciones en el tiempo, dibujadas con la velocidad de la fase lenta de cada una (arriba: bate a la derecha; abajo: a la izquierda). A: en un oído sano las cuatro curvas llegan casi a la misma altura y a la misma hora; el agua tibia del derecho coincide con la fría del izquierdo (las dos baten a la derecha). B: con el laberinto izquierdo hipofuncionante, las dos respuestas del izquierdo (azules) son menores; la derecha no cambia. La respuesta no empieza al abrir el agua: el frío o el calor demoran en cruzar el hueso, culminan después de cerrarla y decaen. Curvas de un modelo docente (simulador), solo para mostrar la forma. Las cifras del eje no son valores de referencia.
+:::imagen ilustraciones/h16-mariposa.svg Las cuatro irrigaciones en el tiempo, dibujadas con la velocidad de la fase lenta de cada una (arriba: bate a la derecha; abajo: a la izquierda). A: en un oído sano las cuatro curvas llegan casi a la misma altura y a la misma hora; el agua tibia del derecho coincide con la fría del izquierdo (las dos baten a la derecha). B: con el laberinto izquierdo hipofuncionante, las dos respuestas del izquierdo (azules) son menores; la derecha no cambia. La respuesta no empieza al abrir el agua: el frío o el calor demoran en cruzar el hueso, culminan después de cerrarla y decaen. Curvas de un modelo docente, solo para mostrar la forma: las cifras del eje son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 ### Paresia canalicular y preponderancia direccional
@@ -230,23 +235,6 @@ Lo que **no** se informa es un diagnóstico: "paresia izquierda" describe un oí
 
 :::ojo Ojo clínico
 Una calórica caída con un vHIT normal **no es un error**: es el patrón de la enfermedad de Ménière y, menos, de otras causas (Hannigan y cols., 2021). Y al revés: una calórica **normal** no descarta una lesión de los canales: solo dice que **ese** rango de frecuencias está sano. Informa lo que mediste; el diagnóstico es del conjunto.
-:::
-
-## En el simulador
-
-LabSim **no hace** pruebas vestibulares (salvo el VEMP, → H12). Para ver la calórica se usa **Labyrinthus 3D**, un simulador del propio autor, software libre, que muestra la cabeza, los dos laberintos y el ojo. En su vista **Pruebas** se elige el oído y el agua y se pulsa **Irrigar**; la cabeza se acuesta con la luz encendida, se apaga la luz, se abre el agua, y se ve en el canal lateral cómo se calienta (o enfría) el lado que da al oído, cómo corre la endolinfa y cómo se dobla la cúpula, mientras los ojos hacen el nistagmo. Con las cuatro irrigaciones calcula la fórmula de Jongkees.
-
-:::imagen ilustraciones/h16-simulador-calorica.png Calórica en el simulador, a los 45 s de una irrigación con agua tibia en el oído derecho (la prueba va a cuatro veces la velocidad real)
-- @29,17 | **Ocluido.** El nistagmo se registra sin fijación, como detrás de las lentes de Frenzel o de la VNG.
-- @29,28 | **Registro de los ojos.** Horizontal, vertical y torsional: aquí se ve el nistagmo del oído irrigado.
-- @71,52 | **Lateral irrigado.** El punto tibio sube, la endolinfa corre hacia la ampolla y la cúpula se dobla: excitación.
-- @70,47 | **Resultados.** A medida que irrigas aparecen las cuatro velocidades y, al final, la paresia y la preponderancia.
-:::
-
-Lo que se aprende ahí: que el nistagmo **no empieza al abrir el agua** (la respuesta tarda y culmina después de cerrarla), que **tibia y fría baten en sentidos opuestos** (COWS), que la respuesta **cae si el canal no está vertical** y que con un hidrops una calórica cae sin que el impulso cefálico lo haga.
-
-:::comentario Lo que el simulador no hace
-Las constantes de Labyrinthus 3D (temperaturas, velocidades, tiempos) son **órdenes de magnitud docentes**, no valores normativos: ninguna cifra de este capítulo sale de él. No modela el **volumen** del agua ni el aire, ni el canal posterior, ni la mínima con agua helada del protocolo (usa agua a 44 y 30 °C durante 40 s), ni la fijación **de la calórica** por separado de la general. Tampoco reproduce la variabilidad real entre sanos, ni la tolerancia del paciente. La disociación calórica-vHIT del Ménière sí está (se carga el caso de hidrops).
 :::
 
 :::pregunta Preguntas para practicar

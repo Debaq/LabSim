@@ -18,7 +18,7 @@ from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 # LabSim da solo el lado auditivo: lo vestibular y lo postural de cada caso está escrito en el .md
 # ("cifras inventadas para el libro") o sale de los esquemas de ilustraciones/cap27-*.svg
-# (hacer_cap27.py) y de las capturas de labyrinthus3d (hacer_cap27_capturas.py).
+# (hacer_cap27.py) y del modelo postural de labyrinthus3d (hacer_cap27_simulador.py).
 CASOS = [
     cuadro('neuritis', [fig.audiograma(), fig.vemp()], od='normal', oi='normal', edad=47, sexo='mujer',
            anamnesis="""Tiene 47 años y es analista de crédito en un banco. Hace nueve meses despertó con el mundo girando:

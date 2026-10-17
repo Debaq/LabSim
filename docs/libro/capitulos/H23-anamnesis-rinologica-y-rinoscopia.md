@@ -151,7 +151,7 @@ Sobre la **limpieza del espéculo**: las guías de desinfección clasifican como
 
 ### Conoce tu equipo
 
-LabSim no tiene simulador nasal, así que aquí no hay captura de pantalla: el equipo se describe con un esquema. Tres elementos, todos de uso manual.
+El equipo de la rinoscopía anterior son tres elementos, todos de uso manual.
 
 :::imagen ilustraciones/h23-equipo.svg ancho=100% Espéculo nasal bivalvo, espejo frontal y lámpara de cuello flexible. A la izquierda, el espéculo con las valvas abiertas y, abajo, visto de frente. En el centro, el espejo frontal, cóncavo y con un orificio. A la derecha, la lámpara. Esquema de los tres elementos; los modelos reales varían.
 - @9,22 | **Valvas.** Entran en el vestíbulo y se abren apenas: lo justo para ver. Si las apoyas en el tabique, duele.
@@ -322,7 +322,7 @@ Una nariz **tapada de un solo lado y siempre del mismo**, sobre todo si hay sang
 
 ## En LabSim
 
-**LabSim no tiene simulador nasal.** No hay rinoscopio, ni nariz virtual, ni paciente con síntomas nasales, y por eso este capítulo no trae capturas del programa ni casos. Lo que sí puedes practicar es la **conversación y la mano**, y para eso no hace falta un programa:
+**LabSim no tiene simulador nasal.** No hay rinoscopio, ni nariz virtual, ni paciente con síntomas nasales, y por eso esta herramienta no tiene casos para atender. Lo que sí puedes practicar es la **conversación y la mano**, y para eso no hace falta un programa:
 
 - **La anamnesis con un compañero.** Uno hace de paciente con un guion corto (por ejemplo, "obstrucción bilateral hace 3 años, usa un descongestionante, última dosis ayer") y el otro recorre la lista. Cambien de papel y de guion. La pregunta que casi todos olvidan es la del descongestionante.
 - **La rinoscopía con un compañero**, con guantes y con el material de verdad, y con la supervisión del docente. Una persona sana ya tiene tabique, cornetes y ciclo nasal que mirar, y las dos fosas no se ven iguales.

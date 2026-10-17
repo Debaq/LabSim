@@ -145,7 +145,7 @@ Un paciente tiene emisiones presentes, reflejos a 90 dB SPL y un PEAT con onda V
 
 LabSim arma cada paciente con su **audición verdadera**: sus emisiones, sus reflejos y su PEAT salen de ella. Lo que no puede hacer hoy es cargar encima un audiograma **informado** distinto del verdadero, ni el umbral verdadero de un oído que el paciente dice tener sordo: el caso que fuera de verdad no orgánico (una pérdida que se informa y un oído que oye) no se puede armar completo. Lo que el docente sí puede hacer es marcar un oído con la casilla **Stenger** del caso: sus umbrales serán los que el paciente entrega y el verdadero se supone igual al del otro oído, como en alguien que oye parejo y dice una pérdida de un solo lado. El paciente simulado tampoco se cansa ni se confunde, así que no reproduce las variaciones de un paciente real (→ H6).
 
-Por eso los casos de este capítulo muestran la **audición verdadera** del paciente con las pruebas que no dependen de su mano, y lo que el paciente informó va en una tabla, dato por dato, como un registro de la consulta. Los números de esas tablas son inventados para el caso; los de las figuras salen del simulador.
+Por eso los casos de este capítulo muestran la **audición verdadera** del paciente con las pruebas que no dependen de su mano, y lo que el paciente informó va en una tabla, dato por dato, como un registro de la consulta. Los números de esas tablas son datos de ejemplo; los de las figuras son los que mide el simulador.
 
 ## Casos
 
@@ -181,7 +181,7 @@ El SRT del OD que entrega es de **55 dB**; el promedio tonal del OD es de **78 d
 
 Sin enmascarar, con el OI en 0 dB, un OD realmente sordo habría respondido a unos 40 a 60 dB por el otro oído (→ H3, H4): Felipe **no responde hasta los 75 a 80**. Eso es lo que no calza.
 
-Lo que sigue son las pruebas que Felipe no gobierna: lo que el simulador mide de su oído derecho real.
+Lo que sigue son las pruebas que Felipe no gobierna: lo que miden de su oído derecho real.
 
 :::figura cap19_unilateral timpanograma
 - @OD pico | Curva A en los dos oídos: el oído medio está sano y los reflejos y las emisiones se pueden leer sin más.
@@ -208,7 +208,7 @@ Lo que sigue son las pruebas que Felipe no gobierna: lo que el simulador mide de
 - **Qué pedir:** audiometría con instrucción cuidadosa y repeticiones, SRT, logoaudiometría; sin enmascarar y enmascarado; **reflejos, emisiones, PEAT**; Stenger si hay asimetría (→ H3, H5, H6, H7, H9, H10).
 - **Errores esperables:** escribir "simulación" en el informe; informar los 80 dB como umbral; enmascarar el OI con ruido antes de ver cómo responde sin enmascarar.
 - **Para discutir en clases:** qué aporta el reflejo a 5 dB del umbral informado y qué diría del oído un Stenger positivo; cuál es la mejor frase de informe.
-- **En LabSim:** caso armado para el libro con la audición verdadera; el docente puede armarlo con el cuadro *normal* y marcar la casilla Stenger del OD (el verdadero se supone igual al del OI).
+- **En LabSim:** cuadro *normal* con la casilla Stenger marcada en el OD (el umbral verdadero se supone igual al del OI).
 :::
 
 {{caso cap19_sobre_real}}
@@ -238,7 +238,7 @@ Tabla: Umbrales aéreos que entrega Enrique (dB HL)
 
 Su SRT es de **50 dB en el OD** y de **45 en el OI**, contra promedios tonales de 83 y 78 dB: diferencias de más de 30 dB. En la segunda ronda el 1.000 Hz del OD bajó a 70.
 
-Y esto es lo que mide el simulador de su oído real, sin su mano:
+Y esto es lo que miden de su oído real las pruebas que no dependen de su mano:
 
 :::figura cap19_sobre_real audiograma
 - @OD 1000 | Esta es la audición verdadera: normal hasta 1 kHz (10 dB), con la caída típica del ruido desde 2 kHz.
@@ -267,7 +267,7 @@ Y esto es lo que mide el simulador de su oído real, sin su mano:
 - **Qué pedir:** audiometría con repeticiones, SRT y su comparación con el promedio tonal, reflejos, emisiones, **PEAT con click y tono puro**, estado estable si hay duda (→ H10, H13).
 - **Errores esperables:** concluir que "no tiene nada" por las emisiones presentes (en 3 y 4 kHz no pasan); comparar los 60 dB nHL del PEAT con los 85 dB HL del audiograma sin pasar por la corrección; no distinguir lo real de lo exagerado.
 - **Para discutir en clases:** cómo se escribe un informe cuando el paciente tiene una pérdida real y una exageración; qué parte de la conclusión pertenece al audiólogo y cuál al médico (→ capítulo 34).
-- **En LabSim:** caso armado para el libro con el cuadro *pérdida por ruido crónica* leve en los dos oídos; lo informado por el paciente va en el texto.
+- **En LabSim:** cuadro *pérdida por ruido crónica*, grado leve en los dos oídos; lo informado por el paciente va en el texto.
 :::
 
 {{caso cap19_nina}}
@@ -318,7 +318,7 @@ Con la voz, repite palabras desde los **15 dB**, unos 37 dB mejor que su promedi
 - **Qué pedir:** audiometría con juego e instrucción repetida, SRT, timpanometría, reflejos, emisiones; el PEAT solo si lo anterior no alcanza (→ H8, H7, H9).
 - **Errores esperables:** confrontar a la niña o a los padres; informar "audición normal" sin explicar qué se hizo y por qué; pedir un PEAT con sedación sin necesidad.
 - **Para discutir en clases:** cómo se le dice a los padres; qué se deriva y a quién (pediatría, psicología escolar); qué pasa si se informa mal.
-- **En LabSim:** caso armado para el libro con el cuadro *normal* a los 11 años.
+- **En LabSim:** cuadro *normal*, 11 años.
 :::
 
 {{caso cap19_p42}}

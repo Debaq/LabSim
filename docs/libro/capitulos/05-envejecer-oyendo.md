@@ -64,7 +64,7 @@ El LDL también decide qué pruebas se pueden hacer. El STAT presenta 100 dB HL 
 
 La membrana basilar no vibra igual en toda su longitud. En la **base**, cerca de la ventana oval, es angosta y rígida y responde a los **agudos**; hacia el **ápex** se hace ancha y flexible y responde a los **graves**. Cada frecuencia tiene su lugar, y la relación entre posición y frecuencia está descrita con precisión: es la función de Greenwood (Greenwood, 1990). Es la **tonotopía**, y se mantiene en el nervio y en toda la vía auditiva.
 
-![Cóclea desenrollada de la base al ápex, con la frecuencia que responde en cada tramo (de 20.000 Hz en la base a 20 Hz en el ápex). Sobre ella, dónde caen los sonidos del habla: las vocales y la voz en los tramos graves y medios; las consonantes s, f, ch y t en el tramo basal. Sombrear la base como la zona que se daña primero con la edad.](ilustraciones/05-tonotopia-habla.svg)
+![Cóclea desenrollada de la base al ápex, con la frecuencia que responde en cada tramo (de 20.000 Hz en la base a 20 Hz en el ápex). Sobre ella, dónde caen los sonidos del habla: las vocales y la voz en los tramos graves y medios; las consonantes s, f, ch y t en el tramo basal. La base, donde caen la s, la f, la ch y la t, es la que se pierde primero con la edad: la voz se sigue oyendo, pero se escapan las consonantes.](ilustraciones/05-tonotopia-habla.svg)
 
 Sobre ese mapa trabajan las **células ciliadas externas**. Amplifican la vibración de los sonidos suaves en el lugar exacto de su frecuencia, unos 40 a 50 dB (Dallos, 2008), y apenas amplifican los fuertes. El resultado es una respuesta **comprimida** y muy afinada: el oído sano oye sonidos muy débiles y tolera sonidos muy intensos, y separa frecuencias vecinas (Robles y Ruggero, 2001). Cuando las células ciliadas externas se pierden, se pierde la amplificación de lo suave, pero lo fuerte sigue llegando casi como antes. Eso es, mecánicamente, el reclutamiento y el campo dinámico estrecho.
 
@@ -275,7 +275,7 @@ Su mamá usó audífonos desde los 80. ¿Pesa ese dato? Plantea al menos tres ca
 - **Hipótesis esperables:** "presbiacusia precoz"; hipoacusia asociada a la diabetes y a la enfermedad renal; ototoxicidad (hay que preguntar); causa familiar (la mamá con audífonos a los 80 tuvo, con toda probabilidad, una presbiacusia, que no es un antecedente familiar de peso).
 - **Qué pedir:** audiometría con vía ósea, logoaudiometría con enmascaramiento al buscar el roll-over, LDL y emisiones (→ H3, H5, H9). Preguntar por diuréticos, antibióticos inyectados y hospitalizaciones.
 - **Errores esperables:** informar "presbiacusia" sin comparar con la edad y el sexo; buscar el roll-over sin enmascarar y concluir que no hay; leer como asimetría los 8 puntos de diferencia en la discriminación.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Diabetes / insuficiencia renal* en los dos oídos, grado leve, en una mujer de 56 años. Es el caso para practicar la curva sombra al buscar el roll-over.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Diabetes / insuficiencia renal* en los dos oídos, grado leve, en una mujer de 56 años. Es el caso para practicar la curva sombra al buscar el roll-over.
 :::
 
 ## Resolución de los casos

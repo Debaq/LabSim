@@ -304,7 +304,7 @@ El oído derecho no tuvo nada. ¿Qué cuidado de técnica vas a necesitar para m
 - **Hipótesis esperables:** trauma acústico agudo del OI; perforación traumática del tímpano (con componente conductivo); desplazamiento temporal que todavía no se recupera.
 - **Qué pedir:** otoscopía, audiometría con enmascaramiento (la diferencia entre oídos lo exige), logoaudiometría, emisiones y acufenometría (→ H1, H3, H4, H9). La impedanciometría confirma el oído medio sano.
 - **Errores esperables:** no enmascarar y anotar la curva sombra del OI; dar por normal la acumetría; no dejar escrito que esta audiometría es la base del seguimiento.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Trauma acústico agudo (explosión)* en el OI y el OD normal.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Trauma acústico agudo (explosión)* en el OI y el OD normal.
 :::
 
 {{caso cap06_muesca_4k}}
@@ -344,7 +344,7 @@ Las marcas de molestia (LDL) están en 90 dB HL en todas las frecuencias. En 4 k
 - **Hipótesis esperables:** hipoacusia por ruido (muesca); en una mujer joven que no trabaja en industria, muchos no piensan en el ruido. La historia laboral es la clave.
 - **Qué pedir:** audiometría (el reposo se cumple de sobra), acufenometría, DPOAE para ver de 3 a 8 kHz (→ H3, H9). La TEOAE agrega poco: no llega a 6 y 8 kHz.
 - **Errores esperables:** informar "hipoacusia leve" (BIAP) sin describir la muesca; no preguntar el último turno; pensar que el ruido laboral es solo de la industria.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Muesca en 4 kHz (trauma acústico)* en los dos oídos.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Muesca en 4 kHz (trauma acústico)* en los dos oídos.
 :::
 
 ## Resolución de los casos

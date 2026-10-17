@@ -73,7 +73,7 @@ Lo que la distingue en los exámenes es que **no depende de la mucosa**:
 - **Rinomanometría**: curva baja de un solo lado; la resistencia inspiratoria y la espiratoria son parecidas; después del vasoconstrictor casi no cambia (obstrucción **mecánica**, → H24).
 - **Rinometría acústica**: el primer mínimo (MCA1) es más chico en ese lado, a la distancia a la que está el obstáculo (→ H25).
 
-:::imagen ilustraciones/cap35-tc-tabique.jpg ancho=46% Tomografía coronal de los senos paranasales de otra persona (no es el paciente de este capítulo): se ve el tabique desviado, los cornetes inferiores aumentados de tamaño, una concha bullosa y una duplicación del cornete inferior izquierdo, una variante rara. La tomografía no es parte del flujo de este libro; se muestra para que se vea la forma de lo que las curvas miden. Imagen: Simsim R, Alhumaizi A, Althubiti S. J Surg Case Rep 2026 (doi:10.1093/jscr/rjag689), CC BY 4.0, sin modificaciones.
+:::imagen ilustraciones/cap35-tc-tabique.jpg ancho=46% Tomografía coronal de los senos paranasales de otra persona (no es el paciente de este capítulo): se ve el tabique desviado, los cornetes inferiores aumentados de tamaño, una concha bullosa y una duplicación del cornete inferior izquierdo, una variante rara. El tabique es hueso y cartílago: un vasoconstrictor no lo mueve. La tomografía la pide y la informa el médico; aquí sirve para ver lo que las curvas miden. Imagen: Simsim R y cols. (2026), J Surg Case Rep, doi:10.1093/jscr/rjag689, CC BY 4.0.
 :::
 
 :::sabias ¿Sabías que?
@@ -92,7 +92,7 @@ La maniobra de Cottle es una **señal**, no una prueba definitiva: en 106 volunt
 
 ¿Y los equipos? Ni la rinometría acústica ni la rinomanometría son, hoy, un estándar para este diagnóstico (Rhee y cols., 2010). La rinometría en apnea no ve una pared que solo cede con flujo. La rinomanometría puede mostrar el comportamiento distinto de las dos fases: en una serie de 55 pacientes, la diferencia entre el flujo inspiratorio y el espiratorio fue mayor en los que tenían colapso de válvula, y con un punto de corte el examen tuvo una sensibilidad del 82 % y una especificidad del 59 %; se hizo con rinomanometría posterior, no con la anterior que usa este libro (Maalouf y cols., 2016). Es una pista, no un diagnóstico. La tomografía tampoco lo resuelve: mira la válvula quieta.
 
-:::imagen ilustraciones/cap35-tc-valvula.jpg ancho=90% La válvula nasal interna en tomografía, en un corte coronal reformateado perpendicular al eje del flujo, justo delante de la cabeza del cornete inferior. Es otra persona, no un paciente de este capítulo, operada por obstrucción nasal (rinoplastía); los dos cortes son de antes de la cirugía. A: el ángulo entre el tabique y el cartílago lateral superior (los autores dan 10 a 15° en personas sin síntomas). C: el área de aire de cada lado, contorneada. En 20 pacientes operados, el NOSE bajó de 67,5 a 39,0 en promedio, y ni el ángulo ni el área medidos así cambiaron de forma significativa. Imagen: Shafik AG, Alkady HA, Tawfik GM y cols. Braz J Otorhinolaryngol 2020 (doi:10.1016/j.bjorl.2019.08.009), Fig. 2, paneles A y C, CC BY 4.0; recortada.
+:::imagen ilustraciones/cap35-tc-valvula.jpg ancho=90% La válvula nasal interna en tomografía, en un corte coronal reformateado perpendicular al eje del flujo, justo delante de la cabeza del cornete inferior. Es otra persona, no un paciente de este capítulo, operada por obstrucción nasal (rinoplastía); los dos cortes son de antes de la cirugía. A: el ángulo entre el tabique y el cartílago lateral superior (los autores dan 10 a 15° en personas sin síntomas). C: el área de aire de cada lado, contorneada. Compara los lados: el derecho tiene el ángulo más cerrado y menos área. Pero es una válvula quieta: en 20 pacientes operados, el NOSE bajó de 67,5 a 39,0 en promedio, y ni el ángulo ni el área medidos así cambiaron de forma significativa. Imagen: Shafik AG y cols. (2020), Braz J Otorhinolaryngol, doi:10.1016/j.bjorl.2019.08.009, CC BY 4.0, adaptada.
 - @15,56 | **Ángulo derecho: 6,0°** (izquierda de la imagen), entre el tabique y el cartílago lateral superior.
 - @35,56 | **Ángulo izquierdo: 10,7°**.
 - @63,76 | **Área derecha: 115,3 mm²**.
@@ -155,7 +155,7 @@ En el caso 2, la fosa derecha da 0,61 al inspirar y 0,36 al espirar. Si el exame
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. Las **curvas y las cifras nasales** de los tres casos salen de RinoSim, el simulador nasal del autor de este libro: son registros simulados, no pacientes. Los valores que aparecen son órdenes de magnitud del modelo; el único valor de referencia que se usa es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24; Ren y cols., 2018; Vogt y cols., 2016).
+Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. Las **curvas y las cifras nasales** de los tres casos son de **pacientes simulados**, no de pacientes reales. Los valores que aparecen son órdenes de magnitud del modelo, no normas; el único valor de referencia que se usa es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24; Ren y cols., 2018; Vogt y cols., 2016).
 
 {{caso cap35_desviacion}}
 
@@ -183,14 +183,14 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 | Con vasoconstrictor, inspiración | **0,48** | 0,29 | 0,18 |
 :::
 
-:::imagen ilustraciones/cap35-rs-desv-rm.svg ancho=78% Rinomanometría de Carlos (paciente simulado con RinoSim, software libre del autor; no es un paciente). Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV. Las rayas verticales marcan 75 y 150 Pa.
+:::imagen ilustraciones/cap35-rs-desv-rm.svg ancho=78% Rinomanometría de Carlos (paciente simulado). Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV. Las rayas verticales marcan 75 y 150 Pa. La fosa derecha es la más cerrada y casi no cambia ni con el vasoconstrictor ni con la fase: un obstáculo mecánico. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @78,38 | **FND (rojo)**: a 150 Pa pasan unos 280 cm³/s, lo que da **0,53 Pa/(cm³/s)**: sobre el valor de trabajo (0,4).
 - @20,38 | **FNI (azul)**: a 150 Pa pasan unos 450 cm³/s, **0,33**: dentro del valor de trabajo.
-- @74,9 | Con vasoconstrictor (rayas) la FND casi no se mueve: **0,48**, una baja de 9 %. El simulador lo lee como "igual que en reposo" porque es menos del 15 % (un criterio del simulador, no una norma).
+- @74,9 | Con vasoconstrictor (rayas) la FND casi no se mueve: **0,48**, una baja de 9 %. Con menos del 15 % se lee como "igual que en reposo" (un umbral del modelo, no una norma).
 - @16,60 | Espirando, la FND da **0,50**: casi lo mismo que inspirando. El obstáculo no depende de la fase.
 :::
 
-:::imagen ilustraciones/cap35-rs-desv-ra.svg ancho=78% Rinometría acústica de Carlos, simulada con RinoSim; no es un paciente. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor.
+:::imagen ilustraciones/cap35-rs-desv-ra.svg ancho=78% Rinometría acústica de Carlos. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. El estrechamiento derecho está a la entrada de la fosa (MCA1) y no se abre con el vasoconstrictor; lo que sí se abre es el cornete izquierdo. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @30,80 | **FND, MCA1 0,36 cm²** a 1,3 cm de la narina: el estrechamiento está en la zona de la válvula, y es más chico que el de la fosa izquierda (0,58). Con vasoconstrictor solo sube a 0,39.
 - @47,50 | **FNI, MCA2 1,32 cm²**: el cornete inferior izquierdo ocupa más espacio y deja menos fosa que el derecho (1,78). Con vasoconstrictor sube a 1,92: ese espacio sí era mucosa.
 - @38,24 | Las dos curvas con vasoconstrictor (rayas) se juntan pasados los 2,5 cm: lo mucoso se fue. Lo que queda de diferencia entre las fosas, en MCA1, es estructura.
@@ -202,7 +202,6 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 - **Qué pedir:** rinoscopía mirando primero la fosa que dice estar mejor (→ H23); rinomanometría de reposo; vasoconstrictor **en la fosa sobre 0,4** (→ H24); rinometría para ubicar el obstáculo (→ H25).
 - **Errores esperables:** informar solo la resistencia total (0,20); concluir "mecánica" sin mirar el relato; llamar "tabique" a lo que la prueba solo llama "estructural".
 - **Para discutir en clase:** el cornete izquierdo grande, ¿es compensación? ¿Cuánto es mucosa y cuánto hueso? (Berger y cols., 2000).
-- **Con RinoSim:** cuadro *desviación derecha*.
 :::
 
 {{caso cap35_valvula}}
@@ -232,13 +231,13 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 | Con vasoconstrictor, espiración | 0,33 | 0,33 | |
 :::
 
-:::imagen ilustraciones/cap35-rs-colapso-rm.svg ancho=78% Rinomanometría de Mónica con inspiración forzada (paciente simulado con RinoSim; no es un paciente). Fíjate en la escala: llega a 1.200 Pa y 1.500 cm³/s. Línea continua: reposo; discontinua: con vasoconstrictor.
+:::imagen ilustraciones/cap35-rs-colapso-rm.svg ancho=78% Rinomanometría de Mónica con inspiración forzada. Fíjate en la escala: llega a 1.200 Pa y 1.500 cm³/s. Línea continua: reposo; discontinua: con vasoconstrictor. Al inspirar, el flujo se estanca en una meseta aunque suba la presión; al espirar, la misma fosa se comporta casi normal. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @80,22 | **Meseta inspiratoria.** En el cuadrante I y el II el flujo casi no sube: de unos 290 cm³/s a 300 Pa pasa a unos 380 a 800 Pa. Por más presión que se haga, no pasa más aire.
 - @21,62 | **Espiración.** En el III y el IV el flujo sigue subiendo: unos 610 cm³/s a 300 Pa y unos 1.020 a 800 Pa. La misma fosa, en la otra fase, se comporta como una fosa casi normal. En la nariz simulada sin obstrucción, a 800 Pa pasan unos 1.110 cm³/s al inspirar y unos 1.180 al espirar: casi lo mismo.
 - @60,75 | A 150 Pa, la cifra de siempre ya muestra la diferencia: **0,61 al inspirar contra 0,36 al espirar**. En la nariz simulada sin obstrucción esas dos cifras son casi iguales (0,32 y 0,31).
 :::
 
-:::imagen ilustraciones/cap35-rs-colapso-ra.svg ancho=78% Rinometría acústica de Mónica, simulada con RinoSim; no es un paciente. Se mide en apnea, sin flujo de aire.
+:::imagen ilustraciones/cap35-rs-colapso-ra.svg ancho=78% Rinometría acústica de Mónica. Se mide en apnea, sin flujo de aire, y por eso sale casi normal: con el aire quieto, una pared que solo cede al inspirar no se ve. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @30,80 | **MCA1 0,51 cm²** en las dos fosas, a 1,3 cm: algo menor que el de la nariz simulada sin obstrucción (0,61), pero sin ninguna señal de colapso. Con el aire quieto, la pared no se mueve: este examen no puede mostrar lo que solo pasa al inspirar.
 - @47,50 | **MCA2 1,67 cm²**: el cornete inferior está bien; la que falla no es la mucosa. Con vasoconstrictor sube a 1,97.
 :::
@@ -248,8 +247,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 - **Hipótesis esperables:** colapso de la válvula nasal (cirugía previa); rinitis (no: sin estornudos ni estacionalidad); desviación septal (el tabique es recto).
 - **Qué pedir:** rinoscopía con inspiración profunda y Cottle; rinomanometría con **las dos fases** y, si el equipo lo permite, con esfuerzo (→ H24).
 - **Errores esperables:** informar "normal" mirando solo la espiración (0,36); pensar que la rinometría confirmará; llamar "mecánica" a la prueba con vasoconstrictor y detenerse ahí.
-- **Mira la curva:** el equipo simulado avisó que los registros acústicos de la fosa derecha varían algo más de lo que pide el criterio del libro: en un caso real se repetirían.
-- **Con RinoSim:** cuadro *colapso valvular*, con la opción de inspiración forzada.
+- **Mira la curva:** los registros acústicos de la fosa derecha varían algo más de lo que pide el criterio del libro: en un caso real se repetirían.
 :::
 
 {{caso cap35_discordancia}}
@@ -277,13 +275,13 @@ Con un NOSE de 80 y una rinoscopía que no muestra nada, ¿qué pruebas harías?
 | Reposo, espiración | 0,31 | 0,31 | |
 :::
 
-:::imagen ilustraciones/cap35-rs-normal-rm.svg ancho=72% Rinomanometría de Rocío (la nariz sin obstrucción del simulador RinoSim; no es un paciente). Solo reposo.
+:::imagen ilustraciones/cap35-rs-normal-rm.svg ancho=72% Rinomanometría de Rocío, una nariz sin obstrucción, solo en reposo. Sirve de referencia: las dos fosas son simétricas y quedan bajo el valor de trabajo, e inspirar o espirar da lo mismo. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @76,36 | **FND**: 0,32 a 150 Pa, bajo el valor de trabajo.
 - @18,36 | **FNI**: también 0,32. Las dos curvas son simétricas, sin pausas.
 - @28,70 | Inspirando y espirando da lo mismo: no hay diferencia entre fases.
 :::
 
-:::imagen ilustraciones/cap35-rs-normal-ra.svg ancho=72% Rinometría acústica de Rocío (nariz sin obstrucción de RinoSim; no es un paciente). Solo reposo. Las dos fosas se superponen.
+:::imagen ilustraciones/cap35-rs-normal-ra.svg ancho=72% Rinometría acústica de Rocío, solo en reposo: las dos fosas se superponen, sin estrechamientos ni asimetría. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @30,82 | **MCA1 0,61 cm²** a 1,3 cm de la narina, igual en las dos fosas.
 - @47,50 | **MCA2 1,52 cm²**, igual en las dos. Ni estrechamientos ni asimetría.
 :::
@@ -296,7 +294,6 @@ Con las dos fosas en 0,32 no hace falta la prueba con vasoconstrictor (→ H24):
 - **Qué pedir:** los mismos exámenes de los casos anteriores **más** una evaluación del olfato y, si el médico lo decide, una endoscopía. Una resistencia normal no es el final del estudio.
 - **Errores esperables:** "no tiene nada"; indicar una cirugía por el NOSE; pensar que el puntaje fue exagerado.
 - **Para discutir en clase:** ¿qué es lo que le dirías a Rocío cuando le entregas el informe? ¿Cómo se lo dirías sin invalidarla?
-- **Con RinoSim:** cuadro *normal*. El simulador no tiene sensación: la discordancia la pone el caso.
 :::
 
 ## Resolución de los casos

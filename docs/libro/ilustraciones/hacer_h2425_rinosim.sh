@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Figuras y capturas de H24 y H25 hechas con RinoSim (software libre del autor).
+# Figuras de H24 y H25 hechas con RinoSim (curvas y pantallas de resultado, sin interfaz).
 # Reproduce exactamente lo que hay en docs/libro/ilustraciones/h24-rs-* y h25-rs-*.
 #   RINOSIM=/ruta/a/rinosim bash docs/libro/ilustraciones/hacer_h2425_rinosim.sh
 # No modifica RinoSim: las figuras salen a una carpeta temporal y de ahí se copian.
@@ -75,18 +75,25 @@ paneles('h24-rs-vasoconstrictor.svg', [('h24-vasomotora/rm-resistencia.svg', 'A'
 paneles('h25-rs-vasoconstrictor.svg', [('h25-mucosa/ra-curva.svg', 'A'), ('h25-estructura/ra-curva.svg', 'B')])
 PY
 
-# ---- Capturas de la aplicacion (chromium sin pantalla, servidor solo de lectura) ----
+# ---- Pantallas de resultado (curva + tabla), sin la interfaz del programa ----
+# Se copia RinoSim a la carpeta temporal y a la copia se le agrega CSS que esconde
+# barra, botones, casillas, avisos, notas y referencias: queda solo la curva y la tabla.
+# El repo de RinoSim no se toca.
 if [ "${CAPTURAS:-1}" = 1 ]; then
-  (cd "$RINOSIM" && python3 -m http.server "$PUERTO" --bind 127.0.0.1 >/dev/null 2>&1) &
+  cp -r "$RINOSIM" "$TMP/rs" && rm -rf "$TMP/rs/.git"
+  cat >> "$TMP/rs/css/estilo.css" <<'CSS'
+body.captura .equipo-titulo, body.captura .herramientas, body.captura .mensaje,
+body.captura .avisos, body.captura .referencias, body.captura .tabla .pie { display: none !important; }
+CSS
+  (python3 -m http.server "$PUERTO" --bind 127.0.0.1 -d "$TMP/rs" >/dev/null 2>&1) &
   SERV=$!
   sleep 1
-  cap() { # cap <salida.png> <alto de ventana> <url> <recorte ancho x alto>
+  cap() { # cap <salida.png> <alto de ventana> <url>
     chromium --headless=new --no-sandbox --disable-gpu --window-size=1400,"$2" \
       --virtual-time-budget=8000 --screenshot="$TMP/c.png" "$3" >/dev/null 2>&1
-    magick "$TMP/c.png" -crop "$4+0+0" +repage "$1"
+    magick "$TMP/c.png" -trim +repage -bordercolor white -border 10 "$1"
   }
-  # alto de ventana y alto final (sin el gris de abajo)
-  cap "$ILUS/h24-rs-equipo.png" 2000 "http://localhost:$PUERTO/?vista=rm&cuadro=mixta&medir=1&vc=1&captura=1" 1400x1550
-  cap "$ILUS/h25-rs-equipo.png" 1580 "http://localhost:$PUERTO/?vista=ra&cuadro=cornetes&medir=1&vc=1&captura=1" 1385x1490
+  cap "$ILUS/h24-rs-equipo.png" 2000 "http://localhost:$PUERTO/?vista=rm&cuadro=mixta&medir=1&vc=1&captura=1"
+  cap "$ILUS/h25-rs-equipo.png" 1700 "http://localhost:$PUERTO/?vista=ra&cuadro=cornetes&medir=1&vc=1&captura=1"
 fi
 echo "listo"

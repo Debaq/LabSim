@@ -43,7 +43,7 @@ Pero eso es solo la parte **estática**. Lo que queda después es la parte **din
 
 La compensación no es un solo proceso. Es un conjunto de subprocesos que se recuperan a distinto nivel y a distinta velocidad: unos casi por completo, otros solo en parte, y en algunos el cerebro reemplaza al vestíbulo con otra información sensorial o con estrategias nuevas (Curthoys y Halmagyi, 1995). La imagen que se usa hoy separa dos mecanismos. En lo **estático**, la actividad de los núcleos vestibulares del lado dañado se reequilibra con ayuda del impulso del lado sano. En lo **dinámico**, lo que más pesa es la **sustitución** sensorial y de comportamiento: otros sentidos y otras estrategias que cubren la función perdida (Lacour y cols., 2016).
 
-:::imagen ilustraciones/h19-compensacion.svg Recuperación en el tiempo después de perder un laberinto. Esquema con las curvas del simulador, sin cifras a propósito: el reposo se equilibra primero; la función con el movimiento tarda más; el reflejo vestíbulo-ocular recupera solo una parte de lo perdido.
+:::imagen ilustraciones/h19-compensacion.svg Recuperación en el tiempo después de perder un laberinto, en un paciente simulado. Lo que importa es la forma, no las cifras: el reposo se equilibra primero y solo; la función con el movimiento tarda más y necesita movimiento para recuperarse; el reflejo vestíbulo-ocular recupera solo una parte de lo perdido, y el resto lo cubre la sustitución. Esquema propio con las curvas de labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
 De ahí salen las reglas del programa:
@@ -59,7 +59,7 @@ El **reflejo vestíbulo-ocular** (VOR) mueve los ojos al revés que la cabeza pa
 
 Que la ganancia se recalibra con lo que se ve está demostrado desde hace décadas. Cuatro adultos sanos que llevaron prismas que invertían la imagen durante días vieron bajar la ganancia de su reflejo hasta un 25 % del valor normal en una semana, y se recuperó, con un tiempo parecido, al sacarse los prismas (Gonshor y Jones, 1976). En el mono, ese ajuste depende de la visión y sus elementos modificables están en las vías vestibulares del tronco (Miles y Lisberger, 1981).
 
-:::imagen ilustraciones/h19-vor-ejercicios.svg Arriba, el deslizamiento de la imagen cuando el reflejo se queda corto (esquema propio). Abajo, los tres ejercicios de la rehabilitación: en x1 el blanco está quieto; en x2 se mueve en sentido contrario a la cabeza; en la sustitución el ojo va al blanco antes que la cabeza.
+:::imagen ilustraciones/h19-vor-ejercicios.svg Arriba, el deslizamiento de la imagen cuando el reflejo se queda corto: ese error en la retina es la señal que recalibra la ganancia. Abajo, los tres ejercicios de la rehabilitación: en x1 el blanco está quieto y se le pide al reflejo ganancia 1; en x2 se mueve en sentido contrario a la cabeza y se le pide 2; en la sustitución el ojo va al blanco antes que la cabeza. Esquema propio.
 :::
 
 Eso explica los ejercicios de **adaptación**, o de **estabilización de la mirada**: se mueve la cabeza **mirando un blanco** para que el reflejo falle un poco y el cerebro lo corrija. En la guía, la adaptación es el cambio de la descarga neuronal ante los movimientos de cabeza para reducir el deslizamiento, y clínicamente significa menos síntomas y más estabilidad de la mirada y de la postura (Hall y cols., 2022).
@@ -85,7 +85,21 @@ De pie, el cuerpo se mantiene con tres fuentes: la **vista**, la **somatosensaci
 
 Un paciente sin vestíbulo se las arregla en terreno firme y con luz, porque la vista y los pies le alcanzan. Lo pierde cuando se le quitan: a oscuras, sobre pasto o una alfombra gruesa, subiendo una escalera con las manos ocupadas. Por eso las pruebas de equilibrio sensibilizadas le quitan la vista (ojos cerrados) y los pies (una espuma). La prueba clínica de interacción sensorial, la CTSIB, combina ojos abiertos, ojos cerrados y un entorno visual en conflicto, sobre piso firme y sobre espuma: seis condiciones (Shumway-Cook y Horak, 1986). Los pacientes con trastornos vestibulares rinden peor que los sanos de su edad (Cohen y cols., 1993). La versión modificada, el **mCTSIB**, quita el entorno en conflicto y deja cuatro. <!-- verificar: la atribución de la versión de cuatro condiciones (mCTSIB); la fuente consultada solo describe la CTSIB de seis condiciones. --> En la última, ojos cerrados sobre espuma, no queda ningún sentido confiable más que el vestíbulo.
 
-:::imagen ilustraciones/h19-mctsib.svg Cómo se balancea el cuerpo adelante-atrás en las cuatro condiciones del mCTSIB, con un laberinto sano (arriba) y sin vestíbulo (abajo). Esquema con las trazas del simulador, no un paciente: lo que muestra es la lógica de la prueba. Solo con la vista y los pies disponibles se compensa; con ojos cerrados sobre espuma, no.
+:::imagen ilustraciones/h19-mctsib.svg Cómo se balancea el cuerpo adelante-atrás en las cuatro condiciones del mCTSIB, con un laberinto sano (arriba) y sin vestíbulo (abajo). Son trazas de un paciente simulado, no de uno real: lo que muestran es la lógica de la prueba. Sin vestíbulo, mientras quedan la vista o los pies el balanceo se compensa; con ojos cerrados sobre espuma, no queda nada que lo sostenga. Esquema propio con las trazas de labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+En una plataforma de fuerza, el balanceo se registra como el movimiento del **centro de presión**, el punto de los pies donde cae el peso del cuerpo, que se corre todo el tiempo porque el cuerpo se corrige para no caerse (figura siguiente). La posturografía lleva la misma lógica a las seis condiciones del SOT, en las que además el entorno visual o la plataforma siguen al balanceo, para que la vista o los pies informen mal (→ H15).
+
+:::imagen ilustraciones/h19-romberg.png ancho=90% Un paciente simulado sano de pie en la plataforma, con los ojos abiertos y sobre superficie firme: el centro de presión y los dos balanceos de los últimos 20 s. Aun quieto, el cuerpo se corrige todo el tiempo; la plataforma mide cuánto. Valores del modelo, no normativos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @73,24 | **El centro de presión** se arrastra dentro de la plataforma: el trazo naranja es lo que el cuerpo hace para no caerse.
+- @52,64 | **El balanceo a los lados** y, debajo, **el balanceo adelante-atrás**.
+- @16,90 | **El paciente**, de pie con los pies juntos sobre la plataforma de fuerza.
+:::
+
+:::imagen ilustraciones/h19-sot.png ancho=70% Las seis condiciones del SOT en un paciente simulado sano, con los puntajes y el análisis sensorial. Las condiciones le van quitando o falseando la vista y los pies; comparar los puntajes entre condiciones dice de cuál depende el paciente. Puntajes, límites y razones del modelo, no valores de referencia clínica. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @83,12 | **Las seis condiciones**: la 5, con la plataforma que sigue al balanceo y los ojos cerrados, deja solo al vestíbulo.
+- @18,30 | **Puntaje de equilibrio** de cada una (100 sin balanceo, 0 si se cae); el rayado rojo es su límite normal.
+- @34,85 | **Las razones del análisis sensorial**: cuánto le sirve cada sentido.
 :::
 
 Esa lógica es también la del **entrenamiento**. La guía incluye entre los ejercicios de equilibrio y marcha el trabajo con **entradas sensoriales alteradas**: sin vista o con optocinéticos, con movimientos de cabeza que ponen a trabajar al vestíbulo, y con espuma o superficies móviles que desafían la somatosensación (Hall y cols., 2022). Se le pide al paciente que aprenda a **usar mejor** el sentido que le queda y a no depender de uno solo.
@@ -127,19 +141,6 @@ No hay un equipo que comprar. Lo que se necesita:
 - Para entrenar: una **superficie de espuma** y un blanco (una letra o una tarjeta) que se pegue en la pared.
 
 El paciente usa su **calzado habitual** y sus **lentes** (o los lentes de contacto) durante toda la evaluación. La primera sesión dura 1 hora y las siguientes, 30 minutos.
-
-### Conoce tu equipo: el simulador de equilibrio
-
-Para ver el principio de las pruebas de equilibrio se usa **labyrinthus3d**, el simulador libre del autor de este libro (→ "En el simulador"). Su pestaña **Romberg** pone al paciente de pie sobre una plataforma de fuerza y dibuja el balanceo del centro de presión.
-
-:::imagen ilustraciones/h19-simulador-romberg.png Labyrinthus3d, pestaña Romberg, con un paciente simulado sano de pie en la plataforma, con los ojos abiertos y sobre superficie firme.
-- @46,45 | **El centro de presión**, que se arrastra dentro de la plataforma. El trazo naranja es lo que el cuerpo hace para no caerse.
-- @44,65 | **Los dos balanceos**, a los lados y adelante-atrás, de los últimos 20 s.
-- @88,30.5 | **La superficie**: firme o espuma (el mCTSIB).
-- @102,38 | **Hacer el Romberg** y detenerlo.
-- @10,22 | **Los ojos** abiertos o cerrados, y los empujones, que están arriba, en el visor.
-- @102,48 | **El peso de cada sentido** en esa condición: aquí pesan la vista, los pies y el vestíbulo.
-:::
 
 ## Paso a paso
 
@@ -348,7 +349,7 @@ Muchos pacientes se hacen gradualmente **independientes**: pierden la insegurida
 
 Se informa el **antes y el después** con las mismas pruebas, y qué se hizo en el medio.
 
-:::ayuda Ejemplo de redacción (no es un paciente; las cifras son inventadas)
+:::ayuda Ejemplo de redacción (no es un paciente; cifras de ejemplo)
 **Motivo:** hipofunción vestibular izquierda por neuritis, examen vestibular de hace 3 meses. **Inicio:** DHI 58 (moderado). DVA: pierde 3 líneas con giro horizontal de cabeza y 2 con vertical. Alcance funcional 18 cm. Apoyo monopodal 4 s. TUG 14 s. DGI de 4 ítems 8/12, con mayor dificultad en los giros de cabeza. **Programa:** 6 sesiones semanales; estabilización de la mirada (VOR x1 con blanco cerca y lejos, luego x2), 3 a 5 veces al día, 20 min; equilibrio en espuma con ojos cerrados y marcha con giros de cabeza. **Final:** DHI 24 (leve). DVA: pierde 1 línea. Alcance funcional 28 cm. Apoyo monopodal 20 s. TUG 9 s. DGI de 4 ítems 11/12. **Conclusión:** mejoría funcional; se deriva al médico tratante para evaluación y alta.
 :::
 
@@ -377,27 +378,6 @@ Lo que debe quedar escrito:
 Un paciente que **empeora con los ejercicios** (más vértigo, nistagmo nuevo, vómitos que no ceden, o síntomas neurológicos) no tiene un problema de dosis: tiene un diagnóstico que revisar. Se suspende el programa y se avisa al médico. Lo mismo si lo que más le molesta no cambia con semanas de ejercicio bien hecho: es una meseta, y se deriva. <!-- verificar: criterio de suspensión por empeoramiento; es juicio clínico del libro, no una recomendación citada. -->
 :::
 
-## En el simulador
-
-LabSim **no hace pruebas vestibulares** (salvo el VEMP, → H12), ni rehabilitación. Para esta herramienta se usa **labyrinthus3d**, un simulador 3D del autor de este libro, libre (licencia Apache-2.0) y que corre en el navegador, sin instalar nada. Las imágenes y los esquemas de este capítulo salen de él o están hechos a la manera de su modelo.
-
-Lo que se practica en su vista **postural**:
-
-- **Romberg y mCTSIB.** Un paciente de pie sobre una plataforma de fuerza, que se puede poner en **firme** o en **espuma** y con los ojos **abiertos** o **cerrados**. El gráfico del centro de presión y los dos balanceos muestran qué le cuesta. Al lado, el panel dice **cuánto pesa cada sentido** en esa condición.
-- **Posturografía (SOT).** Las seis condiciones del test de organización sensorial, con puntajes, razones del análisis sensorial y un compuesto. Es una forma de **ver la repesada sensorial** como números.
-- **Casos.** Se elige el tipo de lesión, el lado y el **tiempo desde la lesión**, y el caso se puede esconder (paciente a ciegas) para descubrirlo con las pruebas.
-- **Compensación en días.** Al avanzar el tiempo desde una lesión, el reposo se reequilibra primero y la respuesta dinámica después, y se ve cómo la lateropulsión del paciente se atenúa.
-
-:::imagen ilustraciones/h19-simulador-sot.png ancho=80% Labyrinthus3d, pestaña Posturografía, con un paciente sano: las seis condiciones del SOT, el análisis sensorial y el compuesto.
-- @37,18 | **Las seis condiciones**: la 5, con la plataforma que sigue al balanceo y los ojos cerrados, deja solo al vestíbulo.
-- @37,25 | **Puntaje de equilibrio** de cada una (100 sin balanceo, 0 si se cae); el rayado rojo es su límite normal.
-- @37,54 | **Las razones del análisis sensorial**: cuánto le sirve cada sentido.
-:::
-
-:::comentario Lo que el simulador no tiene
-No tiene un módulo de **rehabilitación**: no hay ejercicios, ni dosis, ni un paciente que mejore con ellos, ni el DHI ni la batería de este capítulo (la DVA, el alcance funcional, el TUG o el DGI). Modela el control postural y la compensación **con el tiempo**, no con el entrenamiento. Y sus **constantes son órdenes de magnitud para enseñar**, no valores normativos: los puntajes, los límites y las razones que muestra no son referencia clínica. Todo número de este capítulo sale de la literatura citada, y **ninguno del simulador**. Las curvas y las trazas de los esquemas ilustran el principio, no los tiempos de un paciente.
-:::
-
 :::pregunta Preguntas para practicar
 1. Un paciente tuvo una neuritis hace 3 semanas. Ya no tiene nistagmo ni vértigo en reposo, pero ve borroso al girar la cabeza. ¿Qué parte de la compensación se cumplió, cuál no, y qué ejercicio le pones primero?
 2. ¿Por qué un ejercicio de VOR x2 es más exigente que uno de VOR x1? ¿Qué le pides al reflejo?
@@ -408,7 +388,7 @@ No tiene un módulo de **rehabilitación**: no hay ejercicios, ni dosis, ni un p
 7. El protocolo del libro pide una sesión semanal de 30 a 40 minutos y un programa de 3 a 6 semanas. ¿Qué agregas, según la guía, para que la dosis sea suficiente?
 8. ¿Por qué el ítem de recoger un objeto del Berg no se puede usar como puntaje de riesgo? ¿Y qué hay que cuidar al comparar la agudeza visual dinámica de una persona de 65 años con la de una de 30?
 9. ¿Cuándo es obligatorio derivar, y cuándo hay que hacerlo antes del alta?
-10. En el simulador, pon la pérdida bilateral y haz el mCTSIB en sus cuatro condiciones. ¿En cuál se cae? ¿Qué pasa si agregas la vista?
+10. Un paciente con pérdida vestibular bilateral hace el mCTSIB en sus cuatro condiciones. ¿En cuál se cae? ¿Qué cambia si se le devuelve la vista?
 :::
 
 ## Referencias

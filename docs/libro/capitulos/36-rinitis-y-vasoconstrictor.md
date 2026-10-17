@@ -54,9 +54,9 @@ La prueba con vasoconstrictor no es un detector de enfermedad: una nariz sana se
 
 ### El mismo vaivén, otro efecto: el ciclo nasal en una nariz congestionada
 
-La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el paso (→ H24, B4; en el modelo de RinoSim, el término laminar crece con el cubo del angostamiento). Por eso **un vaivén de la mucosa** pesa poco en una nariz amplia y mucho en una que parte estrecha. La figura lo muestra con el modelo de RinoSim, que da a la congestión de la mucosa un valor de 0 (retraída) a 1 (al máximo). La nariz normal del simulador parte de 0,4 y oscila 0,3 hacia cada lado; la de cornetes congestionados parte de 0,8 y oscila la mitad (0,15). En la normal, cada fosa varía entre 0,29 y 0,35 Pa/(cm³/s) a lo largo del ciclo; en la congestionada, con un vaivén **menor**, una fosa pasa de poco más de 0,4 a unos 30 (casi se cierra) mientras la otra queda cerca del valor de trabajo, y la resistencia total se mueve poco. Son constantes del modelo, no valores de personas.
+La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el paso (→ H24, B4; en el modelo de las figuras, el término laminar crece con el cubo del angostamiento). Por eso **un vaivén de la mucosa** pesa poco en una nariz amplia y mucho en una que parte estrecha. La figura lo muestra con un modelo que da a la congestión de la mucosa un valor de 0 (retraída) a 1 (al máximo). La nariz normal del modelo parte de 0,4 y oscila 0,3 hacia cada lado; la de cornetes congestionados parte de 0,8 y oscila la mitad (0,15). En la normal, cada fosa varía entre 0,29 y 0,35 Pa/(cm³/s) a lo largo del ciclo; en la congestionada, con un vaivén **menor**, una fosa pasa de poco más de 0,4 a unos 30 (casi se cierra) mientras la otra queda cerca del valor de trabajo, y la resistencia total se mueve poco. Son constantes del modelo, no valores de personas.
 
-:::imagen ilustraciones/cap36-rs-ciclo.svg ancho=92% Ciclo nasal simulado con RinoSim (software libre del autor; no es un paciente): resistencia a 150 Pa de cada fosa y total, cada 5 minutos durante 300. A: nariz normal del simulador. B: nariz con los cornetes congestionados (cuadro *cornetes*: parte de una mucosa mucho más hinchada y oscila la mitad que A); el eje es logarítmico. Los valores extremos de B (más de 30) son del modelo: en una persona real el ciclo es menos regular y no tiene por qué llegar a esos valores.
+:::imagen ilustraciones/cap36-rs-ciclo.svg ancho=92% Ciclo nasal simulado (no es un paciente): resistencia a 150 Pa de cada fosa y total, cada 5 minutos durante 300. A: nariz normal del modelo. B: nariz con los cornetes congestionados (parte de una mucosa mucho más hinchada y oscila la mitad que A); el eje es logarítmico. Compara A con B: con un vaivén menor, en B cada fosa se cierra por turnos mientras el total casi no se mueve, y una sola medición puede caer en cualquier punto de la curva. Los valores extremos de B (más de 30) son del modelo: en una persona real el ciclo es menos regular y no tiene por qué llegar a esos valores. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @50,22 | **A: nariz normal.** Cada fosa se mueve entre 0,29 y 0,35: apenas cruza la raya del valor de trabajo (0,4). El total, en gris, queda en 0,16.
 - @26,50 | **B: fosa derecha.** En su fase congestionada el modelo la lleva de 0,6 a unos 30 Pa/(cm³/s): una sola medición caería en cualquier parte de esa curva.
 - @47,50 | **B: fosa izquierda.** Hace lo mismo desfasada: cuando una se cierra, la otra queda abierta. En la realidad el ciclo es regular solo en una parte de las personas (11 de 52 voluntarios en Flanagan y Eccles, 1997; → H24).
@@ -68,7 +68,7 @@ La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el
 La consecuencia práctica es doble. Una nariz con la mucosa congestionada es justo donde **una sola medición es más una foto**. Y el vasoconstrictor, que apaga el ciclo, hace la comparación más justa entre las dos fosas, pero cambia la pregunta: ya no se mide cómo está la nariz hoy, sino **cuánto queda cuando se le quita la mucosa**.
 
 :::sabias ¿Sabías que?
-El modelo de RinoSim lleva el vasoconstrictor al máximo y lo deja ahí: no simula su curso en el tiempo, ni que se pase, ni el rebote (la congestión que sigue a su efecto). En la nariz real el efecto empieza a los minutos y se va en horas; y con el uso repetido la respuesta se debilita. Eso es la **taquifilaxia**, y el caso 36.2 trata de ella.
+El modelo de las figuras lleva el vasoconstrictor al máximo y lo deja ahí: no simula su curso en el tiempo, ni que se pase, ni el rebote (la congestión que sigue a su efecto). En la nariz real el efecto empieza a los minutos y se va en horas; y con el uso repetido la respuesta se debilita. Eso es la **taquifilaxia**, y el caso 36.2 trata de ella.
 :::
 
 ## Patología
@@ -81,7 +81,7 @@ La rinitis alérgica es una inflamación de la mucosa nasal en personas predispu
 
 **En la nariz**, la rinoscopía puede mostrar los cornetes inferiores aumentados de tamaño y **pálidos** (por la cronicidad del proceso inflamatorio); en una infección aguda se ven hiperémicos y la secreción puede ser clara o espesa (Solé y cols., 2025). El paciente puede además tener los signos de la cara que acompañan a la alergia de larga data (pliegue doble bajo el párpado, ojeras, surco transversal en el dorso de la nariz) (Solé y cols., 2025).
 
-:::imagen ilustraciones/cap36-rinitis-endoscopia.jpg ancho=38% Endoscopías nasales de dos pacientes con rinitis alérgica, en la columna izquierda antes de empezar un tratamiento con inmunoterapia sublingual y a los 1,5 y 3 años en las otras dos. De arriba abajo: fosa izquierda, fosa derecha y rinofaringe de cada paciente. Imagen: Liu B, Hu S, Xiao M. Front Immunol 2026 (doi:10.3389/fimmu.2026.1828695), Fig. 4, CC BY, sin modificaciones. No es parte del flujo de este libro: se muestra para que se vea cómo luce la mucosa que las curvas miden.
+:::imagen ilustraciones/cap36-rinitis-endoscopia.jpg ancho=38% Endoscopías nasales de dos pacientes con rinitis alérgica, en la columna izquierda antes de empezar un tratamiento con inmunoterapia sublingual y a los 1,5 y 3 años en las otras dos. De arriba abajo: fosa izquierda, fosa derecha y rinofaringe de cada paciente. Recorre cada fila de izquierda a derecha: así luce la mucosa que las curvas miden, antes y durante el tratamiento. Imagen: Liu B y cols. (2026), Front Immunol, doi:10.3389/fimmu.2026.1828695, CC BY.
 :::
 
 **El aporte de la prueba con vasoconstrictor.** Como la inflamación hincha los senos y la mucosa, una rinitis alérgica pura cede por completo al vasoconstrictor (caso 36.1). El **diagnóstico de alergia** no sale de ahí. Lo da la historia y, si hace falta, una prueba cutánea (*prick test*): se pone una gota de extracto del alérgeno sobre la piel del antebrazo, se punza y, a los 15-20 minutos, se mide la pápula que se forma, con controles positivo y negativo (Heinzerling y cols., 2013). La prueba cutánea confirma **sensibilización**, y su relevancia clínica se interpreta con la historia; frente a la provocación nasal, en una revisión de siete estudios su sensibilidad fue de 85 % y su especificidad de 77 % (Heinzerling y cols., 2013; Nevis y cols., 2016). Algunos antihistamínicos distorsionan la prueba cutánea y se suspenden antes de hacerla (Heinzerling y cols., 2013), de modo que la indicación de dejarlos días antes del examen de la nariz tiene también ese sentido práctico.
@@ -137,15 +137,15 @@ En cuanto a la pauta, el consenso brasileño recomienda no pasar de 5 días y su
 
 Algunas obstrucciones que parecen de mucosa no se explican por ella y se derivan (→ cap. 35):
 
-- **Pólipos nasales.** Masas blandas que se ven a la rinoscopía o con endoscopia (→ H23). En el simulador los pólipos no responden al vasoconstrictor: lo que baja es la mucosa de los cornetes que los rodea, por eso el resultado suele salir mixto. En la tomografía, que pide el médico, la rinosinusitis con pólipos puede llenar los senos y las fosas (figura).
+- **Pólipos nasales.** Masas blandas que se ven a la rinoscopía o con endoscopia (→ H23). En el modelo de las figuras los pólipos no responden al vasoconstrictor: lo que baja es la mucosa de los cornetes que los rodea, por eso el resultado suele salir mixto. En la tomografía, que pide el médico, la rinosinusitis con pólipos puede llenar los senos y las fosas (figura).
 - **Síntomas de un solo lado, sangrado o pérdida del olfato de un lado.** No se explican por el ciclo ni por una alergia y se derivan (Fokkens y cols., 2020).
 
-:::imagen ilustraciones/cap36-rs-polipos-ra.svg ancho=62% Rinometría acústica de la fosa derecha de una nariz con pólipos (cuadro *pólipos* de RinoSim; no es un paciente). El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor.
+:::imagen ilustraciones/cap36-rs-polipos-ra.svg ancho=62% Rinometría acústica de la fosa derecha de una nariz con pólipos (paciente simulado). El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. El segundo mínimo cae más atrás que el cornete y casi no se abre con el vasoconstrictor: el pólipo no es mucosa que se retraiga. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @58,70 | **El segundo mínimo no es el cornete**: MCA2 0,42 cm² a 4,9 cm de la narina, y no a unos 3,2 cm como en las otras figuras de este capítulo. Ya está en la zona poco fiable (más allá de ~5 cm).
 - @30,28 | Con vasoconstrictor (rayas) sube solo a 0,68 cm²: lo que se abre es la mucosa de alrededor, no el pólipo.
 :::
 
-:::imagen ilustraciones/cap36-tc-polipos.jpg ancho=80% Tomografías coronales de senos paranasales de dos personas con rinosinusitis crónica con pólipos y asma. Son otras personas, no pacientes de este capítulo: la tomografía la pide y la informa el médico, y se muestra para que se vea la forma de lo que las curvas miden. El aire se ve negro. Izquierda: compromiso leve (puntaje de Lund-Mackay de 0 a 10 sobre 24). Derecha: opacificación total de todos los senos y de los complejos osteomeatales, 24 sobre 24. Imagen: Al-Ahmad M, Ali A, Dawood HA, Beshreda GM. J Asthma Allergy 2024 (doi:10.2147/JAA.S478040), Fig. 1, un corte del panel A y uno del panel C, CC BY-NC 3.0; recortada y unida.
+:::imagen ilustraciones/cap36-tc-polipos.jpg ancho=80% Tomografías coronales de senos paranasales de dos personas con rinosinusitis crónica con pólipos y asma. Son otras personas, no pacientes de este capítulo. La tomografía la pide y la informa el médico; aquí sirve para ver lo que las curvas miden. El aire se ve negro. Izquierda: compromiso leve (puntaje de Lund-Mackay de 0 a 10 sobre 24). Derecha: opacificación total de todos los senos y de los complejos osteomeatales, 24 sobre 24: donde debería haber aire hay tejido. Imagen: Al-Ahmad M y cols. (2024), J Asthma Allergy, doi:10.2147/JAA.S478040, CC BY-NC 3.0, adaptada.
 - @14,58 | **Seno maxilar con aire** y, al medio, los cornetes rodeados de aire.
 - @58,74 | **Seno maxilar lleno**: tiene la misma densidad que los tejidos blandos.
 - @71,66 | **Fosa nasal ocupada**: casi no queda aire entre los cornetes.
@@ -191,7 +191,7 @@ Sofía (36.1) y Álvaro (36.2) dan casi la misma respuesta al vasoconstrictor: l
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. Las **curvas y las cifras nasales** salen de RinoSim, el simulador nasal del autor de este libro: son registros simulados, no pacientes. Los valores que aparecen son órdenes de magnitud del modelo; el único valor de referencia que se usa es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24). La sensación de obstrucción se anota con el cuestionario NOSE, que va de 0 a 100 y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Stewart y cols., 2004; Lipan y Most, 2013; → H23). Hay dos límites del simulador que importan aquí: el vasoconstrictor **actúa entero e instantáneamente** (no tiene curso en el tiempo, ni rebote, ni taquifilaxia) y el simulador **no mide la sensación** de obstrucción. En el caso 36.2 eso se dice cuando importa.
+Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. Las **curvas y las cifras nasales** son de **pacientes simulados**, no de pacientes reales. Los valores que aparecen son órdenes de magnitud del modelo, no normas; el único valor de referencia que se usa es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24). La sensación de obstrucción se anota con el cuestionario NOSE, que va de 0 a 100 y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Stewart y cols., 2004; Lipan y Most, 2013; → H23). Hay dos límites del modelo que importan aquí: el vasoconstrictor **actúa entero e instantáneamente** (no tiene curso en el tiempo, ni rebote, ni taquifilaxia) y el modelo **no mide la sensación** de obstrucción. En el caso 36.2 eso se dice cuando importa.
 
 {{caso cap36_alergica}}
 
@@ -220,10 +220,10 @@ Antes de medir, ¿qué mirarías en la rinoscopía? Si las dos fosas salen sobre
 | Con vasoconstrictor, espiración | 0,28 | 0,28 | |
 :::
 
-:::imagen ilustraciones/cap36-rs-alergica-rm.svg ancho=78% Rinomanometría de Sofía (paciente simulada con RinoSim, software libre del autor; no es un paciente). Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV.
+:::imagen ilustraciones/cap36-rs-alergica-rm.svg ancho=78% Rinomanometría de Sofía. Línea continua: reposo; discontinua: con vasoconstrictor. La fosa derecha (rojo) pasa por los cuadrantes I y III; la izquierda (azul), por II y IV. En reposo las dos fosas están sobre el valor de trabajo; con vasoconstrictor bajan juntas hasta la referencia: la obstrucción era mucosa. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @78,36 | **FND en reposo**: a 150 Pa pasan unos 220 cm³/s, lo que da **0,68 Pa/(cm³/s)**, sobre el valor de trabajo (0,4).
 - @22,32 | **FNI en reposo**: unos 300 cm³/s, **0,50**: también sobre el valor, pero menos. La diferencia con la derecha es de la **fase del ciclo**: la rinoscopía de las dos fosas es igual.
-- @74,9 | **Con vasoconstrictor** (rayas) las dos fosas quedan casi iguales: unos 515 cm³/s, **0,29** en las dos. El simulador lo lee como "baja hasta la referencia: vasomotora". Bajaron 57 % (FND) y 42 % (FNI).
+- @74,9 | **Con vasoconstrictor** (rayas) las dos fosas quedan casi iguales: unos 515 cm³/s, **0,29** en las dos. Bajan hasta la referencia: vasomotora. Bajaron 57 % (FND) y 42 % (FNI).
 - @26,72 | **Espirando** da lo mismo que inspirando (0,67 y 0,48 en reposo): la obstrucción no depende de la fase, como en una mucosa o un tabique.
 :::
 
@@ -235,9 +235,9 @@ Antes de medir, ¿qué mirarías en la rinoscopía? Si las dos fosas salen sobre
 | Volumen 2-5 cm (cm³) | 3,8 | 6,8 | 4,2 | 6,8 |
 :::
 
-:::imagen ilustraciones/cap36-rs-alergica-ra.svg ancho=78% Rinometría acústica de Sofía, simulada con RinoSim; no es un paciente. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor.
+:::imagen ilustraciones/cap36-rs-alergica-ra.svg ancho=78% Rinometría acústica de Sofía. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. Con vasoconstrictor las dos curvas se superponen y el segundo mínimo, el del cornete, casi desaparece: no queda nada estructural. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @53,66 | **MCA2** (el cornete inferior): 0,31 cm² en la derecha y 0,44 en la izquierda; con la mucosa congestionada el cornete casi tapa el paso.
-- @11,58 | **MCA1** (la válvula): 0,44 y 0,46 cm²; con vasoconstrictor sube a 0,67 en las dos. En la nariz normal del simulador es 0,61 (normal del modelo, no es una norma).
+- @11,58 | **MCA1** (la válvula): 0,44 y 0,46 cm²; con vasoconstrictor sube a 0,67 en las dos. En la nariz normal del modelo es 0,61 (no es una norma).
 - @38,28 | Con vasoconstrictor (rayas) las dos curvas se **superponen** y el segundo mínimo casi desaparece: 1,92 y 1,91 cm². No queda nada estructural.
 :::
 
@@ -247,7 +247,6 @@ Antes de medir, ¿qué mirarías en la rinoscopía? Si las dos fosas salen sobre
 - **Qué pedir:** rinoscopía (→ H23); rinomanometría de reposo; vasoconstrictor **en las dos fosas**, porque las dos superan 0,4 (→ H24); rinometría si se quiere ubicar dónde está el estrechamiento (→ H25). El *prick test* **no** forma parte de estos exámenes: lo pide el médico.
 - **Errores esperables:** leer el total (0,29) como "nariz permeable"; llamar "unilateral" a la diferencia entre fosas (0,68 y 0,50), que es del ciclo; informar "rinitis alérgica" porque el vasoconstrictor funcionó.
 - **Para discutir en clase:** después del vasoconstrictor las dos fosas dan 0,29: ¿qué pasó con la diferencia de antes? ¿Qué dice el estudio de Corey y cols. (1997) sobre una nariz sana frente al vasoconstrictor?
-- **Con RinoSim:** cuadro *cornetes*, minuto 5 del ciclo.
 :::
 
 {{caso cap36_medicamentosa}}
@@ -277,11 +276,11 @@ Anota las causas de una obstrucción bilateral y constante que empezó con un re
 | Con vasoconstrictor, espiración | 0,27 | 0,27 | |
 :::
 
-:::imagen ilustraciones/cap36-rs-medic-rm.svg ancho=78% Rinomanometría de Álvaro (paciente simulado con RinoSim; no es un paciente). Línea continua: reposo; discontinua: con vasoconstrictor. Las curvas de reposo casi no se despegan de la horizontal.
+:::imagen ilustraciones/cap36-rs-medic-rm.svg ancho=78% Rinomanometría de Álvaro. Línea continua: reposo; discontinua: con vasoconstrictor. Las curvas de reposo casi no se despegan de la horizontal: las dos fosas están muy cerradas. Con vasoconstrictor se abren del todo. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @82,32 | **FND en reposo**: a 150 Pa pasan solo unos 58 cm³/s: **2,57 Pa/(cm³/s)**, seis veces el valor de trabajo (0,4).
 - @20,28 | **FNI en reposo**: unos 100 cm³/s, **1,47**. Las dos fosas están muy cerradas y la total sale **0,93**: aquí el total sí delata el problema.
 - @74,8 | **Con vasoconstrictor** (rayas) las dos fosas pasan a unos 530 cm³/s: **0,28**. Bajaron 89 % y 81 %.
-- @30,70 | **El simulador abre la nariz de Álvaro como abriría la de cualquiera**: no modela la taquifilaxia ni la menor duración del efecto. En una persona con meses de uso la respuesta puede ser menor.
+- @30,70 | **El modelo abre la nariz de Álvaro como abriría la de cualquiera**: no tiene taquifilaxia ni la menor duración del efecto. En una persona con meses de uso la respuesta puede ser menor.
 :::
 
 :::ayuda-ancho Álvaro, rinometría acústica (promedio de tres registros por fosa)
@@ -292,8 +291,8 @@ Anota las causas de una obstrucción bilateral y constante que empezó con un re
 | Volumen 2-5 cm (cm³) | 1,7 | 6,8 | 2,1 | 6,8 |
 :::
 
-:::imagen ilustraciones/cap36-rs-medic-ra.svg ancho=78% Rinometría acústica de Álvaro, simulada con RinoSim; no es un paciente. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor.
-- @27,76 | **MCA2**: 0,13 cm² (derecha) y 0,17 (izquierda), la quinta parte de lo que dan Sofía y la nariz normal del simulador (1,52): los cornetes casi cierran el paso.
+:::imagen ilustraciones/cap36-rs-medic-ra.svg ancho=78% Rinometría acústica de Álvaro. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. En reposo los cornetes casi cierran el paso; con vasoconstrictor las dos fosas se superponen: se abrió todo lo mucoso. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+- @27,76 | **MCA2**: 0,13 cm² (derecha) y 0,17 (izquierda), la quinta parte de lo que dan Sofía y la nariz normal del modelo (1,52): los cornetes casi cierran el paso.
 - @9,60 | **MCA1**: 0,44 y 0,47 cm² en reposo; con vasoconstrictor sube a 0,69 y 0,71.
 - @40,20 | Con vasoconstrictor (rayas) las dos fosas se **superponen** y MCA2 pasa a 1,88 y 1,86: se abrió todo lo mucoso. Es la misma curva que la de la nariz de Sofía.
 - @75,62 | En reposo ni siquiera pasados los 5 cm la fosa se abre del todo: a 10 cm la curva sigue muy por debajo de la de rayas. El equipo avisó que, en la fosa derecha con vasoconstrictor, los registros **no se parecían** (MCA2 ±0,03 cm²): en un caso real se repetirían.
@@ -305,7 +304,6 @@ Anota las causas de una obstrucción bilateral y constante que empezó con un re
 - **Qué pedir:** la anamnesis del producto (→ H23); rinomanometría de reposo con las 48 horas cumplidas; vasoconstrictor en las dos fosas (→ H24); rinometría acústica (→ H25).
 - **Errores esperables:** informar "rinitis alérgica" porque la prueba dio vasomotora; no preguntar por el spray; medir con el spray puesto y leer "estructural"; decirle al paciente que el examen demostró que es medicamentosa.
 - **Para discutir en clase:** ¿qué le dices a un paciente que acaba de respirar perfecto gracias al vasoconstrictor del examen y quiere volver a usarlo en la casa? ¿Dónde cae tu responsabilidad y dónde la del médico?
-- **Con RinoSim:** cuadro *cornetes*, semilla 1.
 :::
 
 {{caso cap36_mixta}}
@@ -335,7 +333,7 @@ Si las dos fosas no están igual, ¿en cuál harías la prueba con vasoconstrict
 | Con vasoconstrictor (solo FND), espiración | 0,44 | no se aplica | |
 :::
 
-:::imagen ilustraciones/cap36-rs-mixta-rm.svg ancho=78% Rinomanometría de Marcos (paciente simulado con RinoSim; no es un paciente). Línea continua: reposo; discontinua: con vasoconstrictor. El simulador mide con vasoconstrictor las dos fosas; según la regla del libro (→ H24) solo se aplicaría en la derecha, que es la única sobre 0,4.
+:::imagen ilustraciones/cap36-rs-mixta-rm.svg ancho=78% Rinomanometría de Marcos. Línea continua: reposo; discontinua: con vasoconstrictor. Se muestran las dos fosas con vasoconstrictor; según la regla del libro (→ H24) solo se aplicaría en la derecha, que es la única sobre 0,4. La derecha baja a la mitad pero no llega al valor de trabajo: una respuesta mixta. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @79,40 | **FND en reposo**: a 150 Pa pasan unos 160 cm³/s: **0,95**, más del doble del valor de trabajo.
 - @25,36 | **FNI en reposo**: unos 420 cm³/s, **0,36**: dentro del valor, así que no lleva vasoconstrictor.
 - @82,22 | **FND con vasoconstrictor** (rayas): sube el flujo a unos 330 cm³/s, **0,46**. Bajó 52 %, pero **no llegó al valor de trabajo**: es la respuesta mixta.
@@ -350,7 +348,7 @@ Si las dos fosas no están igual, ¿en cuál harías la prueba con vasoconstrict
 | Volumen 2-5 cm (cm³) | 2,8 | 6,8 | 5,4 |
 :::
 
-:::imagen ilustraciones/cap36-rs-mixta-ra.svg ancho=78% Rinometría acústica de Marcos, simulada con RinoSim; no es un paciente. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor (el simulador la hizo en las dos fosas; la regla del libro la haría solo en la derecha).
+:::imagen ilustraciones/cap36-rs-mixta-ra.svg ancho=78% Rinometría acústica de Marcos. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor (se muestra en las dos fosas; la regla del libro la haría solo en la derecha). En la fosa derecha el cornete se abre y la válvula no: lo que queda es estructura. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @9,66 | **FND, MCA1 0,23 cm²** a 1,3 cm de la narina: el estrechamiento más grande de las dos fosas, en la zona de la válvula.
 - @45,66 | **FND, MCA2 0,49 cm²** a 3,2 cm: el cornete derecho, congestionado.
 - @45,22 | Con vasoconstrictor (rayas) la FND hace dos cosas distintas: **MCA2 se abre a 1,93** (era mucosa) y **MCA1 solo sube a 0,41**: queda el estrechamiento de la válvula, que es estructura (→ cap. 35).
@@ -363,7 +361,6 @@ Si las dos fosas no están igual, ¿en cuál harías la prueba con vasoconstrict
 - **Qué pedir:** rinoscopía; rinomanometría de reposo; vasoconstrictor **solo en la derecha** (la izquierda está en 0,36); rinometría para separar el nivel del estrechamiento (→ H24, H25).
 - **Errores esperables:** concluir "vasomotora" porque bajó; concluir "mecánica" porque no llegó a 0,4; leer el MCA2 de reposo sin considerar que el primer mínimo está muy cerrado.
 - **Para discutir en clase:** si se operaran solo los cornetes, ¿qué quedaría? ¿Y si se operara solo el tabique? ¿Qué parte de la queja de Marcos es de la izquierda?
-- **Con RinoSim:** cuadro *mixta*, minuto 10 del ciclo.
 :::
 
 ## Resolución de los casos
@@ -401,7 +398,7 @@ Obstrucción nasal **bilateral de tipo vasomotora (mucosa)**, en un paciente con
 > **Informe.** Rinomanometría anterior activa. Sin vasoconstrictores durante 48 horas antes del examen; refiere uso diario previo de oximetazolina en spray durante unos ocho meses, con varios disparos al día. Resistencia a 150 Pa en reposo: FND 2,57; FNI 1,47; total 0,93 Pa/(cm³/s). **Ambas fosas fuera del valor de referencia (≤ 0,4).** Con oximetazolina, 2 puff por fosa, y 15 minutos: FND 0,28; FNI 0,28; total 0,14. Rinometría acústica: MCA2 0,13 (FND) y 0,17 cm² (FNI) en reposo, que se abren a 1,88 y 1,86 con vasoconstrictor; en FND con vasoconstrictor los registros no cumplieron el criterio de repetición. **Conclusión:** obstrucción nasal bilateral de tipo **vasomotora** (mucosa), sin componente mecánico. El antecedente de uso prolongado de un descongestionante tópico se informa al médico tratante.
 
 :::ojo Ojo clínico
-Si Álvaro hubiera llegado a la hora con el spray puesto, la mucosa ya estaría retirada: su resistencia de reposo se parecería a la que tuvo con el vasoconstrictor (0,28 y 0,28) y la prueba no mostraría ningún cambio. El informe habría dicho "igual que en reposo" y **estructural** sobre una nariz que es solo mucosa. Por eso se pregunta, se anota y, si el paciente usó el producto, se discute con el médico si se repite el examen otro día. El simulador no modela este caso: es un razonamiento a partir de sus dos mediciones.
+Si Álvaro hubiera llegado a la hora con el spray puesto, la mucosa ya estaría retirada: su resistencia de reposo se parecería a la que tuvo con el vasoconstrictor (0,28 y 0,28) y la prueba no mostraría ningún cambio. El informe habría dicho "igual que en reposo" y **estructural** sobre una nariz que es solo mucosa. Por eso se pregunta, se anota y, si el paciente usó el producto, se discute con el médico si se repite el examen otro día. Las figuras no muestran este caso: es un razonamiento a partir de las dos mediciones.
 :::
 
 :::comentario Lo que dicen las normas
@@ -442,7 +439,7 @@ Las guías de rinitis ponen los corticoides nasales como primera elección en la
 - **Se pregunta por el spray** y se anota: medir con el producto puesto da un "estructural" falso.
 - **El ciclo nasal** engaña en una nariz congestionada: una fosa sola es una foto. El vasoconstrictor lo apaga.
 - **"Vasomotora" en el informe = mucosa**, no *rinitis vasomotora*.
-- **El simulador no tiene curso ni rebote**: el efecto del vasoconstrictor es entero e inmediato.
+- **El modelo de las figuras no tiene curso ni rebote**: el efecto del vasoconstrictor es entero e inmediato.
 - **El informe describe el patrón**; el diagnóstico y el tratamiento son del médico.
 :::
 

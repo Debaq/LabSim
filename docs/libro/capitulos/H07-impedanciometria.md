@@ -60,7 +60,7 @@ Con eso se entienden las dos formas de medirlo:
 
 Todos los impedanciómetros tienen la misma lógica: una pantalla que cambia según la prueba, unas **teclas bajo la pantalla** cuya función aparece rotulada en la última línea, y unos controles fijos para elegir el oído, la sonda y la intensidad. La figura muestra el de LabSim con un timpanograma recién hecho en el oído derecho de Carolina, la paciente con otoesclerosis que vas a ver más abajo.
 
-:::imagen /docs/manual/img/estudiante/impedanciometro-timpanograma.png El impedanciómetro de LabSim en la pantalla de timpanograma
+:::imagen /docs/manual/img/estudiante/impedanciometro-timpanograma.png El impedanciómetro de LabSim en la pantalla de timpanograma. Antes de mirar la curva, lee los tres números de la derecha: compliancia, presión y volumen.
 - @55.7,34 | **La curva.** Un pico muy bajo, apenas sobre la línea de base: un oído medio rígido.
 - @89.8,11 | **Compliancia** (*Compliance*): la altura del pico, ya descontado el conducto. Aquí 0,18 mL.
 - @89.8,18 | **Presión** (*Pressure*): dónde cae el pico. Aquí 18 daPa, prácticamente cero.
@@ -142,10 +142,10 @@ Pregunta si el reflejo **se sostiene**. Una fibra del VIII par comprimida no man
 
 En los tumores del VIII lo más frecuente es que el reflejo esté **elevado o ausente**; el deterioro completa el cuadro: 95 de 97 oídos con tumor tenían una de las dos alteraciones (Hirsch, 1983).
 
-:::imagen /docs/manual/img/estudiante/impedanciometro-decay.png Deterioro del reflejo sin decaimiento
+:::imagen /docs/manual/img/estudiante/impedanciometro-decay.png Deterioro del reflejo sin decaimiento: la contracción se sostiene plana los 10 segundos del tono, como en un nervio sano.
 - @46.4,40 | **La contracción**: empieza en el segundo 1, cuando arranca el tono, y se mantiene plana hasta el 11.
 - @88.8,20 | **Lo que queda de la amplitud inicial**: 97 % a los 5 s y 94 % a los 10 s. Perdió 6 %: **negativo**.
-- @24.6,59 | **Teclas**: 500 o 1000 Hz, *Inicio*, intensidad (aquí 95 dB) e *IPSI/CONTRA*. La captura es un ipsilateral del OI; la prueba clásica es contralateral, y el equipo permite las dos.
+- @24.6,59 | **Teclas**: 500 o 1000 Hz, *Inicio*, intensidad (aquí 95 dB) e *IPSI/CONTRA*. Aquí, un ipsilateral del OI; la prueba clásica es contralateral, y el equipo permite las dos.
 :::
 
 ### 6. Función tubaria
@@ -183,7 +183,7 @@ Bajo los **6 meses de edad corregida** se usa la sonda de **1000 Hz** (BSA, 2024
 - **Clasificación** (Baldwin, 2006, a partir de Marchant y cols., 1986): se traza una línea de base entre los extremos del barrido y se mira el pico principal. **Sobre la línea, positivo: normal. Bajo la línea o plano: anormal.** Si hay un pico positivo y uno negativo, se clasifica como normal (BSA, 2024).
 - **Repetir** el trazo y comprobar que cae en la misma categoría (BSA, 2024).
 
-:::imagen /docs/manual/img/estudiante/impedanciometro-etf.png Función tubaria con membrana íntegra
+:::imagen /docs/manual/img/estudiante/impedanciometro-etf.png Función tubaria con membrana íntegra: si la trompa abre, el pico se corre hacia el lado contrario de la presión que se aplicó.
 - @57.5,30 | **Tres timpanogramas superpuestos**: reposo (blanco), después de tragar a +400 (amarillo) y a −400 daPa (verde).
 - @89.8,21 | **La presión de cada pico**: −18, −23 y −11 daPa. Tras +400 el pico se fue a lo negativo y tras −400 a lo positivo: la trompa **abre**. Entre −23 y −11 hay 12 daPa.
 - @24.6,59 | **Teclas**: *Prueba* (íntegra o perforada), *Reposo*, *+400 trag* y *−400 trag*.
@@ -294,7 +294,7 @@ Además del umbral, mira la **forma** de la deflexión. La normal baja al empeza
 {{caso h7_p34}}
 
 :::figura h7_p34 timpanograma
-- @OD pico | **Tipo As**: pico en su lugar (18 daPa) pero de solo 0,18 mL, con volumen normal (1,24 mL). Es el oído de la captura del equipo.
+- @OD pico | **Tipo As**: pico en su lugar (18 daPa) pero de solo 0,18 mL, con volumen normal (1,24 mL). Es el oído que muestra la pantalla del equipo en *Conoce tu equipo*.
 - @OI pico | El OI es A (1,41 mL): la diferencia entre los dos oídos es el hallazgo.
 :::
 

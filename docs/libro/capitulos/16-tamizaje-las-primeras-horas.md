@@ -263,7 +263,7 @@ Pasa el tamizaje y está listo para el alta. ¿Qué le dices a la familia y qué
 - **Hipótesis esperables:** audición normal; pérdida de aparición tardía si la infección fue congénita; ninguna si la PCR resulta negativa.
 - **Qué pedir:** esperar la PCR; si es positiva, evaluación audiológica a los 3 meses como máximo y control cada 12 meses hasta los 3 años (JCIH, 2019).
 - **Errores esperables:** dar de alta sin seguimiento porque "pasó"; olvidar la PCR; decirle a la familia que "su hijo oye perfecto".
-- **En LabSim:** el caso se arma como recién nacido sano de 50 horas; los datos de TORCH se pueden cargar en la ficha y van a la hoja del docente como indicador de riesgo, sin cambiar el resultado del tamizaje.
+- **En LabSim:** recién nacido sano de 50 horas; los datos de TORCH se pueden cargar en la ficha y van a la hoja del docente como indicador de riesgo, sin cambiar el resultado del tamizaje.
 :::
 
 {{caso cap16_efusion}}

@@ -32,7 +32,7 @@ El protocolo de este libro **no hace VEMP aéreo a quien tiene hipoacusia de con
 
 El oído interno es una cámara cerrada, llena de líquido, con solo **dos puntos blandos**: la ventana oval, donde se apoya el estribo, y la ventana redonda, cubierta por una membrana. Cuando el estribo empuja la oval, el líquido de la rampa vestibular se mueve; como el líquido no se comprime, el movimiento tiene que ir a alguna parte, y la única salida es la ventana redonda, que cede hacia afuera. En el camino, el líquido empuja la **membrana basilar**, y es ese empuje el que la cóclea convierte en audición. La diferencia de presión entre las dos rampas es lo que mueve la membrana.
 
-![Dos cócleas desenrolladas. A: oído sano, con la ventana oval, la ventana redonda y una flecha gruesa a cada lado de la membrana basilar. B: el mismo oído con un orificio extra en la rampa vestibular por donde se escapa parte de la presión y flechas más finas sobre la membrana.](ilustraciones/cap26-ventanas.svg)
+![Dos cócleas desenrolladas. A: oído sano, con la ventana oval, la ventana redonda y una flecha gruesa a cada lado de la membrana basilar. B: el mismo oído con un orificio extra en la rampa vestibular por donde se escapa parte de la presión; las flechas sobre la membrana son más finas porque le llega menos energía, y la vía aérea oye peor.](ilustraciones/cap26-ventanas.svg)
 
 Una **tercera ventana** es cualquier punto por donde el líquido del laberinto queda en contacto con un espacio blando fuera de él: un hueso que falta sobre un conducto, un acueducto demasiado ancho, una comunicación con la arteria carótida. Parte de la energía que debía ir a la membrana basilar **se escapa por el nuevo orificio**, y la vía aérea oye peor. Con vibración del cráneo ocurre lo contrario y la vía ósea oye mejor. Los dos efectos juntos dan lo que la prueba interpreta como un gap sin oído medio enfermo (Merchant y Rosowski, 2008). <!-- verificar: el mecanismo exacto de la mejoría de la vía ósea (diferencia de presión entre rampas con vibración del cráneo) no está leído en el texto completo de Merchant y Rosowski 2008; se dejó solo lo que dice el resumen -->
 
@@ -68,19 +68,19 @@ La audiometría es el primer lugar donde asoma:
 - **VEMP con umbral bajo**: 81 ± 9 dB nHL en los oídos afectados, contra 99 ± 7 en los oídos sanos de los mismos pacientes y 98 ± 4 en los controles (Minor, 2005). Con el estímulo en dB SPL, la diferencia fue de 20 a 30 dB: 84 dB SPL en el cVEMP y 85 en el oVEMP de los oídos con dehiscencia (Welgampola y cols., 2008). Los números cambian de un equipo a otro, y por eso cada servicio necesita su propia normativa.
 - **VEMP de amplitud grande.** En el oVEMP la amplitud de la n10 llegó a 25 µV con el estímulo más alto y a 40 µV con la mirada hacia arriba, y su amplitud y su umbral separaron a los pacientes de los controles (Rosengren y cols., 2008).
 
-![Tres paneles de un esquema construido con cifras de la literatura para una dehiscencia del conducto superior derecho. Audiograma con la ósea bajo 0 dB y la aérea entre 9 y 11 dB. Cuadro de reflejo presente. Umbral del cVEMP de 81 dB nHL en el oído con dehiscencia contra 99 en el sano.](ilustraciones/cap26-dehiscencia.svg)
+![Lo que deja una dehiscencia del conducto superior derecho en tres pruebas. Audiograma con la ósea bajo 0 dB y la aérea entre 9 y 11 dB: un gap sin oído medio enfermo. Reflejo presente a pesar del gap. Umbral del cVEMP de 81 dB nHL en el oído con dehiscencia contra 99 en el sano. Esquema con cifras promedio de la literatura, no un paciente.](ilustraciones/cap26-dehiscencia.svg)
 
 La dehiscencia **se confirma con la tomografía** de alta resolución de los huesos temporales y la decide el médico. Lo que hace el audiólogo es sospecharla, porque una combinación de síntomas, audiometría con gap sin oído medio, y VEMP, junto con la tomografía, es lo que da el diagnóstico (Zhou y cols., 2007).
 
-:::imagen ilustraciones/cap26-tc-dehiscencia.jpg ancho=95% Tomografía de alta resolución de los huesos temporales de otra persona (no es un paciente de este capítulo), con una dehiscencia del conducto superior derecho. Los cortes se reconstruyen en dos planos: el de Pöschl va paralelo al conducto superior y lo muestra como un anillo; el de Stenvers va perpendicular a él (Noij y Rauch, 2020, Front Neurol, doi:10.3389/fneur.2020.00695). La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Reddy YM y Pandey AK (2025), Cureus, doi:10.7759/cureus.84477, Fig. 2 (paneles B, C y D), CC BY 4.0, recortada.
+:::imagen ilustraciones/cap26-tc-dehiscencia.jpg ancho=95% Tomografía de alta resolución de los huesos temporales de otra persona (no es un paciente de este capítulo), con una dehiscencia del conducto superior derecho. Los cortes se reconstruyen en dos planos: el de Pöschl va paralelo al conducto superior y lo muestra como un anillo; el de Stenvers va perpendicular a él (Noij y Rauch, 2020, Front Neurol, doi:10.3389/fneur.2020.00695). La tomografía la pide y la informa el médico; aquí sirve para ver el orificio que las pruebas sospechan: compara el techo del conducto en los dos oídos. Imagen: Reddy YM y Pandey AK (2025), Cureus, doi:10.7759/cureus.84477, CC BY 4.0, adaptada.
 - @22,24 | **Stenvers, oído derecho**: el techo óseo del conducto superior falta (flecha).
 - @61,32 | **Pöschl, oído derecho**: el anillo del conducto queda abierto arriba, contra la fosa media.
 - @94,33 | **Pöschl, oído izquierdo**: el mismo conducto con su techo óseo grueso.
-- RT y LT son los rótulos del original: oído derecho e izquierdo.
+- RT y LT: oído derecho e izquierdo.
 :::
 
 :::ojo Ojo clínico
-LabSim todavía **no puede armar una dehiscencia**: su motor recorta la vía ósea en 0 dB y apaga el reflejo cuando hay un gap. El caso 26.1 de este capítulo se resuelve con un esquema dibujado con las cifras de la literatura, no con registros del simulador.
+LabSim todavía **no simula una dehiscencia**: recorta la vía ósea en 0 dB y apaga el reflejo cuando hay un gap. Por eso el caso 26.1 se resuelve con un esquema con las cifras de la literatura, no con registros del simulador.
 :::
 
 ### Otras terceras ventanas
@@ -154,9 +154,9 @@ Antes de la estapedotomía, el médico pidió impedanciometría con reflejos y V
 
 #### Paso 4 · Los resultados
 
-Los resultados de esta paciente **no están en LabSim**, porque el simulador no puede escribir una dehiscencia. El esquema se construyó con las cifras de la literatura de la sección anterior, y sus cifras son promedios y no valores de un paciente.
+Los resultados de esta paciente **no están en LabSim**, porque el simulador no puede escribir una dehiscencia. El esquema usa las cifras de la literatura de la sección anterior: son promedios, no valores de un paciente.
 
-:::imagen ilustraciones/cap26-dehiscencia.svg ancho=95% La dehiscencia del conducto superior derecho en tres pruebas: esquema construido con cifras de la literatura (Minor, 2005; Zhou y cols., 2007), no un registro de LabSim.
+:::imagen ilustraciones/cap26-dehiscencia.svg ancho=95% La dehiscencia del conducto superior derecho en tres pruebas. La combinación que la delata: ósea mejor que lo normal en graves, reflejo presente a pesar del gap y un cVEMP de umbral bajo. Cifras promedio de la literatura (Minor, 2005; Zhou y cols., 2007), no de un paciente.
 - @10,24 | **La ósea baja de 0 dB HL** en graves: el oído oye por hueso mejor que lo normal.
 - @6,60 | **La aérea queda en 9 a 11 dB**: es un gap de 19 dB en 250 Hz, con timpanograma A.
 - @50,15 | **El reflejo está presente** a pesar del gap: la cadena se mueve.
@@ -168,7 +168,7 @@ Los resultados de esta paciente **no están en LabSim**, porque el simulador no 
 - **Hipótesis esperables:** otoesclerosis (por el gap), trompa abierta (por la autofonía), dehiscencia del conducto superior.
 - **Qué pedir:** impedanciometría con reflejos, VEMP con búsqueda de umbral, y una tomografía de huesos temporales que pide el médico (→ H3, H7, H12).
 - **Errores esperables:** operar sin mirar el reflejo; leer el VEMP por la razón de asimetría de amplitud; redondear la ósea a 0.
-- **En LabSim:** la paciente está armada como un oído normal solo para la entrevista y el rostro; el audiograma, el reflejo y el VEMP del caso no salen del simulador. El simulador todavía no escribe una ósea bajo 0 dB ni un reflejo presente con gap. <!-- docs/decisiones.md: "Reflejo presente con gap" y "Ósea supranormal". -->
+- **En LabSim:** la paciente se crea con oídos normales, solo para la entrevista y el rostro; el audiograma, el reflejo y el VEMP del caso no salen del simulador. El simulador todavía no escribe una ósea bajo 0 dB ni un reflejo presente con gap. <!-- docs/decisiones.md: "Reflejo presente con gap" y "Ósea supranormal". -->
 :::
 
 {{caso cap26_otoesclerosis}}
@@ -211,7 +211,7 @@ Con un gap de 30 a 60 dB en un oído, ¿harías un VEMP aéreo? ¿Qué te diría
 - **Hipótesis:** otoesclerosis, fijación del estribo por otra causa, tercera ventana (por el gap). Reflejo ausente y timpanograma As empujan a la primera.
 - **Qué pedir:** audiometría con vía ósea, impedanciometría con reflejos (→ H3, H7). El VEMP aéreo en este oído **no es informativo del vestíbulo** y, si se quiere saber algo de él, se usa la vía ósea (→ cap. 20).
 - **Errores esperables:** leer el VEMP caído como hipofunción del sáculo; decir "tercera ventana" porque hay gap; olvidar mirar el reflejo.
-- **En LabSim:** caso armado para el libro con el cuadro *otoesclerosis* solo en el OD.
+- **En LabSim:** cuadro *otoesclerosis* solo en el OD.
 :::
 
 {{caso cap26_pendred}}
@@ -241,7 +241,7 @@ Un niño de 11 años con una pérdida bilateral que se nota más en la escuela. 
 :::
 :::figura cap26_pendred reflejos
 - @ipsi OD 1000 | **Reflejos presentes** de 1 a 4 kHz en los dos oídos, en el nivel que corresponde a su umbral.
-- @ipsi OI 500 | El único que falta es el de 500 Hz del OI, donde el gap ya es de 10 dB: es el límite del motor de LabSim, que apaga el reflejo con ese gap.
+- @ipsi OI 500 | El único que falta es el de 500 Hz del OI, donde el gap ya es de 10 dB: es un límite de LabSim, que apaga el reflejo con ese gap.
 :::
 
 El simulador da en este cuadro una acumetría con Rinne positivo en 500 y 1.000 Hz: el diapasón no encuentra el gap, que está en 125 y 250 Hz. Por eso el diapasón no reemplaza a la audiometría con vía ósea.
@@ -251,7 +251,7 @@ El simulador da en este cuadro una acumetría con Rinne positivo en 500 y 1.000 
 - **Hipótesis:** efusión crónica (no: timpanograma A), pérdida sensorioneural genética (en parte), **tercera ventana por acueducto dilatado**.
 - **Qué pedir:** audiometría con vía ósea y mirar los graves (→ H3), impedanciometría con reflejos (→ H7), y derivar para imagen del oído interno y estudio genético (→ cap. 10). La tomografía o resonancia la decide el médico.
 - **Errores esperables:** repetir el procedimiento sobre el oído medio; informarlo como "mixta" a secas; olvidar que el gap está en 125 y 250 Hz y que el Rinne de 500 no lo ve.
-- **En LabSim:** caso armado para el libro con el cuadro *Pendred / acueducto vestibular dilatado*, grado moderado, en los dos oídos. **El VEMP de este cuadro no sale con umbral bajo**: sale en el rango de un oído normal. Por eso este caso no lo muestra; la literatura espera lo contrario (Zhou y Gopen, 2011). La ósea tampoco queda mejor que lo normal, porque el motor no escribe valores bajo 0 dB.
+- **En LabSim:** cuadro *Pendred / acueducto vestibular dilatado*, grado moderado, en los dos oídos. **El VEMP de este cuadro no sale con umbral bajo**: sale en el rango de un oído normal. Por eso este caso no lo muestra; la literatura espera lo contrario (Zhou y Gopen, 2011). La ósea tampoco queda mejor que lo normal, porque el simulador no escribe valores bajo 0 dB.
 :::
 
 ## Resolución de los casos

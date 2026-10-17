@@ -91,7 +91,7 @@ def perfil(nombre, titulo, filas):
         c.l(z2x(0), y, z2x(z), y, col, 2)
         c.c(z2x(z), y, 6, col, '#fff')
     c.t((xl + xr) / 2, ybot + 32, 'desviaciones estándar respecto de la norma de la versión y de la edad', 8.5, TENUE)
-    c.t(14, alto - 6, 'Datos inventados para el libro. El z supone una norma de cada versión que aquí no se da.', 7.5, TENUE, 'start')
+    c.t(14, alto - 6, 'Datos de ejemplo. El z supone una norma de cada versión que aquí no se da.', 7.5, TENUE, 'start')
     c.guardar(nombre)
 
 

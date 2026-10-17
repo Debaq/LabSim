@@ -629,7 +629,7 @@ def escalas():
         xs_ = x0 + 220
         c.l(xs_ - 12, Y(ret + umbral_hl), xs_ + 12, Y(ret + umbral_hl), AZUL, 2.4)
         c.t(xs_ + 18, Y(ret + umbral_hl) + 3, 'umbral', 8, AZUL, 'start', 700)
-    c.t(14, 352, 'Mismo sonido, tres números. Los umbrales del paciente son inventados (40 dB HL en 1.000 Hz y 10 dB HL en 125 Hz).', 8, TENUE, 'start')
+    c.t(14, 352, 'Mismo sonido, tres números. Los umbrales del paciente son de ejemplo (40 dB HL en 1.000 Hz y 10 dB HL en 125 Hz).', 8, TENUE, 'start')
     c.t(14, 365, 'RETSPL del TDH-39 (ISO 389-1, 2017): 45 dB SPL en 125 Hz y 7 dB SPL en 1.000 Hz, los mismos valores que usa H3.', 8, TENUE, 'start')
     c.guardar('b4-escalas.svg')
 
@@ -769,7 +769,7 @@ def promedio():
     c.t(436, 335, 'línea: 5 / √N', 8, TENUE, 'start')
     c.t(436, 360, f'N = 2.000: 5 / √2000 = {num_es(5 / math.sqrt(2000), 2)} µV', 8.5, TINTA, 'start', 700)
     c.t(436, 374, f'razón señal/ruido: {num_es(20 * math.log10(0.5 / (5 / math.sqrt(2000))), 0)} dB', 8.5, TINTA, 'start', 700)
-    c.t(14, 508, 'Simulación: ruido aleatorio suavizado de 5 µV RMS por barrido y una señal inventada con forma de ABR. No es un registro.', 8, TENUE, 'start')
+    c.t(14, 508, 'Simulación: ruido aleatorio suavizado de 5 µV RMS por barrido y una señal artificial con forma de ABR. No es un registro.', 8, TENUE, 'start')
     c.guardar('b4-promedio.svg')
 
 

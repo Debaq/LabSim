@@ -36,7 +36,7 @@ El oído que trabaja en ruido no sufre un solo daño sino **dos tiempos** (→ c
 - **Desplazamiento temporal del umbral (TTS).** Al terminar el turno el umbral está peor que al empezar. Con reposo vuelve a la base en horas, días o, tras exposiciones muy intensas, semanas (Ryan y cols., 2016).
 - **Desplazamiento permanente del umbral (PTS).** La parte que no vuelve. Aparece cuando la exposición fue muy intensa o se repitió muchas veces sin que el oído terminara de recuperarse (Ryan y cols., 2016).
 
-:::imagen ilustraciones/cap33-ttspts.svg ancho=100% Cada turno sube el umbral y cada noche lo baja; con los años puede quedar un resto
+:::imagen ilustraciones/cap33-ttspts.svg ancho=100% Cada turno sube el umbral y cada noche de reposo lo baja. Al principio el oído vuelve a la base; con los años puede quedar un resto que ya no vuelve: el desplazamiento permanente. Esquema sin cifras.
 :::
 
 ¿Qué pasa por dentro? Las revisiones coinciden en que no hay un solo mecanismo. Con sonidos de muy alta energía hay daño **mecánico**: se rompen o se desordenan los estereocilios y las uniones de las células de sostén. Con exposiciones menos extremas pesa el daño **metabólico**: la transducción trabaja al máximo, las mitocondrias producen radicales de oxígeno y el calcio se acumula en la célula, y a eso se suma el exceso de glutamato en la sinapsis con el nervio (Henderson y cols., 2006; Kurabi y cols., 2017). Una parte de esto es reversible y otra no: la célula ciliada externa que muere no se reemplaza.
@@ -147,7 +147,7 @@ El examen de hoy ya es una confirmación en cámara. ¿Qué más necesitas para 
 - @OD pico | Curva A en los dos oídos: el oído medio está sano, así que el cambio no es conductivo.
 :::
 
-:::imagen ilustraciones/cap33-cambio.svg ancho=100% El control de hoy contra la base de la ficha
+:::imagen ilustraciones/cap33-cambio.svg ancho=100% El control de hoy contra la base de la ficha, oído por oído: el cambio pasa de 15 dB desde 2 kHz hacia arriba, y los tres criterios lo declaran positivo en los dos oídos.
 :::
 
 El cambio es mayor de 15 dB desde 2 kHz hacia arriba en los dos oídos, y los tres criterios lo declaran positivo: promedio de 2, 3 y 4 kHz de 56,7 dB en los dos oídos (OSHA pide 10), cambios de 30 a 85 dB en las frecuencias entre 2 y 6 kHz (NIOSH pide 15) y umbrales resultantes muy sobre los 25 dB HL (PREXOR).
@@ -158,7 +158,7 @@ El cambio es mayor de 15 dB desde 2 kHz hacia arriba en los dos oídos, y los tr
 - **Qué pedir:** otoscopía y timpanograma para descartar causa conductiva; confirmar que el examen se hizo con reposo y registrar la hora de la última exposición; comparar contra la base con los tres criterios (→ H22).
 - **Lo que enseña:** un cambio que no vino acompañado de vigilancia llega **grande**. Con vigilancia anual el mismo oído habría saltado al primer control. Además, 80 y 85 dB en 4 kHz están por encima de lo que la guía chilena describe como habitual en la pérdida por ruido (agudos hasta unos 75 dB HL; MINSAL, 2013, citado en H22): para ocho años de exposición es mucho y obliga a preguntar por otras causas.
 - **Errores esperables:** decir "es ruido" y cerrar sin pasar al médico; olvidar que la pérdida es bilateral y por eso el criterio se aplica a los dos oídos; no revisar el puesto; no corregir la protección; olvidar el **aviso por escrito** al trabajador.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso). La base de la ficha no está en el motor: se compara contra los números de la ficha.
+- **En LabSim:** no está en la práctica del curso. La base no está en el simulador: se compara contra los números de la ficha.
 :::
 
 {{caso cap33_reposo}}
@@ -177,9 +177,9 @@ Con el mismo trabajador, ¿qué pedirías antes de dar por cerrado el caso, adem
 
 #### Paso 4 · Los resultados
 
-La ficha del control de fin de turno (valores inventados, porque LabSim no simula el desplazamiento temporal) y el resultado de la confirmación en cámara se leen juntos:
+La ficha del control de fin de turno (valores de ejemplo, porque LabSim no simula el desplazamiento temporal) y el resultado de la confirmación en cámara se leen juntos:
 
-:::imagen ilustraciones/cap33-reposo.svg ancho=100% El control del final del turno y la confirmación tras el reposo, contra la base
+:::imagen ilustraciones/cap33-reposo.svg ancho=100% El control del final del turno y la confirmación tras 14 horas de reposo, contra la base: el cambio que en la tarde cumplía los criterios ya no está en la mañana.
 :::
 
 :::figura cap33_reposo audiograma
@@ -196,7 +196,7 @@ El control del final del turno cumplía los criterios de OSHA (promedios de 16,7
 - **Qué pedir:** confirmación en cámara con reposo documentado; revisión de cómo usa la protección y, si el programa lo tiene, un ensayo de ajuste; adelantar el siguiente control; las emisiones otoacústicas pueden agregar información (→ H9, cap. 6).
 - **Lo que enseña:** un cambio que **no se confirma** no es un resultado tranquilizador: el oído se desplaza 30 dB cada turno, lo que quiere decir que lo que llega a la cóclea es más de lo que la protección debería dejar pasar. La medida es sobre el puesto, no sobre el oído (→ H22).
 - **Errores esperables:** llamarlo permanente; llamarlo "normal" y cerrar; olvidar que el acúfeno nuevo es un dato (puede haber daño que el umbral no ve, → cap. 6); no anotar la hora del último turno.
-- **En LabSim:** el motor no modela desplazamiento temporal ni reposo: el paciente responde con su umbral permanente, sin importar cuándo fue su última exposición (→ H22). El control del final del turno son números inventados para el caso y el audiograma de la confirmación es el del paciente armado.
+- **En LabSim:** el simulador no modela desplazamiento temporal ni reposo: el paciente responde con su umbral permanente, sin importar cuándo fue su última exposición (→ H22). El control del final del turno son números de ejemplo; la confirmación es el audiograma del paciente en el simulador.
 :::
 
 {{caso cap33_ingreso}}
@@ -230,7 +230,7 @@ Una diferencia de 95 dB entre los oídos sobrepasa el límite de 40 dB desde el 
 - **Qué pedir:** audiometría diagnóstica con vía ósea y enmascaramiento, logoaudiometría, impedanciometría con reflejos y evaluación de otorrinolaringología. Si la discriminación está peor que el umbral, el cap. 11 manda.
 - **Lo que enseña:** la base alterada **sigue siendo la base**, pero antes de usarla hay que saber qué es. Es un caso de derivación, no de archivo; y de confidencialidad: el trabajador recibe el resultado y a la empresa llegan datos agrupados.
 - **Errores esperables:** archivarla como "base alterada por ruido previo" sin estudiar el oído; decidir la contratación desde la audiometría; olvidar proteger el oído sano (el único que oye hoy); no pensar en el diagnóstico diferencial retrococlear.
-- **En LabSim:** caso armado para el libro.
+- **En LabSim:** cuadro *Muesca en 4 kHz (trauma acústico)* en el OI; OD normal.
 :::
 
 ## Resolución de los casos

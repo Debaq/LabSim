@@ -95,7 +95,7 @@ def cociente():
     c.t(ox + w / 2, oy + h + 36, 'oído derecho: suma de la velocidad de la fase lenta, tibia + fría (°/s)', 11, TINTA)
     c.out.append(f'<text transform="translate(26,{oy + h / 2}) rotate(-90)" {F} font-size="11" fill="{TINTA}" text-anchor="middle">'
                  f'oído izquierdo: suma tibia + fría (°/s)</text>')
-    c.t(375, 430, 'Cifras inventadas para el libro. Entre paréntesis, la paresia canalicular con la fórmula de Jongkees; el eje llega solo a 14 °/s.', 9.5, TENUE)
+    c.t(375, 430, 'Cifras de ejemplo. Entre paréntesis, la paresia canalicular con la fórmula de Jongkees; el eje llega solo a 14 °/s.', 9.5, TENUE)
     c.guardar('cap24-cociente.svg')
 
 

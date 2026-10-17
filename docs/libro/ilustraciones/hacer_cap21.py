@@ -107,7 +107,7 @@ def ficha(nombre, d):
         c.t(x0 + (w - 6) / 2, 288, t1, 8.5, TENUE)
         c.t(x0 + (w - 6) / 2, 304, t2, 8.5, col, 'middle', 700)
         x0 += w
-    c.t(262, 328, 'Verde: lo que se espera de una lesión periférica. Rojo: signo central. Cifras de los pacientes inventados.',
+    c.t(262, 328, 'Verde: lo que se espera de una lesión periférica. Rojo: signo central. Cifras de ejemplo.',
         7.5, TENUE, 'start')
     c.guardar(f'cap21-ficha-{nombre}.svg')
 

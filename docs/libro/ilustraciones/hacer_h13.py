@@ -145,7 +145,7 @@ def correccion():
     c.t(lx - 6, 196, 'Correcciones de BSA (2023), recién nacido', 8.5, TENUE, 'start')
     c.t(lx - 6, 208, 'hasta 12 semanas, fonos de inserción:', 8.5, TENUE, 'start')
     c.t(lx - 6, 220, '500 y 1000 Hz: −20 · 2000 y 4000 Hz: −15.', 8.5, TENUE, 'start')
-    c.t(14, 292, 'Esquema: los umbrales del ejemplo son inventados. Valen solo para umbrales sobre 30 dB eHL.', 8, TENUE, 'start')
+    c.t(14, 292, 'Esquema con umbrales de ejemplo. Valen solo para umbrales sobre 30 dB eHL.', 8, TENUE, 'start')
     c.guardar('h13-correccion.svg', punta('p-corr', AVISO))
 
 

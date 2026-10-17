@@ -15,7 +15,7 @@ La técnica completa, paso a paso, está en la herramienta H18; aquí solo se re
 
 - **Dix-Hallpike hacia cada lado** (→ H18): examina los canales verticales. Aquí importa lo que sale en el primer segundo y en el último: cuánto tarda en empezar, hacia dónde bate, cuánto dura y qué pasa al sentarse.
 - **Giro supino** (→ H18): se hace cuando el Dix-Hallpike dio un nistagmo horizontal o ninguno. Examina el canal lateral: la dirección (hacia el suelo o hacia el techo) dice el tipo, y **cuál de los dos lados da más nistagmo** dice el lado afectado.
-- **Maniobras**: una por hallazgo, cada una un protocolo cerrado (Epley, 1992; Semont y cols., 1988; Lempert y Tiel-Wilck, 1996; Gufoni y cols., 1998; → H18). Se enseñan en H18 y se **practican en labyrinthus3d**, el simulador libre del autor de este libro, que corre en el navegador. LabSim no hace pruebas vestibulares.
+- **Maniobras**: una por hallazgo, cada una un protocolo cerrado (Epley, 1992; Semont y cols., 1988; Lempert y Tiel-Wilck, 1996; Gufoni y cols., 1998; → H18). Se enseñan en H18. LabSim no hace pruebas vestibulares.
 
 :::ayuda Ayuda memoria
 **Se lee siempre en el mismo orden**: ¿hay nistagmo? → ¿en qué postura salió? → ¿hacia dónde bate? → ¿cómo se comporta en el tiempo (latencia, duración, fatiga, inversión)?
@@ -73,7 +73,7 @@ Ante un "me mareo al moverme", la entrevista decide si vale la pena mirar los oj
 3. **¿Hay algo que no encaje?** Síntomas auditivos nuevos, cefalea, visión doble, dificultad para hablar, inestabilidad al caminar, un golpe en la cabeza reciente. Cualquiera de estos cambia la pregunta.
 4. **¿Se ve en los ojos?** Sin nistagmo, el vértigo solo no basta. Un Dix-Hallpike negativo no descarta el VPPB: la guía cita una sensibilidad de 82 % y una especificidad de 71 % entre especialistas, y sugiere repetirlo en otra visita antes de darlo por negativo (Bhattacharyya y cols., 2017).
 
-:::imagen ilustraciones/cap22-decision.svg Del hallazgo a la maniobra, o a la derivación. Esquema propio; las maniobras se enseñan en H18.
+:::imagen ilustraciones/cap22-decision.svg Del hallazgo a la maniobra, o a la derivación. Recorre las preguntas en orden: cualquier dato que no encaje te saca del camino de la maniobra y te lleva a derivar. Esquema propio; las maniobras se enseñan en H18.
 :::
 
 ### Lo que más se equivoca
@@ -117,7 +117,7 @@ Plantea al menos tres causas posibles de un vértigo que aparece al girar en la 
 | Giro supino | sin nistagmo |
 :::
 
-:::imagen ilustraciones/cap22-trazas-posterior.svg Trazas esquemáticas del Dix-Hallpike de Luisa. Esquema propio construido con los criterios de la guía: no son datos medidos.
+:::imagen ilustraciones/cap22-trazas-posterior.svg Trazas esquemáticas del Dix-Hallpike de Luisa. Fíjate en la latencia, en el crescendo-decrescendo y en la inversión al sentarse: las tres señas del canal posterior. Esquema propio con los criterios de la guía, no datos medidos.
 - @7,36 | El vértigo **empieza después de una latencia**, no al llegar a la postura.
 - @15,30 | **Crescendo-decrescendo**: sube a un máximo y baja solo, en menos de un minuto.
 - @47,43 | Al sentarse, la traza **se invierte** y es más débil.
@@ -134,7 +134,7 @@ Plantea al menos tres causas posibles de un vértigo que aparece al girar en la 
 - **Hipótesis esperables:** VPPB del canal posterior (la más probable); vértigo central (se descarta con la entrevista y los ojos); hipotensión ortostática (da mareo al pararse, no al acostarse); neuritis vestibular y enfermedad de Ménière (crisis más largas, no posicionales).
 - **Qué pedir:** Dix-Hallpike a los dos lados, y giro supino si el primero da horizontal o nada (→ H18). **No** audiometría, imágenes ni VNG para el vértigo (Bhattacharyya y cols., 2017).
 - **Errores esperables:** pedir audiometría "porque es vértigo"; leer la torsión al revés; no examinar el otro lado; atribuir el acúfeno al vértigo.
-- **En LabSim:** el cuadro de audición (presbiacusia) está armado para el libro; el examen posicional se practica en labyrinthus3d, con un paciente de canalitiasis del canal posterior derecho (→ H18).
+- **En LabSim:** cuadro de audición *presbiacusia*; el examen posicional no se hace en LabSim (→ H18).
 :::
 
 {{caso cap22_geotropico}}
@@ -162,7 +162,7 @@ Si el Dix-Hallpike del lado ya tratado ya no da el nistagmo de antes, ¿qué pru
 | Giro supino, cabeza a la **derecha** | nistagmo horizontal hacia la **derecha** (también hacia el suelo), **más débil** |
 :::
 
-:::imagen ilustraciones/cap22-trazas-geotropico.svg Trazas esquemáticas del giro supino de Rafael. Esquema propio construido con los criterios de la guía: no son datos medidos.
+:::imagen ilustraciones/cap22-trazas-geotropico.svg Trazas esquemáticas del giro supino de Rafael. El nistagmo bate hacia el suelo a los dos lados; el lado afectado es el que da el más fuerte. Esquema propio con los criterios de la guía, no datos medidos.
 - @21,44 | A la derecha, el nistagmo bate hacia la **derecha**, o sea hacia el suelo, pero **débil**.
 - @66,68 | A la izquierda bate hacia la **izquierda**, también hacia el suelo, y **más fuerte**: ese es el lado afectado.
 :::
@@ -176,7 +176,7 @@ Si el Dix-Hallpike del lado ya tratado ya no da el nistagmo de antes, ¿qué pru
 - **Hipótesis:** VPPB del canal lateral (geotrópico) del mismo oído tratado; recaída del posterior; VPPB del otro oído.
 - **Qué pedir:** giro supino a los dos lados (→ H18). Con nistagmo horizontal en el Dix-Hallpike, la guía recomienda el giro supino.
 - **Errores esperables:** llamarlo "bilateral" por el nistagmo hacia los dos lados; tratar el lado de menor nistagmo; repetir el Epley.
-- **En LabSim:** el cuadro de audición es normal. Para practicar el giro supino y el Gufoni se pone en labyrinthus3d un paciente con canalitiasis del canal lateral izquierdo.
+- **En LabSim:** el cuadro de audición es normal; el giro supino y el Gufoni no se hacen en LabSim (→ H18).
 :::
 
 {{caso cap22_apogeotropico}}
@@ -203,12 +203,12 @@ Con estos antecedentes, ¿qué prueba harías? ¿Y qué verías si las partícul
 | Giro supino, cabeza a la **izquierda** | nistagmo horizontal hacia la **derecha** (hacia el techo), **intenso**, sin latencia; dura más de un minuto |
 :::
 
-:::imagen ilustraciones/cap22-apogeotropico-sim.png Giro supino en labyrinthus3d, simulador libre del autor, con una cupulolitiasis del canal lateral derecho. En cada postura, a la derecha, el canal visto desde arriba con las partículas pegadas a la cúpula, y el ojo con su traza. Las constantes del simulador son órdenes de magnitud para enseñar, no valores normativos.
-- @41,12 | Las partículas (amarillas) están **pegadas a la cúpula**: no caen, la pesan.
-- @92,68 | La traza horizontal del ojo muestra el nistagmo, que bate hacia el lado del techo.
+:::imagen ilustraciones/cap22-apogeotropico-sim.png Giro supino de una paciente simulada con cupulolitiasis del canal lateral derecho, vista desde arriba. En cada postura, a la derecha, ese canal en su plano, con las partículas pegadas a la cúpula y la flecha de hacia dónde queda abajo. Mira hacia dónde se dobla la cúpula cargada en cada postura: eso explica que el nistagmo bata siempre hacia el techo. Constantes del modelo, no normativas. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @36,11 | Las partículas (amarillas) están **pegadas a la cúpula**: no caen, la pesan.
+- @80,70 | Al girar la cabeza al otro lado, **abajo** queda del lado contrario: la cúpula cargada se dobla al revés y el nistagmo cambia de sentido, siempre hacia el techo.
 :::
 
-:::imagen ilustraciones/cap22-trazas-apogeotropico.svg Trazas esquemáticas del giro supino de Rosa. Esquema propio construido con los criterios de la guía: no son datos medidos.
+:::imagen ilustraciones/cap22-trazas-apogeotropico.svg Trazas esquemáticas del giro supino de Rosa. Aquí bate hacia el techo y la regla se invierte: el lado más fuerte es el sano. Esquema propio con los criterios de la guía, no datos medidos.
 - @16,58 | A la derecha el nistagmo bate hacia la **izquierda**: hacia el techo, y **débil**.
 - @59,36 | A la izquierda bate hacia la **derecha**, otra vez hacia el techo, y **más fuerte**. El lado de mayor nistagmo es el **sano**; el afectado es el contrario: el **derecho**.
 - @79,74 | **Sigue** al terminar la ventana: no se apaga solo.
@@ -223,7 +223,7 @@ Con estos antecedentes, ¿qué prueba harías? ¿Y qué verías si las partícul
 - **Hipótesis:** VPPB lateral apogeotrópico (cupulolitiasis o partículas cerca de la ampolla); VPPB geotrópico (se descarta por la dirección); causa central si el nistagmo no calza o no responde.
 - **Qué pedir:** giro supino a los dos lados, y comparar intensidades (→ H18).
 - **Errores esperables:** aplicar la regla del geotrópico y tratar el lado equivocado; tomar el lado donde la paciente se siente peor como el afectado; hacer un Epley.
-- **En LabSim:** el cuadro de audición (presbiacusia) está armado para el libro; en labyrinthus3d se pone una cupulolitiasis del canal lateral derecho y se hace el giro supino (→ H18).
+- **En LabSim:** cuadro de audición *presbiacusia*; el giro supino no se hace en LabSim (→ H18).
 :::
 
 {{caso cap22_central}}
@@ -251,7 +251,7 @@ Hay tres datos en su relato que **no** son de un VPPB. ¿Cuáles son? ¿Qué sig
 | Examen neurológico mínimo | marcha de base ancha, torpeza al llevar el dedo a la nariz |
 :::
 
-:::imagen ilustraciones/cap22-trazas-central.svg Trazas esquemáticas del Dix-Hallpike de Felipe. Esquema propio construido con los criterios de la guía: no son datos medidos.
+:::imagen ilustraciones/cap22-trazas-central.svg Trazas esquemáticas del Dix-Hallpike de Felipe. Hacia abajo, sin latencia, sin fin y sin cansarse: nada de eso lo da un canal. Esquema propio con los criterios de la guía, no datos medidos.
 - @8,70 | Hacia **abajo**, sin torsión y **sin latencia**: ningún canal da eso.
 - @26,70 | **Sigue** mientras dure la postura.
 - @75,70 | Repetido, **no se cansa**.
@@ -266,7 +266,7 @@ Hay tres datos en su relato que **no** son de un VPPB. ¿Cuáles son? ¿Qué sig
 - **Hipótesis:** nistagmo posicional central (cerebelo, tronco o IV ventrículo) hasta que se pruebe lo contrario; VPPB del canal anterior (no explica la marcha ni la cefalea).
 - **Qué pedir:** Dix-Hallpike y examen neurológico mínimo; derivar. **No** se hace una maniobra de reposición (Büttner y cols., 1999; Macdonald y cols., 2017).
 - **Errores esperables:** hacer un Yacovino "porque es el anterior"; explicar la marcha por la diabetes; pedir audiometría.
-- **En LabSim:** el cuadro de audición es normal; el nistagmo posicional central se puede mostrar en labyrinthus3d eligiendo "central" en las partículas.
+- **En LabSim:** el cuadro de audición es normal; el examen posicional no se hace en LabSim.
 :::
 
 ## Resolución de los casos

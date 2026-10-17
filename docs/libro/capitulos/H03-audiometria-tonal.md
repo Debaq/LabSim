@@ -31,7 +31,7 @@ Para aprender a leer el audiograma desde el principio, el capítulo parte con su
 
 ### Radiografía de un audiograma
 
-Todo lo que sigue termina en este gráfico. No es el de un paciente: es un audiograma armado para que aparezcan **todos** sus elementos juntos. Aquí solo se nombran; el resto del capítulo explica de dónde sale cada uno, y *Cómo se informa* enseña a sacar de él el tipo, el grado y la configuración. El derecho va siempre en <span class="od">rojo</span> y el izquierdo en <span class="oi">azul</span>.
+Todo lo que sigue termina en este gráfico. No es el de un paciente: es un audiograma de ejemplo, con **todos** sus elementos juntos. Aquí solo se nombran; el resto del capítulo explica de dónde sale cada uno, y *Cómo se informa* enseña a sacar de él el tipo, el grado y la configuración. El derecho va siempre en <span class="od">rojo</span> y el izquierdo en <span class="oi">azul</span>.
 
 :::figura h3radiografia audiograma
 - @OD 125 | **Frecuencias**: graves a la izquierda, agudos a la derecha, de octava en octava. Las interoctavas (3 y 6 kHz) llevan un rótulo más chico.
@@ -84,7 +84,7 @@ Si la aérea recorre todo el camino y la ósea solo el último tramo, al compara
 - **Las dos alteradas y juntas.** El tramo de transmisión funciona y la falla está en la cóclea o más allá: **hipoacusia sensorioneural**.
 - **Las dos alteradas, con gap.** Hay de ambas cosas: **hipoacusia mixta**.
 
-:::imagen ilustraciones/h03-dos-vias.svg ancho=96% Las dos vías y lo que deja ver cada una
+:::imagen ilustraciones/h03-dos-vias.svg ancho=96% Las dos vías y lo que deja ver cada una. La aérea pasa por todo el oído; la ósea se salta el externo y el medio. Por eso la ósea dice cómo está la cóclea y la distancia entre las dos dice cuánto pierde la transmisión.
 :::
 
 Del mismo dibujo salen tres reglas que vas a usar todo el tiempo:
@@ -101,7 +101,7 @@ En la fijación del estribo la ósea empeora alrededor de 2 kHz aunque la cócle
 
 Lejos por debajo del umbral, el paciente nunca oye el tono; bien por encima, lo oye siempre. Entre medio hay una franja de pocos decibeles en que **el mismo tono, al mismo nivel, a veces se detecta y a veces no**. La señal que llega al nervio compite con la actividad de fondo del propio sistema auditivo, y la atención del paciente sube y baja. La curva que une el nivel del tono con la proporción de veces que se detecta es la **función psicométrica**.
 
-:::imagen ilustraciones/h03-funcion-psicometrica.svg ancho=96% El umbral como probabilidad de detección
+:::imagen ilustraciones/h03-funcion-psicometrica.svg ancho=96% El umbral como probabilidad de detección. Entre el nivel que nunca se oye y el que se oye siempre hay una franja de pocos decibeles; el umbral es el punto de esa subida en que se detecta la mitad de los tonos.
 :::
 
 Por eso el umbral se define en el medio de esa subida: el nivel en que el paciente detecta **la mitad** de los tonos. En la clínica no hay tiempo para presentar cien tonos por nivel, y el audiómetro avanza de a 5 dB. La forma práctica de estimar ese 50 % es la regla de las normas: **el nivel más bajo en que el paciente responde en al menos la mitad de las presentaciones en ascenso**, con un mínimo de 2 de 3 (ASHA, 2005; ISO 8253-1, 1989).
@@ -114,7 +114,7 @@ El oído no es igual de sensible en todas las frecuencias. Medido con un micróf
 
 El audiómetro resuelve eso trabajando en **dB HL** (*hearing level*, nivel de audición). En cada frecuencia, **0 dB HL** es el nivel que detecta un adulto joven típico, otológicamente normal, entre 18 y 25 años (ISO 389-7, 2019). <!-- verificar: el rango de 18 a 25 años se confirmó en la edición 1996 de la ISO 389-7; no se leyó la de 2019. --> El equipo guarda esa referencia para cada frecuencia y cada transductor, y la resta. Así, un oído normal dibuja una **línea recta cerca de 0**, y lo que el audiograma muestra es directamente cuánto le falta a ese oído respecto de lo normal.
 
-:::imagen ilustraciones/h03-hl-spl.svg ancho=96% El mismo oído normal, en dB SPL y en dB HL
+:::imagen ilustraciones/h03-hl-spl.svg ancho=96% El mismo oído normal, en dB SPL y en dB HL. En SPL el umbral normal cambia con la frecuencia: los graves necesitan mucha más presión. En HL se resta esa referencia, el oído normal queda en 0 en todas y cualquier pérdida se lee como distancia a esa línea.
 :::
 
 De aquí salen varias cosas que se ven a diario:
@@ -145,7 +145,7 @@ El audiograma mide de 125 a 8.000 Hz, en octavas y algunas interoctavas. Hay tre
 
 **Cada frecuencia examina un lugar de la cóclea.** La cóclea está ordenada por frecuencias: la base, junto a la ventana oval, responde a los agudos, y el ápice a los graves. La membrana basilar es angosta y rígida en la base, de unos 0,1 mm, y ancha y flexible en el ápice, de unos 0,5 mm; por eso cada tramo vibra mejor con una frecuencia distinta (Robles y Ruggero, 2001). <!-- verificar: anchos de la membrana basilar humana (~0,1 mm en la base, ~0,5 mm en el ápice); cifra clásica atribuida a Békésy, sin fuente primaria leída. Fuentes secundarias dan 0,08-0,2 mm en la base y 0,42-0,5 mm en el ápice. --> Sobre 500 Hz, cada octava ocupa un tramo parecido de la membrana (Greenwood, 1990). Por eso el eje de frecuencias del audiograma va en octavas: espacios iguales en el papel corresponden a tramos parecidos de cóclea. Un audiograma es, en el fondo, un mapa de la cóclea de la base al ápice.
 
-:::imagen ilustraciones/h03-tonotopia.svg ancho=96% Dónde cae cada frecuencia del audiograma en la cóclea
+:::imagen ilustraciones/h03-tonotopia.svg ancho=96% Dónde cae cada frecuencia del audiograma en la cóclea: los agudos en la base, junto a la ventana oval, y los graves en el ápice. Fíjate en el tramo de la base que queda sobre 8 kHz, fuera de la audiometría convencional.
 :::
 
 **La base se daña primero.** Las células de la base son más vulnerables: tienen menos defensas frente a los radicales libres y manejan más calcio (Sha y cols., 2001; Fettiplace y Nam, 2019). Por eso el ruido, la edad y los ototóxicos empiezan por los agudos. Y el tramo más basal, sobre 8 kHz, casi una quinta parte del largo de la cóclea, queda fuera de la audiometría convencional: es lo que agrega la audiometría de alta frecuencia cuando se vigila un ototóxico. Las interoctavas de 3 y 6 kHz se miden siempre porque ahí vive la muesca del ruido (→ cap. 6).
@@ -172,7 +172,7 @@ Eso tiene dos consecuencias prácticas. La primera: una diferencia de 5 dB entre
 
 Todo audiómetro clínico tiene la misma lógica: **dos canales** independientes, cada uno con su pantalla y sus controles, y un **centro** con lo que comparten los dos (la frecuencia, el paso, el cronómetro). Uno lleva el tono al oído que estás midiendo; el otro, cuando hace falta, lleva el ruido que enmascara al oído contrario. La figura muestra el audiómetro de LabSim armado justo así: tono por el canal 1 al oído derecho y ruido de banda estrecha por el canal 2 al izquierdo.
 
-:::imagen /docs/manual/img/estudiante/audiometro.png El audiómetro de LabSim, con un enmascaramiento armado
+:::imagen /docs/manual/img/estudiante/audiometro.png El audiómetro de LabSim, listo para enmascarar: tono por el canal 1 al oído que mides, ruido por el canal 2 al oído contrario. Lee siempre las dos pantallas antes de presentar.
 - @4,13 | **Pantalla del canal 1.** Intensidad (40 dB HL), transductor (*Aérea*), paso (5 dB), salida (*Derecha*) y estímulo (*Tono*). Léela antes de cada presentación: es lo que de verdad va a sonar.
 - @40,10 | **Frecuencia y prueba.** 1.000 Hz, en *Umbrales*. Se cambia con las flechas de abajo.
 - @51,22 | **Indicador de respuesta.** Se pone lila cuando el paciente levanta la mano. Es tu único dato: no mires al paciente, mira esto.
@@ -213,7 +213,7 @@ Se le dice por qué oído se parte y se le pregunta si entendió. "Aunque sea ap
 
 Rojo en el derecho y azul en el izquierdo, con la membrana centrada sobre la entrada del conducto y los dos a la misma altura. Los pone quien examina, no el paciente (ASHA, 2005). Una vez puestos, el paciente no los toca.
 
-![Paciente adulto sentado de perfil dentro de la cabina, con fonos supraaurales (rojo en el oído derecho, azul en el izquierdo) centrados sobre el conducto y el pulsador en la mano. Tras el vidrio, el examinador frente al audiómetro; el paciente no ve el panel. Recuadro de detalle: fono bien centrado frente a fono corrido hacia atrás.](ilustraciones/h03-cabina-fonos.png)
+![{IA} La audiometría en cabina. El fono rojo va en el oído derecho y el azul en el izquierdo, centrados sobre el conducto; el paciente responde con el pulsador y no ve el panel. Un fono corrido deja pasar menos sonido y el umbral sale peor de lo que es.](ilustraciones/h03-cabina-fonos.png)
 
 ## Paso a paso
 
@@ -237,7 +237,7 @@ El ascendente no es la única forma de llegar al umbral. La **descendente** es e
 
 <!-- verificar: horquilla según resúmenes de la ISO 8253-1 (tres series ascendentes y tres descendentes; promedio de los niveles más bajos oídos), no según la norma leída. Hughson y Westlake (1944) confirmada en catálogos y en la guía ASHA 2005 (Trans Am Acad Ophthalmol Otolaryngol 48 Supl:1-15; también edición aparte, Omaha, Douglas Print Co., WorldCat OCLC 221510216); texto completo no leído. Método en discusión con el equipo: docs/libro/incongruencias_protocolo.md, punto 13b. -->
 
-:::imagen ilustraciones/h03-metodos-umbral.svg ancho=100% Cuatro formas de buscar el umbral, con el mismo umbral de 25 dB HL
+:::imagen ilustraciones/h03-metodos-umbral.svg ancho=100% Cuatro formas de buscar el umbral, con el mismo umbral de 25 dB HL. Compara en qué dirección avanza cada una y en qué punto se juzga el umbral: la descendente arriesga que el paciente siga respondiendo por inercia.
 :::
 
 ### 3. Orden de frecuencias
@@ -282,7 +282,7 @@ Cuando ya tengas la ósea, **revisa**: donde la ósea del oído no evaluado sali
 
 <!-- Protocolo ORL 2019 no fija tolerancia para repetir 1 kHz; se tomó la de 5 dB (ASHA 2005, BSA 2018, ISO 8253-1:1989). -->
 
-![Colocación del vibrador óseo. Panel principal: cabeza de perfil derecho; el vibrador óseo (un transductor pequeño, rectangular y plano, del tamaño de una caja de fósforos) apoyado de plano sobre el hueso mastoides, detrás del pabellón y sin tocarlo, sujeto por una vincha metálica delgada que pasa por encima de la cabeza hasta la sien izquierda; el conducto derecho queda destapado. Paneles pequeños con una X roja: vibrador tocando el pabellón, vibrador sobre el pelo, vibrador sobre la escama del temporal (demasiado alto).](ilustraciones/h03-vibrador-mastoides.png)
+![{IA} Dónde va el vibrador óseo: de plano sobre la mastoides, detrás del pabellón sin tocarlo y con el conducto libre. Sobre el pelo, tocando el pabellón o demasiado alto, el umbral óseo sale peor de lo que es.](ilustraciones/h03-vibrador-mastoides.png)
 
 ¿Por qué no se mide la ósea en 125 Hz ni sobre 4 kHz? El vibrador distorsiona en los graves y en los agudos irradia sonido por el aire. Además, en 250 Hz el paciente puede **sentir** la vibración antes de oírla: en la mastoides, el umbral táctil puede estar en 25 dB a 250 Hz, 55 dB a 500 Hz y 70 dB a 1 kHz (BSA, 2018). Una "respuesta" ósea por encima de esos niveles en graves puede ser tacto, y se anota así en el audiograma (ASHA, 2005).
 
@@ -353,7 +353,7 @@ Los umbrales de alta frecuencia varían mucho entre personas y con la edad. Por 
 
 Los símbolos del audiograma son los de la ASHA (1990). En Chile, el derecho va en **rojo** y el izquierdo en **azul**; si los dos oídos tienen el mismo umbral, el símbolo del izquierdo se dibuja dentro del derecho (ISP, 2018).
 
-:::imagen ilustraciones/h03-simbolos.svg ancho=86% Los símbolos del audiograma, del Fowler y de la acumetría
+:::imagen ilustraciones/h03-simbolos.svg ancho=86% Los símbolos del audiograma, del Fowler y de la acumetría. Rojo para el derecho, azul para el izquierdo; los óseos, corridos hacia el lado del oído, como si el paciente te mirara de frente.
 :::
 
 La aérea se une con línea continua; la ósea, cuando se une, con línea punteada, y el LDL con guiones. Los símbolos óseos del derecho van a la izquierda de la línea de frecuencia y los del izquierdo a la derecha: es el paciente mirándote de frente. Los de campo libre van en **verde** y centrados, porque no son de un oído: los oye el mejor. La lámina trae también los símbolos que se usan más adelante: el LDL (→ H5), la escalera del Fowler (→ H6) y el Weber y el Rinne de la acumetría (→ H2).

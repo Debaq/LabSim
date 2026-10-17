@@ -52,22 +52,9 @@ Los cuestionarios sirven para **seguir** al paciente, no para diagnosticar. Un N
 - **Los cuestionarios.** El DHI es el que lleva este libro (→ H19). Los otros se agregan solo cuando se sospecha un componente visual o de miedo a caer; con el DHI basta para partir.
 :::
 
-## En el simulador
+## En LabSim
 
-LabSim da el lado auditivo de estos pacientes (audiograma, logoaudiometría, reflejos, PEAT y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo que cada caso entrega de calórica, vHIT, equilibrio y cuestionarios está **escrito** en la ficha de resultados, con cifras inventadas para el libro.
-
-Para ver el principio del capítulo se usa **labyrinthus3d**, el simulador 3D del autor de este libro, libre y que corre en el navegador (→ H19). Trae un caso llamado **PPPD**: un vestíbulo **sano** con una **dependencia visual** marcada, es decir, un paciente cuyo laberinto funciona pero que le da de más a lo que ve. En la posturografía de seis condiciones se ve cómo se desordena donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. -->.
-
-:::imagen ilustraciones/cap27-sot-sano-pppd.png Posturografía de seis condiciones en labyrinthus3d. A la izquierda, un paciente sano; a la derecha, el caso PPPD del simulador, con el vestíbulo sano y la dependencia visual marcada.
-- @95,38 | **Condición 6, la vista y la plataforma engañan a la vez.** El paciente sano la sostiene; el del caso PPPD cae. Con el vestíbulo intacto.
-- @71,55 | **Condición 3, el entorno visual en movimiento con los pies firmes.** La barra en rojo: no alcanza el límite normal. El que depende de la vista se desordena con lo que ve moverse.
-- @90,98 | **La razón de preferencia visual** baja (barra roja): mide cuánto cae el paciente cuando se le falsea la vista, en comparación con cuando se le cierran los ojos.
-- @40,98 | **En el sano**, la misma razón está dentro de lo normal: **deja de lado** lo que miente.
-:::
-
-:::comentario Lo que el simulador no tiene
-Modela **una** idea del PPPD, la dependencia visual, y la modela como un rasgo fijo. No tiene la historia (el evento que lo disparó), el miedo, la rigidez ni el efecto de la atención. Sus **constantes son órdenes de magnitud para enseñar**, no valores normativos: ningún número de este capítulo sale del simulador, y el cuadro de la captura **no** es un criterio diagnóstico. En los pacientes reales, la posturografía puede salir normal o con un patrón variable <!-- verificar: hallazgos de la posturografía dinámica en PPPD; no hay un patrón diagnóstico establecido (revisar Trinidade y Goebel, 2018). --> y por eso no se usa para decidir.
-:::
+LabSim da el lado auditivo de estos pacientes (audiograma, logoaudiometría, reflejos, PEAT y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo que cada caso entrega de calórica, vHIT, equilibrio y cuestionarios está **escrito** en la ficha de resultados, con cifras de ejemplo.
 
 ## Fisiología
 
@@ -75,7 +62,7 @@ Modela **una** idea del PPPD, la dependencia visual, y la modela como un rasgo f
 
 Después de una pérdida vestibular o de un cuadro que marea, el sistema **compensa** (→ H19, B2). El reposo se reequilibra primero, la función con el movimiento después, y la persona vuelve a confiar en lo que siente. El mareo del primer mes es parte de eso y no es un problema.
 
-:::imagen ilustraciones/cap27-curso.svg Dos caminos del mismo síntoma después de un evento agudo. Esquema sin cifras a propósito: ilustra el principio, no los tiempos de un paciente.
+:::imagen ilustraciones/cap27-curso.svg Dos caminos del mismo síntoma después de un evento agudo: el mareo que se apaga a medida que el sistema compensa, y el que baja un poco, se queda en una meseta y sube cada vez que el paciente se expone. Esquema sin cifras: ilustra el principio, no los tiempos de un paciente.
 :::
 
 El PPPD es cuando el **segundo camino** se instala: el mareo baja un poco y se queda en una meseta, que sube cada vez que el paciente se expone a lo que lo marea. Pasados los meses, ya no es lo esperable de una compensación en curso.
@@ -88,7 +75,16 @@ La Sociedad Bárány describe tres cambios que se mantienen aunque el vestíbulo
 2. **La vista pesa de más.** Se vio en la neuritis: los pacientes que seguían mareados tenían una mayor dependencia visual (Cousins y cols., 2014) <!-- Cousins 2014 (PMID 25233234), resumen: ~50 % con síntomas a largo plazo; el tercio con peor resultado tuvo más dependencia visual (6,35° vs 3,39°). -->. Y en el "vértigo visual", quienes lo refieren se desordenan más con un entorno visual en movimiento (Guerraz y cols., 2001; Bronstein, 1995). Es la misma lógica de la repesada sensorial de H19: el cerebro reparte la confianza entre vista, pies y vestíbulo, y aquí la vista queda con demasiado peso.
 3. **La integración central amplifica.** Las señales del cuerpo y del entorno se interpretan con más alarma. En un estudio con resonancia, los pacientes con mareo crónico subjetivo respondían distinto a un estímulo vestibular en regiones que integran el equilibrio con la emoción (Indovina y cols., 2015) <!-- verificar: Indovina 2015, hallazgo exacto (DOI confirmado en Crossref: 10.3389/fnbeh.2015.00334). -->.
 
-:::imagen ilustraciones/cap27-ciclo.svg El círculo que mantiene el mareo. Esquema didáctico: cada paso refuerza al siguiente.
+El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente simulado con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. -->. El modelo muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y sus cifras no son normativas ni un criterio diagnóstico: en los pacientes reales la posturografía puede salir normal o con un patrón variable <!-- verificar: hallazgos de la posturografía dinámica en PPPD; no hay un patrón diagnóstico establecido (revisar Trinidade y Goebel, 2018). --> y por eso no se usa para decidir.
+
+:::imagen ilustraciones/cap27-sot-sano-pppd.svg ancho=100% Posturografía de seis condiciones de dos pacientes simulados: a la izquierda, sano; a la derecha, con el vestíbulo sano y la dependencia visual marcada. Fíjate en que el de la derecha se desordena justo donde la vista miente (condiciones 3 y 6), aunque su vestíbulo esté intacto. Cifras y límites del modelo, no normativos. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @95,46 | **Condición 6, la vista y la plataforma engañan a la vez.** El paciente sano la sostiene; el de la dependencia visual cae. Con el vestíbulo intacto.
+- @72,40 | **Condición 3, el entorno visual en movimiento con los pies firmes.** La barra en rojo: no alcanza el límite. El que depende de la vista se desordena con lo que ve moverse.
+- @88,82 | **La razón de preferencia visual** baja (barra roja): mide cuánto cae el paciente cuando se le falsea la vista, en comparación con cuando se le cierran los ojos.
+- @30,83 | **En el sano**, la misma razón está dentro de lo normal: **deja de lado** lo que miente.
+:::
+
+:::imagen ilustraciones/cap27-ciclo.svg El círculo que mantiene el mareo: un evento que mareó deja al paciente vigilante, la vigilancia endurece la postura y le da peso de más a la vista, y cada síntoma vuelve a subir la vigilancia. Esquema didáctico.
 :::
 
 ### Por qué el supermercado
@@ -233,7 +229,7 @@ Ya tiene una resonancia de cerebro normal. ¿Qué agregarías para ver si el lab
 - @OI P13 | El del OI, el lado de la neuritis, mide **343 µV** (6,82). La asimetría es de **0 %**: el sáculo del lado enfermo responde igual. En una neuritis superior, el cVEMP suele conservarse (→ cap. 21).
 :::
 
-:::ayuda-ancho Lo que entrega Victoria del examen vestibular y de los cuestionarios (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Victoria del examen vestibular y de los cuestionarios (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | normales |
@@ -253,7 +249,7 @@ Ya tiene una resonancia de cerebro normal. ¿Qué agregarías para ver si el lab
 - **Qué pedir:** audiometría, calórica y vHIT para medir lo que quedó del laberinto, VEMP, batería funcional y DHI, VVAS y ABC.
 - **Lo que enseña:** que el laberinto compensó (la calórica baja del corte y el vHIT es normal), que **el déficit residual no alcanza a explicar** lo que cuenta, y que la historia, no el examen, hace el diagnóstico.
 - **Errores esperables:** decir "tu examen está normal" sin más; buscar el daño en el laberinto cuando el criterio es que no hay uno que lo explique.
-- **En LabSim:** caso armado para el libro con audición normal en los dos oídos. El nombre de la paciente lo sortea el editor.
+- **En LabSim:** audición normal en los dos oídos. El nombre de la paciente lo sortea el editor.
 :::
 
 {{caso cap27_vppb}}
@@ -282,7 +278,7 @@ La paciente dice que la llamaron "ansiosa" y que no está de acuerdo. ¿Qué har
 - @OI max | El OI llega al **96 %**: discriminación buena, acorde a la pérdida, y casi igual en los dos oídos. No hay nada asimétrico ni retrococlear.
 :::
 
-:::ayuda-ancho Lo que entrega Eva del examen vestibular y de los cuestionarios (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Eva del examen vestibular y de los cuestionarios (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | normales |
@@ -303,7 +299,7 @@ La paciente dice que la llamaron "ansiosa" y que no está de acuerdo. ¿Qué har
 - **Qué pedir:** audiometría y logoaudiometría, pruebas posicionales repetidas (→ cap. 22), calórica, vHIT, la presión de pie y la lista de remedios; DHI, VVAS y ABC.
 - **Lo que enseña:** que se **repite** lo que se descartó antes (la posicional ya estaba tratada); que la ansiedad que aparece **después** del mareo no lo explica ni lo contradice; y que una hipoacusia de la edad suma dificultad sin ser la causa.
 - **Errores esperables:** cerrarlo como "ansiedad" sin mirar el vestíbulo; dar por curada la posicional sin repetirla; olvidar que el ansiolítico se suspende 48 horas antes de la calórica (→ H16).
-- **En LabSim:** caso armado para el libro con presbiacusia leve en los dos oídos. El nombre de la paciente lo sortea el editor.
+- **En LabSim:** presbiacusia leve en los dos oídos. El nombre de la paciente lo sortea el editor.
 :::
 
 {{caso cap27_schwannoma}}
@@ -346,7 +342,7 @@ Tiene un pitido en el oído izquierdo y dificultad para oír por teléfono con e
 - @OI P13 | El del OI mide **38 µV** (0,75 corregida). La asimetría es de **76 %**, sobre el corte de 35 % de LabSim (→ H12): el sáculo del OI responde muy poco.
 :::
 
-:::ayuda-ancho Lo que entrega Joaquín del examen vestibular y de los cuestionarios (cifras inventadas para el libro; → H15 a H19)
+:::ayuda-ancho Lo que entrega Joaquín del examen vestibular y de los cuestionarios (cifras de ejemplo; → H15 a H19)
 | Prueba | Resultado |
 |---|---|
 | Supraliminares (→ H6) | Carhart en el OI: **30 dB** de deterioro. SISI en el OI: **10 %** |
@@ -368,7 +364,7 @@ Tiene un pitido en el oído izquierdo y dificultad para oír por teléfono con e
 - **Qué pedir:** audiometría, logoaudiometría, reflejos, deterioro tonal, PEAT y VEMP (→ cap. 11); calórica y vHIT; VVAS.
 - **Lo que enseña:** el **criterio E**. Aun con ansiedad, aun con mareo crónico, la asimetría auditiva y los reflejos obligan a seguir estudiando. Y que un cuestionario **bajo** en lo visual es una señal en sí mismo.
 - **Errores esperables:** quedarse con el "mareo funcional" por el relato; no leer el audiograma; creer que la ansiedad del paciente confirma el diagnóstico.
-- **En LabSim:** caso armado para el libro con el cuadro *Schwannoma* leve en el OI. El nombre del paciente lo sortea el editor.
+- **En LabSim:** cuadro *Schwannoma* leve en el OI. El nombre del paciente lo sortea el editor.
 :::
 
 ## Resolución de los casos

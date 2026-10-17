@@ -120,7 +120,7 @@ La pérdida es conductiva y progresiva, de los graves primero. Dos síntomas ayu
 
 La otoscopía es **normal**. En cerca del 10 % de los casos se ve un tinte rosado detrás del tímpano, sobre el promontorio, que es el **signo de Schwartze**; que no esté no descarta nada (Toscano y cols., 2025). Con los años la enfermedad puede tomar también la cóclea y la pérdida se vuelve mixta (→ cap. 15). El tratamiento lo decide el otorrinolaringólogo: la cirugía del estribo o un audífono, que en un oído con la cóclea sana funciona muy bien. Cuando se pide una tomografía, el foco se busca delante de la ventana oval, en la *fissula ante fenestram*.
 
-:::imagen ilustraciones/cap04-tc-fissula.jpg ancho=80% Tomografía axial de ultra alta resolución (cortes de 0,1 mm), muy ampliada a la altura de la ventana oval, de los dos oídos de otra persona, no de los pacientes de este capítulo: el derecho (a), con otoesclerosis fenestral, y el izquierdo (b), sano. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Xu N y cols. (2023), Insights Imaging, doi:10.1186/s13244-023-01562-y, Fig. 2, CC BY 4.0, sin modificar.
+:::imagen ilustraciones/cap04-tc-fissula.jpg ancho=80% Tomografía axial de ultra alta resolución (cortes de 0,1 mm), muy ampliada a la altura de la ventana oval, de los dos oídos de otra persona, no de los pacientes de este capítulo: el derecho (a), con otoesclerosis fenestral, y el izquierdo (b), sano. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Imagen: Xu N y cols. (2023), Insights Imaging, doi:10.1186/s13244-023-01562-y, Fig. 2, CC BY 4.0.
 - @13,37 | **Fissula ante fenestram** con hueso menos denso (flecha gruesa): el foco de otoesclerosis.
 - @12,49 | **Ligamento anular** engrosado (flecha fina), el que une la platina del estribo a la ventana oval.
 - @40,16 | **Cóclea**, oscura, a la izquierda del globo.
@@ -142,7 +142,7 @@ Es una enfermedad del **remodelado óseo** del adulto mayor: el hueso se destruy
 
 Cuando toma el hueso temporal, la hipoacusia es lenta y progresiva, casi siempre bilateral. En una serie de 27 pacientes, el 85 % consultó por hipoacusia; en los audiogramas disponibles, el 65 % era sensorioneural y el 35 % mixta (Deep y cols., 2017). Lo interesante es de dónde sale el gap. Monsell (2004) midió la densidad del hueso de la **cápsula coclear** en pacientes con Paget del cráneo y encontró que, cuanto menos denso era, peores eran los umbrales agudos **y mayor era el gap** en 500 y 1000 Hz. El gap del Paget no viene necesariamente de una cadena fija: puede venir de la cápsula. Por eso el timpanograma puede ser A y los reflejos, sin embargo, faltar. En la tomografía, el hueso enfermo se ve grueso y desordenado, y puede llegar a estrechar el conducto auditivo interno.
 
-:::imagen ilustraciones/cap04-tc-paget.jpg ancho=62% Tomografía axial de la base del cráneo de otra persona con enfermedad de Paget, no de Adrián. Imagen: Battal B, Zamora C (2023), Tomography, doi:10.3390/tomography9040097, Fig. 31, CC BY 4.0, recortada.
+:::imagen ilustraciones/cap04-tc-paget.jpg ancho=62% Tomografía axial de la base del cráneo de otra persona con enfermedad de Paget, no de Adrián. Imagen: Battal B, Zamora C (2023), Tomography, doi:10.3390/tomography9040097, Fig. 31, CC BY 4.0, adaptada.
 - @9,40 | **CAI derecho** (flecha), estrechado por el engrosamiento del hueso.
 - @88,37 | **CAI izquierdo** (flecha), también estrechado.
 - @5,72 | Hueso de la base y de la calota engrosado, con zonas claras y oscuras mezcladas: el aspecto "en copos de algodón".
@@ -286,7 +286,7 @@ En un niño de 9 años que no pasó el control del colegio, ¿qué causas de hip
 - **Hipótesis esperables:** fijación congénita del estribo o malformación de la cadena; otoesclerosis juvenil (la historia de no progresión la hace menos probable); otitis media con efusión (la descarta la otoscopía y que haya pico); hipoacusia sensorioneural (la descarta la ósea).
 - **Qué pedir:** audiometría con ósea enmascarada (gap bilateral: → H4), acumetría e impedanciometría. Las emisiones otoacústicas no sirven para la cóclea con un gap así: no pasan el oído medio.
 - **Errores esperables:** leer el As del OI como normal o como anormal sin considerar la edad; no enmascarar la ósea; atribuir la muesca de 2 kHz a la cóclea; no preguntar por la evolución.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *fijación congénita del estribo* en los dos oídos (moderada en el OD, leve en el OI). Para discutir: qué se le recomienda al colegio mientras el otorrino decide (ubicarlo adelante, hablarle de frente).
+- **En LabSim:** cuadro *fijación congénita del estribo* en los dos oídos (moderada en el OD, leve en el OI). Para discutir: qué se le recomienda al colegio mientras el otorrino decide (ubicarlo adelante, hablarle de frente).
 :::
 
 {{caso cap04_paget}}
@@ -325,7 +325,7 @@ Si la pérdida tiene un componente conductivo, ¿esperas una curva As? ¿Qué es
 - **Hipótesis esperables:** hipoacusia mixta por Paget del hueso temporal; presbiacusia (no explica el gap); otoesclerosis avanzada (no calza con la edad de inicio ni con la historia).
 - **Qué pedir:** audiometría con ósea enmascarada, impedanciometría con reflejos y logoaudiometría (→ H3, H5, H7).
 - **Errores esperables:** atribuirlo todo a la edad; pasar por alto un gap de 10 a 15 dB porque "es chico"; esperar una curva As para aceptar un componente conductivo; no preguntar por signos de nervios craneales.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *enfermedad de Paget* en los dos oídos. La logoaudiometría máxima sale en 84 % en los dos oídos, más baja que la de Carolina: el componente coclear se nota.
+- **En LabSim:** cuadro *enfermedad de Paget* en los dos oídos. La logoaudiometría máxima sale en 84 % en los dos oídos, más baja que la de Carolina: el componente coclear se nota.
 :::
 
 ## Resolución de los casos

@@ -13,7 +13,7 @@ Este capítulo es un mapa. No enseña una prueba ni resuelve un caso: nombra las
 
 Las ilustraciones vienen de bancos libres: dibujos de **Servier Medical Art** (CC BY 4.0) y de **OpenStax** (CC BY 4.0 en Wikimedia Commons; el sitio de OpenStax declara hoy CC BY-NC-SA 4.0, compatible con este libro), láminas de **Gray** de dominio público y esquemas propios hechos para este libro. Los rótulos de las láminas de Gray y de OpenStax están en inglés, tal como vienen; los globos numerados los traducen. La lista completa de créditos está al final.
 
-:::imagen ilustraciones/b1-oido.png El oído completo en un corte frontal: externo, medio e interno. Servier Medical Art, CC BY 4.0 (smart.servier.com); sin modificar.
+:::imagen ilustraciones/b1-oido.png El oído completo en un corte frontal. Sigue el camino del sonido: el pabellón y el conducto lo llevan a la membrana, la cadena lo pasa a la cóclea y el VIII par lo lleva al tronco; la trompa ventila el oído medio hacia la rinofaringe. Imagen: Servier Medical Art, CC BY 4.0.
 - @10,45 | **Pabellón** (→ El pabellón).
 - @40,52 | **Conducto auditivo externo**: cartilaginoso afuera, óseo adentro.
 - @58,62 | **Membrana timpánica**, el límite con el oído medio.
@@ -32,7 +32,7 @@ El oído externo recoge el sonido y lo lleva hasta la membrana timpánica. Lo fo
 
 El pabellón es una lámina de **cartílago elástico** cubierta de piel, que se prolonga hacia abajo en el **lóbulo**, hecho solo de grasa y piel. Sus relieves tienen nombre porque se usan al describir la otoscopía y al tirar del oído para enderezar el conducto (→ H1):
 
-:::imagen ilustraciones/b1-pabellon.svg ancho=48% Los relieves del pabellón derecho. Esquema propio.
+:::imagen ilustraciones/b1-pabellon.svg ancho=48% Los relieves del pabellón derecho: son los nombres que usarás para describir una malformación y para saber de dónde tomar el pabellón en la otoscopía. Esquema propio.
 :::
 
 - El **hélix** es el borde enrollado. Nace dentro de la concha como un pliegue (la cruz del hélix) y rodea todo el pabellón.
@@ -42,7 +42,7 @@ El pabellón es una lámina de **cartílago elástico** cubierta de piel, que se
 
 **La microtia** es un pabellón pequeño o malformado, y casi siempre se acompaña de un conducto estrecho o ausente (atresia; → cap. 1). Va de alteraciones leves hasta la ausencia total del pabellón (Luquetti y cols., 2012) y se gradúa en cuatro grados según cuánto queda de las estructuras (Truong y cols., 2022): en el grado I, el más leve, el pabellón es pequeño pero conserva sus relieves; en el III, la forma más frecuente, queda solo un remanente de cartílago con el lóbulo; y en el IV no hay pabellón (anotia). Mira siempre los dos pabellones juntos: su asimetría dice más que cada uno por separado.
 
-:::imagen ilustraciones/b1-microtia-grados.jpg ancho=60% Los grados de la microtia, frente a un pabellón normal. Rótulos originales en inglés (Class, grado). Ilustración: Truong MT, Liu YC, Kohn J y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, Fig. 1, CC BY 4.0, sin modificar.
+:::imagen ilustraciones/b1-microtia-grados.jpg ancho=60% Los grados de la microtia, frente a un pabellón normal. A medida que sube el grado se pierden los relieves: en el III queda un remanente con el lóbulo y en el IV no queda nada. Rótulos en inglés (*Class*, grado). Imagen: Truong y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, CC BY 4.0.
 :::
 
 ### El conducto auditivo externo
@@ -60,7 +60,7 @@ Tabla: Las dos partes del conducto auditivo externo
 
 Por eso el cerumen se produce afuera y **no debe manipularse adentro** sin ver: el tercio óseo es estrecho, delgado y sangra con facilidad (→ H1).
 
-:::imagen ilustraciones/b1-cae-gray907.png ancho=70% Corte del oído externo y la trompa. Gray's Anatomy (lámina 907), dominio público. Rótulos originales en inglés.
+:::imagen ilustraciones/b1-cae-gray907.png ancho=70% Corte del oído externo y la trompa. Mira dónde termina el cartílago y empieza el hueso del conducto: ahí la piel se vuelve fina y el roce empieza a doler. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 907), dominio público.
 - @16,70 | **Parte cartilaginosa** del conducto (*cartilaginous part of ext. acoustic meatus*): piel con pelos y glándulas.
 - @41,56 | **Parte ósea** del conducto (*bony part*): piel fina y muy sensible.
 - @44,44 | **Membrana timpánica** (*tympanic membrane*), que cierra el fondo del conducto.
@@ -78,7 +78,7 @@ Por eso el cerumen se produce afuera y **no debe manipularse adentro** sin ver: 
 
 La membrana timpánica separa el oído externo del medio. Es una lámina casi circular, de cerca de **1 cm** de diámetro y muy delgada, **inclinada**: su borde superior queda más afuera que el inferior, de modo que el piso del conducto es más largo que el techo. Se ve por otoscopía, y todo lo que se describe en ella tiene un nombre fijo.
 
-:::imagen ilustraciones/b1-membrana.svg ancho=100% Referencias de la membrana timpánica derecha y dónde cae cada hallazgo. Esquema propio.
+:::imagen ilustraciones/b1-membrana.svg ancho=100% Referencias de la membrana timpánica derecha y dónde cae cada hallazgo. Ubica primero el mango y el umbo: desde ellos se trazan los cuadrantes que usarás para dar la posición de una perforación. Esquema propio.
 :::
 
 - **Pars tensa.** Es casi toda la membrana. Tiene tres capas (piel por fuera, mucosa por dentro y, en medio, fibras de colágeno), y se sostiene en el **anillo timpánico**, un borde fibrocartilaginoso encajado en el hueso (→ B3).
@@ -116,7 +116,7 @@ Tabla: Las paredes de la caja timpánica
 | **Anterior** | abertura de la trompa y canal de la arteria carótida interna | la trompa ventila la caja (→ más abajo) |
 | **Posterior** | entrada a la **mastoides** (*aditus*) y eminencia piramidal, de donde sale el tendón del estapedio | |
 
-:::imagen ilustraciones/b1-caja-gray911.png ancho=76% Pared medial de la caja timpánica. Gray's Anatomy (lámina 911), dominio público. Rótulos originales en inglés.
+:::imagen ilustraciones/b1-caja-gray911.png ancho=76% Pared medial de la caja timpánica, la que verías si sacaras la membrana. Ubica el promontorio con la ventana oval arriba y la redonda abajo, y el canal del facial pasando justo sobre la oval. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 911), dominio público.
 - @33,22 | **Canal del nervio facial** (*facial canal*): el nervio pasa sobre la ventana oval.
 - @45,31 | **Ventana oval** (*fen. ovale*): ahí apoya la base del estribo.
 - @40,52 | **Ventana redonda** (*fen. rotunda*).
@@ -129,7 +129,7 @@ Tabla: Las paredes de la caja timpánica
 
 La caja se divide en tres alturas respecto de la membrana: el **epitímpano** o **ático** (arriba, donde está la cabeza del martillo y el cuerpo del yunque), el **mesotímpano** (frente a la membrana, donde está la mayor parte de la cadena) y el **hipotímpano** (abajo, cerca del piso). El **ático** se comunica por atrás con las celdillas mastoideas y se ventila por un paso estrecho: por eso las bolsas de retracción y el colesteatoma suelen nacer allí.
 
-:::imagen ilustraciones/b1-tc-coronal.jpg ancho=55% Tomografía coronal de un oído derecho sano, a la altura del ático; afuera queda a la izquierda. Es la imagen de una persona real, no de un paciente de este libro; la tomografía la pide y la informa el médico, y aquí se muestra para que se vea la forma de lo que miden las pruebas. En la tomografía el aire es negro y el hueso, blanco. Imagen: Touska P, Connor SEJ (2025), Eur Radiol, doi:10.1007/s00330-024-11021-x, Fig. 1A, CC BY 4.0, recortada.
+:::imagen ilustraciones/b1-tc-coronal.jpg ancho=55% Tomografía coronal de un oído derecho sano, a la altura del ático; afuera queda a la izquierda. El aire es negro y el hueso, blanco: mira el escudo, el borde de hueso que el colesteatoma del ático erosiona. Es una persona real, no un paciente de este libro; la tomografía la pide y la informa el médico, y sirve aquí para ver la forma de lo que miden las pruebas. Imagen: Touska y Connor (2025), Eur Radiol, doi:10.1007/s00330-024-11021-x, CC BY 4.0, adaptada.
 - @36,22 | **Ático** (epitímpano), con aire.
 - @25,57 | **Escudo** (flecha hueca): el borde de hueso donde se apoya la parte alta de la membrana. El colesteatoma del ático lo erosiona (→ cap. 3).
 - @43,58 | **Articulación del yunque con el estribo** (flecha chica).
@@ -146,7 +146,7 @@ Tres huesecillos transmiten la vibración desde la membrana hasta la ventana ova
 
 Las articulaciones son dos, la **incudomaleolar** y la **incudoestapedial**. Lo que sostiene la cadena es sutil: ligamentos, los tendones de dos músculos y la membrana timpánica. Al ser tan fina, la cadena se interrumpe con el trauma o la infección: la **articulación incudoestapedial** es de las que más se separa<!-- verificar: cuál es la articulación que se luxa con más frecuencia en el trauma; confirmar con una fuente de otología antes de darlo como regla -->, y la rama larga del yunque puede erosionarse con el colesteatoma. El resultado es una pérdida conductiva grande, con la membrana intacta (→ cap. 3). Una fijación del estribo en la ventana oval (otosclerosis) produce el cuadro opuesto: cadena entera, pero rígida (→ cap. 4).
 
-:::imagen ilustraciones/b1-oido-interno.png ancho=62% Membrana, cadena osicular y oído interno juntos. Servier Medical Art, CC BY 4.0.
+:::imagen ilustraciones/b1-oido-interno.png ancho=62% Membrana, cadena osicular y oído interno juntos. Sigue la cadena desde el mango del martillo, pegado a la membrana, hasta la platina del estribo en la ventana oval: por ahí entra la vibración al laberinto. Imagen: Servier Medical Art, CC BY 4.0.
 - @7,80 | **Membrana timpánica**, vista de lado.
 - @11,26 | **Martillo**: cabeza y mango.
 - @22,54 | **Yunque**: su rama larga baja hacia el estribo.
@@ -173,7 +173,7 @@ La trompa comunica la caja con la **rinofaringe**. Su trabajo es **igualar la pr
 
 Tiene dos porciones: una **ósea**, cercana al oído medio, y otra **cartilaginosa y membranosa**, que se abre en la pared lateral de la rinofaringe, detrás del cornete inferior, rodeada por un reborde (el *torus tubario*) y, detrás de él, un surco, el **receso faríngeo** (fosa de Rosenmüller).
 
-:::imagen ilustraciones/b1-trompa.svg ancho=100% La trompa del lactante y del adulto. Esquema propio, con el largo y las proporciones medidos por Ishijima y cols. (2000).
+:::imagen ilustraciones/b1-trompa.svg ancho=100% La trompa del lactante y del adulto. En el lactante es más corta y más horizontal: por eso lo que pasa en la rinofaringe llega con facilidad al oído medio. Esquema propio, con las medidas de Ishijima y cols. (2000).
 :::
 
 **El niño no es un adulto pequeño.** En un estudio con reconstrucción tridimensional de huesos temporales, el largo de la trompa de un lactante de 3 meses fue de unos **21 mm**, contra unos **37 mm** del adulto; la porción cartilaginosa y de transición es 8 veces más larga que la ósea en el lactante y 4 veces en el adulto. Además, en el niño las dos porciones están alineadas, y en el adulto la cartilaginosa se inclina hacia abajo y afuera (Ishijima y cols., 2000). Una trompa más corta y más horizontal se abre peor y drena peor, y por eso el niño pequeño tiene más otitis media con efusión (→ cap. 2).
@@ -196,7 +196,7 @@ El oído interno está en la **porción petrosa** del hueso temporal, el hueso m
 
 El laberinto tiene una parte **anterior**, la cóclea (audición), y una **posterior**, el vestíbulo y los canales semicirculares (equilibrio).
 
-:::imagen ilustraciones/b1-laberinto-gray920.png ancho=70% Laberinto óseo izquierdo. Gray's Anatomy (lámina 920), dominio público. Rótulos originales en inglés.
+:::imagen ilustraciones/b1-laberinto-gray920.png ancho=70% Laberinto óseo izquierdo: la cóclea adelante, para la audición, y el vestíbulo con los tres canales atrás, para el equilibrio. Las dos ventanas quedan entre ambos. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 920), dominio público.
 - @28,18 | **Canal semicircular superior** (*superior canal*).
 - @22,64 | **Canal semicircular lateral** (*lateral canal*), el horizontal.
 - @8,70 | **Canal semicircular posterior** (*posterior canal*).
@@ -207,7 +207,7 @@ El laberinto tiene una parte **anterior**, la cóclea (audición), y una **poste
 - @80,58 | **Cóclea**.
 :::
 
-:::imagen ilustraciones/b1-tc-axial.jpg ancho=100% Dos cortes axiales de tomografía de alta resolución (0,625 mm) de un oído normal: a la izquierda, uno más bajo; a la derecha, uno más alto. Adelante queda arriba y afuera, a la izquierda. Rótulos originales en inglés; ICA es la carótida interna. Imagen: Feraco P, Piccinini S, Gagliardo C (2021), Radiol Med, doi:10.1007/s11547-021-01387-z, Fig. 3 (cortes b y c), CC BY 4.0, recortada y con los dos cortes lado a lado.
+:::imagen ilustraciones/b1-tc-axial.jpg ancho=100% Dos cortes axiales de tomografía de un oído normal: a la izquierda, uno más bajo; a la derecha, uno más alto. Adelante queda arriba y afuera, a la izquierda. Es el laberinto de la lámina anterior, ahora dentro del hueso: busca la cóclea, el vestíbulo y los canales, y sigue el facial por la caja y la mastoides. Rótulos en inglés; ICA es la carótida interna. Imagen: Feraco y cols. (2021), Radiol Med, doi:10.1007/s11547-021-01387-z, CC BY 4.0, adaptada.
 - @8.5,51 | **Nervio facial**, segmento mastoideo (*VII-MS*): baja por la mastoides.
 - @17,76 | **Celdillas mastoideas**: hueso lleno de aire, negro.
 - @25,81 | **Canal semicircular lateral** (*LSCC*).
@@ -229,7 +229,7 @@ Si se la corta en sección, se ven **tres tubos** apilados:
 - La **rampa vestibular** (arriba) y la **rampa timpánica** (abajo) contienen perilinfa. Se comunican en el ápice por un pasaje, el **helicotrema**. La vestibular empieza en la ventana oval; la timpánica termina en la ventana redonda.
 - La **rampa media**, o **conducto coclear** (en el centro), contiene endolinfa y está limitada arriba por la **membrana de Reissner** (vestibular) y abajo por la **membrana basilar**. Sobre la membrana basilar apoya el **órgano de Corti**, con las células ciliadas, y sobre él, la **membrana tectoria** (→ B3).
 
-:::imagen ilustraciones/b1-coclea-openstax.jpg ancho=100% Corte transversal de una vuelta de la cóclea. OpenStax, Anatomy and Physiology 2e, CC BY 4.0 (según Wikimedia Commons). Rótulos originales en inglés.
+:::imagen ilustraciones/b1-coclea-openstax.jpg ancho=100% Corte transversal de una vuelta de la cóclea: las tres rampas, con el órgano de Corti apoyado en la membrana basilar, en el piso de la rampa media. Rótulos en inglés. Imagen: OpenStax, Anatomy and Physiology 2e, CC BY 4.0.
 - @56,26 | **Rampa vestibular** (*scala vestibuli*): perilinfa.
 - @51,37 | **Conducto coclear** (rampa media): endolinfa.
 - @61,49 | **Órgano de Corti**, sobre la membrana basilar y bajo la membrana tectoria.
@@ -276,14 +276,14 @@ El VIII par lleva la información de la cóclea y del vestíbulo al tronco encef
 
 Una resonancia en T2 con un corte perpendicular al CAI muestra los cuatro nervios en su lugar.
 
-:::imagen ilustraciones/b1-rm-cai.jpg ancho=90% Resonancia en T2 del CAI de un lactante, en un corte sagital oblicuo (perpendicular al conducto), del oído que oye normal. A la izquierda, el corte completo; a la derecha, ampliado. Adelante queda a la izquierda. Rótulos originales en inglés. Imagen: Johansson M, Karltorp E, Edholm K, Drott M, Berninger E (2022), J Clin Med, doi:10.3390/jcm11143966, Fig. 4 a-b, CC BY 4.0, recortada (se omite el otro oído).
+:::imagen ilustraciones/b1-rm-cai.jpg ancho=90% Resonancia en T2 del CAI de un lactante, en un corte perpendicular al conducto, del oído que oye normal; a la derecha, ampliado. Adelante queda a la izquierda. Busca los cuatro nervios en su cuadrante: el facial arriba y adelante, el coclear abajo y adelante, las ramas vestibulares atrás. Rótulos en inglés. Imagen: Johansson y cols. (2022), J Clin Med, doi:10.3390/jcm11143966, CC BY 4.0, adaptada.
 - @32,72 | El **CAI**, cortado de través, dentro del círculo.
 - @64.5,18 | **Nervio facial** (*facial nerve*): arriba y adelante.
 - @82,22 | **Ramas vestibulares**, superior e inferior (*vestibular branches*): atrás.
 - @81.5,78 | **Nervio coclear** (*cochlear branch*): abajo y adelante. En el otro oído de este niño, sordo, no se ve: aplasia del nervio coclear.
 :::
 
-:::imagen ilustraciones/b1-rm-cai-plano.jpg ancho=100% Cómo se saca ese corte, en una resonancia de 7 teslas de un voluntario con audición normal: el plano sobre el corte axial, el esquema de los cuatro nervios en el fondo del CAI y el corte real. Rótulos originales en inglés (S, superior; A, anterior). Imagen: Aphiwatthanasumet K y cols. (2025), MAGMA, doi:10.1007/s10334-024-01213-3, Fig. 5c, CC BY 4.0, recortada.
+:::imagen ilustraciones/b1-rm-cai-plano.jpg ancho=100% De dónde sale ese corte, en un adulto con audición normal: el plano se traza perpendicular al CAI sobre el corte axial, y en el fondo del conducto los cuatro nervios quedan en una cruz. Compara el esquema con el corte real. Rótulos en inglés (S, superior; A, anterior). Imagen: Aphiwatthanasumet y cols. (2025), MAGMA, doi:10.1007/s10334-024-01213-3, CC BY 4.0, adaptada.
 - @12,8 | **Plano del corte**: la línea blanca larga, perpendicular al CAI.
 - @39,17 | **Facial** (*facial nerve*): anterosuperior.
 - @60,12 | **Vestibular superior**: posterosuperior.
@@ -309,7 +309,7 @@ La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recib
 
 Desde el nervio coclear, la señal pasa por una cadena de estaciones en el tronco, el mesencéfalo, el tálamo y la corteza. Casi todas están **repetidas a cada lado**, y casi todas reciben información de **los dos oídos**; por eso una lesión central de un lado rara vez produce una pérdida de umbral: altera, en cambio, la localización, la comprensión en ruido o la integración entre los oídos (→ H14, cap. 13).
 
-:::imagen ilustraciones/b1-via-auditiva.svg ancho=100% La vía auditiva central y la estación que se asocia habitualmente a cada onda del PEAT (→ H10). Esquema propio. La asignación es una guía, no un mapa literal.
+:::imagen ilustraciones/b1-via-auditiva.svg ancho=100% La vía auditiva central y la estación que se asocia habitualmente a cada onda del PEAT (→ H10). Fíjate en que desde el complejo olivar la vía ya lleva información de los dos oídos. La asignación de las ondas es una guía, no un mapa literal. Esquema propio.
 :::
 
 1. **Núcleos cocleares** (ventral y dorsal), en el bulbo, donde termina el nervio. Cada fibra hace sinapsis aquí.
@@ -329,7 +329,7 @@ Además de esta vía ascendente hay una **descendente**, con eferentes olivococl
 
 La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupaciones (superior, medial, lateral e inferior) en el tronco, en el límite entre la protuberancia y el bulbo. De ahí salen conexiones hacia cuatro destinos:
 
-:::imagen ilustraciones/b1-via-vestibular.svg ancho=100% Las vías vestibulares centrales. Esquema propio.
+:::imagen ilustraciones/b1-via-vestibular.svg ancho=100% Las vías vestibulares centrales: desde los núcleos vestibulares la señal sale hacia los ojos, la médula, el cerebelo y la corteza. Esquema propio.
 :::
 
 - **Núcleos oculomotores** (III, IV y VI), por el fascículo longitudinal medial: es el arco del **reflejo vestíbulo-ocular**, que mantiene la mirada fija mientras la cabeza se mueve. Solo tres neuronas separan el canal del ojo, y por eso el reflejo es tan rápido (→ H15, H17).
@@ -341,7 +341,7 @@ La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupac
 
 El oído interno recibe sangre de una arteria sola, la **arteria laberíntica** (auditiva interna), casi siempre una rama de la **AICA**, que a su vez sale de la arteria basilar (Mazzoni, 1972). Se divide en:
 
-:::imagen ilustraciones/b1-irrigacion.svg ancho=100% Las arterias del laberinto. Esquema propio, según la descripción clásica de Mazzoni (1972).
+:::imagen ilustraciones/b1-irrigacion.svg ancho=100% Las arterias del laberinto: una sola arteria, terminal, que se reparte entre la cóclea y el vestíbulo. Por eso una falla de irrigación puede quitar audición y equilibrio a la vez. Esquema propio, según Mazzoni (1972).
 :::
 
 - La **arteria vestibular anterior**, que irriga el utrículo, los canales lateral y superior y parte del sáculo: el territorio del nervio vestibular superior.
@@ -360,7 +360,7 @@ La nariz externa tiene forma de pirámide: la **raíz** arriba, el **dorso** has
 - La parte **ósea**, arriba: los **huesos nasales** y las ramas frontales de los maxilares.
 - La parte **cartilaginosa**, abajo: los **cartílagos laterales superiores**, que forman el dorso y se unen al tabique; los **cartílagos alares** (mayores), que forman la punta y las narinas; y el **cartílago del tabique**.
 
-:::imagen ilustraciones/b1-valvula.svg ancho=100% A: la pirámide nasal vista de lado. B: la válvula nasal interna en un corte frontal. Esquema propio. Las cifras son las de Pirola y cols. (2025).
+:::imagen ilustraciones/b1-valvula.svg ancho=100% A: la pirámide nasal vista de lado, con su parte ósea y su parte cartilaginosa. B: la válvula nasal interna en un corte frontal, el punto más estrecho de la vía aérea. Esquema propio, con las cifras de Pirola y cols. (2025).
 :::
 
 ### El vestíbulo y la válvula nasal
@@ -375,7 +375,7 @@ La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. 
 
 El tabique divide la cavidad en dos fosas. Es **óseo atrás y cartilaginoso adelante**: la **lámina perpendicular del etmoides** (arriba), el **vómer** (abajo y atrás) y el **cartílago cuadrangular** (adelante), apoyados en la cresta de los huesos maxilar y palatino. Rara vez es perfectamente recto; sus desviaciones son tan comunes que casi todas las narices las tienen en algún grado, y solo importan si estrechan la vía aérea.
 
-:::imagen ilustraciones/b1-tabique-gray854.png ancho=70% El tabique nasal. Gray's Anatomy (lámina 854), dominio público. Rótulos originales en inglés.
+:::imagen ilustraciones/b1-tabique-gray854.png ancho=70% El tabique nasal: hueso atrás y cartílago adelante. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 854), dominio público.
 - @37,36 | **Lámina perpendicular del etmoides** (*perpendicular plate of ethmoid*).
 - @66,46 | **Cartílago del tabique** (*cartilage of septum*), el cuadrangular.
 - @30,62 | **Vómer**.
@@ -389,7 +389,7 @@ La parte anterior del tabique tiene una trama rica de vasos (el **plexo de Kiess
 
 Cada fosa tiene un **techo** (la lámina cribosa del etmoides, por donde pasan los filetes del nervio olfatorio), un **piso** (el paladar duro), una pared **medial** (el tabique) y una pared **lateral**, la más compleja: tiene tres repisas curvas de hueso cubiertas de mucosa, los **cornetes superior, medio e inferior**. Bajo cada cornete queda un espacio, un **meato**.
 
-:::imagen ilustraciones/b1-nariz-sagital.png ancho=64% La pared lateral de la nariz y la relación con los senos. Servier Medical Art, CC BY 4.0.
+:::imagen ilustraciones/b1-nariz-sagital.png ancho=64% La pared lateral de la nariz, con sus tres cornetes, y su relación con los senos. Imagen: Servier Medical Art, CC BY 4.0.
 - @8,56 | **Cartílagos de la pirámide**, que sostienen la nariz por fuera.
 - @16,66 | **Vestíbulo nasal**, con las vibrisas.
 - @57,47 | **Cornete superior**.
@@ -419,7 +419,7 @@ Tabla: Meatos y senos paranasales que drenan en cada uno
 
 El **meato medio** concentra el drenaje de tres de los cuatro senos, y esa zona ("complejo ostiomeatal") es la que se bloquea primero con la inflamación: es el origen de la mayoría de las sinusitis (Stammberger y Kennedy, 1995). Los cuatro senos son el **maxilar**, el **frontal**, el **etmoidal** (un grupo de celdillas) y el **esfenoidal**. Todos están inervados por el trigémino.
 
-:::imagen ilustraciones/b1-pared-lateral-gray856.png ancho=84% Pared lateral de la fosa nasal derecha con las aberturas de los senos y de la trompa. Gray's Anatomy (lámina 856), dominio público. Rótulos originales en inglés.
+:::imagen ilustraciones/b1-pared-lateral-gray856.png ancho=84% Pared lateral de la fosa nasal derecha, con los cornetes cortados para ver los meatos. Fíjate en cuántas aberturas caen en el meato medio, y en lo cerca que queda la trompa de la cola del cornete inferior. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 856), dominio público.
 - @13,64 | **Vestíbulo** de la nariz.
 - @29,19 | **Seno frontal**.
 - @53,40 | **Cornete superior** (cortado).
@@ -432,7 +432,7 @@ El **meato medio** concentra el drenaje de tres de los cuatro senos, y esa zona 
 - @80,72 | **Receso faríngeo** (fosa de Rosenmüller), detrás de la trompa.
 :::
 
-:::imagen ilustraciones/b1-senos.png ancho=42% Los senos paranasales, vistos de frente. Servier Medical Art, CC BY 4.0.
+:::imagen ilustraciones/b1-senos.png ancho=42% Los senos paranasales, vistos de frente: frontal sobre la órbita, maxilar bajo ella, etmoidal entre las órbitas. Imagen: Servier Medical Art, CC BY 4.0.
 - @62,34 | **Seno frontal**, sobre la órbita.
 - @62,45 | **Celdillas etmoidales**, entre la órbita y la nariz.
 - @70,57 | **Seno maxilar**, el más grande, bajo la órbita.
@@ -470,9 +470,8 @@ Los tres huesecillos del oído medio ya tienen casi su tamaño de adulto al nace
 - Servier Medical Art (smart.servier.com), CC BY 4.0: figuras del oído, del oído interno, de la nariz y de los senos.
 - OpenStax, Anatomy and Physiology 2e: corte de la cóclea. El archivo figura como CC BY 4.0 en Wikimedia Commons; el sitio de OpenStax declara hoy para el libro CC BY-NC-SA 4.0, que es compatible con la licencia de este libro.
 - Gray H. Anatomy of the Human Body (1918), láminas 854, 856, 907, 911 y 920, dominio público.
-- Tomografías y resonancias del oído: figuras de artículos de acceso abierto (Feraco y cols., 2021; Touska y Connor, 2025; Johansson y cols., 2022; Aphiwatthanasumet y cols., 2025), CC BY 4.0; detalle en `docs/libro/ilustraciones/CREDITOS_IMG_OIDO.md`.
-- Esquemas propios (pabellón, membrana timpánica, trompa, vías auditiva y vestibular, irrigación y válvula nasal): hechos para este libro con `docs/libro/ilustraciones/hacer_b1.py`.
-- Detalle (origen, autor, licencia y si se modificó): `docs/libro/ilustraciones/CREDITOS_B1.md`.
+- Tomografías y resonancias del oído: figuras de artículos de acceso abierto (Feraco y cols., 2021; Touska y Connor, 2025; Johansson y cols., 2022; Aphiwatthanasumet y cols., 2025), CC BY 4.0, adaptadas.
+- Esquemas propios: pabellón, membrana timpánica, trompa, vías auditiva y vestibular, irrigación y válvula nasal.
 
 ## Referencias
 

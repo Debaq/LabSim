@@ -60,7 +60,7 @@ El conducto no es recto: la parte cartilaginosa y la ósea forman un ángulo. Al
 
 En el recién nacido el conducto está lleno de vérnix y restos de líquido amniótico, que pueden ocupar también el oído medio en los primeros días (Eavey, 1993). Una otoscopía difícil en esas horas no es necesariamente patológica.
 
-![Tracción del pabellón según la edad. Izquierda: adulto sentado, el examinador sostiene el otoscopio como un lápiz, con el dorso de la mano apoyado en la cabeza del paciente, y la otra mano tracciona el pabellón hacia arriba y atrás (flecha). Derecha: niño pequeño sentado de lado en el regazo del adulto, que le sujeta la cabeza contra el pecho; el pabellón se tracciona hacia atrás y algo hacia abajo (flecha). En recuadro, corte del conducto mostrando cómo la tracción alinea la porción cartilaginosa con la ósea.](ilustraciones/h01-traccion.png)
+![{IA} Para ver la membrana hay que alinear el conducto. En el adulto el pabellón se tracciona hacia arriba y atrás; en el niño pequeño, hacia atrás y a veces hacia abajo. El otoscopio se toma como un lápiz, con la mano apoyada en la cabeza: si el paciente se mueve, el espéculo se mueve con él y no lo daña.](ilustraciones/h01-traccion.png)
 
 ### La membrana y sus referencias
 
@@ -71,7 +71,7 @@ La membrana timpánica es un cono poco profundo con el vértice hacia adentro, e
 
 Las referencias que se buscan en toda membrana son tres: la **apófisis corta** del martillo (un relieve blanco arriba), el **mango del martillo** (que baja y va hacia atrás hasta el umbo) y el **triángulo luminoso** (el reflejo de la luz del otoscopio, que sale del umbo hacia adelante y abajo). Una línea a lo largo del mango y otra perpendicular por el umbo dividen la pars tensa en **cuatro cuadrantes**: anterosuperior, anteroinferior, posteroinferior y posterosuperior.
 
-:::imagen ilustraciones/h01-cuadrantes.svg Membranas timpánicas derecha e izquierda vistas por el otoscopio
+:::imagen ilustraciones/h01-cuadrantes.svg Membranas timpánicas derecha e izquierda vistas por el otoscopio. Son imágenes en espejo: el mango baja siempre hacia atrás y el triángulo luminoso queda siempre adelante y abajo. Así sabes de qué oído es una foto.
 - @7.5,28 | **Anillo timpánico.** El borde engrosado que fija la membrana al hueso. Si no lo recorres entero, puedes no ver una perforación marginal.
 - @33,11 | **Pars flácida.** La porción pequeña de arriba, sobre la apófisis corta. Es donde se forman las bolsas de retracción del colesteatoma atical.
 - @33.5,19 | **Apófisis corta del martillo.** El punto blanco de arriba: la primera referencia que se busca.
@@ -98,7 +98,7 @@ El triángulo luminoso existe porque la membrana está inclinada y tiene forma d
 
 El otoscopio es una linterna con lupa. La luz entra por el espéculo, ilumina el fondo del conducto, y tú miras por la lente, que agranda la imagen. Todo lo que puede salir mal en una otoscopía tiene que ver con una de sus partes: poca luz, un espéculo chico o la lente sucia.
 
-:::imagen ilustraciones/h01-otoscopio.png El otoscopio y sus partes
+:::imagen ilustraciones/h01-otoscopio.png {IA} El otoscopio y sus partes
 <!-- dibujo: a handheld clinical otoscope shown from the side: cylindrical handle with battery, the head with its light source, the magnifying viewing lens at the back, and a disposable black ear speculum cone attached at the front. -->
 - @33,16 | **Espéculo.** El cono que entra al conducto. Se usa el más grande que entre cómodo: más luz y más campo de visión. Uno por paciente, o se limpia entre uno y otro.
 - @50,21 | **Fuente de luz.** Tiene que ser blanca e intensa: con luz amarilla, una membrana normal parece inflamada.
@@ -195,17 +195,17 @@ Recórrela siempre en este orden:
 
 Las fotos que siguen son otoscopías reales de dos bancos abiertos, uno de ellos del Hospital Clínico de la Universidad de Chile. Junto a cada una, lo que tienes que mirar.
 
-![Membrana timpánica normal. Arriba se ve el relieve blanco de la apófisis corta; desde ahí baja el mango del martillo hasta el umbo, en el centro, donde nace el triángulo luminoso. La membrana es gris y semitransparente, y el conducto está limpio. Foto: Polat, 2021 (CC BY 4.0).](otoscopias/h01-normal.jpg)
+![Membrana timpánica normal. Arriba se ve el relieve blanco de la apófisis corta; desde ahí baja el mango del martillo hasta el umbo, en el centro, donde nace el triángulo luminoso. La membrana es gris y semitransparente, y el conducto está limpio. Imagen: dataset eardrum (Polat, 2021), CC BY 4.0.](otoscopias/h01-normal.jpg)
 
 **Normal.** Gris perla y semitransparente, en posición neutra, con las tres referencias visibles. Es la imagen contra la que se compara todo lo demás: antes de describir un hallazgo, pregúntate qué falta o qué sobra respecto de esta.
 
-![Cerumen. A: tapón oclusivo, una masa café oscura con pelos adheridos que ocupa todo el lumen; no se ve la membrana. B: cerumen amarillento pegado a una pared, que deja un paso libre por el que se ve parte de la membrana. Fotos: A, Polat, 2021 (CC BY 4.0); B, Viscaino y Auat Cheein, 2020 (CC0).](otoscopias/h01-cerumen.jpg)
+![Cerumen. A: tapón oclusivo, una masa café oscura con pelos adheridos que ocupa todo el lumen; no se ve la membrana. B: cerumen amarillento pegado a una pared, que deja un paso libre por el que se ve parte de la membrana. Imágenes: A, dataset eardrum (Polat, 2021), CC BY 4.0, adaptada; B, dataset Ear imagery database (Viscaino y Auat Cheein, 2020), CC0.](otoscopias/h01-cerumen.jpg)
 
 **Tapón oclusivo (A).** Llena el conducto y no deja ver la membrana. Puede dar una hipoacusia conductiva y altera el timpanograma. **No sigues** con exámenes de conducto: se resuelve el tapón (lavado, si no hay contraindicaciones) y se vuelve a mirar (cap. 1).
 
 **Cerumen no oclusivo (B).** Deja paso y se ve la membrana. Si no da síntomas y permite el examen, **no se trata** (Schwartz y cols., 2017). Ojo con la sonda del impedanciómetro y el fono de inserción: pueden empujarlo y taparse con él.
 
-![Inflamación aguda. A: otitis externa; el conducto se ve estrechado por la piel hinchada, con restos blanquecinos en las paredes, y la membrana no se alcanza a ver. B: otitis media aguda; membrana abombada hacia el conducto, opaca y rojo violácea, sin mango del martillo ni triángulo luminoso visibles. Fotos: Polat, 2021 (CC BY 4.0).](otoscopias/h01-otitis-aguda.jpg)
+![Inflamación aguda. A: otitis externa; el conducto se ve estrechado por la piel hinchada, con restos blanquecinos en las paredes, y la membrana no se alcanza a ver. B: otitis media aguda; membrana abombada hacia el conducto, opaca y rojo violácea, sin mango del martillo ni triángulo luminoso visibles. Imágenes: dataset eardrum (Polat, 2021), CC BY 4.0, adaptadas.](otoscopias/h01-otitis-aguda.jpg)
 
 **Otitis externa (A).** Conducto enrojecido y edematoso, a veces con secreción o restos, que se estrecha y no deja ver la membrana. **Duele al traccionar el pabellón y al presionar el trago**: muchas veces lo sabes antes de mirar. No se lava ni se pone sonda o fono de inserción: se deriva.
 
@@ -213,13 +213,13 @@ Las fotos que siguen son otoscopías reales de dos bancos abiertos, uno de ellos
 
 **Otitis media con efusión** (sin foto). Membrana opaca o ámbar, a veces retraída, con un **nivel hidroaéreo o burbujas** detrás y poca movilidad en la neumática (Rosenfeld y cols., 2016). Sin dolor ni fiebre: es el niño que "no escucha" en la sala (cap. 2).
 
-![Otitis media crónica. A: perforación ovalada en la pars tensa, de bordes nítidos, por la que se ve la mucosa del oído medio, más oscura; la membrana vecina está engrosada. B: perforación amplia con la mucosa del oído medio enrojecida y una secreción amarilla acumulada en el fondo del conducto. Fotos: A, Polat, 2021 (CC BY 4.0); B, Viscaino y Auat Cheein, 2020 (CC0).](otoscopias/h01-perforacion-otorrea.jpg)
+![Otitis media crónica. A: perforación ovalada en la pars tensa, de bordes nítidos, por la que se ve la mucosa del oído medio, más oscura; la membrana vecina está engrosada. B: perforación amplia con la mucosa del oído medio enrojecida y una secreción amarilla acumulada en el fondo del conducto. Imágenes: A, dataset eardrum (Polat, 2021), CC BY 4.0, adaptada; B, dataset Ear imagery database (Viscaino y Auat Cheein, 2020), CC0.](otoscopias/h01-perforacion-otorrea.jpg)
 
 **Perforación (A).** Un orificio por el que se ve el oído medio. Describe **dónde** está (cuadrante, central o marginal), **qué tamaño** tiene respecto de la membrana y si está **seca o húmeda**. Contraindica el lavado. El timpanograma sale sin pico y con un volumen grande, porque la sonda mide conducto más oído medio (H7).
 
 **Otorrea (B).** Secreción en el conducto, de una otitis externa o de un oído medio que supura por una perforación. Es un **alto**: no se lava ni se mete sonda o fono, se usa guante y se cambia de espéculo antes del otro oído. Se deriva.
 
-![A: miringoesclerosis; gran placa blanca, de aspecto calcáreo, en la mitad anterior de la pars tensa, con el resto de la membrana gris y translúcido. B: tubo de ventilación; un pequeño carrete blanco, con el lumen al centro, atraviesa la membrana. Fotos: A, Viscaino y Auat Cheein, 2020 (CC0); B, Polat, 2021 (CC BY 4.0).](otoscopias/h01-miringoesclerosis-tubo.jpg)
+![A: miringoesclerosis; gran placa blanca, de aspecto calcáreo, en la mitad anterior de la pars tensa, con el resto de la membrana gris y translúcido. B: tubo de ventilación; un pequeño carrete blanco, con el lumen al centro, atraviesa la membrana. Imágenes: A, dataset Ear imagery database (Viscaino y Auat Cheein, 2020), CC0; B, dataset eardrum (Polat, 2021), CC BY 4.0, adaptada.](otoscopias/h01-miringoesclerosis-tubo.jpg)
 
 **Miringoesclerosis (A).** Placas blancas como tiza en la pars tensa, secuela de otitis antiguas o de tubos, con la membrana íntegra. Se describe el cuadrante y la extensión. No es una perforación (la placa es blanca y opaca; la perforación, oscura) ni un colesteatoma (que se ve detrás de la membrana o en la pars flácida, no en su espesor). Cerca puede haber una **membrana monomérica**: una perforación antigua que cerró sin su capa fibrosa, más delgada y transparente que el resto, que puede parecer un agujero.
 
@@ -282,7 +282,7 @@ Una **cicatriz detrás de la oreja** es una cirugía de oído hasta que el pacie
 <!-- Protocolo ORL 2019: no incluía la otoscopía de control al terminar. Se agregó (Schwartz y cols., 2017, recomendación 9). -->
 <!-- verificar: la dirección del chorro hacia la pared posterosuperior y la punta sin ocluir el conducto son técnica habitual, pero no están en las fuentes verificadas de este capítulo (Schwartz 2017 se revisó solo por el resumen). -->
 
-![Técnica de lavado de oído, vista de frente al paciente sentado. La mano izquierda del examinador tracciona el pabellón hacia arriba y atrás; la derecha sostiene la jeringa con la punta apoyada en la entrada del conducto, sin ocluirlo. Una flecha azul muestra el chorro dirigido a la pared posterosuperior, pasando por detrás del tapón; una flecha de vuelta muestra el agua y el tapón saliendo hacia el riñón, que el paciente sostiene bajo el oído. Una toalla cubre el hombro.](ilustraciones/h01-lavado.png)
+![{IA} El lavado de oído. Con el pabellón traccionado, la punta se apoya en la entrada sin ocluir el conducto y el chorro va a la pared posterosuperior: el agua pasa por detrás del tapón y lo empuja hacia afuera. El riñón bajo el oído recibe el agua.](ilustraciones/h01-lavado.png)
 
 **Complicaciones.** Dolor, vértigo, acúfeno, otitis externa, lesión de la piel del conducto y perforación de la membrana (Schwartz y cols., 2017). Casi todas se evitan con las contraindicaciones bien revisadas, agua a la temperatura correcta y poca presión.
 

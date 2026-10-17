@@ -300,7 +300,7 @@ El dolor ya pasó. ¿Qué esperas de la vía ósea del OD en esta fase? Si sale 
 - **Hipótesis esperables:** otitis media aguda derecha en resolución (con el líquido todavía en la caja); efusión residual. Lo agudo de la historia y el abombamiento hablan de la aguda.
 - **Qué pedir:** audiometría con vía ósea y impedanciometría (→ H3, H7). Si el oído todavía doliera, la impedanciometría se pospone.
 - **Errores esperables:** pasar por alto la diferencia de ósea entre los dos oídos (está en rango normal) o, al revés, informarla como una hipoacusia sensorioneural; dar el alta sin control; hacer la función tubaria con un B.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *otitis media aguda* en el OD. La mamá pregunta por la prueba del lunes: es buena ocasión para practicar qué se le dice a un acompañante sin dar un diagnóstico médico.
+- **En LabSim:** cuadro *otitis media aguda* en el OD. La mamá pregunta por la prueba del lunes: es buena ocasión para practicar qué se le dice a un acompañante sin dar un diagnóstico médico.
 :::
 
 {{caso cap02_disfuncion_tubaria}}
@@ -341,7 +341,7 @@ En LabSim, la **función tubaria de membrana íntegra** de Irene muestra los tre
 - **Hipótesis esperables:** disfunción tubaria dilatadora bilateral; trompa patulosa (se descarta por la falta de autofonía y porque el tímpano está retraído, no móvil con la respiración); efusión incipiente.
 - **Qué pedir:** audiometría, impedanciometría con reflejos y **función tubaria de membrana íntegra** (presión-deglución): los tímpanos están enteros y tienen pico.
 - **Errores esperables:** elegir la prueba de membrana perforada; leer la ósea de 10 dB en graves como sensorioneural; no ver que el OD (Cs) está más cerca de la efusión que el OI.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *disfunción tubaria* en los dos oídos. Es el caso para practicar la pantalla ETF.
+- **En LabSim:** cuadro *disfunción tubaria* en los dos oídos. Es el caso para practicar la pantalla ETF.
 :::
 
 {{caso cap02_barotrauma}}
@@ -380,7 +380,7 @@ El tímpano izquierdo está violáceo, con sangre detrás. ¿Qué curva esperas?
 - **Hipótesis esperables:** barotrauma de oído medio izquierdo con hemotímpano; barotrauma de oído interno (se descarta con la ósea normal y la falta de vértigo).
 - **Qué pedir:** audiometría con vía ósea (lo más urgente: descartar el componente sensorioneural) e impedanciometría sin función tubaria (→ H3, H7).
 - **Errores esperables:** presurizar el oído para probar la trompa; no preguntar por vértigo; leer el B como si fuera una efusión de meses.
-- **En LabSim:** caso armado para el libro; el docente puede crearlo con el cuadro *barotrauma* en el OI. Para discutir: qué se le aconseja antes del próximo vuelo de su turno (lo decide el médico).
+- **En LabSim:** cuadro *barotrauma* en el OI. Para discutir: qué se le aconseja antes del próximo vuelo de su turno (lo decide el médico).
 :::
 
 ## Resolución de los casos

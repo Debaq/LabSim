@@ -210,7 +210,7 @@ El paciente vuelve a la misma silla, ahora con su audífono:
 
 La comparación entre los umbrales sin audífono (S) y con audífono (A) muestra cuánto le acerca el audífono los sonidos suaves. Se lee contra la **zona del habla**, la "banana" que dibujan en el audiograma los sonidos del habla a intensidad de conversación: las vocales y los sonidos graves, más intensos, arriba a la izquierda; las consonantes agudas y suaves como /s/ y /f/, abajo a la derecha. Un umbral A que queda **por encima de la banana** dice que esos sonidos ahora son audibles.
 
-:::imagen ilustraciones/h08-campo-libre-audifono.svg ancho=55% Campo libre de un niño con audífonos sobre la zona del habla
+:::imagen ilustraciones/h08-campo-libre-audifono.svg ancho=55% Campo libre de un niño con audífonos sobre la zona del habla. Sin audífonos (S) los umbrales quedan bajo la zona; con audífonos (A) suben hasta ella. Esa distancia es lo que le aporta el audífono.
 - @104,64 | **S**, sin audífonos: todos los umbrales quedan bajo la zona del habla. La voz conversacional no le llega.
 - @104,39 | **A**, con audífonos: los umbrales suben a la zona del habla o quedan muy cerca. En 2 kHz, de 80 a 35 dB: eso es lo que aporta el audífono.
 - @62,22 | La **zona del habla** es aproximada: un esquema para ubicar los umbrales, no una norma.

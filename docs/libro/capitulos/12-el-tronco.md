@@ -218,7 +218,7 @@ Ella dice que oye bien. ¿Qué te dice eso sobre el audiograma que esperas? ¿Qu
 - **Qué pedir:** audiometría, timpanometría con reflejos y ABR a 21,1 y a 81,1 estímulos por segundo (→ H3, H5, H10). El ABR es **una de varias** pruebas de potenciales; la imagen manda.
 - **Errores esperables:** concluir "audición normal" y cerrar el caso con el audiograma; leer la V sin mirar el interpico III-V; olvidar el registro a tasa alta.
 - **Decisión docente:** el generador muestra siempre la forma alterada. En la realidad el ABR es normal en una parte de los pacientes: en la serie de Robinson y Rudge (1977) la V fue anormal en el 79 % de los que tenían signos de lesión del tronco y en el 51 % de los que no.
-- **En LabSim:** caso armado para el libro con el cuadro *esclerosis múltiple* en los dos oídos; no está en la práctica del curso.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *esclerosis múltiple* en los dos oídos.
 :::
 
 {{caso cap12_infarto_aica}}
@@ -271,7 +271,7 @@ Una sordera súbita con vértigo puede ser viral, de oído interno o vascular. �
 - **Qué pedir:** audiometría con logoaudiometría, impedanciometría con reflejos, VEMP y ABR a 21,1 y 81,1 (→ H3, H10, H12).
 - **La trampa:** una hipoacusia súbita coclear, con reclutamiento y VEMP caído, se parece a una laberintitis. Lo que cambia la conducta es la **historia vascular y los signos del tronco**, no el audiograma.
 - **Errores esperables:** llamar "coclear" y cerrar sin avisar; interpretar la falta de la onda I como un tumor; olvidar que un ABR con III y V conservadas dice que el tronco conduce.
-- **En LabSim:** caso armado para el libro con el cuadro *infarto de la AICA* en el OD, grado moderado.
+- **En LabSim:** cuadro *infarto de la AICA* en el OD, grado moderado.
 :::
 
 {{caso cap12_glioma_tronco}}
@@ -314,7 +314,7 @@ La resonancia tiene lista de espera. ¿Qué parte de la evaluación auditiva se 
 - **Qué pedir:** ABR con la tabla de niño de 7 años, reflejos y emisiones (→ H10). La resonancia la decide el médico y se adelanta con la historia.
 - **Errores esperables:** quedarse con la hipoacusia leve y recomendar controles; usar la tabla del adulto; esperar la resonancia para informar.
 - **Para discutir en clases:** el audiólogo no diagnostica el tumor, pero **sí tiene que decir que el ABR no es normal** y pedir que la derivación no espere. Cómo se redacta ese aviso a la médica tratante.
-- **En LabSim:** caso armado para el libro con el cuadro *glioma de tronco* en los dos oídos y grado leve.
+- **En LabSim:** cuadro *glioma de tronco* en los dos oídos y grado leve.
 :::
 
 {{caso cap12_siderosis}}
@@ -365,7 +365,7 @@ Los dos oídos están afectados y no hay oído testigo. ¿Qué pruebas agregarí
 - **Qué pedir:** audiometría con logoaudiometría, VEMP y ABR (→ H3, H10, H12), y avisar al médico.
 - **La limitación:** con ondas tan bajas el ABR **no mide con confianza**; el cuadro se apoya en la suma de las pruebas, no en el interpico.
 - **Errores esperables:** atribuir todo a la edad; tomar los marcadores del ABR por mediciones; no registrar el antecedente neuroquirúrgico.
-- **En LabSim:** caso armado para el libro con el cuadro *siderosis* en los dos oídos, grado leve; el generador muestra la siderosis de larga evolución, con el VEMP caído (decisión docente).
+- **En LabSim:** cuadro *siderosis* en los dos oídos, grado leve; el generador muestra la siderosis de larga evolución, con el VEMP caído (decisión docente).
 :::
 
 {{caso cap12_hic_idiopatica}}
@@ -408,7 +408,7 @@ El médico pensó en Ménière. ¿Qué dato de la historia no calza con un hidro
 - **Qué pedir:** audiometría, reflejos, emisiones y ABR (→ H3, H5, H10). El registro de esfuerzo a 81,1 no puede ser el criterio para dar de alta.
 - **Errores esperables:** tratarla como Ménière; leer el ABR "casi normal" como "sin causa neurológica"; no preguntar si el zumbido late con el pulso.
 - **Para discutir en clases:** por qué la presión del líquido cefalorraquídeo llega al oído interno (por el acueducto coclear, según Sismanis, 1987) y cómo el médico confirma el diagnóstico.
-- **En LabSim:** caso armado para el libro con el cuadro *hipertensión intracraneal idiopática* en los dos oídos.
+- **En LabSim:** cuadro *hipertensión intracraneal idiopática* en los dos oídos.
 :::
 
 ## Resolución de los casos
@@ -425,7 +425,7 @@ Audiograma normal, reflejos ausentes en los cuatro registros, interpico III-V la
 
 ABR **con patrón retrococlear de tronco**, bilateral, con audición normal. Se informa así, sin poner nombre al diagnóstico. La resonancia y el neurólogo lo deciden; el ABR aporta que la vía auditiva del tronco está comprometida aunque ella no lo note, y sirve de base para el seguimiento.
 
-:::imagen ilustraciones/cap12-rm-esclerosis-multiple.jpg ancho=80% Resonancia FLAIR de otra persona con esclerosis múltiple; no es la paciente de este caso. La imagen la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Cortes axiales en orientación radiológica: la derecha de la persona queda a la izquierda. Imagen: cortes propios del dataset MSLesSeg, paciente P57 (Guarnera F, Rondinella A y cols., 2025, Sci Data 12:920, doi:10.1038/s41597-025-05250-y; datos doi:10.6084/m9.figshare.27919209), CC BY 4.0; imágenes llevadas a un espacio estándar por el dataset, recortadas y con ventana ajustada.
+:::imagen ilustraciones/cap12-rm-esclerosis-multiple.jpg ancho=80% Resonancia FLAIR de otra persona con esclerosis múltiple; no es la paciente de este caso. La imagen la pide y la informa el médico; se muestra para que se vea la forma de lo que miden las pruebas. Cortes axiales en orientación radiológica: la derecha de la persona queda a la izquierda. Imagen: dataset MSLesSeg (Guarnera F, Rondinella A y cols., 2025, Sci Data 12:920, doi:10.1038/s41597-025-05250-y; datos doi:10.6084/m9.figshare.27919209), CC BY 4.0, adaptada.
 - @31,40 | **Placas en la protuberancia**: las manchas blancas de su lado derecho. Es el tramo del tronco por donde pasa la vía auditiva.
 - @90,72 | **La misma persona, un corte más arriba**: placas alrededor de los ventrículos. Las lesiones están repartidas.
 :::
@@ -444,7 +444,7 @@ Faltan la onda I y la pérdida es coclear (sin gap, con reclutamiento y VEMP ca�
 
 Hipoacusia sensorioneural moderada del OD, **de inicio súbito y con signos cocleares**, VEMP disminuido del mismo lado y conducción central conservada. La audiometría sola no separa lo viral de lo vascular; en un infarto de la AICA, la sordera súbita puede ser la primera señal (Lee y cols., 2002). Se avisa **el mismo día** al médico tratante para que la evalúe como un posible evento vascular y se solicite imagen.
 
-:::imagen ilustraciones/cap12-rm-infarto-aica.jpg ancho=100% Infarto de la AICA derecha en otra persona; no es el paciente de este caso. Rótulos originales en inglés. Imagen: Kim SH, Kim H, Lee SU y cols. (2024), Front Neurol 15:1448989, doi:10.3389/fneur.2024.1448989, Fig. 1, CC BY 4.0, sin modificar.
+:::imagen ilustraciones/cap12-rm-infarto-aica.jpg ancho=100% Infarto de la AICA derecha en otra persona; no es el paciente de este caso. Rótulos originales en inglés. Imagen: Kim SH, Kim H, Lee SU y cols. (2024), Front Neurol 15:1448989, doi:10.3389/fneur.2024.1448989, Fig. 1, CC BY 4.0.
 - @53,20 | **vHIT**: ganancia baja en los canales horizontal y posterior de los **dos** lados (0,64 y 0,65 a la derecha; 0,76 y 0,67 a la izquierda).
 - @20,70 | **Audiometría**: hipoacusia sensorioneural de 73 dB en el OD.
 - @66,43 | **Difusión**: el infarto agudo, blanco, en el territorio de la AICA derecha (la derecha queda a la izquierda de la imagen).

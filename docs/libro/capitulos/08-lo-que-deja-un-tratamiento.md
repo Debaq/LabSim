@@ -260,7 +260,7 @@ Contra su base, que era de 0 a 10 dB en todas las frecuencias, el cambio supera 
 - **Hipótesis esperables:** ototoxicidad por cisplatino. Diferenciales: ruido (no hay exposición, no hay muesca), hipoacusia súbita bilateral (no fue brusca), algo retrococlear (sería asimétrico o con mala discriminación).
 - **Qué pedir:** audiometría convencional con vía ósea, alta frecuencia, logoaudiometría, timpanometría y DPOAE, todo con los mismos equipos de la base, y repetir lo que cambie para confirmarlo (→ H3, H7, H9).
 - **Errores esperables:** leer el audiograma contra lo normal ("hipoacusia leve" por el promedio BIAP) y no contra la base; no informar la alta frecuencia como pérdida de respuesta; pensar que, como terminó la quimioterapia, no hacen falta más controles.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Ototóxica (agudos, bilateral simétrica)* en los dos oídos. El simulador entrega una sola audiometría, de 125 a 8.000 Hz: la base está en la historia clínica y la alta frecuencia no se puede practicar.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Ototóxica (agudos, bilateral simétrica)* en los dos oídos. El simulador entrega una sola audiometría, de 125 a 8.000 Hz: la base está en la historia clínica y la alta frecuencia no se puede practicar.
 :::
 
 {{caso cap08_salicilatos}}
@@ -307,7 +307,7 @@ Se tomó la última aspirina ayer en la mañana. ¿Qué esperas de la audiometr�
 - **Hipótesis esperables:** ototoxicidad por salicilatos. Diferenciales: hipoacusia súbita bilateral (→ cap. 7), causa autoinmune, presbiacusia (no a los 57 con una pérdida plana de diez días) y, por el oído tapado, una otitis con efusión (la ósea la descarta).
 - **Qué pedir:** audiometría con logoaudiometría, emisiones e impedanciometría hoy, y **la misma batería en una semana** sin aspirina (→ H3, H5, H7, H9).
 - **Errores esperables:** quedarse con el "pasa" de la DPOAE; informar una hipoacusia sensorioneural "de causa a precisar" sin anotar el consumo de aspirina; no dejar programado el control, que es el que confirma.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Ototoxicidad por salicilatos / quinina* en los dos oídos. El simulador no modela la recuperación: para practicar el control, el docente puede crear un segundo caso de la misma paciente con audición normal para su edad.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Ototoxicidad por salicilatos / quinina* en los dos oídos. El simulador no modela la recuperación: para practicar el control, el docente puede crear un segundo caso de la misma paciente con audición normal para su edad.
 :::
 
 {{caso cap08_post_radioterapia}}
@@ -355,7 +355,7 @@ El oído tapado empezó durante la radioterapia y la pérdida, más de un año d
 - **Hipótesis esperables:** otitis con efusión por disfunción tubaria posradiación; hipoacusia sensorioneural por radiación; las dos juntas. Diferencial obligado: recidiva del tumor (el otorrino ya miró la rinofaringe y el oncólogo no la encontró).
 - **Qué pedir:** audiometría con enmascaramiento (la diferencia entre oídos lo exige en la aérea y el gap en la ósea), impedanciometría con reflejos, y emisiones solo sabiendo que la efusión las va a borrar (→ H3, H4, H7, H9).
 - **Errores esperables:** llamar conductiva a una pérdida mixta porque hay curva B; leer la DPOAE ausente del OD como daño coclear; no enmascarar la ósea del OD; olvidar que la parte coclear puede seguir avanzando.
-- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *Post-radioterapia de cabeza y cuello* en el OD y el OI normal.
+- **En LabSim:** no está entre los pacientes de práctica; se crea con el cuadro *Post-radioterapia de cabeza y cuello* en el OD y el OI normal.
 :::
 
 :::comentario Lo que el simulador no tiene
