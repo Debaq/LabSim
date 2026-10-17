@@ -566,7 +566,9 @@
                 // delata cuál es "el" valor normal.
                 valor = entre(0.15, 0.32);
             }
-            campo.value = Math.round(valor * 100) / 100;
+            // El campo de la tasa avanza de a 0,1: con dos decimales el
+            // formulario no valida y no deja guardar el caso.
+            campo.value = param === 'tasa' ? Math.round(valor * 10) / 10 : Math.round(valor * 100) / 100;
         });
         if (window.drawEcochgEquiv) { window.drawEcochgEquiv(); }
     }
