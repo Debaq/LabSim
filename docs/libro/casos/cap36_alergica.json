@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 22,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 22 años y estudia kinesiología. Desde la adolescencia se le tapa la nariz casi todos los años entre septiembre y diciembre: estornuda en tandas de cinco o seis seguidas, le pica la nariz y los ojos y le gotea agua clara. También le pasa, sin ser primavera, cuando ordena el clóset o cuando duerme con su perra en la cama. De noche \"se tapa un lado y después el otro\", y a veces despierta con la boca seca. En invierno mejora a medias, pero nunca queda del todo bien. Nunca ha tenido silbidos en el pecho. Cuando está mal toma un antihistamínico; hace tres días que lo dejó, como le pidieron al darle la hora. No ha usado gotas ni sprays para la nariz. Hace unos dos años un alergólogo le hizo pruebas en la piel del antebrazo y le dijo que reaccionaba a los ácaros y al pasto.",
+      "historia": "{{-3000}} Control por estornudos y picazón en primavera; se indica un antihistamínico oral cuando hay síntomas.\n{{-700}} Pruebas cutáneas en el antebrazo con alérgenos inhalantes: reacciona a ácaros y a pasto (según relata; no trajo el informe).\n{{-45}} Médico general: rinitis alérgica; se solicita evaluación funcional de la nariz.",
+      "hist": [],
+      "medicamentos": "Antihistamínico oral cuando hay síntomas (lo dejó hace tres días, como se le pidió)",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

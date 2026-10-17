@@ -264,6 +264,8 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 164 | 32, H19 | Examen vestibular previo (< 6 meses) | exigido antes de rehabilitar | vale para rehabilitación vestibular, no para un programa general de fuerza y equilibrio | WFG 2022 | P | |
 | 165 | H19, 32 | Corte del TUG | 13,5 s en H19 (fuente sin cotejar) | WFG usa > 15 s; unificar | WFG 2022 | A · verificar | |
 | 166 | 35 | Lectura del vasoconstrictor | "igual que en reposo = mecánica" | se aclara que es estructural, no necesariamente tabique (también la válvula); se leen las dos fases | Rhee 2010 | A | |
+| 167 | 36 | "Disminución total = vasomotora" | rótulo del examen | se mantiene en el informe; recuadro: "rinitis vasomotora" es la idiopática y el término se desaconseja | Hellings 2017; Solé 2025 | P | |
+| 168 | 36, H24 | "Efecto rebote" (#117) | tras el vasoconstrictor | discutido: Graf 1995/1997 y Vaidyanathan 2010 lo muestran; Mortuaire 2013 y Hagen 2026 no; el `verificar` de H24 se puede cerrar con estas fuentes | ver cap. 36 | A | |
 <!-- tanda 10: -->
 
 ## Encontradas fuera del texto de los capítulos

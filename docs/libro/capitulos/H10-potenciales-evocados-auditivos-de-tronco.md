@@ -215,7 +215,7 @@ Decidir "hay onda" a ojo cerca del umbral es la fuente de error más común del 
 En LabSim los dos están en la pestaña *Promediación* de los parámetros avanzados, junto al **rechazo de artefactos** (±25 µV: el barrido que lo supera, por un movimiento o un músculo, no entra al promedio). Los dos sirven para decidir **cuándo parar**: se sigue promediando hasta que el FSP cruza el criterio o hasta que el ruido residual es tan bajo que, si hubiera una respuesta del tamaño esperable, ya se vería (Don y Elberling, 1996). Parar antes es la forma más rápida de inventar una pérdida.
 
 :::ojo Barridos y umbral
-En LabSim el umbral de cada caso está definido **con 2.000 barridos**. Si promedias menos, la respuesta cerca del umbral no alcanza a salir del ruido: **cada vez que partes los barridos a la mitad, el umbral que encuentras sube unos 6 dB**. Si promedias más, puedes encontrar respuesta algo por debajo del umbral del caso, y eso también es correcto: es lo que pasa en la clínica.
+En LabSim el umbral de cada caso está definido **con 2.000 barridos**. Si promedias menos, la respuesta cerca del umbral no alcanza a salir del ruido: **cada vez que partes los barridos a la mitad, el umbral que encuentras sube unos 6 dB** (así lo modela el simulador; el ruido residual, en cambio, sube solo 3 dB al partir los barridos a la mitad: → B4). Si promedias más, puedes encontrar respuesta algo por debajo del umbral del caso, y eso también es correcto: es lo que pasa en la clínica.
 :::
 
 ### 5. Enmascara cuando el otro oído puede contestar

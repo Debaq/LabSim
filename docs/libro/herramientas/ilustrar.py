@@ -31,7 +31,9 @@ AQUI = pathlib.Path(__file__).resolve().parent        # docs/libro/herramientas
 LIBRO = AQUI.parent
 ILUSTRACIONES = LIBRO / 'ilustraciones'
 REGISTRO = ILUSTRACIONES / 'REGISTRO.md'
-MODELO = 'gemini-3.1-flash-image'
+# El más económico por defecto (2026-10-17); para rostros con signos que el
+# Lite no dibuja (ver rostros/REHACER.md): LIBRO_MODELO_IMAGEN=gemini-3.1-flash-image
+MODELO = os.environ.get('LIBRO_MODELO_IMAGEN', 'gemini-3.1-flash-lite-image')
 
 ESTILO = (
     'Scientific medical illustration for a university audiology textbook, in the clean flat vector style '

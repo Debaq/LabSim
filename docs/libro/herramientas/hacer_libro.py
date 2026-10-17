@@ -486,10 +486,13 @@ def capitulo(md_texto):
             salida.append(f'<div class="dos-col">{"".join(columna)}</div>')
         return ''.join(salida)
 
+    es_base = re.match(r'\s*#\s*B\d', md_texto) is not None
     partes = re.split(r'(<h2>.*?</h2>)', cuerpo)
     for i in range(1, len(partes) - 1, 2):
         titulo = re.sub(r'<.*?>', '', partes[i]).strip()
-        if titulo in SECCIONES_DOS_COLUMNAS:
+        # Las Bases (B1-B4) son texto de consulta: todas sus secciones van
+        # a dos columnas, como las de las herramientas.
+        if titulo in SECCIONES_DOS_COLUMNAS or (es_base and titulo not in ('Referencias', 'Ayuda memoria')):
             partes[i + 1] = dos_columnas(partes[i + 1])
         elif titulo == 'Referencias':
             # a dos columnas y en letra más chica que el texto: ocupaban

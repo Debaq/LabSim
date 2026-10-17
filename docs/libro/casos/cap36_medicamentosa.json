@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 29,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 29 años y trabaja en un call center. Hace unos ocho meses tuvo un resfrío fuerte y desde entonces la nariz no se le ha destapado. Compró un spray descongestionante en la farmacia y le funcionó tan bien que lo sigue usando: hoy se le acaba un frasco por semana, con un par de disparos en cada fosa cada cuatro a seis horas, incluso de madrugada. \"Al principio me duraba toda la noche; ahora me dura dos horas.\" Sin el spray se queda sin aire por los dos lados y duerme con la boca abierta. No tiene estornudos ni picazón, no cambia con las estaciones ni con los animales y nadie en su familia es alérgico. Para este examen aguantó dos días sin el spray: durmió sentado, con la boca seca, y llegó \"desesperado\". Pregunta si después del examen le van a dejar usarlo otra vez.",
+      "historia": "{{-240}} Cuadro respiratorio alto con fiebre; empieza a usar un descongestionante nasal en spray comprado sin receta.\n{{-60}} Médico general: nariz tapada persistente; se le pide no usar el spray 48 horas antes del examen y se solicita evaluación funcional de la nariz.",
+      "hist": [],
+      "medicamentos": "Oximetazolina en spray nasal, varias veces al día (la última vez hace dos días, por el examen)",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

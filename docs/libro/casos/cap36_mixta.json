@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 37,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 37 años y es técnico eléctrico. A los 12 años se cayó de la bicicleta y se golpeó la nariz; no lo atendieron. Desde hace años siente la fosa derecha más tapada que la izquierda: la derecha casi nunca \"pasa\"; la izquierda se tapa y se destapa, sobre todo en primavera y cuando se resfría, y en esa época estornuda un poco y le pica la nariz, aunque no tanto como para tomar remedios. Ronca. Probó un corticoide nasal por seis semanas: \"me abrió el lado izquierdo, el derecho siguió igual\". Usa un descongestionante en spray solo cuando duerme muy mal, unas pocas veces al mes; la última vez fue hace una semana.",
+      "historia": "{{-9000}} Caída en bicicleta con golpe en la nariz; no consultó.\n{{-120}} Médico general: rinitis; corticoide nasal por seis semanas con mejoría solo del lado izquierdo; se solicita evaluación funcional de la nariz.",
+      "hist": [],
+      "medicamentos": "Oximetazolina en spray de forma ocasional (la última vez hace una semana); corticoide nasal por seis semanas, ya terminado",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}
