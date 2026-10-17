@@ -1,0 +1,19 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 41,
+    "sexo": "mujer",
+    "semilla": 27,
+    "anamnesis": {
+      "otros": "Tiene 41 años y es diseñadora gráfica. Hace dos años, después de una gripe fuerte, empezó a sentir el oído derecho \"tapado\" y a oír su propia voz demasiado fuerte, \"como hablar dentro de un tambor\". Al masticar una manzana el ruido le retumba en la cabeza y, de noche, con la oreja en la almohada, oye los latidos del corazón y hasta \"el ruido de los ojos\" cuando los mueve. Con la bocina de un bus o la sirena de una ambulancia siente que el piso se mueve un instante; cuando tose fuerte o se suena la nariz, la imagen se le \"salta\" unos segundos. Por el teléfono oye bien, y la conversación en un lugar con ruido no le cuesta más que antes. No ha tenido secreción ni dolor de oídos, ni golpes en la cabeza.",
+      "historia": "{{-700}} Gripe fuerte; desde entonces, sensación de oído derecho tapado y autofonía.\n{{-120}} Otorrinolaringólogo: audiometría con gap aéreo-óseo en los graves del OD y otoscopía normal; se plantea otoesclerosis y se agenda una estapedotomía.\n{{-10}} Antes de la cirugía, el mismo médico pide impedanciometría con reflejos y VEMP.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

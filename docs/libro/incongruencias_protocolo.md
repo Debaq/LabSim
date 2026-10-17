@@ -236,7 +236,18 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 141 | 21 | Preparación en el vértigo agudo | ayuno 4 h, suspender antivertiginosos 48 h | no aplica en el agudo: anotar qué recibió y cuándo | — | P | |
 | 142 | 21 | HINTS | nistagmo en cinco posiciones; impulso solo con equipo; sin oclusión alternada | se enseña el HINTS completo (complementa #70) | Kattah 2009 | A · vacío | |
 | 143 | 22 | Apogeotrópico persistente | no lo distingue de un nistagmo central | recuadro: si persiste, evaluar causa central | Bhattacharyya 2017 | A | |
-<!-- tanda 8: -->
+| 144 | 26 | Contraindicación del VEMP aéreo | "hipoacusia de conducción" e "hipersensibilidad al sonido" | se mantiene con oído medio enfermo; con gap sin oído medio que lo explique, el VEMP es la prueba que decide | Zhou 2007; Zuniga 2021 | P | |
+| 145 | 26 | Regla de asimetría | menor amplitud = oído enfermo | se invierte en la dehiscencia (el enfermo da la mayor) | Rosengren 2008 | A | |
+| 146 | 26 | Umbral del oVEMP | solo a 100 dB nHL, sin búsqueda de umbral | en tercera ventana hace falta el umbral | Welgampola 2008 | A · vacío | |
+| 147 | 26 | Conclusiones del VEMP | solo "hipofunción vestibular" | falta umbral bajo / amplitud grande | Minor 2005 | A · vacío | |
+| 148 | 24 | Calórica mínima en la pérdida bilateral | informa solo la asimetría (≥ 25 %) | el protocolo; recuadro: suma tibia + fría < 6 °/s por oído y completar con bitérmica | Strupp 2017 | P | |
+| 149 | 24 | "Hipoexcitabilidad severa", "arreflexia" | sin número | se apoya en el criterio Bárány | Strupp 2017 | A | |
+| 150 | 24 | Corte del vHIT | "dentro de la normalidad", sin corte; ganancia a 60 ms | Bárány < 0,6 (150-300 °/s); muchos equipos marcan bajo 0,8 | Strupp 2017 | A | |
+| 151 | 24, H19 | Agudeza visual dinámica | 3 líneas o más | Bárány: ≥ 0,2 logMAR (2 líneas en tabla logMAR) | Strupp 2017 | P | |
+| 152 | 25 | Posiciones de la mirada en la VNG | centro, derecha e izquierda (Frenzel sí pide arriba y abajo) | el protocolo; recuadro: mirar arriba y abajo y activar el canal vertical (nistagmo hacia abajo) | Eggers 2019 | P | |
+| 153 | 25 | Oculomotor | sin sacadas, seguimiento ni optocinético (ya en H15) | recuadro | Fife 2000 | A · vacío | |
+| 154 | 25 | Fármacos antes de la VNG | suspender 48 h antivertiginosos, antieméticos y ansiolíticos; nada de anticonvulsivantes ni alcohol | el protocolo; recuadro: anotar anticonvulsivantes y alcohol, suspender es decisión del médico | — (verificar) | P | |
+| 155 | 25 | Errata | "Otra forma desensibilizar esta prueba" (Frenzel) | "sensibilizar" | — | E | |
 
 ## Encontradas fuera del texto de los capítulos
 

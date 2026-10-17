@@ -1,0 +1,866 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "presbiacusia",
+   "OI": "presbiacusia"
+  },
+  "edad": 64,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "leve",
+   "OI": "leve"
+  },
+  "anamnesis": {
+   "otros": "Tiene 64 años y está jubilada de una tienda de ropa, donde fue vendedora. Hace cinco meses, al darse vuelta en la cama, todo giró unos segundos; le pasaba cada vez que se acostaba o se levantaba. Le dijeron que eran \"cristales\" y le hicieron dos maniobras; el giro se acabó a las dos semanas. Pero desde entonces el piso \"no está firme\": se siente inestable todos los días, más en el supermercado, en la micro y entre mucha gente, y mejor cuando se sienta en casa. Hace dos meses, en el supermercado, tuvo una crisis: el corazón se le aceleró, sintió que le faltaba el aire y que se caía, y tuvo que salir. Desde entonces no sale sola. En urgencia le dijeron que era ansiedad y le dieron un ansiolítico, que toma a veces de noche. Ella no está de acuerdo: \"antes no era nerviosa; el mareo partió primero\". Hace años oye menos los agudos y no usa audífono; en los lugares ruidosos se le hace todavía más difícil.",
+   "historia": "{{-150}} Urgencia: vértigo posicional; Dix-Hallpike positivo derecho; diagnóstico de VPPB del canal posterior derecho.\n{{-140}} Dos maniobras de reposición con resolución del vértigo.\n{{-60}} Urgencia: crisis de angustia en el supermercado; electrocardiograma normal; alta con clonazepam.\n{{-20}} Médico de familia: mareo persistente; deriva a otorrinolaringología y evaluación audiovestibular.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Losartán 50 mg al día; clonazepam 0,5 mg de noche, a veces",
+   "cirugias": ""
+  }
+ },
+ "semilla": 2681688568,
+ "data": {
+  "gender": 1,
+  "id": 9568,
+  "Aerea": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    35,
+    30
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    60,
+    50
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    75,
+    70
+   ]
+  ],
+  "Osea": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    35,
+    30
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    60,
+    50
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    75,
+    70
+   ]
+  ],
+  "LDL": [
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    35,
+    30
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    60,
+    50
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    75,
+    70
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    35,
+    30
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    60,
+    50
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    75,
+    70
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 64,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.25,
+   1.52,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 50,
+    "percentage": 92
+   },
+   {
+    "int": 50,
+    "percentage": 96
+   }
+  ],
+  "SDT": [
+   5,
+   5
+  ],
+  "SRT": [
+   10,
+   10
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     95
+    ],
+    [
+     95,
+     100
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     100
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     100
+    ],
+    [
+     100,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Losartán 50 mg al día; clonazepam 0,5 mg de noche, a veces",
+   "cirugias": "",
+   "otros": "Tiene 64 años y está jubilada de una tienda de ropa, donde fue vendedora. Hace cinco meses, al darse vuelta en la cama, todo giró unos segundos; le pasaba cada vez que se acostaba o se levantaba. Le dijeron que eran \"cristales\" y le hicieron dos maniobras; el giro se acabó a las dos semanas. Pero desde entonces el piso \"no está firme\": se siente inestable todos los días, más en el supermercado, en la micro y entre mucha gente, y mejor cuando se sienta en casa. Hace dos meses, en el supermercado, tuvo una crisis: el corazón se le aceleró, sintió que le faltaba el aire y que se caía, y tuvo que salir. Desde entonces no sale sola. En urgencia le dijeron que era ansiedad y le dieron un ansiolítico, que toma a veces de noche. Ella no está de acuerdo: \"antes no era nerviosa; el mareo partió primero\". Hace años oye menos los agudos y no usa audífono; en los lugares ruidosos se le hace todavía más difícil.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Eva",
+     "edad": 64,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 38,
+     "confiabilidad": 68,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 85,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 55,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 65,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 65,
+     "click": 55,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1579,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.08,
+      "amp": -0.09
+     },
+     "onda_III": {
+      "lat": 0.01,
+      "amp": -0.04
+     },
+     "onda_V": {
+      "lat": 0.07,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 50,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": 50,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 50,
+     "ce_chirp_ls": 50
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.2,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2489,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.14,
+      "amp": -0.18
+     },
+     "onda_III": {
+      "lat": 0.1,
+      "amp": -0.06
+     },
+     "onda_V": {
+      "lat": 0.11,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_female",
+    "baseline": {
+     "I": {
+      "lat": 1.84,
+      "amp": 0.396
+     },
+     "III": {
+      "lat": 3.84,
+      "amp": 0.423
+     },
+     "V": {
+      "lat": 5.84,
+      "amp": 0.486
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 10.8,
+     "2000": 19.8,
+     "3000": 30.6,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.7,
+    "sello_pct": 85,
+    "variabilidad_db": 2.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 6.2,
+     "2000": 12.6,
+     "3000": 22.8,
+     "4000": 33,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.2,
+    "sello_pct": 79,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T02:39:58+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Eva Rocío",
+   "apellido": "Aguilar Molina",
+   "rut": "9000886",
+   "fecha_nac": "16-04-1962"
+  },
+  "historia_clinica": "{{-150}} Urgencia: vértigo posicional; Dix-Hallpike positivo derecho; diagnóstico de VPPB del canal posterior derecho.\r\n{{-140}} Dos maniobras de reposición con resolución del vértigo.\r\n{{-60}} Urgencia: crisis de angustia en el supermercado; electrocardiograma normal; alta con clonazepam.\r\n{{-20}} Médico de familia: mareo persistente; deriva a otorrinolaringología y evaluación audiovestibular."
+ }
+}

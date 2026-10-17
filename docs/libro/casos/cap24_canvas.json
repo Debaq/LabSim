@@ -1,0 +1,33 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 67,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 67 años y es carpintero jubilado. Desde hace unos cuatro años camina \"como curado\": abre los pies, se desvía y se agarra de las paredes. Con los ojos cerrados o en la oscuridad empeora mucho. Se ha caído dos veces en el último año. Hace años nota hormigueo y \"como corcho\" en los pies, y dice que a veces no siente el piso. Su hija cuenta que a ratos habla \"arrastrado\". Al caminar rápido ve la calle rebotar. Oye menos desde hace años, parejo de los dos lados, y tiene un pitido agudo permanente. No ha tenido vértigo. No recuerda haber tomado antibióticos fuertes ni haber estado grave.",
+      "historia": "{{-1500}} Médico general: neuropatía de los pies; glicemia, vitamina B12 y tiroides normales.\n{{-700}} Neurólogo: electromiografía con polineuropatía sensitiva; marcha atáxica.\n{{-300}} Resonancia de cerebro: atrofia del vermis cerebeloso.\n{{-40}} Neurólogo: solicita evaluación audiológica y vestibular por oscilopsia e inestabilidad.",
+      "hist": [],
+      "medicamentos": "Ninguno",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

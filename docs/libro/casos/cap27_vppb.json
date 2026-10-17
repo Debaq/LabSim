@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 64,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 64 años y está jubilada de una tienda de ropa, donde fue vendedora. Hace cinco meses, al darse vuelta en la cama, todo giró unos segundos; le pasaba cada vez que se acostaba o se levantaba. Le dijeron que eran \"cristales\" y le hicieron dos maniobras; el giro se acabó a las dos semanas. Pero desde entonces el piso \"no está firme\": se siente inestable todos los días, más en el supermercado, en la micro y entre mucha gente, y mejor cuando se sienta en casa. Hace dos meses, en el supermercado, tuvo una crisis: el corazón se le aceleró, sintió que le faltaba el aire y que se caía, y tuvo que salir. Desde entonces no sale sola. En urgencia le dijeron que era ansiedad y le dieron un ansiolítico, que toma a veces de noche. Ella no está de acuerdo: \"antes no era nerviosa; el mareo partió primero\". Hace años oye menos los agudos y no usa audífono; en los lugares ruidosos se le hace todavía más difícil.",
+      "historia": "{{-150}} Urgencia: vértigo posicional; Dix-Hallpike positivo derecho; diagnóstico de VPPB del canal posterior derecho.\n{{-140}} Dos maniobras de reposición con resolución del vértigo.\n{{-60}} Urgencia: crisis de angustia en el supermercado; electrocardiograma normal; alta con clonazepam.\n{{-20}} Médico de familia: mareo persistente; deriva a otorrinolaringología y evaluación audiovestibular.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día; clonazepam 0,5 mg de noche, a veces",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

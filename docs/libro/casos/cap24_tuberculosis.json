@@ -1,0 +1,36 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "ototoxica",
+      "OI": "ototoxica"
+    },
+    "edad": 41,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 41 años y es peluquera. Hace tres años le diagnosticaron una tuberculosis resistente a los fármacos habituales y la trataron durante un año y medio, con una inyección diaria los primeros meses. Hoy está curada. Viene derivada del programa de tuberculosis porque tiene un pitido en los dos oídos, agudo y permanente, y no entiende bien en la peluquería con las máquinas y el secador prendidos, ni cuando hablan varias personas. Cuando se le pregunta por el equilibrio dice que está \"débil de piernas\" desde el tratamiento: se cansa al caminar, en el metro no se atreve a soltar el pasamanos y a oscuras se agarra de las murallas. Hace dos años le cambiaron los lentes porque \"al caminar rápido veo los carteles movidos\", y no mejoró. No ha tenido vértigo.",
+      "historia": "{{-1100}} Diagnóstico de tuberculosis multirresistente. Esquema con kanamicina inyectable más otros fármacos, por 18 meses en total.\n{{-900}} Se suspende la kanamicina a los seis meses por alza de la creatinina; sin audiometría de control durante el tratamiento.\n{{-400}} Alta con baciloscopias negativas.\n{{-60}} Control de oftalmología: lentes nuevos, sin mejoría de la visión al caminar.\n{{-25}} Programa de tuberculosis: acúfeno bilateral e hipoacusia referida; deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "Ninguno",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "teoae"
+    }
+  ]
+}

@@ -1,0 +1,876 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "normal",
+   "OI": "schwannoma"
+  },
+  "edad": 58,
+  "sexo": "hombre",
+  "grado": {
+   "OI": "leve"
+  },
+  "anamnesis": {
+   "otros": "Tiene 58 años y es técnico en refrigeración. Hace diez meses empezó, sin ningún evento que él recuerde, a sentirse inestable: \"como caminar sobre un colchón\". No ha tenido vértigo ni crisis. Es peor de noche, cuando va al baño a oscuras, y al girar rápido; en el supermercado o frente a la pantalla no nota diferencia, y mejora sentado. Ha tropezado dos veces de noche. Desde hace más o menos un año tiene un pitido agudo en el oído izquierdo y le cuesta entender por teléfono con ese lado, por lo que se lo pasa al derecho. Su señora cree que es \"la edad\"; su médico le dijo que era estrés por el trabajo y le recomendó ejercicios de respiración. Él está preocupado porque no mejora.",
+   "historia": "{{-300}} Médico general: inestabilidad crónica; diagnóstico de \"estrés\"; se indica respiración y pausas.\n{{-150}} Segundo control: sin cambios; se sugiere consulta con psicología.\n{{-45}} Otorrinolaringólogo: solicita evaluación audiológica y vestibular por inestabilidad y acúfeno izquierdo.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Enalapril 10 mg cada 12 horas",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1083351287,
+ "data": {
+  "gender": 0,
+  "id": 9287,
+  "Aerea": [
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    10,
+    30
+   ],
+   [
+    15,
+    45
+   ],
+   [
+    20,
+    45
+   ],
+   [
+    25,
+    60
+   ],
+   [
+    25,
+    65
+   ]
+  ],
+  "Osea": [
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    10,
+    30
+   ],
+   [
+    15,
+    45
+   ],
+   [
+    20,
+    45
+   ],
+   [
+    25,
+    60
+   ],
+   [
+    25,
+    65
+   ]
+  ],
+  "LDL": [
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    115
+   ],
+   [
+    115,
+    120
+   ],
+   [
+    115,
+    120
+   ],
+   [
+    115,
+    120
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    10,
+    30
+   ],
+   [
+    15,
+    45
+   ],
+   [
+    20,
+    45
+   ],
+   [
+    25,
+    60
+   ],
+   [
+    25,
+    65
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    10
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    5,
+    20
+   ],
+   [
+    10,
+    30
+   ],
+   [
+    15,
+    45
+   ],
+   [
+    20,
+    45
+   ],
+   [
+    25,
+    60
+   ],
+   [
+    25,
+    65
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 58,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.96,
+   1.51,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 35,
+    "percentage": 100
+   },
+   {
+    "int": 55,
+    "percentage": 56
+   }
+  ],
+  "SDT": [
+   0,
+   15
+  ],
+  "SRT": [
+   5,
+   20
+  ],
+  "Fowler": {
+   "enabled": true,
+   "patterns": {
+    "4": "none",
+    "5": "none",
+    "6": "none"
+   },
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   10
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     130
+    ],
+    [
+     85,
+     130
+    ],
+    [
+     90,
+     130
+    ],
+    [
+     90,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     95
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     95
+    ],
+    [
+     130,
+     95
+    ],
+    [
+     130,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": true
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": true
+   },
+   "medicamentos": "Enalapril 10 mg cada 12 horas",
+   "cirugias": "",
+   "otros": "Tiene 58 años y es técnico en refrigeración. Hace diez meses empezó, sin ningún evento que él recuerde, a sentirse inestable: \"como caminar sobre un colchón\". No ha tenido vértigo ni crisis. Es peor de noche, cuando va al baño a oscuras, y al girar rápido; en el supermercado o frente a la pantalla no nota diferencia, y mejora sentado. Ha tropezado dos veces de noche. Desde hace más o menos un año tiene un pitido agudo en el oído izquierdo y le cuesta entender por teléfono con ese lado, por lo que se lo pasa al derecho. Su señora cree que es \"la edad\"; su médico le dijo que era estrés por el trabajo y le recomendó ejercicios de respiración. Él está preocupado porque no mejora.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Joaquín",
+     "edad": 58,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 79,
+     "confiabilidad": 80,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "unilateral",
+   "oido": "oi",
+   "predominio": null,
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Pitido",
+   "frecuencia": 4000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 20,
+    "retro": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 115
+  },
+  "ABR": {
+   "OD": {
+    "type": "normal",
+    "umbral": 25,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 25,
+     "tone_burst_1000Hz": 20,
+     "tone_burst_2000Hz": 20,
+     "tone_burst_4000Hz": 25,
+     "nb_ce_chirp_ls_500Hz": 20,
+     "nb_ce_chirp_ls_1000Hz": 15,
+     "nb_ce_chirp_ls_2000Hz": 15,
+     "nb_ce_chirp_ls_4000Hz": 25,
+     "click": 25,
+     "ce_chirp": 15,
+     "ce_chirp_ls": 15
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 35,
+     "tone_burst_2000Hz": 35,
+     "tone_burst_4000Hz": 40,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 30,
+     "nb_ce_chirp_ls_2000Hz": 30,
+     "nb_ce_chirp_ls_4000Hz": 40,
+     "click": 40,
+     "ce_chirp": 30,
+     "ce_chirp_ls": 30
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.26,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1322,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.04,
+      "amp": -0.02
+     },
+     "onda_III": {
+      "lat": -0.05,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0.01,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 50,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 35,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 30,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 50,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 50,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 45,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
+    },
+    "neural": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": false,
+    "repro_var": 0.24,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.26,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3581,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.04,
+      "amp": 0
+     },
+     "onda_III": {
+      "lat": 0.02,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_male",
+    "baseline": {
+     "I": {
+      "lat": 1.47,
+      "amp": 0.32
+     },
+     "III": {
+      "lat": 3.75,
+      "amp": 0.37
+     },
+     "V": {
+      "lat": 5.68,
+      "amp": 0.4
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 6,
+     "6000": 12,
+     "8000": 12
+    },
+    "atten_db": 0,
+    "ruido_db": 1.5,
+    "sello_pct": 86,
+    "variabilidad_db": 2.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 2.7,
+    "sello_pct": 83,
+    "variabilidad_db": 3.4,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T02:39:52+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Joaquín Jorge",
+   "apellido": "Jiménez Ramírez",
+   "rut": "10758189",
+   "fecha_nac": "25-02-1968"
+  },
+  "historia_clinica": "{{-300}} Médico general: inestabilidad crónica; diagnóstico de \"estrés\"; se indica respiración y pausas.\r\n{{-150}} Segundo control: sin cambios; se sugiere consulta con psicología.\r\n{{-45}} Otorrinolaringólogo: solicita evaluación audiológica y vestibular por inestabilidad y acúfeno izquierdo."
+ }
+}

@@ -1,0 +1,30 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 71,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "semilla": 28,
+    "anamnesis": {
+      "otros": "Tiene 71 años y es jubilado de la construcción. Desde un golpe en la cabeza a los 45 años tiene epilepsia, controlada. Hace cuatro meses tuvo una convulsión y su neurólogo le subió la dosis de la fenitoína. Desde entonces anda \"mareado, como curado\": no gira nada, pero camina con los pies separados, ve doble o borroso al mirar hacia los lados y le cuesta leer. Oye menos que antes, parejo en los dos oídos, y no tiene pitido. Toma dos o tres vasos de vino al día con la comida. El médico general pensó en un problema del oído interno y lo envía a estudio.",
+      "historia": "{{-125}} Neurología: convulsión tónico-clónica; se sube la dosis de fenitoína.\n{{-20}} Médico general: \"mareo\", betahistina por tres semanas sin mejoría.",
+      "hist": [],
+      "medicamentos": "Fenitoína 100 mg cada 8 horas; clonazepam 0,5 mg en la noche",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

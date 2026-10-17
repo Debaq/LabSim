@@ -1,0 +1,29 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 47,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 47 años y es analista de crédito en un banco. Hace nueve meses despertó con el mundo girando: vértigo intenso, vómitos y dos días sin poder ponerse de pie; en urgencia le dijeron que era una neuritis vestibular del lado izquierdo. El giro se fue en unos días, pero no volvió a sentirse firme: desde entonces tiene un mareo suave todos los días, como si flotara o el piso fuera blando, sin giro. Es peor de pie, en la fila del banco, en el supermercado, frente a la pantalla del computador y en el auto cuando hay mucho tráfico; mejora acostada y cuando está en una conversación que la entretiene. Se le nota más al final del día. No se ha caído, pero evita los centros comerciales y camina con anteojos de sol. Su familia piensa que son \"los nervios\" y a ella le preocupa si \"quedó dañada\". No tiene dolor de cabeza, pitido ni pérdida de audición.",
+      "historia": "{{-270}} Urgencia: vértigo intenso con nistagmo; diagnóstico de neuritis vestibular izquierda, tratada y dada de alta a los cuatro días.\n{{-240}} Control: sin vértigo; persiste mareo al caminar. Se indica seguir con sus actividades.\n{{-60}} Neurólogo: resonancia de cerebro normal; deriva a evaluación auditiva y vestibular por mareo persistente.",
+      "hist": [],
+      "medicamentos": "Ninguno; paracetamol ocasional",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "otoesclerosis",
+      "OI": "normal"
+    },
+    "edad": 47,
+    "sexo": "mujer",
+    "semilla": 26,
+    "anamnesis": {
+      "otros": "Tiene 47 años y es asistente de párvulos. Hace unos tres años nota que por el oído derecho oye menos: pasa el teléfono al otro lado y en la sala de clases se sienta de modo que su oído izquierdo mire al grupo. Su propia voz le suena \"apagada\", y al masticar no le hace ruido. No tiene pitido, mareos ni sensibilidad a los sonidos fuertes; la sirena de una ambulancia no le molesta más que a nadie. No ha tenido secreción ni dolor de oídos ni golpes en la cabeza. Su hermana mayor usa audífono desde los 40 años.",
+      "historia": "{{-1100}} Primera vez que nota que oye menos por el oído derecho.\n{{-60}} Otorrinolaringólogo: otoscopía normal; se piden audiometría, impedanciometría y VEMP antes de decidir tratamiento.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

@@ -1,0 +1,868 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "normal",
+   "OI": "chiari_hic"
+  },
+  "edad": 38,
+  "sexo": "mujer",
+  "grado": {
+   "OI": "leve"
+  },
+  "semilla": 27,
+  "anamnesis": {
+   "otros": "Tiene 38 años y trabaja en una oficina de partes. Desde hace dos años tiene un dolor de cabeza en la nuca que le sube al toser, estornudar o reírse fuerte. Se siente inestable, \"como si el piso se moviera\", sobre todo al bajar escaleras mirando los peldaños y al leer: dice que las líneas del texto saltan un poco. No gira nada. Por el oído izquierdo oye menos, aunque no tiene pitido. Hace seis meses le hicieron en otro servicio un examen del equilibrio con videonistagmografía: el informe dice \"sin nistagmo, calórica simétrica\". Le hormiguean a veces las manos.",
+   "historia": "{{-180}} Otorrinolaringología (otro servicio): mareo inespecífico y videonistagmografía sin hallazgos. Se indica observación.\n{{-30}} Neurología: cefalea occipital con maniobra de Valsalva; solicita resonancia y repetir el estudio vestibular con registro vertical.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 27,
+ "data": {
+  "gender": 1,
+  "id": 9393,
+  "Aerea": [
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    20
+   ],
+   [
+    0,
+    25
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    50
+   ],
+   [
+    5,
+    50
+   ],
+   [
+    5,
+    55
+   ]
+  ],
+  "Osea": [
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    20
+   ],
+   [
+    0,
+    25
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    50
+   ],
+   [
+    5,
+    50
+   ],
+   [
+    5,
+    55
+   ]
+  ],
+  "LDL": [
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    110
+   ],
+   [
+    110,
+    120
+   ],
+   [
+    110,
+    120
+   ],
+   [
+    110,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    20
+   ],
+   [
+    0,
+    25
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    50
+   ],
+   [
+    5,
+    50
+   ],
+   [
+    5,
+    55
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    15
+   ],
+   [
+    0,
+    20
+   ],
+   [
+    0,
+    25
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    35
+   ],
+   [
+    0,
+    50
+   ],
+   [
+    5,
+    50
+   ],
+   [
+    5,
+    55
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 38,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.2,
+   1.39,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 30,
+    "percentage": 100
+   },
+   {
+    "int": 55,
+    "percentage": 52
+   }
+  ],
+  "SDT": [
+   -5,
+   15
+  ],
+  "SRT": [
+   0,
+   20
+  ],
+  "Fowler": {
+   "enabled": true,
+   "patterns": {
+    "3": "none",
+    "4": "none",
+    "5": "none"
+   },
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   0,
+   10
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ],
+   [
+    0,
+    30
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     130
+    ],
+    [
+     85,
+     130
+    ],
+    [
+     90,
+     130
+    ],
+    [
+     90,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     95
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     95
+    ],
+    [
+     130,
+     95
+    ],
+    [
+     130,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": true
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Tiene 38 años y trabaja en una oficina de partes. Desde hace dos años tiene un dolor de cabeza en la nuca que le sube al toser, estornudar o reírse fuerte. Se siente inestable, \"como si el piso se moviera\", sobre todo al bajar escaleras mirando los peldaños y al leer: dice que las líneas del texto saltan un poco. No gira nada. Por el oído izquierdo oye menos, aunque no tiene pitido. Hace seis meses le hicieron en otro servicio un examen del equilibrio con videonistagmografía: el informe dice \"sin nistagmo, calórica simétrica\". Le hormiguean a veces las manos.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Silvia",
+     "edad": 38,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 65,
+     "confiabilidad": 74,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 25,
+    "retro": {
+     "i_iii_ms": 0.15,
+     "iii_v_ms": 0.45,
+     "global_delay_ms": 0.1,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.55,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "moderada"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "normal",
+    "umbral": 10,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 20,
+     "tone_burst_1000Hz": 15,
+     "tone_burst_2000Hz": 10,
+     "tone_burst_4000Hz": 5,
+     "nb_ce_chirp_ls_500Hz": 15,
+     "nb_ce_chirp_ls_1000Hz": 10,
+     "nb_ce_chirp_ls_2000Hz": 5,
+     "nb_ce_chirp_ls_4000Hz": 5,
+     "click": 10,
+     "ce_chirp": 5,
+     "ce_chirp_ls": 5
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 20,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 20,
+     "click": 25,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.21,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1346,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.02,
+      "amp": -0.02
+     },
+     "onda_III": {
+      "lat": 0,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": -0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 50,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": 50,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.15,
+     "iii_v_ms": 0.45,
+     "global_delay_ms": 0.1,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.55,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "moderada"
+    },
+    "repro": false,
+    "repro_var": 0.28,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3329,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.01,
+      "amp": 0.01
+     },
+     "onda_III": {
+      "lat": 0,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": -0.01,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 0.4,
+    "sello_pct": 88,
+    "variabilidad_db": 1.7,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 1.9,
+    "sello_pct": 83,
+    "variabilidad_db": 3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T02:46:29+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Silvia Patricia",
+   "apellido": "López Rivas",
+   "rut": "16713313",
+   "fecha_nac": "08-01-1988"
+  },
+  "historia_clinica": "{{-180}} Otorrinolaringología (otro servicio): mareo inespecífico y videonistagmografía sin hallazgos. Se indica observación.\r\n{{-30}} Neurología: cefalea occipital con maniobra de Valsalva; solicita resonancia y repetir el estudio vestibular con registro vertical."
+ }
+}

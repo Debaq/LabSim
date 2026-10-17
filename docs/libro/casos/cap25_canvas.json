@@ -1,0 +1,30 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 64,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "semilla": 25,
+    "anamnesis": {
+      "otros": "Tiene 64 años y es electricista jubilado. Hace unos cinco años empezó a andar inseguro: en el baño de noche, sin luz, tiene que agarrarse de las paredes, y en el pasto o en una vereda en mal estado \"se le van los pies\". No siente que todo gire: es inestabilidad. Cuando camina rápido o va en auto por un camino con baches, las letras de los letreros \"saltan\" y no las puede leer. Hace unos dos años se le duermen y le hormiguean los pies. Tiene una tos seca desde los 40 años, que nadie le explicó. Oye algo menos que antes, sobre todo en grupos, como casi todos los de su edad, y tiene un pitido agudo en los dos oídos, permanente, que ya no le molesta; no tiene mareos giratorios. Un hermano mayor \"camina raro\" y se mueve con bastón. Toma un vaso de vino los fines de semana.",
+      "historia": "{{-1100}} Médico general: \"mareo del adulto mayor\"; betahistina por tres meses, sin mejoría.\n{{-200}} Neurología: marcha atáxica y reflejos aquilianos ausentes; solicita resonancia y estudio vestibular.",
+      "hist": [],
+      "medicamentos": "Ninguno de forma permanente",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

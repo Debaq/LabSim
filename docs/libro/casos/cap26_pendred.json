@@ -1,0 +1,37 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "pendred",
+      "OI": "pendred"
+    },
+    "edad": 11,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "semilla": 26,
+    "anamnesis": {
+      "otros": "Tiene 11 años y está en sexto básico. Su mamá lo trae porque la profesora dice que \"no escucha\" y porque en el último año le pide que repita más. A los seis años le pusieron tubos de ventilación por \"pérdida conductiva\" y, según la mamá, no cambió nada. No ha tenido secreción de oídos y los resfríos le duran lo mismo que a sus hermanos. No tiene mareos ni zumbido. En los recreos juega a la pelota y es de los que se queda atrás de la conversación.",
+      "historia": "{{-1800}} Colocación de tubos de ventilación bilaterales por hipoacusia atribuida a oído medio; sin mejoría.\n{{-30}} Pediatra: la profesora informa que no responde cuando se le habla desde atrás; se deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

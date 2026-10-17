@@ -1,0 +1,54 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "schwannoma"
+    },
+    "edad": 58,
+    "sexo": "hombre",
+    "grado": {
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 58 años y es técnico en refrigeración. Hace diez meses empezó, sin ningún evento que él recuerde, a sentirse inestable: \"como caminar sobre un colchón\". No ha tenido vértigo ni crisis. Es peor de noche, cuando va al baño a oscuras, y al girar rápido; en el supermercado o frente a la pantalla no nota diferencia, y mejora sentado. Ha tropezado dos veces de noche. Desde hace más o menos un año tiene un pitido agudo en el oído izquierdo y le cuesta entender por teléfono con ese lado, por lo que se lo pasa al derecho. Su señora cree que es \"la edad\"; su médico le dijo que era estrés por el trabajo y le recomendó ejercicios de respiración. Él está preocupado porque no mejora.",
+      "historia": "{{-300}} Médico general: inestabilidad crónica; diagnóstico de \"estrés\"; se indica respiración y pausas.\n{{-150}} Segundo control: sin cambios; se sugiere consulta con psicología.\n{{-45}} Otorrinolaringólogo: solicita evaluación audiológica y vestibular por inestabilidad y acúfeno izquierdo.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg cada 12 horas",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

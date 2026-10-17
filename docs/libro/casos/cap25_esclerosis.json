@@ -1,0 +1,26 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "esclerosis_multiple",
+      "OI": "esclerosis_multiple"
+    },
+    "edad": 31,
+    "sexo": "mujer",
+    "semilla": 26,
+    "anamnesis": {
+      "otros": "Tiene 31 años y es cajera en una farmacia. Hace tres semanas, al mirar hacia el lado derecho, empezó a ver doble: las dos imágenes están una al lado de la otra y se juntan cuando mira al frente. A veces siente que el cuadro que mira \"tiembla\". No tiene mareo giratorio, ni pitido, ni cambios en la audición. A los 27 años perdió la visión del ojo derecho durante diez días, con dolor al mover el ojo; se recuperó con tratamiento y no volvió a pensar en eso. Desde hace unos meses un hormigueo en la mano izquierda que va y viene. Su neuróloga sospecha una enfermedad desmielinizante y le pidió que se evalúen los movimientos de los ojos mientras llega la resonancia.",
+      "historia": "{{-1500}} Oftalmología: neuritis óptica del ojo derecho, corticoide endovenoso con recuperación.\n{{-25}} Neurología: diplopía horizontal a la derecha y hormigueo de la mano izquierda; solicita resonancia y registro de movimientos oculares de los dos ojos.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

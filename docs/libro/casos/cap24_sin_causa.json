@@ -1,0 +1,25 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 58,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 58 años y es administrativa en un colegio. Hace unos tres años le cuesta caminar con seguridad, sobre todo cuando está oscuro o el piso es desparejo: en las escaleras de la micro se afirma con las dos manos y en la playa, con arena, camina \"como si el piso se moviera\". Cuando trota para alcanzar la micro ve la calle temblar. Sentada no tiene ningún síntoma. Tiene jaquecas desde los 20 años, que le laten de un lado, con luz y ruido que le molestan. Hace ocho años tuvo dos episodios de vértigo de unas horas, con náuseas, que le trataron como laberintitis, y después nunca más. No oye peor, no tiene pitidos ni ha tomado antibióticos fuertes, y no ha tenido meningitis. Hace un año se cayó una noche en el pasillo de su casa. Le dijeron que lo suyo era migraña y ansiedad.",
+      "historia": "{{-2900}} Urgencia: dos episodios de vértigo de horas con náuseas, tratados como laberintitis; sin estudio posterior.\n{{-400}} Videonistagmografía en otro centro: calórica mínima informada como \"hipoexcitabilidad no significativa\"; se concluye sin alteración vestibular.\n{{-200}} Neurólogo: migraña; resonancia de cerebro normal. Se indica profilaxis.\n{{-20}} Otorrinolaringólogo: inestabilidad crónica con oscilopsia al trotar; pide evaluación audiológica y repetir el estudio vestibular.",
+      "hist": [],
+      "medicamentos": "Propranolol 40 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

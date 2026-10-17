@@ -1,0 +1,29 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "chiari_hic"
+    },
+    "edad": 38,
+    "sexo": "mujer",
+    "grado": {
+      "OI": "leve"
+    },
+    "semilla": 27,
+    "anamnesis": {
+      "otros": "Tiene 38 años y trabaja en una oficina de partes. Desde hace dos años tiene un dolor de cabeza en la nuca que le sube al toser, estornudar o reírse fuerte. Se siente inestable, \"como si el piso se moviera\", sobre todo al bajar escaleras mirando los peldaños y al leer: dice que las líneas del texto saltan un poco. No gira nada. Por el oído izquierdo oye menos, aunque no tiene pitido. Hace seis meses le hicieron en otro servicio un examen del equilibrio con videonistagmografía: el informe dice \"sin nistagmo, calórica simétrica\". Le hormiguean a veces las manos.",
+      "historia": "{{-180}} Otorrinolaringología (otro servicio): mareo inespecífico y videonistagmografía sin hallazgos. Se indica observación.\n{{-30}} Neurología: cefalea occipital con maniobra de Valsalva; solicita resonancia y repetir el estudio vestibular con registro vertical.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

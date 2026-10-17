@@ -1,0 +1,865 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "presbiacusia",
+   "OI": "presbiacusia"
+  },
+  "edad": 71,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "leve",
+   "OI": "leve"
+  },
+  "semilla": 28,
+  "anamnesis": {
+   "otros": "Tiene 71 años y es jubilado de la construcción. Desde un golpe en la cabeza a los 45 años tiene epilepsia, controlada. Hace cuatro meses tuvo una convulsión y su neurólogo le subió la dosis de la fenitoína. Desde entonces anda \"mareado, como curado\": no gira nada, pero camina con los pies separados, ve doble o borroso al mirar hacia los lados y le cuesta leer. Oye menos que antes, parejo en los dos oídos, y no tiene pitido. Toma dos o tres vasos de vino al día con la comida. El médico general pensó en un problema del oído interno y lo envía a estudio.",
+   "historia": "{{-125}} Neurología: convulsión tónico-clónica; se sube la dosis de fenitoína.\n{{-20}} Médico general: \"mareo\", betahistina por tres semanas sin mejoría.",
+   "hist": [],
+   "medicamentos": "Fenitoína 100 mg cada 8 horas; clonazepam 0,5 mg en la noche",
+   "cirugias": ""
+  }
+ },
+ "semilla": 28,
+ "data": {
+  "gender": 0,
+  "id": 9971,
+  "Aerea": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    50,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    70,
+    65
+   ]
+  ],
+  "Osea": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    50,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    70,
+    65
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    50,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    70,
+    65
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    10,
+    10
+   ],
+   [
+    15,
+    15
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    50,
+    45
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    70,
+    65
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 71,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.04,
+   1.04,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 50,
+    "percentage": 92
+   },
+   {
+    "int": 50,
+    "percentage": 96
+   }
+  ],
+  "SDT": [
+   5,
+   5
+  ],
+  "SRT": [
+   10,
+   10
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     90
+    ],
+    [
+     85,
+     85
+    ],
+    [
+     90,
+     90
+    ],
+    [
+     90,
+     95
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     95,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "Fenitoína 100 mg cada 8 horas; clonazepam 0,5 mg en la noche",
+   "cirugias": "",
+   "otros": "Tiene 71 años y es jubilado de la construcción. Desde un golpe en la cabeza a los 45 años tiene epilepsia, controlada. Hace cuatro meses tuvo una convulsión y su neurólogo le subió la dosis de la fenitoína. Desde entonces anda \"mareado, como curado\": no gira nada, pero camina con los pies separados, ve doble o borroso al mirar hacia los lados y le cuesta leer. Oye menos que antes, parejo en los dos oídos, y no tiene pitido. Toma dos o tres vasos de vino al día con la comida. El médico general pensó en un problema del oído interno y lo envía a estudio.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Álvaro",
+     "edad": 71,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 46,
+     "confiabilidad": 57,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 120
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 50,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 55,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 55,
+     "click": 50,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 50,
+     "ce_chirp_ls": 50
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.31,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1932,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.12,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.1,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": 0.1,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 45,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 30,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 25,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 45,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 45,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 40,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 50,
+     "ce_chirp_ls": 50
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.22,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2397,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.08,
+      "amp": -0.1
+     },
+     "onda_III": {
+      "lat": 0.11,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0.05,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 10.5,
+     "2000": 18,
+     "3000": 24,
+     "4000": 42,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.7,
+    "sello_pct": 91,
+    "variabilidad_db": 2.3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 9.1,
+     "2000": 16.2,
+     "3000": 21.9,
+     "4000": 33.3,
+     "6000": 44.7,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1,
+    "sello_pct": 84,
+    "variabilidad_db": 3.5,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T02:39:08+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Álvaro Martín",
+   "apellido": "Cruz González",
+   "rut": "7037469",
+   "fecha_nac": "27-09-1955"
+  },
+  "historia_clinica": "{{-125}} Neurología: convulsión tónico-clónica; se sube la dosis de fenitoína.\r\n{{-20}} Médico general: \"mareo\", betahistina por tres semanas sin mejoría."
+ }
+}

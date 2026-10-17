@@ -49,7 +49,10 @@ El primer término es lo laminar; el segundo, lo turbulento. Dividiendo por V̇ 
 
 Hay un segundo fenómeno que dobla la curva. Cuando el aire acelera por la válvula nasal, la presión de las paredes baja (principio de Bernoulli) y el tejido blando de la válvula puede cerrarse un poco. A mayor esfuerzo, el flujo deja de crecer: la curva forma una **meseta**. Por eso la curva normal tiene forma de S aplanada y no de recta.
 
-:::imagen ilustraciones/h24-curvas.svg ancho=100% La relación presión-flujo de cada fosa. A: las curvas en los cuatro cuadrantes; la derecha (rojo) pasa por I y III, la izquierda (azul) por II y IV; la línea punteada es la recta del origen al punto de 150 Pa, cuya pendiente es la resistencia. B: la misma información como resistencia contra presión: sube a medida que la presión crece. Las curvas son de ejemplo (fosa derecha 0,50 y fosa izquierda 0,25 Pa/cm³/s a 150 Pa), no de pacientes.
+:::imagen ilustraciones/h24-rs-colapso.svg ancho=100% Una válvula blanda, con inspiración forzada. La rama inspiratoria (la fosa derecha, en rojo, en el cuadrante I; la izquierda, en azul, en el II) se aplana en una meseta: por más presión que se haga, el flujo ya no sube. La espiratoria (cuadrantes III y IV) sigue creciendo. A 150 Pa, la resistencia de la fosa derecha es cerca de 0,6 Pa/(cm³/s) al inspirar y 0,36 al espirar. Registro simulado con RinoSim (software libre del autor); no es un paciente.
+:::
+
+:::imagen ilustraciones/h24-rs-curvas.svg ancho=100% La relación presión-flujo de cada fosa. A: las curvas en los cuatro cuadrantes; la derecha (rojo) pasa por I y III, la izquierda (azul) por II y IV; las líneas verticales de rayas marcan 75 y 150 Pa y la diagonal punteada es la recta de la resistencia de referencia (0,4): una curva que pasa por encima de ella tiene menos resistencia que esa. B: la misma información como resistencia contra presión, en inspiración: sube a medida que la presión crece. A 150 Pa la fosa derecha da 0,35 y la izquierda 0,29 Pa/(cm³/s); el total, 0,16. Registro simulado con RinoSim (software libre del autor); no es un paciente.
 :::
 
 ### De ahí salen los cuatro cuadrantes
@@ -58,7 +61,7 @@ Cada fosa se mide por separado y su curva se dibuja con la **presión en el eje 
 
 ### De dónde sale el número: la presión de referencia
 
-Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto fijo y común**. Lo habitual es una presión: 150 Pa, o 75 Pa cuando el paciente no alcanza los 150 (Clement, 1984; Wong y Eccles, 2014). <!-- verificar: Clement (1984) recomienda una presión fija; que sea 150 Pa y que se use 75 Pa como alternativa se confirmó en la introducción de Wong y Eccles (2014), no en el informe de 1984. --> En el ejemplo de la figura, la misma nariz derecha da 0,39 a 75 Pa y 0,50 a 150 Pa. Por eso el informe escribe **siempre** la presión.
+Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto fijo y común**. Lo habitual es una presión: 150 Pa, o 75 Pa cuando el paciente no alcanza los 150 (Clement, 1984; Wong y Eccles, 2014). <!-- verificar: Clement (1984) recomienda una presión fija; que sea 150 Pa y que se use 75 Pa como alternativa se confirmó en la introducción de Wong y Eccles (2014), no en el informe de 1984. --> En el ejemplo de la figura, la fosa derecha da 0,26 a 75 Pa y 0,35 a 150 Pa. Por eso el informe escribe **siempre** la presión.
 
 ¿Por qué 150 Pa y no menos? A presiones muy bajas, el flujo recién se está poniendo en marcha, la señal es chica y el ruido pesa mucho. Pero a presiones muy altas no todos los pacientes llegan, sobre todo los de nariz amplia. En una serie de 20.069 mediciones en reposo, entre 4,5 y 8,6 % no alcanzó los 150 Pa según la fase del ciclo respiratorio (Vogt y cols., 2016). 150 Pa es un compromiso: suficientemente alto para tener señal, suficientemente bajo para que casi todos lleguen.
 
@@ -66,10 +69,10 @@ Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto 
 
 Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en la bibliografía, el "radio 200"). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
 
-:::imagen ilustraciones/h24-broms.svg ancho=96% La idea del gráfico polar de Broms. Dos curvas inventadas cortan el mismo círculo; la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia.
+:::imagen ilustraciones/h24-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Registro simulado con RinoSim (software libre del autor); no es un paciente.
 :::
 
-¿Qué se gana? Con un radio, cada nariz se mide a **una distancia similar del origen**, aunque el punto caiga a otra presión. Una nariz muy obstruida se lee a una presión más alta (en el dibujo, 194 Pa) y una muy abierta a una más baja (146 Pa): la medición no depende de que el paciente alcance una presión fija. Es lo que hace el gráfico polar de los equipos que lo traen. El valor numérico del radio estándar depende de la escala con que el equipo dibuje los ejes. <!-- verificar: escala de ejes del "radio 200" de Broms y cols. (1982), no leída en el original. -->
+¿Qué se gana? Con un radio, cada nariz se mide a **una distancia similar del origen**, aunque el punto caiga a otra presión. Una nariz muy obstruida se lee a una presión más alta (en el dibujo, la fosa derecha, unos 118 Pa) y una muy abierta a una más baja (la izquierda, unos 43 Pa): la medición no depende de que el paciente alcance una presión fija. Es lo que hace el gráfico polar de los equipos que lo traen. El valor numérico del radio estándar depende de la escala con que el equipo dibuje los ejes. <!-- verificar: escala de ejes del "radio 200" de Broms y cols. (1982), no leída en el original. -->
 
 ### Dos fosas: resistencias en paralelo
 
@@ -119,7 +122,7 @@ El equipo se enciende y se configura antes de que entre el paciente, para que no
 
 ### Conoce tu equipo: la rinomanometría anterior activa
 
-LabSim no tiene rinomanómetro, así que no hay captura de pantalla. El dibujo muestra el montaje que se arma sobre el paciente: la máscara cubre la nariz y la boca; el neumotacógrafo, delante de la máscara, mide cuánto aire pasa; y el tubo de presión sale de la fosa contraria, tapada con el adaptador. En el equipo real el neumotacógrafo y los sensores van en un cabezal; el esquema separa las partes para que se vea cada una.
+Primero, el montaje. El dibujo muestra lo que se arma sobre el paciente: la máscara cubre la nariz y la boca; el neumotacógrafo, delante de la máscara, mide cuánto aire pasa; y el tubo de presión sale de la fosa contraria, tapada con el adaptador. En el equipo real el neumotacógrafo y los sensores van en un cabezal; el esquema separa las partes para que se vea cada una.
 
 :::imagen ilustraciones/h24-montaje.svg ancho=100% La rinomanometría anterior activa, midiendo la fosa derecha
 - @36,68 | **Máscara.** Cubre nariz y boca, con una presión leve: si deja escapar aire, el flujo medido es menor que el real. Cubre también la boca para que todo el aire pase por el neumotacógrafo: por eso el paciente debe tener la boca cerrada, porque el aire que entra o sale por ella ya no es el de la nariz.
@@ -130,6 +133,23 @@ LabSim no tiene rinomanómetro, así que no hay captura de pantalla. El dibujo m
 - @73,35 | **Registro.** El equipo cruza presión y flujo en cada instante y dibuja la curva; calcula la resistencia a la presión de referencia.
 - @84,59 | **Fosa medida** (la derecha, en rojo): queda libre, sin nada dentro.
 - @90.5,59 | **Fosa ocluida** (la izquierda, en azul): lleva el adaptador y el tubo de presión.
+:::
+
+Después, la pantalla. La captura es del rinomanómetro simulado de RinoSim (→ *En el simulador*), con un paciente simulado ya medido, en reposo y con vasoconstrictor. Los equipos reales dibujan lo mismo con otra disposición.
+
+:::imagen ilustraciones/h24-rs-equipo.png ancho=96% La pantalla de un rinomanómetro anterior simulado (RinoSim, software libre del autor): paciente simulado del cuadro «Mixta: desviación y cornetes», medido con 4 ciclos por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). No es un paciente.
+- @37.5,4.0 | **Barra de mando.** *Comprobar sello* (el paso 3), *Medir FND* y *Medir FNI* (una fosa por vez, con el adaptador en la contraria), *Borrar*, y el número de ciclos que se promedian.
+- @60,6.5 | **Errores de técnica.** Solo existen en el simulador: fuga en la máscara, adaptador sin sellar, respira por la boca y respiración irregular. Son los de *Errores frecuentes*, para provocarlos a propósito y ver qué le hacen a la curva.
+- @47,8.4 | **Vista.** Inspiración forzada, la recta de 0,4, los ciclos sueltos (las líneas finas) y la lectura de Broms.
+- @87.0,28.4 | **Curva en reposo** de la fosa derecha (roja, continua): el promedio de los ciclos. Las líneas finas son cada ciclo.
+- @85.4,19.4 | **Con vasoconstrictor** (discontinua): la misma fosa después de la prueba. Más flujo con la misma presión es menos resistencia.
+- @79.4,69.5 | **Cuadrantes.** La fosa derecha (roja) va en I y III; la izquierda (azul), en II y IV. Presión en el eje horizontal, flujo en el vertical.
+- @75.9,14.5 | **Recta de 0,4.** La diagonal punteada es la resistencia de referencia del libro: una curva que pasa por debajo de ella tiene más resistencia que 0,4.
+- @59.1,66.1 | **75 y 150 Pa.** Las dos líneas verticales de rayas son las presiones en que se lee la resistencia.
+- @75.9,79.4 | **Resistencia según la presión.** El gráfico pequeño es el B de la figura de las curvas, con la raya de referencia (0,4) a 150 Pa.
+- @76.8,90.1 | **R 150.** Resistencia a 150 Pa de cada fosa: 150 Pa dividido por el flujo de la columna de al lado. En rojo lo que supera 0,4 (la derecha, 0,81); en verde lo que está dentro (la izquierda, 0,38).
+- @92.3,90.1 | **R 150 con VC y cambio.** La derecha baja de 0,81 a 0,46 (−43 %): bajó, pero no llegó a 0,4, así que es **mixta** según la tabla de *Cómo se informa*. La izquierda ya estaba dentro de la referencia y, según el paso 7, no necesitaba la prueba.
+- @57.1,93.6 | **Total.** Las dos fosas en paralelo, 1 / RT = 1 / RD + 1 / RI: 0,26 en reposo y 0,18 con vasoconstrictor.
 :::
 
 En el rinomanómetro con que se escribió este capítulo, el menú sigue este orden, que otros equipos repiten con distinto nombre: *Measuring* → *Measuring of right nostril* → botón de tiempo (*t*) → contar los ciclos de la medición → *Continue with measuring* (cambiar el adaptador de fosa) → *Measuring of left nostril* → botón de tiempo → contar los ciclos → *Select documentation mode* → *Print result*. Memoriza la idea, no los nombres: **una fosa, un número de ciclos, la otra fosa, imprimir**.
@@ -239,7 +259,7 @@ Tabla: Qué indica la resistencia después del vasoconstrictor (PVC)
 | Baja del todo, hasta el valor de referencia | **Vasomotora** (mucosa) | Todo era mucosa |
 | Sube respecto del reposo | **Vasomotora**, sin descartar un componente mecánico ("efecto rebote") | Ver el recuadro |
 
-:::imagen ilustraciones/h24-vasoconstrictor.svg ancho=100% Las tres respuestas al vasoconstrictor en una misma fosa. Las curvas y los flujos son de ejemplo; la recta de puntos es la resistencia de referencia: una curva que pasa por encima de ella a 150 Pa tiene una resistencia menor al valor de referencia.
+:::imagen ilustraciones/h24-rs-vasoconstrictor.svg ancho=86% Las tres respuestas al vasoconstrictor en la fosa derecha, como resistencia según la presión: reposo (línea continua) y con vasoconstrictor (discontinua). La raya horizontal punteada es el valor de referencia (0,4) y las verticales, 75 y 150 Pa. A: vasomotora, a 150 Pa baja de 0,57 a 0,29 y queda bajo la referencia. B: mixta, baja de 0,80 a 0,46 sin llegar a la referencia. C: mecánica, 0,53 y 0,48: casi no cambia. Registros simulados con RinoSim (software libre del autor); no son pacientes.
 :::
 
 :::comentario Lo que dicen las normas
@@ -250,7 +270,10 @@ Tabla: Qué indica la resistencia después del vasoconstrictor (PVC)
 
 ### Leer la curva
 
-La curva dice más que el número. Una curva normal es regular, simétrica entre la inspiración y la espiración, y de forma de S aplanada: sube casi recta al principio y luego se aplana. Una curva muy plana y baja puede ser una fosa muy amplia (también la de una nariz atrófica); una curva que se cierra y no despega es una fosa obstruida. Una curva con **pausas** o saltos suele ser del paciente: respira a tirones, traga, o la máscara se mueve. En ese caso no se informa: se repite.
+La curva dice más que el número. Una curva normal es regular, simétrica entre la inspiración y la espiración, y de forma de S aplanada: sube casi recta al principio y luego se aplana. Una curva empinada, pegada al eje del flujo, es una fosa muy amplia (también la de una nariz atrófica); una curva baja, pegada al eje de la presión, que casi no despega, es una fosa obstruida. <!-- Protocolo ORL 2019 / borrador: decía "muy plana y baja" para la fosa amplia, lo que contradice el Fundamento (fosa abierta = curva empinada, pegada al eje del flujo). Se corrigió al sentido del Fundamento. --> Una curva con **pausas** o saltos suele ser del paciente: respira a tirones, traga, o la máscara se mueve. En ese caso no se informa: se repite.
+
+:::imagen ilustraciones/h24-rs-irregular.svg ancho=100% Una respiración irregular. Los ciclos sueltos (las líneas finas) no se parecen entre sí, tienen pausas y saltos, y el promedio (la línea gruesa) se quiebra. El equipo simulado avisa «ciclos poco reproducibles» (variación de 15 % en la fosa derecha y de 18 % en la izquierda): se repite la medición. Registro simulado con RinoSim (software libre del autor); no es un paciente.
+:::
 
 ### Ejercicios: de los números al informe
 
@@ -292,18 +315,33 @@ Se comprueba sumando flujos: 250 + 500 = 750 cm³/s, y 150 / 750 = 0,20. El tota
 **Una fosa "obstruida" en el examen no siempre molesta, y una nariz que molesta no siempre da un número alto.** La rinomanometría mide resistencia, y la queja del paciente es sensación. Cuando las dos no calzan, ese desacuerdo es un hallazgo. Y recuerda que el total puede estar normal con una fosa muy resistente si la otra compensa: **informa siempre cada fosa por separado**.
 :::
 
-## En LabSim
+## En el simulador
 
-LabSim no tiene un simulador nasal: no hay rinomanómetro, ni pacientes con curvas, ni informe. Este capítulo se practica **con números**, que es lo que de verdad se hace después de medir.
+Para esta herramienta hay un simulador propio: **RinoSim**, un programa libre hecho por el autor de este libro. Corre en el navegador, sin instalar nada y sin conexión a internet, y reproduce en pantalla la rinomanometría anterior que se describe en este capítulo (y la rinometría acústica de H25) sobre **pacientes simulados**. Las curvas y la pantalla del equipo de las figuras de este capítulo salen de él.
 
 Para practicar:
 
-- Resuelve los **ejercicios 1 a 6** de *Cómo se informa* a mano y cambia los valores. Los cálculos que enseñan son los que hace el equipo.
-- Si tienes acceso a un rinomanómetro, practica **el montaje** sobre un compañero: adaptador, máscara y comprobación del sello. La parte difícil es la mano, no el número.
-- Con una **hoja de cálculo**, dibuja la curva de Rohrer (ΔP = k₁·V̇ + k₂·V̇²) con tus propios k₁ y k₂ y mira cómo cambia la resistencia a 75 y a 150 Pa. Es la mejor manera de entender por qué la resistencia no es un número fijo.
+- **Elige un cuadro** y mide: *Comprobar sello*, *Medir FND*, *Medir FNI*. Los cuadros son *normal*, *desviación derecha* e *izquierda*, *cornetes*, *colapso valvular*, *pólipos*, *mixta* y *perforación*. Con una **semilla** (un número) cada cuadro se vuelve una variante individual, siempre la misma para esa semilla; «Otro paciente de este cuadro» sortea una.
+- **Lee el resultado como en el apartado *Cómo se informa***: resistencia de cada fosa a 75 y a 150 Pa, resistencia total en paralelo, y la comparación con el valor de referencia de 0,4. Mide dos veces la misma nariz cambiando el **minuto del ciclo nasal** y mira cómo se compensan las dos fosas.
+- **Haz la prueba con vasoconstrictor.** *Aplicar vasoconstrictor* retira la mucosa y apaga el ciclo; a partir de ahí se mide «con VC». Compara los cuadros *cornetes* (vasomotora), *mixta* y *desviación* (mecánica) y clasifica cada fosa con la tabla de este capítulo, antes de mirar lo que dice la pantalla.
+- **Provoca los errores de técnica** y mira qué le hacen a la curva: la *fuga en la máscara* sube la resistencia, el *adaptador sin sellar* la baja, *respira por la boca* pega la curva al eje del flujo y la *respiración irregular* da ciclos que no se parecen (y el equipo avisa). Con el cuadro *perforación*, la técnica anterior mide mal, como se vio en *Fundamento*.
+- **Mira lo que el equipo no sabe.** El botón del docente *Mostrar lo que el equipo no sabe* muestra la resistencia verdadera de cada fosa, sin errores de técnica, y la lectura de la prueba con vasoconstrictor según la tabla de este capítulo. Sirve para corregir una práctica o para que el propio alumno compare lo que midió con lo que había.
+- **Sin pantalla**, resuelve los **ejercicios 1 a 6** de *Cómo se informa* a mano y cambia los valores. Y con una **hoja de cálculo** dibuja la curva de Rohrer (ΔP = k₁·V̇ + k₂·V̇²) con tus propios k₁ y k₂: es la mejor manera de entender por qué la resistencia no es un número fijo.
+- **Con un rinomanómetro real**, practica **el montaje** sobre un compañero: adaptador, máscara y comprobación del sello. La parte difícil es la mano, no el número.
 
-:::comentario Lo que el libro no tiene
-Este capítulo no usa pacientes de LabSim ni imágenes de equipo. Los dibujos son esquemas propios hechos a partir de las fórmulas, con números inventados; no son registros de personas.
+:::comentario Lo que el simulador no es
+**RinoSim es un modelo para enseñar, no un equipo médico ni una norma.** Sus cifras son órdenes de magnitud elegidos para que una nariz normal, una obstruida y una que responde al vasoconstrictor se vean como en la clínica; los únicos valores de referencia que muestra son los que cita este capítulo (0,4 a 150 Pa como valor de trabajo, Ren y cols., 2018; Vogt y cols., 2016). Lo que **no** hace:
+
+- No simula la rinomanometría de 4 fases (ni la resistencia efectiva ni el logaritmo de Reff), ni la rinomanometría posterior ni la pasiva.
+- El flujo sigue a la presión casi de forma estática: no hay inercia ni histéresis reales, solo un retraso fijo para que la curva tenga un lazo estrecho.
+- El ciclo nasal es **regular**; el real muchas veces no lo es (Flanagan y Eccles, 1997).
+- El vasoconstrictor actúa entero, como a los 15 minutos: no hay curso en el tiempo ni rebote.
+- El umbral para leer un cambio como «igual que en reposo» es de 15 %, tomado de la variación de la rinomanometría (Hilberg y cols., 1989): es un criterio del simulador, no una norma. El libro no fija un porcentaje.
+- La lectura de Broms usa el supuesto de 1 Pa ≙ 1 cm³/s en los ejes; el original no se pudo verificar.
+- No depende de edad, sexo, talla ni grupo étnico, no hay niños, y no están la atresia coanal, las costras, las cirugías previas, la rinitis atrófica ni la respuesta a una provocación.
+- No mide la **sensación** de obstrucción: la discordancia entre lo que siente el paciente y lo que mide el examen la pone el docente.
+
+Las figuras son **registros simulados**, no pacientes.
 :::
 
 :::pregunta Preguntas para practicar

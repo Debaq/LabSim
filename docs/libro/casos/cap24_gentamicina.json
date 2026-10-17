@@ -1,0 +1,27 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 52,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 52 años y es electricista. Hace diez meses lo operaron de urgencia por una peritonitis, estuvo ocho días en cuidados intensivos y tres semanas hospitalizado. Hacia el final de la segunda semana se sintió \"mareado, flojo\", y lo atribuyeron a la debilidad de haber estado tanto tiempo en cama. Salió de alta sin vértigo. Hoy el problema es otro: cuando camina por la calle los letreros y las caras \"saltan\", y no puede leer el número de la micro si va caminando, pero sí cuando se detiene. En la oscuridad pierde el equilibrio: de noche camina al baño con la mano en la pared, y una vez se cayó al entrar a una pieza sin luz. Sentado o acostado no siente nada, no tiene vértigo, y en la camioneta, por un camino de tierra, ve el paisaje \"temblar\". Oye igual que siempre y no tiene pitidos. Hizo tres meses de kinesiología general sin cambio, y el neurólogo le dijo que la resonancia de cerebro estaba normal y que podía ser \"ansiedad\".",
+      "historia": "{{-300}} Hospitalización por peritonitis postoperatoria: cuidados intensivos, antibióticos de amplio espectro, entre ellos gentamicina por 12 días. Alza transitoria de la creatinina.\n{{-280}} Alta con diagnóstico de polineuropatía del paciente crítico leve; se indica kinesiología.\n{{-120}} Neurólogo: resonancia de cerebro normal; mareo inespecífico, posible componente ansioso.\n{{-30}} Otorrinolaringólogo: oscilopsia al caminar con audición normal; solicita evaluación audiológica y vestibular.",
+      "hist": [
+        "ototoxicos"
+      ],
+      "medicamentos": "Ninguno",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}
