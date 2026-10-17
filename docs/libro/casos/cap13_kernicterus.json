@@ -1,0 +1,52 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "kernicterus",
+      "OI": "kernicterus"
+    },
+    "edad": 11,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 11 años y viene con su mamá, que cuenta la historia. Nació de término en un hospital rural; al tercer día estaba \"amarillo hasta los pies\", lo trasladaron tarde y estuvo varios días en fototerapia. El tamizaje de oído del recién nacido no se hizo. Desde bebé tiene movimientos involuntarios de brazos y cara, le cuesta mirar hacia arriba sin mover la cabeza y los dientes de leche le salieron con el esmalte amarillo verdoso. Va a una escuela especial. Se asusta con los ruidos y se da vuelta cuando lo llaman, pero \"no entiende lo que se le dice\": se comunica con gestos y pocas palabras, y a veces se entiende mejor en la casa que en la escuela.",
+      "historia": "{{-4015}} Hospital rural: hiperbilirrubinemia neonatal al tercer día, fototerapia.\n{{-1500}} Neurología infantil: trastorno del movimiento de tipo atetósico.\n{{-60}} Fonoaudiología escolar: no responde de forma confiable a la audiometría de tamizaje; se deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

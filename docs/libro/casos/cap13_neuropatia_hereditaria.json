@@ -1,0 +1,52 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "neuropatia_hereditaria",
+      "OI": "neuropatia_hereditaria"
+    },
+    "edad": 28,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 28 años y es técnica en enfermería. Desde que se acuerda oye bien \"pero no entiende\" cuando hay ruido: en el casino del hospital, en las reuniones o con la mascarilla puesta se pierde, y por teléfono entiende menos aún. En silencio, cara a cara, conversa sin problema. No tiene pitidos ni mareos. De adolescente le salieron los pies arqueados, se tuerce los tobillos con facilidad y le cuesta correr; su padre y una tía camina con bastón. El neurólogo le dijo que \"los nervios de las piernas conducen lento\" y la mandó a control auditivo.",
+      "historia": "{{-900}} Neurólogo: debilidad distal en piernas, pies cavos y arreflexia aquileana; estudio de conducción nerviosa lento.\n{{-30}} Neurólogo: solicita evaluación auditiva por dificultad para entender en ruido.",
+      "hist": [],
+      "medicamentos": "Ninguno",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

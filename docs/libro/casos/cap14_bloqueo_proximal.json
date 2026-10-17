@@ -1,0 +1,37 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "bloqueo_proximal",
+      "OI": "bloqueo_proximal"
+    },
+    "edad": 45,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 45 años y es soldador. No puede contestar: informa su hermana y la ficha de la unidad de cuidados intensivos. Hace cuatro días, en el trabajo, se quejó de un dolor de cabeza \"como un golpe\" y cayó inconsciente; la tomografía mostró una hemorragia cerebral masiva. Es hipertenso y dejó el enalapril hace un año. Lleva cuatro días intubado, sin respuesta a ningún estímulo. Los sedantes están suspendidos hace más de 24 horas y la temperatura central es de 36,8 °C. El equipo médico evalúa el cuadro y pide un ABR en la cama como examen complementario. Antes oía normal.",
+      "historia": "{{-4}} Ingreso por hemorragia intracerebral masiva; intubado en UCI.\n{{-1}} Sedación suspendida; temperatura central 36,8 °C.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Ninguno (dejó el enalapril)",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

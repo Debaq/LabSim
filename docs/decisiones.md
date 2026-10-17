@@ -2714,7 +2714,7 @@ calcula, y el vibrador óseo llega a 50 dB y eso no es un bug.
 | Función L-I bajo 70 dB | 0.3 ms/10 dB | 0.28 (70-50) y 0.50 (<50) | F26 vs F22 Delgado |
 | Tasa, onda V 10→90/s | +7.6% | +13.6% | F13 Jiang (publicado 12-15%) |
 | Polaridad | ×1.1 a todas las ondas | I ×0.82 y III ×0.85 en condensación | F27 (mismo click, dos polaridades) |
-| Vibrador óseo | sin techo | 50 dB nHL (`BONE_MAX_OUTPUT_DB`) | F18, que normaliza a 50/30/10 |
+| Vibrador óseo | sin techo | 50 dB nHL (`BONE_MAX_OUTPUT_DB`); subido a 55 el 2026-09-21 (84bc3f19, la revisión lo ubica entre 45 y 55) | F18, que normaliza a 50/30/10 |
 
 **El hallazgo de fondo (neonato):** lo teníamos al revés. El neonato real
 tiene la periferia casi madura (onda I 1.79, contra 1.46 del adulto) y el

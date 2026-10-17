@@ -1,0 +1,873 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "mixta_otoesclerosis",
+   "OI": "mixta_otoesclerosis"
+  },
+  "edad": 48,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "moderada",
+   "OI": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 48 años y es profesora de básica. Hace unos quince años empezó a oír menos, primero por un lado y después por los dos, y notó que empeoró después de sus dos embarazos. Dice que en la sala de profesores, con ruido, entiende mejor que en la calma. Tiene un zumbido grave en los dos oídos, todo el día. Su madre y una tía usaron audífonos desde los cuarenta. Nunca ha tenido secreción ni dolor, ni mareos.",
+   "historia": "{{-1800}} Audiometría de salud ocupacional: hipoacusia bilateral, sin seguimiento.\n{{-45}} Otorrinolaringólogo: otoscopía normal bilateral y Rinne negativo en los dos oídos. Se solicita audiometría con vía ósea e impedanciometría para decidir entre cirugía y audífonos.",
+   "hist": [
+    "hipoacusia_familiar"
+   ],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 1872832610,
+ "data": {
+  "gender": 1,
+  "id": 9610,
+  "Aerea": [
+   [
+    55,
+    60
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    50,
+    55
+   ],
+   [
+    55,
+    65
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    60,
+    70
+   ],
+   [
+    70,
+    70
+   ]
+  ],
+  "Osea": [
+   [
+    30,
+    35
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    40,
+    45
+   ],
+   [
+    45,
+    50
+   ],
+   [
+    40,
+    45
+   ],
+   [
+    45,
+    50
+   ],
+   [
+    50,
+    55
+   ]
+  ],
+  "LDL": [
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    55,
+    60
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    55,
+    55
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    50,
+    55
+   ],
+   [
+    55,
+    65
+   ],
+   [
+    60,
+    65
+   ],
+   [
+    60,
+    70
+   ],
+   [
+    70,
+    70
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    30,
+    35
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    35,
+    40
+   ],
+   [
+    40,
+    45
+   ],
+   [
+    45,
+    50
+   ],
+   [
+    40,
+    45
+   ],
+   [
+    45,
+    50
+   ],
+   [
+    50,
+    55
+   ]
+  ],
+  "Z_OD": "As",
+  "Z_OI": "As",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "negativo",
+    "oi": "negativo"
+   },
+   "1000": {
+    "od": "negativo",
+    "oi": "negativo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "od"
+  },
+  "sector": "Camara_sono",
+  "edad": 48,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.86,
+   1.49,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 85,
+    "percentage": 92
+   },
+   {
+    "int": 85,
+    "percentage": 84
+   }
+  ],
+  "SDT": [
+   45,
+   50
+  ],
+  "SRT": [
+   50,
+   55
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": true,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Tiene 48 años y es profesora de básica. Hace unos quince años empezó a oír menos, primero por un lado y después por los dos, y notó que empeoró después de sus dos embarazos. Dice que en la sala de profesores, con ruido, entiende mejor que en la calma. Tiene un zumbido grave en los dos oídos, todo el día. Su madre y una tía usaron audífonos desde los cuarenta. Nunca ha tenido secreción ni dolor, ni mareos.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Verónica",
+     "edad": 48,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 82,
+     "confiabilidad": 74,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Zumbido",
+   "frecuencia": 500
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 85,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 90,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 110
+  },
+  "ABR": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 65,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 75,
+     "tone_burst_1000Hz": 75,
+     "tone_burst_2000Hz": 60,
+     "tone_burst_4000Hz": 65,
+     "nb_ce_chirp_ls_500Hz": 70,
+     "nb_ce_chirp_ls_1000Hz": 70,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": 65,
+     "click": 65,
+     "ce_chirp": 60,
+     "ce_chirp_ls": 60
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.21,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1815,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.33,
+      "amp": -0.17
+     },
+     "onda_III": {
+      "lat": 0.33,
+      "amp": -0.18
+     },
+     "onda_V": {
+      "lat": 0.33,
+      "amp": -0.21
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 70,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 75,
+     "tone_burst_1000Hz": 75,
+     "tone_burst_2000Hz": 65,
+     "tone_burst_4000Hz": 70,
+     "nb_ce_chirp_ls_500Hz": 70,
+     "nb_ce_chirp_ls_1000Hz": 70,
+     "nb_ce_chirp_ls_2000Hz": 60,
+     "nb_ce_chirp_ls_4000Hz": 70,
+     "click": 70,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.21,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2125,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.26,
+      "amp": -0.12
+     },
+     "onda_III": {
+      "lat": 0.26,
+      "amp": -0.13
+     },
+     "onda_V": {
+      "lat": 0.26,
+      "amp": -0.15
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_female",
+    "baseline": {
+     "I": {
+      "lat": 1.46,
+      "amp": 0.44
+     },
+     "III": {
+      "lat": 3.65,
+      "amp": 0.47
+     },
+     "V": {
+      "lat": 5.54,
+      "amp": 0.54
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 41.7,
+     "1000": 45,
+     "1500": 37.1,
+     "2000": 26.8,
+     "3000": 31.9,
+     "4000": 45,
+     "6000": 41.9,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 1.6,
+    "sello_pct": 77,
+    "variabilidad_db": 2.4,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 43.8,
+     "1000": 45,
+     "1500": 40.7,
+     "2000": 34.6,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 5.7,
+    "sello_pct": 84,
+    "variabilidad_db": 2.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T00:39:40+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Verónica Lourdes",
+   "apellido": "López Mendoza",
+   "rut": "13816226",
+   "fecha_nac": "10-05-1978"
+  },
+  "historia_clinica": "{{-1800}} Audiometría de salud ocupacional: hipoacusia bilateral, sin seguimiento.\r\n{{-45}} Otorrinolaringólogo: otoscopía normal bilateral y Rinne negativo en los dos oídos. Se solicita audiometría con vía ósea e impedanciometría para decidir entre cirugía y audífonos."
+ }
+}

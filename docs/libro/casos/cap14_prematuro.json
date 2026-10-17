@@ -1,0 +1,41 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "prematuro",
+      "OI": "prematuro"
+    },
+    "edad": 0,
+    "sexo": "hombre",
+    "edad_valor": 1344,
+    "edad_unidad": "horas",
+    "anamnesis": {
+      "otros": "Tiene 8 semanas de vida y viene con su mamá. Nació a las 32 semanas, con 1.700 g, tras un trabajo de parto prematuro; el embarazo había sido normal y la mamá no tuvo infecciones ni tomó medicamentos. Estuvo cuatro semanas en la unidad de neonatología por inmadurez respiratoria: recibió cafeína por las apneas y no recibió antibióticos aminoglucósidos. Antes del alta, el tamizaje automático (AABR) refirió en el oído derecho. Hoy viene a la evaluación de seguimiento: llegó despierto, comió justo antes del examen y se durmió en brazos de su mamá. Nadie en la familia tiene problemas de audición.",
+      "historia": "{{-28}} Alta de neonatología a las 36 semanas de edad corregida; AABR refiere OD y pasa OI.",
+      "hist": [],
+      "medicamentos": "Ninguno actual",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": 1000
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

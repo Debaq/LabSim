@@ -1,0 +1,57 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "colesteatoma_fistula",
+      "OI": "normal"
+    },
+    "edad": 38,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 38 años y es técnico en refrigeración. Desde los quince le sale pus de mal olor por el oído derecho de vez en cuando, y nunca se lo siguió. Hace dos semanas, al sonarse con fuerza, sintió que la pieza giraba unos segundos; le ha pasado de nuevo al apretarse el trago del oído y al toser. Con ese oído oye cada vez menos. No tiene pitido y la cara se le mueve normal.",
+      "historia": "{{-3650}} Otitis media crónica derecha con otorrea; tratamiento con gotas, sin control posterior.\n{{-10}} Servicio de urgencia: vértigo breve al sonarse la nariz y al presionar el trago. Otoscopía con secreción fétida y masa blanquecina en el cuadrante posterosuperior derecho. Se deriva a otorrinolaringología con audiometría.",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        50,
+        30,
+        10
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "transductor": "oseo"
+    }
+  ]
+}

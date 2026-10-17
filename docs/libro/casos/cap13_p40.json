@@ -1,0 +1,50 @@
+{
+  "caso": "demo:40",
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        90
+      ],
+      "marcar": [],
+      "polaridad": "rarefaccion"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        90
+      ],
+      "marcar": [],
+      "polaridad": "condensacion"
+    }
+  ]
+}

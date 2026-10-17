@@ -1,0 +1,49 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "toxico_metabolico",
+      "OI": "toxico_metabolico"
+    },
+    "edad": 45,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 45 años y es profesora de enseñanza básica. Hace como un año que oye menos por los dos oídos, parejo: dice que es \"como tener algodón\" y que en el recreo le cuesta entender a los niños. No tiene pitidos ni mareos, nunca ha tenido dolor ni secreción de oídos, no ha estado expuesta a ruido y en su familia nadie oye mal. Cuenta que en el último año está \"apagada\": se cansa con todo, tiene frío cuando los demás no, ha subido seis kilos sin comer más, tiene la piel seca, el pelo quebradizo, está estreñida y le notan la voz más ronca. Atribuye todo al trabajo y al estrés.",
+      "historia": "{{-400}} Consulta a médico general por cansancio y aumento de peso; se indican exámenes de sangre que no se retiró.\n{{-60}} Médico general: hipoacusia bilateral referida; otoscopía normal. Se deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "Ninguno",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        90,
+        80,
+        60
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

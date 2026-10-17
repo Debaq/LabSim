@@ -1,0 +1,44 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "mixta_otoesclerosis",
+      "OI": "mixta_otoesclerosis"
+    },
+    "edad": 48,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 48 años y es profesora de básica. Hace unos quince años empezó a oír menos, primero por un lado y después por los dos, y notó que empeoró después de sus dos embarazos. Dice que en la sala de profesores, con ruido, entiende mejor que en la calma. Tiene un zumbido grave en los dos oídos, todo el día. Su madre y una tía usaron audífonos desde los cuarenta. Nunca ha tenido secreción ni dolor, ni mareos.",
+      "historia": "{{-1800}} Audiometría de salud ocupacional: hipoacusia bilateral, sin seguimiento.\n{{-45}} Otorrinolaringólogo: otoscopía normal bilateral y Rinne negativo en los dos oídos. Se solicita audiometría con vía ósea e impedanciometría para decidir entre cirugía y audífonos.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": true
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "reflejos"
+    }
+  ]
+}

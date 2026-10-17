@@ -1,0 +1,67 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "infarto_aica",
+      "OI": "normal"
+    },
+    "edad": 63,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 63 años y es taxista. Hace seis días, al levantarse, sintió que la pieza giraba, vomitó varias veces y notó que el oído derecho \"se había apagado\". Se agarraba de las paredes para caminar y la comisura derecha de la boca le quedó caída. El mareo fuerte cedió en un par de días, pero la audición del derecho no volvió y sigue inestable al caminar. No tiene pitido. Lo atendieron en un servicio de urgencia como \"sordera súbita con laberintitis\" y lo derivan con prioridad.",
+      "historia": "{{-6}} Urgencia: vértigo intenso, vómitos, hipoacusia derecha y parálisis facial derecha de inicio brusco. Se indica corticoide oral y reposo.\n{{-2}} Otorrinolaringología: solicita audiometría y potenciales evocados con prioridad.",
+      "hist": [
+        "hta",
+        "diabetes"
+      ],
+      "medicamentos": "Enalapril 10 mg cada 12 horas; metformina 850 mg cada 12 horas",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "tasa": 81.1
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

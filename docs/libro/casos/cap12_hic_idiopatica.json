@@ -1,0 +1,53 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "hic_idiopatica",
+      "OI": "hic_idiopatica"
+    },
+    "edad": 29,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 29 años y es diseñadora gráfica. Hace cuatro meses le apareció un zumbido grave en los dos oídos que \"late\" con el pulso y que se calma cuando se tiende de lado. Oye como si tuviera los oídos tapados, sobre todo en las mañanas. Tiene dolor de cabeza casi todos los días y, de vez en cuando, la vista se le nubla unos segundos al agacharse. En el último año subió 15 kilos. Sin vértigo ni crisis de horas. El médico general pensó en Ménière y la envía a evaluación auditiva.",
+      "historia": "{{-120}} Médico general: acúfeno bilateral y sensación de oído tapado; se indica betahistina.\n{{-30}} Médico general: sin mejoría; deriva a evaluación auditiva por sospecha de hidrops.",
+      "hist": [],
+      "medicamentos": "Betahistina 16 mg cada 8 horas (sin mejoría)",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "tasa": 81.1
+    }
+  ]
+}

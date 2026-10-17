@@ -1,0 +1,55 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "fractura_transversal",
+      "OI": "normal"
+    },
+    "edad": 34,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "profunda"
+    },
+    "anamnesis": {
+      "otros": "Tiene 34 años y es pintor de edificios. Hace tres semanas cayó de un andamio de unos tres metros y se golpeó la parte de atrás de la cabeza. Desde ese día no oye nada por el oído derecho. Los primeros cinco días tuvo un mareo giratorio muy intenso con vómitos, que fue cediendo. Le quedó un zumbido agudo permanente en ese oído y algo de inestabilidad al caminar rápido.",
+      "historia": "{{-25}} Urgencia: caída de altura con traumatismo craneoencefálico. TAC: fractura del peñasco derecho que cruza el laberinto. Hospitalizado seis días.\n{{-7}} Control: otoscopía normal, membrana timpánica íntegra. Se solicita audiometría e impedanciometría.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": true
+    },
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        100,
+        80,
+        60
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

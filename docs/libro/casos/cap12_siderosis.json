@@ -1,0 +1,67 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "siderosis",
+      "OI": "siderosis"
+    },
+    "edad": 58,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 58 años y es contador. Hace unos tres años nota que oye menos por los dos oídos y que en las reuniones \"oye pero no entiende\". Tiene un zumbido agudo permanente en ambos oídos. Su señora dice que camina como \"pisando algodón\" y que se le ha enredado la letra. A los 34 años se cayó de un andamio, estuvo dos días inconsciente y lo operaron de un hematoma en la cabeza; después no tuvo secuelas. No toma medicamentos y nunca ha trabajado con ruido.",
+      "historia": "{{-900}} Médico general: hipoacusia bilateral, se atribuye a la edad.\n{{-60}} Otorrinolaringología: hipoacusia bilateral progresiva con inestabilidad; solicita evaluación auditiva completa.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": "Drenaje de hematoma subdural hace 24 años"
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "tasa": 81.1
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "vemp",
+      "subtipo": "cvemp"
+    }
+  ]
+}

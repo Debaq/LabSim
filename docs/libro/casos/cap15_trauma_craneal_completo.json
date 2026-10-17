@@ -1,0 +1,37 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "trauma_craneal_completo",
+      "OI": "normal"
+    },
+    "edad": 29,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 29 años y es repartidor en moto. Hace seis semanas chocó, sin casco, y se golpeó el lado derecho de la cabeza. Estuvo dos días hospitalizado; le sangró el oído derecho y desde entonces oye mucho menos por ahí. Dice que el sonido le llega \"como con algodón\" y que las voces agudas, las de mujeres y niños, le cuestan más. No ha tenido mareos que recuerde ni la cara caída.",
+      "historia": "{{-45}} Urgencia: traumatismo craneoencefálico en accidente de moto. TAC: fractura del hueso temporal derecho que respeta el laberinto; otorragia derecha, sin parálisis facial.\n{{-10}} Control otorrinolaringológico: hemotímpano residual derecho. Se solicita audiometría.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    }
+  ]
+}

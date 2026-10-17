@@ -1,0 +1,54 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "esclerosis_multiple",
+      "OI": "esclerosis_multiple"
+    },
+    "edad": 34,
+    "sexo": "mujer",
+    "semilla": 11,
+    "anamnesis": {
+      "otros": "Tiene 34 años y es educadora de párvulos. Hace ocho meses vio doble durante tres semanas y se le durmió la pierna izquierda; se le pasó sola y no volvió a consultar. Hace poco, después de un turno largo, le volvió un hormigueo en la mano derecha y una fatiga que no se le quita con el descanso. Dice que oye bien, que no tiene pitidos ni mareos: viene porque la neuróloga, que sospecha una enfermedad desmielinizante, le pidió potenciales evocados mientras se consigue hora para la resonancia, que tiene lista de espera de varios meses.",
+      "historia": "{{-240}} Urgencia: visión doble y adormecimiento de la pierna izquierda; se indica observación y control.\n{{-45}} Neurología: examen con signos piramidales leves; solicita resonancia y potenciales evocados visuales, auditivos de tronco y somatosensoriales.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "tasa": 81.1
+    }
+  ]
+}

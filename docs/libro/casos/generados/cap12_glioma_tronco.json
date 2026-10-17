@@ -1,0 +1,879 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "glioma_tronco",
+   "OI": "glioma_tronco"
+  },
+  "edad": 7,
+  "sexo": "mujer",
+  "grado": {
+   "OD": "leve",
+   "OI": "leve"
+  },
+  "anamnesis": {
+   "otros": "Es una niña de 7 años que cursa segundo básico. Su mamá cuenta que desde hace unas seis semanas se tropieza y se le caen las cosas, que se queja de dolor de cabeza al despertar y que a veces \"se le va un ojo hacia adentro\". En la sala la profesora dice que \"no escucha cuando la llaman\". La pediatra pidió una resonancia, que está en lista de espera porque necesita sedación, y adelantó la evaluación auditiva.",
+   "historia": "{{-40}} Pediatría: torpeza progresiva, cefalea matinal y desviación ocular intermitente; solicita resonancia con sedación y evaluación auditiva.",
+   "hist": [],
+   "medicamentos": "",
+   "cirugias": ""
+  }
+ },
+ "semilla": 3536046878,
+ "data": {
+  "gender": 1,
+  "id": 9878,
+  "Aerea": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    50,
+    45
+   ]
+  ],
+  "Osea": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    50,
+    45
+   ]
+  ],
+  "LDL": [
+   [
+    90,
+    90
+   ],
+   [
+    90,
+    95
+   ],
+   [
+    90,
+    95
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    95,
+    105
+   ],
+   [
+    100,
+    110
+   ],
+   [
+    110,
+    115
+   ],
+   [
+    110,
+    115
+   ],
+   [
+    115,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    50,
+    45
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    25,
+    20
+   ],
+   [
+    35,
+    25
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    35,
+    35
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    45,
+    40
+   ],
+   [
+    50,
+    45
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 7,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   0.82,
+   0.79,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 60,
+    "percentage": 56
+   },
+   {
+    "int": 55,
+    "percentage": 56
+   }
+  ],
+  "SDT": [
+   20,
+   15
+  ],
+  "SRT": [
+   25,
+   20
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   10,
+   10
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Stat": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Rosemberg": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": true
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "Es una niña de 7 años que cursa segundo básico. Su mamá cuenta que desde hace unas seis semanas se tropieza y se le caen las cosas, que se queja de dolor de cabeza al despertar y que a veces \"se le va un ojo hacia adentro\". En la sala la profesora dice que \"no escucha cuando la llaman\". La pediatra pidió una resonancia, que está en lista de espera porque necesita sedación, y adelantó la evaluación auditiva.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Julia",
+     "edad": 7,
+     "genero": 1,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 69,
+     "confiabilidad": 83,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amvbp7vp2gl",
+     "rol": "madre",
+     "nombre": "Isabel Delgado",
+     "edad": 43,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 68,
+     "conciencia": 80,
+     "confiabilidad": 67,
+     "version": "",
+     "comportamiento": "ansiosa, se adelanta y contesta por él antes de que termine",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 35,
+    "retro": {
+     "i_iii_ms": 0.1,
+     "iii_v_ms": 0.65,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.35,
+     "microfonica": "normal",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "moderada"
+    }
+   },
+   "OI": {
+    "cce_pct": 25,
+    "retro": {
+     "i_iii_ms": 0.1,
+     "iii_v_ms": 0.65,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.35,
+     "microfonica": "normal",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "moderada"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 90
+  },
+  "ABR": {
+   "OD": {
+    "type": "neural",
+    "umbral": 45,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 50,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 45,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 45,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 55,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.1,
+     "iii_v_ms": 0.65,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.35,
+     "microfonica": "normal",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "moderada"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.18,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3073,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.01,
+      "amp": 0.01
+     },
+     "onda_III": {
+      "lat": -0.05,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": 0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 45,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 45,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 45,
+     "click": 45,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": 50,
+     "ce_chirp_ls": 50
+    },
+    "neural": {
+     "i_iii_ms": 0.1,
+     "iii_v_ms": 0.65,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.35,
+     "microfonica": "normal",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "moderada"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.32,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3102,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.03,
+      "amp": 0
+     },
+     "onda_III": {
+      "lat": -0.02,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": -0.04,
+      "amp": -0.02
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "child",
+    "baseline": {
+     "I": {
+      "lat": 1.48,
+      "amp": 0.239
+     },
+     "III": {
+      "lat": 3.5,
+      "amp": 0.282
+     },
+     "V": {
+      "lat": 5.5,
+      "amp": 0.41
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0.9,
+     "6000": 0.9,
+     "8000": 3
+    },
+    "atten_db": 0,
+    "ruido_db": 0.6,
+    "sello_pct": 80,
+    "variabilidad_db": 2.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 0
+    },
+    "atten_db": 0,
+    "ruido_db": 0.5,
+    "sello_pct": 93,
+    "variabilidad_db": 2.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 55,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T01:09:12+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Julia Blanca",
+   "apellido": "Delgado Rivas",
+   "rut": "26183043",
+   "fecha_nac": "13-08-2019"
+  },
+  "historia_clinica": "{{-40}} Pediatría: torpeza progresiva, cefalea matinal y desviación ocular intermitente; solicita resonancia con sedación y evaluación auditiva."
+ }
+}

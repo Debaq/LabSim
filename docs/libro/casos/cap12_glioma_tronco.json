@@ -1,0 +1,57 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "glioma_tronco",
+      "OI": "glioma_tronco"
+    },
+    "edad": 7,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Es una niña de 7 años que cursa segundo básico. Su mamá cuenta que desde hace unas seis semanas se tropieza y se le caen las cosas, que se queja de dolor de cabeza al despertar y que a veces \"se le va un ojo hacia adentro\". En la sala la profesora dice que \"no escucha cuando la llaman\". La pediatra pidió una resonancia, que está en lista de espera porque necesita sedación, y adelantó la evaluación auditiva.",
+      "historia": "{{-40}} Pediatría: torpeza progresiva, cefalea matinal y desviación ocular intermitente; solicita resonancia con sedación y evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "tasa": 81.1
+    }
+  ]
+}

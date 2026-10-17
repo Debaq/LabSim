@@ -1,0 +1,48 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "leucodistrofia",
+      "OI": "leucodistrofia"
+    },
+    "edad": 8,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 8 años y viene con su mamá. Hasta hace unos meses era buen alumno. Desde el otoño, dice la mamá, \"no oye\": no responde cuando lo llaman, en la sala no sigue las instrucciones y la profesora cree que es distraído. Ella nota que además tropieza más, la letra le empeoró y se queja de que \"ve borroso\" el pizarrón. Está más irritable y llorón. Hace años que se broncea muy rápido y la piel de los codos se le ve oscura. Un tío materno murió joven de una \"enfermedad de los nervios\".",
+      "historia": "{{-90}} Profesora jefe: baja de rendimiento y falta de atención desde marzo.\n{{-40}} Pediatra: descarta cerumen, otoscopía normal; sospecha de hipoacusia y déficit atencional, solicita audiometría.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

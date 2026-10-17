@@ -1,0 +1,35 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "hipotermia_farmacos",
+      "OI": "hipotermia_farmacos"
+    },
+    "edad": 45,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 45 años y es chofer de camión. No puede contestar: informa su esposa y la ficha de la unidad de cuidados intensivos. Hace 18 horas sufrió un paro cardiorrespiratorio en su casa; su señora inició las compresiones y los paramédicos lo recuperaron a los 12 minutos. Está intubado, con enfriamiento controlado a 33,0 °C de temperatura central según el protocolo de la unidad, y sedado con infusión de propofol y fentanilo. Antes del paro oía bien, no usaba audífonos y no tomaba medicamentos. El equipo médico pide un ABR en la cama para ver cómo está el tronco.",
+      "historia": "{{-1}} Ingreso a UCI tras paro cardiorrespiratorio recuperado; inicia enfriamiento controlado a 33 °C y sedoanalgesia continua.",
+      "hist": [],
+      "medicamentos": "Propofol y fentanilo en infusión (UCI)",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "teoae"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

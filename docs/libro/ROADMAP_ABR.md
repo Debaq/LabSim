@@ -119,10 +119,8 @@ Así una corrección de un valor se hace en un solo lugar.
 
 ## Pendientes del simulador que afectan al ABR
 
-- **Cada nivel sale dos veces** en la pila de trazos (80 dos veces, 60 dos
-  veces, etc.), según observó el autor. Revisar antes de hacer las figuras de
-  ABR de estos capítulos (ver también la memoria "ABR: pila duplicada + escalón
-  sin V", que lo vio en el PDF de la ficha).
+- **Cada nivel sale dos veces**: es a propósito (réplica, confirmado por él el
+  2026-10-16); también en la vista previa del editor de casos.
 - Ítem 7 del realismo del ABR: rampa de atenuación del canal, otros
   potenciales y modificadores fisiológicos (sin hacer).
 - TODO 48: conectar al modelo los 17 parámetros de `UNCONNECTED_SETTINGS`.

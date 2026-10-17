@@ -1,0 +1,64 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "mixta_otitis_cronica",
+      "OI": "normal"
+    },
+    "edad": 52,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 52 años y trabaja de costurera. Desde niña le supura el oído derecho cada vez que se resfría; hace tres años la secreción no se ha cortado del todo. Con ese oído casi no oye: habla por teléfono con el izquierdo y la familia se queja de que sube la tele. No tiene pitido ni mareos. Hoy la deriva el cirujano que le propone cerrar la perforación, y quiere saber cuánto oído \"de verdad\" le queda antes de operar.",
+      "historia": "{{-1500}} Otorrinolaringología: perforación central amplia del tímpano derecho con otorrea mucosa; se indican gotas y control.\n{{-60}} Control: otoscopía con perforación seca y oído medio húmedo. Se solicita audiometría e impedanciometría antes de decidir una timpanoplastia.",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    },
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": 226
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        50,
+        30,
+        10
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ],
+      "transductor": "oseo"
+    }
+  ]
+}

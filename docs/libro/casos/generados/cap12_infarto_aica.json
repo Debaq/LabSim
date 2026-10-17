@@ -1,0 +1,872 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "infarto_aica",
+   "OI": "normal"
+  },
+  "edad": 63,
+  "sexo": "hombre",
+  "grado": {
+   "OD": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 63 años y es taxista. Hace seis días, al levantarse, sintió que la pieza giraba, vomitó varias veces y notó que el oído derecho \"se había apagado\". Se agarraba de las paredes para caminar y la comisura derecha de la boca le quedó caída. El mareo fuerte cedió en un par de días, pero la audición del derecho no volvió y sigue inestable al caminar. No tiene pitido. Lo atendieron en un servicio de urgencia como \"sordera súbita con laberintitis\" y lo derivan con prioridad.",
+   "historia": "{{-6}} Urgencia: vértigo intenso, vómitos, hipoacusia derecha y parálisis facial derecha de inicio brusco. Se indica corticoide oral y reposo.\n{{-2}} Otorrinolaringología: solicita audiometría y potenciales evocados con prioridad.",
+   "hist": [
+    "hta",
+    "diabetes"
+   ],
+   "medicamentos": "Enalapril 10 mg cada 12 horas; metformina 850 mg cada 12 horas",
+   "cirugias": ""
+  }
+ },
+ "semilla": 843582847,
+ "data": {
+  "gender": 0,
+  "id": 9847,
+  "Aerea": [
+   [
+    30,
+    5
+   ],
+   [
+    30,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    40,
+    10
+   ],
+   [
+    45,
+    15
+   ],
+   [
+    50,
+    20
+   ],
+   [
+    60,
+    25
+   ],
+   [
+    70,
+    30
+   ],
+   [
+    70,
+    35
+   ]
+  ],
+  "Osea": [
+   [
+    30,
+    5
+   ],
+   [
+    30,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    40,
+    10
+   ],
+   [
+    45,
+    15
+   ],
+   [
+    50,
+    20
+   ],
+   [
+    60,
+    25
+   ],
+   [
+    70,
+    30
+   ],
+   [
+    70,
+    35
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    105,
+    100
+   ],
+   [
+    115,
+    100
+   ],
+   [
+    115,
+    100
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    30,
+    5
+   ],
+   [
+    30,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    40,
+    10
+   ],
+   [
+    45,
+    15
+   ],
+   [
+    50,
+    20
+   ],
+   [
+    60,
+    25
+   ],
+   [
+    70,
+    30
+   ],
+   [
+    70,
+    35
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    30,
+    5
+   ],
+   [
+    30,
+    5
+   ],
+   [
+    45,
+    5
+   ],
+   [
+    40,
+    10
+   ],
+   [
+    45,
+    15
+   ],
+   [
+    50,
+    20
+   ],
+   [
+    60,
+    25
+   ],
+   [
+    70,
+    30
+   ],
+   [
+    70,
+    35
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 63,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.09,
+   1.06,
+   "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
+  ],
+  "UMD": [
+   {
+    "int": 75,
+    "percentage": 56
+   },
+   {
+    "int": 40,
+    "percentage": 100
+   }
+  ],
+  "SDT": [
+   35,
+   0
+  ],
+  "SRT": [
+   40,
+   5
+  ],
+  "Fowler": {
+   "enabled": true,
+   "patterns": {
+    "1": "partial",
+    "2": "partial",
+    "3": "partial",
+    "4": "partial",
+    "5": "partial"
+   },
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   50,
+   0
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Stat": [
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Rosemberg": [
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ],
+   [
+    30,
+    0
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     85
+    ],
+    [
+     130,
+     90
+    ],
+    [
+     130,
+     90
+    ]
+   ],
+   "contra": [
+    [
+     95,
+     130
+    ],
+    [
+     90,
+     130
+    ],
+    [
+     95,
+     130
+    ],
+    [
+     95,
+     130
+    ],
+    [
+     95,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": true,
+    "hta": true
+   },
+   "medicamentos": "Enalapril 10 mg cada 12 horas; metformina 850 mg cada 12 horas",
+   "cirugias": "",
+   "otros": "Tiene 63 años y es taxista. Hace seis días, al levantarse, sintió que la pieza giraba, vomitó varias veces y notó que el oído derecho \"se había apagado\". Se agarraba de las paredes para caminar y la comisura derecha de la boca le quedó caída. El mareo fuerte cedió en un par de días, pero la audición del derecho no volvió y sigue inestable al caminar. No tiene pitido. Lo atendieron en un servicio de urgencia como \"sordera súbita con laberintitis\" y lo derivan con prioridad.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Iván",
+     "edad": 63,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 66,
+     "confiabilidad": 81,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 60,
+    "retro": {
+     "i_iii_ms": 0,
+     "iii_v_ms": 0.7,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.35,
+     "microfonica": "normal",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "moderada"
+    }
+   },
+   "OI": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   },
+   "ldl_tolerancia_db": 100
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 60,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 65,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": 55,
+     "tone_burst_4000Hz": 65,
+     "nb_ce_chirp_ls_500Hz": 60,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 50,
+     "nb_ce_chirp_ls_4000Hz": 65,
+     "click": 60,
+     "ce_chirp": 55,
+     "ce_chirp_ls": 55
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0,
+     "iii_v_ms": 0.7,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.35,
+     "microfonica": "normal",
+     "desincronia": "alta",
+     "sensibilidad_tasa": "moderada"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.29,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1537,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.07,
+      "amp": -0.08
+     },
+     "onda_III": {
+      "lat": 0.14,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 30,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 25,
+     "tone_burst_1000Hz": 25,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 30,
+     "nb_ce_chirp_ls_500Hz": 20,
+     "nb_ce_chirp_ls_1000Hz": 20,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 30,
+     "click": 30,
+     "ce_chirp": 20,
+     "ce_chirp_ls": 20
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 40,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 45,
+     "nb_ce_chirp_ls_500Hz": 35,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 45,
+     "click": 45,
+     "ce_chirp": 35,
+     "ce_chirp_ls": 35
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.18,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1226,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.01,
+      "amp": 0
+     },
+     "onda_III": {
+      "lat": 0.04,
+      "amp": 0.01
+     },
+     "onda_V": {
+      "lat": 0.02,
+      "amp": -0.03
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 14.4,
+     "1000": 10.8,
+     "1500": 12.9,
+     "2000": 14.4,
+     "3000": 18,
+     "4000": 25.2,
+     "6000": 32.4,
+     "8000": 32.4
+    },
+    "atten_db": 0,
+    "ruido_db": 1.7,
+    "sello_pct": 89,
+    "variabilidad_db": 2.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "normal",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 6,
+     "4000": 12,
+     "6000": 18,
+     "8000": 24
+    },
+    "atten_db": 0,
+    "ruido_db": 0,
+    "sello_pct": 88,
+    "variabilidad_db": 3.4,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-17T01:09:28+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Iván Antonio",
+   "apellido": "Torres Jiménez",
+   "rut": "9254628",
+   "fecha_nac": "19-02-1963"
+  },
+  "historia_clinica": "{{-6}} Urgencia: vértigo intenso, vómitos, hipoacusia derecha y parálisis facial derecha de inicio brusco. Se indica corticoide oral y reposo.\r\n{{-2}} Otorrinolaringología: solicita audiometría y potenciales evocados con prioridad."
+ }
+}
