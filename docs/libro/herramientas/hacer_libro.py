@@ -69,11 +69,115 @@ ORDEN = os.environ.get('LIBRO_ORDEN', 'lado')   # elegido por él el 2026-10-16
 # trainHIT, labyrinthus3d) son herramientas de apoyo, no el título.
 TITULO = 'Evaluación y rehabilitación en otorrinolaringología'
 BAJADA = 'Un libro de casos clínicos'
-# Autores: por ahora no van en el libro (decisión 2026-10-15). Los previstos,
-# para cuando se agreguen: pasarlos a AUTORES y vuelven a la portada, la
-# portada interior, los créditos, la página de autores y la contraportada.
-AUTORES_PREVISTOS = ['Baier-Quezada', 'López-Moncada', 'Uribe-Hernández', 'Vargas-Bustamante', 'Catipillán-Ulloa']
-AUTORES = []
+# Autores (él, 2026-10-17). En la portada y la contraportada, solo los
+# apellidos compuestos, todos iguales y por orden alfabético (no quiso al
+# editor destacado en la portada); el editor va primero y rotulado en la
+# portada interior y los créditos. El nombre
+# completo, en la portada interior, los créditos y la página de autores.
+AUTORES = {
+    'baier': dict(nombre='Nicolás', apellidos='Baier-Quezada', rol='Editor',
+                  areas='Electrofisiología, física acústica y salud ocupacional', orcid='0000-0003-2818-0990'),
+    'casanova': dict(nombre='Geovana', apellidos='Casanova-Torres', areas='Audífonos y procesamiento auditivo central'),
+    'catipillan': dict(nombre='Benjamín', apellidos='Catipillán-Ulloa', rol='Revisor general de los casos clínicos'),
+    'lopez': dict(nombre='Fernanda', apellidos='López-Moncada', areas='Fisiología e histología'),
+    'poza': dict(nombre='Pablo', apellidos='Poza-Nauto', areas='Evaluación y rehabilitación vestibular'),
+    'uribe': dict(nombre='Vanessa', apellidos='Uribe-Hernández', areas='Audiología y rinología'),
+    'vargas': dict(nombre='Cristina', apellidos='Vargas-Bustamante', areas='Audiología y electrofisiología'),
+}
+EDITOR = 'baier'
+REVISOR_CASOS = 'catipillan'   # firma la revisión de los casos de los capítulos clínicos
+
+
+def _autoria():
+    """Capítulo -> autores, según en qué es experto cada uno (él, 2026-10-17)."""
+    a = {'B1': ['catipillan', 'uribe'], 'B2': ['lopez'], 'B3': ['lopez'], 'B4': ['baier'],
+         'H12': ['poza', 'baier'], 'H14': ['casanova'], 'H22': ['baier']}
+    for n in range(1, 9):
+        a[f'H{n}'] = ['uribe', 'vargas']                 # audiología
+    for n in (9, 10, 11, 13):
+        a[f'H{n}'] = ['vargas', 'baier']                 # electrofisiología
+    for n in range(15, 20):
+        a[f'H{n}'] = ['poza']                            # vestibular
+    for n in (20, 21):
+        a[f'H{n}'] = ['casanova']                        # audífonos
+    for n in (23, 24, 25):
+        a[f'H{n}'] = ['uribe']                           # nasal
+    for n in (1, 2, 3, 4, 5, 7, 8, 10, 19):
+        a[str(n)] = ['uribe', 'vargas']
+    a['6'] = ['uribe', 'vargas', 'baier']                # ruido: también salud ocupacional
+    for n in (9, 11, 12, 13, 14, 15, 16, 17, 18):
+        a[str(n)] = ['vargas', 'baier']
+    a['20'] = ['poza', 'baier']
+    for n in (21, 22, 23, 24, 25, 26, 27, 31, 32):
+        a[str(n)] = ['poza']
+    for n in (28, 29, 30):
+        a[str(n)] = ['casanova']
+    for n in (33, 34):
+        a[str(n)] = ['baier']
+    for n in (35, 36):
+        a[str(n)] = ['uribe']
+    return a
+
+
+AUTORIA = _autoria()
+
+
+def nombre_completo(clave):
+    return f"{AUTORES[clave]['nombre']} {AUTORES[clave]['apellidos']}"
+
+
+def orden_autores():
+    """El editor primero; el resto por apellido."""
+    return [EDITOR] + sorted((k for k in AUTORES if k != EDITOR), key=lambda k: AUTORES[k]['apellidos'])
+
+
+def alfabetico():
+    """Todos por apellido, sin destacar al editor (portada y contraportada)."""
+    return sorted(AUTORES, key=lambda k: AUTORES[k]['apellidos'])
+
+
+def cita_vancouver(clave):
+    a = AUTORES[clave]
+    return f"{a['apellidos']} {a['nombre'][0]}"
+
+
+def firma_capitulo(cap):
+    """Autores bajo el título del capítulo, revisión de casos en los clínicos."""
+    autores = AUTORIA.get(cap)
+    if not autores:
+        return ''
+    h = f'<p class="ap-autores">{" · ".join(nombre_completo(k) for k in autores)}</p>'
+    if cap.isdigit():
+        h += f'<p class="ap-revision">Revisión de los casos: {nombre_completo(REVISOR_CASOS)}</p>'
+    return h
+
+
+def como_citar(cap, titulo):
+    autores = AUTORIA.get(cap)
+    if not autores:
+        return ''
+    anio = __import__('datetime').date.today().year
+    return (f'<p class="como-citar"><span>Cómo citar este capítulo</span>'
+            f'{", ".join(cita_vancouver(k) for k in autores)}. {titulo}. En: {cita_vancouver(EDITOR)}, editor. '
+            f'{TITULO}. {BAJADA}. 1.ª ed. {CIUDAD}: TecMedHub, Universidad Austral de Chile; {anio}.</p>')
+
+
+def capitulos_de(clave):
+    """Lista compacta de los capítulos de un autor, en el orden del libro."""
+    def orden(c):
+        return ({'B': 0, 'H': 1}.get(c[:1], 2), int(re.sub(r'\D', '', c)))
+    caps = sorted((c for c, ks in AUTORIA.items() if clave in ks), key=orden)
+    grupos, previo = [], None
+    for c in caps:
+        o = orden(c)
+        if grupos and previo and o[0] == previo[0] and o[1] == previo[1] + 1:
+            grupos[-1][1] = c
+        else:
+            grupos.append([c, c])
+        previo = o
+    return ', '.join(a if a == b else f'{a}-{b}' for a, b in grupos)
+
+
 LICENCIA = 'CC BY-NC-SA 4.0'
 EDICION = 'Primera edición'
 SELLO = ['TecMedHub', 'Universidad Austral de Chile', 'Sede Puerto Montt']
@@ -546,8 +650,10 @@ def capitulo(md_texto):
         # data-marca: el marcador del PDF lleva el número ("H2. Acumetría")
         marca = html.escape(f"{cap}. {re.sub(r'<.*?>', '', m[1]).strip()}", quote=True)
         apertura = (f'<header class="apertura" id="cap-{cap}"><div class="ap-num"><span class="ap-tipo">{tipo}</span>'
-                    f'<span class="ap-n">{cap}</span></div><h1 class="capitulo" data-marca="{marca}">{m[1]}</h1></header>')
-        cuerpo = cuerpo[:m.start()] + apertura + cuerpo[m.end():]
+                    f'<span class="ap-n">{cap}</span></div><div class="ap-tit"><h1 class="capitulo" data-marca="{marca}">'
+                    f'{m[1]}</h1>{firma_capitulo(cap)}</div></header>')
+        cuerpo = (cuerpo[:m.start()] + apertura + cuerpo[m.end():]
+                  + como_citar(cap, re.sub(r'<.*?>', '', m[1]).strip()))
     return cuerpo
 
 
@@ -612,9 +718,12 @@ body {{ margin: 0; }}
 .portada h1 {{ font: 700 38pt/1.08 Fraunces, serif; color: #F8F1F3; margin: 0 0 7mm; }}
 .portada .bajada {{ font: 15pt/1.3 'Plus Jakarta Sans'; color: #E7A7BA; margin: 0; }}
 .portada .trazos {{ position: absolute; left: 0; right: 0; top: 150mm; width: 210mm; height: 78mm; }}
-.portada .autores {{ position: absolute; left: 22mm; right: 22mm; bottom: 44mm; margin: 0; padding-top: 5mm;
-                     border-top: .8pt solid #5a2a3c; font: 600 10.5pt/1.6 'Plus Jakarta Sans'; letter-spacing: .4pt;
-                     color: #F8F1F3; }}
+.portada .autores {{ position: absolute; left: 22mm; right: 22mm; bottom: 38mm; margin: 0; padding-top: 5mm;
+                     border-top: .8pt solid #5a2a3c; color: #F8F1F3; }}
+.pt-ed {{ font: 700 17pt/1.2 Fraunces, serif; margin: 0 0 3mm; }}
+.pt-ed span, .in-ed span {{ display: block; font: 700 7pt 'Plus Jakarta Sans'; letter-spacing: 2.5pt; text-transform: uppercase;
+                           color: #E7A7BA; margin-bottom: 1.2mm; }}
+.pt-aut {{ font: 600 10.5pt/1.7 'Plus Jakarta Sans'; letter-spacing: .5pt; color: #F1DCE3; margin: 0; }}
 .pt-logos, .cp-logos {{ position: absolute; left: 22mm; right: 22mm; bottom: 16mm; display: flex; align-items: center; gap: 10mm; }}
 .pt-logos .logo, .cp-logos .logo {{ height: 13mm; }}
 .pt-logos .logo.tm, .cp-logos .logo.tm {{ height: 17mm; }}
@@ -631,15 +740,30 @@ body {{ margin: 0; }}
 .interior {{ text-align: center; padding-top: 28mm; height: 255mm; box-sizing: border-box; position: relative; }}
 .in-titulo {{ font: 700 28pt/1.12 Fraunces, serif; color: #24101a; margin: 0 10mm 4mm; }}
 .in-bajada {{ font: 13pt 'Plus Jakarta Sans'; color: #8e2a4a; margin: 0 0 22mm; }}
-.in-autores {{ font: 600 12pt/1.9 'Plus Jakarta Sans'; color: #2a1a20; margin: 0 0 14mm; }}
+.in-ed {{ font: 700 14pt Fraunces, serif; color: #24101a; margin: 0 0 7mm; }}
+.in-ed span {{ color: #8e2a4a; margin: 1.5mm 0 0; order: 2; }}
+.in-autores {{ font: 500 11pt/1.85 'Plus Jakarta Sans'; color: #2a1a20; margin: 0 0 12mm; }}
 .in-edicion {{ font: 600 10pt 'Plus Jakarta Sans'; letter-spacing: 1.5pt; text-transform: uppercase; color: #8e2a4a; }}
 .in-sello {{ position: absolute; left: 0; right: 0; bottom: 6mm; }}
 .in-sello .logo {{ height: 15mm; margin: 0 6mm; vertical-align: middle; }}
 .in-sello .logo.tm {{ height: 22mm; }}
 .in-sello p {{ font: 9pt/1.5 'Plus Jakarta Sans'; color: #6f5a63; margin: 4mm 0 0; }}
 h1.prelim {{ font: 700 24pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; padding-bottom: 3mm; border-bottom: 2pt solid #8e2a4a; }}
-.autor {{ margin: 0 0 4mm; }}
-.autor-n {{ font: 700 12pt Fraunces, serif; color: #24101a; margin: 0 0 1mm; }}
+.autores-lista {{ columns: 2; column-gap: 9mm; }}
+.autor {{ margin: 0 0 6mm; break-inside: avoid; padding-left: 3mm; border-left: 1.5pt solid #E7A7BA; }}
+.autor-n {{ font: 400 13pt Fraunces, serif; color: #24101a; margin: 0 0 1mm; }}
+.autor-n span {{ font-weight: 700; }}
+.autor-d {{ font: 600 8.6pt/1.4 'Plus Jakarta Sans'; color: #8e2a4a; margin: 0; }}
+.autor-c {{ font: 8.2pt/1.4 'Plus Jakarta Sans'; color: #6f5a63; margin: .8mm 0 0; }}
+.autor .pendiente {{ margin-top: 1.5mm; }}
+.ap-tit {{ flex: 1; }}
+.ap-autores {{ font: 600 9.6pt/1.4 'Plus Jakarta Sans'; color: #8e2a4a; margin: 2.5mm 0 0; letter-spacing: .2pt; }}
+.ap-revision {{ font: 7.8pt/1.3 'Plus Jakarta Sans'; color: #8f7a83; margin: .8mm 0 0; }}
+.como-citar {{ break-inside: avoid; margin: 9mm 0 0; padding: 2.5mm 3.5mm; background: #f6f1f3; border-left: 2pt solid #8e2a4a;
+               font: 7.8pt/1.45 'Plus Jakarta Sans'; color: #4a3a40; }}
+.como-citar span {{ display: block; font: 700 6.8pt 'Plus Jakarta Sans'; letter-spacing: 1.2pt; text-transform: uppercase;
+                    color: #8e2a4a; margin-bottom: .8mm; }}
+.toc-aut {{ font: italic 7.8pt/1.2 'Plus Jakarta Sans'; color: #8f7a83; margin: -1mm 0 1.6mm 11mm; }}
 .contraportada {{ page: portada; break-before: left; position: relative; height: 297mm; color: #F8F1F3; }}
 .cp-titulo {{ position: absolute; top: 40mm; left: 25mm; right: 25mm; margin: 0; font: 700 22pt/1.15 Fraunces, serif; }}
 .cp-texto {{ position: absolute; top: 80mm; left: 25mm; right: 25mm; margin: 0; font: 11pt/1.6 'Plus Jakarta Sans'; color: #E9D6DD; }}
@@ -648,7 +772,7 @@ h1.prelim {{ font: 700 24pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; pa
 .portadilla {{ padding-top: 80mm; text-align: center; }}
 .pd-titulo {{ font: 700 24pt/1.15 Fraunces, serif; color: #24101a; margin: 0 20mm 4mm; }}
 .pd-bajada {{ font: 12pt 'Plus Jakarta Sans'; color: #8e2a4a; }}
-.creditos {{ padding-top: 150mm; font-size: 8.4pt; line-height: 1.5; color: #4a3a40; }}
+.creditos {{ padding-top: 105mm; font-size: 8.4pt; line-height: 1.5; color: #4a3a40; }}
 .creditos p {{ margin: 0 0 3mm; }}
 
 .titulo-indice {{ font: 700 26pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; padding-bottom: 3mm; border-bottom: 2pt solid #8e2a4a; }}
@@ -859,17 +983,22 @@ def paginas_iniciales(capitulos):
     portada = (f'<section class="portada"><div class="pt-banda-sup">TecMedHub · Universidad Austral de Chile</div>'
                f'<div class="pt-centro"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p></div>'
                f'{trazos_portada()}'
-               + (f'<p class="autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
+               + f'<div class="autores"><p class="pt-aut">{" · ".join(AUTORES[k]["apellidos"] for k in alfabetico())}</p></div>' +
                f'<div class="pt-logos">{logo("uach-pm-blanco.png")}{logo("tecmedhub-blanco.png", "tm")}</div></section>')
     portadilla = f'<section class="portadilla"><p class="pd-titulo">{TITULO}</p></section>'
     interior = (f'<section class="interior"><p class="in-titulo">{TITULO}</p><p class="in-bajada">{BAJADA}</p>'
-                + (f'<p class="in-autores">{"<br>".join(AUTORES)}</p>' if AUTORES else '<p class="in-autores"></p>') +
+                + f'<p class="in-ed">{nombre_completo(EDITOR)}<span>editor</span></p>'
+                f'<p class="in-autores">{"<br>".join(nombre_completo(k) for k in orden_autores()[1:])}</p>' +
                 f'<p class="in-edicion">{EDICION}</p>'
                 f'<div class="in-sello">{logo("uach-pm.png")}{logo("tecmedhub.png", "tm")}'
                 f'<p>{" · ".join(SELLO)}<br>{CIUDAD}, {anio}</p></div></section>')
     creditos = (f'<section class="creditos"><p><strong>{TITULO}</strong><br>{BAJADA}</p>'
                 f'<p>{EDICION}, {anio}</p>'
-                + (f'<p>Autores: {", ".join(AUTORES)}</p>' if AUTORES else '') +
+                + f'<p>Editor: {nombre_completo(EDITOR)}.<br>Autoras y autores: '
+                f'{", ".join(nombre_completo(k) for k in orden_autores())}.<br>'
+                f'Revisión general de los casos clínicos: {nombre_completo(REVISOR_CASOS)}.</p>'
+                f'<p>Cómo citar este libro: {cita_vancouver(EDITOR)}, editor. {TITULO}. {BAJADA}. 1.ª ed. '
+                f'{CIUDAD}: TecMedHub, Universidad Austral de Chile; {anio}.</p>' +
                 f'<p>Edita: {", ".join(SELLO)}. {CIUDAD}, Chile.</p>'
                 f'<p>ISBN: en trámite</p>'
                 f'<p>Esta obra se distribuye con licencia <strong>Creative Commons Atribución-NoComercial-'
@@ -883,10 +1012,18 @@ def paginas_iniciales(capitulos):
                 f'con la bibliografía citada en cada capítulo, pero quien atiende a un paciente debe contrastarlos '
                 f'con la normativa vigente y el protocolo de su lugar de trabajo.</p>'
                 f'<p>Diseño y diagramación: TecMedHub, con herramientas propias.</p></section>')
-    autores = '' if not AUTORES else ('<section class="preliminar"><h1 class="prelim">Autores</h1>'
-               + ''.join(f'<div class="autor"><p class="autor-n">{a}</p>'
-                         f'<div class="pendiente"><span>Falta texto</span> nombre completo, título y afiliación</div></div>'
-                         for a in AUTORES) + '</section>')
+    def ficha_autor(k):
+        a = AUTORES[k]
+        datos = [x for x in (a.get('rol'), a.get('areas')) if x]
+        caps = capitulos_de(k)
+        return (f'<div class="autor"><p class="autor-n">{a["nombre"]} <span>{a["apellidos"]}</span></p>'
+                + ''.join(f'<p class="autor-d">{x}</p>' for x in datos)
+                + (f'<p class="autor-c">Capítulos: {caps}</p>' if caps else '')
+                + (f'<p class="autor-c">Revisó los casos de los capítulos 1 a 36</p>' if k == REVISOR_CASOS else '')
+                + (f'<p class="autor-c">ORCID {a["orcid"]}</p>' if a.get('orcid') else '')
+                + '<div class="pendiente"><span>Falta texto</span> título profesional y afiliación</div></div>')
+    autores = ('<section class="preliminar"><h1 class="prelim">Autoras y autores</h1><div class="autores-lista">'
+               + ''.join(ficha_autor(k) for k in orden_autores()) + '</div></section>')
     prelim = {f.stem: capitulo(f.read_text(encoding='utf-8')) for f in sorted(PRELIMINARES.glob('*.md'))}
     antes = ''.join(v for k, v in prelim.items() if k[:2] in ('01', '02'))
     despues = ''.join(v for k, v in prelim.items() if k[:2] not in ('01', '02'))
@@ -896,6 +1033,8 @@ def paginas_iniciales(capitulos):
             filas.append(f'<p class="toc-parte">{parte[0]}{" · " + parte[1] if parte[1] else ""}</p>')
             parte_actual = parte
         filas.append(f'<a class="toc" href="#cap-{cap}" data-pag="@@PAG-{cap}@@"><span class="toc-n">{cap}</span>{titulo}</a>')
+        if AUTORIA.get(cap):
+            filas.append(f'<p class="toc-aut">{", ".join(AUTORES[k]["apellidos"] for k in AUTORIA[cap])}</p>')
     indice = f'<section class="indice"><h1 class="titulo-indice">Índice</h1>{"".join(filas)}</section>'
     return portada + portadilla + interior + creditos + autores + antes + indice + despues
 
@@ -907,7 +1046,7 @@ def contraportada():
             f'anamnesis hasta el diagnóstico, con los exámenes relatados sobre sus gráficos. Los simuladores de '
             f'apoyo generan los pacientes y sus resultados, así que muchos casos se pueden atender en el '
             f'simulador.</p>'
-            + (f'<p class="cp-autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
+            + f'<p class="cp-autores">{" · ".join(AUTORES[k]["apellidos"] for k in alfabetico())}</p>' +
             f'<div class="cp-logos">{logo("uach-pm-blanco.png")}{logo("tecmedhub-blanco.png", "tm")}</div>'
             f'<p class="cp-licencia">{LICENCIA}</p></section>')
 

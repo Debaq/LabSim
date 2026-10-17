@@ -9,8 +9,19 @@ Para retomar en una conversación nueva: leer este archivo, `LEEME.md`
 - **Título:** *Evaluación y rehabilitación en otorrinolaringología. Un libro
   de casos clínicos.* Un solo libro que crece por secciones (audición →
   equilibrio → nariz → rehabilitación). Gratis, CC BY-NC-SA 4.0. Primera
-  edición, TecMedHub · UACh Sede Puerto Montt. Sin autores por ahora
-  (previstos en `herramientas/hacer_libro.py`, `AUTORES_PREVISTOS`).
+  edición, TecMedHub · UACh Sede Puerto Montt. Editor: Nicolás Baier-Quezada. Siete autores
+  (2026-10-17) con sus áreas, en `herramientas/hacer_libro.py` (`AUTORES`, y
+  `_autoria()` dice quién firma cada capítulo): Uribe-Hernández audio y nasal,
+  Vargas-Bustamante audio y electro, Baier-Quezada electro, física y salud
+  ocupacional, López-Moncada fisiología e histología (B2, B3, con nota de
+  licencias de imágenes), Catipillán-Ulloa revisor general de los casos
+  (firma la revisión en los caps. 1-36) y, con Uribe-Hernández, B1 anatomía;
+  Casanova-Torres audífonos y procesamiento central, Poza-Nauto vestibular y
+  rehabilitación vestibular. Portada y contraportada con apellidos; portada
+  interior, créditos y página de autores con nombre completo, áreas y
+  capítulos; firma bajo el título de cada capítulo, autores en el índice y
+  "Cómo citar este capítulo" al final. Falta: título profesional y afiliación
+  de cada uno (sale como "Falta texto" en la página de autores).
 - **Una sola edición:** la guía del docente (`:::docente`) va dentro de cada
   caso.
 - **Simuladores de apoyo:** LabSim (audición, VEMP); trainHIT y labyrinthus3d
