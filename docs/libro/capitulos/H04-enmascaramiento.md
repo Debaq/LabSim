@@ -28,7 +28,8 @@ Un oído anacúsico sin enmascarar aparece como una pérdida leve a moderada; un
 
 Un tono presentado por un fono pone a vibrar la caja del fono y, con ella, el cráneo. Esa vibración llega a la cóclea del otro lado **por vía ósea**. La diferencia entre el nivel presentado y el que llega a la cóclea contraria es la **atenuación interaural** (AI), también llamada pérdida de transmisión transcraneal (BSA, 2018).
 
-![{IA} Por qué hay que enmascarar. El tono de un fono supraaural hace vibrar el cráneo y llega a la otra cóclea por vía ósea, atenuado entre 40 y 80 dB según la persona: es la atenuación interaural. Con el vibrador óseo la atenuación es casi nula, y las dos cócleas reciben lo mismo.](ilustraciones/h04-cruce-craneo.png)
+:::imagen ilustraciones/h04-cruce-craneo.svg ancho=100% Por qué hay que enmascarar. A: el tono de un fono supraaural hace vibrar el cráneo y llega a la otra cóclea por vía ósea, atenuado entre 40 y 80 dB según la persona: es la atenuación interaural. B: con el vibrador óseo la atenuación es casi nula, y las dos cócleas reciben lo mismo. C: el fono de inserción casi no hace vibrar el hueso y atenúa 55 dB o más. Esquema propio.
+:::
 
 De esta idea salen dos consecuencias que ordenan todo el capítulo:
 
@@ -100,7 +101,8 @@ Aun con los oídos separados, un ruido fuerte en un oído sube unos pocos dB el 
 
 Cuando tapas un oído con oído medio sano, su umbral **óseo mejora en los graves**. El conducto abierto deja escapar la energía de baja frecuencia que el hueso irradia hacia el conducto; tapado, esa energía queda atrapada y sube la presión sonora frente al tímpano (Fagelson y Martin, 1998). Es el mismo fenómeno de la prueba de Bing (capítulo H2).
 
-![{IA} El efecto de oclusión. Con el conducto abierto, la energía de baja frecuencia que el hueso irradia al conducto se escapa por la entrada. Tapado por un fono, queda atrapada y sube la presión frente al tímpano: los graves se oyen mejor por vía ósea. Desde 2 kHz el efecto desaparece.](ilustraciones/h04-efecto-oclusion.png)
+:::imagen ilustraciones/h04-efecto-oclusion.svg ancho=100% El efecto de oclusión. A: con el conducto abierto, la energía de baja frecuencia que el hueso irradia al conducto se escapa por la entrada. B: tapado por la copa de un fono, queda atrapada y sube la presión frente al tímpano: los graves se oyen mejor por vía ósea. C: cuánto mejora la ósea con fono supraaural, según la tabla de este capítulo; desde 2 kHz el efecto desaparece. Esquema propio.
+:::
 
 Importa al enmascarar la ósea: el fono que lleva el ruido **tapa al oído no evaluado**, ese oído oye mejor el tono óseo que cruza, y hace falta más ruido para taparlo. Se suma al mínimo solo cuando:
 
