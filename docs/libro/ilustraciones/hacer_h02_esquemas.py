@@ -4,9 +4,9 @@
     h02-weber-conductivo.svg  por qué el Weber se va al oído con pérdida conductiva:
                               A, dos oídos sanos; B, el conducto derecho tapado
 
-El oído tapado oye mejor el diapasón por dos razones: no le entra el ruido ambiente, que al oído
-abierto lo enmascara un poco, y el efecto de oclusión (la pared del conducto vibra con el cráneo y su
-sonido, encerrado, empuja el tímpano).
+El oído tapado oye mejor el diapasón sobre todo por el efecto de oclusión: la pared del conducto vibra
+con el cráneo y su sonido, encerrado, empuja el tímpano. El ruido ambiente, que entra solo por el oído
+abierto y lo enmascara algo, aporta poco: en la cabina el Weber se lateraliza igual.
 
 Corte frontal de la cabeza, mirada de frente al paciente: el OD queda a la izquierda del dibujo.
 Esquema, no a escala. La explicación (oclusión y ruido ambiente) es la clásica que da el capítulo, marcada allí como `verificar`.
@@ -176,9 +176,9 @@ def weber():
             c.t(cx - 66, cy - 128, 'vibración', 8, COCLEAR, 'end', 700)
             c.t(cx - 66, cy - 118, 'por el hueso', 8, COCLEAR, 'end', 700)
             c.l(cx - 64, cy - 121, cx - 12, cy - 104, TENUE, 0.8)
-        # cada conducto: el ruido ambiente entra por el abierto y lo enmascara un poco; el tapado
-        # no deja entrar ruido y suma el efecto de oclusión (la pared vibra y su sonido, encerrado,
-        # empuja el tímpano)
+        # cada conducto: el tapado suma el efecto de oclusión (la pared vibra y su sonido, encerrado,
+        # empuja el tímpano), que es lo principal; el ruido ambiente, que entra solo por el abierto,
+        # aporta poco
         for lado in ('od', 'oi'):
             q = p[lado]
             sg, ye = q['sg'], q['y']
@@ -194,9 +194,9 @@ def weber():
                 c.out.append(f'<circle cx="{q["coclea"][0]:.1f}" cy="{q["coclea"][1]:.1f}" r="15" fill="none" '
                              f'stroke="{OD}" stroke-width="1.4" stroke-dasharray="2 2"/>')
                 xt = cx - 64
-                c.t(xt, ye + 44, 'tapón: no entra ruido', 8, '#7b5524', 'start', 700)
-                c.t(xt, ye + 54, 'y el sonido de la pared', 8, TINTA_2, 'start', 600)
-                c.t(xt, ye + 64, 'que vibra empuja el tímpano', 8, TINTA_2, 'start', 600)
+                c.t(xt, ye + 44, 'tapón: la pared vibra', 8, '#7b5524', 'start', 700)
+                c.t(xt, ye + 54, 'y su sonido, encerrado,', 8, TINTA_2, 'start', 600)
+                c.t(xt, ye + 64, 'empuja el tímpano', 8, TINTA_2, 'start', 600)
                 c.t(xt, ye + 74, '(efecto de oclusión)', 8, TINTA_2, 'start', 600)
                 c.l(xt + 4, ye + 34, q['entrada'] - sg * 12, ye + 7, TENUE, 0.8)
             else:
@@ -207,8 +207,8 @@ def weber():
                 if lado == 'oi':
                     xt = q['entrada'] + sg * 46
                     c.t(xt, ye - 52, 'ruido ambiente', 8, TENUE, 'middle', 600)
-                    c.t(xt, ye + 26, 'entra y enmascara', 8, TINTA_2, 'middle', 600)
-                    c.t(xt, ye + 36, 'un poco al diapasón', 8, TINTA_2, 'middle', 600)
+                    c.t(xt, ye + 26, 'si lo hay, enmascara', 8, TENUE, 'middle', 600)
+                    c.t(xt, ye + 36, 'algo al oído abierto', 8, TENUE, 'middle', 600)
         # rótulos de estructuras, solo en A
         if not tapado:
             q = p['od']
