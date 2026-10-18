@@ -4,9 +4,12 @@
     h02-weber-conductivo.svg  por qué el Weber se va al oído con pérdida conductiva:
                               A, dos oídos sanos; B, el conducto derecho tapado
 
+El oído tapado oye mejor el diapasón por dos razones: no le entra el ruido ambiente, que al oído
+abierto lo enmascara un poco, y el efecto de oclusión (la pared del conducto vibra con el cráneo y su
+sonido, encerrado, empuja el tímpano).
+
 Corte frontal de la cabeza, mirada de frente al paciente: el OD queda a la izquierda del dibujo.
-Esquema, no a escala. La explicación (la energía ósea no escapa por el conducto tapado y el ruido
-ambiente no lo enmascara) es la clásica que da el capítulo, marcada allí como `verificar`.
+Esquema, no a escala. La explicación (oclusión y ruido ambiente) es la clásica que da el capítulo, marcada allí como `verificar`.
 
 `cabeza_frontal` la usa también hacer_h04_esquemas.py."""
 import math
@@ -54,6 +57,14 @@ def onda(c, x0, y0, x1, y1, color, grosor=1.3, id_=None, amp=2.6, ciclos=3):
         pts.append((x0 + ux * largo * u - uy * a, y0 + uy * largo * u + ux * a))
     d = 'M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in pts)
     camino(c, d, 'none', color, grosor, f' marker-end="url(#{id_})"' if id_ else '')
+
+
+def pared_vibrando(c, xa, xb, y):
+    """Las dos paredes del conducto, entre xa y xb, dibujadas vibrando."""
+    x0, x1 = min(xa, xb), max(xa, xb)
+    for yp, sg in ((y - 5, -1), (y + 5, 1)):
+        pts = [(x0 + (x1 - x0) * i / 40, yp + sg * 1.3 * math.sin(2 * math.pi * 5 * i / 40)) for i in range(41)]
+        c.poli(pts, COCLEAR, 1.1)
 
 
 def espiral(c, x, y, r, color, relleno):
@@ -165,38 +176,39 @@ def weber():
             c.t(cx - 66, cy - 128, 'vibración', 8, COCLEAR, 'end', 700)
             c.t(cx - 66, cy - 118, 'por el hueso', 8, COCLEAR, 'end', 700)
             c.l(cx - 64, cy - 121, cx - 12, cy - 104, TENUE, 0.8)
-        # cada conducto: escape de la energía hacia afuera y entrada del ruido ambiente
+        # cada conducto: el ruido ambiente entra por el abierto y lo enmascara un poco; el tapado
+        # no deja entrar ruido y suma el efecto de oclusión (la pared vibra y su sonido, encerrado,
+        # empuja el tímpano)
         for lado in ('od', 'oi'):
             q = p[lado]
             sg, ye = q['sg'], q['y']
             if tapado and lado == 'od':
                 rect(c, min(q['entrada'], q['entrada'] - sg * 18), ye - 5, 18, 10, TAPON, '#7b5524', 0.8, 3)
-                # el ruido choca con el tapón y la energía queda adentro
+                pared_vibrando(c, q['entrada'] - sg * 18, q['timpano'], ye)
+                flecha(c, f'M{q["entrada"] - sg * 21:.1f},{ye:.1f} L{q["timpano"] + sg * 3:.1f},{ye:.1f}',
+                       COCLEAR, 2, 'p-c')
                 flecha(c, f'M{q["entrada"] + sg * 46:.1f},{ye - 46:.1f} L{q["entrada"] + sg * 6:.1f},{ye - 9:.1f}',
                        TENUE, 1.3, 'p-t', '3 2')
                 c.l(q['entrada'] + sg * 4, ye - 14, q['entrada'] + sg * 12, ye - 6, OD, 1.6)
                 c.l(q['entrada'] + sg * 4, ye - 6, q['entrada'] + sg * 12, ye - 14, OD, 1.6)
-                camino(c, f'M{q["timpano"] + sg * 2:.1f},{ye:.1f} L{q["entrada"] - sg * 22:.1f},{ye:.1f}',
-                       'none', COCLEAR, 1.3)
-                flecha(c, f'M{q["entrada"] - sg * 22:.1f},{ye:.1f} Q{q["entrada"] - sg * 14:.1f},{ye + 3:.1f} '
-                          f'{q["entrada"] - sg * 28:.1f},{ye + 3:.1f}', COCLEAR, 1.3, 'p-c')
                 c.out.append(f'<circle cx="{q["coclea"][0]:.1f}" cy="{q["coclea"][1]:.1f}" r="15" fill="none" '
                              f'stroke="{OD}" stroke-width="1.4" stroke-dasharray="2 2"/>')
-                xt = q['entrada'] + sg * 22
-                c.t(xt, ye + 50, 'tapón:', 8, '#7b5524', 'end', 700)
-                c.t(xt, ye + 60, 'la energía no escapa', 8, TINTA_2, 'end', 600)
-                c.t(xt, ye + 70, 'y no entra ruido', 8, TINTA_2, 'end', 600)
-                c.l(xt + 2, ye + 42, q['entrada'] - sg * 8, ye + 6, TENUE, 0.8)
+                xt = cx - 64
+                c.t(xt, ye + 44, 'tapón: no entra ruido', 8, '#7b5524', 'start', 700)
+                c.t(xt, ye + 54, 'y el sonido de la pared', 8, TINTA_2, 'start', 600)
+                c.t(xt, ye + 64, 'que vibra empuja el tímpano', 8, TINTA_2, 'start', 600)
+                c.t(xt, ye + 74, '(efecto de oclusión)', 8, TINTA_2, 'start', 600)
+                c.l(xt + 4, ye + 34, q['entrada'] - sg * 12, ye + 7, TENUE, 0.8)
             else:
-                onda(c, q['timpano'] + sg * 3, ye, q['entrada'] + sg * 26, ye, COCLEAR, 1.3, 'p-c', 2.2, 4)
                 flecha(c, f'M{q["entrada"] + sg * 46:.1f},{ye - 46:.1f} L{q["entrada"] + sg * 4:.1f},{ye - 7:.1f}',
                        TENUE, 1.3, 'p-t', '3 2')
+                camino(c, f'M{q["entrada"]:.1f},{ye:.1f} L{q["timpano"] + sg * 4:.1f},{ye:.1f}', 'none', TENUE, 1.3,
+                       ' marker-end="url(#p-t)" stroke-dasharray="3 2"')
                 if lado == 'oi':
-                    xt = q['entrada'] + sg * 30
-                    c.t(q['entrada'] + sg * 46, ye - 52, 'ruido ambiente', 8, TENUE, 'middle', 600)
-                    c.t(xt - 2, ye + 18, 'la energía', 8, COCLEAR, 'start', 600)
-                    c.t(xt - 2, ye + 28, 'escapa por', 8, COCLEAR, 'start', 600)
-                    c.t(xt - 2, ye + 38, 'el conducto', 8, COCLEAR, 'start', 600)
+                    xt = q['entrada'] + sg * 46
+                    c.t(xt, ye - 52, 'ruido ambiente', 8, TENUE, 'middle', 600)
+                    c.t(xt, ye + 26, 'entra y enmascara', 8, TINTA_2, 'middle', 600)
+                    c.t(xt, ye + 36, 'un poco al diapasón', 8, TINTA_2, 'middle', 600)
         # rótulos de estructuras, solo en A
         if not tapado:
             q = p['od']
