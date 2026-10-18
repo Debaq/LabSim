@@ -164,7 +164,7 @@ En todas se observa con los **ojos abiertos y la mirada al frente**, y se pregun
 La guía de la AAO-HNS describe el mismo procedimiento: el paciente pasa de sentado a acostado con la cabeza girada 45° y el cuello extendido unos 20°, con el oído que se examina abajo; si el primer lado es negativo se repite del otro (Bhattacharyya y cols., 2017).
 
 :::comentario Lo que dicen las normas
-- **Cuánto cuelga la cabeza.** Aquí la cabeza queda unos 30° bajo el nivel de la camilla; la guía de la AAO-HNS habla de unos 20° (Bhattacharyya y cols., 2017). Lo importante es que el cuello quede **extendido** y la cabeza **apoyada en tus manos**: más de eso no cambia la lógica y sí el riesgo para el cuello.
+- **Cuánto cuelga la cabeza.** Aquí la cabeza queda unos 30° bajo el nivel de la camilla; la guía de la AAO-HNS habla de unos 20° (Bhattacharyya y cols., 2017). Basta con que el cuello quede **extendido** y la cabeza **apoyada en tus manos**: colgarla más no cambia la lógica y sí aumenta el riesgo para el cuello.
 - **Cuánto se observa.** Un minuto en la postura cubre la duración típica de una canalitiasis, menos de 1 minuto, y deja ver una cupulolitiasis, que dura más (von Brevern y cols., 2015). Y 30 segundos al sentarse alcanzan para ver la inversión.
 - **Repetir para ver la fatiga.** No se recomienda: el paciente vuelve a tener vértigo y puede interferir con la maniobra de reposición inmediata (Bhattacharyya y cols., 2017).
 - **Un Dix-Hallpike negativo.** No descarta un VPPB: la guía cita una sensibilidad de 82% y una especificidad de 71% entre especialistas, y un valor predictivo negativo de 52% en atención primaria, y sugiere repetirlo en otra visita antes de dar el resultado por negativo (Bhattacharyya y cols., 2017).

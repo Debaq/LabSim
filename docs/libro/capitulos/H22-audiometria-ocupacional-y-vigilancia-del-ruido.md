@@ -186,7 +186,7 @@ Es la técnica de H3: se parte por el oído que el trabajador siente mejor, se p
 :::comentario Lo que dicen las normas
 La guía chilena vigente (versión 3.0, 2026) fija el **método descendente-ascendente modificado de Carhart y Jerger**: se parte de 1 kHz a **30 dB HL o más**, se baja de a 10 dB mientras responde, se sube de a 5 cuando no, y el umbral es el nivel más bajo con **2 respuestas de 3**; el orden es 1.000, 2.000, 3.000, 4.000, 6.000, 8.000, 500 y 250 Hz, y repetir 1 kHz se recomienda **solo ante la duda** (ISP, 2026). La versión anterior (2018) pedía 3 respuestas de 5 al subir de 5 en 5, y esa regla ya no rige. La familiarización sigue siendo la de la ISO 8253-1:2010: 1 kHz a un nivel claro (40 dB para oídos normales), se baja de 20 en 20 hasta que no responda, se sube de 10 en 10 hasta que responda y se repite al mismo nivel.
 
-La técnica de H3 coincide con lo que fija la guía vigente en lo esencial (oído mejor primero, 10 abajo y 5 arriba, 2 de 3). Difiere en dos detalles: H3 parte de 40 dB y repite 1 kHz siempre; la guía parte de 30 dB y repite 1 kHz solo ante la duda. Son variantes del mismo método, y lo importante es que **la base y los controles usen la misma**.
+La técnica de H3 coincide con lo que fija la guía vigente en lo esencial (oído mejor primero, 10 abajo y 5 arriba, 2 de 3). Difiere en dos detalles: H3 parte de 40 dB y repite 1 kHz siempre; la guía parte de 30 dB y repite 1 kHz solo ante la duda. Son variantes del mismo método; **la base y los controles tienen que usar la misma**.
 :::
 
 ### 5. Registrar, graficar y comparar en el momento

@@ -79,7 +79,7 @@ Por eso las ondas del cVEMP se escriben con mayúscula inicial en las figuras de
 
 ### Por qué la amplitud depende del músculo
 
-Aquí está la diferencia que más cuesta entender cuando se viene del ABR. En el ABR, la respuesta no depende de lo que haga el paciente: dormido, sedado o despierto, da lo mismo. En el VEMP, la respuesta es **una modulación de una contracción que ya existe**.
+En el ABR, la respuesta no depende de lo que haga el paciente: dormido, sedado o despierto, da lo mismo. En el VEMP, la respuesta es **una modulación de una contracción que ya existe**.
 
 Piensa en el cVEMP. Si el ECM está relajado, no hay actividad que interrumpir, y no hay respuesta que ver. Si está contraído, el estímulo detiene unas motoneuronas que estaban disparando, y se ve una pausa. Y mientras más actividad hay, más grande es la pausa: la amplitud del cVEMP crece **casi en línea recta** con la fuerza de la contracción (Colebatch y cols., 1994; Lim y cols., 1995; Rosengren y cols., 2019).
 
