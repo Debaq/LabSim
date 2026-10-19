@@ -65,6 +65,59 @@ Un método **prescriptivo** parte del audiograma y calcula una ganancia objetivo
 
 Dan objetivos distintos porque persiguen cosas distintas, y por eso un mismo audiograma puede dar dos prescripciones. Este libro no entrega valores ni tablas: los números salen de las reglas completas y del programa del fabricante, no de un libro de texto.
 
+### El software de adaptación en la práctica
+
+El programa del fabricante contiene uno o más métodos prescriptivos y los aplica al audífono que está conectado. El recorrido es el mismo con cualquier marca:
+
+1. **Ingresar los datos del paciente.** El método calcula con lo que se le entrega, y un dato mal puesto da un objetivo equivocado.
+2. **Leer los objetivos** por frecuencia y por nivel de entrada.
+3. **Cargar la primera adaptación** y compararla con esos objetivos.
+4. **Medir en el oído real y acercar el audífono al objetivo** (→ H22).
+5. **Afinar según lo que cuenta el paciente.**
+6. **Acompañar la aclimatación.**
+
+**Los datos de entrada.** NAL-NL2 parte del audiograma y de un perfil del usuario: edad, sexo, experiencia con amplificación e idioma (Keidser y cols., 2011). Cada dato mueve el objetivo por una razón que viene de datos empíricos:
+
+Tabla: Datos que pide el método y qué cambia en el objetivo
+
+| Dato | Qué hace el método con él |
+|---|---|
+| **Umbrales** | Son la base del cálculo. Con fonos de inserción, el programa convierte los umbrales a nivel de presión sonora dentro del conducto con una medición del RECD o con un valor promedio por edad (AAA, 2013). |
+| **Edad** | En niños prescribe más ganancia para los niveles de entrada bajos que en adultos, porque los niños prefirieron más ganancia (Keidser y cols., 2011). DSL v5 se revisó para considerar las diferencias entre adultos y niños (Scollie y cols., 2005). |
+| **Sexo** | En los datos de NAL-NL2, las usuarias prefirieron en promedio 2 dB menos de ganancia que los usuarios, y por eso el método prescribe ganancia distinta según el sexo (Keidser y cols., 2011). |
+| **Experiencia** | Con pérdida leve, los usuarios nuevos y los experimentados prefieren la misma ganancia; con pérdida moderada, los nuevos prefieren menos. NAL-NL2 recomienda una adaptación gradual de la ganancia en usuarios nuevos con pérdida mayor que leve (Keidser y cols., 2011). |
+| **Idioma** | Las frecuencias graves pesan más en la comprensión de una lengua tonal, y NAL-NL2 tiene dos versiones: la de lengua tonal prescribe algo más de ganancia en graves (Keidser y cols., 2011). El español no es tonal. |
+| **Uno o dos audífonos** | El programa lo pide para ajustar la prescripción a la escucha con un oído o con los dos. <!-- verificar: efecto de la adaptación bilateral/unilateral sobre el objetivo en NAL-NL2 y DSL v5; Keidser 2011 (texto cotejado) no lo detalla --> |
+| **Nivel de molestia (LDL)** | Fija el techo de la salida del audífono (ver abajo). |
+
+**Los objetivos por nivel de entrada.** El resultado es una curva de ganancia (o de salida) por frecuencia para cada nivel de habla que entra al audífono. Por ejemplo, NAL-NL2 muestra objetivos para entradas de 50, 65 y 80 dB SPL (Keidser y cols., 2011), que equivalen a habla suave, media y fuerte. La ganancia es mayor para la entrada de 50 dB SPL que para la de 80 dB SPL, y esa diferencia es la compresión que prescribe el método (→ *La tecnología del audífono*).
+
+**La salida máxima (MPO).** Es el nivel más alto que el audífono entrega aunque entre un sonido muy fuerte. Se fija con el nivel de molestia del paciente: si la salida pasa ese nivel, el audífono molesta. DSL v5 tiene entre sus metas explícitas evitar la molestia por volumen (Scollie y cols., 2005). Por eso el LDL medido en la logoaudiometría (→ H5) es un dato de ajuste y no un trámite. <!-- verificar: que el programa acepte el LDL medido en lugar del predicho y cómo NAL-NL2 deriva el MPO; el resumen de Keidser 2011 no lo detalla. Cotejar con los manuales de ambos métodos -->
+
+**La primera adaptación frente al objetivo.** El programa carga una primera adaptación (*first fit*) calculada con la fórmula del fabricante y con datos promedio. No es lo mismo que el método validado, y suele quedar por debajo del objetivo. En un estudio con cuatro tipos de audífonos digitales programados con NAL-NL1, el 64 % de los 42 oídos quedó a más de 10 dB del objetivo en al menos una frecuencia; ajustando la respuesta con la medición en el oído, el 83 % entró en el margen de ±10 dB (Aazh y Moore, 2007). Los estudios previos que cita Valente y cols. (2018) encontraron menos ganancia y salida en las frecuencias altas con la primera adaptación que con el ajuste a objetivo, que son las que importan para el habla. Por qué ocurre no lo fija una fuente que se haya podido cotejar: puede deberse a que el fabricante calcula con una acústica de oído promedio, y no la del paciente (Bagatto y cols., 2005), o a que parte con menos ganancia a propósito para un usuario nuevo. <!-- verificar: causa de que la primera adaptación quede bajo el objetivo; no se encontró un estudio que la cuantifique -->
+
+Eso importa porque el ajuste a objetivo rinde: en un ensayo cruzado doble ciego con 24 adultos sin experiencia previa, el ajuste a objetivo NAL-NL2 con medición en oído real dio una ventaja mediana de 15 % en palabras (y 7,7 % en fonemas) a 50 dB SPL, y de 4 % en palabras a 65 dB SPL, frente a la primera adaptación; 79 % prefirió el ajuste a objetivo. No hubo diferencias en la comprensión de frases en ruido ni en el cuestionario SSQ (Valente y cols., 2018). Una revisión sistemática halló efectos moderados a favor de la medición en el oído real en el reconocimiento del habla en silencio (DME 0,59) y pequeños en ruido (0,15), y advierte que son pocos estudios y que no está establecido si la diferencia es clínicamente importante (Almufarrij y cols., 2021).
+
+**Afinar según lo que cuenta el paciente.** Con el audífono en el objetivo, el paciente describe lo que oye. La queja apunta a una parte del ajuste:
+
+Tabla: De la queja a lo que se revisa
+
+| Lo que dice el paciente | Lo que se revisa |
+|---|---|
+| "Mi voz suena hueca o tapada" | El efecto de oclusión: ventilación más amplia o molde más abierto (→ *El molde, la ventilación y el efecto de oclusión*) |
+| "Silba" | El sello del molde, la ventilación y la ganancia, que son los tres factores de la retroalimentación (Dillon, 2012) |
+| "Los sonidos fuertes me molestan" | La salida máxima frente al LDL medido |
+| "Oigo pero no entiendo" | Si los agudos llegan al objetivo en la medición, no solo por lo que dice el paciente |
+| "Todo suena muy fuerte" (usuario nuevo) | No bajar a ciegas: planificar una adaptación gradual de la ganancia hasta el objetivo (Keidser y cols., 2011) |
+
+<!-- verificar: la tabla resume práctica clínica habitual a partir de lo ya citado en el capítulo; falta una fuente única que la respalde (Dillon, 2012, capítulo de ajuste fino) -->
+
+**Aclimatación.** El beneficio de un audífono no aparece entero el primer día. En el estudio de Cox y Alexander (1992), la mejoría del beneficio subjetivo y de la comprensión (en poco ruido y en ruido sin pistas visuales) siguió durante las primeras 10 semanas de uso. Gatehouse (1992) midió que el beneficio de una respuesta en frecuencia nueva no se instala de inmediato, sino a lo largo de al menos 6 a 12 semanas, y concluyó que los métodos de evaluación de corto plazo con pruebas comparativas del habla son discutibles. Eso limita lo que enseña la prueba de este capítulo: mide el primer contacto, no el rendimiento a las semanas. En una muestra pequeña de NAL-NL2, los usuarios nuevos con pérdida moderada llegaron a las ganancias que preferían los experimentados después de unos dos años (Keidser y cols., 2011).
+
+**En el niño.** Para los niños, el método de referencia es DSL v5 o NAL-NL2, y la guía pediátrica pide un método validado para esa edad que considere el **RECD** (*real-ear-to-coupler difference*: la diferencia entre el nivel que produce un mismo sonido en el oído del niño y en un acoplador de 2 cm³) para no sobreamplificar (AAA, 2013). El conducto de un niño es pequeño: el mismo audífono produce más presión sonora en su oído que en el de un adulto, y el RECD cambia con la edad (los oídos pequeños dan RECD mayores) y con el molde. Se mide al niño o se usa un valor promedio por edad (AAA, 2013; Bagatto y cols., 2005). Como el niño crece, el RECD y el molde se miden de nuevo cada vez que se cambia el molde (AAA, 2013).
+
+**NAL-NL2 y DSL v5: dos filosofías.** NAL-NL2 busca la máxima inteligibilidad del habla con una sonoridad total que no supere la de un oyente normal (Keidser y cols., 2011). DSL v5 busca que el habla sea audible en todo el rango y evitar la molestia (Scollie y cols., 2005). Para adultos, la comparación teórica de Johnson y Dillon (2011) halló que NAL-NL2 y el algoritmo de DSL v5 (que allí aparece como DSL m[i/o]) producían una sonoridad parecida (unos 8 sones para una entrada de 65 dB SPL, frente a 18,6 sones en un oyente normal) y una inteligibilidad predicha parecida. En adultos con audífono, un estudio retrospectivo de 43 pacientes no halló diferencias en la comprensión en ruido ni en el cuestionario APHAB entre los dos métodos (Portelli y cols., 2024). En niños las diferencias son mayores: las fórmulas pediátricas pueden diferir entre 6 y 25 dB en la salida prescrita según la frecuencia (Pittman y Stewart, 2023), y los niños usaron la prescripción DSL v4.1 para oír el habla suave o cuando querían oír fuerte y claro, y NAL-NL1 cuando querían oír más bajo o reducir el ruido de fondo; pidieron poder elegir entre los dos programas (Scollie y cols., 2010). La elección entre ambos no la resuelve esta literatura, y por eso se verifica contra el método que se haya elegido.
+
 ### La tecnología del audífono, sin marcas
 
 Los fabricantes nombran las funciones con términos propios. Lo que sigue describe qué hace cada una por su principio, y qué se puede prometer al paciente.
@@ -96,6 +149,31 @@ Un nivel más alto no es una pérdida más grande: es más herramientas de ajust
 **Compresión y transposición frecuencial.** En una pérdida severa de agudos, amplificar más no devuelve información: la cóclea de esa zona no la recibe o no la usa. La alternativa es llevar esa información a una zona donde aún hay audición. La **compresión frecuencial** comprime la banda alta hacia frecuencias más bajas; la **transposición** traslada una banda de agudos a una región más baja. La revisión de Simpson (2009) resume que las primeras versiones tuvieron resultados poco favorables, que los dispositivos recientes muestran mejor percepción del habla, y que siguen abiertas la pregunta de quién es candidato y si un entrenamiento mejora el resultado. El costo es que los sonidos agudos pasan a sonar distintos, y por eso la verificación en oído real se hace con esta función apagada (BSA, 2018). <!-- verificar: "los sonidos agudos pasan a sonar distintos"; Simpson 2009 y Bentler y cols. 2014 (doi:10.1097/AUD.0000000000000030) -->
 
 **Conectividad.** Los audífonos actuales reciben audio por radio desde el teléfono, el televisor o un micrófono remoto, directo o a través de un accesorio. Los estándares más nuevos del Bluetooth (LE Audio, desde la versión 5.2) incluyen audífonos estándar y la difusión de audio a muchos receptores a la vez (Auracast), con menor gasto de pila que el Bluetooth clásico (Canadian Audiologist, 2024). Transmitir audio gasta pila, y por eso importa en los modelos con pila de aire (→ H22, tabla de pilas).
+
+### Conectividad: protocolos, latencia y pila
+
+Los audífonos usan cinco tipos de conexión, que no se reemplazan: cada una resuelve un problema distinto.
+
+Tabla: Conexiones de un audífono, sin marcas
+
+| Conexión | Cómo transmite | Para qué sirve | A tener en cuenta |
+|---|---|---|---|
+| **Telebobina** | Inducción magnética: la bobina del audífono capta el campo de un bucle (NIDCD, 2019) | Teléfono compatible, salas con bucle | No hay que emparejar nada, pero solo funciona donde hay bucle; la norma IEC 60118-4 fija el campo que debe producir (IEC, 2014) |
+| **Bluetooth clásico** | Radio Bluetooth Classic, con el códec SBC (Bluetooth SIG, s. f.) | Audio desde teléfono y TV | Es una radio distinta de la de baja energía (Bluetooth SIG, s. f.). <!-- verificar: cuántos audífonos lo usan directo y cuántos pasan por un accesorio; no hay fuente cotejada --> |
+| **Bluetooth de baja energía y LE Audio** | Radio Bluetooth Low Energy y códec LC3. Incluye soporte para audífonos, audio multi-flujo sincronizado y difusión (Auracast) (Bluetooth SIG, s. f.) | Streaming directo desde teléfono o TV; en un recinto con transmisor Auracast, difusión a un número ilimitado de receptores | El audífono y la fuente deben ser compatibles con LE Audio. |
+| **Inducción magnética de campo cercano (NFMI)** | Campo magnético de alcance muy corto, que atraviesa la cabeza | Comunicación entre los dos audífonos o con un accesorio en el cuello | <!-- verificar: descripción y alcance de NFMI en audífonos; sin fuente primaria cotejada --> |
+| **Radio de 2,4 GHz propietaria** | Protocolo del fabricante en la misma banda que el Bluetooth | Enlace del audífono con accesorios y micrófonos remotos del mismo fabricante | <!-- verificar: ídem; sin fuente primaria cotejada. Solo funciona con equipos del mismo fabricante --> |
+
+**Streaming.** Desde un teléfono, un televisor o un micrófono remoto, el audio llega al audífono como señal eléctrica y no pasa por el aire. Con un micrófono remoto cerca de quien habla, mejora la comprensión de esa persona en el ruido o a distancia (NIDCD, 2019; → *Ayudas complementarias*). En el teléfono, enviar la señal a los dos audífonos dio mejor reconocimiento del habla que enviarla a uno solo; frente al teléfono acústico, la ventaja solo apareció con domos que ocluyen (Picou y Ricketts, 2011). Por eso un paciente con ventilación amplia puede no ganar tanto como espera.
+
+**Latencia.** Es el retardo entre el sonido original y el que llega por el enlace o por el procesador. Hay dos casos distintos:
+
+- **El retardo del propio audífono (micrófono a receptor).** Importa porque el paciente oye su voz por tres caminos: por el aire y las fugas del molde, por el cráneo, y por el audífono, que llega más tarde. Con 18 personas que oían su propia voz por un audífono digital de retardo variable, un retardo de 3 a 5 ms fue notado en el 76 % de los ensayos y uno de más de 10 ms fue objetable en el 90 % (Agnew y Thornton, 2000). En simulaciones de pérdida leve a moderada con oyentes normales, los retardos de 20 a 30 ms se calificaron como "molestos" (Stone y Moore, 1999). En usuarios con pérdida coclear, una calificación "probablemente aceptable" se obtuvo con retardos de 14 a 30 ms según la pérdida (Stone y Moore, 2005). Con una adaptación abierta, que deja pasar el sonido del exterior, una simulación con oyentes normales dio un límite de unos 5 a 6 ms para pérdidas de agudos que parten en 2 y en 1 kHz respectivamente (Stone y cols., 2008).
+- **El retardo del streaming (de la fuente al audífono).** Importa cuando el paciente ve a quien habla, como en la TV, y cuando también le llega el sonido directo. Como referencia, en el habla natural el sonido y el movimiento de labios ya difieren: entre 20 ms de adelanto y 70 ms de atraso del audio en sílabas encadenadas, y de 40 ms de adelanto a 200 ms de atraso con material más complejo (Schwartz y Savariaux, 2014). Con una adaptación abierta, el sonido directo de la TV y su copia por streaming se mezclan, igual que lo hacen el aire y el audífono en los estudios de arriba; el límite de esos estudios (5 a 6 ms) no se midió para streaming y se toma solo como una analogía. <!-- verificar: latencia típica del streaming en Bluetooth clásico y en LE Audio (cifras en ms) y umbrales de sincronía labial de la recomendación ITU-R BT.1359; no se obtuvieron cifras cotejadas, por eso no se dan -->
+
+**Pila.** Transmitir audio gasta pila. La especificación LE Audio incluye un códec (LC3) que, según el Bluetooth SIG, da mejor calidad que el SBC aun con la mitad de la tasa de bits, y esa tasa menor se puede usar para alargar la vida de la pila (Bluetooth SIG, s. f.). En adolescentes con audífonos con streaming, el uso diario fue más de dos horas mayor que en pares sin streaming, y entre los problemas que refirieron estuvieron la menor duración de la pila, fallas de conexión y la compatibilidad con pocos dispositivos (Gross y cols., 2026). Qué cifra de duración esperar en cada modelo la da el fabricante, y no hay un número general que se pueda dar aquí.
+
+**Compatibilidad.** Antes de prometer una función, se comprueba con el teléfono y el televisor del paciente, y se le avisa que un cambio de teléfono o de versión del sistema puede cortarla (→ H22, *tabla de fallas*). <!-- verificar: "un cambio de teléfono o de versión puede cortarla" es práctica clínica sin fuente cotejada; confirmar o suprimir -->
 
 ### El molde, la ventilación y el efecto de oclusión
 
@@ -427,6 +505,15 @@ El paciente de este capítulo (★, el 36 de la práctica) llega diciendo que oy
 1. Moore BCJ. Cochlear hearing loss: physiological, psychological and technical issues. 2.ª ed. Chichester: Wiley; 2007. doi:10.1002/9780470987889
 1. Stenfelt S, Goode RL. Bone-conducted sound: physiological and clinical aspects. Otol Neurotol. 2005;26(6):1245-61. doi:10.1097/01.mao.0000187236.10842.d5
 1. National Institute for Health and Care Excellence. Hearing loss in adults: assessment and management. NICE guideline NG98 [Internet]. Londres: NICE; 2018 [actualizada el 2 de octubre de 2023]. Disponible en: https://www.nice.org.uk/guidance/ng98
+1. Bagatto M, Moodie S, Scollie S, Seewald R, Moodie S, Pumford J, et al. Clinical protocols for hearing instrument fitting in the Desired Sensation Level method. Trends Amplif. 2005;9(4):199-226. doi:10.1177/108471380500900404. PMID 16424946
+1. Scollie S, Ching TY, Seewald R, Dillon H, Britton L, Steinberg J, et al. Evaluation of the NAL-NL1 and DSL v4.1 prescriptions for children: preference in real world use. Int J Audiol. 2010;49(Suppl 1):S49-63. doi:10.3109/14992020903148038. PMID 20109089
+1. Johnson EE, Dillon H. A comparison of gain for adults from generic hearing aid prescriptive methods: impacts on predicted loudness, frequency bandwidth, and speech intelligibility. J Am Acad Audiol. 2011;22(7):441-59. doi:10.3766/jaaa.22.7.5. PMID 21993050
+1. Pittman AL, Stewart EC. Task-dependent effects of signal audibility for processing speech: comparing performance with NAL-NL2 and DSL v5 hearing aid prescriptions at threshold and at suprathreshold levels in 9- to 17-year-olds with hearing loss. Trends Hear. 2023;27:23312165231177509. doi:10.1177/23312165231177509. PMID 37254534
+1. Portelli D, Loteta S, Ciodaro F, Salvago P, Galletti C, Freni L, et al. Functional outcomes for speech-in-noise intelligibility of NAL-NL2 and DSL v.5 prescriptive fitting rules in hearing aid users. Eur Arch Otorhinolaryngol. 2024;281(6):3227-35. doi:10.1007/s00405-024-08587-z. PMID 38546852
+1. Valente M, Oeding K, Brockmeyer A, Smith S, Kallogjeri D. Differences in word and phoneme recognition in quiet, sentence recognition in noise, and subjective outcomes between manufacturer first-fit and hearing aids programmed to NAL-NL2 using real-ear measures. J Am Acad Audiol. 2018;29(8):706-21. doi:10.3766/jaaa.17005. PMID 30222541
+1. Almufarrij I, Dillon H, Munro KJ. Does probe-tube verification of real-ear hearing aid amplification characteristics improve outcomes in adults? A systematic review and meta-analysis. Trends Hear. 2021;25:2331216521999563. doi:10.1177/2331216521999563. PMID 33899603
+1. Cox RM, Alexander GC. Maturation of hearing aid benefit: objective and subjective measurements. Ear Hear. 1992;13(3):131-41. doi:10.1097/00003446-199206000-00001. PMID 1397752
+1. Gatehouse S. The time course and magnitude of perceptual acclimatization to frequency responses: evidence from monaural fitting of hearing aids. J Acoust Soc Am. 1992;92(3):1258-68. doi:10.1121/1.403921. PMID 1401514
 
 ### Verificación y funcional
 
@@ -458,6 +545,14 @@ El paciente de este capítulo (★, el 36 de la práctica) llega diciendo que oy
 1. Canadian Audiologist. Auracast: revolutionizing accessibility in audio [Internet]. 2024. Disponible en: https://canadianaudiologist.ca/auracast-revolutionizing-accessibility-in-audio/ <!-- verificar: año y autor de la nota -->
 1. Energizer Brands. Product data sheet S6600584: 312 zinc air (IEC PR41), edición C [Internet]. Westlake (OH): Energizer; s. f. Disponible en: https://www.123accu.nl/pdf/A1200018.pdf
 1. National Capital Poison Center. Button battery ingestion guideline [Internet]. Washington (DC): NCPC; 2023. Disponible en: https://www.poison.org/battery/guideline <!-- verificar: edición vigente de la guía -->
+1. Stone MA, Moore BCJ. Tolerable hearing aid delays. I. Estimation of limits imposed by the auditory path alone using simulated hearing losses. Ear Hear. 1999;20(3):182-92. doi:10.1097/00003446-199906000-00002. PMID 10386846
+1. Stone MA, Moore BCJ. Tolerable hearing-aid delays: IV. Effects on subjective disturbance during speech production by hearing-impaired subjects. Ear Hear. 2005;26(2):225-35. doi:10.1097/00003446-200504000-00009. PMID 15809547
+1. Stone MA, Moore BCJ, Meisenbacher K, Derleth RP. Tolerable hearing aid delays. V. Estimation of limits for open canal fittings. Ear Hear. 2008;29(4):601-17. doi:10.1097/AUD.0b013e3181734ef2. PMID 18469715
+1. Agnew J, Thornton JM. Just noticeable and objectionable group delays in digital hearing aids. J Am Acad Audiol. 2000;11(6):330-6. PMID 10858005
+1. Schwartz JL, Savariaux C. No, there is no 150 ms lead of visual speech on auditory speech, but a range of audiovisual asynchronies varying from small audio lead to large audio lag. PLoS Comput Biol. 2014;10(7):e1003743. doi:10.1371/journal.pcbi.1003743. PMID 25079216
+1. Picou EM, Ricketts TA. Comparison of wireless and acoustic hearing aid-based telephone listening strategies. Ear Hear. 2011;32(2):209-20. doi:10.1097/AUD.0b013e3181f53737. PMID 20808225
+1. Gross RL, McCreery RW, Walker EA. Streaming with hearing aids for adolescents who are hard of hearing. Semin Hear. 2026;47(1):26-32. doi:10.1055/s-0046-1815940. PMID 41982943
+1. Bluetooth SIG. Bluetooth LE Audio [Internet]. Kirkland (WA): Bluetooth SIG; s. f. Disponible en: https://www.bluetooth.com/learn-about-bluetooth/recent-enhancements/le-audio/
 
 ### Ayudas complementarias y acceso en Chile
 
