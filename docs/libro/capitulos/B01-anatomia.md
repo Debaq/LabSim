@@ -40,7 +40,7 @@ El pabellón es una lámina de **cartílago elástico** cubierta de piel, que se
 - La **concha** es la cavidad que rodea la entrada del conducto.
 - El **trago** (adelante) y el **antitrago** (atrás y abajo) son dos salientes que acotan la entrada.
 
-**La microtia** es un pabellón pequeño o malformado, y casi siempre se acompaña de un conducto estrecho o ausente (atresia; → cap. 1). Va de alteraciones leves hasta la ausencia total del pabellón (Luquetti y cols., 2012) y se gradúa en cuatro grados según cuánto queda de las estructuras (Truong y cols., 2022): en el grado I, el más leve, el pabellón es pequeño pero conserva sus relieves; en el III, la forma más frecuente, queda solo un remanente de cartílago con el lóbulo; y en el IV no hay pabellón (anotia). Mira siempre los dos pabellones juntos: su asimetría dice más que cada uno por separado.
+**La microtia** es un pabellón pequeño o malformado, y a menudo se acompaña de un conducto estrecho o ausente (atresia; → cap. 1).<!-- Pasada de fundamentos 2026-10-18: decía "casi siempre se acompaña". Se corrigió a "a menudo" (Truong y cols., 2022: "often associated"). --> Va de alteraciones leves hasta la ausencia total del pabellón (Luquetti y cols., 2012) y se gradúa en cuatro grados según cuánto queda de las estructuras (Truong y cols., 2022): en el grado I, el más leve, el pabellón es pequeño pero conserva sus relieves; en el III, la forma más frecuente, queda solo un remanente de cartílago con el lóbulo; y en el IV no hay pabellón (anotia). Mira siempre los dos pabellones juntos: su asimetría dice más que cada uno por separado.
 
 :::imagen ilustraciones/b1-microtia-grados.jpg ancho=60% Los grados de la microtia, frente a un pabellón normal. A medida que sube el grado se pierden los relieves: en el III queda un remanente con el lóbulo y en el IV no queda nada. Rótulos en inglés (*Class*, grado). Imagen: Truong y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, CC BY 4.0.
 :::
@@ -72,7 +72,7 @@ Por eso el cerumen se produce afuera y **no debe manipularse adentro** sin ver: 
 
 **Por qué se tracciona en un sentido en el adulto y en otro en el niño.** El conducto adulto sube un poco hacia el fondo y luego baja: para verlo en línea recta con el otoscopio se tira del pabellón **hacia arriba y atrás**. En el lactante el hueso timpánico aún no se ha formado y el conducto es corto y casi plano, con la membrana más horizontal; se tira **hacia atrás y, a veces, hacia abajo** (→ H1, con la figura de la tracción).
 
-**Inervación y relaciones.** La piel del conducto recibe fibras de varios nervios: el auriculotemporal (rama del trigémino, V3), el ramo auricular del **vago** (nervio de Arnold) y, en menor medida, el facial y ramas del plexo cervical (Standring, 2020). La rama del vago explica una escena conocida: al lavar o tocar la pared posterior, el paciente **tose** o se marea (reflejo vagal; → H1). Por delante del conducto óseo está la **articulación temporomandibular**: el cóndilo de la mandíbula está a un centímetro de la pared anterior, y por eso la otitis externa duele **al masticar** o al mover la mandíbula, y por eso el dolor de la articulación se confunde con el de oído (→ H1, cap. 1).
+**Inervación y relaciones.** La piel del conducto recibe fibras de varios nervios: el auriculotemporal (rama del trigémino, V3), el ramo auricular del **vago** (nervio de Arnold) y, en menor medida, el facial y ramas del plexo cervical (Standring, 2020). La rama del vago explica una escena conocida: al lavar o tocar la pared posterior, el paciente **tose** o se marea (reflejo vagal; → H1). Por delante del conducto óseo está la **articulación temporomandibular**: el cóndilo de la mandíbula queda justo por delante de la pared anterior, y por eso la otitis externa duele **al masticar** o al mover la mandíbula, y por eso el dolor de la articulación se confunde con el de oído (→ H1, cap. 1).
 
 ## La membrana timpánica
 
@@ -82,7 +82,7 @@ La membrana timpánica separa el oído externo del medio. Es una lámina casi ci
 :::
 
 - **Pars tensa.** Es casi toda la membrana. Tiene tres capas (piel por fuera, mucosa por dentro y, en medio, fibras de colágeno), y se sostiene en el **anillo timpánico**, un borde fibrocartilaginoso encajado en el hueso (→ B3).
-- **Pars flaccida (de Shrapnell).** Es un triángulo pequeño sobre la apófisis corta, **sin capa fibrosa media**: es más laxa y por eso es el punto donde se forman las bolsas de retracción. Detrás de ella queda el espacio de Prussak, que se abre al ático.
+- **Pars flaccida (de Shrapnell).** Es un triángulo pequeño sobre la apófisis corta, **sin la capa fibrosa ordenada** de la pars tensa (sus fibras son pocas y sueltas): es más laxa y por eso es el punto donde se forman las bolsas de retracción. Detrás de ella queda el espacio de Prussak, que se abre al ático.
 - **Mango del martillo y apófisis corta.** El martillo está adherido a la cara interna de la membrana: se ve su mango, que baja hacia el centro, y en el extremo superior un puntito, la **apófisis corta**.
 - **Umbo.** Es el centro, donde termina el mango; allí la membrana queda tirada hacia adentro.
 - **Cono luminoso.** Es el reflejo de la luz del otoscopio en la parte anteroinferior. Está a las **5 horas** en el oído derecho y a las **7 horas** en el izquierdo. Si no está, o cambia, la membrana está retraída o engrosada, pero un cono presente no prueba que el oído esté sano.
@@ -144,7 +144,7 @@ Tres huesecillos transmiten la vibración desde la membrana hasta la ventana ova
 - **Yunque** (*incus*): une al martillo con el estribo; su rama larga baja y termina en la apófisis lenticular.
 - **Estribo** (*stapes*): el más pequeño del cuerpo. Su **platina** apoya en la ventana oval, sujeta por un ligamento anular.
 
-Las articulaciones son dos, la **incudomaleolar** y la **incudoestapedial**. Lo que sostiene la cadena es sutil: ligamentos, los tendones de dos músculos y la membrana timpánica. Al ser tan fina, la cadena se interrumpe con el trauma o la infección: la **articulación incudoestapedial** es de las que más se separa<!-- verificar: cuál es la articulación que se luxa con más frecuencia en el trauma; confirmar con una fuente de otología antes de darlo como regla -->, y la rama larga del yunque puede erosionarse con el colesteatoma. El resultado es una pérdida conductiva grande, con la membrana intacta (→ cap. 3). Una fijación del estribo en la ventana oval (otosclerosis) produce el cuadro opuesto: cadena entera, pero rígida (→ cap. 4).
+Las articulaciones son dos, la **incudomaleolar** y la **incudoestapedial**. Lo que sostiene la cadena es sutil: ligamentos, los tendones de dos músculos y la membrana timpánica. Al ser tan fina, la cadena se interrumpe con el trauma o la infección: la separación de la **articulación incudoestapedial** es la lesión traumática más común de la cadena, porque el yunque, sin músculo propio, cuelga entre dos huesecillos bien anclados (Coulier y cols., 2015), y la rama larga del yunque puede erosionarse con el colesteatoma. El resultado es una pérdida conductiva grande, con la membrana intacta (→ cap. 3). Una fijación del estribo en la ventana oval (otosclerosis) produce el cuadro opuesto: cadena entera, pero rígida (→ cap. 4).
 
 :::imagen ilustraciones/b1-oido-interno.png ancho=62% Membrana, cadena osicular y oído interno juntos. Sigue la cadena desde el mango del martillo, pegado a la membrana, hasta la platina del estribo en la ventana oval: por ahí entra la vibración al laberinto. Imagen: Servier Medical Art, CC BY 4.0.
 - @7,80 | **Membrana timpánica**, vista de lado.
@@ -187,12 +187,12 @@ La **mastoides** es el hueso detrás del pabellón. Está ocupada por un sistema
 El **nervio facial (VII par)** atraviesa el hueso temporal y tiene tres segmentos, todos relacionados con el oído medio:
 
 - El **laberíntico**, que sale del conducto auditivo interno, junto al nervio vestibulococlear, y llega al **ganglio geniculado**.
-- El **timpánico** (o horizontal), que corre por la pared medial de la caja, **sobre la ventana oval** y bajo el relieve del canal semicircular lateral. A menudo el hueso que lo cubre es tan fino, o falta, que el nervio queda expuesto: por eso una infección o una cirugía pueden dejar una **parálisis facial**.
+- El **timpánico** (o horizontal), que corre por la pared medial de la caja, **sobre la ventana oval** y bajo el relieve del canal semicircular lateral. A menudo el hueso que lo cubre es tan fino, o falta, que el nervio queda expuesto: en una serie de 1.000 huesos temporales, más de la mitad tenía al menos una dehiscencia del canal, sobre todo junto a la ventana oval (Moreano y cols., 1994). Por eso una infección o una cirugía pueden dejar una **parálisis facial**.
 - El **mastoideo** (o vertical), que baja por la mastoides y sale del cráneo por el **foramen estilomastoideo**. En su trayecto emite la **cuerda del tímpano**, que cruza la caja entre martillo y yunque, lleva el **gusto** de los dos tercios anteriores de la lengua y puede lesionarse en una cirugía de oído (Standring, 2020).
 
 ## El oído interno
 
-El oído interno está en la **porción petrosa** del hueso temporal, el hueso más duro del cuerpo. Allí está el **laberinto óseo**, un sistema de cavidades en el hueso; dentro de él, el **laberinto membranoso**, un sistema de tubos y sacos de pared fina, con el mismo trazado. Entre ambos hay **perilinfa**; dentro del membranoso, **endolinfa**. Cuántos iones hay en cada una, y por qué eso importa, va en B2.
+El oído interno está en la **porción petrosa** del hueso temporal, uno de los huesos más densos del cuerpo. Allí está el **laberinto óseo**, un sistema de cavidades en el hueso; dentro de él, el **laberinto membranoso**, un sistema de tubos y sacos de pared fina, con el mismo trazado. Entre ambos hay **perilinfa**; dentro del membranoso, **endolinfa**. Cuántos iones hay en cada una, y por qué eso importa, va en B2.
 
 El laberinto tiene una parte **anterior**, la cóclea (audición), y una **posterior**, el vestíbulo y los canales semicirculares (equilibrio).
 
@@ -257,7 +257,7 @@ Tabla: Los canales semicirculares y sus pares coplanares
 | **Anterior** (= superior) derecho | **posterior** izquierdo | plano RALP (→ H17) |
 | **Posterior** derecho | **anterior** (= superior) izquierdo | plano LARP (→ H17) |
 
-El **canal posterior** es el que más se afecta en el vértigo posicional paroxístico benigno (→ H18, cap. 22), y cada canal tiene su maniobra (→ H18).
+El **canal posterior** es el que más se afecta en el vértigo posicional paroxístico benigno, del 85 al 95 % de los casos (Bhattacharyya y cols., 2017; → H18, cap. 22), y cada canal tiene su maniobra (→ H18).
 
 ### Acueductos y saco endolinfático
 
@@ -300,10 +300,10 @@ Tabla: Rama superior e inferior del nervio vestibular
 
 | Rama | Receptores que inerva | Por qué importa |
 |---|---|---|
-| **Superior** | canal **lateral**, canal **superior** (anterior), **utrículo** y una parte del sáculo | la neuritis vestibular afecta casi siempre a esta rama sola: fallan el vHIT de los canales lateral y superior y el VEMP ocular (utrículo), no el cervical (→ H12, H17, cap. 21). Se ha propuesto que su canal óseo, más largo y estrecho, la hace más vulnerable (Goebel y cols., 2001; Gianoli y cols., 2005) |
-| **Inferior** | canal **posterior** y la mayor parte del **sáculo** | la neuritis que la afecta sola es rara; el VEMP cervical (sáculo) y el vHIT del canal posterior la exploran (→ H12, H17) |
+| **Superior** | canal **lateral**, canal **superior** (anterior), **utrículo** y una parte del sáculo | la neuritis vestibular afecta casi siempre a esta rama, sola o junto con la inferior: en 43 pacientes estudiados con vHIT de los tres canales y VEMP, el 42 % tenía solo la superior y el 56 %, las dos (Taylor y cols., 2016). Cuando es solo la superior, fallan el vHIT de los canales lateral y superior y el VEMP ocular (utrículo), no el cervical (→ H12, H17, cap. 21). Se ha propuesto que su canal óseo, más largo y estrecho, la hace más vulnerable (Goebel y cols., 2001; Gianoli y cols., 2005) |
+| **Inferior** | canal **posterior** y la mayor parte del **sáculo** | la neuritis que la afecta sola es rara (1 de esos 43 pacientes; Taylor y cols., 2016); el VEMP cervical (sáculo) y el vHIT del canal posterior la exploran (→ H12, H17) |
 
-La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recibe de las dos. Pero es el esquema que usan el VEMP y el vHIT para localizar la lesión (→ H12, H17).
+La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recibe de las dos. Pero es el esquema que usan el VEMP y el vHIT para localizar la lesión (→ H12, H17).<!-- Pasada de fundamentos 2026-10-18: la tabla decía "la neuritis vestibular afecta casi siempre a esta rama sola". Se corrigió a "a esta rama, sola o junto con la inferior" con las cifras de Taylor y cols. (2016): 55,8 % ambas ramas, 41,9 % solo superior, 2,3 % solo inferior. -->
 
 ### La vía auditiva central
 
@@ -367,13 +367,13 @@ La nariz externa tiene forma de pirámide: la **raíz** arriba, el **dorso** has
 
 El **vestíbulo nasal** es la entrada: va de la narina a la **válvula nasal**. Está tapizado de piel con pelos gruesos, las **vibrisas**, que atrapan las partículas más grandes.
 
-La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. La forman el borde inferior del cartílago lateral superior y el **tabique**, y en un corte frontal es un triángulo con el vértice hacia arriba, con un ángulo de **10 a 15°**; su área es de apenas **40 a 60 mm²**, y aporta de la mitad a dos tercios de la resistencia nasal total (Pirola y cols., 2025). Un cambio mínimo del ángulo cambia mucho el flujo (→ H24). La **válvula externa** es la parte de la pared lateral (cartílago alar y partes blandas del ala) que se colapsa si inspiras fuerte con la nariz tapada.
+La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. La forman el borde inferior del cartílago lateral superior y el **tabique**, con la cabeza del cornete inferior y el piso abajo, y en un corte frontal es un triángulo con el vértice hacia arriba, con un ángulo de **10 a 15°**; su área es de apenas **40 a 60 mm²**, y aporta de la mitad a dos tercios de la resistencia nasal total (Pirola y cols., 2025). Un cambio mínimo del ángulo cambia mucho el flujo (→ H24). La **válvula externa** es la parte de la pared lateral (cartílago alar y partes blandas del ala) que se colapsa si inspiras fuerte con la nariz tapada.
 
 **Por qué importa en el examen.** Cuando una persona dice que "no respira por la nariz", la causa puede estar en el tabique, en los cornetes o en las válvulas, y cada una se examina distinto. La maniobra de Cottle y la rinomanometría exploran esta región (→ H23, H24).
 
 ### El tabique nasal
 
-El tabique divide la cavidad en dos fosas. Es **óseo atrás y cartilaginoso adelante**: la **lámina perpendicular del etmoides** (arriba), el **vómer** (abajo y atrás) y el **cartílago cuadrangular** (adelante), apoyados en la cresta de los huesos maxilar y palatino. Rara vez es perfectamente recto; sus desviaciones son tan comunes que casi todas las narices las tienen en algún grado, y solo importan si estrechan la vía aérea.
+El tabique divide la cavidad en dos fosas. Es **óseo atrás y cartilaginoso adelante**: la **lámina perpendicular del etmoides** (arriba), el **vómer** (abajo y atrás) y el **cartílago cuadrangular** (adelante), apoyados en la cresta de los huesos maxilar y palatino. Rara vez es perfectamente recto; sus desviaciones leves son muy comunes, y solo importan si estrechan la vía aérea.
 
 :::imagen ilustraciones/b1-tabique-gray854.png ancho=70% El tabique nasal: hueso atrás y cartílago adelante. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 854), dominio público.
 - @37,36 | **Lámina perpendicular del etmoides** (*perpendicular plate of ethmoid*).
@@ -417,7 +417,7 @@ Tabla: Meatos y senos paranasales que drenan en cada uno
 | **Meato superior** | entre cornete superior y medio | celdillas etmoidales **posteriores** |
 | **Receso esfenoetmoidal** | sobre y detrás del cornete superior | **seno esfenoidal** |
 
-El **meato medio** concentra el drenaje de tres de los cuatro senos, y esa zona ("complejo ostiomeatal") es la que se bloquea primero con la inflamación: es el origen de la mayoría de las sinusitis (Stammberger y Kennedy, 1995). Los cuatro senos son el **maxilar**, el **frontal**, el **etmoidal** (un grupo de celdillas) y el **esfenoidal**. Todos están inervados por el trigémino.
+El **meato medio** concentra el drenaje de tres de los cuatro senos por una vía común y estrecha, el **complejo ostiomeatal** (Stammberger y Kennedy, 1995): cuando la inflamación la cierra, se tapan a la vez el maxilar, el frontal y el etmoides anterior.<!-- Pasada de fundamentos 2026-10-18: decía "es la que se bloquea primero con la inflamación: es el origen de la mayoría de las sinusitis (Stammberger y Kennedy, 1995)". Esa referencia es de terminología y no sostiene la proporción; se dejó el hecho anatómico. --> Los cuatro senos son el **maxilar**, el **frontal**, el **etmoidal** (un grupo de celdillas) y el **esfenoidal**. Todos están inervados por el trigémino.
 
 :::imagen ilustraciones/b1-pared-lateral-gray856.png ancho=84% Pared lateral de la fosa nasal derecha, con los cornetes cortados para ver los meatos. Fíjate en cuántas aberturas caen en el meato medio, y en lo cerca que queda la trompa de la cola del cornete inferior. Rótulos en inglés. Imagen: Gray's Anatomy (lámina 856), dominio público.
 - @13,64 | **Vestíbulo** de la nariz.
@@ -439,7 +439,7 @@ El **meato medio** concentra el drenaje de tres de los cuatro senos, y esa zona 
 - @47,55 | **Fosa nasal** y meatos, por donde drenan.
 :::
 
-Los senos no están formados al nacer: en el recién nacido ya existen el maxilar y el etmoidal, pequeños, y los demás se neumatizan durante la infancia<!-- verificar: edades de neumatización del esfenoidal (hacia los 3-5 años) y del frontal (desde los 6-8 años) con una fuente verificable; no se dan edades aquí -->. El seno frontal, en particular, casi no existe en el niño pequeño.
+Los senos no están formados al nacer: en el recién nacido ya existen el maxilar y el etmoidal, pequeños; el esfenoidal empieza a neumatizarse hacia los 9 meses y el frontal, después de los 5 años (Adibelli y cols., 2011). El seno frontal, en particular, casi no existe en el niño pequeño.
 
 ### Las coanas y la rinofaringe
 
@@ -462,7 +462,7 @@ Las **coanas** son las dos aberturas posteriores de las fosas, que las comunican
 :::
 
 :::sabias ¿Sabías que?
-Los tres huesecillos del oído medio ya tienen casi su tamaño de adulto al nacer<!-- verificar: tamaño adulto de los huesecillos al nacer (afirmación de texto clásico; confirmar con una fuente) -->; es el **conducto** el que crece, y por eso cambia la técnica para mirar el tímpano de un lactante. El hueso de la porción timpánica se forma durante los primeros años, y hasta entonces el conducto es casi todo cartílago y piel.
+El laberinto membranoso alcanza su tamaño de adulto a mitad del embarazo; lo que sigue creciendo después de nacer es lo de afuera: el **conducto**, la mastoides y el conducto auditivo interno (Nemzek y cols., 1996). Por eso cambia la técnica para mirar el tímpano de un lactante.<!-- Pasada de fundamentos 2026-10-18: decía "Los tres huesecillos del oído medio ya tienen casi su tamaño de adulto al nacer". La literatura sobre el tamaño de los huesecillos al nacer está dividida; se reemplazó por el dato del laberinto y del crecimiento posnatal (Nemzek y cols., 1996, abstract). --> El hueso de la porción timpánica se forma durante los primeros años, y hasta entonces el conducto es casi todo cartílago y piel.
 :::
 
 ## Créditos de las figuras
@@ -496,3 +496,9 @@ Los tres huesecillos del oído medio ya tienen casi su tamaño de adulto al nace
 1. Lee H. Audiovestibular loss in anterior inferior cerebellar artery territory infarction: a window to early detection? J Neurol Sci. 2012;313(1-2):153-9. doi:10.1016/j.jns.2011.08.039
 1. Stammberger HR, Kennedy DW. Paranasal sinuses: anatomic terminology and nomenclature. Ann Otol Rhinol Laryngol Suppl. 1995;167:7-16. doi:10.1177/000348949510410s01
 1. Pirola F, Kim R, Douglas R. Nasal valve obstruction: a comprehensive analysis of the current literature and proposal of a management algorithm. Front Surg. 2025;12:1549915. doi:10.3389/fsurg.2025.1549915
+1. Coulier B, Lamarque C, Dejardin S. 2D and 3D CT diagnosis of traumatic incudostapedial joint separation. J Belg Soc Radiol. 2015;99(1):116-7. doi:10.5334/jbr-btr.831
+1. Moreano EH, Paparella MM, Zelterman D, Goycoolea MV. Prevalence of facial canal dehiscence and of persistent stapedial artery in the human middle ear: a report of 1000 temporal bones. Laryngoscope. 1994;104(3):309-20. doi:10.1288/00005537-199403000-00012
+1. Bhattacharyya N, Gubbels SP, Schwartz SR, Edlow JA, El-Kashlan H, Fife T, et al. Clinical practice guideline: benign paroxysmal positional vertigo (update). Otolaryngol Head Neck Surg. 2017;156(3 Suppl):S1-47. doi:10.1177/0194599816689667
+1. Taylor RL, McGarvie LA, Reid N, Young AS, Halmagyi GM, Welgampola MS. Vestibular neuritis affects both superior and inferior vestibular nerves. Neurology. 2016;87(16):1704-12. doi:10.1212/WNL.0000000000003223
+1. Adibelli ZH, Songu M, Adibelli H. Paranasal sinus development in children: a magnetic resonance imaging analysis. Am J Rhinol Allergy. 2011;25(1):30-5. doi:10.2500/ajra.2011.25.3552
+1. Nemzek WR, Brodie HA, Chong BW, Babcook CJ, Hecht ST, Salamat S, et al. Imaging findings of the developing temporal bone in fetal specimens. AJNR Am J Neuroradiol. 1996;17(8):1467-77. PMID 8883642

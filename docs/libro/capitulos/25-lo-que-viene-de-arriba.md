@@ -77,7 +77,7 @@ Las cuatro pruebas del protocolo, **metría, diadococinesia, sinergia y temblor 
 El protocolo pide al paciente **suspender 48 horas antes** los antivertiginosos, los antieméticos y los ansiolíticos, porque suprimen el nistagmo y pueden esconder un hallazgo. Hay otros dos grupos que producen hallazgos centrales y que **no están en esa lista**: los **anticonvulsivantes** y el **alcohol**. El nistagmo evocado por la mirada en todas las direcciones apunta al cerebelo y tiene muchas causas, entre ellas los fármacos, sobre todo los antiepilépticos, y el consumo crónico de alcohol (Strupp y cols., 2014).
 
 :::comentario Lo que dicen las normas
-**Quien toma un anticonvulsivante o un ansiolítico por una epilepsia no lo suspende por seguir el protocolo.** Esos fármacos los decide el médico tratante, y suspenderlos para el examen puede ser peligroso: aunque el protocolo nombra a los ansiolíticos, un clonazepam o un fenobarbital se toman a menudo para una epilepsia. En este libro la práctica es **anotar qué toma, en qué dosis y desde cuándo, y avisar al médico** que pidió el examen: es él quien decide si el examen se hace con el fármaco y quien interpreta el hallazgo. <!-- verificar: guía o consenso sobre qué fármacos suspender antes de una VNG y qué hacer con los anticonvulsivantes; no se encontró una fuente citable para el libro. -->
+**Quien toma un anticonvulsivante o un ansiolítico por una epilepsia no lo suspende por seguir el protocolo.** Esos fármacos los decide el médico tratante, y suspenderlos para el examen puede ser peligroso: aunque el protocolo nombra a los ansiolíticos, un clonazepam o un fenobarbital se toman a menudo para una epilepsia. En este libro la práctica es **anotar qué toma, en qué dosis y desde cuándo, y avisar al médico** que pidió el examen: es él quien decide si el examen se hace con el fármaco y quien interpreta el hallazgo. <!-- verificar: guía o consenso sobre qué fármacos suspender antes de una VNG y qué hacer con los anticonvulsivantes. Pasada 2026-10-18: se buscó el procedimiento de la BSA para la prueba calórica (2010) y no se pudo leer; solo aparecen folletos de hospitales del NHS (suspender 48 h los supresores vestibulares, consultar al médico por benzodiacepinas, seguir con los demás fármacos), que no son citables. -->
 :::
 
 ### Cómo se ven los nistagmos centrales
@@ -98,7 +98,7 @@ El detalle de la anatomía y de las vías está en las Bases (→ B1 a B4). Aqu�
 
 ### Quién sostiene la mirada
 
-Para mantener los ojos en una posición excéntrica hace falta una orden **de posición**, no de velocidad, y la construye el **integrador neural de la mirada**: neuronas del tronco que convierten la velocidad en posición. Para el plano horizontal están en el núcleo prepósito del hipogloso (Cannon y Robinson, 1987); para el vertical, en el mesencéfalo, en el núcleo intersticial de Cajal (Leigh y Zee, 2015). El cerebelo, sobre todo el flóculo, los mantiene afinados (→ H15). Cuando falla, el ojo se va de vuelta hacia el centro y el tronco lo devuelve con una fase rápida: eso es el nistagmo evocado por la mirada (Eggers y cols., 2019).
+Para mantener los ojos en una posición excéntrica hace falta una orden **de posición**, no de velocidad, y la construye el **integrador neural de la mirada**: neuronas del tronco que convierten la velocidad en posición. Para el plano horizontal están en el núcleo prepósito del hipogloso y el vestibular medial (Cannon y Robinson, 1987); <!-- Pasada de fundamentos 2026-10-18: decía "en el núcleo prepósito del hipogloso". Se corrigió a "prepósito del hipogloso y vestibular medial", la región que Cannon y Robinson (1987) inactivaron. --> para el vertical, en el mesencéfalo, en el núcleo intersticial de Cajal (Leigh y Zee, 2015). El cerebelo, sobre todo el flóculo, los mantiene afinados (→ H15). Cuando falla, el ojo se va de vuelta hacia el centro y el tronco lo devuelve con una fase rápida: eso es el nistagmo evocado por la mirada (Eggers y cols., 2019).
 
 ### Qué hace cada parte del cerebelo con los ojos
 
@@ -114,8 +114,8 @@ Los movimientos rápidos de los ojos los genera el tronco. Para la mirada horizo
 
 ### Por qué cada nistagmo central tiene su forma
 
-- **Hacia abajo.** El flóculo frena de manera tónica las vías que suben el ojo. Sin ese freno, el ojo sube lentamente y baja con una fase rápida: nistagmo hacia abajo. Las lesiones focales que lo producen están en el flóculo o el paraflóculo (Pierrot-Deseilligny y Milea, 2005).
-- **Hacia arriba.** Se explica por un déficit de la señal que sube el ojo, en el puente o el bulbo (Pierrot-Deseilligny y Milea, 2005). Es menos frecuente y menos localizador que el nistagmo hacia abajo (Eggers y cols., 2019).
+- **Hacia abajo.** Las lesiones focales que lo producen están en el flóculo o el paraflóculo. La hipótesis más aceptada es que el flóculo frena de manera tónica las vías que suben el ojo: sin ese freno, el ojo sube lentamente y baja con una fase rápida (Pierrot-Deseilligny y Milea, 2005).
+- **Hacia arriba.** Se lo atribuye a un déficit de la señal que sube el ojo, en el puente o el bulbo (Pierrot-Deseilligny y Milea, 2005). Es menos frecuente y menos localizador que el nistagmo hacia abajo (Eggers y cols., 2019).
 - **Periódico alternante.** Un reflejo inestable que se invierte solo, por lo general cada 90 a 120 segundos (Eggers y cols., 2019).
 - **Pendular adquirido.** Va y viene sin fase rápida, y el de la esclerosis múltiple suele tener más de 4 Hz y menos de 4° de amplitud (Eggers y cols., 2019).
 
@@ -162,7 +162,7 @@ Para quien examina, eso significa que un paciente con **episodios de mareo de mi
 Descenso de las amígdalas cerebelosas por el foramen magno (→ cap. 12). Hay **cefalea occipital** que empeora al toser o hacer fuerza, inestabilidad y, a veces, hipoacusia. En 77 pacientes con Chiari I estudiados por un servicio vestibular, 32 tenían hipoacusia neurosensorial, **22 de ellos de un solo lado**; los hallazgos de la VNG fueron variados: nistagmo horizontal espontáneo en 27, nistagmo hacia arriba en 3 y hacia abajo en 4, alteraciones del seguimiento en 12, dismetría sacádica en 4 y nistagmo posicional en 9 (Kumar y cols., 2002). La ectopia cerebelosa es una de las dos causas más frecuentes del nistagmo hacia abajo: en una serie de 62 pacientes con ese nistagmo, 25 % tenía ectopia y otro 25 % degeneración cerebelosa (Halmagyi y cols., 1983).
 
 :::ojo Ojo clínico
-**El nistagmo hacia abajo es el signo clásico y el menos frecuente**: 4 de 77 pacientes con Chiari I (Kumar y cols., 2002). Una VNG sin hallazgos **no descarta** un Chiari: con una cefalea occipital que empeora al toser, el audiólogo informa lo que vio y sugiere completar con el médico.
+**El nistagmo hacia abajo es el signo clásico y uno de los menos frecuentes**: 4 de 77 pacientes con Chiari I (Kumar y cols., 2002). <!-- Pasada de fundamentos 2026-10-18: decía "el menos frecuente". En Kumar y cols. (2002) el nistagmo hacia arriba (3) y el optocinético alterado (3) fueron menos frecuentes. --> Una VNG sin hallazgos **no descarta** un Chiari: con una cefalea occipital que empeora al toser, el audiólogo informa lo que vio y sugiere completar con el médico.
 :::
 
 :::imagen ilustraciones/cap25-rm-chiari.jpg ancho=62% Malformación de Chiari tipo I en una resonancia sagital (T1) de una niña de 13 años con mareo e inestabilidad al caminar desde hacía 18 meses, sin cefalea y con examen neurológico normal. Las amígdalas cerebelosas bajan 19 mm por debajo de la línea de McRae (la que une los bordes del agujero magno). Fíjate en que el mareo y la inestabilidad eran toda la queja: un Chiari no siempre trae la cefalea clásica. Imagen: Sahuquillo J y cols. (2023), J Clin Med, doi:10.3390/jcm12144626, CC BY 4.0, adaptada.
@@ -322,7 +322,6 @@ No hay síntomas auditivos. ¿Pedirías igual la audiometría? ¿Qué cuidado te
 - @70,24 | El **ojo izquierdo** hacia la derecha se queda en 0° y el blanco está en 10°: sale a tiempo, pero no llega.
 - @72,63 | Precisión de 0,50 hacia la derecha: la mitad del camino. Hacia la izquierda es 1,00.
 :::
-<!-- verificar: aducción lenta y nistagmo del ojo que abduce en la INO (Leigh y Zee 2015, capítulo de movimientos conjugados); el resumen de Strupp 2014 solo cita la aducción alterada. -->
 :::figura cap25_esclerosis audiograma
 - @OD 4000 | La audición es **normal** en los dos oídos: 0 dB en 4 kHz. No es lo que se esperaba de un cuadro de ojos, pero la esclerosis múltiple casi no da hipoacusia.
 - @OI 4000 | El OI tiene el mismo valor.

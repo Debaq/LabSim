@@ -124,13 +124,13 @@ El glicerol tomado por boca saca agua de los tejidos por ósmosis, también del 
 3. **Controles**: dos, a la hora y media y a las tres horas de la toma; o tres, a la hora, a las dos y a las tres horas. En cada uno se mide la vía aérea, la logoaudiometría y el acúfeno.
 4. **Lectura.** La prueba es **positiva** si una frecuencia del audiograma mejora 15 dB o más, si la discriminación mejora 12 % o más, si el promedio tonal aéreo mejora 10 dB o más respecto de la basal, o si disminuyen el acúfeno o la plenitud.
 
-Un resultado **negativo no descarta** el hidrops: la enfermedad fluctúa, y un oído medido en un buen día, o con un daño ya fijo, no tiene cuánto mejorar.
+Un resultado **negativo no descarta** el hidrops (Basel y Lütkenhöner, 2013): la enfermedad fluctúa, y un oído medido en un buen día, o con un daño ya fijo, no tiene cuánto mejorar.
 
 :::comentario Lo que dicen las normas
-No hay un criterio único de positividad. En la literatura se usa sobre todo la mejoría del umbral en las frecuencias graves, de 10 dB o más en varias frecuencias, o la de la discriminación, y no se suelen aceptar como criterio los síntomas que refiere el paciente, como el acúfeno o la plenitud. En este libro la prueba se lee con los cinco criterios de arriba, y en el informe se anota cuál se cumplió.
+No hay un criterio único de positividad, y los que se han propuesto difieren mucho en sensibilidad y especificidad (Basel y Lütkenhöner, 2013). En la literatura se usa sobre todo la mejoría del umbral en las frecuencias graves, de 10 dB o más en varias frecuencias, o la de la discriminación, y no se suelen aceptar como criterio los síntomas que refiere el paciente, como el acúfeno o la plenitud. En este libro la prueba se lee con los cinco criterios de arriba, y en el informe se anota cuál se cumplió.
 :::
 
-<!-- verificar: Klockhoff y Lindblom 1966 (dosis original de 1,5 g/kg, que con la densidad del glicerol, ~1,26 g/mL, equivale a ~1,2 mL/kg; criterio original de positividad). No se leyó el texto original; una serie posterior usó 10 dB de mejoría en las dos o tres frecuencias más graves (Magliulo y cols., no está en la bibliografía del libro). -->
+<!-- Pasada de fundamentos 2026-10-18: la dosis de 1,2 mL/kg es la que usa la serie de 347 pacientes de Basel y Lütkenhöner (2013, resumen: "glycerol (1.2 mL/kg body weight) was orally administered"); ahí el mayor efecto fue a las 4 horas y casi igual a las 3. El resumen también dice "there is no consensus as to the definition of positive" y "a negative test result is of little diagnostic value". verificar: la frase del recuadro sobre qué criterios usa la literatura (10 dB en varias frecuencias graves, discriminación, síntomas no aceptados) no se pudo confirmar en un texto leído; Klockhoff y Lindblom 1966 no tiene resumen y no se leyó. -->
 
 LabSim no tiene la prueba de glicerol: sus pacientes no cambian dentro de una atención.
 
@@ -163,26 +163,26 @@ Cuando el sonido mueve el órgano de Corti, la corriente que entra a las célula
 
 ### Lo que hace el hidrops
 
-En el hidrops la endolinfa aumenta y la rampa media se **distiende**: la membrana de Reissner se abomba hacia la rampa vestibular y, en el ápice, puede llegar a ocuparla (Salt y Plontke, 2010). La presión de la rampa media desplaza también la membrana basilar hacia la rampa timpánica. Con el órgano de Corti corrido de su posición de reposo, la transducción trabaja desde otro punto de partida y se vuelve más asimétrica: **el PS crece**. El PA, que depende de las fibras, cambia poco. Por eso la **razón PS/PA sube** (Salt y Plontke, 2010; Ferraro y Durrant, 2006).
+En el hidrops la endolinfa aumenta y la rampa media se **distiende**: la membrana de Reissner se abomba hacia la rampa vestibular y, en el hidrops avanzado, puede llegar a llenarla. En las vueltas apicales también se ha visto la membrana basilar desplazada hacia la rampa timpánica (Salt y Plontke, 2010). La explicación más usada del PS grande parte de ahí: con el órgano de Corti corrido de su posición de reposo, la transducción trabaja desde otro punto de partida y se vuelve más asimétrica, y **el PS crece**. En el cobayo, correr el órgano de Corti hacia la rampa timpánica con un gel inyectado en el ápice cambia ese punto de trabajo y agranda el PS (Salt y Plontke, 2010). El PA, que depende de las fibras, cambia poco. Por eso la **razón PS/PA sube** (Ferraro y Durrant, 2006). No es un mecanismo cerrado: en el hidrops experimental del cobayo el PS creció poco y solo al comienzo, y la presión de la endolinfa casi no sube (Salt y Plontke, 2010).
 
-<!-- verificar: el desplazamiento de la membrana basilar hacia la rampa timpánica como causa del PS aumentado, y que el ápice se distiende primero; confirmar en el texto de Salt y Plontke 2010 y de Ferraro y Durrant 2006. -->
+<!-- Pasada de fundamentos 2026-10-18: decía que "la presión de la rampa media desplaza también la membrana basilar hacia la rampa timpánica" y daba el mecanismo como hecho. Salt y Plontke (2010, texto completo PMC2923478): "Displacements of the basilar membrane in the apical segments of the cochlea have also been reported, in some patients to a degree where the basilar membrane contacts the bony wall of the scala tympani"; gel en el ápice: "sustained transducer operating point change, consistent with a displacement of the organ of Corti towards scala tympani", con "increases of summating potential" a tasas altas; pero "the increase of SP in hydropic guinea pigs was small and confined to the initial period after sac ablation" y "the role that pressure plays in endolymphatic hydrops is at best, limited". Se resolvió el verificar. Ferraro y Durrant (2006) no se leyó entero: queda solo como fuente de la razón PS/PA como medida del hidrops (resumen). -->
 
 :::imagen ilustraciones/cap09-hidrops.svg ancho=92% Corte de una espira de la cóclea. A, normal: la rampa media (endolinfa) es un triángulo entre la membrana de Reissner, la membrana basilar y la estría vascular. B, hidrops: la endolinfa aumenta, la membrana de Reissner se abomba hacia la rampa vestibular y la rampa media se agranda.
 :::
 
-El hidrops empieza y pesa más en el **ápice**, que es donde se codifican los graves. Por eso la primera pérdida es **ascendente**: graves peores que agudos (→ H3). La cóclea sigue comportándose como cóclea, con reclutamiento, y la discriminación se mantiene más o menos acorde a la curva mientras la pérdida no avance. Del laberinto posterior, el primero en comprometerse suele ser el sáculo, y después el utrículo y los canales (Young, 2013).
+El hidrops pesa más en el **ápice**, que es donde se codifican los graves: ahí se desplaza la membrana basilar y ahí se pierden primero las células ciliadas (Salt y Plontke, 2010). Por eso la primera pérdida es **ascendente**: graves peores que agudos (→ H3). <!-- Pasada de fundamentos 2026-10-18: decía "El hidrops empieza y pesa más en el ápice", sin cita. Salt y Plontke (2010): estereocilios de las CCE alterados "first occurring in the apical regions", pérdidas "greatest in the apical turns" y membrana basilar desplazada en los segmentos apicales. Que el hidrops "empiece" en el ápice no lo dicen (en el cobayo lo primero fueron sáculo, seno endolinfático y Reissner). --> La cóclea sigue comportándose como cóclea, con reclutamiento, y la discriminación se mantiene más o menos acorde a la curva mientras la pérdida no avance. Del laberinto posterior, el primero en comprometerse suele ser el sáculo, y después el utrículo y los canales (Young, 2013).
 
 La relación entre el hidrops y los síntomas no es simple. Hay oídos con hidrops en el estudio histológico que nunca tuvieron crisis, y el hidrops podría ser más un marcador de la enfermedad que la causa directa de cada crisis (Merchant y cols., 2005; Salt y Plontke, 2010). La audición fluctúa, y la ECochG, que mide un oído en un momento, también.
 
 :::sabias ¿Sabías que?
-Prosper Ménière describió en 1861 que el vértigo con hipoacusia y zumbido podía venir del oído y no del cerebro, como se creía entonces. Que la causa fuera un exceso de endolinfa no se vio hasta 1938, cuando Hallpike y Cairns encontraron la rampa media distendida en los huesos temporales de pacientes que la habían tenido (Hallpike y Cairns, 1938).
+Prosper Ménière describió en 1861 que el vértigo con hipoacusia y zumbido podía venir del oído y no del cerebro, como se creía entonces (Baloh, 2001). Que la causa fuera un exceso de endolinfa no se vio hasta 1938, cuando Hallpike y Cairns encontraron la rampa media distendida en los huesos temporales de pacientes que la habían tenido (Hallpike y Cairns, 1938).
 :::
 
 ## Patología
 
 ### Enfermedad de Ménière
 
-Es el hidrops sin una causa conocida. Lo característico son las **crisis**: vértigo que gira, de minutos a horas, con náuseas y vómitos, acompañado en el oído afectado de **plenitud**, **acúfeno** (casi siempre grave, un zumbido) y **baja de audición**. Entre crisis el paciente queda bien o con algo de inestabilidad, y la audición mejora en parte. Con los años, cada crisis deja algo más de pérdida.
+Es el hidrops sin una causa conocida. Lo característico son las **crisis**: vértigo que gira, de minutos a horas, con náuseas y vómitos, acompañado en el oído afectado de **plenitud**, **acúfeno** (típicamente grave, un zumbido) y **baja de audición**. <!-- Pasada de fundamentos 2026-10-18: decía "casi siempre grave". Sin fuente para el "casi siempre"; lo que hay es que el tono del acúfeno coincide con la frecuencia peor del audiograma en el 64 % (Zhang y cols., 2016), que al comienzo son los graves. --> Entre crisis el paciente queda bien o con algo de inestabilidad, y la audición mejora en parte. Con los años, cada crisis deja algo más de pérdida.
 
 Los criterios de la Sociedad Bárány (Lopez-Escamez y cols., 2015) piden, para un Ménière **definido**:
 
@@ -218,7 +218,7 @@ Los casos de LabSim muestran el Ménière **típico**: el de la etapa ascendente
 
 ### Hidrops retardado
 
-Es un hidrops que aparece **años después** de una sordera profunda de un oído (Schuknecht, 1978). Esa sordera antigua suele venir de una laberintitis viral, sobre todo por **paperas**, o de un trauma. Tiene dos formas:
+Es un hidrops que aparece **años después** de una sordera profunda de un oído (Schuknecht, 1978). Esa sordera antigua viene de una infección o de un trauma; en más de la mitad de los casos es una sordera de un oído que se descubre en la infancia sin fecha de inicio, y en los huesos temporales estudiados el oído sordo muestra las lesiones de la laberintitis por **paperas** o por sarampión (Schuknecht y cols., 1990). <!-- Pasada de fundamentos 2026-10-18: decía "suele venir de una laberintitis viral, sobre todo por paperas, o de un trauma". Schuknecht 1978 (resumen): "usually from infection or trauma"; Schuknecht y cols. 1990 (resumen): "In more than half the cases... the profound hearing losses in the early phase are simply discovered to be present in early childhood without a known time of onset" y, en dos huesos temporales, cambios del oído sordo "similar to those known to occur in mumps and measles labyrinthitis". --> Tiene dos formas:
 
 - **Ipsilateral**: el mismo oído sordo empieza a dar crisis de vértigo, sin cambios de audición que medir.
 - **Contralateral**: el oído **que oía bien** empieza a fluctuar, con o sin crisis de vértigo. En una serie de 57 pacientes con esta forma, el oído con hidrops tuvo una pérdida fluctuante de graves, con un promedio de 41 dB, que rara vez llegó a severa (Albera y cols., 2021).
@@ -228,10 +228,10 @@ La forma contralateral tiene una gravedad propia: enferma el **único oído que 
 En el estudio hay dos detalles técnicos. El oído sordo exige **enmascarar** para medir el que oye, y el que oye, para confirmar que el sordo no responde (→ H4). Y las pruebas que comparan contra un oído sano, como el **Fowler**, no se pueden hacer: no hay un oído normal de referencia. El reclutamiento se busca con el **SISI** y con el **Metz**.
 
 :::sabias ¿Sabías que?
-Schuknecht propuso que el oído sordo y el que se enferma después podrían haber sufrido la misma infección en la infancia: en uno destruyó la cóclea de inmediato y en el otro dañó en silencio la reabsorción de la endolinfa, que tardó años en descompensarse (Schuknecht, 1978).
+Schuknecht propuso que el oído sordo y el que se enferma después podrían haber sufrido la misma infección viral en la infancia: en uno destruyó la cóclea de inmediato y en el otro dejó un daño silencioso que, años después, terminó en un hidrops como el del Ménière (Schuknecht y cols., 1990).
 :::
 
-<!-- verificar: la hipótesis de Schuknecht 1978 sobre la infección bilateral subclínica (se cita así en la literatura secundaria; no se leyó el original). -->
+<!-- Pasada de fundamentos 2026-10-18: se resolvió el verificar. La hipótesis está en Schuknecht y cols. (1990), no en el de 1978; resumen: "Meniere's disease may occur as a delayed sequela of inner ear damage sustained during an attack of subclinical viral labyrinthitis occurring in childhood" (lo atribuye igual Kamei, 2004, Int Tinnitus J 10:137-43). Decía además que el daño era de "la reabsorción de la endolinfa": eso es el mecanismo que Schuknecht da para la forma ipsilateral (atrofia u obliteración del sistema de reabsorción, según Kamei 2004); para la contralateral la fuente habla solo de un daño subclínico, y se dejó así. -->
 
 ## Razonamiento
 
@@ -475,6 +475,7 @@ El audiograma de hoy está casi normal y es fácil tranquilizar al paciente. Per
 1. Baba A, Takasaki K, Tanaka F, Tsukasaki N, Kumagami H, Takahashi H. Amplitude and area ratios of summating potential/action potential (SP/AP) in Meniere's disease. Acta Otolaryngol. 2009;129(1):25-29. doi:10.1080/00016480701724888. PMID 19003588.
 1. Lamounier P, Gobbo DA, de Souza TSA, de Oliveira CACP, Bahmad F Jr. Electrocochleography for Ménière's disease: is it reliable? Braz J Otorhinolaryngol. 2014;80(6):527-532. doi:10.1016/j.bjorl.2014.08.010.
 1. Klockhoff I, Lindblom U. Endolymphatic hydrops revealed by glycerol test. Preliminary report. Acta Otolaryngol. 1966;61(5):459-62. doi:10.3109/00016486609127084
+1. Basel T, Lütkenhöner B. Auditory threshold shifts after glycerol administration to patients with suspected Menière's disease: a retrospective analysis. Ear Hear. 2013;34(3):370-84. doi:10.1097/AUD.0b013e31826d0c08
 
 ### Fisiología
 
@@ -493,4 +494,6 @@ El audiograma de hoy está casi normal y es fácil tranquilizar al paciente. Per
 1. Albera A, Canale A, Boldreghini M, Lucisano S, Riva G, Albera R. Contralateral delayed endolymphatic hydrops: Clinical features and long term outcome. J Otol. 2021;16(4):205-209. doi:10.1016/j.joto.2021.02.003
 1. Young YH, Huang TW, Cheng PW. Vestibular evoked myogenic potentials in delayed endolymphatic hydrops. Laryngoscope. 2002;112(9):1623-6. doi:10.1097/00005537-200209000-00018
 1. Hallpike CS, Cairns H. Observations on the pathology of Ménière's syndrome. J Laryngol Otol. 1938;53(10):625-55. doi:10.1017/S0022215100003947
-1. Merchant SN, Adams JC, Nadol JB Jr. Pathophysiology of Meniere's syndrome: are symptoms caused by endolymphatic hydrops? Otol Neurotol. 2005;26(1):74-81. PMID 15699723.
+1. Merchant SN, Adams JC, Nadol JB Jr. Pathophysiology of Meniere's syndrome: are symptoms caused by endolymphatic hydrops? Otol Neurotol. 2005;26(1):74-81. doi:10.1097/00129492-200501000-00013. PMID 15699723.
+1. Schuknecht HF, Suzuka Y, Zimmermann C. Delayed endolymphatic hydrops and its relationship to Ménière's disease. Ann Otol Rhinol Laryngol. 1990;99(11):843-53. doi:10.1177/000348949009901101
+1. Baloh RW. Prosper Ménière and his disease. Arch Neurol. 2001;58(7):1151-6. doi:10.1001/archneur.58.7.1151

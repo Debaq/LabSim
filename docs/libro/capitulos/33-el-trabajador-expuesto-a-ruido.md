@@ -47,7 +47,7 @@ Tres consecuencias para quien examina:
 - **Que vuelva a la base no siempre es inocente.** En ratones, una exposición que solo desplazó el umbral por unos días dejó el audiograma normal y, aun así, se perdió una proporción importante de sinapsis (Kujawa y Liberman, 2009; → cap. 6). En humanos se discute cuánto pesa, así que un audiograma que vuelve a 0 dB HL **no dice** "sin daño": dice "sin daño que el umbral vea".
 - **El reposo es parte del método.** Una base y una confirmación quieren el umbral permanente: por eso se piden 12 a 14 horas sin ruido según la norma (→ H22). Si la exposición fue muy intensa, esas horas pueden no alcanzar y quedará un resto de TTS que se confunde con permanente: en ese caso el control se repite más adelante, en vez de dar el cambio por definitivo (Ryan y cols., 2016).
 
-<!-- verificar: el plazo exacto de recuperación del TTS en humanos tras una jornada laboral típica no se encontró en una fuente de acceso abierto; Ryan y cols. (2016) hablan de horas, días o semanas según la exposición. -->
+<!-- Pasada de fundamentos 2026-10-18: NIOSH (1998, sección 2.2) dice que el TTS "typically returns to its former level within a few minutes to a few hours"; Ryan y cols. (2016): de minutos a horas o de días a semanas, con un tope de 30 días. No hay una cifra única para una jornada típica. -->
 
 ### Por qué se compara contra la propia base
 
@@ -75,10 +75,10 @@ La base se toma **antes** (o al comienzo) de la exposición precisamente para de
 
 - **Si es simétrica y con la forma del ruido**, es una exposición previa (otro empleo, tiro, música): se anota, se informa al trabajador y entra al programa. El oído ya dañado no queda más sensible, pero tampoco protegido (→ H22).
 - **Si es asimétrica, con gap, plana o con acúfeno unilateral**, el ruido no es toda la explicación. La vía aérea sin enmascarar del cribado no sirve para estudiarla: con diferencias de 40 dB o más entre los oídos el tono puede estar cruzando al otro lado (ISP, 2026; → H3, H4). Va a audiometría diagnóstica y a otorrinolaringología, y a veces a la pregunta del cap. 11.
-- **Quién decide.** Quien toma la audiometría **informa el patrón**; no decide si el trabajador puede o no ocupar un puesto. En Chile, el protocolo manda que una base alterada o con un perfil de pérdida no laboral o mixto pase al médico de salud ocupacional (MINSAL, 2013; → H22). El resultado individual es del trabajador: a la empresa llegan datos agrupados y sin nombre. <!-- verificar: no se encontró en las fuentes leídas una norma chilena que diga si una base alterada impide la contratación; el libro no lo afirma ni lo niega. -->
+- **Quién decide.** Quien toma la audiometría **informa el patrón**; no decide si el trabajador puede o no ocupar un puesto. En Chile, el protocolo manda que una base alterada o con un perfil de pérdida no laboral o mixto pase al médico de salud ocupacional (MINSAL, 2013; → H22). El resultado individual es del trabajador: a la empresa llegan datos agrupados y sin nombre. <!-- verificar: no se encontró una norma chilena que diga si una base alterada impide la contratación; el libro no lo afirma ni lo niega. Se revisaron el texto de PREXOR (NT 156) y la guía ISP 2026 (2026-10-18): ninguno lo trata. Falta revisar el Código del Trabajo o la Ley 16.744. -->
 
 :::ojo Ojo clínico
-La audiometría de vigilancia **no es un examen de aptitud ni de diagnóstico** (ISP, 2026). Dice cómo está el umbral hoy. Lo que se hace con eso, para el trabajador y para el puesto, lo deciden un médico y el programa, con la historia y el nivel de exposición.
+La audiometría de vigilancia **no es un examen de diagnóstico**: la guía chilena prohíbe usarla para diagnosticar patología otorrinolaringológica, para calificar una enfermedad profesional o en un contexto médico-legal (ISP, 2026). Dice cómo está el umbral hoy. <!-- Pasada de fundamentos 2026-10-18: decía "no es un examen de aptitud ni de diagnóstico (ISP, 2026)". La guía (consideración 4) excluye el diagnóstico clínico, la calificación de enfermedad profesional y el uso médico-legal; no habla de aptitud. --> Lo que se hace con eso, para el trabajador y para el puesto, lo deciden un médico y el programa, con la historia y el nivel de exposición.
 :::
 
 ## Razonamiento
@@ -222,10 +222,10 @@ Es una audiometría de cribado por vía aérea y sin enmascarar. ¿Sirve para es
 - @OI 8000 | En 8 kHz recupera a 40 dB: la forma de la muesca, pero muy profunda y de un solo lado.
 :::
 
-Una diferencia de 95 dB entre los oídos sobrepasa el límite de 40 dB desde el cual la guía chilena indica no usar el cribado, porque el tono puede estar cruzando al otro oído (ISP, 2026). El OI debe estudiarse con vía ósea y enmascaramiento (→ H3, H4).
+Una diferencia de 95 dB entre los oídos sobrepasa los 40 dB desde los cuales, según la guía chilena, aumenta la probabilidad de que el tono cruce al otro oído (ISP, 2026). <!-- Pasada de fundamentos 2026-10-18: decía "el límite de 40 dB desde el cual la guía chilena indica no usar el cribado". La guía solo advierte: "en casos de asimetrías iguales o superiores a 40 dB entre ambos oídos aumenta la probabilidad de que ocurra la transmisión cruzada del estímulo". --> El OI debe estudiarse con vía ósea y enmascaramiento (→ H3, H4).
 
 :::docente Guía del caso
-- **Datos clave:** 10 años de tiro y caza sin protección fiable, diestro (el oído izquierdo es el que queda del lado del arma <!-- verificar: lateralidad de la pérdida en tiradores diestros, fuente -->), pitido unilateral izquierdo de cinco años, entiende bien en conversación, nunca consultó.
+- **Datos clave:** 10 años de tiro y caza sin protección fiable, diestro (con rifle o escopeta, la cabeza le hace sombra al oído derecho y el izquierdo recibe más: Meinke y cols., 2014), pitido unilateral izquierdo de cinco años, entiende bien en conversación, nunca consultó.
 - **Hipótesis:** trauma acústico por armas (lo más probable: asimétrico por la lateralidad del tirador, → cap. 6), pérdida retrococlear (asimetría + acúfeno unilateral: la tríada del cap. 11), otra causa unilateral.
 - **Qué pedir:** audiometría diagnóstica con vía ósea y enmascaramiento, logoaudiometría, impedanciometría con reflejos y evaluación de otorrinolaringología. Si la discriminación está peor que el umbral, el cap. 11 manda.
 - **Lo que enseña:** la base alterada **sigue siendo la base**, pero antes de usarla hay que saber qué es. Es un caso de derivación, no de archivo; y de confidencialidad: el trabajador recibe el resultado y a la empresa llegan datos agrupados.
@@ -269,7 +269,7 @@ Si en la confirmación hubiera quedado un resto de 5 o 10 dB, no se lo llama TTS
 
 #### Razonamiento
 
-La audiometría de ingreso no se parece a ninguna base típica: un oído en 0 dB HL y el otro con 95 dB en 4 kHz. Calza con el trauma acústico de un tirador diestro, pero la asimetría y el acúfeno unilateral son también la entrada del cap. 11, y 95 dB de diferencia pasan el umbral de 40 dB desde el cual el cribado no sirve. Primero se estudia el oído; después se hace la base.
+La audiometría de ingreso no se parece a ninguna base típica: un oído en 0 dB HL y el otro con 95 dB en 4 kHz. Calza con el trauma acústico de un tirador diestro, pero la asimetría y el acúfeno unilateral son también la entrada del cap. 11, y 95 dB de diferencia pasan los 40 dB desde los cuales el tono puede cruzar al otro oído (ISP, 2026). Primero se estudia el oído; después se hace la base.
 
 #### Diagnóstico y qué sigue
 
@@ -305,7 +305,7 @@ La pérdida de este trabajador **no** es de la faena. Que esté escrito, con fec
 1. Occupational Safety and Health Administration. Occupational noise exposure. 29 CFR 1910.95. Disponible en: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.95
 1. National Institute for Occupational Safety and Health. Criteria for a recommended standard: occupational noise exposure, revised criteria 1998. Cincinnati (OH): DHHS (NIOSH) Publication No. 98-126; 1998. Disponible en: https://stacks.cdc.gov/view/cdc/6376
 1. Instituto de Salud Pública de Chile. Guía técnica para la evaluación auditiva de vigilancia de la salud de los trabajadores expuestos ocupacionalmente a ruido, versión 3.0. Santiago: ISP; 2026. Disponible en: https://www.ispch.cl/wp-content/uploads/2026/04/Evaluacion-Auditiva.pdf
-1. Ministerio de Salud de Chile. Protocolo sobre normas mínimas para el desarrollo de programas de vigilancia de la pérdida auditiva por exposición a ruido en los lugares de trabajo (PREXOR). Norma Técnica N.° 156, aprobada por D.Ex. N.° 1052 del 14-10-2013. Santiago: MINSAL; 2013. <!-- verificar: no se encontró un enlace oficial estable al PDF; las copias halladas están en sitios de terceros. -->
+1. Ministerio de Salud de Chile. Protocolo sobre normas mínimas para el desarrollo de programas de vigilancia de la pérdida auditiva por exposición a ruido en los lugares de trabajo (PREXOR). Norma Técnica N.° 156, aprobada por D.Ex. N.° 1052 del 14-10-2013. Santiago: MINSAL; 2013. <!-- verificar: sigue sin enlace oficial estable en minsal.cl. El texto del decreto (NT 156, D.Ex. 1052 del 14-10-2013, 55 págs.) se cotejó el 2026-10-18 en la copia de la Escuela de Salud Pública de la Universidad de Chile (educa.saludpublica.uchile.cl). -->
 
 ### Fisiología
 
@@ -316,4 +316,5 @@ La pérdida de este trabajador **no** es de la faena. Que esté escrito, con fec
 
 ### Patología
 
-1. Rink (1989), estudio de NIOSH citado en la referencia 2 (sección de la segunda prueba inmediata); no se leyó el original. <!-- verificar: referencia primaria completa de Rink (1989) -->
+1. Rink T. Clinical review of patterns from 300,000 industrial audiograms. Presentado en: Industrial Hearing Conservation Conference; 12-14 abr 1989; Lexington (KY). Citado en NIOSH (1998); no se leyó el original.
+1. Meinke DK, Murphy WJ, Finan DS, Lankford JE, Flamme GA, Stewart M, et al. Auditory risk estimates for youth target shooting. Int J Audiol. 2014;53(Suppl 2):S16-25. doi:10.3109/14992027.2013.865845

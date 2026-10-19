@@ -30,7 +30,7 @@ LabSim lo toma en serio. Cuando el caso trae un oído como **no realizable** (ot
 
 El diapasón se apoya en la frente, en la mastoides o frente al pabellón. Por eso es el examen que **casi siempre se puede hacer**, y el que orienta cuando lo demás se posterga.
 
-- **Weber.** Con un conducto ocluido, el diapasón en la frente se oye **en el oído tapado**: la oclusión refuerza la vía ósea en los graves (efecto de oclusión; Fagelson y Martin, 1998) y además aísla ese oído del ruido de la sala.
+- **Weber.** Con un conducto ocluido, el diapasón en la frente se oye **en el oído tapado**: la oclusión refuerza la vía ósea en los graves (efecto de oclusión; Fagelson y Martin, 1998). El ruido de la sala, que enmascara algo el oído abierto, suma poco.
 - **Rinne.** Sale **negativo** en el oído ocluido si el componente conductivo alcanza el umbral del diapasón. Con gaps chicos sigue positivo (BSA, 2022).
 
 :::comentario Lo que dicen las normas
@@ -39,7 +39,7 @@ En LabSim el Rinne se da vuelta con **15 dB** de gap: es el umbral que usa LabSi
 
 ### Por qué no se mide a través de un tapón
 
-Un tapón que cierra el conducto le agrega al oído una pérdida de transmisión que **no es del oído**. En 42 oídos con tapón, la hipoacusia fue conductiva en todos, casi siempre leve (Adobamen y Ogisi, 2012). Si mides así:
+Un tapón que cierra el conducto le agrega al oído una pérdida de transmisión que **no es del oído**. En 42 oídos con tapón, todos tuvieron una pérdida conductiva, en general leve, y 8 tenían además un componente sensorioneural (Adobamen y Ogisi, 2012).<!-- Pasada de fundamentos 2026-10-18: decía "la hipoacusia fue conductiva en todos, casi siempre leve". El abstract dice que 8 de los 42 oídos tenían una pérdida mixta; se precisó (Adobamen y Ogisi, 2012). --> Si mides así:
 
 - **La audiometría** informa una conductiva que desaparece con el lavado. Peor aún, queda escrita en una ficha, en un examen laboral o en el presupuesto de un audífono.
 - **La sonda** empuja el tapón hacia la membrana y su punta se llena de cerumen. Además, el impedanciómetro mide el aire que hay entre la sonda y lo que tenga enfrente: si enfrente hay cerumen, el timpanograma describe el tapón, no el oído medio. Sale **plano y con un volumen bajo**, porque la sonda solo ve el poco aire que queda hasta el cerumen (BSA, 2024; caso 1.1).
@@ -73,7 +73,7 @@ El detalle del oído externo está en B1 y B2. Aquí va lo que explica los casos
 
 ### Tapón de cerumen
 
-Es la causa más común de un conducto ocluido. Se habla de **tapón** (impactación) cuando el cerumen da síntomas o impide examinar el oído, ocluya o no por completo (Schwartz y cols., 2017). Da oído tapado, autofonía, a veces acúfeno o mareo. Es típico que se cierre de golpe después de la ducha o la piscina, cuando el agua hincha un cerumen que ya estaba casi tapando. La pérdida es conductiva y leve, y en 109 oídos no tuvo relación con el largo del tapón (Subha y Raman, 2006).
+Es un motivo de consulta frecuente (Guest y cols., 2004).<!-- Pasada de fundamentos 2026-10-18: decía "Es la causa más común de un conducto ocluido". Sin fuente para el superlativo; Guest 2004 lo describe como causa importante de consulta en atención primaria. --> Se habla de **tapón** (impactación) cuando el cerumen da síntomas o impide examinar el oído, ocluya o no por completo (Schwartz y cols., 2017). Da oído tapado, autofonía, a veces acúfeno o mareo. Es típico que se cierre de golpe después de la ducha o la piscina, cuando el agua hincha un cerumen que ya estaba casi tapando. La pérdida es conductiva y leve, y en 109 oídos no tuvo relación con el largo del tapón (Subha y Raman, 2006).
 
 ### Cuerpo extraño
 
@@ -87,7 +87,7 @@ Infección de la piel del conducto, favorecida por la humedad (piscina, ducha) y
 
 ### Estenosis y atresia congénita
 
-El conducto no se formó (atresia) o quedó muy estrecho (estenosis). Suele acompañarse de **microtia**, un pabellón pequeño o malformado, y casi siempre es de un solo lado. La cóclea es sana y la pérdida es una conductiva grande y estable: en series quirúrgicas el gap ronda los 50 dB antes de operar (Dobratz y cols., 2008), y<!-- verificar: los ~50 dB se deducen del gap posoperatorio más la mejora que informa Dobratz; no es una cifra preoperatoria publicada tal cual. --> la cirugía mejora la aérea en unos 26 dB, sin normalizarla (Jonas y cols., 2022). La audiometría con **vía ósea enmascarada** es el examen que decide: confirma la reserva coclear antes de cualquier tratamiento. Por fuera, la atresia con microtia salta a la vista; la estenosis, en cambio, puede mostrar la entrada del conducto abierta y estrecharse más adentro, en el hueso. El otorrinolaringólogo estudia el oído con una tomografía, que muestra si el conducto está estrecho o si no existe.
+El conducto no se formó (atresia) o quedó muy estrecho (estenosis). Suele acompañarse de **microtia**, un pabellón pequeño o malformado, y suele ser de un solo lado: lo fue en 67 de 74 niños de una serie (Jensen y cols., 2013). La cóclea es sana y la pérdida es una conductiva grande y estable: en series quirúrgicas el gap ronda los 50 dB antes de operar (Dobratz y cols., 2008), y<!-- Pasada de fundamentos 2026-10-18: los ~50 dB salen del abstract de Dobratz: gap posoperatorio más mejora media = 33,8 + 16,8 = 50,6 dB (osiculoplastía) y 23,8 + 29,9 = 53,7 dB (cadena propia). --> la cirugía mejora la aérea en unos 26 dB, sin normalizarla (Jonas y cols., 2022). La audiometría con **vía ósea enmascarada** es el examen que decide: confirma la reserva coclear antes de cualquier tratamiento. Por fuera, la atresia con microtia salta a la vista; la estenosis, en cambio, puede mostrar la entrada del conducto abierta y estrecharse más adentro, en el hueso. El otorrinolaringólogo estudia el oído con una tomografía, que muestra si el conducto está estrecho o si no existe.
 
 :::imagen ilustraciones/cap01-foto-estenosis-atresia.jpg ancho=100% El oído derecho de dos niños, visto por fuera. A: el conducto se abre, pero la tomografía mostró una estenosis ósea severa; mirado desde afuera, no se adivina. B: microtia con atresia completa del conducto. Son otras personas, no los pacientes de este capítulo. Imagen: Truong MT, Liu YC, Kohn J y cols. (2022), Front Surg, doi:10.3389/fsurg.2022.944223, Fig. 2, CC BY 4.0, adaptada.
 - @23,30 | **A · Estenosis**: el pabellón está formado y el conducto se abre bajo el globo; la estrechez está más adentro, en el hueso, y no se ve por fuera.
@@ -103,12 +103,12 @@ El conducto no se formó (atresia) o quedó muy estrecho (estenosis). Suele acom
 
 ### Carcinoma del conducto
 
-Es raro, de adultos mayores, y suele ser un carcinoma escamoso. Se presenta como una "otitis externa que no se cura": otorrea con sangre, **dolor que no calza con lo que se ve** y tejido de granulación que sangra al tocarlo. Al crecer invade el hueso y el oído medio, y puede alcanzar la cóclea y el nervio facial. En una serie de 9 pacientes, 7 tenían hipoacusia y 5 de ellos severa a profunda (Ungar y cols., 2021). Una **parálisis facial** en un oído con otorrea es una señal de alarma que no espera.
+Es raro, de adultos mayores, y suele ser un carcinoma escamoso. Se presenta como una "otitis externa que no se cura": otorrea con sangre, **dolor que no calza con lo que se ve** y una masa o tejido de granulación que sangra al tocarlo (Ungar y cols., 2021). Al crecer invade el hueso y el oído medio, y puede alcanzar la cóclea y el nervio facial. En una serie de 9 pacientes, 7 tenían hipoacusia y 5 de ellos severa a profunda (Ungar y cols., 2021). Una **parálisis facial** en un oído con otorrea es una señal de alarma que no espera.
 
-<!-- verificar: el cuadro clínico ("otitis externa que no cura", dolor nocturno, granulación) y la otitis externa necrotizante como diagnóstico diferencial en el diabético mayor son conocimiento clínico estándar, pero no tienen cita verificada en este capítulo. -->
+<!-- Pasada de fundamentos 2026-10-18: el verificar del cuadro clínico se resolvió. Ungar 2021 (texto completo): el carcinoma escamoso es el 80% de los tumores primarios del temporal, es raro, sus primeros síntomas se atribuyen a otitis media o externa, la tríada clásica es dolor, sangrado y otorrea, y lo más específico es una masa que obstruye el conducto, sobre todo con parálisis facial. La otitis externa necrotizante en el adulto mayor diabético: Mahdyoun 2013. El "dolor nocturno" del caso 1.5 queda sin cita (es relato del caso). -->
 
 :::sabias ¿Sabías que?
-En un conducto con tejido que sangra y un paciente diabético mayor, el médico piensa también en la **otitis externa necrotizante** ("maligna"), una infección que avanza hacia el hueso del cráneo. Se parece al carcinoma por fuera, y las dos piden lo mismo de ti: no tocar el conducto y derivar sin demora.
+En un conducto con tejido que sangra y un paciente diabético mayor, el médico piensa también en la **otitis externa necrotizante** ("maligna"), una infección que avanza hacia el hueso del cráneo y afecta sobre todo a hombres mayores con diabetes (Mahdyoun y cols., 2013). Se parece al carcinoma por fuera, y las dos piden lo mismo de ti: no tocar el conducto y derivar sin demora.
 :::
 
 ## Razonamiento
@@ -184,7 +184,7 @@ Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas
 
 :::figura cap01_tapon_cerumen timpanograma
 - La timpanometría del OD no corresponde con el tapón puesto. Si igual se hace, esto es lo que sale, y conviene saber reconocerlo.
-- @OD pico | Curva **plana**, sin pico, con un volumen de solo 0,44 mL: menos que el mínimo normal de un adulto (0,6 mL). La sonda mide el poco aire que hay hasta el cerumen.
+- @OD pico | Curva **plana**, sin pico, con un volumen de solo 0,44 mL: menos que el mínimo normal de un adulto (0,6 mL; BSA, 2024). La sonda mide el poco aire que hay hasta el cerumen.
 - @OI pico | El OI es A, con 1,17 mL de volumen. Un plano con volumen bajo, distinto del otro oído, es el **tapón**, no el oído medio: no se informa como tipo B.
 :::
 
@@ -448,10 +448,10 @@ Nunca limpies, aspires ni toques con instrumentos un conducto con tejido que san
 
 1. British Society of Audiology. Recommended procedure: ear examination [Internet]. Bathgate: BSA; 2022 Feb [citado 2026 oct 15]. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-54-BSA-Recommended-Procedure-Ear-Examiniation-February-2022.pdf
 1. British Society of Audiology. Recommended procedure: tympanometry and acoustic reflex thresholds [Internet]. BSA; 2024 Feb (enmiendas menores feb 2025 y mar 2026) [citado 2026 oct 15]. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2026/03/BSA-Recommended-Procedure-Tympanometry-Acoustic-Reflex-Thresholds-March-2026-minor-revision.pdf
-1. British Society of Audiology (2022). Recommended Procedure: Rinne and Weber Tuning Fork Tests (OD104-51 v2). Turton L, Batty S.
+1. British Society of Audiology. Recommended procedure: Rinne and Weber tuning fork tests (OD104-51 v2) [Internet]. Bathgate: BSA; 2022 Feb [citado 2026 oct 18]. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-51-BSA-Recommended-Procedure-Rinne-Weber-Tuning-Fork-Tests-February-2022.pdf
 1. Kelly EA, Li B, Adams ME. Diagnostic accuracy of tuning fork tests for hearing loss: a systematic review. Otolaryngol Head Neck Surg. 2018;159(2):220-230. doi:10.1177/0194599818770405. PMID 29661046.
 1. Schwartz SR, Magit AE, Rosenfeld RM, Ballachanda BB, Hackell JM, Krouse HJ, et al. Clinical practice guideline (update): earwax (cerumen impaction). Otolaryngol Head Neck Surg. 2017;156(1 Suppl):S1-S29. doi:10.1177/0194599816671491
-1. Fagelson MA, Martin FN. The occlusion effect and ear canal sound pressure level. Am J Audiol. 1998;7(2):50-4. doi:10.1044/1059-0889(1998/010)
+1. Fagelson MA, Martin FN. The occlusion effect and ear canal sound pressure level. Am J Audiol. 1998;7(2):50-4. doi:10.1044/1059-0889(1998/010). PMID 26649518
 
 ### Fisiología
 
@@ -462,12 +462,14 @@ Nunca limpies, aspires ni toques con instrumentos un conducto con tejido que san
 
 ### Patología
 
-1. Adobamen PR, Ogisi FO. Hearing loss due to wax impaction. Nig Q J Hosp Med. 2012;22(2):117-120.
-1. Subha ST, Raman R. Role of impacted cerumen in hearing loss. Ear Nose Throat J. 2006;85(10):650, 652-653.
+1. Adobamen PR, Ogisi FO. Hearing loss due to wax impaction. Nig Q J Hosp Med. 2012;22(2):117-120. PMID 23175910
+1. Subha ST, Raman R. Role of impacted cerumen in hearing loss. Ear Nose Throat J. 2006;85(10):650, 652-653. doi:10.1177/014556130608501011. PMID 17124935
 1. Plum AW, Wong M. An Overview of Acute Otitis Externa. Otolaryngol Clin North Am. 2023;56(5):891-896. doi:10.1016/j.otc.2023.06.006
 1. Dobratz EJ, Rastogi A, Jahrsdoerfer RA, Kesser BW. To POP or not: ossiculoplasty in congenital aural atresia surgery. Laryngoscope. 2008;118(8):1452-1457. doi:10.1097/MLG.0b013e3181753354
 1. Jonas RH, Casazza GC, Kesser BW. Audiometric Outcomes After Surgical Repair of Congenital Aural Atresia: Does Age Matter? Otol Neurotol. 2022;43(7):814-819. doi:10.1097/MAO.0000000000003599
 1. Ungar OJ, Santos F, Nadol JB, Horowitz G, Fliss DM, Faquin WC, Handzel O. Invasion Patterns of External Auditory Canal Squamous Cell Carcinoma: A Histopathology Study. Laryngoscope. 2021;131(2):E590-E597. doi:10.1002/lary.28676. PMID 32311775
+1. Jensen DR, Grames LM, Lieu JE. Effects of aural atresia on speech development and learning: retrospective analysis from a multidisciplinary craniofacial clinic. JAMA Otolaryngol Head Neck Surg. 2013;139(8):797-802. doi:10.1001/jamaoto.2013.3859. PMID 23868202
+1. Mahdyoun P, Pulcini C, Gahide I, Raffaelli C, Savoldelli C, Castillo L, Guevara N. Necrotizing otitis externa: a systematic review. Otol Neurotol. 2013;34(4):620-9. doi:10.1097/MAO.0b013e3182804aee. PMID 23598690
 
 ### Fotos de otoscopía
 

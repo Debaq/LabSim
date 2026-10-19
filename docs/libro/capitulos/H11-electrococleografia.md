@@ -11,7 +11,7 @@
 
 La electrococleografía (ECochG o ECoG) registra la respuesta eléctrica de la **cóclea** y de la porción más distal del **nervio auditivo** en los primeros milisegundos después de un sonido. Es un potencial evocado como el PEAT (→ H10), con una diferencia que lo cambia todo: el electrodo activo **no está en el vértex, sino dentro del oído**, a centímetros o a milímetros de la cóclea. Eso hace que la respuesta sea grande, de microvoltios, y que lo que se ve no sea una serie de ondas del tronco sino los potenciales del propio órgano de Corti.
 
-La técnica nació como una forma de medir el umbral auditivo de manera objetiva (Eggermont, citado por Hornibrook, 2017). Hoy su uso clínico más frecuente es otro: buscar la huella eléctrica del **hidrops endolinfático** (→ cap. 9).
+La técnica nació como una forma de medir el umbral auditivo de manera objetiva (Hornibrook, 2017). Hoy su uso clínico más frecuente es otro: buscar la huella eléctrica del **hidrops endolinfático** (→ cap. 9).
 
 ## Para qué sirve
 
@@ -19,7 +19,7 @@ La ECochG responde, sobre todo, una pregunta:
 
 - **¿La cóclea de este oído tiene un potencial de sumación desproporcionado para su potencial de acción?** Una razón PS/PA alta apoya el diagnóstico de hidrops endolinfático, la lesión de la enfermedad de Ménière (Coats, 1981; Ferraro y Durrant, 2006). Se pide, junto con la audiometría, el reclutamiento y el VEMP cervical (→ H12), cuando hay crisis de vértigo con plenitud y acúfeno, o una pérdida que fluctúa.
 
-También ayuda a ubicar **dónde** falla una respuesta ausente: una microfónica presente con un PA ausente o desorganizado apunta a la sincronía del nervio y no a las células ciliadas (→ H10 y cap. 13). Se usa además en el monitoreo durante cirugías del oído y en el estudio de pacientes con implante coclear (Hall, 2007), cosas que LabSim no practica.
+También ayuda a ubicar **dónde** falla una respuesta ausente: una microfónica presente con un PA ausente o desorganizado apunta a la sincronía del nervio y no a las células ciliadas (→ H10 y cap. 13). Se usa además para vigilar la cóclea durante la cirugía de implante coclear y para registrar desde el propio implante (Simpson y cols., 2020), cosas que LabSim no practica.<!-- Pasada de fundamentos 2026-10-18: decía "en el monitoreo durante cirugías del oído y en el estudio de pacientes con implante coclear (Hall, 2007)"; Hall no se consultó. Simpson y cols. (2020, texto completo) describen el registro intraoperatorio en la cirugía de implante y la ECochG intracoclear por el implante. -->
 
 Hay que tener claros sus límites desde el principio:
 
@@ -50,7 +50,7 @@ En la cóclea sana, la membrana basilar vibra alrededor de una posición de repo
 :::imagen ilustraciones/h11-sesgo.svg ancho=100% La misma vibración de la membrana con dos puntos de trabajo. La respuesta de la célula ciliada tiene forma de S: si la membrana vibra en el tramo del medio, el promedio queda casi en el reposo y el PS es chico; si el hidrops corre el punto de trabajo, el promedio se desplaza y el PS crece. Es la explicación más difundida, no un hecho demostrado.
 :::
 
-En el hidrops, la presión de la endolinfa **empuja la membrana basilar** hacia la rampa timpánica y desplaza su punto de trabajo. La misma vibración produce entonces un promedio más corrido: un PS más grande. Esta es la explicación más difundida (Gibson y cols., 1977) y se apoya en experimentos en los que una polarización continua de la partición coclear cambió el PS (Durrant y Dallos, 1972). La fisiopatología del hidrops en general se revisa en Salt y Plontke (2010). Es una **hipótesis de trabajo**, no una medición directa del desplazamiento en el paciente.
+En el hidrops, la presión de la endolinfa **empuja la membrana basilar** hacia la rampa timpánica y desplaza su punto de trabajo. La misma vibración produce entonces un promedio más corrido: un PS más grande. La relación entre un PS grande y el hidrops la propusieron Gibson y cols. (1977); el mecanismo del punto de trabajo es la explicación más difundida (Hornibrook, 2017) y se apoya en experimentos en los que una polarización continua de la partición coclear cambió el PS (Durrant y Dallos, 1972). La fisiopatología del hidrops en general se revisa en Salt y Plontke (2010). Es una **hipótesis de trabajo**, no una medición directa del desplazamiento en el paciente.
 
 El hidrops hace dos cosas más en el trazo. El PS no solo sube: **se prolonga**, porque el desplazamiento de la membrana tarda más en volver a la base, y por eso la razón de **áreas** puede detectar oídos que la de amplitudes todavía llama normales (Devaiah y cols., 2003). Y el PA, que depende de que las fibras descarguen a la vez, no crece con él: queda proporcionalmente más chico.
 
@@ -58,12 +58,12 @@ El hidrops hace dos cosas más en el trazo. El PS no solo sube: **se prolonga**,
 
 ### La distancia al electrodo
 
-Cuanto más cerca de la cóclea, más grande es todo, y por eso la técnica se hace con electrodos dentro del oído. Un electrodo lejano da una respuesta de alrededor de **una cuarta parte** de la que da uno en contacto con la cóclea (Hornibrook, 2017).
+Cuanto más cerca de la cóclea, más grande es todo, y por eso la técnica se hace con electrodos dentro del oído. Un electrodo lejano da una respuesta de **una cuarta a una décima parte** de la que da uno en contacto con la cóclea (Hornibrook, 2017; Simpson y cols., 2020).<!-- Pasada de fundamentos 2026-10-18: decía "alrededor de una cuarta parte (Hornibrook, 2017)". Hornibrook da un cuarto en su resumen, pero cita series de 7 y de 10 a 25 veces; Simpson y cols. (2020) dan un PA transtimpánico 5 a 10 veces mayor que el extratimpánico. -->
 
 :::imagen ilustraciones/h11-electrodos.svg ancho=100% Las tres posiciones del electrodo activo: conducto, tímpano y promontorio. Cuanto más cerca de la cóclea, más grande es la respuesta; las barras muestran el orden de magnitud, no la escala.
 :::
 
-Pero el electrodo no solo cambia el tamaño: cambia **la razón**. El PA es un campo cercano y muy sincronizado, que se atenúa rápido con la distancia; el PS, que suma la actividad de muchas células, se atenúa menos. Por eso la misma cóclea da razones **más altas** medidas desde el conducto que desde el promontorio, y el límite normal es distinto en cada posición. Comparar una razón con el límite de otro electrodo es el error más fácil de cometer (ver "Cómo se informa").
+Pero el electrodo no solo cambia el tamaño: cambia **la razón**. Los límites publicados son **más altos** con los electrodos extratimpánicos que con la aguja en el promontorio (Wuyts y cols., 1997), así que el límite normal es distinto en cada posición.<!-- Pasada de fundamentos 2026-10-18: decía que el PA "es un campo cercano" que se atenúa más rápido con la distancia que el PS y que "por eso" la misma cóclea da razones más altas desde el conducto. No se encontró respaldo para ese mecanismo; queda el hecho de los límites distintos por electrodo (Wuyts 1997: 0,35 transtimpánico, 0,42 extratimpánico, según EcochgReferences.php). --> Comparar una razón con el límite de otro electrodo es el error más fácil de cometer (ver "Cómo se informa").
 
 ### Click y tone burst
 
@@ -122,11 +122,11 @@ Antes de poner el electrodo:
 El electrodo activo se pone en el **oído que se estudia**. Hay tres posiciones, de la más lejana a la más cercana a la cóclea:
 
 - **De conducto (TIPtrode).** Un tapón de espuma con una lámina de oro, que se inserta en el conducto como un fono de inserción y por cuyo centro llega el sonido (Roland y cols., 1993). Es el más **cómodo**, no necesita colocarse sobre el tímpano y lo puede poner cualquier examinador entrenado. Es el que da la respuesta más chica, y obliga a promediar más.
-- **Timpánico.** Un electrodo blando, de punta de plata o de mecha húmeda, que se apoya **sobre la membrana timpánica** bajo visión otoscópica. Da un PA de unos pocos microvoltios y es el que se usa en este libro. Un contacto malo se nota en el trazo: el PA sale chico y el ruido sube (Simpson y cols., 2020).
-- **Transtimpánico.** Una aguja que atraviesa el tímpano y se apoya en el **promontorio**. Da el registro más grande, decenas de microvoltios (Ge y Shea, 2002), pero lo coloca un médico, con anestesia local, y es el más invasivo.
+- **Timpánico.** Un electrodo blando, de punta de plata o de mecha húmeda, que se apoya **sobre la membrana timpánica** bajo visión otoscópica. Con click a 90 dB nHL da un PA de alrededor de 1 µV, algo más con buen contacto, y es el que se usa en este libro. Un contacto malo se nota en el trazo: el PA sale chico y el ruido sube (Simpson y cols., 2020).<!-- Pasada de fundamentos 2026-10-18: decía "un PA de unos pocos microvoltios". Simpson y cols. (2020) reportan amplitudes que se acercan a 1 µV con electrodo de mecha y click de 90 dB nHL, y un aumento de 1,54 µV del PA cuando el electrodo se coloca bajo visión (Margolis, 1999, citado ahí). -->
+- **Transtimpánico.** Una aguja que atraviesa el tímpano y se apoya en el **promontorio**. Da el registro más grande, de 5 a 10 veces el de un electrodo extratimpánico (Simpson y cols., 2020), pero lo coloca un médico y es el más invasivo.<!-- Pasada de fundamentos 2026-10-18: decía "decenas de microvoltios (Ge y Shea, 2002), pero lo coloca un médico, con anestesia local". El abstract de Ge y Shea no da amplitudes; la cifra salía del modelo de LabSim. Se reemplazó por la razón publicada (Simpson y cols., 2020, citando a Mori y cols., 1982). -->
 
 :::comentario Lo que dicen las normas
-En la literatura, "extratimpánico" suele agrupar todo lo que no atraviesa el tímpano: el electrodo sobre la membrana y el de conducto, que dan respuestas distintas. Aquí se separan en tres porque la razón normal cambia con cada uno. La separación entre el tímpano y el conducto no es unánime: algunos trabajos los juntan (Wuyts y cols., 1997), y hay quienes recomiendan el de conducto para el PEAT del recién nacido por su comodidad (Ferraro, 2010). El valor que se use tiene que corresponder al electrodo con el que se midió.
+En la literatura, "extratimpánico" suele agrupar todo lo que no atraviesa el tímpano: el electrodo sobre la membrana y el de conducto, que dan respuestas distintas. Aquí se separan en tres porque la razón normal cambia con cada uno. La separación entre el tímpano y el conducto no es unánime: algunos trabajos los juntan (Wuyts y cols., 1997), y hay quienes usan el de conducto para mejorar el PEAT del recién nacido (Ferraro, 2010). El valor que se use tiene que corresponder al electrodo con el que se midió.
 :::
 
 ### Montaje
@@ -164,7 +164,7 @@ Cada parámetro tiene su razón, y se puede cometer el error de olvidarla:
 5. **La tasa baja y los barridos son menos.** Con 11,1 por segundo, 1.500 barridos toman algo más de dos minutos por curva.
 
 :::comentario Lo que dicen las normas
-No hay un protocolo único de ECochG. Las revisiones describen ajustes distintos de filtros, tasa, nivel y número de promediaciones, con estímulos de click o de tone burst y con distintas polaridades (Wuyts y cols., 1997; Ferraro y Durrant, 2006; Simpson y cols., 2020). Margolis y cols. (1995) registraron en condensación, rarefacción y alternado, y recomendaron mirar la diferencia entre polaridades; en la serie de Satar y cols. (2003) esa diferencia no mejoró el diagnóstico. En este libro se usa el estándar de la tabla, con el que están calculados los límites de LabSim.
+No hay un protocolo único de ECochG. Las revisiones describen ajustes distintos de filtros, tasa, nivel y número de promediaciones, con estímulos de click o de tone burst y con distintas polaridades (Wuyts y cols., 1997; Ferraro y Durrant, 2006; Simpson y cols., 2020). Margolis y cols. (1995) registraron en condensación, rarefacción y alternado, y recomendaron mirar la diferencia entre polaridades; con aguja transtimpánica, Ge y Shea (2002) la encontraron prolongada en el 62 % de los oídos con Ménière; en la serie de Satar y cols. (2003) esa diferencia no mejoró el diagnóstico. En este libro se usa el estándar de la tabla, con el que están calculados los límites de LabSim.
 :::
 
 ## Paso a paso
@@ -342,7 +342,7 @@ Para practicar, el paciente de este capítulo está entre los de práctica (★)
 7. Un paciente con la historia completa de Ménière tiene la ECochG normal. ¿Descarta eso el diagnóstico?
 :::
 
-<!-- verificar: (1) Hall 2007 como fuente del uso intraoperatorio y en implante coclear: no se consultó el libro. (2) Ge y Shea 2002 para "decenas de microvoltios" y la anestesia local del electrodo transtimpánico: no se leyó el original; el orden de magnitud sale del modelo de LabSim (PA ~1, ~3,5 y ~20 µV por electrodo). (3) Gibson 1977 como origen de la explicación del sesgo de la membrana: no se leyó el original; Hornibrook 2017 lo atribuye a Gibson solo para el hallazgo del PS agrandado. (4) Simpson 2020 sobre el contacto del electrodo: no se leyó el texto completo. (5) Ferraro 2010 sobre el electrodo de conducto en el recién nacido: solo se leyó el resumen. -->
+<!-- Pasada de fundamentos 2026-10-18: se resolvieron los cinco verificar que había aquí. (1) Hall 2007 se reemplazó por Simpson y cols. 2020 (texto completo). (2) Las "decenas de microvoltios" del transtimpánico se reemplazaron por la razón de 5 a 10 veces de Simpson y cols. 2020; la anestesia local se quitó. (3) Hornibrook 2017 describe el mecanismo del punto de trabajo (lo atribuye a Gibson 1978); Gibson y cols. 1977 queda solo para la relación PS grande-hidrops, que es lo que dice su abstract. (4) Simpson y cols. 2020, leído completo: el contacto y la colocación bajo visión cambian la amplitud del PA. (5) Ferraro 2010, abstract: el electrodo de conducto para mejorar el PEAT del recién nacido; se quitó "por su comodidad". -->
 
 ## Referencias
 
@@ -351,7 +351,6 @@ Para practicar, el paciente de este capítulo está entre los de práctica (★)
 1. Ferraro JA, Durrant JD. Electrocochleography in the evaluation of patients with Ménière's disease/endolymphatic hydrops. J Am Acad Audiol. 2006;17(1):45-68. doi:10.3766/jaaa.17.1.6
 1. Ferraro JA. Electrocochleography: a review of recording approaches, clinical applications, and new findings in adults and children. J Am Acad Audiol. 2010;21(3):145-52. doi:10.3766/jaaa.21.3.2
 1. Simpson MJ, Jennings SG, Margolis RH. Techniques for obtaining high-quality recordings in electrocochleography. Front Syst Neurosci. 2020;14:18. doi:10.3389/fnsys.2020.00018
-1. Hall JW 3rd. New handbook of auditory evoked responses. Boston: Pearson; 2007.
 1. Wuyts FL, Van de Heyning PH, Van Spaendonck MP, Molenberghs G. A review of electrocochleography: instrumentation settings and meta-analysis of criteria for diagnosis of endolymphatic hydrops. Acta Otolaryngol Suppl. 1997;526:14-20. doi:10.3109/00016489709124014
 1. Ge X, Shea JJ Jr. Transtympanic electrocochleography: a 10-year experience. Otol Neurotol. 2002;23(5):799-805. doi:10.1097/00129492-200209000-00032
 1. British Society of Audiology. Recommended procedure: cochlear microphonic testing (OD104-87). BSA; 2019. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-87-Recommended-Procedure-for-Cochlear-Microphonic-Testing.pdf

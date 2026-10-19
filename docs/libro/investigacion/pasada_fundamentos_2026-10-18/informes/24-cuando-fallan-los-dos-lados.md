@@ -1,0 +1,34 @@
+# 24. Cuando fallan los dos lados
+
+Se leyó el texto completo de Strupp y cols. (2017) (PMC9249284), de la fe de erratas de 2023 (PMC9986683), de Lucieer y cols. (2016) (PMC4777732) y de Szmulewicz y cols. (2016) (PMC4753833), y los resúmenes de todas las demás referencias (Europe PMC). Confirmado sin cambios: criterios vHIT (<0,6, 150-300 °/s) y calórico (suma bitérmica <6 °/s por lado); DVA ≥0,2 logMAR, Romberg y VEMP como complementarias "not included in the definition"; probable con HIT de cabecera bilateral; Ward 2013 (21.782; 28/100.000; 64.046; 31 veces; 25 %; 44 %; 58 %); Zingler 2007 (255; 62 años; 62 % hombres; 24 + 25 % = 49 %; 13/7/5 %; 36 % crisis previas; 25 % signos cerebelosos; hipoacusia bilateral 25 % y unilateral 6 %; más frecuente en Cogan, meningitis y Ménière); Lucieer 2016 (47/22/31 %; >20 causas; migraña 50 vs 11 %; "23.4% of all patients ... reported an autoimmune disease"; "In 49% ... normal hearing or only moderate hearing loss in both ears"; "Blood tests did not often contribute"); Grossman 1988; Brandt 2005 (10 pacientes, 16,9 %); Black 2004 (33; 32 oscilopsia; 23 acúfeno; 1 a 3 semanas; 32 de 33 no reconocidos; niveles sin correlación; "no safe dose"; creatinina alta en 6 de 17); Hain 2013; Cortese 2019; Porciuncula 2012 (14 estudios; evidencia moderada; participación insuficiente; prótesis en fase temprana).
+
+## Citas agregadas (respaldo encontrado)
+- Aminoglucósidos · presentación sin vértigo y audición acorde a la edad · (Ahmed y cols., 2012) · doi:10.5694/mja11.10850 · nueva no. Resumen: "103 patients ... presented with imbalance, oscillopsia or both, but none had vertigo"; "audiometric thresholds for all patients were consistent with their age".
+- CANVAS · cómo se ve el reflejo potenciado visualmente alterado · (Szmulewicz y cols., 2016) · doi:10.1212/CPJ.0000000000000215 · PMID 26918204 · nueva sí. Texto completo: "turning a patient's head from side to side in the yaw plane at about 0.5 Hz while the patient stares at an earth-fixed target ... and observing that the compensatory eye movements are saccadic rather than smooth". Resuelve el `verificar`.
+- Caso 24.4, tabla de resultados · "seguimiento fragmentado, con sacadas" · se retiró el `verificar` (dato del caso): Szmulewicz 2016 lista entre los signos oculomotores cerebelosos de CANVAS "abnormally broken-up smooth pursuit". Sin cita en la tabla.
+- Resolución del caso 24.4 · compensación limitada · (Strupp y cols., 2017) · nueva no. Texto completo, nota 3: "Imbalance is even worse if there is an additional sensory polyneuropathy". Resuelve el `verificar` reformulando a lo que la fuente sostiene.
+
+## Corregidas (la literatura dice otra cosa)
+- Lo que dicen las normas (Técnica) y tabla de criterios · silla rotatoria "ganancia menor de 0,1 ... **o** un adelanto de fase mayor de 68 grados" → "ganancia de 0,1 o menos ... **y** un adelanto de fase de 15 grados o más (constante de tiempo de 6 s o menos)" · Strupp y cols., 2023 (fe de erratas, texto completo): "where it reads: Reduced horizontal angular VOR gain < 0.1 ... and a phase lead > 68 degrees (time constant < 5 sec) Should be: Reduced horizontal angular VOR gain≤0.1 upon sinusoidal stimulation on a rotatory chair (0.1 Hz, Vmax = 50°/sec) and a phase lead≥15 degrees (time constant≤6 sec)". En el original de 2017 la lista de criterios ya decía "and" (el resumen dice "and/or"). Se agregó la referencia de la fe de erratas (doi:10.3233/VES-229002, PMID 36336950) y se retiró el `verificar`.
+- Tabla de criterios, fila Historia · "peor a oscuras o en terreno desparejo, o con movimiento de la cabeza; a veces oscilopsia" → inestabilidad "más" visión borrosa/oscilopsia con el movimiento "o" empeoramiento a oscuras/terreno desparejo; sin síntomas sentado o acostado en reposo · Strupp 2017, criterios: "Unsteadiness when walking or standing plus at least one of 2 or 3: 2. Movement-induced blurred vision or oscillopsia during walking or quick head/body movements and/or 3. Worsening of unsteadiness in darkness and/or on uneven ground; B. No symptoms while sitting or lying down under static conditions". Se retiró el `verificar`.
+- CANVAS · "en la parte anterior y posterior del vermis" → "en el vermis anterior y dorsal" · Szmulewicz 2011, resumen: "cerebellar atrophy involving anterior and dorsal vermis, as well as the hemispheric crus I".
+- CANVAS · "Se describió como un trastorno de comienzo tardío y recesivo" → "Por las dos parejas de hermanos de la serie se propuso que fuera un trastorno recesivo de comienzo tardío" · Szmulewicz 2011, resumen: "There are two sets of sibling pairs, suggesting CANVAS is a late-onset recessive disorder".
+- Ayuda memoria · "La mitad de las vestibulopatías bilaterales no tiene causa conocida" → "Entre un tercio y la mitad" · Zingler 2007: "The cause of BV remains unclear in about half"; Lucieer 2016: "In 31%, the etiology of BVH remained idiopathic".
+- Aminoglucósidos · "nunca vértigo" → "sin vértigo", con la serie de Ahmed como respaldo (el absoluto "nunca" vale para esa serie, no como regla).
+
+## Quitadas o reformuladas (sin respaldo)
+- CANVAS · "la ayuda que la visión le suma al reflejo cuando se gira la cabeza con luz tampoco aparece" → se reemplazó por la descripción de la prueba y del hallazgo que da Szmulewicz 2016.
+- Resolución 24.4 · "la compensación que logran los otros pacientes está limitada" → reformulada con el argumento de la neuropatía y la cita de Strupp 2017.
+
+## Quedan `verificar`
+- Técnica, segundo "Lo que dicen las normas" (DVA) · equivalencia de líneas entre Snellen y logMAR y origen del criterio de 3 líneas de H19. Es práctica del autor (H19 ya tiene su propio `verificar` sobre Herdman y Clendaniel); no se buscó más.
+
+## Para el autor (práctica que choca con la literatura, no editada)
+- DVA · el libro usa 3 líneas o más (H19) y el consenso 0,2 logMAR (2 líneas en tabla logMAR) · Strupp 2017 · ya está explicado en el recuadro; queda el `verificar` de arriba.
+- Sabías que (audición) · el 49 % de Lucieer es "normal o pérdida moderada"; en esa serie solo 22 de 143 no tenían ninguna pérdida y 36 % tenía pérdida asimétrica. La frase es exacta, pero, puesta junto a "un audiograma normal no tranquiliza", podría leerse como que la mitad oía normal. Si el autor quiere, puede agregar el dato de 22 de 143.
+- Lucieer 2016 incluyó pacientes con suma calórica bitérmica menor de 20 °/s, no de 6 °/s como el consenso: sus porcentajes de causas son de una población definida con un criterio más amplio. No se tocó el texto.
+
+## Referencias de la lista con problemas
+- Hain 2013: Crossref lista los autores como "Cherchi, Yacovino, Hain", y PubMed como "Hain TC, Cherchi M, Yacovino DA". Se dejó el orden de PubMed.
+- Se agregaron Strupp 2023 (fe de erratas) al final de Técnica y Szmulewicz 2016 al final de Patología; las dos verificadas en Crossref.
+- El resto coincide con Crossref y Europe PMC.

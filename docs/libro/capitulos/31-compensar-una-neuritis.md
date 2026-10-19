@@ -32,7 +32,7 @@ Este capítulo no agrega una prueba. Usa las que ya conoces, **repetidas en el t
 - Una medida que **no acompaña** a las otras es el dato más útil del control.
 :::
 
-<!-- verificar: la señal "la ganancia baja de una visita a otra: avisar" y el "avisar" ante una medida que no acompaña son criterio del libro, no una recomendación citada. -->
+<!-- Pasada de fundamentos 2026-10-18: "la ganancia baja de una visita a otra: avisar" y el aviso ante una medida que no acompaña son criterio del libro (práctica), no una recomendación citada; no se les pega cita. -->
 
 ### Un programa por fases
 
@@ -48,9 +48,9 @@ El programa de H19 tiene cuatro ejes y una dosis. En una neuritis lo que hay que
 | **En la casa** | Varias veces al día, pocos minutos | Al menos 12 minutos al día en total (→ H19) | Como en la fase 2 y con el registro al día |
 :::
 
-<!-- verificar: los plazos de las fases (2, 6 semanas y 3 meses) son orientativos del libro, juicio clínico sobre la guía de Hall 2022 y Strupp 2001; la guía solo cita la dosis mínima y los motivos para parar, no fases con fechas. -->
+<!-- Pasada de fundamentos 2026-10-18: los plazos de las fases (2 y 6 semanas, 3 meses) son práctica del libro. Hall y cols. (2022) lo confirman: para la hipofunción aguda y subaguda "no specific dose recommendation" más allá del mínimo diario; no dan fases con fechas. -->
 
-El eje oculomotor con la cabeza quieta (seguir una luz con los ojos) se puede conservar como lo describe el protocolo, pero **no cuenta** como estabilización de la mirada ni se suma a su dosis (→ H19).
+El eje oculomotor con la cabeza quieta (seguir una luz con los ojos) se puede conservar como lo describe el protocolo, pero **no cuenta** como estabilización de la mirada ni se suma a su dosis (Hall y cols., 2022; → H19).
 
 :::comentario Lo que dicen las normas
 - **Cuándo empezar.** La guía de la APTA encuentra que empezar temprano puede mejorar el resultado en la hipofunción aguda (Hall y cols., 2022). Strupp y cols. concluyeron antes que los ejercicios deben empezar **lo más pronto posible** tras el inicio de los síntomas, y que los **lentos** podrían ser más eficaces que los rápidos, porque dependen más del sistema vestibular (Strupp y cols., 2001). Por eso aquí se empieza lento y se sube la velocidad a medida que se tolera; la regla de H19, "tan rápido como se pueda mantener el blanco nítido", es el techo de esa subida y no el punto de partida.
@@ -108,10 +108,10 @@ La edad **no** es un freno por sí misma: la guía dice que los mayores mejoran 
 
 ### Qué queda de una neuritis
 
-La neuritis vestibular es una pérdida unilateral aguda de la función del nervio, muchas veces de la rama superior, que lleva el canal lateral, el anterior y el utrículo (Tarnutzer y Weber, 2022); por eso el sáculo y el canal posterior suelen quedar intactos (→ cap. 21). La **audición no se toca**. Lo que queda después depende de dos cosas que van por separado: cuánto **recupera el nervio** y cuánto **compensa el cerebro**.
+La neuritis vestibular es una pérdida unilateral aguda de la función del nervio, que compromete la rama superior (canal lateral, anterior y utrículo) sola o junto con la inferior: en 43 pacientes, 42 % tenía solo la superior y 56 %, las dos (Taylor y cols., 2016; Tarnutzer y Weber, 2022). Cuando es solo la superior, el sáculo y el canal posterior quedan intactos (→ cap. 21). La **audición no se toca**. Lo que queda después depende de dos cosas que van por separado: cuánto **recupera el nervio** y cuánto **compensa el cerebro**.
 
 - **Recupera y compensa.** La ganancia vuelve a valores cercanos a lo normal y los síntomas desaparecen.
-- **Compensa con un déficit que queda.** El canal no se recupera del todo, pero el cerebro lo suple: el paciente vive bien con una ganancia baja y sacadas encubiertas. Es frecuente: en el seguimiento de Okinaka y cols., el 80 % tenía paresia canalicular a los 6 meses y alrededor del 50 % seguía con ella a los 5 o 10 años.
+- **Compensa con un déficit que queda.** El canal no se recupera del todo, pero el cerebro lo suple: el paciente vive bien con una ganancia baja y sacadas encubiertas. Es frecuente: en el seguimiento de Okinaka y cols. (1993), el 80 % tenía paresia canalicular a los 6 meses y alrededor del 50 % seguía con ella a los 5 o 10 años.
 - **No compensa bien.** Queda una inestabilidad, una visión que se corre o un mareo que no cede. Puede ser un déficit mal compensado (por lo que frena, → Fisiología) o **otra cosa**.
 
 :::sabias ¿Sabías que?
@@ -151,7 +151,7 @@ Una neuritis que compensa se reconoce porque **todo mejora, en el mismo sentido 
 ### Lo que más se equivoca
 
 - **Tomar la ganancia como la meta.** Se puede estar bien con una ganancia corta. El alta se decide por lo que el paciente puede hacer.
-- **Dar el alta a una fecha.** El protocolo habla de 3 a 6 semanas y la guía de más, y la decisión de parar es por las metas, no por las semanas (Hall y cols., 2022).
+- **Dar el alta a una fecha.** El protocolo habla de 3 a 6 semanas; en los estudios que revisa la guía la rehabilitación duró de 5 días a 52 semanas, y la decisión de parar se toma por las metas o por una meseta, no por las semanas (Hall y cols., 2022). <!-- Pasada de fundamentos 2026-10-18: decía "y la guía de más". Se corrigió: la guía no fija una duración mayor; informa duraciones de 5 días a 52 semanas y recomienda parar por metas, síntomas resueltos o meseta (Hall y cols., 2022). -->
 - **Suspender un fármaco por cuenta propia.** Un supresor retrasa la compensación, pero indicarlo y retirarlo es del médico. Lo que se hace es avisarle, con los datos.
 - **Subir la dosis cuando el paciente se estanca.** Si la función ya está, más ejercicio de VOR no resuelve lo que no es del VOR.
 - **Decir "su examen está normal"** a quien sigue mareado. Es lo que enseñó el caso del cap. 27: el laberinto funciona **y** el paciente sigue mal.
@@ -328,7 +328,7 @@ Esta es la hoja de sus tres visitas:
 :::docente Guía del caso
 - **Datos clave:** 33 años, diez semanas de una neuritis, **mejoró y se estancó**, mareo constante que no gira, peor con pantallas, supermercado y metro, mejor acostado o concentrado, **evita** lo que lo marea, hace los ejercicios "cuando se siente bien", duerme mal, miedo a que vuelva el vértigo.
 - **Hipótesis:** déficit mal compensado (no: la ganancia, la DVA y la batería están en lo esperable), vértigo posicional (pedir las pruebas posicionales), **mareo persistente funcional** en gestación (→ cap. 27).
-- **Qué pedir:** repetir el vHIT y la batería, preguntar lo que dejó de hacer, y **avisar al médico**: la meseta con la función recuperada es un motivo de derivación en la guía (Hall y cols., 2022).
+- **Qué pedir:** repetir el vHIT y la batería, preguntar lo que dejó de hacer, y **avisar al médico**: para la guía, la meseta es un motivo para detener la rehabilitación, y la ansiedad y la depresión son comorbilidades que empeoran el resultado y que llevan a derivar a otros profesionales (Hall y cols., 2022). <!-- Pasada de fundamentos 2026-10-18: decía "la meseta con la función recuperada es un motivo de derivación en la guía". Se corrigió: Hall y cols. (2022) dan la meseta como motivo para parar la terapia (AS 8), y la derivación la recomiendan ante comorbilidades como ansiedad y depresión (AS 9). -->
 - **Qué enseña:** que **más ejercicio de VOR no lo arregla** y que la función normal no es la misma cosa que "estar bien". La historia ya era la de Cousins y cols. (2017): evitación, miedo y dependencia visual.
 - **Errores esperables:** subir la dosis; decir "su examen está normal"; ponerle nombre de PPPD a las diez semanas, cuando el criterio de tiempo todavía no se cumple.
 - **En LabSim:** audición normal en los dos oídos. Es el mismo camino del paciente del cap. 27, **antes** de los nueve meses.
@@ -427,6 +427,7 @@ Es el caso que más se repite en la consulta: **un paciente con la función de v
 
 ### Patología
 
+1. Taylor RL, McGarvie LA, Reid N, Young AS, Halmagyi GM, Welgampola MS. Vestibular neuritis affects both superior and inferior vestibular nerves. Neurology. 2016;87(16):1704-12. doi:10.1212/WNL.0000000000003223
 1. Tarnutzer AA, Weber KP. Pattern analysis of peripheral-vestibular deficits with machine learning using hierarchical clustering. J Neurol Sci. 2022;434:120159. doi:10.1016/j.jns.2022.120159
 1. Okinaka Y, Sekitani T, Okazaki H, Miura M, Tahara T. Progress of caloric response of vestibular neuronitis. Acta Otolaryngol Suppl. 1993;503:18-22. doi:10.3109/00016489309128064
 1. Bergenius J, Perols O. Vestibular neuritis: a follow-up study. Acta Otolaryngol. 1999;119(8):895-9. doi:10.1080/00016489950180243

@@ -8,7 +8,7 @@
 - Decidir cuándo un oído medio se controla, cuándo se deriva y cuándo es urgente.
 :::
 
-Un oído medio sano es una caja llena de aire, a la misma presión que afuera. Cuando la trompa de Eustaquio deja de ventilarla, la presión baja, el tímpano se hunde y, con el tiempo, la caja se llena de líquido. Es la causa más frecuente de hipoacusia en la infancia y una de las consultas más comunes del adulto que "siente el oído tapado". Casi siempre es transitoria. Pero un niño que pasa meses oyendo como bajo el agua, justo en la edad en que aprende a hablar, pierde algo que después cuesta recuperar. Este capítulo trata de cómo reconocer ese oído con el timpanograma y la audiometría, y de qué hacer con lo que encuentras.
+Un oído medio sano es una caja llena de aire, a la misma presión que afuera. Cuando la trompa de Eustaquio deja de ventilarla, la presión baja, el tímpano se hunde y, con el tiempo, la caja se llena de líquido. Es una causa frecuente de hipoacusia en la infancia (Rosenfeld y cols., 2016) y aparece también en el adulto que "siente el oído tapado". Casi siempre es transitoria.<!-- Pasada de fundamentos 2026-10-18: decía "Es la causa más frecuente de hipoacusia en la infancia y una de las consultas más comunes del adulto". Rosenfeld 2016 no la llama la más frecuente; el superlativo del adulto no tenía fuente. Se dejó como en H1. --> Pero un niño que pasa meses oyendo como bajo el agua, justo en la edad en que aprende a hablar, pierde algo que después cuesta recuperar. Este capítulo trata de cómo reconocer ese oído con el timpanograma y la audiometría, y de qué hacer con lo que encuentras.
 
 ## Técnica en foco
 
@@ -46,9 +46,9 @@ Una curva plana dice que el tímpano no se mueve **o** que la sonda no está mid
 - **Volumen alto**: la sonda está midiendo el conducto **más** la caja y la mastoides. Hay una **perforación** o un **tubo de ventilación** que funciona.
 - **Volumen muy bajo**: la sonda está contra la pared del conducto o tapada por cerumen, o un tapón cierra el conducto y la sonda mide solo el aire que queda hasta él (→ cap. 1). No es un resultado del oído medio: se recoloca la oliva y se mide de nuevo, o se resuelve primero el tapón.
 
-Como referencia, el volumen del conducto va de unos 0,4 a 1,0 mL en niños de 3 a 5 años y de 0,6 a 1,5 mL en adultos (Margolis y Heller, 1987). Son rangos del 90 %: algunos oídos sanos quedan fuera. Por eso, más que el número aislado, sirve **compararlo con el otro oído**: una perforación da un volumen claramente mayor que el del lado sano. En un niño, un timpanograma plano con más de 1,0 mL es criterio de derivación (ASHA, 1997).
+Como referencia, el volumen del conducto va de unos 0,4 a 1,0 mL en niños de 3 a 5 años y de 0,6 a 1,5 mL en adultos (Margolis y Heller, 1987); en adultos, normas más recientes dan un rango más amplio, de 0,6 a 2,2 mL (BSA, 2024). Son rangos del 90 %: algunos oídos sanos quedan fuera. Por eso, más que el número aislado, sirve **compararlo con el otro oído**: una perforación da un volumen claramente mayor que el del lado sano. En un niño, un timpanograma plano con más de 1,0 mL es criterio de derivación (ASHA, 1997).
 
-<!-- verificar: los rangos de volumen de Margolis y Heller (1987) se tomaron de fuentes secundarias; cotejar con la tabla del artículo. -->
+<!-- verificar: los rangos de volumen de Margolis y Heller (1987) se tomaron de fuentes secundarias; cotejar con la tabla del artículo (el abstract no da cifras; un manual clínico universitario que lo cita da 0,6-1,4 mL para adultos). Pasada de fundamentos 2026-10-18: se agregó el rango adulto de la BSA 2024 (0,6-2,2 mL, de Hunter y Sanford 2015), que explica los volúmenes de 1,5-1,7 mL del caso 2.3. -->
 
 :::ojo Ojo clínico
 Un B con volumen normal y otro con volumen alto se dibujan igual. Si informas "curva B" sin el volumen, el médico no sabe si el tímpano está entero.
@@ -102,7 +102,7 @@ Ninguna prueba de función tubaria tiene un patrón de oro con qué compararse, 
 
 ### El gap y la acumetría
 
-En la audiometría (→ H3), un oído medio con líquido da una pérdida **conductiva**: la vía ósea queda normal y la aérea se separa de ella. En los niños con otitis media con efusión la aérea promedió unos 27 dB HL, con la ósea bajo 10 dB (Fria y cols., 1985). El gap suele ser algo mayor en los graves.
+En la audiometría (→ H3), un oído medio con líquido da una pérdida **conductiva**: la vía ósea queda normal y la aérea se separa de ella. En los niños con otitis media con efusión la aérea promedió unos 27 dB HL, con la ósea bajo 10 dB, y la pérdida fue unos 7 dB menor en 2 kHz (Fria y cols., 1985). En los graves suele ser algo mayor: en niños con efusión, 250 Hz fue la frecuencia con peores umbrales (Ren y Wang, 2012).<!-- Pasada de fundamentos 2026-10-18: decía "El gap suele ser algo mayor en los graves", sin cita. Fria 1985 (abstract): "acuity was 7 dB less impaired at 2,000 Hz"; Ren 2012 (abstract, umbrales aéreos por ASSR): "0.25 kHz ... poorer hearing thresholds than those in the 0.5, 1, 2, and 4 kHz". -->
 
 Dos detalles de la vía ósea confunden:
 
@@ -119,7 +119,7 @@ El líquido del oído medio cambia de un día a otro: se espesa, se reabsorbe y 
 
 La mucosa de la caja absorbe gas todo el tiempo, y por eso la presión del oído medio tiende a bajar. Lo que la repone es la **trompa de Eustaquio**: está cerrada en reposo y se abre un instante al tragar o bostezar, cuando se contraen los músculos del velo del paladar. Cada apertura deja entrar aire desde la nasofaringe e iguala la presión (Sadé y Ar, 1997; Doyle, 2017). El detalle anatómico está en B1.
 
-Si la trompa no abre lo suficiente, la secuencia es siempre la misma:
+Si la trompa no abre lo suficiente, la secuencia clásica es esta:
 
 1. **Presión negativa**: la caja queda bajo la presión atmosférica y el tímpano se hunde. Es la curva **C**.
 2. **Trasudado**: con la presión negativa sostenida, la mucosa deja salir líquido hacia la caja. La curva se redondea y baja (**Cs**).
@@ -135,7 +135,7 @@ En el **barotrauma** el problema es de velocidad. Al bajar un avión o al descen
 
 ### Otitis media con efusión
 
-Es líquido en el oído medio **sin signos de infección aguda**: sin dolor, sin fiebre, sin tímpano abombado. Casi todos los niños tienen al menos un episodio antes de entrar al colegio, muchas veces después de un resfrío o de una otitis aguda, y la mayoría se resuelve sola en semanas (Rosenfeld y cols., 2016). En la otoscopía el tímpano se ve opaco o ámbar, a veces con burbujas o un nivel de líquido, y se mueve poco con la otoscopía neumática. El timpanograma B tiene una sensibilidad y una especificidad cercanas al 92 % para efusión (Ren y Wang, 2012).
+Es líquido en el oído medio **sin signos de infección aguda**: sin dolor, sin fiebre, sin tímpano abombado. Entre la mitad y el 90 % de los niños tiene al menos un episodio antes de los cinco años, muchas veces después de un resfrío o de una otitis aguda, y la mayoría se resuelve sola dentro de unos tres meses (Rosenfeld y cols., 2016).<!-- Pasada de fundamentos 2026-10-18: decía "Casi todos los niños tienen al menos un episodio antes de entrar al colegio ... y la mayoría se resuelve sola en semanas". Resumen de la guía en Am Fam Physician 2016;94(9):747: "approximately 50% to 90% of children are affected by five years of age"; la introducción de la guía dice que la mayoría se resuelve en unos tres meses y al menos el 25 % dura tres meses o más. --> En la otoscopía el tímpano se ve opaco o ámbar, a veces con burbujas o un nivel de líquido, y se mueve poco con la otoscopía neumática. En niños con hipertrofia adenoidea, el timpanograma B tuvo una sensibilidad y una especificidad cercanas al 92 % para efusión (Ren y Wang, 2012).
 
 La pérdida es leve, conductiva y **fluctuante** (Fria y cols., 1985). En un adulto sería una molestia. En un niño de 2 a 5 años significa meses oyendo peor la conversación de la casa y la voz de la educadora en una sala con ruido. Por eso la guía de práctica clínica pide (Rosenfeld y cols., 2016):
 
@@ -152,7 +152,7 @@ La guía desaconseja tratar la otitis con efusión con antibióticos, corticoide
 
 Es la infección del oído medio: empieza en horas, con dolor y muchas veces fiebre. El signo que la define es el **tímpano abombado** por el pus; sin líquido en la caja no hay otitis aguda (Lieberthal y cols., 2013). El diagnóstico y el tratamiento son médicos. El audiólogo la ve en dos momentos: cuando el oído "sigue tapado" después del dolor y en el control posterior.
 
-Además de la pérdida conductiva, en la fase aguda la **vía ósea puede bajar**, sobre todo en los agudos: en una serie de otitis agudas de menos de siete días, el 90 % tenía hipoacusia y el 43 % era mixta (Kasemodel y cols., 2020). Se atribuye al paso de la inflamación al oído interno por la ventana redonda, y en general es transitoria. <!-- verificar: mecanismo propuesto por Kasemodel 2020 (ventana redonda). --> Por eso una ósea baja durante una otitis aguda **no se informa como hipoacusia sensorioneural definitiva**: se informa lo medido y se controla cuando el oído se ventile.
+Además de la pérdida conductiva, en la fase aguda la **vía ósea puede bajar**, sobre todo en los agudos: en una serie de otitis agudas de menos de siete días, el 90 % tenía hipoacusia y el 43 % era mixta (Kasemodel y cols., 2020). Se atribuye sobre todo al paso de toxinas y mediadores de la inflamación al oído interno por la ventana redonda (Kasemodel y cols., 2020), y no se sabe de antemano si se recuperará.<!-- Pasada de fundamentos 2026-10-18: decía "y en general es transitoria", con un verificar del mecanismo. Kasemodel 2020 (texto completo, PMC9422693): el componente sensorioneural "probably occurs due to intracochlear inflammation generated by the passage of toxins and inflammatory agents from the middle ear to the inner ear", por la ventana redonda, y propone además un hidrops transitorio; como es transversal, "we could not analyze whether the increase in bone thresholds was temporary or permanent". --> Por eso una ósea baja durante una otitis aguda **no se informa como hipoacusia sensorioneural definitiva**: se informa lo medido y se controla cuando el oído se ventile.
 
 Después de una otitis aguda el líquido suele quedarse semanas. Si a los tres meses sigue, se maneja como una otitis con efusión.
 
@@ -168,7 +168,7 @@ Muchas disfunciones tubarias tienen audición normal. Cuando la presión negativ
 
 ### Barotrauma de oído medio
 
-Aparece después de un vuelo o de un buceo, casi siempre en el descenso y casi siempre en quien viaja resfriado. Da dolor fuerte, oído tapado e hipoacusia. En la otoscopía hay desde una retracción con vasos marcados hasta sangre detrás del tímpano (hemotímpano) o una perforación (Mirza y Richardson, 2005). En pilotos en formación fue unilateral en el 86 % de los casos y la mayoría se resolvió en una semana (Sohn y Cho, 2017).
+Aparece después de un vuelo o de un buceo, sobre todo en el descenso (Mirza y Richardson, 2005), y la congestión nasal lo favorece (Sohn y Cho, 2017).<!-- Pasada de fundamentos 2026-10-18: decía "casi siempre en el descenso y casi siempre en quien viaja resfriado". Mirza 2005 (abstract): "developing after ascent or more usually descent"; Sohn 2017 (abstract): los síntomas nasales y la hipertrofia de cornetes se asociaron con el grado y la duración. Ninguno sostiene el "casi siempre resfriado". --> Da dolor fuerte, oído tapado e hipoacusia. En la otoscopía hay desde una retracción con vasos marcados hasta sangre detrás del tímpano (hemotímpano) o una perforación (Mirza y Richardson, 2005). En pilotos en formación fue unilateral en el 86 % de los casos y la mayoría se resolvió en una semana (Sohn y Cho, 2017).
 
 :::ojo Ojo clínico
 El barotrauma también puede dañar el **oído interno** (una fístula de la ventana redonda u oval). Vértigo, una pérdida **sensorioneural** o una vía ósea que cae después del vuelo o del buceo son una **urgencia**: se deriva el mismo día. En un barotrauma agudo no se presuriza el oído con la prueba de función tubaria.
@@ -203,7 +203,7 @@ Frente a un paciente con "oído tapado", el razonamiento sigue el camino del son
 - **A control**: la otitis aguda resuelta y la disfunción tubaria leve, con un nuevo audiograma e impedanciometría.
 
 :::ojo Ojo clínico
-Una efusión de **un solo oído en un adulto** sin una causa clara (resfrío, vuelo) obliga a que el otorrino mire la nasofaringe: un tumor que obstruye la trompa puede debutar así.
+Una efusión de **un solo oído en un adulto** sin una causa clara (resfrío, vuelo) obliga a que el otorrino mire la nasofaringe: un tumor que obstruye la trompa puede debutar así (Shah y cols., 2026).
 :::
 
 :::pregunta Pregunta abierta
@@ -489,7 +489,7 @@ El acúfeno grave e intermitente acompaña a la caja ocupada. Si después de la 
 1. Rosenfeld RM, Shin JJ, Schwartz SR, Coggins R, Gagnon L, Hackell JM, et al. Clinical practice guideline: otitis media with effusion (update). Otolaryngol Head Neck Surg. 2016;154(1 Suppl):S1-S41. doi:10.1177/0194599815623467
 1. Lieberthal AS, Carroll AE, Chonmaitree T, Ganiats TG, Hoberman A, Jackson MA, et al. The diagnosis and management of acute otitis media. Pediatrics. 2013;131(3):e964-99. doi:10.1542/peds.2012-3488
 1. Fria TJ, Cantekin EI, Eichler JA. Hearing acuity of children with otitis media with effusion. Arch Otolaryngol. 1985;111(1):10-16. doi:10.1001/archotol.1985.00800030044003
-1. Ren DD, Wang WQ. Assessment of middle ear effusion and audiological characteristics in young children with adenoid hypertrophy. Chin Med J (Engl). 2012;125(7):1276-1281.
+1. Ren DD, Wang WQ. Assessment of middle ear effusion and audiological characteristics in young children with adenoid hypertrophy. Chin Med J (Engl). 2012;125(7):1276-1281. PMID 22613601
 1. Ahmad I, Pahor AL. Carhart's notch: a finding in otitis media with effusion. Int J Pediatr Otorhinolaryngol. 2002;64(2):165-170. doi:10.1016/s0165-5876(02)00080-0
 1. Kasemodel ALP, Costa LEM, Monsanto RDC, Tomaz A, Penido NO. Sensorineural hearing loss in the acute phase of a single episode of acute otitis media. Braz J Otorhinolaryngol. 2020;86(6):767-773. doi:10.1016/j.bjorl.2019.06.001
 1. Schilder AG, Bhutta MF, Butler CC, Holy C, Levine LH, Kvaerner KJ, et al. Eustachian tube dysfunction: consensus statement on definition, types, clinical presentation and diagnosis. Clin Otolaryngol. 2015;40(5):407-11. doi:10.1111/coa.12475
@@ -497,3 +497,4 @@ El acúfeno grave e intermitente acompaña a la caja ocupada. Si después de la 
 1. Lildholdt T, Courtois J, Kortholm B, Schou JW, Warrer H. The correlation between negative middle ear pressure and the corresponding conductive hearing loss in children. A 12-month study of 352 unselected 7-year-old children. Scand Audiol. 1979;8(2):117-120. doi:10.3109/01050397909076310
 1. Mirza S, Richardson H. Otic barotrauma from air travel. J Laryngol Otol. 2005;119(5):366-370. doi:10.1258/0022215053945723
 1. Sohn JH, Cho KR. Middle Ear Barotrauma in Student Pilots. Aerosp Med Hum Perform. 2017;88(4):406-412. doi:10.3357/AMHP.4666.2017
+1. Shah S, Khalil A, Ahmed A, Mohamed S, Chawdhary G. Current management of adults with persistent unilateral otitis media with effusion: survey of UK otolaryngologists. Acta Otolaryngol. 2026;146(4):462-468. doi:10.1080/00016489.2025.2612020. PMID 41553000

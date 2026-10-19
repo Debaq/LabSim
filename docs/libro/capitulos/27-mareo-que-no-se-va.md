@@ -32,13 +32,13 @@ Cada uno mira algo distinto. Ninguno diagnostica; juntos arman el perfil.
 
 | Instrumento | Qué mide | Cómo se contesta |
 |---|---|---|
-| **DHI** (→ H19) | Cuánto limita el mareo la vida diaria, con subescalas funcional, emocional y física | 25 ítems (sí, a veces, no); 0 a 100 |
-| **VSS** (escala de síntomas de vértigo) | Con qué frecuencia hubo síntomas de vértigo-equilibrio y síntomas autonómicos y de ansiedad en el último año | Ítems de frecuencia; dos subescalas |
-| **VVAS** (escala análoga de vértigo visual, de Dannenbaum) | Cuánto marean las situaciones visuales: supermercado, multitud, pantallas, tráfico | Una escala de 0 a 10 en cada situación |
-| **NPQ** (cuestionario de Niigata para el PPPD) | La gravedad del PPPD en sus tres dominios: postura y marcha, movimiento y estímulos visuales | 12 ítems; puntaje total |
-| **ABC** (confianza en el equilibrio) | Cuán seguro se siente el paciente al hacer 16 actividades, de 0 a 100 % | 16 ítems; promedio en % |
+| **DHI** (→ H19) (Jacobson y Newman, 1990) | Cuánto limita el mareo la vida diaria, con subescalas funcional, emocional y física | 25 ítems (sí, a veces, no); 0 a 100 |
+| **VSS** (escala de síntomas de vértigo) (Yardley y cols., 1992) | Con qué frecuencia hubo síntomas de vértigo-equilibrio y síntomas autonómicos y de ansiedad en el último año | Ítems de frecuencia; dos subescalas |
+| **VVAS** (escala análoga de vértigo visual) (Dannenbaum y cols., 2011) | Cuánto marean nueve situaciones visuales de la vida diaria: supermercado, multitud, pantallas, tráfico | Una escala análoga de 0 a 10 en cada situación |
+| **NPQ** (cuestionario de Niigata para el PPPD) (Yagi y cols., 2019) | La gravedad del PPPD en sus tres dominios: postura y marcha, movimiento y estímulos visuales | 12 ítems, cuatro por dominio, cada uno de 0 a 6; 0 a 24 por dominio |
+| **ABC** (confianza en el equilibrio) (Powell y Myers, 1995) | Cuán seguro se siente el paciente al hacer 16 actividades, de 0 a 100 % | 16 ítems; promedio en % |
 
-<!-- verificar: la forma exacta de cada instrumento (número de ítems y rango del VSS y de la VVAS; los 12 ítems y el punto de corte del NPQ; el puntaje del ABC y sus tramos). Se citan las fuentes originales; falta contrastar cada formato con la versión en español. -->
+<!-- verificar: el período que pregunta la VSS ("el último año") y su número de ítems; los tramos del ABC; y el formato de cada instrumento en su versión en español. El resto se contrastó con los resúmenes originales en la pasada de fundamentos 2026-10-18. -->
 
 La lectura útil no es el número solo, sino el **perfil**. Un DHI alto con mucho **emocional** y una VVAS alta, con la audición y el vestíbulo sanos, es el perfil de un mareo que se ha vuelto visual y de vigilancia. Un DHI moderado con una VVAS **baja** y un empeoramiento a oscuras apunta a otro sitio. El ABC dice qué ha dejado de hacer el paciente por miedo: una confianza baja con una función normal es justo la brecha que el tratamiento va a trabajar.
 
@@ -72,10 +72,10 @@ El PPPD es cuando el **segundo camino** se instala: el mareo baja un poco y se q
 La Sociedad Bárány describe tres cambios que se mantienen aunque el vestíbulo ya funcione (Staab y cols., 2017):
 
 1. **El control postural se pone rígido.** El cuerpo se sostiene con más tensión: se bloquean tobillos y rodillas, se mira fijo, se oscila poco y rápido. En pacientes con un mareo postural fóbico, lo que se vio es más co-contracción de las piernas y un balanceo de pequeña amplitud, y **ambos se normalizaron cuando se les distrajo la atención** con una tarea (Wuehr y cols., 2017). La rigidez es una estrategia, no una pérdida: por eso cede cuando el paciente deja de vigilarse.
-2. **La vista pesa de más.** Se vio en la neuritis: los pacientes que seguían mareados tenían una mayor dependencia visual (Cousins y cols., 2014) <!-- Cousins 2014 (PMID 25233234), resumen: ~50 % con síntomas a largo plazo; el tercio con peor resultado tuvo más dependencia visual (6,35° vs 3,39°). -->. Y en el "vértigo visual", quienes lo refieren se desordenan más con un entorno visual en movimiento (Guerraz y cols., 2001; Bronstein, 1995). Es la misma lógica de la repesada sensorial de H19: el cerebro reparte la confianza entre vista, pies y vestíbulo, y aquí la vista queda con demasiado peso.
-3. **La integración central amplifica.** Las señales del cuerpo y del entorno se interpretan con más alarma. En un estudio con resonancia, los pacientes con mareo crónico subjetivo respondían distinto a un estímulo vestibular en regiones que integran el equilibrio con la emoción (Indovina y cols., 2015) <!-- verificar: Indovina 2015, hallazgo exacto (DOI confirmado en Crossref: 10.3389/fnbeh.2015.00334). -->.
+2. **La vista pesa de más.** Se vio en la neuritis: los pacientes que seguían mareados tenían una mayor dependencia visual (Cousins y cols., 2014) <!-- Cousins 2014 (PMID 25233234), resumen: ~50 % con síntomas a largo plazo; el tercio con peor resultado tuvo más dependencia visual (6,35° vs 3,39°). -->. Y en el "vértigo visual", quienes lo refieren se desordenan más con un entorno visual en movimiento (Guerraz y cols., 2001; Bronstein, 1995). Es la misma lógica de la repesada sensorial de H19: el cerebro reparte la confianza entre vista, pies y vestíbulo (Peterka, 2002), y aquí la vista queda con demasiado peso.
+3. **La integración central amplifica.** Las señales del cuerpo y del entorno se interpretan con más alarma. En un estudio con resonancia funcional, los pacientes con mareo crónico subjetivo activaban menos que los sanos la corteza vestibular, la ínsula, el hipocampo y el cíngulo anterior frente a un estímulo vestibular, regiones que integran el equilibrio con la ansiedad, y esas regiones estaban conectadas de otra manera (Indovina y cols., 2015).
 
-El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. -->. La figura muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y no es un criterio diagnóstico: en la clínica la posturografía puede salir normal o con un patrón variable <!-- verificar: hallazgos de la posturografía dinámica en PPPD; no hay un patrón diagnóstico establecido (revisar Trinidade y Goebel, 2018). --> y por eso no se usa para decidir.
+El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. Pasada 2026-10-18: solo aparece en material de fabricantes y en tablas de artículos que la usan sin citar su origen; Nashner y cols. (1982) describen las condiciones, no la razón. -->. La figura muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y no es un criterio diagnóstico: la dependencia visual se describió en los cuadros que precedieron al PPPD, y cuánto se repite en el PPPD está todavía por medirse (Staab y cols., 2017). Por eso la posturografía no se usa para decidir.
 
 :::imagen ilustraciones/cap27-sot-sano-pppd.svg ancho=100% Posturografía de seis condiciones de dos pacientes: a la izquierda, sano; a la derecha, con el vestíbulo sano y la dependencia visual marcada. Fíjate en que el de la derecha se desordena justo donde la vista miente (condiciones 3 y 6), aunque su vestíbulo esté intacto. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @95,46 | **Condición 6, la vista y la plataforma engañan a la vez.** El paciente sano la sostiene; el de la dependencia visual cae. Con el vestíbulo intacto.
@@ -128,9 +128,9 @@ El mareo parte siempre de **algo**: el criterio C lo exige. Lo que más a menudo
 | Crisis de pánico u otro malestar psicológico | El mareo se instaló en el cuerpo | caso 27.2 |
 | Otras causas médicas | Arritmia, hipotensión, un fármaco | el médico |
 
-<!-- verificar: la frecuencia relativa de cada precipitante; el consenso los lista sin dar una proporción única, y las series varían según el centro. -->
+Los precipitantes más comunes son los trastornos vestibulares periféricos o centrales (25 a 30 % de los casos), las crisis de migraña vestibular (15 a 20 %), las crisis de pánico y la ansiedad con mareo marcado (15 % cada una), las conmociones cerebrales o los latigazos cervicales (10 a 15 %) y los trastornos autonómicos (7 %) (Staab y cols., 2017).
 
-El PPPD es de los diagnósticos más frecuentes en las consultas especializadas en mareo (Staab y cols., 2017; Popkirov y cols., 2018) <!-- verificar: la frecuencia exacta y la posición entre los diagnósticos de una clínica especializada. -->. No se limita al adulto mayor ni a quien "ya era nervioso": se instala en personas sin antecedentes.
+En los centros terciarios, los cuadros que precedieron al PPPD (el mareo postural fóbico y el mareo subjetivo crónico) eran el 15 a 20 % de los pacientes que consultaban por síntomas vestibulares: el diagnóstico más frecuente en adultos jóvenes y el segundo en todos los adultos, después del VPPB. No es exclusivo del adulto mayor: la edad promedio de consulta ronda los 45 años, con un rango de la adolescencia a la vejez. Tampoco lo deciden los antecedentes: una historia de problemas o de estrés no suma ni resta al diagnóstico (Staab y cols., 2017). <!-- Pasada de fundamentos 2026-10-18: decía "No se limita al adulto mayor ni a quien 'ya era nervioso': se instala en personas sin antecedentes". Se reemplazó por lo que dice el consenso (Staab y cols., 2017). -->
 
 ### Lo que se le parece
 
@@ -147,7 +147,7 @@ El PPPD **puede coexistir** con alguna de ellas. Lo que el criterio E pide es qu
 
 ### Curso y tratamiento
 
-El PPPD puede durar años, pero **se trata**. Las opciones que describen las revisiones son tres, y se combinan: **rehabilitación vestibular** con exposición graduada a lo que marea (→ cap. 32), **psicoterapia**, en especial cognitivo-conductual, y **fármacos** serotoninérgicos (Popkirov y cols., 2018). La evidencia es todavía de ensayos pequeños <!-- verificar: calidad de la evidencia de cada una de las tres opciones (Trinidade y Goebel, 2018). -->. La decisión es del médico. Para quien evalúa, lo que importa es el **mensaje**: tiene salida.
+El PPPD puede durar años: al llegar a un centro terciario, los pacientes llevaban en promedio 4,5 años con síntomas, y lo probable es que la mayoría siga con ellos si no se trata (Staab y cols., 2017). Pero **se trata**. Las opciones son tres, y se combinan: **rehabilitación vestibular** con exposición graduada a lo que marea (→ cap. 32), **psicoterapia**, en especial cognitivo-conductual, y **fármacos** serotoninérgicos (Popkirov y cols., 2018). La evidencia es todavía escasa: en una revisión sistemática, la mayoría de los estudios eran de casos y controles (Trinidade y Goebel, 2018). La decisión es del médico. Para quien evalúa, lo que importa es el **mensaje**: tiene salida.
 
 ## Razonamiento
 
@@ -172,9 +172,9 @@ Frente a un mareo que dura meses, las preguntas siguen un orden:
 
 ### Cómo explicar un trastorno funcional
 
-Un trastorno **funcional** es uno en que el sistema está intacto pero **trabaja mal** (Stone y cols., 2005): un problema de *software*, no de *hardware* <!-- verificar: la analogía del software y el hardware está en la literatura de trastornos neurológicos funcionales (Stone y cols.); no se confirmó su uso para el PPPD. -->. No es imaginado, ni fingido, ni "de los nervios". El paciente siente lo que siente.
+Un trastorno **funcional** es uno en que el sistema está intacto pero **trabaja mal** (Stone y cols., 2005). Se lo suele explicar como un problema de *software*, no de *hardware*: una analogía útil para el paciente, aunque simplifica (Bègue y cols., 2019). No es imaginado, ni fingido, ni "de los nervios". El paciente siente lo que siente.
 
-Lo que más sirve, según quienes lo estudian, es **darle un nombre**, decir que es común y que se trata, y mostrar cómo calza con lo que él ya notó (Popkirov y cols., 2018):
+Lo que más sirve es **darle un nombre**, decir que es común y que se trata, y mostrar cómo calza con lo que él ya notó (Popkirov y cols., 2018):
 
 :::ayuda-ancho Lo que sirve decir y lo que no
 | Se dice | No se dice |
@@ -458,3 +458,4 @@ Etiquetar a un paciente de "funcional" sin haber mirado la audición y el vestí
 1. Popkirov S, Staab JP, Stone J. Persistent postural-perceptual dizziness (PPPD): a common, characteristic and treatable cause of chronic dizziness. Pract Neurol. 2018;18(1):5-13. doi:10.1136/practneurol-2017-001809
 1. Stone J, Carson A, Sharpe M. Functional symptoms and signs in neurology: assessment and diagnosis. J Neurol Neurosurg Psychiatry. 2005;76(Suppl 1):i2-12. doi:10.1136/jnnp.2004.061655
 1. Trinidade A, Goebel JA. Persistent postural-perceptual dizziness: a systematic review of the literature for the balance specialist. Otol Neurotol. 2018;39(10):1291-1303. doi:10.1097/MAO.0000000000002010
+1. Bègue I, Adams C, Stone J, Perez DL. Structural alterations in functional neurological disorder and related conditions: a software and hardware problem? Neuroimage Clin. 2019;22:101798. doi:10.1016/j.nicl.2019.101798

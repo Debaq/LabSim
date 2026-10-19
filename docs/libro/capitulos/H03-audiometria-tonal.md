@@ -54,7 +54,7 @@ Para tomar bien un umbral hay que entender tres cosas: qué camino recorre el to
 
 El fono deja el tono en la entrada del conducto. Desde ahí el sonido recorre una cadena de estructuras, y cada una aporta algo:
 
-1. **Pabellón y conducto.** Llevan el sonido hasta la membrana timpánica y lo refuerzan: el conducto resuena y le suma unos 15 a 20 dB a las frecuencias cercanas a 2,5-3 kHz (Shaw, 1974). Un conducto tapado por cerumen, por un cuerpo extraño o por un conducto blando que colapsa bajo el fono le quita sonido al tono antes de que llegue a ninguna parte.
+1. **Pabellón y conducto.** Llevan el sonido hasta la membrana timpánica y lo refuerzan: sobre todo por la resonancia del conducto, entre los dos le suman unos 15 a 20 dB a las frecuencias cercanas a 2,5-3 kHz (Shaw, 1974). <!-- Pasada de fundamentos 2026-10-18: decía "el conducto resuena y le suma unos 15 a 20 dB". Shaw (1974) da 15-20 dB para la transformación completa campo libre-tímpano (cabeza, pabellón, concha y conducto); el conducto solo aporta una parte. Se corrigió a "entre los dos". --> Un conducto tapado por cerumen, por un cuerpo extraño o por un conducto blando que colapsa bajo el fono le quita sonido al tono antes de que llegue a ninguna parte.
 2. **Membrana timpánica y cadena de huesecillos.** El sonido viaja por aire, y la cóclea está llena de líquido. Si el aire chocara directo con el líquido, casi toda la energía rebotaría. El oído medio adapta esa diferencia de impedancias: junta la fuerza que recibe la membrana, que es grande, sobre la platina del estribo, que es chica, y la cadena le suma un pequeño efecto de palanca. Medida en huesos temporales, esa ganancia real es de unos 20 dB, con su máximo cerca de 1 kHz (Aibara y cols., 2001; Merchant y cols., 1998).
 3. **Ventana oval.** La platina del estribo empuja los líquidos del oído interno. La ventana redonda cede hacia el oído medio y deja que se muevan.
 4. **Cóclea.** El movimiento del líquido hace vibrar la membrana basilar en una onda que viaja desde la base hacia el ápice y alcanza su máximo en un lugar distinto para cada frecuencia (Robles y Ruggero, 2001). Las **células ciliadas externas** amplifican esa vibración cuando el sonido es suave, en unos 40 a 50 dB (Dallos, 2008). Las **células ciliadas internas** la convierten en impulsos del nervio.
@@ -73,7 +73,7 @@ El vibrador apoyado en la mastoides hace vibrar el cráneo. La cóclea está exc
 Stenfelt y Goode (2005) agregan una vía por los líquidos del cráneo; el detalle está en B2. Para la técnica, lo que importa es esto: la vía ósea **se salta casi todo el oído externo y el medio**. En la práctica, mide la cóclea y lo que viene después de ella.
 
 :::ojo Ojo clínico
-La vía ósea **no es de un oído**. El cráneo vibra entero y el sonido llega a las dos cócleas casi con la misma intensidad: la atenuación transcraneal por vía ósea va de 0 a unos 10 dB (Stenfelt, 2012). Una ósea sin enmascarar refleja la **mejor cóclea**, esté donde esté el vibrador. → H4.
+La vía ósea **no es de un oído**. El cráneo vibra entero y el sonido llega a las dos cócleas casi con la misma intensidad: la atenuación transcraneal por vía ósea va, en mediana, de 0 a unos 10 dB según la frecuencia, con mucha variación entre personas (Stenfelt, 2012). Una ósea sin enmascarar refleja la **mejor cóclea**, esté donde esté el vibrador. → H4.
 :::
 
 ### Qué deja ver cada vía: el gap
@@ -90,7 +90,7 @@ Si la aérea recorre todo el camino y la ósea solo el último tramo, al compara
 Del mismo dibujo salen tres reglas que vas a usar todo el tiempo:
 
 - **La ósea no puede ser peor que la aérea.** Todo lo que recorre la ósea lo recorre también la aérea. Una ósea 5 o 10 dB peor que la aérea cabe en la incertidumbre de dos umbrales. Si la diferencia es mayor, casi siempre hay un error de técnica (un vibrador mal puesto, el transductor equivocado en la pantalla) y se repite.
-- **El gap tiene techo.** Cuando el tono por vía aérea es muy fuerte, el fono hace vibrar el cráneo y el sonido llega a la cóclea por vía ósea, aunque el oído medio no transmita nada. Por eso una pérdida puramente conductiva rara vez pasa de unos 60 dB. Una aérea mucho peor que eso con la ósea normal suele ser una ósea **sin enmascarar** que en realidad es la del otro oído (→ H4). <!-- verificar: techo de la hipoacusia conductiva en torno a 60 dB; es el GAP_MAX_DB de LabSim (respaldado en BibliografiaPatologias.php con Farahmand y cols., 2016, para la disyunción completa). Falta una fuente general para la frase. -->
+- **El gap tiene techo.** Cuando el tono por vía aérea es muy fuerte, el fono hace vibrar el cráneo y el sonido llega a la cóclea por vía ósea, aunque el oído medio no transmita nada. Por eso, con fonos supraaurales, una pérdida puramente conductiva rara vez pasa de unos 60 dB; con fonos de inserción, que hacen vibrar menos el cráneo, el gap puede ser mayor (Collier, 2023). Una aérea mucho peor que eso con la ósea normal suele ser una ósea **sin enmascarar** que en realidad es la del otro oído (→ H4). <!-- Pasada de fundamentos 2026-10-18: decía "una pérdida puramente conductiva rara vez pasa de unos 60 dB", sin fuente. El techo de 60 dB es la cifra clásica de Reger (1944, citado por Collier, 2023), que depende del transductor: con inserción se han descrito gaps mayores. Se acotó a fonos supraaurales, que es lo que simula LabSim (GAP_MAX_DB = 60). -->
 - **El audiograma no separa la cóclea del nervio.** Una lesión de la cóclea y una del nervio dan las dos una sensorioneural, con la ósea junto a la aérea. Para separarlas están la logoaudiometría (→ H5), las pruebas supraliminares (→ H6), las emisiones (→ H9) y el PEAT (→ H10).
 
 ### La ósea también puede caer sin daño coclear
@@ -112,7 +112,7 @@ En ese punto también decide el paciente. Cada persona fija, sin darse cuenta, c
 
 El oído no es igual de sensible en todas las frecuencias. Medido con un micrófono, en **dB SPL** (nivel de presión sonora), un oído joven normal necesita mucha más presión en los graves que en los medios. Con el fono TDH-39, el umbral normal está en 45 dB SPL a 125 Hz, en 25,5 a 250 Hz y en apenas 7 a 1 kHz (ISO 389-1, 2017). <!-- Valores de la tabla ISO 389-1 para el TDH-39, leídos en la hoja técnica del Interacoustics AT235 (la misma que usa Bibliografia.php, clave AT235). --> Si el audiograma se dibujara en dB SPL, un oído normal sería una curva, distinta para cada fono, y habría que memorizarla para saber si un umbral es normal.
 
-El audiómetro resuelve eso trabajando en **dB HL** (*hearing level*, nivel de audición). En cada frecuencia, **0 dB HL** es el nivel que detecta un adulto joven típico, otológicamente normal, entre 18 y 25 años (ISO 389-7, 2019). <!-- verificar: el rango de 18 a 25 años se confirmó en la edición 1996 de la ISO 389-7; no se leyó la de 2019. --> El equipo guarda esa referencia para cada frecuencia y cada transductor, y la resta. Así, un oído normal dibuja una **línea recta cerca de 0**, y lo que el audiograma muestra es directamente cuánto le falta a ese oído respecto de lo normal.
+El audiómetro resuelve eso trabajando en **dB HL** (*hearing level*, nivel de audición). En cada frecuencia, **0 dB HL** es el nivel que detecta un adulto joven típico, otológicamente normal, entre 18 y 25 años (ISO 389-7, 2019). <!-- verificar: el rango de 18 a 25 años se confirmó en la edición 1996 de la ISO 389-7 (y en la EN ISO 389-7:1998 y la descripción DIN de la serie ISO 389); la vista previa de la 2019 en ANSI e iso.org no se pudo leer (2026-10-18). --> El equipo guarda esa referencia para cada frecuencia y cada transductor, y la resta. Así, un oído normal dibuja una **línea recta cerca de 0**, y lo que el audiograma muestra es directamente cuánto le falta a ese oído respecto de lo normal.
 
 :::imagen ilustraciones/h03-hl-spl.svg ancho=96% El mismo oído normal, en dB SPL y en dB HL. En SPL el umbral normal cambia con la frecuencia: los graves necesitan mucha más presión. En HL se resta esa referencia, el oído normal queda en 0 en todas y cualquier pérdida se lee como distancia a esa línea.
 :::
@@ -131,7 +131,7 @@ Cada detalle del método de búsqueda responde a cómo se comporta el oído cerc
 
 - **En ascenso.** El umbral se toma con tonos que aparecen después de uno que el paciente no oyó. Ya en los años treinta los clínicos notaban que un tono continuo se "apaga" (adaptación) y que las series ascendentes daban umbrales más estables. Hughson y Westlake dejaron por escrito el umbral en ascenso con tonos cortos contra silencio, y Carhart y Jerger (1959) le dieron su base al comparar la búsqueda ascendente con la descendente (Jerger, 2018). Una forma simple de entenderlo: al bajar, el paciente viene de oír el tono y sabe cómo suena, y la expectativa puede hacerlo responder a un nivel que ya no detecta; al subir, cada respuesta es una detección nueva.
 - **Baja 10, sube 5.** Bajar de a 10 lleva rápido bajo el umbral con pocos tonos, y cada tono cuesta tiempo y atención del paciente. Subir de a 5 da la resolución con que se dibuja y se informa el audiograma. Es un compromiso entre precisión y tiempo.
-- **Tonos de 1 a 2 segundos.** El oído suma la energía del tono durante sus primeras décimas de segundo: un tono muy corto necesita más intensidad para detectarse. Esa suma se completa en unos 30 a 70 ms en los agudos y en 125 a 175 ms en los graves (Watson y Gengel, 1969). Un tono de 1 a 2 s la supera con holgura, así que la duración deja de mover el umbral. Más largo tampoco conviene: el tono continuo se adapta y el examen se alarga. <!-- verificar: volumen y páginas de Watson y Gengel (1969), JASA 46(4B):989-97, citados de memoria en la investigación. -->
+- **Tonos de 1 a 2 segundos.** El oído suma la energía del tono durante sus primeras décimas de segundo: un tono muy corto necesita más intensidad para detectarse. Esa suma se completa en unos 30 a 70 ms en los agudos y en 125 a 175 ms en los graves (Watson y Gengel, 1969). Un tono de 1 a 2 s la supera con holgura, así que la duración deja de mover el umbral. Más largo tampoco conviene: el tono continuo se adapta y el examen se alarga.
 - **Pulsado o continuo.** Dan el mismo umbral y la misma repetibilidad, pero dos de cada tres pacientes prefieren el pulsado cuando el tono es suave o agudo (Burk y Wiley, 2004). El botón *Pulsado* del audiómetro es para eso.
 - **Silencios irregulares, nunca más cortos que el tono.** Con un ritmo fijo el paciente aprende el compás y aprieta por anticipación. Si el silencio varía, una respuesta sin tono queda a la vista como lo que es: una respuesta falsa (ASHA, 2005; BSA, 2018).
 - **Familiarización y aprendizaje.** La primera vez, el paciente no sabe qué tan suave es "apenas", y sus primeras respuestas tienden a ser peores. Un tono claro le muestra qué tiene que buscar. Repetir 1 kHz al final del primer oído mide si siguió aprendiendo en el camino: si la segunda vez sale mejor, las primeras frecuencias pueden estar subestimadas. La norma ISO pide, ante una mejora de 10 dB o más, volver a medir las demás frecuencias (ISO 8253-1, 1989).
@@ -143,12 +143,12 @@ El audiograma mide de 125 a 8.000 Hz, en octavas y algunas interoctavas. Hay tre
 
 **Es el rango del habla.** Las vocales concentran su energía en los graves y los medios. Muchas consonantes, como la *s*, la *f* o la *ch*, la tienen en los agudos, y son las que más ayudan a distinguir una palabra de otra. Por eso una pérdida de agudos deja oír la voz y no entenderla (→ H5, cap. 5).
 
-**Cada frecuencia examina un lugar de la cóclea.** La cóclea está ordenada por frecuencias: la base, junto a la ventana oval, responde a los agudos, y el ápice a los graves. La membrana basilar es angosta y rígida en la base, de unos 0,1 mm, y ancha y flexible en el ápice, de unos 0,5 mm; por eso cada tramo vibra mejor con una frecuencia distinta (Robles y Ruggero, 2001). <!-- verificar: anchos de la membrana basilar humana (~0,1 mm en la base, ~0,5 mm en el ápice); cifra clásica atribuida a Békésy, sin fuente primaria leída. Fuentes secundarias dan 0,08-0,2 mm en la base y 0,42-0,5 mm en el ápice. --> Sobre 500 Hz, cada octava ocupa un tramo parecido de la membrana (Greenwood, 1990). Por eso el eje de frecuencias del audiograma va en octavas: espacios iguales en el papel corresponden a tramos parecidos de cóclea. Un audiograma es, en el fondo, un mapa de la cóclea de la base al ápice.
+**Cada frecuencia examina un lugar de la cóclea.** La cóclea está ordenada por frecuencias: la base, junto a la ventana oval, responde a los agudos, y el ápice a los graves. La membrana basilar es angosta y rígida en la base, de unos 0,13 mm, y ancha y flexible en el ápice, de unos 0,42 mm (Liu y cols., 2015); por eso cada tramo vibra mejor con una frecuencia distinta (Robles y Ruggero, 2001). <!-- Pasada de fundamentos 2026-10-18: decía "de unos 0,1 mm" en la base y "de unos 0,5 mm" en el ápice. Se corrigió a 126 µm en la base y 418 µm en el ápice, medidos en cócleas humanas (Liu y cols., 2015). --> Sobre 500 Hz, cada octava ocupa un tramo parecido de la membrana (Greenwood, 1990). Por eso el eje de frecuencias del audiograma va en octavas: espacios iguales en el papel corresponden a tramos parecidos de cóclea. Un audiograma es, en el fondo, un mapa de la cóclea de la base al ápice.
 
 :::imagen ilustraciones/h03-tonotopia.svg ancho=96% Dónde cae cada frecuencia del audiograma en la cóclea: los agudos en la base, junto a la ventana oval, y los graves en el ápice. Fíjate en el tramo de la base que queda sobre 8 kHz, fuera de la audiometría convencional.
 :::
 
-**La base se daña primero.** Las células de la base son más vulnerables: tienen menos defensas frente a los radicales libres y manejan más calcio (Sha y cols., 2001; Fettiplace y Nam, 2019). Por eso el ruido, la edad y los ototóxicos empiezan por los agudos. Y el tramo más basal, sobre 8 kHz, casi una quinta parte del largo de la cóclea, queda fuera de la audiometría convencional: es lo que agrega la audiometría de alta frecuencia cuando se vigila un ototóxico. Las interoctavas de 3 y 6 kHz se miden siempre porque ahí vive la muesca del ruido (→ cap. 6).
+**La base se daña primero.** Las células de la base son más vulnerables: tienen menos defensas frente a los radicales libres y manejan más calcio (Sha y cols., 2001; Fettiplace y Nam, 2019). Por eso el ruido, la edad y los ototóxicos empiezan por los agudos. Y el tramo más basal, sobre 8 kHz, casi una quinta parte del largo de la cóclea (Greenwood, 1990), queda fuera de la audiometría convencional: es lo que agrega la audiometría de alta frecuencia cuando se vigila un ototóxico. Las interoctavas de 3 y 6 kHz se miden siempre porque ahí vive la muesca del ruido (→ cap. 6).
 
 ### Cuánto se repite un umbral
 
@@ -235,7 +235,7 @@ Antes de este método, la audiometría usaba el método de límites: un tono con
 
 El ascendente no es la única forma de llegar al umbral. La **descendente** es el viejo método de límites de la psicofísica (Fechner, 1860), que Bunch (1943) llevó a la audiometría: baja de a 5 dB hasta que el paciente deja de responder. Es rápida, pero el paciente tiende a seguir respondiendo por inercia y el umbral sale más bajo de lo que es. La de **horquilla** es la otra que describe la ISO 8253-1 (1989): alterna series de 5 dB que suben y que bajan alrededor del umbral hasta completar tres de cada una, y el umbral es el promedio de los niveles más bajos que el paciente oyó en ellas; llega al mismo umbral que la ascendente, pero tarda más. La **combinada acortada** baja de a 10 mientras el paciente responde y sube de a 5 cuando deja de hacerlo, y en vez de repetir ascensos repite el tono al mismo nivel: el umbral es la mínima intensidad con 2 respuestas de 3 tonos.
 
-<!-- verificar: horquilla según resúmenes de la ISO 8253-1 (tres series ascendentes y tres descendentes; promedio de los niveles más bajos oídos), no según la norma leída. Hughson y Westlake (1944) confirmada en catálogos y en la guía ASHA 2005 (Trans Am Acad Ophthalmol Otolaryngol 48 Supl:1-15; también edición aparte, Omaha, Douglas Print Co., WorldCat OCLC 221510216); texto completo no leído. Método en discusión con el equipo: docs/libro/incongruencias_protocolo.md, punto 13b. -->
+<!-- Pasada de fundamentos 2026-10-18: la horquilla (ascensos y descensos de 5 dB, 3 + 3, umbral = promedio) está confirmada en la ISO 8253-1:1989 leída completa (docs/investigacion/tecnica_audiometria_tonal/notas/normativa_internacional.md). Hughson y Westlake (1944) confirmada en catálogos y en la guía ASHA 2005 (Trans Am Acad Ophthalmol Otolaryngol 48 Supl:1-15; también edición aparte, Omaha, Douglas Print Co., WorldCat OCLC 221510216); texto completo no leído. Método en discusión con el equipo: docs/libro/incongruencias_protocolo.md, punto 13b. -->
 
 :::imagen ilustraciones/h03-metodos-umbral.svg ancho=100% Cuatro formas de buscar el umbral, con el mismo umbral de 25 dB HL. Compara en qué dirección avanza cada una y en qué punto se juzga el umbral: la descendente arriesga que el paciente siga respondiendo por inercia.
 :::
@@ -248,7 +248,7 @@ Se empieza en 1 kHz porque es la frecuencia más estable y la más fácil de oí
 
 - **Repetir 1 kHz** es el control de confiabilidad. Si difiere en más de 5 dB de la primera vez, algo cambió: se vuelve a instruir al paciente y se repiten otras frecuencias (ASHA, 2005; BSA, 2018).
 - En el segundo oído se sigue el mismo orden y ya no hace falta repetir 1 kHz (ASHA, 2005).
-- Las **interoctavas** (750 y 1.500 Hz) se agregan cuando entre dos octavas vecinas hay un salto grande. <!-- verificar: ASHA 2005 da un salto de 20 dB o más entre octavas vecinas como indicación de interoctavas. -->
+- Las **interoctavas** (750 y 1.500 Hz) se agregan cuando entre dos octavas vecinas hay un salto grande; ASHA (2005) lo fija en 20 dB o más entre 500 y 2.000 Hz.
 - Si el umbral aéreo de un oído supera a la ósea del otro en lo que el sonido pierde al cruzar el cráneo (unos 40 dB con fonos supraaurales), el otro oído puede estar contestando: hay que enmascarar. → H4.
 
 ### 4. Vía ósea
@@ -301,7 +301,7 @@ Se repite la acumetría. Si sigue sin calzar, se hace un **Weber audiométrico**
 
 ### Audiometría de screening
 
-El screening no busca umbrales: presenta cada frecuencia a un **nivel fijo** y separa a quien responde a todo de quien no. En niños el nivel habitual es **20 dB HL** (ASHA, 1997). <!-- verificar: ASHA 1997 para niños, 1, 2 y 4 kHz a 20 dB HL. --> Quien no responde a alguna frecuencia **no "tiene" una pérdida**: se deriva a audiometría completa.
+El screening no busca umbrales: presenta cada frecuencia a un **nivel fijo** y separa a quien responde a todo de quien no. En niños en edad escolar se presentan 1, 2 y 4 kHz a **20 dB HL** en cada oído (ASHA, 1997). <!-- Pasada de fundamentos 2026-10-18: confirmado en fuente secundaria (Richburg e Imhoff, "Survey of hearing screeners", J Educ Audiol, edaud.org, que resume ASHA 1997: 1, 2 y 4 kHz a 20 dB HL, en los dos oídos); el texto de ASHA 1997 ya no está en asha.org. --> Quien no responde a alguna frecuencia **no "tiene" una pérdida**: se deriva a audiometría completa.
 
 <!-- Protocolo ORL 2019: "se considera umbral si el paciente tiene la capacidad de escuchar todos los estímulos a 20 dB HL". El screening es pasa/no pasa a nivel fijo y no entrega umbrales (ASHA 1997); se corrigió la redacción. -->
 
@@ -313,16 +313,16 @@ La vigilancia de los trabajadores expuestos a ruido la regula el **PREXOR** (MIN
 
 PREXOR distingue cuatro audiometrías:
 
-<!-- verificar: la columna "Cuándo" resume las definiciones de PREXOR de memoria; la columna "Qué mide" sí está cotejada con el texto (docs/investigacion/tecnica_audiometria_tonal/notas/normativa_chile_hispana.md). -->
+<!-- Pasada de fundamentos 2026-10-18: columna "Cuándo" cotejada con el texto de PREXOR (MINSAL 2013, §A-D): base dentro de 60 días de iniciada la exposición; confirmación dentro de 30 días de una base o un seguimiento en terreno alterados; egreso al dejar la exposición (desvinculación o cambio de puesto). -->
 
 Tabla: Las cuatro audiometrías de PREXOR
 
 | Tipo | Cuándo | Qué mide |
 |---|---|---|
-| **Base** | al ingresar a la exposición | aérea de 500 a 8.000 Hz |
+| **Base** | dentro de los 60 días de iniciada la exposición | aérea de 500 a 8.000 Hz |
 | **Seguimiento** | periódica, mientras dure la exposición | aérea de 500 a 8.000 Hz |
-| **Confirmación** | cuando el seguimiento sale alterado | aérea de 250 a 8.000 Hz, en cámara |
-| **Egreso** | al terminar la exposición | aérea de 250 a 8.000 Hz, en cámara |
+| **Confirmación** | dentro de los 30 días de un seguimiento (o una base en terreno) alterado | aérea de 250 a 8.000 Hz, en cámara |
+| **Egreso** | al dejar la exposición, por desvinculación o cambio de puesto | aérea de 250 a 8.000 Hz, en cámara |
 
 La técnica de la guía ISP (versión 3.0, 2026) sigue a la ISO 8253-1, con tres diferencias con la clínica:
 
@@ -343,7 +343,7 @@ Su uso principal es **vigilar fármacos ototóxicos** (cisplatino, aminoglucósi
 2. **Controles durante** el tratamiento.
 3. **Control después** de terminado.
 
-Los umbrales de alta frecuencia varían mucho entre personas y con la edad. Por eso cada control se compara contra **la línea de base del mismo paciente**, no contra una norma. <!-- verificar: AAA 2009 describe una versión abreviada que solo mide la zona de frecuencias más altas con respuesta ("sensitive range for ototoxicity"). -->
+Los umbrales de alta frecuencia varían mucho entre personas y con la edad. Por eso cada control se compara contra **la línea de base del mismo paciente**, no contra una norma. La guía de la AAA describe además una versión abreviada que en los controles sigue solo la octava más alta que el paciente oye, propia de cada uno y fijada en la línea de base; ahí aparecen casi 9 de cada 10 de los primeros cambios (Durrant y cols., 2009).
 
 ![Dos audiogramas de alta frecuencia del mismo oído, superpuestos: línea de base (gris) y control a las seis semanas de cisplatino (azul). De 250 Hz a 8 kHz las curvas coinciden; de 10 a 16 kHz el control cae 20 a 30 dB. Una franja marca el rango convencional y otra el de alta frecuencia.](ilustraciones/h03-alta-frecuencia.png)
 
@@ -444,7 +444,7 @@ El grado se calcula **por oído** con el promedio de 500, 1.000, 2.000 y 4.000 H
 En el caso de Hernán (caso H3.4): el OD promedia (20 + 25 + 40 + 60) / 4 = **36 dB, leve**; el OI promedia (25 + 30 + 45 + 65) / 4 = **41 dB, moderada**. Dos oídos casi iguales quedan en grados distintos por un decibel. El grado resume, pero no reemplaza mirar la curva.
 
 :::comentario Otras escalas de grado
-La escala BIAP es la que usa este libro y la que calcula LabSim, pero no es la única. La Organización Mundial de la Salud (2021) usa el mismo promedio de 500 a 4.000 Hz, calculado en el **oído mejor**, con cortes distintos: audición normal bajo 20 dB HL; leve de 20 a menos de 35; moderada de 35 a menos de 50; moderadamente severa de 50 a menos de 65; severa de 65 a menos de 80; profunda de 80 a menos de 95, y completa desde 95. <!-- verificar: cortes de la escala OMS 2021 (World report on hearing), escritos de memoria. -->
+La escala BIAP es la que usa este libro y la que calcula LabSim, pero no es la única. La Organización Mundial de la Salud (2021) usa el mismo promedio de 500 a 4.000 Hz, calculado en el **oído mejor**, con cortes distintos: audición normal bajo 20 dB HL; leve de 20 a menos de 35; moderada de 35 a menos de 50; moderadamente severa de 50 a menos de 65; severa de 65 a menos de 80; profunda de 80 a menos de 95, y completa desde 95. <!-- Pasada de fundamentos 2026-10-18: cortes cotejados con la tabla 1.3 del World report on hearing reproducida por Holube y cols., HNO 2024;72(8):561-4, doi:10.1007/s00106-024-01494-z. -->
 
 La OMS clasifica a la **persona** para estudios de población; la BIAP clasifica **cada oído**, que es lo que necesita un informe clínico. Un mismo promedio puede caer en grados distintos según la escala: por eso el informe dice cuál usó y da el número, no solo el nombre del grado.
 :::
@@ -619,7 +619,7 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. American Speech-Language-Hearing Association. Guidelines for audiologic screening [Guidelines]. Rockville (MD): ASHA; 1997. doi:10.1044/policy.GL1997-00199
 1. INSST. NTP 285: Audiometría tonal liminar: vía ósea y enmascaramiento. Madrid: Instituto Nacional de Seguridad e Higiene en el Trabajo; 1992.
 1. Munro KJ, Agnew N. A comparison of inter-aural attenuation with the Etymotic ER-3A insert earphone and the Telephonics TDH-39 supra-aural earphone. Br J Audiol. 1999;33(4):259-62. doi:10.3109/03005369909090106
-1. Mahomed F, Swanepoel DW, Eikelboom RH, Soer M. Validity of automated threshold audiometry: a systematic review and meta-analysis. Ear Hear. 2013;34(6):745-52.
+1. Mahomed F, Swanepoel DW, Eikelboom RH, Soer M. Validity of automated threshold audiometry: a systematic review and meta-analysis. Ear Hear. 2013;34(6):745-52. doi:10.1097/AUD.0b013e3182944bdf
 1. Fechner GT. Elemente der Psychophysik. Leipzig: Breitkopf und Härtel; 1860.
 1. Bunch CC. Clinical audiometry. St. Louis: Mosby; 1943.
 1. Hughson W, Westlake HD. Manual for program outline for rehabilitation of aural casualties both military and civilian. Trans Am Acad Ophthalmol Otolaryngol. 1944;48(Suppl):1-15.
@@ -629,7 +629,8 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. International Organization for Standardization. ISO 389-1:2017. Acoustics — Reference zero for the calibration of audiometric equipment — Part 1: Reference equivalent threshold sound pressure levels for pure tones and supra-aural earphones. Ginebra: ISO; 2017.
 1. International Organization for Standardization. ISO 389-7:2019. Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions. Ginebra: ISO; 2019.
 1. World Health Organization. World report on hearing. Ginebra: WHO; 2021. Disponible en: https://www.who.int/publications/i/item/9789240020481
-1. Coles RR, Lutman ME, Buffin JT. Guidelines on the diagnosis of noise-induced hearing loss for medicolegal purposes. Clin Otolaryngol Allied Sci. 2000;25(4):264-73.
+1. Coles RR, Lutman ME, Buffin JT. Guidelines on the diagnosis of noise-induced hearing loss for medicolegal purposes. Clin Otolaryngol Allied Sci. 2000;25(4):264-73. doi:10.1046/j.1365-2273.2000.00368.x
+1. Collier C. Maximum conductive hearing loss—revisited. Audiology Today. 2023;35(3). Disponible en: https://www.audiology.org/news-and-publications/audiology-today/articles/maximum-conductive-hearing-loss-revisited/
 
 ### Normativa chilena
 
@@ -656,9 +657,10 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. Dallos P. Cochlear amplification, outer hair cells and prestin. Curr Opin Neurobiol. 2008;18(4):370-6. doi:10.1016/j.conb.2008.08.016
 1. Greenwood DD. A cochlear frequency-position function for several species--29 years later. J Acoust Soc Am. 1990;87(6):2592-605. doi:10.1121/1.399052
 1. Fettiplace R, Nam JH. Tonotopy in calcium homeostasis and vulnerability of cochlear hair cells. Hear Res. 2019;376:11-21. doi:10.1016/j.heares.2018.11.002
-1. Watson CS, Gengel RW. Signal duration and signal frequency in relation to auditory sensitivity. J Acoust Soc Am. 1969;46(4B):989-97.
+1. Watson CS, Gengel RW. Signal duration and signal frequency in relation to auditory sensitivity. J Acoust Soc Am. 1969;46(4B):989-97. doi:10.1121/1.1911819
 1. Stenfelt S, Goode RL. Bone-conducted sound: physiological and clinical aspects. Otol Neurotol. 2005;26(6):1245-61. doi:10.1097/01.mao.0000187236.10842.d5
 1. Stenfelt S. Transcranial attenuation of bone-conducted sound when stimulation is at the mastoid and at the bone conduction hearing aid position. Otol Neurotol. 2012;33(2):105-14. doi:10.1097/MAO.0b013e31823e28ab
 1. Carhart R. Clinical application of bone conduction audiometry. Arch Otolaryngol. 1950;51(6):798-808. doi:10.1001/archotol.1950.00700020824003
 1. Homma K, Du Y, Shimizu Y, Puria S. Ossicular resonance modes of the human middle ear for bone and air conduction. J Acoust Soc Am. 2009;125(2):968-79. doi:10.1121/1.3056564
 1. Sha SH, Taylor R, Forge A, Schacht J. Differential vulnerability of basal and apical hair cells is based on intrinsic susceptibility to free radicals. Hear Res. 2001;155(1-2):1-8. doi:10.1016/S0378-5955(01)00224-6
+1. Liu W, Atturo F, Aldaya R, Santi P, Cureoglu S, Obwegeser S, et al. Macromolecular organization and fine structure of the human basilar membrane - RELEVANCE for cochlear implantation. Cell Tissue Res. 2015;360(2):245-62. doi:10.1007/s00441-014-2098-z

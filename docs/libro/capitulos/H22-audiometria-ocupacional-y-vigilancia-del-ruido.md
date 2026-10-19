@@ -86,7 +86,7 @@ Dos consecuencias para la técnica:
 
 ### Por qué la muesca cae en 3 a 6 kHz
 
-El ruido de banda ancha, con energía en todas las frecuencias, deja su marca en una zona acotada, con el fondo hacia **4 kHz** (la "muesca del calderero") y una **recuperación en 8 kHz** (→ cap. 6). Con los años la muesca se ensancha hacia 2, 1 y 0,5 kHz, y la recuperación en 8 kHz se acorta (Le y cols., 2017). Las explicaciones se suman, y ninguna por sí sola está demostrada:
+El ruido de banda ancha, con energía en todas las frecuencias, deja su marca en una zona acotada, con el fondo hacia **4 kHz** (la "muesca del calderero") y una **recuperación en 8 kHz** (→ cap. 6). Si la exposición sigue, la muesca se hace más profunda y se ensancha hacia 2, 1 y 0,5 kHz; con la edad, la presbiacusia también cae en los agudos y la muesca puede borrarse (Le y cols., 2017). <!-- Pasada de fundamentos 2026-10-18: decía "Con los años la muesca se ensancha hacia 2, 1 y 0,5 kHz, y la recuperación en 8 kHz se acorta". Se corrigió: la revisión atribuye el ensanchamiento a la exposición continuada y la desaparición de la muesca a la presbiacusia (Le y cols., 2017). --> Las explicaciones se suman, y ninguna por sí sola está demostrada:
 
 - **El oído externo y el medio refuerzan esa zona.** El conducto resuena y le suma 15 a 20 dB a los sonidos cercanos a 2,5-3 kHz (Shaw, 1974; → H3), de modo que ahí llega más energía a la cóclea. La revisión de Le y cols. (2017) atribuye la selectividad a esa resonancia y a la mecánica del oído medio.
 - **La base de la cóclea es más vulnerable** (→ H3, Fettiplace y Nam, 2019), y es ahí donde se representan los 3 a 8 kHz.

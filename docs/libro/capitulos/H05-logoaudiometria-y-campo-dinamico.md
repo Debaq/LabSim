@@ -71,7 +71,7 @@ La voz **grabada** es la opción preferida: cada paciente oye las mismas palabra
 
 ### Campo dinámico
 
-El **campo dinámico** es el espacio entre el umbral y el umbral de molestia, frecuencia por frecuencia. En un oído sin pérdida el LDL **no es un número fijo**: cambia mucho de una persona a otra, y hay quien no marca molestia hasta la salida máxima del audiómetro. Entonces se anota que no hubo molestia al máximo (por ejemplo, *LDL > 120 dB HL*). Lo que importa no es si el LDL de un oído "es normal", sino cuánto campo dinámico le queda y si se estrecha frente al otro oído. En los estudios, el LDL de adultos con audición normal promedia unos 100 dB HL, con mucha dispersión (Sherlock y Formby, 2005); la mayoría cae entre 90 y 105 dB HL (BSA, 2022).
+El **campo dinámico** es el espacio entre el umbral y el umbral de molestia, frecuencia por frecuencia. En un oído sin pérdida el LDL **no es un número fijo**: cambia mucho de una persona a otra, y hay quien no marca molestia hasta la salida máxima del audiómetro. Entonces se anota que no hubo molestia al máximo (por ejemplo, *LDL > 120 dB HL*). Lo que importa no es si el LDL de un oído "es normal", sino cuánto campo dinámico le queda y si se estrecha frente al otro oído. En los estudios, el LDL de adultos con audición normal promedia unos 100 dB HL (Sherlock y Formby, 2005), con mucha variación entre personas; la mayoría cae entre 90 y 105 dB HL (BSA, 2022).
 
 Cuando la cóclea pierde sus células ciliadas externas, el umbral sube y el LDL casi no se mueve: la sonoridad crece más rápido de lo normal y alcanza la de un oído sano a niveles altos. Es el **reclutamiento** (→ H6), y deja un campo dinámico **estrecho**: el audífono tiene que meter toda la voz, de la más suave a la más fuerte, en menos espacio, y las voces fuertes molestan aunque el paciente "no oiga". En una pérdida conductiva el umbral y el LDL suben juntos y el campo se conserva.
 
@@ -81,7 +81,7 @@ Cuando la cóclea pierde sus células ciliadas externas, el umbral sube y el LDL
 - **Listas equivalentes**, varias, para no repetir ninguna. Para el SDT basta un estímulo corto, como "pa pa pa".
 - **Ruido de habla** (*speech noise*) en el otro canal: tiene el espectro de la voz. Una banda estrecha deja pasar casi todas las frecuencias de la palabra (→ H4).
 - El **audiograma tonal** hecho, con el PTP de cada oído: de ahí salen todos los niveles de partida.
-- **El paciente** tiene que conocer las palabras y poder repetirlas. Con un hablante no nativo, una afasia, una disartria o un deterioro cognitivo, una discriminación baja puede no ser auditiva. Si no puede repetir, puede señalar en láminas o escribir; se anota en el informe (ASHA, 1988). Los niños usan listas por edad (→ H8).
+- **El paciente** tiene que conocer las palabras y poder repetirlas. Con un hablante no nativo, una afasia, una disartria o un deterioro cognitivo, una discriminación baja puede no ser auditiva. Si no puede repetir, puede señalar en láminas de un set cerrado (ASHA, 1988) o escribir; se anota en el informe. <!-- Pasada de fundamentos 2026-10-18: ASHA (1988) nombra señalar láminas, señas y barrido visual con set cerrado; no menciona la respuesta escrita. Se dejó la cita solo para las láminas. --> Los niños usan listas por edad (→ H8).
 - **Instrucción:** "Va a escuchar palabras, algunas muy suaves. Repita cada una en voz alta, aunque no esté seguro". Pedirle que adivine evita que se calle cuando duda (ASHA, 1988).
 
 ### Conoce tu equipo: el audiómetro en logoaudiometría
@@ -117,14 +117,14 @@ Instrucción: "Levante la mano apenas escuche mi voz, aunque no entienda". Prese
 Desde el SDT, sube de 5 en 5 dB dictando **dos palabras familiares** en cada nivel. El SRT es el primer nivel en que repite una de las dos. Se usan palabras que todos conocen porque el SRT mide intensidad, no vocabulario; si el set es cerrado, se le muestran antes (ASHA, 1988).
 
 :::comentario Lo que dicen las normas
-ASHA (1988) propone un método **descendente**: partir 30 a 40 dB sobre el SRT esperado, bajar en pasos de 2 o 5 dB y calcular el 50 % con una fórmula cuando falla 5 de las 6 últimas palabras. Partir donde el paciente acierta lo orienta. El método ascendente desde el SDT es más corto y sigue la lógica de la tonal; ASHA lo considera el más apropiado cuando se sospecha una pérdida no orgánica (→ H6), porque el paciente no sabe de antemano dónde aparece la voz.
+ASHA (1988) propone un método **descendente**: partir 30 a 40 dB sobre el SRT esperado, bajar en pasos de 2 o 5 dB y calcular el 50 % con una fórmula cuando falla 5 de las 6 últimas palabras. Partir donde el paciente acierta lo orienta. El método ascendente desde el SDT es más corto y sigue la lógica de la tonal; ASHA lo considera más apropiado cuando se sospecha una pérdida no orgánica (→ H6), porque el paciente no sabe de antemano dónde aparece la voz.
 :::
 
 ### 3. Concordancia SRT y PTP
 
 En quien responde con su umbral real, el SRT y el PTP casi coinciden: en el estudio en que se apoya ASHA, las diferencias promedio fueron de 0,3 a 3,1 dB. En una curva **descendente** concuerda mejor con el promedio de los **dos mejores** umbrales de 500, 1.000 y 2.000 Hz (Fletcher), porque la frecuencia más caída casi no aporta (ASHA, 1988). Una diferencia de más de unos 10 dB obliga a revisar antes de seguir: un fono corrido, una instrucción mal entendida o un paciente que no responde con su umbral. Un SRT **mucho mejor** que el PTP es de las primeras señales de una pérdida no orgánica (→ H6).
 
-<!-- verificar: tolerancia SRT-PTP. ASHA 1988 no da una cifra; los ±10 dB son los que usa el chequeo de coherencia de los casos de LabSim (src/audiometria/DebugMkg.py, _chk_sdt). -->
+<!-- verificar: tolerancia SRT-PTP. ASHA 1988 no da una cifra; los ±10 dB son los que usa el chequeo de coherencia de los casos de LabSim (src/audiometria/DebugMkg.py, _chk_sdt). Búsqueda 2026-10-18: solo fuentes docentes o protocolos (±7 dB en el protocolo del Tinnitus Retraining Therapy Trial; 12 dB atribuido a Ventry y Chaiklin en apuntes universitarios); ninguna primaria leída. Es criterio de la práctica del autor. -->
 
 ### 4. Discriminación (UMD)
 
@@ -144,7 +144,7 @@ No encontraste el máximo. Un puntaje en un solo nivel puede **subestimarlo**, y
 
 Jerger y Jerger (1971) propusieron 0,45 como corte para sospechar una lesión retrococlear; con otro material grabado se propuso 0,35 (Meyer y Mishler, 1985). En adultos mayores el roll-over aparece también sin tumor, con el envejecimiento de la vía, y pierde valor diagnóstico (Gang, 1976).
 
-<!-- verificar: el corte 0,45 es la cifra clásica atribuida a Jerger y Jerger 1971; el artículo no tiene resumen en PubMed y no se leyó. -->
+<!-- verificar: el corte 0,45 es la cifra clásica atribuida a Jerger y Jerger 1971; el artículo no tiene resumen en PubMed y no se leyó. Búsqueda 2026-10-18: lo confirma solo una fuente secundaria (AudiologyOnline, "Positive rollover", que lo atribuye a Jerger y Jerger 1971 y a Dirks y cols. 1977); el resumen de Dirks 1977 (PMID 881822) describe el roll-over retrococlear sin dar el índice. -->
 
 ### 5. Enmascarar
 
@@ -158,7 +158,7 @@ La voz cruza el cráneo igual que un tono, y la discriminación se mide 20 a 40 
 Cada nivel de la curva tiene su cálculo, porque el mínimo sube con la voz. El SDT y el SRT se enmascaran si cumplen la regla. El efecto de no hacerlo está en el caso de Luis, más adelante.
 
 :::comentario Lo que dicen las normas
-Este libro y LabSim usan **45 dB** de atenuación interaural para la voz con fono supraaural. ASHA (1988) pide enmascarar cuando el SRT de un oído supera en **40 dB** o más al SRT del otro o a cualquiera de sus umbrales óseos de 500 a 4.000 Hz. El laboratorio usa 45 dB porque la voz, que reparte su energía en un rango ancho de frecuencias, cruza el cráneo con más pérdida que un tono aislado con el mismo fono, y comparar contra el promedio del oído no evaluado sigue la misma lógica con que se lee el SRT. <!-- verificar: cifra de atenuación interaural del habla con fono supraaural (rango publicado ~45-55 dB) con fuente primaria. -->
+Este libro y LabSim usan **45 dB** de atenuación interaural para la voz con fono supraaural. ASHA (1988) pide enmascarar cuando el SRT de un oído supera en **40 dB** o más al SRT del otro o a cualquiera de sus umbrales óseos de 500 a 4.000 Hz. El laboratorio usa 45 dB porque la voz, que reparte su energía en un rango ancho de frecuencias, cruza el cráneo con más pérdida que un tono aislado con el mismo fono, y comparar contra el promedio del oído no evaluado sigue la misma lógica con que se lee el SRT. <!-- verificar: cifra de atenuación interaural del habla con fono supraaural (rango publicado ~45-55 dB) con fuente primaria. Búsqueda 2026-10-18: Snyder (1973, Laryngoscope) y Smith y Markides (1981, Br J Audiol 15) existen pero no se leyeron sus cifras; Ramos y cols. (2009, Rev Soc Bras Fonoaudiol 14(4), doi:10.1590/S1516-80342009000400012) solo dan en el resumen que la de inserción atenúa más, también para la voz. -->
 :::
 
 ### 6. Umbral de molestia (LDL)
@@ -331,7 +331,7 @@ Los pacientes de este capítulo están entre los de práctica (★): Carolina, H
 
 1. Burdiles-Aguirre J, Flores-Bustos C, Lagos-Riveros G, Crisosto-Alarcón J. Equilibrio fonológico de las listas de palabras empleadas en la logoaudiometría en Chile. Rev Otorrinolaringol Cir Cabeza Cuello. 2024;84(4):361-70. doi:10.4067/S0718-48162024000400492
 1. Cañete OM, Figueroa M, Ferrada C, Carrera J. Equivalencia de listas de palabras bisilábicas en español de AUDITEC (St. Louis) en adultos y niños con audición normal. Rev Otorrinolaringol Cir Cabeza Cuello. 2024;84(3):267-79. doi:10.4067/S0718-48162024000300138
-1. Cañete O, Azúa C, Vera C. Prácticas audiológicas en Chile: encuesta online para tecnólogos médicos mención otorrinolaringología. Rev Otorrinolaringol Cir Cabeza Cuello. 2016;76(3):286-94. doi:10.4067/S0718-48162016000300006
+1. Cañete OM, Azúa CG, Vera C. Prácticas audiológicas en Chile: encuesta online para tecnólogos médicos mención otorrinolaringología. Rev Otorrinolaringol Cir Cabeza Cuello. 2016;76(3):286-94. doi:10.4067/S0718-48162016000300006
 1. Palacio Rodríguez J. Evaluación de familiaridad y rendimiento de listas de palabras usadas en logoaudiometría [tesis de pregrado]. Santiago: Universidad de Chile, Facultad de Medicina; 2000. Profesora guía: Farfán Reyes C. Disponible en: https://repositorio.uchile.cl/handle/2250/110573
 1. Carlo MA, Wilson RH, Villanueva-Reyes A. Psychometric characteristics of Spanish monosyllabic, bisyllabic, and trisyllabic words for use in word-recognition protocols. J Am Acad Audiol. 2020;31(7):531-46. doi:10.1055/s-0040-1709446
 

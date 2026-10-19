@@ -12,9 +12,11 @@ Response* (Hood, 1998), en tres partes:
 2. Aplicaciones: diagnóstico neurológico, estimar la audición y el ABR en niños.
 3. Casos e informes, más ejercicios de laboratorio.
 
-Falta conseguir el índice completo del libro de Hood (en papel o en la ficha
-de una biblioteca) antes de citarlo; lo de arriba sale de la descripción del
-editor.
+Hood es la referencia central del autor para el ABR (él, 2026-10-18: "Hood
+es mi diosa"): sus citas en el libro no se quitan ni se reemplazan. Lo único
+pendiente es el índice completo (en papel o en la ficha de una biblioteca)
+para citar capítulos o tablas puntuales; lo de arriba sale de la descripción
+del editor.
 
 ## Regla general
 

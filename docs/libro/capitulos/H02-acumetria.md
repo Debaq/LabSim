@@ -30,9 +30,9 @@ El sonido llega a la cóclea por dos caminos (ver B2). Por **vía aérea** recor
 - si una cóclea oye peor, se va al **oído mejor**;
 - si un oído tiene una pérdida **conductiva**, se va al **oído peor**.
 
-El Weber conductivo se comprueba en uno mismo: tápese un oído con el dedo y tararee; la voz, que también llega por el hueso, se oye en el oído tapado. La razón principal es que el oído con el problema conductivo recibe **mejor** la vibración del hueso. Con un tapón es el **efecto de oclusión**: cuando el cráneo vibra también vibran las paredes del conducto, que suenan dentro de él; con el conducto abierto ese sonido, sobre todo el grave, se pierde hacia afuera, pero con el conducto tapado queda encerrado y empuja el tímpano. En una pérdida de oído medio, sin tapón, el mecanismo es otro: cambia cómo responden a la vibración del cráneo la cadena de huesecillos y lo que llena la caja timpánica, pero el resultado es el mismo. El **ruido ambiente** suma poco: entra por el oído abierto y le enmascara algo el diapasón. No es la causa principal, porque con el vibrador dentro de la cabina, donde casi no hay ruido, el Weber se va igual al oído conductivo.
+El Weber conductivo se comprueba en uno mismo: tápese un oído con el dedo y tararee; la voz, que también llega por el hueso, se oye en el oído tapado. La razón principal es que el oído con el problema conductivo recibe **mejor** la vibración del hueso. Con un tapón es el **efecto de oclusión**: cuando el cráneo vibra también vibran las paredes del conducto, que suenan dentro de él; con el conducto abierto ese sonido, sobre todo el grave, se pierde hacia afuera, pero con el conducto tapado queda encerrado y empuja el tímpano (Fagelson y Martin, 1998). En una pérdida de oído medio, sin tapón, el mecanismo es otro: cambia cómo responden a la vibración del cráneo la cadena de huesecillos y lo que llena la caja timpánica, pero el resultado es el mismo (Sichel y cols., 2002). El **ruido ambiente** suma poco: entra por el oído abierto y le enmascara algo el diapasón. No es la causa principal, porque con el vibrador dentro de la cabina, donde casi no hay ruido, el Weber se va igual al oído conductivo.
 
-<!-- verificar: la explicación del Weber conductivo (oclusión y enmascaramiento por ruido ambiente) es la clásica de los textos, pero ninguna de las referencias de este capítulo la desarrolla. -->
+<!-- Pasada de fundamentos 2026-10-18: el verificar sobre el Weber conductivo se resolvió. Oclusión: con el conducto tapado sube la presión sonora en el conducto y mejora la ósea en 250-1000 Hz (Fagelson y Martin, 1998). Oído medio: al fijar la cadena, el umbral óseo mejora en ese oído y la lateralización se explica, al menos en parte, por una diferencia de intensidad entre las dos cócleas (Sichel y cols., 2002, modelo animal; propone además una vía por el LCR, que es una de varias explicaciones). Lo del ruido ambiente es argumento propio del texto, sin cita. -->
 
 :::imagen ilustraciones/h02-weber-conductivo.svg ancho=100% Por qué el Weber se va al oído con pérdida conductiva, en un corte frontal de la cabeza visto de frente (el OD queda a la izquierda). A: con los dos oídos sanos, la vibración del diapasón llega por el hueso igual a las dos cócleas y se oye al centro. B: con el conducto derecho tapado, la pared del conducto, que vibra con el cráneo, suena dentro de él; ese sonido queda encerrado y empuja el tímpano (efecto de oclusión), y el diapasón se oye en el oído tapado. El ruido del ambiente, que entra solo por el oído abierto, aporta poco.
 :::
@@ -162,7 +162,7 @@ Las respuestas salen del audiograma del caso, con umbrales que tu docente puede 
 - @OI 500 | El OI es normal. Casi toda la asimetría es de transmisión, y por eso el Weber va al OD.
 :::
 
-Weber, Rinne y audiograma apuntan al mismo oído: conductiva del OD con cóclea sana. La caída de la ósea en 2 kHz es la muesca de Carhart, que suma a la sospecha de otoesclerosis.
+Weber, Rinne y audiograma apuntan al mismo oído: conductiva del OD con cóclea sana. La caída de la ósea en 2 kHz es la muesca de Carhart, que suma a la sospecha de otoesclerosis (Carhart, 1950).
 
 {{caso h2_p39}}
 
@@ -178,7 +178,7 @@ Weber, Rinne y audiograma apuntan al mismo oído: conductiva del OD con cóclea 
 - @OD osea 2000 | La ósea va con la aérea: sin gap, el Rinne no tiene por qué cambiar.
 :::
 
-El diapasón detecta una asimetría que en los graves todavía es normal. Lo importante de la pérdida está en los agudos, donde ningún diapasón llega: la acumetría orienta, pero no reemplaza la curva.
+El diapasón detecta una asimetría que en los graves todavía es normal. La pérdida está sobre todo en los agudos, donde ningún diapasón llega: la acumetría orienta, pero no reemplaza la curva.
 
 {{caso h2_p42}}
 
@@ -209,7 +209,10 @@ Es una cófosis del OD, sin componente conductivo. Con el Rinne solo, se habría
 
 ## Referencias
 
-1. British Society of Audiology (2022). Recommended Procedure: Rinne and Weber Tuning Fork Tests (OD104-51 v2). Turton L, Batty S.
+1. British Society of Audiology. Recommended procedure: Rinne and Weber tuning fork tests (OD104-51 v2) [Internet]. Bathgate: BSA; 2022 Feb [citado 2026 oct 18]. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-51-BSA-Recommended-Procedure-Rinne-Weber-Tuning-Fork-Tests-February-2022.pdf
 1. Kelly EA, Li B, Adams ME. Diagnostic accuracy of tuning fork tests for hearing loss: a systematic review. Otolaryngol Head Neck Surg. 2018;159(2):220-230. doi:10.1177/0194599818770405. PMID 29661046.
 1. Stankiewicz JA, Mowry HJ. Clinical accuracy of tuning fork tests. Laryngoscope. 1979;89(12):1956-1963. doi:10.1288/00005537-197912000-00009.
-1. Ungar OJ, Wengier A, Cavel O, Abergel A, Safadi A, Warshavsky A, et al. Does sinusitis affect lateralization of a tuning fork Weber test? Otol Neurotol. 2021;42:792-798. doi:10.1097/MAO.0000000000003086.
+1. Ungar OJ, Wengier A, Cavel O, Abergel A, Safadi A, Warshavsky A, et al. Does sinusitis affect lateralization of a tuning fork Weber test? Otol Neurotol. 2021;42(6):792-798. doi:10.1097/MAO.0000000000003086.
+1. Fagelson MA, Martin FN. The occlusion effect and ear canal sound pressure level. Am J Audiol. 1998;7(2):50-4. doi:10.1044/1059-0889(1998/010)
+1. Sichel JY, Freeman S, Sohmer H. Lateralization during the Weber test: animal experiments. Laryngoscope. 2002;112(3):542-6. doi:10.1097/00005537-200203000-00024. PMID 12148868.
+1. Carhart R. Clinical application of bone conduction audiometry. Arch Otolaryngol. 1950;51(6):798-808. doi:10.1001/archotol.1950.00700020824003. PMID 15419943.

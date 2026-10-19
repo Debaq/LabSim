@@ -46,13 +46,13 @@ La cupulolitiasis se propuso en 1969 (Schuknecht) y la canalitiasis recién se v
 
 ## Patología
 
-El VPPB es la causa más frecuente de vértigo de origen periférico. En una encuesta de población adulta en Alemania, la prevalencia a lo largo de la vida fue de 2,4 %, la de un año de 1,6 % y la incidencia anual de 0,6 %, y aumentaba con la edad; solo 8 % de los afectados había recibido un tratamiento eficaz (von Brevern y cols., 2007). Se asoció también con migraña, hipertensión, hiperlipidemia y accidente cerebrovascular (von Brevern y cols., 2007).
+El VPPB es la causa más frecuente de vértigo de origen periférico (Bhattacharyya y cols., 2017). En una encuesta de población adulta en Alemania, la prevalencia a lo largo de la vida fue de 2,4 %, la de un año de 1,6 % y la incidencia anual de 0,6 %, y aumentaba con la edad; solo 8 % de los afectados había recibido un tratamiento eficaz (von Brevern y cols., 2007). Se asoció también con migraña, hipertensión, hiperlipidemia y accidente cerebrovascular (von Brevern y cols., 2007).
 
-- **Canal posterior** (canalitiasis, lo más frecuente): el posterior es el más bajo con el paciente sentado o acostado, y por eso recibe casi todas las partículas. Da el nistagmo upbeat-torsional en el Dix-Hallpike hacia el lado afectado.
-- **Canal lateral**: segundo en frecuencia. Con la cabeza girada a cada lado, el nistagmo es horizontal y **cambia de dirección** con el lado. Puede ser **geotrópico** (partículas sueltas, lo más frecuente) o **apogeotrópico** (partículas pegadas a la cúpula o cerca de la ampolla). En cerca de 20 % la diferencia de intensidad entre los dos lados no alcanza para decidir el lado (Bhattacharyya y cols., 2017).
+- **Canal posterior** (canalitiasis, lo más frecuente): el posterior es el más bajo con el paciente sentado o acostado, y por eso recibe casi todas las partículas: es el 85 a 95 % de los VPPB (Bhattacharyya y cols., 2017). Da el nistagmo upbeat-torsional en el Dix-Hallpike hacia el lado afectado.
+- **Canal lateral**: segundo en frecuencia, 5 a 15 % de los casos. Con la cabeza girada a cada lado, el nistagmo es horizontal y **cambia de dirección** con el lado. Puede ser **geotrópico** (partículas sueltas, lo más frecuente) o **apogeotrópico** (partículas pegadas a la cúpula o cerca de la ampolla). En cerca de 20 % la diferencia de intensidad entre los dos lados no alcanza para decidir el lado (Bhattacharyya y cols., 2017).
 - **Canal anterior**: raro (1 a 3 %). Nistagmo hacia **abajo**, justo el que más hay que sospechar de una causa central (Bhattacharyya y cols., 2017).
 
-Una parte de los VPPB laterales aparece **después de tratar un posterior**: las partículas cambian de canal durante la maniobra y el paciente vuelve con otro tipo de vértigo (Bhattacharyya y cols., 2017).
+Una parte de los VPPB laterales aparece **después de tratar un posterior**: las partículas cambian de canal durante la maniobra, en cerca de 6 a 7 % de los tratados, y el paciente vuelve con otro tipo de vértigo (Bhattacharyya y cols., 2017).
 
 :::ojo Ojo clínico
 Un nistagmo posicional **puro hacia abajo**, que aparece **sin latencia**, **no se cansa** y no cambia con las maniobras, o que viene con dolor de cabeza nuevo, diplopía, disartria o ataxia, **no es un VPPB** aunque el paciente diga que gira al acostarse. Es un hallazgo central hasta que se pruebe lo contrario (Büttner y cols., 1999; Macdonald y cols., 2017). El audiograma normal no tranquiliza: no mide el cerebelo.
@@ -68,7 +68,7 @@ La guía de la AAO-HNS recomienda **no** pedir imágenes ni pruebas vestibulares
 
 Ante un "me mareo al moverme", la entrevista decide si vale la pena mirar los ojos:
 
-1. **¿Es un vértigo (giro) y dura segundos?** El VPPB dura menos de 1 minuto por episodio y el paciente está bien entre una crisis y otra. Si dura minutos u horas, o está mareado todo el día, hay que pensar en otro cuadro (→ cap. 21, cap. 23 y cap. 27). Los criterios de la Sociedad Bárány piden crisis recurrentes de vértigo posicional, provocadas por acostarse o girar en la cama, de menos de 1 minuto <!-- verificar: texto exacto del criterio de duración por canal en von Brevern 2015; no se pudo abrir completo, solo el resumen -->.
+1. **¿Es un vértigo (giro) y dura segundos?** El VPPB dura menos de 1 minuto por episodio y el paciente está bien entre una crisis y otra. Si dura minutos u horas, o está mareado todo el día, hay que pensar en otro cuadro (→ cap. 21, cap. 23 y cap. 27). Los criterios de la Sociedad Bárány piden crisis recurrentes de vértigo posicional, provocadas por acostarse o girar en la cama, de menos de 1 minuto en las formas por canalitiasis; en la cupulolitiasis del canal lateral el nistagmo dura más de 1 minuto (von Brevern y cols., 2015). <!-- Pasada de fundamentos 2026-10-18: decía "de menos de 1 minuto" para todo VPPB. Los criterios piden "Duration of attacks <1 minute" en la canalitiasis del posterior y del lateral; la cupulolitiasis del lateral no tiene criterio de duración de la crisis y su nistagmo dura ">1 minute" (von Brevern y cols., 2015, transcritos en Lee y cols., Clin Exp Otorhinolaryngol 2022;15(3):213-9, material suplementario 1). -->
 2. **¿Qué lo provoca?** Acostarse, darse vuelta en la cama, mirar hacia arriba, agacharse. Preguntar **hacia qué lado** gira peor: en el lateral apogeotrópico el paciente suele señalar el lado **sano**.
 3. **¿Hay algo que no encaje?** Síntomas auditivos nuevos, cefalea, visión doble, dificultad para hablar, inestabilidad al caminar, un golpe en la cabeza reciente. Cualquiera de estos cambia la pregunta.
 4. **¿Se ve en los ojos?** Sin nistagmo, el vértigo solo no basta. Un Dix-Hallpike negativo no descarta el VPPB: la guía cita una sensibilidad de 82 % y una especificidad de 71 % entre especialistas, y sugiere repetirlo en otra visita antes de darlo por negativo (Bhattacharyya y cols., 2017).
@@ -358,13 +358,13 @@ Es el caso que justifica el capítulo. El VPPB es la causa más frecuente de vé
 1. Epley JM. The canalith repositioning procedure: for treatment of benign paroxysmal positional vertigo. Otolaryngol Head Neck Surg. 1992;107(3):399-404. doi:10.1177/019459989210700310
 1. Semont A, Freyss G, Vitte E. Curing the BPPV with a liberatory maneuver. Adv Otorhinolaryngol. 1988;42:290-3. doi:10.1159/000416126
 1. Lempert T, Tiel-Wilck K. A positional maneuver for treatment of horizontal-canal benign positional vertigo. Laryngoscope. 1996;106(4):476-8. doi:10.1097/00005537-199604000-00015
-1. Gufoni M, Mastrosimone L, Di Nasso F. Trattamento con manovra di riposizionamento per la canalolitiasi orizzontale. Acta Otorhinolaryngol Ital. 1998;18(6):363-7.
+1. Gufoni M, Mastrosimone L, Di Nasso F. Trattamento con manovra di riposizionamento per la canalolitiasi orizzontale. Acta Otorhinolaryngol Ital. 1998;18(6):363-7. PMID 10388148.
 
 ### Fisiología
 
 1. Kim JS, Zee DS. Benign paroxysmal positional vertigo. N Engl J Med. 2014;370(12):1138-47. doi:10.1056/NEJMcp1309481
 1. Schuknecht HF. Cupulolithiasis. Arch Otolaryngol. 1969;90(6):765-78. doi:10.1001/archotol.1969.00770030767020
-1. Hall SF, Ruby RR, McClure JA. The mechanics of benign paroxysmal vertigo. J Otolaryngol. 1979;8(2):151-8.
+1. Hall SF, Ruby RR, McClure JA. The mechanics of benign paroxysmal vertigo. J Otolaryngol. 1979;8(2):151-8. PMID 430582.
 1. Parnes LS, McClure JA. Free-floating endolymph particles: a new operative finding during posterior semicircular canal occlusion. Laryngoscope. 1992;102(9):988-92. doi:10.1288/00005537-199209000-00006
 1. Squires TM, Weidman MS, Hain TC, Stone HA. A mathematical model for top-shelf vertigo: the role of sedimenting otoconia in BPPV. J Biomech. 2004;37(8):1137-46. doi:10.1016/j.jbiomech.2003.12.014
 

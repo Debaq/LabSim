@@ -7,7 +7,7 @@
 - Distinguir una neuritis vestibular de una laberintitis y de un ictus que las imita, y decidir cuándo el hallazgo obliga a derivar sin demora.
 :::
 
-Una persona llega con el mundo girando desde hace horas, vomita y no puede ponerse de pie. Casi siempre es una neuritis vestibular: benigna, de buen pronóstico, y se recupera. Pero entre quienes llegan así hay también ictus del cerebelo y del tronco que **se ven igual** y que no admiten esperar. Este capítulo trata de cómo separar unos de otros con lo que se ve y se mide en los primeros minutos: el nistagmo, el impulso cefálico, los ojos al taparlos y la audición.
+Una persona llega con el mundo girando desde hace horas, vomita y no puede ponerse de pie. Lo más frecuente es una neuritis vestibular, que es benigna y en general se compensa (Newman-Toker y cols., 2008).<!-- Pasada de fundamentos 2026-10-18: decía "Casi siempre es una neuritis vestibular: benigna, de buen pronóstico, y se recupera". Newman-Toker y cols. (2008): "Most patients with acute vertigo, nausea/vomiting, and unsteady gait have benign APV (vestibular neuritis or labyrinthitis)"; la recuperación del laberinto es variable (ver "Compensación"). --> Pero entre quienes llegan así hay también ictus del cerebelo y del tronco que **se ven igual** y que no admiten esperar. Este capítulo trata de cómo separar unos de otros con lo que se ve y se mide en los primeros minutos: el nistagmo, el impulso cefálico, los ojos al taparlos y la audición.
 
 ## Técnica en foco
 
@@ -23,7 +23,7 @@ En el SVA la pregunta no es "¿qué oído está enfermo?" sino **"¿es periféri
 
 HINTS son las iniciales en inglés de tres pruebas de cabecera: **H**ead **I**mpulse, **N**ystagmus y **T**est of **S**kew. Se hacen en ese orden, en pocos minutos, sin equipos.
 
-1. **Impulso cefálico (*head impulse*).** El paciente fija la mirada en la nariz del examinador y este le gira la cabeza de forma **breve, rápida e impredecible** (unos 10 a 20° <!-- verificar: amplitud habitual del impulso manual -->) hacia un lado y hacia el otro. Si el reflejo vestíbulo-ocular (VOR) funciona, los ojos se quedan en la nariz. Si falla, el ojo se va con la cabeza y **salta de vuelta** con una sacada correctiva (Halmagyi y Curthoys, 1988). El porqué de la rapidez y de esa sacada está en H17.
+1. **Impulso cefálico (*head impulse*).** El paciente fija la mirada en la nariz del examinador y este le gira la cabeza de forma **breve, rápida e impredecible** (unos 15° en unos 100 ms; Halmagyi y cols., 2017) hacia un lado y hacia el otro. Si el reflejo vestíbulo-ocular (VOR) funciona, los ojos se quedan en la nariz. Si falla, el ojo se va con la cabeza y **salta de vuelta** con una sacada correctiva (Halmagyi y Curthoys, 1988). El porqué de la rapidez y de esa sacada está en H17.
 2. **Nistagmo.** Se mira con la mirada al frente, a la derecha y a la izquierda (→ H15); con las lentes de Frenzel se ve además el nistagmo espontáneo que la fijación esconde. Un nistagmo **unidireccional**, horizontal con componente torsional, que **no cambia de sentido** al cambiar la mirada, es el de una lesión periférica. Uno que **cambia de sentido** (bate a la derecha al mirar a la derecha y a la izquierda al mirar a la izquierda), o que es **puramente vertical o torsional**, es central.
 3. **Desviación oblicua (*test of skew*).** Con la prueba de oclusión alternada se tapa un ojo unos segundos y se pasa la mano al otro. Si el ojo que se destapa **sube o baja a re-fijar**, hay una desviación vertical: un signo de lesión del tronco o de las vías de los otolitos.
 
@@ -76,7 +76,7 @@ No es una regla perfecta. Una lesión que toque a la vez el laberinto y el tronc
 
 ### Qué rama del nervio: neuritis superior
 
-La neuritis vestibular suele ser **parcial**. En 16 pacientes estudiados entre los 3 y los 10 días, el nistagmo y las asimetrías del reflejo correspondían a la **rama superior** del nervio vestibular: canales horizontal y anterior (Fetter y Dichgans, 1996). El canal **posterior**, que depende de la rama inferior, se salva. Eso explica un vHIT con los canales horizontal y anterior del lado enfermo con ganancia baja y el posterior normal, y es la razón por la que el cVEMP (sáculo, rama inferior) puede quedar conservado y el oVEMP (utrículo, rama superior) reducido (→ H12 y cap. 20). En una laberintitis, en cambio, cae **todo** el laberinto.
+La neuritis vestibular suele ser **parcial**. En 16 pacientes estudiados entre los 3 y los 10 días, el nistagmo y las asimetrías del reflejo correspondían a la **rama superior** del nervio vestibular: canales horizontal y anterior (Fetter y Dichgans, 1996). Con vHIT de los tres canales y VEMP en 43 pacientes, el 42 % tenía solo la rama superior comprometida, el 56 % las dos y uno solo la inferior (Taylor y cols., 2016). Cuando es solo la superior, el canal **posterior**, que depende de la rama inferior, se salva. Eso explica un vHIT con los canales horizontal y anterior del lado enfermo con ganancia baja y el posterior normal, y es la razón por la que el cVEMP (sáculo, rama inferior) puede quedar conservado y el oVEMP (utrículo, rama superior) reducido (→ H12 y cap. 20). En una laberintitis, en cambio, cae **todo** el laberinto.
 
 ### Compensación: lo que se recupera y lo que se aprende
 
@@ -95,7 +95,7 @@ La neuritis tiene tres frentes. **Síntomas**: antiemético y reposo breve, por 
 
 ### Laberintitis
 
-Es la pérdida **vestibular y auditiva juntas** del mismo oído: vértigo agudo más hipoacusia súbita con o sin acúfeno. En 61 pacientes con laberintitis idiopática, todos tenían debilidad vestibular al presentarse y la audición se recuperó, según ellos, solo en el 20 %; a los 61 meses el 72,5 % seguía con problemas de equilibrio (Oussoren y cols., 2023). La pérdida suele ser severa, plana y sin brecha aéreo-ósea (como en el caso 21.2). Si hay otitis media, con otoscopía anormal, fiebre o secreción, se piensa en la **laberintitis supurada**, que es otra urgencia (Maranhão y cols., 2016). El examen audiológico no separa una laberintitis de un infarto de la AICA; lo hace el contexto (→ cap. 12 y "Razonamiento").
+Es la pérdida **vestibular y auditiva juntas** del mismo oído: vértigo agudo más hipoacusia súbita con o sin acúfeno. En 61 pacientes con laberintitis idiopática, todos tenían debilidad vestibular al presentarse y la audición se recuperó, según ellos, solo en el 20 %; a los 61 meses el 72,5 % seguía con problemas de equilibrio (Oussoren y cols., 2023). La pérdida es sensorioneural, sin brecha aéreo-ósea; en esa serie promedió 58 dB en el oído afectado, con una desviación amplia, y puede llegar a severa como en el caso 21.2 (Oussoren y cols., 2023).<!-- Pasada de fundamentos 2026-10-18: decía "La pérdida suele ser severa, plana". Oussoren y cols. (2023), texto completo: "The average sensorineural hearing loss in the affected ear was 58.1 dB (high Fletcher index, SD 25.1)"; no describen la forma de la curva. --> Si hay otitis media, con otoscopía anormal, fiebre o secreción, se piensa en la **laberintitis supurada**, que es otra urgencia (Maranhão y cols., 2016). El examen audiológico no separa una laberintitis de un infarto de la AICA; lo hace el contexto (→ cap. 12 y "Razonamiento").
 
 :::sabias ¿Sabías que?
 La neuritis y la laberintitis se distinguen en un dato que el audiólogo mide: la **audición**. Un vértigo agudo con una audición intacta apunta a la neuritis; con una caída del mismo lado, a la laberintitis o a la AICA. Por eso el audiograma, que parece accesorio, es parte del examen del vértigo.
@@ -140,7 +140,7 @@ Con un vértigo agudo, el razonamiento sigue cuatro preguntas, en orden:
 | **Audición** | normal | **cae** del mismo lado | normal |
 | **Impulso cefálico** | anormal hacia el lado enfermo | anormal hacia el lado enfermo | **normal**, o anormal en la AICA |
 | **Nistagmo** | unidireccional | unidireccional | cambia con la mirada, o unidireccional en la AICA |
-| **Skew** | ausente | ausente | **presente** en cerca de un tercio de los ictus con tronco comprometido |
+| **Skew** | ausente | ausente | **presente** en cerca de un tercio de los ictus con tronco comprometido (Kattah y cols., 2009) |
 | **Marcha** | desequilibrio leve a moderado | leve a moderado | **no se sostiene** |
 | **VEMP** (→ cap. 20) | oVEMP reducido, cVEMP conservado | **los dos** caídos | sin hallazgo propio; cae del lado si el infarto toca el laberinto (AICA) |
 :::
@@ -386,7 +386,7 @@ Dos de los tres pasos del HINTS parecen una neuritis izquierda: impulso anormal 
 Hipoacusia sensorioneural moderada del OI con VEMP del mismo lado caído y **skew presente** en un SVA, con riesgo vascular y ataxia de tronco. Se informa el patrón y se avisa **sin demora**: es un ictus de fosa posterior hasta que se demuestre lo contrario. Es la misma lógica del caso 12.2 del capítulo del tronco, aquí vista desde el vértigo.
 
 :::sabias ¿Sabías que?
-En el infarto de la AICA, la pérdida auditiva y vestibular juntas puede ser **el primer signo, días antes** de que aparezcan los signos del tronco (Lee, 2012). Por eso un paciente con "laberintitis" y factores de riesgo vascular no es un paciente tranquilo.
+En el infarto de la AICA, la pérdida auditiva y vestibular juntas puede ser **el primer signo**: en 4 de 12 pacientes, el vértigo o los síntomas auditivos aparecieron aislados entre un día y dos meses antes del infarto (Lee y cols., 2002).<!-- Pasada de fundamentos 2026-10-18: decía "el primer signo, días antes de que aparezcan los signos del tronco (Lee, 2012)". Lee y cols. (2002), resumen: "Four patients had vertigo and/or acute auditory symptoms such as hearing loss or tinnitus as an isolated manifestation from 1 day to 2 months before infarction". --> Por eso un paciente con "laberintitis" y factores de riesgo vascular no es un paciente tranquilo.
 :::
 
 ## Para cerrar
@@ -422,10 +422,12 @@ En el infarto de la AICA, la pérdida auditiva y vestibular juntas puede ser **e
 1. Carmona S, Martínez C, Zalazar G, Moro M, Batuecas-Caletrio A, Luis L, et al. The diagnostic accuracy of truncal ataxia and HINTS as cardinal signs for acute vestibular syndrome. Front Neurol. 2016;7:125. doi:10.3389/fneur.2016.00125
 1. Weber KP, Aw ST, Todd MJ, McGarvie LA, Curthoys IS, Halmagyi GM. Head impulse test in unilateral vestibular loss: vestibulo-ocular reflex and catch-up saccades. Neurology. 2008;70(6):454-63. doi:10.1212/01.wnl.0000299117.48935.2e
 1. Strupp M, Bisdorff A, Furman J, Hornibrook J, Jahn K, Maire R, et al. Acute unilateral vestibulopathy/vestibular neuritis: diagnostic criteria. J Vestib Res. 2022;32(5):389-406. doi:10.3233/VES-220201
+1. Halmagyi GM, Chen L, MacDougall HG, Weber KP, McGarvie LA, Curthoys IS. The video head impulse test. Front Neurol. 2017;8:258. doi:10.3389/fneur.2017.00258
 
 ### Fisiología
 
 1. Fetter M, Dichgans J. Vestibular neuritis spares the inferior division of the vestibular nerve. Brain. 1996;119(3):755-63. doi:10.1093/brain/119.3.755
+1. Taylor RL, McGarvie LA, Reid N, Young AS, Halmagyi GM, Welgampola MS. Vestibular neuritis affects both superior and inferior vestibular nerves. Neurology. 2016;87(16):1704-12. doi:10.1212/WNL.0000000000003223
 1. Strupp M, Zingler VC, Arbusow V, Niklas D, Maag KP, Dieterich M, et al. Methylprednisolone, valacyclovir, or the combination for vestibular neuritis. N Engl J Med. 2004;351(4):354-61. doi:10.1056/NEJMoa033280
 1. Sjögren J, Fransson PA, Karlberg ML, Magnusson M, Tjernström F. Vestibular recovery and central compensation after acute unilateral vestibulopathy: changes in saccadic response patterns and gains over time. Front Neurol. 2026;17:1832160. doi:10.3389/fneur.2026.1832160
 

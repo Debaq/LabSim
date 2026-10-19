@@ -23,10 +23,10 @@ El VEMP responde tres preguntas:
 
 Conviene tener claros sus límites desde el principio:
 
-- El VEMP **no es una prueba de audición**. No necesita que el oído oiga: un oído sordo con el oído medio sano puede dar un VEMP normal, y un oído que oye bien puede dar uno ausente.
+- El VEMP **no es una prueba de audición**. No necesita que el oído oiga: un oído sordo con el oído medio sano puede dar un VEMP normal (Colebatch y cols., 1994), y un oído que oye bien puede dar uno ausente.
 - **No mide los conductos semicirculares.** Para eso están la calórica y el vHIT (→ H16 y H17).
 - Un VEMP alterado **no dice la causa**: describe qué parte de la vía falla, no por qué.
-- Un VEMP **normal no descarta** una enfermedad. En un hidrops, por ejemplo, el cVEMP puede salir normal (→ cap. 9).
+- Un VEMP **normal no descarta** una enfermedad. En un hidrops, por ejemplo, el cVEMP puede salir normal (Rosengren y cols., 2019; → cap. 9).
 - Un VEMP **ausente** tampoco asegura que haya enfermedad: en adultos mayores, y sobre todo en el oVEMP, es frecuente que falte (ver "Cómo se informa").
 
 ## Fundamento
@@ -43,7 +43,7 @@ Con vibración del cráneo, en cambio, el sáculo y el utrículo se activan casi
 
 Cada órgano otolítico tiene su nervio: el **sáculo** manda sus fibras por el **nervio vestibular inferior** y el **utrículo**, por el **nervio vestibular superior**. Se atribuye el cVEMP al sáculo y el oVEMP al utrículo (Curthoys, 2010). Desde los núcleos vestibulares del tronco, la señal sigue por dos vías reflejas:
 
-- **cVEMP, reflejo vestíbulo-cólico.** Sáculo, nervio vestibular inferior, núcleos vestibulares y, por la vía vestibuloespinal, las motoneuronas del nervio accesorio que mueven el **esternocleidomastoideo (ECM) del mismo lado** (Colebatch y cols., 1994). Es una vía corta e **ipsilateral**: el oído derecho se registra en el cuello derecho.
+- **cVEMP, reflejo vestíbulo-cólico.** Sáculo, nervio vestibular inferior, núcleos vestibulares y, por el fascículo vestibuloespinal medial, las motoneuronas que mueven el **esternocleidomastoideo (ECM) del mismo lado** (Colebatch y cols., 1994; Kushiro y cols., 1999). Es una vía corta e **ipsilateral**: el oído derecho se registra en el cuello derecho.
 - **oVEMP, reflejo vestíbulo-ocular.** Utrículo y parte anterior del sáculo, nervio vestibular superior, núcleos vestibulares, un cruce hacia el lado opuesto y los núcleos de los músculos del ojo. La respuesta más clara se registra en el **músculo oblicuo inferior del ojo contrario** al oído estimulado (Iwasaki y cols., 2007; Curthoys y cols., 2012). Es una vía **cruzada**: el oído derecho se registra bajo el ojo izquierdo.
 
 La figura siguiente dibuja las dos vías juntas, de frente: a la izquierda de la figura queda el lado derecho del paciente. Aquí se sigue el **oído derecho**.
@@ -66,13 +66,13 @@ Con esta misma figura se entiende por qué la neuritis de una rama deja normal e
 - @14,88 | **Sáculo y rama inferior intactos**: el cVEMP de este oído se conserva.
 :::
 
-<!-- verificar: "vía vestibuloespinal" y "motoneuronas del nervio accesorio" son descripción de libro de texto; las fuentes leídas (Rosengren 2019, Colebatch 1994) dan el trayecto sáculo-ECM sin nombrar cada relevo. Confirmar con Curthoys 2010 o con un tratado antes de la edición final. -->
+<!-- Pasada de fundamentos 2026-10-18: el verificar sobre la vía vestibuloespinal se resolvió con Kushiro y cols. (1999): en el gato, la inhibición sáculo-ECM es disináptica, ipsilateral y viaja por el fascículo vestibuloespinal medial. Se sacó "del nervio accesorio" del texto (anatomía de manual, no hacía falta). -->
 
 ### Un potencial que es una pausa
 
 El ABR es una respuesta eléctrica de las neuronas (→ H10). El VEMP es otra cosa: es lo que **un músculo hace** después del estímulo, y lo que se ve en el electrodo es la actividad de ese músculo.
 
-- El **cVEMP es una inhibición.** El estímulo hace que las unidades motoras del ECM **se detengan unos milisegundos** (Rosengren y cols., 2019). Eso se ve como una onda positiva a los 13 ms (**P13**) y una negativa a los 23 ms (**N23**) cuando el registro se dibuja con la polaridad habitual de este libro. La polaridad con que se dibuja depende del equipo (la convención neurofisiológica deja las negatividades hacia arriba): guíate por la latencia, que es siempre la misma, y no por el sentido de la onda.
+- El **cVEMP es una inhibición.** El estímulo hace que las unidades motoras del ECM **se detengan unos milisegundos** (Rosengren y cols., 2019). Eso se ve como una onda positiva a los 13 ms (**P13**) y una negativa a los 23 ms (**N23**) cuando el registro se dibuja con la polaridad habitual de este libro. La polaridad con que se dibuja depende del equipo (la convención neurofisiológica deja las negatividades hacia arriba): guíate por la latencia, que no cambia con la forma de dibujar, y no por el sentido de la onda. <!-- Pasada de fundamentos 2026-10-18: decía "la latencia, que es siempre la misma". La latencia depende de la forma del estímulo y de su tiempo de subida (Rosengren y cols., 2019); lo que no la cambia es la polaridad del dibujo. -->
 - El **oVEMP es una excitación.** El estímulo hace que el oblicuo inferior se contraiga un instante. Se ve como una onda negativa a los 10 ms (**n10**) y una positiva a los 15 a 16 ms (**p16**). En la literatura se las llama también n10 y p15; LabSim usa p16.
 
 Por eso las ondas del cVEMP se escriben con mayúscula inicial en las figuras del libro (P13, N23) y las del oVEMP con minúscula (n10, p16), como el equipo.
@@ -91,7 +91,7 @@ Eso tiene dos consecuencias:
 El oVEMP funciona igual, pero con la mirada: al mirar hacia arriba el oblicuo inferior se contrae más y además queda más cerca de los electrodos, y la respuesta crece casi en línea recta con el ángulo de la mirada (Rosengren y cols., 2019).
 
 :::sabias ¿Sabías que?
-El VEMP sirvió primero para comprobar que la respuesta era del vestíbulo. Colebatch y Halmagyi (1992) la registraron en el cuello antes y después de cortar el nervio vestibular en pacientes operados: tras la sección, la onda desaparecía del lado operado.
+El VEMP sirvió primero para comprobar que la respuesta era del vestíbulo. Colebatch y Halmagyi (1992) la registraron en el cuello antes y después de una sección del nervio vestibular: tras la sección, la onda desaparecía del lado operado. <!-- Pasada de fundamentos 2026-10-18: decía "en pacientes operados". La carta de 1992 no tiene resumen y no se pudo leer; no se confirmó cuántos pacientes eran, y se dejó sin número. -->
 :::
 
 ## Antes de empezar
@@ -192,7 +192,7 @@ Se comprueba la impedancia de cada electrodo: **menos de 5 kΩ** y una diferenci
 | **Canal derecho** (rotulado "referencia derecha") | Bajo la pupila del **ojo izquierdo** |
 :::
 
-El canal "izquierdo" es el del oído izquierdo, y por eso va al **ojo derecho**: el oVEMP es cruzado. Un alumno que pone el electrodo del mismo lado registra el oído equivocado. La impedancia debe quedar **menor de 3 kΩ**, con una diferencia entre electrodos **menor de 1 kΩ**, más exigente que en el cuello: la señal del oVEMP es diez veces más chica.
+El canal "izquierdo" es el del oído izquierdo, y por eso va al **ojo derecho**: el oVEMP es cruzado. Un alumno que pone el electrodo del mismo lado registra el oído equivocado. La impedancia debe quedar **menor de 3 kΩ**, con una diferencia entre electrodos **menor de 1 kΩ**, más exigente que en el cuello: la señal del oVEMP es diez veces más chica (Rosengren y cols., 2019).
 
 :::comentario Lo que dicen las normas
 El montaje clásico del oVEMP pone el electrodo de registro justo bajo el ojo y la referencia uno o dos centímetros más abajo, sobre la mejilla. Está pensado para captar el oblicuo inferior y restar la actividad de los músculos vecinos (Todd y cols., 2007). Una referencia **lejana**, como el mentón de este libro, da **amplitudes mayores**, porque no resta la señal del músculo, pero también deja pasar la de otros músculos del ojo y pierde especificidad (Rosengren y cols., 2019). Las dos formas son válidas; lo que importa es que la norma que uses esté medida con el mismo montaje.
@@ -206,8 +206,8 @@ El montaje clásico del oVEMP pone el electrodo de registro justo bajo el ojo y 
 | Estímulo | Tone burst 500 Hz, ventana de Blackman | Tone burst 1.000 o 500 Hz, Blackman | El sáculo responde mejor entre 500 y 1.000 Hz; el burst, a diferencia del click, concentra la energía en una banda |
 | Polaridad | Rarefacción | Rarefacción | La del protocolo; LabSim ofrece también condensación y alternante |
 | Intensidad | 100 dB nHL | 100 dB nHL | El más alto que la cóclea tolera: el umbral del VEMP es alto |
-| Tasa | 5,1 estímulos/s | 5,1 estímulos/s | Sobre 10/s la amplitud del cVEMP cae; el decimal evita la red eléctrica (→ H10) |
-| Filtros | 3 Hz a 1,5 kHz | 1 Hz a 1 kHz | Dejan pasar el EMG (40 a 60 Hz en el cuello, unos 100 Hz bajo el ojo) y sacan la deriva |
+| Tasa | 5,1 estímulos/s | 5,1 estímulos/s | Sobre 10/s la amplitud del cVEMP cae (Rosengren y cols., 2019); el decimal evita la red eléctrica (→ H10) |
+| Filtros | 3 Hz a 1,5 kHz | 1 Hz a 1 kHz | Dejan pasar la respuesta (su energía está hacia los 40 Hz en el cuello y los 100 Hz bajo el ojo; Rosengren y cols., 2019) y sacan la deriva |
 | Ganancia | 5.000 | 10.000 | El oVEMP es más chico |
 | Ventana | 50 a 100 ms | 50 ms, con 10 ms antes del estímulo | Lo que se alcanza a ver del reflejo y su línea de base |
 | Barridos | 100 a 200 por registro | 100 a 200 por registro | Menos, y la respuesta chica no sale del EMG |
@@ -247,7 +247,7 @@ El paciente va **semisentado** en la camilla (con el respaldo unos **30° sobre 
 
 Lo que buscas es una contracción **moderada y pareja en los dos lados**, y no la máxima. Una contracción máxima cansa, tiembla y, al revés de lo que parece, deja residuos de EMG que se confunden con una respuesta chica (Rosengren y cols., 2019). Si el equipo mide el EMG, sírvete de él: LabSim acepta barridos solo cuando el EMG rectificado queda **dentro de una banda** (30 a 150 µV en el cVEMP), y descarta los que quedan fuera.
 
-El ECM se **cansa**, y cada maniobra se cansa a su ritmo. En LabSim, levantar la cabeza desde la posición acostada da el EMG más alto y es la que más rápido se agota; la rotación sostenida de la cabeza da menos EMG y aguanta más tiempo. Por eso se registra por tandas cortas y se **descansa entre curvas**: el músculo recupera la fuerza al doble de la velocidad con que la pierde.
+El ECM se **cansa**, y cada maniobra se cansa a su ritmo. En LabSim, levantar la cabeza desde la posición acostada da el EMG más alto y es la que más rápido se agota; la rotación sostenida de la cabeza da menos EMG y aguanta más tiempo. Por eso se registra por tandas cortas y se **descansa entre curvas**: en el simulador, el músculo recupera la fuerza al doble de la velocidad con que la pierde.
 
 ### 4. Registra y repite
 
@@ -312,7 +312,7 @@ Mide la **n10** (la primera onda, negativa, hacia los 10 ms) y la **p16** (la po
 :::
 
 :::comentario Lo que dicen las normas
-**La mirada.** El oVEMP crece casi en línea recta con el ángulo de la mirada hacia arriba, y Rosengren y cols. (2019) recomiendan la mayor **mirada hacia arriba cómoda**; a los 30° del protocolo se suma una ventaja: es un ángulo fácil de repetir y de enseñar. La falta de mirada hacia arriba es una causa frecuente de oVEMP ausente en adultos mayores.
+**La mirada.** El oVEMP crece casi en línea recta con el ángulo de la mirada hacia arriba, y Rosengren y cols. (2019) recomiendan la mayor **mirada hacia arriba cómoda**; a los 30° del protocolo se suma una ventaja: es un ángulo fácil de repetir y de enseñar. La falta de mirada hacia arriba puede explicar malos resultados en adultos mayores y en pacientes con parálisis de la mirada (Rosengren y cols., 2019).
 
 **El nivel.** El umbral del oVEMP es de **5 a 10 dB más alto** que el del cVEMP (Rosengren y cols., 2019), y por eso se parte desde el nivel máximo.
 
@@ -364,8 +364,7 @@ La fórmula con el signo, sin el valor absoluto, indica **de qué lado** está l
 :::comentario Lo que dicen las normas
 **Por qué se corrige.** Un ejemplo publicado: en un voluntario sano, el ECM derecho se contrajo con 46 µV y el izquierdo con 156 µV. Las amplitudes crudas fueron de 109 y 320 µV, una asimetría de **49 %**; corregidas por el EMG, la asimetría fue de **6,7 %** (Rosengren y cols., 2019). Sin corregir, un sano parece enfermo. McCaslin y cols. (2014) mostraron lo mismo en una serie de sujetos normales: la normalización reduce las asimetrías.
 
-**Los límites.** Los 35 % del protocolo coinciden con el límite del cVEMP corregido que dan Rosengren y cols. (2019), citando a Welgampola y Colebatch (2001): **35 %** con amplitud corregida y **46 %** con amplitud cruda. McCaslin y cols. (2014) dan 43 % con amplitud cruda y cerca de 30 % con la corregida. Un límite depende de cómo se midió, y por eso cada centro debe tener el suyo. Para el oVEMP, el límite de 33 % del protocolo no tiene una fuente en lo que se revisó para este capítulo.
-<!-- verificar: límite de asimetría del oVEMP; no se encontró un valor publicado en las fuentes leídas. -->
+**Los límites.** Los 35 % del protocolo coinciden con el límite del cVEMP corregido que dan Rosengren y cols. (2019), citando a Welgampola y Colebatch (2001): **35 %** con amplitud corregida y **46 %** con amplitud cruda. McCaslin y cols. (2014) dan 43 % con amplitud cruda y cerca de 30 % con la corregida. Un límite depende de cómo se midió, y por eso cada centro debe tener el suyo. Para el oVEMP aéreo, Piker y cols. (2011) dan un límite de **34 %** (media más dos desviaciones estándar, con tone burst de 500 Hz a 95 dB nHL), cerca del 33 % del protocolo.
 :::
 
 ### Contra qué se compara
@@ -420,7 +419,7 @@ Patricia tiene un Ménière del OI (→ cap. 9). Mira los dos VEMP juntos: el s�
 :::figura h12_p38 vemp 2
 - @OD n10 | El oVEMP de Patricia: **24 µV**, **0,57** corregidos en un oído...
 - @OI n10 | ...y **24 µV**, **0,55** en el otro. La razón de asimetría es de **1 %**.
-- Con el cVEMP del OI alterado y el oVEMP simétrico, el compromiso es **sacular**: la rama inferior, no la superior. Es lo que se espera en un hidrops, donde el sáculo se daña antes que el utrículo (→ cap. 9).
+- Con el cVEMP del OI alterado y el oVEMP simétrico, el compromiso es **sacular**: la rama inferior, no la superior. Es lo que se espera en un hidrops, donde el sáculo se daña antes que el utrículo (Young, 2013; → cap. 9).
 :::
 
 {{caso h12_p34}}
@@ -462,7 +461,7 @@ Dos puntos para tener presentes:
 - **Registrar pocos barridos.** 50 barridos de EMG de fondo pueden dibujar una respuesta donde no hay.
 - **Medir el EMG en el promedio.** Da valores cercanos a cero y una amplitud corregida que no sirve (ver arriba).
 - **Electrodo mal puesto o corrido.** Alarga las latencias y, en los extremos del músculo, invierte la onda. Un electrodo que se corre con el giro de la cabeza hace lo mismo.
-- **Mirada insuficiente en el oVEMP.** Es la causa más frecuente de un oVEMP chico o ausente.
+- **Mirada insuficiente en el oVEMP.** Da un oVEMP chico o ausente (Rosengren y cols., 2019). <!-- Pasada de fundamentos 2026-10-18: decía "Es la causa más frecuente". Rosengren y cols. (2019) la dan como una causa de respuestas chicas o ausentes, sin decir que sea la más frecuente. -->
 - **Poner el electrodo del oVEMP del mismo lado.** El oVEMP es cruzado: se registra el oído equivocado.
 - **No mirar el oído medio.** Un cVEMP bajo con un gap aéreo-óseo y un umbral alto no es un sáculo enfermo (→ caso de Carolina).
 - **Leer un oVEMP aéreo ausente como enfermedad.** Sobre todo en adultos mayores: es sensible a la edad y da más resultados falsamente alterados que el oVEMP por vía ósea.
@@ -513,6 +512,7 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. Welgampola MS, Colebatch JG. Characteristics and clinical applications of vestibular-evoked myogenic potentials. Neurology. 2005;64(10):1682-8. doi:10.1212/01.wnl.0000161876.20552.aa
 1. Todd NP, Rosengren SM, Aw ST, Colebatch JG. Ocular vestibular evoked myogenic potentials (OVEMPs) produced by air- and bone-conducted sound. Clin Neurophysiol. 2007;118(2):381-90. doi:10.1016/j.clinph.2006.09.025
 1. Iwasaki S, McGarvie LA, Halmagyi GM, Burgess AM, Kim J, Colebatch JG, et al. Head taps evoke a crossed vestibulo-ocular reflex. Neurology. 2007;68(15):1227-9. doi:10.1212/01.wnl.0000259064.80564.21
+1. Piker EG, Jacobson GP, McCaslin DL, Hood LJ. Normal characteristics of the ocular vestibular evoked myogenic potential. J Am Acad Audiol. 2011;22(4):222-30. doi:10.3766/jaaa.22.4.5
 
 ### Contracción del músculo y amplitud corregida
 
@@ -526,3 +526,5 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. Curthoys IS. A critical review of the neurophysiological evidence underlying clinical vestibular testing using sound, vibration and galvanic stimuli. Clin Neurophysiol. 2010;121(2):132-44. doi:10.1016/j.clinph.2009.09.027
 1. Curthoys IS, Vulovic V, Manzari L. Ocular vestibular-evoked myogenic potential (oVEMP) to test utricular function: neural and oculomotor evidence. Acta Otorhinolaryngol Ital. 2012;32(1):41-5. PMID 22500066
 1. Zhou G, Poe D, Gopen Q. Clinical use of vestibular evoked myogenic potentials in the evaluation of patients with air-bone gaps. Otol Neurotol. 2012;33(8):1368-1374. doi:10.1097/MAO.0b013e31826a542f
+1. Kushiro K, Zakir M, Ogawa Y, Sato H, Uchino Y. Saccular and utricular inputs to sternocleidomastoid motoneurons of decerebrate cats. Exp Brain Res. 1999;126(3):410-6. doi:10.1007/s002210050747
+1. Young YH. Potential application of ocular and cervical vestibular-evoked myogenic potentials in Meniere's disease: a review. Laryngoscope. 2013;123(2):484-91. doi:10.1002/lary.23640

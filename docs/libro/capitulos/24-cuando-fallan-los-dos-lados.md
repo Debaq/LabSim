@@ -38,7 +38,7 @@ Un ejemplo con las cuatro irrigaciones: tibia derecha 1, fría derecha 2, tibia 
 El protocolo ya trae la frase que hace falta, aunque no la use en la mínima: *según parámetros cuantitativos, hipoexcitabilidad vestibular severa* o *arreflexia vestibular en oído derecho/izquierdo/bilateral* (→ H16). En un paciente así, el informe debe llevar esa frase **y** el porcentaje, y no dejar solo el "no significativo".
 
 :::comentario Lo que dicen las normas
-El protocolo no fija un número para "severa" ni para "arreflexia". El consenso de la Sociedad Bárány (Strupp y cols., 2017) sí lo hace para el diagnóstico de la vestibulopatía bilateral: en la calórica, la **suma de las velocidades máximas de la fase lenta con agua tibia y fría, en cada oído, menor de 6 °/s**; en el vHIT, una **ganancia del reflejo menor de 0,6 en los dos lados** con impulsos de 150 a 300 °/s; o, en la silla rotatoria, una ganancia menor de 0,1 con una sinusoide de 0,1 Hz y velocidad máxima de 50 °/s, o un adelanto de fase mayor de 68 grados. Basta cumplir una de las tres. En este libro se usa ese criterio como **número de apoyo** del informe, y el límite se aplica al parámetro con que fue calculado: la mínima con agua a 2 °C es un solo estímulo, el más fuerte, y no entrega la suma tibia + fría; por eso, ante una mínima baja en los dos oídos, se completa con la bitérmica antes de nombrar la hipofunción bilateral. <!-- verificar: el consenso fue corregido en una fe de erratas de 2023 (J Vestib Res 33:87); revisar si cambió alguna cifra, no se leyó el texto de la corrección -->
+El protocolo no fija un número para "severa" ni para "arreflexia". El consenso de la Sociedad Bárány (Strupp y cols., 2017) sí lo hace para el diagnóstico de la vestibulopatía bilateral: en la calórica, la **suma de las velocidades máximas de la fase lenta con agua tibia y fría, en cada oído, menor de 6 °/s**; en el vHIT, una **ganancia del reflejo menor de 0,6 en los dos lados** con impulsos de 150 a 300 °/s; o, en la silla rotatoria, una ganancia de 0,1 o menos con una sinusoide de 0,1 Hz y velocidad máxima de 50 °/s, junto con un adelanto de fase de 15 grados o más (Strupp y cols., 2023). Basta cumplir una de las tres. En este libro se usa ese criterio como **número de apoyo** del informe, y el límite se aplica al parámetro con que fue calculado: la mínima con agua a 2 °C es un solo estímulo, el más fuerte, y no entrega la suma tibia + fría; por eso, ante una mínima baja en los dos oídos, se completa con la bitérmica antes de nombrar la hipofunción bilateral. <!-- Pasada de fundamentos 2026-10-18: decía, para la silla, "una ganancia menor de 0,1 ... o un adelanto de fase mayor de 68 grados". La fe de erratas (Strupp y cols., 2023) cambió el criterio a "gain ≤0.1 ... and a phase lead ≥15 degrees (time constant ≤6 sec)"; en el original de 2017 los dos requisitos ya iban unidos por "and" en la lista de criterios. -->
 :::
 
 ### La agudeza visual dinámica
@@ -93,14 +93,14 @@ La pérdida del vestíbulo no solo desestabiliza la mirada y la marcha. En 10 pa
 
 La Sociedad Bárány la define como un **síndrome vestibular crónico**: inestabilidad al caminar o al estar de pie, que empeora a oscuras o sobre terreno irregular, o con el movimiento de la cabeza; con frecuencia visión borrosa u oscilopsia con los movimientos de cabeza o cuerpo; y, típicamente, sin síntomas sentado o acostado en condiciones estáticas. El diagnóstico exige además que el reflejo vestíbulo-ocular esté **significativamente disminuido o ausente de los dos lados** en una de las pruebas (Strupp y cols., 2017).
 
-Tabla: Criterios de la Sociedad Bárány para la vestibulopatía bilateral (Strupp y cols., 2017)
+Tabla: Criterios de la Sociedad Bárány para la vestibulopatía bilateral (Strupp y cols., 2017, 2023)
 
 | | Qué se exige |
 |---|---|
-| **Historia** | Inestabilidad al caminar o estar de pie, peor a oscuras o en terreno desparejo, o con movimiento de la cabeza; a veces oscilopsia; sin síntomas sentado o acostado <!-- verificar: la redacción exacta de los síntomas del criterio A se tomó del resumen del consenso --> |
+| **Historia** | Síndrome vestibular crónico: inestabilidad al caminar o estar de pie, más visión borrosa u oscilopsia al caminar o al mover rápido la cabeza o el cuerpo, o empeoramiento a oscuras o en terreno desparejo; sin síntomas sentado o acostado en reposo |
 | **vHIT** | Ganancia del reflejo menor de 0,6 de los dos lados (impulsos de 150 a 300 °/s) |
 | **Calórica** | Suma de la velocidad máxima de la fase lenta con agua tibia y fría, en cada oído, menor de 6 °/s |
-| **Silla rotatoria** | Ganancia menor de 0,1 (0,1 Hz, 50 °/s máx.) o adelanto de fase mayor de 68° |
+| **Silla rotatoria** | Ganancia de 0,1 o menos (0,1 Hz, 50 °/s máx.) y adelanto de fase de 15° o más (constante de tiempo de 6 s o menos), según la fe de erratas de 2023 |
 | **Probable** | Los mismos síntomas con un test de impulso cefálico de cabecera patológico de los dos lados |
 | **Complementarias** | Agudeza visual dinámica (caída de 0,2 logMAR o más), Romberg y VEMP |
 
@@ -121,7 +121,7 @@ En la serie de Zingler la audición estaba comprometida en los dos oídos en el 
 
 ### Los aminoglucósidos y el vestíbulo
 
-La gentamicina es el ejemplo mayor. Hain y cols. (2013) la señalan como la causa más frecuente de pérdida vestibular bilateral grave. En 33 pacientes con pérdida permanente por gentamicina, todos referían inestabilidad, 32 oscilopsia y 23 acúfeno; los síntomas empezaron **entre una y tres semanas** después de iniciar el fármaco y **no se reconocieron antes del alta en 32 de los 33**; los niveles de gentamicina en sangre, picos y valles, no se correlacionaron con la aparición del daño, ni tampoco la observancia de las dosis consideradas seguras (Black y cols., 2004). Los autores concluyen que no hay una dosis segura y que retirar el fármaco al aparecer los síntomas podría reducir el daño permanente. Eso, más la forma en que estos pacientes se presentan (inestabilidad y oscilopsia, nunca vértigo, con audición acorde a la edad, como describe el capítulo 8), explica por qué tantos llegan **meses después**, con la fecha del tratamiento olvidada y un diagnóstico de "ansiedad" o "debilidad" ya puesto.
+La gentamicina es el ejemplo mayor. Hain y cols. (2013) la señalan como la causa más frecuente de pérdida vestibular bilateral grave. En 33 pacientes con pérdida permanente por gentamicina, todos referían inestabilidad, 32 oscilopsia y 23 acúfeno; los síntomas empezaron **entre una y tres semanas** después de iniciar el fármaco y **no se reconocieron antes del alta en 32 de los 33**; los niveles de gentamicina en sangre, picos y valles, no se correlacionaron con la aparición del daño, ni tampoco la observancia de las dosis consideradas seguras (Black y cols., 2004). Los autores concluyen que no hay una dosis segura y que retirar el fármaco al aparecer los síntomas podría reducir el daño permanente. Eso, más la forma en que estos pacientes se presentan (inestabilidad y oscilopsia, sin vértigo, con audición acorde a la edad: así llegaron los 103 pacientes de Ahmed y cols., 2012, y lo describe el capítulo 8), explica por qué tantos llegan **meses después**, con la fecha del tratamiento olvidada y un diagnóstico de "ansiedad" o "debilidad" ya puesto.
 
 Del lado auditivo, el daño y su monitoreo se explican en el capítulo 8 (→ cap. 8). Aquí vale una sola cosa: el mismo fármaco puede dañar la cóclea, el vestíbulo o las dos cosas, y el paciente puede quejarse de lo que oye sin mencionar que no ve estable lo que mira.
 
@@ -135,7 +135,7 @@ Del lado auditivo, el daño y su monitoreo se explican en el capítulo 8 (→ ca
 
 ### CANVAS: cuando no es solo el oído
 
-El **síndrome CANVAS** (*cerebellar ataxia, neuropathy, vestibular areflexia syndrome*) reúne una ataxia cerebelosa, una neuropatía sensitiva y la pérdida vestibular bilateral. En 27 pacientes, todos tenían una pérdida de la sensibilidad en la que no se obtenían potenciales sensitivos, y 22 de 27 tenían atrofia cerebelosa en la resonancia, en la parte anterior y posterior del vermis y en el lóbulo hemisférico llamado *crus I* (la atrofia del vermis en la resonancia se ve en el cap. 25). El signo clínico característico es un **reflejo vestíbulo-ocular potenciado visualmente ausente**: la ayuda que la visión le suma al reflejo cuando se gira la cabeza con luz tampoco aparece, algo que se mide con video-oculografía (Szmulewicz y cols., 2011). <!-- verificar: explicación del reflejo potenciado visualmente; el resumen solo dice que está ausente --> Se describió como un trastorno de comienzo tardío y recesivo, y hoy se conoce una causa genética frecuente: una expansión del repetido AAGGG en las dos copias del gen *RFC1*, que se encontró en la ataxia de inicio tardío sobre todo cuando se juntan la neuronopatía sensitiva y la arreflexia vestibular bilateral (Cortese y cols., 2019). Para quien evalúa, lo útil es esto: una pérdida vestibular bilateral con **neuropatía y ataxia** no es del oído; el estudio sigue en neurología.
+El **síndrome CANVAS** (*cerebellar ataxia, neuropathy, vestibular areflexia syndrome*) reúne una ataxia cerebelosa, una neuropatía sensitiva y la pérdida vestibular bilateral. En 27 pacientes, todos tenían una pérdida de la sensibilidad en la que no se obtenían potenciales sensitivos, y 22 de 27 tenían atrofia cerebelosa en la resonancia, en el vermis anterior y dorsal y en el lóbulo hemisférico llamado *crus I* (la atrofia del vermis en la resonancia se ve en el cap. 25). El signo clínico característico es un **reflejo vestíbulo-ocular potenciado visualmente** alterado, que se mide con video-oculografía (Szmulewicz y cols., 2011): se gira la cabeza de lado a lado, a unos 0,5 Hz, mientras el paciente mira un punto fijo, y los movimientos compensadores del ojo salen a saltos, con sacadas, en lugar de suaves (Szmulewicz y cols., 2016). Por las dos parejas de hermanos de la serie se propuso que fuera un trastorno recesivo de comienzo tardío, y hoy se conoce una causa genética frecuente: una expansión del repetido AAGGG en las dos copias del gen *RFC1*, que se encontró en la ataxia de inicio tardío sobre todo cuando se juntan la neuronopatía sensitiva y la arreflexia vestibular bilateral (Cortese y cols., 2019). Para quien evalúa, lo útil es esto: una pérdida vestibular bilateral con **neuropatía y ataxia** no es del oído; el estudio sigue en neurología.
 
 ### Qué se hace con ella
 
@@ -337,7 +337,7 @@ Pide la hoja de resultados de la neurología. ¿Qué parte del estudio vestibula
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo | sin nistagmo | |
-| VNG: seguimiento y sacádicos | seguimiento fragmentado, con sacadas; sacádicos normales <!-- verificar: signos oculomotores cerebelosos que acompañan a CANVAS; no se leyeron en el resumen de Szmulewicz 2011 --> | |
+| VNG: seguimiento y sacádicos | seguimiento fragmentado, con sacadas; sacádicos normales | |
 | Calórica mínima (agua a 2 °C), fase lenta | **2 °/s** | **3 °/s** |
 | Asimetría de la mínima | hipoexcitabilidad OD de 20 % (valor **no significativo**) | |
 | Calórica bitérmica (30 y 44 °C): tibia + fría | 1 + 1 = **2 °/s** | 1 + 2 = **3 °/s** |
@@ -405,7 +405,7 @@ Cuando un informe previo dice "no significativo", **mira los números**. Una cal
 
 #### Razonamiento
 
-Jorge tiene dos cosas a la vez. En el oído, una presbiacusia simétrica con discriminación acorde: lo explica la edad. Y en el reflejo, una pérdida bilateral: calórica con suma de 2 y 3 °/s, vHIT en 0,22 y 0,25. Lo que cambia el cuadro es lo que viene con ella: una **neuropatía sensitiva** con electromiografía alterada, una **marcha atáxica**, **atrofia del vermis** y un habla que cambió. Esa combinación, ataxia cerebelosa más neuropatía más pérdida vestibular bilateral, es la del síndrome CANVAS (Szmulewicz y cols., 2011), cuyo estudio sigue por otro camino. Con un reflejo vestibular perdido y un cerebelo que no puede suplirlo con la vista, la compensación que logran los otros pacientes está limitada. <!-- verificar: expectativa de compensación en CANVAS; no se leyó una fuente que lo cuantifique -->
+Jorge tiene dos cosas a la vez. En el oído, una presbiacusia simétrica con discriminación acorde: lo explica la edad. Y en el reflejo, una pérdida bilateral: calórica con suma de 2 y 3 °/s, vHIT en 0,22 y 0,25. Lo que cambia el cuadro es lo que viene con ella: una **neuropatía sensitiva** con electromiografía alterada, una **marcha atáxica**, **atrofia del vermis** y un habla que cambió. Esa combinación, ataxia cerebelosa más neuropatía más pérdida vestibular bilateral, es la del síndrome CANVAS (Szmulewicz y cols., 2011), cuyo estudio sigue por otro camino. Con un reflejo vestibular perdido, un cerebelo que no puede suplirlo con la vista y una neuropatía que le quita la sensibilidad de los pies, la compensación que logran los otros pacientes tiene menos de dónde apoyarse: la inestabilidad de la pérdida bilateral es peor cuando se suma una polineuropatía (Strupp y cols., 2017).
 
 #### Diagnóstico y qué sigue
 
@@ -430,7 +430,7 @@ Lo que se aprende de Jorge es hasta dónde llega el estudio del oído. Que el au
 - La **fórmula de asimetría no la ve**: se leen las velocidades de la calórica y las ganancias del vHIT de **cada** oído.
 - Criterios de la Sociedad Bárány: calórica con suma tibia + fría **< 6 °/s** en cada oído, vHIT con ganancia **< 0,6** en los dos lados, o silla rotatoria.
 - Aminoglucósidos: síntomas **1 a 3 semanas** después de empezar, no se reconocen al alta, **el audiograma suele ser normal**.
-- La mitad de las vestibulopatías bilaterales **no tiene causa conocida**; con neuropatía y ataxia, pensar en **CANVAS** y derivar a neurología.
+- Entre un tercio y la mitad de las vestibulopatías bilaterales **no tiene causa conocida**; con neuropatía y ataxia, pensar en **CANVAS** y derivar a neurología.
 - Tratamiento: apoyo y **rehabilitación vestibular** (→ H19, cap. 32); no usar supresores vestibulares.
 :::
 
@@ -441,6 +441,7 @@ Lo que se aprende de Jorge es hasta dónde llega el estudio del oído. Que el au
 1. Strupp M, Kim JS, Murofushi T, Straumann D, Jen JC, Rosengren SM, et al. Bilateral vestibulopathy: diagnostic criteria. Consensus document of the Classification Committee of the Bárány Society. J Vestib Res. 2017;27(4):177-89. doi:10.3233/VES-170619
 1. Hain TC, Cherchi M, Yacovino DA. Bilateral vestibular loss. Semin Neurol. 2013;33(3):195-203. doi:10.1055/s-0033-1354597
 1. Lucieer F, Vonk P, Guinand N, Stokroos R, Kingma H, van de Berg R. Bilateral vestibular hypofunction: insights in etiologies, clinical subtypes, and diagnostics. Front Neurol. 2016;7:26. doi:10.3389/fneur.2016.00026
+1. Strupp M, Kim JS, Murofushi T, Straumann D, Jen JC, Rosengren SM, et al. Erratum to: Bilateral vestibulopathy: diagnostic criteria. Consensus document of the Classification Committee of the Bárány Society. J Vestib Res. 2023;33(1):87. doi:10.3233/VES-229002
 
 ### Fisiología
 
@@ -456,3 +457,4 @@ Lo que se aprende de Jorge es hasta dónde llega el estudio del oído. Que el au
 1. Szmulewicz DJ, Waterston JA, MacDougall HG, Mossman S, Chancellor AM, McLean CA, et al. Cerebellar ataxia, neuropathy, vestibular areflexia syndrome (CANVAS): a review of the clinical features and video-oculographic diagnosis. Ann N Y Acad Sci. 2011;1233:139-47. doi:10.1111/j.1749-6632.2011.06158.x
 1. Cortese A, Simone R, Sullivan R, Vandrovcova J, Tariq H, Yau WY, et al. Biallelic expansion of an intronic repeat in RFC1 is a common cause of late-onset ataxia. Nat Genet. 2019;51(4):649-58. doi:10.1038/s41588-019-0372-4
 1. Porciuncula F, Johnson CC, Glickman LB. The effect of vestibular rehabilitation on adults with bilateral vestibular hypofunction: a systematic review. J Vestib Res. 2012;22(5-6):283-98. doi:10.3233/VES-120464
+1. Szmulewicz DJ, Roberts L, McLean CA, MacDougall HG, Halmagyi GM, Storey E. Proposed diagnostic criteria for cerebellar ataxia with neuropathy and vestibular areflexia syndrome (CANVAS). Neurol Clin Pract. 2016;6(1):61-8. doi:10.1212/CPJ.0000000000000215

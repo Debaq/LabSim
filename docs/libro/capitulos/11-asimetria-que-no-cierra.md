@@ -18,13 +18,13 @@ Las pruebas de sitio de lesión no son de rutina. Se indican cuando el audiogram
 - **Asimetría sensorioneural**: diferencia de 15 dB o más entre los oídos en una o más frecuencias, sin causa conocida.
 - **Acúfeno unilateral** persistente, aun con audición normal.
 - **Discriminación que no se corresponde con el audiograma**: un oído con pérdida leve que entiende mucho menos de lo esperable.
-- **Hipoacusia súbita** unilateral (siempre se estudia el ángulo después).
+- **Hipoacusia súbita** unilateral (siempre se estudia el ángulo después, con resonancia o PEAT; Chandrasekhar y cols., 2019).
 
 :::ayuda Ayuda memoria
 **Asimetría + acúfeno unilateral + mala discriminación** = la tríada que obliga a pensar en el VIII par.
 :::
 
-Todas estas pruebas se hacen sobre umbrales confiables y con el **oído no evaluado enmascarado** cuando el tono puede cruzar. El error más frecuente es un deterioro **negativo falso**: el tono que el oído malo deja de oír lo sigue oyendo el sano por vía cruzada, y el paciente no baja la mano (Priede y Coles, 1975).
+Todas estas pruebas se hacen sobre umbrales confiables y con el **oído no evaluado enmascarado** cuando el tono puede cruzar. Sin enmascaramiento estas pruebas llevan a diagnósticos equivocados (Priede y Coles, 1975). El error típico es un deterioro **negativo falso**: el tono que el oído malo deja de oír lo sigue oyendo el sano por vía cruzada, y el paciente no baja la mano. <!-- Pasada de fundamentos 2026-10-18: decía "El error más frecuente es un deterioro negativo falso ... (Priede y Coles, 1975)". El resumen de Priede y Coles dice que sin enmascarar "serious misdiagnoses can result"; no dice cuál error es el más frecuente. -->
 
 ### Deterioro tonal
 
@@ -32,7 +32,7 @@ Mide si el oído puede seguir oyendo un tono sostenido. Un oído normal o coclea
 
 **Carhart (deterioro tonal en el umbral).** Se elige una frecuencia de 500 a 4.000 Hz y se presenta el tono continuo en el umbral. El paciente levanta la mano mientras lo oye. Si lo deja de oír antes del minuto, se sube 5 dB **sin cortar el tono y el minuto vuelve a empezar**. La prueba termina cuando el paciente oye un minuto completo, o al llegar al tope del equipo o a la molestia. El resultado son los dB que hubo que subir (Carhart, 1957).
 
-**Rosenberg (prueba de un minuto).** Igual que la anterior, pero el reloj **no se reinicia**: dura un minuto en total y se informa cuánto hubo que subir en ese minuto (Olsen y Noffsinger, 1974). Es más corta y por eso más usada en la clínica.
+**Rosenberg (prueba de un minuto).** Igual que la anterior, pero el reloj **no se reinicia**: dura un minuto en total y se informa cuánto hubo que subir en ese minuto (Olsen y Noffsinger, 1974). Es más corta. <!-- Pasada de fundamentos 2026-10-18: se quitó "y por eso más usada en la clínica": no se encontró fuente sobre qué prueba de deterioro se usa más (igual que en H6). -->
 
 <!-- Protocolo ORL 2019: la llamaba "Maspétiol" (inicio 5 dB SL, +5 dB por cada pérdida, 60 s acumulados, positiva > 30 dB). El procedimiento citable con esa forma es el de Rosenberg (Olsen y Noffsinger 1974); no se encontró fuente verificable para "Maspétiol". -->
 
@@ -52,7 +52,7 @@ En el STAT el oído contrario **siempre** va enmascarado: a 110 dB SPL el tono c
 
 Se presenta un tono **10 dB sobre el umbral del reflejo**, de forma contralateral, durante 10 segundos, y se mira si la deflexión se mantiene. Se prueba **solo en 500 y 1.000 Hz**: en frecuencias más altas también decaen los oídos normales (Cook y cols., 1999).
 
-- **Normal**: la amplitud se mantiene; un oído sano pierde menos del 10 % a los 10 s (Rosenhall y cols., 1979).
+- **Normal**: la amplitud se mantiene; la mayoría de los oídos sanos pierde menos del 10 % a los 10 s, y el que decae lo hace poco, más en 1.000 que en 500 Hz (Rosenhall y cols., 1979). <!-- Pasada de fundamentos 2026-10-18: decía "un oído sano pierde menos del 10 % a los 10 s". Rosenhall 1979 (100 oídos normales): "No decrement at all (less than 10% decay 10 sec after the onset of a stimulus 10 dB above the reflex threshold) was present in a majority of the ears. Between 27 and 58% of the ears showed reflex decay"; "generally small". -->
 - **Positivo**: la amplitud cae a la mitad (50 %) o menos dentro de los 10 s.
 
 <!-- Protocolo ORL 2019: positivo si en 500 Hz cae un tercio y en 1.000 Hz la mitad. Se corrigió a 50 % en las dos frecuencias (guía de reflejos de GSI; Rosenhall 1979 para lo normal). -->
@@ -83,7 +83,7 @@ Se miden:
 - Mandan los valores normativos del Apéndice A, no estos números.
 :::
 
-**Tasa alta como prueba de esfuerzo.** Al subir la tasa todas las ondas se alargan un poco en un oído normal: de 10 a 90 estímulos por segundo, la I un 8 %, la III un 11 % y la V un 14 % (Jiang y cols.). Una vía comprometida se alarga mucho más o pierde la onda V.
+**Tasa alta como prueba de esfuerzo.** Al subir la tasa todas las ondas se alargan un poco en un oído normal: de 10 a 90 estímulos por segundo, la I entre un 4 y un 10 %, la III entre un 9 y un 13 % y la V entre un 12 y un 15 % (Jiang y cols., 1991). <!-- Pasada de fundamentos 2026-10-18: decía "la I un 8 %, la III un 11 % y la V un 14 %". El resumen de Jiang 1991 da rangos por grupo de edad (80 niños de 0 a 6 años y 21 adultos): "prolonged by 4-10%, 9-13% and 12-15% respectively" (igual que en el cap. 12). --> Una vía comprometida se alarga mucho más o pierde la onda V.
 
 <!-- Protocolo ORL 2019: subir la tasa a 81,1/s "en sospecha de neuropatía". La tasa alta es una prueba de la vía retrococlear (desmielinización, compresión). En la neuropatía auditiva lo que decide es la microfónica coclear con polaridades separadas y el tubo pinzado (cap. 13). -->
 
@@ -138,7 +138,7 @@ El **interpico I-III** recorre el nervio dentro del conducto auditivo interno y 
 
 ### Schwannoma vestibular
 
-Tumor benigno de las células de Schwann de la porción vestibular del VIII par. Crece lento en el conducto auditivo interno y el ángulo pontocerebeloso, donde es el tumor más frecuente. El audiograma típico es una **hipoacusia sensorioneural unilateral o asimétrica, de predominio en agudos** (Tsuzuki y cols., 2024), con acúfeno del mismo lado y, a veces, inestabilidad.
+Tumor benigno de las células de Schwann de la porción vestibular del VIII par. Crece lento en el conducto auditivo interno y el ángulo pontocerebeloso, donde es el tumor más frecuente. El audiograma típico es una **hipoacusia sensorioneural unilateral o asimétrica**, con la diferencia entre los oídos más marcada en los agudos (Tsuzuki y cols., 2024), con acúfeno del mismo lado y, a veces, inestabilidad.
 
 Aunque nace en el nervio vestibular, el síntoma vestibular es tardío y discreto: el cerebelo compensa el déficit que se instala lento. El VEMP, en cambio, suele estar alterado: el cervical en cerca del 65 % y el ocular en cerca del 76 % de los tumores sin operar. En un 16 % es la única prueba alterada, con audición normal (Chiarovano y cols., 2014).
 
@@ -154,16 +154,16 @@ El diagnóstico lo da la resonancia con gadolinio, que pide el médico. Un tumor
 :::
 
 :::ojo Ojo clínico
-Una audición **normal** no descarta un schwannoma: en la serie de Chiarovano solo un tercio tenía hipoacusia tonal. Si el acúfeno es unilateral y persistente, se estudia igual.
+Una audición **normal** no descarta un schwannoma: en la serie de Chiarovano solo un tercio tenía hipoacusia en el promedio de 500 a 2.000 Hz (Chiarovano y cols., 2014). Si el acúfeno es unilateral y persistente, se estudia igual.
 :::
 
 ### Neurofibromatosis tipo 2
 
-Enfermedad genética en la que crecen **schwannomas vestibulares en los dos lados**, además de otros tumores del sistema nervioso. Se presenta en adultos jóvenes. La hipoacusia es de grado muy variable: en 14 oídos hubo desde audición casi normal hasta pérdidas de más de 90 dB (Wang y cols., 2004). Lo que más enseña es la **disociación**: el PEAT y las pruebas vestibulares se alteran según el tamaño del tumor, aunque el audiograma no lo refleje (Holliday y cols.).
+Enfermedad genética en la que crecen **schwannomas vestibulares en los dos lados**, además de otros tumores del sistema nervioso. Se presenta en adultos jóvenes. La hipoacusia es de grado muy variable: en 14 oídos hubo desde audición casi normal hasta pérdidas de más de 90 dB (Wang y cols., 2005). Lo que más enseña es la **disociación**: el PEAT y las pruebas vestibulares se alteran según el tamaño del tumor, aunque el audiograma no lo refleje (Holliday y cols., 2014).
 
 ### Otros tumores del ángulo
 
-El **meningioma** del ángulo y el **epidermoide** dan un cuadro parecido. En 51 meningiomas del hueso petroso, el 65 % tenía hipoacusia y en el 41 % fue el primer síntoma (Bassiouni y cols., 2004). El PEAT está alterado o ausente en la mayoría de los tumores del ángulo: en 309 casos, 31,4 % patológico y 50,2 % sin respuesta (Marangos y cols.).
+El **meningioma** del ángulo y el **epidermoide** dan un cuadro parecido. En 51 meningiomas del hueso petroso, el 65 % tenía hipoacusia y en el 41 % fue el primer síntoma (Bassiouni y cols., 2004). El PEAT está alterado o ausente en la mayoría de los tumores del ángulo: en 309 casos, 31,4 % patológico y 50,2 % sin respuesta (Marangos y cols., 2001).
 
 :::imagen ilustraciones/cap11-rm-epidermoide.jpg ancho=100% Quiste epidermoide del ángulo pontocerebeloso derecho en otra persona: T2 (A), T1 con gadolinio (B) y difusión (C). Imagen: Chon KH, Lee JM, Koh EJ, Choi HY (2012), J Korean Neurosurg Soc 52:148, doi:10.3340/jkns.2012.52.2.148, Fig. 1 A-C, CC BY-NC 3.0, adaptada.
 - @12,62 | **En T2 es blanco**, como el líquido que lo rodea.
@@ -173,7 +173,7 @@ El **meningioma** del ángulo y el **epidermoide** dan un cuadro parecido. En 51
 
 ### Compresión microvascular del VIII par
 
-Un asa vascular, casi siempre la arteria cerebelosa anteroinferior, contacta el nervio en el ángulo o el conducto. Da **acúfeno unilateral**, a veces episodios de vértigo, y una pérdida leve y de frecuencia específica, con los graves conservados (De Ridder y cols.). El PEAT muestra lo que se espera de una lesión proximal del nervio: **la onda II se reduce y el interpico I-III se alarga**, y la frecuencia del acúfeno coincide con la de máxima pérdida.
+Un asa vascular, a menudo de la arteria cerebelosa anteroinferior, contacta el nervio en el ángulo o el conducto. Da **acúfeno unilateral**, a veces crisis breves de vértigo, y una pérdida de frecuencia específica, porque el nervio está ordenado por frecuencias y el asa lo toca en un punto (De Ridder y cols., 2005). El PEAT muestra lo que se espera de una lesión proximal del nervio: **la onda II se reduce y el interpico I-III se alarga**, y la frecuencia del acúfeno coincide con la de máxima pérdida (De Ridder y cols., 2007). <!-- Pasada de fundamentos 2026-10-18: decía "casi siempre la arteria cerebelosa anteroinferior" y "una pérdida leve y de frecuencia específica, con los graves conservados (De Ridder y cols.)". Los resúmenes de De Ridder 2005 y 2007 sostienen la pérdida de frecuencia específica, las crisis breves de vértigo, la onda II reducida, el I-III alargado y la coincidencia de frecuencias; no dicen qué arteria es la más frecuente ni que la pérdida sea leve con graves conservados. verificar: frecuencia de la AICA como vaso del conflicto. -->
 
 :::imagen ilustraciones/cap11-rm-asa-aica.jpg ancho=40% Asa de la arteria cerebelosa anteroinferior (flecha amarilla) en T2 de alta resolución de otras personas, según cómo toca el VIII par (clasificación de Gorrie). Imagen: Kim SH y cols. (2019), PeerJ 7:e6582, doi:10.7717/peerj.6582, Fig. 2, CC BY 4.0.
 - @42,8 | **Tipo 1**: el asa va separada del nervio.
@@ -218,7 +218,7 @@ Frente a una asimetría sensorioneural, el razonamiento sigue cuatro preguntas, 
 
 - **Leer el PEAT sin el audiograma.** Una pérdida coclear en agudos atrasa la onda V. Antes de culpar al nervio hay que preguntarse cuánto del retraso explica la cóclea.
 - **Confiar en una sola prueba.** Ninguna prueba suprasliminar es suficiente sola; la **concordancia** entre varias es lo que da confianza.
-- **Dar de alta con un PEAT normal.** Un tumor pequeño puede no alterar la conducción. Si la sospecha clínica es alta, la resonancia la decide el médico, no el PEAT.
+- **Dar de alta con un PEAT normal.** Un tumor pequeño puede no alterar la conducción: en los schwannomas de menos de 15 mm, el 41,7 % tuvo un PEAT normal (Marangos y cols., 2001). Si la sospecha clínica es alta, la resonancia la decide el médico, no el PEAT.
 
 :::pregunta Pregunta abierta
 Un paciente tiene emisiones otoacústicas presentes en un oído con 50 dB de pérdida. ¿Qué te dice eso sobre dónde está el problema? ¿Y qué examen pedirías para confirmarlo?
@@ -562,21 +562,21 @@ La edad explica una pérdida, pero no una pérdida de **un solo oído**. Con ac�
 Hipoacusia sensorioneural asimétrica del OI con signos retrococleares. No se debe atribuir a la edad. Se sugiere resonancia magnética.
 
 :::ayuda Ayuda memoria
-La presbiacusia es **bilateral y simétrica**. Una "presbiacusia de un solo oído" no existe: es otra cosa hasta que se demuestre lo contrario.
+La presbiacusia es **bilateral y simétrica**. Una "presbiacusia de un solo oído" no es un diagnóstico: es otra cosa hasta que se demuestre lo contrario.
 :::
 
 ### Caso 11.5
 
 #### Razonamiento
 
-El cuadro es retrococlear, pero más discreto que el de un tumor. Un acúfeno unilateral, un I-III alargado y una pérdida leve de frecuencia específica son la forma típica de un **conflicto vascular** del VIII par (De Ridder y cols.).
+El cuadro es retrococlear, pero más discreto que el de un tumor. Un acúfeno unilateral, un I-III alargado y una pérdida leve de frecuencia específica son la forma típica de un **conflicto vascular** del VIII par (De Ridder y cols., 2007).
 
 #### Diagnóstico y qué sigue
 
 Hipoacusia sensorioneural leve del OD con signos retrococleares. La resonancia debe incluir secuencias que muestren los vasos del ángulo. El diagnóstico de compresión vascular lo hacen el médico y la imagen; el audiólogo informa el patrón.
 
 :::sabias ¿Sabías que?
-En la compresión microvascular, la frecuencia del acúfeno suele coincidir con la de mayor pérdida. En algunos pacientes la audición mejora después de la descompresión quirúrgica, justo en esa frecuencia (De Ridder y cols.).
+En la compresión microvascular, la frecuencia del acúfeno suele coincidir con la de mayor pérdida. En algunos pacientes la audición mejora después de la descompresión quirúrgica, justo en esa frecuencia (De Ridder y cols., 2005).
 :::
 
 ### Caso 11.6
@@ -617,12 +617,12 @@ Es el paciente que vuelve molesto porque "el audífono no le sirve". La discrimi
 1. Olsen WO, Noffsinger D. Comparison of one new and three old tests of auditory adaptation. Arch Otolaryngol. 1974;99(2):94-9. doi:10.1001/archotol.1974.00780030100004
 1. Jerger J, Jerger S. A simplified tone decay test. Arch Otolaryngol. 1975;101(7):403-7. doi:10.1001/archotol.1975.00780360003001
 1. Priede VM, Coles RR. Masking of the non-test ear in tone decay, Békésy audiometry and SISI tests. J Laryngol Otol. 1975;89(3):227-36. doi:10.1017/s0022215100080324
-1. Jerger J, Jerger S. Diagnostic significance of PB word functions. Arch Otolaryngol. 1971;93(6):573-80.
+1. Jerger J, Jerger S. Diagnostic significance of PB word functions. Arch Otolaryngol. 1971;93(6):573-80. doi:10.1001/archotol.1971.00770060875006
 1. Cook RD, Ferguson MO, Hall JW 3rd, Grose JH, Pillsbury HC. The effects of amplitude modulation on acoustic reflex decay. Audiol Neurootol. 1999;4(2):104-113. doi:10.1159/000013827
-1. Rosenhall U, Lidén G, Nilsson E. Stapedius reflex decay in normal hearing subjects. J Am Audiol Soc. 1979;4(4):157-62.
+1. Rosenhall U, Lidén G, Nilsson E. Stapedius reflex decay in normal hearing subjects. J Am Audiol Soc. 1979;4(4):157-62. PMID 422428.
 1. Hirsch A. The stapedius reflex tests in retrocochlear hearing disorders. Audiology. 1983;22(5):463-70. doi:10.3109/00206098309072807
 1. Grason-Stadler (GSI). Acoustic Reflex Testing (guía de pruebas).
-1. Jiang ZD y cols. The effect of click rate on latency and interpeak interval of the brain-stem auditory evoked potentials in children from birth to 6 years.
+1. Jiang ZD, Wu YY, Zheng WS, Sun DK, Feng LY, Liu XY. The effect of click rate on latency and interpeak interval of the brain-stem auditory evoked potentials in children from birth to 6 years. Electroencephalogr Clin Neurophysiol. 1991;80(1):60-4. doi:10.1016/0168-5597(91)90044-x
 1. Hall JW III. eHandbook of Auditory Evoked Responses. Kindle Direct Publishing; 2015.
 1. American Clinical Neurophysiology Society. Guideline 9C: Guidelines on Short-Latency Auditory Evoked Potentials. 2008.
 
@@ -630,18 +630,19 @@ Es el paciente que vuelve molesto porque "el audífono no le sirve". La discrimi
 
 1. Westerman LA, Smith RL. Rapid and short-term adaptation in auditory nerve responses. Hear Res. 1984;15(3):249-60. doi:10.1016/0378-5955(84)90032-7
 1. Pérez-González D, Malmierca MS. Adaptation in the auditory system: an overview. Front Integr Neurosci. 2014;8:19. doi:10.3389/fnint.2014.00019
-1. Jerger J, Harford E, Clemis J, Alford B. The acoustic reflex in eighth nerve disorders. Arch Otolaryngol. 1974;99(6):409-13.
+1. Jerger J, Harford E, Clemis J, Alford B. The acoustic reflex in eighth nerve disorders. Arch Otolaryngol. 1974;99(6):409-13. doi:10.1001/archotol.1974.00780030423004
 1. Møller AR, Jannetta P, Bennett M, Møller MB. Intracranially recorded responses from the human auditory nerve. Electroencephalogr Clin Neurophysiol. 1981;52(1):18-27. doi:10.1016/0013-4694(81)90184-X
 1. Møller AR, Jannetta PJ. Interpretation of brainstem auditory evoked potentials: results from intracranial recordings in humans. Scand Audiol. 1983;12(2):125-33. doi:10.3109/01050398309076235
 1. Melcher JR, Kiang NY. Generators of the brainstem auditory evoked potential in cat. III. Hear Res. 1996;93(1-2):52-71. doi:10.1016/0378-5955(95)00200-6
 
 ### Patología
 
-1. Tsuzuki N y cols. Characteristics of pure tone audiogram in patients with untreated sporadic vestibular schwannoma. Auris Nasus Larynx. 2024;51(2):347-55. doi:10.1016/j.anl.2023.09.004
+1. Tsuzuki N, Kitama T, Wasano K, Wakabayashi T, Hosoya M, Nishiyama T, et al. Characteristics of pure tone audiogram in patients with untreated sporadic vestibular schwannoma: analysis of audiometric shape and interaural differences stratified by age and mode of onset. Auris Nasus Larynx. 2024;51(2):347-55. doi:10.1016/j.anl.2023.09.004
 1. Chiarovano E, Darlington C, Vidal PP, Lamas G, de Waele C. The role of cervical and ocular vestibular evoked myogenic potentials in the assessment of patients with vestibular schwannomas. PLoS One. 2014;9(8):e105026. doi:10.1371/journal.pone.0105026
-1. Wang CP, Hsu WC, Young YH. Vestibular evoked myogenic potentials in neurofibromatosis 2. Ann Otol Rhinol Laryngol.
-1. Holliday MA, Kim HJ, Zalewski CK y cols. Audiovestibular characteristics of small cochleovestibular schwannomas in neurofibromatosis type 2.
-1. Bassiouni H, Hunold A, Asgari S, Stolke D. Meningiomas of the posterior petrous bone: functional outcome after microsurgery.
-1. Marangos N, Maier W, Merz R, Laszig R. Brainstem response in cerebellopontine angle tumors. Otol Neurotol.
-1. De Ridder D, Heijneman K, Haarman B, van der Loo E. Tinnitus in vascular conflict of the eighth cranial nerve.
-1. De Ridder D, Ryu H, De Mulder G, Van de Heyning P, Verlooy J, Møller A. Frequency specific hearing improvement in microvascular decompression of the cochlear nerve.
+1. Wang CP, Hsu WC, Young YH. Vestibular evoked myogenic potentials in neurofibromatosis 2. Ann Otol Rhinol Laryngol. 2005;114(1 Pt 1):69-73. doi:10.1177/000348940511400113
+1. Holliday MA, Kim HJ, Zalewski CK, Wafa T, Dewan R, King KA, et al. Audiovestibular characteristics of small cochleovestibular schwannomas in neurofibromatosis type 2. Otolaryngol Head Neck Surg. 2014;151(1):117-24. doi:10.1177/0194599814529081
+1. Bassiouni H, Hunold A, Asgari S, Stolke D. Meningiomas of the posterior petrous bone: functional outcome after microsurgery. J Neurosurg. 2004;100(6):1014-24. doi:10.3171/jns.2004.100.6.1014
+1. Marangos N, Maier W, Merz R, Laszig R. Brainstem response in cerebellopontine angle tumors. Otol Neurotol. 2001;22(1):95-9. doi:10.1097/00129492-200101000-00018
+1. De Ridder D, Heijneman K, Haarman B, van der Loo E. Tinnitus in vascular conflict of the eighth cranial nerve: a surgical pathophysiological approach to ABR changes. Prog Brain Res. 2007;166:401-11. doi:10.1016/S0079-6123(07)66039-7
+1. De Ridder D, Ryu H, De Mulder G, Van de Heyning P, Verlooy J, Møller A. Frequency specific hearing improvement in microvascular decompression of the cochlear nerve. Acta Neurochir (Wien). 2005;147(5):495-501. doi:10.1007/s00701-005-0497-3
+1. Chandrasekhar SS, Tsai Do BS, Schwartz SR, Bontempo LJ, Faucett EA, Finestone SA, et al. Clinical practice guideline: sudden hearing loss (update). Otolaryngol Head Neck Surg. 2019;161(1 Suppl):S1-S45. doi:10.1177/0194599819859885

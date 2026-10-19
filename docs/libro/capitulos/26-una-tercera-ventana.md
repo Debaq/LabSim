@@ -16,7 +16,7 @@ Los instrumentos son los de siempre: la audiometría con vía ósea (→ H3), la
 
 1. **La vía ósea se anota como sale, también bajo cero.** Un umbral de −5 o −10 dB HL es posible (→ H3) y aquí es el dato: en el 60 % de los oídos con dehiscencia la ósea era mejor que 0 dB HL en 250 o 500 Hz (Zhou y cols., 2007). Redondear a 0 borra el hallazgo.
 2. **El reflejo estapedial se interpreta junto con el gap.** Un gap de 15 dB o más con timpanograma A y reflejo ipsilateral **presente** no es una transmisión que falla (→ H7, cap. 4).
-3. **El VEMP se busca hacia abajo.** En vez de preguntar si hay respuesta a 100 dB nHL, se pregunta cuánto sonido hace falta para obtenerla, y se compara con el otro oído. Hay que buscar el umbral en el cVEMP y también en el oVEMP, que es el que más crece (→ H12).
+3. **El VEMP se busca hacia abajo.** En vez de preguntar si hay respuesta a 100 dB nHL, se pregunta cuánto sonido hace falta para obtenerla, y se compara con el otro oído. Hay que buscar el umbral en el cVEMP y también en el oVEMP aéreo, que es el que mejor separa un oído con dehiscencia de uno sano (Janky y cols., 2013) (→ H12). <!-- Pasada de fundamentos 2026-10-18: decía "el oVEMP, que es el que más crece". Se cambió a lo que mide Janky y cols. (2013): el oVEMP aéreo es el que mejor separa. -->
 
 :::ayuda Ayuda memoria
 **Gap + timpanograma A + reflejo presente** = el oído medio transmite. El gap viene de otro lado: piensa en una **tercera ventana**.
@@ -34,7 +34,7 @@ El oído interno es una cámara cerrada, llena de líquido, con solo **dos punto
 
 ![Dos cócleas desenrolladas. A: oído sano, con la ventana oval, la ventana redonda y una flecha gruesa a cada lado de la membrana basilar. B: el mismo oído con un orificio extra en la rampa vestibular por donde se escapa parte de la presión; las flechas sobre la membrana son más finas porque le llega menos energía, y la vía aérea oye peor.](ilustraciones/cap26-ventanas.svg)
 
-Una **tercera ventana** es cualquier punto por donde el líquido del laberinto queda en contacto con un espacio blando fuera de él: un hueso que falta sobre un conducto, un acueducto demasiado ancho, una comunicación con la arteria carótida. Parte de la energía que debía ir a la membrana basilar **se escapa por el nuevo orificio**, y la vía aérea oye peor. Con vibración del cráneo ocurre lo contrario y la vía ósea oye mejor. Los dos efectos juntos dan lo que la prueba interpreta como un gap sin oído medio enfermo (Merchant y Rosowski, 2008). <!-- verificar: el mecanismo exacto de la mejoría de la vía ósea (diferencia de presión entre rampas con vibración del cráneo) no está leído en el texto completo de Merchant y Rosowski 2008; se dejó solo lo que dice el resumen -->
+Una **tercera ventana** es cualquier punto por donde el líquido del laberinto queda en contacto con un espacio blando fuera de él: un hueso que falta sobre un conducto, un acueducto demasiado ancho, una comunicación con la arteria carótida. Parte de la energía que debía ir a la membrana basilar **se escapa por el nuevo orificio**, y la vía aérea oye peor. Con vibración del cráneo ocurre lo contrario: el orificio de baja impedancia deja que el sonido que llega por el hueso entre al líquido del laberinto, y la vía ósea oye mejor que lo normal (Ward y cols., 2017). Los dos efectos juntos dan lo que la prueba interpreta como un gap sin oído medio enfermo (Merchant y Rosowski, 2008).
 
 ### Qué lo distingue de un estribo fijo
 
@@ -48,17 +48,17 @@ Merchant y Rosowski proponen tres pistas para sospechar una tercera ventana ante
 
 El conducto semicircular superior corre justo bajo el piso de la fosa craneal media. Si el hueso que lo cubre falta, el conducto queda en contacto con la dura madre y con el cerebro. Eso lo transforma en un **tercer orificio móvil**: el sonido que entra por el oído y los cambios de presión en el conducto auditivo, en el oído medio o dentro del cráneo mueven la endolinfa de ese conducto, y con ella la cúpula. Un movimiento de la cúpula que el cerebro lee como giro de la cabeza produce **movimientos de los ojos en el plano del conducto superior**, vertical y torsional, con **sonido** (signo de Tullio) o con **presión** (signo de Hennebert) (Minor y cols., 1998).
 
-El mismo orificio explicaría lo auditivo: se piensa que la vibración del cráneo y de la propia voz mueve el líquido con más facilidad, y el paciente oye los ruidos del cuerpo, entre ellos su voz, masticar, los latidos y el movimiento de los ojos. Es la **autofonía**, la hiperacusia por vía ósea y el **tinnitus pulsátil** (Ward y cols., 2017). <!-- verificar: el mecanismo de la hiperacusia ósea no está leído a texto completo; Ward 2017 da solo los síntomas -->
+El mismo orificio explica lo auditivo: el sonido que viaja por el hueso, como la propia voz, entra al líquido del laberinto por el orificio, y el paciente oye los ruidos del cuerpo mejor que lo normal, entre ellos su voz, masticar, los pasos, los latidos y el movimiento de los ojos. Es la **autofonía**, la hiperacusia por vía ósea y el **tinnitus pulsátil** (Ward y cols., 2017).
 
 :::sabias ¿Sabías que?
-El hueso sobre el conducto superior es muy fino en todos los recién nacidos y se engruesa con los años, hasta los tres. En una serie de 1.000 huesos temporales de adultos había dehiscencia completa en el 0,5 % y hueso de 0,1 mm o menos en otro 1,4 %, casi siempre en los dos oídos (Carey y cols., 2000). La dehiscencia no aparece "de la nada": parte de un hueso que no terminó de engrosar y que, cuando es muy fino, puede romperse con un golpe (Carey y cols., 2000).
+El hueso sobre el conducto superior es muy fino en todos los recién nacidos y se engruesa con los años, hasta los tres. En una serie de 1.000 huesos temporales de adultos había dehiscencia completa en el 0,5 % y hueso de 0,1 mm o menos en otro 1,4 %, casi siempre en los dos oídos (Carey y cols., 2000). Los autores proponen que la dehiscencia no aparece "de la nada": partiría de un hueso que no terminó de engrosar y que, cuando es muy fino, puede romperse con un golpe (Carey y cols., 2000).
 :::
 
 ## Patología
 
 ### Dehiscencia del conducto semicircular superior
 
-Fue descrita por Minor y cols. (1998) en ocho pacientes con vértigo y oscilopsia por sonido o por cambios de presión, con movimientos oculares en el plano del conducto y un defecto óseo visible en la tomografía. Veinte años después se reconocía por una triada: **vértigo inducido por presión o sonido, hiperacusia por vía ósea y tinnitus pulsátil** (Ward y cols., 2017). En una serie de 65 pacientes, 54 de los 60 con síntomas vestibulares tenían mareo con sonidos fuertes y 44 lo tenían con tos, estornudo o esfuerzo (Minor, 2005). En otra serie de adultos, lo más frecuente era la **autofonía de la voz** y la sensación de **oído tapado** (94 %), a veces con alivio al hacer Valsalva o al acostarse (Zhou y cols., 2007), un cuadro que se parece a una trompa abierta.
+Fue descrita por Minor y cols. (1998) en ocho pacientes con vértigo y oscilopsia por sonido o por cambios de presión, siete de ellos con movimientos oculares en el plano del conducto, y todos con un defecto óseo visible en la tomografía. Veinte años después se reconocía por una triada: **vértigo inducido por presión o sonido, hiperacusia por vía ósea y tinnitus pulsátil** (Ward y cols., 2017). En una serie de 65 pacientes, 54 de los 60 con síntomas vestibulares tenían mareo con sonidos fuertes y 44 lo tenían con tos, estornudo o esfuerzo (Minor, 2005). En otra serie de adultos, lo más frecuente era la **autofonía de la voz** y la sensación de **oído tapado** (94 %), a veces con alivio al hacer Valsalva o al acostarse (Zhou y cols., 2007), un cuadro que se parece a una trompa abierta.
 
 La audiometría es el primer lugar donde asoma:
 
@@ -87,7 +87,7 @@ LabSim todavía **no simula una dehiscencia**: recorta la vía ósea en 0 dB y a
 
 La dehiscencia del conducto superior es la más conocida, pero no es la única. Merchant y Rosowski (2008) agrupan las lesiones del laberinto que actúan así: dehiscencia del conducto **superior, lateral o posterior**, del **vestíbulo óseo** (acueducto vestibular dilatado y otras malformaciones del oído interno), de la **cóclea** (comunicación entre la carótida y la cóclea, sordera ligada al X con *stapes gusher*) y lesiones **difusas**, como la enfermedad de Paget.
 
-El **acueducto vestibular dilatado**, que en LabSim es el cuadro *Pendred / acueducto vestibular dilatado* (→ cap. 10, donde está su tomografía), es la tercera ventana de los niños. En 25 niños con 37 oídos y acueducto dilatado, 36 oídos tenían hipoacusia, todas las pérdidas tenían gap con el oído medio normal y el **VEMP salió con umbral anormalmente bajo y amplitud alta en 34 de 37 oídos**; en tres, que tenían síntomas vestibulares, el VEMP faltaba de un lado (Zhou y Gopen, 2011). En 98 oídos de pacientes con síndrome de Pendred, 60 tenían gap en graves, y los acueductos más anchos tenían más gap (Seo y cols., 2016).
+El **acueducto vestibular dilatado**, que en LabSim es el cuadro *Pendred / acueducto vestibular dilatado* (→ cap. 10, donde está su tomografía), es la tercera ventana de los niños. En 25 niños con 37 oídos y acueducto dilatado, 36 oídos tenían hipoacusia, todas las pérdidas tenían gap con el oído medio normal y el **VEMP salió con umbral anormalmente bajo en 34 de 37 oídos**, con amplitudes altas; en tres, que tenían síntomas vestibulares, el VEMP faltaba de un lado (Zhou y Gopen, 2011). En 98 oídos de pacientes con síndrome de Pendred, 60 tenían gap en graves, y los acueductos más anchos tenían más gap (Seo y cols., 2016).
 
 Tabla: Tres oídos con gap aéreo-óseo y tímpano normal a la otoscopía
 
@@ -95,7 +95,7 @@ Tabla: Tres oídos con gap aéreo-óseo y tímpano normal a la otoscopía
 |---|---|---|---|
 | Quién | adulto joven o de mediana edad | adulto | niño o adolescente |
 | Timpanograma | A o As | A | A |
-| Reflejo estapedial | ausente; puede estar presente en una etapa muy inicial <!-- verificar: reflejo presente o "on-off" en la otoesclerosis inicial; no está en las referencias leídas --> | presente | presente en las frecuencias sin gap |
+| Reflejo estapedial | ausente; en una etapa inicial puede verse un reflejo de patrón *on-off* (Forquer y Sheehy, 1981) | presente | presente en las frecuencias sin gap |
 | Ósea en graves | sin mejoría; muesca de Carhart | mejor que lo normal (bajo 0 dB HL) | gap en graves; la ósea mejor que lo normal es una pista, no una regla (Merchant y Rosowski, 2008) |
 | cVEMP aéreo | umbral alto o ausente | umbral bajo, amplitud grande | umbral bajo, amplitud alta |
 | Lo que cuenta el paciente | oye menos; su voz suena apagada | oye su voz, sus latidos y sus ojos; mareo con ruido o presión | oye menos, a escalones |
@@ -124,7 +124,7 @@ Un gap aéreo-óseo con otoscopía normal se piensa en este orden:
 
 ### Lo que más se equivoca
 
-- **Operar un estribo móvil.** Si el gap viene de la tercera ventana, la cirugía del estribo no lo cierra, y por eso conviene pedir el reflejo y el VEMP antes de decidir.
+- **Operar un estribo móvil.** Si el gap viene de la tercera ventana, la cirugía del estribo no lo cierra, y por eso conviene pedir el reflejo y el VEMP antes de decidir (Halmagyi y cols., 2003).
 - **Leer la amplitud del VEMP como siempre.** La razón de asimetría dice que el oído de **menor** amplitud es el enfermo, y la dehiscencia da una amplitud **mayor**. Con ese criterio se acusa al oído sano.
 - **Redondear la ósea a 0.** El valor bajo cero es el que sostiene la sospecha.
 - **Quedarse con un solo dato.** Una ósea mejor que lo normal puede ser un oído que oye bien; un reflejo presente puede ser una otoesclerosis muy inicial. Lo que da peso es la **concordancia** de las tres pruebas con la historia.
@@ -325,6 +325,7 @@ La historia del tubo sin efecto era la pista. Cuando el niño tiene una pérdida
 
 1. Zhou G, Gopen Q, Poe DS. Clinical and diagnostic characterization of canal dehiscence syndrome: a great otologic mimicker. Otol Neurotol. 2007;28(7):920-6. doi:10.1097/MAO.0b013e31814b25f2
 1. Zuniga MG, Schell A, Engst B, Carey JP. Reducing sound exposure during ocular vestibular evoked myogenic potential testing for superior semicircular canal dehiscence syndrome. Otol Neurotol. 2021;42(6):e735-e743. doi:10.1097/MAO.0000000000003084
+1. Janky KL, Nguyen KD, Welgampola M, Zuniga MG, Carey JP. Air-conducted oVEMPs provide the best separation between intact and superior canal dehiscent labyrinths. Otol Neurotol. 2013;34(1):127-34. doi:10.1097/MAO.0b013e318271c32a
 
 ### Fisiología
 
@@ -340,3 +341,5 @@ La historia del tubo sin efecto era la pista. Cuando el niño tiene una pérdida
 1. Rosengren SM, Aw ST, Halmagyi GM, Todd NP, Colebatch JG. Ocular vestibular evoked myogenic potentials in superior canal dehiscence. J Neurol Neurosurg Psychiatry. 2008;79(5):559-68. doi:10.1136/jnnp.2007.126730
 1. Zhou G, Gopen Q. Characteristics of vestibular evoked myogenic potentials in children with enlarged vestibular aqueduct. Laryngoscope. 2011;121(1):220-5. doi:10.1002/lary.21184
 1. Seo YJ, Kim J, Choi JY. Correlation of vestibular aqueduct size with air-bone gap in enlarged vestibular aqueduct syndrome. Laryngoscope. 2016;126(7):1633-8. doi:10.1002/lary.25664
+1. Forquer BD, Sheehy JL. The negative on/off effect in cochlear and early stapedial otosclerosis. Ear Hear. 1981;2(6):256-9. doi:10.1097/00003446-198111000-00003
+1. Halmagyi GM, Aw ST, McGarvie LA, Todd MJ, Bradshaw A, Yavor RA, et al. Superior semicircular canal dehiscence simulating otosclerosis. J Laryngol Otol. 2003;117(7):553-7. doi:10.1258/002221503322113003

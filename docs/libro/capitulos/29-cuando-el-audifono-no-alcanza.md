@@ -15,13 +15,13 @@ La paciente lleva más de un año con audífonos potentes, bien puestos, bien co
 
 ### Lo primero: ¿el audífono "no alcanza" o está mal ajustado?
 
-Antes de decir que un audífono no alcanza hay que saber que **estaba bien ajustado**. Un audífono puesto por comodidad, sin medirlo en el oído real, suele quedar corto justo en los agudos (→ H20, *Ojo clínico* y *Lo que dicen las normas*). Si ese es el caso, lo que "no alcanza" es el ajuste, y no hay nada que derivar: hay que ajustar. Por eso los consensos piden que la evaluación para implante parta de **audífonos verificados contra un objetivo prescriptivo** (Zeitler y cols., 2024).
+Antes de decir que un audífono no alcanza hay que saber que **estaba bien ajustado**. Un audífono que se deja con el ajuste inicial del fabricante o se ajusta por comodidad, sin medirlo en el oído real, suele quedar corto justo en los agudos (Valente y cols., 2018; → H20, *Ojo clínico* y *Lo que dicen las normas*). Si ese es el caso, lo que "no alcanza" es el ajuste, y no hay nada que derivar: hay que ajustar. Por eso los consensos piden que la evaluación para implante parta de **audífonos verificados contra un objetivo prescriptivo** (Zeitler y cols., 2024).
 
 Con el audífono bien ajustado, el mismo examen de la H20 responde la pregunta de este capítulo: se repiten las listas de palabras **con y sin audífono**, con y sin lectura labial (→ H20, H5), y se mira **cuánto entiende** con la mejor amplificación posible. Lo que importa no es el umbral con audífono (que casi siempre mejora), sino la discriminación: un oído que con audífono sigue por debajo de la mitad de las palabras está recibiendo el sonido, pero no puede usarlo.
 
 ### Los criterios para derivar a evaluación de implante
 
-Los criterios han ido cambiando hacia ser **más amplios**. Los de hace una década pedían pérdidas profundas y casi nada de discriminación; hoy se aceptan oídos con restos auditivos útiles (Gifford y cols., 2010). Lo que sigue es lo que dicen las fuentes principales.
+Los criterios han ido cambiando hacia ser **más amplios**. Los primeros pedían pérdidas profundas y casi nada de discriminación; hoy se aceptan oídos con restos auditivos útiles (Gifford y cols., 2010; Buchman y cols., 2020). <!-- Pasada de fundamentos 2026-10-18: decía "Los de hace una década": Gifford 2010 ya pedía ampliar los criterios de entonces, así que el cambio es anterior a 2016. Buchman 2020 (consenso) recomienda el implante también en pérdidas "moderate sloping to profound"; estaba en la lista sin citarse en el texto. --> Lo que sigue es lo que dicen las fuentes principales.
 
 Tabla: Criterios de derivación a implante coclear en adultos, según distintas fuentes
 
@@ -32,7 +32,7 @@ Tabla: Criterios de derivación a implante coclear en adultos, según distintas 
 | **Evaluación con audífono** (Zeitler y cols., 2024) | Se prueba cada oído con audífonos optimizados: apoya el implante un puntaje de **50 % o menos** en palabras (CNC) en el oído a implantar, y se agregan frases en ruido. |
 | **NICE, 2019** (TA566) | Sordera severa a profunda: umbrales de **80 dB HL o más** en 2 o más frecuencias (500 a 4.000 Hz) en los dos oídos; beneficio inadecuado con audífonos, que en adultos es un puntaje de fonemas **menor de 50 %** en la prueba de Boothroyd a 70 dBA; y una prueba de audífono de al menos **3 meses** y evaluación por un equipo multidisciplinario. |
 
-<!-- verificar: la etiqueta de la FDA de EE. UU. para adultos (frases ≤ 50 % en el oído a implantar y ≤ 60 % con la mejor condición) está resumida en la Tabla 1 de Zeitler y cols. (2024), que mezcla marcas y años; confirmar con la ficha vigente de cada fabricante antes de citarla como número -->
+<!-- Pasada de fundamentos 2026-10-18: confirmado en la Tabla 1 de Zeitler y cols. (2024): la etiqueta de Cochlear para adultos dice "Sentences score ≤ 50% in ear to be implanted, ≤ 60% in best aided condition". Cambia por fabricante y año; por eso no se agrega a la tabla. -->
 
 :::ojo Ojo clínico
 Estos cortes **no son un diagnóstico**: son la regla para no dejar pasar a nadie. La regla 60/60 deja fuera a quien tiene una caída en pendiente muy marcada (promedio de 500 a 2.000 Hz bajo 60, pero agudos profundos) y que igual es candidato. El consenso de adultos lo dice así: ante la duda y un audífono que no rinde, **se deriva** (Zeitler y cols., 2024). Quien decide la candidatura es el equipo de implantes, no el audiólogo que deriva.
@@ -53,7 +53,7 @@ Todo lo demás (imágenes del oído interno y del conducto auditivo interno, eva
 :::comentario Lo que dicen las normas
 **Los materiales.** Los puntajes de las guías están dados con listas en inglés: palabras monosilábicas (CNC) y frases (AzBio, y antes HINT), dentro de una *Minimum Speech Test Battery* que pide ambos tipos, en silencio y en ruido, por oído y con los dos juntos (Zeitler y cols., 2024). El protocolo de este libro usa **bisílabos**, con y sin lectura labial (→ H20, H5), que son más fáciles que los monosílabos porque el contexto ayuda. Un puntaje de bisílabos y uno de CNC no son intercambiables: los cortes de 50 o 60 % no se pueden copiar sin más a una lista en español. <!-- verificar: no encontré un corte validado para bisílabos o frases en español; consultar los equipos de implantes de cada país -->
 
-**El ruido.** El protocolo mide en silencio. Las guías piden además **frases en ruido** (en general a +10 dB de relación señal-ruido), porque es la situación donde el audífono falla antes y donde más se nota la diferencia con el implante.
+**El ruido.** El protocolo mide en silencio. Las guías piden además **frases en ruido** (en general a +10 dB de relación señal-ruido), porque se parecen más a la escucha de la vida diaria (Zeitler y cols., 2024). <!-- Pasada de fundamentos 2026-10-18: decía "porque es la situación donde el audífono falla antes y donde más se nota la diferencia con el implante", sin fuente. Zeitler 2024 recomienda AzBio "in +10 dB SNR" y dice "Varying the SNR represents real-life listening situations". -->
 :::
 
 ### Dispositivos de conducción ósea: el umbral óseo decide
@@ -107,7 +107,7 @@ Es candidato quien tiene una pérdida **sensorioneural** severa a profunda en la
 
 - **Genéticas, autoinmunes, ototóxicas o de causa desconocida** que avanzan hasta pérdidas severas a profundas. La enfermedad autoinmune del oído interno es una pérdida bilateral de progresión rápida, a veces con respuesta parcial a los corticoides (Bovo y cols., 2006), y es uno de los cuadros en que el implante llega a ser la salida.
 - **Meningitis**: la pérdida posmeningitis es permanente y más frecuente con *S. pneumoniae* (31 % en la serie clásica de Dodge y cols., 1984); en una serie de implantados, ese germen fue el 85,7 % de los casos (Douglas y cols., 2008). El riesgo es que la cóclea **se osifique** y se estreche la ventana quirúrgica: por eso se estudia pronto (→ cap. 15).
-- **Neuropatía auditiva (ANSD)**: el implante puede servir cuando la amplificación no alcanza, pero los resultados son más variables porque no se sabe de antemano si el problema está antes o después de las sinapsis (Teagle y cols., 2010; → cap. 13).
+- **Neuropatía auditiva (ANSD)**: el implante puede servir cuando la amplificación no alcanza, pero los resultados son más variables: en una serie de niños implantados, la mitad llegó a reconocer habla sin opciones de respuesta, y ninguno de los que tenían un nervio coclear deficiente lo logró (Teagle y cols., 2010; → cap. 13). <!-- Pasada de fundamentos 2026-10-18: decía "porque no se sabe de antemano si el problema está antes o después de las sinapsis"; Teagle 2010 no lo plantea así. Resumen: "50% of the implanted children with ANSD demonstrated open-set speech perception abilities"; "No child with cochlear nerve deficiency (CND) in their implanted ear achieved open-set speech perception abilities". -->
 - **CMV congénito**: pérdida que puede avanzar con los años, de modo que un niño que hoy usa audífono puede dejar de rendir con él (→ cap. 17).
 
 :::sabias ¿Sabías que?
@@ -152,7 +152,7 @@ Ante un paciente que dice que el audífono no le alcanza, el razonamiento sigue 
 
 ### Lo que más se equivoca
 
-- **Dar por perdido un audífono que nunca se midió.** El audífono que "no sirve" casi siempre es uno que no se verificó.
+- **Dar por perdido un audífono que nunca se midió.** Muchos de los que llegan a evaluación de implante traen audífonos mal ajustados (Zeitler y cols., 2024). <!-- Pasada de fundamentos 2026-10-18: decía "El audífono que 'no sirve' casi siempre es uno que no se verificó" (absoluto sin fuente). Zeitler 2024: "many potential CI candidates arrive with inappropriately fit HAs at the time of the evaluation". -->
 - **Mirar solo el umbral con audífono.** Un campo libre con audífono en 25 a 30 dB engaña si la persona no entiende: lo que se mide con el implante es la comprensión, no la detección.
 - **Aplicar la regla 60/60 como regla de exclusión.** Es un tamiz de derivación, no un criterio para decir que no.
 - **Prometer lo que el dispositivo no da.** El implante cambia el código y pide rehabilitación; la conducción ósea en la sordera unilateral no devuelve la localización; ninguno devuelve una audición normal.
@@ -428,6 +428,7 @@ Sordera unilateral derecha posparotiditis, con el OI normal. Las opciones son: n
 1. Gifford RH, Dorman MF, Shallop JK, Sydlowski SA. Evidence for the expansion of adult cochlear implant candidacy. Ear Hear. 2010;31(2):186-94. doi:10.1097/AUD.0b013e3181c6b831. PMID 20071994.
 1. Buchman CA, Gifford RH, Haynes DS, Lenarz T, O'Donoghue G, Adunka O, et al. Unilateral cochlear implants for severe, profound, or moderate sloping to profound bilateral sensorineural hearing loss: a systematic review and consensus statements. JAMA Otolaryngol Head Neck Surg. 2020;146(10):942-53. doi:10.1001/jamaoto.2020.0998. PMID 32857157.
 1. Reinfeldt S, Håkansson B, Taghavi H, Eeg-Olofsson M. New developments in bone-conduction hearing implants: a review. Med Devices (Auckl). 2015;8:79-93. doi:10.2147/MDER.S39691. PMID 25653565.
+1. Valente M, Oeding K, Brockmeyer A, Smith S, Kallogjeri D. Differences in word and phoneme recognition in quiet, sentence recognition in noise, and subjective outcomes between manufacturer first-fit and hearing aids programmed to NAL-NL2 using real-ear measures. J Am Acad Audiol. 2018;29(8):706-21. doi:10.3766/jaaa.17005. PMID 30222541.
 
 ### Fisiología
 

@@ -16,7 +16,7 @@ Las OEA responden una sola pregunta: **¿funciona el amplificador coclear en est
 
 1. **Tamizaje.** En recién nacidos y en operativos, separan a quien pasa de quien hay que estudiar. No dan un umbral.
 2. **Sitio de lesión.** Junto al audiograma y al ABR, distinguen una pérdida **coclear** (OEA ausentes) de una **neural** (OEA presentes con ABR alterado). → H10.
-3. **Seguimiento.** Vigilan la cóclea frente a ruido u ototóxicos. El cisplatino y los aminoglucósidos dañan primero la base de la cóclea: la DPOAE de las f2 más altas puede caer antes que la audiometría convencional, y sirve en quien no puede responder (Durrant y cols., 2009). Cada control se compara con la **línea de base** del mismo paciente, con los mismos parámetros y la misma sonda (→ H3). <!-- verificar: AAA 2009 no fija un criterio de cambio de DPOAE equivalente al de ASHA 1994 para la audiometría; confirmar en el texto. -->
+3. **Seguimiento.** Vigilan la cóclea frente a ruido u ototóxicos. El cisplatino y los aminoglucósidos dañan primero la base de la cóclea: la DPOAE de las f2 más altas puede caer antes que la audiometría convencional, y sirve en quien no puede responder (Durrant y cols., 2009). Cada control se compara con la **línea de base** del mismo paciente, con los mismos parámetros y la misma sonda (→ H3). No hay un criterio de cambio significativo de las OEA aceptado por todos, como sí lo hay para la audiometría: cada servicio fija el suyo a partir de la variabilidad test-retest de su equipo (Durrant y cols., 2009; AAA, 2020). <!-- Pasada de fundamentos 2026-10-18: verificado en el texto de Durrant y cols. (2009, "none yet enjoy universal acceptance") y de la AAA (2020, OAE, D). -->
 
 Tienen un límite que conviene grabarse desde ya: **las OEA viajan por el oído medio dos veces**, de ida como estímulo y de vuelta como emisión. Cualquier cosa que estorbe ahí (líquido, presión negativa, un tapón) las apaga aunque la cóclea esté perfecta.
 
@@ -28,7 +28,7 @@ Las células ciliadas externas cambian de largo cuando se estimulan. Ese movimie
 
 Parte de esa energía mecánica viaja de vuelta: sale de la cóclea, mueve la cadena y el tímpano al revés y se convierte en sonido dentro del conducto. Kemp (1978) la registró por primera vez con un micrófono en el conducto: un "eco" que llegaba milisegundos después del click y que no podía venir del oído medio.
 
-Si las células ciliadas externas de una zona están dañadas, esa zona deja de amplificar **y** deja de emitir. Por eso, en general, las OEA desaparecen cuando la pérdida coclear de esa zona supera unos 30 a 40 dB HL (Probst y cols., 1991). <!-- verificar: el rango de 30-40 dB HL es el que repiten las revisiones (Probst 1991, Kemp 2002); confirmar la cifra en el texto. -->
+Si las células ciliadas externas de una zona están dañadas, esa zona deja de amplificar **y** deja de emitir. Por eso, con un oído medio normal y un buen registro, unas OEA ausentes sugieren una pérdida coclear de unos 30 a 40 dB HL o más en esa zona (AAA, 2020). La DPOAE aguanta algo más: se achica a medida que crece la pérdida y deja de medirse por encima de unos 50 a 60 dB HL (Gorga y cols., 1997). <!-- Pasada de fundamentos 2026-10-18: decía "las OEA desaparecen cuando la pérdida coclear de esa zona supera unos 30 a 40 dB HL (Probst y cols., 1991)". La cifra 30-40 dB HL está en la AAA (2020) como sugerencia, no como corte; para la DPOAE, Gorga y cols. (1997) dan 50-60 dB HL. -->
 
 :::ojo Ojo clínico
 OEA presentes quieren decir **células ciliadas externas que funcionan**. No dicen que el paciente oiga: la célula ciliada interna, la sinapsis y el nervio quedan fuera de la prueba. Una neuropatía auditiva tiene OEA normales y un ABR ausente (Starr y cols., 1996).
@@ -43,7 +43,7 @@ OEA presentes quieren decir **células ciliadas externas que funcionan**. No dic
 | **DPOAE** (productos de distorsión) | dos tonos, f1 y f2 | el tono nuevo en 2f1−f2, frecuencia por frecuencia |
 | **SFOAE** (frecuencia de estímulo) | un tono | la emisión a la misma frecuencia del estímulo; es sobre todo de investigación |
 
-TEOAE y DPOAE no nacen igual. La DPOAE sale sobre todo de la **distorsión**: el amplificador no es lineal y, al recibir dos tonos, fabrica tonos que no estaban. La TEOAE sale sobre todo de la **reflexión** de la onda viajera en irregularidades de la cóclea (Shera y Guinan, 1999). Por eso no se comportan igual y conviene tener las dos.
+TEOAE y DPOAE no nacen igual. La DPOAE sale sobre todo de la **distorsión**: el amplificador no es lineal y, al recibir dos tonos, fabrica tonos que no estaban. La TEOAE sale sobre todo de la **reflexión** de la onda viajera en irregularidades de la cóclea (Shera y Guinan, 1999), aunque la separación no es tajante: en el cobayo, buena parte de la energía de la TEOAE resultó ser distorsión (Yates y Withnell, 1999). Por eso no se comportan igual y conviene tener las dos.
 
 Las **SOAE** se registran sin estímulo, en una parte de los oídos normales y no en todos (Penner y Zhang, 1997). Su **ausencia no es patológica**.
 
@@ -124,7 +124,7 @@ Se registra el conducto **en silencio**, sin estímulo, por unos 30 segundos o m
 ### 4. TEOAE
 
 - **Estímulo:** click, en el **modo no lineal**, a **80 dB SPL**.
-- **Por qué no lineal:** el click también rebota en el conducto y en el tímpano, y ese rebote es lineal. El modo no lineal presenta los clicks en grupos de tres de una polaridad y uno de la contraria, tres veces más fuerte. Al sumarlos, lo lineal (el rebote) se cancela y lo que sobrevive es la emisión, que crece menos que el estímulo (Kemp, 2002). <!-- verificar: descripción del grupo 3+1 del modo no lineal en Kemp 2002 o Robinette y Glattke 2007. -->
+- **Por qué no lineal:** el click también rebota en el conducto y en el tímpano, y ese rebote es lineal. El modo no lineal presenta los clicks en grupos de tres de una polaridad y uno de la contraria, tres veces más fuerte. Al sumarlos, lo lineal (el rebote) se cancela y lo que sobrevive es la emisión, que crece menos que el estímulo (Kemp y cols., 1990). <!-- Pasada de fundamentos 2026-10-18: el grupo 3+1 (tres clicks iguales y uno invertido de triple amplitud) lo describe Killan (Hear Res, eprints White Rose) atribuyéndolo a Kemp y cols. (1990); se cambió la cita de Kemp 2002 a Kemp y cols. 1990. -->
 - **Mientras promedia**, mira que el ajuste de la sonda siga en verde y que los rechazos sean pocos: cada rechazo es un barrido que el equipo botó por ruido.
 - La prueba termina al completar los barridos (el 100 %). Si el registro no es confiable por movimiento, llanto o ruido, se repite.
 
@@ -150,12 +150,12 @@ Se registra el conducto **en silencio**, sin estímulo, por unos 30 segundos o m
 
 En el tamizaje no se busca nada: se aprieta un botón y el equipo responde **pasa** o **refiere** con su propio criterio. Lo que hace quien examina es lo que el equipo no puede hacer: otoscopía, una sonda bien puesta, un niño tranquilo y el registro de cada oído en el formulario.
 
-- **Recién nacidos.** Las OEA se tamizan en la maternidad, lo más tarde posible antes del alta. En las primeras horas el conducto tiene **vérnix y líquido**, y el oído medio todavía está terminando de airearse: la emisión no vuelve. Medidos antes de las 48 horas, la TEOAE refirió en más de un tercio de los recién nacidos sanos y el AABR en uno de cada seis (Van Dyk y cols., 2015; → cap. 16). Es un estorbo transitorio: limpiar el conducto antes de medir sube la tasa de pase (*Newborn hearing screening: early ear examination improves the pass rate*), y pasadas las 48 horas la TEOAE refiere mucho menos (Cheepcharoenrat y Rerkasem, 2025). Un "refiere" temprano es un **rescreening**, no una derivación (Nebraska DHHS, s. f.).
+- **Recién nacidos.** Las OEA se tamizan en la maternidad, lo más tarde posible antes del alta. En las primeras horas el conducto tiene **vérnix y líquido**, y el oído medio todavía está terminando de airearse: la emisión no vuelve. Medidos antes de las 48 horas, la TEOAE refirió en más de un tercio de los recién nacidos sanos y el AABR en uno de cada seis (Van Dyk y cols., 2015; → cap. 16). Es un estorbo transitorio: limpiar el vérnix del conducto y repetir sube la tasa de pase (Schwarz y cols., 2023), y pasadas las 48 horas la TEOAE refiere menos (Van Dyk y cols., 2015; Cheepcharoenrat y Rerkasem, 2025). Un "refiere" temprano es un **rescreening**, no una derivación (JCIH, 2019). <!-- Pasada de fundamentos 2026-10-18: decía "refiere mucho menos". Cheepcharoenrat y Rerkasem (2025): 53 % antes de 48 h y 46 % después; Van Dyk y cols. (2015): por oído, 41-42 % entre 24 y 48 h y 26 % después de 48 h. Se reemplazó la cita por título por Schwarz y cols. (2023) y la del protocolo de Nebraska por la JCIH (2019). -->
 - **UCI neonatal.** Un recién nacido que estuvo más de cinco días en la UCI se tamiza con **AABR**, no solo con OEA: es la población con más riesgo de neuropatía auditiva, que pasa las OEA (JCIH, 2019). → H10.
 - **La meta** es el esquema 1-3-6: tamizado al mes, diagnóstico a los 3 meses e intervención a los 6 (JCIH, 2019).
 - **Operativos** en colegios o faenas: solo TEOAE, oído por oído, con la conclusión en el formulario.
 
-En Chile, la hipoacusia del prematuro está en las garantías explícitas en salud (GES), y el tamizaje del recién nacido sigue la guía del MINSAL vigente. <!-- verificar: GES 59 "hipoacusia neurosensorial bilateral del prematuro" y la guía MINSAL de tamizaje auditivo universal; ninguna está en la bibliografía central del libro. -->
+En Chile, la hipoacusia neurosensorial bilateral del prematuro está en las garantías explícitas en salud (GES): el recién nacido de menos de 1.500 g o de menos de 32 semanas tiene garantizado un tamizaje automatizado antes del alta de neonatología (Superintendencia de Salud, s. f.). Para los demás recién nacidos, las recomendaciones de tamizaje están en la guía clínica del MINSAL de hipoacusia en menores de 4 años (MINSAL, 2017).
 
 :::ojo Repetir no es conseguir un pasa
 Se repite cuando el **registro** no fue confiable: el niño se movió, lloró o la sonda se salió. No se repite un "refiere" limpio hasta que salga "pasa". Cada intento es otra oportunidad de que el ruido cruce el criterio por azar, y el niño que pasó así se va a la casa sin seguimiento.
@@ -287,23 +287,24 @@ Pacientes de práctica (★): Tomás, Hernán, Benjamín y Valentina. A Benjamí
 ### Técnica
 
 1. Kemp DT. Stimulated acoustic emissions from within the human auditory system. J Acoust Soc Am. 1978;64(5):1386-91. doi:10.1121/1.382104
-1. Kemp DT. Otoacoustic emissions, their origin in cochlear function, and use. Br Med Bull. 2002;63:223-41. doi:10.1093/bmb/63.1.223
-1. Probst R, Lonsbury-Martin BL, Martin GK. A review of otoacoustic emissions. J Acoust Soc Am. 1991;89(5):2027-67. doi:10.1121/1.400897
 1. Gorga MP, Neely ST, Ohlrich B, Hoover B, Redner J, Peters J. From laboratory to clinic: a large scale study of distortion product otoacoustic emissions in ears with normal hearing and ears with hearing loss. Ear Hear. 1997;18(6):440-55. doi:10.1097/00003446-199712000-00003
 1. Prieve BA, Gorga MP, Schmidt A, Neely S, Peters J, Schultes L, et al. Analysis of transient-evoked otoacoustic emissions in normal-hearing and hearing-impaired ears. J Acoust Soc Am. 1993;93(6):3308-19. doi:10.1121/1.405715
 1. Durrant JD, Campbell K, Fausti S, Guthrie O, Jacobson G, Lonsbury-Martin BL, et al. American Academy of Audiology position statement and clinical practice guidelines: ototoxicity monitoring [Internet]. Reston (VA): AAA; 2009 Oct. Disponible en: https://www.audiology.org/wp-content/uploads/2021/06/AAA_OtoMonGuidelines_2009.pdf
+1. American Academy of Audiology. Clinical guidance document: assessment of hearing in infants and young children [Internet]. Reston (VA): AAA; 2020 Jan 23. Disponible en: https://www.audiology.org/wp-content/uploads/2021/05/Clin-Guid-Doc_Assess_Hear_Infants_Children_1.23.20.pdf
+1. Kemp DT, Ryan S, Bray P. A guide to the effective use of otoacoustic emissions. Ear Hear. 1990;11(2):93-105. doi:10.1097/00003446-199004000-00004
 
 ### Tamizaje neonatal
 
 1. Joint Committee on Infant Hearing. Year 2019 Position Statement: Principles and Guidelines for Early Hearing Detection and Intervention Programs. J Early Hear Detect Interv. 2019;4(2):1-44. doi:10.15142/fptk-b748
-1. Nebraska DHHS, EHDI. Newborn Hearing Screening Protocol (basado en JCIH 2019).
-1. Van Dyk M, Swanepoel DW, Hall JW 3rd. Outcomes with OAE and AABR in the first 48 h. Int J Pediatr Otorhinolaryngol. 2015. PMID 25921078.
-1. Cheepcharoenrat C, Rerkasem A. Timing effect on TEOAE referral rates within and after 48 hours of birth. Int Arch Otorhinolaryngol. 2025. PMID 40735129.
-1. Newborn hearing screening: early ear examination improves the pass rate. PMCID PMC10645159.
+1. van Dyk M, Swanepoel DW, Hall JW 3rd. Outcomes with OAE and AABR screening in the first 48 h: implications for newborn hearing screening in developing countries. Int J Pediatr Otorhinolaryngol. 2015;79(7):1034-40. doi:10.1016/j.ijporl.2015.04.021
+1. Cheepcharoenrat C, Rerkasem A. Timing effect on transient evoked otoacoustic emission referral rates for newborn hearing screening within and after 48 hours of birth. Int Arch Otorhinolaryngol. 2025;29(3):1-8. doi:10.1055/s-0045-1802580
+1. Schwarz Y, Mauthner R, Kraus O, Gluk O, Globus O, Kariv L, et al. Newborn hearing screening: early ear examination improves the pass rate. J Int Adv Otol. 2023;19(5):402-6. doi:10.5152/iao.2023.22987
+1. Superintendencia de Salud. Problema de salud 59: hipoacusia neurosensorial bilateral del prematuro/a [Internet]. Santiago: Superintendencia de Salud; s. f. [citado 2026 oct 18]. Disponible en: https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-neurosensorial-bilateral-del-prematuro-a/
+1. Ministerio de Salud de Chile. Hipoacusia en recién nacidos, niños y niñas menores de 4 años: recomendaciones [Internet]. Santiago: MINSAL; 2017 [citado 2026 oct 18]. Disponible en: https://diprece.minsal.cl/le-informamos/auge/acceso-guias-clinicas/guias-clinicas-desarrolladas-utilizando-manual-metodologico/hipoacusia-en-menores-de-4-anos/recomendaciones/
 
 ### Fisiología y patología
 
 1. Shera CA, Guinan JJ Jr. Evoked otoacoustic emissions arise by two fundamentally different mechanisms: a taxonomy for mammalian OAEs. J Acoust Soc Am. 1999;105(2):782-98. doi:10.1121/1.426948
 1. Penner MJ, Zhang T. Prevalence of spontaneous otoacoustic emissions in adults revisited. Hear Res. 1997;103(1-2):28-34. doi:10.1016/s0378-5955(96)00162-1
-
 1. Starr A, Picton TW, Sininger Y, Hood LJ, Berlin CI. Auditory neuropathy. Brain. 1996;119(Pt 3):741-753. doi:10.1093/brain/119.3.741
+1. Yates GK, Withnell RH. The role of intermodulation distortion in transient-evoked otoacoustic emissions. Hear Res. 1999;136(1-2):49-64. doi:10.1016/s0378-5955(99)00108-2

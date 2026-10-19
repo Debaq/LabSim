@@ -28,7 +28,7 @@ La evidencia a favor es fuerte. La guía recomienda **ofrecer** rehabilitación 
 Tiene tres límites. Trata el **déficit periférico**: la guía advierte que sus recomendaciones pueden no aplicarse a trastornos vestibulares centrales (Hall y cols., 2022). **No sustituye** el diagnóstico: un vértigo posicional se resuelve con una maniobra (→ H18), no con ejercicios. Y quien ya **no tiene mareo ni inestabilidad** por su hipofunción no necesita un programa formal (Hall y cols., 2022).
 
 :::sabias ¿Sabías que?
-Los primeros ejercicios de rehabilitación vestibular los publicaron Cawthorne y Cooksey en 1946. Son una serie ordenada de movimientos de ojos, cabeza y cuerpo, de acostado a sentado, de pie y caminando, y se siguen usando todavía como comparación en los estudios (Hall y cols., 2022). La rehabilitación de hoy es más dirigida: elige el ejercicio según el déficit que se midió. Pero la idea de fondo, que el paciente se recupera moviéndose, viene de ahí.
+Los primeros ejercicios de rehabilitación vestibular los publicaron Cawthorne y Cooksey en 1946 (Cawthorne, 1946; Cooksey, 1946). Son una serie ordenada de movimientos de ojos, cabeza y cuerpo, de acostado a sentado, de pie y caminando, y se siguen usando todavía como comparación en los estudios (Hall y cols., 2022). La rehabilitación de hoy es más dirigida: elige el ejercicio según el déficit que se midió. Pero la idea de fondo, que el paciente se recupera moviéndose, viene de ahí.
 :::
 
 ## Fundamento
@@ -48,10 +48,10 @@ La compensación no es un solo proceso. Es un conjunto de subprocesos que se rec
 
 De ahí salen las reglas del programa:
 
-- **Empezar temprano.** Hay un período después de la lesión en que las redes neuronales se reorganizan con facilidad, y la rehabilitación activa y temprana aprovecha ese período (Lacour y Bernard-Demanze, 2014). La guía encuentra que empezar antes puede mejorar el resultado en la hipofunción aguda; en la crónica los ejercicios sirven igual cuando se empieza tarde, pero no hay razón para esperar (Hall y cols., 2022).
-- **Progresar.** Lo que se aprende es la respuesta a un desafío; cuando el desafío deja de serlo hay que subirlo (Lacour y Bernard-Demanze, 2014).
+- **Empezar temprano.** Hay un período después de la lesión en que las redes neuronales se reorganizan con facilidad, y la rehabilitación activa y temprana aprovecha ese período (Lacour y Bernard-Demanze, 2015). La guía encuentra que empezar antes puede mejorar el resultado en la hipofunción aguda; en la crónica los ejercicios sirven igual cuando se empieza tarde, pero no hay razón para esperar (Hall y cols., 2022).
+- **Progresar.** Lo que se aprende es la respuesta a un desafío; cuando el desafío deja de serlo hay que subirlo (Lacour y Bernard-Demanze, 2015).
 - **Evitar lo que frena.** El uso prolongado de supresores vestibulares puede estorbar la recuperación. Los antihistamínicos a dosis bajas y por poco tiempo pueden ayudar a controlar los síntomas mientras se hacen los ejercicios (Hall y cols., 2022).
-- **Individualizar.** El perfil sensoriomotor, cognitivo y emocional de cada paciente cambia lo que le sirve (Lacour y Bernard-Demanze, 2014).
+- **Individualizar.** El perfil sensoriomotor, cognitivo y emocional de cada paciente cambia lo que le sirve (Lacour y Bernard-Demanze, 2015).
 
 ### El error retiniano le enseña al reflejo
 
@@ -83,7 +83,7 @@ La habituación incluye también estímulos **optocinéticos** (patrones que se 
 
 De pie, el cuerpo se mantiene con tres fuentes: la **vista**, la **somatosensación** de los pies y el piso, y el **vestíbulo**. El cerebro no les cree a las tres por igual: da a cada una un **peso** que depende de la tarea y del entorno, y lo cambia cuando una falla o miente. A este reparto se le llama **repesada sensorial** (Peterka, 2002; Horak, 2006).
 
-Un paciente sin vestíbulo se las arregla en terreno firme y con luz, porque la vista y los pies le alcanzan. Lo pierde cuando se le quitan: a oscuras, sobre pasto o una alfombra gruesa, subiendo una escalera con las manos ocupadas. Por eso las pruebas de equilibrio sensibilizadas le quitan la vista (ojos cerrados) y los pies (una espuma). La prueba clínica de interacción sensorial, la CTSIB, combina ojos abiertos, ojos cerrados y un entorno visual en conflicto, sobre piso firme y sobre espuma: seis condiciones (Shumway-Cook y Horak, 1986). Los pacientes con trastornos vestibulares rinden peor que los sanos de su edad (Cohen y cols., 1993). La versión modificada, el **mCTSIB**, quita el entorno en conflicto y deja cuatro. <!-- verificar: la atribución de la versión de cuatro condiciones (mCTSIB); la fuente consultada solo describe la CTSIB de seis condiciones. --> En la última, ojos cerrados sobre espuma, no queda ningún sentido confiable más que el vestíbulo.
+Un paciente sin vestíbulo se las arregla en terreno firme y con luz, porque la vista y los pies le alcanzan. Lo pierde cuando se le quitan: a oscuras, sobre pasto o una alfombra gruesa, subiendo una escalera con las manos ocupadas. Por eso las pruebas de equilibrio sensibilizadas le quitan la vista (ojos cerrados) y los pies (una espuma). La prueba clínica de interacción sensorial, la CTSIB, combina ojos abiertos, ojos cerrados y un entorno visual en conflicto, sobre piso firme y sobre espuma: seis condiciones (Shumway-Cook y Horak, 1986). Los pacientes con trastornos vestibulares rinden peor que los sanos de su edad (Cohen y cols., 1993). La versión modificada, el **mCTSIB**, quita el entorno en conflicto y deja cuatro. <!-- verificar: la atribución de la versión de cuatro condiciones (mCTSIB). La ficha de RehabMeasures (SRALab) la atribuye a Cohen y cols. 1993, pero el abstract de ese artículo solo describe la CTSIB de seis condiciones; falta el texto completo. --> En la última, ojos cerrados sobre espuma, no queda ningún sentido confiable más que el vestíbulo.
 
 :::imagen ilustraciones/h19-mctsib.svg Cómo se balancea el cuerpo adelante-atrás en las cuatro condiciones del mCTSIB, con un laberinto sano (arriba) y sin vestíbulo (abajo). Sin vestíbulo, mientras quedan la vista o los pies el balanceo se compensa; con ojos cerrados sobre espuma, no queda nada que lo sostenga. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
@@ -150,9 +150,9 @@ Antes de las pruebas se hace la **anamnesis** de la atención habitual (→ H1) 
 
 El DHI es un cuestionario de **25 ítems** que mide cuánto se ve afectada la vida diaria por el mareo y la inestabilidad. Los ítems se agrupan en tres dominios: **funcional**, **emocional** y **físico** (Jacobson y Newman, 1990). Cada uno se contesta *sí*, *a veces* o *no*, que valen **4, 2 y 0** puntos. El total va de 0 a 100: más puntos, más discapacidad. Lo contesta el paciente solo, sin que el examinador sugiera la respuesta, porque mide **su** percepción.
 
-Se lee el total y se compara el del inicio con el del final. Para agrupar el total se usan **tres tramos**: 0 a 30 leve, 31 a 60 moderado y 61 a 100 grave. En 85 pacientes con distintas causas vestibulares, quienes caían en el tramo grave tenían peor marcha, peor puntaje de equilibrio y más caídas que los otros (Whitney y cols., 2004). El DHI tiene además relación con las pruebas de laboratorio: en 367 pacientes, la mayor parte de las correlaciones significativas estuvo con la posturografía y era mayor la discapacidad en quienes tenían nistagmo espontáneo (Jacobson y cols., 1991).
+Se lee el total y se compara el del inicio con el del final. Para agrupar el total se usan **tres tramos**: 0 a 30 leve, 31 a 60 moderado y 61 a 100 grave. En 85 pacientes con distintas causas vestibulares, quienes caían en el tramo grave tenían peor marcha, se paraban más lento de una silla, confiaban menos en su equilibrio y contaban más caídas que los otros (Whitney y cols., 2004). <!-- Pasada de fundamentos 2026-10-18: decía "peor marcha, peor puntaje de equilibrio y más caídas". El abstract de Whitney 2004 compara DGI, sentarse y pararse 5 veces (FTSST), confianza en el equilibrio (ABC) y caídas; no hay un puntaje de equilibrio como tal. --> El DHI tiene además relación con las pruebas de laboratorio: en 367 pacientes, la mayor parte de las correlaciones significativas estuvo con la posturografía y era mayor la discapacidad en quienes tenían nistagmo espontáneo (Jacobson y cols., 1991).
 
-Para saber si un cambio es **real**, un cambio de 18 puntos o más suele tomarse como cambio verdadero. <!-- verificar: el valor de 18 puntos del DHI (cambio real / mínima diferencia importante); las fuentes consultadas discrepan (11, 17,18 y 18) y la mínima diferencia clínicamente importante figura como no establecida en adultos mayores. -->
+Para saber si un cambio es **real**, un cambio de 18 puntos o más se toma como cambio verdadero (Jacobson y Newman, 1990). En la versión noruega, el cambio que supera el error de medida fue de 20 puntos y el mínimo cambio importante para el paciente, de 11 (Tamber y cols., 2009). <!-- Pasada de fundamentos 2026-10-18: el criterio de 18 puntos se atribuye a Jacobson y Newman 1990 según Tamber 2009 (texto completo, introducción: "a change in the DHI total score should decrease by at least 18-points in individual patients to be called a true change [1]"); los 20 y 11 puntos están en el abstract de Tamber 2009. -->
 
 :::comentario Lo que dicen las normas
 - **Versión en español.** Existen versiones del DHI adaptadas culturalmente al español. En 337 pacientes con mareo, el análisis factorial de esa versión dio tres factores (discapacidad vestibular, discapacidad visuovestibular y minusvalía), y **no coincidieron** con las tres subescalas originales (Pérez y cols., 2001). Por eso el total es el dato confiable; si se informa por subescalas, hay que decir que se leen con cautela.
@@ -226,7 +226,7 @@ Se pone una **silla** con respaldo y apoyabrazos y, a **3 m** por delante, una m
 
 **Por qué se hace así.** Reúne en una sola tarea cosas de la vida diaria: levantarse, caminar, girar y sentarse. Se diseñó como una prueba de **movilidad básica** para adultos frágiles (Podsiadlo y Richardson, 1991). El primer intento sirve de ensayo, para que el tiempo no mida la sorpresa.
 
-Para decidir quién cae, el TUG distinguió a mayores con antecedente de caídas de los que no tenían ninguno, con una sensibilidad y una especificidad de 87 % (Shumway-Cook y cols., 2000). <!-- verificar: el punto de corte de 13,5 s de esa misma publicación; el resumen consultado no lo trae. -->
+Para decidir quién cae, el TUG distinguió a mayores con antecedente de caídas de los que no tenían ninguno, con una sensibilidad y una especificidad de 87 % (Shumway-Cook y cols., 2000). De ese estudio, de solo 15 mayores con caídas y 15 sin ellas, viene el corte de 13,5 s; un metaanálisis posterior en mayores que viven en la comunidad encontró que ese corte predice mal las caídas (sensibilidad 31 %, especificidad 74 %) y que el TUG no debe usarse solo para decidir quién está en riesgo (Barry y cols., 2014). <!-- Pasada de fundamentos 2026-10-18: el corte de 13,5 s se confirmó en Barry 2014 (texto completo: "The commonly cited cut-off score of ≥13.5 seconds ... was first described by Shumway-Cook and colleagues in 2000"); sensibilidad 0,31 y especificidad 0,74 en su abstract. -->
 
 #### Índice de Marcha Dinámica de 4 ítems (4-item DGI)
 
@@ -367,7 +367,7 @@ Lo que debe quedar escrito:
 - **Contar sacadas y seguimiento como estabilización de la mirada.** Con la cabeza quieta no hay deslizamiento retiniano, y sin él no hay adaptación (Hall y cols., 2022).
 - **Esquivar los movimientos que marean.** La habituación necesita repetir el estímulo; si se evita, no se habitúa.
 - **Dejar todo a la sesión en el box.** Una sesión semanal sin programa para la casa pone muy pocas repeticiones.
-- **No subir la dificultad.** El ejercicio que ya no desafía deja de enseñar (Lacour y Bernard-Demanze, 2014).
+- **No subir la dificultad.** El ejercicio que ya no desafía deja de enseñar (Lacour y Bernard-Demanze, 2015).
 - **Mover la cabeza tan lento que no hay error.** Si la imagen no resbala nada, no hay señal que corregir.
 - **Hacer la DVA con una frecuencia baja.** El seguimiento ocular esconde el déficit.
 - **Cambiar las condiciones entre el inicio y el final.** Otra silla, otro calzado, otro pasillo: la diferencia puede ser del montaje y no del paciente.
@@ -421,14 +421,16 @@ Un paciente que **empeora con los ejercicios** (más vértigo, nistagmo nuevo, v
 1. Podsiadlo D, Richardson S. The timed "Up & Go": a test of basic functional mobility for frail elderly persons. J Am Geriatr Soc. 1991;39(2):142-8. doi:10.1111/j.1532-5415.1991.tb01616.x
 1. Shumway-Cook A, Brauer S, Woollacott M. Predicting the probability for falls in community-dwelling older adults using the Timed Up & Go Test. Phys Ther. 2000;80(9):896-903. PMID 10960937 (sin DOI)
 1. Marchetti GF, Whitney SL. Construction and validation of the 4-item dynamic gait index. Phys Ther. 2006;86(12):1651-60. doi:10.2522/ptj.20050402
-1. Shumway-Cook A, Horak FB. Assessing the influence of sensory interaction of balance. Suggestion from the field. Phys Ther. 1986;66(10):1548-50. doi:10.1093/ptj/66.10.1548
+1. Shumway-Cook A, Horak FB. Assessing the influence of sensory interaction on balance. Suggestion from the field. Phys Ther. 1986;66(10):1548-50. doi:10.1093/ptj/66.10.1548
 1. Cohen H, Blatchly CA, Gombash LL. A study of the clinical test of sensory interaction and balance. Phys Ther. 1993;73(6):346-51. doi:10.1093/ptj/73.6.346
+1. Tamber AL, Wilhelmsen KT, Strand LI. Measurement properties of the Dizziness Handicap Inventory by cross-sectional and longitudinal designs. Health Qual Life Outcomes. 2009;7:101. doi:10.1186/1477-7525-7-101
+1. Barry E, Galvin R, Keogh C, Horgan F, Fahey T. Is the Timed Up and Go test a useful predictor of risk of falls in community dwelling older adults: a systematic review and meta-analysis. BMC Geriatr. 2014;14:14. doi:10.1186/1471-2318-14-14
 
 ### Fisiología y compensación
 
 1. Curthoys IS, Halmagyi GM. Vestibular compensation: a review of the oculomotor, neural, and clinical consequences of unilateral vestibular loss. J Vestib Res. 1995;5(2):67-107. PMID 7743004 (sin DOI)
 1. Lacour M, Helmchen C, Vidal PP. Vestibular compensation: the neuro-otologist's best friend. J Neurol. 2016;263(Suppl 1):S54-64. doi:10.1007/s00415-015-7903-4
-1. Lacour M, Bernard-Demanze L. Interaction between vestibular compensation mechanisms and vestibular rehabilitation therapy: 10 recommendations for optimal functional recovery. Front Neurol. 2014;5:285. doi:10.3389/fneur.2014.00285
+1. Lacour M, Bernard-Demanze L. Interaction between vestibular compensation mechanisms and vestibular rehabilitation therapy: 10 recommendations for optimal functional recovery. Front Neurol. 2015;5:285. doi:10.3389/fneur.2014.00285
 1. Gonshor A, Jones GM. Extreme vestibulo-ocular adaptation induced by prolonged optical reversal of vision. J Physiol. 1976;256(2):381-414. doi:10.1113/jphysiol.1976.sp011330
 1. Miles FA, Lisberger SG. Plasticity in the vestibulo-ocular reflex: a new hypothesis. Annu Rev Neurosci. 1981;4:273-99. doi:10.1146/annurev.ne.04.030181.001421
 1. Norré ME, De Weerdt W. Treatment of vertigo based on habituation. 2. Technique and results of habituation training. J Laryngol Otol. 1980;94(9):971-7. doi:10.1017/s0022215100089726

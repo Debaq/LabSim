@@ -28,7 +28,7 @@ Antes de marcar una onda: **ruido bajo, se repite, migra con la intensidad, resi
 
 ### Qué hay entre los electrodos
 
-Los electrodos recogen la suma de todo lo que genera voltaje bajo la piel de la cabeza. Una pequeña parte es la respuesta de tronco que buscamos. El resto es **ruido**: el EEG de fondo (la actividad eléctrica de la corteza, de decenas de microvoltios), la actividad de los músculos del cuello y la cara, el movimiento de los electrodos y la corriente de la red eléctrica. La onda V de un adulto con audición normal mide cerca de **0,5 µV** (Da Silva Nunes y Gentile Matas, 2005), de modo que en un solo barrido la respuesta es invisible: está enterrada en un ruido que la supera varias veces (Picton, 2010).
+Los electrodos recogen la suma de todo lo que genera voltaje bajo la piel de la cabeza. Una pequeña parte es la respuesta de tronco que buscamos. El resto es **ruido**: el EEG de fondo (la actividad eléctrica de la corteza, de decenas de microvoltios), la actividad de los músculos del cuello y la cara, el movimiento de los electrodos y la corriente de la red eléctrica. La onda V de un adulto con audición normal mide cerca de **0,5 µV** (Da Silva Nunes y Gentile Matas, 2005), <!-- verificar: la cifra de 0,5 µV en Da Silva Nunes 2005; el resumen confirma que mide amplitudes de I, III y V en 50 adultos, pero el texto completo (revfono.uchile.cl) no se pudo abrir. --> de modo que en un solo barrido la respuesta es invisible: está enterrada en un ruido que la supera varias veces (Picton, 2010).
 
 ### Por qué el promedio mejora con la raíz de los barridos
 
@@ -73,13 +73,17 @@ Algunos barridos son tan ruidosos (el paciente tragó, se movió, se tensó) que
 
 Tres decisiones del equipo modifican lo que se ve, y cada una tiene un costo.
 
-- **Los filtros** dejan pasar la banda donde está la energía del ABR y sacan el resto: el pasa alto elimina el EEG lento y la deriva; el pasa bajo, el ruido eléctrico y muscular de frecuencia alta. La rutina del libro es **100 a 3.000 Hz**. Un pasa alto demasiado alto le quita parte de la energía a la respuesta misma y la achica; uno demasiado bajo deja pasar la deriva y el ruido lento; un pasa bajo muy bajo redondea y funde las ondas (Picton, 2010). Con **filtros analógicos o causales** de un equipo real, el filtrado además **corre las latencias**; los filtros de LabSim son de fase cero y no las corren, y esa diferencia es una limitación del simulador que conviene tener presente <!-- verificar: magnitud del corrimiento de latencia según el pasa alto en equipos reales -->.
+- **Los filtros** dejan pasar la banda donde está la energía del ABR y sacan el resto: el pasa alto elimina el EEG lento y la deriva; el pasa bajo, el ruido eléctrico y muscular de frecuencia alta. La rutina del libro es **100 a 3.000 Hz**. Un pasa alto demasiado alto le quita parte de la energía a la respuesta misma y la achica; uno demasiado bajo deja pasar la deriva y el ruido lento; un pasa bajo muy bajo redondea y funde las ondas (Picton, 2010). Con **filtros analógicos o causales** de un equipo real, el filtrado además **corre las latencias**: frente a un filtro de fase cero, el pasa alto convencional achica más las ondas y adelanta la V, con más variabilidad entre registros (Kavanagh y Franks, 1989). Los filtros de LabSim son de fase cero y no las corren, y esa diferencia es una limitación del simulador que conviene tener presente.
 - **La polaridad** del estímulo (rarefacción, condensación o alternada) cambia el sentido en que se mueve el tímpano. El artefacto eléctrico del transductor y la microfónica coclear **invierten su signo** con la polaridad; la respuesta neural, en lo esencial, no. Al **alternar**, esas dos cancelan al promediar y la respuesta neural queda. El precio: se promedian dos respuestas de latencia apenas distinta y las ondas se ensanchan un poco. En rarefacción la onda I sale antes y más clara (Stockard y cols., 1979; → H10).
 - **La ventana** es el tramo de tiempo que se registra después de cada estímulo. La rutina del libro es de 10 a 12 ms. Hay que cubrir la V incluso cuando está atrasada: cerca del umbral, en un oído con pérdida, en un lactante. Una ventana corta la deja afuera. Una ventana larga muestra componentes tardíos que la rutina no ve, entre ellos el que sigue.
 
 ### Un músculo que contesta al sonido
 
-Detrás de la oreja está el músculo auricular posterior. Con sonidos intensos se contrae de forma refleja y da una respuesta que los electrodos del mastoides o del lóbulo recogen sin querer: la **respuesta postauricular** (PAMR), una onda ancha de latencia cercana a **12 a 15 ms** (O'Beirne y Patuzzi, 1999). Es una respuesta real al sonido, pero no es auditiva de tronco: es muscular. Su amplitud varía con la tensión del paciente y con la posición de los ojos (Patuzzi y O'Beirne, 1999a), y por eso aparece y desaparece entre registros <!-- verificar: si la latencia de la PAMR cambia o no con la intensidad (el capítulo y LabSim la tratan como fija) -->. En una ventana de rutina de 12 ms solo asoma su comienzo; si se abre la ventana, se ve entera. El PAMR se ha estudiado también como una respuesta útil por sí misma (Purdy y cols., 2005), pero en un ABR es un contaminante.
+Detrás de la oreja está el músculo auricular posterior. Con sonidos intensos se contrae de forma refleja y da una respuesta que los electrodos del mastoides o del lóbulo recogen sin querer: la **respuesta postauricular** (PAMR), una onda ancha de latencia cercana a **12 a 15 ms** (O'Beirne y Patuzzi, 1999). Es una respuesta real al sonido, pero no es auditiva de tronco: es muscular. Su amplitud varía con la tensión del paciente y con la posición de los ojos (Patuzzi y O'Beirne, 1999a), y por eso aparece y desaparece entre registros. En una ventana de rutina de 12 ms solo asoma su comienzo; si se abre la ventana, se ve entera. El PAMR se ha estudiado también como una respuesta útil por sí misma (Purdy y cols., 2005), pero en un ABR es un contaminante.
+
+:::comentario Lo que dicen las normas
+En personas reales el primer pico de la PAMR está entre 12,5 y 15 ms según la intensidad y el tono del músculo, y puede registrarse a menos de 20 dB del umbral subjetivo (O'Beirne y Patuzzi, 1999); al bajar el estímulo su amplitud cae y su latencia se alarga (Purdy y cols., 2005). La onda muscular de LabSim mantiene la latencia fija y desaparece al bajar el nivel. En un registro real lo que la separa de la V es la latencia absoluta, el tamaño, el ancho y su dependencia del tono muscular y de la mirada.
+:::
 
 ## Patología
 
@@ -238,7 +242,7 @@ Sin cambiar de paciente, ¿qué mirarías al bajar la intensidad para saber si e
 :::docente Guía del caso
 - **Datos clave:** 74 años, pérdida simétrica, ventana de 25 ms, onda ancha a 13 ms.
 - **Hipótesis:** lesión retrococlear (no: la pérdida es simétrica y no hay otros signos), **respuesta postauricular** de un paciente tenso con sonido intenso.
-- **Qué pedir:** volver a la ventana de rutina; registrar a un nivel menor (la respuesta muscular suele caer antes que la V <!-- verificar: umbral de la PAMR frente al de la V en O'Beirne y Patuzzi 1999 -->); relajar al paciente, **cuello suelto y cabeza apoyada**; revisar la posición de los electrodos.
+- **Qué pedir:** volver a la ventana de rutina; registrar a un nivel menor y comparar: la V se achica y se atrasa; la onda muscular no se atrasa, cambia de tamaño o desaparece <!-- Pasada de fundamentos 2026-10-18: decía "la respuesta muscular suele caer antes que la V" con un verificar. O'Beirne y Patuzzi 1999 la registran a menos de 20 dB del umbral subjetivo y Purdy 2005 la obtuvo con clicks de 20 dB nHL en la mitad de los normoyentes en la condición menos favorable: no cae de forma fiable antes que la V; la literatura sobre su latencia está en el recuadro de Fisiología. -->; relajar al paciente, **cuello suelto y cabeza apoyada**; revisar la posición de los electrodos.
 - **Errores esperables:** marcar V en el máximo más grande de la pantalla; "interpretar" interpicos con un componente muscular.
 - **En LabSim:** es el paciente de práctica 36. La respuesta postauricular depende de la configuración del caso: la activa el docente en el perfil del oído; en la ventana de 12 ms asoma solo su comienzo, y el alumno la ve entera al abrir la ventana.
 :::
@@ -350,7 +354,7 @@ Un "no hay respuesta" solo vale si el **ruido residual** era lo bastante bajo co
 
 #### Razonamiento
 
-Una "onda I" a 0,6 ms no puede ser neural con ese estímulo: el sonido ni siquiera ha tenido tiempo de llegar a la cóclea y generar un potencial del nervio. Lo que hay ahí es el **artefacto electromagnético del transductor**, que es peor con el fono supraaural y con intensidad alta, y que con una sola polaridad no se cancela. Alternar lo cancela, y con fonos de inserción, pinzar el tubo lo demuestra: el sonido deja de llegar, las ondas desaparecen y el artefacto sigue. Además, la V de un supraaural llega antes que la de la inserción, porque no hay tubo que retrase el sonido: las latencias de la norma, medidas con inserción, no valen.
+Una "onda I" a 0,6 ms no puede ser neural con ese estímulo: el sonido ni siquiera ha tenido tiempo de llegar a la cóclea y generar un potencial del nervio. Lo que hay ahí es el **artefacto electromagnético del transductor**, que es peor con el fono supraaural y con intensidad alta, y que con una sola polaridad no se cancela. Alternar lo cancela, y con fonos de inserción, pinzar el tubo lo demuestra: el sonido deja de llegar, las ondas desaparecen y el artefacto sigue (BSA, 2019). Además, la V de un supraaural llega antes que la de la inserción, porque no hay tubo que retrase el sonido: las latencias de la norma, medidas con inserción, no valen.
 
 #### Diagnóstico y qué sigue
 
@@ -418,7 +422,7 @@ El oído estaba bien: lo que estaba mal era el equipo. Por eso H10 insiste en qu
 - Lo que se repite en cada estímulo (artefacto, músculo) **sobrevive al promedio**: la replicación no lo descarta.
 - Una V verdadera **migra**: se achica y se atrasa al bajar. Lo que no se mueve no es V.
 - El artefacto de estímulo está **desde 0 ms**, no se va al alternar del todo con el vibrador y **sigue con el tubo pinzado**.
-- La respuesta postauricular está a **12 a 15 ms**, es ancha, grande y cae antes que la V.
+- La respuesta postauricular está a **12 a 15 ms**, es ancha, grande, no se atrasa al bajar el nivel y cambia con la tensión del paciente.
 - La falsa V vive en **una sola mitad** del promedio.
 - Filtros, polaridad, transductor, tasa y ventana: la norma vale solo con **los mismos ajustes**.
 - Antes de dudar del paciente, duda del registro.
@@ -435,6 +439,7 @@ El oído estaba bien: lo que estaba mal era el equipo. Por eso H10 insiste en qu
 1. Stockard JE, Stockard JJ, Westmoreland BF, Corfits JL. Brainstem auditory-evoked responses: normal variation as a function of stimulus and subject characteristics. Arch Neurol. 1979;36(13):823-31. doi:10.1001/archneur.1979.00500490037006.
 1. British Society of Audiology. Recommended procedure: cochlear microphonic testing (OD104-87). BSA; 2019 (describe la prueba de pinzar el tubo). Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-87-Recommended-Procedure-for-Cochlear-Microphonic-Testing.pdf
 1. Small SA, Stapells DR. Artifactual responses when recording auditory steady-state responses. Ear Hear. 2004;25(6):611-23. doi:10.1097/00003446-200412000-00009
+1. Kavanagh KT, Franks R. Analog and digital filtering of the brain stem auditory evoked response. Ann Otol Rhinol Laryngol. 1989;98(7 Pt 1):508-14. doi:10.1177/000348948909800704
 
 ### Respuesta postauricular
 
@@ -445,4 +450,4 @@ El oído estaba bien: lo que estaba mal era el equipo. Por eso H10 insiste en qu
 ### Fisiología
 
 1. Elberling C, Don M. Quality estimation of averaged auditory brainstem responses. Scand Audiol. 1984;13(3):187-97. doi:10.3109/01050398409043059
-1. Da Silva Nunes C, Gentile Matas C. Audiometría de tronco encefálico utilizando diferentes polaridades de presentación del estímulo acústico. Rev Chil Fonoaudiol. 2005;6(2):7-16. doi:10.5354/0719-4692.2005.48433.
+1. Da Silva Nunes C, Gentile Matas C. Audiometría de tronco encefálico utilizando diferentes polaridades de presentación del estímulo. Rev Chil Fonoaudiol. 2005;6(2):7-16. doi:10.5354/0719-4692.2005.48433.

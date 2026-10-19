@@ -40,7 +40,7 @@ La mínima del protocolo, con agua a 2 °C, compara los dos oídos con una sola 
 
 ### Qué se agrega al leer el VEMP
 
-El VEMP de este libro se hace con una sola frecuencia, la de 500 Hz (→ H12). En el Ménière, el sáculo afectado tiene además una **sintonía alterada**: responde peor a 500 Hz y relativamente mejor a frecuencias más altas, con lo cual un VEMP de 500 Hz subestima el problema y uno con varias frecuencias lo muestra mejor (Rauch y cols., 2004) <!-- verificar: dirección exacta del cambio de sintonía en Rauch 2004 (no se leyó el texto completo) -->.
+El VEMP de este libro se hace con una sola frecuencia, la de 500 Hz (→ H12). En el Ménière, el sáculo afectado tiene además una **sintonía alterada**: los umbrales del VEMP suben en todas las frecuencias y se pierde la ventaja que el estímulo de 500 Hz tiene en el oído sano (Rauch y cols., 2004). Un VEMP de una sola frecuencia no puede ver ese cambio de sintonía; hace falta comparar frecuencias. <!-- Pasada de fundamentos 2026-10-18: decía "responde peor a 500 Hz y relativamente mejor a frecuencias más altas, con lo cual un VEMP de 500 Hz subestima el problema". Se corrigió a lo que dice el resumen: umbrales más altos en todas las frecuencias y menos sintonía en 500 Hz (Rauch y cols., 2004). -->
 
 ## En LabSim
 
@@ -52,7 +52,7 @@ LabSim da el lado auditivo de estos pacientes: audiograma, logoaudiometría, ele
 
 La calórica y el vHIT estimulan **el mismo canal lateral**, pero de dos maneras muy distintas: la calórica con un calentamiento lento que dura minutos, y el vHIT con un giro rápido de 150 milisegundos (→ H17, tabla de comparación). Cada una pone a prueba una **parte distinta del reflejo**: la calórica, su respuesta a variaciones muy lentas; el vHIT, su respuesta a variaciones rápidas.
 
-En un hidrops pasa algo curioso: una calórica caída con un vHIT normal. En 644 pacientes con ambas pruebas, 570 coincidieron; de los 36 que no coincidieron, todos tenían el vHIT normal y la calórica alterada, y en 27 el diagnóstico final fue enfermedad de Ménière. Ningún paciente con vHIT lateral anormal tuvo una calórica normal (Hannigan y cols., 2021). Una explicación propuesta es que el hidrops dilata el laberinto y altera la forma en que el calor activa los receptores, pero casi no cambia la respuesta de la cúpula al giro rápido (Halmagyi y cols., 2017); qué revela esa disociación sobre el oído enfermo es lo que discuten McGarvie y cols. (2015).
+En un hidrops pasa algo curioso: una calórica caída con un vHIT normal. En 644 pacientes con ambas pruebas, 570 coincidieron; 36 tuvieron las pruebas disociadas, todos con el vHIT normal y una paresia calórica mayor de 30 %, y en 27 de ellos el diagnóstico final fue enfermedad de Ménière definida. <!-- Pasada de fundamentos 2026-10-18: decía "de los 36 que no coincidieron", pero 644 − 570 = 74; 36 son los que mostraron la disociación (Hannigan y cols., 2021, resumen). --> Ningún paciente con vHIT lateral anormal tuvo una calórica normal (Hannigan y cols., 2021). Una explicación propuesta es que el hidrops dilata el laberinto y altera la forma en que el calor activa los receptores, pero casi no cambia la respuesta de la cúpula al giro rápido (Halmagyi y cols., 2017); qué revela esa disociación sobre el oído enfermo es lo que discuten McGarvie y cols. (2015).
 
 :::imagen ilustraciones/cap23-disociacion.svg Calórica y vHIT de los cuatro casos del capítulo. El cuadrante verde (calórica alterada y vHIT normal) es el de la disociación: el canal falla ante el estímulo lento y responde al rápido, como en el hidrops. Fíjate en quiénes caen ahí y quiénes no.
 :::
@@ -61,7 +61,7 @@ Dos cosas se desprenden de ese hallazgo. La primera: **que el vHIT salga normal 
 
 ### De la fluctuación a la pérdida fija
 
-La audición de un Ménière sube y baja mientras el hidrops es reversible, y se queda abajo cuando hay daño celular. En los huesos temporales de pacientes con Ménière se encuentra el hidrops en todos, aunque también en oídos que nunca dieron síntomas (Merchant y cols., 2005). Lo que el paciente vive como "ya no se recupera" se interpreta como una lesión que dejó de ser un exceso de presión y se hizo estructural, con pérdida de células <!-- verificar: pérdida celular en el hueso temporal de Ménière avanzado; Merchant 2005 documenta el hidrops, no está comprobado que sustente esta frase -->. La evolución es variable. La experiencia de seguimientos largos es que las crisis tienden a ser menos frecuentes con los años, mientras la audición y la función vestibular se deterioran (Huppert y cols., 2010) <!-- verificar: Huppert 2010 se conoce solo por resúmenes secundarios (más de 7.500 pacientes; crisis más espaciadas en 5 a 10 años); confirmar el resultado en el original -->. Es la paradoja que el paciente describe: "ahora tengo menos crisis, pero oigo peor".
+La audición de un Ménière sube y baja mientras el hidrops es reversible, y se queda abajo cuando hay daño celular. En los huesos temporales de pacientes con Ménière se encuentra el hidrops en todos, aunque también en oídos que nunca dieron síntomas (Merchant y cols., 2005). Lo que el paciente vive como "ya no se recupera" se atribuye a una degeneración de las células ciliadas, de las neuronas del ganglio espiral y de los fibrocitos de la pared lateral de la cóclea, que se ha demostrado en el hidrops experimental; en el hueso temporal humano, lo que se ve al microscopio óptico se correlaciona mal con la pérdida de audición (Nadol y cols., 1995). La evolución es variable. En una revisión de 46 estudios con 7.852 pacientes, las crisis se hicieron menos frecuentes en 5 a 10 años, y la pérdida de audición (de unos 50 a 60 dB) y de función vestibular ocurrió sobre todo en esos mismos primeros 5 a 10 años (Huppert y cols., 2010). Es la paradoja que el paciente describe: "ahora tengo menos crisis, pero oigo peor".
 
 ### Las caídas bruscas
 
@@ -69,7 +69,7 @@ Algunos pacientes sufren una caída **sin aviso**, sin pérdida de conciencia y 
 
 ### La migraña vestibular
 
-La migraña vestibular es **vértigo recurrente en una persona con migraña**, sin lesión del oído que lo explique. Se desconoce su mecanismo con precisión <!-- verificar: mecanismo propuesto de la migraña vestibular (vía trigeminovascular y procesamiento sensorial central); fuente primaria por elegir -->. Para este libro basta lo clínico: el oído suele **estar sano**, y las crisis se parecen a las de migraña en lo que traen consigo (luz, ruido, cefalea) y en lo que las dispara (falta de sueño, hormonas, olores).
+La migraña vestibular es **vértigo recurrente en una persona con migraña**, sin lesión del oído que lo explique. Su mecanismo se conoce poco (Huang y cols., 2020). Para este libro basta lo clínico: el oído suele **estar sano**, y las crisis se parecen a las de migraña en lo que traen consigo (luz, ruido, cefalea) y en lo que las dispara (falta de sueño, hormonas, olores).
 
 ## Patología
 
@@ -79,14 +79,14 @@ El criterio de la Sociedad Bárány es el del capítulo 9: crisis de vértigo de
 
 Con los años, el cuadro cambia de forma en tres sentidos.
 
-**La audición deja de fluctuar.** Al principio es ascendente y vuelve; después se aplana y desciende, y ya no se recupera. El audiograma se agrupa por **etapas** según el promedio de 500, 1.000, 2.000 y 3.000 Hz del peor audiograma de los últimos seis meses: la etapa 1 llega hasta 25 dB, la 2 de 26 a 40, la 3 de 41 a 70 y la 4 sobre 70 dB (Comité de Audición y Equilibrio de la AAO-HNS, 1995) <!-- verificar: el límite entre las etapas 1 y 2 aparece como 25 o 26 dB según la fuente; confirmar en el original -->. Esa clasificación es **solo audiométrica**: no dice nada de las crisis ni del vestíbulo.
+**La audición deja de fluctuar.** Al principio es ascendente y vuelve; después se aplana y desciende, y ya no se recupera. El audiograma se agrupa por **etapas** según el promedio de 500, 1.000, 2.000 y 3.000 Hz del peor audiograma de los últimos seis meses: la etapa 1 llega hasta 25 dB, la 2 de 26 a 40, la 3 de 41 a 70 y la 4 sobre 70 dB (Comité de Audición y Equilibrio de la AAO-HNS, 1995). <!-- Pasada de fundamentos 2026-10-18: el original de 1995 no se pudo abrir; las fuentes secundarias lo escriben como "≤25 dB" o "menos de 26 dB", que con umbrales enteros es el mismo límite (Zhang y cols., J Clin Med 2022;11(11):3131, doi:10.3390/jcm11113131; Sobhy y cols., Acta Otorhinolaryngol Ital 2019;39(6):419-28, doi:10.14639/0392-100X-2461). --> Esa clasificación es **solo audiométrica**: no dice nada de las crisis ni del vestíbulo.
 
 :::imagen ilustraciones/cap23-evolucion.svg El mismo oído en tres momentos. El del año 0 y el del año 3 son parte de la historia del caso 23.1; el de hoy es el que el paciente trae a la evaluación. Sigue la forma: de ascendente a plana y descendente, y de una etapa a la siguiente.
 :::
 
 **El vestíbulo deja de responder.** La calórica cae; con la enfermedad avanzada, el vHIT también puede caer, y entonces ya no hay disociación. Con la pérdida llegan los síntomas de la persona sin crisis: inestabilidad, miedo a caminar en la oscuridad.
 
-**Aparecen cosas nuevas.** Las **caídas de Tumarkin** y, en una parte de los pacientes, el **otro oído**. Qué proporción termina con los dos oídos comprometidos varía mucho de una serie a otra, y no es un dato para citar sin su fuente <!-- verificar: porcentaje de Ménière bilateral (House 2006 y otras series) -->. Lo que importa en la sala es que **un paciente con un oído "malo" y uno "bueno" puede tener los dos enfermos**: la comparación entre oídos, que en un Ménière unilateral dice casi todo, deja de servir. Esto pesa en dos decisiones. Para el diagnóstico, porque el criterio audiométrico se escribió comparando con el otro oído <!-- verificar: cómo define el criterio de 2015 la pérdida cuando el oído contrario también está afectado -->. Y para el tratamiento: un procedimiento que apague un laberinto es una decisión médica, y quien evalúa entrega lo que el **otro** laberinto todavía hace.
+**Aparecen cosas nuevas.** Las **caídas de Tumarkin** y, en una parte de los pacientes, el **otro oído**. La proporción con los dos oídos comprometidos crece con los años de enfermedad: hasta 35 % a los 10 años y hasta 47 % a los 20 (Huppert y cols., 2010). Lo que importa en la sala es que **un paciente con un oído "malo" y uno "bueno" puede tener los dos enfermos**: la comparación entre oídos, que en un Ménière unilateral dice casi todo, deja de servir. Esto pesa en dos decisiones. Para el diagnóstico, porque el criterio audiométrico se escribió comparando con el otro oído: 30 dB de diferencia por vía ósea en dos frecuencias contiguas bajo 2.000 Hz. Cuando la pérdida de graves es de los dos oídos, el consenso pide en cambio umbrales óseos de 35 dB HL o más en dos frecuencias contiguas bajo 2.000 Hz (Lopez-Escamez y cols., 2015). Y para el tratamiento: un procedimiento que apague un laberinto es una decisión médica, y quien evalúa entrega lo que el **otro** laberinto todavía hace.
 
 La resonancia con gadolinio tardío también gradúa el hidrops, oído por oído, por lo que ocupa en el vestíbulo y la cóclea (→ cap. 9). La pide y la informa el médico.
 
@@ -105,15 +105,15 @@ Los criterios de la Sociedad Bárány y de la Sociedad Internacional de Cefaleas
 3. **Una o más características de migraña** en al menos la mitad de los episodios: cefalea con dos de cuatro rasgos (un solo lado, pulsátil, intensidad moderada o grave, empeora con la actividad física), **fotofobia y fonofobia**, o aura visual.
 4. Que otra enfermedad vestibular o de la cefalea no lo explique mejor.
 
-La versión de 2022 agrega una forma **probable**: cumple el primer criterio y uno de los otros dos. Por lo que a este capítulo concierne, la **audición**: suele ser normal y, cuando hay pérdida, es leve; en una serie con seguimiento, algunos pacientes terminaron con una hipoacusia leve bilateral, que no cumplía el patrón típico del Ménière (Radtke y cols., 2011) <!-- verificar: porcentaje y características de la hipoacusia en Radtke 2011 y 2012 (conocidos solo por resúmenes) -->. Las pruebas vestibulares entre las crisis son normales o muestran hallazgos discretos <!-- verificar: frecuencia de calórica alterada entre crisis en la migraña vestibular -->. En un estudio de población, cerca del 1 % de los adultos había tenido vértigo migrañoso (Neuhauser y cols., 2006) <!-- verificar: 0,98 % de prevalencia de vida en Neuhauser 2006; confirmar en el original -->, una frecuencia que explica por qué es una causa común de "laberintitis" repetida.
+Los dos documentos definen también una forma **probable**: cumple el primer criterio y uno de los otros dos; la actualización de 2022 dejó los criterios de 2012 sin cambios (Lempert y cols., 2022). <!-- Pasada de fundamentos 2026-10-18: decía "La versión de 2022 agrega una forma probable". La migraña vestibular probable ya estaba en 2012; la de 2022 "contains a literature update while the original criteria from 2012 were left unchanged" (Lempert y cols., 2012 y 2022, resúmenes). --> Por lo que a este capítulo concierne, la **audición**: suele ser normal y, cuando hay pérdida, es leve. En 61 pacientes seguidos una mediana de 9 años, 18 % desarrolló una hipoacusia sensorioneural bilateral leve, que tocaba también los graves (Radtke y cols., 2012); en otra serie del mismo grupo, 8 de 75 pacientes con una hipoacusia leve llegaron a cumplir formalmente los criterios de un Ménière bilateral, con rasgos clínicos que no eran los del Ménière (Radtke y cols., 2011). Las pruebas vestibulares entre las crisis suelen ser normales (Huang y cols., 2020); en el seguimiento, los hallazgos oculomotores entre crisis, sobre todo un nistagmo posicional, pasaron de 16 % a 41 % de los pacientes (Radtke y cols., 2012). En un estudio de población, cerca del 1 % de los adultos había tenido vértigo migrañoso, y de quienes consultaron, solo 20 % recibió ese diagnóstico (Neuhauser y cols., 2006): es una causa frecuente y poco reconocida de "laberintitis" repetida.
 
 :::ojo Ojo clínico
-La migraña vestibular **no** tiene pérdida de audición progresiva y fija. Un paciente con mareos repetidos **y** hipoacusia que va empeorando no cabe en este diagnóstico solo: hay que buscar otra causa.
+La migraña vestibular no lleva a una pérdida de audición importante: cuando aparece, suele ser leve y de los dos oídos (Lopez-Escamez y cols., 2015; Radtke y cols., 2012). Un paciente con mareos repetidos **y** una hipoacusia que avanza hasta moderada o más, o que es de un solo oído, no cabe en este diagnóstico solo: hay que buscar otra causa. <!-- Pasada de fundamentos 2026-10-18: decía "no tiene pérdida de audición progresiva y fija". Radtke 2012: "vestibulo-cochlear dysfunction progresses slowly in some patients with VM" (18 % con hipoacusia bilateral leve); Lopez-Escamez 2015: "SNHL does not typically progress to severe hearing loss over the years in migraine. When hearing loss develops in vestibular migraine, it is often bilateral". -->
 :::
 
 ### Cuando las dos coexisten
 
-Las dos enfermedades son frecuentes y **no se excluyen**. En un servicio de mareo, de 189 pacientes con Ménière, migraña vestibular o ambas, 21 tenían las dos; un 38 % de los pacientes con migraña vestibular tenía síntomas del oído (pérdida, plenitud o zumbido) durante los episodios, y casi la mitad de quienes tenían solo Ménière refería cefaleas con rasgos de migraña (Neff y cols., 2012) <!-- verificar: cifras de Neff 2012 tomadas del resumen (76 Ménière, 92 migraña vestibular, 21 ambas; 38 %; 49 %); confirmar en el original -->. En esa mezcla, el dato que ordena es **cuál crisis trae qué**: la que viene con el oído tapado y la audición que baja es del oído, y la que viene con cefalea, luz y ruido es migrañosa, aunque las dos hayan pasado en la misma persona.
+Las dos enfermedades son frecuentes y **no se excluyen**. En un servicio de mareo, de unos 147 pacientes con Ménière, migraña vestibular o ambas, 21 tenían las dos, cerca de un cuarto de los diagnosticados con cada enfermedad; un 38 % de los pacientes con solo migraña vestibular tenía síntomas del oído (pérdida, presión o zumbido) durante los episodios, y el 49 % de quienes tenían solo Ménière tenía rasgos de migraña: cefaleas migrañosas que no cumplían todos los criterios, síntomas migrañosos o un familiar directo con migraña (Neff y cols., 2012). <!-- Pasada de fundamentos 2026-10-18: decía "de 189 pacientes" (suma 76 + 92 + 21, que cuenta dos veces a los 21 con ambas; el resumen da "approximately 147") y "casi la mitad ... refería cefaleas con rasgos de migraña" (el 49 % incluye síntomas migrañosos o un familiar con migraña). --> En esa mezcla, el dato que ordena es **cuál crisis trae qué**: la que viene con el oído tapado y la audición que baja es del oído, y la que viene con cefalea, luz y ruido es migrañosa, aunque las dos hayan pasado en la misma persona.
 
 ## Razonamiento
 
@@ -151,8 +151,8 @@ Frente a crisis de vértigo que vuelven, el razonamiento sigue cinco preguntas, 
 - **Leer una ECochG o un VEMP normales como "no es Ménière".** Una parte de los Ménière los tiene normales (→ cap. 9).
 - **Medir la razón PS/PA en un oído que ya perdió mucho.** El PA chico deja la razón sin sentido.
 - **Comparar un oído con el otro cuando los dos están enfermos.** Los dos pueden estar bajos y la asimetría sale pequeña.
-- **Leer una pérdida de audición progresiva como migraña vestibular.**
-- **Llamar "laberintitis" a cada crisis.** La labirintitis aguda es una sola crisis; un cuadro que vuelve es otra cosa.
+- **Leer como migraña vestibular una pérdida de audición que avanza hasta moderada, o que es de un solo oído.**
+- **Llamar "laberintitis" a cada crisis.** La laberintitis aguda es una sola crisis; un cuadro que vuelve es otra cosa.
 
 :::pregunta Pregunta abierta
 Una paciente con migraña desde los 16 años tiene tres crisis largas de mareo, con luz y ruido molestos, y un audiograma normal. Seis meses después, en una nueva crisis, nota que el oído izquierdo se tapa y oye menos por unos días. ¿Qué cambió en tu hipótesis? ¿Qué pedirías ahora que no pedirías antes?
@@ -420,7 +420,7 @@ Dos clases de crisis, dos explicaciones. Las **cuatro** crisis cortas, con el o�
 Hipoacusia sensorioneural del OI de graves, etapa 2, con hallazgos de hidrops (ECochG, cVEMP, calórica con vHIT normal), compatible con enfermedad de Ménière; migraña con aura de fondo, con crisis largas compatibles con migraña vestibular. Se informa el hallazgo del oído y se deja el de la migraña al médico: este estudio **no puede decir** que las crisis largas no sean del oído, solo que no tienen huella en él.
 
 :::sabias ¿Sabías que?
-Se estima que casi la mitad de los pacientes con Ménière sin migraña vestibular tiene cefaleas con rasgos de migraña (Neff y cols., 2012). La coincidencia de las dos enfermedades es la regla más que la excepción.
+En una serie de un servicio de mareo, casi la mitad de los pacientes con Ménière sin migraña vestibular tenía rasgos de migraña, y cerca de un cuarto de los diagnosticados con Ménière o con migraña vestibular tenía las dos enfermedades (Neff y cols., 2012). <!-- Pasada de fundamentos 2026-10-18: decía "La coincidencia de las dos enfermedades es la regla más que la excepción"; la fuente da 21 de 76 con Ménière y 21 de 92 con migraña vestibular con ambas, frecuente pero no la regla. -->
 :::
 
 ## Para cerrar
@@ -438,7 +438,7 @@ Se estima que casi la mitad de los pacientes con Ménière sin migraña vestibul
 - **Calórica baja con vHIT normal**: hidrops. **Las dos bajas**: canal que ya no responde.
 - Las pruebas vestibulares van **entre** crisis; los resultados normales no descartan el Ménière.
 - Con **dos oídos** comprometidos, la comparación entre oídos engaña: se leen las velocidades de cada uno.
-- Migraña vestibular: **cinco crisis de 5 minutos a 72 horas** con rasgos de migraña; oído sano; la pérdida progresiva y fija no es de ella.
+- Migraña vestibular: **cinco crisis de 5 minutos a 72 horas** con rasgos de migraña; oído sano o una pérdida leve de los dos lados; una pérdida que avanza hasta moderada no es de ella.
 - Las dos enfermedades **coexisten**: se clasifica cada crisis por lo que trae.
 :::
 
@@ -447,7 +447,7 @@ Se estima que casi la mitad de los pacientes con Ménière sin migraña vestibul
 ### Técnica
 
 1. Lopez-Escamez JA, Carey J, Chung WH, Goebel JA, Magnusson M, Mandalà M, et al. Diagnostic criteria for Menière's disease. J Vestib Res. 2015;25(1):1-7. doi:10.3233/VES-150549
-1. Committee on Hearing and Equilibrium. Committee on Hearing and Equilibrium guidelines for the diagnosis and evaluation of therapy in Menière's disease. Otolaryngol Head Neck Surg. 1995;113(3):181-5. PMID 7675476.
+1. Committee on Hearing and Equilibrium. Committee on Hearing and Equilibrium guidelines for the diagnosis and evaluation of therapy in Menière's disease. Otolaryngol Head Neck Surg. 1995;113(3):181-5. doi:10.1016/S0194-5998(95)70102-8. PMID 7675476.
 1. Hannigan IP, Welgampola MS, Watson SRD. Dissociation of caloric and head impulse tests: a marker of Meniere's disease. J Neurol. 2021;268(2):431-9. doi:10.1007/s00415-019-09431-9
 1. Halmagyi GM, Chen L, MacDougall HG, Weber KP, McGarvie LA, Curthoys IS. The video head impulse test. Front Neurol. 2017;8:258. doi:10.3389/fneur.2017.00258
 1. McGarvie LA, Curthoys IS, MacDougall HG, Halmagyi GM. What does the head impulse test versus caloric dissociation reveal about vestibular dysfunction in Ménière's disease? Ann N Y Acad Sci. 2015;1343:58-62. doi:10.1111/nyas.12687
@@ -459,6 +459,7 @@ Se estima que casi la mitad de los pacientes con Ménière sin migraña vestibul
 1. Merchant SN, Adams JC, Nadol JB Jr. Pathophysiology of Meniere's syndrome: are symptoms caused by endolymphatic hydrops? Otol Neurotol. 2005;26(1):74-81. PMID 15699723.
 1. Baloh RW, Jacobson K, Winder T. Drop attacks with Meniere's syndrome. Ann Neurol. 1990;28(3):384-7. doi:10.1002/ana.410280314
 1. Huppert D, Strupp M, Brandt T. Long-term course of Menière's disease revisited. Acta Otolaryngol. 2010;130(6):644-51. doi:10.3109/00016480903382808
+1. Nadol JB Jr, Adams JC, Kim JR. Degenerative changes in the organ of Corti and lateral cochlear wall in experimental endolymphatic hydrops and human Menière's disease. Acta Otolaryngol Suppl. 1995;519:47-59. doi:10.3109/00016489509121870
 
 ### Patología
 
@@ -467,3 +468,5 @@ Se estima que casi la mitad de los pacientes con Ménière sin migraña vestibul
 1. Radtke A, von Brevern M, Neuhauser H, Hottenrott T, Lempert T. Vestibular migraine: validity of clinical diagnostic criteria. Cephalalgia. 2011;31(8):906-13. doi:10.1177/0333102411405228
 1. Neuhauser HK, Radtke A, von Brevern M, Feldmann M, Lezius F, Ziese T, et al. Migrainous vertigo: prevalence and impact on quality of life. Neurology. 2006;67(6):1028-33. doi:10.1212/01.wnl.0000237539.09942.06
 1. Neff BA, Staab JP, Eggers SD, Carlson ML, Schmitt WR, Van Abel KM, et al. Auditory and vestibular symptoms and chronic subjective dizziness in patients with Ménière's disease, vestibular migraine, and Ménière's disease with concomitant vestibular migraine. Otol Neurotol. 2012;33(7):1235-44. doi:10.1097/MAO.0b013e31825d644a
+1. Radtke A, von Brevern M, Neuhauser H, Hottenrott T, Lempert T. Vestibular migraine: long-term follow-up of clinical symptoms and vestibulo-cochlear findings. Neurology. 2012;79(15):1607-14. doi:10.1212/WNL.0b013e31826e264f
+1. Huang TC, Wang SJ, Kheradmand A. Vestibular migraine: an update on current understanding and future directions. Cephalalgia. 2020;40(1):107-21. doi:10.1177/0333102419869317

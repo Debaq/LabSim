@@ -33,7 +33,7 @@ Mientras conversas, **mira al paciente**: anomalías físicas, asimetrías de la
 | **Ligada al X** | Sobre todo hombres, emparentados por la madre; la madre portadora puede tener signos leves | 50 % de los hijos varones de una madre portadora |
 :::
 
-La mayoría de las hipoacusias genéticas del niño son **recesivas**, y por eso la frase "en la familia nadie es sordo" no descarta nada (Del Castillo y Del Castillo, 2017). <!-- verificar: proporción de recesivas entre las no sindrómicas (cifra habitual ~75-80 %) y de genéticas entre las congénitas (~50 %); no están en la bibliografía verificada. -->
+Las causas genéticas explican la mitad o algo más de las hipoacusias congénitas, y de ellas unas tres de cada cuatro son **recesivas** (77 %; 22 % dominantes y 1 % ligadas al X), por eso la frase "en la familia nadie es sordo" no descarta nada (De Rosa y cols., 2024). <!-- Pasada de fundamentos 2026-10-18: decía "La mayoría de las hipoacusias genéticas del niño son recesivas (Del Castillo y Del Castillo, 2017)"; Del Castillo no da la proporción. Se agregaron las cifras de De Rosa y cols. (2024): genéticas ~50-60 % de las congénitas; recesiva 77 %, dominante 22 %, ligada al X 1 %. -->
 
 ### El método, según la edad
 
@@ -52,7 +52,7 @@ Un solo examen nunca basta en un niño. Cada resultado conductual se cruza con o
 
 Varias hipoacusias genéticas **progresan**: la de la conexina 26 en más de la mitad de los niños con audición residual (Kenna y cols., 2010), la del acueducto vestibular dilatado a saltos, la del Alport en la adolescencia. Por eso cada control se compara contra el anterior, frecuencia por frecuencia, como en la vigilancia del ruido (→ cap. 6).
 
-En un niño hay una trampa: los métodos cambian con la edad. Un **nivel mínimo de respuesta** de VRA queda **por encima** del umbral verdadero: en lactantes de 6 a 12 meses, con insertos, unos 15 dB en 500 y 1.000 Hz y unos 5 dB en 2.000 y 4.000 Hz (Parry y cols., 2003; BSA, 2025a). La consecuencia es asimétrica:
+En un niño hay una trampa: los métodos cambian con la edad. Un **nivel mínimo de respuesta** de VRA queda **por encima** del umbral verdadero: en lactantes de 8 a 12 meses de audición normal, con insertos, quedó en promedio en 16 y 13 dB HL en 500 y 1.000 Hz y en 7 y 6 dB HL en 2.000 y 4.000 Hz (Parry y cols., 2003), y la BSA lo redondea a una corrección de 15 dB en los graves y de 5 dB en los agudos (BSA, 2025a). <!-- Pasada de fundamentos 2026-10-18: decía "en lactantes de 6 a 12 meses ... unos 15 dB ... y unos 5 dB". Parry y cols. (2003) estudiaron lactantes de 33 a 50 semanas, con MRL medios de 16/13/7/6 dB HL; 15 y 5 dB son la corrección de la BSA (igual que en H8). --> La consecuencia es asimétrica:
 
 - Si el umbral por juego de hoy sale **mejor** que el nivel mínimo de la VRA de hace un año, puede ser solo que el niño creció y la tarea es otra.
 - Si sale **peor**, la caída es real, y probablemente mayor de lo que parece.
@@ -105,7 +105,7 @@ Si la estría falla, la endolinfa pierde su potencial y su potasio, y las célul
 
 ### Un gen, un tramo del circuito
 
-Cada eslabón del circuito tiene un gen, y varias de las hipoacusias de este capítulo son la falla de uno de ellos (Zdebik y cols., 2009):
+Cada eslabón del circuito tiene un gen, y varias de las hipoacusias de este capítulo son la falla de uno de ellos (Zdebik y cols., 2009). En la estría, los melanocitos son necesarios para que haya potencial endococlear (Steel y Barkway, 1989; Tachibana, 2001), y la pendrina está en el surco externo y el saco endolinfático (Royaux y cols., 2003):
 
 Tabla: Dónde falla el circuito del potasio en las hipoacusias de este capítulo
 
@@ -116,19 +116,19 @@ Tabla: Dónde falla el circuito del potasio en las hipoacusias de este capítulo
 | Células marginales de la estría | Canal KCNQ1/KCNE1 | Jervell-Lange-Nielsen: el mismo canal falla en el corazón |
 | Epitelio del surco externo y del saco endolinfático | Pendrina (SLC26A4) | Pendred y acueducto vestibular dilatado |
 
-<!-- verificar: que Zdebik 2009 trate los cuatro tramos; el de Waardenburg (melanocitos de la estría) puede estar mejor en Hibino 2010. Pendrina: su papel en el pH y el volumen de la endolinfa, no confirmado en el texto completo. -->
+<!-- Pasada de fundamentos 2026-10-18: Zdebik 2009 (texto completo) trata conexinas, KCNQ1/KCNE1 (Jervell-Lange-Nielsen) y pendrina (acidificación de la endolinfa y pérdida de KCNJ10), pero no Waardenburg; Waardenburg se apoya en Steel y Barkway (1989) y Tachibana (2001), y la ubicación de la pendrina en Royaux y cols. (2003). -->
 
 ## Patología
 
 ### Genéticas, sindrómicas y no sindrómicas
 
-Una hipoacusia genética es **no sindrómica** cuando el oído es lo único afectado, y **sindrómica** cuando viene con signos en otros órganos. Las no sindrómicas son la mayoría, y la más frecuente de todas es la de la conexina 26 (Del Castillo y Del Castillo, 2017). Lo que el audiograma permite reconocer no es el gen: es la **forma**, la **edad de aparición** y la **evolución**. El gen lo confirma el estudio genético.
+Una hipoacusia genética es **no sindrómica** cuando el oído es lo único afectado, y **sindrómica** cuando viene con signos en otros órganos. Las no sindrómicas son la mayoría, cerca del 70 % (De Rosa y cols., 2024), y el gen que más se altera es el de la conexina 26 (Del Castillo y Del Castillo, 2017). Lo que el audiograma permite reconocer no es el gen: es la **forma**, la **edad de aparición** y la **evolución**. El gen lo confirma el estudio genético.
 
 ### La conexina 26 (GJB2)
 
 La conexina 26 se identificó como causa de sordera hereditaria en 1997 (Kelsell y cols., 1997). Se hereda en forma **autosómica recesiva**: el niño tiene dos copias alteradas del gen, una de cada padre, y los padres, con una sola, oyen bien. La variante más frecuente en Europa y América es la **35delG**; en una muestra chilena de sordos no sindrómicos de moderados a profundos, uno de cada cinco la portaba (Cifuentes y cols., 2013).
 
-- **Grado según la variante.** Dos variantes que truncan la proteína, como 35delG en las dos copias, dan una hipoacusia severa a profunda; las que no la truncan, una leve a moderada (Snoeckx y cols., 2005).
+- **Grado según la variante.** Dos variantes que truncan la proteína, como 35delG en las dos copias, dan una hipoacusia más severa que dos que no la truncan; algunas de estas, como M34T y V37I, dan una leve a moderada (Snoeckx y cols., 2005). <!-- Pasada de fundamentos 2026-10-18: decía "dan una hipoacusia severa a profunda; las que no la truncan, una leve a moderada". El resumen de Snoeckx 2005 dice que las truncantes bialélicas dan una pérdida significativamente más severa y que M34T, V37I y L90P se asocian a pérdidas leves a moderadas (mediana 25-40 dB); no da el grado de todas. -->
 - **Forma.** Bilateral, casi siempre simétrica, plana o algo descendente (Iliadou y cols., 2004).
 - **Evolución.** Suele ser congénita, pero no siempre estable: en una serie de 126 niños, el 56 % de los que tenían audición residual progresó, casi siempre de a poco (Kenna y cols., 2010). Otras series la describen como estable (Iliadou y cols., 2004).
 
@@ -136,7 +136,7 @@ Como es coclear, las emisiones están ausentes y el oído medio es normal. Una f
 
 ### Pendred y el acueducto vestibular dilatado
 
-El **acueducto vestibular** es un canal óseo fino que lleva el conducto endolinfático desde el vestíbulo hasta el saco endolinfático. Cuando está dilatado, se ve en la tomografía o la resonancia, y es la malformación del oído interno más frecuente en los niños con hipoacusia. <!-- verificar: "la más frecuente" y los criterios de imagen (diámetro) no están en la bibliografía verificada. --> Muchos de estos niños tienen variantes de la **pendrina** (SLC26A4), de herencia recesiva; cuando además desarrollan **bocio**, es el **síndrome de Pendred** (Forli y cols., 2021).
+El **acueducto vestibular** es un canal óseo fino que lleva el conducto endolinfático desde el vestíbulo hasta el saco endolinfático. Cuando está dilatado, se ve en la tomografía o la resonancia, y es el hallazgo de imagen más frecuente en los niños con hipoacusia sensorioneural congénita (Patel y cols., 2025). <!-- Pasada de fundamentos 2026-10-18: decía "la malformación del oído interno más frecuente en los niños con hipoacusia"; Patel y cols. (2025) lo dicen como "most common radiographic finding in children diagnosed with congenital SNHL". Criterios de Cincinnati (≥1,0 mm en el punto medio o ≥2,0 mm en el opérculo): Boston y cols. (2007), coinciden con el pie de la figura. --> Muchos de estos niños tienen variantes de la **pendrina** (SLC26A4), de herencia recesiva; cuando además desarrollan **bocio**, es el **síndrome de Pendred** (Forli y cols., 2021).
 
 :::imagen ilustraciones/cap10-tc-acueducto.jpg ancho=78% Tomografía axial de alta resolución del hueso temporal de otras personas (no son pacientes de este capítulo). Izquierda: un oído control. Derecha: un oído con síndrome del acueducto vestibular dilatado. Arriba se mide el ancho del acueducto en su punto medio y abajo en el opérculo, su salida hacia la fosa posterior; son los dos puntos de los criterios de Cincinnati, que lo llaman dilatado con más de 0,9 mm en el punto medio o más de 1,9 mm en el opérculo. La tomografía la pide y la informa el médico; se muestra para que se vea la forma de lo que las pruebas miden. Imagen: Weiss NM y cols. (2023), Eur Arch Otorhinolaryngol, doi:10.1007/s00405-022-07681-4, Fig. 4, CC BY 4.0, adaptada.
 - @11,33 | **Punto medio** del acueducto normal (línea verde): un canal fino.
@@ -149,7 +149,7 @@ El **acueducto vestibular** es un canal óseo fino que lleva el conducto endolin
 Su hipoacusia se reconoce por cómo **se comporta**:
 
 - Puede ser congénita, progresiva, de aparición tardía, a escalones, fluctuante o mixta (Forli y cols., 2021). Un niño puede **pasar el tamizaje** y caerse después.
-- Las caídas suelen seguir a un golpe en la cabeza o a una enfermedad menor. <!-- verificar: la asociación con traumatismos craneanos menores es clásica, pero no está en la bibliografía verificada. -->
+- Una caída puede seguir a un golpe menor en la cabeza: le pasó a un tercio de 179 pacientes con acueducto dilatado, sobre todo a los que ya tenían una audición fluctuante (Noordman y cols., 2015). También se describen caídas después de una enfermedad menor. <!-- Pasada de fundamentos 2026-10-18: decía "Las caídas suelen seguir a un golpe en la cabeza o a una enfermedad menor". Noordman 2015: 34 % de 179 pacientes tuvo caídas tras un traumatismo menor, asociado a hipoacusia fluctuante previa. verificar: caídas tras infecciones menores, no se buscó fuente. -->
 - Tiene un **gap aéreo-óseo en los graves con el oído medio normal**. En 98 oídos con Pendred, 60 tenían gap en graves, mayor cuanto más ancho era el acueducto (Seo y cols., 2016). No es de transmisión: el acueducto dilatado funciona como una **tercera ventana** del oído interno (→ cap. 26).
 - El VEMP puede salir con umbral anormalmente bajo y amplitud alta: en 37 oídos con acueducto dilatado, así fue en el 92 % (Zhou y Gopen, 2011) (→ H12, cap. 20).
 
@@ -159,37 +159,37 @@ El síndrome de Pendred tiene peor audición que el acueducto dilatado aislado (
 
 El resto de los cuadros de este capítulo se reconocen por lo que hay **fuera del oído**. Cada uno tiene una forma típica de audiograma, que es la que muestra el simulador; en la clínica, el grado varía mucho, también dentro de una misma familia.
 
-**Waardenburg.** Es el más frecuente de los síndromes con hipoacusia y alteración del pigmento. En 417 pacientes, el 71 % tenía hipoacusia sensorioneural, el 91,6 % en el tipo 2; era bilateral en el 89,4 % y estable en el 91,9 %, y el grado más común fue el profundo (Song y cols., 2016). El grado varía mucho dentro de una misma familia (Newton, 1990): un padre con el mechón blanco puede oír bien y tener una hija sorda.
+**Waardenburg.** Es uno de los síndromes con hipoacusia y alteración del pigmento más frecuentes (Toriello, 2011). <!-- Pasada de fundamentos 2026-10-18: decía "Es el más frecuente"; Toriello 2011: "One of the most common of these". --> En 417 pacientes, el 71 % tenía hipoacusia sensorioneural, el 91,6 % en el tipo 2; era bilateral en el 89,4 % y estable en el 91,9 %, y el grado más común fue el profundo (Song y cols., 2016). El grado varía mucho dentro de una misma familia (Newton, 1990): un padre con el mechón blanco puede oír bien y tener una hija sorda.
 
-**Usher.** Es la causa más frecuente de sordera con ceguera. El tipo 2, el más frecuente (cerca del 60 %), da una hipoacusia congénita descendente con función vestibular normal (Castiglione y Möller, 2022). En el tipo 2a, los graves quedan en 16 a 33 dB y los medios y agudos en 51 a 60 dB, y la audición empeora de 0,4 a 0,8 dB por año (Hartel y cols., 2016). La retinosis pigmentaria empieza con ceguera nocturna y se come el campo visual desde la periferia.
+**Usher.** Es la causa más frecuente de sordera con ceguera. El tipo 2, el más frecuente (cerca del 60 %), da una hipoacusia congénita descendente con función vestibular normal (Castiglione y Möller, 2022). En el tipo 2a, la pérdida de partida es de 16 a 33 dB en los graves y de 51 a 60 dB en los medios y agudos, y la audición empeora de 0,4 a 0,8 dB por año (Hartel y cols., 2016). La retinosis pigmentaria empieza con ceguera nocturna y se come el campo visual desde la periferia.
 
-**Alport.** Es una enfermedad del **colágeno IV**, que forma las membranas basales del riñón, del ojo y de la cóclea. <!-- verificar: colágeno IV en las membranas basales de la cóclea (membrana basilar, estría); no está en la bibliografía verificada. --> En 87 varones con la forma ligada al X, la hipoacusia fue bilateral y simétrica, empezó en la edad escolar y progresó; en el 92,7 % empezó en las frecuencias medias, con una curva **en cubeta** que después se extiende a los agudos (Zhang y cols., 2018). Suele ser leve a moderada (Alves y De Andrade Quintanilha Ribeiro, 2008).
+**Alport.** Es una enfermedad del **colágeno IV**, que forma las membranas basales del riñón, del ojo y de la cóclea, donde sus cadenas α3 y α5 están en la membrana basal que cubre la membrana basilar y en el ligamento espiral (Zehnder y cols., 2005). De 87 varones con la forma ligada al X, 55 tenían hipoacusia: siempre bilateral y simétrica, empezó en la edad escolar en las frecuencias medias, se extendió después a los agudos y progresó; en el 92,7 % de ellos la curva era **en cubeta** (Zhang y cols., 2018). <!-- Pasada de fundamentos 2026-10-18: decía "En 87 varones ... en el 92,7 % empezó en las frecuencias medias". En Zhang 2018, 32 de los 87 oían normal; el 92,73 % (51 de 55) es la proporción de curvas en cubeta entre los que tenían hipoacusia. --> Suele ser leve a moderada (Alves y De Andrade Quintanilha Ribeiro, 2008).
 
 **Jervell-Lange-Nielsen.** Hipoacusia profunda congénita con un **QT largo** en el electrocardiograma, mayor de 500 ms (Tranebjærg y cols., 2017). En una serie de 186 pacientes, el 86 % tuvo eventos cardíacos, la mitad antes de los 3 años (Schwartz y cols., 2006). El audiograma es igual al de cualquier sordera profunda congénita: solo el electrocardiograma lo separa.
 
-**Stickler.** Una enfermedad del colágeno con miopía alta, riesgo de desprendimiento de retina, fisura palatina y articulaciones laxas que se desgastan. La hipoacusia está en dos de cada tres pacientes, casi siempre leve a moderada y sobre todo sensorioneural (Acke y cols., 2012); en los niños con fisura palatina se suma una conductiva por otitis, que es transitoria (Acke y De Leenheer, 2022).
+**Stickler.** Una enfermedad del colágeno con miopía alta, riesgo de desprendimiento de retina, fisura palatina y articulaciones laxas que se desgastan. La hipoacusia está en cerca de dos de cada tres pacientes (62,9 %), casi siempre leve a moderada y sobre todo sensorioneural (Acke y cols., 2012); en los niños con fisura palatina se suma una conductiva por otitis, que es transitoria (Acke y De Leenheer, 2022).
 
 :::ayuda-ancho Hipoacusias genéticas: lo que hay que reconocer
 | Cuadro | Gen y herencia | Audiograma típico | Fuera del oído |
 |---|---|---|---|
 | **Conexina 26** (DFNB1) | GJB2; recesiva | Congénito, bilateral, plano o algo descendente; leve a profundo según la variante; puede progresar | Nada |
 | **Pendred / acueducto dilatado** | SLC26A4; recesiva | Puede pasar el tamizaje; cae a saltos o fluctúa; gap en graves con timpanograma A | Bocio (Pendred); acueducto dilatado en las imágenes |
-| **Waardenburg** | PAX3 (tipo 1), MITF (tipo 2), SOX10 y otros; dominante | Congénito, bilateral, a menudo profundo y estable; a veces unilateral | Mechón blanco, canas tempranas, heterocromía del iris; ojos separados (distopía cantorum) en el tipo 1 |
+| **Waardenburg** | PAX3 (tipo 1), MITF (tipo 2), SOX10 y otros (Pingault y cols., 2010); dominante | Congénito, bilateral, a menudo profundo y estable; a veces unilateral | Mechón blanco, canas tempranas, heterocromía del iris; ojos separados (distopía cantorum) en el tipo 1 |
 | **Usher tipo 1** | MYO7A y otros; recesiva | Profundo congénito | Sin función vestibular (camina tarde); retinosis pigmentaria desde la infancia |
 | **Usher tipo 2** | USH2A, sobre todo; recesiva | Descendente: graves leves a moderados, agudos severos | Retinosis pigmentaria desde la adolescencia; vestíbulo normal |
-| **Alport** | COL4A5, ligada al X (la más común); COL4A3 y COL4A4 | En cubeta, desde la edad escolar, progresivo | Hematuria, proteinuria, insuficiencia renal; alteraciones del cristalino y la retina |
+| **Alport** | COL4A5, ligada al X (la más común); COL4A3 y COL4A4 (Nozu y cols., 2019) | En cubeta, desde la edad escolar, progresivo | Hematuria, proteinuria, insuficiencia renal; alteraciones del cristalino y la retina |
 | **Jervell-Lange-Nielsen** | KCNQ1, KCNE1; recesiva | Profundo congénito | QT largo en el electrocardiograma: síncopes y muerte súbita |
 | **Stickler** | COL2A1 (el más común), COL11A1, COL11A2; dominante | Agudos, leve (COL2A1); moderado y plano (COL11A1 y A2) | Miopía alta, desprendimiento de retina, fisura palatina, articulaciones |
 :::
 
-<!-- verificar: genes de Waardenburg (Song 2016), de Usher (Castiglione 2022), de JLN (Tranebjærg 2017) y de Stickler (Acke 2022) según las revisiones citadas; COL4A3/COL4A4 y las alteraciones oculares del Alport no están en la bibliografía verificada. Usher tipo 3 (CLRN1, progresivo) no va en la tabla. -->
+<!-- Pasada de fundamentos 2026-10-18: genes verificados en Pingault 2010 (Waardenburg: PAX3, MITF, EDN3, EDNRB, SOX10, SNAI2), Castiglione y Möller 2022 (Usher 1: MYO7A y otros; Usher 2: USH2A en 80-90 %; tipo 2 = 60 %), GeneReviews de Tranebjærg 2017 (KCNQ1, KCNE1) y Acke y De Leenheer 2022 (Stickler: COL2A1 el más frecuente, leve en agudos; COL11A1/A2 moderado en todas las frecuencias). Alport: COL4A5 ligada al X, COL4A3/COL4A4 autosómicas y alteraciones oculares en Nozu 2019. Usher tipo 3 (CLRN1, progresivo) no va en la tabla. -->
 
 :::ojo Ojo clínico
-Un niño con hipoacusia sensorioneural profunda congénita y sin una causa clara necesita un **electrocardiograma**. El Jervell-Lange-Nielsen no tiene ningún signo que se vea, y su primer síntoma puede ser un desmayo o una muerte súbita (Schwartz y cols., 2006). El audiólogo no lo pide, pero sí lo sugiere en el informe. <!-- verificar: la recomendación de ECG en toda sordera profunda congénita sin causa (GeneReviews, Tranebjærg 2017) no se leyó en el texto completo. -->
+Un niño con hipoacusia sensorioneural profunda bilateral congénita, sin variantes de la conexina 26 y con un examen físico normal, hace sospechar un Jervell-Lange-Nielsen (Tranebjærg y cols., 2017), y la sospecha se aclara con un **electrocardiograma**. El Jervell-Lange-Nielsen no tiene ningún signo que se vea, y su primer síntoma puede ser un desmayo o una muerte súbita (Schwartz y cols., 2006). El audiólogo no lo pide, pero sí lo sugiere en el informe. <!-- Pasada de fundamentos 2026-10-18: decía "Un niño con hipoacusia sensorioneural profunda congénita y sin una causa clara necesita un electrocardiograma". GeneReviews (Tranebjærg 2017, Differential diagnosis): "JLNS should be suspected in any infant who has profound bilateral sensorineural hearing loss, no identifiable GJB2 pathogenic variants, and a normal physical examination"; no recomienda ECG universal y cita un estudio poblacional que no encontró más JLNS en los recién nacidos con hipoacusia. -->
 :::
 
 :::sabias ¿Sabías que?
-El mechón blanco y la sordera del Waardenburg tienen la misma causa. Los melanocitos que dan color al pelo, a la piel y al iris nacen en la cresta neural del embrión y migran por todo el cuerpo, y algunos terminan en la estría vascular, donde son las células intermedias. Los genes del Waardenburg controlan esa migración: si los melanocitos no llegan al pelo de la frente, queda un mechón blanco; si no llegan a la estría, no hay potencial endococlear y la cóclea se queda sin batería (Hibino y cols., 2010). <!-- verificar: la cita del origen de las células intermedias y su relación con Waardenburg en Hibino 2010. -->
+El mechón blanco y la sordera del Waardenburg tienen la misma causa. Los melanocitos que dan color al pelo, a la piel y al iris nacen en la cresta neural del embrión y migran por todo el cuerpo, y algunos terminan en la estría vascular, donde son las células intermedias. Los genes del Waardenburg controlan esa migración: si los melanocitos no llegan al pelo de la frente, queda un mechón blanco; si no llegan a la estría, no hay potencial endococlear y la cóclea se queda sin batería (Steel y Barkway, 1989; Tachibana, 2001). <!-- Pasada de fundamentos 2026-10-18: decía (Hibino y cols., 2010); el resumen de Hibino no trata el origen de las células intermedias. Steel y Barkway 1989: células intermedias "melanocyte-like cells, presumably derived from the neural crest"; ratones sin melanocitos en la estría tienen el potencial endococlear cerca de cero. Tachibana 2001: MITF es necesario para los melanocitos de la estría y su falla da sordera, heterocromía y leucodermia en el Waardenburg tipo 2. -->
 :::
 
 ## Razonamiento
@@ -502,7 +502,7 @@ La historia de Andrés tiene la firma del acueducto vestibular dilatado: **pasó
 Hipoacusia sensorioneural moderada bilateral (promedio BIAP 60 dB en OD y 65 dB en OI), con gap aéreo-óseo de 30 dB en 250 Hz y oído medio normal (timpanograma A y reflejos presentes), con caída respecto de la audiometría de hace tres años. Los hallazgos son compatibles con una tercera ventana del oído interno; se sugiere estudio de imágenes de oído interno y evaluación genética y de la tiroides, que decide el médico. Se reajustan los audífonos y se controla de cerca: si la audición sigue cayendo, corresponde evaluar un implante coclear (→ cap. 29).
 
 :::comentario Comentario
-En este caso el gap no es de transmisión, aunque se mida igual. Por eso se informa el gap **y** el estado del oído medio, sin llamarlo "mixta" a secas: quien lea el informe tiene que ver que el oído medio está sano. <!-- verificar: si conviene recomendar evitar deportes de contacto; es consejo habitual en el acueducto dilatado, sin fuente en la bibliografía verificada. -->
+En este caso el gap no es de transmisión, aunque se mida igual. Por eso se informa el gap **y** el estado del oído medio, sin llamarlo "mixta" a secas: quien lea el informe tiene que ver que el oído medio está sano. Como Andrés ya tuvo una caída después de un golpe, se le sugiere además evitar los deportes de contacto: es el consejo que se reserva para quienes tienen una audición fluctuante o caídas previas tras un golpe (Noordman y cols., 2015).
 :::
 
 ### Caso 10.4
@@ -569,6 +569,9 @@ Carmen entiende hoy con el oído **y** con los labios. La retinosis le va a quit
 1. Jagger DJ, Forge A. Connexins and gap junctions in the inner ear: it's not just about K⁺ recycling. Cell Tissue Res. 2015;360(3):633-44. doi:10.1007/s00441-014-2029-z
 1. Kelsell DP, Dunlop J, Stevens HP, Lench NJ, Liang JN, Parry G, et al. Connexin 26 mutations in hereditary non-syndromic sensorineural deafness. Nature. 1997;387(6628):80-3. doi:10.1038/387080a0
 1. Del Castillo FJ, Del Castillo I. DFNB1 non-syndromic hearing impairment: diversity of mutations and associated phenotypes. Front Mol Neurosci. 2017;10:428. doi:10.3389/fnmol.2017.00428
+1. Steel KP, Barkway C. Another role for melanocytes: their importance for normal stria vascularis development in the mammalian inner ear. Development. 1989;107(3):453-63. doi:10.1242/dev.107.3.453
+1. Tachibana M. Cochlear melanocytes and MITF signaling. J Investig Dermatol Symp Proc. 2001;6(1):95-8. doi:10.1046/j.0022-202x.2001.00017.x
+1. Royaux IE, Belyantseva IA, Wu T, Kachar B, Everett LA, Marcus DC, et al. Localization and functional studies of pendrin in the mouse inner ear provide insight about the etiology of deafness in Pendred syndrome. J Assoc Res Otolaryngol. 2003;4(3):394-404. doi:10.1007/s10162-002-3052-4
 
 ### Patología
 
@@ -589,3 +592,10 @@ Carmen entiende hoy con el oído **y** con los labios. La retinosis le va a quit
 1. Schwartz PJ, Spazzolini C, Crotti L, Bathen J, Amlie JP, Timothy K, et al. The Jervell and Lange-Nielsen syndrome: natural history, molecular basis, and clinical outcome. Circulation. 2006;113(6):783-90. doi:10.1161/CIRCULATIONAHA.105.592899
 1. Acke FRE, De Leenheer EMR. Hearing Loss in Stickler Syndrome: An Update. Genes (Basel). 2022;13(9):1571. doi:10.3390/genes13091571
 1. Acke FR, Dhooge IJ, Malfait F, De Leenheer EM. Hearing impairment in Stickler syndrome: a systematic review. Orphanet J Rare Dis. 2012;7:84. doi:10.1186/1750-1172-7-84
+1. De Rosa MA, Bernardi MT, Kleppe S, Walz K. Hearing loss: genetic testing, current advances and the situation in Latin America. Genes (Basel). 2024;15(2):178. doi:10.3390/genes15020178
+1. Patel P, Parkes W, Pritchett C, Stewart M, Choudhari A, Nikam R, et al. Auditory characteristics in children with enlarged vestibular aqueduct. Otol Neurotol. 2025;46(5):544-51. doi:10.1097/MAO.0000000000004485
+1. Noordman BJ, van Beeck Calkoen E, Witte B, Goverts T, Hensen E, Merkus P. Prognostic factors for sudden drops in hearing level after minor head injury in patients with an enlarged vestibular aqueduct: a meta-analysis. Otol Neurotol. 2015;36(1):4-11. doi:10.1097/MAO.0000000000000659
+1. Toriello HV. Pigmentary anomalies and hearing loss. Adv Otorhinolaryngol. 2011;70:50-5. doi:10.1159/000322471
+1. Zehnder AF, Adams JC, Santi PA, Kristiansen AG, Wacharasindhu C, Mann S, et al. Distribution of type IV collagen in the cochlea in Alport syndrome. Arch Otolaryngol Head Neck Surg. 2005;131(11):1007-13. doi:10.1001/archotol.131.11.1007
+1. Pingault V, Ente D, Dastot-Le Moal F, Goossens M, Marlin S, Bondurand N. Review and update of mutations causing Waardenburg syndrome. Hum Mutat. 2010;31(4):391-406. doi:10.1002/humu.21211
+1. Nozu K, Nakanishi K, Abe Y, Udagawa T, Okada S, Okamoto T, et al. A review of clinical characteristics and genetic backgrounds in Alport syndrome. Clin Exp Nephrol. 2019;23(2):158-68. doi:10.1007/s10157-018-1629-4

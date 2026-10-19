@@ -33,7 +33,7 @@ Antes de culpar al oído o al nervio: **edad corregida, sexo, temperatura, fárm
 |---|---|---|
 | Edad, adulto | La V se alarga unos 0,2 ms entre los 25 y los 55 años; su amplitud cae cerca de 10 % (Jerger y Hall, 1980) | V, amplitud |
 | Edad, recién nacido y lactante | Latencias largas que bajan con la maduración; la V llega a valores de adulto entre los 9 meses y los 3 años (→ H10) | I-V, III-V |
-| Sexo (adultos) | En mujeres III y V llegan 0,08 a 0,19 ms antes y los interpicos son 0,07 a 0,15 ms más cortos (Jerger y Hall, 1980; Sanfins y cols., 2026) | III, V, interpicos |
+| Sexo (adultos) | En mujeres III y V llegan 0,08 a 0,19 ms antes y los interpicos son 0,07 a 0,19 ms más cortos (Jerger y Hall, 1980; Sanfins y cols., 2026) | III, V, interpicos |
 | Temperatura baja | Todas las ondas se alargan, la I incluida, y más las tardías: los interpicos crecen cerca de 7 % por cada grado (Markand y cols., 1987) | I, III, V, I-V |
 | Temperatura alta | De 38 a 42 °C la III y la V llegan antes; en un caso, el I-V se acortó 0,5 a 0,6 ms (Hall y cols., 1988) | III, V, I-V |
 | Anestésicos y sedantes | Los potenciales de origen subcortical se afectan menos que los corticales (Sloan, 1998); en 156 pacientes anestesiados, la V cambió poco (Scheller y cols., 2009) | casi nada |
@@ -41,6 +41,7 @@ Antes de culpar al oído o al nervio: **edad corregida, sexo, temperatura, fárm
 | Encefalopatía hepática | El I-V no difirió de los controles en ningún grado (Yang y cols., 1986) | nada |
 | Prematurez | A edad de término, el III-V es 0,081 ms más largo que en los nacidos a término (Stipdonk y cols., 2016) | III-V, I-V |
 :::
+<!-- Pasada de fundamentos 2026-10-18: en la fila del sexo decía "interpicos 0,07 a 0,15 ms más cortos". En la tabla 1 de Sanfins y cols. (2026, texto completo PMC13072904), hombre menos mujer: I-III 0,07/0,14, III-V 0,07/0,19, I-V 0,14/0,15 ms (oído derecho/izquierdo); el rango es 0,07 a 0,19. -->
 
 Los números de la tabla son **órdenes de magnitud** de estudios con grupos pequeños y condiciones propias. No son factores de corrección: el ABR no se "corrige" restando el efecto de la temperatura, se registra la temperatura y se repite cuando el paciente vuelve a la normalidad.
 
@@ -57,7 +58,7 @@ LabSim elige la fila de referencia por la edad del paciente (y por el sexo desde
 | Adulto, hombre | 1,47 | 3,75 | 5,68 | 2,28 | 1,93 | 4,21 |
 :::
 
-La fila del recién nacido sale de una serie por edad **posconcepcional** (35-36, 37-38 y 39-40 semanas, y 6 meses; Rosa y cols., 2014); la del adulto, de Sanfins y cols. (2026). La del lactante la deriva LabSim de las series vecinas. <!-- verificar: a qué grupo de edad de Rosa y cols. (2014) corresponde la fila de recién nacido de LabSim, y la procedencia exacta de la fila del lactante de 1 a 3 años (la planilla la marca como derivada). -->
+La fila del recién nacido sale de una serie por edad **posconcepcional** (35-36, 37-38 y 39-40 semanas, y 6 meses; Rosa y cols., 2014); la del adulto, de Sanfins y cols. (2026). La del lactante la deriva LabSim de las series vecinas. <!-- verificar: a qué grupo de edad de Rosa y cols. (2014) corresponde la fila de recién nacido de LabSim, y la procedencia exacta de la fila del lactante de 1 a 3 años (la planilla la marca como derivada). Pasada de fundamentos 2026-10-18: el resumen de Rosa 2014 da, a 39-40 semanas, I 1,79, III 4,56 y V 6,90 ms; a 37-38 semanas, V 7,05. La I y la III de la fila coinciden con 39-40 semanas, pero la V de la fila (7,00) no coincide con ningún grupo, y los interpicos de la fila son restas de I, III y V. Va al autor (dato de LabSim, no se tocó). -->
 
 La consecuencia práctica es la que enseña el cuarto caso: un **prematuro se compara por su edad corregida**, no por los días que lleva de vida. La edad corregida (o posconcepcional) es la edad gestacional con que nació más las semanas que lleva viviendo; un niño nacido a las 32 semanas y evaluado a las 8 semanas de vida tiene 40 semanas corregidas, es decir, la edad de un recién nacido de término.
 
@@ -116,7 +117,7 @@ Es el cuadro del capítulo. Con la temperatura central en 32 °C, más o menos, 
 
 ### Coma y bloqueo proximal
 
-Cuando la lesión del tronco progresa, el ABR se degrada de una forma ordenada. En 27 pacientes que cumplían criterios de muerte encefálica, las respuestas estaban ausentes o solo existía la onda I; cuando la I estaba, tenía amplitud normal pero latencia prolongada. En cuatro pacientes seguidos de varios días, el trazo pasó de intacto a una disminución de amplitud y alargamiento de las ondas tardías, hasta quedar la I sola (Starr, 1976). Garcia-Larrea y cols. (1987) vieron dos formas de deterioro: un alargamiento simultáneo de todas las ondas, que acompañó a la caída de la presión de perfusión cerebral, y un deterioro de las ondas III a V con la I conservada o incluso mayor. El patrón de "onda I sola" dice que **la cóclea y el tramo distal del nervio están vivos y que el resto de la vía no responde**. En 138 pacientes en coma con Glasgow 3, un ABR alterado se asoció a mayor probabilidad de muerte que uno normal (de Sousa y cols., 2007).
+Cuando la lesión del tronco progresa, el ABR se degrada de una forma ordenada. En 27 pacientes que cumplían criterios de muerte encefálica, las respuestas estaban ausentes o solo existía la onda I; cuando la I estaba, tenía amplitud normal pero latencia prolongada. En cuatro pacientes seguidos de varios días, el trazo pasó de intacto a una disminución de amplitud y alargamiento de las ondas tardías, hasta quedar la I sola (Starr, 1976). Garcia-Larrea y cols. (1987) vieron dos formas de deterioro: un alargamiento simultáneo de todas las ondas, que acompañó a la caída de la presión de perfusión cerebral, y un deterioro de las ondas III a V con la I conservada o incluso mayor. <!-- verificar: el resumen de Garcia-Larrea y cols. (1987) describe la segunda forma como "deterioration of brain-stem components" de evolución rostro-caudal; el detalle de la I conservada o mayor no está en el resumen y no se pudo leer el texto completo. --> El patrón de "onda I sola" dice que **la cóclea y el tramo distal del nervio están vivos y que el resto de la vía no responde**. En 138 pacientes en coma con Glasgow 3, un ABR alterado se asoció a mayor probabilidad de muerte que uno normal (de Sousa y cols., 2007).
 
 ### Prematurez
 
@@ -135,7 +136,7 @@ Frente a un ABR cuyos valores no calzan con la pérdida del paciente, el razonam
 1. **¿Con qué fila lo estoy comparando?** Edad corregida si es prematuro, edad si es lactante o niño, sexo si es adulto. Un recién nacido sano comparado con la tabla del adulto sale con una V "tardía" en más de un milisegundo y un I-V largo: parece un tumor del tronco y es un niño.
 2. **¿Qué temperatura tiene?** Un trazo con todas las ondas atrasadas, la I incluida, y con los interpicos largos, en una persona grave, es una hipotermia hasta que se demuestre otra cosa.
 3. **¿Qué fármacos recibe?** Casi ninguno mueve el ABR; si el trazo está muy cambiado, el fármaco no es la explicación fácil, y menos aún si la sedación es la habitual.
-4. **¿Tiene una enfermedad de fondo conocida o por conocer?** Un hipotiroidismo da una pérdida coclear bilateral y simétrica con un ABR que puede quedar dentro de los límites; el ABR no hace el diagnóstico, lo hace el médico con los exámenes de sangre.
+4. **¿Tiene una enfermedad de fondo conocida o por conocer?** Un hipotiroidismo puede dar una pérdida coclear bilateral y simétrica con un ABR que puede quedar dentro de los límites; el ABR no hace el diagnóstico, lo hace el médico con los exámenes de sangre.
 5. **Recién ahora: ¿el oído, el nervio, el tronco?** Con los patrones de H10 y los capítulos 11 y 12.
 
 :::ayuda-ancho Un trazo atrasado, cuatro explicaciones
@@ -149,7 +150,7 @@ Frente a un ABR cuyos valores no calzan con la pérdida del paciente, el razonam
 
 ### Lo que el ABR no hace
 
-El ABR no sustituye al examen del paciente. En el coma, con el patrón de "onda I sola", informa que la cóclea y el nervio distal funcionan y que el resto de la vía no responde; **el diagnóstico de muerte encefálica es clínico y lo hace el equipo médico según la norma de cada país**. Los exámenes complementarios que se aceptan varían. <!-- verificar: qué examen complementario exige o acepta la normativa chilena para el diagnóstico de muerte encefálica; el libro no cita ninguna ley. --> Un ABR sin ninguna onda no basta para hablar de tronco: puede ser una sordera previa. Por eso en este patrón lo que se busca es la **onda I**.
+El ABR no sustituye al examen del paciente. En el coma, con el patrón de "onda I sola", informa que la cóclea y el nervio distal funcionan y que el resto de la vía no responde; **el diagnóstico de muerte encefálica es clínico y lo hace el equipo médico según la norma de cada país**. Los exámenes complementarios que se aceptan varían (Greer y cols., 2020). <!-- Pasada de fundamentos 2026-10-18: el verificar preguntaba por la normativa chilena; el texto no la nombra. Greer y cols. (2020, World Brain Death Project, resumen): hay "inconsistencies in concept, criteria, practice, and documentation ... both internationally and within countries"; el diagnóstico se hace con el examen clínico (coma, arreflexia del tronco, apnea) y, si no se puede completar, "ancillary testing may be considered with blood flow studies or electrophysiologic testing". Qué acepta la norma chilena no se buscó: queda para el autor si quiere nombrarla. --> Un ABR sin ninguna onda no basta para hablar de tronco: puede ser una sordera previa. Por eso en este patrón lo que se busca es la **onda I**.
 
 :::pregunta Pregunta abierta
 Una paciente con hipotiroidismo mejora sus umbrales con levotiroxina, pero su ABR queda igual. ¿Qué dice eso sobre cuáles de sus hallazgos eran de la cóclea y cuáles del tronco? ¿Cómo lo explicarías sin hablar de "daño"?
@@ -184,7 +185,7 @@ Además de la audiometría, ¿qué pruebas de oído medio y de cóclea agregarí
 - @OD pico | Curva A en los dos oídos: el oído medio está sano.
 :::
 :::figura cap14_toxico_metabolico teoae
-- @OD 2000 | Las emisiones están **ausentes** en las cinco bandas, en los dos oídos: con 30 a 45 dB de pérdida es lo esperable de una pérdida coclear (→ H7).
+- @OD 2000 | Las emisiones están **ausentes** en las cinco bandas, en los dos oídos: con 30 a 45 dB de pérdida es lo esperable de una pérdida coclear (→ H9).
 :::
 :::figura cap14_toxico_metabolico abr
 - @OI 90 I | A 90 dB el OI muestra la onda I a 1,2 ms.
@@ -410,7 +411,7 @@ En el prematuro, "normal" cambia cada semana: la fila contra la que se compara a
 
 1. Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-91. doi:10.1001/archotol.1980.00790310011003.
 1. Sanfins MD, Santillo MEA, Martins MFP, Silva DLdS, Gos E, Skarzynski PH, Hall JW III. The influence of sex, ear, and age on auditory brainstem responses recorded with the NeuroAudio system. Diagnostics. 2026;16(7):971. doi:10.3390/diagnostics16070971
-1. Rosa LAC, Suzuki FA, Angrisani RG, Azevedo MF. Auditory brainstem response: reference-values for age. CoDAS. 2014;26(2):117-21. doi:10.1590/2317-1782/2014469in
+1. Rosa LAC, Suzuki MR, Angrisani RG, Azevedo MF. Auditory brainstem response: reference-values for age. CoDAS. 2014;26(2):117-21. doi:10.1590/2317-1782/2014469in
 1. Knaus V, Mühler R, Verhey JL. Hörschwellenbestimmung bei Kindern mittels Hirnstammaudiometrie: Einfluss von Sedierung und Narkose auf Qualität und Messdauer. HNO. 2019;67(8):584-9. doi:10.1007/s00106-019-0657-z
 1. Marshall NK, Donchin E. Circadian variation in the latency of brainstem responses and its relation to body temperature. Science. 1981;212(4492):356-8. doi:10.1126/science.7209538
 
@@ -429,7 +430,7 @@ En el prematuro, "normal" cambia cada semana: la fila contra la que se compara a
 1. Anand VT, Mann SB, Dash RJ, Mehra YN. Auditory investigations in hypothyroidism. Acta Otolaryngol. 1989;108(1-2):83-7. doi:10.3109/00016488909107396
 1. Yang SS, Chu NS, Liaw YF. Brainstem auditory evoked potentials in hepatic encephalopathy. Hepatology. 1986;6(6):1352-5. doi:10.1002/hep.1840060622
 1. Stockard JJ, Sharbrough FW, Tinker JA. Effects of hypothermia on the human brainstem auditory response. Ann Neurol. 1978;3(4):368-70. doi:10.1002/ana.410030416
-1. Markand ON, Lee BI, Warren C, Stoelting RK, King RD, Brown JW, Mahomed Y. Effects of hypothermia on brainstem auditory evoked potentials in humans. Ann Neurol. 1987;22(4):507-13. doi:10.1002/ana.410220410
+1. Markand ON, Lee BI, Warren C, Stoelting RK, King RD, Brown JW, et al. Effects of hypothermia on brainstem auditory evoked potentials in humans. Ann Neurol. 1987;22(4):507-13. doi:10.1002/ana.410220410
 1. Hall JW 3rd, Bull JM, Cronau LH. Hypo- and hyperthermia in clinical auditory brain stem response measurement: two case reports. Ear Hear. 1988;9(3):137-43. doi:10.1097/00003446-198806000-00006
 1. Hett DA, Smith DC, Pilkington SN, Abbott TR. Effect of temperature and cardiopulmonary bypass on the auditory evoked response. Br J Anaesth. 1995;75(3):293-6. doi:10.1093/bja/75.3.293
 1. Starr A. Auditory brain-stem responses in brain death. Brain. 1976;99(3):543-54. doi:10.1093/brain/99.3.543
@@ -437,3 +438,4 @@ En el prematuro, "normal" cambia cada semana: la fila contra la que se compara a
 1. de Sousa LC, Colli BO, Piza MR, da Costa SS, Ferez M, Lavrador M. Auditory brainstem response: prognostic value in patients with a score of 3 on the Glasgow Coma Scale. Otol Neurotol. 2007;28(3):426-8. doi:10.1097/MAO.0b013e3180326170
 1. Stipdonk LW, Weisglas-Kuperus N, Franken MC, Nasserinejad K, Dudink J, Goedegebure A. Auditory brainstem maturation in normal-hearing infants born preterm: a meta-analysis. Dev Med Child Neurol. 2016;58(10):1009-15. doi:10.1111/dmcn.13151
 1. Pasman JW, Rotteveel JJ, de Graaf R, Maassen B, Visco YM. The effects of early and late preterm birth on brainstem and middle-latency auditory evoked responses in children with normal neurodevelopment. J Clin Neurophysiol. 1996;13(3):234-41. doi:10.1097/00004691-199605000-00007
+1. Greer DM, Shemie SD, Lewis A, Torrance S, Varelas P, Goldenberg FD, et al. Determination of brain death/death by neurologic criteria: the World Brain Death Project. JAMA. 2020;324(11):1078-1097. doi:10.1001/jama.2020.11586

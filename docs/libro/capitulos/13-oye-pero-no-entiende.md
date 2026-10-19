@@ -28,7 +28,7 @@ La neuropatía auditiva es un trastorno de la **sincronía** con que descarga el
 | Logoaudiometría | **peor** de lo que predice el audiograma | se pierde la información temporal del habla |
 
 :::ayuda Ayuda memoria
-**Emisiones presentes + ABR ausente + reflejos ausentes** = el nervio no descarga en sincronía, aunque la cóclea esté sana. Es lo contrario de lo que haría una pérdida coclear de ese tamaño: con 35 a 45 dB de pérdida de origen coclear las emisiones suelen desaparecer (→ H9).
+**Emisiones presentes + ABR ausente + reflejos ausentes** = el nervio no descarga en sincronía, aunque la cóclea esté sana. Es lo contrario de lo que haría una pérdida coclear de ese tamaño: con 35 a 45 dB de pérdida de origen coclear las emisiones suelen desaparecer (AAA, 2020; → H9).
 :::
 
 ### La polaridad: sacar la microfónica de debajo de la alternada
@@ -63,7 +63,7 @@ El protocolo de este libro registra con polaridad alternada y, ante la sospecha 
 ### Qué más se pide
 
 - **Reflejos con y sin deterioro** (→ H5): en la neuropatía son ausentes; en la retrococlear de adulto suelen estar elevados (→ cap. 11).
-- **Emisiones y ECochG** (→ H9, H11): confirman que la cóclea transduce; el ECochG registra la microfónica cerca de la cóclea, con más amplitud que en la mastoides (Riazi y Ferraro, 2008).
+- **Emisiones y ECochG** (→ H9, H11): confirman que la cóclea transduce; con el electrodo en el conducto, el ECochG separa la microfónica del artefacto mejor que el electrodo en la mastoides (Riazi y Ferraro, 2008). <!-- Pasada de fundamentos 2026-10-18: decía "registra la microfónica cerca de la cóclea, con más amplitud que en la mastoides". El resumen de Riazi y Ferraro (2008) dice que la microfónica "is easier to separate from stimulus artifact using an EC electrode"; la amplitud no se pudo confirmar en el texto completo. -->
 - **Logoaudiometría en silencio y en ruido** (→ H4): la queja es el ruido. Un puntaje bajo en silencio ya es patológico; en ruido empeora aún más (Rance, 2005).
 - **VEMP** (→ H12): el nervio vestibular puede estar afectado como el coclear (Hu y cols., 2020).
 
@@ -80,17 +80,17 @@ La señal pasa por tres sitios antes de ser un potencial de acción en una fibra
 - **Presináptica**: la célula ciliada interna o la sinapsis (por ejemplo mutaciones de la otoferlina). No hay liberación sincrónica del transmisor.
 - **Postsináptica**: la neurona y su axón (neuropatías sensitivo-motoras hereditarias, enfermedades desmielinizantes). Los potenciales de acción se retrasan o se dispersan.
 
-Por eso la neuropatía auditiva no es **una enfermedad**: es un patrón de pruebas que puede tener varias causas, desde una mutación aislada del oído hasta una polineuropatía o una enfermedad metabólica que también afecta otros nervios. "Espectro" quiere decir eso (Norrix y Velenovsky, 2014). <!-- verificar: el término ANSD viene del consenso de 2008 (Guidelines Development Conference, Colorado): sin referencia verificable de DOI -->
+Por eso la neuropatía auditiva no es **una enfermedad**: es un patrón de pruebas que puede tener varias causas, desde una mutación aislada del oído hasta una polineuropatía o una enfermedad metabólica que también afecta otros nervios. "Espectro" quiere decir eso (Norrix y Velenovsky, 2014). <!-- Pasada de fundamentos 2026-10-18: el verificar decía "consenso de 2008 (Colorado)". La conferencia de consenso que adoptó el término ANSD fue en Como (Italia), 2008; las guías las publicó el Bill Daniels Center de Colorado (Northern, ed., 2008), sin DOI. BSA 2019 (OD104-85, introducción) lo resume: el término "expresses the wide range of presentations, prognoses and underlying aetiologies". El texto visible no afirma el origen, no hace falta cita nueva. -->
 
 :::sabias ¿Sabías que?
-La neuropatía auditiva se describió en **1996**, cuando Starr y su grupo reunieron diez pacientes que oían "bajo" pero entendían muy mal el habla y cuyos ABR no tenían ondas, con emisiones y microfónica presentes. Hasta entonces se los consideraba sordos coclear o "sordos de causa central" sin más.
+La neuropatía auditiva recibió su nombre en **1996**, cuando Starr y su grupo reunieron diez pacientes, nueve de ellos con pérdidas leves a moderadas, que entendían el habla peor de lo que predecía el audiograma y cuyos ABR no tenían ondas, con emisiones y microfónica presentes (Starr y cols., 1996). <!-- Pasada de fundamentos 2026-10-18: decía "se describió en 1996 ... oían 'bajo' pero entendían muy mal ... Hasta entonces se los consideraba sordos coclear o 'sordos de causa central' sin más". Lo verificable es el nombre: Moser y Starr (2016) dicen que el término "was originally coined" para este cuadro; que no hubiera casos publicados antes no se verificó. La frase final no tiene fuente y se quitó. Resumen de Starr 1996: "mild to moderate elevation of pure tone threshold in nine patients"; habla "affected out of proportion" en 6 de 8. -->
 :::
 
 ## Patología
 
 ### Neuropatía auditiva congénita o del lactante
 
-Es el cuadro con el que se describió el grupo. Se asocia al tiempo en una unidad de cuidado intensivo neonatal, a la prematurez, a la hiperbilirrubinemia y a antecedentes familiares (Rance y cols., 1999; Berlin y cols., 2010). El audiograma puede ir de normal a profundo, a menudo plano o con más pérdida en graves, y el ABR no estima la audición. En los recién nacidos de más de cinco días en la UCI, el AABR es el tamiz que la detecta y las emisiones no (→ H9, H10, cap. 16). Si se sospecha, el diagnóstico exige microfónica y ABR de alto nivel; el manejo (audífonos, implante coclear, comunicación visual) lo decide un equipo y depende del sitio de la lesión (Moser y Starr, 2016). <!-- verificar: resultados con implante coclear según sitio de la lesión (presináptico vs postsináptico): Moser y Starr 2016 / Rance y Starr 2015 -->
+En el lactante se asocia al tiempo en una unidad de cuidado intensivo neonatal, a la prematurez, a la hiperbilirrubinemia y a antecedentes familiares (Rance y cols., 1999; Berlin y cols., 2010). El audiograma puede ir de normal a profundo, a menudo plano o con más pérdida en graves, y el ABR no estima la audición. En los recién nacidos de más de cinco días en la UCI, el AABR es el tamiz que la detecta y las emisiones no (JCIH, 2019; → H9, H10, cap. 16). Si se sospecha, el diagnóstico exige microfónica y ABR de alto nivel; el manejo (audífonos, implante coclear, comunicación visual) lo decide un equipo y depende del sitio de la lesión (Rance y Starr, 2015; Moser y Starr, 2016). <!-- Pasada de fundamentos 2026-10-18: decía "Es el cuadro con el que se describió el grupo". Los diez pacientes de Starr y cols. (1996) "presented as children or young adults", no como lactantes; se quitó la frase. -->
 
 ### Neuropatías hereditarias
 
@@ -98,14 +98,14 @@ En la **enfermedad de Charcot-Marie-Tooth** y en la **ataxia de Friedreich** el 
 
 ### Kernícterus
 
-La bilirrubina libre daña en el recién nacido primero los núcleos del tronco y el nervio auditivo; la cóclea queda comparativamente sana. El resultado es una **neuropatía auditiva** con emisiones presentes y ABR alterado o ausente (Shapiro y Popelka, 2011). Además del oído, la bilirrubina toca los núcleos vestibulares: en 17 recién nacidos con hiperbilirrubinemia grave el VEMP estaba presente pero con latencias más largas (Ozkiraz y cols., 2012). El cuadro clásico del kernícterus crónico reúne trastorno del movimiento, parálisis de la mirada hacia arriba, defecto del esmalte dentario y sordera. <!-- verificar: tétrada clásica del kernícterus crónico (atetosis, parálisis de la mirada superior, hipoplasia del esmalte, hipoacusia): necesita fuente con DOI -->
+La bilirrubina libre daña en el recién nacido primero los núcleos del tronco y el nervio auditivo; la cóclea queda comparativamente sana. El resultado es una **neuropatía auditiva** con emisiones presentes y ABR alterado o ausente (Shapiro y Popelka, 2011). Además del oído, la bilirrubina toca los núcleos vestibulares: en 17 recién nacidos con hiperbilirrubinemia grave el VEMP estaba presente pero con latencias más largas (Ozkiraz y cols., 2012). El cuadro clásico del kernícterus crónico reúne trastorno del movimiento, parálisis de la mirada hacia arriba, displasia del esmalte de los dientes de leche y trastorno auditivo, con o sin pérdida de audición (Das y van Landeghem, 2019). <!-- Pasada de fundamentos 2026-10-18: decía "defecto del esmalte dentario y sordera". Das y van Landeghem (2019, texto completo en PMC) describen la tétrada como "an auditory processing disturbance with or without hearing loss" y "dysplasia of the enamel of deciduous (baby) teeth". -->
 
 ### Leucodistrofias
 
-Las **leucodistrofias** (Krabbe, adrenoleucodistrofia) son enfermedades de la mielina. En ellas el ABR se altera pronto, a veces antes que los síntomas, mientras la sensibilidad periférica no cambia: en 96 pacientes con adrenoleucodistrofia ligada al X la detección estaba normal y los interpicos alargados (Pillion y cols., 2006); en la forma infantil temprana de Krabbe el ABR estuvo alterado en el 88 % (Aldosari y cols., 2004). Para el audiólogo es el cuadro más peligroso del capítulo: un niño que "no oye" con audiograma normal puede estar comenzando una enfermedad del sistema nervioso, y el ABR puede ser la primera prueba objetiva que lo muestra.
+Las **leucodistrofias** (Krabbe, adrenoleucodistrofia) son enfermedades de la mielina. En ellas el ABR se altera pronto, a veces antes que los síntomas, mientras la sensibilidad periférica no cambia: en 96 pacientes con adrenoleucodistrofia ligada al X la pérdida auditiva periférica no fue más frecuente que en la población de su edad, y las alteraciones del ABR, incluidos los interpicos alargados, fueron frecuentes (Pillion y cols., 2006); en la forma infantil temprana de Krabbe el ABR estuvo alterado en el 88 % (Aldosari y cols., 2004). Para el audiólogo es el cuadro más peligroso del capítulo: un niño que "no oye" con audiograma normal puede estar comenzando una enfermedad del sistema nervioso, y el ABR puede ser la primera prueba objetiva que lo muestra.
 
 :::sabias ¿Sabías que?
-Una "neuropatía auditiva" del adulto, o del niño en edad escolar, casi nunca es solo del oído. Si el paciente tiene además dificultad para caminar, para ver o para el aprendizaje, el hallazgo es un **signo** de una enfermedad que corresponde estudiar con neurología.
+Una "neuropatía auditiva" del adulto, o del niño en edad escolar, muchas veces no es solo del oído: de los diez pacientes de la serie original, ocho desarrollaron después una neuropatía periférica (Starr y cols., 1996). <!-- Pasada de fundamentos 2026-10-18: decía "casi nunca es solo del oído", absoluto sin fuente. Resumen de Starr 1996: "Subsequently, eight of these patients developed evidence for a peripheral neuropathy". --> Si el paciente tiene además dificultad para caminar, para ver o para el aprendizaje, el hallazgo es un **signo** de una enfermedad que corresponde estudiar con neurología.
 :::
 
 ## Razonamiento
@@ -115,7 +115,7 @@ Una "neuropatía auditiva" del adulto, o del niño en edad escolar, casi nunca e
 Frente a alguien que oye pero no entiende, el razonamiento sigue cuatro preguntas, en orden:
 
 1. **¿El oído medio y la cóclea explican lo que pasa?** Timpanograma, umbrales tonales con ósea, emisiones. Con 35 a 45 dB de pérdida coclear esperarías emisiones ausentes; si están presentes, la cóclea no es el problema principal.
-2. **¿La discriminación es la que predice el audiograma?** Un oído coclear con 35 a 45 dB llega al 90 % o más. Un máximo de 30 a 40 % pide otra explicación.
+2. **¿La discriminación es la que predice el audiograma?** Cada promedio tonal tiene un máximo esperable: con 35 a 45 dB de pérdida coclear, el límite inferior del 95 % ronda el 60 % (Dubno y cols., 1995). Un máximo de 30 a 40 % pide otra explicación. <!-- Pasada de fundamentos 2026-10-18: decía "Un oído coclear con 35 a 45 dB llega al 90 % o más". Dubno y cols. (1995) dan el límite inferior del 95 % del PB máx. según el PTA; leído en el gráfico SPRINT para listas de 50 palabras (Thibodeau, adaptado de Dubno 1995), con PTA 40 dB HL el área "desproporcionadamente baja" llega a cerca del 60 %. El valor del gráfico es aproximado: confirmar con la tabla del artículo. El pie de la figura de logoaudiometría del caso 13.1 decía lo mismo ("entendería el 90 % o más") y se corrigió igual. -->
 3. **¿El nervio descarga en sincronía?** ABR a alto nivel con **dos polaridades**, microfónica con tubo pinzado y reflejos.
 4. **¿Es solo el oído?** Edad, historia perinatal, familia, marcha, visión, rendimiento escolar. Si hay más sistemas afectados, la neuropatía auditiva es un signo.
 
@@ -127,8 +127,9 @@ Frente a alguien que oye pero no entiende, el razonamiento sigue cuatro pregunta
 | ABR | I-V normal para la pérdida | I-III o I-V **alargado** | **ausente o desordenado** |
 | Reflejos | presentes a bajo nivel SL | elevados o ausentes (unilateral) | **ausentes, bilaterales** |
 | Discriminación | acorde al umbral | peor | **mucho peor**, peor aún en ruido |
-| Lateralidad | simétrica o no | asimétrica | **casi siempre bilateral** |
+| Lateralidad | simétrica o no | asimétrica | **en general bilateral** |
 :::
+<!-- Pasada de fundamentos 2026-10-18: decía "casi siempre bilateral". No se encontró una serie grande con la proporción de casos unilaterales; hay casos unilaterales publicados (p. ej., con deficiencia del nervio coclear). Se suavizó el absoluto. -->
 
 ### Lo que más se equivoca
 
@@ -169,7 +170,7 @@ Además del audiograma, ¿qué pruebas separan una causa coclear de una neural? 
 - @OI 4000 | El OI es parecido, con 35 dB en 4 kHz.
 :::
 :::figura cap13_p40 logoaudiometria
-- @OD max | El OD llega solo al **32 %**, a 70 dB. Con 35 a 45 dB de pérdida, un oído coclear entendería el 90 % o más.
+- @OD max | El OD llega solo al **32 %**, a 70 dB. Con 35 a 45 dB de pérdida, un oído coclear no debería bajar de cerca del 60 %.
 - @OI max | El OI llega al **36 %**.
 - @OD 100 | A 100 dB la curva **cae** al 8 %: subir el volumen no ayuda.
 :::
@@ -344,7 +345,7 @@ La pérdida es de 35 a 45 dB y con emisiones presentes: la cóclea funciona. La 
 
 #### Diagnóstico y qué sigue
 
-Patrón de neuropatía auditiva bilateral: emisiones y microfónica presentes, ABR ausente, reflejos ausentes, discriminación desproporcionada al umbral. Se confirma la microfónica con el **tubo pinzado** y se informa como patrón, no como un tipo de hipoacusia. Se deriva a otorrinolaringología y a un equipo con experiencia en rehabilitación auditiva; la adecuación de apoyos (comunicación visual, sistemas de frecuencia modulada, audífono con cautela) se decide con el equipo (BSA, 2019). <!-- verificar: recomendación de apoyos y cautela con audífono en neuropatía del escolar: BSA 2019 es para lactantes -->
+Patrón de neuropatía auditiva bilateral: emisiones y microfónica presentes, ABR ausente, reflejos ausentes, discriminación desproporcionada al umbral. Se confirma la microfónica con el **tubo pinzado** y se informa como patrón, no como un tipo de hipoacusia. Se deriva a otorrinolaringología y a un equipo con experiencia en rehabilitación auditiva; la adecuación de apoyos (comunicación visual, sistemas de frecuencia modulada, audífono con cautela) se decide con el equipo: el beneficio del audífono es variable y suele ser menor de lo que haría esperar el audiograma (BSA, 2019; Berlin y cols., 2010). <!-- Pasada de fundamentos 2026-10-18: se resolvió el verificar sobre la cautela con el audífono. Berlin y cols. (2010, 260 pacientes de todas las edades, resumen): "Approximately 15% reported some benefit from hearing aids". BSA 2019 (OD104-85, lista de hallazgos funcionales): "Hearing aids may be of less benefit than the behavioural audiogram would suggest"; es una guía para lactantes, por eso va junto a Berlin. -->
 
 :::comentario Comentario
 Un tamizaje de emisiones "normal" al nacer no descarta una neuropatía: las emisiones pasan. Un niño con factores de riesgo neonatales necesita **AABR** (→ H10, cap. 16).
@@ -358,7 +359,7 @@ Audiograma normal, emisiones presentes, reflejos ausentes y discriminación del 
 
 #### Diagnóstico y qué sigue
 
-Patrón de neuropatía auditiva con ABR presente pero lento, en el contexto de una polineuropatía. No es una hipoacusia por umbral. Se coordina con neurología y genética, y se orienta al paciente sobre estrategias para el ruido (ubicación, sistemas FM). <!-- verificar: indicación de sistemas FM en neuropatía del adulto con umbral normal -->
+Patrón de neuropatía auditiva con ABR presente pero lento, en el contexto de una polineuropatía. No es una hipoacusia por umbral. Se coordina con neurología y genética, y se orienta al paciente sobre estrategias para el ruido (ubicación, sistemas FM): en adultos con neuropatía auditiva por ataxia de Friedreich, el sistema FM personal mejoró mucho la escucha en la vida diaria (Rance y cols., 2010).
 
 :::ayuda Ayuda memoria
 En la neuropatía auditiva el ABR **no siempre es plano**: puede tener ondas y estar solo lento. Lo que la define es el conjunto: emisiones y microfónica presentes, reflejos ausentes y discriminación pobre.
@@ -421,6 +422,9 @@ Audición periférica normal con alteración de la conducción central bilateral
 1. Soares ID, Menezes PL, Carnaúba AT, de Andrade KC, Lins OG. Study of cochlear microphonic potentials in auditory neuropathy. Braz J Otorhinolaryngol. 2016;82(6):722-36. doi:10.1016/j.bjorl.2015.11.022
 1. British Society of Audiology. Recommended procedure: cochlear microphonic testing [Internet]. BSA; 2019 (OD104-87). Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-87-Recommended-Procedure-for-Cochlear-Microphonic-Testing.pdf
 1. British Society of Audiology. Recommended procedure: assessment and management of auditory neuropathy spectrum disorder (ANSD) in young infants [Internet]. BSA; 2019 (OD104-85). Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-85-Recommended-Procedure-Assessment-and-Management-of-ANSD-in-Young-Infants.pdf
+1. Dubno JR, Lee FS, Klein AJ, Matthews LJ, Lam CF. Confidence limits for maximum word-recognition scores. J Speech Hear Res. 1995;38(2):490-502. doi:10.1044/jshr.3802.490
+1. American Academy of Audiology. Clinical guidance document: assessment of hearing in infants and young children [Internet]. Reston (VA): AAA; 2020 Jan 23. Disponible en: https://www.audiology.org/wp-content/uploads/2021/05/Clin-Guid-Doc_Assess_Hear_Infants_Children_1.23.20.pdf
+1. Joint Committee on Infant Hearing. Year 2019 position statement: principles and guidelines for early hearing detection and intervention programs. J Early Hear Detect Interv. 2019;4(2):1-44. doi:10.15142/fptk-b748
 
 ### Fisiología
 
@@ -436,6 +440,8 @@ Audición periférica normal con alteración de la conducción central bilateral
 1. Poretti A, Palla A, Tarnutzer AA, Petersen JA, Weber KP, Straumann D, Jung HH. Vestibular impairment in patients with Charcot-Marie-tooth disease. Neurology. 2013;80(23):2099-2105. doi:10.1212/WNL.0b013e318295d72a
 1. Rance G, Ryan MM, Bayliss K, Gill K, O'Sullivan C, Whitechurch M. Auditory function in children with Charcot-Marie-Tooth disease. Brain. 2012;135(Pt 5):1412-1422. doi:10.1093/brain/aws085
 1. Shapiro SM, Popelka GR. Auditory impairment in infants at risk for bilirubin-induced neurologic dysfunction. Semin Perinatol. 2011;35(3):162-170. doi:10.1053/j.semperi.2011.02.011
-1. Ozkiraz S, Gokmen Z, Ecevit A, Erbek S, Erbek SS, Ozel D. Vestibular evoked myogenic potentials in term newborn infants with severe hyperbilirubinemia. Pediatr Int. 2012;54(5):646-650. doi:10.1111/j.1442-200X.2012.03635.x
+1. Ozkiraz S, Gokmen Z, Ecevit A, Erbek S, Erbek SS, Ozel D, et al. Vestibular evoked myogenic potentials in term newborn infants with severe hyperbilirubinemia. Pediatr Int. 2012;54(5):646-650. doi:10.1111/j.1442-200X.2012.03635.x
 1. Aldosari M, Altuwaijri M, Husain AM. Brain-stem auditory and visual evoked potentials in children with Krabbe disease. Clin Neurophysiol. 2004;115(7):1653-1656. doi:10.1016/j.clinph.2004.02.022
 1. Pillion JP, Kharkar S, Mahmood A, Moser H, Shimizu H. Auditory brainstem response findings and peripheral auditory sensitivity in adrenoleukodystrophy. J Neurol Sci. 2006;247(2):130-137. doi:10.1016/j.jns.2006.04.001
+1. Das S, van Landeghem FKH. Clinicopathological spectrum of bilirubin encephalopathy/kernicterus. Diagnostics (Basel). 2019;9(1):24. doi:10.3390/diagnostics9010024
+1. Rance G, Corben LA, Du Bourg E, King A, Delatycki MB. Successful treatment of auditory perceptual disorder in individuals with Friedreich ataxia. Neuroscience. 2010;171(2):552-555. doi:10.1016/j.neuroscience.2010.09.013

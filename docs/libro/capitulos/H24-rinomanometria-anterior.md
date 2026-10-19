@@ -61,13 +61,13 @@ Cada fosa se mide por separado y su curva se dibuja con la **presión en el eje 
 
 ### De dónde sale el número: la presión de referencia
 
-Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto fijo y común**. Lo habitual es una presión: 150 Pa, o 75 Pa cuando el paciente no alcanza los 150 (Clement, 1984; Wong y Eccles, 2014). <!-- verificar: Clement (1984) recomienda una presión fija; que sea 150 Pa y que se use 75 Pa como alternativa se confirmó en la introducción de Wong y Eccles (2014), no en el informe de 1984. --> En el ejemplo de la figura, la fosa derecha da 0,26 a 75 Pa y 0,35 a 150 Pa. Por eso el informe escribe **siempre** la presión.
+Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto fijo y común**. Lo habitual es una presión: 150 Pa en la rama inspiratoria y, cuando el paciente no alcanza los 150, 75 o 100 Pa, diciendo en el informe cuál se usó (Clement y Gordts, 2005). <!-- Pasada de fundamentos 2026-10-18: citaba (Clement, 1984; Wong y Eccles, 2014) con un verificar. El texto completo del consenso de 2005 dice: "if for whatever reason the pressure level of 150 Pa cannot be reached, the lower nasal pressures of 75 and 100 Pa can be used but should be mentioned. Resistance is however routinely expressed as the resistance determined at 150 Pa on the inspiratory part". --> En el ejemplo de la figura, la fosa derecha da 0,26 a 75 Pa y 0,35 a 150 Pa. Por eso el informe escribe **siempre** la presión.
 
 ¿Por qué 150 Pa y no menos? A presiones muy bajas, el flujo recién se está poniendo en marcha, la señal es chica y el ruido pesa mucho. Pero a presiones muy altas no todos los pacientes llegan, sobre todo los de nariz amplia. En una serie de 20.069 mediciones en reposo, entre 4,5 y 8,6 % no alcanzó los 150 Pa según la fase del ciclo respiratorio (Vogt y cols., 2016). 150 Pa es un compromiso: suficientemente alto para tener señal, suficientemente bajo para que casi todos lleguen.
 
 ### Broms: leer la resistencia en un radio, no en una presión
 
-Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en la bibliografía, el "radio 200"). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
+Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en el consenso internacional, el "radio 2"; en otros textos, el "radio 200") (Clement y Gordts, 2005). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
 
 :::imagen ilustraciones/h24-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
@@ -84,7 +84,7 @@ Como V̇ = ΔP / R, y ΔP es la misma, queda:
 
 **1 / RT = 1 / RD + 1 / RI**
 
-Es la fórmula de las resistencias en paralelo. Tiene dos consecuencias que sirven para leer un informe. La resistencia total es **siempre menor que la de la fosa más abierta**: dos caminos son mejores que uno. Y si una fosa se tapa del todo (resistencia infinita), el total queda igual a la resistencia de la otra. Una precisión: la fórmula vale cuando las dos resistencias se leen **a la misma presión**, por eso el informe da las dos a 150 Pa.
+Es la fórmula de las resistencias en paralelo. Tiene dos consecuencias que sirven para leer un informe. La resistencia total es **siempre menor que la de la fosa más abierta**: dos caminos son mejores que uno. Y si una fosa se tapa del todo (resistencia infinita), el total queda igual a la resistencia de la otra. Una precisión: la fórmula vale cuando las dos resistencias se leen **a la misma presión**, por eso el informe da las dos a 150 Pa. Y es una aproximación: el consenso reconoce que, desde la física, no es del todo exacta, pero la acepta para la clínica (Clement y Gordts, 2005).
 
 La técnica anterior mide cada fosa por separado, y la resistencia total se calcula con esta fórmula. En el apartado de ejercicios hay ejemplos con números.
 
@@ -96,7 +96,7 @@ Por eso la técnica **requiere que el tabique esté íntegro**: una perforación
 
 ### El ciclo nasal: por qué una sola medida puede engañar
 
-La mucosa de los cornetes y del tabique tiene una gran cantidad de vasos que se llenan y se vacían. Eso permite que una fosa se congestione un rato mientras la otra se abre, y después al revés: es el **ciclo nasal**, descrito desde fines del siglo XIX (Flanagan y Eccles, 1997). Una fosa que hoy aparece tapada puede estar, simplemente, en su fase congestionada. Es un cambio fisiológico, y lo normal es que el total se mantenga relativamente estable aunque los lados se compensen (Hasegawa y Kern, 1977). <!-- verificar: que la resistencia total se mantiene relativamente constante mientras los lados se alternan es la lectura habitual de Hasegawa y Kern (1977); no se leyó el texto completo. --> Lo que no es fisiológico es una asimetría que **no se compensa** con la otra fosa y se repite.
+La mucosa de los cornetes y del tabique tiene una gran cantidad de vasos que se llenan y se vacían. Eso permite que una fosa se congestione un rato mientras la otra se abre, y después al revés: es el **ciclo nasal**, descrito desde fines del siglo XIX (Flanagan y Eccles, 1997). Una fosa que hoy aparece tapada puede estar, simplemente, en su fase congestionada. Es un cambio fisiológico, y lo normal es que el total se mantenga relativamente estable aunque los lados se compensen (Hasegawa y Kern, 1977). <!-- Pasada de fundamentos 2026-10-18: confirmado en el resumen de Hasegawa y Kern (1977): "the total nasal resistance usually remains fairly constant and is less than the resistance of either one of the individual nasal passages". --> Lo que no es fisiológico es una asimetría que **no se compensa** con la otra fosa y se repite.
 
 En un estudio de 52 voluntarios medidos cada hora durante ocho horas, solo 11 (alrededor de un quinto) cumplían una definición estricta de ciclo (Flanagan y Eccles, 1997), así que no se debe esperar un ciclo regular en todos. La consecuencia práctica es una sola: **una medición de una fosa en un solo momento es una foto**, y la comparación entre lados se hace con cuidado.
 
@@ -163,7 +163,7 @@ Antes de medir, el paciente **se aclimata sentado 15 minutos** en la sala (cuent
 Se descartan antes de empezar los impedimentos de la técnica: una enfermedad respiratoria aguda, una perforación del tabique y una atresia de coana. Tampoco se examina a quien acaba de fumar.
 
 :::comentario Lo que dicen las normas
-Este libro pide 48 horas sin vasoconstrictores y 24 horas sin fumar ni beber alcohol, y 15 minutos de aclimatación. Las normas de estandarización piden evitar los fármacos que cambian la mucosa y aclimatar al paciente, pero **los plazos varían** de una fuente a otra y no se encontraron cifras idénticas a estas en las fuentes consultadas (Clement y Gordts, 2005). <!-- verificar: plazos de suspensión de fármacos, de abstención de tabaco y alcohol y de aclimatación en el informe de consenso de Clement y Gordts (2005) y en el informe de 1984; no se pudo leer el texto completo. --> La lógica es la misma en todas: que la nariz esté como suele estar.
+Este libro pide 48 horas sin vasoconstrictores y 24 horas sin fumar ni beber alcohol, y 15 minutos de aclimatación. El consenso internacional, que mantiene el procedimiento de la estandarización de 1984 (Clement, 1984), pide medir sentado después de **20 a 30 minutos de adaptación**, y anotar en el gráfico si el paciente usó descongestionantes o dilatadores de la válvula, o si hizo ejercicio antes (Clement y Gordts, 2005); no fija plazos de suspensión de fármacos ni de tabaco y alcohol. La lógica es la misma: que la nariz esté como suele estar. <!-- Pasada de fundamentos 2026-10-18: decía que no se encontraron cifras y tenía un verificar. Texto completo del consenso de 2005, "Measurement procedure": "remains unchanged with respect to the previously issued recommendations [Clement 1984]. Measurements are obtained in a sitting position, after an adaptation period of 20-30 minutes. The use of decongestants and/or nasal valve dilatators as well as previous exercise should be mentioned on the graph." -->
 :::
 
 ## Paso a paso
@@ -182,7 +182,7 @@ Con el adaptador puesto, se presiona con el dedo la fosa **sin adaptador** y se 
 
 ### 4. Medir la primera fosa
 
-En el equipo se elige *Measuring of right nostril* y se inicia la medición con el botón de tiempo. El paciente respira con normalidad mientras el equipo cuenta los ciclos que se le configuraron; la curva se promedia (los equipos suelen promediar varios ciclos, de 3 a 5, Vogt y cols., 2016). Se mira la curva mientras se registra: debe ser regular y sin interrupciones.
+En el equipo se elige *Measuring of right nostril* y se inicia la medición con el botón de tiempo. El paciente respira con normalidad mientras el equipo cuenta los ciclos que se le configuraron; la curva se promedia (el consenso pide promediar de 3 a 5 ciclos; Clement y Gordts, 2005). Se mira la curva mientras se registra: debe ser regular y sin interrupciones.
 
 ### 5. Cambiar de fosa y medir la segunda
 
@@ -201,7 +201,7 @@ El valor de referencia de este libro para la **resistencia unilateral a 150 Pa e
 :::comentario Lo que dicen las normas
 **El valor de 0,4 depende de la población, del equipo y de cómo se mide.** En un estudio de adultos sanos de China (505 sujetos), la resistencia unilateral a 150 Pa tuvo una media de 0,51 Pa/(cm³/s), con un intervalo de 95 % entre 0,09 y 0,94, y la total una media de 0,24 (intervalo entre 0,11 y 0,37) (Ren y cols., 2018). Otros grupos, con otras poblaciones y otros equipos, dan otras cifras. El mismo estudio señala que el mismo examen, a 75 Pa, da valores más bajos. Por eso este libro enseña esta cifra como **referencia de trabajo** y pide que el informe diga con qué se compara.
 
-Hay además una crítica más de fondo. El grupo que desarrolló la **rinomanometría de 4 fases** (Vogt y cols., 2016) sostiene que el flujo (o la resistencia) a 150 Pa es una estimación y no una medición, porque sale de un solo punto de la curva, y que un porcentaje de pacientes ni siquiera llega a esa presión. Propone en cambio el **logaritmo de la resistencia efectiva (Reff)**, que integra toda la respiración, y clasifica la obstrucción en cinco grados según percentiles de una serie de 36.563 mediciones. El libro mantiene el método clásico a 150 Pa porque es el que se enseña aquí y el que trae casi todo equipo; si el tuyo ofrece los parámetros de 4 fases, son una segunda lectura válida.
+Hay además una crítica más de fondo. El grupo que desarrolló la **rinomanometría de 4 fases** (Vogt y cols., 2016) sostiene que el flujo (o la resistencia) a 150 Pa es una estimación y no una medición, porque sale de un solo punto de la curva, y que un porcentaje de pacientes ni siquiera llega a esa presión. Propone en cambio el **logaritmo de la resistencia efectiva (Reff)**, que integra toda la respiración, y clasifica la obstrucción en cinco grados según percentiles de una serie de 36.563 mediciones. En modelos de nariz artificial, en cambio, el método clásico y el de 4 fases dieron resistencias que concordaban (Wong y Eccles, 2014). El libro mantiene el método clásico a 150 Pa porque es el que se enseña aquí y el que trae casi todo equipo; si el tuyo ofrece los parámetros de 4 fases, son una segunda lectura válida.
 :::
 
 ### 8. Aplicar el vasoconstrictor
@@ -214,7 +214,7 @@ Hay además una crítica más de fondo. El grupo que desarrolló la **rinomanome
 6. Repite la medición con el **mismo procedimiento** del reposo, con el mismo adaptador y el mismo orden.
 
 :::comentario Lo que dicen las normas
-Este libro espera 15 minutos tras el vasoconstrictor. En la serie de Vogt y cols. (2016) la segunda medición se hizo **10 minutos** después de xylometazolina al 0,1 % en atomizador, y el consenso internacional pide estandarizar más estrictamente el procedimiento de descongestión (Clement y Gordts, 2005), sin que se haya confirmado aquí una cifra única. <!-- verificar: tiempo y dosis de descongestión que fija el consenso de Clement y Gordts (2005); la cifra de 10 minutos es de Vogt y cols. (2016). --> El principio es el mismo: esperar lo suficiente para que el efecto sea máximo y **medir siempre con el mismo tiempo** para poder comparar.
+Este libro aplica dos disparos y espera 15 minutos. El consenso internacional pide estandarizar la descongestión y propone hacerla en **dos pasos**: un agonista α2 (oximetazolina o xilometazolina), dos pulverizaciones de 50 µg en cada fosa y una más a los 5 minutos, y medir unos 15 a 30 minutos después; un solo paso le parece insuficiente cuando la congestión es importante (Clement y Gordts, 2005). En la serie de Vogt y cols. (2016), la segunda medición se hizo **10 minutos** después de xilometazolina al 0,1 % en atomizador. <!-- Pasada de fundamentos 2026-10-18: el verificar pedía la pauta del consenso. Texto completo de Clement y Gordts (2005), sección de rinometría acústica, a la que remite la de rinomanometría: "A α2 mimetic (e.g. oxymetathazoline or xylomethazoline; 2 sprays of 50 µg in each nostril; repeated after 5 minutes with a single spray) is administered in two steps. A one step approach is felt to be insufficient ... in the presence of important nasal congestion. Measurements should be obtained at approximately 15-30 minutes". --> El principio es el mismo: esperar lo suficiente para que el efecto sea máximo y **medir siempre con el mismo tiempo** para poder comparar.
 :::
 
 :::ayuda Ayuda memoria
@@ -333,7 +333,7 @@ Se comprueba sumando flujos: 250 + 500 = 750 cm³/s, y 150 / 750 = 0,20. El tota
 1. Broms P. Rhinomanometry. III. Procedures and criteria for distinction between skeletal stenosis and mucosal swelling. Acta Otolaryngol. 1982;94:361-70. PMID: 6183919.
 1. Wong EH, Eccles R. Comparison of classic and 4-phase rhinomanometry methods, is there any difference? Rhinology. 2014;52:360-5. doi:10.4193/Rhino13.187. PMID: 25479215.
 1. Ren L, Zhang L, Duan S, Zhang W, Zhang Y. Nasal airflow resistance measured by rhinomanometry in a healthy population of China. Int Forum Allergy Rhinol. 2018;8:1308-14. doi:10.1002/alr.22177. PMID: 29996010.
-1. Flanagan P, Eccles R. Spontaneous changes of unilateral nasal airflow in man. A re-examination of the "nasal cycle". Acta Otolaryngol. 1997;117:590-5. PMID: 9288218.
+1. Flanagan P, Eccles R. Spontaneous changes of unilateral nasal airflow in man. A re-examination of the "nasal cycle". Acta Otolaryngol. 1997;117:590-5. doi:10.3109/00016489709113443. PMID: 9288218.
 1. Hasegawa M, Kern EB. The human nasal cycle. Mayo Clin Proc. 1977;52:28-34. PMID: 609283.
 1. Ferris BG Jr, Mead J, Opie LH. Partitioning of respiratory flow resistance in man. J Appl Physiol. 1964;19:653-8. PMID: 14195575.
 1. Rohrer F. Der Strömungswiderstand in den menschlichen Atemwegen und der Einfluss der unregelmässigen Verzweigung des Bronchialsystems auf den Atmungsverlauf in verschiedenen Lungenbezirken. Pflügers Arch. 1915;162:225-99. doi:10.1007/BF01681259.

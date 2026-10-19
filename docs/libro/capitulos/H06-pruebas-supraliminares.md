@@ -47,7 +47,7 @@ El órgano de Corti tiene una fila de células ciliadas internas y tres de exter
 
 Ese empuje es una ganancia que **depende del nivel**: a los sonidos suaves les suma unos 40 a 50 dB y a los fuertes casi nada (Robles y Ruggero, 2001; Dallos, 2008). Cerca del umbral la membrana se mueve casi tanto como sube el estímulo; en el rango medio, mucho menos. Eso es la **compresión**: hace que un rango enorme de intensidades quepa en el de las fibras y que la sonoridad crezca pareja desde el umbral hasta la molestia. El mismo mecanismo afina cada lugar de la cóclea a una banda estrecha de frecuencias.
 
-Cuando el amplificador se apaga, la respuesta de la membrana cae mucho con los estímulos suaves y poco con los fuertes. En la chinchilla, un diurético que bloquea la transducción de las células ciliadas redujo la vibración de la membrana sobre todo a niveles bajos (Ruggero y Rich, 1991). Esa asimetría es el reclutamiento.
+Cuando el amplificador se apaga, la respuesta de la membrana cae mucho con los estímulos suaves y poco con los fuertes. En la chinchilla, un diurético que reduce las corrientes de transducción de las células ciliadas redujo la vibración de la membrana sobre todo a niveles bajos (Ruggero y Rich, 1991). <!-- Pasada de fundamentos 2026-10-18: decía "un diurético que bloquea la transducción". La furosemida disminuye las corrientes de transducción, no las bloquea (Ruggero y Rich, 1991, resumen). --> Esa asimetría es el reclutamiento.
 
 ### Reclutamiento: cuando se pierde la compresión
 
@@ -72,11 +72,11 @@ En una lesión del **nervio** la historia es otra. La cóclea amplifica y compri
 
 El SISI no pregunta cuánto suena, sino si el paciente nota que el sonido **cambió**. El menor cambio de intensidad que un oído sano detecta en un tono depende del nivel: cerca del umbral necesita más de 1 dB, y a niveles altos menos (Jesteadt y cols., 1977). Por eso a 20 dB SL un oído sano casi nunca nota 1 dB.
 
-En un oído coclear con 50 dB de pérdida, el portador de 20 dB SL queda en 70 dB HL. Ahí el cambio se nota mejor, y además cae sobre una sonoridad que crece rápido, donde 1 dB es un salto mayor. El SISI sale alto. No mide una habilidad "mejor" del oído coclear: aprovecha que su portador queda alto y en la zona empinada de la curva (Buus y cols., 1982).
+En un oído coclear con 50 dB de pérdida, el portador de 20 dB SL queda en 70 dB HL. Ahí el cambio se nota mejor, y además cae sobre una sonoridad que crece rápido, donde 1 dB es un salto mayor. El SISI sale alto. No mide una habilidad "mejor" del oído coclear: aprovecha que su portador queda alto y en la zona empinada de la curva (Buus y cols., 1982b).
 
 En el nervio, el portador alto no basta. Con menos fibras funcionando y una descarga menos sincrónica, los cambios pequeños llegan mal codificados y el SISI sale bajo.
 
-<!-- verificar: Buus y cols. 1982 para el efecto del nivel del portador sobre el puntaje (el resumen no lo dice); y la explicación del SISI bajo retrococlear por pérdida de fibras y de sincronía (Møller 2013, fisiopatología del nervio). -->
+<!-- Pasada de fundamentos 2026-10-18: la cita de Buus pasa a la parte II de la revisión (1982b), cuyo resumen concluye que un SISI alto en el oído coclear no indica mejor agudeza y que el SISI a nivel alto detecta lesiones retrococleares. verificar: la explicación del SISI bajo retrococlear por pérdida de fibras y de sincronía (Møller 2013, fisiopatología del nervio); no se leyó el capítulo. -->
 
 ### Adaptación normal y deterioro tonal
 
@@ -125,7 +125,7 @@ La mayoría de los acúfenos se asocia a una pérdida auditiva, por ruido o por 
 
 De ahí salen las reglas de la acufenometría:
 
-- **El tono del acúfeno cae casi siempre en la zona de la pérdida** (Noreña y cols., 2002). Por eso se busca en las frecuencias donde el audiograma baja.
+- **El tono del acúfeno suele caer en la zona de la pérdida** (Noreña y cols., 2002). <!-- Pasada de fundamentos 2026-10-18: decía "cae casi siempre". Noreña 2002 (10 pacientes) encontró el espectro del acúfeno "en gran parte" en la zona de la pérdida; se dejó "suele caer". --> Por eso se busca en las frecuencias donde el audiograma baja.
 - **Un acúfeno con audiograma normal no contradice esto**: puede haber fibras perdidas que el audiograma no muestra (Schaette y McAlpine, 2011).
 - **Se iguala pocos dB sobre el umbral, pero eso no lo hace suave.** En un oído que recluta, pocos dB sobre el umbral ya suenan fuertes (Tyler y Conrad-Armes, 1983).
 - **Se puede tapar con ruido, incluso desde el oído contrario** (Tyler y Conrad-Armes, 1983): lo que se enmascara no es un sonido en el oído sino actividad en la vía.
@@ -277,7 +277,7 @@ El SISI (*short increment sensitivity index*) mide si el oído nota aumentos de 
 **Por qué funciona.** A 20 dB SL, el portador de un oído coclear ya está a un nivel alto y en la parte empinada de su curva de sonoridad, donde 1 dB se nota. El de un oído sano está en la zona baja, donde no se nota. Y un nervio comprimido no codifica bien cambios tan chicos aunque el portador esté alto.
 
 1. **Portador.** Un tono continuo **20 dB sobre el umbral** del oído evaluado, en la frecuencia elegida.
-2. **Familiarización.** Ocho a diez incrementos de **5 dB**, que cualquier oído nota. Sirven para que el paciente entienda qué tiene que avisar.
+2. **Familiarización.** Ocho a diez incrementos de **5 dB**, que cualquier oído nota. Sirven para que el paciente entienda qué tiene que avisar; sin práctica previa el puntaje es menos confiable (Buus y cols., 1982a).
 3. **Prueba.** Veinte incrementos de **1 dB**, breves, más o menos uno cada cinco segundos, volviendo cada vez al portador. Se cuentan los que el paciente nota.
 4. **Puntaje.** Cada incremento vale 5 %: 20 de 20 es 100 %.
 5. Se repite en las frecuencias que interesan y **en cada oído**.
@@ -292,9 +292,9 @@ El SISI (*short increment sensitivity index*) mide si el oído nota aumentos de 
 
 <!-- Protocolo ORL 2019: decía 100-70 % reclutamiento, 70-25 % sospecha y 25-0 % sin reclutamiento, con límites que se repiten en dos categorías. Con 20 incrementos el puntaje va de 5 en 5 %; se dejaron 70-100, 25-65 y 0-20 %. verificar los cortes contra Buus y cols. 1982. -->
 
-El nivel importa: a niveles altos, incluso un oído sano nota incrementos de 1 dB. Por eso el portador va a 20 dB sobre el umbral y no más arriba (Buus y cols., 1982). El SISI tiene otra ventaja sobre el Fowler: **no necesita un oído sano** al lado. Sirve en pérdidas simétricas.
+El nivel importa: a niveles altos, incluso un oído sano nota incrementos de 1 dB. Por eso el portador va a 20 dB sobre el umbral y no más arriba (Jesteadt y cols., 1977). El SISI tiene otra ventaja sobre el Fowler: **no necesita un oído sano** al lado. Sirve en pérdidas simétricas.
 
-<!-- verificar: Buus y cols. 1982 para el efecto del nivel del portador sobre el puntaje en oídos normales. -->
+<!-- Pasada de fundamentos 2026-10-18: la cita pasó de Buus 1982 a Jesteadt 1977, que muestra que el menor cambio de intensidad que detecta un oído normal se achica al subir el nivel de sensación. -->
 
 ### Deterioro tonal
 
@@ -318,7 +318,7 @@ Si se llega al techo sin que el paciente oiga el minuto, se calcula la **velocid
 
 #### Rosenberg: un solo minuto
 
-Igual que el Carhart, pero el reloj **no se reinicia**: la prueba dura un minuto en total desde la primera presentación. Se parte 5 dB sobre el umbral, se sube 5 dB cada vez que el paciente baja la mano y se informa **cuántos dB hubo que subir en ese minuto** (Olsen y Noffsinger, 1974). Es más corta que el Carhart y por eso es la más usada en la clínica.
+Igual que el Carhart, pero el reloj **no se reinicia**: la prueba dura un minuto en total desde la primera presentación. Se parte 5 dB sobre el umbral, se sube 5 dB cada vez que el paciente baja la mano y se informa **cuántos dB hubo que subir en ese minuto** (Olsen y Noffsinger, 1974). Es más corta que el Carhart. <!-- Pasada de fundamentos 2026-10-18: decía "y por eso es la más usada en la clínica". No se encontró fuente sobre qué prueba de deterioro tonal se usa más; se quitó. -->
 
 <!-- Protocolo ORL 2019: la llamaba "Maspétiol" (inicio 5 dB SL, +5 dB por cada pérdida, 60 s acumulados, positiva > 30 dB). El procedimiento citable con esa forma es el de Rosenberg (Olsen y Noffsinger 1974); no se encontró fuente verificable para "Maspétiol". -->
 <!-- verificar: nivel de partida del Rosenberg (umbral o 5 dB SL); se dejó 5 dB SL del protocolo. -->
@@ -353,11 +353,11 @@ Una **pérdida no orgánica** es una diferencia entre los umbrales que el pacien
 
 #### Concordancia SRT-PTA
 
-El umbral de recepción de la palabra (SRT, → H5) y el promedio tonal de 500, 1.000 y 2.000 Hz (PTA, → H3) miden casi lo mismo por caminos distintos. En quien responde con honestidad quedan cerca, a no más de unos 10 dB. En una pérdida no orgánica el SRT suele salir **bastante mejor que el promedio tonal**: el paciente no logra exagerar igual con palabras que con tonos (Ventry, 1976).
+El umbral de recepción de la palabra (SRT, → H5) y el promedio tonal de 500, 1.000 y 2.000 Hz (PTA, → H3) miden casi lo mismo por caminos distintos. En quien responde con honestidad quedan cerca, a no más de unos 10 dB, y una discordancia puede ser el primer aviso de una pérdida no orgánica (ASHA, 1988). En una pérdida no orgánica el SRT suele salir **bastante mejor que el promedio tonal**: el paciente no logra exagerar igual con palabras que con tonos (Ventry, 1976).
 
-<!-- verificar: tolerancia de la concordancia SRT-PTA (alrededor de 10 dB); no está en las fuentes revisadas. -->
+<!-- Pasada de fundamentos 2026-10-18: ASHA 1988 respalda la concordancia y la discordancia como signo temprano de pseudohipoacusia, pero no da una cifra. Los 10 dB son el criterio del chequeo de coherencia de LabSim (práctica del libro, igual que en el cap. 19). -->
 
-Otros datos levantan la sospecha antes de cualquier prueba especial: umbrales que no se repiten, curvas planas o en "platillo" (Chaiklin y cols., 1959), un paciente que conversa sin problemas con un audiograma que no se lo permitiría y, sobre todo, **una pérdida unilateral sin curva sombra**.
+Otros datos levantan la sospecha antes de cualquier prueba especial: umbrales que no se repiten, curvas planas o en "platillo" (Chaiklin y cols., 1959) <!-- verificar: Chaiklin 1959 no tiene resumen en PubMed y no se leyó, y hay trabajos posteriores que discuten que la curva en platillo sea un indicador confiable. Confirmar qué patrones describe Chaiklin y con qué frecuencia. -->, un paciente que conversa sin problemas con un audiograma que no se lo permitiría y, sobre todo, **una pérdida unilateral sin curva sombra**.
 
 :::ojo Una cofosis sin curva sombra no existe
 Sin enmascarar, un oído "muerto" responde por el otro alrededor de los 40 a 60 dB (→ H3, H4). Si el paciente niega oír hasta el máximo sin enmascarar, alguien está decidiendo no responder.
@@ -373,7 +373,7 @@ Se basa en un efecto que el paciente no controla: si suena el mismo tono en los 
 3. **Si la pérdida es real**, el tono del oído malo no se oye y el paciente sigue oyendo el del bueno: **responde**. Stenger negativo.
 4. **Si la pérdida no es real**, el tono del oído "malo" está sobre su umbral verdadero y es el más fuerte: el paciente lo percibe solo en ese oído y, como dice no oír por él, **no responde**. Stenger positivo.
 
-Subiendo de a poco el tono del oído malo hasta que el paciente deja de responder se tiene una idea de dónde está su umbral real. Hay una versión con palabras en vez de tonos. El Stenger resiste incluso a pacientes que saben cómo funciona (Martin y Shipp, 1982).
+Subiendo de a poco el tono del oído malo hasta que el paciente deja de responder se tiene una idea de dónde está su umbral real. Hay una versión con palabras en vez de tonos. Un paciente que sabe cómo funciona puede engañarlo en parte: con más conocimiento de la prueba, los sujetos lograron simular pérdidas mayores con el Stenger de tonos y con el de palabras (Martin y Shipp, 1982). <!-- Pasada de fundamentos 2026-10-18: decía "El Stenger resiste incluso a pacientes que saben cómo funciona". Martin y Shipp 1982 encontraron lo contrario: la sofisticación permitió simular pérdidas mayores en los dos Stenger. -->
 
 :::comentario Cuando las pruebas no alcanzan
 Las pruebas que no dependen de la respuesta del paciente ponen el límite: emisiones presentes, reflejos estapediales por debajo del umbral informado o un PEAT mejor que el audiograma (→ H7, H9, H10; cap. 19). La guía del ISP nombra también las pruebas de Lombard y de Doerfler-Stewart (ISP, 2012).
@@ -516,6 +516,7 @@ Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
 1. Jerger J, Jerger S. A simplified tone decay test. Arch Otolaryngol. 1975;101(7):403-7. doi:10.1001/archotol.1975.00780360003001
 1. Priede VM, Coles RR. Masking of the non-test ear in tone decay, Békésy audiometry and SISI tests. J Laryngol Otol. 1975;89(3):227-36. doi:10.1017/s0022215100080324
 1. Instituto de Salud Pública de Chile (2012). Guía Técnica para la Evaluación Auditiva de los Trabajadores Expuestos Ocupacionalmente a Ruido, v1.0. §2: Evaluación Audiológica Médico Legal.
+1. Buus S, Florentine M, Redden RB. The SISI test: a review. Part II. Audiology. 1982;21(5):365-85. PMID 6751308
 
 ### Pérdida no orgánica
 
@@ -524,6 +525,7 @@ Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
 1. Chaiklin JB, Ventry IM, Barrett LS, Skalbeck GA. Pure-tone threshold patterns observed in functional hearing loss. Laryngoscope. 1959;69(9):1165-79. doi:10.1288/00005537-195909000-00003
 1. Kinstler DB, Phelan JG, Lavender RW. The Stenger and speech Stenger tests in functional hearing loss. Audiology. 1972;11(3-4):187-93. doi:10.3109/00206097209089295
 1. Martin FN, Shipp DB. The effects of sophistication on three threshold tests for subjects with simulated hearing loss. Ear Hear. 1982;3(1):34-6. doi:10.1097/00003446-198201000-00007
+1. American Speech-Language-Hearing Association. Determining threshold level for speech [Guidelines]. Rockville (MD): ASHA; 1988. doi:10.1044/policy.GL1988-00008
 
 ### Fisiología
 

@@ -16,7 +16,7 @@ La técnica del PEAT está en el H10, y la latencia-intensidad y la diferencia i
 
 ### La razón de amplitud V/I
 
-Se mide el tamaño de la onda I y el de la onda V, **del pico al valle que sigue**, y se divide V entre I. En un adulto con la vía sana la V es la onda más grande y la más estable, por eso el cociente da más de 1; el equipo de LabSim lo calcula solo y lo marca cuando es menor que 1 (→ H10). Una V proporcionalmente chica quiere decir que la señal sale bien del oído, porque la I es normal, y **se dispersa o se pierde en el camino**.
+Se mide el tamaño de la onda I y el de la onda V, **del pico al valle que sigue**, y se divide V entre I. En un adulto con la vía sana la V es la onda más grande y la más estable, por eso el cociente da más de 1: un cociente bajo 1 casi no aparece en oídos normales ni cocleares, y sí en el 44 % de los retrococleares (Musiek y cols., 1984). El equipo de LabSim lo calcula solo y lo marca cuando es menor que 1 (→ H10). Una V proporcionalmente chica quiere decir que la señal sale bien del oído, porque la I es normal, y **se dispersa o se pierde en el camino**.
 
 :::ayuda Cómo se lee la razón V/I
 - **V/I sobre 1**: lo esperable en el adulto.
@@ -25,12 +25,12 @@ Se mide el tamaño de la onda I y el de la onda V, **del pico al valle que sigue
 - Mandan los valores normativos de tu equipo y de la edad del paciente (Apéndice A): este corte es una guía, no una regla.
 :::
 
-<!-- verificar: no se encontró en PubMed una fuente que dé un corte único para V/I; Chiappa 1979 estudió las razones de amplitud en 50 adultos sanos pero el resumen no publica el valor. H10 usa 'menor que 1' como el corte de LabSim; se dejó igual y se advierte que manda la norma del equipo. -->
+<!-- Pasada de fundamentos 2026-10-18: Musiek y cols. 1984 (25 oídos normales, 25 cocleares y 25 retrococleares): "amplitude ratios of less than 1.00 seldom occurred in the normal or cochlear ears. However, 44% of the retrocochlear ears revealed an amplitude ratio of less than 1.00". La ACNS (2008) pone entre los criterios retrococleares la "abnormal diminution of the IV-V/I amplitude ratio, especially when accompanied by other abnormalities", con el límite en 2,5 a 3 DE de la norma por edad. El corte 1 de LabSim está en docs/decisiones.md ("La razón V/I normal es mayor que 1"). -->
 
 La razón se lee **junto con el audiograma**. Una pérdida coclear en agudos achica la I y puede dejar la V casi intacta, y entonces el cociente sube; una pérdida severa borra las dos y no hay razón que medir. Por eso el cociente solo habla cuando las dos ondas existen y se repiten.
 
 :::comentario Lo que dicen las normas
-No hay un corte universal para la razón V/I. Cada servicio la define con su equipo, su transductor y su población, y la edad la mueve: la amplitud de la V cae cerca de un 10 % entre los 25 y los 55 años (Jerger y Hall, 1980; → H10). Algunos criterios usan la razón como una señal de alerta y no como un criterio de diagnóstico; por eso aquí se lee siempre junto con los interpicos, la tasa y el audiograma.
+No hay un corte universal para la razón V/I. Cada servicio la define con su equipo, su transductor y su población, y la edad la mueve: la amplitud de la V cae cerca de un 10 % entre los 25 y los 55 años (Jerger y Hall, 1980; → H10). La guía de la ACNS la pone entre los criterios retrococleares sobre todo cuando la acompañan otras alteraciones, y da por anormal lo que se aleja 2,5 a 3 desviaciones estándar de la norma de la edad (ACNS, 2008); por eso aquí se lee siempre junto con los interpicos, la tasa y el audiograma.
 :::
 
 ### La tasa como prueba de esfuerzo
@@ -39,7 +39,7 @@ En la rutina se registra a 21,1 estímulos por segundo. Cada estímulo deja a la
 
 Se hace así: se repite el registro a 80 dB nHL a **81,1 estímulos por segundo**, con los mismos electrodos, filtros y polaridad, y se miden **las mismas ondas** en las dos curvas. Lo que se mira es la diferencia entre la curva de 21,1 y la de 81,1: si la V se atrasa mucho más que lo que se atrasa en un oído sano, o desaparece, la vía no soporta el esfuerzo.
 
-La idea viene de los primeros trabajos con potenciales auditivos en esclerosis múltiple: con un ritmo rápido de clicks, la anormalidad de la onda V en los pacientes se hacía más marcada y se detectaban más pacientes (Robinson y Rudge, 1977).
+La idea viene de los primeros trabajos con potenciales auditivos en esclerosis múltiple: con pares de clicks separados por 5 ms y presentados a un ritmo rápido, la anormalidad de la onda V en los pacientes se hacía más marcada y se detectaban más pacientes (Robinson y Rudge, 1977).
 
 :::ojo Ojo clínico
 La tasa alta **destapa** una lesión; no la descarta. Una vía con compromiso leve o difuso puede aguantar el esfuerzo con un alargamiento parecido al normal, y entonces el registro a 81,1 sale "normal" en un paciente con una causa real (caso 12.5).
@@ -48,8 +48,8 @@ La tasa alta **destapa** una lesión; no la descarta. Una vía con compromiso le
 <!-- Protocolo ORL 2019: "En el caso de sospecha de neuropatía, es necesario aumentar la tasa de estimulación a 81,1 estímulos/segundo". Se mantiene la tasa de 81,1 como práctica del libro y se explica como prueba de la vía retrococlear y del tronco; en la neuropatía auditiva, con ABR ausente, lo que define el cuadro es la microfónica coclear (→ H10 y cap. 13). Ya registrado como incongruencia en H10. -->
 
 :::comentario Lo que dicen las normas
-La guía de la ACNS incluye el efecto de la tasa entre las pruebas que se pueden agregar al registro de rutina (ACNS, 2008), pero este libro no fija un criterio único de "alargamiento anormal": el de la serie de Jiang y cols. (1991) es la referencia de lo que se alarga una vía sana, y lo que importa es la comparación con la curva de 21,1 del mismo paciente. La tasa de 81,1 es la que usa el protocolo del libro porque el equipo la ofrece y porque cae en la zona donde la V de un oído sano se alarga de forma conocida.
-<!-- verificar: confirmar con el texto de ACNS 9C qué dice exactamente sobre la tasa alta y si recomienda un valor. -->
+La guía de la ACNS menciona la tasa alta (50 a 70 por segundo) solo para encontrar rápido la onda V en estudios de tamizaje, no la cuenta entre los criterios retrococleares y no fija un criterio de "alargamiento anormal" (ACNS, 2008): el de la serie de Jiang y cols. (1991) es la referencia de lo que se alarga una vía sana, y lo que importa es la comparación con la curva de 21,1 del mismo paciente. La tasa de 81,1 es la que usa el protocolo del libro porque el equipo la ofrece y porque cae en la zona donde la V de un oído sano se alarga de forma conocida.
+<!-- Pasada de fundamentos 2026-10-18: decía "La guía de la ACNS incluye el efecto de la tasa entre las pruebas que se pueden agregar al registro de rutina (ACNS, 2008), pero este libro no fija un criterio único". ACNS 9C (PDF de acns.org, © 2008), sección VIII "Recording at High Stimulus Rates": "Recording BAEPs at stimulus rates of 50-70/s facilitates the rapid identification of wave V in screening studies"; sección VI: "There are at present insufficient data to justify interpreting any BAEP alterations not listed above as suggestive of retrocochlear dysfunction" (la tasa no está en la lista). -->
 :::
 
 ### Qué ondas faltan
@@ -92,10 +92,10 @@ Esa organización explica tres cosas de este capítulo. Primero, **el audiograma
 
 ### Por qué la tasa alta pone a prueba la vía
 
-Cada vez que una neurona descarga, necesita un tiempo antes de poder hacerlo de nuevo, y cada sinapsis necesita reponer su neurotransmisor. A tasa baja el tiempo alcanza. A tasa alta se acorta: las neuronas llegan menos preparadas, la descarga se vuelve menos sincrónica y la onda se achica y se retrasa. Una fibra con su vaina de mielina alterada conduce con **menos margen** (la desmielinización la hace más lenta y más propensa a fallar cuando se la exige), de modo que cada estímulo adicional pesa más. <!-- verificar: la explicación del menor margen de seguridad de una fibra desmielinizada es de fisiología general; falta citar una fuente (p. ej. revisión de conducción en axones desmielinizados). --> Por eso el esfuerzo de la tasa alta distingue una vía sana, que solo se "cansa" un poco, de una enferma, que se retrasa mucho más o deja de responder.
+Cada vez que una neurona descarga, necesita un tiempo antes de poder hacerlo de nuevo, y cada sinapsis necesita reponer su neurotransmisor. A tasa baja el tiempo alcanza. A tasa alta se acorta: las neuronas llegan menos preparadas, la descarga se vuelve menos sincrónica y la onda se achica y se retrasa. Una fibra con su vaina de mielina alterada conduce con **menos margen**: la desmielinización la hace más lenta y le cuesta sobre todo conducir trenes de impulsos seguidos (Smith y McDonald, 1999), de modo que cada estímulo adicional pesa más. Por eso el esfuerzo de la tasa alta distingue una vía sana, que solo se "cansa" un poco, de una enferma, que se retrasa mucho más o deja de responder.
 
 :::sabias ¿Sabías que?
-En un paciente con síndrome de "enclaustramiento" (despierto, pero sin movimiento), el ABR mostró alteración del tronco, y la autopsia confirmó el infarto de la protuberancia. Fue de los primeros casos en que una alteración del ABR se pudo comparar con el daño anatómico (Seales y cols., 1981).
+En un paciente con síndrome de "enclaustramiento" (despierto, pero sin movimiento), el ABR mostró alteración del tronco y se recuperó en parte. En la autopsia, las alteraciones que persistieron correspondían al daño permanente de la protuberancia: el ABR había separado lo transitorio de lo definitivo (Seales y cols., 1981). <!-- Pasada de fundamentos 2026-10-18: decía "Fue de los primeros casos en que una alteración del ABR se pudo comparar con el daño anatómico"; Starr y Hamilton (1976) y Stockard y Rossiter (1977) ya habían correlacionado el ABR con lesiones confirmadas en autopsia. Seales 1981: "partial BAEP recovery ... close correspondence between permanent brainstem damage and persistent BAEP abnormalities". -->
 :::
 
 ## Patología
@@ -120,7 +120,7 @@ En la infancia, el tumor más frecuente del tronco es el **glioma pontino difuso
 
 ### Malformación de Chiari
 
-Descenso de las amígdalas cerebelosas por el foramen magno. En 77 pacientes con Chiari I, 32 tenían hipoacusia neurosensorial de severidad variable, y en 22 de ellos era de un solo lado (Kumar y cols., 2002). El I-V basal está alargado (4,19 ± 0,22 ms) y **se acorta tras la descompresión** de la fosa posterior (Anderson y cols., 2003): es un ABR que mejora cuando se alivia la compresión.
+Descenso de las amígdalas cerebelosas por el foramen magno. En 77 pacientes con Chiari I, 32 tenían hipoacusia neurosensorial de severidad variable, y en 22 de ellos era de un solo lado (Kumar y cols., 2002). En 11 niños y adultos jóvenes operados, el I-V **se acortó durante la cirugía**, de 4,19 ± 0,22 a 4,03 ± 0,25 ms, apenas se abrió el hueso de la fosa posterior (Anderson y cols., 2003): es un ABR que mejora cuando se alivia la compresión. <!-- Pasada de fundamentos 2026-10-18: decía "El I-V basal está alargado (4,19 ± 0,22 ms) y se acorta tras la descompresión". Anderson 2003 mide el I-V durante la cirugía (monitoreo intraoperatorio, edad media 9,8 años); no dice que 4,19 ms sea un valor alargado. -->
 
 ### Hipertensión intracraneal idiopática
 
@@ -135,7 +135,7 @@ Depósito de hemosiderina sobre la superficie del cerebro, el cerebelo y los ner
 Después de un traumatismo de cráneo, 7 % de 199 niños quedó con una pérdida neurosensorial persistente de 30 dB o más en las frecuencias de 4 a 8 kHz (Vartiainen y cols., 1985), y en la revisión sistemática de Chen y cols. (2018), sin fractura del temporal, hasta el 58 % mostró un cambio auditivo de al menos 10 a 15 dB en algún rango de frecuencias. La lesión del tronco se agrega a la coclear, y por eso conviene separarlas con el ABR y las emisiones.
 
 :::sabias ¿Sabías que?
-El ABR de la malformación de Chiari **mejora después de la cirugía**: el I-V se acorta cuando se descomprime la fosa posterior (Anderson y cols., 2003). Es una de las pocas patologías donde el registro sirve para seguir la respuesta al tratamiento.
+El ABR de la malformación de Chiari **mejora en la misma cirugía**: el I-V se acorta apenas se descomprime la fosa posterior. Si esa mejoría anuncia la evolución clínica todavía no se sabe (Anderson y cols., 2003). <!-- Pasada de fundamentos 2026-10-18: decía "mejora después de la cirugía ... Es una de las pocas patologías donde el registro sirve para seguir la respuesta al tratamiento". Anderson 2003: mejora intraoperatoria; "Additional studies are needed to establish whether the improvement ... will predict long-term clinical improvement". El ABR también siguió la evolución clínica en el glioma de tronco (Weston 1986), por lo que "una de las pocas" no se sostiene. -->
 :::
 
 ## Razonamiento
@@ -296,7 +296,7 @@ La resonancia tiene lista de espera. ¿Qué parte de la evaluación auditiva se 
 :::
 :::figura cap12_glioma_tronco reflejos
 - @ipsi OD 1000 | Los reflejos están **ausentes en los cuatro registros**, con umbrales de 20 a 35 dB entre 500 y 2.000 Hz.
-- @contra OI 1000 | Con esa audición y un timpanograma A, un oído coclear tendría reflejos presentes; su ausencia bilateral apunta al arco del reflejo en el tronco. <!-- verificar: citar fuente de que los reflejos se conservan con pérdidas cocleares de este grado -->
+- @contra OI 1000 | Con esa audición y un timpanograma A, un oído coclear tendría reflejos presentes (Gelfand y cols., 1990); su ausencia bilateral apunta al arco del reflejo en el tronco.
 :::
 :::figura cap12_glioma_tronco abr
 - @OD 80 V | La V del OD llega a 6,1 ms, **0,6 ms después** de lo que marca la tabla del niño (5,5 ms), con I-V de 4,4 ms. Las ondas miden menos de 0,2 µV.
@@ -390,7 +390,7 @@ El médico pensó en Ménière. ¿Qué dato de la historia no calza con un hidro
 :::
 :::figura cap12_hic_idiopatica reflejos
 - @ipsi OD 1000 | Los reflejos están **ausentes** en los cuatro registros, con 15 a 30 dB en 1.000 a 4.000 Hz.
-- @contra OI 1000 | Un oído coclear con esa audición en las frecuencias medias y agudas tendría reflejos: su ausencia no encaja con la cóclea sola. <!-- verificar: ídem caso 12.3 -->
+- @contra OI 1000 | Un oído coclear con esa audición en las frecuencias medias y agudas tendría reflejos (Gelfand y cols., 1990): su ausencia no encaja con la cóclea sola.
 :::
 :::figura cap12_hic_idiopatica abr
 - @OD 80 I | En el OD la I llega a 1,6 ms, la III a 4,0 y la V a 6,3: **I-III de 2,4** y **III-V de 2,3 ms**, bajo el límite; **I-V de 4,7 ms**, apenas sobre el límite de 4,58.
@@ -407,7 +407,7 @@ El médico pensó en Ménière. ¿Qué dato de la historia no calza con un hidro
 - **Hipótesis esperables:** hidrops (Ménière) bilateral, otoesclerosis, causa vascular, hipertensión intracraneal idiopática. La **pulsatilidad** y los síntomas visuales no calzan con un hidrops.
 - **Qué pedir:** audiometría, reflejos, emisiones y ABR (→ H3, H5, H10). El registro de esfuerzo a 81,1 no puede ser el criterio para dar de alta.
 - **Errores esperables:** tratarla como Ménière; leer el ABR "casi normal" como "sin causa neurológica"; no preguntar si el zumbido late con el pulso.
-- **Para discutir en clases:** por qué la presión del líquido cefalorraquídeo llega al oído interno (por el acueducto coclear, según Sismanis, 1987) y cómo el médico confirma el diagnóstico.
+- **Para discutir en clases:** por qué la presión del líquido cefalorraquídeo llega al oído interno (por el acueducto coclear, según Sismanis, 1987) <!-- verificar: el mecanismo por el acueducto coclear no está en el resumen de Sismanis 1987; no se leyó el texto completo. --> y cómo el médico confirma el diagnóstico.
 - **En LabSim:** cuadro *hipertensión intracraneal idiopática* en los dos oídos.
 :::
 
@@ -513,8 +513,10 @@ Hipoacusia neurosensorial bilateral de graves con acúfeno pulsátil, **sin hall
 1. Chiappa KH, Gladstone KJ, Young RR. Brain stem auditory evoked responses: studies of waveform variations in 50 normal human subjects. Arch Neurol. 1979;36(2):81-87. doi:10.1001/archneur.1979.00500380051005
 1. Stockard JE, Stockard JJ, Westmoreland BF, Corfits JL. Brainstem auditory-evoked responses: normal variation as a function of stimulus and subject characteristics. Arch Neurol. 1979;36(13):823-831. doi:10.1001/archneur.1979.00500490037006
 1. Robinson K, Rudge P. Abnormalities of the auditory evoked potentials in patients with multiple sclerosis. Brain. 1977;100(1):19-40. doi:10.1093/brain/100.1.19
-1. American Clinical Neurophysiology Society. Guideline 9C: Guidelines on Short-Latency Auditory Evoked Potentials. 2008.
-1. Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-91. doi:10.1001/archotol.1980.00790310011003.
+1. American Clinical Neurophysiology Society. Guideline 9C: guidelines on short-latency auditory evoked potentials [Internet]. ACNS; 2008. Publicada también en J Clin Neurophysiol. 2006;23(2):157-67. doi:10.1097/00004691-200604000-00012
+1. Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-91. doi:10.1001/archotol.1980.00790310011003
+1. Musiek FE, Kibbe K, Rackliffe L, Weider DJ. The auditory brain stem response I-V amplitude ratio in normal, cochlear, and retrocochlear ears. Ear Hear. 1984;5(1):52-5. doi:10.1097/00003446-198401000-00011
+1. Gelfand SA, Schwander T, Silman S. Acoustic reflex thresholds in normal and cochlear-impaired ears: effects of no-response rates on 90th percentiles in a large sample. J Speech Hear Disord. 1990;55(2):198-205. doi:10.1044/jshd.5502.198
 
 ### Fisiología
 
@@ -524,14 +526,15 @@ Hipoacusia neurosensorial bilateral de graves con acúfeno pulsátil, **sin hall
 1. Starr A, Hamilton AE. Correlation between confirmed sites of neurological lesions and abnormalities of far-field auditory brainstem responses. Electroencephalogr Clin Neurophysiol. 1976;41(6):595-608. doi:10.1016/0013-4694(76)90005-5
 1. Stockard JJ, Rossiter VS. Clinical and pathologic correlates of brain stem auditory response abnormalities. Neurology. 1977;27(4):316-325. doi:10.1212/wnl.27.4.316
 1. Häusler R, Levine RA. Auditory dysfunction in stroke. Acta Otolaryngol. 2000;120(6):689-703. doi:10.1080/000164800750000207
+1. Smith KJ, McDonald WI. The pathophysiology of multiple sclerosis: the mechanisms underlying the production of symptoms and the natural history of the disease. Philos Trans R Soc Lond B Biol Sci. 1999;354(1390):1649-73. doi:10.1098/rstb.1999.0510
 
 ### Patología
 
 1. Gür E, Binkhamis G, Kluk K. Effects of multiple sclerosis on the audio-vestibular system: a systematic review. BMJ Open. 2022;12(8):e060540. doi:10.1136/bmjopen-2021-060540
 1. Mirmosayyeb O, Naderi M, Raeisi S, Ebrahimi N, Ghaffary EM, Afshari-Safavi A, et al. Hearing loss among patients with multiple sclerosis (PwMS): a systematic review and meta-analysis. Mult Scler Relat Disord. 2022;62:103754. doi:10.1016/j.msard.2022.103754
 1. Versino M, Colnaghi S, Callieco R, Bergamaschi R, Romani A, Cosi V. Vestibular evoked myogenic potentials in multiple sclerosis patients. Clin Neurophysiol. 2002;113(9):1464-1469. doi:10.1016/s1388-2457(02)00155-4
-1. Murofushi T, Shimizu K, Takegoshi H, Cheng PW. Diagnostic value of prolonged latencies in the vestibular evoked myogenic potential. Arch Otolaryngol Head Neck Surg. 2001;127(9):1069-1072. PMID 11556854.
-1. Gazioglu S, Boz C. Ocular and cervical vestibular evoked myogenic potentials in multiple sclerosis patients. Clin Neurophysiol. 2012;123(9):1872-1879. PMID 22418590.
+1. Murofushi T, Shimizu K, Takegoshi H, Cheng PW. Diagnostic value of prolonged latencies in the vestibular evoked myogenic potential. Arch Otolaryngol Head Neck Surg. 2001;127(9):1069-1072. doi:10.1001/archotol.127.9.1069
+1. Gazioglu S, Boz C. Ocular and cervical vestibular evoked myogenic potentials in multiple sclerosis patients. Clin Neurophysiol. 2012;123(9):1872-1879. doi:10.1016/j.clinph.2012.01.022
 1. Seales DM, Torkelson RD, Shuman RM, Rossiter VS, Spencer JD. Abnormal brainstem auditory evoked potentials and neuropathology in "locked-in" syndrome. Neurology. 1981;31(7):893-896. doi:10.1212/wnl.31.7.893
 1. Oh SJ, Kuba T, Soyer A, Choi IS, Bonikowski FP, Vitek J. Lateralization of brainstem lesions by brainstem auditory evoked potentials. Neurology. 1981;31(1):14-18. doi:10.1212/wnl.31.1.14
 1. Lee H, Sohn SI, Jung DK, Cho YW, Lim JG, Yi SD, et al. Sudden deafness and anterior inferior cerebellar artery infarction. Stroke. 2002;33(12):2807-2812. doi:10.1161/01.str.0000038692.17290.24

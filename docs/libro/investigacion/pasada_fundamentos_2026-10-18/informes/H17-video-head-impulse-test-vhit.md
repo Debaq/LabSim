@@ -1,0 +1,34 @@
+# H17. Video head impulse test (vHIT)
+
+El capítulo ya venía bien sostenido. Halmagyi y cols. (2017) se leyó en texto completo (PMC5465266) y confirma: latencia ~8 ms ("its latency is about 8 ms"), prueba puramente vestibular hecha con luz, impulso de ~15° en ~100 ms sobre 150 °/s, pasivo e imprevisible, aceleración de hasta 4.000 °/s², paciente sin VOR a 100 °/s que pierde el blanco los primeros ~100 ms, ganancia normal "close to 1.0" y en la pérdida unilateral "usually less than 0.7", 1 m como distancia mínima sugerida, ganancia de área en ventana ancha y artefacto de gafas bifásico, ventanas estrechas poco confiables con video, desalineación ±10° < 1,5 % y 10 % a 25°, sacada pequeña hacia el lado sano por falta de desinhibición, artefactos del párpado (bifásico en el anterior, falsa sacada encubierta en el posterior, meseta), mirada fuera del plano = ganancia baja con falso retraso, la calórica no es el patrón de oro, hidrops que dilata el laberinto, anterior preservado > 0,7 y < 0,73°/impulso. También en texto completo: McGarvie 2015 (PMC4495346), Zamaro 2020 (PMC9037838), Sjögren 2026 (PMC13152781), Strupp 2022 (PMC9661346). Resúmenes de PubMed confirmados: Weber 2008, Blödow 2013, Matiño-Soler 2015, Wiener-Vacher 2017, Jacobsen 2021, Mantokoudis 2015, Judge 2018, Yip 2016, McCaslin 2014, MacDougall 2013, McGarvie 2015b, Colagiorgio 2017, Hannigan 2021.
+
+## Citas agregadas (respaldo encontrado)
+- Fundamento, segunda ley de Ewald · excitación > inhibición · (Baloh y cols., 1977) · doi:10.3109/00016487709128874 · PMID 888682 · nueva sí. Halmagyi 2017 no nombra la ley de Ewald (búsqueda en el texto completo); solo sostiene el silenciamiento del lado inhibido ("high-acceleration head impulses, which silence the input from the opposite side"), que sigue citado.
+- Cómo se informa, métodos · el cálculo depende del equipo; apoyarse en valores del laboratorio o del fabricante · (Strupp y cols., 2022) · doi:10.3233/VES-220201 · nueva sí. Texto completo: "Calculations may depend upon the equipment and analyzing system used. Thus, investigations have to rely on laboratory standards or manufacturers' data."
+- Tabla de ganancias, límite habitual 0,8 (resuelve verificar) · (Strupp y cols., 2022). Texto completo: "A VOR gain above 0.8 is often classified as normal but there is variability of what is assumed to be normal or pathological ... For a significant VOR deficit, the gain should be less than 0.7 and the side-difference greater than 0.3. There should also be saccades during the test."
+- Tabla, canales verticales (resuelve verificar) · ganancia media de los verticales bajo 1 a todas las edades · (McGarvie y cols., 2015) · nueva no. Texto completo: "For the anterior and posterior canals, the average VOR gain was significantly <1 at all ages"; también "Age was only weakly significant (p < 0.02) for the posterior canal" (sostiene "el posterior baja un poco con la edad", ya en el texto).
+- Comparación con la calórica, mecanismo en Ménière · (McGarvie y cols., 2015c) · doi:10.3109/00016489.2015.1015606 · PMID 26087818 · nueva sí. Resumen: "the increased diameter of the semicircular duct in hydropic labyrinths resulting in endolymph circulation within the duct itself and so a smaller thermally induced pressure across the cupula. The increased duct diameter will have little effect on responses to rotation." Va con la letra "c" porque el capítulo ya tiene McGarvie 2015 (edad) y 2015b (posición de la mirada).
+- Errores, blanco cerca · 1 m como distancia mínima sugerida · (Halmagyi y cols., 2017): "a fixation point closer than 1 m (the minimum suggested distance)".
+
+## Corregidas (la literatura dice otra cosa)
+- Comparación con la calórica · "de los 36 que no [coincidieron], todos tenían vHIT normal y calórica alterada" → "36 mostraron disociación, todos con vHIT normal y paresia calórica sobre 30 %" · Hannigan 2021, resumen: 644 pacientes, 570 concordantes, "36 patients showed a dissociation ... the vHIT gain was normal ... and the caloric test showed a CP > 30%"; 644 − 570 = 74, no 36.
+- Comparación con la calórica · "el hidrops ... altera la forma en que el calor activa los receptores" → "altera la forma en que el calor estimula la cúpula" · McGarvie 2015c (presión térmica sobre la cúpula, no los receptores).
+- Tabla, sanos · "0,96 ± 0,08 en otra serie (Blödow)" → "en los registros normales de otra serie": en el resumen es la "normal hVOR gain" de la serie de 117 pacientes y 20 controles, no una muestra de sanos.
+- Tabla, verticales · "El anterior se consideró preservado con ganancia sobre 0,7 y sacadas menores de 0,73°" → "En pérdidas bilaterales, ... sacadas acumuladas menores de 0,73° por impulso" · Halmagyi 2017: "AC sparing, determined by gain values (>0.7) and cumulative catch-up saccade amplitudes (<0.73°/trial)", en la sección de pérdida bilateral.
+- Errores, blanco cerca · "Con el blanco a menos de 1 m la ganancia sube (Judge 2018)" → "Al acercar el blanco la ganancia de un sano sube (Judge 2018), y 1 m es la distancia mínima sugerida (Halmagyi 2017)". El resumen de Judge dice "gain increased as target distance decreased"; no da el umbral de 1 m.
+
+## Quitadas o reformuladas (sin respaldo)
+- Paso 6 · se retiró el verificar del número mínimo de impulsos: los 20 por oído son práctica; la frase citada (repetir para confirmar un anormal) la sostiene Zamaro 2020: "A larger number of HITs should be performed to confirm abnormal results".
+- Sacadas encubiertas · se retiró el verificar de Sjögren 2026: se leyó el texto completo (43 pacientes; "The presence of covert saccades is a strong indicator of significant underlying VOR hypofunction"; la ganancia mejora sobre todo en los primeros 3 meses).
+
+## Quedan `verificar`
+- Preparación · efecto de los supresores vestibulares sobre la ganancia del vHIT (práctica; sin fuente que lo cuantifique). Sin cambios.
+
+## Para el autor (práctica que choca con la literatura, no editada)
+- Ninguna. El informe a 60 ms ya tiene su recuadro "Lo que dicen las normas" (Halmagyi 2017 prefiere área en ventana ancha; Zamaro 2020 no encuentra un método superior), y las cifras de ese recuadro (1.300 trazas, r² = 0,77) se confirmaron.
+
+## Referencias de la lista con problemas
+- 14 · Jacobsen 2021 · título truncado · se completó: "... of the lateral semicircular canals?" (Crossref/PubMed).
+- 7 · Sjögren 2026 · existe (Crossref: Front Neurol 2026;17, artículo 1832160; PMC13152781); sin cambios.
+- Verificadas sin problemas: Halmagyi y Curthoys 1988, MacDougall 2009 y 2013, Halmagyi 2017, Weber 2008, Colagiorgio 2017, Blödow 2013, McGarvie 2015 y 2015b, Matiño-Soler 2015, Wiener-Vacher 2017, Zamaro 2020, Mantokoudis 2015, Suh 2017, Judge 2018, Yip 2016, McCaslin 2014, Hannigan 2021.
+- Ojo para el coordinador: H16 cita el mismo artículo de McGarvie (Ménière) como "McGarvie y cols., 2015" porque allí es el único McGarvie; en H17 es "2015c".

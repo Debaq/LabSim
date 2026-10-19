@@ -68,7 +68,7 @@ La forma de la curva **no la decide el simulador**: la elige tu docente para cad
 
 ### El timpanograma: As, pero no siempre
 
-En un oído rígido, el pico del timpanograma queda en su lugar (la presión del oído medio es normal) pero **bajo**: es la curva **As** de Jerger, con una compliancia bajo 0,3 mL en el adulto. LabSim, cuando arma una otoesclerosis, la dibuja así.
+En un oído rígido, el pico del timpanograma queda en su lugar (la presión del oído medio es normal) pero **bajo**: es la curva **As** de Jerger, con una compliancia bajo 0,3 mL en el adulto, el límite inferior del 90 % de los adultos sanos (BSA, 2024). LabSim, cuando arma una otoesclerosis, la dibuja así.
 
 :::comentario Lo que dice la literatura
 La curva As es la **forma típica** de la otoesclerosis, y por eso es la que LabSim muestra cuando el docente arma ese cuadro: el ejercicio es reconocer el hallazgo alterado. Pero en la clínica **la mayoría de las otoesclerosis tiene una curva A**. En una serie quirúrgica de 80 oídos, el timpanograma fue A en el 80 % y As en el 20 % (Xue y Sun, 2025). Y aunque la compliancia media de los oídos con otoesclerosis es más baja que la de los sanos, los rangos se superponen tanto que, con un corte que solo marca como anormal al 10 % de los oídos sanos, el 72 % de las otoesclerosis queda dentro de lo normal (Browning y cols., 1985). El timpanograma no confirma ni descarta una otoesclerosis: lo hacen el gap con tímpano normal, la forma de la ósea, los reflejos y la historia. Un caso con curva A se arma a mano en el editor.
@@ -113,7 +113,7 @@ El perfil clásico calza con Carolina, la paciente de práctica 34. En una cohor
 
 La pérdida es conductiva y progresiva, de los graves primero. Dos síntomas ayudan:
 
-- El **acúfeno**, muy frecuente: en una serie, el 73 % lo tenía, casi siempre grave (Lima y cols., 2022).
+- El **acúfeno**, muy frecuente: en una serie, el 73 % lo tenía, en la mayoría de un solo lado y grave, en torno a 500 Hz (Lima y cols., 2022). <!-- Pasada de fundamentos 2026-10-18: decía "casi siempre grave". Se corrigió a "en la mayoría de un solo lado y grave, en torno a 500 Hz" (Lima y cols., 2022: "mostly unilateral, identified in the low frequencies, namely 500 Hz"). -->
 - La **paracusia de Willis**: el paciente entiende mejor en ambientes ruidosos que en silencio (Toscano y cols., 2025). La explicación habitual es que en el ruido los demás levantan la voz, mientras el oído conductivo atenúa el ruido de fondo.
 
 <!-- verificar: la explicación de la paracusia de Willis no está en Toscano 2025; es la clásica de los textos de otología. -->
@@ -136,9 +136,9 @@ Lo que la separa de una **otoesclerosis juvenil** es la historia: la fijación c
 
 ### Enfermedad de Paget
 
-Es una enfermedad del **remodelado óseo** del adulto mayor: el hueso se destruye y se rehace de forma desordenada, más grueso y más débil. Da dolor óseo y deformidades, y cuando toma el cráneo, la cabeza crece; en el examen de sangre sube la **fosfatasa alcalina**. Se trata con bisfosfonatos, como el ácido zoledrónico (Ralston, 2013).
+Es una enfermedad del **remodelado óseo** del adulto mayor: el hueso se destruye y se rehace de forma desordenada, más grueso y más débil. Da dolor óseo y deformidades, y cuando toma el cráneo, la cabeza crece; en el examen de sangre sube la **fosfatasa alcalina**. El dolor óseo se trata con bisfosfonatos, de preferencia el ácido zoledrónico (Ralston y cols., 2019).
 
-<!-- verificar: datos generales de la enfermedad de Paget (adultos mayores, fosfatasa alcalina, bisfosfonatos) tomados de Ralston 2013 sin leer el texto completo (la ficha de PubMed no trae resumen). -->
+<!-- Pasada de fundamentos 2026-10-18: el verificar sobre Ralston 2013 (sin resumen) se resolvió con la guía clínica de Ralston y cols. 2019 (texto completo, PMC6522384): remodelado aumentado y desordenado con hueso mecánicamente débil, incidencia que se duplica cada década después de los 50, fosfatasa alcalina como examen de primera línea y bisfosfonatos, de preferencia ácido zoledrónico, para el dolor óseo. -->
 
 Cuando toma el hueso temporal, la hipoacusia es lenta y progresiva, casi siempre bilateral. En una serie de 27 pacientes, el 85 % consultó por hipoacusia; en los audiogramas disponibles, el 65 % era sensorioneural y el 35 % mixta (Deep y cols., 2017). El gap depende del hueso de la cápsula: Monsell (2004) midió la densidad del hueso de la **cápsula coclear** en pacientes con Paget del cráneo y encontró que, cuanto menos denso era, peores eran los umbrales agudos **y mayor era el gap** en 500 y 1000 Hz. El gap del Paget no viene necesariamente de una cadena fija: puede venir de la cápsula. Por eso el timpanograma puede ser A y los reflejos, sin embargo, faltar. En la tomografía, el hueso enfermo se ve grueso y desordenado, y puede llegar a estrechar el conducto auditivo interno.
 
@@ -432,6 +432,6 @@ Las curvas A con reflejos ausentes son el punto de este caso. Si hubieras leído
 1. Perez R, de Almeida J, Nedzelski JM, Chen JM. Variations in the "Carhart notch" and overclosure after laser-assisted stapedotomy in otosclerosis. Otol Neurotol. 2009;30(8):1033-1036. doi:10.1097/MAO.0b013e31818edf00
 1. Park K, Choung YH. Isolated congenital ossicular anomalies. Acta Otolaryngol. 2009;129(4):419-422. doi:10.1080/00016480802587846
 1. Daniel A, Budiono G, Rao A, Low GK, Ellis MP, Lee J. Juvenile otosclerosis and congenital stapes footplate fixation. A systematic review and meta-analysis of surgical outcomes and management. Int J Pediatr Otorhinolaryngol. 2023;166:111418. doi:10.1016/j.ijporl.2022.111418
-1. Ralston SH. Clinical practice. Paget's disease of bone. N Engl J Med. 2013;368(7):644-50. doi:10.1056/NEJMcp1204713
 1. Monsell EM. The mechanism of hearing loss in Paget's disease of bone. Laryngoscope. 2004;114(4):598-606. doi:10.1097/00005537-200404000-00002
 1. Deep NL, Besch-Stokes JG, Lane JI, Driscoll CLW, Carlson ML. Paget's disease of the temporal bone: a single-institution contemporary review of 27 patients. Otol Neurotol. 2017;38(6):907-915. doi:10.1097/MAO.0000000000001430
+1. Ralston SH, Corral-Gudino L, Cooper C, Francis RM, Fraser WD, Gennari L, et al. Diagnosis and management of Paget's disease of bone in adults: a clinical guideline. J Bone Miner Res. 2019;34(4):579-604. doi:10.1002/jbmr.3657

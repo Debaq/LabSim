@@ -31,7 +31,7 @@ Conviene tener claros sus límites desde el principio:
 
 Cuando un sonido breve llega a la cóclea, miles de fibras del nervio auditivo descargan casi al mismo tiempo. Esa descarga, y la de los núcleos que siguen, produce un campo eléctrico que llega hasta la piel. Unos electrodos en el vértex y detrás de la oreja lo recogen como una serie de ondas positivas en los primeros 10 ms. Jewett y Williston (1971) las describieron en el ser humano y les pusieron los números romanos que se usan hasta hoy.
 
-El problema es el tamaño. La onda V de un adulto normal mide alrededor de **0,5 µV** (Da Silva Nunes y Gentile Matas, 2005). El EEG de fondo y la actividad de los músculos, en la misma banda, son varias veces más grandes. En un solo barrido la respuesta es invisible.
+El problema es el tamaño. La onda V de un adulto normal mide alrededor de **0,5 µV** (Sanfins y cols., 2026).<!-- Pasada de fundamentos 2026-10-18: la cita era Da Silva Nunes y Gentile Matas (2005), que no se pudo leer; Sanfins y cols. (2026, tabla de amplitudes, 244 normoyentes) dan 0,50 µV de media para la onda V. --> El EEG de fondo y la actividad de los músculos, en la misma banda, son varias veces más grandes. En un solo barrido la respuesta es invisible.
 
 La solución es **promediar**. Se repite el estímulo miles de veces y se suman los tramos de señal que siguen a cada uno. La respuesta aparece siempre a la misma latencia y se suma; el ruido aparece al azar y se cancela. El ruido que queda (el **ruido residual**) baja con la raíz cuadrada del número de barridos: para dejarlo a la mitad hay que promediar **cuatro veces más** (Picton, 2010). Por eso no basta "un poco más": de 1.000 a 2.000 barridos el ruido baja solo un 30 %.
 
@@ -66,7 +66,7 @@ De ese mapa sale la lectura clínica de los **interpicos**:
 
 ### Latencia e intensidad
 
-Al bajar la intensidad, las ondas llegan **más tarde** y son **más chicas**. Las primeras en perderse son la I y la III; la V es la que llega más cerca del umbral, y por eso el umbral del ABR es el **umbral de la onda V**. La onda V pasa de unos 5 a 6 ms a 90 dB nHL a unos 8 a 9 ms a 20 dB nHL (ACNS, 2008).
+Al bajar la intensidad, las ondas llegan **más tarde** y son **más chicas**. Las primeras en perderse son la I y la III; la V es la que llega más cerca del umbral, y por eso el umbral del ABR es el **umbral de la onda V**. En una serie de adultos normoyentes, la onda V pasa de 5,5 ms a 90 dB nHL a 8,2 ms a 20 dB nHL (Delgado Hernández y cols., 2003).<!-- Pasada de fundamentos 2026-10-18: decía "de unos 5 a 6 ms a 90 dB nHL a unos 8 a 9 ms a 20 dB nHL (ACNS, 2008)". La guía ACNS 9C no trae esas latencias (expresa la intensidad en dB pe SPL). Se corrigió a las medias de Delgado Hernández y cols. (2003, tabla II: V90 5,53 ms; V20 8,19 ms). -->
 
 La razón está en la cóclea. A intensidad alta, el click excita con fuerza la base, que responde primero. A intensidad baja, la respuesta depende de regiones más apicales, donde la onda viajera llega después, y además la descarga tarda más en sincronizarse. Los interpicos, en cambio, casi no cambian con la intensidad: todas las ondas se corren juntas detrás de la I. Por eso son el parámetro neurológico preferido.
 
@@ -220,7 +220,7 @@ En LabSim el umbral de cada caso está definido **con 2.000 barridos**. Si prome
 
 ### 5. Enmascara cuando el otro oído puede contestar
 
-El sonido que entra por un oído también llega, más débil, a la cóclea del otro. Con fonos de inserción pierde unos 60 a 70 dB en el camino (LabSim usa 65); por vía ósea, casi nada. Si el oído que estudias oye mucho peor que el otro, la respuesta que ves puede ser del oído bueno: es la misma **curva sombra** de la audiometría (→ H4). La regla es la misma: si la intensidad del estímulo, menos lo que se pierde al cruzar, alcanza el umbral óseo del otro oído, se enmascara con ruido en el otro oído (el **Masking** del panel).
+El sonido que entra por un oído también llega, más débil, a la cóclea del otro. Con fonos de inserción pierde unos 60 a 70 dB en el camino (LabSim usa 65); por vía ósea, casi nada.<!-- verificar: 60 a 70 dB de atenuación interaural del click con fono de inserción. Munro y Agnew (1999, doi:10.3109/03005369909090106) miden tonos puros con ER-3A: 15 a 20 dB más que el supraaural (mediana ~60) con inserción profunda, y proponen enmascarar desde 55 dB. No se encontró una serie con click de ABR; el 60-70 viene de decisiones.md (aporte del docente, 2026-09-21) sin fuente. --> Si el oído que estudias oye mucho peor que el otro, la respuesta que ves puede ser del oído bueno: es la misma **curva sombra** de la audiometría (→ H4). La regla es la misma: si la intensidad del estímulo, menos lo que se pierde al cruzar, alcanza el umbral óseo del otro oído, se enmascara con ruido en el otro oído (el **Masking** del panel).
 
 ### 6. Si sospechas compromiso neural, sube la tasa
 
@@ -275,16 +275,14 @@ En Tomás: 20 dB nHL con burst de 500 Hz − 20 = **0 dB eHL**, lo mismo que su 
 
 Cuando el ABR por vía aérea sale elevado, la vía ósea responde lo mismo que en la audiometría: **¿es transmisión o es la cóclea?** Es clave en el lactante con otitis media o con una malformación del oído (→ cap. 15 y 17).
 
-- **Cómo**: el **vibrador** en la mastoides, el mismo montaje, y en LabSim el transductor *vibrador óseo* en Parámetros avanzados. El cráneo vibra entero, así que en el adulto el estímulo llega casi igual a las dos cócleas: hay que **enmascarar** el oído contrario. En el lactante el cráneo transmite peor de un lado al otro y el enmascaramiento pesa menos.
-- **Hasta dónde**: el vibrador entrega poco. Los equipos llegan a unos **45 a 55 dB nHL** (Seo y cols., 2018); en LabSim, **55**. Y cada vía tiene su propia referencia: en el adulto normoyente el umbral del click por vía ósea queda unos **15 dB más arriba** que por vía aérea, mientras que en el lactante quedan casi iguales (Cobb y Stuart, 2016). Al adulto le sobra poco margen: con una pérdida sensorioneural de 35 dB HL, la respuesta ósea ya se sale del alcance del vibrador.
+- **Cómo**: el **vibrador** en la mastoides, el mismo montaje, y en LabSim el transductor *vibrador óseo* en Parámetros avanzados. El cráneo vibra entero, así que en el adulto el estímulo llega casi igual a las dos cócleas: hay que **enmascarar** el oído contrario. En el lactante el cráneo transmite peor de un lado al otro y el enmascaramiento pesa menos (Yang y cols., 1987).
+- **Hasta dónde**: el vibrador entrega poco. Los equipos llegan a unos **45 a 55 dB nHL** (Seo y cols., 2018); en LabSim, **55**. Y cada vía tiene su propia referencia: en el adulto normoyente el umbral del click por vía ósea queda unos **15 dB más arriba** que por vía aérea, mientras que en el lactante quedan casi iguales (Stuart y cols., 1993).<!-- Pasada de fundamentos 2026-10-18: la cita era Cobb y Stuart (2016). Esos trabajos usan CE-Chirp, no click, y en el de umbrales (J Speech Lang Hear Res 2016;59(4):853-9) la diferencia ósea-aérea del adulto es de 4 dB (13,8 contra 9,8 dB nHL). Los 15 dB con click salen de Stuart y cols. (1993): adultos 3,75 dB nHL aérea y 18,75 ósea; neonatos 3,75 y 1,25. --> Al adulto le sobra poco margen: con una pérdida sensorioneural de 35 dB HL, la respuesta ósea ya se sale del alcance del vibrador.
 - **Qué se lee**: **solo la onda V**. La I y la III rara vez se identifican por vía ósea (Seo y cols., 2018): el estímulo trae poca energía aguda y el artefacto del vibrador, apoyado a centímetros del electrodo, tapa los primeros milisegundos. Buscar interpicos en un registro óseo es un error.
-- **El lactante es distinto**: su onda V por vía ósea llega **antes** que por vía aérea, al revés que en el adulto (Yang y cols., 1987).
+- **El lactante es distinto**: su onda V por vía ósea llega **antes** que por vía aérea, al revés que en el adulto (Seo y cols., 2018).
 
 :::comentario Por qué 55 dB en LabSim
 El tope del vibrador no es un error del simulador: es el límite físico del transductor. La revisión de Seo y cols. (2018) lo ubica entre 45 y 55 dB nHL según el equipo, y hay series normativas que solo miden hasta 50 dB nHL porque su vibrador no entrega más. LabSim toma el extremo alto, 55 dB nHL. Si tu equipo llega solo a 45 o 50, la ventana útil de la vía ósea es todavía más angosta: un ABR óseo "sin respuesta" a su tope no es lo mismo que una cóclea sin función.
 :::
-
-<!-- verificar: Cobb y Stuart 2016 (Ear Hear 37(6), partes I y II): autores, año y diseño confirmados en Bibliografia.php (A03); volumen y páginas sin confirmar en el original. -->
 
 ### 9. Mide y revisa la función latencia-intensidad
 
@@ -345,14 +343,14 @@ El nivel del tamizaje es fijo por una razón: 35 dB nHL separa un oído que oye 
 
 - **Latencias absolutas** de las ondas I, III y V a 80 dB nHL, por oído.
 - **Interpicos** I-III, III-V e I-V.
-- **Diferencia interaural de la onda V** al mismo nivel. En normoyentes es de apenas 0,08 ms en promedio (Sanfins y cols., 2026); según el centro, se considera anormal sobre 0,2 a 0,4 ms. LabSim usa 0,4 ms.
-- **Razón de amplitudes V/I**. En un oído normal la V es más grande que la I. Una V proporcionalmente chica (en LabSim, V/I menor que 1) es un hallazgo retrococlear.
+- **Diferencia interaural de la onda V** al mismo nivel. En normoyentes es de apenas 0,08 ms en promedio (Sanfins y cols., 2026); según el centro, se considera anormal sobre 0,2 a 0,4 ms (Selters y Brackmann, 1977). LabSim usa 0,4 ms.
+- **Razón de amplitudes V/I**. En un oído normal la V es más grande que la I (Musiek y cols., 1984). Una V proporcionalmente chica (en LabSim, V/I menor que 1) es un hallazgo retrococlear.
 - **Morfología y replicabilidad**: si las ondas son claras y se repiten.
 - **Umbral de la onda V** por estímulo, en dB nHL, y su estimación en dB eHL.
 
 ### Contra qué se compara
 
-Cada laboratorio debe tener su propia norma, medida con su equipo, su transductor y su protocolo, estratificada por sexo y edad (Sanfins y cols., 2026; ACNS, 2008). En las mujeres las ondas III y V llegan 0,08 a 0,19 ms antes que en los hombres, y los interpicos son 0,07 a 0,15 ms más cortos (Jerger y Hall, 1980; Sanfins y cols., 2026). Con la edad adulta la V se alarga unos 0,2 ms entre los 25 y los 55 años y su amplitud cae cerca de un 10 % (Jerger y Hall, 1980). El recién nacido tiene la onda I casi de adulto y un I-V largo (Rosa y cols., 2014), que se acorta hasta llegar a valores de adulto entre los 9 meses y los 3 años (Gorga y cols., 1989; Sharma y cols., 2016). La temperatura también cuenta: la hipotermia alarga el I-V (→ cap. 14).
+Cada laboratorio debe tener su propia norma, medida con su equipo, su transductor y su protocolo, estratificada por sexo y edad (Sanfins y cols., 2026; ACNS, 2008). En las mujeres las ondas III y V llegan 0,08 a 0,19 ms antes que en los hombres, y los interpicos son 0,07 a 0,15 ms más cortos (Jerger y Hall, 1980; Sanfins y cols., 2026). Con la edad adulta la V se alarga unos 0,2 ms entre los 25 y los 55 años y su amplitud cae cerca de un 10 % (Jerger y Hall, 1980). El recién nacido tiene la onda I algo más tardía que la del adulto y un I-V largo (Rosa y cols., 2014). La onda V, y con ella los interpicos, se acorta rápido hasta los 18 meses mientras la I casi no cambia (Gorga y cols., 1989), y después de los 3 años sigue acortándose más lento (Sharma y cols., 2016).<!-- Pasada de fundamentos 2026-10-18: decía "la onda I casi de adulto" y que el I-V llega "a valores de adulto entre los 9 meses y los 3 años". Rosa y cols. (2014) dan la onda I del término en 1,79 ms (adulto ~1,47); Gorga y cols. (1989) ven acortarse la V al menos hasta los 18 meses, y Sharma y cols. (2016) la ven madurar del todo recién a los 12 años. --> La temperatura también cuenta: la hipotermia alarga el I-V (→ cap. 14).
 
 :::ayuda-ancho Valores de referencia que usa LabSim en el adulto (click a 80 dB nHL, en ms)
 | | Hombre: media | Hombre: límite | Mujer: media | Mujer: límite |
@@ -497,31 +495,33 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. Hall JW 3rd. New handbook of auditory evoked responses. Boston: Pearson; 2007.
 1. American Clinical Neurophysiology Society. Guideline 9C: Guidelines on short-latency auditory evoked potentials. ACNS; 2008. Disponible en: https://www.acns.org/pdf/guidelines/Guideline-9C.pdf
 1. Elberling C, Don M. Quality estimation of averaged auditory brainstem responses. Scand Audiol. 1984;13(3):187-97. doi:10.3109/01050398409043059
-1. Don M, Elberling C. Evaluating residual background noise in human auditory brain-stem responses. J Acoust Soc Am. 1994;96(5 Pt 1):2746-57.
-1. Don M, Elberling C. Use of quantitative measures of auditory brain-stem response peak amplitude and residual background noise in the decision to stop averaging. J Acoust Soc Am. 1996;99(1):491-9.
-1. Stockard JE, Stockard JJ, Westmoreland BF, Corfits JL. Brainstem auditory-evoked responses: normal variation as a function of stimulus and subject characteristics. Arch Neurol. 1979;36(13):823-31.
-1. Da Silva Nunes C, Gentile Matas C. Audiometría de tronco encefálico utilizando diferentes polaridades de presentación del estímulo acústico. Rev Chil Fonoaudiol. 2005;6(2):7-16.
-1. Jiang ZD, et al. The effect of click rate on latency and interpeak interval of the brain-stem auditory evoked potentials in children from birth to 6 years. Electroencephalogr Clin Neurophysiol. 1991.
+1. Don M, Elberling C. Evaluating residual background noise in human auditory brain-stem responses. J Acoust Soc Am. 1994;96(5 Pt 1):2746-57. doi:10.1121/1.411281
+1. Don M, Elberling C. Use of quantitative measures of auditory brain-stem response peak amplitude and residual background noise in the decision to stop averaging. J Acoust Soc Am. 1996;99(1):491-9. doi:10.1121/1.414560
+1. Stockard JE, Stockard JJ, Westmoreland BF, Corfits JL. Brainstem auditory-evoked responses: normal variation as a function of stimulus and subject characteristics. Arch Neurol. 1979;36(13):823-31. doi:10.1001/archneur.1979.00500490037006
+1. Da Silva Nunes C, Gentile Matas C. Audiometría de tronco encefálico utilizando diferentes polaridades de presentación del estímulo. Rev Chil Fonoaudiol. 2005;6(2):7-16. doi:10.5354/0719-4692.2005.48433
+1. Jiang ZD, Wu YY, Zheng WS, Sun DK, Feng LY, Liu XY. The effect of click rate on latency and interpeak interval of the brain-stem auditory evoked potentials in children from birth to 6 years. Electroencephalogr Clin Neurophysiol. 1991;80(1):60-4. doi:10.1016/0168-5597(91)90044-x
 1. Cargnelutti M, Coser PL, Biaggio EP. LS CE-Chirp vs. click in the neuroaudiological diagnosis by ABR. Braz J Otorhinolaryngol. 2017;83(3):313-7. doi:10.1016/j.bjorl.2016.04.018
-1. Pinto FR, Matas CG. A comparison between hearing and tone burst electrophysiological thresholds. Braz J Otorhinolaryngol. 2007. doi:10.1016/S1808-8694(15)30103-8 <!-- verificar: año, volumen y páginas (el año se dedujo del DOI). -->
-1. Stapells DR, Oates P. Estimation of the pure-tone audiogram by the auditory brainstem response: a review. Audiol Neurootol. 1997;2(5):257-80.
+1. Pinto FR, Matas CG. A comparison between hearing and tone burst electrophysiological thresholds. Braz J Otorhinolaryngol. 2007;73(4):513-22. doi:10.1016/S1808-8694(15)30103-8
+1. Stapells DR, Oates P. Estimation of the pure-tone audiogram by the auditory brainstem response: a review. Audiol Neurootol. 1997;2(5):257-80. doi:10.1159/000259252
 1. Stapells DR. Threshold estimation by the tone-evoked auditory brainstem response: a literature meta-analysis. J Speech Lang Pathol Audiol. 2000;24(2):74-83.
-1. Seo YJ, et al. Update on bone-conduction auditory brainstem responses: a review. J Audiol Otol. 2018;22(2):53-8. PMID 29471611.
-1. Cobb KM, Stuart A. Neonate auditory brainstem responses to CE-Chirp and CE-Chirp octave band stimuli I y II. Ear Hear. 2016;37(6). <!-- verificar: páginas. -->
-1. Yang EY, Rupert AL, Moushegian G. A developmental study of bone conduction auditory brain stem response in infants. Ear Hear. 1987;8:244-51.
+1. Seo YJ, Kwak C, Kim S, Park YA, Park KH, Han W. Update on bone-conduction auditory brainstem responses: a review. J Audiol Otol. 2018;22(2):53-8. doi:10.7874/jao.2017.00346 PMID 29471611.
+1. Stuart A, Yang EY, Stenstrom R, Reindorp AG. Auditory brainstem response thresholds to air and bone conducted clicks in neonates and adults. Am J Otol. 1993;14(2):176-82. PMID 8503493.
+1. Yang EY, Rupert AL, Moushegian G. A developmental study of bone conduction auditory brain stem response in infants. Ear Hear. 1987;8(4):244-51. doi:10.1097/00003446-198708000-00009
 1. British Society of Audiology. Recommended procedure: cochlear microphonic testing (OD104-87). BSA; 2019. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-87-Recommended-Procedure-for-Cochlear-Microphonic-Testing.pdf
-1. O'Beirne GA, Patuzzi RB. Basic properties of the sound-evoked post-auricular muscle response (PAMR). Hear Res. 1999;138(1-2):115-32.
+1. O'Beirne GA, Patuzzi RB. Basic properties of the sound-evoked post-auricular muscle response (PAMR). Hear Res. 1999;138(1-2):115-32. doi:10.1016/s0378-5955(99)00159-8
 
 ### Valores normales
 
 1. Sanfins MD, Santillo MEA, Martins MFP, Silva DLdS, Gos E, Skarzynski PH, Hall JW III. The influence of sex, ear, and age on auditory brainstem responses recorded with the NeuroAudio system. Diagnostics. 2026;16(7):971. doi:10.3390/diagnostics16070971
-1. Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-91.
+1. Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-91. doi:10.1001/archotol.1980.00790310011003
 1. Hood LJ. Clinical applications of the auditory brainstem response. San Diego: Singular Publishing Group; 1998. Tabla 2-3. <!-- verificar: año y ciudad de la edición; la planilla de LabSim no los trae. -->
-1. Delgado Hernández J, Zenker Castro F, Barajas del Prat JJ. Normalización de los potenciales evocados auditivos del tronco cerebral I: resultados en una muestra de adultos normoyentes. Auditio. 2003;2(1). doi:10.51445/sja.auditio.vol2.2003.0020
-1. Aguilar-Madrid G, Torres-Valenzuela A, Hinojos-Escobar W, Cabello-López A, Gopar-Nieto R, Ravelo-Cortés PE, et al. Latencias de los potenciales evocados auditivos del tallo cerebral, por edad y sexo, en población adulta mexicana. Rev Med Inst Mex Seguro Soc. 2016;54(2):203-10.
-1. Gorga MP, Kaminski JR, Beauchaine KL, Jesteadt W, Neely ST. Auditory brainstem responses from children three months to three years of age: normal patterns of response II. J Speech Hear Res. 1989;32(2):281-8.
-1. Rosa LAC, et al. Auditory brainstem response: reference-values for age. CoDAS. 2014. doi:10.1590/2317-1782/2014469in
-1. Sharma M, Bist SS, Kumar S. Age-related maturation of wave V latency of auditory brainstem response in children. J Audiol Otol. 2016;20(2):97-104.
+1. Delgado Hernández J, Zenker Castro F, Barajas del Prat JJ. Normalización de los potenciales evocados auditivos del tronco cerebral I: resultados en una muestra de adultos normoyentes. Auditio. 2003;2(1):13-8. doi:10.51445/sja.auditio.vol2.2003.0020
+1. Aguilar-Madrid G, Torres-Valenzuela A, Hinojos-Escobar W, Cabello-López A, Gopar-Nieto R, Ravelo-Cortés PE, et al. Latencias de los potenciales evocados auditivos del tallo cerebral, por edad y sexo, en población adulta mexicana. Rev Med Inst Mex Seguro Soc. 2016;54(2):203-10. PMID 26960049.
+1. Gorga MP, Kaminski JR, Beauchaine KL, Jesteadt W, Neely ST. Auditory brainstem responses from children three months to three years of age: normal patterns of response II. J Speech Hear Res. 1989;32(2):281-8. doi:10.1044/jshr.3202.281
+1. Rosa LAC, Suzuki MR, Angrisani RG, Azevedo MF. Auditory brainstem response: reference-values for age. CoDAS. 2014;26(2):117-21. doi:10.1590/2317-1782/2014469in
+1. Sharma M, Bist SS, Kumar S. Age-related maturation of wave V latency of auditory brainstem response in children. J Audiol Otol. 2016;20(2):97-101. doi:10.7874/jao.2016.20.2.97
+1. Selters WA, Brackmann DE. Acoustic tumor detection with brain stem electric response audiometry. Arch Otolaryngol. 1977;103(4):181-7. doi:10.1001/archotol.1977.00780210037001
+1. Musiek FE, Kibbe K, Rackliffe L, Weider DJ. The auditory brain stem response I-V amplitude ratio in normal, cochlear, and retrocochlear ears. Ear Hear. 1984;5(1):52-5. doi:10.1097/00003446-198401000-00011
 
 ### Umbral por frecuencia y tamizaje
 
@@ -533,8 +533,8 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 ### Fisiología
 
 1. Jewett DL, Williston JS. Auditory-evoked far fields averaged from the scalp of humans. Brain. 1971;94(4):681-96. doi:10.1093/brain/94.4.681
-1. Møller AR, Jannetta P, Bennett M, Møller MB. Intracranially recorded responses from the human auditory nerve: new insights into the origin of brain stem evoked potentials (BSEPs). Electroencephalogr Clin Neurophysiol. 1981;52(1):18-27.
-1. Møller AR, Jannetta PJ. Interpretation of brainstem auditory evoked potentials: results from intracranial recordings in humans. Scand Audiol. 1983;12(2):125-33.
-1. Melcher JR, Kiang NY. Generators of the brainstem auditory evoked potential in cat. III: Identified cell populations. Hear Res. 1996;93(1-2):52-71.
-1. Starr A, Picton TW, Sininger Y, Hood LJ, Berlin CI. Auditory neuropathy. Brain. 1996;119(Pt 3):741-53.
-1. Berlin CI, Bordelon J, St John P, Wilensky D, Hurley A, Kluka E, et al. Reversing click polarity may uncover auditory neuropathy in infants. Ear Hear. 1998;19(1):37-47.
+1. Møller AR, Jannetta P, Bennett M, Møller MB. Intracranially recorded responses from the human auditory nerve: new insights into the origin of brain stem evoked potentials (BSEPs). Electroencephalogr Clin Neurophysiol. 1981;52(1):18-27. doi:10.1016/0013-4694(81)90184-x
+1. Møller AR, Jannetta PJ. Interpretation of brainstem auditory evoked potentials: results from intracranial recordings in humans. Scand Audiol. 1983;12(2):125-33. doi:10.3109/01050398309076235
+1. Melcher JR, Kiang NY. Generators of the brainstem auditory evoked potential in cat. III: Identified cell populations. Hear Res. 1996;93(1-2):52-71. doi:10.1016/0378-5955(95)00200-6
+1. Starr A, Picton TW, Sininger Y, Hood LJ, Berlin CI. Auditory neuropathy. Brain. 1996;119(Pt 3):741-53. doi:10.1093/brain/119.3.741
+1. Berlin CI, Bordelon J, St John P, Wilensky D, Hurley A, Kluka E, et al. Reversing click polarity may uncover auditory neuropathy in infants. Ear Hear. 1998;19(1):37-47. doi:10.1097/00003446-199802000-00002

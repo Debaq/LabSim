@@ -4,9 +4,11 @@ Este libro enseña a **evaluar y rehabilitar en otorrinolaringología a partir d
 
 Es un solo libro que crece por **secciones**. Esta edición trae la audición: sus bases, cómo se hace cada examen y los casos clínicos. Las ediciones siguientes suman el equilibrio, la nariz y la rehabilitación auditiva y vestibular, sin cambiar lo que ya está.
 
+<!-- Pasada de fundamentos 2026-10-18: Bases decía "La fisiología auditiva"; B1-B4 son anatomía, fisiología auditiva y vestibular, histología y física. -->
+
 ## Tres tipos de capítulo
 
-- **Bases (B).** La fisiología auditiva que necesitas para entender por qué cada examen se hace como se hace.
+- **Bases (B).** La anatomía, la histología, la física y la fisiología auditiva y vestibular que necesitas para entender por qué cada examen se hace como se hace.
 - **Caja de herramientas (H1 a H25).** Cómo se hace cada examen: para qué sirve, su fundamento, qué preparar, el paso a paso, cómo se informa, los errores frecuentes y cómo practicarlo en LabSim. Cuando un capítulo clínico dice "→ H4", el detalle de esa técnica está en la herramienta H4.
 - **Capítulos clínicos (1 a 36).** Parten de un problema y enseñan a razonar: qué mirar de la técnica en ese problema, el mecanismo, los cuadros y los casos.
 
@@ -68,4 +70,4 @@ Cada caso trae su **guía para el docente** en un recuadro verde, «Para el doce
 
 ## Las referencias
 
-Cada capítulo trae sus propias referencias al final, separadas en técnica, fisiología y patología. Cuando la práctica que enseña este libro difiere de una norma o guía, el texto explica las dos y por qué hacemos lo que hacemos.
+Cada capítulo trae sus propias referencias al final, agrupadas por tema (técnica, fisiología, patología) cuando son varias. Cuando la práctica que enseña este libro difiere de una norma o guía, el texto explica las dos y por qué hacemos lo que hacemos.

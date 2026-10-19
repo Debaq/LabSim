@@ -18,7 +18,7 @@ Las herramientas son las mismas del capítulo 2: la **audiometría con vía óse
 
 Con la ósea normal, todo lo que la aérea pierde es transmisión (→ H3). En un oído medio estructural interesan tres cosas del gap:
 
-- **Cuánto mide.** Un oído medio con la membrana entera y la cadena cortada pierde unos 50 a 60 dB: es la conductiva más grande posible (Merchant y cols., 1998). Ninguna perforación ni placa llega ahí por sí sola. Un gap de 50 dB o más con la membrana entera apunta a la cadena.
+- **Cuánto mide.** Un oído medio con la membrana entera y la cadena cortada pierde unos 50 a 60 dB: es la conductiva más grande posible (Merchant y cols., 1998).<!-- verificar: el abstract de Merchant 1998 explica el gap de la interrupción de cadena por la pérdida del acople osicular, pero no da la cifra; los 50-60 dB no se pudieron ver en el texto completo. En la serie quirúrgica de Farahmand 2016 la discontinuidad completa promedió 35-50 dB de gap. --> Ninguna perforación ni placa llega ahí por sí sola. Un gap de 50 dB o más con la membrana entera apunta a la cadena.
 - **Qué forma tiene.** Mayor en los graves y más chico en los agudos (configuración ascendente), plano, o mayor en los agudos. Cada forma habla de un mecanismo distinto (ver *Fisiología*).
 - **El grado.** Se calcula igual que siempre, con el promedio BIAP de 500 a 4.000 Hz por vía aérea (→ H3). Una conductiva pura casi nunca pasa de moderada.
 
@@ -72,7 +72,7 @@ El sonido viaja por el aire y la cóclea está llena de líquido. Si el aire emp
 
 <!-- verificar: 17:1 y 1,3:1 son los valores clásicos (Wever y Lawrence, 1954), citados por Merchant 1998; se tomaron de fuentes secundarias. -->
 
-La cuenta teórica da unos 25 a 30 dB; lo medido en huesos temporales es menor, unos 20 dB, con el máximo cerca de 1 kHz (Aibara y cols., 2001). Además, la membrana entera **protege la ventana redonda**: el sonido empuja la cóclea por la ventana oval y no por las dos ventanas a la vez, donde se anularía.
+La cuenta teórica da unos 25 a 30 dB; lo medido en huesos temporales es menor, unos 23 dB como máximo, cerca de 1,2 kHz (Aibara y cols., 2001).<!-- Pasada de fundamentos 2026-10-18: decía "unos 20 dB, con el máximo cerca de 1 kHz". Aibara 2001 (abstract): "The mean GME magnitude reached 23.5 dB at 1.2 kHz". --> Además, la membrana entera **protege la ventana redonda**: el sonido empuja la cóclea por la ventana oval y no por las dos ventanas a la vez, donde se anularía.
 
 Eso explica las dos lesiones extremas:
 
@@ -96,7 +96,7 @@ El vibrador no "se salta" el oído medio del todo. La cóclea recibe la vibraci�
 
 ### Perforación timpánica
 
-Viene de la **otitis media crónica** o de un **trauma** (una bofetada, un cotonito, una explosión). La traumática suele cerrarse sola en semanas; la crónica, no, y supura cuando entra agua o con un resfrío.
+Viene de la **otitis media crónica** o de un **trauma** (una bofetada, un cotonito, una explosión). La traumática suele cerrarse sola en semanas: en una serie se cerró el 97 %, la mayoría en tres a cuatro semanas (Jellinge y cols., 2015). La crónica, no, y supura cuando entra agua o con un resfrío.
 
 La pérdida es conductiva, mayor en los graves y proporcional al tamaño del agujero (Mehta y cols., 2006). Una perforación chica da un gap pequeño; una subtotal puede dar 40 o 50 dB en los graves. Si el gap es **mucho mayor** de lo que explica el tamaño, la cadena también está dañada. El tratamiento es quirúrgico y lo decide el otorrino: la **timpanoplastia** cierra la membrana y, si hace falta, reconstruye la cadena. Antes de operar se pide la audiometría y la función tubaria.
 
@@ -105,7 +105,7 @@ La pérdida es conductiva, mayor en los graves y proporcional al tamaño del agu
 Son depósitos de colágeno hialinizado y calcio que quedan después de inflamaciones repetidas del oído medio y de los tubos de ventilación. En la otoscopía se ven como **placas blancas**, a menudo en herradura.
 
 - **Miringoesclerosis**: las placas están solo en la membrana. Casi nunca dan pérdida: en un modelo de la membrana, la placa aislada cambió el movimiento del umbo, pero no el de la platina (Gentil y cols., 2014).
-- **Timpanoesclerosis**: las placas llegan a la caja y a la cadena. Rigidizan el sistema y dan un gap **mayor en los graves**, casi siempre bajo 40 dB (83 % de los casos limitados a la membrana; Kaur y cols., 2006), con curva As. Cuando fija el estribo, el gap puede pasar de 40 dB. La cirugía mejora sobre todo 0,5 a 2 kHz (Stankovic, 2009).
+- **Timpanoesclerosis**: las placas llegan a la caja y a la cadena. Rigidizan el sistema y dan un gap **mayor en los graves**, con curva As. El tamaño depende de hasta dónde llegan las placas: con la timpanoesclerosis limitada a la membrana, el 83 % de los oídos tuvo un gap bajo 40 dB; cuando comprometía también la caja, el 75 % pasó de 40 dB (Kaur y cols., 2006). Los casos y la tabla de este capítulo muestran la forma leve, de hasta unos 40 dB.<!-- Pasada de fundamentos 2026-10-18: decía "casi siempre bajo 40 dB (83 % de los casos limitados a la membrana; Kaur y cols., 2006) ... Cuando fija el estribo, el gap puede pasar de 40 dB". Kaur 2006 (abstract): "When tympanosclerosis was confined only to the tympanic membrane, 83.3% of the cases had an air-bone-gap less than 40 dB. On the other hand, when tympanosclerosis affected both the tympanic membrane and the middle ear, 75% of the cases had an air-bone-gap more than 40 dB". El 83 % era de la forma limitada a la membrana, no de la que llega a la caja. --> La cirugía mejora sobre todo 0,5 a 2 kHz (Stankovic, 2009).
 
 ### Disyunción y fractura de cadena
 
@@ -114,13 +114,13 @@ La causa principal es el **traumatismo encefalocraneano** con fractura del tempo
 En las fracturas que respetan la cápsula el gap es mayor en los graves, con un valle en 2 kHz, y es mayor cuando la cadena está comprometida (Kim y cols., 2016). La mayoría se recupera sola: en una serie, el gap bajó de 27 dB a las tres semanas a 20 dB a los casi tres meses, sin cirugía (Song y cols., 2017). Lo que **no se recupera** cuando se reabsorbe la sangre es la cadena:
 
 - **Disyunción**: la cadena se desarticula, casi siempre entre el yunque y el estribo. Gap grande (45 a 60 dB) y plano, membrana íntegra, curva **Ad** y reflejos ausentes con la sonda en ese oído.
-- **Fractura de cadena**: un huesecillo se rompe pero queda unido a medias (el mango del martillo, las cruras del estribo). Gap menor, cerca de 30 dB, **mayor en los agudos**, con curva A o Ad (Farahmand y cols., 2016).
+- **Fractura de cadena**: un huesecillo se rompe pero queda unido a medias (el mango del martillo, las cruras del estribo). Gap menor, cerca de 30 dB; cuando es **mayor en los agudos** que en los graves, lo más probable es una unión a medias (Farahmand y cols., 2016). La curva es A o Ad.<!-- Pasada de fundamentos 2026-10-18: decía "Gap menor, cerca de 30 dB, mayor en los agudos". Farahmand 2016 (texto completo, PMC4767640): en promedio, la discontinuidad parcial dio un gap "quite flat and hovers near 30 dB across all frequencies"; el gap mayor en agudos, cuando aparece, se asoció a bandas de tejido blando en la cirugía. La curva A o Ad no sale de Farahmand. -->
 
 También la puede desarticular una otitis crónica que necrosa el yunque, o un cotonito. Se trata con una osiculoplastia o un audífono.
 
 ### Colesteatoma
 
-Es piel atrapada en el oído medio: el epitelio de una bolsa de retracción, casi siempre en el **ático** (la parte superior de la caja), se acumula como escamas de queratina, se infecta y **erosiona el hueso**. Da otorrea **fétida** a repetición e hipoacusia progresiva. En la otoscopía hay una bolsa de retracción o una costra en el ático, con material blanco.
+Es piel atrapada en el oído medio: el epitelio de una bolsa de retracción, la mayoría de las veces en el **ático** (la parte superior de la caja), se acumula como escamas de queratina, se infecta y **erosiona el hueso**. Da otorrea **fétida** a repetición e hipoacusia progresiva. En la otoscopía hay una bolsa de retracción o una costra en el ático, con material blanco.
 
 El gap crece a medida que se come la cadena, sobre todo el yunque (Martins y cols., 2012), y suele ser más grande y plano que el de una perforación. Mientras la ósea esté normal, la cóclea está a salvo. El colesteatoma **no se cura con gotas**: el tratamiento es quirúrgico, y la audiometría sirve para planificarlo y seguirlo (Stankovic, 2008).
 
@@ -135,7 +135,7 @@ Es un **paraganglioma**: un tumor benigno, muy vascular, que nace sobre el promo
 
 ### Otitis media crónica y el oído operado
 
-Una otitis crónica con años de otorrea no se queda siempre en el oído medio. La ósea cae, más en los agudos (Elzinga y cols., 2021), probablemente porque la inflamación pasa al oído interno por la ventana redonda. <!-- verificar: el mecanismo por la ventana redonda es la hipótesis más citada; confirmar que Elzinga 2021 lo discute. --> La pérdida se vuelve **mixta**. Después de una cirugía, el audiograma depende de lo que quedó: una timpanoplastia con un injerto laxo puede dar Ad, una cavidad abierta (mastoidectomía radical) un B con volumen alto, y la audición suele quedar mejor cuando se conserva la pared del conducto (Kim y cols., 2010).
+Una otitis crónica con años de otorrea no se queda siempre en el oído medio. En los estudios que lo comparan, la ósea del oído enfermo queda peor que la del sano, con más diferencia en los agudos; se atribuye al paso de toxinas de la inflamación por la ventana redonda, aunque esos estudios tienen sesgos que impiden asegurar la relación (Elzinga y cols., 2021).<!-- Pasada de fundamentos 2026-10-18: decía "La ósea cae, más en los agudos (Elzinga y cols., 2021), probablemente porque la inflamación pasa al oído interno por la ventana redonda", con un verificar. Elzinga 2021 (texto completo, PMC8362691): ósea 1,19-32,21 dB peor en el oído enfermo; "Four out of seven of our included studies ... show a larger difference in HL in the higher frequencies"; "toxins can initiate damage to the round window membrane"; conclusión: "no conclusion on the correlation between OM and SNHL can be made". --> La pérdida se vuelve **mixta**. Después de una cirugía, el audiograma depende de lo que quedó: una timpanoplastia con un injerto laxo puede dar Ad, una cavidad abierta (mastoidectomía radical) un B con volumen alto, y en el colesteatoma la audición queda mejor cuando se conserva la pared del conducto (Stankovic, 2008), aunque en la otitis crónica sin colesteatoma la técnica no cambió el resultado (Kim y cols., 2010).<!-- Pasada de fundamentos 2026-10-18: decía "la audición suele quedar mejor cuando se conserva la pared del conducto (Kim y cols., 2010)". Kim 2010 (abstract) dice lo contrario: "The type of mastoid surgery (CWUM and CWDM) did not affect the hearing results of CSOM patients". Stankovic 2008 (abstract): "CWD tympanoplasty ... associated with reduced gains in hearing". -->
 
 ## Razonamiento
 
@@ -382,7 +382,7 @@ Mientras la membrana no se cierre, el agua es lo que reactiva la otorrea. Para l
 
 #### Razonamiento
 
-Las placas blancas cuentan la historia: otitis y tubos en la infancia. Pero la miringoesclerosis sola casi no da pérdida, y Daniela tiene un gap de 25 a 40 dB, mayor en los graves, con una curva As. Eso es rigidez más allá de la membrana: la timpanoesclerosis llegó a la caja o a la cadena. La ósea sin muesca en 2 kHz y un gap bajo 40 dB no apuntan a un estribo fijo.
+Las placas blancas cuentan la historia: otitis y tubos en la infancia. Pero la miringoesclerosis sola casi no da pérdida, y Daniela tiene un gap de 25 a 40 dB, mayor en los graves, con una curva As. Eso es rigidez más allá de la membrana: la timpanoesclerosis llegó a la caja o a la cadena, en su forma leve. La ósea sin muesca en 2 kHz y un gap bajo 40 dB no apuntan a un estribo fijo.
 
 #### Diagnóstico y qué sigue
 
@@ -472,19 +472,20 @@ La pérdida de un chofer suele atribuirse al ruido del motor. Aquí no calza: el
 
 ### Patología
 
-1. Mehta RP, Rosowski JJ, Voss SE, O'Neil E, Merchant SN. Determinants of hearing loss in perforations of the tympanic membrane. Otol Neurotol. 2006;27(2):136-143.
+1. Mehta RP, Rosowski JJ, Voss SE, O'Neil E, Merchant SN. Determinants of hearing loss in perforations of the tympanic membrane. Otol Neurotol. 2006;27(2):136-143. doi:10.1097/01.mao.0000176177.17636.53
 1. Kaur K, Sonkhya N, Bapna AS. Tympanosclerosis revisited. Indian J Otolaryngol Head Neck Surg. 2006;58(2):128-132. doi:10.1007/BF03050766
-1. Stankovic MD. Hearing results of surgery for tympanosclerosis. Eur Arch Otorhinolaryngol. 2009;266(5):635-640.
+1. Stankovic MD. Hearing results of surgery for tympanosclerosis. Eur Arch Otorhinolaryngol. 2009;266(5):635-640. doi:10.1007/s00405-008-0789-3
 1. Gentil F, Garbe C, Parente M, Martins P, Ferreira A, Jorge RN, Santos C, Paço J. Analysis of eardrum pathologies using the finite element method. J Mech Med Biol. 2014;14(3):1450034. doi:10.1142/s0219519414500341
 1. Farahmand RB, Merchant GR, Lookabaugh SA, Röösli C, Ulku CH, McKenna MJ, de Venecia RK, Halpin CF, Rosowski JJ, Nakajima HH. The audiometric and mechanical effects of partial ossicular discontinuity. Ear Hear. 2016;37(2):206-215. doi:10.1097/AUD.0000000000000239
-1. Cheon D, Kim D, Kim SH, Choi JY, Bae SH. Diagnostic value of the air-bone threshold gap in stapes fixation. Audiol Neurootol. 2023;28(4):255-261.
-1. Sarmento KMA Jr, Sampaio ALL, Santos TGT, Oliveira CACP. High-frequency conductive hearing loss as a diagnostic test for incomplete ossicular discontinuity in non-cholesteatomatous chronic suppurative otitis media. PLoS One. 2017;12(12):e0189997.
-1. Song SW, Jun BC, Kim H. Clinical features and radiological evaluation of otic capsule sparing temporal bone fractures. J Laryngol Otol. 2017;131(3):209-214.
+1. Cheon D, Kim D, Kim SH, Choi JY, Bae SH. Diagnostic value of the air-bone threshold gap in stapes fixation. Audiol Neurootol. 2023;28(4):255-261. doi:10.1159/000528826
+1. Sarmento KMA Jr, Sampaio ALL, Santos TGT, Oliveira CACP. High-frequency conductive hearing loss as a diagnostic test for incomplete ossicular discontinuity in non-cholesteatomatous chronic suppurative otitis media. PLoS One. 2017;12(12):e0189997. doi:10.1371/journal.pone.0189997
+1. Song SW, Jun BC, Kim H. Clinical features and radiological evaluation of otic capsule sparing temporal bone fractures. J Laryngol Otol. 2017;131(3):209-214. doi:10.1017/S0022215117000123
 1. Dahiya R, Keller JD, Litofsky NS, Bankey PE, Bonassar LJ, Megerian CA. Temporal bone fractures: otic capsule sparing versus otic capsule violating clinical and radiographic considerations. J Trauma. 1999;47(6):1079-1083. doi:10.1097/00005373-199912000-00014
 1. Kim SY, Kim YJ, Kim YH, Park MH. Audiologic patterns of otic capsule preserving temporal bone fracture: effects of the affected subsites. Clin Exp Otorhinolaryngol. 2016;9(3):206-211. doi:10.21053/ceo.2015.01116
 1. Martins O, Victor J, Selesnick S. The relationship between individual ossicular status and conductive hearing loss in cholesteatoma. Otol Neurotol. 2012;33(3):387-392. doi:10.1097/MAO.0b013e3182487fb0
-1. Stankovic MD. Audiologic results of surgery for cholesteatoma: short- and long-term follow-up of influential factors. Otol Neurotol. 2008;29(7):933-940.
-1. Yilala MH, Fancello G, Fancello V, Lauda L, Sanna M. Long-term surgical outcome of class A and B tympanomastoid paragangliomas. Cancers (Basel). 2024;16(8):1466.
+1. Stankovic MD. Audiologic results of surgery for cholesteatoma: short- and long-term follow-up of influential factors. Otol Neurotol. 2008;29(7):933-940. doi:10.1097/MAO.0b013e31818201af
+1. Yilala MH, Fancello G, Fancello V, Lauda L, Sanna M. Long-term surgical outcome of class A and B tympanomastoid paragangliomas. Cancers (Basel). 2024;16(8):1466. doi:10.3390/cancers16081466
 1. Baguley DM, Irving RM, Hardy DG, Harada T, Moffat DA. Audiological findings in glomus tumours. Br J Audiol. 1994;28(6):291-297. doi:10.3109/03005369409077313
 1. Elzinga HBE, van Oorschot HD, Stegeman I, Smit AL. Relation between otitis media and sensorineural hearing loss: a systematic review. BMJ Open. 2021;11(8):e050108. doi:10.1136/bmjopen-2021-050108
-1. Kim MB, Choi J, Lee JK, Park JY, Chu H, Cho YS, Hong SH, Chung WH. Hearing outcomes according to the types of mastoidectomy: a comparison between canal wall up and canal wall down mastoidectomy. Clin Exp Otorhinolaryngol. 2010;3(4):203-206.
+1. Kim MB, Choi J, Lee JK, Park JY, Chu H, Cho YS, Hong SH, Chung WH. Hearing outcomes according to the types of mastoidectomy: a comparison between canal wall up and canal wall down mastoidectomy. Clin Exp Otorhinolaryngol. 2010;3(4):203-206. doi:10.3342/ceo.2010.3.4.203
+1. Jellinge ME, Kristensen S, Larsen K. Spontaneous closure of traumatic tympanic membrane perforations: observational study. J Laryngol Otol. 2015;129(10):950-4. doi:10.1017/S0022215115002303. PMID 26344019

@@ -7,7 +7,7 @@
 - Decidir **cuándo lavar un oído y cuándo no**, hacerlo con buena técnica y registrar el resultado.
 :::
 
-Todo examen auditivo empieza igual: conversando con el paciente y mirando su oído. Son los cinco minutos más baratos de la atención y los que más errores evitan. Una pregunta a tiempo te dice qué buscar; una mirada al conducto te dice si lo que vas a medir es el oído o un tapón de cerumen. Esta herramienta reúne lo que hay que hacer antes de poner un fono, una sonda o un electrodo.
+Todo examen auditivo empieza igual: conversando con el paciente y mirando su oído. Son los cinco minutos más baratos de la atención y evitan muchos errores. Una pregunta a tiempo te dice qué buscar; una mirada al conducto te dice si lo que vas a medir es el oído o un tapón de cerumen. Esta herramienta reúne lo que hay que hacer antes de poner un fono, una sonda o un electrodo.
 
 ## Para qué sirve
 
@@ -102,6 +102,8 @@ El otoscopio es una linterna con lupa. La luz entra por el espéculo, ilumina el
 <!-- dibujo: a handheld clinical otoscope shown from the side: cylindrical handle with battery, the head with its light source, the magnifying viewing lens at the back, and a disposable black ear speculum cone attached at the front. -->
 - @33,16 | **Espéculo.** El cono que entra al conducto. Se usa el más grande que entre cómodo: más luz y más campo de visión. Uno por paciente, o se limpia entre uno y otro.
 - @50,21 | **Fuente de luz.** Tiene que ser blanca e intensa: con luz amarilla, una membrana normal parece inflamada.
+<!-- verificar: no se encontró fuente para "con luz amarilla una membrana normal parece inflamada". Lo que sí está escrito es que la luz débil de ampolletas viejas impide ver bien la membrana (Pichichero, Am Fam Physician 2000, aafp.org/afp/2000/0401/p2051) y que el color de la membrana solo es poco fiable. Si el autor no tiene fuente, reformular a "con luz débil o amarillenta el color de la membrana engaña". -->
+<!-- Pasada de fundamentos 2026-10-18: "Agranda unas tres veces" se dejó: los otoscopios de diagnóstico traen lentes de 2,5x a 3x (fichas de fabricantes; no hay norma). -->
 - @69,22 | **Lente de aumento.** Por aquí miras. Agranda unas tres veces; en algunos modelos se desliza hacia un lado para pasar instrumentos.
 - @57,32 | **Cabezal.** Une la luz, la lente y el espéculo. En los modelos neumáticos tiene una conexión para la pera de goma (otoscopía neumática).
 - @53,62 | **Mango.** Lleva la batería. Se toma como un lápiz, apoyando el borde de la mano en la mejilla del paciente: si el paciente se mueve, el otoscopio se mueve con él.
@@ -155,9 +157,11 @@ Las preguntas van a la madre, al padre o a quien acompañe al niño, y se suman 
 | Hipoacusia en la familia | Hipoacusia hereditaria de la infancia |
 | Malformaciones | Del pabellón, del conducto o craneofaciales; síndromes |
 | Desarrollo del lenguaje y conducta auditiva | Si responde a su nombre, se asusta con ruidos fuertes, balbucea o habla según su edad |
-| Otitis y resfríos a repetición | La causa más frecuente de hipoacusia conductiva en el niño (cap. 2) |
+| Otitis y resfríos a repetición | La otitis media con efusión es una causa frecuente de hipoacusia en el niño (Rosenfeld y cols., 2016; cap. 2) |
 
 La **preocupación de los padres** por la audición del niño es en sí un indicador de riesgo (JCIH, 2019): no se descarta porque "el tamizaje pasó".
+
+<!-- Pasada de fundamentos 2026-10-18: la última fila decía "La causa más frecuente de hipoacusia conductiva en el niño". Rosenfeld 2016 y NICE la llaman causa frecuente (common cause), no la más frecuente; se reformuló. -->
 :::
 
 ### La otoscopía
@@ -253,7 +257,7 @@ Algunas historias también se derivan antes de medir: una **hipoacusia súbita**
 **Contraindicaciones.** Antes de lavar, la otoscopía y la anamnesis tienen que descartar:
 
 - **Membrana no íntegra**: perforación actual o antigua, tubo de ventilación, o una membrana que no se puede ver y de la que no hay certeza. El agua entraría al oído medio.
-- **Cirugía de oído previa** (timpanoplastía, mastoidectomía, estapedectomía).
+- **Cirugía de oído previa** (timpanoplastía, mastoidectomía, estapedectomía) (Sutton y cols., 2026).
 - **Otitis externa activa**, otorrea u otalgia.
 - **Negativa del paciente**.
 
@@ -270,17 +274,18 @@ Una **cicatriz detrás de la oreja** es una cirugía de oído hasta que el pacie
 **Paso a paso.**
 
 1. **Lávate las manos y ponte guantes.** Confirma en la ficha que no hay contraindicaciones y explica el procedimiento: el agua entra y sale, puede sentir presión, pero **no debe doler**; si duele, se detiene.
-2. **Prepara el agua a temperatura corporal (36 a 37 °C).** Agua más fría o más caliente estimula el laberinto (es el principio de la prueba calórica) y produce vértigo y náuseas.
+2. **Prepara el agua a temperatura corporal (36 a 37 °C).** Agua más fría o más caliente estimula el laberinto (es el principio de la prueba calórica) y produce vértigo y náuseas (Sutton y cols., 2026).
 3. **Sienta al paciente** con la cabeza recta y quieta, una toalla en el hombro del lado a lavar y el riñón bajo el oído, apoyado en el cuello. Puede sostenerlo él mismo o un ayudante.
 4. **Tracciona el pabellón** igual que en la otoscopía, para alinear el conducto.
-5. **Apoya la punta en la entrada del conducto, sin ocluirlo**, y dirige el chorro hacia la **pared posterosuperior**, no hacia la membrana. El agua pasa por detrás del tapón y lo empuja hacia afuera; si la punta tapa el conducto, el agua no tiene por dónde salir y la presión cae sobre la membrana.
+5. **Apoya la punta en la entrada del conducto, sin ocluirlo**, y dirige el chorro hacia la **pared posterosuperior**, no hacia la membrana (Sutton y cols., 2026). El agua pasa por detrás del tapón y lo empuja hacia afuera; si la punta tapa el conducto, el agua no tiene por dónde salir y la presión cae sobre la membrana.
 6. **Presión suave y constante.** Repite las veces necesarias y mira con el otoscopio cada pocas jeringas. **Detente** si aparece dolor, vértigo o sangre, o si el paciente lo pide.
 7. **Seca la entrada** del conducto y entrega toalla de papel al paciente.
 8. **Haz una otoscopía de control** y registra que el tapón salió y cómo está la membrana. Si no salió, se completa el tratamiento (gotas y nuevo intento otro día) o se deriva (Schwartz y cols., 2017).
 9. **Espera a que el conducto esté seco** antes de cualquier examen.
 
 <!-- Protocolo ORL 2019: no incluía la otoscopía de control al terminar. Se agregó (Schwartz y cols., 2017, recomendación 9). -->
-<!-- verificar: la dirección del chorro hacia la pared posterosuperior y la punta sin ocluir el conducto son técnica habitual, pero no están en las fuentes verificadas de este capítulo (Schwartz 2017 se revisó solo por el resumen). -->
+<!-- Pasada de fundamentos 2026-10-18: la dirección posterosuperior, el agua a 37 °C y la cirugía previa como contraindicación quedaron con Sutton y cols. (StatPearls, 2026). Ojo: esa fuente dice además, de forma confusa, que el chorro "should be directed toward the tympanic membrane"; no se usó para eso. -->
+<!-- verificar: "la punta sin ocluir el conducto" sigue sin fuente verificada. Aparece en guías locales de enfermería (NHS Scotland, Ear care and irrigation guideline) y en Hayter, Nursing 2016;46(6):62-5 (doi:10.1097/01.NURSE.0000481437.02178.3b), pero no se pudo leer el texto. -->
 
 ![{IA} El lavado de oído. Con el pabellón traccionado, la punta se apoya en la entrada sin ocluir el conducto y el chorro va a la pared posterosuperior: el agua pasa por detrás del tapón y lo empuja hacia afuera. El riñón bajo el oído recibe el agua.](ilustraciones/h01-lavado.png)
 
@@ -382,9 +387,10 @@ LabSim no simula el lavado. Lo que practicas es **la decisión**: si ves cerumen
 1. Schwartz SR, Magit AE, Rosenfeld RM, Ballachanda BB, Hackell JM, Krouse HJ, et al. Clinical practice guideline (update): earwax (cerumen impaction). Otolaryngol Head Neck Surg. 2017;156(1 Suppl):S1-S29. doi:10.1177/0194599816671491
 1. Rosenfeld RM, Shin JJ, Schwartz SR, Coggins R, Gagnon L, Hackell JM, et al. Clinical practice guideline: otitis media with effusion (update). Otolaryngol Head Neck Surg. 2016;154(1 Suppl):S1-S41. doi:10.1177/0194599815623467
 1. Lieberthal AS, Carroll AE, Chonmaitree T, Ganiats TG, Hoberman A, Jackson MA, et al. The diagnosis and management of acute otitis media. Pediatrics. 2013;131(3):e964-99. doi:10.1542/peds.2012-3488
-1. Sullivan RF. Video otoscopy in audiologic practice. J Am Acad Audiol. 1997;8(6):447-67.
-1. Joint Committee on Infant Hearing. Year 2019 position statement: principles and guidelines for early hearing detection and intervention programs. J Early Hear Detect Interv. 2019;4(2):1-44.
+1. Sullivan RF. Video otoscopy in audiologic practice. J Am Acad Audiol. 1997;8(6):447-67. PMID: 9433690.
+1. Joint Committee on Infant Hearing. Year 2019 position statement: principles and guidelines for early hearing detection and intervention programs. J Early Hear Detect Interv. 2019;4(2):1-44. doi:10.15142/fptk-b748
 1. Durrant JD, Campbell K, Fausti S, Guthrie O, Jacobson G, Lonsbury-Martin BL, et al. American Academy of Audiology position statement and clinical practice guidelines: ototoxicity monitoring [Internet]. Reston (VA): AAA; 2009 Oct. Disponible en: https://www.audiology.org/wp-content/uploads/2021/06/AAA_OtoMonGuidelines_2009.pdf
+1. Sutton AE, Toscano ML, Launico MV. Ear irrigation. En: StatPearls [Internet]. Treasure Island (FL): StatPearls Publishing; 2026 [actualizado 2026 feb 23; citado 2026 oct 18]. Disponible en: https://www.ncbi.nlm.nih.gov/books/NBK459335/. PMID: 29083577.
 
 ### Fisiología
 

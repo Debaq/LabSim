@@ -46,7 +46,7 @@ Los límites son orientativos y se solapan: la AAA da la VRA entre 5 y 24 meses 
 
 Un lactante sano no responde donde respondería un adulto. Responde algo más arriba, por razones sensoriales y no sensoriales: un conducto más pequeño, su propio ruido, la atención (BSA, 2025a). Por eso lo que se mide en la VRA no se llama umbral sino **nivel mínimo de respuesta** (MRL, *minimum response level*): el nivel más bajo con respuestas confiables y repetibles a un estímulo dado.
 
-Con insertos, en lactantes de 6 a 12 meses de audición normal, el MRL queda en promedio unos 15 dB sobre el umbral adulto en 500 y 1.000 Hz y unos 5 dB en 2.000 y 4.000 Hz (Parry y cols., 2003; BSA, 2025a). En campo libre la diferencia que se suele aceptar es de unos 10 dB, pero no hay estudios que la respalden. La regla práctica es la de la BSA: un lactante que responde en **25 dB HL en campo libre**, o en 20 dB HL con insertos, fonos o vibrador, tiene una audición satisfactoria (BSA, 2025a).
+Con insertos, en lactantes de 8 a 12 meses de audición normal, el MRL quedó en promedio en 16 y 13 dB HL en 500 y 1.000 Hz, y en 7 y 6 dB HL en 2.000 y 4.000 Hz (Parry y cols., 2003); la BSA redondea esas cifras a una corrección de 15 dB en los graves y de 5 dB en los agudos (BSA, 2025a). <!-- Pasada de fundamentos 2026-10-18: decía "de 6 a 12 meses" y "en promedio unos 15 dB ... y unos 5 dB". Parry y cols. (2003) estudiaron lactantes de 8 a 12 meses, con MRL medios de 16,4/13,3/7,1/6,4 dB HL; 15 y 5 dB son la corrección recomendada por la BSA (2025a, tabla 1). --> En campo libre la diferencia que se suele aceptar es de unos 10 dB, pero no hay estudios que la respalden. La regla práctica es la de la BSA: un lactante que responde en **25 dB HL en campo libre**, o en 20 dB HL con insertos, fonos o vibrador, tiene una audición satisfactoria (BSA, 2025a).
 
 ### El campo libre: el sonido llega a los dos oídos
 
@@ -59,7 +59,7 @@ Tres consecuencias:
 3. **El nivel depende de dónde está la cabeza.** El cero de campo libre se fijó con oyentes escuchando con los dos oídos y el sonido de frente (ISO 389-7, 2019; BSA, 2025b). Si la cabeza se corre del punto calibrado, o el parlante queda de lado, el nivel en el oído cambia (BSA, 2025b).
 
 :::sabias ¿Sabías que?
-La audiometría por juego la describió Barr (1955) en preescolares, muchos de ellos con hipoacusias severas. La VRA tomó su nombre de Lidén y Kankkunen (1969), y Moore y cols. (1975) mostraron que un juguete que se ilumina y se mueve mantiene el giro de cabeza del lactante mucho mejor que una luz sola o que ningún refuerzo. Los cabinetes con juguetes animados que se usan hoy vienen de ahí.
+La audiometría por juego la describió Barr (1955) en preescolares, muchos de ellos con hipoacusias severas. La VRA tomó su nombre de Lidén y Kankkunen (1969), y Moore y cols. (1975) mostraron que un refuerzo visual, una luz que parpadea o un juguete animado, mantiene el giro de cabeza del lactante mucho mejor que el elogio o que ningún refuerzo. <!-- Pasada de fundamentos 2026-10-18: decía "un juguete que se ilumina y se mueve ... mucho mejor que una luz sola". En Moore y cols. (1975) las dos condiciones visuales (luz y juguete animado) dieron más respuestas que el refuerzo social y que ninguno; el resumen no separa la luz del juguete. --> Los cabinetes con juguetes animados que se usan hoy vienen de ahí.
 :::
 
 ## Antes de empezar
@@ -181,13 +181,13 @@ Es la técnica del adulto, con el parlante como transductor.
 
 #### Enmascarar en campo libre
 
-El parlante no elige el oído, pero el otro oído sí se puede sacar del examen: se le pone un **fono o un inserto con ruido** (NBN de la frecuencia que se mide) y el oído que queda libre es el único que contesta. Es lo que se hace cuando hay que saber qué aporta **cada audífono** por separado, cuando un oído tiene un implante coclear y el otro oye, o cuando se sospecha una asimetría en alguien que tolera un fono en un solo oído.
+El parlante no elige el oído, pero el otro oído sí se puede sacar del examen: se le pone un **fono o un inserto con ruido** (NBN de la frecuencia que se mide) y el oído que queda libre es el único que contesta. Es lo que se hace cuando hay que saber qué aporta **cada audífono** por separado (AAA, 2013), cuando un oído tiene un implante coclear y el otro oye, o cuando se sospecha una asimetría en alguien que tolera un fono en un solo oído.
 
 - El ruido entra por el fono o el inserto del oído que **no** se evalúa, por el otro canal del audiómetro, igual que en la audiometría tonal (→ H4). El parlante sigue sonando para el oído en estudio.
 - El nivel del ruido se calcula como siempre: lo bastante alto para tapar el oído no evaluado y no tanto como para que cruce al que se evalúa. El inserto cruza menos que el fono.
-- Se anota en el audiograma y en el informe: qué oído quedó enmascarado, con qué transductor y a qué nivel. Sin ese dato, el umbral vuelve a ser "el del oído mejor".
+- Se anota en el audiograma y en el informe: qué oído quedó enmascarado, con qué transductor y a qué nivel (BSA, 2025a). Sin ese dato, el umbral vuelve a ser "el del oído mejor".
 
-<!-- verificar: la BSA (2025a) menciona tapar o enmascarar el oído no evaluado al medir un solo audífono; confirmar la cita textual antes de citarla. -->
+<!-- Pasada de fundamentos 2026-10-18: verificado. BSA 2025a, anexo E: en el resultado con audífono de un solo oído se anota cómo se logró (p. ej., ocluyendo el oído contralateral y con qué); la AAA (2013, §6.2.3) mide el audiograma con audífono por oído "con el oído contralateral enmascarado si hace falta". -->
 
 <!-- Protocolo ORL 2019: "El examen consiste en aplicar sonidos a distintas intensidades en ambos oídos por separado". En campo libre el estímulo llega a los dos oídos y el resultado es el del oído mejor en cada frecuencia (BSA 2025a §4.3.2; BSA 2025b §5.1). Se corrigió: el campo libre no separa los oídos. -->
 

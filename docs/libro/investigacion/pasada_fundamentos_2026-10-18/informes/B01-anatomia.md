@@ -1,0 +1,35 @@
+# B1. Anatomía
+
+## Citas agregadas (respaldo encontrado)
+- La cadena osicular · la separación incudoestapedial es la lesión traumática más común de la cadena; el yunque cuelga sin músculo entre dos huesecillos anclados (resolvía un `verificar`) · (Coulier y cols., 2015) · doi:10.5334/jbr-btr.831 · nueva sí. Texto completo (Europe PMC, PMC6032428): "Among these various types incudostapedial dislocation or disarticulation is the most common posttraumatic injury of the ossicular chain... The two main reasons are 1) the nature of tenuous suspension of the incus (the heavier ossicule that has no muscular anchor...) between the malleus and stapes that are both firmly anchored".
+- La mastoides y el nervio facial · "a menudo el hueso que lo cubre falta" ahora con cifra: más de la mitad de 1.000 huesos temporales con dehiscencia, sobre todo junto a la ventana oval · (Moreano y cols., 1994) · doi:10.1288/00005537-199403000-00012 · nueva sí. Abstract: "560 (56%) contained at least one facial canal dehiscence... The most common site of dehiscence was the oval window area."
+- Vestíbulo y canales · canal posterior el más afectado en el VPPB, 85-95 % · (Bhattacharyya y cols., 2017) · doi:10.1177/0194599816689667 · nueva sí. Texto completo (PDF de la guía): "Posterior canal BPPV is more common than horizontal canal BPPV, constituting approximately 85% to 95% of BPPV cases."
+- Rama inferior del vestibular · la neuritis inferior aislada es rara (1 de 43) · (Taylor y cols., 2016) · doi:10.1212/WNL.0000000000003223 · nueva sí (abstract: "1 patient (2.3%) had inferior neuritis").
+- Senos paranasales · edades de neumatización (resolvía un `verificar`): maxilar y etmoidal al nacer, esfenoidal hacia los 9 meses, frontal después de los 5 años · (Adibelli y cols., 2011) · doi:10.2500/ajra.2011.25.3552 · nueva sí. Abstract (1.452 niños, RM): "Initial signs of pneumatization were observed at birth for the maxillary and ethmoid sinuses, at 9 months for sphenoid sinus, and after the age of 5 years for the frontal sinus."
+- Microtia · grado III la forma más frecuente: ya citada (Truong y cols., 2022); verificado en el texto completo (PMC9831057): "The most common presentation is grade 3, consisting of significant hypoplasia of the entire cartilaginous framework with a lobule remnant."
+- Trompa · 21,2 mm a los 3 meses, 37 mm adulto, razón 8:1 y 4:1, alineación: ya citada (Ishijima y cols., 2000); verificada en el abstract de PubMed. Sin cambios.
+- Válvula nasal · ángulo 10-15°, 40-60 mm², mitad a dos tercios de la resistencia: ya citada (Pirola y cols., 2025); verificada en el texto completo (PMC11983596): "the angle of the apex is between 10° to 15°. The average cross-sectional area of the INV is only about 40 to 60 mm2 ... it accounts for between half to two-thirds of the total nasal airway resistance". Se completó el límite inferior de la válvula con lo que dice la misma fuente ("the head of the inferior turbinate inferolaterally, and the nasal floor inferiorly").
+- AICA · hipoacusia súbita como pródromo aislado: ya citada (Lee y cols., 2002); verificado en el abstract ("Four patients had vertigo and/or acute auditory symptoms ... as an isolated manifestation from 1 day to 2 months before infarction").
+
+## Corregidas (la literatura dice otra cosa)
+- Rama superior del vestibular (tabla) · decía "la neuritis vestibular afecta casi siempre a esta rama sola" → "casi siempre a esta rama, sola o junto con la inferior: 42 % solo la superior, 56 % las dos" · Taylor y cols. (2016), abstract: "Twenty-four patients (55.8%) had abnormalities localizing to both vestibular nerve divisions; 18 patients (41.9%) had superior neuritis; and 1 patient (2.3%) had inferior neuritis... Acute vestibular neuritis most often affects both vestibular nerve divisions." Nota: los cap. 20 y 21 citan a Fetter y Dichgans (1996) para "casi siempre superior"; no los toqué (no son míos), pero conviene alinearlos con Taylor 2016.
+- El pabellón (microtia) · decía "casi siempre se acompaña de un conducto estrecho o ausente" → "a menudo" · Truong y cols. (2022), texto completo: "Microtia is often associated with the absence of the external auditory canal".
+- ¿Sabías que? · decía "Los tres huesecillos ya tienen casi su tamaño de adulto al nacer" (con `verificar`) → el laberinto membranoso llega a tamaño adulto a mitad del embarazo; después de nacer siguen creciendo el conducto, la mastoides y el CAI · Nemzek y cols. (1996), abstract: "The membranous labyrinth grows with amazing rapidity and attains adult size by the middle of the gestation period... The mastoid, internal auditory canal, vestibular aqueduct, and external auditory canal continue to grow after birth." Sobre los huesecillos la literatura está dividida (estudios fetales de los años 60-90 en ambos sentidos), por eso no se sostuvo.
+
+## Quitadas o reformuladas (sin respaldo)
+- Inervación y relaciones · "el cóndilo está a un centímetro de la pared anterior": cifra sin fuente → "queda justo por delante de la pared anterior".
+- Membrana timpánica · "pars flaccida sin capa fibrosa media" → "sin la capa fibrosa ordenada de la pars tensa (sus fibras son pocas y sueltas)": la pars flaccida tiene lámina propia con fibras laxas; lo que le falta es la capa radial y circular organizada.
+- El oído interno · "el hueso más duro del cuerpo" (superlativo) → "uno de los huesos más densos del cuerpo".
+- El tabique · "casi todas las narices las tienen en algún grado" → "sus desviaciones leves son muy comunes".
+- Meatos · "el complejo ostiomeatal se bloquea primero y es el origen de la mayoría de las sinusitis (Stammberger y Kennedy, 1995)": la referencia es un documento de terminología y no sostiene la proporción → se dejó el hecho anatómico (vía común de drenaje que, al cerrarse, tapa los tres senos), con la misma cita.
+
+## Quedan `verificar`
+- Ninguno. Se resolvieron los tres que había (articulación incudoestapedial, neumatización de los senos, huesecillos al nacer).
+
+## Para el autor (práctica que choca con la literatura, no editada)
+- Nada propio de B1. Solo la nota de coherencia: cap. 20 y cap. 21 presentan la neuritis como "casi siempre de la rama superior" con Fetter y Dichgans (1996, 16 pacientes); con vHIT de los tres canales y VEMP, Taylor y cols. (2016, 43 pacientes) encontraron compromiso de las dos ramas en el 56 %.
+
+## Referencias de la lista con problemas
+- Todas las DOI de la lista resuelven en Crossref con autores, revista, volumen y páginas coincidentes. Detalles menores sin arreglo necesario: Luquetti 2012 figura en Crossref con fecha en línea 2011 (vol. 158A es de 2012); Touska y Connor y Aphiwatthanasumet salieron en línea en 2024 y en volumen 2025.
+- Mazzoni (1972) y Ferris no tienen abstract en PubMed; Mazzoni se dejó tal cual (es la fuente clásica de que la arteria laberíntica nace casi siempre de la AICA).
+- Nuevas: Coulier 2015, Moreano 1994, Bhattacharyya 2017, Taylor 2016, Adibelli 2011 (verificadas en Crossref) y Nemzek 1996 (sin DOI; verificada en PubMed, PMID 8883642).

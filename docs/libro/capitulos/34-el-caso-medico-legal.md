@@ -23,14 +23,14 @@ Son tres preguntas distintas, y conviene no mezclarlas, porque se contestan con 
 La técnica base es la de la audiometría diagnóstica (→ H3). En este libro, la evaluación completa parte con la acumetría y sigue con la audiometría aérea con fonos de inserción o supraurales calibrados, comenzando en 1.000 Hz, 40 dB, bajando de 10 en 10 y subiendo de 5 en 5, con umbral al percibir 2 de 3 estímulos; la ósea se mide **en los dos oídos**, con enmascaramiento; después vienen la logoaudiometría, el LDL y, si hay asimetría o la discriminación no calza, las pruebas supraliminares (→ H5, H6). Si lo que oye el paciente no coincide con los diapasones, se repite la acumetría; si sigue sin coincidir, se hace un Weber audiométrico en 500 Hz, 15 dB sobre el umbral óseo de esa frecuencia (→ H3). Y si los resultados no son confiables, **no se fuerzan**: se cita de nuevo con otra instrucción o se pasa a un estudio electrofisiológico.
 
 :::ojo Ojo clínico
-La audiometría de **screening** de un operativo (7 minutos, un solo nivel de 20 dB) no sirve para un informe médico-legal. La guía técnica chilena prohíbe usar la audiometría de vigilancia para fines médico-legales (→ H22). Tampoco sirve una audiometría hecha sin enmascarar donde el tono puede cruzar.
+La audiometría de **screening** de un operativo (7 minutos, un solo nivel de 20 dB) no sirve para un informe médico-legal. La guía técnica chilena prohíbe usar la audiometría de vigilancia para fines médico-legales (ISP, 2026; → H22). Tampoco sirve una audiometría hecha sin enmascarar donde el tono puede cruzar.
 :::
 
 ### Estimar el umbral real
 
 Cuando lo conductual no es confiable, la estimación sale de pruebas que dependen de la fisiología y no de la mano (→ capítulo 19, tabla de lo que depende de la mano):
 
-- **PEAT con burst** por frecuencia: el umbral de la onda V, menos la corrección a dB eHL de cada frecuencia (→ H10). Es lo más cercano al audiograma que se puede obtener sin la colaboración del paciente. Las correcciones de H10, que se apoyan en la revisión de Stapells (2000), parten de que el umbral del burst de 500 Hz queda unos 20 dB sobre el conductual y el de 4.000 Hz, unos 5.
+- **PEAT con burst** por frecuencia: el umbral de la onda V, menos la corrección a dB eHL de cada frecuencia (→ H10). Es lo más cercano al audiograma que se puede obtener sin la colaboración del paciente. Las correcciones de H10 restan unos 20 dB al umbral del burst de 500 Hz y unos 5 al de 4.000 Hz. En el metaanálisis de Stapells (2000), los umbrales del PEAT con tonos de adultos con pérdida sensorioneural quedaron, en promedio, entre 5 y 13 dB sobre los conductuales. <!-- Pasada de fundamentos 2026-10-18: decía "Las correcciones de H10, que se apoyan en la revisión de Stapells (2000), parten de que el umbral del burst de 500 Hz queda unos 20 dB sobre el conductual y el de 4.000 Hz, unos 5". Las cifras 20/5 son la tabla de LabSim (H10), no de Stapells; se separó la práctica del dato de la fuente (resumen de Stapells, 2000, en el ASHA Evidence Map: "ABR thresholds are, on average, 5.2 to 13.4 dB higher than their pure-tone behavioural thresholds in adults with SNHL"). -->
 - **Estado estable** (ASSR): un umbral por frecuencia y por oído sin lectura de ondas (→ H13). En adultos con pérdida sensorioneural, los umbrales del ASSR múltiple quedaron, en promedio, 14, 8, 10 y 3 dB sobre los conductuales en 500, 1.000, 2.000 y 4.000 Hz, con desviaciones de 9 a 13 dB (Herdman y Stapells, 2003). LabSim no tiene ASSR.
 - **Emisiones y reflejos** no entregan un umbral, pero acotan: una emisión presente en una banda descarta una pérdida coclear grande en esa banda, y el reflejo estapedial aparece muy por encima del umbral de un oído real, no pegado a él (→ H7, H9).
 
@@ -51,7 +51,7 @@ Tabla: Lo que el ruido ocupacional produce y lo que no (ACOEM, 2002, actualizada
 | Tipo | Siempre sensorioneural | Gap aéreo-óseo: hay un componente conductivo | cap. 3, 4 |
 | Cuadro clínico | Acúfeno agudo, mala discriminación en ruido, sin vértigo | Vértigo, plenitud, fluctuación, pérdida súbita | cap. 9, 11 |
 
-Las cifras de la tabla (75 y 40 dB, 10 a 15 años) son de la declaración de ACOEM de 2002. <!-- verificar: ACOEM actualizó la declaración en 2012 (Kirchner y cols., J Occup Environ Med 54:106-8); las cifras de 75/40 dB se leyeron en la versión de 2002 y no se confirmaron en la de 2012 -->
+Las cifras de la tabla (75 y 40 dB, 10 a 15 años) son de la declaración de ACOEM de 2002. <!-- verificar: las cifras 75/40 dB y 10-15 años se confirmaron (pasada de fundamentos 2026-10-18) en el texto de la declaración de 2002 (PDF de CAOHC): "Noise exposure alone usually does not produce a loss greater than 75 decibels (dB) in high frequencies, and 40 dB in lower frequencies"; "The rate of hearing loss due to chronic noise exposure is greatest during the first 10-15 years of exposure". Falta la versión de 2012 (Kirchner y cols., J Occup Environ Med 54:106-8), con muro de pago; hay otra actualización de 2018 (J Occup Environ Med 60(9):e498-501) que tampoco se leyó -->
 
 ### Cuantificar el daño
 
@@ -61,7 +61,7 @@ Una vez que hay un umbral que sostener y un patrón compatible, se pide un porce
 
 Un ejemplo con números simples: un oído con 20, 30, 30 y 40 dB en esas cuatro frecuencias promedia 30 dB; 30 − 25 = 5; 5 × 1,5 = **7,5 %** monoaural.
 
-**Criterio chileno (SUSESO).** El daño auditivo médico-legal se define con otro promedio, el de **1.000, 2.000, 3.000, 4.000 y 6.000 Hz**: hay daño cuando es **superior a 25 dB HL** y está **entre 26 y 92 dB HL**, en un adulto expuesto ocupacionalmente a ruido (Circular 3G/40 de 1983, citada en el Compendio de la SUSESO). Un daño auditivo de **23,07 %** equivale a una incapacidad de ganancia de **15 %**, y desde ese nivel el caso pasa a la COMPIN, que es quien determina la incapacidad permanente (Circular B33/N.° 47 de 2009, en el dictamen SUSESO 10.556-2014). La incapacidad se expresa en tramos de 2,5 puntos hasta el 40 % y de 5 sobre el 40 % (D.S. 109, art. 29, en el mismo dictamen). <!-- verificar: no se pudo leer la tabla de la Circular que convierte el promedio en porcentaje de daño por oído y los combina; por eso este capítulo no la reproduce ni la aplica. En el dictamen 10.556-2014, la mutual planteó que 20,24 % de daño equivalía a 13,16 % de incapacidad (razón 0,65, la misma de 23,07 a 15), y la SUSESO no discutió esa cifra -->
+**Criterio chileno (SUSESO).** El daño auditivo médico-legal se define con otro promedio, el de **1.000, 2.000, 3.000, 4.000 y 6.000 Hz**: hay daño cuando es **superior a 25 dB HL** y está **entre 26 y 92 dB HL**, en un adulto expuesto ocupacionalmente a ruido (Circular 3G/40 de 1983, citada en el Compendio de la SUSESO). Un daño auditivo de **23,07 %** equivale a una incapacidad de ganancia de **15 %**, y la Circular B33/N.° 47 de 2009 manda enviar desde ese nivel el caso a la COMPIN, que es quien determina la incapacidad permanente. La SUSESO precisó que esa cifra no autoriza al organismo administrador a dejar fuera a nadie: toda incapacidad presumiblemente permanente por enfermedad profesional la evalúa la COMPIN, y los factores de ponderación se aplican aunque la incapacidad previa a ellos sea menor de 15 % (dictamen 10.556-2014). <!-- Pasada de fundamentos 2026-10-18: decía "y desde ese nivel el caso pasa a la COMPIN ... (Circular B33/N.° 47 de 2009, en el dictamen SUSESO 10.556-2014)". En el dictamen esa frase es la cita de la Circular que hace la mutual, y la SUSESO rechazó su lectura como filtro: "las incapacidades presumiblemente permanentes derivadas de enfermedades profesionales deben ser evaluadas por la correspondiente COMPIN, por ende, las Circulares de Concordancias no pueden interpretarse en sentido diverso"; "los factores de ponderación deben ser considerados en la determinación de la incapacidad aún cuando el grado de incapacidad fijado previo a la aplicación de dichos factores sea inferior a un 15%". --> La incapacidad se expresa en tramos de 2,5 puntos hasta el 40 % y de 5 sobre el 40 % (D.S. 109, art. 29, en el mismo dictamen). <!-- verificar: no se pudo leer la tabla de la Circular que convierte el promedio en porcentaje de daño por oído y los combina; por eso este capítulo no la reproduce ni la aplica. En el dictamen 10.556-2014, la mutual planteó que 20,24 % de daño equivalía a 13,16 % de incapacidad (razón 0,65, la misma de 23,07 a 15), y la SUSESO no discutió esa cifra -->
 
 Las dos fórmulas miran el mismo audiograma desde ángulos distintos. La de la AMA se detiene en 3.000 Hz y mide la **comunicación**; la chilena llega a 4.000 y 6.000 Hz, donde el ruido pega primero, y mide el **daño por ruido**. Más adelante, el caso 34.3 muestra lo que eso produce en un mismo trabajador.
 
@@ -117,7 +117,7 @@ El PEAT y el estado estable no miden el umbral del paciente; miden **el nivel en
 
 ### La pérdida que se reclama y la que se tiene
 
-En una evaluación laboral hay un interés en juego, y eso no es una acusación, es un dato del contexto. El capítulo 19 distingue tres situaciones (Austen y Lynch, 2004): la pérdida inventada, la pérdida real exagerada y la funcional. Aquí interesa la segunda, **la pérdida real exagerada**, que es la que más reviste de dificultad: hay un daño verdadero (por ruido, en este contexto) y el paciente informa uno mayor. El informe tiene que decir los dos hechos, y el cálculo se hace con el real.
+En una evaluación laboral hay un interés en juego, y eso no es una acusación, es un dato del contexto. El capítulo 19 distingue tres situaciones por lo que se observa, no por la intención: la pérdida inventada, la pérdida real exagerada y la funcional. Aquí interesa la segunda, **la pérdida real exagerada**, que es la más difícil de informar: <!-- Pasada de fundamentos 2026-10-18: decía "El capítulo 19 distingue tres situaciones (Austen y Lynch, 2004): la pérdida inventada, la pérdida real exagerada y la funcional". Austen y Lynch (2004) usan otras tres categorías, por motivación: "Three categories (malingering, factitious and conversion) are used distinctly, for the purpose of diagnosis" (resumen, PubMed 15643738). Las tres situaciones son del capítulo 19; se quitó la cita. --> hay un daño verdadero (por ruido, en este contexto) y el paciente informa uno mayor. El informe tiene que decir los dos hechos, y el cálculo se hace con el real.
 
 ### Lo que se confunde con el ruido
 
@@ -301,7 +301,7 @@ Con una pérdida unilateral, ¿qué pruebas agregarías a la audiometría para s
 - @OD 40 V | El OD tiene ondas III y V a 40 dB, normal.
 :::
 
-Con el criterio chileno, el promedio de 1.000, 2.000, 3.000, 4.000 y 6.000 Hz es de **12 dB en el OD** y de **46 dB en el OI**: el OI **cumple** el criterio de daño auditivo médico-legal (superior a 25 y menor de 92). Con la AMA, el OI da un 41,3 % monoaural y 6,9 % binaural.
+Con el criterio chileno, el promedio de 1.000, 2.000, 3.000, 4.000 y 6.000 Hz es de **12 dB en el OD** y de **46 dB en el OI**: el OI **cumple** el criterio de daño auditivo médico-legal (superior a 25 y hasta 92 dB HL inclusive). Con la AMA, el OI da un 41,3 % monoaural y 6,9 % binaural.
 
 :::docente Guía del caso
 - **Datos clave:** 26 años de prensa, vértigo de horas con plenitud y zumbido grave **solo a la izquierda**, audición que fluctúa, audiometría de vigilancia normal hace tres años, pide calificación como enfermedad profesional.
@@ -457,6 +457,7 @@ El 0,3 % no es "nada": es lo que la AMA entrega porque la fórmula se detiene en
 1. Herdman AT, Stapells DR. Auditory steady-state response thresholds of adults with sensorineural hearing impairments. Int J Audiol. 2003;42(5):237-48. doi:10.3109/14992020309078343. PMID 12916697
 1. Jerger J, Jerger S. Diagnostic significance of PB word functions. Arch Otolaryngol. 1971;93(6):573-80.
 1. Dobie RA. Medical-legal evaluation of hearing loss. 2nd ed. San Diego: Singular; 2001.
+1. Instituto de Salud Pública de Chile. Guía técnica para la evaluación auditiva de vigilancia de la salud de los trabajadores expuestos ocupacionalmente a ruido, versión 3.0. Santiago: ISP; 2026. Disponible en: https://www.ispch.cl/wp-content/uploads/2026/04/Evaluacion-Auditiva.pdf
 
 ### Fisiología
 
@@ -467,5 +468,4 @@ El 0,3 % no es "nada": es lo que la AMA entrega porque la fórmula se detiene en
 ### Patología
 
 1. Coles RR, Lutman ME, Buffin JT. Guidelines on the diagnosis of noise-induced hearing loss for medicolegal purposes. Clin Otolaryngol Allied Sci. 2000;25(4):264-73. doi:10.1046/j.1365-2273.2000.00368.x. PMID 10971532
-1. Austen S, Lynch C. Non-organic hearing loss redefined: understanding, categorizing and managing non-organic behaviour. Int J Audiol. 2004;43(8):449-57. doi:10.1080/14992020400050057
 1. Kinstler DB, Phelan JG, Lavender RW. The Stenger and speech Stenger tests in functional hearing loss. Audiology. 1972;11(3-4):187-93. doi:10.3109/00206097209089295

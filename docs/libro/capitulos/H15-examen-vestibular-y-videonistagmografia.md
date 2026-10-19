@@ -32,7 +32,7 @@ Tiene límites:
 - **Describe, no diagnostica.** Dice qué parte del sistema falla y cómo, no por qué.
 
 :::sabias ¿Sabías que?
-Un nistagmo se nombra por su **fase rápida**: "nistagmo hacia la derecha" es el que bate a la derecha, aunque lo que lo produce sea la fase **lenta** hacia la izquierda. Es una convención, no una descripción del mecanismo: la fase rápida es lo que el ojo del examinador ve primero (Eggers y cols., 2019).
+Un nistagmo se nombra por su **fase rápida**: "nistagmo hacia la derecha" es el que bate a la derecha, aunque lo que lo produce sea la fase **lenta** hacia la izquierda. Es una convención, no una descripción del mecanismo: la fase rápida solo corrige la deriva lenta, pero la costumbre está tan arraigada que la clasificación internacional decidió mantenerla (Eggers y cols., 2019). <!-- Pasada de fundamentos 2026-10-18: decía "la fase rápida es lo que el ojo del examinador ve primero". Eggers y cols. (2019) no dan esa razón: "the committee agreed this convention is too deeply entrenched in clinical practice to change". -->
 :::
 
 ## Fundamento
@@ -43,7 +43,7 @@ Ninguno de los exámenes de esta herramienta mide el oído interno directamente.
 
 Cuando la cabeza gira, el ojo tiene que girar igual y hacia el lado contrario para que la imagen quede quieta en la retina. Ese es el **reflejo vestíbulo-ocular** (VOR). Lo disparan los conductos semicirculares, que detectan la **velocidad** del giro de la cabeza. Cada conducto horizontal tiene un compañero en el lado opuesto: cuando la cabeza gira a la derecha, el conducto derecho se **excita** y el izquierdo se **inhibe**. Es un sistema de **empuje y tracción**.
 
-Los nervios vestibulares **no están en silencio cuando la cabeza está quieta**. Descargan de forma continua: en el mono ardilla, alrededor de 90 impulsos por segundo (Goldberg y Fernández, 1971). Esa descarga de reposo permite que un nervio **informe en las dos direcciones**: más que el reposo, giro hacia ese lado; menos, giro hacia el otro. <!-- verificar: ~90 impulsos/s de reposo en el mono ardilla (Goldberg y Fernández 1971, resumen no leído completo). -->
+Los nervios vestibulares **no están en silencio cuando la cabeza está quieta**. Descargan de forma continua: en el mono ardilla, alrededor de 90 impulsos por segundo (Goldberg y Fernández, 1971). Esa descarga de reposo permite que un nervio **informe en las dos direcciones**: más que el reposo, giro hacia ese lado; menos, giro hacia el otro. <!-- verificar: ~90 impulsos/s de reposo en el mono ardilla (Goldberg y Fernández 1971). PubMed no trae resumen y el texto completo (APS) devuelve 403; no se encontró una fuente secundaria abierta que dé la cifra (pasada 2026-10-18). -->
 
 El tronco no lee un nervio, **compara los dos**. Con la cabeza quieta, los dos lados descargan igual, la diferencia es cero y los ojos no se mueven. Si la cabeza gira a la derecha, el lado derecho sube y el izquierdo baja: la diferencia manda los ojos a la izquierda, a la misma velocidad.
 
@@ -56,7 +56,7 @@ Si un laberinto o su nervio **deja de descargar**, el reposo de ese lado cae. Co
 
 Pero el ojo no puede irse hacia un lado para siempre: llega al borde de la órbita. Entonces el tronco lo devuelve de un salto, con un movimiento rápido parecido a una sacada, que se genera en la formación reticular pontina para el plano horizontal. Ese es el componente **rápido**. Lento, rápido, lento, rápido: un diente de sierra. Y como se nombra por la fase rápida, el nistagmo de una pérdida izquierda **bate hacia la derecha**, hacia el lado sano (Leigh y Zee, 2015).
 
-Los conductos tienen una segunda propiedad que conviene tener a mano: un conducto horizontal responde **más** a la excitación que a la inhibición (segunda ley de Ewald, 1892). Por eso, en una fase **irritativa** (por ejemplo, al comienzo de una crisis de hidrops), en lugar de destructiva, el nistagmo puede batir hacia el lado enfermo. Es la misma lógica con el signo cambiado, y por eso se describe cada nistagmo con su **dirección real** y no con la que "debería" tener. <!-- verificar: la segunda ley de Ewald se describe de memoria en el texto de Baloh y cols. (2011); confirmar la formulación. -->
+Los conductos tienen una segunda propiedad que conviene tener a mano: un conducto horizontal responde **más** a la excitación que a la inhibición (segunda ley de Ewald); con estímulos grandes, el flujo hacia la ampolla da una fase lenta más rápida que el flujo que se aleja de ella (Baloh y cols., 1977). Y la pérdida no es la única forma de desequilibrio: en una fase **irritativa**, en la que el laberinto enfermo descarga **más** en lugar de menos (por ejemplo, al comienzo de una crisis de hidrops), el nistagmo puede batir hacia el lado enfermo (Hirai y cols., 2017). Es la misma lógica con el signo cambiado, y por eso se describe cada nistagmo con su **dirección real** y no con la que "debería" tener. <!-- Pasada de fundamentos 2026-10-18: decía "Por eso, en una fase irritativa... el nistagmo puede batir hacia el lado enfermo", como si la segunda ley de Ewald explicara el nistagmo irritativo; el irritativo sale de una descarga aumentada, no de la asimetría excitación/inhibición. Se separaron los dos hechos, con Baloh y cols. (1977) para Ewald y Hirai y cols. (2017) para el nistagmo hacia el lado afectado al inicio de la crisis de Ménière. -->
 
 El desequilibrio de un lado **no dura para siempre**. En pocos días el cerebelo y los núcleos vestibulares rebalancean sus reposos y el nistagmo espontáneo baja, aunque el laberinto siga sin funcionar. Por eso un paciente con una pérdida vieja puede tener un examen espontáneo normal, y por eso el nistagmo de una neuritis aguda se ve mucho más fácil el primer día que a la semana (Leigh y Zee, 2015).
 
@@ -84,7 +84,7 @@ Con un integrador **sano**, el ojo se queda donde se lo deja. Con un integrador 
 :::imagen ilustraciones/h15-mirada.svg Desviación del ojo respecto de la posición pedida al mirar a la izquierda, al frente y a la derecha. A: un nistagmo periférico mantiene su dirección y cambia de intensidad (ley de Alexander). B: un nistagmo evocado por la mirada cambia de dirección con ella. Sin fijación. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 :::
 
-Lo que separa a los dos es la **dirección**. El periférico **no cambia de sentido** al cambiar la mirada: sube o baja de intensidad. El evocado por la mirada **cambia de sentido**: bate a la derecha cuando se mira a la derecha y a la izquierda cuando se mira a la izquierda. Esa diferencia es la que se examina en la mirada excéntrica del examen. En una persona sana puede haber unas pocas sacudidas con la mirada **extrema**: es el nistagmo de fin de rango y no es patológico, por eso no se mira más allá de lo que el protocolo pide (Leigh y Zee, 2015).
+Lo que separa a los dos es la **dirección**. El periférico **no cambia de sentido** al cambiar la mirada: sube o baja de intensidad. El evocado por la mirada **cambia de sentido**: bate a la derecha cuando se mira a la derecha y a la izquierda cuando se mira a la izquierda. Esa diferencia es la que se examina en la mirada excéntrica del examen. En una persona sana puede haber unas pocas sacudidas con la mirada **extrema**: es el nistagmo de fin de rango y no es patológico, por eso no se mira más allá de lo que el protocolo pide (Eggers y cols., 2019).
 
 ### Qué pone a prueba cada examen oculomotor
 
@@ -100,7 +100,7 @@ Los ojos tienen cuatro formas de moverse con un fin: saltar, seguir, compensar l
 :::
 
 - Las **sacadas** salen de dos estaciones: la corteza frontal y el colículo superior deciden **adónde**, y el tronco genera el **pulso** que las ejecuta. Una sacada **lenta** habla del tronco; una **imprecisa**, del cerebelo (vermis y núcleo fastigio); una **tardía**, de la corteza. Su velocidad pico crece con la amplitud, una relación tan regular que se llama **secuencia principal** (Bahill y cols., 1975).
-- El **seguimiento** mide la **ganancia**: la velocidad del ojo sobre la velocidad del blanco. Es cercana a 1 con blancos lentos y **cae con blancos rápidos** (Meyer y cols., 1985). Cuando el ojo no alcanza, lo recupera con sacadas pequeñas: **seguimiento sacádico**, un signo poco específico que aparece con la edad, con fármacos y con lesiones del cerebelo o de la corteza (Lencer y Trillenberg, 2008). <!-- verificar: valores típicos de latencia (~200 ms) y de ganancia (cercana a 1 con blancos lentos) en el adulto sano: Leigh y Zee 2015, capítulos de sacadas y seguimiento. -->
+- El **seguimiento** mide la **ganancia**: la velocidad del ojo sobre la velocidad del blanco. En sanos, el ojo va a cerca del 90 % de la velocidad del blanco hasta unos 100 °/s, y más rápido **ya no alcanza** (Meyer y cols., 1985). Cuando el ojo no alcanza, lo recupera con sacadas pequeñas: **seguimiento sacádico**, un signo poco específico que aparece con la edad (Moschner y Baloh, 1994), con fármacos y con lesiones del cerebelo o de las áreas corticales del seguimiento (Lencer y Trillenberg, 2008). <!-- Pasada de fundamentos 2026-10-18: decía "Es cercana a 1 con blancos lentos y cae con blancos rápidos". Meyer y cols. (1985): "eye velocity was approximately 90% of target velocity up to a target velocity of 100 deg/sec. Eye velocity then saturated". Lencer y Trillenberg (2008) describen las áreas corticales (V5, campos oculares frontal y suplementario), no la edad ni los fármacos; la edad va con Moschner y Baloh (1994): "smooth pursuit gain was significantly decreased at all target velocities in the older subjects". Se retiró el verificar de latencia de sacadas (~200 ms): el texto no da esa cifra. -->
 - El **optocinético** se ve como un nistagmo: el ojo sigue las barras (fase lenta) y salta de vuelta (fase rápida). Pone a prueba parte de lo mismo que el seguimiento, y una asimetría entre los dos sentidos orienta hacia un lado.
 
 ### Periférico o central
@@ -117,7 +117,7 @@ Con todo lo anterior se puede armar una tabla para leer el nistagmo. Es una **gu
 | **Compañeros** | náuseas, a veces hipoacusia o acúfeno | otros signos neurológicos: diplopía, ataxia del tronco, déficit |
 :::
 
-Un nistagmo periférico **típico** es el de la neuritis vestibular (Strupp y cols., 2022). Pero la tabla tiene una excepción conocida, que importa en el vértigo agudo: un ataque cerebrovascular de la fosa posterior puede dar un cuadro que parece periférico. Por eso el examen tiene más de una prueba, y por eso un paciente con vértigo continuo **no se tranquiliza** con una sola prueba normal (→ cap. 21).
+Un nistagmo periférico **típico** es el de la neuritis vestibular: horizontal con componente torsional, de dirección fija y más intenso al quitar la fijación (Strupp y cols., 2022). Pero la tabla tiene una excepción conocida, que importa en el vértigo agudo: un ataque cerebrovascular de la fosa posterior puede dar un cuadro que parece periférico. Por eso el examen tiene más de una prueba, y por eso un paciente con vértigo continuo **no se tranquiliza** con una sola prueba normal (→ cap. 21).
 
 ## Antes de empezar
 
@@ -132,7 +132,7 @@ El paciente se presenta con:
 El examen con lentes de Frenzel toma **una hora**, y el de VNG, **una hora y veinte minutos**. Avísale al paciente de entrada: no es un examen corto, y el mareo puede aparecer.
 
 :::comentario Lo que dicen las normas
-Los centros difieren en cuántas horas de ayuno piden y en qué fármacos suspender. Lo que importa es el principio: los **supresores vestibulares** (antihistamínicos, benzodiacepinas, algunos antieméticos) bajan la respuesta, y es el médico quien decide si el paciente puede dejarlos. Si no puede, se anota qué toma y a qué hora, y se interpreta con eso a la vista. <!-- verificar: criterios de ayuno y de suspensión de fármacos en la guía de la AAN (Fife y cols. 2000) y en los protocolos de VNG; el libro conserva los del protocolo sin una cifra respaldada. -->
+Los centros difieren en cuántas horas de ayuno piden y en qué fármacos suspender. Lo que importa es el principio: los **supresores vestibulares** (antihistamínicos, benzodiacepinas, algunos antieméticos) bajan la respuesta, y es el médico quien decide si el paciente puede dejarlos. Si no puede, se anota qué toma y a qué hora, y se interpreta con eso a la vista. <!-- verificar: criterios de ayuno y de suspensión de fármacos. Fife y cols. 2000 (guía retirada de la AAN) no tiene resumen en PubMed y el texto completo devolvió 403. Existe un editorial que cuestiona la evidencia de la suspensión de 24-48 h (McCaslin DL. Stopping medications before vestibular testing: evidence-based or neuromythology? J Am Acad Audiol. 2018;29(7):566-7. doi:10.3766/jaaa.29.7.1), sin resumen y no leído (pasada 2026-10-18). -->
 :::
 
 ### Conoce tu equipo: lentes de Frenzel y videonistagmógrafo
@@ -199,7 +199,7 @@ Antes de los ojos, el paciente está de pie. Estas pruebas muestran **cómo se l
 - **Marcha** con los ojos abiertos hacia delante y hacia atrás, y con los ojos **cerrados** hacia delante y hacia atrás, varias veces.
 - **Marcha en línea (tándem):** talón con punta, ojos abiertos, ida y vuelta.
 
-En una pérdida unilateral reciente, la caída, el desvío de los brazos y el giro del Unterberger van **hacia el lado enfermo**, el mismo lado hacia donde el nistagmo tiene su fase lenta (Baloh y cols., 2011). <!-- verificar: sentido de la caída y del desvío en la pérdida unilateral aguda, Baloh y cols. 2011. --> En una lesión del **cerebelo**, en cambio, el paciente tambalea con **los ojos abiertos** también, y la marcha en tándem es la que más lo delata.
+En una pérdida unilateral reciente, la caída del Romberg va **hacia el lado enfermo**, el mismo lado hacia donde el nistagmo tiene su fase lenta (Strupp y cols., 2022), y el desvío de los brazos y el giro del Unterberger suelen ir hacia el mismo lado. En una lesión del **cerebelo**, en cambio, el paciente tambalea con **los ojos abiertos** también, y la marcha en tándem es la que más lo delata.
 
 ### 3. Examen neocerebeloso
 
@@ -271,7 +271,7 @@ La VFL **sin** fijación y **con** fijación permite comparar. Con la fijación 
 
 ### 8. Pruebas oculomotoras con VNG
 
-El protocolo de VNG **no incluye** las pruebas oculomotoras, pero la VNG de uso corriente las trae y la literatura las pide (Fife y cols., 2000). Suelen hacerse **antes** de las posicionales y con el paciente sentado, con la cabeza quieta. Cada una tiene una pantalla con un **blanco** y un registro de los dos ojos.
+El protocolo de VNG **no incluye** las pruebas oculomotoras, pero la VNG de uso corriente las trae como parte del examen. <!-- verificar: decía "y la literatura las pide (Fife y cols., 2000)". La guía de la AAN no tiene resumen en PubMed y el texto completo devolvió 403; no se pudo confirmar qué dice de las pruebas oculomotoras (pasada 2026-10-18). --> Suelen hacerse **antes** de las posicionales y con el paciente sentado, con la cabeza quieta. Cada una tiene una pantalla con un **blanco** y un registro de los dos ojos.
 
 - **Sacadas.** El blanco **salta** entre dos puntos, a un lado y al otro, o en un orden al azar para que no se pueda anticipar. Se mide la **latencia** (cuánto tarda el ojo en arrancar desde que el blanco saltó), la **velocidad** pico y la **precisión** (cuánto del salto recorrió el ojo en la primera sacada). Una sacada **lenta**, **corta** (hipométrica), **que se pasa** (hipermétrica) o **tardía** son los cuatro hallazgos.
 - **Seguimiento lento.** El blanco **va y viene** con un movimiento suave. Se mide la **ganancia**, y se mira si el ojo alcanza al blanco con **sacadas de alcance**. Un seguimiento suave y de ganancia alta es normal.
@@ -281,7 +281,7 @@ El protocolo de VNG **no incluye** las pruebas oculomotoras, pero la VNG de uso 
 :::
 
 :::comentario Lo que dicen las normas
-Los valores normales de las pruebas oculomotoras **dependen de cada equipo, de su velocidad de muestreo y de la edad del paciente**, y por eso se usan los del fabricante o los que el servicio haya medido en su propia población. El libro no entrega un límite único. Lo que sí fija la literatura es el método: el blanco, la amplitud y la velocidad deben anotarse junto con el resultado, y un hallazgo solo se interpreta junto con otros signos (Fife y cols., 2000; Leigh y Zee, 2015). <!-- verificar: la AAN (Fife y cols. 2000) trata los movimientos oculares de la VNG; confirmar qué dice exactamente de la calibración y de los valores normales. -->
+Los valores normales de las pruebas oculomotoras **dependen de cada equipo, de su velocidad de muestreo y de la edad del paciente** (Moschner y Baloh, 1994), y por eso se usan los del fabricante o los que el servicio haya medido en su propia población. El libro no entrega un límite único. Lo que sí fija la literatura es el método: el blanco, la amplitud y la velocidad deben anotarse junto con el resultado, y un hallazgo solo se interpreta junto con otros signos (Fife y cols., 2000; Leigh y Zee, 2015). <!-- verificar: la AAN (Fife y cols. 2000) trata los movimientos oculares de la VNG; confirmar qué dice exactamente de la calibración y de los valores normales. -->
 :::
 
 ### 9. Lo que sigue: posición y calórica
@@ -328,7 +328,7 @@ El protocolo se queda en lo que se ve sentado y con la cabeza quieta. El examen 
 - **El impulso cefálico** (→ H17), que mide el reflejo directamente.
 - **El nistagmo evocado por la mirada** y la **prueba de oclusión alternada** de los ojos para ver una desviación vertical (*skew*). La desviación oblicua es un signo de lesión del tronco o del utrículo, y la reacción de inclinación ocular completa se ve también en lesiones periféricas (Halmagyi y cols., 1979; Brandt y Dieterich, 1994).
 - **El nistagmo tras sacudir la cabeza** (*head-shaking*), útil para sacar a la luz un desequilibrio que ya se compensó (Hain y cols., 1987).
-- **HINTS**: el impulso cefálico, el nistagmo de mirada y el *skew* juntos. Entre los pacientes con vértigo agudo continuo y un factor de riesgo vascular, un impulso normal, un nistagmo que cambia de sentido o un *skew* fue 100 % sensible para ataque cerebrovascular y 96 % específico, (Kattah y cols., 2009). Esa serie era de 101 pacientes y la hizo un grupo experto: no se traslada sin más a cualquier examinador.
+- **HINTS**: el impulso cefálico, el nistagmo de mirada y el *skew* juntos. Entre los pacientes con vértigo agudo continuo y un factor de riesgo vascular, un impulso normal, un nistagmo que cambia de sentido o un *skew* fue 100 % sensible para ataque cerebrovascular y 96 % específico (Kattah y cols., 2009). Esa serie era de 101 pacientes y la hizo un grupo experto: no se traslada sin más a cualquier examinador.
 - **La videooculografía** cuantificada puede aportar al HINTS (Newman-Toker y cols., 2013).
 
 Y en cuanto a las **pruebas de equilibrio**: la prueba de Fukuda (marcha en el puesto, parecida a la de Unterberger) **no sirvió** como tamizaje de una asimetría vestibular periférica en 736 pacientes con mareo crónico, con o sin sacudida de cabeza (Honaker y cols., 2009). Los autores dejan abierta su utilidad en pacientes agudos, pero no la recomiendan como tamizaje de una pérdida crónica.
@@ -378,6 +378,7 @@ Un vértigo continuo con un nistagmo que **parece periférico** no es siempre un
 1. Eggers SDZ, Bisdorff A, von Brevern M, et al. Classification of vestibular signs and examination techniques: nystagmus and nystagmus-like movements. Consensus document of the Classification Committee of the Bárány Society. J Vestib Res. 2019;29(2-3):57-87. doi:10.3233/VES-190658
 1. Strupp M, Bisdorff A, Furman J, Hornibrook J, Jahn K, Maire R, et al. Acute unilateral vestibulopathy/vestibular neuritis: diagnostic criteria. J Vestib Res. 2022;32(5):389-406. doi:10.3233/VES-220201
 1. Brandt T, Dieterich M. Vestibular syndromes in the roll plane: topographic diagnosis from brainstem to cortex. Ann Neurol. 1994;36(3):337-47. doi:10.1002/ana.410360304
+1. Hirai C, Yamamoto Y, Takeda T, Tasaki A, Inaba Y, Kiyokawa Y, et al. Nystagmus at the onset of vertiginous attack in Ménière's disease. Otol Neurotol. 2017;38(1):110-3. doi:10.1097/MAO.0000000000001255
 
 ### Fisiología
 
@@ -392,3 +393,5 @@ Un vértigo continuo con un nistagmo que **parece periférico** no es siempre un
 1. Lencer R, Trillenberg P. Neurophysiology and neuroanatomy of smooth pursuit in humans. Brain Cogn. 2008;68(3):219-28. doi:10.1016/j.bandc.2008.08.013
 1. Leigh RJ, Zee DS. The neurology of eye movements. 5.ª ed. Nueva York: Oxford University Press; 2015. ISBN 978-0-19-996928-9.
 1. Baloh RW, Honrubia V, Kerber KA. Baloh and Honrubia's clinical neurophysiology of the vestibular system. 4.ª ed. Nueva York: Oxford University Press; 2011. ISBN 978-0-19-978083-9.
+1. Baloh RW, Honrubia V, Konrad HR. Ewald's second law re-evaluated. Acta Otolaryngol. 1977;83(5-6):475-9. doi:10.3109/00016487709128874
+1. Moschner C, Baloh RW. Age-related changes in visual tracking. J Gerontol. 1994;49(5):M235-8. doi:10.1093/geronj/49.5.m235

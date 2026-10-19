@@ -8,7 +8,7 @@
 - Informar la impedanciometría de modo que otro la lea igual que tú.
 :::
 
-La impedanciometría es el único examen de la batería que **no le pide nada al paciente**: no tiene que responder, solo quedarse quieto. En unos minutos dice cómo se mueve el oído medio y si funciona el arco reflejo que une la cóclea, el tronco y el nervio facial. Por eso acompaña casi a cualquier audiometría y es muchas veces el primer examen en un niño que no coopera.
+La impedanciometría, como las emisiones otoacústicas y el PEAT, **no le pide nada al paciente**: no tiene que responder, solo quedarse quieto. <!-- Pasada de fundamentos 2026-10-18: decía "es el único examen de la batería que no le pide nada al paciente". Las emisiones y el PEAT (H9, H10) tampoco piden respuesta; se corrigió. --> En unos minutos dice cómo se mueve el oído medio y si funciona el arco reflejo que une la cóclea, el tronco y el nervio facial. Por eso acompaña casi a cualquier audiometría y es muchas veces el primer examen en un niño que no coopera.
 
 ## Para qué sirve
 
@@ -135,7 +135,7 @@ Pregunta si el reflejo **se sostiene**. Una fibra del VIII par comprimida no man
 - **Cuándo**: si hay sospecha retrococlear y el reflejo está **presente** (sin reflejo no hay qué deteriorar).
 - **Cómo**: tono **10 dB sobre el umbral del reflejo**, contralateral, durante **10 segundos**, en **500 y 1000 Hz**. Sobre 1000 Hz también decaen los oídos normales, por eso no se usa (Cook y cols., 1999).
 - **Instrucción**: "Vas a escuchar un sonido fuerte un rato; quédate quieto".
-- **Normal**: la amplitud se mantiene; un oído sano pierde menos del 10 % a los 10 s (Rosenhall y cols., 1979).
+- **Normal**: la amplitud se mantiene; la mayoría de los oídos sanos pierde menos del 10 % a los 10 s, y el decaimiento que aparece en algunos es pequeño (Rosenhall y cols., 1979). <!-- Pasada de fundamentos 2026-10-18: decía "un oído sano pierde menos del 10 % a los 10 s". Rosenhall 1979 (100 oídos): sin decaimiento (menos de 10 %) en la mayoría; entre 27 y 58 % mostró algo de decaimiento, casi nunca de nivel patológico. -->
 - **Positivo**: la amplitud cae a la **mitad (50 %) o menos** dentro de los 10 s (GSI). Se anota con un signo entre paréntesis: (+) o (−).
 
 <!-- Protocolo ORL 2019: positivo si en 500 Hz cae un tercio y en 1.000 Hz la mitad. Se corrigió a 50 % en las dos frecuencias (guía de reflejos de GSI; Rosenhall 1979 para lo normal), igual que en el capítulo 11. -->
@@ -191,7 +191,7 @@ Bajo los **6 meses de edad corregida** se usa la sonda de **1000 Hz** (BSA, 2024
 
 ### En operativos
 
-En un operativo de screening (colegio, jardín, faena) se hace la **timpanometría** con la misma técnica, sin reflejos, y se imprime el resultado. El objetivo no es diagnosticar, sino decidir a quién derivar. En niños, la ASHA deriva con una compliancia bajo 0,2 a 0,3 mL, un pico demasiado ancho (más de 200 a 235 daPa a media altura) o un timpanograma plano con volumen sobre 1,0 mL (ASHA, 1997).
+En un operativo de screening (colegio, jardín, faena) se hace la **timpanometría** con la misma técnica, sin reflejos, y se imprime el resultado. El objetivo no es diagnosticar, sino decidir a quién derivar. En niños, la ASHA deriva con una compliancia bajo 0,2 a 0,3 mL, un pico demasiado ancho (más de 200 a 235 daPa a media altura) o un timpanograma plano con volumen sobre 1,0 mL (ASHA, 1997). <!-- verificar: los cortes de la ASHA 1997 (0,2-0,3 mL, 200-235 daPa, 1,0 mL); la guía no está disponible en línea (la página de ASHA da error) y no se pudieron confirmar. Nozza 1994 menciona como criterio de las normas provisorias de la ASHA un TW > 150 daPa o Ytm < 0,2. -->
 
 :::ayuda Ayuda memoria
 - Otoscopía → sonda en el **OD** → timpanograma → reflejos del mismo oído → OI.
@@ -238,13 +238,13 @@ La gradiente es un número para la forma del pico. Se unen con una recta los dos
 
 <!-- Brooks 1968: datos verificados en Crossref; el texto completo no se leyó. La fórmula (pico sobre la recta a ±50 daPa, dividida por la altura) es la forma de cociente con que se enseña (ver Bibliografia.php, BROOKS1968). -->
 
-No todos los equipos la calculan igual, así que antes de comparar con una tabla averigua cómo la calcula el tuyo. Por eso hoy se prefiere el **ancho timpanométrico** (TW): el ancho del pico, en daPa, a la mitad de su altura. De ocho formas de medir la forma del pico, fue la que se prefirió (Koebsell y Margolis, 1986). En niños de 1 a 7 años, un TW bajo 200 daPa se considera normal (Nozza y cols., 1994).
+No todos los equipos la calculan igual, así que antes de comparar con una tabla averigua cómo la calcula el tuyo. Por eso hoy se prefiere el **ancho timpanométrico** (TW): el ancho del pico, en daPa, a la mitad de su altura. De ocho formas de medir la forma del pico, fue la que se prefirió (Koebsell y Margolis, 1986). En niños con otitis media, fue la medida de admitancia que mejor separó los oídos con efusión de los sanos (Nozza y cols., 1994), y la BSA sugiere informarlo entre 1 y 7 años cuando la curva es redondeada o ancha (BSA, 2024). <!-- Pasada de fundamentos 2026-10-18: decía "En niños de 1 a 7 años, un TW bajo 200 daPa se considera normal (Nozza y cols., 1994)". El resumen de Nozza 1994 no da ese corte (muestra que el punto de corte depende de la población); el rango de 1 a 7 años es el de la BSA 2024. -->
 
 ### El reflejo: umbral y Metz
 
 En adultos con audición normal, el reflejo con tonos de 500 a 2000 Hz aparece entre **75 y 95 dB HL**; el contralateral sale 2 a 5 dB más alto que el ipsilateral, y el ruido de banda ancha unos 20 dB más bajo que los tonos (BSA, 2024; Wiley y cols., 1987). El de 4000 Hz puede faltar en oídos normales, y alrededor del 5 % de los adultos no tiene reflejos sin que haya patología (Golding y cols., 2007).
 
-En una **hipoacusia coclear** el reflejo no sube en proporción a la pérdida: sigue apareciendo cerca de su nivel normal mientras la pérdida no pase de unos 50 dB HL, y suele faltar desde los 60 dB HL (Gelfand y cols., 1990). Por eso, en un oído coclear, la distancia entre el umbral tonal y el umbral del reflejo **se achica**. Cuando esa distancia es **menor de 60 dB**, se habla de **fenómeno de Metz**, y es un signo de reclutamiento (Jerger y cols., 1972; BSA, 2024). Ejemplo: umbral de 50 dB HL en 1 kHz y reflejo a 90 dB HL: 40 dB de distancia, Metz presente.
+En una **hipoacusia coclear** el reflejo no sube en proporción a la pérdida: sigue apareciendo cerca de su nivel normal mientras la pérdida no pase de unos 55 dB HL, y suele faltar desde los 60 dB HL (Gelfand y cols., 1990; BSA, 2024). <!-- Pasada de fundamentos 2026-10-18: decía "unos 50 dB HL". Gelfand 1990 ve el efecto de los reflejos ausentes sobre unos 55 dB de pérdida, y la BSA 2024, que lo resume, da 55 y 60 dB HL. --> Por eso, en un oído coclear, la distancia entre el umbral tonal y el umbral del reflejo **se achica**. Cuando esa distancia es **menor de 60 dB**, se habla de **fenómeno de Metz**, y es un signo de reclutamiento (Jerger y cols., 1972; BSA, 2024). Ejemplo: umbral de 50 dB HL en 1 kHz y reflejo a 90 dB HL: 40 dB de distancia, Metz presente.
 
 <!-- Protocolo ORL 2019: Metz "a intensidades iguales o menores a 60 dB sobre el umbral". La BSA 2024 dice "menos de 60 dB SL"; se dejó el criterio de la guía. -->
 

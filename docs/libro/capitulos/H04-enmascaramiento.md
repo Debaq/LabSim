@@ -7,7 +7,7 @@
 - Reconocer la curva sombra, el sobreenmascaramiento, el efecto de oclusión y el dilema de enmascaramiento.
 :::
 
-Los fonos te dan la ilusión de que estás midiendo un oído a la vez. No es así: cuando un oído oye mucho peor que el otro, el tono que mandas al oído malo atraviesa el cráneo y lo contesta el bueno. El paciente levanta la mano de buena fe y tú anotas un umbral que no es de ese oído. El enmascaramiento es la forma de **ocupar al oído que no estás evaluando** para que no conteste por el otro. Es la herramienta que más errores diagnósticos evita, y también la que más errores produce cuando se hace mal (Coles y Priede, 1970).
+Los fonos te dan la ilusión de que estás midiendo un oído a la vez. No es así: cuando un oído oye mucho peor que el otro, el tono que mandas al oído malo atraviesa el cráneo y lo contesta el bueno. El paciente levanta la mano de buena fe y tú anotas un umbral que no es de ese oído. El enmascaramiento es la forma de **ocupar al oído que no estás evaluando** para que no conteste por el otro. Bien hecho evita errores diagnósticos graves; mal hecho, los produce (Coles y Priede, 1970).
 
 ## Para qué sirve
 
@@ -48,12 +48,13 @@ La atenuación interaural **varía de una persona a otra y depende del transduct
 | Fono supraaural o circumaural | 40 a 80 dB | **40 dB** |
 | Fono de inserción bien puesto | 55 dB o más; mayor en los graves | **55 dB** |
 | Vibrador óseo | casi 0 dB | **0 dB** |
-| Habla con fono supraaural | similar a la de los tonos graves | **45 dB** |
+| Habla con fono supraaural | similar a la de los tonos de 1 a 2 kHz | **45 dB** |
 
 Fuentes: BSA (2018), Munro y Agnew (1999), Sklare y Denenberg (1987), Smith y Markides (1981).
 :::
 
-<!-- verificar: el valor de 45 dB para el habla con supraaural es la convención de la cátedra y de LabSim; falta confirmar la cifra exacta en Smith y Markides 1981. -->
+<!-- Pasada de fundamentos 2026-10-18: la fila del habla decía "similar a la de los tonos graves". Se corrigió a "de 1 a 2 kHz": Sklare y Denenberg (1987) encontraron que la atenuación interaural del habla se aproxima a la de 1 a 2 kHz. -->
+<!-- verificar: el valor de 45 dB para el habla con supraaural es la convención de la cátedra y de LabSim (docs/decisiones.md: "suele darse 45-50 dB"); Smith y Markides 1981 no tiene resumen en PubMed y el texto no se pudo leer. -->
 
 <!-- Protocolo ORL 2019: tabla de AI aérea por frecuencia 35/40/40/40/45/45/50/50/50 dB (125 a 8000 Hz). Se presenta como regla el mínimo de 40 dB en todas las frecuencias con supraaural y 55 dB con inserción (BSA 2018, citando a Munro y Agnew 1999); la tabla por frecuencia queda como convención del simulador (sección En LabSim), que además usa 40 en 2000 Hz y 45 en 4000 Hz. -->
 
@@ -99,7 +100,8 @@ Aun con los oídos separados, un ruido fuerte en un oído sube unos pocos dB el 
 
 ### Efecto de oclusión
 
-Cuando tapas un oído con oído medio sano, su umbral **óseo mejora en los graves**. El conducto abierto deja escapar la energía de baja frecuencia que el hueso irradia hacia el conducto; tapado, esa energía queda atrapada y sube la presión sonora frente al tímpano (Fagelson y Martin, 1998). Es el mismo fenómeno de la prueba de Bing (capítulo H2).
+Cuando tapas un oído con oído medio sano, su umbral **óseo mejora en los graves**. El conducto abierto deja escapar la energía de baja frecuencia que el hueso irradia hacia el conducto; tapado, esa energía queda atrapada y sube la presión sonora frente al tímpano (Fagelson y Martin, 1998). Es el fenómeno en que se basa la prueba de Bing y el que lleva el Weber al oído tapado (capítulo H2).
+<!-- Pasada de fundamentos 2026-10-18: decía "Es el mismo fenómeno de la prueba de Bing (capítulo H2)", pero H2 no describe la prueba de Bing; sí explica el efecto de oclusión en el Weber conductivo. Se ajustó la remisión. -->
 
 :::imagen ilustraciones/h04-efecto-oclusion.svg ancho=100% El efecto de oclusión. A: con el conducto abierto, la energía de baja frecuencia que el hueso irradia al conducto se escapa por la entrada. B: tapado por la copa de un fono, queda atrapada y sube la presión frente al tímpano: los graves se oyen mejor por vía ósea. C: cuánto mejora la ósea con fono supraaural, según la tabla de este capítulo; desde 2 kHz el efecto desaparece.
 :::
@@ -149,9 +151,9 @@ La **regla 3** es la que más se olvida: dos oídos con la misma pérdida aérea
 
 ### 2. Cuánto ruido: mínimo y máximo
 
-El ruido tiene una ventana. Por debajo del **mínimo**, el oído no evaluado sigue oyendo el tono cruzado (**subenmascaramiento**). Por encima del **máximo**, el ruido cruza de vuelta y tapa al oído que estás midiendo (**sobreenmascaramiento**). El método de fórmula consiste en calcular los dos bordes y elegir un nivel al medio (Studebaker, 1964; Studebaker, 1967).
+El ruido tiene una ventana. Por debajo del **mínimo**, el oído no evaluado sigue oyendo el tono cruzado (**subenmascaramiento**). Por encima del **máximo**, el ruido cruza de vuelta y tapa al oído que estás midiendo (**sobreenmascaramiento**). El método de fórmula consiste en calcular los dos bordes y elegir un nivel al medio (Studebaker, 1964, 1967; Yacullo, 1999).
 
-<!-- verificar: elegir el punto medio entre mínimo y máximo se atribuye a Studebaker 1964; confirmar en el artículo. -->
+<!-- Pasada de fundamentos 2026-10-18: el verificar del punto medio se resolvió con Yacullo 1999 (resumen: "the goal is to select a masking level that falls at the middle of the masking plateau"). Studebaker 1964 y 1967 siguen como origen del método de fórmula; no tienen resumen en PubMed. -->
 
 :::ayuda-ancho Fórmulas de nivel mínimo y máximo
 **Vía aérea**
@@ -353,3 +355,4 @@ Cuando el mínimo queda sobre el máximo, el simulador se comporta como el pacie
 1. Coles RR, Priede VM. On the misdiagnoses resulting from incorrect use of masking. J Laryngol Otol. 1970;84(1):41-63. doi:10.1017/s0022215100071620
 1. Fagelson MA, Martin FN. The occlusion effect and ear canal sound pressure level. Am J Audiol. 1998;7(2):50-4. doi:10.1044/1059-0889(1998/010)
 1. Dean MS, Martin FN. Insert earphone depth and the occlusion effect. Am J Audiol. 2000;9(2):131-4. doi:10.1044/1059-0889(2000/011)
+1. Yacullo WS. Clinical masking in speech audiometry: a simplified approach. Am J Audiol. 1999;8(2):106-16. doi:10.1044/1059-0889(1999/019). PMID 10646194.

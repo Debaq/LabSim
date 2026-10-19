@@ -40,7 +40,7 @@ Cinco números describen un tono puro:
 
 - **Frecuencia** (*f*, en hercios): cuántos ciclos de subida y bajada hay en un segundo. Es lo que el oído oye como grave o agudo.
 - **Período** (*T*): lo que dura un ciclo, *T* = 1 / *f*. A 1.000 Hz dura 1 ms; a 125 Hz, 8 ms.
-- **Longitud de onda** (λ): la distancia que recorre el sonido en un ciclo, λ = *c* / *f*, donde *c* es la velocidad del sonido. En el aire *c* es de unos **343 m/s a 20 °C** y cambia con la temperatura, *c* = 331,3 + 0,606 *T* (con *T* en °C): 331 m/s a 0 °C, 343 a 20 °C y 352 a 34 °C, la temperatura del aire dentro de la nariz (→ H25).
+- **Longitud de onda** (λ): la distancia que recorre el sonido en un ciclo, λ = *c* / *f*, donde *c* es la velocidad del sonido. En el aire *c* es de unos **343 m/s a 20 °C** y cambia con la temperatura, *c* = 331,3 + 0,606 *T* (con *T* en °C): 331 m/s a 0 °C, 343 a 20 °C y 352 a 34 °C, la temperatura que alcanza el aire inspirado al llegar a la rinofaringe (Keck y cols., 2000; → H25).
 - **Amplitud**: cuánto sube y baja la presión. Se puede dar de pico, de pico a pico o **RMS** (*root mean square*, la raíz del promedio de los cuadrados). El RMS mide la potencia del sonido y es el que usan los decibeles; para un tono puro vale 0,707 veces el pico.
 - **Fase**: en qué punto del ciclo está la onda en un instante dado, de 0° a 360°.
 
@@ -98,7 +98,7 @@ Un **ruido** es un sonido sin pauta: no se puede predecir su siguiente valor, as
 :::imagen ilustraciones/b4-ruidos.svg ancho=96% Ruido blanco y rosa, por hercio y por banda de un tercio de octava. El mismo ruido se ve plano o inclinado según cómo se mida: fíjate en qué eje usa cada panel antes de compararlos.
 :::
 
-**Banda crítica.** Un tono no es enmascarado por todo el ruido que suene, sino solo por el que cae **cerca de su frecuencia**. Fletcher (1940) lo mostró así: si se ensancha un ruido alrededor de un tono, el enmascaramiento sube hasta cierto ancho y después ya no sube más. Ese ancho es la **banda crítica**, el equivalente en frecuencia de un filtro de la cóclea. Es de unos 100 Hz bajo 500 Hz y crece desde ahí, cerca de un quinto de octava. A 1.000 Hz es de unos 160 Hz (Zwicker, 1961; Zwicker y Terhardt, 1980); con otra forma de medirla, el ancho rectangular equivalente (ERB) da 133 Hz (Glasberg y Moore, 1990).
+**Banda crítica.** Un tono no es enmascarado por todo el ruido que suene, sino solo por el que cae **cerca de su frecuencia**. Fletcher (1940) lo mostró así: si se ensancha un ruido alrededor de un tono, el enmascaramiento sube hasta cierto ancho y después ya no sube más. Ese ancho es la **banda crítica**, el equivalente en frecuencia de un filtro de la cóclea. Es de unos 100 Hz bajo 500 Hz y crece desde ahí, hasta cerca de un sexto de la frecuencia central, algo menos que un tercio de octava.<!-- Pasada de fundamentos 2026-10-18: decía "cerca de un quinto de octava". Con la fórmula de Zwicker y Terhardt (1980), 25 + 75 (1 + 1,4 f²)^0,69 (f en kHz), la banda vale 162 Hz en 1 kHz, 301 Hz en 2 kHz y 688 Hz en 4 kHz: un 15-17 % de la frecuencia; un quinto de octava sería el 14 % y un tercio de octava, el 23 %. --> A 1.000 Hz es de unos 160 Hz (Zwicker, 1961; Zwicker y Terhardt, 1980); con otra forma de medirla, el ancho rectangular equivalente (ERB) da 133 Hz (Glasberg y Moore, 1990).
 
 :::imagen ilustraciones/b4-banda-critica.svg ancho=96% La banda crítica comparada con la banda de un tercio de octava: bajo 500 Hz el tercio de octava es más angosto que la banda crítica y sobre 500 Hz, más ancho.
 :::
@@ -109,7 +109,7 @@ Dos consecuencias que se usan en el libro. Primera: **bajo 500 Hz un ruido de te
 
 Un **filtro** deja pasar unas frecuencias y atenúa otras. Hay cuatro formas: **pasa altos** (deja pasar sobre una frecuencia), **pasa bajos** (bajo una frecuencia), **pasa banda** (entre dos) y **de muesca** o *notch* (saca una banda angosta, como los 50 Hz de la red eléctrica). Un filtro se describe con su **frecuencia de corte**, donde la señal ha caído 3 dB (la mitad de la potencia), y su **pendiente**: cada "orden" del filtro agrega 6 dB de caída por octava.
 
-El electrodo del PEAT recoge, mezcladas, tres cosas. La respuesta del tronco mide menos de 1 µV y su energía está sobre todo entre 100 y 3.000 Hz. El EEG de fondo es 10 o 100 veces más grande y su energía está en las frecuencias bajas. El músculo y la red eléctrica meten ruido en otras bandas. Un pasa altos de 100 Hz y un pasa bajos de 3.000 Hz dejan la banda de la respuesta y sacan buena parte de lo demás, y con eso el promedio necesita menos barridos para mostrar la onda (→ Señal y ruido). Con un pasa altos de 2.º orden, la red de 50 Hz queda 12 dB más abajo. <!-- verificar: banda de energía del PEAT y del EEG, tomadas como órdenes de magnitud de Picton (2010) y Hall (2007). -->
+El electrodo del PEAT recoge, mezcladas, tres cosas. La respuesta del tronco mide menos de 1 µV y su energía está bajo unos 1.000 Hz: en el adulto tiene picos entre 0 y 200 Hz, en 500-600 Hz y en 900-1.000 Hz (Hall, 1986); en el lactante se carga todavía más a los graves (Sininger, 1995). El EEG de fondo es 10 o 100 veces más grande y su energía está en las frecuencias bajas. El músculo y la red eléctrica meten ruido en otras bandas. Un pasa altos de 100 Hz y un pasa bajos de 3.000 Hz dejan adentro el grueso de la respuesta y sacan buena parte de lo demás, y con eso el promedio necesita menos barridos para mostrar la onda (→ Señal y ruido). Con un pasa altos de 2.º orden, la red de 50 Hz queda 12 dB más abajo.<!-- Pasada de fundamentos 2026-10-18: decía "su energía está sobre todo entre 100 y 3.000 Hz". Se corrigió con el espectro medido en 25 adultos normales (Hall, 1986: "energy peaks in three main regions: 0 to 200 Hz, 500 to 600 Hz and 900 to 1000 Hz") y en lactantes (Sininger, 1995: "energy in the infant ABR is concentrated below 100 Hz"). -->
 
 :::imagen ilustraciones/b4-filtros.svg ancho=96% Los filtros del PEAT: lo que dejan pasar y lo que sacan. La banda de la respuesta queda adentro; el EEG de fondo, en los graves, y buena parte del ruido muscular y de la red quedan afuera.
 :::
@@ -175,9 +175,9 @@ Cada escala de decibeles del libro es la misma cuenta con otro cero.
 - **dB SPL**: el cero es 20 µPa, la presión que se aproxima al umbral de un oído joven a 1.000 Hz. Es una escala **física**, sin oyente: la mide un micrófono. Con la ponderación A se llama dB(A) (→ Ruido ocupacional).
 - **dB HL** (*hearing level*): el cero es el **umbral de un adulto joven otológicamente normal, en esa frecuencia y con ese transductor**. En cada frecuencia, dB SPL = dB HL + RETSPL. Por eso **0 dB HL no es 0 dB SPL**: con el fono TDH-39, 0 dB HL son 45 dB SPL a 125 Hz y 7 dB SPL a 1.000 Hz (ISO 389-1, 2017; → H3).
 - **dB SL** (*sensation level*): el cero es el **umbral del propio paciente**. 20 dB SL son 20 dB sobre lo que él detecta. La logoaudiometría y las pruebas supraliminares lo usan (→ H5, H6).
-- **dB nHL** (*normalized hearing level*): el cero es el nivel al que un grupo de adultos jóvenes normales detecta **ese mismo estímulo breve**, en ese equipo (ISO 389-6, 2007; IEC 60645-3). Un click o un burst se oyen peor que un tono sostenido porque el oído suma la energía durante unas décimas de segundo, así que cada estímulo corto necesita su propio cero. Los equipos de potenciales usan además el **dB peSPL** (SPL de pico equivalente): el nivel del tono continuo que tiene la misma amplitud de pico que el estímulo breve. El 0 dB nHL de un click equivale a unos 30 a 40 dB peSPL, según el transductor. <!-- verificar: valor de peSPL del 0 dB nHL del click según ISO 389-6 e IEC 60645-3. -->
+- **dB nHL** (*normalized hearing level*): el cero es el nivel al que un grupo de adultos jóvenes normales detecta **ese mismo estímulo breve**, en ese equipo (ISO 389-6, 2007; IEC 60645-3). Un click o un burst se oyen peor que un tono sostenido porque el oído suma la energía durante unas décimas de segundo, así que cada estímulo corto necesita su propio cero. Los equipos de potenciales usan además el **dB peSPL** (SPL equivalente de pico a pico): el nivel del tono continuo que tiene la misma amplitud de pico a pico que el estímulo breve, que es como se expresan los umbrales de referencia de los estímulos breves (Poulsen y Legarth, 2008).<!-- Pasada de fundamentos 2026-10-18: decía "SPL de pico equivalente ... la misma amplitud de pico". La medida de la norma es de pico a pico (Poulsen y Legarth, 2008, abstract: "peak-to-peak equivalent threshold sound pressure levels (peETSPL)... part of the basis for the ISO 389-6 standard"). --> El 0 dB nHL de un click equivale a unos 30 a 40 dB peSPL, según el transductor. <!-- verificar: valor de peSPL del 0 dB nHL del click según ISO 389-6 e IEC 60645-3. -->
 - **dB eHL** (*estimated hearing level*): no es una referencia física. Es la **estimación del umbral tonal** que se obtiene restando una corrección, publicada para cada estímulo y frecuencia, al umbral electrofisiológico en dB nHL. Con burst de 500 Hz, un umbral de 40 dB nHL queda en 40 − 20 = **20 dB eHL** (→ H10, H13).
-- **dB EM** (*effective masking*, enmascaramiento efectivo): el nivel de un ruido **expresado como el dB HL del tono que ese ruido apenas enmascara** (ISO 389-4, 1994). Un ruido de banda estrecha de 40 dB EM sube a 40 dB HL el umbral de un tono de su banda. Lo que importa en la clínica es cuánto sube el umbral. Por eso el enmascarante se calibra en EM, y no en dB HL, que es lo que el ruido necesita para ser *detectado*, 5 a 10 dB menos (→ H4, H8).
+- **dB EM** (*effective masking*, enmascaramiento efectivo): el nivel de un ruido **expresado como el dB HL del tono que ese ruido apenas enmascara** (ISO 389-4, 1994). Un ruido de banda estrecha de 40 dB EM sube a 40 dB HL el umbral de un tono de su banda. Lo que importa en la clínica es cuánto sube el umbral. Por eso el enmascarante se calibra en EM, y no en dB HL, que es lo que el ruido necesita para ser *detectado*, 5 a 10 dB menos (→ H4, H8). <!-- verificar: diferencia entre el nivel de detección de un ruido de banda estrecha y su nivel de enmascaramiento efectivo; las correcciones de la ISO 389-4 sobre el RETSPL (que se citan de memoria en unos 4 dB para tercio de octava y 6 dB para media octava) no se pudieron leer: la norma es de pago. -->
 
 Tabla: Las referencias de los decibeles
 
@@ -194,14 +194,14 @@ Tabla: Las referencias de los decibeles
 
 El **RETSPL** (*reference equivalent threshold sound pressure level*) es el nivel de presión, medido en un acoplador específico con un transductor específico, que corresponde a **0 dB HL**. Está en tablas de la serie ISO 389: la parte 1 para fonos supraaurales, la 2 para los de inserción, la 3 para el vibrador óseo (donde la referencia no es presión sino **fuerza**, en dB re 1 µN), la 7 para campo libre y la 6 para estímulos breves. Es la tabla que el audiómetro guarda y resta.
 
-Tabla: RETSPL de dos fonos (dB SPL; ISO 389-1 e ISO 389-2)
+Tabla: RETSPL de dos fonos (dB SPL; ISO 389-1 e ISO 389-2, este último en el acoplador de 2 cm³)
 
 | Fono | 125 Hz | 250 Hz | 500 Hz | 1.000 Hz | 2.000 Hz | 4.000 Hz |
 |---|---|---|---|---|---|---|
 | TDH-39 (supraaural) | 45 | 25,5 | 11,5 | 7 | 9 | 9,5 |
 | ER-3A (inserción) | 26 | 14 | 5,5 | 0 | 3 | 5,5 |
 
-<!-- verificar: valores de ER-3A en 125 y 250 Hz (leídos de memoria de la ISO 389-2). Los de 500 a 4.000 Hz son los que usa LabSim para el reflejo ipsilateral, y los del TDH-39 son los de H3. -->
+<!-- Pasada de fundamentos 2026-10-18: los valores del ER-3A (26; 14; 5,5; 0; 3; 5,5) coinciden con la tabla 1 de la ISO 389-2 para el acoplador IEC 126 (2 cm³); en el simulador de oído ocluido (IEC 711) son otros (28; 17,5; 9,5; 5,5; 11,5; 15). -->
 
 :::imagen ilustraciones/b4-escalas.svg ancho=96% El mismo tono de 60 dB SPL en dB SPL, dB HL y dB SL. El sonido no cambia: cambia contra qué se compara, un micrófono, el oído normal o el umbral de este paciente.
 :::
@@ -210,7 +210,7 @@ Tabla: RETSPL de dos fonos (dB SPL; ISO 389-1 e ISO 389-2)
 Un audiómetro calibrado para TDH-39 presenta "20 dB HL" a 1.000 Hz como 20 + 7 = 27 dB SPL, y a 125 Hz como 20 + 45 = 65 dB SPL. Si se le conecta un fono de inserción sin recalibrar, ese mismo nivel equivale, para el ER-3A, a 27 − 0 = 27 dB HL a 1.000 Hz y a 65 − 26 = **39 dB HL a 125 Hz**. El paciente oiría un sonido más fuerte que el que dice la pantalla, y todos sus umbrales saldrían **mejores de lo que son, en 7 dB a 1.000 Hz y en 19 dB a 125 Hz** (el cálculo es aproximado: los acopladores no son iguales). Por eso "el cero es de cada transductor" (→ H3).
 :::
 
-Calibrar es comprobar que el audiómetro entrega esos niveles. Hay tres niveles de control: la **verificación subjetiva diaria** (que suene, que un oyente conocido oiga igual que siempre; → H3), la **calibración objetiva** periódica (se mide la presión con un acoplador y un sonómetro, y la fuerza del vibrador con una mastoides artificial) y la **calibración exhaustiva**. Las tolerancias y la periodicidad las fijan la ANSI S3.6, la IEC 60645-1 y la norma local. <!-- verificar: tolerancia de ±3 dB en frecuencias de 125 a 4.000 Hz que piden las normas para el nivel de presión. -->
+Calibrar es comprobar que el audiómetro entrega esos niveles. Hay tres niveles de control: la **verificación subjetiva diaria** (que suene, que un oyente conocido oiga igual que siempre; → H3), la **calibración objetiva** periódica (se mide la presión con un acoplador y un sonómetro, y la fuerza del vibrador con una mastoides artificial) y la **calibración exhaustiva**. Las tolerancias y la periodicidad las fijan la ANSI S3.6, la IEC 60645-1 y la norma local.
 
 ### Atenuación: interaural, del protector y del molde
 
@@ -226,9 +226,9 @@ Un tapón que por sí solo atenúa 30 dB deja pasar 10^(−3) de la energía. Si
 Se presenta un tono de 80 dB HL al oído derecho. Con un fono supraaural (40 dB), llegan 80 − 40 = **40 dB** a la cóclea izquierda; si el umbral óseo del izquierdo es 30 dB, ese oído lo detecta y el umbral que se anota puede ser **del oído equivocado**. Con inserción (55 dB) llegan 80 − 55 = **25 dB**, bajo los 30 dB del umbral: el tono no cruza. Es la lógica de la decisión de enmascarar (→ H4).
 :::
 
-**Protector auditivo.** Su atenuación se mide, en personas, como la diferencia entre el umbral con y sin protector (ISO 4869-1, 2018). Crece con la frecuencia, porque las ondas cortas son las que mejor se frenan, y se pierde sobre todo por **fugas**. Lo que importa para el trabajador es el nivel que queda en el oído, que es el nivel del ambiente menos la atenuación *real*, que casi nunca es la de la etiqueta (→ H22).
+**Protector auditivo.** Su atenuación se mide, en personas, como la diferencia entre el umbral con y sin protector (ISO 4869-1, 2018). Crece con la frecuencia, porque las ondas cortas son las que mejor se frenan, y se pierde sobre todo por **fugas**. Lo que importa para el trabajador es el nivel que queda en el oído, que es el nivel del ambiente menos la atenuación *real*. Esa suele ser menor que la de la etiqueta, que se mide en laboratorio: NIOSH recomienda descontarle un 25 % en las orejeras, un 50 % en los tapones moldeables y un 70 % en los demás tapones (NIOSH, 1998; → H22).
 
-**Molde del audífono.** Un molde cerrado y bien sellado se comporta como un tapón: el audífono queda aislado del exterior y los graves se acumulan en el conducto. Una **ventilación** es un tubo angosto que atraviesa el molde: deja salir los graves (más cuanto más ancha), mejora la oclusión y reduce la ganancia grave, y deja volver sonido al micrófono (→ H20, H21; Dillon, 2012). <!-- verificar: atenuación típica de un molde cerrado (del orden de 20 a 30 dB en agudos) y efecto de la ventilación (Dillon, 2012). -->
+**Molde del audífono.** Un molde cerrado y bien sellado se comporta como un tapón: el audífono queda aislado del exterior y los graves se acumulan en el conducto. Una **ventilación** es un tubo angosto que atraviesa el molde: deja salir los graves (más cuanto más ancha), mejora la oclusión y reduce la ganancia grave, y deja volver sonido al micrófono (→ H20, H21; Dillon, 2012).
 
 ## Del sonido a lo que se oye
 
@@ -238,12 +238,12 @@ Tabla: Lo físico y lo percibido
 
 | Físico | Se percibe como | Lo que hay que saber |
 |---|---|---|
-| Frecuencia | **tono** (agudo o grave) | el orden se conserva, pero no es una recta: de oído se distinguen cambios de unas décimas de por ciento en 1.000 Hz (Sek y Moore, 1995) <!-- verificar: tamaño del umbral diferencial de frecuencia en 1.000 Hz. --> |
+| Frecuencia | **tono** (agudo o grave) | el orden se conserva, pero no es una recta: hasta 2.000 Hz se distinguen cambios de menos del 0,6 % de la frecuencia (Sek y Moore, 1995) |
 | Nivel | **sonoridad** (fuerte o suave) | depende también de la frecuencia (curvas de igual sonoridad) |
 | Duración | **duración** | bajo unos 200 ms el oído suma la energía, y un tono más corto necesita más nivel para detectarse |
 | Espectro y envolvente | **timbre** | es lo que distingue una vocal de otra, o un piano de una guitarra con la misma nota |
 
-**Sonoridad y curvas de igual sonoridad.** Un tono de 125 Hz y uno de 1.000 Hz con el mismo nivel en dB SPL no suenan igual de fuertes: el oído es menos sensible en los graves, y el umbral de 125 Hz está en 45 dB SPL con el TDH-39 contra 7 dB SPL en 1.000 Hz (→ Decibeles). Fletcher y Munson (1933) midieron a qué nivel hay que poner un tono de cada frecuencia para que suene tan fuerte como uno de 1.000 Hz; cada curva se rotula con ese nivel de 1.000 Hz, en **fonos** (ISO 226, 2003). <!-- verificar: ISO 226:2003 fue revisada en 2023. --> Al subir el nivel las curvas se aplanan: los graves "alcanzan" a los medios. Para medir cuánto más fuerte suena un sonido hay otra escala, el **sono**: 1 sono es la sonoridad de 40 fonos, y cada +10 fonos la duplica. Así 50 fonos son 2 sonos, 60 son 4, 70 son 8 y 80 son 16 (Stevens, 1955). Cerca del umbral, la sonoridad crece más rápido que eso, y por eso la regla de los 10 dB solo vale a niveles moderados y altos.
+**Sonoridad y curvas de igual sonoridad.** Un tono de 125 Hz y uno de 1.000 Hz con el mismo nivel en dB SPL no suenan igual de fuertes: el oído es menos sensible en los graves, y el umbral de 125 Hz está en 45 dB SPL con el TDH-39 contra 7 dB SPL en 1.000 Hz (→ Decibeles). Fletcher y Munson (1933) midieron a qué nivel hay que poner un tono de cada frecuencia para que suene tan fuerte como uno de 1.000 Hz; cada curva se rotula con ese nivel de 1.000 Hz, en **fonos** (ISO 226, 2023). Al subir el nivel las curvas se aplanan: los graves "alcanzan" a los medios. Para medir cuánto más fuerte suena un sonido hay otra escala, el **sono**: 1 sono es la sonoridad de 40 fonos, y cada +10 fonos la duplica. Así 50 fonos son 2 sonos, 60 son 4, 70 son 8 y 80 son 16 (Stevens, 1955). Cerca del umbral, la sonoridad crece más rápido que eso, y por eso la regla de los 10 dB solo vale a niveles moderados y altos.
 
 **Campo auditivo.** Es la región, en el plano frecuencia-nivel, que va de lo que apenas se oye (el umbral) a lo que molesta o duele: unas frecuencias de 20 a 20.000 Hz y unos niveles de 0 a 120 dB SPL. El habla ocupa una parte de ese campo (→ H3, H5).
 
@@ -265,7 +265,7 @@ La **impedancia acústica** (*Z*) es cuánto se **opone** un sistema al paso del
 - **Masa**: lo que pesa. Se opone más a los movimientos **rápidos**, a las frecuencias altas. Viene de los huesecillos y del líquido.
 - **Roce** (resistencia): el amortiguador. No depende de la frecuencia y gasta energía en forma de calor.
 
-A una frecuencia el resorte y la masa se **anulan entre sí**: la oposición de uno compensa la del otro y solo queda el roce. Es la **frecuencia de resonancia**, *f*₀ = 1 / (2π √(*M* × *C*)), con *M* la masa y *C* la compliancia. En ella la admitancia es máxima. Un oído medio normal de adulto resuena en torno a 1.000 Hz (Margolis y Goycoolea, 1993). <!-- verificar: valor de la frecuencia de resonancia del oído medio normal del adulto (se cita de memoria entre 800 y 1.200 Hz). --> Un oído **más rígido** (otosclerosis, líquido) sube su resonancia; uno **más laxo** (una cadena interrumpida) la baja.
+A una frecuencia el resorte y la masa se **anulan entre sí**: la oposición de uno compensa la del otro y solo queda el roce. Es la **frecuencia de resonancia**, *f*₀ = 1 / (2π √(*M* × *C*)), con *M* la masa y *C* la compliancia. En ella la admitancia es máxima. Un oído medio normal de adulto resuena por debajo de los 1.000 Hz: en 100 oídos normales la media fue de 935 Hz. Un oído **más rígido** sube su resonancia (en la otosclerosis la media fue de 1.190 Hz; Ogut y cols., 2008); uno **más laxo** (una cadena interrumpida) la baja.<!-- Pasada de fundamentos 2026-10-18: decía "resuena en torno a 1.000 Hz (Margolis y Goycoolea, 1993)" y "más rígido (otosclerosis, líquido)". El abstract de Margolis y Goycoolea no da el valor; se citó Ogut y cols. (2008), abstract: "Mean middle-ear resonant frequency for the otosclerotic group was found to be 1190 Hz and mean middle-ear resonant frequency of the control group was 934.6 Hz". Se quitó "líquido": no se encontró respaldo de que la efusión suba la resonancia de forma constante. -->
 
 :::imagen ilustraciones/b4-resonancia.svg ancho=100% Masa, rigidez y roce, y la admitancia de tres oídos de juguete: uno normal, uno rígido y uno laxo. Mira cómo cambia el orden entre los tres al pasar de la sonda de 226 Hz a la de 1.000 Hz.
 :::
@@ -372,7 +372,7 @@ La consecuencia para el examen es directa. **Un umbral con tono puro en campo li
 
 **Distancia.** En campo libre la presión baja con la distancia: **6 dB por cada vez que se duplica la distancia** (ley del inverso del cuadrado). Si la cabeza queda a 1 m y se mueve 10 cm, el nivel cambia entre +0,8 y −0,9 dB; a 0,5 m, la misma desviación cambia entre +1,6 y −1,9 dB. Por eso el parlante va a **1 m o más** del paciente (→ H8): a esa distancia un movimiento normal de la cabeza deja el nivel dentro de 1 dB, y el sonido directo domina sobre el reflejado.
 
-**Ángulo.** Cuando la longitud de onda es menor que la cabeza, que tiene unos 18 cm, la cabeza hace **sombra**: sobre unos 1.900 Hz (343 m/s / 0,18 m) el oído lejano al parlante recibe menos nivel que el cercano, y la diferencia crece con la frecuencia; bajo 500 Hz, con ondas de 0,7 m o más, la cabeza casi no estorba (Shaw, 1974). <!-- verificar: valor de la diferencia interaural de nivel a 4 y 8 kHz para una fuente a 90° (Shaw, 1974). --> Por eso el cero de campo libre se fija con el sonido llegando de frente (0°) y con los dos oídos, y por eso la posición del parlante respecto de la cabeza cambia el nivel que llega a cada oído (ISO 389-7, 2019; → H8).
+**Ángulo.** Cuando la longitud de onda es menor que la cabeza, que tiene unos 18 cm, la cabeza hace **sombra**: sobre unos 1.900 Hz (343 m/s / 0,18 m) el oído lejano al parlante recibe menos nivel que el cercano, y la diferencia crece con la frecuencia; bajo 500 Hz, con ondas de 0,7 m o más, la cabeza casi no estorba (Shaw, 1974). Por eso el cero de campo libre se fija con el sonido llegando de frente (0°) y con los dos oídos, y por eso la posición del parlante respecto de la cabeza cambia el nivel que llega a cada oído (ISO 389-7, 2019; → H8).
 
 ### Ruido ambiente y cabina
 
@@ -437,7 +437,7 @@ Un trabajador pasa 4 horas a 91 dB(A) y 4 horas a 82 dB(A). Con la tabla de 3 dB
 
 ### Presión, flujo y resistencia
 
-El aire entra por la nariz porque el tórax baja la presión de la nasofaringe. Esa **diferencia de presión** (ΔP, en Pa) empuja un **flujo** (V̇, en cm³/s), y su cociente es la **resistencia** (*R* = ΔP / V̇), como en un circuito eléctrico. Se mide en Pa/(cm³/s); 1 Pa/(cm³/s) son unos 10,2 cmH₂O/L/s (→ H24). La nariz es la parte más resistente de la vía aérea del adulto (Ferris y cols., 1964).
+El aire entra por la nariz porque el tórax baja la presión de la nasofaringe. Esa **diferencia de presión** (ΔP, en Pa) empuja un **flujo** (V̇, en cm³/s), y su cociente es la **resistencia** (*R* = ΔP / V̇), como en un circuito eléctrico. Se mide en Pa/(cm³/s); 1 Pa/(cm³/s) son unos 10,2 cmH₂O/L/s (→ H24). La nariz es la parte más resistente de la vía aérea del adulto (Ferris y cols., 1964). <!-- verificar: Ferris y cols. (1964) no tiene abstract en PubMed y el texto completo no es de acceso libre; no se pudo leer qué fracción de la resistencia total atribuyen a la nariz. -->
 
 **Una pequeña reducción del radio cambia mucho.** En un tubo recto y liso con flujo ordenado (laminar), la resistencia es proporcional a **1 / r⁴** (ley de Poiseuille). Si el radio baja un 20 %, la resistencia sube ×2,4; si baja a la mitad, ×16. La nariz no es un tubo liso, pero es la razón de que unos milímetros de mucosa hinchada tapen y de que un vasoconstrictor que los reduzca pueda destapar (→ H24).
 
@@ -522,14 +522,14 @@ Los límites del método que explica H25 salen de estas mismas cuentas. Después
 1. International Organization for Standardization. ISO 389-7:2019. Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions. Ginebra: ISO; 2019.
 1. International Organization for Standardization. ISO 8253-1:2010. Acoustics — Audiometric test methods — Part 1: Pure-tone air and bone conduction audiometry. Ginebra: ISO; 2010.
 1. International Organization for Standardization. ISO 8253-2:2009. Acoustics — Audiometric test methods — Part 2: Sound field audiometry with pure-tone and narrow-band test signals. Ginebra: ISO; 2009.
-1. International Organization for Standardization. ISO 226:2003. Acoustics — Normal equal-loudness-level contours. Ginebra: ISO; 2003.
+1. International Organization for Standardization. ISO 226:2023. Acoustics — Normal equal-loudness-level contours. 3.ª ed. Ginebra: ISO; 2023.
 1. International Organization for Standardization. ISO 1999:2013. Acoustics — Estimation of noise-induced hearing loss. Ginebra: ISO; 2013.
 1. International Organization for Standardization. ISO 4869-1:2018. Acoustics — Hearing protectors — Part 1: Subjective method for the measurement of sound attenuation. Ginebra: ISO; 2018.
 1. International Electrotechnical Commission. IEC 60645-1:2017. Electroacoustics — Audiometric equipment — Part 1: Equipment for pure-tone and speech audiometry. Ginebra: IEC; 2017.
-1. International Electrotechnical Commission. IEC 60645-3. Electroacoustics — Audiometric equipment — Part 3: Auditory test signals of short duration for audiometric and neuro-otological purposes. Ginebra: IEC. <!-- verificar: año de la edición vigente. -->
+1. International Electrotechnical Commission. IEC 60645-3:2020. Electroacoustics — Audiometric equipment — Part 3: Test signals of short duration. 3.ª ed. Ginebra: IEC; 2020.
 1. International Electrotechnical Commission. IEC 61672-1:2013. Electroacoustics — Sound level meters — Part 1: Specifications. Ginebra: IEC; 2013.
 1. International Electrotechnical Commission. IEC 60118-0:2022. Electroacoustics — Hearing aids — Part 0: Measurement of the performance characteristics of hearing aids. Ginebra: IEC; 2022.
-1. Acoustical Society of America. ANSI/ASA S3.6-2018. Specification for audiometers. Melville (NY): ASA; 2018. <!-- verificar: edición vigente. -->
+1. Acoustical Society of America. ASA/ANSI S3.6-2025. Specification for audiometers. Melville (NY): ASA; 2025.
 1. Acoustical Society of America. ANSI/ASA S3.1-1999 (R2018). Maximum permissible ambient noise levels for audiometric test rooms. Melville (NY): ASA; 2018.
 1. British Society of Audiology. Recommended procedure: pure-tone air-conduction and bone-conduction threshold audiometry with and without masking (OD104-32). BSA; 2018.
 1. National Institute for Occupational Safety and Health. Criteria for a recommended standard: occupational noise exposure, revised criteria 1998. Cincinnati (OH): DHHS (NIOSH) Publication No. 98-126; 1998. Disponible en: https://stacks.cdc.gov/view/cdc/6376
@@ -538,11 +538,11 @@ Los límites del método que explica H25 salen de estas mismas cuentas. Después
 
 1. Gelfand SA. Hearing: an introduction to psychological and physiological acoustics. 6.ª ed. Boca Raton: CRC Press; 2017. doi:10.1201/9781315154718
 1. Plack CJ. The sense of hearing. 3.ª ed. Londres: Routledge; 2018. doi:10.4324/9781315208145
-1. Moore BCJ. An introduction to the psychology of hearing. 6.ª ed. Leiden: Brill; 2013. <!-- verificar: año y edición. -->
+1. Moore BCJ. An introduction to the psychology of hearing. 6.ª ed. Leiden: Brill; 2013. ISBN 978-90-04-25242-4
 1. Rossing TD, editor. Springer handbook of acoustics. Nueva York: Springer; 2007. doi:10.1007/978-0-387-30425-0
 1. Picton TW. Human auditory evoked potentials. San Diego: Plural Publishing; 2010 (el editor la fecha en 2011).
 1. Hall JW 3rd. New handbook of auditory evoked responses. Boston: Pearson; 2007.
-1. Dillon H. Hearing aids. 2.ª ed. Nueva York: Thieme; 2012. <!-- verificar: editorial y año de la 2.ª edición. -->
+1. Dillon H. Hearing aids. 2.ª ed. Sídney: Boomerang Press; Nueva York: Thieme; 2012. ISBN 978-1-60406-810-8
 1. Cole B. A summary of ANSI S3.22 tests [Internet]. Etymonic Design / Audioscan; 2006. Disponible en: https://docs.audioscan.com/library/misc/ANSI-S3_22-Tests-Summary.pdf
 
 ### Sonido, psicoacústica y calibración
@@ -560,21 +560,25 @@ Los límites del método que explica H25 salen de estas mismas cuentas. Después
 1. Munro KJ, Agnew N. A comparison of inter-aural attenuation with the Etymotic ER-3A insert earphone and the Telephonics TDH-39 supra-aural earphone. Br J Audiol. 1999;33(4):259-62. doi:10.3109/03005369909090106
 1. Stenfelt S. Transcranial attenuation of bone-conducted sound when stimulation is at the mastoid and at the bone conduction hearing aid position. Otol Neurotol. 2012;33(2):105-14. doi:10.1097/MAO.0b013e31823e28ab
 1. Dau T, Wegner O, Mellert V, Kollmeier B. Auditory brainstem responses with optimized chirp signals compensating basilar-membrane dispersion. J Acoust Soc Am. 2000;107(3):1530-40. doi:10.1121/1.428438
+1. Poulsen T, Legarth SV. Reference hearing threshold levels for short duration signals. Int J Audiol. 2008;47(10):665-74. doi:10.1080/14992020802203330
 
 ### Impedancia y admitancia
 
-1. British Society of Audiology. Recommended procedure: tympanometry and acoustic reflex thresholds. BSA; 2024. <!-- verificar: ficha completa, igual a la de H7. -->
+1. British Society of Audiology. Recommended procedure: tympanometry and acoustic reflex thresholds [Internet]. BSA; 2024 Feb (enmiendas menores feb 2025 y mar 2026) [citado 2026 oct 15]. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2026/03/BSA-Recommended-Procedure-Tympanometry-Acoustic-Reflex-Thresholds-March-2026-minor-revision.pdf
 1. Margolis RH, Goycoolea HG. Multifrequency tympanometry in normal adults. Ear Hear. 1993;14(6):408-13. doi:10.1097/00003446-199312000-00006
 1. Holte L, Margolis RH, Cavanaugh RM Jr. Developmental changes in multifrequency tympanograms. Audiology. 1991;30(1):1-24. doi:10.3109/00206099109072866
 1. Kei J, Allison-Levick J, Dockray J, Harrys R, Kirkegard C, Wong J, et al. High-frequency (1000 Hz) tympanometry in normal neonates. J Am Acad Audiol. 2003;14(1):20-8. doi:10.3766/jaaa.14.1.4
 1. Alaerts J, Luts H, Wouters J. Evaluation of middle ear function in young children: clinical guidelines for the use of 226- and 1,000-Hz tympanometry. Otol Neurotol. 2007;28(6):727-32. doi:10.1097/mao.0b013e3180dca1e5
 1. Chasin M. Back to basics: a primer on equivalent volume, impedance, and couplers for hearing aids. Hear Rev. 2015;22(12).
+1. Ogut F, Serbetcioglu B, Kirazli T, Kirkim G, Gode S. Results of multiple-frequency tympanometry measures in normal and otosclerotic middle ears. Int J Audiol. 2008;47(10):615-20. doi:10.1080/14992020802178656
 
 ### Señal y ruido
 
 1. Elberling C, Don M. Quality estimation of averaged auditory brainstem responses. Scand Audiol. 1984;13(3):187-97. doi:10.3109/01050398409043059
 1. Don M, Elberling C. Evaluating residual background noise in human auditory brain-stem responses. J Acoust Soc Am. 1994;96(5 Pt 1):2746-57. doi:10.1121/1.411281
 1. Picton TW, Hillyard SA, Krausz HI, Galambos R. Human auditory evoked potentials. I: Evaluation of components. Electroencephalogr Clin Neurophysiol. 1974;36(2):179-90. doi:10.1016/0013-4694(74)90155-2
+1. Hall JW. Auditory brain stem response spectral content in comatose head-injured patients. Ear Hear. 1986;7(6):383-9. doi:10.1097/00003446-198612000-00007
+1. Sininger YS. Filtering and spectral characteristics of averaged auditory brain-stem response and background noise in infants. J Acoust Soc Am. 1995;98(4):2048-55. doi:10.1121/1.413321
 
 ### Nariz
 
@@ -586,3 +590,4 @@ Los límites del método que explica H25 salen de estas mismas cuentas. Después
 1. Hilberg O, Jackson AC, Swift DL, Pedersen OF. Acoustic rhinometry: evaluation of nasal cavity geometry by acoustic reflection. J Appl Physiol. 1989;66(1):295-303. doi:10.1152/jappl.1989.66.1.295
 1. Jackson AC, Butler JP, Millet EJ, Hoppin FG Jr, Dawson SV. Airway geometry by analysis of acoustic pulse response measurements. J Appl Physiol. 1977;43(3):523-36. doi:10.1152/jappl.1977.43.3.523
 1. Fredberg JJ, Wohl ME, Glass GM, Dorkin HL. Airway area by acoustic reflections measured at the mouth. J Appl Physiol. 1980;48(5):749-58. doi:10.1152/jappl.1980.48.5.749
+1. Keck T, Leiacker R, Riechelmann H, Rettinger G. Temperature profile in the nasal cavity. Laryngoscope. 2000;110(4):651-4. doi:10.1097/00005537-200004000-00021

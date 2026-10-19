@@ -8,7 +8,7 @@
 - Describir la acufenometría: tono, sonoridad, nivel mínimo de enmascaramiento e inhibición residual.
 :::
 
-El ruido es la causa evitable más común de hipoacusia en el adulto. No duele, no se ve y se instala tan lento que el paciente suele ser el último en notarlo: primero dice que la gente habla bajo, después que no entiende en el restorán y, al final, que el pitido no lo deja dormir. Cuando llega a la consulta, el daño ya es permanente. Por eso la mitad de este capítulo trata de pacientes que **todavía no tienen nada**: el trabajador que entra a la faena y deja su audición escrita para compararla en diez años. La otra mitad trata de cómo leer el oído que el ruido ya dañó, con el audiograma y con las emisiones, que muestran el daño en la cóclea misma.
+El ruido es una causa evitable de hipoacusia, y la hipoacusia por ruido es una de las enfermedades laborales más frecuentes (ACOEM, 2003). <!-- Pasada de fundamentos 2026-10-18: decía "El ruido es la causa evitable más común de hipoacusia en el adulto". Superlativo sin fuente; ACOEM (2003): "noise-induced hearing loss remains one of the most prevalent occupational conditions". --> No duele, no se ve y se instala tan lento que el paciente suele ser el último en notarlo: primero dice que la gente habla bajo, después que no entiende en el restorán y, al final, que el pitido no lo deja dormir. Cuando llega a la consulta, el daño ya es permanente. Por eso la mitad de este capítulo trata de pacientes que **todavía no tienen nada**: el trabajador que entra a la faena y deja su audición escrita para compararla en diez años. La otra mitad trata de cómo leer el oído que el ruido ya dañó, con el audiograma y con las emisiones, que muestran el daño en la cóclea misma.
 
 ## Técnica en foco
 
@@ -26,7 +26,7 @@ En el tamizaje neonatal la pregunta de las emisiones es una sola: ¿pasa o refie
 Las emisiones se informan **por banda o por frecuencia**: dónde están presentes, dónde reducidas y dónde ausentes. Un "pasa" a secas en un trabajador expuesto esconde exactamente lo que se fue a buscar.
 :::
 
-Para la vigilancia, las emisiones tienen la misma lógica que la audiometría: valen contra **la línea de base del mismo oído**, medida con los mismos parámetros y la misma sonda (→ H9). <!-- verificar: si las OEA (sobre todo la DPOAE de agudos) anticipan el cambio de umbral por ruido en la vigilancia; hay estudios (p. ej. Lapsley Miller y cols., 2006) que no están en la bibliografía verificada del libro. -->
+Para la vigilancia, las emisiones tienen la misma lógica que la audiometría: valen contra **la línea de base del mismo oído**, medida con los mismos parámetros y la misma sonda (→ H9). En tripulantes de un portaaviones expuestos seis meses a ruido, las emisiones bajaron en promedio sin que cambiara el audiograma, y los oídos con emisiones bajas o ausentes al inicio tuvieron más riesgo de quedar con un cambio permanente del umbral (Lapsley Miller y cols., 2006). <!-- Pasada de fundamentos 2026-10-18: resuelto el verificar con Lapsley Miller y cols. 2006 (abstract: "While the average amplitudes of the otoacoustic emissions decreased significantly, the average audiometric thresholds did not change... permanent threshold shift status following a deployment was predicted by baseline low-level or absent otoacoustic emissions"). -->
 
 **Las SOAE** casi no tienen papel en el ruido. Aparecen en una parte de los oídos sanos y su ausencia no es patológica (Penner y Zhang, 1997). Cuando un paciente con acúfeno tiene una SOAE, la tentación es pensar que el pitido es esa emisión. Rara vez lo es: el acúfeno causado por una SOAE es poco frecuente (Penner, 1990).
 
@@ -55,22 +55,22 @@ Muchos pacientes dañados por ruido tienen acúfeno, y varios consultan por él 
 **¿En qué oído?** Los estímulos se presentan en el oído **sin acúfeno** o, si suena en los dos, en el que suena menos. Así el paciente compara el sonido del audiómetro con su acúfeno sin que uno tape al otro.
 
 1. **Tipo de sonido.** Se le presentan un tono puro, un ruido de banda estrecha y un ruido blanco, y elige el que más se parece. Un "pitido" suele parecerse a un tono; un "chicharreo" o un "siseo", a un ruido.
-2. **Tono.** Se le presentan tres estímulos de distinta frecuencia, a un nivel cómodo, y elige el que más se parece; se sigue probando alrededor del elegido hasta dar con el tono. Al final se le presenta una octava arriba y una abajo, porque confundir la octava es el error más común de esta prueba (Henry y cols., 2004). Se anota la frecuencia.
+2. **Tono.** Se le presentan tres estímulos de distinta frecuencia, a un nivel cómodo, y elige el que más se parece; se sigue probando alrededor del elegido hasta dar con el tono. Al final se le presenta una octava arriba y una abajo, porque es fácil confundir el tono con su octava (Tyler y Conrad-Armes, 1983a). <!-- Pasada de fundamentos 2026-10-18: decía "confundir la octava es el error más común de esta prueba (Henry y cols., 2004)". El abstract de Henry 2004 no habla de la confusión de octava (no se pudo leer el texto completo); Tyler y Conrad-Armes (1983a) registran confusiones de octava al igualar el tono (abstract: "resulted in more octave confusions than the other two methods"). --> Se anota la frecuencia.
 3. **Sonoridad.** En esa frecuencia se sube el nivel hasta que el paciente diga que el estímulo y su acúfeno suenan **igual de fuerte**. Se anota en dB HL y en dB SL, que es ese nivel menos el umbral del paciente en esa frecuencia.
 4. **Nivel mínimo de enmascaramiento (NME).** Se presenta un ruido y se sube de a poco hasta que el paciente deje de oír su acúfeno. Se anota el nivel (Feldmann, 1971; Henry y Meikle, 2000).
 5. **Inhibición residual.** Se presenta un tono o un ruido **una octava por encima o por debajo** de la frecuencia del acúfeno, **10 dB sobre el NME**, durante **un minuto** en el oído del acúfeno; se apaga y se pregunta qué pasó con el acúfeno: igual (negativa), más suave (parcial) o desaparecido (total). Se espera otro minuto para ver si el efecto se mantiene.
 
 :::comentario Lo que dicen las normas
-En la literatura, la inhibición residual se mide con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto (Roberts, 2007; Henry y Meikle, 2000). La comparación una octava arriba y abajo aparece en otro paso: al igualar el tono, para descartar la confusión de octava (Henry y cols., 2004). En este libro, el estímulo de la inhibición residual va una octava por encima o por debajo del acúfeno.
+En la literatura, la inhibición residual se mide con el mismo ruido con que se midió el NME, centrado en la frecuencia del acúfeno o de banda ancha, a NME + 10 dB durante un minuto (Roberts, 2007; Henry y Meikle, 2000). La comparación una octava arriba y abajo aparece en otro paso: al igualar el tono, para descartar la confusión de octava (Mahboubi y cols., 2012). En este libro, el estímulo de la inhibición residual va una octava por encima o por debajo del acúfeno.
 :::
 
 <!-- Protocolo ORL 2019: la inhibición residual "en una 8ª perfecta superior o inferior a la frecuencia del tinnitus". Se mantiene el protocolo (regla del autor, 2026-10-16) y la literatura va en el recuadro. Para decidir con el equipo: docs/libro/incongruencias_protocolo.md. -->
 
 :::ojo Ojo clínico
-La sonoridad casi siempre sale **baja en dB SL**, aunque el paciente diga que el acúfeno es insoportable. No significa que exagere: en un oído con reclutamiento, pocos decibeles sobre el umbral ya suenan fuertes (Tyler y Conrad-Armes, 1983b). Se anotan los dos números y no se le discute la molestia.
+La sonoridad suele salir **baja en dB SL**, aunque el paciente diga que el acúfeno es insoportable. No significa que exagere: en un oído con reclutamiento, pocos decibeles sobre el umbral ya suenan fuertes (Tyler y Conrad-Armes, 1983b). Se anotan los dos números y no se le discute la molestia.
 :::
 
-La acufenometría **describe** el acúfeno, pero no demuestra que exista: el paciente puede igualar un tono que no oye (Henry y cols., 2013). Sus resultados además varían de una sesión a otra, sobre todo el tono (Tyler y Conrad-Armes, 1983a). Sirve para orientar el manejo y para seguir al mismo paciente, no como prueba objetiva.
+La acufenometría **describe** el acúfeno, pero no demuestra que exista: no hay una medida objetiva de su presencia (Henry y cols., 2013). Sus resultados además varían de una medición a otra, sobre todo el tono: en la mitad de los pacientes, las igualaciones repetidas abarcaron más de dos octavas (Henry y cols., 2004). <!-- Pasada de fundamentos 2026-10-18: decía "el paciente puede igualar un tono que no oye (Henry y cols., 2013)" y "varían de una sesión a otra, sobre todo el tono (Tyler y Conrad-Armes, 1983a)". Henry 2013, abstract: "determining the presence of tinnitus is based on subjective reporting-objective measures do not exist"; Henry 2004, abstract: "About half of the subjects selected pitch matches over a range of 2 1/3 octaves". --> Sirve para orientar el manejo y para seguir al mismo paciente, no como prueba objetiva.
 
 En el informe va, en ese orden: dónde suena el acúfeno y en qué oído se evaluó; el tipo de sonido; el tono en Hz, con la confusión de octava descartada; la sonoridad en dB HL y en dB SL; el NME con el ruido usado, y la inhibición residual (negativa, parcial o total) y si se mantuvo al minuto. Se anota en las observaciones de la audiometría.
 
@@ -80,7 +80,7 @@ En el informe va, en ese orden: dónde suena el acúfeno y en qué oído se eval
 
 El órgano de Corti tiene una hilera de **células ciliadas internas** y tres de **externas**. Las internas son los receptores: transforman el movimiento en la señal que viaja por el nervio. Las externas casi no mandan información al cerebro; su trabajo es **mecánico**.
 
-Cuando una célula ciliada externa se estimula, **cambia de largo**: se acorta y se alarga siguiendo el sonido, cientos o miles de veces por segundo. Es la **electromotilidad** (Brownell y cols., 1985), y el motor es una proteína de su membrana, la **prestina** (Zheng y cols., 2000). Ese movimiento empuja la membrana basilar en el momento justo y amplifica la vibración de los sonidos suaves en una zona muy estrecha: es el **amplificador coclear**. Le da al oído unos 40 a 50 dB de sensibilidad y su sintonía fina (Dallos, 2008). Un ratón sin prestina pierde entre 40 y 60 dB (Liberman y cols., 2002). El detalle está en B2 y la histología en B3.
+Cuando una célula ciliada externa se estimula, **cambia de largo**: se acorta y se alarga siguiendo el sonido, cientos o miles de veces por segundo. Es la **electromotilidad** (Brownell y cols., 1985), y el motor es una proteína de su membrana, la **prestina** (Zheng y cols., 2000). Ese movimiento empuja la membrana basilar en el momento justo y amplifica la vibración de los sonidos suaves en una zona muy estrecha: es el **amplificador coclear**. Le da al oído unos 50 dB de sensibilidad y su sintonía fina (Dallos, 2008). <!-- Pasada de fundamentos 2026-10-18: decía "unos 40 a 50 dB". Dallos (2008, texto completo PMC2630119): "in the absence of OHCs hearing threshold was elevated by some 50 dB". --> Un ratón sin prestina pierde entre 40 y 60 dB (Liberman y cols., 2002). El detalle está en B2 y la histología en B3.
 
 ![Órgano de Corti en corte transversal: una célula ciliada interna y tres externas sobre la membrana basilar, bajo la membrana tectoria. A la derecha, ampliación de una célula ciliada externa en dos momentos: acortada y alargada, con la prestina marcada en su pared lateral y una flecha doble que indica el cambio de largo.](ilustraciones/cap06-electromotilidad.png)
 
@@ -90,7 +90,7 @@ Las emisiones otoacústicas son el subproducto de ese motor (→ H9). Si las cé
 
 ### Lo que hace el ruido
 
-Las células ciliadas externas son las más frágiles del órgano de Corti frente al ruido, y la base de la cóclea es más vulnerable que el ápice, por cómo maneja el calcio y la carga metabólica de la transducción (Fettiplace y Nam, 2019). El ruido de banda ancha de una faena o de una discoteca termina dañando una zona alrededor de **4 kHz**, aunque tenga energía en todas las frecuencias. <!-- verificar: la explicación habitual de por qué la muesca cae en 3-6 kHz (resonancia del conducto en 2,5-3 kHz, que refuerza esa zona, y daño máximo media octava sobre la frecuencia del estímulo) no está en la bibliografía verificada; buscar fuente antes de agregarla (→ B2, B4). -->
+Las células ciliadas externas son las más frágiles del órgano de Corti frente al ruido, y la base de la cóclea es más vulnerable que el ápice, por cómo maneja el calcio y la carga metabólica de la transducción (Fettiplace y Nam, 2019). El ruido de banda ancha de una faena o de una discoteca termina dañando una zona alrededor de **4 kHz**, aunque tenga energía en todas las frecuencias. Dónde cae exactamente la muesca depende, entre otras cosas, de la frecuencia del ruido y del largo del conducto auditivo (ACOEM, 2003). <!-- verificar: el detalle del mecanismo (resonancia del conducto en 2,5-3 kHz que refuerza esa zona, y daño máximo media octava sobre la frecuencia del estímulo) sigue sin fuente verificada; ACOEM 2003 solo dice "The exact location of the notch depends on multiple factors including the frequency of the damaging noise and the length of the ear canal". -->
 
 El daño tiene dos tiempos:
 
@@ -107,7 +107,7 @@ Un desplazamiento temporal que se recupera por completo no siempre es inocente. 
 
 ### Hipoacusia por ruido crónica
 
-Es la de años de exposición laboral o recreativa. Es **sensorioneural, bilateral y casi simétrica**, porque el ruido de una faena llega a los dos oídos. Empieza como una muesca en 3, 4 o 6 kHz con recuperación en 8 kHz y, con los años, la muesca se ensancha y la recuperación se achica. El ruido solo rara vez lleva los agudos más allá de 75 dB ni los graves más allá de 40 dB (ACOEM, 2003): una pérdida mayor obliga a buscar otra causa sumada. <!-- verificar: ACOEM 2003 también dice que la pérdida por ruido no progresa al terminar la exposición; confirmar en el texto antes de afirmarlo. -->
+Es la de años de exposición laboral o recreativa. Es **sensorioneural, bilateral y casi simétrica**, porque el ruido de una faena llega a los dos oídos. Empieza como una muesca en 3, 4 o 6 kHz con recuperación en 8 kHz y, con los años, la muesca se ensancha y la recuperación se achica. El ruido solo rara vez lleva los agudos más allá de 75 dB ni los graves más allá de 40 dB (ACOEM, 2003): una pérdida mayor obliga a buscar otra causa sumada. Cuando la exposición termina, la pérdida por ruido deja de avanzar, más allá de lo que va sumando la edad (ACOEM, 2003). <!-- Pasada de fundamentos 2026-10-18: resuelto el verificar en el texto de ACOEM (copia en caohc.org): "Noise exposure alone usually does not produce a loss greater than 75 decibels (dB) in high frequencies, and 40 dB in lower frequencies"; "Most scientific evidence indicates that previously noise-exposed ears are not more sensitive to future noise exposure and that hearing loss due to noise does not progress (in excess of what would be expected from the addition of age-related threshold shifts) once the exposure to noise is discontinued". -->
 
 Como es coclear, la **discriminación** queda acorde al audiograma y hay **reclutamiento**. Las emisiones se apagan en la zona de la muesca y se conservan en los graves. El **acúfeno** es frecuente, agudo y bilateral. El acúfeno, en general, afecta a cerca de uno de cada siete adultos en el mundo (Jarach y cols., 2022), y el ruido es una de sus causas más frecuentes.
 
@@ -115,17 +115,17 @@ El paciente casi nunca consulta por la audición: los graves y 1 kHz están sano
 
 ### Muesca en 4 kHz
 
-La muesca es el signo audiométrico del ruido. En más de 12.000 trabajadores ferroviarios, el 63 % de los hombres expuestos a ruido tenía una muesca según el criterio de Coles, el 31 % en 4 kHz (Lie y cols., 2015). La misma serie mostró muescas en cerca de la mitad de los **no expuestos**: la muesca **sugiere** ruido, pero no lo demuestra. Lo que lo demuestra es la muesca **más** una exposición que calce en intensidad y en tiempo.
+La muesca es el signo audiométrico del ruido. En más de 12.000 trabajadores ferroviarios, el 63 % de los hombres expuestos a ruido tenía una muesca según el criterio de Coles, y el 31 %, una muesca más estricta centrada en 4 kHz (Lie y cols., 2015). La misma serie mostró muescas de Coles en el 53 % de los **no expuestos**: la muesca **sugiere** ruido, pero no lo demuestra. Lo que lo demuestra es la muesca **más** una exposición que calce en intensidad y en tiempo.
 
 En el grado BIAP la muesca casi no pesa: con 500 Hz y 1 kHz sanos, el promedio queda en leve aunque 4 kHz esté en 75 dB. Por eso el informe tiene que **describirla**, no solo dar el grado (→ H3).
 
 ### Trauma acústico agudo
 
-Es el daño de **una sola exposición muy intensa**: un disparo, una explosión, un petardo. La pérdida es de **un solo oído** o asimétrica, porque el impulso llega de un lado (Temmel y cols., 1999), y la muesca es más profunda y más estrecha que la crónica. En más del 75 % de los oídos la pérdida queda sobre 2 kHz (Temmel y cols., 1999); el daño se concentra entre 3 y 6 kHz y suele alcanzar los 8 kHz (Zloczower y cols., 2022).
+Es el daño de **una sola exposición muy intensa**: un disparo, una explosión, un petardo. La pérdida es de **un solo oído** o asimétrica, porque el impulso llega de un lado (Temmel y cols., 1999), y la muesca es más profunda y más estrecha que la crónica. <!-- verificar: "más profunda y más estrecha que la crónica" no está en Temmel 1999 ni en Zloczower 2022 (abstracts); no se buscó otra fuente. --> En más del 75 % de los oídos la pérdida queda sobre 2 kHz (Temmel y cols., 1999); el daño se concentra entre 3 y 6 kHz y suele alcanzar los 8 kHz (Zloczower y cols., 2022).
 
 - **Acúfeno**: casi todos lo tienen al consultar. En 418 conscriptos con trauma por disparo, todos lo refirieron (Mrena y cols., 2002); al terminar el servicio militar seguía en el 29 %.
 - **Vértigo**: raro, del 2,5 al 5 % (Yehudai y cols., 2017).
-- **Evolución**: parte de la pérdida se recupera en las primeras semanas. Sin nueva exposición, se estabiliza alrededor del año (Segal y cols., 1988).
+- **Evolución**: durante el primer año la audición puede mejorar o empeorar; sin nueva exposición, pasado el año la pérdida se considera definitiva (Segal y cols., 1988). <!-- Pasada de fundamentos 2026-10-18: decía "parte de la pérdida se recupera en las primeras semanas. Sin nueva exposición, se estabiliza alrededor del año". Segal 1988, abstract: "during the first year after injury, changes were observed in hearing, whether improvement or deterioration; after this period, hearing loss appeared to be final"; no habla de las primeras semanas. -->
 - **Otoscopía**: si el impulso rompió el tímpano, a la pérdida coclear se suma una conductiva (→ cap. 3).
 
 :::ojo Ojo clínico
@@ -387,7 +387,7 @@ Una muesca profunda en **un solo oído**, que empezó en un momento con fecha y 
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural del OI con muesca profunda en 3 a 6 kHz, de características cocleares, compatible con trauma acústico agudo. Se informa como **base del seguimiento** y se sugiere control audiométrico, con la misma técnica, durante su recuperación. Parte de la pérdida puede volver en las primeras semanas; lo que quede al año probablemente queda (Segal y cols., 1988).
+Hipoacusia sensorioneural del OI con muesca profunda en 3 a 6 kHz, de características cocleares, compatible con trauma acústico agudo. Se informa como **base del seguimiento** y se sugiere control audiométrico, con la misma técnica, durante su recuperación. La audición puede cambiar durante el primer año; lo que quede al año, sin nueva exposición, se considera definitivo (Segal y cols., 1988).
 
 :::comentario Comentario
 El Weber de 500 Hz no lateralizó, y eso no fue un error: el disparo no tocó esa frecuencia. Una acumetría normal en un paciente con pitido después de un ruido no lo da de alta.
@@ -442,6 +442,8 @@ Existen tapones que bajan el sonido parejo en todas las frecuencias, pensados pa
 1. Tyler RS, Conrad-Armes D. The determination of tinnitus loudness considering the effects of recruitment. J Speech Hear Res. 1983;26(1):59-72. doi:10.1044/jshr.2601.59
 1. Feldmann H. Homolateral and contralateral masking of tinnitus by noise-bands and by pure tones. Audiology. 1971;10(3):138-44. doi:10.3109/00206097109072551
 1. Roberts LE. Residual inhibition. Prog Brain Res. 2007;166:487-95. doi:10.1016/s0079-6123(07)66047-6
+1. Lapsley Miller JA, Marshall L, Heller LM, Hughes LM. Low-level otoacoustic emissions may predict susceptibility to noise-induced hearing loss. J Acoust Soc Am. 2006;120(1):280-96. doi:10.1121/1.2204437
+1. Mahboubi H, Ziai K, Brunworth J, Djalilian HR. Accuracy of tinnitus pitch matching using a web-based protocol. Ann Otol Rhinol Laryngol. 2012;121(10):671-4. doi:10.1177/000348941212101008
 
 ### Fisiología
 
@@ -455,7 +457,7 @@ Existen tapones que bajan el sonido parejo en todas las frecuencias, pensados pa
 
 ### Patología
 
-1. ACOEM Noise and Hearing Conservation Committee. ACOEM evidence-based statement: noise-induced hearing loss. J Occup Environ Med. 2003;45(6):579-81.
+1. ACOEM Noise and Hearing Conservation Committee. ACOEM evidence-based statement: noise-induced hearing loss. J Occup Environ Med. 2003;45(6):579-81. doi:10.1097/00043764-200306000-00001
 1. Lie A, Skogstad M, Johnsen TS, Engdahl B, Tambs K. The prevalence of notched audiograms in a cross-sectional study of 12,055 railway workers. Ear Hear. 2015;36(3):e86-e92. doi:10.1097/AUD.0000000000000129
 1. Jarach CM, Lugo A, Scala M, van den Brandt PA, Cederroth CR, Odone A, et al. Global prevalence and incidence of tinnitus: a systematic review and meta-analysis. JAMA Neurol. 2022;79(9):888-900. doi:10.1001/jamaneurol.2022.2189
 1. Temmel AF, Kierner AC, Steurer M, Riedl S, Innitzer J. Hearing loss and tinnitus in acute acoustic trauma. Wien Klin Wochenschr. 1999;111(21):891-3.

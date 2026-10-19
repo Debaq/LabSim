@@ -35,7 +35,7 @@ Las pruebas son **conductuales**: dependen de que el paciente atienda, entienda 
 Esta herramienta explica la técnica. El caso clínico completo (qué pedir, cómo se razona con un paciente que "oye pero no entiende") está en el cap. 30; el patrón de la neuropatía auditiva, en el cap. 13.
 
 :::sabias ¿Sabías que?
-Kimura (1961) hizo oír a cada oído un dígito distinto al mismo tiempo y comprobó que los dígitos del **oído derecho** se repetían mejor. Lo explicó por las vías auditivas: bajo competencia, el oído derecho llega directo al hemisferio izquierdo, que es el del lenguaje en la mayoría de las personas. Esa ventaja es el fundamento de toda la escucha dicótica clínica, y se inventó para estudiar cerebros, no oídos.
+Kimura (1961) hizo oír a cada oído un dígito distinto al mismo tiempo y comprobó que los dígitos del **oído derecho** se repetían mejor. Lo explicó por las vías auditivas: bajo competencia, el oído derecho llega directo al hemisferio izquierdo, que es el del lenguaje en la mayoría de las personas. Esa ventaja es el fundamento de toda la escucha dicótica clínica. La técnica de dos mensajes a la vez la había ideado Broadbent (1954) para estudiar la atención; Kimura la usó para estudiar cerebros, no oídos. <!-- Pasada de fundamentos 2026-10-18: decía "Esa ventaja [...] se inventó para estudiar cerebros, no oídos". La escucha dicótica nace con Broadbent (1954), que estudiaba la atención; la guía de la AAA (2010) da los dos como origen. -->
 :::
 
 ## Fundamento
@@ -71,7 +71,7 @@ Un silencio de pocos milisegundos dentro de un ruido es un cambio mínimo en la 
 
 ### Escucha dicótica: dos mensajes, una sola vía ganadora
 
-Cuando los dos oídos oyen **cosas distintas al mismo tiempo**, las dos vías compiten. Con competencia, la vía del mismo lado se suprime y gana la vía **cruzada** (Kimura, 1961). Resultado:
+Cuando los dos oídos oyen **cosas distintas al mismo tiempo**, las dos vías compiten. Con competencia, la vía del mismo lado se suprime y gana la vía **cruzada** (Kimura, 1961, 1967). Resultado:
 
 - Lo que entra por el **oído derecho** va directo al hemisferio izquierdo, donde está el lenguaje.
 - Lo que entra por el **oído izquierdo** llega al hemisferio derecho y tiene que **cruzar el cuerpo calloso** hacia el izquierdo para ser reconocido como palabra.
@@ -88,11 +88,11 @@ Un tono enterrado en un ruido se detecta mal cuando el tono y el ruido llegan **
 :::imagen ilustraciones/h14-mld.svg Interacción binaural. A: tono y ruido iguales en los dos oídos; se oyen en el mismo lugar y el tono cuesta separarlo. B: el ruido igual y el tono con fase invertida en un oído; el tono ocupa otro lugar en la imagen y se detecta con menos nivel. La diferencia entre A y B, en dB, es el MLD.
 :::
 
-La comparación de fase entre los oídos la hace el tronco bajo. Por eso un MLD reducido se ha descrito en lesiones del tronco (Olsen y cols., 1976), y por eso la prueba se hace solo cuando la audición periférica es lo bastante simétrica como para no dar una diferencia artificial entre los oídos.
+La comparación de fase entre los oídos la hace el tronco bajo. Por eso el MLD sale reducido con frecuencia en lesiones bajo la corteza, como la esclerosis múltiple, y no se altera en las lesiones corticales (Olsen y cols., 1976); y por eso la prueba se hace solo cuando la audición periférica es lo bastante simétrica como para no dar una diferencia artificial entre los oídos.
 
 ### Habla en ruido: la prueba que se parece a la queja
 
-Entender habla en ruido necesita todo lo anterior junto: resolución temporal, comparación entre oídos, atención y, además, lenguaje y memoria. Por eso es la prueba **más fiel a lo que el paciente cuenta** y la **menos específica**: un mal resultado puede venir de la audición, del lenguaje, de la atención o de la vía central, y no dice cuál. En la guía de la AAA, las pruebas de habla de baja redundancia son **menos sensibles** a un problema central que otras pruebas de la batería, pero útiles para describir la dificultad real del paciente (AAA, 2010). Se mide casi siempre como el **cociente señal/ruido (SNR)** en el que el paciente repite bien la mitad de lo que oye, que se busca de forma adaptativa: sube el ruido relativo si acierta, baja si falla (Nilsson y cols., 1994; Killion y cols., 2004).
+Entender habla en ruido necesita todo lo anterior junto: resolución temporal, comparación entre oídos, atención y, además, lenguaje y memoria. Por eso es la prueba **más fiel a lo que el paciente cuenta** y la **menos específica**: un mal resultado puede venir de la audición, del lenguaje, de la atención o de la vía central, y no dice cuál. En la guía de la AAA, las pruebas de habla de baja redundancia son **menos sensibles** a un problema central que otras pruebas de la batería, pero útiles para describir la dificultad real del paciente (AAA, 2010). Se mide casi siempre como el **cociente señal/ruido (SNR)** en el que el paciente repite bien la mitad de lo que oye, que se busca de forma adaptativa, subiendo el ruido relativo si acierta y bajándolo si falla (Nilsson y cols., 1994), o se calcula con una lista que baja el SNR en pasos fijos (Killion y cols., 2004). <!-- Pasada de fundamentos 2026-10-18: decía que las dos pruebas buscan el SNR de forma adaptativa. El QuickSIN no es adaptativo: cada lista tiene seis frases a SNR fijos de 25 a 0 dB (Killion y cols., 2004). -->
 
 ### Umbrales diferenciales: el cambio mínimo que se nota
 
@@ -113,7 +113,7 @@ Antes de hacer una sola prueba central hay que tener **cerrado lo periférico**:
 - **Impedanciometría y reflejos** (→ H7) y **emisiones otoacústicas** (→ H9), para descartar oído medio y cóclea. La guía de la AAA propone justamente DPOAE e impedanciometría como parte de la evaluación periférica previa (AAA, 2010).
 - **PEAT** (→ H10) cuando se sospecha el tronco.
 
-Y hay que conocer al paciente: **lenguaje, atención, memoria, lengua materna y lateralidad**. Si no entiende la instrucción o no puede sostener la atención cuatro minutos, el resultado de cualquier prueba de esta herramienta mide eso y no su vía auditiva. La guía de la AAA insiste en que el rendimiento en estas pruebas se confunde con el de la atención, el lenguaje y la memoria, y pide una evaluación **multidisciplinaria** (AAA, 2010; Dawes y Bishop, 2009).
+Y hay que conocer al paciente: **lenguaje, atención, memoria, lengua materna y lateralidad**. Si no entiende la instrucción o no puede sostener la atención lo que dura una prueba, el resultado de cualquier prueba de esta herramienta mide eso y no su vía auditiva. La guía de la AAA insiste en que el rendimiento en estas pruebas se confunde con el de la atención, el lenguaje y la memoria, y pide una evaluación **multidisciplinaria** (AAA, 2010; Dawes y Bishop, 2009).
 
 ### La batería: qué pruebas y para qué
 
@@ -143,7 +143,7 @@ La guía de la AAA para el trastorno de procesamiento auditivo central pide una 
 - **Nivel de presentación** el que indica el manual de cada prueba. Puede ser en dB HL o sobre el umbral del paciente, según la prueba: no lo improvises.
 - **Verificar la cadena de audio** antes de empezar y tras cualquier cambio de equipo, volumen o fonos. Una comprobación rápida (dos tonos con 6 dB de diferencia: ¿cuál suena más fuerte?) detecta un cambio grosero de volumen, de dispositivo o un silenciamiento, pero **no reemplaza al sonómetro**.
 - **Calibración atada al montaje.** Si las pruebas corren en un computador con fonos comunes y se calibran con un sonómetro externo, sin acoplador, la calibración vale solo para ese par de fonos, ese dispositivo de salida y ese volumen del sistema, y no cumple las normas de audiómetros (ANSI S3.6, IEC 60645-1). Sirve para investigar y para enseñar; no convierte al computador en un equipo clínico.
-- **Instrucción** clara, con un ejemplo y **práctica con retroalimentación** antes de la prueba. Una instrucción mal entendida es la causa más común de un resultado malo.
+- **Instrucción** clara, con un ejemplo y **práctica con retroalimentación** antes de la prueba. Una instrucción mal entendida basta para dar un resultado malo. <!-- Pasada de fundamentos 2026-10-18: decía "es la causa más común de un resultado malo"; no se encontró fuente que lo ordene entre las causas. -->
 
 :::ojo Los estímulos hechos en casa
 Es posible grabar ruidos, silencios y listas de palabras con un programa de audio y armar pruebas propias. La guía de la AAA advierte que estos estímulos **no deben usarse con fines diagnósticos** hasta que haya investigación suficiente sobre su eficiencia y utilidad clínica (AAA, 2010). Sirven para practicar, para enseñar y para investigar. Para un diagnóstico hacen falta el estímulo validado, la calibración y las normas.
@@ -162,19 +162,19 @@ Se presentan tres tonos seguidos que combinan dos posibilidades: **grave o agudo
 - @103,82 | **El error es informativo.** Decir los mismos tonos en otro lugar no es lo mismo que invertirlos todos.
 :::
 
-**Por qué funciona.** Para responder hay que percibir el patrón completo, retener el orden y nombrarlo. Las pruebas de patrones tienen sensibilidad y especificidad documentadas para lesiones del sistema nervioso auditivo central (Pinheiro y Ptacek, 1971; Musiek y Pinheiro, 1987; Musiek y cols., 1990; AAA, 2010). Una de las pruebas más informativas es pedir la respuesta de dos maneras: **nombrando** los tonos y **tarareándolos**. Tararear no necesita ponerle nombre al sonido: si la persona tararea bien lo que no logra nombrar, el problema está en el paso de reconocer a nombrar, y eso se asocia con la comunicación entre hemisferios. <!-- verificar: la disociación nombrar/tararear y su lectura callosa, tomada de la lógica de Musiek y Pinheiro 1987; no se leyó el artículo completo. -->
+**Por qué funciona.** Para responder hay que percibir el patrón completo, retener el orden y nombrarlo. Las pruebas de patrones tienen sensibilidad y especificidad documentadas para lesiones del sistema nervioso auditivo central (Musiek y Pinheiro, 1987; Musiek y cols., 1990; AAA, 2010). <!-- Pasada de fundamentos 2026-10-18: se sacó Pinheiro y Ptacek (1971) de esta cita: trata de las inversiones al percibir patrones, no de sensibilidad en lesiones. Se movió al paso 4. --> Una de las pruebas más informativas es pedir la respuesta de dos maneras: **nombrando** los tonos y **tarareándolos**. Tararear no necesita ponerle nombre al sonido: si la persona tararea bien lo que no logra nombrar, el problema está en el paso de reconocer a nombrar, y eso se asocia con la comunicación entre hemisferios. Con el cuerpo calloso seccionado, los pacientes nombran mal los patrones, pero los tararean bien (Musiek y cols., 1980).
 
 1. **Instrucción con ejemplo**: "Va a escuchar tres sonidos, unos graves y otros agudos. Dígame el orden. Por ejemplo: grave, agudo, grave. También puede tararearlos." En la prueba de duración: "largos y cortos, todos con el mismo tono".
 2. **Práctica** con retroalimentación. Si no entiende, se vuelve a explicar; el resultado de una persona que no comprendió la tarea no vale.
 3. **Prueba** sin retroalimentación, una secuencia a la vez, esperando que responda antes de pasar a la siguiente.
-4. Se anota **cada secuencia presentada y la respondida**, no solo el total. El error siempre es informativo: confundir *dónde* está el cambio no es lo mismo que confundir *qué* cambio es.
+4. Se anota **cada secuencia presentada y la respondida**, no solo el total. El error siempre es informativo: confundir *dónde* está el cambio no es lo mismo que confundir *qué* cambio es, y decir el patrón al revés es un error propio de estas tareas (Pinheiro y Ptacek, 1971). <!-- verificar: Pinheiro y Ptacek 1971 no tiene resumen en PubMed; la atribución sale del título (Reversals in the perception of noise and tone patterns). -->
 5. Si hay sospecha de asimetría, se repite **por oído**.
 
 El nivel, la duración de cada tono y la separación entre ellos son los de la versión de la prueba que se usa: son propios de cada versión y **no se cambian** sin perder la comparación con sus normas. Si el paciente tiene problemas de lenguaje (para nombrar), la respuesta tarareada o señalada es una alternativa.
 
 ### Resolución temporal: GIN y detección de gaps
 
-Se presenta un ruido continuo, a veces con un **silencio muy breve** en el medio, y el paciente avisa cuando lo oye. En el **GIN** el ruido es de banda ancha y los silencios van de pocos milisegundos hasta 20 ms; el resultado clave es el **umbral de gap**, el silencio más corto que el paciente detecta de forma consistente (Musiek y cols., 2005). <!-- verificar: criterio exacto de consistencia del GIN comercial y número de ítems. -->
+Se presenta un ruido continuo, a veces con un **silencio muy breve** en el medio, y el paciente avisa cuando lo oye. En el **GIN** el ruido es de banda ancha y los silencios van de pocos milisegundos hasta 20 ms; el resultado clave es el **umbral de gap**, el silencio más corto que el paciente detecta de forma consistente (Musiek y cols., 2005). <!-- verificar: criterio exacto de consistencia del umbral aproximado del GIN (no está en el resumen de Musiek 2005 ni en la guía de la AAA). Número de ítems resuelto en el resumen de Musiek 2005: segmentos de 6 s de ruido blanco con 0 a 3 silencios de 2 a 20 ms, 60 silencios por lista, cuatro listas. -->
 
 **Por qué funciona.** Notar un silencio de unos pocos milisegundos dentro de un ruido depende de qué tan bien el sistema siga los cambios rápidos de intensidad. Como el silencio va dentro de un ruido de banda ancha, no hay otra pista que el tiempo. Es una de las pruebas con **menos carga de lenguaje y de memoria** (AAA, 2010).
 
@@ -219,14 +219,14 @@ Se mide cuánto mejor se detecta un tono de 500 Hz en ruido cuando el tono llega
 4. Se busca el **umbral de detección del tono** en cada condición con un procedimiento adaptativo, y se resta (Wilson y cols., 2003).
 5. Se informa el **MLD en dB**, no un porcentaje de aciertos.
 
-Un MLD menor que el esperado orienta a la comparación entre oídos en el tronco bajo (Olsen y cols., 1976). La guía de la AAA anota que el MLD se usa poco en la clínica de rutina y que es sensible a disfunción del tronco bajo (AAA, 2010). <!-- verificar: valor esperado del MLD en 500 Hz y su rango en oyentes normales, de Wilson y cols. 2003; no se incluyen cifras hasta confirmarlas. -->
+Un MLD menor que el esperado orienta a la comparación entre oídos en el tronco bajo (Olsen y cols., 1976). La guía de la AAA anota que el MLD se usa poco en la clínica de rutina y que es sensible a disfunción del tronco bajo (AAA, 2010).<!-- verificar: valor esperado del MLD en 500 Hz y su rango en oyentes normales (Wilson y cols., 2003: media ~13 dB, 95 % >= 10 dB); no se incluyen cifras porque el capítulo no da valores de corte. -->
 
 ### Habla en ruido: HINT, SinB y Matrix
 
-Se presentan frases con **ruido de fondo** y se busca de forma adaptativa el **SNR** en que el paciente repite bien la mitad. Es el resultado que se parece más a lo que el paciente cuenta.
+Se presentan frases con **ruido de fondo** y se busca el **SNR** en que el paciente repite bien la mitad, de forma adaptativa (HINT, Matrix) o con pasos fijos de SNR (QuickSIN). Es el resultado que se parece más a lo que el paciente cuenta.
 
 - **HINT** (*Hearing in Noise Test*): frases cortas en ruido con el espectro del habla (Nilsson y cols., 1994). Hay una versión en español castellano (Huarte, 2008).
-- **QuickSIN / SinB** (*speech in babble*): frases con ruido de varias voces. Se informa la **pérdida de SNR** respecto de un oyente normal (Killion y cols., 2004).
+- **QuickSIN / SinB** (*speech in babble*): frases con ruido de cuatro voces, con el SNR que baja en pasos fijos dentro de cada lista. Se informa la **pérdida de SNR** respecto de un oyente normal (Killion y cols., 2004).
 - **Matrix**: cada frase se arma con una palabra de cada columna (nombre, verbo, número, objeto y adjetivo), así que las frases son nuevas cada vez y no se pueden memorizar. Hay una versión en español (Hochmuth y cols., 2012). El paciente repite o elige las palabras en una grilla.
 
 :::imagen ilustraciones/h14-matrix.svg ancho=96% La prueba Matrix. A: cada frase toma una palabra de cada columna, así que la estructura es siempre la misma y el contenido no se puede adivinar. B: el recorrido adaptativo de una lista; el SNR baja cuando el paciente acierta la mayoría de las palabras y sube cuando no, hasta oscilar alrededor del SRT. La regla de pasos es genérica (cada versión trae la suya).
@@ -307,7 +307,7 @@ Esta herramienta **no entrega valores de corte**. Hay tres razones:
 :::comentario Lo que dicen las normas
 **Para el español.** Hay materiales de habla en ruido desarrollados y normados en español de España: el HINT castellano (Huarte, 2008) y la prueba de frases Matrix en español (Hochmuth y cols., 2012), y un banco de frases equilibradas en fonemas para audiología, el corpus Sharvard (Aubanel y cols., 2014). Son del español peninsular. Queda un problema sin resolver: el seseo, la /s/ aspirada, el yeísmo y el léxico de cada país pueden hacer que una persona de otra variedad falle por la forma de las palabras y no por su audición central.
 
-**Para las otras pruebas** (patrones, gaps, dígitos dicóticos, MLD) no encontramos normas en español publicadas y verificadas para adultos o niños, y por eso **no se dan cifras**. <!-- verificar: normas en español (chilenas o de otros países) de FPT, GIN, dígitos dicóticos y MLD; la revisión de Cañete 2006 (Rev Otorrinolaringol Cir Cabeza Cuello 66:263-73) es una lectura en español sobre el tema, no se revisó su contenido. --> La guía de la AAA dice que, si una prueba está **traducida, con sensibilidad y especificidad documentadas y normada en la lengua del paciente**, se puede usar; si no, hay que limitar las pruebas o no se puede hacer un diagnóstico confiable (AAA, 2010). Así lo adopta este libro.
+**Para las otras pruebas** hay una propuesta inicial de normas chilenas en niños de 7 a 12 años para patrones de frecuencia y dígitos dicóticos (versiones de Auditec, la de dígitos en español), hecha con 153 escolares de Santiago a 50 dB sobre el promedio tonal (Marcotti y cols., 2022). Para gaps y MLD, y para adultos, no encontramos normas en español publicadas. En ningún caso este libro **da cifras**: se toman de la fuente de la versión que uses. <!-- Pasada de fundamentos 2026-10-18: decía que no había normas en español publicadas para patrones, gaps, dígitos dicóticos ni MLD, en adultos ni niños. Marcotti y cols. (2022) publicaron normas para niños chilenos de 7 a 12 años (patrones de frecuencia, habla filtrada y dígitos dicóticos). Queda verificar: normas en español de GIN y MLD, y de adultos; la revisión de Cañete 2006 (Rev Otorrinolaringol Cir Cabeza Cuello 66:263-73) no se revisó. --> La guía de la AAA dice que, si una prueba está **traducida, con sensibilidad y especificidad documentadas y normada en la lengua del paciente**, se puede usar; si no, hay que limitar las pruebas o no se puede hacer un diagnóstico confiable (AAA, 2010). Así lo adopta este libro.
 
 **Cómo se fija un corte.** La AAA describe el criterio habitual: se toma como anormal un rendimiento a unas **2 desviaciones estándar bajo la media** de la norma, para equilibrar sensibilidad y especificidad (AAA, 2010).
 :::
@@ -354,7 +354,7 @@ Un mal resultado en estas pruebas **no dice dónde está el problema**. Dice que
 ### Guías y revisiones
 
 1. American Academy of Audiology. Clinical practice guidelines: diagnosis, treatment and management of children and adults with central auditory processing disorder. 2010. Disponible en audiology.org.
-1. American Speech-Language-Hearing Association. (Central) auditory processing disorders [Technical report]. 2005. Disponible en asha.org/policy/TR2005-00043/. <!-- verificar: DOI del informe técnico (probable 10.1044/policy.TR2005-00043, no confirmado: la página no cargó); la copia no se pudo leer. -->
+1. American Speech-Language-Hearing Association. (Central) auditory processing disorders [Technical report]. 2005. doi:10.1044/policy.TR2005-00043
 1. Jerger J, Musiek F. Report of the Consensus Conference on the Diagnosis of Auditory Processing Disorders in School-Aged Children. J Am Acad Audiol. 2000;11(9):467-74. doi:10.1055/s-0042-1748136
 1. Dawes P, Bishop DVM. Auditory processing disorder in relation to developmental disorders of language, communication and attention: a review and critique. Int J Lang Commun Disord. 2009;44(4):440-65. doi:10.1080/13682820902929073
 1. Moore DR, Ferguson MA, Edmondson-Jones AM, Ratib S, Riley A. Nature of auditory processing disorder in children. Pediatrics. 2010;126(2):e382-90. doi:10.1542/peds.2009-2826
@@ -378,6 +378,10 @@ Un mal resultado en estas pruebas **no dice dónde está el problema**. Dice que
 1. Hochmuth S, Brand T, Zokoll MA, Castro FZ, Wardenga N, Kollmeier B. A Spanish matrix sentence test for assessing speech reception thresholds in noise. Int J Audiol. 2012;51(7):536-44. doi:10.3109/14992027.2012.670731
 1. Aubanel V, García Lecumberri ML, Cooke M. The Sharvard Corpus: a phonemically-balanced Spanish sentence resource for audiology. Int J Audiol. 2014;53(9):633-8. doi:10.3109/14992027.2014.907507
 1. Keith RW. Random Gap Detection Test. St. Louis: Auditec; 2000.
+1. Broadbent DE. The role of auditory localization in attention and memory span. J Exp Psychol. 1954;47(3):191-6. doi:10.1037/h0054182
+1. Kimura D. Functional asymmetry of the brain in dichotic listening. Cortex. 1967;3(2):163-78. doi:10.1016/S0010-9452(67)80010-8
+1. Musiek FE, Pinheiro ML, Wilson DH. Auditory pattern perception in 'split brain' patients. Arch Otolaryngol. 1980;106(10):610-2. doi:10.1001/archotol.1980.00790340018004
+1. Marcotti A, Alvear B, Vargas N, Puebla T. Valores normativos de pruebas conductuales de procesamiento auditivo para niños chilenos entre 7 y 12 años: una propuesta inicial. Rev Otorrinolaringol Cir Cabeza Cuello. 2022;82(3):311-23. doi:10.4067/S0718-48162022000300311
 
 ### Umbrales diferenciales
 

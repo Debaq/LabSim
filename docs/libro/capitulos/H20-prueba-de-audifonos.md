@@ -38,7 +38,7 @@ Que un paciente tenga una pérdida no basta para indicar un audífono, y que la 
 - **Cuánto se pierde y de qué tipo.** La audiometría y la logoaudiometría (→ H3, H5). Una discriminación pobre anuncia que amplificar ayudará menos de lo que el paciente espera.
 - **El campo dinámico.** Entre el umbral y el umbral de molestia: si es estrecho, el ajuste es más difícil (→ H5).
 - **La motivación y el entorno.** Quién lo acompaña, si vive solo, si trabaja, si usa las manos con destreza para ponerse y limpiar el audífono. Un paciente que dice "son para viejos" necesita primero que alguien lo escuche.
-- **Lo que hay que resolver antes.** Un tapón de cerumen (→ H1), una otitis, una asimetría, una pérdida súbita, un vértigo, una otorrea: el audífono espera a que el especialista evalúe. <!-- verificar: lista de "banderas rojas" previas a la adaptación; falta una guía citable (p. ej. NICE NG98, 2018, o la regla de la FDA de EE. UU.) -->
+- **Lo que hay que resolver antes.** Un tapón de cerumen (→ H1), una otitis, una asimetría, una pérdida súbita, un vértigo, una otorrea: el audífono espera a que el especialista evalúe (NICE, 2018).
 
 ### Por qué la amplificación tiene que ser selectiva y comprimida
 
@@ -58,7 +58,7 @@ Los métodos de ajuste que se describen enseguida son, en buena parte, reglas pa
 
 Un método **prescriptivo** parte del audiograma y calcula una ganancia objetivo para cada frecuencia y para distintos niveles de entrada. No es una receta que se aplique sin mirar al paciente: es un punto de partida basado en evidencia, y lo que decide después es la verificación y la respuesta del paciente. Los dos más usados son:
 
-- **NAL-NL2**, del Australian Hearing Research Centre: busca **maximizar la inteligibilidad del habla** sin que la sonoridad total supere la que percibiría un oyente normal (Keidser y cols., 2011; ajustes empíricos en Keidser y cols., 2012).
+- **NAL-NL2**, de los National Acoustic Laboratories (NAL) de Australia: busca **maximizar la inteligibilidad del habla** sin que la sonoridad total supere la que percibiría un oyente normal (Keidser y cols., 2011; ajustes empíricos en Keidser y cols., 2012). <!-- Pasada de fundamentos 2026-10-18: decía "del Australian Hearing Research Centre". Se corrigió a los National Acoustic Laboratories, autores del procedimiento (Keidser y cols., 2011). -->
 - **DSL v5**, de la Universidad de Western Ontario: busca devolver **audibilidad** a lo largo del rango del habla, con atención especial a los niños (Scollie y cols., 2005).
 
 Dan objetivos distintos porque persiguen cosas distintas, y por eso un mismo audiograma puede dar dos prescripciones. Este libro no entrega valores ni tablas: los números salen de las reglas completas y del programa del fabricante, no de un libro de texto.
@@ -187,7 +187,7 @@ Es un dato útil para mostrarle al paciente y a su familia, en el mismo gráfico
 :::comentario Lo que dicen las normas
 **Primero, la ganancia funcional no es una verificación.** En un audífono moderno, la ganancia no es la misma para todos los niveles: según su intensidad, el tono de prueba interactúa con el procesamiento del audífono (compresión, reducción de ruido, control de retroalimentación), y el umbral con audífono puede sobrestimar o subestimar lo que el audífono entrega a la voz de conversación (AAA, 2013; Kuk y Ludvigsen, 2003). Además, el ruido de la sala esconde la ganancia en los graves si el paciente los oye casi normales, y la cabeza que se mueve sale del punto calibrado (AAA, 2013).
 
-El estándar para saber si un audífono hace lo que la pérdida necesita es la **medición en oído real**: un micrófono sonda diminuto, dentro del conducto y junto a la membrana, mide **cuánto sonido llega realmente** con el audífono puesto, y lo compara con un objetivo de un método prescriptivo. Así lo recomiendan la British Society of Audiology (2018) y la American Academy of Audiology (Valente y cols., 2006). En un estudio de adultos, un porcentaje grande de los ajustes de partida quedó a más de 10 dB del objetivo en al menos una frecuencia entre 250 y 4.000 Hz (Aazh y Moore, 2007).
+El estándar para saber si un audífono hace lo que la pérdida necesita es la **medición en oído real**: un micrófono sonda diminuto, dentro del conducto y junto a la membrana, mide **cuánto sonido llega realmente** con el audífono puesto, y lo compara con un objetivo de un método prescriptivo. Así lo recomiendan la British Society of Audiology (2018) y la American Academy of Audiology (Valente y cols., 2006). En un estudio de adultos, el 64 % de los ajustes de partida (42 oídos) quedó a más de 10 dB del objetivo en al menos una frecuencia entre 250 y 4.000 Hz (Aazh y Moore, 2007).
 
 La prueba de este capítulo mide **qué hace el paciente con el audífono**. La medición en oído real mide **qué hace el audífono en el oído del paciente**. Las dos preguntas son distintas y se necesitan ambas. Esa medición se hace al ajustar el audífono entregado, no en esta prueba. En H21 verás una medida de otra naturaleza, en **acoplador**, que revisa el aparato y no el ajuste.
 
@@ -218,7 +218,7 @@ El protocolo pide tres datos en la conclusión:
 2. **Qué características del molde** se sugieren: cerrado o abierto, con o sin ventilación, y su tamaño.
 3. **La preferencia del paciente** por el oído a adaptar, porque en la práctica el uso diario depende de lo que él sienta como suyo.
 
-Cuando la pérdida es de los dos oídos, lo habitual es considerar la adaptación **bilateral**, porque ayuda a localizar y a entender en ruido. <!-- verificar: recomendación de adaptación bilateral cuando la pérdida es bilateral; citar AAA (2006) o BSA con la sección -->
+Cuando la pérdida es de los dos oídos, lo habitual es considerar la adaptación **bilateral**, porque ayuda a entender el habla con ruido de fondo, a localizar de dónde viene el sonido y mejora su calidad (NICE, 2018).
 
 ### Lo que viene después de la prueba
 
@@ -289,6 +289,7 @@ El paciente de este capítulo (★, el 36 de la práctica) llega diciendo que oy
 1. Dillon H. Hearing aids. 2.ª ed. Sídney: Boomerang Press; Nueva York: Thieme; 2012. ISBN 978-1-60406-810-8
 1. Moore BCJ. Cochlear hearing loss: physiological, psychological and technical issues. 2.ª ed. Chichester: Wiley; 2007. doi:10.1002/9780470987889
 1. Stenfelt S, Goode RL. Bone-conducted sound: physiological and clinical aspects. Otol Neurotol. 2005;26(6):1245-61. doi:10.1097/01.mao.0000187236.10842.d5
+1. National Institute for Health and Care Excellence. Hearing loss in adults: assessment and management. NICE guideline NG98 [Internet]. Londres: NICE; 2018 [actualizada el 2 de octubre de 2023]. Disponible en: https://www.nice.org.uk/guidance/ng98
 
 ### Verificación y funcional
 

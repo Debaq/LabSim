@@ -65,7 +65,7 @@ En una pérdida brusca, la primera audiometría no solo diagnostica: es el **pun
 
 ### Un solo cruce, tres disfraces
 
-Un fono supraaural apoya una caja sobre el pabellón. Cuando suena fuerte, la caja hace vibrar el cráneo, y esa vibración llega **por vía ósea** a la cóclea del otro lado. La diferencia entre lo que entra por el fono y lo que llega a la cóclea contraria es la **atenuación interaural**: con supraaural va de 40 a 80 dB según la persona; con un inserto, que casi no toca el hueso, es de 55 dB o más; con el vibrador, casi nula (BSA, 2018; Munro y Agnew, 1999). Por vía ósea, el sonido llega a las dos cócleas con una diferencia de 0 a unos 10 dB (Stenfelt, 2012).
+Un fono supraaural apoya una caja sobre el pabellón. Cuando suena fuerte, la caja hace vibrar el cráneo, y esa vibración llega **por vía ósea** a la cóclea del otro lado. La diferencia entre lo que entra por el fono y lo que llega a la cóclea contraria es la **atenuación interaural**: con supraaural va de 40 a 80 dB según la persona; con un inserto, que casi no toca el hueso, es de 55 dB o más; con el vibrador, casi nula (BSA, 2018; Munro y Agnew, 1999). Por vía ósea, el sonido llega a las dos cócleas con una diferencia mediana de 0 a unos 10 dB según la frecuencia, que varía mucho de una persona a otra (Stenfelt, 2012). <!-- Pasada de fundamentos 2026-10-18: decía "con una diferencia de 0 a unos 10 dB". Se precisó que es la mediana: Stenfelt (2012) da 3-5 dB hasta 0,5 kHz, cerca de 0 entre 0,5 y 1,8 kHz y cerca de 10 dB en 3-5 kHz, con una variabilidad entre sujetos de unos 40 dB. -->
 
 Lo que importa de esa vibración es **a qué cóclea llega**. El tono cruzado no pasa por el oído medio del otro lado: lo oye directamente su cóclea. Por eso todo el razonamiento del enmascaramiento usa la **ósea** del oído no evaluado (Studebaker, 1967). De ese único cruce salen tres errores que en este capítulo aparecen una y otra vez:
 
@@ -79,16 +79,16 @@ El oído enfermo sin enmascarar, entonces, **nunca sale peor que su sombra**: en
 Una **conductiva de un solo oído** que apareció de un día para otro, con la ósea normal y un Weber que se fue al **otro** oído, es una sensorioneural sin enmascarar hasta que demuestres lo contrario.
 :::
 
-El Weber obedece a la misma física. El diapasón en la frente hace vibrar el cráneo y llega a las dos cócleas con casi la misma intensidad. Si una cóclea está dañada, el sonido se oye en la **otra**. En una conductiva, en cambio, se va al oído tapado. La explicación clásica es la misma del **efecto de oclusión** que obliga a sumar ruido en la ósea: el oído tapado no deja escapar los graves que el hueso irradia hacia el conducto, y además no le entra el ruido ambiente que enmascara al otro oído (→ H2, H4). <!-- verificar: explicación clásica del Weber conductivo; H2 la marca igual, sin fuente verificada. -->
+El Weber obedece a la misma física. El diapasón en la frente hace vibrar el cráneo y llega a las dos cócleas con casi la misma intensidad. Si una cóclea está dañada, el sonido se oye en la **otra**. En una conductiva, en cambio, se va al oído tapado, porque ese oído recibe **mejor** la vibración del hueso. Con un tapón es el mismo **efecto de oclusión** que obliga a sumar ruido en la ósea: el sonido que el hueso irradia hacia el conducto, sobre todo el grave, queda encerrado y empuja el tímpano (Fagelson y Martin, 1998). En una pérdida de oído medio cambia cómo responden a la vibración del cráneo la cadena y lo que llena la caja, con el mismo resultado (Sichel y cols., 2002). El ruido ambiente, que entra solo por el oído abierto, suma poco (→ H2, H4). <!-- Pasada de fundamentos 2026-10-18: decía que el Weber conductivo se explica por la oclusión "y además" por el ruido ambiente que enmascara al otro oído. Se alineó con H2: la causa principal es la mejor recepción ósea del oído conductivo (Fagelson y Martin, 1998; Sichel y cols., 2002); el ruido ambiente suma poco. Se resolvió el verificar. -->
 
 ### Por qué la cóclea puede fallar de un día para otro
 
-La cóclea es un órgano con poco margen. Las células ciliadas funcionan bañadas en una endolinfa de composición muy distinta a la de cualquier otro líquido del cuerpo, que la **estría vascular** mantiene con un gasto de energía constante (→ cap. 9 y 10, B2). Todo ese trabajo depende de una irrigación pequeña: la arteria del laberinto, una rama larga y fina que entra por el conducto auditivo interno junto al nervio (→ B1). <!-- verificar: que la arteria laberíntica sea terminal, sin circulación colateral útil, es lo que dicen los textos de anatomía; no está en la bibliografía verificada del libro. -->
+La cóclea es un órgano con poco margen. Las células ciliadas funcionan bañadas en una endolinfa de composición muy distinta a la de cualquier otro líquido del cuerpo, que la **estría vascular** mantiene con un gasto de energía constante (→ cap. 9 y 10, B2). Todo ese trabajo depende de una irrigación pequeña: la arteria del laberinto, una rama larga y fina que entra por el conducto auditivo interno junto al nervio y que es la única arteria, terminal, que irriga el oído interno (Tsuzuki y Wasano, 2024; → B1).
 
 Eso explica por qué causas muy distintas terminan en la misma consulta:
 
 - **Si falla la circulación**, la cóclea y el vestíbulo dejan de funcionar juntos. Es una de las explicaciones propuestas para la súbita (Chandrasekhar y cols., 2019), y es lo que pasa en el infarto de la arteria cerebelosa anteroinferior, donde la pérdida auditiva y vestibular combinada es el patrón más frecuente (Lee, 2012).
-- **Si un virus inflama el laberinto**, como en la parotiditis o en la laberintitis viral, el daño puede llevarse la cóclea entera (Cohen y cols., 2014).
+- **Si un virus inflama el laberinto**, como en la parotiditis o en la laberintitis viral, el daño puede dejar una pérdida severa a profunda y permanente (Cohen y cols., 2014). <!-- Pasada de fundamentos 2026-10-18: decía "puede llevarse la cóclea entera". Cohen y cols. (2014) dicen de la parotiditis que la pérdida "can be severe and permanent"; no hablan de la cóclea entera. -->
 - **Si el sistema inmune ataca el oído interno**, la pérdida avanza en semanas o meses y puede tomar los dos oídos (Bovo y cols., 2006).
 - **Si un golpe sacude el cráneo**, la cóclea puede dañarse sin que se rompa el hueso ni el tímpano. Su audiograma se parece al de un trauma acústico (Brusis, 2011).
 
@@ -110,7 +110,7 @@ Lo que la guía pide al equipo que evalúa (Chandrasekhar y cols., 2019):
 
 - **Separarla de una conductiva** en la primera consulta: otoscopía y diapasón.
 - **Audiometría pronto**, para confirmarla y como base: la guía la pide dentro de los 14 días del inicio (Chandrasekhar y cols., 2019).
-- **Buscar una causa retrococlear**, con resonancia, potenciales evocados o seguimiento audiométrico: un tumor del VIII par puede empezar como una súbita (→ cap. 11).
+- **Buscar una causa retrococlear**, con resonancia o con potenciales evocados; el seguimiento audiométrico solo ya no basta para eso: un tumor del VIII par puede empezar como una súbita (→ cap. 11). <!-- Pasada de fundamentos 2026-10-18: decía "con resonancia, potenciales evocados o seguimiento audiométrico". La actualización de 2019 (KAS 6) sacó el seguimiento audiométrico como estudio retrococlear aceptable: "Audiometric follow-up is excluded as a reasonable workup for retrocochlear pathology" (Chandrasekhar y cols., 2019, resumen). -->
 - **No llamarla idiopática** si es de los dos oídos a la vez, si se repite o si hay signos neurológicos.
 - **Control audiométrico** al terminar el tratamiento y dentro de seis meses.
 
@@ -152,7 +152,7 @@ Un oído sordo desde hace años no es un caso cerrado. Años después, algunos d
 
 Es una pérdida sensorioneural **de los dos oídos** que avanza **en semanas o meses**, no en años. Puede empezar por un oído, puede fluctuar, y los dos oídos pueden ir parejos o muy distintos. Entre un cuarto y la mitad de los pacientes tiene acúfeno o sensación de oído tapado, y casi la mitad tiene síntomas vestibulares (Bovo y cols., 2006). La pérdida suele ser **asimétrica**, de forma poco típica, y la discriminación puede estar peor de lo que haría esperar el audiograma (Campbell y Klemens, 2000).
 
-No hay una prueba que la confirme. La sospecha nace de la **velocidad**: un oído que en dos meses pasa de moderado a severo y un segundo oído que empieza a caer. Clásicamente, mejora con corticoides y vuelve a empeorar al dejarlos (McCabe, 1979). El mismo cuadro lo puede dar la **sífilis** del oído interno, que tiene tratamiento: por eso, ante una pérdida bilateral que avanza rápido, el médico pide su serología (Ramchandani y cols., 2020).
+No hay una prueba que la confirme. La sospecha nace de la **velocidad**: un oído que en dos meses pasa de moderado a severo y un segundo oído que empieza a caer. Responde al tratamiento inmunosupresor (McCabe, 1979), y en muchos pacientes la audición vuelve a caer cuando baja la dosis de corticoides (Rauch, 2014). <!-- Pasada de fundamentos 2026-10-18: decía "Clásicamente, mejora con corticoides y vuelve a empeorar al dejarlos (McCabe, 1979)". El resumen de McCabe (1979) dice que los 18 pacientes respondieron a cortisona y ciclofosfamida, sin hablar de recaída; la dependencia de corticoides la describe Rauch (2014): "hearing is stable while on steroids, but declines whenever the dose gets too low". --> El mismo cuadro lo puede dar la **sífilis** del oído interno, que tiene tratamiento: por eso, ante una pérdida bilateral que avanza rápido, el médico pide su serología (Ramchandani y cols., 2020).
 
 Lo que aporta la audiología es la **serie**: audiometrías repetidas con la misma técnica, que muestran cuánto cae cada oído, si fluctúa y cuánto responde al tratamiento.
 
@@ -163,7 +163,7 @@ Lo que aporta la audiología es la **serie**: audiometrías repetidas con la mis
 Frente a un paciente que dejó de oír de un día para otro, el razonamiento sigue cinco preguntas:
 
 1. **¿Es conductiva o sensorioneural?** Otoscopía y Weber antes del audiómetro; después, la ósea enmascarada. Una conductiva brusca suele estar en el conducto o en el tímpano, y se ve.
-2. **¿El audiograma está enmascarado?** Una curva paralela al oído sano, unos 40 a 50 dB más abajo y con la ósea normal, es una sombra hasta que el ruido diga otra cosa.
+2. **¿El audiograma está enmascarado?** Una curva paralela al oído sano, 40 dB o más abajo y con la ósea normal, es una sombra hasta que el ruido diga otra cosa. <!-- Pasada de fundamentos 2026-10-18: decía "unos 40 a 50 dB más abajo". La atenuación interaural con supraaural va de 40 a 80 dB (BSA, 2018), así que la sombra puede quedar más abajo que 50 dB; el texto de Fisiología ya lo dice. -->
 3. **¿Uno o los dos oídos?** La súbita idiopática es de un oído. Dos oídos a la vez, o uno detrás del otro en semanas, obligan a pensar en otra cosa: autoinmune, sífilis, una causa central.
 4. **¿Qué vino con ella?** Vértigo intenso (laberintitis, infarto), un golpe (conmoción), un virus (paperas), una pérdida que fluctúa o avanza (autoinmune, hidrops → cap. 9), un síntoma neurológico (→ cap. 12).
 5. **¿Cuál es la base?** La primera audiometría completa, bien enmascarada, es contra la que se va a medir la recuperación o el avance.
@@ -523,6 +523,9 @@ En este caso la audiología no pone el nombre del cuadro: pone la **curva en el 
 1. Studebaker GA. Clinical masking of the nontest ear. J Speech Hear Disord. 1967;32(4):360-71. doi:10.1044/jshd.3204.360
 1. Stenfelt S. Transcranial attenuation of bone-conducted sound when stimulation is at the mastoid and at the bone conduction hearing aid position. Otol Neurotol. 2012;33(2):105-14. doi:10.1097/MAO.0b013e31823e28ab
 1. Lee H. Audiovestibular loss in anterior inferior cerebellar artery territory infarction: a window to early detection? J Neurol Sci. 2012;313(1-2):153-9. doi:10.1016/j.jns.2011.08.039
+1. Fagelson MA, Martin FN. The occlusion effect and ear canal sound pressure level. Am J Audiol. 1998;7(2):50-4. doi:10.1044/1059-0889(1998/010)
+1. Sichel JY, Freeman S, Sohmer H. Lateralization during the Weber test: animal experiments. Laryngoscope. 2002;112(3):542-6. doi:10.1097/00005537-200203000-00024
+1. Tsuzuki N, Wasano K. Idiopathic sudden sensorineural hearing loss: a review focused on the contribution of vascular pathologies. Auris Nasus Larynx. 2024;51(4):747-54. doi:10.1016/j.anl.2024.05.009
 
 ### Patología
 
@@ -541,3 +544,4 @@ En este caso la audiología no pone el nombre del cuadro: pone la **curva en el 
 1. Campbell KC, Klemens JJ. Sudden hearing loss and autoimmune inner ear disease. J Am Acad Audiol. 2000;11(7):361-7.
 1. McCabe BF. Autoimmune sensorineural hearing loss. Ann Otol Rhinol Laryngol. 1979;88(5 Pt 1):585-9. doi:10.1177/000348947908800501
 1. Ramchandani MS, Litvack JR, Marra CM. Otosyphilis: a review of the literature. Sex Transm Dis. 2020;47(5):296-300. doi:10.1097/OLQ.0000000000001155
+1. Rauch SD. IL-1β inhibition in autoimmune inner ear disease: can you hear me now? J Clin Invest. 2014;124(9):3685-7. doi:10.1172/JCI77197

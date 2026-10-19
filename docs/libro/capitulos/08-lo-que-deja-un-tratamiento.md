@@ -28,7 +28,7 @@ Sin base, el monitoreo pierde su fuerza. Muchas personas ya tienen alguna pérdi
 
 ### La audiometría de alta frecuencia
 
-El cisplatino y los aminoglucósidos empiezan a dañar la cóclea **por encima de 8 kHz**, en el tramo que la audiometría convencional no mira (→ Fisiología). En 222 oídos tratados con estos fármacos, el 62,5 % de los que perdieron audición la perdieron primero **solo** en la alta frecuencia (Fausti y cols., 1994). Medir hasta 8 kHz es enterarse tarde.
+El cisplatino y los aminoglucósidos suelen empezar a dañar la cóclea **por encima de 8 kHz**, en el tramo que la audiometría convencional no mira (→ Fisiología). En 222 oídos tratados con estos fármacos, el 62,5 % de los que perdieron audición la perdieron primero **solo** en la alta frecuencia (Fausti y cols., 1994). Medir hasta 8 kHz es enterarse tarde. <!-- Pasada de fundamentos 2026-10-18: decía "empiezan a dañar la cóclea por encima de 8 kHz". En Fausti y cols. (1994) el 13,5 % de los oídos empezó solo en la frecuencia convencional, y la AAA (Durrant y cols., 2009) ubica el primer daño cerca de la frecuencia más alta que oye cada paciente; se dejó "suelen empezar". -->
 
 En este libro, la audiometría de alta frecuencia se hace así:
 
@@ -85,7 +85,7 @@ Tabla: Escala SIOP Boston (Brock y cols., 2012)
 | 3 | más de 20 dB HL desde 2 o 3 kHz hacia arriba |
 | 4 | más de 40 dB HL desde 2 kHz hacia arriba |
 
-El audiólogo informa el cambio con sus números y el criterio que cumple. Con eso el médico gradúa y decide si sigue igual, ajusta el tratamiento o lo cambia; el monitoreo existe para que esa decisión llegue antes de que el daño alcance las frecuencias del habla (Durrant y cols., 2009). Las recomendaciones actuales integran la base, los controles, las escalas y la rehabilitación en un mismo programa (Fernandez y cols., 2025).
+El audiólogo informa el cambio con sus números y el criterio que cumple. Con eso el médico gradúa y decide si sigue igual, ajusta el tratamiento o lo cambia; el monitoreo existe para que esa decisión llegue antes de que el daño alcance las frecuencias del habla (Durrant y cols., 2009). Una hoja de ruta internacional reciente propone reunir en un mismo programa la prevención, el diagnóstico, el monitoreo y la rehabilitación (Fernandez y cols., 2025). <!-- Pasada de fundamentos 2026-10-18: decía "Las recomendaciones actuales integran la base, los controles, las escalas y la rehabilitación en un mismo programa". Fernandez y cols. (2025), resumen: "Ototoxicity management (OtoM) comprises the prevention, diagnosis, monitoring, and treatment, including rehabilitation" y "there are no widely adopted standards"; es una hoja de ruta, no una recomendación vigente. -->
 
 ### Las emisiones como monitor temprano
 
@@ -151,7 +151,7 @@ El **cisplatino** es el fármaco más ototóxico de uso clínico habitual, y es 
 **El vestíbulo.** Los aminoglucósidos dañan también las células ciliadas del vestíbulo; el cisplatino mucho menos (Schacht y cols., 2012). La **gentamicina** es el ejemplo extremo: en 103 pacientes con pérdida vestibular bilateral grave por gentamicina, todos tenían una audiometría acorde a su edad. Consultaron por inestabilidad y por oscilopsia (ver el mundo moverse al caminar), nunca por vértigo, y varios en dosis consideradas correctas (Ahmed y cols., 2012). Ese paciente no se descubre con un audiograma (→ cap. 24).
 
 :::sabias ¿Sabías que?
-Hay familias en las que los aminoglucósidos dejan sordos a varios de sus miembros. En cuatro de ellas se encontró el mismo cambio en el ADN de la mitocondria, la mutación **m.1555A>G** del gen del ARN ribosomal 12S, justo en un sitio donde actúa el antibiótico (Prezant y cols., 1993). Como el ADN mitocondrial se hereda de la madre, la pregunta de la entrevista es si alguien de la familia materna quedó sordo después de un antibiótico.
+Hay familias en las que los aminoglucósidos dejan sordos a varios de sus miembros. En tres de ellas, y en una gran familia árabe-israelí con sordera de herencia materna sin relación con el antibiótico, se encontró el mismo cambio en el ADN de la mitocondria, la mutación **m.1555A>G** del gen del ARN ribosomal 12S, justo en un sitio donde actúa el antibiótico (Prezant y cols., 1993). <!-- Pasada de fundamentos 2026-10-18: decía "En cuatro de ellas". Prezant y cols. (1993), resumen: "three unrelated patients with familial aminoglycoside-induced deafness" y "the Arab-Israeli pedigree" (sordera no sindrómica de herencia materna); "All four families shared a nucleotide 1555 A to G substitution". --> Como el ADN mitocondrial se hereda de la madre, la pregunta de la entrevista es si alguien de la familia materna quedó sordo después de un antibiótico.
 :::
 
 ### Salicilatos y quinina: la que se recupera
@@ -419,7 +419,7 @@ Hipoacusia mixta del OD, con componente conductivo mayor en los graves y sensori
 Se sugiere evaluación por otorrinolaringología para el manejo de la efusión, y **controles semestrales**, porque la parte sensorioneural puede seguir avanzando (Bhandare y cols., 2010). Si se resuelve la efusión, la audiometría siguiente mostrará cuánto de la pérdida era del oído medio y cuánto queda de la cóclea.
 
 :::ojo Ojo clínico
-En un adulto, una otitis con efusión de un solo lado obliga a pensar en lo que puede estar tapando la trompa. En un paciente que tuvo un tumor de cabeza y cuello, eso incluye una recidiva: se informa y se deja la pregunta al médico. <!-- verificar: la recomendación de estudiar la rinofaringe ante una otitis con efusión unilateral del adulto es práctica habitual, pero no está en la bibliografía verificada del libro. -->
+En un adulto, una otitis con efusión de un solo lado obliga a pensar en lo que puede estar tapando la trompa: entre sus causas están el cáncer de rinofaringe y otros tumores vecinos que infiltran la trompa, además de la radioterapia (Mills y Hathorn, 2016). En un paciente que tuvo un tumor de cabeza y cuello, eso incluye una recidiva: se informa y se deja la pregunta al médico.
 :::
 
 ## Para cerrar
@@ -474,3 +474,4 @@ En un adulto, una otitis con efusión de un solo lado obliga a pensar en lo que 
 1. Bhandare N, Jackson A, Eisbruch A, Pan CC, Flickinger JC, Antonelli P, et al. Radiation therapy and hearing loss. Int J Radiat Oncol Biol Phys. 2010;76(3 Suppl):S50-7. doi:10.1016/j.ijrobp.2009.04.096
 1. Petsuksiri J, Sermsree A, Thephamongkhol K, Keskool P, Thongyai K, Chansilpa Y, et al. Sensorineural hearing loss after concurrent chemoradiotherapy in nasopharyngeal cancer patients. Radiat Oncol. 2011;6:19. doi:10.1186/1748-717X-6-19
 1. Christensen JG, Wessel I, Gothelf AB, Homøe P. Otitis media with effusion after radiotherapy of the head and neck: a systematic review. Acta Oncol. 2018;57(8):1011-6. doi:10.1080/0284186X.2018.1468085
+1. Mills R, Hathorn I. Aetiology and pathology of otitis media with effusion in adult life. J Laryngol Otol. 2016;130(5):418-24. doi:10.1017/S0022215116000943

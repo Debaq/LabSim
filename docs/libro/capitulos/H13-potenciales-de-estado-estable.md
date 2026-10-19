@@ -40,7 +40,7 @@ Las neuronas auditivas descargan con más probabilidad en cada subida de la envo
 Según el ritmo de modulación, la respuesta nace en lugares distintos (Picton y cols., 2003; BSA, 2023):
 
 - **Alrededor de 80 a 100 Hz** (en los equipos, "90 Hz"). La respuesta viene sobre todo del **tronco**, como el ABR. Está presente desde el nacimiento y **casi no cambia con el sueño**, la sedación ni la anestesia. Es la que se usa en lactantes y en cualquier paciente dormido. Su costo es que es **más chica**.
-- **Alrededor de 40 Hz**. Es similar a la respuesta de latencia media: más grande, pero **depende del estado de alerta** y **no madura hasta bien entrada la infancia**. Es adecuada en adultos y niños mayores (más de unos 5 años) **despiertos**, y no sirve en recién nacidos ni se debe usar en quien duerme.
+- **Alrededor de 40 Hz**. Es similar a la respuesta de latencia media: más grande, pero **depende del estado de alerta** y **no se parece a la del adulto hasta la adolescencia**, aunque desde los 5 años ya se puede registrar (BSA, 2023). Es adecuada en adultos y niños mayores (más de unos 5 años) **despiertos**, y no sirve en recién nacidos ni se debe usar en quien duerme.
 
 Por eso las pantallas de los equipos ofrecen protocolos distintos para el niño, el adulto dormido y el adulto despierto: no cambia el examen, cambia la familia de respuesta que se está buscando.
 
@@ -244,8 +244,8 @@ El informe de ejemplo es de un recién nacido, y es el único contexto en que la
 
 ### Lo que el ASSR no hace bien
 
-- **El oído normal.** La mayor dispersión está en la audición normal y en las pérdidas leves, porque el sistema se recluta: pasar de inaudible a fuerte requiere cambios pequeños de nivel (BSA, 2023). En lactantes normoyentes, el 90 % ya tiene respuesta a niveles de 32 a 49 dB HL según la frecuencia, así que el ASSR de un oído normal no baja de ahí (Van Maanen y Stapells, 2009). Un ASSR **puede confirmar que el umbral está dentro de lo normal**, pero **no distingue** un oído normal de una pérdida de 20 a 30 dB.
-- **La neuropatía auditiva.** El ASSR **no puede diagnosticarla** y en ella **no predice el umbral conductual**: en 19 niños con pérdida de tipo neuropatía, los umbrales del ASSR no reflejaron el audiograma conductual (Rance y cols., 2005). Hay incluso casos en que el ASSR muestra respuesta a niveles bajos mientras el ABR está ausente, y se piensa que lo que se detecta es actividad previa al nervio (el potencial de suma) y no una respuesta neural (De Jager y cols., 2026). Una respuesta presente no basta para decir que hay audición.
+- **El oído normal.** La mayor dispersión está en la audición normal y en las pérdidas leves. En una pérdida coclear hay reclutamiento: un cambio pequeño de nivel lleva el sonido de inaudible a fuerte, y la respuesta aparece cerca del umbral; en el oído normal, sin reclutamiento, la respuesta crece de a poco y el umbral del examen se dispersa más (BSA, 2023). En lactantes normoyentes, la mitad tiene respuesta a 15 a 36 dB HL según la frecuencia y el 90 % recién a 32 a 49 dB HL, y por eso se toman como "normales" las respuestas a 50, 45, 40 y 40 dB HL en 500, 1.000, 2.000 y 4.000 Hz (Van Maanen y Stapells, 2009). Un ASSR **puede confirmar que el umbral está dentro de lo normal**, pero **distingue mal** un oído normal de una pérdida leve. <!-- Pasada de fundamentos 2026-10-18: decía "porque el sistema se recluta: pasar de inaudible a fuerte requiere cambios pequeños de nivel" (la BSA atribuye la menor dispersión de las pérdidas a su reclutamiento, no al oído normal) y "el 90 % ya tiene respuesta a 32 a 49 dB HL ... así que el ASSR de un oído normal no baja de ahí" (la mediana está en 15 a 36 dB HL; Van Maanen y Stapells, 2009). También decía "no distingue un oído normal de una pérdida de 20 a 30 dB", cifra sin fuente. -->
+- **La neuropatía auditiva.** El ASSR **no puede diagnosticarla** y en ella **no predice el umbral conductual**: en 19 niños con pérdida de tipo neuropatía, los umbrales del ASSR no reflejaron el audiograma conductual (Rance y cols., 2005). Hay incluso casos en que el ASSR muestra respuesta a niveles bajos mientras el ABR está ausente, y se piensa que lo que se detecta es actividad previa al nervio (el potencial de suma) y no una respuesta neural (Biagio de Jager y cols., 2026). Una respuesta presente no basta para decir que hay audición.
 - **Las intensidades altas.** La respuesta de varias frecuencias a la vez cae sobre unos 80 dB nHL y los artefactos aumentan; a más de 100 dB nHL por vía aérea las respuestas pueden ser vestibulares o del estímulo (BSA, 2023).
 - **El lactante muy pequeño.** Las respuestas maduran: los umbrales mejoran unos 5 dB en las primeras semanas, y la BSA propone hacer el ASSR entre **2 semanas y 3 meses** de edad corregida y usar estimaciones conservadoras si se hace antes (BSA, 2023).
 
@@ -269,7 +269,7 @@ Tabla: ABR por tono breve y ASSR frente a frente
 | **Artefacto de estímulo** | Se ve en la curva | No se ve: puede contar como respuesta |
 | **Tiempo para 4 frecuencias y 2 oídos** | Más largo | Más corto con equipos de última generación: unos 20 min contra unos 32 min en un estudio con lactantes (Sininger y cols., 2018) |
 | **Dependencia del sueño** | No | 90 Hz no; 40 Hz sí |
-| **Diferencia con el umbral conductual** | Corrección conocida en cada protocolo | En lactantes, alrededor de 6 a 11 dB más alto que el ABR por tono en un sistema temprano (Van Maanen y Stapells, 2010) |
+| **Diferencia con el umbral conductual** | Corrección conocida en cada protocolo | En lactantes, alrededor de 6 a 11 dB más alto que el ABR por tono en un sistema temprano (Van Maanen y Stapells, 2010); con detección de última generación, hasta 14 dB más bajo que el ABR (Sininger y cols., 2018) |
 
 En la práctica, el ABR responde primero (¿hay una vía sana?, ¿qué umbral con click o con tono?) y el ASSR completa rápido el audiograma de los dos oídos cuando el ABR salió normal en morfología (BSA, 2023).
 
@@ -325,8 +325,8 @@ No hay sueño que conseguir, ni modulación, ni análisis en frecuencia, ni la e
 ### Técnica
 
 1. British Society of Audiology. Practice guidance: auditory steady state response (ASSR) testing (OD104-115, v3). BSA; 2023. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-115-Practice-Guidance-for-ASSR-Testing-1.pdf
-1. Picton TW, John MS, Dimitrijevic A, Purcell D. Human auditory steady-state responses. Int J Audiol. 2003;42:177-219. doi:10.3109/14992020309101316
-1. John MS, Lins OG, Boucher BL, Picton TW. Multiple auditory steady-state responses (MASTER): stimulus and recording parameters. Audiology. 1998;37:59-82. doi:10.3109/00206099809072962
+1. Picton TW, John MS, Dimitrijevic A, Purcell D. Human auditory steady-state responses. Int J Audiol. 2003;42(4):177-219. doi:10.3109/14992020309101316
+1. John MS, Lins OG, Boucher BL, Picton TW. Multiple auditory steady-state responses (MASTER): stimulus and recording parameters. Audiology. 1998;37(2):59-82. doi:10.3109/00206099809072962
 1. Small SA, Stapells DR. Artifactual responses when recording auditory steady-state responses. Ear Hear. 2004;25(6):611-23. doi:10.1097/00003446-200412000-00009
 1. Joint Committee on Infant Hearing. Year 2019 position statement: principles and guidelines for early hearing detection and intervention programs. J Early Hear Detect Interv. 2019;4(2):1-44. doi:10.15142/fptk-b748
 
@@ -345,9 +345,8 @@ No hay sueño que conseguir, ni modulación, ni análisis en frecuencia, ni la e
 
 ### Neuropatía auditiva
 
-1. De Jager LB, Lightfoot G, Michel F, Zanin J, Rance G. Auditory steady-state responses to low-level stimuli in children with auditory neuropathy: case series and theoretical considerations. Int J Audiol. 2026:1-11. doi:10.1080/14992027.2026.2665402
+1. Biagio de Jager L, Lightfoot G, Michel F, Zanin J, Rance G. Auditory steady-state responses to low-level stimuli in children with auditory neuropathy: case series and theoretical considerations. Int J Audiol. 2026:1-11. doi:10.1080/14992027.2026.2665402
 
-<!-- verificar: las cifras de la BSA (2023, apéndice B) sobre lactantes normales (media 12 dB, DE 14) y con hipoacusia sensorioneural (7 dB, DE 11) vienen de Casey y Small 2014 y Aimoni y cols. 2018; no se cotejaron en los originales y no se usaron en el texto visible. -->
-<!-- verificar: la prueba F y la coherencia de fase como pruebas de detección se describen con la BSA (2023, sección 7.1) y Picton y cols. (2003); la explicación de "fase estable frente a ruido aleatorio" es didáctica, no una cita textual. -->
+<!-- Pasada de fundamentos 2026-10-18: se cotejó en la BSA (2023, apéndice B) que da 12 dB (DE 14) en lactantes normales (Casey y Small, 2014) y 7 dB (DE 11) con hipoacusia sensorioneural (Aimoni y cols., 2018); no se usan en el texto visible, así que no se citan. La prueba F y la coherencia de fase están en la BSA (2023, §7.1). -->
 <!-- Protocolo ORL 2019: "Paciente debe presentarse en cansado": errata por "presentarse cansado". "Impedancia idealmente inferior a 3Komh": errata por kΩ; se dejó 3 kΩ como meta del libro y la norma (BSA: 5 kΩ y diferencia de 2 kΩ) va en "Lo que dicen las normas". "Adultos despiertos, 90 Hz": se mantuvo; la BSA usa 40 Hz en vigilia (comentario en el paso 1). El protocolo no menciona ABR previo ni exclusión de neuropatía: se agregó con la BSA. -->
 <!-- Informe de ejemplo: cifras inventadas para ilustrar; la corrección del OD (−20/−20/−15/−15) es la tabla provisional de la BSA para recién nacidos con fonos de inserción. -->

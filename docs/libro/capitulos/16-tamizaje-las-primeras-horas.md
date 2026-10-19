@@ -30,7 +30,7 @@ Dos preguntas antes de encender el equipo: **¿cuántas horas de vida tiene?** (
 
 ### El momento importa
 
-El oído de un recién nacido no está listo en las primeras horas (→ Fisiología). Por eso el porcentaje de oídos sanos que pasa depende de cuántas horas de vida tiene el bebé al medirlo. En 408 recién nacidos de bajo riesgo tamizados con TEOAE, pasó el 53,7 % antes de las 24 horas y el 99,3 % después de las 48 (Seehiranwong y Saengrat, 2025):
+El oído de un recién nacido no está listo en las primeras horas (→ Fisiología). Por eso el porcentaje de oídos sanos que pasa depende de cuántas horas de vida tiene el bebé al medirlo. En 408 recién nacidos de bajo riesgo tamizados con TEOAE, pasó el 53,7 % antes de las 24 horas y el 99,3 % después de las 48 (Seehiranwong y Saengrat, 2026):
 
 Tabla: Porcentaje de pase de la TEOAE según las horas de vida (bajo riesgo)
 
@@ -44,7 +44,7 @@ Tabla: Porcentaje de pase de la TEOAE según las horas de vida (bajo riesgo)
 El AABR sufre menos este efecto. En 150 recién nacidos sanos medidos con las dos pruebas dentro de las primeras 48 horas, el AABR refirió al 16,7 % y la TEOAE al 37,9 % (Van Dyk y cols., 2015). Los equipos de AABR, además, terminan rápido: en una serie de 11.711 recién nacidos, el tamizaje duró en promedio 7,1 minutos y la tasa de "refiere" al alta fue menor de 2 % (Stewart y cols., 2000).
 
 :::sabias ¿Sabías que?
-El JCIH recomienda tamizar cerca del alta, pero **no fija una hora óptima** (Seehiranwong y Saengrat, 2025). Esperar mejora el pase, pero la meta es tamizar al mes de vida como máximo; por eso un alta muy temprana lleva a elegir AABR o a tamizar de nuevo después.
+El JCIH recomienda tamizar cerca del alta, pero **no fija una hora óptima** (Seehiranwong y Saengrat, 2026). Esperar mejora el pase, pero la meta es tamizar al mes de vida como máximo; por eso un alta muy temprana lleva a elegir AABR o a tamizar de nuevo después.
 :::
 
 ### Cómo se hace el AABR
@@ -72,15 +72,15 @@ LabSim tiene el AABR como **equipo aparte** del ABR: nivel fijo, una sola curva 
 
 ### Por qué el oído del recién nacido refiere
 
-En las primeras horas de vida el oído externo tiene **vérnix** y restos de líquido amniótico, y el oído medio todavía contiene **mesénquima y líquido** que no terminaron de reabsorberse (Eavey, 1993). Es una pérdida de transmisión **real**, pero transitoria: el sonido llega peor a la cóclea y, para las emisiones, peor aún, porque la emisión tiene que **salir** por el mismo camino por el que entró el estímulo. Un oído medio que atenúa 10 dB lo atenúa a la ida y otra vez a la vuelta. Los fallos del tamizaje por esta causa se resuelven solos (Doyle y cols., 2000), pasadas algunas horas o pocos días <!-- verificar: la escala de tiempo de la reabsorción del mesénquima y líquido; Eavey 1993 describe la presencia, y Doyle 2000 el efecto sobre el tamizaje -->.
+En las primeras horas de vida el oído externo tiene **vérnix** y restos de líquido amniótico, y el oído medio todavía contiene **mesénquima y líquido** que no terminaron de reabsorberse (Eavey, 1993). Es una pérdida de transmisión **real**, pero transitoria: el sonido llega peor a la cóclea y, para las emisiones, peor aún, porque la emisión tiene que **salir** por el mismo camino por el que entró el estímulo. Un oído medio que atenúa 10 dB lo atenúa a la ida y otra vez a la vuelta. Los fallos del tamizaje por esta causa son transitorios: en recién nacidos de bajo riesgo el pase de la TEOAE sube con las horas de vida y pasa casi todos después de las 48 horas (Seehiranwong y Saengrat, 2026), y retirar el vérnix que ocluye el conducto sube el pase de las dos pruebas (Doyle y cols., 2000). <!-- Pasada de fundamentos 2026-10-18: decía "Los fallos del tamizaje por esta causa se resuelven solos (Doyle y cols., 2000), pasadas algunas horas o pocos días". Doyle 2000 mide un solo tamizaje (limpiar el vérnix sube el pase); la resolución con las horas es de Seehiranwong y Saengrat 2026. -->
 
 Eso explica el orden en que las pruebas se ven afectadas:
 
-- La **TEOAE** atraviesa el oído medio dos veces, así que es la más sensible a este transitorio: refiere más, sobre todo antes de las 24 horas (Van Dyk y cols., 2015).
-- El **AABR** la atraviesa una sola vez, con un estímulo de nivel fijo y un registro que se promedia, así que refiere menos (Stewart y cols., 2000).
+- La **TEOAE** atraviesa el oído medio dos veces, así que es la más sensible a este transitorio: refiere más, sobre todo antes de las 24 horas (Van Dyk y cols., 2015). Con el tímpano poco móvil a la otoscopia neumática, solo un tercio de los oídos pasó la TEOAE (Doyle y cols., 2000).
+- El **AABR** la atraviesa una sola vez, con un estímulo de nivel fijo y un registro que se promedia, así que refiere menos: en esos mismos oídos de tímpano poco móvil pasó el 95 % (Doyle y cols., 2000; Van Dyk y cols., 2015). <!-- Pasada de fundamentos 2026-10-18: la cita era (Stewart y cols., 2000), que no compara AABR con TEOAE; se cambió a Doyle 2000 y Van Dyk 2015, que sí lo hacen. -->
 - Ninguna de las dos "oye" mejor: la diferencia es solo por dónde pasa la señal.
 
-Hay dos detalles del oído del recién nacido que importan para leer el resto del estudio (→ H8, cap. 17): la pared del conducto es cartilaginosa y blanda, por lo que la timpanometría con sonda de 226 Hz engaña y se usa **1000 Hz** (Kei y cols., 2003); y el hueso del cráneo transmite mejor por vía ósea que el del adulto.
+Hay dos detalles del oído del recién nacido que importan para leer el resto del estudio (→ H8, cap. 17): la pared del conducto es cartilaginosa y blanda, por lo que la timpanometría con sonda de 226 Hz engaña y se usa **1000 Hz** (Kei y cols., 2003); y la vía ósea le llega mejor que al adulto: con el mismo umbral aéreo, el umbral óseo del ABR de un recién nacido queda unos 10 dB más bajo que el de un adulto (Cobb y Stuart, 2016).
 
 ### Lo que el tamizaje sí puede ver y lo que no
 
@@ -98,7 +98,7 @@ Detrás de los que **sí** tienen una pérdida permanente, hay muchos menos de l
 
 ### Un refiere que no es sordera
 
-Si el "refiere" se repite en el rescreening, la causa más común no es la cóclea: es un **oído medio que no terminó de airearse** o una efusión neonatal. La vía ósea está intacta y la pérdida es de transmisión. Es el cuadro del caso 16.4. Se descubre en el **diagnóstico** (→ cap. 17): con la ósea del ABR, que no pasa por el oído medio.
+Si el "refiere" se repite en el rescreening, la causa más común no es la cóclea: es un **oído medio que no terminó de airearse** o una efusión neonatal. En 76 lactantes derivados por no pasar las emisiones, el 64,5 % tenía otitis media con efusión (Boone y cols., 2005). La vía ósea está intacta y la pérdida es de transmisión. Es el cuadro del caso 16.4. Se descubre en el **diagnóstico** (→ cap. 17): con la ósea del ABR, que no pasa por el oído medio.
 
 ### La hipoacusia sensorioneural congénita
 
@@ -122,13 +122,13 @@ Tabla: Indicadores de riesgo del JCIH 2019 que obligan a seguimiento aunque el t
 | UCI neonatal más de 5 días; exanguinotransfusión; aminoglucósidos más de 5 días; asfixia; malformaciones craneofaciales; síndromes | antes de los 9 meses |
 | Preocupación de la familia | derivación inmediata |
 
-El **citomegalovirus congénito** es el ejemplo mayor: muchos de los niños infectados nacen con tamizaje normal y desarrollan la pérdida a los meses o años. Por eso su evaluación es la más temprana de la lista (JCIH, 2019). Para confirmar que la infección es congénita hay que buscar el virus en saliva u orina **en las primeras semanas de vida**; después de eso ya no se distingue de una infección adquirida (Rawlinson y cols., 2017) <!-- verificar: el plazo exacto de 3 semanas para la PCR en Rawlinson 2017 -->.
+El **citomegalovirus congénito** es el ejemplo mayor: el tamizaje neonatal no detecta la mayoría de las hipoacusias por CMV, porque muchas aparecen meses o años después del nacimiento (Cohen y cols., 2014). Por eso su evaluación es la más temprana de la lista (JCIH, 2019). <!-- Pasada de fundamentos 2026-10-18: decía "muchos de los niños infectados nacen con tamizaje normal y desarrollan la pérdida"; la mayoría de los infectados no pierde audición (Goderis 2014: 12,6 %). Se reformuló a lo que dice Cohen 2014. --> Para confirmar que la infección es congénita hay que buscar el virus en saliva u orina **en las primeras tres semanas de vida**; después de eso ya no se distingue de una infección adquirida (Rawlinson y cols., 2017).
 
 :::ojo Ojo clínico
 Un **padre o madre preocupado** vale como un indicador de riesgo. Si la familia cree que el niño no oye, se estudia aunque el tamizaje haya pasado.
 :::
 
-En Chile, la hipoacusia neurosensorial bilateral del prematuro es una garantía explícita en salud (GES 59), con tamizaje automatizado antes del alta de neonatología <!-- verificar: criterios actuales del GES 59 (prematuros menores de 1.500 g o menos de 32 semanas), el método de tamizaje y los plazos, en la guía MINSAL vigente y en https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-neurosensorial-bilateral-del-prematuro-a/ -->.
+En Chile, la hipoacusia neurosensorial bilateral del prematuro es una garantía explícita en salud (GES 59) para los recién nacidos de menos de 1.500 g o de menos de 32 semanas de gestación, con tamizaje auditivo automatizado antes del alta de neonatología y confirmación diagnóstica dentro de 120 días desde un tamizaje alterado (Superintendencia de Salud de Chile, s. f.).
 
 ## Razonamiento
 
@@ -399,9 +399,12 @@ Si se hubiera usado la sonda de 226 Hz, el timpanograma saldría "normal" y se h
 1. Eavey RD. Abnormalities of the neonatal ear: otoscopic observations, histologic observations, and a model for contamination of the middle ear by cellular contents of amniotic fluid. Laryngoscope. 1993;103(1 Pt 2 Suppl 58):1-31. doi:10.1002/lary.1993.103.s58.1
 1. Doyle KJ, Rodgers P, Fujikawa S, Newman E. External and middle ear effects on infant hearing screening test results. Otolaryngol Head Neck Surg. 2000;122(4):477-81. doi:10.1067/mhn.2000.102573
 1. Starr A, Picton TW, Sininger Y, Hood LJ, Berlin CI. Auditory neuropathy. Brain. 1996;119(Pt 3):741-53. doi:10.1093/brain/119.3.741
+1. Cobb KM, Stuart A. Auditory brainstem response thresholds to air- and bone-conducted CE-Chirps in neonates and adults. J Speech Lang Hear Res. 2016;59(4):853-9. doi:10.1044/2016_JSLHR-H-15-0182
 
 ### Patología
 
 1. NC EHDI Program. Risk factors for early childhood hearing loss: guidelines for infants who pass the newborn hearing screen (reproduce la Tabla 1 del JCIH 2019). North Carolina DHHS; 2020.
 1. Rawlinson WD, Boppana SB, Fowler KB, Kimberlin DW, Lazzarotto T, Alain S, et al. Congenital cytomegalovirus infection in pregnancy and the neonate: consensus recommendations for prevention, diagnosis, and therapy. Lancet Infect Dis. 2017;17(6):e177-e188. doi:10.1016/S1473-3099(17)30143-3
-1. Superintendencia de Salud de Chile. Problema de salud 59: hipoacusia neurosensorial bilateral del prematuro (GES). Disponible en: https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-neurosensorial-bilateral-del-prematuro-a/
+1. Superintendencia de Salud de Chile. Problema de salud 59: hipoacusia neurosensorial bilateral del prematuro (GES) [Internet]. Santiago: Superintendencia de Salud; s. f. [consultado 18 oct 2026]. Disponible en: https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-neurosensorial-bilateral-del-prematuro-a/
+1. Boone RT, Bower CM, Martin PF. Failed newborn hearing screens as presentation for otitis media with effusion in the newborn population. Int J Pediatr Otorhinolaryngol. 2005;69(3):393-7. doi:10.1016/j.ijporl.2004.11.006
+1. Cohen BE, Durstenfeld A, Roehm PC. Viral causes of hearing loss: a review for hearing health professionals. Trends Hear. 2014;18:2331216514541361. doi:10.1177/2331216514541361
