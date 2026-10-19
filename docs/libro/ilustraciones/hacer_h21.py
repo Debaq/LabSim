@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Dibuja las ilustraciones de la herramienta H21 (medición electroacústica del audífono):
+"""Dibuja las ilustraciones de la herramienta H21 (prueba de audífonos):
 
-    h21-caja-acoplador.svg   la cámara de medida con el altavoz, el micrófono de referencia,
-                             el audífono y el acoplador de 2 cc
-    h21-curva-ejemplo.svg    curvas inventadas: OSPL90 y respuesta con 60 dB de entrada
-    h21-distorsion-ruido.svg A: armónicos de un tono puro; B: ruido interno referido a la entrada
+    h21-rango-dinamico.svg  el rango dinamico del oido normal, con perdida coclear, con ganancia lineal y con compresion
+    h21-ventilacion.svg     molde cerrado y ventilado: que pasa con los graves
 
-SVG propios, no IA. Son esquemas: ninguna curva ni cifra es de un audífono real."""
+SVG propios, no IA: son esquemas. Son esquemas: no llevan cifras clínicas, solo la forma."""
 import math
 import pathlib
+import random
 
 TINTA, TENUE, GRILLA, FUERTE = '#24101a', '#8a8a90', '#e7e5e0', '#cfccc5'
 COCLEAR, RETRO, AVISO = '#c0571c', '#21796c', '#c62f3a'
@@ -36,14 +35,6 @@ class Lienzo:
         self.out.append(f'<polyline points="{p}" fill="none" stroke="{color}" stroke-width="{w}" '
                         f'stroke-linejoin="round" stroke-linecap="round"{d}{extra}/>')
 
-    def r(self, x, y, w, h, fill='none', color=TINTA, sw=1.2, rx=4, dash=None):
-        d = f' stroke-dasharray="{dash}"' if dash else ''
-        self.out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{fill}" '
-                        f'stroke="{color}" stroke-width="{sw}"{d}/>')
-
-    def raw(self, s):
-        self.out.append(s)
-
     def guardar(self, nombre, defs=''):
         svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {self.w} {self.h}" '
                f'width="{self.w}" height="{self.h}"><defs>{defs}</defs>'
@@ -58,163 +49,95 @@ def punta(id_, color):
             f'transform="scale(.8)" fill="{color}"/></marker>')
 
 
-def caja():
-    c = Lienzo(700, 330)
-    c.t(14, 20, 'Montaje de la medición: cámara de medida, audífono y acoplador de 2 cc', 10.5, TINTA, 'start', 700)
-    # camara
-    c.r(20, 40, 400, 250, '#f6f5f2', FUERTE, 1.5, 8)
-    c.t(30, 58, 'cámara de medida (aislada del ruido)', 8.5, TENUE, 'start', 600)
-    # altavoz
-    c.r(40, 120, 16, 70, '#fff', TINTA, 1.4, 2)
-    c.raw(f'<polygon points="56,125 86,100 86,210 56,185" fill="#fff" stroke="{TINTA}" stroke-width="1.4"/>')
-    c.t(70, 230, 'altavoz', 9, TINTA, 'middle', 600)
-    # ondas
-    for i, rr in enumerate((24, 44, 64)):
-        a = math.radians(32)
-        pts = [(86 + rr * 0.9 + rr * math.cos(t), 155 + rr * math.sin(t)) for t in
-               [(-a + 2 * a * k / 12) for k in range(13)]]
-        c.poli(pts, COCLEAR, 1.4)
-    c.t(200, 100, 'tono puro que barre las frecuencias', 8.5, COCLEAR, 'middle', 600)
-    # micro referencia
-    c.r(205, 130, 10, 36, '#fff', RETRO, 1.6, 3)
-    c.t(210, 182, 'micrófono de', 8, RETRO, 'middle', 600)
-    c.t(210, 193, 'referencia', 8, RETRO, 'middle', 600)
-    # audifono BTE (forma)
-    c.raw(f'<path d="M262,150 C262,118 300,112 306,140 C310,165 296,196 282,198 C268,198 262,175 262,150 z" '
-          f'fill="#e9e4dc" stroke="{TINTA}" stroke-width="1.4"/>')
-    c.raw(f'<circle cx="275" cy="150" r="3" fill="{TINTA}"/>')
-    c.t(284, 222, 'audífono', 9, TINTA, 'middle', 600)
-    c.t(284, 234, '(abierto y encendido)', 8, TENUE, 'middle')
-    # tubo
-    c.poli([(300, 128), (330, 100), (350, 100)], TINTA, 3)
-    c.t(318, 112, 'tubo corto', 8, TINTA, 'end', 600)
-    # acoplador
-    c.r(350, 80, 56, 40, '#fff', AVISO, 1.6, 4)
-    c.t(378, 98, '2 cc', 10, AVISO, 'middle', 700)
-    c.t(378, 111, 'acoplador', 8, AVISO, 'middle', 600)
-    # micro medicion
-    c.r(380, 124, 12, 30, '#fff', AVISO, 1.6, 3)
-    c.t(378, 170, 'micrófono de', 8, AVISO, 'middle', 600)
-    c.t(378, 181, 'medida', 8, AVISO, 'middle', 600)
-    # cables
-    c.poli([(420, 140), (450, 140), (450, 100), (480, 100)], TENUE, 1.2)
-    c.poli([(420, 150), (440, 150), (440, 230), (480, 230)], TENUE, 1.2)
-    # analizador
-    c.r(480, 60, 190, 210, '#fff', TINTA, 1.5, 8)
-    c.t(575, 82, 'analizador de audífonos', 9.5, TINTA, 'middle', 700)
-    c.t(575, 100, 'genera el tono y regula', 8.5, TINTA)
-    c.t(575, 112, 'su nivel con el micrófono de referencia', 8.5, TINTA)
-    c.t(575, 134, 'mide la presión que llega', 8.5, TINTA)
-    c.t(575, 146, 'al micrófono de medida', 8.5, TINTA)
-    c.t(575, 168, 'calcula ganancia = salida − entrada', 8.5, COCLEAR, 'middle', 600)
-    c.r(500, 188, 150, 62, '#f6f5f2', FUERTE, 1, 4)
-    c.poli([(508, 238), (530, 228), (548, 214), (565, 204), (585, 210), (610, 224), (640, 240)], COCLEAR, 1.6)
-    c.t(575, 262, 'pantalla: curva e informe', 8, TENUE)
-    c.guardar('h21-caja-acoplador.svg')
+def rango():
+    c = Lienzo(720, 335)
+    top, bot = 50, 270          # nivel: arriba fuerte, abajo suave
+    def y(n):                   # n en 0..100 (esquema), 100 = muy fuerte
+        return bot - (bot - top) * n / 100
+    cols = [(110, 'A · Oído normal'), (290, 'B · Pérdida coclear,\nsin audífono'),
+            (470, 'C · Ganancia lineal\n(todo sube igual)'), (640, 'D · Compresión\n(sube más lo suave)')]
+    for x, tit in cols:
+        for k, linea in enumerate(tit.split('\n')):
+            c.t(x, 18 + 13 * k, linea, 9.5, TINTA, 'middle', 700)
+        c.l(x, top, x, bot, FUERTE, 1)
+    w = 52
+    def rect(x, a, b, color, op, nombre=None):
+        c.out.append(f'<rect x="{x - w / 2:.1f}" y="{y(b):.1f}" width="{w}" height="{y(a) - y(b):.1f}" '
+                     f'fill="{color}" fill-opacity="{op}" stroke="{color}" stroke-width="1"/>')
+    # rangos audibles: entre el umbral (abajo) y la molestia (arriba)
+    rect(110, 5, 95, COCLEAR, .13)
+    rect(290, 55, 95, COCLEAR, .13)
+    rect(470, 25, 95, COCLEAR, .13)
+    rect(640, 25, 95, COCLEAR, .13)
+    # el habla: del suave al fuerte
+    rect(110, 30, 60, RETRO, .45)
+    rect(290, 30, 60, RETRO, .45)
+    rect(470, 55, 85, RETRO, .45)
+    rect(640, 28, 52, RETRO, .45)
+    # molestia
+    for x in (110, 290, 470, 640):
+        c.l(x - w / 2 - 8, y(95), x + w / 2 + 8, y(95), AVISO, 1.6)
+    c.t(110, y(95) - 6, 'molestia', 8, AVISO)
+    for x, n in ((110, 5), (290, 55), (470, 25), (640, 25)):
+        c.l(x - w / 2 - 8, y(n), x + w / 2 + 8, y(n), TINTA, 1.6)
+    c.t(110, y(5) + 13, 'umbral', 8, TINTA)
+    c.t(290, y(55) - 6, 'umbral', 8, TINTA)
+    c.t(470, y(25) + 13, 'umbral con audífono', 8, TINTA)
+    c.t(640, y(25) + 13, 'umbral con audífono', 8, TINTA)
+    # el habla bajo el umbral en B
+    c.t(290, y(45) + 3, 'habla', 8, '#fff', 'middle', 700)
+    c.t(110, y(45) + 3, 'habla', 8, '#fff', 'middle', 700)
+    c.t(470, y(70) + 3, 'habla', 8, '#fff', 'middle', 700)
+    c.t(640, y(40) + 3, 'habla', 8, '#fff', 'middle', 700)
+    c.t(290, bot + 28, 'casi toda bajo el umbral: no se oye', 8, AVISO)
+    c.t(470, bot + 28, 'el habla fuerte pasa la molestia', 8, AVISO)
+    c.t(640, bot + 28, 'cabe entera en el rango', 8, RETRO, 'middle', 700)
+    c.t(30, top - 4, 'fuerte', 8, TENUE, 'middle')
+    c.t(30, bot + 10, 'suave', 8, TENUE, 'middle')
+    c.l(30, top + 4, 30, bot - 4, TENUE, 1, extra=' marker-end="url(#p-r)"')
+    c.t(360, 322, 'Un oído y una frecuencia. El rango entre el umbral y la molestia se achica; el habla no.', 8.5, TENUE)
+    c.guardar('h21-rango-dinamico.svg', punta('p-r', TENUE))
 
 
-def curva():
-    c = Lienzo(700, 360)
-    x0, x1, y0, y1 = 70, 660, 50, 300      # marco
-    fmin, fmax = 200, 8000
-    dmin, dmax = 30, 130
-
-    def X(f):
-        return x0 + (math.log10(f) - math.log10(fmin)) / (math.log10(fmax) - math.log10(fmin)) * (x1 - x0)
-
-    def Y(d):
-        return y1 - (d - dmin) / (dmax - dmin) * (y1 - y0)
-
-    c.t(14, 20, 'Salida de un audífono en el acoplador de 2 cc', 10.5, TINTA, 'start', 700)
-    for d in range(40, 131, 10):
-        c.l(x0, Y(d), x1, Y(d), GRILLA, 0.8)
-        c.t(x0 - 8, Y(d) + 3, str(d), 8.5, TENUE, 'end')
-    for f in (250, 500, 1000, 2000, 4000, 8000):
-        c.l(X(f), y0, X(f), y1, GRILLA, 0.8)
-        c.t(X(f), y1 + 14, str(f), 8.5, TENUE)
-    c.t(x0 - 40, (y0 + y1) / 2, 'dB SPL en el acoplador', 8.5, TENUE, 'middle')
-    c.out[-1] = c.out[-1].replace('<text ', f'<text transform="rotate(-90 {x0 - 52} {(y0 + y1) / 2})" ', 1)
-    c.t((x0 + x1) / 2, y1 + 32, 'frecuencia (Hz)', 8.5, TENUE)
-    fs = [200 * (8000 / 200) ** (i / 120) for i in range(121)]
-
-    def ospl(f):
-        # forma inventada: sube, pico cerca de 2 kHz, cae en agudos
-        return 70 + 38 * math.exp(-((math.log2(f / 1900)) ** 2) / 1.3) + 6 * math.exp(-((math.log2(f / 700)) ** 2) / 0.4)
-
-    def rta(f):
-        return 52 + 24 * math.exp(-((math.log2(f / 1800)) ** 2) / 1.8) + 3 * math.exp(-((math.log2(f / 800)) ** 2) / 0.5)
-
-    c.poli([(X(f), Y(ospl(f))) for f in fs], AVISO, 2.4)
-    c.poli([(X(f), Y(rta(f))) for f in fs], RETRO, 2.4)
-    # entrada 60
-    c.l(x0, Y(60), x1, Y(60), TENUE, 1, '5 3')
-    c.t(x0 + 6, Y(60) - 5, 'entrada de 60 dB SPL', 8.5, TENUE, 'start')
-    # pico OSPL90
-    fp = max(fs, key=ospl)
-    c.l(X(fp), Y(ospl(fp)), X(fp), y1, AVISO, 1, '2 3')
-    c.raw(f'<circle cx="{X(fp):.1f}" cy="{Y(ospl(fp)):.1f}" r="4" fill="{AVISO}"/>')
-    c.t(X(fp) + 8, Y(ospl(fp)) - 10, 'OSPL90 máximo', 9, AVISO, 'start', 700)
-    # HFA
-    for f in (1000, 1600, 2500):
-        c.raw(f'<circle cx="{X(f):.1f}" cy="{Y(ospl(f)):.1f}" r="3" fill="#fff" stroke="{AVISO}" stroke-width="1.5"/>')
-        c.raw(f'<circle cx="{X(f):.1f}" cy="{Y(rta(f)):.1f}" r="3" fill="#fff" stroke="{RETRO}" stroke-width="1.5"/>')
-    c.l(X(1000), y0 + 6, X(2500), y0 + 6, TINTA, 1.2)
-    c.l(X(1000), y0 + 2, X(1000), y0 + 10, TINTA, 1.2)
-    c.l(X(2500), y0 + 2, X(2500), y0 + 10, TINTA, 1.2)
-    c.t((X(1000) + X(2500)) / 2, y0 - 4, 'HFA: promedio en 1.000, 1.600 y 2.500 Hz', 8.5, TINTA, 'middle', 600)
-    # ganancia
-    xg = X(1600)
-    c.raw(f'<line x1="{xg:.1f}" y1="{Y(60):.1f}" x2="{xg:.1f}" y2="{Y(rta(1600)) + 3:.1f}" stroke="{RETRO}" '
-          f'stroke-width="1.6" marker-end="url(#gp)"/>')
-    c.t(xg - 8, (Y(60) + Y(rta(1600))) / 2 + 3, 'ganancia', 8.5, RETRO, 'end', 700)
-    c.t(130, Y(rta(250)) + 20, 'respuesta con 60 dB de entrada', 9, RETRO, 'start', 700)
-    c.t(100, Y(88), 'OSPL90: salida con 90 dB de entrada', 9, AVISO, 'start', 700)
-    c.guardar('h21-curva-ejemplo.svg', punta('gp', RETRO))
-
-
-def distorsion():
-    c = Lienzo(700, 290)
-    # Panel A: armonicos
-    c.t(14, 20, 'A · Distorsión armónica', 10.5, TINTA, 'start', 700)
-    xa, ya = 50, 230
-    c.l(xa, ya, 320, ya, FUERTE, 1.2)
-    c.t(310, ya + 26, 'frecuencia →', 8.5, TENUE, 'end')
-    c.t(185, 44, 'salida del audífono con un tono puro de entrada', 8.5, TENUE)
-    barras = [(90, 130, TINTA, 'f', 'tono de entrada'), (150, 40, AVISO, '2f', ''), (210, 22, AVISO, '3f', ''), (270, 11, AVISO, '4f', '')]
-    for x, h, col, lab, nota in barras:
-        c.r(x - 9, ya - h, 18, h, col, col, 0, 1)
-        c.t(x, ya + 12, lab, 9, col, 'middle', 700)
-    c.t(210, 100, 'armónicos: frecuencias que', 8.5, AVISO, 'middle', 600)
-    c.t(210, 112, 'el audífono agrega y que no estaban', 8.5, AVISO, 'middle', 600)
-    c.t(185, 268, 'distorsión = potencia de los armónicos / potencia del fundamental', 8.5, TINTA, 'middle', 600)
-    # Panel B: EIN
-    c.t(360, 20, 'B · Ruido interno referido a la entrada', 10.5, TINTA, 'start', 700)
-    c.r(370, 60, 90, 56, '#fff', TINTA, 1.4, 4)
-    c.t(415, 84, 'audífono', 9, TINTA, 'middle', 700)
-    c.t(415, 98, 'con ganancia G', 8.5, TINTA)
-    c.raw(f'<line x1="340" y1="88" x2="368" y2="88" stroke="{TINTA}" stroke-width="1.4" marker-end="url(#pa)"/>')
-    c.raw(f'<line x1="462" y1="88" x2="492" y2="88" stroke="{TINTA}" stroke-width="1.4" marker-end="url(#pa)"/>')
-    c.t(340, 76, 'entrada:', 8.5, TENUE, 'end')
-    c.t(340, 88, 'silencio', 8.5, TENUE, 'end')
-    c.t(500, 76, 'salida:', 8.5, TENUE, 'start')
-    c.t(500, 88, 'siseo propio', 8.5, AVISO, 'start', 700)
-    # ruido
-    pts = []
-    import random
-    rnd = random.Random(21)
-    for i in range(60):
-        pts.append((500 + i * 3, 112 + rnd.uniform(-9, 9)))
-    c.poli(pts, AVISO, 1)
-    c.t(515, 148, 'nivel de salida sin señal', 8.5, AVISO, 'start', 600)
-    c.t(515, 170, 'EIN = ese nivel de salida − ganancia', 9, TINTA, 'start', 700)
-    c.t(380, 200, 'Es el nivel de un ruido imaginario a la entrada', 8.5, TINTA, 'start')
-    c.t(380, 213, 'de un audífono perfecto que daría ese mismo siseo.', 8.5, TINTA, 'start')
-    c.t(380, 233, 'Ese número es el que se puede comparar entre audífonos', 8.5, TENUE, 'start')
-    c.t(380, 246, 'de distinta ganancia.', 8.5, TENUE, 'start')
-    c.guardar('h21-distorsion-ruido.svg', punta('pa', TINTA))
+def ventilacion():
+    c = Lienzo(720, 332)
+    c.t(14, 20, 'Lo que pasa con los graves según el molde', 10.5, TINTA, 'start', 700)
+    for k, (x0, tit, cerrado) in enumerate(((50, 'A · Molde cerrado', True), (390, 'B · Molde con ventilación', False))):
+        # conducto
+        c.t(x0 + 120, 46, tit, 9.5, TINTA, 'middle', 700)
+        cy = 85
+        c.out.append(f'<rect x="{x0}" y="{cy - 14}" width="240" height="28" rx="14" fill="#f3e3d4" stroke="{FUERTE}"/>')
+        c.out.append(f'<rect x="{x0 + 70}" y="{cy - 11}" width="80" height="22" rx="7" fill="{COCLEAR}" fill-opacity=".55" stroke="{COCLEAR}"/>')
+        c.t(x0 + 110, cy + 3, 'molde', 8, '#fff', 'middle', 700)
+        c.t(x0 + 225, cy + 3, 'tímpano', 7.5, TENUE, 'end')
+        c.t(x0 + 10, cy + 3, 'afuera', 7.5, TENUE, 'start')
+        if not cerrado:
+            c.l(x0 + 72, cy - 3, x0 + 148, cy - 3, '#fff', 3)
+            c.t(x0 + 110, cy + 26, 'ventilación', 8, RETRO, 'middle', 700)
+        # curvas de graves
+        gx, gy, gw, gh = x0 + 20, 140, 200, 110
+        c.l(gx, gy + gh, gx + gw, gy + gh, TENUE, 1)
+        c.l(gx, gy, gx, gy + gh, TENUE, 1)
+        c.t(gx + gw / 2, gy + gh + 18, 'frecuencia (graves → agudos)', 8, TENUE)
+        c.t(gx - 6, gy + 4, 'nivel', 8, TENUE, 'end')
+        pts_ampl, pts_oclu = [], []
+        n = 40
+        for i in range(n + 1):
+            u = i / n
+            amp = 0.55 + 0.25 * u if cerrado else (0.18 + 0.7 * (1 - math.exp(-6 * u)) * (0.9))
+            pts_ampl.append((gx + u * gw, gy + gh - gh * amp))
+        c.poli(pts_ampl, COCLEAR, 2.2)
+        c.t(gx + gw - 4, pts_ampl[-1][1] - 6, 'ganancia', 8, COCLEAR, 'end', 700)
+        if cerrado:
+            c.t(gx + 4, gy + gh + 32, 'los graves quedan atrapados:', 8, AVISO, 'start', 700)
+            c.t(gx + 4, gy + gh + 44, 'refuerzo de graves y oclusión', 8, AVISO, 'start', 700)
+        else:
+            c.t(gx + 4, gy + gh + 32, 'parte de los graves se escapa:', 8, RETRO, 'start', 700)
+            c.t(gx + 4, gy + gh + 44, 'menos ganancia grave, menos oclusión', 8, RETRO, 'start', 700)
+    c.t(360, 322, 'El efecto depende del largo y el diámetro de la ventilación y del conducto.', 8.5, TENUE)
+    c.guardar('h21-ventilacion.svg')
 
 
 if __name__ == '__main__':
-    caja()
-    curva()
-    distorsion()
+    rango()
+    ventilacion()

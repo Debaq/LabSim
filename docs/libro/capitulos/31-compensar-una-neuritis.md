@@ -2,7 +2,7 @@
 
 :::objetivos En este capítulo
 - Explicar qué se compensa solo después de una neuritis (el reposo) y qué necesita movimiento (la función con los giros), y por qué la rehabilitación se empieza temprano.
-- Armar y progresar un programa por fases con los ejes de H19 (mirada, equilibrio, marcha, habituación) y su dosis en la casa.
+- Armar y progresar un programa por fases con los ejes de H20 (mirada, equilibrio, marcha, habituación) y su dosis en la casa.
 - Seguir a un paciente con las mismas medidas en cada visita (DHI, agudeza visual dinámica, batería funcional y vHIT con sus sacadas) y distinguir tres cursos: compensa, compensa lento y se estanca.
 - Reconocer lo que frena la compensación (supresores vestibulares, inactividad, miedo y dependencia visual) y qué hacer con eso sin salirse del propio rol: avisar al médico.
 - Decidir cuándo más ejercicio deja de ser la respuesta, derivar y distinguir esa meseta de un mareo persistente (→ cap. 27).
@@ -12,16 +12,16 @@ Dos semanas después de una neuritis vestibular, el vértigo ya pasó. Ya no gir
 
 ## Técnica en foco
 
-Este capítulo no agrega una prueba. Usa las que ya conoces, **repetidas en el tiempo**: el cuestionario, la batería funcional y el programa de ejercicios están en H19; el vHIT, en H17. Lo nuevo es saber **qué esperar de cada medida en una neuritis que compensa** y qué es una señal para detenerse a pensar. Sin esa referencia, un número suelto no dice nada; lo que dice algo es **cómo cambia**.
+Este capítulo no agrega una prueba. Usa las que ya conoces, **repetidas en el tiempo**: el cuestionario, la batería funcional y el programa de ejercicios están en H20; el vHIT, en H18. Lo nuevo es saber **qué esperar de cada medida en una neuritis que compensa** y qué es una señal para detenerse a pensar. Sin esa referencia, un número suelto no dice nada; lo que dice algo es **cómo cambia**.
 
 :::ayuda-ancho Qué se mide en cada visita y cómo se lee en una neuritis
 | Medida | Qué mira | En una neuritis que compensa | Para detenerse a pensar |
 |---|---|---|---|
-| **Síntomas y DHI** (→ H19) | Cuánto limita el mareo la vida diaria | Baja en semanas; suele ser lo primero que mejora | No baja, o sube, mientras la función mejora |
-| **DVA** (→ H19) | La visión con la cabeza moviéndose | Pierde cada vez menos líneas | No mejora aunque el entrenamiento de mirada esté bien hecho |
-| **Ganancia del vHIT**, lado enfermo (→ H17) | El reflejo a alta aceleración | Sube, sobre todo en los primeros tres meses, y puede quedar corta | Baja de una visita a otra: avisar |
-| **Sacadas del vHIT** (→ H17) | Cómo suple el cerebro lo que falta | Se hacen menos al recuperarse el reflejo | Sacadas encubiertas con ganancia baja: hipofunción importante |
-| **Batería de H19** | Equilibrio y marcha | Apoyo en un pie, TUG y DGI mejoran | Quedan atrás de lo que el paciente dice, o hay una caída |
+| **Síntomas y DHI** (→ H20) | Cuánto limita el mareo la vida diaria | Baja en semanas; suele ser lo primero que mejora | No baja, o sube, mientras la función mejora |
+| **DVA** (→ H20) | La visión con la cabeza moviéndose | Pierde cada vez menos líneas | No mejora aunque el entrenamiento de mirada esté bien hecho |
+| **Ganancia del vHIT**, lado enfermo (→ H18) | El reflejo a alta aceleración | Sube, sobre todo en los primeros tres meses, y puede quedar corta | Baja de una visita a otra: avisar |
+| **Sacadas del vHIT** (→ H18) | Cómo suple el cerebro lo que falta | Se hacen menos al recuperarse el reflejo | Sacadas encubiertas con ganancia baja: hipofunción importante |
+| **Batería de H20** | Equilibrio y marcha | Apoyo en un pie, TUG y DGI mejoran | Quedan atrás de lo que el paciente dice, o hay una caída |
 | **Registro de ejercicios** | Cuánto hizo de verdad | Casi todos los días | "Cuando me siento bien": el programa no se está haciendo |
 :::
 
@@ -36,7 +36,7 @@ Este capítulo no agrega una prueba. Usa las que ya conoces, **repetidas en el t
 
 ### Un programa por fases
 
-El programa de H19 tiene cuatro ejes y una dosis. En una neuritis lo que hay que decidir, visita a visita, es **cuánto desafío** poner. Se avanza por fases, y se pasa a la siguiente cuando la actual ya se hace sin síntomas que no cedan:
+El programa de H20 tiene cuatro ejes y una dosis. En una neuritis lo que hay que decidir, visita a visita, es **cuánto desafío** poner. Se avanza por fases, y se pasa a la siguiente cuando la actual ya se hace sin síntomas que no cedan:
 
 :::ayuda-ancho Cómo sube el desafío en una neuritis, por fases (los plazos son orientativos)
 | Eje | Fase 1: primeros días y hasta ~2 semanas | Fase 2: de ~2 a ~6 semanas | Fase 3: de ~6 semanas a ~3 meses |
@@ -45,28 +45,28 @@ El programa de H19 tiene cuatro ejes y una dosis. En una neuritis lo que hay que
 | **Habituación** | Movimientos que marean, en dosis leve | Sus movimientos provocadores, repetidos | Entornos cargados: supermercado, pantallas, escaleras |
 | **Equilibrio** | Sentado y de pie con apoyo | Pies juntos y en tándem, con los ojos abiertos | Un pie, ojos cerrados, espuma |
 | **Marcha** | Caminar por la casa y la cuadra | Marcha con giros de cabeza y cambios de velocidad | Tarea mental al caminar, superficies irregulares |
-| **En la casa** | Varias veces al día, pocos minutos | Al menos 12 minutos al día en total (→ H19) | Como en la fase 2 y con el registro al día |
+| **En la casa** | Varias veces al día, pocos minutos | Al menos 12 minutos al día en total (→ H20) | Como en la fase 2 y con el registro al día |
 :::
 
 <!-- Pasada de fundamentos 2026-10-18: los plazos de las fases (2 y 6 semanas, 3 meses) son práctica del libro. Hall y cols. (2022) lo confirman: para la hipofunción aguda y subaguda "no specific dose recommendation" más allá del mínimo diario; no dan fases con fechas. -->
 
-El eje oculomotor con la cabeza quieta (seguir una luz con los ojos) se puede conservar como lo describe el protocolo, pero **no cuenta** como estabilización de la mirada ni se suma a su dosis (Hall y cols., 2022; → H19).
+El eje oculomotor con la cabeza quieta (seguir una luz con los ojos) se puede conservar como lo describe el protocolo, pero **no cuenta** como estabilización de la mirada ni se suma a su dosis (Hall y cols., 2022; → H20).
 
 :::comentario Lo que dicen las normas
-- **Cuándo empezar.** La guía de la APTA encuentra que empezar temprano puede mejorar el resultado en la hipofunción aguda (Hall y cols., 2022). Strupp y cols. concluyeron antes que los ejercicios deben empezar **lo más pronto posible** tras el inicio de los síntomas, y que los **lentos** podrían ser más eficaces que los rápidos, porque dependen más del sistema vestibular (Strupp y cols., 2001). Por eso aquí se empieza lento y se sube la velocidad a medida que se tolera; la regla de H19, "tan rápido como se pueda mantener el blanco nítido", es el techo de esa subida y no el punto de partida.
+- **Cuándo empezar.** La guía de la APTA encuentra que empezar temprano puede mejorar el resultado en la hipofunción aguda (Hall y cols., 2022). Strupp y cols. concluyeron antes que los ejercicios deben empezar **lo más pronto posible** tras el inicio de los síntomas, y que los **lentos** podrían ser más eficaces que los rápidos, porque dependen más del sistema vestibular (Strupp y cols., 2001). Por eso aquí se empieza lento y se sube la velocidad a medida que se tolera; la regla de H20, "tan rápido como se pueda mantener el blanco nítido", es el techo de esa subida y no el punto de partida.
 - **Cuándo medir.** El protocolo pide el DHI y la batería al **inicio y al final**. Aquí se repiten también en medio, cada vez que se sube de fase: no cambia el protocolo, pero sin una medida intermedia no se puede decir si el paciente se estancó (lo que enseña el caso 31.3).
-- **Cuánto.** La dosis mínima por día y por semana está en H19; según el tiempo desde el inicio, el paciente con neuritis cae en el grupo de hipofunción **aguda o subaguda** o en el de **crónica**, y la guía da una dosis distinta para cada uno (Hall y cols., 2022).
+- **Cuánto.** La dosis mínima por día y por semana está en H20; según el tiempo desde el inicio, el paciente con neuritis cae en el grupo de hipofunción **aguda o subaguda** o en el de **crónica**, y la guía da una dosis distinta para cada uno (Hall y cols., 2022).
 :::
 
 ## En LabSim
 
-LabSim da el lado auditivo de estos pacientes (audiograma y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo vestibular de cada caso, es decir el vHIT, el DHI y la batería funcional, está en **tablas** y en **hojas de seguimiento** con impulsos como los de H17.
+LabSim da el lado auditivo de estos pacientes (audiograma y VEMP) y **no hace examen vestibular, postural ni rehabilitación**. Lo vestibular de cada caso, es decir el vHIT, el DHI y la batería funcional, está en **tablas** y en **hojas de seguimiento** con impulsos como los de H18.
 
 ## Fisiología
 
 ### Lo que compensa solo y lo que no
 
-Cuando falla un laberinto, el desequilibrio de reposo entre los dos lados se corrige solo y rápido; eso apaga el vértigo y el nistagmo (→ cap. 21 y H19). Lo que queda después es la función **con el movimiento**, y esa se recupera con las semanas y con la ayuda de lo que el paciente haga. La imagen actual separa dos procesos: en lo **estático**, los núcleos vestibulares del lado dañado se reequilibran con el impulso del lado sano; en lo **dinámico** pesa más la **sustitución**, sensorial y de comportamiento (Lacour y cols., 2016).
+Cuando falla un laberinto, el desequilibrio de reposo entre los dos lados se corrige solo y rápido; eso apaga el vértigo y el nistagmo (→ cap. 21 y H20). Lo que queda después es la función **con el movimiento**, y esa se recupera con las semanas y con la ayuda de lo que el paciente haga. La imagen actual separa dos procesos: en lo **estático**, los núcleos vestibulares del lado dañado se reequilibran con el impulso del lado sano; en lo **dinámico** pesa más la **sustitución**, sensorial y de comportamiento (Lacour y cols., 2016).
 
 En qué se nota esa diferencia lo mostró un ensayo con pacientes con neuritis, con y sin ejercicios vestibulares: la torsión ocular y la vertical visual subjetiva se normalizaron igual en los dos grupos, pero el balanceo del cuerpo, medido a los 30 días, fue de 3,2 m/min con ejercicios y 16,9 m/min sin ellos (Strupp y cols., 1998). Lo que no se compensa solo es lo que el paciente tiene que **usar**: el equilibrio, la marcha y la visión al mover la cabeza.
 
@@ -84,12 +84,12 @@ El reflejo vestíbulo-ocular (VOR) no vuelve de golpe ni del todo. En 43 pacient
 
 Dos cosas más conviene tener a la vista al leer esos números:
 
-- **La ganancia depende de la velocidad del impulso.** En 13 pacientes con neuritis, la ganancia del lado enfermo bajó de 0,59 a 0,29 al subir la aceleración del impulso de 750 a 6.000 °/s², y las sacadas encubiertas aparecían hasta en un 70 % de los impulsos más fuertes (Weber y cols., 2008). Una ganancia solo se compara con **otra medida con el mismo equipo y el mismo tipo de impulso** (→ H17).
+- **La ganancia depende de la velocidad del impulso.** En 13 pacientes con neuritis, la ganancia del lado enfermo bajó de 0,59 a 0,29 al subir la aceleración del impulso de 750 a 6.000 °/s², y las sacadas encubiertas aparecían hasta en un 70 % de los impulsos más fuertes (Weber y cols., 2008). Una ganancia solo se compara con **otra medida con el mismo equipo y el mismo tipo de impulso** (→ H18).
 - **La función del nervio y el síntoma no siempre van juntos.** En 60 pacientes con neuritis, la calórica se normalizó en el 41,7 %, y aun así el 56,7 % quedó sin síntomas: había gente sin síntomas y con un laberinto que no había vuelto (Okinaka y cols., 1993).
 
 ### El error retiniano calibra el reflejo, y la sustitución cubre lo que no vuelve
 
-Cuando la ganancia del reflejo es corta, en cada giro la imagen resbala por la retina. Ese **error retiniano** es la señal con que el cerebro recalibra la ganancia, y por eso la mirada se entrena **moviendo la cabeza mirando un blanco** (Gonshor y Jones, 1976; Miles y Lisberger, 1981; → H19). Lo que no se recupera por esta vía lo cubre la **sustitución**: sacadas compensatorias y la preprogramación central de los movimientos oculares (Hall y cols., 2022). Es lo que ve el vHIT como sacada encubierta, y no la nota el paciente.
+Cuando la ganancia del reflejo es corta, en cada giro la imagen resbala por la retina. Ese **error retiniano** es la señal con que el cerebro recalibra la ganancia, y por eso la mirada se entrena **moviendo la cabeza mirando un blanco** (Gonshor y Jones, 1976; Miles y Lisberger, 1981; → H20). Lo que no se recupera por esta vía lo cubre la **sustitución**: sacadas compensatorias y la preprogramación central de los movimientos oculares (Hall y cols., 2022). Es lo que ve el vHIT como sacada encubierta, y no la nota el paciente.
 
 Eso explica por qué un paciente puede estar bien con una ganancia que sigue baja: lee, camina y gira la cabeza porque su cerebro aprendió a suplir, y por eso la **medida de alta** es lo que hace el paciente y no el número del vHIT.
 
@@ -100,13 +100,13 @@ La guía de la APTA recomienda evaluar, entre los factores que pueden modificar 
 1. **Los supresores vestibulares de uso prolongado.** Los antihistamínicos y anticolinérgicos que calman el vértigo **retrasan la compensación** en lugar de ayudarla; así lo concluye una revisión farmacológica, que aclara que la manipulación de la compensación se había estudiado en animales y no en humanos (Rascol y cols., 1995). La guía advierte que su uso prolongado puede estorbar la recuperación; a dosis bajas y por poco tiempo pueden ayudar a controlar los síntomas mientras se hacen los ejercicios (Hall y cols., 2022). La indicación y el retiro son **del médico**.
 2. **La inactividad.** El reposo largo no da error retiniano ni asimetría que el cerebro tenga que resolver. Los pacientes con neuritis que hicieron ejercicios tenían menos balanceo a los 30 días que los que no (Strupp y cols., 1998).
 3. **El miedo y la ansiedad.** En 40 pacientes con neuritis estudiados desde la fase aguda, 32 de ellos de nuevo a las 10 semanas, lo que predijo un peor resultado, medido con el DHI, fue una **dependencia visual** alta, la activación autonómica, la ansiedad y la depresión y el miedo a las sensaciones corporales; **no** lo predijeron las medidas vestibulares (Cousins y cols., 2017).
-4. **La dependencia visual.** Cerca de la mitad de los pacientes con neuritis refieren síntomas a largo plazo, y el tercio con peor resultado, seis meses o más después, tenía más dependencia visual que los sanos: 6,35° de error en una prueba de barra y disco, contra 3,39° (Cousins y cols., 2014). Es la misma lógica de la repesada sensorial de H19: el cerebro le da a la vista más peso que a los otros sentidos.
+4. **La dependencia visual.** Cerca de la mitad de los pacientes con neuritis refieren síntomas a largo plazo, y el tercio con peor resultado, seis meses o más después, tenía más dependencia visual que los sanos: 6,35° de error en una prueba de barra y disco, contra 3,39° (Cousins y cols., 2014). Es la misma lógica de la repesada sensorial de H20: el cerebro le da a la vista más peso que a los otros sentidos.
 
 La edad **no** es un freno por sí misma: la guía dice que los mayores mejoran igual que los jóvenes (Hall y cols., 2022), aunque pueden tardar más y tener más comorbilidades.
 
 ### Qué hacen los fármacos sobre el reflejo y sobre la compensación
 
-Quien evalúa a un paciente con vértigo casi siempre recibe una lista de remedios. Conocer qué hace cada uno ayuda a leer el examen, porque un fármaco que deprime la respuesta del laberinto o del tronco cerebral cambia la calórica, el nistagmo y el rendimiento en la batería de equilibrio, y a interpretar por qué un paciente no avanza en la rehabilitación. Esta sección es informativa. **Indicar, ajustar y retirar un fármaco es decisión del médico**; lo que le corresponde a quien evalúa es registrar qué toma el paciente, desde cuándo y con qué horarios, y avisarlo (→ H19).
+Quien evalúa a un paciente con vértigo casi siempre recibe una lista de remedios. Conocer qué hace cada uno ayuda a leer el examen, porque un fármaco que deprime la respuesta del laberinto o del tronco cerebral cambia la calórica, el nistagmo y el rendimiento en la batería de equilibrio, y a interpretar por qué un paciente no avanza en la rehabilitación. Esta sección es informativa. **Indicar, ajustar y retirar un fármaco es decisión del médico**; lo que le corresponde a quien evalúa es registrar qué toma el paciente, desde cuándo y con qué horarios, y avisarlo (→ H20).
 
 El criterio que ordena las clases es qué hacen sobre la actividad de los núcleos vestibulares. Los **supresores vestibulares** reducen la respuesta del sistema vestibular y con ella el vértigo y el nistagmo, pero también reducen la señal de error que alimenta la compensación (Hall y cols., 2022; Rascol y cols., 1995). Los **antieméticos** calman las náuseas y el vómito sin tocar necesariamente el reflejo. Un tercer grupo, los **fármacos "de fondo"** (betahistina, cinarizina y flunarizina), se plantea como tratamiento de las crisis recurrentes, no del vértigo agudo.
 
@@ -152,7 +152,7 @@ En el seguimiento a largo plazo de 60 pacientes con neuritis, la calórica se no
 
 Un mareo que sigue después de la neuritis tiene varias causas, y el programa de ejercicios no las resuelve todas:
 
-- **Vértigo posicional por partículas**, que se trata con una maniobra y no con ejercicios (→ H18, cap. 22). Aparece en el seguimiento de la neuritis, como se vio arriba.
+- **Vértigo posicional por partículas**, que se trata con una maniobra y no con ejercicios (→ H19, cap. 22). Aparece en el seguimiento de la neuritis, como se vio arriba.
 - **Un déficit que no compensó por lo que lo frena**: supresores, inactividad (→ caso 31.2).
 - **Un mareo persistente funcional (PPPD)**: el laberinto ya funciona y lo que falla es el uso que el sistema hace de lo que tiene; sus criterios son de la Sociedad Bárány y piden síntomas casi todos los días por tres meses o más (Staab y cols., 2017) (→ cap. 27 y caso 31.3).
 - **Algo central o nuevo.** Cualquier signo neurológico nuevo cambia el capítulo (→ cap. 25).
@@ -224,7 +224,7 @@ El vértigo ya pasó y sigue con síntomas al mover la cabeza. ¿Qué parte de l
 - @OI P13 | El del OI mide **290 µV** (5,74). La asimetría es de **0 %**: el sáculo del lado enfermo responde. Es lo esperable si el daño fue de la rama superior del nervio (→ cap. 21).
 :::
 
-:::ayuda-ancho Lo que entrega Martín del examen y de la batería, a las dos semanas (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Martín del examen y de la batería, a las dos semanas (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | Bate hacia la izquierda, **2 °/s**, casi apagado |
@@ -250,7 +250,7 @@ Con eso se arma el programa (fase 1 y 2 de la Técnica en foco, con el desafío 
 :::docente Guía del caso
 - **Datos clave:** neuritis derecha de dos semanas, sin vértigo en reposo, síntomas al girar la cabeza y al agacharse, **meta clara** (volver a manejar), camina desde el quinto día, audición normal, VEMP simétrico.
 - **Hipótesis:** compensación estática hecha; falta la dinámica. Lo que hay que trabajar es la **mirada con los giros** y el equilibrio con cambios de postura.
-- **Qué pedir:** DHI, DVA, batería funcional de H19 y el vHIT que ya tiene del examen; repetir a la semana 6 y al tercer mes (→ H17, H19).
+- **Qué pedir:** DHI, DVA, batería funcional de H20 y el vHIT que ya tiene del examen; repetir a la semana 6 y al tercer mes (→ H18, H20).
 - **Qué enseña:** el curso típico de una neuritis que compensa, con una ganancia que sube pero **no se normaliza** y un alta por función.
 - **Errores esperables:** dar el alta por llevar la ganancia a 1; empezar el VOR x2 antes de que el x1 se haga sin síntomas; no pedir el registro de ejercicios en la casa.
 - **En LabSim:** audición normal y VEMP normal. El nombre del paciente lo sortea el editor.
@@ -267,7 +267,7 @@ Lleva cinco semanas y se siente peor de lo que se espera. ¿Qué dos hábitos de
 :::
 
 :::pregunta Paso 3 · ¿Qué pedirías y por qué?
-Además de la batería de H19, ¿qué harías con el fármaco y con el reposo? ¿Quién decide cada cosa?
+Además de la batería de H20, ¿qué harías con el fármaco y con el reposo? ¿Quién decide cada cosa?
 :::
 
 #### Paso 4 · Los resultados
@@ -277,7 +277,7 @@ Además de la batería de H19, ¿qué harías con el fármaco y con el reposo? �
 - @OI 1000 | El OI es igual al OD: 10 dB en 1 kHz.
 :::
 
-:::ayuda-ancho Lo que entrega Lucía del examen y de la batería, a las cinco semanas (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Lucía del examen y de la batería, a las cinco semanas (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | No hay |
@@ -329,11 +329,11 @@ Si el reflejo ya volvió, ¿qué más puede explicar el mareo? Separa lo que dep
 - @OD 4000 | La audición es normal: 0 dB hasta 6 kHz y 5 dB en 8 kHz, en los dos oídos.
 :::
 
-:::ayuda-ancho Lo que entrega Ignacio del examen y de la batería, a las diez semanas (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Ignacio del examen y de la batería, a las diez semanas (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | Nistagmo sin fijación | No hay |
-| Calórica | Hipoexcitabilidad derecha de **18 %**, bajo el corte de 25 % de H16 |
+| Calórica | Hipoexcitabilidad derecha de **18 %**, bajo el corte de 25 % de H17 |
 | vHIT, canal lateral | Derecha **0,90** sin sacadas; izquierda **1,00** |
 | DVA | **No pierde** líneas |
 | Apoyo en un pie | **30 s** |
@@ -394,7 +394,7 @@ La ganancia de 0,30 es la más baja de los tres, pero lo que **explica** la lent
 
 #### Diagnóstico y qué sigue
 
-Hipofunción vestibular izquierda **en compensación lenta**, con factores que la frenan. El informe dice lo que se midió y lo que se propone: la batería de H19, el riesgo de caída (apoyo en un pie bajo 5 s, TUG de 17 s, DGI de 5/12), el aviso al médico sobre el antihistamínico de uso prolongado y la caída, y un programa corto y supervisado que se sube de a poco. La decisión de **retirar o cambiar el fármaco es del médico**.
+Hipofunción vestibular izquierda **en compensación lenta**, con factores que la frenan. El informe dice lo que se midió y lo que se propone: la batería de H20, el riesgo de caída (apoyo en un pie bajo 5 s, TUG de 17 s, DGI de 5/12), el aviso al médico sobre el antihistamínico de uso prolongado y la caída, y un programa corto y supervisado que se sube de a poco. La decisión de **retirar o cambiar el fármaco es del médico**.
 
 :::ojo Ojo clínico
 El primer objetivo con ella no es el VOR x2, es que **salga del sillón con seguridad**. Una paciente con miedo a caerse que recibe un programa exigente lo abandona. La guía recomienda ofrecer rehabilitación **supervisada** porque ayuda a que el paciente persista (Hall y cols., 2022).
@@ -408,7 +408,7 @@ Mejoró y se estancó. Y esta vez no hay frenos "físicos": no toma fármacos, n
 
 #### Diagnóstico y qué sigue
 
-Hipofunción vestibular derecha **compensada** en la prueba, con síntomas persistentes que **no se explican por el déficit**. Se informa que la función está en lo esperable, que hay una **meseta con la función recuperada** y que se sugiere evaluación por otorrinolaringología (derivación obligatoria en H19). No se sube la dosis. Qué se hace entre tanto: se retoma con él la **habituación** (H19) con sus propios estímulos, en dosis leve y creciente (la pantalla, el supermercado, el metro, de a poco), y se le explica que lo que siente es real.
+Hipofunción vestibular derecha **compensada** en la prueba, con síntomas persistentes que **no se explican por el déficit**. Se informa que la función está en lo esperable, que hay una **meseta con la función recuperada** y que se sugiere evaluación por otorrinolaringología (derivación obligatoria en H20). No se sube la dosis. Qué se hace entre tanto: se retoma con él la **habituación** (H20) con sus propios estímulos, en dosis leve y creciente (la pantalla, el supermercado, el metro, de a poco), y se le explica que lo que siente es real.
 
 El diagnóstico de **mareo postural-perceptual persistente** lo hace el médico, con los criterios de la Sociedad Bárány (→ cap. 27), que piden síntomas casi todos los días por tres meses o más; a las diez semanas todavía no se cumple el tiempo, y ya conviene verlo.
 

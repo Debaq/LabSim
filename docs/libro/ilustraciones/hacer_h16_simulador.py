@@ -1,33 +1,34 @@
 #!/usr/bin/env python3
-"""h16-simulador-calorica.png (H16, prueba calórica): un paciente simulado acostado en la posición de
-la calórica, con la cabeza 30° arriba, visto del lado del oído derecho que se irriga, con el laberinto
-agrandado al lado: el canal lateral queda vertical. Sin nada de la interfaz.
+"""h16-simulador-frenzel.png (H16, examen vestibular): un paciente simulado con una neuritis vestibular
+superior izquierda a las 6 horas, sin fijación. A la izquierda, la cara con las lentes de Frenzel puestas;
+a la derecha, el ojo derecho de cerca, como lo ve la cámara de una VNG. Sin nada de la interfaz.
 
 Se hace con labyrinthus3d, que NO se toca: se sirve de solo lectura y se maneja por el protocolo de
-DevTools de chromium sin cabeza, con reloj virtual (la captura cae a los 45 s de irrigación con agua
-tibia, sin depender de la máquina). Se esconde todo menos la escena 3D y se recorta a la cabeza.
+DevTools de chromium sin cabeza, con reloj virtual. Se esconde todo menos la escena 3D (el ojo de cerca
+es una vista más del mismo lienzo), se recorta la cara sin los laberintos de los lados y se arma con PIL.
 
     python3 -m http.server 8911 -d ~/Escritorio/Proyectos/labyrinthus3d &
     chromium --headless=new --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader \\
-        --window-size=1600,900 --remote-debugging-port=9911 --user-data-dir=/tmp/h16prof about:blank &
-    python3 hacer_h16_simulador.py <carpeta de trabajo>"""
+        --window-size=1600,900 --remote-debugging-port=9911 --user-data-dir=/tmp/h15prof about:blank &
+    python3 hacer_h15_simulador.py <carpeta de trabajo>      (DEVTOOLS=<puerto> para otro chromium)"""
 import asyncio
 import base64
 import json
+import os
 import pathlib
-import re
 import sys
 import urllib.request
 
 import websockets
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageDraw
 
 AQUI = pathlib.Path(__file__).parent
-HTTP, DEVTOOLS = 8911, 9911
-SEG = 45
-# Solo la escena 3D, sobre blanco.
+HTTP, DEVTOOLS = 8911, int(os.environ.get('DEVTOOLS', 9911))
 OCULTA = ('body *{visibility:hidden!important} #lab-canvas{visibility:visible!important}'
           ' html,body,.laberinto,.lab-cuerpo,#lab-escena{background:#fff!important}')
+# La cara, sin los laberintos que el simulador dibuja a cada lado (px de CSS, vista centrada).
+CARA = (398, 185, 842, 885)
+BORDE = (207, 204, 197)
 
 # Reloj virtual: la animación avanza solo cuando se le pide, con pasos fijos.
 INIT = """
@@ -80,61 +81,61 @@ async def captura(carpeta):
     c = C()
     await c.start(f'http://localhost:{HTTP}/index.html')
     await c.ev("window.__paso(5,0.05)")
-    await c.ev("document.querySelector('[data-modulo-abre=\"laberinto\"]').click()")
+    await c.ev("document.querySelector('[data-modulo-abre=laberinto]').click()")
     await c.ev("window.__paso(20,0.05)")
-    await c.ev("document.querySelector('[data-vista=\"pruebas\"]:not([data-modulo])').click()")
-    await c.ev("window.__paso(20,0.05)")
-    await c.ev("""(()=>{const s=(i,v)=>{const e=document.getElementById(i); e.value=v; e.dispatchEvent(new Event('change'))};
-      s('lab-prov-oido','der'); s('lab-cal-agua','tibia');
-      const r=document.getElementById('lab-cal-rapido'); r.checked=false; r.dispatchEvent(new Event('change'));
-      document.getElementById('lab-cal-irrigar').click()})()""")
-    # Sin el ojo de cerca, que el lienzo 3D dibuja en un rincón.
-    await c.ev("document.getElementById('lab-vng').click()")
+    await c.ev("document.querySelector('[data-vista=patologia]:not([data-modulo])').click()")
+    await c.ev("window.__paso(10,0.05)")
+    await c.ev("""(()=>{const s=(i,v)=>{const e=document.getElementById(i); e.value=v; e.dispatchEvent(new Event('change', {bubbles: true}))};
+      s('lab-caso','neuritis_superior');
+      const d=document.getElementById('lab-pat-der'); d.checked=false; d.dispatchEvent(new Event('change', {bubbles: true}));
+      s('lab-tiempo','1');
+      document.getElementById('lab-fija-no').click()})()""")
+    await c.boton('A los lados')
+    await c.ev("document.getElementById('lab-centrar').click()")
     await c.ev(f"(()=>{{const s=document.createElement('style'); s.textContent={OCULTA!r}; document.head.appendChild(s)}})()")
-    # Se acuesta, se aquieta y se irriga: se avanza hasta los SEG segundos de agua (la cabeza ya no se
-    # mueve; la hora solo cambia el nistagmo, que no sale en la figura). Pasos gruesos: cada cuadro con
-    # swiftshader es lento.
-    for _ in range(2000):
-        estado = await c.ev("window.__paso(4,0.25), document.getElementById('lab-cal-estado').textContent")
-        m = re.search(r': (\d+) s de', estado)
-        if m and int(m.group(1)) >= SEG:
-            break
-    print(estado, flush=True)
-    await c.ev("window.__paso(2,0.01)")
+    print(await c.ev("document.getElementById('lab-tiempo-texto').textContent.slice(0, 40)"), flush=True)
+    await c.ev("window.__paso(12,0.25)")
+    ojo = json.loads(await c.ev("JSON.stringify(document.getElementById('lab-ojos-vista').getBoundingClientRect())"))
     await asyncio.sleep(1)
     crudo = carpeta / 'h16_crudo.png'
     await c.shot(crudo)
-    return crudo
+    return crudo, (ojo['x'], ojo['y'], ojo['x'] + ojo['width'], ojo['y'] + ojo['height'])
 
 
 def blanquea(im, umbral=14):
     """El fondo gris del lienzo 3D, a blanco: se rellena desde las cuatro esquinas."""
-    # El color del fondo del lienzo: el más común, que no sea el blanco de la página.
-    fondo = max((c for c in im.getcolors(im.width * im.height) if c[1] != (255, 255, 255)), key=lambda c: c[0])[1]
     for p in [(0, 0), (im.width - 1, 0), (0, im.height - 1), (im.width - 1, im.height - 1)]:
         ImageDraw.floodfill(im, p, (255, 255, 255), thresh=umbral)
-    # Y el fondo que queda encerrado (dentro de los anillos de los canales).
-    gris = Image.new('RGB', im.size, fondo)
-    mascara = ImageChops.difference(im, gris).convert('L').point(lambda v: 255 if v <= 6 else 0)
-    im.paste((255, 255, 255), mask=mascara)
     return im
 
 
-def recorta(crudo, margen=40):
-    im = blanquea(Image.open(crudo).convert('RGB'))
-    fondo = Image.new('RGB', im.size, (255, 255, 255))
-    caja = ImageChops.difference(im, fondo).convert('L').point(lambda v: 255 if v > 12 else 0).getbbox()
-    x0, y0, x1, y1 = caja
-    return im.crop((max(0, x0 - margen), max(0, y0 - margen), min(im.width, x1 + margen), min(im.height, y1 + margen)))
+def arma(crudo, caja_ojo):
+    im = Image.open(crudo).convert('RGB')
+    k = im.width / 1600
+    cara = blanquea(im.crop(tuple(round(v * k) for v in CARA)))
+    x0, y0, x1, y1 = caja_ojo
+    ojo = im.crop((round((x0 + 2) * k), round((y0 + 2) * k), round((x1 - 2) * k), round((y1 - 2) * k)))
+    ancho_ojo = round(cara.width * 0.95)
+    ojo = ojo.resize((ancho_ojo, round(ojo.height * ancho_ojo / ojo.width)), Image.LANCZOS)
+    sep = round(cara.width * 0.12)
+    out = Image.new('RGB', (cara.width + sep + ojo.width + 4, cara.height), (255, 255, 255))
+    out.paste(cara, (0, 0))
+    # El ojo de cerca, a la altura de los ojos de la cara.
+    oy = round(cara.height * 0.39 - ojo.height / 2)
+    ox = cara.width + sep
+    out.paste(ojo, (ox, oy))
+    ImageDraw.Draw(out).rectangle((ox - 1, oy - 1, ox + ojo.width, oy + ojo.height), outline=BORDE, width=2)
+    return out
 
 
 def main():
-    carpeta = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/h16')
+    carpeta = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/h15')
     carpeta.mkdir(parents=True, exist_ok=True)
-    im = recorta(asyncio.run(captura(carpeta)))
-    im.thumbnail((1400, 1400), Image.LANCZOS)
-    im.save(AQUI / 'h16-simulador-calorica.png', optimize=True)
-    print('h16-simulador-calorica.png', im.size)
+    crudo, caja = asyncio.run(captura(carpeta))
+    im = arma(crudo, caja)
+    im.thumbnail((1600, 1600), Image.LANCZOS)
+    im.save(AQUI / 'h16-simulador-frenzel.png', optimize=True)
+    print('h16-simulador-frenzel.png', im.size)
 
 
 if __name__ == '__main__':

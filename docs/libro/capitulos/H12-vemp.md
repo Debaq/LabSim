@@ -24,7 +24,7 @@ El VEMP responde tres preguntas:
 Conviene tener claros sus límites desde el principio:
 
 - El VEMP **no es una prueba de audición**. No necesita que el oído oiga: un oído sordo con el oído medio sano puede dar un VEMP normal (Colebatch y cols., 1994), y un oído que oye bien puede dar uno ausente.
-- **No mide los conductos semicirculares.** Para eso están la calórica y el vHIT (→ H16 y H17).
+- **No mide los conductos semicirculares.** Para eso están la calórica y el vHIT (→ H17 y H18).
 - Un VEMP alterado **no dice la causa**: describe qué parte de la vía falla, no por qué.
 - Un VEMP **normal no descarta** una enfermedad. En un hidrops, por ejemplo, el cVEMP puede salir normal (Rosengren y cols., 2019; → cap. 9).
 - Un VEMP **ausente** tampoco asegura que haya enfermedad: en adultos mayores, y sobre todo en el oVEMP, es frecuente que falte (ver "Cómo se informa").
@@ -470,7 +470,7 @@ Dos puntos para tener presentes:
 - **Sonido de más.** Repetir registros sin necesidad expone la cóclea.
 
 :::ojo Ojo clínico
-Antes de informar un VEMP, pregúntate si **calza con lo demás**: con el audiograma y el timpanograma del mismo oído, con las crisis de vértigo y con el cVEMP junto al oVEMP. Un VEMP no es una prueba de la audición ni de los conductos, y un resultado aislado se interpreta junto con las otras pruebas del equilibrio (→ H15 a H17).
+Antes de informar un VEMP, pregúntate si **calza con lo demás**: con el audiograma y el timpanograma del mismo oído, con las crisis de vértigo y con el cVEMP junto al oVEMP. Un VEMP no es una prueba de la audición ni de los conductos, y un resultado aislado se interpreta junto con las otras pruebas del equilibrio (→ H16 a H18).
 :::
 
 ## En LabSim

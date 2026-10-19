@@ -144,12 +144,12 @@ Empieza con una pregunta abierta y deja hablar. Las preguntas cerradas vienen de
 2. **Tiempo de evolución y forma de inicio.** Desde cuándo, y si empezó de golpe, fue avanzando o va y viene. ¿Un oído o los dos? Una pérdida que apareció de un día para otro no se estudia igual que una que avanza hace años (cap. 7).
 3. **Síntomas otológicos.**
     - **Acúfeno**: de qué lado, si es permanente u ocasional, y si lo tiene **ahora**. Un acúfeno unilateral persistente obliga a pensar más allá de la cóclea (cap. 11); un acúfeno presente durante el examen puede confundir al paciente cuando busca el umbral (H3).
-    - **Vértigo**: si gira todo o es inestabilidad, cuánto dura cada crisis, qué la gatilla y si viene con plenitud o cambios de audición (cap. 9, H15).
+    - **Vértigo**: si gira todo o es inestabilidad, cuánto dura cada crisis, qué la gatilla y si viene con plenitud o cambios de audición (cap. 9, H16).
     - **Otalgia, otorrea, plenitud aural**: dolor y secreción cambian lo que se puede hacer hoy.
     - **Intolerancia a los sonidos.** Pregunta si los sonidos corrientes le suenan demasiado fuertes (**hiperacusia**) o si le duelen o le molestan (**algiacusia**): la hiperacusia reúne reacciones de exceso de sonoridad, molestia, miedo y dolor (Tyler y cols., 2014). Cambia cómo se hace el examen: con ese paciente el nivel de los estímulos sube con cautela y las pruebas de umbral de molestia y los reflejos se hacen solo si importan (H5, H7).
     - **Autofonía**: oír la propia voz, la respiración o el latido resonando dentro de la cabeza. Un oído tapado por cerumen la da (cap. 1); también una trompa de Eustaquio que queda abierta (Ward, 2023) y la dehiscencia del conducto semicircular superior (cap. 26).
     - **Diplacusia**: oír un mismo sonido con distinto tono en cada oído, o doblado. Se describe en pérdidas cocleares, por ejemplo con una pérdida de graves en un oído (Ichimiya y cols., 2019), y en la pérdida súbita (Knight y cols., 2004). El paciente la cuenta como "las voces suenan metálicas" o "desafinadas".
-    - **Dificultad en ruido.** "Oigo pero no entiendo cuando hay ruido ambiente" es una queja frecuente que puede existir con un audiograma normal (Guest y cols., 2018). Si está, se pide logoaudiometría o una prueba de habla en ruido, porque el audiograma solo no la explica (H5, H14).
+    - **Dificultad en ruido.** "Oigo pero no entiendo cuando hay ruido ambiente" es una queja frecuente que puede existir con un audiograma normal (Guest y cols., 2018). Si está, se pide logoaudiometría o una prueba de habla en ruido, porque el audiograma solo no la explica (H5, H15).
 4. **Antecedentes otológicos.** Otitis (cuántas, de qué tipo), perforaciones, **cirugías de oído**, tubos de ventilación, audífonos, exámenes anteriores. La cirugía y la perforación contraindican el lavado.
 5. **Antecedentes mórbidos.** Diabetes, hipertensión, enfermedades crónicas, traumatismos de cráneo, meningitis, radioterapia de cabeza y cuello, cirugías.
 6. **Fármacos.** Los que usa hoy y para qué, y los que usó antes. Pregunta en especial por **ototóxicos**: aminoglucósidos, derivados del platino (cisplatino), diuréticos de asa y salicilatos en dosis altas. Un paciente que va a recibir un ototóxico necesita una **audiometría de base** antes de empezar el tratamiento (Durrant y cols., 2009; cap. 8). Pregunta también por **anticoagulantes**, porque cambian el manejo de un tapón (Schwartz y cols., 2017).
@@ -202,7 +202,7 @@ Tabla: Datos de la anamnesis que orientan
 | Ruido laboral por años, acúfeno y pérdida en agudos | Pérdida por ruido | Audiograma con muesca en 3 a 6 kHz (H3, cap. 6) |
 | Crisis de vértigo de horas con plenitud y acúfeno grave | Hidrops endolinfático | Audiograma en graves, EOA, VEMP, entre otros (cap. 9) |
 | Acúfeno de un solo oído, pulsátil, o con síntomas neurológicos o pérdida asimétrica | Causa que obliga a estudiar más allá de la cóclea | Derivación; PEAT y reflejos (Tunkel y cols., 2014; cap. 11) |
-| "Oigo pero no entiendo" con audiograma normal | Alteración de la discriminación en ruido o del procesamiento central | Logoaudiometría y pruebas de habla en ruido (H5, H14) |
+| "Oigo pero no entiendo" con audiograma normal | Alteración de la discriminación en ruido o del procesamiento central | Logoaudiometría y pruebas de habla en ruido (H5, H15) |
 | Autofonía y oír los latidos | Trompa abierta o tercera ventana | Impedanciometría, VEMP (cap. 26) |
 
 Una hipótesis no es un diagnóstico, y el diagnóstico es médico. Lo tuyo es que ningún dato de la entrevista quede sin una pregunta para el examen.

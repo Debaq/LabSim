@@ -11,7 +11,7 @@ El libro es la nueva versión del protocolo técnico de ORL, con sentido
 pedagógico. Tiene dos tipos de capítulo, todos autónomos (se pueden leer
 sueltos) y con sus referencias al final (no hay bibliografía general):
 
-**Caja de herramientas (H1-H14): cómo se hace cada examen.** Una técnica por
+**Caja de herramientas (H1-H28): cómo se hace cada examen.** Una técnica por
 capítulo, con la misma secuencia:
 
 1. **Para qué sirve** — qué pregunta clínica responde
@@ -122,49 +122,58 @@ cVEMP y oVEMP: montaje, estímulo, corrección por EMG, umbral, asimetría (`tec
 ### H13. Potenciales de estado estable *(propuesto, del protocolo)*
 ASSR: estimación de umbral por frecuencia.
 
-### H14. Procesamiento auditivo central
+### H14. Potenciales de latencia media y tardía
+Respuestas auditivas de latencia media (MLR: Na, Pa, Nb, Pb) y corticales: exógenas (P1, N1, P2, N2) y endógenas (P300, MMN); generadores, registro, maduración, aplicaciones clínicas y en el procesamiento auditivo central. Sin protocolo ni LabSim: literatura verificada y esquemas propios.
+
+### H15. Procesamiento auditivo central
 Cuándo sospecharlo y a quién evaluar; batería: patrones de frecuencia y duración (FPT, DPS), resolución temporal (GIN, gap detection), escucha dicótica (dígitos dicóticos), interacción binaural (MLD), habla en ruido (HINT, SinB, Matrix); umbrales diferenciales; interpretación por edad e informe. Simulador de apoyo: AudioPAC (software propio, MIT, doi:10.5281/zenodo.19663724), también para las capturas.
 
 **Equilibrio**
 
-### H15. Examen vestibular con lentes de Frenzel y videonistagmografía *(del protocolo)*
+### H16. Examen vestibular con lentes de Frenzel y videonistagmografía *(del protocolo)*
 Anamnesis del mareo; nistagmo espontáneo y evocado por la mirada con lentes de +20 dioptrías; videonistagmografía: pruebas oculomotoras (sacadas, seguimiento, optocinético) y posicionales. Simuladores: trainHIT y labyrinthus3d.
 
-### H16. Prueba calórica *(del protocolo)*
+### H17. Prueba calórica *(del protocolo)*
 Calórica mínima y bilateral con videonistagmografía: irrigación, velocidad de la fase lenta, paresia del canal y preponderancia direccional (fórmula de Jongkees), fijación visual.
 
-### H17. Video head impulse test (vHIT) *(del protocolo)*
+### H18. Video head impulse test (vHIT) *(del protocolo)*
 Impulsos cefálicos por canal: ganancia del reflejo vestíbulo-ocular, sacadas encubiertas y manifiestas; comparación con la calórica.
 
-### H18. Maniobras de diagnóstico y reposición *(del protocolo)*
+### H19. Maniobras de diagnóstico y reposición *(del protocolo)*
 VPPB: Dix-Hallpike y prueba de giro supino, lectura del nistagmo por canal; reposición (Epley, Semont, Lempert/barbacoa) y liberación de partículas.
 
-### H19. Rehabilitación vestibular *(del protocolo)*
+### H20. Rehabilitación vestibular *(del protocolo)*
 Evaluación funcional (DHI, pruebas de equilibrio), ejercicios de adaptación, sustitución y habituación, progresión, control y alta.
 
 **Rehabilitación aural**
 
-### H20. Prueba de audífonos *(del protocolo)*
+### H21. Prueba de audífonos *(del protocolo)*
 Candidatura, selección y prueba del audífono: ganancia funcional en campo libre, discriminación con y sin audífono, molde y ventilación, entrega y control.
 
-### H21. Revisión y medición electroacústica del audífono *(del protocolo)*
+### H22. Revisión y medición electroacústica del audífono *(del protocolo)*
 Revisión visoauditiva (molde, tubo, pila, micrófono, retroalimentación) y medición en acoplador: ganancia, salida máxima, distorsión y ruido interno.
 
 **Salud ocupacional**
 
-### H22. Audiometría ocupacional y vigilancia del ruido
+### H23. Audiometría ocupacional y vigilancia del ruido
 Audiometría de screening y de operativo, evaluación de trabajadores expuestos a ruido (PREXOR, guía del ISP), criterios de daño y de derivación, protección auditiva; la parte médico-legal (SUSESO).
 
 **Nariz**
 
-### H23. Anamnesis rinológica y rinoscopía *(del protocolo)*
+### H24. Anamnesis rinológica y rinoscopía *(del protocolo)*
 Motivo de consulta nasal, síntomas y antecedentes; rinoscopía anterior.
 
-### H24. Rinomanometría anterior *(del protocolo)*
+### H25. Rinomanometría anterior *(del protocolo)*
 Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasoconstrictor e informe.
 
-### H25. Rinometría acústica *(del protocolo)*
+### H26. Rinometría acústica *(del protocolo)*
 Áreas de sección transversal de la fosa nasal por reflexión acústica: técnica, curva, áreas mínimas y volumen, prueba con vasoconstrictor.
+
+### H27. Prick test
+Hipersensibilidad tipo I y su base inmunológica; técnica (preparación, controles positivo y negativo, aeroalérgenos, lectura de la pápula, criterio de positividad), indicaciones, contraindicaciones (fármacos que se suspenden) y reacciones adversas. Alcance: clase de prick test; contenido con literatura verificada.
+
+### H28. Espirometría
+Mecánica ventilatoria, volúmenes y capacidades; FVC, FEV1, relación FEV1/FVC, FEF25-75; maniobra, curvas flujo-volumen y volumen-tiempo, aceptabilidad y repetibilidad (ATS/ERS); patrones y prueba broncodilatadora. Alcance: clase de espirometría; contenido con literatura verificada.
 
 ## Parte I — El oído que transmite
 
@@ -365,7 +374,7 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
 ## Parte VIII — El equilibrio
 
 ### 21. Vértigo agudo
-- **Técnica en foco** (→ H15, H17): nistagmo espontáneo con Frenzel, HINTS, vHIT al lado de la cama
+- **Técnica en foco** (→ H16, H18): nistagmo espontáneo con Frenzel, HINTS, vHIT al lado de la cama
 - **Fisiología:** reflejo vestíbulo-ocular, asimetría de tono y compensación
 - **Casos:**
   - Neuritis vestibular
@@ -373,27 +382,27 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
   - Vértigo agudo central que imita una neuritis
 
 ### 22. Gira al acostarse
-- **Técnica en foco** (→ H18): Dix-Hallpike, giro supino, lectura del nistagmo por canal y maniobras de reposición
+- **Técnica en foco** (→ H19): Dix-Hallpike, giro supino, lectura del nistagmo por canal y maniobras de reposición
 - **Fisiología:** canalitiasis y cupulolitiasis
 - **Casos:**
   - VPPB del canal posterior
   - VPPB del canal horizontal (geotrópico y ageotrópico)
 
 ### 23. Crisis que vuelven
-- **Técnica en foco** (→ H15, H16, H12): VNG entre crisis, calórica, VEMP y audiometría seriada
+- **Técnica en foco** (→ H16, H17, H12): VNG entre crisis, calórica, VEMP y audiometría seriada
 - **Fisiología:** hidrops y migraña vestibular
 - **Casos:**
   - Ménière en etapa avanzada
   - Migraña vestibular
 
 ### 24. Cuando fallan los dos lados
-- **Técnica en foco** (→ H16, H17): calórica y vHIT bilaterales
+- **Técnica en foco** (→ H17, H18): calórica y vHIT bilaterales
 - **Fisiología:** oscilopsia y pérdida del reflejo vestíbulo-ocular
 - **Casos:**
   - Hipofunción vestibular bilateral por ototóxicos
 
 ### 25. Lo que viene de arriba
-- **Técnica en foco** (→ H15): oculomotor (sacadas, seguimiento, optocinético) y nistagmo central
+- **Técnica en foco** (→ H16): oculomotor (sacadas, seguimiento, optocinético) y nistagmo central
 - **Fisiología:** cerebelo y vías vestibulares centrales
 - **Casos:**
   - Vértigo de origen central (cerebelo, tronco)
@@ -405,7 +414,7 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
   - Dehiscencia del canal semicircular superior
 
 ### 27. Mareo que no se va
-- **Técnica en foco** (→ H19): evaluación funcional y cuestionarios
+- **Técnica en foco** (→ H20): evaluación funcional y cuestionarios
 - **Fisiología:** compensación central y dependencia visual
 - **Casos:**
   - Mareo postural perceptual persistente (PPPD)
@@ -413,21 +422,21 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
 ## Parte IX — Rehabilitación auditiva
 
 ### 28. El primer audífono
-- **Técnica en foco** (→ H20, H21, H5): candidatura, prueba, ganancia funcional y control
+- **Técnica en foco** (→ H21, H22, H5): candidatura, prueba, ganancia funcional y control
 - **Fisiología:** campo dinámico y reclutamiento en el ajuste
 - **Casos:**
   - Presbiacusia: el primer audífono
   - Hipoacusia unilateral: CROS o audífono
 
 ### 29. Cuando el audífono no alcanza
-- **Técnica en foco** (→ H20, H5): discriminación con audífono y criterios de derivación a implante
+- **Técnica en foco** (→ H21, H5): discriminación con audífono y criterios de derivación a implante
 - **Fisiología:** estimulación eléctrica del nervio
 - **Casos:**
   - Candidato a implante coclear
   - Prótesis de conducción ósea en una conductiva que no se opera
 
 ### 30. Oír y no entender
-- **Técnica en foco** (→ H14): batería de procesamiento central y entrenamiento auditivo
+- **Técnica en foco** (→ H15): batería de procesamiento central y entrenamiento auditivo
 - **Fisiología:** plasticidad de la vía auditiva central
 - **Casos:**
   - Niño con trastorno del procesamiento auditivo
@@ -436,13 +445,13 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
 ## Parte X — Rehabilitación vestibular
 
 ### 31. Compensar una neuritis
-- **Técnica en foco** (→ H19): ejercicios de adaptación y progresión
+- **Técnica en foco** (→ H20): ejercicios de adaptación y progresión
 - **Fisiología:** adaptación del reflejo vestíbulo-ocular
 - **Casos:**
   - Hipofunción unilateral después de una neuritis
 
 ### 32. Volver a caminar sin miedo
-- **Técnica en foco** (→ H19): equilibrio, marcha y prevención de caídas
+- **Técnica en foco** (→ H20): equilibrio, marcha y prevención de caídas
 - **Fisiología:** sustitución visual y somatosensorial
 - **Casos:**
   - Adulto mayor con caídas y mareo multifactorial
@@ -450,14 +459,14 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
 ## Parte XI — Salud ocupacional
 
 ### 33. El trabajador expuesto a ruido
-- **Técnica en foco** (→ H22): audiometría de vigilancia, comparación con la basal y derivación
+- **Técnica en foco** (→ H23): audiometría de vigilancia, comparación con la basal y derivación
 - **Fisiología:** daño por ruido y desplazamiento temporal del umbral
 - **Casos:**
   - Trabajador en vigilancia con cambio significativo del umbral
   - Trabajador nuevo con audiometría de ingreso alterada
 
 ### 34. El caso médico-legal
-- **Técnica en foco** (→ H22, H6): evaluación de la pérdida no orgánica y del grado de daño
+- **Técnica en foco** (→ H23, H6): evaluación de la pérdida no orgánica y del grado de daño
 - **Fisiología:** lo que el ruido no explica
 - **Casos:**
   - Exageración de la pérdida en una evaluación laboral
@@ -465,14 +474,14 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
 ## Parte XII — La nariz
 
 ### 35. Nariz tapada
-- **Técnica en foco** (→ H23, H24, H25): rinoscopía, rinomanometría y rinometría acústica
+- **Técnica en foco** (→ H24, H25, H26): rinoscopía, rinomanometría y rinometría acústica
 - **Fisiología:** válvula nasal y resistencia al flujo
 - **Casos:**
   - Desviación septal
   - Colapso de la válvula nasal
 
 ### 36. Rinitis y vasoconstrictor
-- **Técnica en foco** (→ H24, H25): prueba con vasoconstrictor
+- **Técnica en foco** (→ H25, H26): prueba con vasoconstrictor
 - **Fisiología:** tejido eréctil de los cornetes y ciclo nasal
 - **Casos:**
   - Rinitis alérgica
@@ -486,11 +495,11 @@ al capítulo donde está su técnica.
 ## Secciones de las próximas ediciones
 
 Un solo libro que crece. Esta edición escribe la sección de **audición**
-(Bases, Caja de herramientas H1-H14 y Partes I-VII). Las demás ya tienen su
+(Bases, Caja de herramientas H1-H15 y Partes I-VII). Las demás ya tienen su
 lugar reservado en esqueleto, para que el libro crezca sin reordenarse:
-equilibrio (H15-H19, Parte VIII), rehabilitación auditiva (H20-H21,
-Parte IX), rehabilitación vestibular (Parte X), salud ocupacional (H22,
-Parte XI) y nariz (H23-H25, Parte XII). Plan y fuentes en
+equilibrio (H16-H20, Parte VIII), rehabilitación auditiva (H21-H22,
+Parte IX), rehabilitación vestibular (Parte X), salud ocupacional (H23,
+Parte XI) y nariz (H24-H26, Parte XII). Plan y fuentes en
 `investigacion/inventario_vestibular_nasal.md`. Simuladores: trainHIT y
 labyrinthus3d para lo vestibular (LabSim no se expande ahí), AudioPAC para
 el procesamiento central; para la nariz todavía no hay.

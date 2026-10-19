@@ -16,9 +16,9 @@ Una persona de ochenta años llega acompañada por su hija. Se ha caído dos vec
 Este capítulo no agrega ninguna prueba nueva. Usa las de siempre, con otra pregunta: no "¿qué le pasa al laberinto?", sino "¿qué le falta a este equilibrio para no caerse, y de eso qué se puede mejorar?". Seis cosas conviene tener a la vista.
 
 - **El relato de la caída.** Cuántas veces, dónde, a qué hora, qué estaba haciendo, si perdió el conocimiento, si pudo levantarse y cuánto tardó, si le queda miedo. Y una pregunta que casi nadie hace: **¿en qué posición de la cabeza o del cuerpo le pasa?** Un mayor rara vez dice "vértigo": dice "se me va el piso", "se me nubla", "no me responde el cuerpo".
-- **La batería de H19** (→ H19): marcha, TUG, apoyo en un pie, alcance funcional, DGI de 4 ítems, agudeza visual dinámica y el mCTSIB. Sirve aquí como **línea de base del riesgo**, no solo de la hipofunción. Ninguno de sus números basta solo.
-- **El Dix-Hallpike** (→ H18, cap. 22) en todo mayor que cae y se marea, aunque no cuente un giro. El vértigo posicional es frecuente y se trata con una maniobra.
-- **El mCTSIB** (→ H19): quita los sentidos de a uno, y por eso muestra **en cuál se apoya** el paciente.
+- **La batería de H20** (→ H20): marcha, TUG, apoyo en un pie, alcance funcional, DGI de 4 ítems, agudeza visual dinámica y el mCTSIB. Sirve aquí como **línea de base del riesgo**, no solo de la hipofunción. Ninguno de sus números basta solo.
+- **El Dix-Hallpike** (→ H19, cap. 22) en todo mayor que cae y se marea, aunque no cuente un giro. El vértigo posicional es frecuente y se trata con una maniobra.
+- **El mCTSIB** (→ H20): quita los sentidos de a uno, y por eso muestra **en cuál se apoya** el paciente.
 - **El miedo a caer**, medido con una escala: la ABC (→ cap. 27) o la FES-I, que son cuestionarios cortos.
 - **La presión arterial acostado y de pie** (→ Patología). La interpreta el médico; que se mida y se informe es parte de no perder la causa más frecuente de caídas de origen cardiovascular.
 
@@ -30,8 +30,8 @@ Este capítulo no agrega ninguna prueba nueva. Usa las de siempre, con otra preg
 :::
 
 :::comentario Lo que dicen las normas
-- **Velocidad de marcha y TUG.** Las Guías Mundiales de Caídas (Montero-Odasso y cols., 2022) recomiendan, para estratificar el riesgo, la **velocidad de marcha con un corte de menos de 0,8 m/s**, y aceptan el TUG como alternativa con un corte de **más de 15 s**, advirtiendo que su evidencia para separar riesgos es más dispar. La batería de H19 trae el TUG y menciona un corte de 13,5 s con una fuente que aún no se coteja: los cortes del TUG varían con la población y con el estudio. La velocidad se puede sacar sin una prueba nueva: la primera marcha del DGI de 4 ítems se hace entre dos marcas a 6 m, así que basta **cronometrarla**: 0,8 m/s son 7,5 s. <!-- Pasada de fundamentos 2026-10-18: la guía (tabla de evaluación) mide la marcha en 4 m: "4-m walking length (<0.8 m/s)". Usar los 6 m del DGI es práctica del libro; va a "Para el autor". -->
-- **El examen vestibular previo.** H19 pide un examen vestibular de menos de 6 meses antes de rehabilitar. Eso vale para un **programa de rehabilitación vestibular**. Un programa general de fuerza y equilibrio para prevenir caídas es otra cosa: la guía mundial lo recomienda a todos los mayores, sin tener en cuenta su riesgo ni su edad, y no pide examen vestibular para ofrecerlo (Montero-Odasso y cols., 2022).
+- **Velocidad de marcha y TUG.** Las Guías Mundiales de Caídas (Montero-Odasso y cols., 2022) recomiendan, para estratificar el riesgo, la **velocidad de marcha con un corte de menos de 0,8 m/s**, y aceptan el TUG como alternativa con un corte de **más de 15 s**, advirtiendo que su evidencia para separar riesgos es más dispar. La batería de H20 trae el TUG y menciona un corte de 13,5 s con una fuente que aún no se coteja: los cortes del TUG varían con la población y con el estudio. La velocidad se puede sacar sin una prueba nueva: la primera marcha del DGI de 4 ítems se hace entre dos marcas a 6 m, así que basta **cronometrarla**: 0,8 m/s son 7,5 s. <!-- Pasada de fundamentos 2026-10-18: la guía (tabla de evaluación) mide la marcha en 4 m: "4-m walking length (<0.8 m/s)". Usar los 6 m del DGI es práctica del libro; va a "Para el autor". -->
+- **El examen vestibular previo.** H20 pide un examen vestibular de menos de 6 meses antes de rehabilitar. Eso vale para un **programa de rehabilitación vestibular**. Un programa general de fuerza y equilibrio para prevenir caídas es otra cosa: la guía mundial lo recomienda a todos los mayores, sin tener en cuenta su riesgo ni su edad, y no pide examen vestibular para ofrecerlo (Montero-Odasso y cols., 2022).
 :::
 
 ## En LabSim
@@ -44,7 +44,7 @@ LabSim da el **lado auditivo** de estos pacientes: el audiograma y la logoaudiom
 
 Para estar de pie, el cerebro recibe información de tres fuentes: la **vista**, que dice dónde está el cuerpo respecto del entorno; el **sentido somatosensorial**, de los pies, las articulaciones y los músculos, que dice cómo está apoyado y cómo está el cuerpo respecto de la superficie; y el **vestíbulo**, que dice cómo se mueve la cabeza y hacia dónde está la gravedad (→ Bases). Las integran el tronco y el cerebelo, que mandan la respuesta a los músculos antiguravitatorios.
 
-Esas fuentes no pesan igual en todo momento. El cerebro **reparte la confianza** según qué tan confiable es cada una en esa situación: en terreno firme y con luz se apoya sobre todo en los pies; si la superficie se vuelve blanda o inestable, o se cierran los ojos, aumenta el peso de las otras (Peterka, 2002). Es lo que la prueba clínica de interacción sensorial aprovecha al quitar los sentidos de a uno (→ H19). Y es también lo que permite **sustituir**: si un sentido falla, los otros suben su peso y el equilibrio se mantiene, con menos margen (Horak, 2006).
+Esas fuentes no pesan igual en todo momento. El cerebro **reparte la confianza** según qué tan confiable es cada una en esa situación: en terreno firme y con luz se apoya sobre todo en los pies; si la superficie se vuelve blanda o inestable, o se cierran los ojos, aumenta el peso de las otras (Peterka, 2002). Es lo que la prueba clínica de interacción sensorial aprovecha al quitar los sentidos de a uno (→ H20). Y es también lo que permite **sustituir**: si un sentido falla, los otros suben su peso y el equilibrio se mantiene, con menos margen (Horak, 2006).
 
 :::imagen ilustraciones/cap32-sustitucion.svg ancho=100% La sustitución sensorial: cuando un sentido falla los otros suben su peso, y con dos caídos queda uno solo. Si además se apaga la luz, no queda ninguno: es el baño de noche.
 :::
@@ -61,7 +61,7 @@ Ningún sentido se pierde solo. El margen que dejaba la redundancia se achica po
 
 ### Cuando falla uno, y cuando fallan dos
 
-Con un sentido caído, el equilibrio se sostiene a costa de los otros dos. Con dos caídos, el que queda **tiene que alcanzar solo**, y para eso se necesitan buenas condiciones: luz, piso firme, atención. De ahí el relato típico de estos pacientes: se las arreglan de día y en la casa, y se caen **a oscuras, en el baño, en el pasto, bajando una escalera con las manos ocupadas**. Es el mismo principio de la prueba de ojos cerrados sobre espuma (→ H19), vivido en la vida diaria. El caso 32.3 lo muestra con las trazas.
+Con un sentido caído, el equilibrio se sostiene a costa de los otros dos. Con dos caídos, el que queda **tiene que alcanzar solo**, y para eso se necesitan buenas condiciones: luz, piso firme, atención. De ahí el relato típico de estos pacientes: se las arreglan de día y en la casa, y se caen **a oscuras, en el baño, en el pasto, bajando una escalera con las manos ocupadas**. Es el mismo principio de la prueba de ojos cerrados sobre espuma (→ H20), vivido en la vida diaria. El caso 32.3 lo muestra con las trazas.
 
 ### Oír y caerse
 
@@ -96,9 +96,9 @@ Tabla: Los dominios de la evaluación multifactorial y quién los resuelve
 
 | Dominio | Qué se busca | Quién actúa |
 |---|---|---|
-| **Vértigo posicional (VPPB)** | Mareo breve al acostarse, girar en la cama, mirar arriba o agacharse; Dix-Hallpike | Quien evalúa el equilibrio lo diagnostica y trata (→ H18, cap. 22) |
-| **Hipofunción vestibular** | Oscilopsia al caminar, peor a oscuras; vHIT y calórica | Quien evalúa el equilibrio; rehabilitación (→ cap. 24, H19) |
-| **Equilibrio y marcha** | Velocidad, TUG, DGI, apoyo en un pie, mCTSIB | Quien evalúa el equilibrio (→ H19) |
+| **Vértigo posicional (VPPB)** | Mareo breve al acostarse, girar en la cama, mirar arriba o agacharse; Dix-Hallpike | Quien evalúa el equilibrio lo diagnostica y trata (→ H19, cap. 22) |
+| **Hipofunción vestibular** | Oscilopsia al caminar, peor a oscuras; vHIT y calórica | Quien evalúa el equilibrio; rehabilitación (→ cap. 24, H20) |
+| **Equilibrio y marcha** | Velocidad, TUG, DGI, apoyo en un pie, mCTSIB | Quien evalúa el equilibrio (→ H20) |
 | **Miedo a caer** | ABC o FES-I; conductas de evitación | Quien evalúa; el manejo lo comparte el equipo |
 | **Presión de pie** | Caída de la presión al levantarse | Se mide; el médico decide qué hacer |
 | **Fármacos** | Sedantes, hipotensores, diuréticos, varios a la vez | Revisión por quien receta |
@@ -133,7 +133,7 @@ Aquí la evidencia es más firme que en cualquier otro frente. La revisión Coch
 
 La guía mundial lo traduce a una receta: programas con ejercicios que desafíen el equilibrio y funcionales (como levantarse de la silla o dar pasos), **tres veces por semana o más**, individualizados, que **progresen en intensidad por al menos 12 semanas** y se **continúen** después, porque el beneficio se pierde al dejarlos. Se recomiendan a todos los mayores, sin importar el riesgo ni la edad (Montero-Odasso y cols., 2022). El más estudiado es el **programa Otago**, de fuerza y equilibrio hecho en casa y adaptado a cada persona: en mujeres de 80 años o más redujo las caídas y las caídas con lesión (Campbell y cols., 1997), y un metaanálisis de siete ensayos con 1503 personas (edad media de 81,6 años) encontró una razón de tasas de 0,68 (Thomas y cols., 2010). El problema es **sostenerlo**: al año, solo el 36,7 % de quienes seguían en los estudios hacía el programa tres o más veces por semana (Thomas y cols., 2010).
 
-No es lo mismo que la **rehabilitación vestibular** de H19: esa se diseña para una hipofunción, con ejercicios de estabilización de la mirada y de sustitución (Hall y cols., 2022). Se parecen en lo que importa: aprender a equilibrarse **desafiándose** de a poco, en condiciones cada vez más difíciles.
+No es lo mismo que la **rehabilitación vestibular** de H20: esa se diseña para una hipofunción, con ejercicios de estabilización de la mirada y de sustitución (Hall y cols., 2022). Se parecen en lo que importa: aprender a equilibrarse **desafiándose** de a poco, en condiciones cada vez más difíciles.
 
 ### El miedo a caer
 
@@ -147,7 +147,7 @@ Frente a un mayor que cae o se marea, el razonamiento sigue cinco preguntas, en 
 
 1. **¿Qué tipo de caída fue?** Un tropiezo, un mareo, o una pérdida del conocimiento. Si hay sospecha de síncope, se estudia aparte (Montero-Odasso y cols., 2022).
 2. **¿Qué tan alto es el riesgo?** Se estratifica (figura siguiente). Decide cuánto estudiar.
-3. **¿En qué sentidos se apoya?** La batería de H19 y el mCTSIB lo dicen.
+3. **¿En qué sentidos se apoya?** La batería de H20 y el mCTSIB lo dicen.
 4. **¿Qué se puede mejorar ya?** Un VPPB con una maniobra; una presión o un fármaco con el médico; una catarata con la cirugía; la audición con un audífono.
 5. **¿Qué lo mantiene?** El miedo, la debilidad, la casa.
 
@@ -206,12 +206,12 @@ Piensa en el lado del vértigo, en la presión, en la marcha y en el miedo. ¿Qu
 - @OD max | Discriminación del **92 %**, acorde con la pérdida y casi igual en los dos oídos.
 :::
 
-:::ayuda-ancho Lo que entrega Eva del equilibrio y de las posturas (→ H18, H19)
+:::ayuda-ancho Lo que entrega Eva del equilibrio y de las posturas (→ H19, H20)
 | Prueba | Resultado |
 |---|---|
 | Presión arterial | acostada **138/78**; de pie al 1.er minuto **134/80** y a los 3 minutos **132/78**: sin caída |
 | Marcha | 6 m en 7 s: **0,86 m/s**. TUG **12 s** |
-| Batería de H19 | apoyo en un pie **6 s**; DGI de 4 ítems **10/12**, con vacilación al girar la cabeza; alcance funcional **21 cm**; DVA: pierde **1 línea** |
+| Batería de H20 | apoyo en un pie **6 s**; DGI de 4 ítems **10/12**, con vacilación al girar la cabeza; alcance funcional **21 cm**; DVA: pierde **1 línea** |
 | mCTSIB | sostiene las cuatro condiciones |
 | Dix-Hallpike derecho | sin nistagmo ni vértigo |
 | Dix-Hallpike izquierdo | tras unos **4 s**, vértigo y nistagmo hacia **arriba** con el polo superior del ojo girando hacia el oído **izquierdo**; crece y se apaga solo en unos **20 s**; al sentarla, nistagmo débil en sentido contrario |
@@ -222,7 +222,7 @@ Piensa en el lado del vértigo, en la presión, en la marcha y en el miedo. ¿Qu
 :::docente Guía del caso
 - **Datos clave:** dos caídas en cuatro meses, ambas con un movimiento de cabeza (levantarse, estirar el cuello); mareos breves al agacharse y al darse vuelta en la cama; sin síntomas sentada; sin síncope; **una fractura de muñeca**; no dice "vértigo".
 - **Hipótesis esperables:** VPPB; hipotensión ortostática (la presión sale normal); hipofunción vestibular (no hay oscilopsia ni empeora a oscuras); causa cardiaca (sin palpitaciones ni síncope); fragilidad y debilidad de las piernas; la edad, que no cierra nada por sí sola.
-- **Qué pedir:** Dix-Hallpike a los dos lados y giro supino; presión acostada y de pie; batería de H19; ABC; audiometría y logoaudiometría para la audición (→ H3, H5, H18, H19).
+- **Qué pedir:** Dix-Hallpike a los dos lados y giro supino; presión acostada y de pie; batería de H20; ABC; audiometría y logoaudiometría para la audición (→ H3, H5, H19, H20).
 - **Lo que enseña:** que el diagnóstico aparece con la **posición**, no con la palabra "vértigo"; y que tratar la causa **no termina** el caso: tiene una fractura reciente y un riesgo que no se agotó.
 - **Errores esperables:** no hacer el Dix-Hallpike porque "no gira"; hacerlo solo del lado derecho; atribuirlo a la presbiacusia; dar el caso por cerrado después de la maniobra.
 - **En LabSim:** cuadro *Presbiacusia* leve en los dos oídos; el simulador no modela el vértigo posicional. El nombre de la paciente lo sortea el editor.
@@ -252,12 +252,12 @@ Agrupa lo que podría explicar sus caídas por sistemas: cardiovascular, sensori
 - @OD max | Discriminación máxima del **64 %** en el OD y del **68 %** en el OI, a 70 dB: baja, pero parecida entre los dos oídos y acorde con una pérdida de agudos tan grande.
 :::
 
-:::ayuda-ancho Lo que entrega Hugo de la evaluación (→ H15, H18, H19)
+:::ayuda-ancho Lo que entrega Hugo de la evaluación (→ H16, H19, H20)
 | Prueba | Resultado |
 |---|---|
 | Presión arterial | acostado 5 min **142/84**; de pie al minuto **118/70**, con "se me nubla"; a los 3 minutos **112/68** |
 | Marcha | 6 m en 11 s: **0,55 m/s**, con bastón. TUG **21 s**, con ayuda de los brazos para levantarse |
-| Batería de H19 | apoyo en un pie **menos de 2 s**; DGI de 4 ítems **5/12**; alcance funcional **12 cm**; DVA: pierde **2 líneas** |
+| Batería de H20 | apoyo en un pie **menos de 2 s**; DGI de 4 ítems **5/12**; alcance funcional **12 cm**; DVA: pierde **2 líneas** |
 | mCTSIB | sostiene con ojos abiertos sobre firme; con ojos cerrados oscila mucho; **cae** con ojos cerrados sobre espuma |
 | Vista | agudeza con lentes **0,3** (OD) y **0,4** (OI), con cataratas |
 | Pies | sensibilidad **disminuida** al monofilamento y a la vibración en ambos pies |
@@ -275,7 +275,7 @@ Agrupa lo que podría explicar sus caídas por sistemas: cardiovascular, sensori
 :::docente Guía del caso
 - **Datos clave:** tres caídas en un año, una con **dos horas en el suelo**; se nubla la vista y se le van las piernas **al ponerse de pie**; siete remedios (dos hipotensores, un diurético de asa, un alfabloqueante, un benzodiazepínico, la metformina y el paracetamol); cataratas; casi no sale; vive solo.
 - **Hipótesis esperables:** hipotensión ortostática por fármacos; hipofunción vestibular (la DVA pierde 2 líneas y el vHIT es normal: no calza); neuropatía; debilidad; sedación nocturna; fragilidad; miedo.
-- **Qué pedir:** presión acostado y de pie; la lista de remedios para el médico; batería de H19; mCTSIB; Dix-Hallpike; ABC o FES-I; audiometría y logoaudiometría (→ H3, H6, H19).
+- **Qué pedir:** presión acostado y de pie; la lista de remedios para el médico; batería de H20; mCTSIB; Dix-Hallpike; ABC o FES-I; audiometría y logoaudiometría (→ H3, H6, H20).
 - **Lo que enseña:** que el caso **no es vestibular** y que la mayor parte de lo que se arregla está fuera del oído; que un laberinto "normal para la edad" no cierra nada; y que la audición es parte de las condiciones de la evaluación.
 - **Errores esperables:** pedirle una calórica; empezar el entrenamiento sin que el médico vea la presión y los fármacos; cambiar los anteojos sin pensar en la cirugía de cataratas; dar la consigna sin comprobar que entendió.
 - **En LabSim:** cuadro *Presbiacusia* moderada en los dos oídos, con acúfeno. El nombre del paciente lo sortea el editor.
@@ -305,7 +305,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 - @OD max | Discriminación del **88 %**, buena y simétrica: nada retrococlear.
 :::
 
-:::ayuda-ancho Lo que entrega Isabel de la evaluación (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Isabel de la evaluación (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | Neurología (informe) | polineuropatía sensitiva distal simétrica; **sin sensibilidad** al monofilamento ni a la vibración en ambos pies; reflejos aquíleos ausentes; sin dismetría, sin disartria; resonancia sin atrofia cerebelosa |
@@ -315,7 +315,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 | Posicional | Dix-Hallpike y giro supino **negativos** |
 | Presión arterial | acostada **134/76**; de pie al minuto **130/76** y a los 3 minutos **128/74**: sin caída |
 | Marcha | 6 m en 9 s: **0,67 m/s**. TUG **16 s**. DGI de 4 ítems **5/12** |
-| Batería de H19 | apoyo en un pie **0 s**; alcance funcional **14 cm** |
+| Batería de H20 | apoyo en un pie **0 s**; alcance funcional **14 cm** |
 | mCTSIB | sostiene las tres primeras (más balanceo sobre espuma con ojos abiertos); **se cae** con ojos cerrados sobre espuma |
 | Cuestionarios | ABC **44 %**; DHI **58** (moderado) |
 :::
@@ -331,7 +331,7 @@ Elige las pruebas que separan una pérdida de los pies, una del laberinto y una 
 :::docente Guía del caso
 - **Datos clave:** tres caídas en ocho meses, **siempre a oscuras**, una con fractura de costilla; "voy sobre algodón"; oscilopsia en la micro, **sin vértigo**; hormigueo y ardor en los pies; diabetes de larga data; sin signos cerebelosos; audición acorde con su edad.
 - **Hipótesis esperables:** polineuropatía; hipofunción vestibular bilateral; CANVAS (no calza: no hay ataxia ni signos cerebelosos, y la resonancia no muestra la atrofia del vermis, → cap. 25); causa central; hipotensión ortostática (la presión sale normal, aunque la diabetes obliga a pensarla); fármacos (gabapentina de noche); miedo proporcionado.
-- **Qué pedir:** calórica bitérmica y vHIT de los dos lados; DVA; batería de H19 con mCTSIB; presión de pie; sensibilidad de los pies; ABC y DHI (→ H15 a H19, cap. 24).
+- **Qué pedir:** calórica bitérmica y vHIT de los dos lados; DVA; batería de H20 con mCTSIB; presión de pie; sensibilidad de los pies; ABC y DHI (→ H16 a H20, cap. 24).
 - **Lo que enseña:** que **dos sentidos caídos no se compensan** y que el tercero tiene que alcanzar solo, con luz; que el caso no se explica con una sola enfermedad; y que su miedo es **realista**.
 - **Errores esperables:** quedarse con la neuropatía y no pedir el examen vestibular; informar "calórica sin asimetría" (→ cap. 24); suponer que es un PPPD por el miedo; dejar el programa sin cambios en la casa.
 - **En LabSim:** cuadro *Presbiacusia* leve en los dos oídos, sin acúfeno. El nombre de la paciente lo sortea el editor.
@@ -349,7 +349,7 @@ Las dos caídas y los mareos sin caída tienen lo mismo en común: un **movimien
 
 #### Diagnóstico y qué sigue
 
-**VPPB del canal posterior izquierdo**, canalitiasis. Se hace la maniobra hacia el lado izquierdo (→ H18, cap. 22; Bhattacharyya y cols., 2017) y se vuelve a controlar a la semana con las pruebas de provocación. Lo que no se hace es dar el caso por cerrado: se cayó dos veces, una con **fractura**, y por eso entra en la caja de **riesgo alto** de la guía. Lo que sigue es lo que se hace con cualquier persona con ese riesgo: una evaluación multifactorial (la vista y los lentes, la casa, la fuerza y los fármacos con su médico, que ya trata una osteoporosis) y un **programa de fuerza y equilibrio** de varias sesiones por semana que progrese durante al menos 12 semanas y continúe después (Montero-Odasso y cols., 2022; → Patología). Se repite la ABC al terminar: su 52 % dice que el miedo también hay que tratarlo, y lo hace la misma recuperación de lo que teme.
+**VPPB del canal posterior izquierdo**, canalitiasis. Se hace la maniobra hacia el lado izquierdo (→ H19, cap. 22; Bhattacharyya y cols., 2017) y se vuelve a controlar a la semana con las pruebas de provocación. Lo que no se hace es dar el caso por cerrado: se cayó dos veces, una con **fractura**, y por eso entra en la caja de **riesgo alto** de la guía. Lo que sigue es lo que se hace con cualquier persona con ese riesgo: una evaluación multifactorial (la vista y los lentes, la casa, la fuerza y los fármacos con su médico, que ya trata una osteoporosis) y un **programa de fuerza y equilibrio** de varias sesiones por semana que progrese durante al menos 12 semanas y continúe después (Montero-Odasso y cols., 2022; → Patología). Se repite la ABC al terminar: su 52 % dice que el miedo también hay que tratarlo, y lo hace la misma recuperación de lo que teme.
 
 :::comentario Comentario
 Es el caso del "es la edad". Una maniobra de pocos minutos le quitó una causa de caídas, y hacerla dependió de **mover la cabeza** y no de lo que ella dijera. La audiometría informa la presbiacusia, que explica que oiga mal en grupos y que merece otra conversación (→ cap. 28), pero **no** explica las caídas.
@@ -384,7 +384,7 @@ Isabel cae de noche y a oscuras, ve bien con sus lentes y tiene la presión norm
 
 **Hipofunción vestibular bilateral** (se cumplen los criterios de consenso en la calórica y en el vHIT), **neuropatía periférica** y **presbiacusia leve**, con riesgo alto de caída. Se informa el patrón con los números de **cada oído** (→ cap. 24), y a quién se deriva cada cosa. Y se le propone:
 
-- **Rehabilitación vestibular** (→ H19): ejercicios de estabilización de la mirada, que se hacen donde se pueda sujetar, y sustitución del equilibrio con la vista y los pies. Las guías la ofrecen a quienes tienen hipofunción bilateral, y la edad no la limita (Hall y cols., 2022).
+- **Rehabilitación vestibular** (→ H20): ejercicios de estabilización de la mirada, que se hacen donde se pueda sujetar, y sustitución del equilibrio con la vista y los pies. Las guías la ofrecen a quienes tienen hipofunción bilateral, y la edad no la limita (Hall y cols., 2022).
 - **Cambios en la casa**: luz de noche en el camino al baño, sin alfombras, un apoyo en el baño; calzado firme; un bastón. Es el **sentido que sí le queda**, la vista, asegurado.
 - **Un aviso al médico**: el control de los pies y de la diabetes, y la gabapentina de la noche, que el médico puede revisar: los antiepilépticos están en la lista europea de fármacos que aumentan el riesgo de caída (Seppala y cols., 2021). <!-- Pasada de fundamentos 2026-10-18: la gabapentina sola tiene evidencia dispar (en un estudio de cohortes no aumentó las caídas frente a la duloxetina: Chaitoff y cols., Ann Intern Med 2025, PMID 39761587); por eso se cita la clase y no el fármaco. -->
 - **Ejercicio de fuerza y equilibrio**, con la base ampliada y con apoyo, de varias veces por semana durante meses (Montero-Odasso y cols., 2022).

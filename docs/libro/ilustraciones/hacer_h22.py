@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-"""Dibuja las ilustraciones de la herramienta H22 (audiometría ocupacional):
+"""Dibuja las ilustraciones de la herramienta H22 (medición electroacústica del audífono):
 
-    h22-intercambio.svg     tiempo diario permitido según el nivel, con tasa de intercambio de 3 dB y de 5 dB
-    h22-cambio-umbral.svg   dos controles inventados de un mismo trabajador contra su base, y qué dice cada criterio
-    h22-flujo.svg           del control periódico al cambio confirmado
+    h22-caja-acoplador.svg   la cámara de medida con el altavoz, el micrófono de referencia,
+                             el audífono y el acoplador de 2 cc
+    h22-curva-ejemplo.svg    curvas inventadas: OSPL90 y respuesta con 60 dB de entrada
+    h22-distorsion-ruido.svg A: armónicos de un tono puro; B: ruido interno referido a la entrada
 
-SVG propios, no IA. Las cifras del primer dibujo salen de las fórmulas de NIOSH (1998) y OSHA
-(29 CFR 1910.95, Tabla G-16); los umbrales del segundo son inventados para el ejemplo (parten de la
-base real del paciente de práctica 33, todo en 0 dB HL); el tercero es un esquema."""
+SVG propios, no IA. Son esquemas: ninguna curva ni cifra es de un audífono real."""
 import math
 import pathlib
 
 TINTA, TENUE, GRILLA, FUERTE = '#24101a', '#8a8a90', '#e7e5e0', '#cfccc5'
-ROJO, AZUL, VERDE, AVISO, NARANJA = '#c62f3a', '#2b5fa8', '#21796c', '#c62f3a', '#c0571c'
+COCLEAR, RETRO, AVISO = '#c0571c', '#21796c', '#c62f3a'
 F = "font-family=\"'Plus Jakarta Sans', sans-serif\""
 AQUI = pathlib.Path(__file__).parent
 ESCALA = 1.2
@@ -37,14 +36,13 @@ class Lienzo:
         self.out.append(f'<polyline points="{p}" fill="none" stroke="{color}" stroke-width="{w}" '
                         f'stroke-linejoin="round" stroke-linecap="round"{d}{extra}/>')
 
-    def rect(self, x, y, w, h, fill='none', stroke=None, sw=1, rx=0, extra=''):
-        s = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ''
-        self.out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{rx}" '
-                        f'fill="{fill}"{s}{extra}/>')
+    def r(self, x, y, w, h, fill='none', color=TINTA, sw=1.2, rx=4, dash=None):
+        d = f' stroke-dasharray="{dash}"' if dash else ''
+        self.out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{fill}" '
+                        f'stroke="{color}" stroke-width="{sw}"{d}/>')
 
-    def circ(self, x, y, r, fill='none', stroke=None, sw=1.6):
-        s = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ''
-        self.out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{fill}"{s}/>')
+    def raw(self, s):
+        self.out.append(s)
 
     def guardar(self, nombre, defs=''):
         svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {self.w} {self.h}" '
@@ -60,177 +58,163 @@ def punta(id_, color):
             f'transform="scale(.8)" fill="{color}"/></marker>')
 
 
-# ---------------------------------------------------------------- tasa de intercambio
-def t3(nivel):   # NIOSH 1998: T(min) = 480 / 2^((L-85)/3)
-    return 480 / 2 ** ((nivel - 85) / 3)
-
-
-def t5(nivel):   # OSHA, Tabla G-16 (equivale a 480 / 2^((L-90)/5))
-    return 480 / 2 ** ((nivel - 90) / 5)
-
-
-def intercambio():
-    c = Lienzo(700, 270)
-    x0, x1, y0, y1 = 70, 660, 36, 214          # área del gráfico
-    niveles = (80, 115)
-    tmin, tmax = 1, 1000                       # minutos, escala log
-
-    def X(n):
-        return x0 + (n - niveles[0]) / (niveles[1] - niveles[0]) * (x1 - x0)
-
-    def Y(m):
-        return y1 - (math.log10(m) - math.log10(tmin)) / (math.log10(tmax) - math.log10(tmin)) * (y1 - y0)
-
-    c.t(14, 20, 'Cuánto tiempo al día se puede estar a cada nivel (dB(A))', 10.5, TINTA, 'start', 700)
-    for m, et in ((1, '1 min'), (10, '10 min'), (60, '1 h'), (480, '8 h')):
-        c.l(x0, Y(m), x1, Y(m), GRILLA, 1)
-        c.t(x0 - 8, Y(m) + 4, et, 8.5, TENUE, 'end')
-    for n in range(80, 116, 5):
-        c.l(X(n), y1, X(n), y1 + 4, FUERTE, 1)
-        c.t(X(n), y1 + 18, str(n), 9, TENUE)
-    c.t((x0 + x1) / 2, y1 + 38, 'nivel de presión sonora continuo equivalente, dB(A)', 9, TENUE)
-    c.l(x0, y0, x0, y1, FUERTE, 1)
-    c.l(x0, y1, x1, y1, FUERTE, 1)
-
-    for f, color, a, b in ((t3, VERDE, 85, 115), (t5, NARANJA, 90, 115)):
-        pts = [(X(n), Y(f(n))) for n in range(a, b + 1)]
-        c.poli(pts, color, 2.4)
-    # puntos de referencia (valores de las fuentes)
-    for n in (85, 88, 91, 94, 100):
-        c.circ(X(n), Y(t3(n)), 3.2, VERDE)
-    for n in (90, 95, 100, 105, 110, 115):
-        c.circ(X(n), Y(t5(n)), 3.2, NARANJA)
-    # etiquetas
-    c.t(X(85) + 8, Y(480) - 8, '85 dB(A): 8 h', 9, VERDE, 'start', 700)
-    c.t(X(90) + 8, Y(480) - 8, '90 dB(A): 8 h', 9, NARANJA, 'start', 700)
-    c.t(X(100) - 6, Y(t3(100)) + 22, '100 dB(A): 15 min', 9, VERDE, 'end', 700)
-    c.t(X(100) + 8, Y(t5(100)) - 6, '100 dB(A): 2 h', 9, NARANJA, 'start', 700)
-    # leyenda
-    c.l(90, 150, 122, 150, VERDE, 2.4)
-    c.t(128, 154, '3 dB por cada mitad del tiempo', 9, TINTA, 'start')
-    c.t(128, 167, 'NIOSH, Unión Europea, Chile', 8.5, TENUE, 'start')
-    c.l(90, 184, 122, 184, NARANJA, 2.4)
-    c.t(128, 188, '5 dB por cada mitad del tiempo', 9, TINTA, 'start')
-    c.t(128, 201, 'OSHA (EE. UU.)', 8.5, TENUE, 'start')
-    c.guardar('h22-intercambio.svg')
-
-
-# ---------------------------------------------------------------- cambio de umbral
-FREQS = ('500', '1 k', '2 k', '3 k', '4 k', '6 k', '8 k')
-BASE = (0, 0, 0, 0, 0, 0, 0)
-CASO_A = (0, 0, 5, 15, 30, 20, 10)
-CASO_B = (0, 0, 0, 5, 20, 15, 5)
-
-
-def criterios(base, ctrl):
-    cambio = [b - a for a, b in zip(base, ctrl)]
-    osha = sum(cambio[2:5]) / 3
-    niosh = any(v >= 15 for v in cambio[:6])          # 500 a 6000 Hz
-    prexor = any(v >= 15 and u > 25 for v, u in zip(cambio, ctrl))
-    return osha, niosh, prexor
-
-
-def panel(c, x0, y0, ancho, alto, titulo, datos, veredicto):
-    c.t(x0, y0 - 14, titulo, 10, TINTA, 'start', 700)
-    n = len(FREQS)
-    paso = ancho / (n - 1)
-
-    def X(i):
-        return x0 + i * paso
-
-    def Y(db):
-        return y0 + db / 50 * alto
-
-    c.rect(X(2) - 8, y0, X(4) - X(2) + 16, alto, '#f5ece6')     # 2, 3 y 4 kHz
-    for db in range(0, 51, 10):
-        c.l(x0 - 8, Y(db), x0 + ancho + 8, Y(db), GRILLA, 1)
-        c.t(x0 - 14, Y(db) + 3, str(db), 8, TENUE, 'end')
-    for i, f in enumerate(FREQS):
-        c.t(X(i), y0 + alto + 14, f, 8.5, TENUE)
-    c.l(x0 - 8, Y(25), x0 + ancho + 8, Y(25), FUERTE, 1, '4 3')
-    c.t(x0 + ancho + 8, Y(25) - 3, '25', 7.5, TENUE, 'end')
-    c.poli([(X(i), Y(v)) for i, v in enumerate(BASE)], TENUE, 2, '5 3')
-    c.poli([(X(i), Y(v)) for i, v in enumerate(datos)], ROJO, 2.4)
-    for i, v in enumerate(datos):
-        c.circ(X(i), Y(v), 3.6, '#fff', ROJO)
-    c.t(X(3), y0 + alto - 6, '2-3-4 kHz', 8, NARANJA)
-    # cambios
-    for i, (b, v) in enumerate(zip(BASE, datos)):
-        if v - b >= 10:
-            c.t(X(i) + 10, Y(v) + 12, f'+{v - b}', 8.5, ROJO, 'start', 700)
-    # veredictos
-    yy = y0 + alto + 38
-    for k, (nombre, texto, si) in enumerate(veredicto):
-        color = AVISO if si else VERDE
-        c.t(x0 - 12, yy + k * 16, f'<tspan font-weight="700">{nombre}</tspan>', 8.5, TINTA, 'start')
-        c.t(x0 + 52, yy + k * 16, f'<tspan fill="{color}" font-weight="700">{"sí" if si else "no"}</tspan>'
-            f' · {texto}', 8.5, TINTA, 'start')
-
-
-def cambio_umbral():
+def caja():
     c = Lienzo(700, 330)
-    c.t(14, 18, 'Dos controles de un mismo trabajador, cada uno contra su base (0 dB HL; los dos oídos iguales)',
-        10.5, TINTA, 'start', 700)
-    for x0, titulo, datos in ((60, 'A · control con la muesca ya formada', CASO_A),
-                              (390, 'B · control con la muesca incipiente', CASO_B)):
-        o, n, p = criterios(BASE, datos)
-        cambio = [b - a for a, b in zip(BASE, datos)]
-        peor = max(range(6), key=lambda i: cambio[i])
-        ver = [('OSHA', f'promedio 2-3-4 kHz: {o:.1f} dB (criterio ≥ 10)'.replace('.', ','), o >= 10),
-               ('NIOSH', f'{FREQS[peor].strip()}: +{cambio[peor]} dB (criterio ≥ 15)', n),
-               ('PREXOR*', f'+15 dB y umbral sobre 25 dB HL', p)]
-        panel(c, x0, 66, 250, 150, titulo, datos, ver)
-    c.t(14, 322, 'línea gris punteada: la base · línea roja: el control · * lectura de este libro del texto de PREXOR',
-        8, TENUE, 'start')
-    c.guardar('h22-cambio-umbral.svg')
+    c.t(14, 20, 'Montaje de la medición: cámara de medida, audífono y acoplador de 2 cc', 10.5, TINTA, 'start', 700)
+    # camara
+    c.r(20, 40, 400, 250, '#f6f5f2', FUERTE, 1.5, 8)
+    c.t(30, 58, 'cámara de medida (aislada del ruido)', 8.5, TENUE, 'start', 600)
+    # altavoz
+    c.r(40, 120, 16, 70, '#fff', TINTA, 1.4, 2)
+    c.raw(f'<polygon points="56,125 86,100 86,210 56,185" fill="#fff" stroke="{TINTA}" stroke-width="1.4"/>')
+    c.t(70, 230, 'altavoz', 9, TINTA, 'middle', 600)
+    # ondas
+    for i, rr in enumerate((24, 44, 64)):
+        a = math.radians(32)
+        pts = [(86 + rr * 0.9 + rr * math.cos(t), 155 + rr * math.sin(t)) for t in
+               [(-a + 2 * a * k / 12) for k in range(13)]]
+        c.poli(pts, COCLEAR, 1.4)
+    c.t(200, 100, 'tono puro que barre las frecuencias', 8.5, COCLEAR, 'middle', 600)
+    # micro referencia
+    c.r(205, 130, 10, 36, '#fff', RETRO, 1.6, 3)
+    c.t(210, 182, 'micrófono de', 8, RETRO, 'middle', 600)
+    c.t(210, 193, 'referencia', 8, RETRO, 'middle', 600)
+    # audifono BTE (forma)
+    c.raw(f'<path d="M262,150 C262,118 300,112 306,140 C310,165 296,196 282,198 C268,198 262,175 262,150 z" '
+          f'fill="#e9e4dc" stroke="{TINTA}" stroke-width="1.4"/>')
+    c.raw(f'<circle cx="275" cy="150" r="3" fill="{TINTA}"/>')
+    c.t(284, 222, 'audífono', 9, TINTA, 'middle', 600)
+    c.t(284, 234, '(abierto y encendido)', 8, TENUE, 'middle')
+    # tubo
+    c.poli([(300, 128), (330, 100), (350, 100)], TINTA, 3)
+    c.t(318, 112, 'tubo corto', 8, TINTA, 'end', 600)
+    # acoplador
+    c.r(350, 80, 56, 40, '#fff', AVISO, 1.6, 4)
+    c.t(378, 98, '2 cc', 10, AVISO, 'middle', 700)
+    c.t(378, 111, 'acoplador', 8, AVISO, 'middle', 600)
+    # micro medicion
+    c.r(380, 124, 12, 30, '#fff', AVISO, 1.6, 3)
+    c.t(378, 170, 'micrófono de', 8, AVISO, 'middle', 600)
+    c.t(378, 181, 'medida', 8, AVISO, 'middle', 600)
+    # cables
+    c.poli([(420, 140), (450, 140), (450, 100), (480, 100)], TENUE, 1.2)
+    c.poli([(420, 150), (440, 150), (440, 230), (480, 230)], TENUE, 1.2)
+    # analizador
+    c.r(480, 60, 190, 210, '#fff', TINTA, 1.5, 8)
+    c.t(575, 82, 'analizador de audífonos', 9.5, TINTA, 'middle', 700)
+    c.t(575, 100, 'genera el tono y regula', 8.5, TINTA)
+    c.t(575, 112, 'su nivel con el micrófono de referencia', 8.5, TINTA)
+    c.t(575, 134, 'mide la presión que llega', 8.5, TINTA)
+    c.t(575, 146, 'al micrófono de medida', 8.5, TINTA)
+    c.t(575, 168, 'calcula ganancia = salida − entrada', 8.5, COCLEAR, 'middle', 600)
+    c.r(500, 188, 150, 62, '#f6f5f2', FUERTE, 1, 4)
+    c.poli([(508, 238), (530, 228), (548, 214), (565, 204), (585, 210), (610, 224), (640, 240)], COCLEAR, 1.6)
+    c.t(575, 262, 'pantalla: curva e informe', 8, TENUE)
+    c.guardar('h22-caja-acoplador.svg')
 
 
-# ---------------------------------------------------------------- flujo
-def caja(c, x, y, w, h, texto, fill='#fff', stroke=TINTA, color=TINTA, peso=400):
-    c.rect(x, y, w, h, fill, stroke, 1.4, 6)
-    lineas = texto.split('|')
-    y0 = y + h / 2 - (len(lineas) - 1) * 6.5 + 3
-    for i, s in enumerate(lineas):
-        c.t(x + w / 2, y0 + i * 13, s, 8.8, color, 'middle', peso)
-
-
-def flecha(c, x1, y1, x2, y2, color=TINTA, etiqueta=None, ex=0, ey=-4, dash=None):
-    d = f' stroke-dasharray="{dash}"' if dash else ''
-    c.out.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="1.5"{d} '
-                 f'marker-end="url(#pf)"/>')
-    if etiqueta:
-        c.t((x1 + x2) / 2 + ex, (y1 + y2) / 2 + ey, etiqueta, 8.5, color, 'middle', 700)
-
-
-def flujo():
+def curva():
     c = Lienzo(700, 360)
-    c.t(14, 18, 'Del control periódico al cambio confirmado', 10.5, TINTA, 'start', 700)
-    caja(c, 20, 150, 110, 52, 'Audiometría|de base|(ingreso)', '#eef5f2', VERDE, TINTA, 700)
-    caja(c, 165, 150, 110, 52, 'Control|periódico|contra la base')
-    caja(c, 310, 150, 110, 52, '¿Cambio mayor|que el criterio|de la norma?')
-    caja(c, 310, 36, 110, 44, 'Sin cambio:|sigue el calendario', '#fff', VERDE, VERDE)
-    caja(c, 310, 250, 110, 56, 'Reexplicar,|recolocar fonos|y repetir al tiro')
-    caja(c, 455, 250, 105, 56, '¿Persiste?|Confirmación en|condiciones de base')
-    caja(c, 455, 150, 105, 52, 'Cambio|no persiste|(era variación)', '#fff', VERDE, VERDE)
-    caja(c, 598, 250, 92, 56, 'Revisión por|médico o|audiólogo', '#fbeeee', AVISO, TINTA, 700)
-    caja(c, 598, 130, 92, 92, 'Si es laboral:|avisar al|trabajador, revisar|el puesto, protección,|nueva base', '#fbeeee', AVISO)
-    caja(c, 598, 40, 92, 62, 'Si no es laboral|o hay dudas:|derivar a ORL', '#fff', NARANJA, TINTA)
-    defs = punta('pf', TINTA)
-    flecha(c, 130, 176, 165, 176)
-    flecha(c, 275, 176, 310, 176)
-    flecha(c, 365, 150, 365, 80, VERDE, 'no', 12, 0)
-    flecha(c, 365, 202, 365, 250, AVISO, 'sí', 12, 0)
-    flecha(c, 420, 278, 455, 278)
-    flecha(c, 507, 250, 507, 202, VERDE, 'no', 12, 0)
-    flecha(c, 560, 278, 598, 278, AVISO, 'sí', 0, -6)
-    flecha(c, 644, 250, 644, 222, AVISO)
-    flecha(c, 644, 130, 644, 102, NARANJA)
-    # el control vuelve al calendario
-    c.t(14, 346, 'La norma de cada país fija el criterio, los plazos y quién revisa (tablas de este capítulo).', 8.5, TENUE, 'start')
-    c.guardar('h22-flujo.svg', defs)
+    x0, x1, y0, y1 = 70, 660, 50, 300      # marco
+    fmin, fmax = 200, 8000
+    dmin, dmax = 30, 130
+
+    def X(f):
+        return x0 + (math.log10(f) - math.log10(fmin)) / (math.log10(fmax) - math.log10(fmin)) * (x1 - x0)
+
+    def Y(d):
+        return y1 - (d - dmin) / (dmax - dmin) * (y1 - y0)
+
+    c.t(14, 20, 'Salida de un audífono en el acoplador de 2 cc', 10.5, TINTA, 'start', 700)
+    for d in range(40, 131, 10):
+        c.l(x0, Y(d), x1, Y(d), GRILLA, 0.8)
+        c.t(x0 - 8, Y(d) + 3, str(d), 8.5, TENUE, 'end')
+    for f in (250, 500, 1000, 2000, 4000, 8000):
+        c.l(X(f), y0, X(f), y1, GRILLA, 0.8)
+        c.t(X(f), y1 + 14, str(f), 8.5, TENUE)
+    c.t(x0 - 40, (y0 + y1) / 2, 'dB SPL en el acoplador', 8.5, TENUE, 'middle')
+    c.out[-1] = c.out[-1].replace('<text ', f'<text transform="rotate(-90 {x0 - 52} {(y0 + y1) / 2})" ', 1)
+    c.t((x0 + x1) / 2, y1 + 32, 'frecuencia (Hz)', 8.5, TENUE)
+    fs = [200 * (8000 / 200) ** (i / 120) for i in range(121)]
+
+    def ospl(f):
+        # forma inventada: sube, pico cerca de 2 kHz, cae en agudos
+        return 70 + 38 * math.exp(-((math.log2(f / 1900)) ** 2) / 1.3) + 6 * math.exp(-((math.log2(f / 700)) ** 2) / 0.4)
+
+    def rta(f):
+        return 52 + 24 * math.exp(-((math.log2(f / 1800)) ** 2) / 1.8) + 3 * math.exp(-((math.log2(f / 800)) ** 2) / 0.5)
+
+    c.poli([(X(f), Y(ospl(f))) for f in fs], AVISO, 2.4)
+    c.poli([(X(f), Y(rta(f))) for f in fs], RETRO, 2.4)
+    # entrada 60
+    c.l(x0, Y(60), x1, Y(60), TENUE, 1, '5 3')
+    c.t(x0 + 6, Y(60) - 5, 'entrada de 60 dB SPL', 8.5, TENUE, 'start')
+    # pico OSPL90
+    fp = max(fs, key=ospl)
+    c.l(X(fp), Y(ospl(fp)), X(fp), y1, AVISO, 1, '2 3')
+    c.raw(f'<circle cx="{X(fp):.1f}" cy="{Y(ospl(fp)):.1f}" r="4" fill="{AVISO}"/>')
+    c.t(X(fp) + 8, Y(ospl(fp)) - 10, 'OSPL90 máximo', 9, AVISO, 'start', 700)
+    # HFA
+    for f in (1000, 1600, 2500):
+        c.raw(f'<circle cx="{X(f):.1f}" cy="{Y(ospl(f)):.1f}" r="3" fill="#fff" stroke="{AVISO}" stroke-width="1.5"/>')
+        c.raw(f'<circle cx="{X(f):.1f}" cy="{Y(rta(f)):.1f}" r="3" fill="#fff" stroke="{RETRO}" stroke-width="1.5"/>')
+    c.l(X(1000), y0 + 6, X(2500), y0 + 6, TINTA, 1.2)
+    c.l(X(1000), y0 + 2, X(1000), y0 + 10, TINTA, 1.2)
+    c.l(X(2500), y0 + 2, X(2500), y0 + 10, TINTA, 1.2)
+    c.t((X(1000) + X(2500)) / 2, y0 - 4, 'HFA: promedio en 1.000, 1.600 y 2.500 Hz', 8.5, TINTA, 'middle', 600)
+    # ganancia
+    xg = X(1600)
+    c.raw(f'<line x1="{xg:.1f}" y1="{Y(60):.1f}" x2="{xg:.1f}" y2="{Y(rta(1600)) + 3:.1f}" stroke="{RETRO}" '
+          f'stroke-width="1.6" marker-end="url(#gp)"/>')
+    c.t(xg - 8, (Y(60) + Y(rta(1600))) / 2 + 3, 'ganancia', 8.5, RETRO, 'end', 700)
+    c.t(130, Y(rta(250)) + 20, 'respuesta con 60 dB de entrada', 9, RETRO, 'start', 700)
+    c.t(100, Y(88), 'OSPL90: salida con 90 dB de entrada', 9, AVISO, 'start', 700)
+    c.guardar('h22-curva-ejemplo.svg', punta('gp', RETRO))
+
+
+def distorsion():
+    c = Lienzo(700, 290)
+    # Panel A: armonicos
+    c.t(14, 20, 'A · Distorsión armónica', 10.5, TINTA, 'start', 700)
+    xa, ya = 50, 230
+    c.l(xa, ya, 320, ya, FUERTE, 1.2)
+    c.t(310, ya + 26, 'frecuencia →', 8.5, TENUE, 'end')
+    c.t(185, 44, 'salida del audífono con un tono puro de entrada', 8.5, TENUE)
+    barras = [(90, 130, TINTA, 'f', 'tono de entrada'), (150, 40, AVISO, '2f', ''), (210, 22, AVISO, '3f', ''), (270, 11, AVISO, '4f', '')]
+    for x, h, col, lab, nota in barras:
+        c.r(x - 9, ya - h, 18, h, col, col, 0, 1)
+        c.t(x, ya + 12, lab, 9, col, 'middle', 700)
+    c.t(210, 100, 'armónicos: frecuencias que', 8.5, AVISO, 'middle', 600)
+    c.t(210, 112, 'el audífono agrega y que no estaban', 8.5, AVISO, 'middle', 600)
+    c.t(185, 268, 'distorsión = potencia de los armónicos / potencia del fundamental', 8.5, TINTA, 'middle', 600)
+    # Panel B: EIN
+    c.t(360, 20, 'B · Ruido interno referido a la entrada', 10.5, TINTA, 'start', 700)
+    c.r(370, 60, 90, 56, '#fff', TINTA, 1.4, 4)
+    c.t(415, 84, 'audífono', 9, TINTA, 'middle', 700)
+    c.t(415, 98, 'con ganancia G', 8.5, TINTA)
+    c.raw(f'<line x1="340" y1="88" x2="368" y2="88" stroke="{TINTA}" stroke-width="1.4" marker-end="url(#pa)"/>')
+    c.raw(f'<line x1="462" y1="88" x2="492" y2="88" stroke="{TINTA}" stroke-width="1.4" marker-end="url(#pa)"/>')
+    c.t(340, 76, 'entrada:', 8.5, TENUE, 'end')
+    c.t(340, 88, 'silencio', 8.5, TENUE, 'end')
+    c.t(500, 76, 'salida:', 8.5, TENUE, 'start')
+    c.t(500, 88, 'siseo propio', 8.5, AVISO, 'start', 700)
+    # ruido
+    pts = []
+    import random
+    rnd = random.Random(21)
+    for i in range(60):
+        pts.append((500 + i * 3, 112 + rnd.uniform(-9, 9)))
+    c.poli(pts, AVISO, 1)
+    c.t(515, 148, 'nivel de salida sin señal', 8.5, AVISO, 'start', 600)
+    c.t(515, 170, 'EIN = ese nivel de salida − ganancia', 9, TINTA, 'start', 700)
+    c.t(380, 200, 'Es el nivel de un ruido imaginario a la entrada', 8.5, TINTA, 'start')
+    c.t(380, 213, 'de un audífono perfecto que daría ese mismo siseo.', 8.5, TINTA, 'start')
+    c.t(380, 233, 'Ese número es el que se puede comparar entre audífonos', 8.5, TENUE, 'start')
+    c.t(380, 246, 'de distinta ganancia.', 8.5, TENUE, 'start')
+    c.guardar('h22-distorsion-ruido.svg', punta('pa', TINTA))
 
 
 if __name__ == '__main__':
-    intercambio()
-    cambio_umbral()
-    flujo()
+    caja()
+    curva()
+    distorsion()

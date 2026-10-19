@@ -15,7 +15,7 @@ Los **potenciales evocados auditivos de estado estable** (PEAee; en inglés *aud
 
 El ASSR responde una pregunta: **¿cuál es el umbral de este oído en cada frecuencia?** Se pide cuando la audiometría no se puede hacer con confianza (BSA, 2023):
 
-- **Lactantes y niños pequeños** que ya tienen un ABR con morfología normal y de quienes se necesita un audiograma estimado, sobre todo para **adaptar audífonos**. Para esta tarea los umbrales por frecuencia son los que importan: un lactante con una pérdida de agudos necesita saber cuánta ganancia pedirle a cada banda (→ H20).
+- **Lactantes y niños pequeños** que ya tienen un ABR con morfología normal y de quienes se necesita un audiograma estimado, sobre todo para **adaptar audífonos**. Para esta tarea los umbrales por frecuencia son los que importan: un lactante con una pérdida de agudos necesita saber cuánta ganancia pedirle a cada banda (→ H21).
 - **Personas que no pueden o no quieren colaborar**: discapacidad cognitiva, pacientes bajo sedación o anestesia, o sospecha de una pérdida no orgánica (→ H3 y cap. 19).
 - **Candidatos a implante coclear**, como alternativa al ABR para estimar cuánta audición residual queda.
 

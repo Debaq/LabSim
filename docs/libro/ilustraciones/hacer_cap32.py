@@ -94,7 +94,7 @@ def sustitucion():
             for m, s in enumerate(nom.split(' y ') if ' y ' in nom else [nom]):
                 g.t(bx, base + 12 + 10 * m, s if m == 0 and ' y ' not in nom else (s + ' y' if m == 0 else s), 7.5, TINTA)
         lineas(g, x + cw / 2, y0 + ph + 52, [l1, l2], 8.3, TINTA, 11)
-    g.t(W / 2, H - 10, 'Cómo se reparte el peso de cada entrada se explica en H19 (→ Fundamento); la anatomía de cada vía, en las Bases.', 8.5, TENUE)
+    g.t(W / 2, H - 10, 'Cómo se reparte el peso de cada entrada se explica en H20 (→ Fundamento); la anatomía de cada vía, en las Bases.', 8.5, TENUE)
     g.guardar('cap32-sustitucion.svg')
 
 
@@ -107,7 +107,7 @@ def factores():
         'en naranja, lo que se pregunta, se mide a pie de cama o se deriva.', 8.2, TENUE, 'start')
     izq = [('Audición', 'audiograma, discriminación (→ cap. 5)', AZUL),
            ('Vestíbulo', 'VPPB, hipofunción (→ cap. 22, 24)', AZUL),
-           ('Equilibrio y marcha', 'TUG, DGI, mCTSIB (→ H19)', AZUL),
+           ('Equilibrio y marcha', 'TUG, DGI, mCTSIB (→ H20)', AZUL),
            ('Miedo a caer', 'ABC o FES-I', AZUL),
            ('Presión de pie', 'acostado y de pie; se deriva', NARANJA),
            ('Fármacos', 'revisión por quien receta', NARANJA)]

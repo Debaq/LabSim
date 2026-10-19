@@ -11,11 +11,11 @@ Entre todas las razones por las que una persona dice "se me da vuelta la pieza",
 
 ## Técnica en foco
 
-La técnica completa, paso a paso, está en la herramienta H18; aquí solo se recuerda **lo que hay que mirar cuando el problema es este**. Las pruebas se hacen sin equipo de medición: una camilla, un observador, luz y los ojos del paciente a la vista (→ H15 para los lentes de Frenzel, que impiden la fijación visual y hacen visible un nistagmo que a simple vista se suprime).
+La técnica completa, paso a paso, está en la herramienta H19; aquí solo se recuerda **lo que hay que mirar cuando el problema es este**. Las pruebas se hacen sin equipo de medición: una camilla, un observador, luz y los ojos del paciente a la vista (→ H16 para los lentes de Frenzel, que impiden la fijación visual y hacen visible un nistagmo que a simple vista se suprime).
 
-- **Dix-Hallpike hacia cada lado** (→ H18): examina los canales verticales. Aquí importa lo que sale en el primer segundo y en el último: cuánto tarda en empezar, hacia dónde bate, cuánto dura y qué pasa al sentarse.
-- **Giro supino** (→ H18): se hace cuando el Dix-Hallpike dio un nistagmo horizontal o ninguno. Examina el canal lateral: la dirección (hacia el suelo o hacia el techo) dice el tipo, y **cuál de los dos lados da más nistagmo** dice el lado afectado.
-- **Maniobras**: una por hallazgo, cada una un protocolo cerrado (Epley, 1992; Semont y cols., 1988; Lempert y Tiel-Wilck, 1996; Gufoni y cols., 1998; → H18). Se enseñan en H18. LabSim no hace pruebas vestibulares.
+- **Dix-Hallpike hacia cada lado** (→ H19): examina los canales verticales. Aquí importa lo que sale en el primer segundo y en el último: cuánto tarda en empezar, hacia dónde bate, cuánto dura y qué pasa al sentarse.
+- **Giro supino** (→ H19): se hace cuando el Dix-Hallpike dio un nistagmo horizontal o ninguno. Examina el canal lateral: la dirección (hacia el suelo o hacia el techo) dice el tipo, y **cuál de los dos lados da más nistagmo** dice el lado afectado.
+- **Maniobras**: una por hallazgo, cada una un protocolo cerrado (Epley, 1992; Semont y cols., 1988; Lempert y Tiel-Wilck, 1996; Gufoni y cols., 1998; → H19). Se enseñan en H19. LabSim no hace pruebas vestibulares.
 
 :::ayuda Ayuda memoria
 **Se lee siempre en el mismo orden**: ¿hay nistagmo? → ¿en qué postura salió? → ¿hacia dónde bate? → ¿cómo se comporta en el tiempo (latencia, duración, fatiga, inversión)?
@@ -33,7 +33,7 @@ Tabla: La lectura del nistagmo posicional en un vistazo
 
 ## Fisiología
 
-Las otoconias son cristales de carbonato de calcio que descansan sobre la mácula del utrículo y sienten la gravedad (→ B1). Si se sueltan y entran a un canal semicircular, el canal pasa a sentir la gravedad como si sintiera un giro, y el reflejo vestíbulo-ocular responde a un giro que no existe. Esa es toda la fisiología del VPPB: un sensor de giros que recibe una señal de gravedad (Bhattacharyya y cols., 2017; Kim y Zee, 2014). El detalle de por qué el ojo se mueve en el plano de cada canal y de cada maniobra está en H18 y en las bases (B1 a B4).
+Las otoconias son cristales de carbonato de calcio que descansan sobre la mácula del utrículo y sienten la gravedad (→ B1). Si se sueltan y entran a un canal semicircular, el canal pasa a sentir la gravedad como si sintiera un giro, y el reflejo vestíbulo-ocular responde a un giro que no existe. Esa es toda la fisiología del VPPB: un sensor de giros que recibe una señal de gravedad (Bhattacharyya y cols., 2017; Kim y Zee, 2014). El detalle de por qué el ojo se mueve en el plano de cada canal y de cada maniobra está en H19 y en las bases (B1 a B4).
 
 Lo que cambia entre los dos mecanismos es **dónde están las partículas**:
 
@@ -73,7 +73,7 @@ Ante un "me mareo al moverme", la entrevista decide si vale la pena mirar los oj
 3. **¿Hay algo que no encaje?** Síntomas auditivos nuevos, cefalea, visión doble, dificultad para hablar, inestabilidad al caminar, un golpe en la cabeza reciente. Cualquiera de estos cambia la pregunta.
 4. **¿Se ve en los ojos?** Sin nistagmo, el vértigo solo no basta. Un Dix-Hallpike negativo no descarta el VPPB: la guía cita una sensibilidad de 82 % y una especificidad de 71 % entre especialistas, y sugiere repetirlo en otra visita antes de darlo por negativo (Bhattacharyya y cols., 2017).
 
-:::imagen ilustraciones/cap22-decision.svg Del hallazgo a la maniobra, o a la derivación. Recorre las preguntas en orden: cualquier dato que no encaje te saca del camino de la maniobra y te lleva a derivar. Las maniobras se enseñan en H18.
+:::imagen ilustraciones/cap22-decision.svg Del hallazgo a la maniobra, o a la derivación. Recorre las preguntas en orden: cualquier dato que no encaje te saca del camino de la maniobra y te lleva a derivar. Las maniobras se enseñan en H19.
 :::
 
 ### Lo que más se equivoca
@@ -108,7 +108,7 @@ Plantea al menos tres causas posibles de un vértigo que aparece al girar en la 
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio en las posturas (→ H18)
+:::ayuda-ancho Lo que se vio en las posturas (→ H19)
 | Postura | Lo que se vio |
 |---|---|
 | Dix-Hallpike derecho (E-CCD) | tras unos segundos, nistagmo hacia **arriba** con el polo superior del ojo girando hacia el oído **derecho**; crece, llega a un máximo y se apaga en unos 20 a 25 segundos; vértigo intenso |
@@ -132,9 +132,9 @@ Plantea al menos tres causas posibles de un vértigo que aparece al girar en la 
 :::docente Guía del caso
 - **Datos clave:** episodios de unos 20 segundos desencadenados por postura (acostarse y girar a la derecha, mirar hacia arriba), sin síntomas entre las crisis, sin signos neurológicos, sin golpe de cabeza. Hipertensión tratada y una presbiacusia estable, con acúfeno simétrico de años.
 - **Hipótesis esperables:** VPPB del canal posterior (la más probable); vértigo central (se descarta con la entrevista y los ojos); hipotensión ortostática (da mareo al pararse, no al acostarse); neuritis vestibular y enfermedad de Ménière (crisis más largas, no posicionales).
-- **Qué pedir:** Dix-Hallpike a los dos lados, y giro supino si el primero da horizontal o nada (→ H18). **No** audiometría, imágenes ni VNG para el vértigo (Bhattacharyya y cols., 2017).
+- **Qué pedir:** Dix-Hallpike a los dos lados, y giro supino si el primero da horizontal o nada (→ H19). **No** audiometría, imágenes ni VNG para el vértigo (Bhattacharyya y cols., 2017).
 - **Errores esperables:** pedir audiometría "porque es vértigo"; leer la torsión al revés; no examinar el otro lado; atribuir el acúfeno al vértigo.
-- **En LabSim:** cuadro de audición *presbiacusia*; el examen posicional no se hace en LabSim (→ H18).
+- **En LabSim:** cuadro de audición *presbiacusia*; el examen posicional no se hace en LabSim (→ H19).
 :::
 
 {{caso cap22_geotropico}}
@@ -153,7 +153,7 @@ Si el Dix-Hallpike del lado ya tratado ya no da el nistagmo de antes, ¿qué pru
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio en las posturas (→ H18)
+:::ayuda-ancho Lo que se vio en las posturas (→ H19)
 | Postura | Lo que se vio |
 |---|---|
 | Dix-Hallpike izquierdo | nistagmo **horizontal** débil, sin componente vertical ni torsional |
@@ -174,9 +174,9 @@ Si el Dix-Hallpike del lado ya tratado ya no da el nistagmo de antes, ¿qué pru
 :::docente Guía del caso
 - **Datos clave:** vértigo posicional tratado hace diez días y que vuelve distinto: ahora se desencadena al darse vuelta en la cama, no al mirar hacia arriba. Sin síntomas auditivos. Es el relato de un **cambio de canal** después de una maniobra (Bhattacharyya y cols., 2017).
 - **Hipótesis:** VPPB del canal lateral (geotrópico) del mismo oído tratado; recaída del posterior; VPPB del otro oído.
-- **Qué pedir:** giro supino a los dos lados (→ H18). Con nistagmo horizontal en el Dix-Hallpike, la guía recomienda el giro supino.
+- **Qué pedir:** giro supino a los dos lados (→ H19). Con nistagmo horizontal en el Dix-Hallpike, la guía recomienda el giro supino.
 - **Errores esperables:** llamarlo "bilateral" por el nistagmo hacia los dos lados; tratar el lado de menor nistagmo; repetir el Epley.
-- **En LabSim:** el cuadro de audición es normal; el giro supino y el Gufoni no se hacen en LabSim (→ H18).
+- **En LabSim:** el cuadro de audición es normal; el giro supino y el Gufoni no se hacen en LabSim (→ H19).
 :::
 
 {{caso cap22_apogeotropico}}
@@ -195,7 +195,7 @@ Con estos antecedentes, ¿qué prueba harías? ¿Y qué verías si las partícul
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio en las posturas (→ H18)
+:::ayuda-ancho Lo que se vio en las posturas (→ H19)
 | Postura | Lo que se vio |
 |---|---|
 | Dix-Hallpike (los dos lados) | sin nistagmo vertical |
@@ -221,9 +221,9 @@ Con estos antecedentes, ¿qué prueba harías? ¿Y qué verías si las partícul
 :::docente Guía del caso
 - **Datos clave:** el vértigo dura **mientras se mantiene la postura** (uno o dos minutos), sin latencia aparente, y la paciente señala como "el peor" el lado izquierdo. Presbiacusia simétrica con acúfeno de años.
 - **Hipótesis:** VPPB lateral apogeotrópico (cupulolitiasis o partículas cerca de la ampolla); VPPB geotrópico (se descarta por la dirección); causa central si el nistagmo no calza o no responde.
-- **Qué pedir:** giro supino a los dos lados, y comparar intensidades (→ H18).
+- **Qué pedir:** giro supino a los dos lados, y comparar intensidades (→ H19).
 - **Errores esperables:** aplicar la regla del geotrópico y tratar el lado equivocado; tomar el lado donde la paciente se siente peor como el afectado; hacer un Epley.
-- **En LabSim:** cuadro de audición *presbiacusia*; el giro supino no se hace en LabSim (→ H18).
+- **En LabSim:** cuadro de audición *presbiacusia*; el giro supino no se hace en LabSim (→ H19).
 :::
 
 {{caso cap22_central}}
@@ -242,7 +242,7 @@ Hay tres datos en su relato que **no** son de un VPPB. ¿Cuáles son? ¿Qué sig
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio (→ H18)
+:::ayuda-ancho Lo que se vio (→ H19)
 | Examen | Lo que se vio |
 |---|---|
 | Dix-Hallpike (cabeza colgando) | nistagmo **hacia abajo, vertical puro**, sin componente torsional, **sin latencia**, que dura todo el minuto de la postura |
@@ -281,7 +281,7 @@ Los episodios son cortos, los provoca la postura, entre uno y otro ella está bi
 
 #### Diagnóstico y qué sigue
 
-VPPB del canal posterior derecho, canalitiasis. Se hace la maniobra de Epley hacia la derecha (→ H18). Con los tiempos del libro, cada postura se mantiene 2 minutos; la guía de la AAO-HNS describe tiempos más cortos (Bhattacharyya y cols., 2017). Terminada la maniobra, se indica dormir semisentada las dos noches siguientes, no hacer movimientos bruscos con la cabeza y volver a un control dentro de 7 días, donde se repiten las pruebas de provocación.
+VPPB del canal posterior derecho, canalitiasis. Se hace la maniobra de Epley hacia la derecha (→ H19). Con los tiempos del libro, cada postura se mantiene 2 minutos; la guía de la AAO-HNS describe tiempos más cortos (Bhattacharyya y cols., 2017). Terminada la maniobra, se indica dormir semisentada las dos noches siguientes, no hacer movimientos bruscos con la cabeza y volver a un control dentro de 7 días, donde se repiten las pruebas de provocación.
 
 :::comentario Lo que dicen las normas
 La guía de la AAO-HNS recomienda **con fuerza no indicar restricciones de postura** después de la maniobra del canal posterior (nivel de evidencia A): los ensayos aleatorizados no muestran que mejoren el resultado y tienen costos (peor sueño, ansiedad, molestias del cuello). En este libro se enseña lo que dice el protocolo, con la lógica de mantener las partículas reposicionadas en el utrículo mientras se pegan a la mácula, y se deja la decisión al criterio del equipo (Bhattacharyya y cols., 2017). La guía también pide **reevaluar dentro del mes**.
@@ -297,7 +297,7 @@ Que el vértigo haya **cambiado de postura** es la pista: antes era al mirar hac
 
 #### Diagnóstico y qué sigue
 
-VPPB del canal lateral izquierdo, canalitiasis, tipo geotrópico. Se hace la **maniobra de Gufoni, variante canalar**: sentado en el borde de la camilla, se le acuesta de lado sobre el lado **sano** (el derecho) y se mantienen 2 minutos; se gira rápido la cabeza 45° hacia el suelo y se mantienen otros 2; se le sienta (→ H18). La barbacoa (Lempert) es la alternativa: una vuelta completa en pasos de 90° hacia el lado sano. Control en 7 días con el giro supino, para ver si quedó resuelto y si hay otros canales (Bhattacharyya y cols., 2017).
+VPPB del canal lateral izquierdo, canalitiasis, tipo geotrópico. Se hace la **maniobra de Gufoni, variante canalar**: sentado en el borde de la camilla, se le acuesta de lado sobre el lado **sano** (el derecho) y se mantienen 2 minutos; se gira rápido la cabeza 45° hacia el suelo y se mantienen otros 2; se le sienta (→ H19). La barbacoa (Lempert) es la alternativa: una vuelta completa en pasos de 90° hacia el lado sano. Control en 7 días con el giro supino, para ver si quedó resuelto y si hay otros canales (Bhattacharyya y cols., 2017).
 
 :::ojo Ojo clínico
 Dos intensidades distintas del mismo nistagmo no son dos canales: es **un** canal con una cúpula más excitada que la otra. Dos canales afectados se reconocen porque hay **dos posturas distintas** que dan nistagmo, no por el nistagmo hacia los dos lados del giro supino.
@@ -311,7 +311,7 @@ El vértigo dura mientras la postura se mantiene, sin latencia, y el nistagmo **
 
 #### Diagnóstico y qué sigue
 
-VPPB del canal lateral derecho, cupulolitiasis, tipo apogeotrópico. Se hace la **maniobra de Gufoni, variante cupular**: sentada en el borde de la camilla, se le acuesta de lado sobre el lado **afectado** (el derecho) y se mantienen 2 minutos; se gira rápido la cabeza 45° hacia arriba y se mantienen otros 2; se le sienta (→ H18). Se repite el giro supino para comprobar que las partículas se soltaron: si el nistagmo pasa a **geotrópico** (más fuerte hacia el derecho), se sigue con la variante canalar. Si no cambia, o el nistagmo no calza con un canal, o hay signos neurológicos, no se insiste: se deriva (Bhattacharyya y cols., 2017).
+VPPB del canal lateral derecho, cupulolitiasis, tipo apogeotrópico. Se hace la **maniobra de Gufoni, variante cupular**: sentada en el borde de la camilla, se le acuesta de lado sobre el lado **afectado** (el derecho) y se mantienen 2 minutos; se gira rápido la cabeza 45° hacia arriba y se mantienen otros 2; se le sienta (→ H19). Se repite el giro supino para comprobar que las partículas se soltaron: si el nistagmo pasa a **geotrópico** (más fuerte hacia el derecho), se sigue con la variante canalar. Si no cambia, o el nistagmo no calza con un canal, o hay signos neurológicos, no se insiste: se deriva (Bhattacharyya y cols., 2017).
 
 :::comentario Lo que dicen las normas
 Para el apogeotrópico la guía de la AAO-HNS reconoce que hay muy pocos ensayos y que no alcanza para recomendar una maniobra en particular; la variante cupular que se enseña aquí es una de las descritas (Bhattacharyya y cols., 2017). El apogeotrópico es además el VPPB que más se parece a un nistagmo posicional central: por eso, si persiste, hay que mirarlo con ojos de neurólogo.

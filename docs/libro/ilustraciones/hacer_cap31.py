@@ -73,7 +73,7 @@ def seguimiento(clave):
             c.t(x + 206, yy, val, 9, TINTA, 'end', 700)
             if i < len(filas) - 1:
                 c.l(x + 18, yy + 7, x + 208, yy + 7, GRILLA, 1)
-    c.t(16, 360, 'La batería es la de H19.', 7.5, TENUE, 'start')
+    c.t(16, 360, 'La batería es la de H20.', 7.5, TENUE, 'start')
     c.guardar(f'cap31-seguimiento-{clave}.svg')
 
 

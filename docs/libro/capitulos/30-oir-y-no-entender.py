@@ -16,7 +16,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
-# Lo periférico que se cierra antes de cualquier batería central (→ H14)
+# Lo periférico que se cierra antes de cualquier batería central (→ H15)
 PERIFERIA = [fig.audiograma(), fig.logo(), fig.timpanograma(), fig.dpoae()]
 
 CASOS = [

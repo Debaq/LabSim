@@ -15,8 +15,8 @@ Una persona cuenta que desde hace meses no se siente firme. No gira nada: es un 
 Este capítulo no agrega ninguna prueba nueva. El PPPD **se diagnostica por la historia**, con cinco criterios (→ Patología), y ningún examen lo confirma. Lo que quien evalúa aporta es otra cosa: mostrar que **no hay otra enfermedad que lo explique mejor**, medir cuánto afecta la vida diaria y dejar una línea de base para cuando se trate (→ cap. 32).
 
 - **Audiometría, logoaudiometría y reflejos** (→ H3, H5, H6, H7): la audición normal, o la propia de la edad y simétrica, es parte de lo que se espera. Una asimetría o una discriminación baja cambia el capítulo entero (→ caso 27.3 y cap. 11).
-- **El examen vestibular** (→ H15, H16, H17, H12): sin nistagmo, con calórica y vHIT simétricos o con una asimetría pequeña, y VEMP sin diferencia. Una **hipofunción residual** pequeña es común y **no explica** un mareo diario de meses.
-- **La batería de función de H19**: la agudeza visual dinámica, el apoyo monopodal, el TUG y el índice de marcha de 4 ítems. En un PPPD suelen salir dentro de lo esperable: la función está; lo que falla es cómo se usa.
+- **El examen vestibular** (→ H16, H17, H18, H12): sin nistagmo, con calórica y vHIT simétricos o con una asimetría pequeña, y VEMP sin diferencia. Una **hipofunción residual** pequeña es común y **no explica** un mareo diario de meses.
+- **La batería de función de H20**: la agudeza visual dinámica, el apoyo monopodal, el TUG y el índice de marcha de 4 ítems. En un PPPD suelen salir dentro de lo esperable: la función está; lo que falla es cómo se usa.
 - **Los cuestionarios**: documentan lo que las pruebas no ven.
 
 :::ayuda Ayuda memoria
@@ -32,7 +32,7 @@ Cada uno mira algo distinto. Ninguno diagnostica; juntos arman el perfil.
 
 | Instrumento | Qué mide | Cómo se contesta |
 |---|---|---|
-| **DHI** (→ H19) (Jacobson y Newman, 1990) | Cuánto limita el mareo la vida diaria, con subescalas funcional, emocional y física | 25 ítems (sí, a veces, no); 0 a 100 |
+| **DHI** (→ H20) (Jacobson y Newman, 1990) | Cuánto limita el mareo la vida diaria, con subescalas funcional, emocional y física | 25 ítems (sí, a veces, no); 0 a 100 |
 | **VSS** (escala de síntomas de vértigo) (Yardley y cols., 1992) | Con qué frecuencia y con qué intensidad hubo síntomas de vértigo-equilibrio y síntomas autonómicos y de ansiedad en los últimos 12 meses | 36 ítems de frecuencia; dos subescalas (Wilhelmsen y cols., 2008) |
 | **VVAS** (escala análoga de vértigo visual) (Dannenbaum y cols., 2011) | Cuánto marean nueve situaciones visuales de la vida diaria: supermercado, multitud, pantallas, tráfico | Una escala análoga de 0 a 10 en cada situación |
 | **NPQ** (cuestionario de Niigata para el PPPD) (Yagi y cols., 2019) | La gravedad del PPPD en sus tres dominios: postura y marcha, movimiento y estímulos visuales | 12 ítems, cuatro por dominio, cada uno de 0 a 6; 0 a 24 por dominio |
@@ -40,7 +40,7 @@ Cada uno mira algo distinto. Ninguno diagnostica; juntos arman el perfil.
 
 <!-- verificar: el formato de cada instrumento en su versión en español. VSS (36 ítems, 12 meses, dos subescalas) y tramos del ABC se cotejaron en la pasada de contenidos 2026-10-18 con Wilhelmsen 2008 (texto completo) y Myers 1998 (resumen). -->
 
-Cómo se puntúan y se leen la VSS y el ABC está en H19.
+Cómo se puntúan y se leen la VSS y el ABC está en H20.
 
 
 La lectura útil no es el número solo, sino el **perfil**. Un DHI alto con mucho **emocional** y una VVAS alta, con la audición y el vestíbulo sanos, es el perfil de un mareo que se ha vuelto visual y de vigilancia. Un DHI moderado con una VVAS **baja** y un empeoramiento a oscuras apunta a otro sitio. El ABC dice qué ha dejado de hacer el paciente por miedo: una confianza baja con una función normal es justo la brecha que el tratamiento va a trabajar.
@@ -50,9 +50,9 @@ Los cuestionarios sirven para **seguir** al paciente, no para diagnosticar. Un N
 :::
 
 :::comentario Lo que dicen las normas
-- **Quién diagnostica y con qué.** Los criterios de la Sociedad Bárány son **clínicos**: no incluyen ninguna prueba obligatoria. El criterio E (no se explica mejor por otra enfermedad) es el que se apoya en los exámenes; por eso se piden, y por eso un examen vestibular reciente, que el protocolo de H19 exige antes de rehabilitar, es también aquí la base (Staab y cols., 2017).
-- **La batería de H19 se diseñó para la hipofunción.** Sus pruebas buscan un déficit de función; en el PPPD lo normal es que salgan bien, y lo que se pierde es la **confianza**. Se aplican igual, porque ese resultado normal es el dato.
-- **Los cuestionarios.** El DHI es el que lleva este libro (→ H19). Los otros se agregan solo cuando se sospecha un componente visual o de miedo a caer; con el DHI basta para partir.
+- **Quién diagnostica y con qué.** Los criterios de la Sociedad Bárány son **clínicos**: no incluyen ninguna prueba obligatoria. El criterio E (no se explica mejor por otra enfermedad) es el que se apoya en los exámenes; por eso se piden, y por eso un examen vestibular reciente, que el protocolo de H20 exige antes de rehabilitar, es también aquí la base (Staab y cols., 2017).
+- **La batería de H20 se diseñó para la hipofunción.** Sus pruebas buscan un déficit de función; en el PPPD lo normal es que salgan bien, y lo que se pierde es la **confianza**. Se aplican igual, porque ese resultado normal es el dato.
+- **Los cuestionarios.** El DHI es el que lleva este libro (→ H20). Los otros se agregan solo cuando se sospecha un componente visual o de miedo a caer; con el DHI basta para partir.
 :::
 
 ## En LabSim
@@ -63,7 +63,7 @@ LabSim da el lado auditivo de estos pacientes (audiograma, logoaudiometría, ref
 
 ### Lo esperable: el mareo se apaga
 
-Después de una pérdida vestibular o de un cuadro que marea, el sistema **compensa** (→ H19, B2). El reposo se reequilibra primero, la función con el movimiento después, y la persona vuelve a confiar en lo que siente. El mareo del primer mes es parte de eso y no es un problema.
+Después de una pérdida vestibular o de un cuadro que marea, el sistema **compensa** (→ H20, B2). El reposo se reequilibra primero, la función con el movimiento después, y la persona vuelve a confiar en lo que siente. El mareo del primer mes es parte de eso y no es un problema.
 
 :::imagen ilustraciones/cap27-curso.svg Dos caminos del mismo síntoma después de un evento agudo: el mareo que se apaga a medida que el sistema compensa, y el que baja un poco, se queda en una meseta y sube cada vez que el paciente se expone.
 :::
@@ -75,7 +75,7 @@ El PPPD es cuando el **segundo camino** se instala: el mareo baja un poco y se q
 La Sociedad Bárány describe tres cambios que se mantienen aunque el vestíbulo ya funcione (Staab y cols., 2017):
 
 1. **El control postural se pone rígido.** El cuerpo se sostiene con más tensión: se bloquean tobillos y rodillas, se mira fijo, se oscila poco y rápido. En pacientes con un mareo postural fóbico, lo que se vio es más co-contracción de las piernas y un balanceo de pequeña amplitud, y **ambos se normalizaron cuando se les distrajo la atención** con una tarea (Wuehr y cols., 2017). La rigidez es una estrategia, no una pérdida: por eso cede cuando el paciente deja de vigilarse.
-2. **La vista pesa de más.** Se vio en la neuritis: los pacientes que seguían mareados tenían una mayor dependencia visual (Cousins y cols., 2014) <!-- Cousins 2014 (PMID 25233234), resumen: ~50 % con síntomas a largo plazo; el tercio con peor resultado tuvo más dependencia visual (6,35° vs 3,39°). -->. Y en el "vértigo visual", quienes lo refieren se desordenan más con un entorno visual en movimiento (Guerraz y cols., 2001; Bronstein, 1995). Es la misma lógica de la repesada sensorial de H19: el cerebro reparte la confianza entre vista, pies y vestíbulo (Peterka, 2002), y aquí la vista queda con demasiado peso.
+2. **La vista pesa de más.** Se vio en la neuritis: los pacientes que seguían mareados tenían una mayor dependencia visual (Cousins y cols., 2014) <!-- Cousins 2014 (PMID 25233234), resumen: ~50 % con síntomas a largo plazo; el tercio con peor resultado tuvo más dependencia visual (6,35° vs 3,39°). -->. Y en el "vértigo visual", quienes lo refieren se desordenan más con un entorno visual en movimiento (Guerraz y cols., 2001; Bronstein, 1995). Es la misma lógica de la repesada sensorial de H20: el cerebro reparte la confianza entre vista, pies y vestíbulo (Peterka, 2002), y aquí la vista queda con demasiado peso.
 3. **La integración central amplifica.** Las señales del cuerpo y del entorno se interpretan con más alarma. En un estudio con resonancia funcional, los pacientes con mareo crónico subjetivo activaban menos que los sanos la corteza vestibular, la ínsula, el hipocampo y el cíngulo anterior frente a un estímulo vestibular, regiones que integran el equilibrio con la ansiedad, y esas regiones estaban conectadas de otra manera (Indovina y cols., 2015).
 
 El segundo ajuste, la dependencia visual, se ve en la posturografía de seis condiciones de un paciente con el vestíbulo **sano** y la vista con peso de más: se desordena justo donde la vista miente. La **razón de preferencia visual** del análisis sensorial compara las condiciones con la vista falseada y las de ojos cerrados (Nashner y cols., 1982) <!-- verificar: la razón (3+6)/(2+5) como "preferencia visual" es la que usa el simulador y la posturografía comercial; falta la fuente primaria de esa definición. Pasada 2026-10-18: solo aparece en material de fabricantes y en tablas de artículos que la usan sin citar su origen; Nashner y cols. (1982) describen las condiciones, no la razón. -->. La figura muestra una sola idea del PPPD, como un rasgo fijo, sin la historia, el miedo, la rigidez ni la atención, y no es un criterio diagnóstico: la dependencia visual se describió en los cuadros que precedieron al PPPD, y cuánto se repite en el PPPD está todavía por medirse (Staab y cols., 2017). Por eso la posturografía no se usa para decidir.
@@ -161,7 +161,7 @@ Frente a un mareo que dura meses, las preguntas siguen un orden:
 1. **¿Es casi diario y lleva 3 meses o más?** (criterio A). Si no, aún puede ser una compensación en curso.
 2. **¿Qué lo empeora y qué lo mejora?** Postura, movimiento y estímulos visuales (criterio B). Lo que lo alivia (acostado, distraído) es tan informativo como lo que lo agrava.
 3. **¿Qué lo disparó?** (criterio C). Si no hay un evento y empezó solo, es una señal de alarma: el PPPD parte de algo.
-4. **¿Hay algo que lo explique mejor?** (criterio E). Se mira la audición, el nistagmo, el impulso cefálico, la calórica y el VEMP, y las pruebas posicionales (→ H15 a H18).
+4. **¿Hay algo que lo explique mejor?** (criterio E). Se mira la audición, el nistagmo, el impulso cefálico, la calórica y el VEMP, y las pruebas posicionales (→ H16 a H19).
 5. **¿Cuánto le cuesta?** (criterio D). DHI, VVAS, ABC.
 
 :::ayuda-ancho Cuando las pruebas están normales: qué dicen y qué no
@@ -196,7 +196,7 @@ Dos cuidados más. El primero: **no se contrapone** la ansiedad al mareo. Una cr
 - **Diagnosticar por descarte.** El PPPD tiene criterios **positivos**: no es lo que queda cuando todo sale normal.
 - **Cerrar el caso porque el examen salió normal.** Hay que mirar si algo del examen apunta a otra cosa; el caso 27.3 es el ejemplo.
 - **Atribuirlo todo a la ansiedad.** Una persona puede estar ansiosa por **tener** un mareo sin causa, y un mareo con causa se atribuye mal a los nervios. En los dos sentidos se equivoca.
-- **Dar supresores vestibulares por tiempo prolongado.** Estorban la compensación (→ H19) y no tratan el PPPD.
+- **Dar supresores vestibulares por tiempo prolongado.** Estorban la compensación (→ H20) y no tratan el PPPD.
 - **No explicar.** Mandar al paciente a la casa con un "está normal" lo deja igual que como llegó, y con razones para desconfiar.
 
 :::pregunta Pregunta abierta
@@ -232,14 +232,14 @@ Ya tiene una resonancia de cerebro normal. ¿Qué agregarías para ver si el lab
 - @OI P13 | El del OI, el lado de la neuritis, mide **343 µV** (6,82). La asimetría es de **0 %**: el sáculo del lado enfermo responde igual. En una neuritis superior, el cVEMP suele conservarse (→ cap. 21).
 :::
 
-:::ayuda-ancho Lo que entrega Victoria del examen vestibular y de los cuestionarios (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Victoria del examen vestibular y de los cuestionarios (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | normales |
 | Posicional (Dix-Hallpike y rotación en decúbito) | negativa |
 | Calórica mínima (agua a 2 °C), fase lenta | OD **21 °/s**, OI **17 °/s**: hipoexcitabilidad OI de **11 %**, bajo el corte de 25 % |
 | vHIT, canal lateral | OD **0,98**, OI **0,93**, sin sacadas |
-| Batería de H19 | DVA: pierde **1 línea** en el giro horizontal. TUG **8 s**. DGI de 4 ítems **12/12** |
+| Batería de H20 | DVA: pierde **1 línea** en el giro horizontal. TUG **8 s**. DGI de 4 ítems **12/12** |
 | DHI | **58** (moderado) |
 | VVAS | **5,8**, con las situaciones de supermercado y pantalla más altas |
 | NPQ | **38** |
@@ -281,7 +281,7 @@ La paciente dice que la llamaron "ansiosa" y que no está de acuerdo. ¿Qué har
 - @OI max | El OI llega al **96 %**: discriminación buena, acorde a la pérdida, y casi igual en los dos oídos. No hay nada asimétrico ni retrococlear.
 :::
 
-:::ayuda-ancho Lo que entrega Eva del examen vestibular y de los cuestionarios (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Eva del examen vestibular y de los cuestionarios (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | normales |
@@ -289,7 +289,7 @@ La paciente dice que la llamaron "ansiosa" y que no está de acuerdo. ¿Qué har
 | Calórica mínima (agua a 2 °C), fase lenta | OD **19 °/s**, OI **20 °/s**: diferencia de **3 %** |
 | vHIT, canal lateral | OD **0,96**, OI **0,97**, sin sacadas |
 | Presión arterial | acostada **128/76**, de pie a los 3 minutos **124/78**: sin caída |
-| Batería de H19 | DVA: pierde **1 línea**. Apoyo monopodal **12 s**. TUG **10 s**. DGI de 4 ítems **11/12**, con vacilación al girar la cabeza |
+| Batería de H20 | DVA: pierde **1 línea**. Apoyo monopodal **12 s**. TUG **10 s**. DGI de 4 ítems **11/12**, con vacilación al girar la cabeza |
 | DHI | **66** (grave), con la subescala **emocional** la más alta |
 | VVAS | **6,4**: la más alta en supermercado y en la micro |
 | NPQ | **44** |
@@ -301,7 +301,7 @@ La paciente dice que la llamaron "ansiosa" y que no está de acuerdo. ¿Qué har
 - **Hipótesis:** VPPB residual o recurrente, hipotensión ortostática, ansiedad primaria, **PPPD** precipitado por el VPPB y amplificado por el pánico.
 - **Qué pedir:** audiometría y logoaudiometría, pruebas posicionales repetidas (→ cap. 22), calórica, vHIT, la presión de pie y la lista de remedios; DHI, VVAS y ABC.
 - **Lo que enseña:** que se **repite** lo que se descartó antes (la posicional ya estaba tratada); que la ansiedad que aparece **después** del mareo no lo explica ni lo contradice; y que una hipoacusia de la edad suma dificultad sin ser la causa.
-- **Errores esperables:** cerrarlo como "ansiedad" sin mirar el vestíbulo; dar por curada la posicional sin repetirla; olvidar que el ansiolítico se suspende 48 horas antes de la calórica (→ H16).
+- **Errores esperables:** cerrarlo como "ansiedad" sin mirar el vestíbulo; dar por curada la posicional sin repetirla; olvidar que el ansiolítico se suspende 48 horas antes de la calórica (→ H17).
 - **En LabSim:** presbiacusia leve en los dos oídos. El nombre de la paciente lo sortea el editor.
 :::
 
@@ -345,7 +345,7 @@ Tiene un pitido en el oído izquierdo y dificultad para oír por teléfono con e
 - @OI P13 | El del OI mide **38 µV** (0,75 corregida). La asimetría es de **76 %**, sobre el corte de 35 % de LabSim (→ H12): el sáculo del OI responde muy poco.
 :::
 
-:::ayuda-ancho Lo que entrega Joaquín del examen vestibular y de los cuestionarios (→ H15 a H19)
+:::ayuda-ancho Lo que entrega Joaquín del examen vestibular y de los cuestionarios (→ H16 a H20)
 | Prueba | Resultado |
 |---|---|
 | Supraliminares (→ H6) | Carhart en el OI: **30 dB** de deterioro. SISI en el OI: **10 %** |
@@ -353,8 +353,8 @@ Tiene un pitido en el oído izquierdo y dificultad para oír por teléfono con e
 | Posicional | negativa |
 | Calórica mínima (agua a 2 °C), fase lenta | OD **26 °/s**, OI **10 °/s**: hipoexcitabilidad OI de **44 %** |
 | vHIT, canal lateral | OD **0,99**, OI **0,86**, sin sacadas |
-| mCTSIB (→ H19) | cae en ojos cerrados sobre espuma, hacia la izquierda |
-| Batería de H19 | DVA: pierde **1 línea**. TUG **9 s**. DGI de 4 ítems **10/12**, con vacilación en los giros |
+| mCTSIB (→ H20) | cae en ojos cerrados sobre espuma, hacia la izquierda |
+| Batería de H20 | DVA: pierde **1 línea**. TUG **9 s**. DGI de 4 ítems **10/12**, con vacilación en los giros |
 | DHI | **40** (moderado) |
 | VVAS | **1,6**: el supermercado y las pantallas casi no lo marean |
 | NPQ | **12** |

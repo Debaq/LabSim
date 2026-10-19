@@ -242,7 +242,7 @@ Si el audiograma saliera normal, ¿darías de alta? ¿Qué agregarías para cuan
 
 :::docente Guía del caso
 - **Datos clave:** 28 años, entiende mal en ruido pero oye "todo", pies cavos, tropiezos, padre y tía con bastón, neurólogo con "nervios lentos".
-- **Hipótesis esperables:** coclear leve (no: audiograma normal), problema de procesamiento central (→ H14), **neuropatía periférica con compromiso del VIII par**.
+- **Hipótesis esperables:** coclear leve (no: audiograma normal), problema de procesamiento central (→ H15), **neuropatía periférica con compromiso del VIII par**.
 - **Qué pedir:** logoaudiometría, reflejos, emisiones, ABR y, si hay equipo, logoaudiometría en ruido y VEMP. Coordinar con neurología.
 - **Errores esperables:** dar de alta por audiograma normal; llamarla "fingida"; no relacionarlo con el cuadro neurológico.
 - **En LabSim:** cuadro *neuropatía hereditaria*, sin grado (audiograma normal).

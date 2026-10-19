@@ -305,7 +305,7 @@ Con un bebé que no reacciona a los portazos, ¿hasta qué nivel de estímulo si
 :::docente Guía del caso
 - **Datos clave:** madre migrante sin vacunación, rash a las 9 semanas, cataratas y ductus, IgM positiva, bajo peso. El tamizaje refirió en ambos oídos.
 - **Hipótesis esperables:** hipoacusia sensorioneural bilateral severa a profunda (rubéola, CMV, toxoplasmosis), efusión de oído medio añadida, neuropatía auditiva.
-- **Qué pedir:** ABR hasta el nivel máximo del equipo, tone burst por frecuencia, emisiones, ASSR para buscar resto auditivo (→ H13), y **derivación temprana** al equipo de rehabilitación y de implante coclear. Los umbrales conductuales llegan después, con refuerzo visual (→ H20).
+- **Qué pedir:** ABR hasta el nivel máximo del equipo, tone burst por frecuencia, emisiones, ASSR para buscar resto auditivo (→ H13), y **derivación temprana** al equipo de rehabilitación y de implante coclear. Los umbrales conductuales llegan después, con refuerzo visual (→ H21).
 - **Errores esperables:** detenerse en 80 dB nHL y escribir "sin respuesta"; no agregar la corrección a dB eHL; leer la vía ósea sin respuesta como diagnóstico; no avisar a la familia que el cuadro sigue y que hay otras necesidades (visión y corazón).
 - **En LabSim:** cuadro *rubéola congénita*, grado severo en los dos oídos. La vía ósea sin respuesta es consecuencia del tope del vibrador y no un error del simulador.
 :::

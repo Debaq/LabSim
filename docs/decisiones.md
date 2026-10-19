@@ -6195,3 +6195,18 @@ El libro se cotejó ítem por ítem con `docs/libro/checklist_de_contenidos_del_
   "Qué tiene que tener" de B2 para la colega; no se duplica en otros
   capítulos, salvo cuando es el fundamento de una prueba (eferente en H9,
   binaural en H14). **B3 histología se escribe** (antes estaba fuera).
+
+## Libro: herramientas renumeradas, H14-H25 pasan a H15-H26 (2026-10-18)
+
+Él pidió un capítulo de potenciales de latencia media y tardía y que lo
+electrofisiológico no quedara desordenado. Entra como **H14**, junto a H13
+(estado estable) y antes del procesamiento central, que pasa a **H15**; todo lo
+que seguía corre un número: vestibular H16-H20, audífonos H21-H22, ocupacional
+H23, nariz H24-H26. Los nuevos de la nariz van al final: **H27 prick test** y
+**H28 espirometría**.
+
+- Hecho con un script (contenido y nombres a la vez, de mayor a menor): textos,
+  generadores, ilustraciones y sus scripts, prefijos de casos (`h21_p36`...),
+  índice, ESTADO, LEEME, incongruencias, autoría de `hacer_libro.py`.
+- **No se tocaron** esta bitácora ni los informes de `investigacion/` anteriores:
+  ahí H14-H25 significan la numeración vieja (sumar uno).

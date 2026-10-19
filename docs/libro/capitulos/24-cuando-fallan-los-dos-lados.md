@@ -14,10 +14,10 @@ Un paciente llega caminando con cuidado, mirando el piso. Dice que "no es vérti
 
 Este capítulo no pide pruebas nuevas. Pide **leer con otra pregunta** las de siempre: no "¿cuál oído responde menos?", sino "¿responde alguno?". Cuatro cosas conviene tener a la vista.
 
-- **La entrevista** (→ H15). Tres preguntas separan a este paciente de uno con vértigo: ¿ve borroso o saltón cuando camina o gira la cabeza?, ¿empeora a oscuras o sobre piso desparejo?, ¿está bien sentado o acostado? Y una de exposición: ¿recibió aminoglucósidos (gentamicina, amikacina, kanamicina, estreptomicina), tuvo meningitis, o tiene familia con problemas del equilibrio o neuropatía?
-- **La calórica** (→ H16). La mínima del protocolo, con agua a 2 °C, entrega la velocidad de la fase lenta **de cada oído**. Esos dos números son lo importante; el porcentaje de asimetría es lo secundario. Para aplicar el criterio de consenso hace falta la **suma de la respuesta tibia y fría de cada oído**: si la mínima sale baja en los dos, se completa con la bitérmica.
-- **El vHIT** (→ H17). La ganancia de **los dos** canales laterales, con sus sacadas. Una ganancia baja de los dos lados, con sacadas manifiestas hacia los dos, es el cuadro. Aquí importa también el **tamaño** de la ganancia: el consenso pide menos de 0,6, más exigente que el límite de 0,8 con que muchos equipos marcan "alterado".
-- **La agudeza visual dinámica** (→ H19). Es la forma de medir en la consulta lo que el paciente cuenta: cuántas líneas pierde al leer con la cabeza en movimiento. Es el examen de pie que mejor muestra a este paciente.
+- **La entrevista** (→ H16). Tres preguntas separan a este paciente de uno con vértigo: ¿ve borroso o saltón cuando camina o gira la cabeza?, ¿empeora a oscuras o sobre piso desparejo?, ¿está bien sentado o acostado? Y una de exposición: ¿recibió aminoglucósidos (gentamicina, amikacina, kanamicina, estreptomicina), tuvo meningitis, o tiene familia con problemas del equilibrio o neuropatía?
+- **La calórica** (→ H17). La mínima del protocolo, con agua a 2 °C, entrega la velocidad de la fase lenta **de cada oído**. Esos dos números son lo importante; el porcentaje de asimetría es lo secundario. Para aplicar el criterio de consenso hace falta la **suma de la respuesta tibia y fría de cada oído**: si la mínima sale baja en los dos, se completa con la bitérmica.
+- **El vHIT** (→ H18). La ganancia de **los dos** canales laterales, con sus sacadas. Una ganancia baja de los dos lados, con sacadas manifiestas hacia los dos, es el cuadro. Aquí importa también el **tamaño** de la ganancia: el consenso pide menos de 0,6, más exigente que el límite de 0,8 con que muchos equipos marcan "alterado".
+- **La agudeza visual dinámica** (→ H20). Es la forma de medir en la consulta lo que el paciente cuenta: cuántas líneas pierde al leer con la cabeza en movimiento. Es el examen de pie que mejor muestra a este paciente.
 
 :::ayuda Ayuda memoria
 - **Pérdida simétrica = fórmula en cero.** La paresia y la preponderancia no sirven aquí: se leen las velocidades y las ganancias **de cada oído**.
@@ -28,14 +28,14 @@ Este capítulo no pide pruebas nuevas. Pide **leer con otra pregunta** las de si
 
 ### Por qué la fórmula de asimetría no la ve
 
-La paresia canalicular es un cociente: la diferencia entre lo que responde un oído y el otro, dividida por la suma de las dos respuestas (→ H16). Cuando los dos oídos responden igual de poco, el numerador es casi cero y el resultado es "sin paresia", **sea cual sea** la altura a la que están los dos. Con velocidades pequeñas, además, el cociente se mueve mucho por una diferencia de un solo grado por segundo: la misma suma de 7 °/s da 14 % si un oído lee 3 y el otro 4, y daría 43 % si leyeran 2 y 5.
+La paresia canalicular es un cociente: la diferencia entre lo que responde un oído y el otro, dividida por la suma de las dos respuestas (→ H17). Cuando los dos oídos responden igual de poco, el numerador es casi cero y el resultado es "sin paresia", **sea cual sea** la altura a la que están los dos. Con velocidades pequeñas, además, el cociente se mueve mucho por una diferencia de un solo grado por segundo: la misma suma de 7 °/s da 14 % si un oído lee 3 y el otro 4, y daría 43 % si leyeran 2 y 5.
 
 Un ejemplo con las cuatro irrigaciones: tibia derecha 1, fría derecha 2, tibia izquierda 1, fría izquierda 3 °/s. La paresia es (3 − 4) / 7 × 100 = **−14 %**, bajo el 25 % del protocolo: "valor no significativo". Y sin embargo la suma de cada oído (3 y 4 °/s) está **bajo 6**: la prueba dice a la vez "sin asimetría" y "sin respuesta". Las dos cosas son verdad y solo la segunda importa.
 
 :::imagen ilustraciones/cap24-cociente.svg ancho=82% Los cuatro pacientes del capítulo en un mismo plano: la suma tibia + fría de cada oído. Los cuatro caen dentro de la cuña donde la paresia es menor de 25 %, que es la que la fórmula llama "no significativa"; tres de los cuatro caen además en el cuadro verde, donde los dos oídos suman menos de 6 °/s
 :::
 
-El protocolo ya trae la frase que hace falta, aunque no la use en la mínima: *según parámetros cuantitativos, hipoexcitabilidad vestibular severa* o *arreflexia vestibular en oído derecho/izquierdo/bilateral* (→ H16). En un paciente así, el informe debe llevar esa frase **y** el porcentaje, y no dejar solo el "no significativo".
+El protocolo ya trae la frase que hace falta, aunque no la use en la mínima: *según parámetros cuantitativos, hipoexcitabilidad vestibular severa* o *arreflexia vestibular en oído derecho/izquierdo/bilateral* (→ H17). En un paciente así, el informe debe llevar esa frase **y** el porcentaje, y no dejar solo el "no significativo".
 
 :::comentario Lo que dicen las normas
 El protocolo no fija un número para "severa" ni para "arreflexia". El consenso de la Sociedad Bárány (Strupp y cols., 2017) sí lo hace para el diagnóstico de la vestibulopatía bilateral: en la calórica, la **suma de las velocidades máximas de la fase lenta con agua tibia y fría, en cada oído, menor de 6 °/s**; en el vHIT, una **ganancia del reflejo menor de 0,6 en los dos lados** con impulsos de 150 a 300 °/s; o, en la silla rotatoria, una ganancia de 0,1 o menos con una sinusoide de 0,1 Hz y velocidad máxima de 50 °/s, junto con un adelanto de fase de 15 grados o más (Strupp y cols., 2023). Basta cumplir una de las tres. En este libro se usa ese criterio como **número de apoyo** del informe, y el límite se aplica al parámetro con que fue calculado: la mínima con agua a 2 °C es un solo estímulo, el más fuerte, y no entrega la suma tibia + fría; por eso, ante una mínima baja en los dos oídos, se completa con la bitérmica antes de nombrar la hipofunción bilateral. <!-- Pasada de fundamentos 2026-10-18: decía, para la silla, "una ganancia menor de 0,1 ... o un adelanto de fase mayor de 68 grados". La fe de erratas (Strupp y cols., 2023) cambió el criterio a "gain ≤0.1 ... and a phase lead ≥15 degrees (time constant ≤6 sec)"; en el original de 2017 los dos requisitos ya iban unidos por "and" en la lista de criterios. -->
@@ -43,10 +43,10 @@ El protocolo no fija un número para "severa" ni para "arreflexia". El consenso 
 
 ### La agudeza visual dinámica
 
-La DVA de H19 se hace con una tabla de letras a 2,8 m, con la cabeza quieta y luego moviéndola de lado a lado a 3 Hz. Lo que se anota son las **líneas perdidas**. En una pérdida bilateral el paciente pierde muchas, porque el reflejo que le mantenía la imagen quieta ya no la mantiene (→ Fisiología). El consenso la deja como prueba **complementaria**, sin incluirla en la definición, y considera patológica una caída de 0,2 unidades logMAR o más (Strupp y cols., 2017): con una tabla logMAR, donde cada línea vale 0,1, son dos líneas. Hain y cols. (2013) la llaman, en su versión de pie de cama con una "E" que gira (la *dynamic illegible E*), el examen que permite hacer el diagnóstico en la consulta, y advierten que sin ella estos pacientes se confunden fácilmente con un síndrome cerebeloso.
+La DVA de H20 se hace con una tabla de letras a 2,8 m, con la cabeza quieta y luego moviéndola de lado a lado a 3 Hz. Lo que se anota son las **líneas perdidas**. En una pérdida bilateral el paciente pierde muchas, porque el reflejo que le mantenía la imagen quieta ya no la mantiene (→ Fisiología). El consenso la deja como prueba **complementaria**, sin incluirla en la definición, y considera patológica una caída de 0,2 unidades logMAR o más (Strupp y cols., 2017): con una tabla logMAR, donde cada línea vale 0,1, son dos líneas. Hain y cols. (2013) la llaman, en su versión de pie de cama con una "E" que gira (la *dynamic illegible E*), el examen que permite hacer el diagnóstico en la consulta, y advierten que sin ella estos pacientes se confunden fácilmente con un síndrome cerebeloso.
 
 :::comentario Lo que dicen las normas
-Entre las dos fuentes hay una diferencia de criterio. La herramienta H19 de este libro, siguiendo su fuente, considera anormal perder **3 líneas o más**; el consenso, 0,2 logMAR, que son **2 líneas** en una tabla logMAR. Las dos cifras se refieren a pruebas ligeramente distintas (tabla de Snellen a 2,8 m, tabla logMAR). Lo que importa para la práctica es **informar las líneas perdidas con el método usado** y no el "normal/anormal" a secas. <!-- verificar: equivalencia de líneas entre tabla de Snellen y logMAR; criterio de 3 líneas de H19 sin fuente primaria -->
+Entre las dos fuentes hay una diferencia de criterio. La herramienta H20 de este libro, siguiendo su fuente, considera anormal perder **3 líneas o más**; el consenso, 0,2 logMAR, que son **2 líneas** en una tabla logMAR. Las dos cifras se refieren a pruebas ligeramente distintas (tabla de Snellen a 2,8 m, tabla logMAR). Lo que importa para la práctica es **informar las líneas perdidas con el método usado** y no el "normal/anormal" a secas. <!-- verificar: equivalencia de líneas entre tabla de Snellen y logMAR; criterio de 3 líneas de H20 sin fuente primaria -->
 :::
 
 ### Lo que no hace el protocolo de este libro
@@ -68,7 +68,7 @@ LabSim no hace examen vestibular, salvo el VEMP. Del lado auditivo entrega el au
 
 ### Un reflejo que ya no estabiliza la imagen
 
-El reflejo vestíbulo-ocular mueve el ojo en sentido contrario a la cabeza y con casi la misma velocidad, de modo que la imagen quede **quieta en la retina** mientras uno se mueve (→ H17). Su ganancia es el cociente entre la velocidad del ojo y la de la cabeza. Con ganancia 1 la imagen no resbala; con ganancia 0,2, resbala lo que el ojo no alcanzó a compensar: el 80 % de la velocidad de la cabeza.
+El reflejo vestíbulo-ocular mueve el ojo en sentido contrario a la cabeza y con casi la misma velocidad, de modo que la imagen quede **quieta en la retina** mientras uno se mueve (→ H18). Su ganancia es el cociente entre la velocidad del ojo y la de la cabeza. Con ganancia 1 la imagen no resbala; con ganancia 0,2, resbala lo que el ojo no alcanzó a compensar: el 80 % de la velocidad de la cabeza.
 
 :::imagen ilustraciones/cap24-oscilopsia.svg ancho=100% Lo que la retina recibe en un segundo de marcha, con el reflejo íntegro y con ganancia 0,2. Con el reflejo íntegro la imagen queda quieta; con ganancia 0,2 resbala en cada paso: es lo que el paciente describe como "el mundo salta".
 :::
@@ -77,7 +77,7 @@ El reflejo vestíbulo-ocular mueve el ojo en sentido contrario a la cabeza y con
 
 ### Por qué solo cuando se mueve, por qué solo cuando oscurece
 
-Sentado, o acostado, el sistema vestibular no está haciendo mucho. La estabilidad la comparten tres sentidos: la **vista**, la **sensibilidad del cuerpo** (los pies, las articulaciones) y el **vestíbulo** (→ H19). Si uno falla, los otros dos lo reemplazan en parte. Un paciente sin vestíbulo se sostiene con los otros dos mientras los tenga: a oscuras o sobre un piso blando le quitan uno y se cae. De ahí viene la característica central de la enfermedad: la inestabilidad **empeora en la oscuridad y sobre terreno desparejo**, y desaparece en condiciones estáticas (Strupp y cols., 2017).
+Sentado, o acostado, el sistema vestibular no está haciendo mucho. La estabilidad la comparten tres sentidos: la **vista**, la **sensibilidad del cuerpo** (los pies, las articulaciones) y el **vestíbulo** (→ H20). Si uno falla, los otros dos lo reemplazan en parte. Un paciente sin vestíbulo se sostiene con los otros dos mientras los tenga: a oscuras o sobre un piso blando le quitan uno y se cae. De ahí viene la característica central de la enfermedad: la inestabilidad **empeora en la oscuridad y sobre terreno desparejo**, y desaparece en condiciones estáticas (Strupp y cols., 2017).
 
 ### Por qué no hay vértigo
 
@@ -139,7 +139,7 @@ El **síndrome CANVAS** (*cerebellar ataxia, neuropathy, vestibular areflexia sy
 
 ### Qué se hace con ella
 
-El tratamiento es de **apoyo**. Hain y cols. (2013) recomiendan evitar los fármacos que suprimen el sistema vestibular y estimular la actividad. La rehabilitación vestibular es la intervención con respaldo: una revisión sistemática de 14 estudios encontró **evidencia moderada** de que los ejercicios mejoran la estabilidad de la mirada y la postura, y evidencia insuficiente sobre la participación en la vida diaria; las prótesis vestibulares seguían en fase temprana (Porciuncula y cols., 2012). El programa y sus ejes están en H19 y los casos de rehabilitación en el capítulo 32 (→ H19, cap. 32). Para quien evalúa, el límite está en la expectativa: la pérdida por gentamicina es permanente (Black y cols., 2004), y la compensación se apoya en la vista y en el cuerpo.
+El tratamiento es de **apoyo**. Hain y cols. (2013) recomiendan evitar los fármacos que suprimen el sistema vestibular y estimular la actividad. La rehabilitación vestibular es la intervención con respaldo: una revisión sistemática de 14 estudios encontró **evidencia moderada** de que los ejercicios mejoran la estabilidad de la mirada y la postura, y evidencia insuficiente sobre la participación en la vida diaria; las prótesis vestibulares seguían en fase temprana (Porciuncula y cols., 2012). El programa y sus ejes están en H20 y los casos de rehabilitación en el capítulo 32 (→ H20, cap. 32). Para quien evalúa, el límite está en la expectativa: la pérdida por gentamicina es permanente (Black y cols., 2004), y la compensación se apoya en la vista y en el cuerpo.
 
 ## Razonamiento
 
@@ -167,7 +167,7 @@ Frente a un paciente que se queja de inestabilidad sin vértigo, el razonamiento
 
 - **Confiar en el porcentaje de la calórica.** Un "no significativo" con las dos velocidades en el piso no es una calórica normal: es una prueba que no pudo comparar.
 - **Pensar que el audiograma normal excluye la ototoxicidad.** La pérdida vestibular por gentamicina suele dejar la cóclea en paz.
-- **Declarar una "arreflexia" sin completar el estudio.** Con la mínima baja en los dos lados se necesita la suma de la bitérmica y, si la respuesta es nula o muy pequeña, el agua helada antes de decir que el laberinto no responde (→ H16).
+- **Declarar una "arreflexia" sin completar el estudio.** Con la mínima baja en los dos lados se necesita la suma de la bitérmica y, si la respuesta es nula o muy pequeña, el agua helada antes de decir que el laberinto no responde (→ H17).
 - **Atribuirlo a ansiedad o a debilidad.** La inestabilidad con oscilopsia y empeoramiento en la oscuridad tiene una causa medible. Y sin la prueba de agudeza dinámica, estos pacientes se confunden con un síndrome cerebeloso (Hain y cols., 2013).
 - **Perder de vista la causa.** Una pérdida simétrica de causa desconocida se informa como tal; la búsqueda de la causa (imagen, estudios de laboratorio, genética) es del médico, y la serie de Lucieer sugiere que los exámenes de sangre rara vez la aclaran.
 
@@ -200,7 +200,7 @@ El paciente oye "igual que siempre". ¿Pedirías el audiograma? ¿Qué pruebas d
 - @OD 8000 | Solo un descenso leve en 8 kHz (20 dB), esperable a los 52 años. Ni el fármaco ni la edad dejaron aquí nada visible.
 :::
 
-:::ayuda-ancho Lo que entrega Enrique del examen vestibular (→ H15, H16, H17, H19)
+:::ayuda-ancho Lo que entrega Enrique del examen vestibular (→ H16, H17, H18, H20)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | sin nistagmo con ni sin fijación; seguimiento y sacádicos normales | |
@@ -214,7 +214,7 @@ El paciente oye "igual que siempre". ¿Pedirías el audiograma? ¿Qué pruebas d
 :::docente Guía del caso
 - **Datos clave:** peritonitis grave diez meses antes, cuidados intensivos y 12 días de gentamicina, "mareo y flojera" en la segunda semana atribuidos a la debilidad, **sin vértigo**, oscilopsia al caminar, inestabilidad que empeora a oscuras, y **sin síntomas sentado**. Audición sin quejas.
 - **Hipótesis:** vestibulopatía bilateral por aminoglucósido; ansiedad (no calza: la oscilopsia y la oscuridad no son de ansiedad); polineuropatía del paciente crítico (no calza con la oscilopsia); lesión cerebelosa (la resonancia es normal y la DVA ayuda a distinguirla).
-- **Qué pedir:** audiometría (puede ser normal), calórica mínima y, como las dos velocidades son bajas, la bitérmica; vHIT de los dos lados; DVA (→ H3, H16, H17, H19).
+- **Qué pedir:** audiometría (puede ser normal), calórica mínima y, como las dos velocidades son bajas, la bitérmica; vHIT de los dos lados; DVA (→ H3, H17, H18, H20).
 - **Lo que enseña:** el "no significativo" de la mínima que, leído solo, cierra el caso en falso; y que **el audiograma normal no resta nada**.
 - **Errores esperables:** cerrar con "calórica sin asimetría"; pedir solo el audiograma por tratarse de "ototoxicidad"; no preguntar por el antibiótico porque el paciente no lo recuerda: hay que mirar la epicrisis.
 - **En LabSim:** cuadro *Normal* en los dos oídos; la audición y la logoaudiometría salen normales, y lo vestibular se entrega con la tabla de resultados.
@@ -248,7 +248,7 @@ Además del estudio auditivo, ¿qué pruebas vestibulares agregarías aunque el 
 - @OD 1000 | El OD responde en **3 de 5 bandas** (hasta 2 kHz) y el OI en **2 de 5** (hasta 1,5 kHz), con reproducibilidad de 72 y 33 %: no hay emisiones donde el audiograma cae.
 :::
 
-:::ayuda-ancho Lo que entrega Verónica del examen vestibular (→ H16, H17, H19)
+:::ayuda-ancho Lo que entrega Verónica del examen vestibular (→ H17, H18, H20)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG | sin nistagmo espontáneo; seguimiento y sacádicos normales | |
@@ -262,7 +262,7 @@ Además del estudio auditivo, ¿qué pruebas vestibulares agregarías aunque el 
 :::docente Guía del caso
 - **Datos clave:** tuberculosis multirresistente tratada 18 meses con kanamicina inyectable los primeros seis, **acúfeno bilateral agudo**, dificultad con ruido, y, sin que lo relacione, "debilidad de piernas", miedo a soltar el pasamanos, caídas a oscuras y **carteles movidos al caminar** que los lentes no arreglaron.
 - **Hipótesis:** hipoacusia por aminoglucósido (la que ella reconoce) y **pérdida vestibular bilateral por el mismo fármaco** (la que no relaciona); debilidad posterior a la enfermedad; un problema visual (descartado por oftalmología).
-- **Qué pedir:** el estudio auditivo completo y, por el relato, la calórica y el vHIT; DVA (→ H3, H9, H16, H17, H19).
+- **Qué pedir:** el estudio auditivo completo y, por el relato, la calórica y el vHIT; DVA (→ H3, H9, H17, H18, H20).
 - **La trampa:** la **mínima** da 25 %, "significativo" a la izquierda, y lleva a informar una hipofunción **izquierda**. El oído derecho está a 5 °/s: con una respuesta tan baja no es "el lado sano". La bitérmica (OI 5, **OD 8 °/s**) y sobre todo el vHIT (**las dos ganancias bajo 0,6**) completan el cuadro.
 - **Lo que enseña:** que la queja auditiva **y** la vestibular pueden venir juntas y que la paciente solo menciona una. Y que el consenso admite que se cumpla **una** de las pruebas: aquí la calórica la cumple solo el OI (suma 5), y el vHIT los dos lados.
 - **Errores esperables:** informar una "paresia izquierda"; no preguntar por el equilibrio a quien consulta por acúfeno; creer que el vHIT bilateral "contradice" la mínima.
@@ -289,7 +289,7 @@ Con ese informe previo y la audición normal, ¿repetirías las pruebas? ¿Cuál
 - @OD 1000 | Audición **normal** en los dos oídos, con la leve caída de agudos de los 58 años (15 a 20 dB en 6 y 8 kHz).
 :::
 
-:::ayuda-ancho Lo que entrega Pilar del examen vestibular (→ H16, H17, H19)
+:::ayuda-ancho Lo que entrega Pilar del examen vestibular (→ H17, H18, H20)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG | sin nistagmo espontáneo; seguimiento y sacádicos normales | |
@@ -333,7 +333,7 @@ Pide la hoja de resultados de la neurología. ¿Qué parte del estudio vestibula
 - @OD max | Discriminación de 92 % en el OD y 96 % en el OI, acorde a la curva: el oído se explica por sí solo.
 :::
 
-:::ayuda-ancho Lo que entrega Jorge del examen vestibular (→ H15, H16, H17, H19)
+:::ayuda-ancho Lo que entrega Jorge del examen vestibular (→ H16, H17, H18, H20)
 | Prueba | OD | OI |
 |---|---|---|
 | VNG: nistagmo espontáneo | sin nistagmo | |
@@ -367,7 +367,7 @@ Lo que cuenta Enrique encaja con un reflejo perdido: la visión salta **cuando s
 
 #### Diagnóstico y qué sigue
 
-Hipofunción vestibular bilateral, severa, compatible con vestibulopatía bilateral por aminoglucósido (los criterios de la Sociedad Bárány se cumplen en la calórica y en el vHIT). Audición normal. Se informa el patrón con los valores de **cada** oído, y se sugiere evaluación por otorrinolaringología y **rehabilitación vestibular** (→ H19, cap. 32). Se recomienda además dejar el antecedente en su ficha: para cualquier uso futuro de un aminoglucósido, el médico tratante debe saber que la pérdida es bilateral y permanente.
+Hipofunción vestibular bilateral, severa, compatible con vestibulopatía bilateral por aminoglucósido (los criterios de la Sociedad Bárány se cumplen en la calórica y en el vHIT). Audición normal. Se informa el patrón con los valores de **cada** oído, y se sugiere evaluación por otorrinolaringología y **rehabilitación vestibular** (→ H20, cap. 32). Se recomienda además dejar el antecedente en su ficha: para cualquier uso futuro de un aminoglucósido, el médico tratante debe saber que la pérdida es bilateral y permanente.
 
 :::comentario Comentario
 El hallazgo del caso es el silencio del audiograma. Un paciente con la cóclea intacta y los dos laberintos sin función no deja nada en el estudio auditivo: se descubre por la pregunta de la entrevista y por la prueba del reflejo.
@@ -409,7 +409,7 @@ Jorge tiene dos cosas a la vez. En el oído, una presbiacusia simétrica con dis
 
 #### Diagnóstico y qué sigue
 
-Presbiacusia bilateral leve, **e** hipofunción vestibular bilateral con signos de compromiso cerebeloso y neuropatía asociados. Se informa el patrón vestibular con los números de cada oído, **sin poner nombre** a la enfermedad, y se sugiere seguimiento por neurología, que puede completar la video-oculografía y plantear el estudio genético. La rehabilitación sigue indicada, con una expectativa realista (→ H19, cap. 32).
+Presbiacusia bilateral leve, **e** hipofunción vestibular bilateral con signos de compromiso cerebeloso y neuropatía asociados. Se informa el patrón vestibular con los números de cada oído, **sin poner nombre** a la enfermedad, y se sugiere seguimiento por neurología, que puede completar la video-oculografía y plantear el estudio genético. La rehabilitación sigue indicada, con una expectativa realista (→ H20, cap. 32).
 
 :::comentario Comentario
 Lo que se aprende de Jorge es hasta dónde llega el estudio del oído. Que el audiograma sea el de la edad y los reflejos sean bajos no es una contradicción: son dos problemas, y el segundo es de quien estudia el sistema nervioso.
@@ -431,7 +431,7 @@ Lo que se aprende de Jorge es hasta dónde llega el estudio del oído. Que el au
 - Criterios de la Sociedad Bárány: calórica con suma tibia + fría **< 6 °/s** en cada oído, vHIT con ganancia **< 0,6** en los dos lados, o silla rotatoria.
 - Aminoglucósidos: síntomas **1 a 3 semanas** después de empezar, no se reconocen al alta, **el audiograma suele ser normal**.
 - Entre un tercio y la mitad de las vestibulopatías bilaterales **no tiene causa conocida**; con neuropatía y ataxia, pensar en **CANVAS** y derivar a neurología.
-- Tratamiento: apoyo y **rehabilitación vestibular** (→ H19, cap. 32); no usar supresores vestibulares.
+- Tratamiento: apoyo y **rehabilitación vestibular** (→ H20, cap. 32); no usar supresores vestibulares.
 :::
 
 ## Referencias

@@ -16,7 +16,7 @@ Este capítulo trata del paciente **crónico o subagudo** que llega a la VNG con
 
 ## Técnica en foco
 
-Todo lo que se hace aquí está en H15: el nistagmo con y sin fijación, la mirada excéntrica, las pruebas oculomotoras y el examen del cerebelo. Lo que cambia en este capítulo es **qué se busca** en esos registros cuando se sospecha una causa central, y a qué estructura apunta cada hallazgo.
+Todo lo que se hace aquí está en H16: el nistagmo con y sin fijación, la mirada excéntrica, las pruebas oculomotoras y el examen del cerebelo. Lo que cambia en este capítulo es **qué se busca** en esos registros cuando se sospecha una causa central, y a qué estructura apunta cada hallazgo.
 
 ### Lo que la VNG sabe decir de lo central
 
@@ -24,7 +24,7 @@ Un oído enfermo mueve los ojos de una manera y el sistema nervioso central de o
 
 1. **Nistagmo vertical puro o torsional puro mirando al frente.** Un nistagmo hacia abajo (*downbeat*) o hacia arriba (*upbeat*) no sale de un canal semicircular, que da una mezcla de componentes: sale de las vías del tronco y del cerebelo (Eggers y cols., 2019).
 2. **Nistagmo evocado por la mirada**, que bate **hacia donde se mira**, y su rebote al volver al centro.
-3. **Un nistagmo que la fijación no frena.** El nistagmo de una lesión periférica se apaga con luz y un punto que mirar; el central, poco o nada (→ H15).
+3. **Un nistagmo que la fijación no frena.** El nistagmo de una lesión periférica se apaga con luz y un punto que mirar; el central, poco o nada (→ H16).
 4. **Seguimiento, sacadas u optocinético alterados**: ganancia baja con sacadas de alcance, sacadas cortas, pasadas, lentas o tardías.
 5. **Ojos que no van juntos**: un ojo que no llega a un lado, o que llega tarde, o una doble imagen.
 
@@ -34,7 +34,7 @@ Un oído enfermo mueve los ojos de una manera y el sistema nervioso central de o
 
 ### Mirar la mirada: lo que el protocolo ya pide
 
-El protocolo del examen con VNG recorre la mirada **al centro 15 segundos, a 30° a la derecha 15 segundos, al centro 10, a 30° a la izquierda 15 y al centro 10**, primero con fijación y luego sin ella; el de las lentes de Frenzel agrega **arriba y abajo** (→ H15). Cada tramo tiene su lectura:
+El protocolo del examen con VNG recorre la mirada **al centro 15 segundos, a 30° a la derecha 15 segundos, al centro 10, a 30° a la izquierda 15 y al centro 10**, primero con fijación y luego sin ella; el de las lentes de Frenzel agrega **arriba y abajo** (→ H16). Cada tramo tiene su lectura:
 
 - **Los 15 segundos a cada lado** buscan el nistagmo evocado por la mirada. Un integrador que filtra hace que el ojo se vaya de vuelta hacia el centro, y el tronco lo devuelve con una fase rápida: el nistagmo bate **hacia donde se mira**, a la derecha cuando se mira a la derecha y a la izquierda cuando se mira a la izquierda. Puede estar presente a los dos lados o solo hacia uno (Eggers y cols., 2019).
 - **Los 10 segundos al centro** que vienen después son los del **rebote**: un nistagmo breve al volver al frente, que bate hacia el lado **contrario** al que se miraba y se apaga solo. Aparece junto con el nistagmo evocado por la mirada (Eggers y cols., 2019), que apunta al cerebelo (Strupp y cols., 2014), y se lo describe desde 1973 (Hood y cols., 1973). Sin esos 10 segundos del protocolo, no se vería.
@@ -43,12 +43,12 @@ El protocolo del examen con VNG recorre la mirada **al centro 15 segundos, a 30�
 :::comentario Lo que dicen las normas
 **La mirada vertical.** El registro del protocolo con VNG recorre solo los lados: centro, derecha e izquierda. Un nistagmo hacia abajo se ve mejor **mirando al frente** y **crece al mirar abajo y a los lados** (Eggers y cols., 2019): con un canal vertical registrado se ve en la primera posición, y en uno solo horizontal **no se ve nunca**. El protocolo de las lentes de Frenzel sí pide arriba y abajo; en este libro se mantiene lo que dice cada protocolo y se recomienda **mirar siempre hacia arriba y hacia abajo a ojo** y, si el equipo tiene un canal vertical, activarlo.
 
-**Las pruebas oculomotoras.** El protocolo de VNG tampoco incluye sacadas, seguimiento ni optocinético, que la VNG de uso corriente trae y la literatura pide (Fife y cols., 2000). Se describen en H15 y aquí se lee lo que dan.
+**Las pruebas oculomotoras.** El protocolo de VNG tampoco incluye sacadas, seguimiento ni optocinético, que la VNG de uso corriente trae y la literatura pide (Fife y cols., 2000). Se describen en H16 y aquí se lee lo que dan.
 :::
 
 ### Sacadas, seguimiento y optocinético: qué hallazgo apunta adónde
 
-Cada prueba oculomotora pone a prueba una parte del circuito (→ H15), y por eso un hallazgo tiene un **dueño probable**:
+Cada prueba oculomotora pone a prueba una parte del circuito (→ H16), y por eso un hallazgo tiene un **dueño probable**:
 
 :::ayuda-ancho Hallazgos oculomotores y la estructura a la que apuntan
 | Hallazgo | Qué se ve | Dónde apunta |
@@ -59,10 +59,10 @@ Cada prueba oculomotora pone a prueba una parte del circuito (→ H15), y por es
 | **Sacadas tardías** | el ojo tarda en arrancar | corteza frontal y colículo; también la edad (Munoz y cols., 1998) |
 | **Aducción lenta o corta de un ojo** con la abducción del otro normal | el ojo no acompaña hacia adentro | fascículo longitudinal medial del mismo lado: oftalmoplejía internuclear (Strupp y cols., 2014) |
 | **Seguimiento sacádico** | ganancia baja y sacadas de alcance | flóculo, corteza; inespecífico (Lencer y Trillenberg, 2008) |
-| **Optocinético asimétrico** | la fase lenta sigue mejor las barras hacia un lado | un lado del sistema de seguimiento (→ H15) |
+| **Optocinético asimétrico** | la fase lenta sigue mejor las barras hacia un lado | un lado del sistema de seguimiento (→ H16) |
 :::
 
-La velocidad pico, la latencia y la ganancia **dependen del equipo, de su velocidad de muestreo y de la edad**: los adultos mayores tienen tiempos de reacción más largos y sacadas de mayor duración que los jóvenes (Munoz y cols., 1998). Por eso el libro no entrega un valor límite y se usan los del fabricante o los que el servicio haya medido en su propia población (→ H15). La excepción son los **hallazgos que no existen en un sano**: un ojo que no aduce, un nistagmo que bate hacia abajo.
+La velocidad pico, la latencia y la ganancia **dependen del equipo, de su velocidad de muestreo y de la edad**: los adultos mayores tienen tiempos de reacción más largos y sacadas de mayor duración que los jóvenes (Munoz y cols., 1998). Por eso el libro no entrega un valor límite y se usan los del fabricante o los que el servicio haya medido en su propia población (→ H16). La excepción son los **hallazgos que no existen en un sano**: un ojo que no aduce, un nistagmo que bate hacia abajo.
 
 :::ojo Ojo clínico
 **La oftalmoplejía internuclear se ve con los dos ojos registrados.** Muchos equipos de VNG registran un solo ojo. Si el ojo registrado es el que abduce, la sacada sale normal y el examen se informa "sin hallazgos". El ojo que se queda atrás es el que aduce, del lado de la lesión. La pista de que algo no calza aparece antes, en el paso del protocolo que mira **la conjugación de los movimientos oculares**: si un ojo se queda atrás en una mirada lateral o el paciente ve doble, hay que mirar los dos ojos.
@@ -70,7 +70,7 @@ La velocidad pico, la latencia y la ganancia **dependen del equipo, de su veloci
 
 ### El examen del cerebelo y el equilibrio
 
-Las cuatro pruebas del protocolo, **metría, diadococinesia, sinergia y temblor intencional**, y la marcha en tándem (→ H15) completan los ojos. En un paciente con signos oculares centrales son las que muestran si hay **ataxia**. El Romberg también cuenta: quien tambalea con los ojos **abiertos** tiene cerebelo; quien solo cae al cerrarlos tiene el laberinto o la sensibilidad profunda (→ H15).
+Las cuatro pruebas del protocolo, **metría, diadococinesia, sinergia y temblor intencional**, y la marcha en tándem (→ H16) completan los ojos. En un paciente con signos oculares centrales son las que muestran si hay **ataxia**. El Romberg también cuenta: quien tambalea con los ojos **abiertos** tiene cerebelo; quien solo cae al cerrarlos tiene el laberinto o la sensibilidad profunda (→ H16).
 
 ### Fármacos y alcohol: antes de leer nada
 
@@ -98,7 +98,7 @@ El detalle de la anatomía y de las vías está en las Bases (→ B1 a B4). Aqu�
 
 ### Quién sostiene la mirada
 
-Para mantener los ojos en una posición excéntrica hace falta una orden **de posición**, no de velocidad, y la construye el **integrador neural de la mirada**: neuronas del tronco que convierten la velocidad en posición. Para el plano horizontal están en el núcleo prepósito del hipogloso y el vestibular medial (Cannon y Robinson, 1987); <!-- Pasada de fundamentos 2026-10-18: decía "en el núcleo prepósito del hipogloso". Se corrigió a "prepósito del hipogloso y vestibular medial", la región que Cannon y Robinson (1987) inactivaron. --> para el vertical, en el mesencéfalo, en el núcleo intersticial de Cajal (Leigh y Zee, 2015). El cerebelo, sobre todo el flóculo, los mantiene afinados (→ H15). Cuando falla, el ojo se va de vuelta hacia el centro y el tronco lo devuelve con una fase rápida: eso es el nistagmo evocado por la mirada (Eggers y cols., 2019).
+Para mantener los ojos en una posición excéntrica hace falta una orden **de posición**, no de velocidad, y la construye el **integrador neural de la mirada**: neuronas del tronco que convierten la velocidad en posición. Para el plano horizontal están en el núcleo prepósito del hipogloso y el vestibular medial (Cannon y Robinson, 1987); <!-- Pasada de fundamentos 2026-10-18: decía "en el núcleo prepósito del hipogloso". Se corrigió a "prepósito del hipogloso y vestibular medial", la región que Cannon y Robinson (1987) inactivaron. --> para el vertical, en el mesencéfalo, en el núcleo intersticial de Cajal (Leigh y Zee, 2015). El cerebelo, sobre todo el flóculo, los mantiene afinados (→ H16). Cuando falla, el ojo se va de vuelta hacia el centro y el tronco lo devuelve con una fase rápida: eso es el nistagmo evocado por la mirada (Eggers y cols., 2019).
 
 ### Qué hace cada parte del cerebelo con los ojos
 
@@ -201,8 +201,8 @@ El nistagmo hacia abajo **tiene tratamiento** en algunos pacientes. En 17 con ni
 
 Frente a un paciente con inestabilidad o visión doble sin un oído que lo explique, el razonamiento sigue siete preguntas, en orden:
 
-1. **¿El oído explica lo que se ve?** Calórica, impulso cefálico y audiograma (→ H16, H17, H3). Si el laberinto falta del todo (→ cap. 24), eso **no** explica un nistagmo evocado por la mirada ni un seguimiento sacádico.
-2. **¿Qué hace el nistagmo con la mirada y con la luz?** Cambia de sentido con la mirada y no se frena: central (→ H15).
+1. **¿El oído explica lo que se ve?** Calórica, impulso cefálico y audiograma (→ H17, H18, H3). Si el laberinto falta del todo (→ cap. 24), eso **no** explica un nistagmo evocado por la mirada ni un seguimiento sacádico.
+2. **¿Qué hace el nistagmo con la mirada y con la luz?** Cambia de sentido con la mirada y no se frena: central (→ H16).
 3. **¿Hay un componente vertical?** Hay que mirarlo: con un canal vertical, o a ojo, arriba y abajo.
 4. **¿Los dos ojos van juntos y llegan?** Un ojo que se queda atrás en una sacada apunta al fascículo longitudinal medial.
 5. **¿Cómo son el seguimiento y las sacadas?** Cortas, pasadas, lentas, tardías o con alcance: cada una tiene su estructura.
@@ -258,7 +258,7 @@ La audición es la de su edad. Además del examen del cerebelo, ¿qué mirarías
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio (→ H15, H16, H17)
+:::ayuda-ancho Lo que se vio (→ H16, H17, H18)
 | Examen | Lo que se vio |
 |---|---|
 | Equilibrio | Romberg con balanceo desde los ojos abiertos y caída al cerrarlos; marcha de base ancha; no logra la marcha en tándem |
@@ -287,7 +287,7 @@ La audición es la de su edad. Además del examen del cerebelo, ¿qué mirarías
 :::docente Guía del caso
 - **Datos clave:** inestabilidad de cinco años, peor sin luz y en terreno irregular, oscilopsia al caminar, hormigueo de los pies, **tos seca de veinte años**, hermano con trastorno de la marcha; audición de la edad.
 - **Hipótesis esperables:** vestibulopatía bilateral por ototóxicos (no hay antecedente), presbiataxia, degeneración cerebelosa, **CANVAS**. Lo que separa a las dos primeras es que en los ojos hay **cerebelo**: nistagmo evocado por la mirada y seguimiento sacádico.
-- **Qué pedir:** audiometría, VNG con mirada excéntrica, seguimiento y sacadas, examen neurocerebeloso, calórica y vHIT (→ H3, H15, H16, H17).
+- **Qué pedir:** audiometría, VNG con mirada excéntrica, seguimiento y sacadas, examen neurocerebeloso, calórica y vHIT (→ H3, H16, H17, H18).
 - **Errores esperables:** informar "arreflexia vestibular bilateral" y cerrar; atribuir todo a los laberintos; no preguntar por la tos ni por los pies.
 :::
 
@@ -307,7 +307,7 @@ No hay síntomas auditivos. ¿Pedirías igual la audiometría? ¿Qué cuidado te
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio (→ H15)
+:::ayuda-ancho Lo que se vio (→ H16)
 | Examen | Lo que se vio |
 |---|---|
 | Conjugación de los ojos | mirando a la derecha, el ojo izquierdo **se queda atrás** y la paciente ve doble |
@@ -330,7 +330,7 @@ No hay síntomas auditivos. ¿Pedirías igual la audiometría? ¿Qué cuidado te
 :::docente Guía del caso
 - **Datos clave:** visión doble solo al mirar a la derecha, **neuritis óptica** a los 27 años, hormigueo de la mano; mujer joven; **audición normal**.
 - **Hipótesis esperables:** parálisis del VI, miastenia, **oftalmoplejía internuclear** por esclerosis múltiple. La doble imagen solo en una mirada y el ojo que no aduce apuntan a lo último.
-- **Qué pedir:** conjugación a la cabecera; VNG con **los dos ojos**; audiometría y, si se pide, ABR (→ H3, H10, H15, cap. 12).
+- **Qué pedir:** conjugación a la cabecera; VNG con **los dos ojos**; audiometría y, si se pide, ABR (→ H3, H10, H16, cap. 12).
 - **Errores esperables:** registrar solo el ojo derecho y concluir "sin hallazgos"; no mirar el paso de la conjugación; buscar en el audiograma lo que no está.
 :::
 
@@ -350,7 +350,7 @@ La VNG anterior salió normal. ¿Qué tendrías que preguntar sobre cómo se hiz
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio (→ H15, H16)
+:::ayuda-ancho Lo que se vio (→ H16, H17)
 | Examen | Lo que se vio |
 |---|---|
 | Nistagmo espontáneo, canal **horizontal** | sin nistagmo, con y sin fijación |
@@ -374,7 +374,7 @@ La VNG anterior salió normal. ¿Qué tendrías que preguntar sobre cómo se hiz
 :::docente Guía del caso
 - **Datos clave:** cefalea occipital con la tos, inestabilidad al bajar escaleras y al leer, hipoacusia izquierda, **VNG anterior "sin hallazgos"** de la que no se sabe qué canales registró.
 - **Hipótesis esperables:** cuadro del oído interno (hipoacusia unilateral), migraña, **Chiari**, compresión del tronco. La cefalea con la maniobra de Valsalva y la VNG horizontal sin nistagmo son el hallazgo.
-- **Qué pedir:** audiometría, VNG con canal vertical y mirada abajo, arriba y a los lados; sugerir al médico la resonancia de la unión craneocervical (→ H3, H15, cap. 12).
+- **Qué pedir:** audiometría, VNG con canal vertical y mirada abajo, arriba y a los lados; sugerir al médico la resonancia de la unión craneocervical (→ H3, H16, cap. 12).
 - **Errores esperables:** repetir la VNG con un solo canal; atribuir el mareo a la hipoacusia; concluir "normal" por una calórica simétrica.
 :::
 
@@ -394,7 +394,7 @@ El protocolo pide suspender los ansiolíticos 48 horas antes del examen. ¿Qué 
 
 #### Paso 4 · Los resultados
 
-:::ayuda-ancho Lo que se vio (→ H15, H17)
+:::ayuda-ancho Lo que se vio (→ H16, H18)
 | Examen | Lo que se vio |
 |---|---|
 | Equilibrio y examen neurocerebeloso | marcha de base ancha, dismetría leve |
@@ -420,7 +420,7 @@ El protocolo pide suspender los ansiolíticos 48 horas antes del examen. ¿Qué 
 :::docente Guía del caso
 - **Datos clave:** epilepsia, **aumento reciente** de la fenitoína, clonazepam, vino a diario; inestabilidad sin giro, visión doble al mirar a los lados; audición de la edad; **impulso cefálico y calórica normales**.
 - **Hipótesis esperables:** causa del oído interno (se descarta: el reflejo está intacto), degeneración cerebelosa, **fármacos y alcohol**.
-- **Qué pedir:** VNG con mirada excéntrica, seguimiento y sacadas, y vHIT (→ H15, H17); **avisar al médico tratante** de lo que se vio.
+- **Qué pedir:** VNG con mirada excéntrica, seguimiento y sacadas, y vHIT (→ H16, H18); **avisar al médico tratante** de lo que se vio.
 - **Errores esperables:** tratar el cuadro con un antivertiginoso; suspender los fármacos por seguir el protocolo; informar "alteración vestibular".
 :::
 

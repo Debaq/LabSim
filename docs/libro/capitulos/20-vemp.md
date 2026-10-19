@@ -65,7 +65,7 @@ Las dos son un vértigo agudo y prolongado. Se separan por **qué órgano toca e
 - **Neuritis de la rama inferior**: mucho más rara (1 de 43 pacientes; Taylor y cols., 2016). Halmagyi y cols. (2002) describen dos pacientes con vértigo agudo, conducto horizontal normal, pérdida del conducto posterior y **cVEMP caído**. Se reconoce porque el examen típico (el impulso cefálico y la calórica del conducto horizontal) sale normal.
 - **Laberintitis**: la inflamación toca todo el oído interno, y por eso hay **hipoacusia sensorioneural acompañando al vértigo**. En 61 pacientes con laberintitis idiopática, todos tenían debilidad vestibular al presentarse y solo el 20 % refirió recuperar la audición (Oussoren y cols., 2023). Pueden caer los dos VEMP.<!-- Pasada de fundamentos 2026-10-18: decía "Los dos VEMP suelen caer". No se encontró una serie de laberintitis con VEMP que dé esa frecuencia; Oussoren y cols. (2023) no informan VEMP. Se dejó como posibilidad. --> En una forma supurada, secundaria a una otitis media, 8 de 14 pacientes quedaron sin audición (Maranhão y cols., 2016).
 
-También hay que decir lo contrario: en 47 pacientes con neurolabirintitis aguda, el cVEMP faltó solo en un tercio (34 %), sin relación con la calórica, la audiometría ni el ABR (Murofushi y cols., 1996). El VEMP **no reemplaza** a la calórica ni al vHIT (→ H16 y H17): agrega lo que ellos no miran, el sáculo.
+También hay que decir lo contrario: en 47 pacientes con neurolabirintitis aguda, el cVEMP faltó solo en un tercio (34 %), sin relación con la calórica, la audiometría ni el ABR (Murofushi y cols., 1996). El VEMP **no reemplaza** a la calórica ni al vHIT (→ H17 y H18): agrega lo que ellos no miran, el sáculo.
 
 :::imagen ilustraciones/cap20-ramas.svg ancho=92% El mismo montaje con la lesión en cada nivel del oído derecho: el OI es el mismo, normal, en las tres filas. Mira qué VEMP cae en cada fila: el cVEMP sigue a la rama inferior y el oVEMP a la superior, y cuando caen los dos el daño es del laberinto o del nervio entero.
 - @101,19 | **Rama superior.** El cVEMP del OD (282 µV, 5,69 corregida) es igual al del OI; el oVEMP del OD casi no sale del ruido (5 µV, 0,12 contra 0,52 del OI). Es la huella de la neuritis superior, sin hipoacusia.
@@ -213,7 +213,7 @@ Con un vértigo agudo de días y una sordera de un oído, ¿qué piensas primero
 :::docente Guía del caso
 - **Datos clave:** resfrío con fiebre baja, vértigo con vómitos de días y sordera del OD instalada con él, inestabilidad residual, sin zumbido ni síntomas del tronco; otoscopía normal.
 - **Hipótesis esperables:** neuritis vestibular, laberintitis, infarto de la AICA, sordera súbita con vértigo. La sordera que acompaña al vértigo descarta la neuritis, que no tiene hipoacusia.
-- **Qué pedir:** audiometría con vía ósea, impedanciometría y los dos VEMP; calórica o vHIT como complemento (→ H3, H12, H16, H17 y cap. 21). Y pedir al médico la imagen si hay factores vasculares o signos del tronco.
+- **Qué pedir:** audiometría con vía ósea, impedanciometría y los dos VEMP; calórica o vHIT como complemento (→ H3, H12, H17, H18 y cap. 21). Y pedir al médico la imagen si hay factores vasculares o signos del tronco.
 - **Errores esperables:** decir "neuritis" con una sordera; creer que el VEMP descarta el infarto de la AICA; pedir el VEMP en pleno vértigo, cuando el paciente no puede sostener la contracción del cuello.
 - **En LabSim:** cuadro *laberintitis* en el OD, grado severo. Los dos VEMP se apagan por regla del cuadro.
 :::

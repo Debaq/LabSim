@@ -16,9 +16,9 @@ La paciente lleva más de un año con audífonos potentes, bien puestos, bien co
 
 ### Lo primero: ¿el audífono "no alcanza" o está mal ajustado?
 
-Antes de decir que un audífono no alcanza hay que saber que **estaba bien ajustado**. Un audífono que se deja con el ajuste inicial del fabricante o se ajusta por comodidad, sin medirlo en el oído real, suele quedar corto justo en los agudos (Valente y cols., 2018; → H20, *Ojo clínico* y *Lo que dicen las normas*). Si ese es el caso, lo que "no alcanza" es el ajuste, y no hay nada que derivar: hay que ajustar. Por eso los consensos piden que la evaluación para implante parta de **audífonos verificados contra un objetivo prescriptivo** (Zeitler y cols., 2024).
+Antes de decir que un audífono no alcanza hay que saber que **estaba bien ajustado**. Un audífono que se deja con el ajuste inicial del fabricante o se ajusta por comodidad, sin medirlo en el oído real, suele quedar corto justo en los agudos (Valente y cols., 2018; → H21, *Ojo clínico* y *Lo que dicen las normas*). Si ese es el caso, lo que "no alcanza" es el ajuste, y no hay nada que derivar: hay que ajustar. Por eso los consensos piden que la evaluación para implante parta de **audífonos verificados contra un objetivo prescriptivo** (Zeitler y cols., 2024).
 
-Con el audífono bien ajustado, el mismo examen de la H20 responde la pregunta de este capítulo: se repiten las listas de palabras **con y sin audífono**, con y sin lectura labial (→ H20, H5), y se mira **cuánto entiende** con la mejor amplificación posible. Lo que importa no es el umbral con audífono (que casi siempre mejora), sino la discriminación: un oído que con audífono sigue por debajo de la mitad de las palabras está recibiendo el sonido, pero no puede usarlo.
+Con el audífono bien ajustado, el mismo examen de la H21 responde la pregunta de este capítulo: se repiten las listas de palabras **con y sin audífono**, con y sin lectura labial (→ H21, H5), y se mira **cuánto entiende** con la mejor amplificación posible. Lo que importa no es el umbral con audífono (que casi siempre mejora), sino la discriminación: un oído que con audífono sigue por debajo de la mitad de las palabras está recibiendo el sonido, pero no puede usarlo.
 
 ### Los criterios para derivar a evaluación de implante
 
@@ -45,14 +45,14 @@ La derivación sale mejor si llega con lo que el equipo de implantes va a pedir 
 
 - **Audiometría tonal** de 125 a 8.000 Hz, con **vía ósea** de cada oído (→ H3). El resto auditivo en graves no excluye: puede servir para amplificar de forma combinada.
 - **Logoaudiometría** de cada oído sin audífono (→ H5).
-- **Discriminación con audífono**, oído por oído y con los dos, con las palabras de la H20 y, si hay material, con frases en silencio y en ruido.
+- **Discriminación con audífono**, oído por oído y con los dos, con las palabras de la H21 y, si hay material, con frases en silencio y en ruido.
 - **Historia**: la causa, la velocidad de progresión, cuánto tiempo lleva sin oír bien, el uso de audífonos, antecedentes de oídos y cirugías.
 - **Pruebas de sitio de lesión** si el cuadro no calza con una cóclea: emisiones, reflejos y ABR (→ H9, H6, H10) para descartar un patrón de **neuropatía** (→ cap. 13).
 
 Todo lo demás (imágenes del oído interno y del conducto auditivo interno, evaluación médica, anestesia, vacunas) corresponde al equipo médico.
 
 :::comentario Lo que dicen las normas
-**Los materiales.** Los puntajes de las guías están dados con listas en inglés: palabras monosilábicas (CNC) y frases (AzBio, y antes HINT), dentro de una *Minimum Speech Test Battery* que pide ambos tipos, en silencio y en ruido, por oído y con los dos juntos (Zeitler y cols., 2024). El protocolo de este libro usa **bisílabos**, con y sin lectura labial (→ H20, H5), que son más fáciles que los monosílabos porque el contexto ayuda. Un puntaje de bisílabos y uno de CNC no son intercambiables: los cortes de 50 o 60 % no se pueden copiar sin más a una lista en español. <!-- verificar: no encontré un corte validado para bisílabos o frases en español; consultar los equipos de implantes de cada país -->
+**Los materiales.** Los puntajes de las guías están dados con listas en inglés: palabras monosilábicas (CNC) y frases (AzBio, y antes HINT), dentro de una *Minimum Speech Test Battery* que pide ambos tipos, en silencio y en ruido, por oído y con los dos juntos (Zeitler y cols., 2024). El protocolo de este libro usa **bisílabos**, con y sin lectura labial (→ H21, H5), que son más fáciles que los monosílabos porque el contexto ayuda. Un puntaje de bisílabos y uno de CNC no son intercambiables: los cortes de 50 o 60 % no se pueden copiar sin más a una lista en español. <!-- verificar: no encontré un corte validado para bisílabos o frases en español; consultar los equipos de implantes de cada país -->
 
 **El ruido.** El protocolo mide en silencio. Las guías piden además **frases en ruido** (en general a +10 dB de relación señal-ruido), porque se parecen más a la escucha de la vida diaria (Zeitler y cols., 2024). <!-- Pasada de fundamentos 2026-10-18: decía "porque es la situación donde el audífono falla antes y donde más se nota la diferencia con el implante", sin fuente. Zeitler 2024 recomienda AzBio "in +10 dB SNR" y dice "Varying the SNR represents real-life listening situations". -->
 :::
@@ -140,7 +140,7 @@ El paciente con un oído sordo y el otro normal oye bien en silencio y de frente
 
 Ante un paciente que dice que el audífono no le alcanza, el razonamiento sigue estas preguntas, en orden:
 
-1. **¿Está bien ajustado?** Con medición en oído real, al objetivo, y usado de verdad. Si no, es lo primero (→ H20).
+1. **¿Está bien ajustado?** Con medición en oído real, al objetivo, y usado de verdad. Si no, es lo primero (→ H21).
 2. **¿Qué tipo de pérdida es?** La audiometría con vía ósea separa la conductiva o mixta (conducción ósea posible) de la sensorioneural.
 3. **¿Cuántos oídos están comprometidos?** Uno solo (sordera unilateral) o los dos.
 4. **¿Cuánto entiende con el mejor audífono?** Si es poco, aunque el umbral con audífono sea bueno, es el dato que lleva a derivar a evaluación de implante.
@@ -209,7 +209,7 @@ Además del audiograma, ¿qué mirarías para decidir si es candidata a evaluaci
 - @A 4000 | En 4 kHz con audífono sigue en **75 dB**: los agudos del habla no se alcanzan aunque el audífono ya esté al límite.
 :::
 
-:::ayuda-ancho Lo que entrega ella con los audífonos puestos (→ H20)
+:::ayuda-ancho Lo que entrega ella con los audífonos puestos (→ H21)
 | Prueba | OD | OI | Los dos |
 |---|---|---|---|
 | Bisílabos con audífono, sin lectura labial | **28 %** | **36 %** | **44 %** |
@@ -221,7 +221,7 @@ Además del audiograma, ¿qué mirarías para decidir si es candidata a evaluaci
 :::docente Guía del caso
 - **Datos clave:** pérdida bilateral de progresión rápida a los 55 años, corticoides con mejoría parcial, audífonos potentes verificados en oído real y usados todo el día, discriminación muy baja pese a eso, hermana con hipoacusia del adulto.
 - **Hipótesis esperables:** hipoacusia sensorioneural autoinmune, genética tardía, ototóxica; en el alumno aparece el reflejo de "subirle la ganancia", y la respuesta es que el problema ya no es de volumen.
-- **Qué pedir:** logoaudiometría por oído, discriminación con audífono por oído y bilateral, emisiones y reflejos, y derivación a un equipo de implantes con la batería (→ H3, H5, H9, H20).
+- **Qué pedir:** logoaudiometría por oído, discriminación con audífono por oído y bilateral, emisiones y reflejos, y derivación a un equipo de implantes con la batería (→ H3, H5, H9, H21).
 - **Errores esperables:** decir que "no es candidata" porque tiene resto auditivo en graves; leer el campo libre con audífono sin mirar la discriminación; pedir ABR como si fuera sospechosa de tumor.
 - **En LabSim:** no está en la práctica del curso; el docente lo crea con el cuadro *autoinmune* severa bilateral, edad 58, mujer. La discriminación con audífono la declara el caso; LabSim no la mide todavía.
 :::
@@ -252,10 +252,10 @@ Dice que el audífono "no le sirve" a los tres meses. ¿Cómo se adaptaron? ¿Cu
 :::figura cap29_aun_no campo_libre
 - @S 1000 | Sin audífono, el mejor oído está en **45 dB** en 1 kHz.
 - @A 1000 | Con audífono está en **15 dB**: queda dentro de lo normal en las frecuencias del habla.
-- @A 4000 | En 4 kHz con audífono baja de 70 a **50 dB**: aún hay agudos sin cubrir, la zona donde el ajuste por comodidad suele quedar corto (→ H20).
+- @A 4000 | En 4 kHz con audífono baja de 70 a **50 dB**: aún hay agudos sin cubrir, la zona donde el ajuste por comodidad suele quedar corto (→ H21).
 :::
 
-:::ayuda-ancho Lo que entrega él (→ H20)
+:::ayuda-ancho Lo que entrega él (→ H21)
 | Prueba | Sin audífono | Con audífono |
 |---|---|---|
 | Bisílabos sin lectura labial, mismo nivel | **40 %** | **84 %** (los dos oídos) |
@@ -267,7 +267,7 @@ Dice que el audífono "no le sirve" a los tres meses. ¿Cómo se adaptaron? ¿Cu
 :::docente Guía del caso
 - **Datos clave:** audífonos comprados hace tres meses sin medición en oído real, queja en ambientes ruidosos, pérdida moderada y simétrica, discriminación buena, destreza manual normal.
 - **Hipótesis esperables:** pérdida demasiado grande para el audífono (error: no lo es), ajuste insuficiente, expectativas frente al ruido, falta de tiempo de adaptación.
-- **Qué pedir:** medición en oído real, discriminación con y sin audífono, cuestionarios (→ H20, COSI), consejería sobre ruido. **No** derivar a implante.
+- **Qué pedir:** medición en oído real, discriminación con y sin audífono, cuestionarios (→ H21, COSI), consejería sobre ruido. **No** derivar a implante.
 - **Errores esperables:** responder "ya no hay nada más" sin verificar; derivar por la queja y no por los datos; confundir "no sirve" con "no alcanza".
 - **En LabSim:** no está en la práctica del curso; el docente lo crea con el cuadro *coclear plana* moderada, edad 74, hombre. La discriminación con audífono la declara el caso.
 :::

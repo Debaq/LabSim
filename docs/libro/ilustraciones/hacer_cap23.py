@@ -142,7 +142,7 @@ def disociacion():
     for nom, p, g, col in pts:
         c.c(X(p), Y(g), 7, col, '#fff', 1.5)
         c.t(X(p) + 11, Y(g) + 4, nom, 11, TINTA, 'start', 700)
-    c.t(375, 392, 'Cortes: paresia de 25 % (calórica mínima del protocolo, → H16) y ganancia de 0,8 como límite habitual (→ H17).', 9.5, TENUE)
+    c.t(375, 392, 'Cortes: paresia de 25 % (calórica mínima del protocolo, → H17) y ganancia de 0,8 como límite habitual (→ H18).', 9.5, TENUE)
     c.guardar('cap23-disociacion.svg')
 
 

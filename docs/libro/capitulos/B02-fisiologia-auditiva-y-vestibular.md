@@ -39,27 +39,27 @@
 
 ### Nervio y vía central
 - Codificación de frecuencia, intensidad y tiempo en el nervio: código de lugar y de ritmo, bloqueo de fase y su límite en frecuencia, fibras de alta y baja actividad espontánea y rango dinámico, sumación por población; adaptación neural (→ H6, cap. 11, cap. 13, cap. 30).
-- Núcleos cocleares ventral y dorsal, complejo olivar, lemnisco, colículo, geniculado y corteza: qué hace cada estación (tonotopía conservada, áreas secundarias, lateralización hemisférica) (→ H14, cap. 12; la anatomía, en B1).
-- Audición binaural y localización: diferencias interaurales de tiempo (oliva superior medial) y de nivel (oliva superior lateral), rango de frecuencias de cada pista, sombra de la cabeza, efecto de precedencia, análisis de la escena auditiva y efecto cóctel (→ H14, cap. 30).
+- Núcleos cocleares ventral y dorsal, complejo olivar, lemnisco, colículo, geniculado y corteza: qué hace cada estación (tonotopía conservada, áreas secundarias, lateralización hemisférica) (→ H15, cap. 12; la anatomía, en B1).
+- Audición binaural y localización: diferencias interaurales de tiempo (oliva superior medial) y de nivel (oliva superior lateral), rango de frecuencias de cada pista, sombra de la cabeza, efecto de precedencia, análisis de la escena auditiva y efecto cóctel (→ H15, cap. 30).
 - Generadores de las ondas I a V del PEAT; latencias e interpicos; maduración y mielinización en el lactante (→ H10, cap. 14, cap. 17).
 - Procesamiento central del habla; por qué la discriminación cae más en lo retrococlear (→ H5, cap. 13).
-- Procesamiento auditivo central: resolución y ordenamiento temporal, interacción binaural, escucha dicótica, separación figura-fondo; maduración hasta la adolescencia (→ H14).
+- Procesamiento auditivo central: resolución y ordenamiento temporal, interacción binaural, escucha dicótica, separación figura-fondo; maduración hasta la adolescencia (→ H15).
 
 ### Desarrollo
 - Oído del recién nacido: vérnix, mesénquima y líquido en el oído medio las primeras horas (→ cap. 16); maduración del oído medio y del tronco (→ cap. 17).
 
 ### Sistema vestibular
-- Canales semicirculares (aceleraciones angulares) y otolitos (lineales y gravedad); actividad de reposo y asimetría (→ H15).
-- Dinámica de la cúpula: por qué el canal se comporta como integrador de la aceleración (modelo de péndulo de torsión), constante de tiempo y almacenamiento de velocidad; leyes de Ewald (→ H16, H17, H18).
+- Canales semicirculares (aceleraciones angulares) y otolitos (lineales y gravedad); actividad de reposo y asimetría (→ H16).
+- Dinámica de la cúpula: por qué el canal se comporta como integrador de la aceleración (modelo de péndulo de torsión), constante de tiempo y almacenamiento de velocidad; leyes de Ewald (→ H17, H18, H19).
 - Fisiología macular: estriola y polarización opuesta de las células, inclinación frente a traslación, reflejos otolíticos (contrarrotación ocular, vertical visual subjetiva), integración canal-otolito (→ H12, cap. 20, cap. 22).
-- Reflejo vestíbulo-ocular: ganancia, fase; por qué el nistagmo bate hacia el lado más activo (→ H15, H16, H17).
+- Reflejo vestíbulo-ocular: ganancia, fase; por qué el nistagmo bate hacia el lado más activo (→ H16, H17, H18).
 - Vías vestíbulo-cólica (cVEMP) y vestíbulo-ocular (oVEMP); sáculo y utrículo (→ H12, cap. 20).
-- Mecanismo del VPPB: canalitiasis y cupulolitiasis (→ H18).
-- Reflejos vestíbulo-espinal y vestíbulo-cólico: vías lateral y medial, control postural (→ H19, cap. 32).
+- Mecanismo del VPPB: canalitiasis y cupulolitiasis (→ H19).
+- Reflejos vestíbulo-espinal y vestíbulo-cólico: vías lateral y medial, control postural (→ H20, cap. 32).
 - Vías vestibulares centrales: núcleos, cerebelo (flóculo y nódulo), tálamo y corteza vestibular (región insular posterior); percepción de la vertical y del movimiento propio, integración multisensorial (→ cap. 25, cap. 27).
-- Compensación central, adaptación y sustitución: la base de la rehabilitación (→ H19).
+- Compensación central, adaptación y sustitución: la base de la rehabilitación (→ H20).
 
 ### Nariz
-- Ciclo nasal, resistencia al flujo y válvula nasal; mucosa y respuesta al vasoconstrictor (→ H23-H25).
-- Acondicionamiento del aire: calentamiento, humidificación, filtrado y depuración mucociliar; papel de los cornetes y del flujo sanguíneo de la mucosa (→ H23, cap. 36).
-- Olfacción: hendidura olfatoria, transducción en la neurona receptora, bulbo, vía y corteza olfatoria; por qué la obstrucción nasal quita el olfato (→ H23, cap. 35).
+- Ciclo nasal, resistencia al flujo y válvula nasal; mucosa y respuesta al vasoconstrictor (→ H24-H26).
+- Acondicionamiento del aire: calentamiento, humidificación, filtrado y depuración mucociliar; papel de los cornetes y del flujo sanguíneo de la mucosa (→ H24, cap. 36).
+- Olfacción: hendidura olfatoria, transducción en la neurona receptora, bulbo, vía y corteza olfatoria; por qué la obstrucción nasal quita el olfato (→ H24, cap. 35).

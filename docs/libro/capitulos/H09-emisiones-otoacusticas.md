@@ -170,7 +170,7 @@ Mide **cuánto baja la emisión cuando el oído contrario recibe ruido**. Es la 
 
 **Para qué se usa y qué no dice.**
 
-- Es una medida de **investigación** y de apoyo al estudio de las quejas de oír en ruido. En 15 niños de 8 a 13 años con trastorno de procesamiento auditivo y dificultades de aprendizaje, la supresión de la TEOAE fue menor que en 15 controles pareados, y sus TEOAE eran más grandes (Muchnik y cols., 2004). Es un hallazgo de grupo: no sirve para diagnosticar a un niño en particular. → H14, cap. 30.
+- Es una medida de **investigación** y de apoyo al estudio de las quejas de oír en ruido. En 15 niños de 8 a 13 años con trastorno de procesamiento auditivo y dificultades de aprendizaje, la supresión de la TEOAE fue menor que en 15 controles pareados, y sus TEOAE eran más grandes (Muchnik y cols., 2004). Es un hallazgo de grupo: no sirve para diagnosticar a un niño en particular. → H15, cap. 30.
 - **No es una prueba de vía auditiva completa.** Mira el último tramo del arco reflejo, la sinapsis sobre las células ciliadas externas.
 
 :::ojo La supresión es una medida poco estable

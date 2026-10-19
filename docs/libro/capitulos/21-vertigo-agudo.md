@@ -23,8 +23,8 @@ En el SVA la pregunta no es "¿qué oído está enfermo?" sino **"¿es periféri
 
 HINTS son las iniciales en inglés de tres pruebas de cabecera: **H**ead **I**mpulse, **N**ystagmus y **T**est of **S**kew. Se hacen en ese orden, en pocos minutos, sin equipos.
 
-1. **Impulso cefálico (*head impulse*).** El paciente fija la mirada en la nariz del examinador y este le gira la cabeza de forma **breve, rápida e impredecible** (unos 15° en unos 100 ms; Halmagyi y cols., 2017) hacia un lado y hacia el otro. Si el reflejo vestíbulo-ocular (VOR) funciona, los ojos se quedan en la nariz. Si falla, el ojo se va con la cabeza y **salta de vuelta** con una sacada correctiva (Halmagyi y Curthoys, 1988). El porqué de la rapidez y de esa sacada está en H17.
-2. **Nistagmo.** Se mira con la mirada al frente, a la derecha y a la izquierda (→ H15); con las lentes de Frenzel se ve además el nistagmo espontáneo que la fijación esconde. Un nistagmo **unidireccional**, horizontal con componente torsional, que **no cambia de sentido** al cambiar la mirada, es el de una lesión periférica. Uno que **cambia de sentido** (bate a la derecha al mirar a la derecha y a la izquierda al mirar a la izquierda), o que es **puramente vertical o torsional**, es central.
+1. **Impulso cefálico (*head impulse*).** El paciente fija la mirada en la nariz del examinador y este le gira la cabeza de forma **breve, rápida e impredecible** (unos 15° en unos 100 ms; Halmagyi y cols., 2017) hacia un lado y hacia el otro. Si el reflejo vestíbulo-ocular (VOR) funciona, los ojos se quedan en la nariz. Si falla, el ojo se va con la cabeza y **salta de vuelta** con una sacada correctiva (Halmagyi y Curthoys, 1988). El porqué de la rapidez y de esa sacada está en H18.
+2. **Nistagmo.** Se mira con la mirada al frente, a la derecha y a la izquierda (→ H16); con las lentes de Frenzel se ve además el nistagmo espontáneo que la fijación esconde. Un nistagmo **unidireccional**, horizontal con componente torsional, que **no cambia de sentido** al cambiar la mirada, es el de una lesión periférica. Uno que **cambia de sentido** (bate a la derecha al mirar a la derecha y a la izquierda al mirar a la izquierda), o que es **puramente vertical o torsional**, es central.
 3. **Desviación oblicua (*test of skew*).** Con la prueba de oclusión alternada se tapa un ojo unos segundos y se pasa la mano al otro. Si el ojo que se destapa **sube o baja a re-fijar**, hay una desviación vertical: un signo de lesión del tronco o de las vías de los otolitos.
 
 :::ayuda-ancho Cómo se lee el HINTS
@@ -46,12 +46,12 @@ Al HINTS se le suman dos datos (Saber Tehrani y cols., 2014; Carmona y cols., 20
 - **La audición.** Una pérdida auditiva **nueva** del mismo lado en un vértigo agudo se busca con una prueba rápida, y es el aporte directo de quien hace audiometría. Señala que el laberinto entero está comprometido: una laberintitis, o el infarto de la arteria cerebelosa anteroinferior (AICA) que lo irriga (→ cap. 12).
 - **La marcha y el tronco.** Se pide al paciente sentarse, ponerse de pie y caminar **sin apoyo**. Carmona y cols. los gradúan en: 1, desequilibrio leve a moderado, camina solo; 2, desequilibrio severo, no camina sin sostén; 3, **cae al ponerse de pie**. Solo los pacientes con ictus tuvieron grado 3, y los grados 2 y 3 juntos detectaron el 92,9 % de los ictus del territorio de la AICA o de la arteria cerebelosa posteroinferior (PICA), con una especificidad de 61,1 %.
 
-### El impulso cefálico con video (→ H17)
+### El impulso cefálico con video (→ H18)
 
 El impulso manual se ve, pero no se guarda y es fácil pasar por alto las sacadas **encubiertas**, que ocurren mientras la cabeza aún gira (Weber y cols., 2008). El **vHIT** registra cabeza y ojo, calcula la **ganancia** del reflejo de cada lado y muestra las sacadas. En el vértigo agudo se usa lo mismo que en el consultorio: el protocolo pide **al menos 20 impulsos por oído**, y se informa la ganancia de cada lado y las sacadas. Un equipo portátil de videooculografía ha servido para estandarizar el HINTS en urgencia (Newman-Toker y cols., 2013), pero con 12 pacientes: es una promesa, no una regla.
 
 :::comentario Lo que dicen las normas
-La preparación del protocolo para el examen vestibular y el vHIT es la de un paciente que **puede esperar**: ayuno de 4 horas, suspender 48 horas antes los antivertiginosos, antieméticos y ansiolíticos, y una hora de examen. Un paciente con vértigo agudo no cumple nada de eso: vomita y ya recibió un antiemético. Los supresores vestibulares bajan el nistagmo y pueden **esconder** un hallazgo, por eso lo que se hace es **anotar qué recibió y a qué hora**, no negar el examen. La calórica, que pide las mismas condiciones y además provoca vómitos (→ H16), no es parte del examen agudo. Y el protocolo no trae el HINTS completo: mira el nistagmo en las cinco posiciones de la mirada, pero pide el impulso cefálico solo con equipo y no incluye la oclusión alternada ni la regla de que un nistagmo que cambia de sentido o un impulso normal son signos centrales. Los criterios de la Sociedad Bárány aceptan para el reflejo disminuido tanto el impulso cefálico como la calórica (Strupp y cols., 2022).
+La preparación del protocolo para el examen vestibular y el vHIT es la de un paciente que **puede esperar**: ayuno de 4 horas, suspender 48 horas antes los antivertiginosos, antieméticos y ansiolíticos, y una hora de examen. Un paciente con vértigo agudo no cumple nada de eso: vomita y ya recibió un antiemético. Los supresores vestibulares bajan el nistagmo y pueden **esconder** un hallazgo, por eso lo que se hace es **anotar qué recibió y a qué hora**, no negar el examen. La calórica, que pide las mismas condiciones y además provoca vómitos (→ H17), no es parte del examen agudo. Y el protocolo no trae el HINTS completo: mira el nistagmo en las cinco posiciones de la mirada, pero pide el impulso cefálico solo con equipo y no incluye la oclusión alternada ni la regla de que un nistagmo que cambia de sentido o un impulso normal son signos centrales. Los criterios de la Sociedad Bárány aceptan para el reflejo disminuido tanto el impulso cefálico como la calórica (Strupp y cols., 2022).
 :::
 
 Un ejemplo de cómo se informa lo de cabecera:
@@ -66,11 +66,11 @@ Un ejemplo de cómo se informa lo de cabecera:
 
 ### Un desequilibrio de reposos
 
-Los dos laberintos descargan siempre, y el tronco **compara** esas descargas: si son iguales, los ojos están quietos; si una cae, el tronco lee un giro que no existe y mueve los ojos para "compensarlo" (→ H15, y el detalle en B2). Una neuritis apaga la descarga de un lado de golpe. El ojo deriva despacio hacia el lado enfermo y se corrige con un salto: el nistagmo **bate hacia el lado sano**. La fijación visual lo frena (por eso se examina sin ella, con lentes de Frenzel), y mirar hacia el lado de la fase rápida lo aumenta (ley de Alexander).
+Los dos laberintos descargan siempre, y el tronco **compara** esas descargas: si son iguales, los ojos están quietos; si una cae, el tronco lee un giro que no existe y mueve los ojos para "compensarlo" (→ H16, y el detalle en B2). Una neuritis apaga la descarga de un lado de golpe. El ojo deriva despacio hacia el lado enfermo y se corrige con un salto: el nistagmo **bate hacia el lado sano**. La fijación visual lo frena (por eso se examina sin ella, con lentes de Frenzel), y mirar hacia el lado de la fase rápida lo aumenta (ley de Alexander).
 
 ### Por qué un impulso normal es central
 
-El impulso cefálico es un giro tan rápido que solo el reflejo directo del canal puede compensarlo (→ H17). Cuando el nervio o el laberinto fallan, **el reflejo falla**: el impulso hacia ese lado sale con la ganancia baja y una sacada. Pero hay lesiones que producen **el mismo desequilibrio de reposos sin tocar el reflejo**. Un infarto del pedúnculo cerebeloso inferior, del bulbo lateral o del cerebelo toca los núcleos vestibulares o sus conexiones: el tronco lee la diferencia de reposos como si fuera un giro, pero los canales y el nervio están **sanos**. Hay vértigo, hay nistagmo y el impulso sale **normal** (Newman-Toker y cols., 2008). En 15 ictus pequeños que se presentaron como SVA, la estructura infartada más frecuente fue el pedúnculo cerebeloso inferior (73 %) y la localización más frecuente fue el bulbo lateral (60 %) (Saber Tehrani y cols., 2014).
+El impulso cefálico es un giro tan rápido que solo el reflejo directo del canal puede compensarlo (→ H18). Cuando el nervio o el laberinto fallan, **el reflejo falla**: el impulso hacia ese lado sale con la ganancia baja y una sacada. Pero hay lesiones que producen **el mismo desequilibrio de reposos sin tocar el reflejo**. Un infarto del pedúnculo cerebeloso inferior, del bulbo lateral o del cerebelo toca los núcleos vestibulares o sus conexiones: el tronco lee la diferencia de reposos como si fuera un giro, pero los canales y el nervio están **sanos**. Hay vértigo, hay nistagmo y el impulso sale **normal** (Newman-Toker y cols., 2008). En 15 ictus pequeños que se presentaron como SVA, la estructura infartada más frecuente fue el pedúnculo cerebeloso inferior (73 %) y la localización más frecuente fue el bulbo lateral (60 %) (Saber Tehrani y cols., 2014).
 
 No es una regla perfecta. Una lesión que toque a la vez el laberinto y el tronco (el infarto de la AICA es el ejemplo) puede dar un impulso **anormal**: en la serie de Newman-Toker y cols. (2008), 3 de 34 ictus (9 %) tuvieron un impulso positivo, uno de ellos pontocerebelo-laberíntico. Por eso el HINTS no se queda en el primer paso.
 
@@ -132,7 +132,7 @@ Con un vértigo agudo, el razonamiento sigue cuatro preguntas, en orden:
 1. **¿Es un síndrome vestibular agudo?** Continuo, con nistagmo, náuseas y mala marcha. Si es episódico o posicional, es otro capítulo (→ cap. 22 y 23).
 2. **¿Hay un signo central?** HINTS completo, marcha sin apoyo y cualquier otro dato neurológico (diplopía, disartria, debilidad, cefalea nueva). Uno basta para derivar.
 3. **¿Cayó la audición?** Una pérdida nueva cambia la hipótesis de neuritis a laberintitis o AICA, y se mira junto con el riesgo vascular.
-4. **¿Qué canales y qué rama?** El vHIT de los seis canales (→ H17) dice si es una neuritis superior, una pérdida total o una lesión central.
+4. **¿Qué canales y qué rama?** El vHIT de los seis canales (→ H18) dice si es una neuritis superior, una pérdida total o una lesión central.
 
 :::ayuda-ancho Tres cuadros lado a lado
 | | Neuritis superior | Laberintitis | Pseudoneuritis (ictus) |
@@ -147,7 +147,7 @@ Con un vértigo agudo, el razonamiento sigue cuatro preguntas, en orden:
 
 ### Lo que más se equivoca
 
-- **Dejarse tranquilizar por un nistagmo "de oído".** Un ictus puede dar un nistagmo que parece periférico: una sola prueba normal no cierra el estudio (→ H15).
+- **Dejarse tranquilizar por un nistagmo "de oído".** Un ictus puede dar un nistagmo que parece periférico: una sola prueba normal no cierra el estudio (→ H16).
 - **Tomar un impulso normal por "sin problema vestibular".** En un SVA, un impulso normal es un **signo central**, no una buena noticia.
 - **Leer un impulso anormal como seguro.** En una serie, 3 de 34 ictus tuvieron un impulso anormal: manda el resto del examen y el contexto.
 - **Tratar la pérdida auditiva como un hallazgo accesorio.** Es lo que une a la laberintitis con la AICA.
@@ -197,7 +197,7 @@ Además del audiograma, ¿qué mirarías de cabecera y con qué equipo? ¿Qué e
 :::docente Guía del caso
 - **Datos clave:** vértigo continuo de dos días con vómitos, mejoría con los ojos cerrados, resfrío previo, **audición normal**, sin síntomas neurológicos ni factores de riesgo; camina desviándose hacia el lado enfermo.
 - **Hipótesis esperables:** neuritis vestibular, laberintitis, ictus de fosa posterior. La audición normal y la ausencia de riesgo vascular inclinan a lo primero, pero no cierran lo último.
-- **Qué pedir:** audiometría, examen de nistagmo con Frenzel o VNG, vHIT de los seis canales; si aparece cualquier signo central, derivar (→ H3, H15, H17).
+- **Qué pedir:** audiometría, examen de nistagmo con Frenzel o VNG, vHIT de los seis canales; si aparece cualquier signo central, derivar (→ H3, H16, H18).
 - **Errores esperables:** concluir "normal" por la audición sin mirar el reflejo; no dar los impulsos de la derecha y de la izquierda por separado; informar el nistagmo con fijación, donde casi no se ve.
 :::
 
@@ -241,7 +241,7 @@ Además del examen del reflejo y del nistagmo, ¿qué agregarías para saber si 
 :::docente Guía del caso
 - **Datos clave:** vértigo agudo tras un resfrío, oído derecho "tapado" con hipoacusia que no vuelve, zumbido a ratos, otoscopía normal, sin signos neurológicos.
 - **Hipótesis esperables:** laberintitis viral, hipoacusia súbita con neuritis, AICA (menos probable a esa edad y sin riesgo vascular, pero **no excluida** por el audiograma), laberintitis supurada (con otoscopía anormal).
-- **Qué pedir:** audiometría, impedanciometría (curva A, sin otitis), HINTS, VEMP de los dos tipos, vHIT (→ H3, H5, H12, H17).
+- **Qué pedir:** audiometría, impedanciometría (curva A, sin otitis), HINTS, VEMP de los dos tipos, vHIT (→ H3, H5, H12, H18).
 - **La trampa:** el audiograma de este paciente sería idéntico en una AICA. Se descarta con el examen del tronco, el contexto y la imagen del médico, **no** con la audiometría.
 - **Errores esperables:** llamarlo "neuritis" sin explicar la hipoacusia; leer un VEMP caído como lesión del tronco (es del laberinto).
 - **En LabSim:** cuadro *laberintitis* en el OD, grado severo.
@@ -280,7 +280,7 @@ El paciente no puede sentarse sin caerse. ¿Cuál es la prioridad: completar el 
 :::docente Guía del caso
 - **Datos clave:** 67 años, hipertensión y diabetes, ex fumador, vértigo súbito con vómitos y **no puede sentarse sin caerse**, dolor de cabeza en la nuca, sin síntomas auditivos.
 - **Hipótesis esperables:** neuritis, ictus cerebeloso o del tronco, intoxicación o fármacos. Los factores de riesgo y la marcha inclinan a lo vascular.
-- **Qué pedir:** HINTS (impulso, nistagmo con mirada excéntrica, skew) y marcha; **aviso al médico antes de seguir**. La audiometría puede esperar (→ H15, H17).
+- **Qué pedir:** HINTS (impulso, nistagmo con mirada excéntrica, skew) y marcha; **aviso al médico antes de seguir**. La audiometría puede esperar (→ H16, H18).
 - **La trampa:** el nistagmo parece periférico cuando se lo mira al frente, y el audiograma es normal para la edad. Lo que lo delata es **la mirada excéntrica**, el impulso normal y el skew.
 - **Errores esperables:** mirar solo el nistagmo al frente; leer el impulso normal como "sin problema vestibular"; dar un informe de alta con la resonancia pendiente.
 :::
@@ -324,7 +324,7 @@ Si el impulso cefálico sale anormal y el nistagmo es unidireccional, ¿estás t
 :::docente Guía del caso
 - **Datos clave:** 58 años, hipertensión mal controlada y tabaquismo, vértigo súbito con vómitos, **pérdida auditiva del oído izquierdo de golpe**, no puede caminar sin que la sostengan (cae hacia la izquierda), sin pitido.
 - **Hipótesis esperables:** laberintitis, hipoacusia súbita con neuritis, **infarto de la AICA**. El riesgo vascular y la imposibilidad de caminar inclinan a lo último.
-- **Qué pedir:** HINTS completo, marcha, audiometría con logo, VEMP y, **antes que todo, avisar** (→ H3, H12, H15, H17, cap. 12).
+- **Qué pedir:** HINTS completo, marcha, audiometría con logo, VEMP y, **antes que todo, avisar** (→ H3, H12, H16, H18, cap. 12).
 - **La trampa:** dos de tres pasos del HINTS salen periféricos y el audiograma es el de una laberintitis. Lo que cambia la conducta es el **skew**, la marcha y el **riesgo vascular**. Es el mismo patrón que el caso 21.2, con una explicación opuesta.
 - **Errores esperables:** quedarse con el impulso anormal y el nistagmo unidireccional ("neuritis con hipoacusia"); atribuir el skew a un vicio de refracción; esperar la resonancia para avisar.
 :::

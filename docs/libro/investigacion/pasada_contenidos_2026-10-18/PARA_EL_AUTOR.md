@@ -9,25 +9,25 @@ que entran "pero no ahora").
 
 ## Para decidir
 
-1. **H24, patrones de curva de Cottle:** la tabla sale solo de la clase nasal,
+1. **H25, patrones de curva de Cottle:** la tabla sale solo de la clase nasal,
    sin fuente primaria (marcada `verificar`). ¿Se deja, se busca la fuente o se quita?
 2. **Cap. 36, prick test:** el texto dice que "no la hace quien mide la nariz";
    la asignatura 11 pide la técnica. Se dejó como está hasta el capítulo nuevo de prick.
-3. **H20, tabla de gamas tecnológicas** de audífonos: sin fuente (no hay norma; son
+3. **H21, tabla de gamas tecnológicas** de audífonos: sin fuente (no hay norma; son
    categorías comerciales). ¿Se queda como descripción general?
-4. **H14, subperfiles de Bellis-Ferre:** no se pudo leer la fuente; los cinco perfiles
+4. **H15, subperfiles de Bellis-Ferre:** no se pudo leer la fuente; los cinco perfiles
    quedan con `verificar`.
-5. **H15 y H18, leyes de Ewald:** H15 enuncia la III para el canal posterior (Ichijo);
-   H18 agrupa horizontal y vertical bajo la II. Conviene unificar.
-6. **Ruido comunitario (H22):** la NCh 1619 no se pudo verificar y quedó fuera del texto
+5. **H16 y H19, leyes de Ewald:** H16 enuncia la III para el canal posterior (Ichijo);
+   H19 agrupa horizontal y vertical bajo la II. Conviene unificar.
+6. **Ruido comunitario (H23):** la NCh 1619 no se pudo verificar y quedó fuera del texto
    visible; el D.S. 38/2011 sigue vigente hasta que rija el D.S. 14/2024 (~agosto 2028).
-7. **Duplicados que se resolvieron:** ayudas complementarias quedan en H20 (cap. 28
-   remite); VSS, ABC, Tinetti y DGI de 8 ítems quedan en H19 (caps. 27 y 32 remiten).
+7. **Duplicados que se resolvieron:** ayudas complementarias quedan en H21 (cap. 28
+   remite); VSS, ABC, Tinetti y DGI de 8 ítems quedan en H20 (caps. 27 y 32 remiten).
 
 ## `verificar` nuevos (~60)
 
-Los más: H22 (12, normas e historia), H20 (12, vigencia GES/SENADIS/JUNAEB y
-datos de industria), H19 (5), H15 (4), H21 (4), H02 (4), H01 (3). Cada uno
+Los más: H23 (12, normas e historia), H21 (12, vigencia GES/SENADIS/JUNAEB y
+datos de industria), H20 (5), H16 (4), H22 (4), H02 (4), H01 (3). Cada uno
 está como comentario HTML en su capítulo y en el informe del agente.
 
 ## Pendiente fuera de esta pasada

@@ -24,7 +24,7 @@ Fuentes de los números:
   ERB = 24,7 (4,37 f + 1) Hz, f en kHz.
 - RETSPL del TDH-39: ISO 389-1, los mismos valores que usa H3 (45 / 25,5 / 7 dB SPL
   en 125 / 250 / 1000 Hz).
-- Resistencias nasales: las de H24 (0,26 Pa/(cm3/s) a 75 Pa y 0,35 a 150 Pa en la
+- Resistencias nasales: las de H25 (0,26 Pa/(cm3/s) a 75 Pa y 0,35 a 150 Pa en la
   fosa derecha del paciente simulado; 0,29 en la izquierda).
 - Todo lo demás es aritmética o un modelo de juguete, y la figura lo dice.
 """
@@ -561,7 +561,7 @@ def decibel():
     c.t(x - 10, y0 - 8, 'dB SPL', 8.5, TINTA, 'end', 700)
     c.t(x + 12, y0 - 8, 'presión', 8.5, TENUE, 'start')
     ej = [(0, 'umbral a 1 kHz (0 a 7 dB SPL)'), (30, 'sala muy silenciosa'),
-          (60, 'conversación a 1 m'), (85, 'límite de 8 horas (→ H22)'), (120, 'dolor')]
+          (60, 'conversación a 1 m'), (85, 'límite de 8 horas (→ H23)'), (120, 'dolor')]
     for db, txt in ej:
         c.circ(x, Y(db), 3.5, COCLEAR, COCLEAR, 1)
         c.t(x + 78, Y(db) + 3, txt, 8, TINTA, 'start')
@@ -924,7 +924,7 @@ def nariz():
         v = 1 / r ** 4
         c.circ(ax2.X(r), ax2.Y(v), 3.6, '#fff', COCLEAR, 1.8)
         c.t(ax2.X(r) + 8, ax2.Y(v) - 6, f'×{num_es(v, 1)}' if v < 10 else f'×{v:.0f}', 8, COCLEAR, 'start', 700)
-    c.t(14, 322, f'A: curva de la forma ΔP = k₁ V̇ + k₂ V̇², ajustada a las dos resistencias de H24 (0,26 a 75 Pa y 0,35 a 150 Pa): k₁ = {num_es(k1, 3)}, k₂ = {num_es(k2 * 1000, 2)}·10⁻³.', 8, TENUE, 'start')
+    c.t(14, 322, f'A: curva de la forma ΔP = k₁ V̇ + k₂ V̇², ajustada a las dos resistencias de H25 (0,26 a 75 Pa y 0,35 a 150 Pa): k₁ = {num_es(k1, 3)}, k₂ = {num_es(k2 * 1000, 2)}·10⁻³.', 8, TENUE, 'start')
     c.t(14, 335, 'B: ley de Poiseuille, R proporcional a 1 / r⁴ (tubo recto y liso).', 8, TENUE, 'start')
     c.guardar('b4-nariz.svg')
 

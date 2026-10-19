@@ -16,8 +16,8 @@ Este capítulo no agrega ninguna prueba nueva: pone a trabajar juntas las de sie
 
 Cuatro cosas conviene tener a la vista:
 
-- **El examen vestibular con VNG** (→ H15), sin nistagmo espontáneo ni posicional entre las crisis. El nistagmo aparece **durante** la crisis y se apaga después; un examen normal no resta nada a una enfermedad de crisis.
-- **La calórica** (→ H16), que informa cuánto responde cada laberinto **al estímulo más lento**, y el **vHIT** (→ H17), que lo hace al más rápido. Hacer las dos y compararlas es lo que enseña este capítulo.
+- **El examen vestibular con VNG** (→ H16), sin nistagmo espontáneo ni posicional entre las crisis. El nistagmo aparece **durante** la crisis y se apaga después; un examen normal no resta nada a una enfermedad de crisis.
+- **La calórica** (→ H17), que informa cuánto responde cada laberinto **al estímulo más lento**, y el **vHIT** (→ H18), que lo hace al más rápido. Hacer las dos y compararlas es lo que enseña este capítulo.
 - **El VEMP** (→ H12): el cVEMP lee el sáculo y el oVEMP el utrículo, y el sáculo es el primero que se compromete en un hidrops (→ cap. 9).
 - **La audiometría seriada** (→ H3): el audiograma de hoy se lee contra el de hace seis meses y contra el de hace tres años. La **serie** es la prueba; un audiograma suelto es una foto de un día.
 
@@ -32,11 +32,11 @@ La electrococleografía (→ H11) se usa como en el capítulo 9. Aquí importa s
 
 ### Cuándo se hace cada prueba
 
-El protocolo de este libro pide, para la calórica mínima, que el paciente **no tenga nistagmo espontáneo** y que haya **suspendido 48 horas antes** antivertiginosos, antieméticos y ansiolíticos (→ H16). En una enfermedad de crisis eso se traduce en una regla práctica: se cita al paciente **cuando está bien**, se le pregunta cuándo fue la última crisis y se anota. Un nistagmo espontáneo con un paciente que acaba de salir de una crisis no es de la prueba: es de la crisis, y la calórica no se interpreta. Para el audiograma sirve la regla contraria: se anota también **cuántos días** lleva desde la última crisis, porque en un hidrops la audición cambia con ella (→ cap. 9).
+El protocolo de este libro pide, para la calórica mínima, que el paciente **no tenga nistagmo espontáneo** y que haya **suspendido 48 horas antes** antivertiginosos, antieméticos y ansiolíticos (→ H17). En una enfermedad de crisis eso se traduce en una regla práctica: se cita al paciente **cuando está bien**, se le pregunta cuándo fue la última crisis y se anota. Un nistagmo espontáneo con un paciente que acaba de salir de una crisis no es de la prueba: es de la crisis, y la calórica no se interpreta. Para el audiograma sirve la regla contraria: se anota también **cuántos días** lleva desde la última crisis, porque en un hidrops la audición cambia con ella (→ cap. 9).
 
 ### La calórica mínima y la calórica bitérmica
 
-La mínima del protocolo, con agua a 2 °C, compara los dos oídos con una sola temperatura: informa una **paresia** si la diferencia entre las velocidades de la fase lenta es de 25 % o más (→ H16). Es suficiente para ver si un laberinto responde menos. No sirve para la **preponderancia direccional**, que necesita las cuatro irrigaciones, ni para decidir una arreflexia bilateral: con los dos oídos igual de caídos, la fórmula da cero. En un paciente con los dos oídos comprometidos (→ caso 23.2) la asimetría engaña y hay que mirar las velocidades **de cada oído**, no solo su diferencia.
+La mínima del protocolo, con agua a 2 °C, compara los dos oídos con una sola temperatura: informa una **paresia** si la diferencia entre las velocidades de la fase lenta es de 25 % o más (→ H17). Es suficiente para ver si un laberinto responde menos. No sirve para la **preponderancia direccional**, que necesita las cuatro irrigaciones, ni para decidir una arreflexia bilateral: con los dos oídos igual de caídos, la fórmula da cero. En un paciente con los dos oídos comprometidos (→ caso 23.2) la asimetría engaña y hay que mirar las velocidades **de cada oído**, no solo su diferencia.
 
 ### Qué se agrega al leer el VEMP
 
@@ -50,7 +50,7 @@ LabSim da el lado auditivo de estos pacientes: audiograma, logoaudiometría, ele
 
 ### Por qué la calórica y el vHIT pueden discrepar
 
-La calórica y el vHIT estimulan **el mismo canal lateral**, pero de dos maneras muy distintas: la calórica con un calentamiento lento que dura minutos, y el vHIT con un giro rápido de 150 milisegundos (→ H17, tabla de comparación). Cada una pone a prueba una **parte distinta del reflejo**: la calórica, su respuesta a variaciones muy lentas; el vHIT, su respuesta a variaciones rápidas.
+La calórica y el vHIT estimulan **el mismo canal lateral**, pero de dos maneras muy distintas: la calórica con un calentamiento lento que dura minutos, y el vHIT con un giro rápido de 150 milisegundos (→ H18, tabla de comparación). Cada una pone a prueba una **parte distinta del reflejo**: la calórica, su respuesta a variaciones muy lentas; el vHIT, su respuesta a variaciones rápidas.
 
 En un hidrops pasa algo curioso: una calórica caída con un vHIT normal. En 644 pacientes con ambas pruebas, 570 coincidieron; 36 tuvieron las pruebas disociadas, todos con el vHIT normal y una paresia calórica mayor de 30 %, y en 27 de ellos el diagnóstico final fue enfermedad de Ménière definida. <!-- Pasada de fundamentos 2026-10-18: decía "de los 36 que no coincidieron", pero 644 − 570 = 74; 36 son los que mostraron la disociación (Hannigan y cols., 2021, resumen). --> Ningún paciente con vHIT lateral anormal tuvo una calórica normal (Hannigan y cols., 2021). Una explicación propuesta es que el hidrops dilata el laberinto y altera la forma en que el calor activa los receptores, pero casi no cambia la respuesta de la cúpula al giro rápido (Halmagyi y cols., 2017); qué revela esa disociación sobre el oído enfermo es lo que discuten McGarvie y cols. (2015).
 
@@ -173,7 +173,7 @@ Frente a crisis de vértigo que vuelven, el razonamiento sigue cinco preguntas, 
 
 ### Lo que más se equivoca
 
-- **Hacer la calórica cerca de una crisis.** El nistagmo espontáneo la invalida (→ H16), y un resultado raro hoy no es el estado del oído.
+- **Hacer la calórica cerca de una crisis.** El nistagmo espontáneo la invalida (→ H17), y un resultado raro hoy no es el estado del oído.
 - **Leer la calórica caída con el vHIT normal como una contradicción.** Es lo esperable en un hidrops y no tranquiliza: el oído está comprometido.
 - **Leer una ECochG o un VEMP normales como "no es Ménière".** Una parte de los Ménière los tiene normales (→ cap. 9).
 - **Medir la razón PS/PA en un oído que ya perdió mucho.** El PA chico deja la razón sin sentido.
@@ -224,7 +224,7 @@ Tienes tres audiogramas de la historia. ¿Qué te falta para decidir si el vest�
 - @OI P13 | El del OI mide **511 µV** (10,20 corregida). La asimetría es de **28 %**, bajo el corte de 35 % de LabSim (→ H12): **el sáculo del OD responde**.
 :::
 
-:::ayuda-ancho Lo que entrega Ignacio del examen vestibular (→ H15, H16, H17)
+:::ayuda-ancho Lo que entrega Ignacio del examen vestibular (→ H16, H17, H18)
 | Prueba | Resultado |
 |---|---|
 | VNG: nistagmo espontáneo, seguimiento y sacádicos | sin nistagmo con ni sin fijación; seguimiento y sacádicos normales |
@@ -402,7 +402,7 @@ La historia es la de un Ménière que dejó la etapa de las crisis y entró a la
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural del OD de grado moderado, **etapa 3**, con hipofunción calórica derecha y vHIT normal, compatible con enfermedad de Ménière avanzada. Se informa el patrón, con la serie de audiogramas y sus fechas. La decisión sobre las caídas y el tratamiento es médica. Para quien evalúa queda el **audífono**: con una pérdida fija de 55 dB en el OD, una discriminación de 68 % y el reclutamiento presente, es el oído que más se beneficia de una prueba de audífonos (→ cap. 28 y H20).
+Hipoacusia sensorioneural del OD de grado moderado, **etapa 3**, con hipofunción calórica derecha y vHIT normal, compatible con enfermedad de Ménière avanzada. Se informa el patrón, con la serie de audiogramas y sus fechas. La decisión sobre las caídas y el tratamiento es médica. Para quien evalúa queda el **audífono**: con una pérdida fija de 55 dB en el OD, una discriminación de 68 % y el reclutamiento presente, es el oído que más se beneficia de una prueba de audífonos (→ cap. 28 y H21).
 
 :::comentario Comentario
 La ECochG de este oído muestra por qué una prueba no se puede dar por hecha: sin PA no hay razón PS/PA que informar. El Ménière avanzado se diagnostica por la historia y la serie de audiogramas, no por una sola prueba.
@@ -419,7 +419,7 @@ Los dos oídos están comprometidos: etapa 3 en el OI y etapa 2 en el OD, con zu
 Hipoacusia sensorioneural bilateral asimétrica, etapas 3 (OI) y 2 (OD), con hallazgos de hidrops en ambos oídos y cVEMP reducido en el OD: compatible con enfermedad de Ménière bilateral. Se informa que **el oído que se propone tratar no es el único comprometido**, y se entregan las velocidades de la calórica de los dos oídos, no solo el porcentaje. La decisión es de la médica; la información de este estudio es lo que necesita para tomarla.
 
 :::pregunta Para discutir
-Si se apagara el laberinto izquierdo y el derecho ya está comprometido, ¿qué función vestibular le quedaría? ¿Qué prueba usarías después para saber cómo quedó, y con qué criterio (→ H16, Strupp y cols., 2017)?
+Si se apagara el laberinto izquierdo y el derecho ya está comprometido, ¿qué función vestibular le quedaría? ¿Qué prueba usarías después para saber cómo quedó, y con qué criterio (→ H17, Strupp y cols., 2017)?
 :::
 
 ### Caso 23.3

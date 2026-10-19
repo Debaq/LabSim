@@ -128,81 +128,81 @@ tabla del protocolo hay que cambiar también el cap. 7), y el 10 solo amplía el
 | 63 | H13 | Rojo en pantalla | "sin respuesta confiable" | el protocolo; en el recuadro, ausente frente a no concluyente (notación ≤ y >) | BSA 2023 | P | |
 | 64 | H13 | Sedación | solo sueño fisiológico | el protocolo; en el recuadro, BSA admite sedación o anestesia | BSA 2023 | P | |
 
-H11 (ECochG) y H14 (procesamiento central) no tienen sección en el protocolo: lo
+H11 (ECochG) y H15 (procesamiento central) no tienen sección en el protocolo: lo
 que enseñan es la configuración de LabSim (ECochG) y la guía AAA 2010 con
 AudioPAC (procesamiento central), con las normas en sus recuadros.
 
-## Vestibular (H15-H18, 2026-10-16)
+## Vestibular (H16-H19, 2026-10-16)
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 65 | H15 | Antecedentes familiares | "de vértigo" (Frenzel) y "de hipoacusia" (VNG) | se juntan los dos | — | A | |
-| 66 | H15 | Mirada vertical | arriba y abajo solo en la versión Frenzel; VNG solo derecha e izquierda | el protocolo, cada versión | — | A | |
-| 67 | H15 | Oculomotor en la VNG | no trae sacadas, seguimiento ni optocinético | se enseñan desde la bibliografía y se dice | Fife 2000; Leigh y Zee 2015 | A · vacío | |
-| 68 | H15, H16 | Cortes de la calórica | Frenzel: hipoexcitabilidad ≥ 20 % y preponderancia ≥ 25 % (frecuencia o duración); calórica VNG: ≥ 25 % y ≥ 30 % (VFL) | H16 sigue la sección de calórica y nombra la otra en el recuadro | Shepard y Jacobson 2016 | E · contradicción interna | |
-| 69 | H15, H18 | Lado de inicio del giro supino (McClure) | Frenzel parte a la derecha; VNG a la izquierda | el orden no cambia la lectura: se comparan las intensidades | Bhattacharyya 2017 | A | |
-| 70 | H15 | Lo que no trae el protocolo | sin HINTS, skew, head-shake ni oclusión alternada | recuadro de normas | Kattah 2009; Halmagyi 1979; Hain 1987 | A · vacío | |
-| 71 | H16 | Calórica mínima | 2 mL de agua a 2 °C, 20 s | el protocolo; en el recuadro, la bitérmica (30/44 °C, 40 s; o aire 24/50 °C) | Shepard y Jacobson 2016 | P | |
-| 72 | H16 | Explicación al paciente | "estructuras no evaluadas en la prueba calórica clásica" (copiado del vHIT) | reescrita | — | E | |
-| 73 | H16 | Canal posterior en anteroflexión 30°, criterio ≥ 15 s | dato complementario | se mantiene con recuadro; sin norma publicada hallada | — | A · verificar | |
-| 74 | H16 | "Período de Török" (45 s a 1 min 15 s) | ventana de medición | se mantiene; sin respaldo hallado | — | A · verificar | |
-| 75 | H17 | Método de la ganancia | a 60 ms | el protocolo; en el recuadro, área en ventana ancha (Halmagyi) y que ningún método es superior | Halmagyi 2017; Zamaro 2020 | P | |
-| 76 | H17 | Alcance del informe | "indemnidad... función vestibular conservada" | se precisa: mide el canal a alta frecuencia | Halmagyi 2017 | A | |
-| 77 | H17 | Planos verticales | solo el lateral | se agregan LARP y RALP | MacDougall 2013; McGarvie 2015 | A · vacío | |
-| 78 | H18 | Lempert | "flexionamos la cabeza 90° al oído sano" | "gira la cabeza" (plano horizontal) | Bhattacharyya 2017, tabla 13 | E | |
-| 79 | H18 | Dix-Hallpike | cabeza unos 30° bajo la camilla | el protocolo; en el recuadro, 20° | Bhattacharyya 2017 | P | |
-| 80 | H18 | Tiempo por postura | Epley 2 min, modificado 3-5, Semont 2-3, Gufoni 2 | el protocolo; en el recuadro, 20-30 s o hasta que cese el nistagmo | Bhattacharyya 2017 | P | |
-| 81 | H18 | Indicaciones después de la maniobra | dormir semisentado 2 noches, sin movimientos bruscos | el protocolo; en el recuadro, la AAO-HNS recomienda con fuerza NO indicar restricciones (grado A) | Bhattacharyya 2017, 4b | P · revisar | |
-| 82 | H18 | Control | a los 7 días | el protocolo; en el recuadro, reevaluar dentro del mes | Bhattacharyya 2017 | P | |
-| 83 | H18 | Lempert "para el apogeotrópico" | variante de partir al lado afectado | se quitó "apogeotrópico" (la guía la pone en el geotrópico) | Bhattacharyya 2017, tabla 13 | E · preguntar | |
-| 84 | H18 | "Epley modificado" (45/15/0/15/45/135°, 3-5 min) | maniobra propia | se mantiene; no se halló en la literatura | — | A · verificar | |
+| 65 | H16 | Antecedentes familiares | "de vértigo" (Frenzel) y "de hipoacusia" (VNG) | se juntan los dos | — | A | |
+| 66 | H16 | Mirada vertical | arriba y abajo solo en la versión Frenzel; VNG solo derecha e izquierda | el protocolo, cada versión | — | A | |
+| 67 | H16 | Oculomotor en la VNG | no trae sacadas, seguimiento ni optocinético | se enseñan desde la bibliografía y se dice | Fife 2000; Leigh y Zee 2015 | A · vacío | |
+| 68 | H16, H17 | Cortes de la calórica | Frenzel: hipoexcitabilidad ≥ 20 % y preponderancia ≥ 25 % (frecuencia o duración); calórica VNG: ≥ 25 % y ≥ 30 % (VFL) | H17 sigue la sección de calórica y nombra la otra en el recuadro | Shepard y Jacobson 2016 | E · contradicción interna | |
+| 69 | H16, H19 | Lado de inicio del giro supino (McClure) | Frenzel parte a la derecha; VNG a la izquierda | el orden no cambia la lectura: se comparan las intensidades | Bhattacharyya 2017 | A | |
+| 70 | H16 | Lo que no trae el protocolo | sin HINTS, skew, head-shake ni oclusión alternada | recuadro de normas | Kattah 2009; Halmagyi 1979; Hain 1987 | A · vacío | |
+| 71 | H17 | Calórica mínima | 2 mL de agua a 2 °C, 20 s | el protocolo; en el recuadro, la bitérmica (30/44 °C, 40 s; o aire 24/50 °C) | Shepard y Jacobson 2016 | P | |
+| 72 | H17 | Explicación al paciente | "estructuras no evaluadas en la prueba calórica clásica" (copiado del vHIT) | reescrita | — | E | |
+| 73 | H17 | Canal posterior en anteroflexión 30°, criterio ≥ 15 s | dato complementario | se mantiene con recuadro; sin norma publicada hallada | — | A · verificar | |
+| 74 | H17 | "Período de Török" (45 s a 1 min 15 s) | ventana de medición | se mantiene; sin respaldo hallado | — | A · verificar | |
+| 75 | H18 | Método de la ganancia | a 60 ms | el protocolo; en el recuadro, área en ventana ancha (Halmagyi) y que ningún método es superior | Halmagyi 2017; Zamaro 2020 | P | |
+| 76 | H18 | Alcance del informe | "indemnidad... función vestibular conservada" | se precisa: mide el canal a alta frecuencia | Halmagyi 2017 | A | |
+| 77 | H18 | Planos verticales | solo el lateral | se agregan LARP y RALP | MacDougall 2013; McGarvie 2015 | A · vacío | |
+| 78 | H19 | Lempert | "flexionamos la cabeza 90° al oído sano" | "gira la cabeza" (plano horizontal) | Bhattacharyya 2017, tabla 13 | E | |
+| 79 | H19 | Dix-Hallpike | cabeza unos 30° bajo la camilla | el protocolo; en el recuadro, 20° | Bhattacharyya 2017 | P | |
+| 80 | H19 | Tiempo por postura | Epley 2 min, modificado 3-5, Semont 2-3, Gufoni 2 | el protocolo; en el recuadro, 20-30 s o hasta que cese el nistagmo | Bhattacharyya 2017 | P | |
+| 81 | H19 | Indicaciones después de la maniobra | dormir semisentado 2 noches, sin movimientos bruscos | el protocolo; en el recuadro, la AAO-HNS recomienda con fuerza NO indicar restricciones (grado A) | Bhattacharyya 2017, 4b | P · revisar | |
+| 82 | H19 | Control | a los 7 días | el protocolo; en el recuadro, reevaluar dentro del mes | Bhattacharyya 2017 | P | |
+| 83 | H19 | Lempert "para el apogeotrópico" | variante de partir al lado afectado | se quitó "apogeotrópico" (la guía la pone en el geotrópico) | Bhattacharyya 2017, tabla 13 | E · preguntar | |
+| 84 | H19 | "Epley modificado" (45/15/0/15/45/135°, 3-5 min) | maniobra propia | se mantiene; no se halló en la literatura | — | A · verificar | |
 
-## Rehabilitación, audífonos y ocupacional (H19-H22, 2026-10-16)
+## Rehabilitación, audífonos y ocupacional (H20-H23, 2026-10-16)
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 85 | H19 | Ejercicios oculomotores con la cabeza quieta | "estimulan los núcleos vestibulares" | se mantienen; recuadro: la guía APTA recomienda (evidencia fuerte) no ofrecerlos como estabilización de la mirada | Hall 2022 | P · revisar | |
-| 86 | H19 | Para qué sirven los cefalomotores | "movilizar los líquidos endolinfáticos" | se mantienen los ejercicios; el mecanismo es el deslizamiento retiniano como señal de error | Hall 2022 | E (fundamento) | |
-| 87 | H19 | Agudeza visual dinámica | a 3 Hz | el protocolo; recuadro con la versión clínica a 2 Hz | RehabMeasures (verificar) | P | |
-| 88 | H19 | Dosis del programa | 3 a 6 semanas, una sesión semanal, sin dosis en casa | el protocolo + tabla con los mínimos diarios y las semanas de la guía | Hall 2022 | P | |
-| 89 | H19 | Berg | un solo ítem | se describe; recuadro: sin corte propio | Berg 1992 | A | |
-| 90 | H19 | "Test de Norré" | en el flujograma | no se identificó; el texto no lo nombra | — | A · preguntar | |
-| 91 | H20 | Ajuste del audífono | por comodidad ("¿más o menos fuerza?") | el protocolo; recuadro: objetivo prescriptivo y medición en oído real | BSA 2018; AAA 2006 | P | |
-| 92 | H20 | Molestia | grito o ruido cerca del oído | el protocolo; lo medible es el LDL con estímulo calibrado (→ H5) | — | P | |
-| 93 | H20 | Palabras | voz viva sin nivel | el protocolo; recuadro: material grabado al mismo nivel con y sin audífono | ISO 8253-3:2022 | P | |
-| 94 | H20 | Cuestionarios | ninguno | COSI, IOI-HA y APHAB en recuadro | Dillon 1997; Cox 2002 | A · vacío | |
-| 95 | H20, H21 | Nombres comerciales e institucionales | modelos, software, GES56, "Auditron" | generalizados (libro mundial) | — | A | |
-| 96 | H21 | Funciones adaptativas en la medición | no pide desactivarlas | el protocolo; recuadro: ANSI S3.22 las pide desactivadas; anotar lo activo | ANSI/ASA S3.22 | P | |
-| 97 | H21 | Conclusión "audibilidad buena/regular/mala" | desde la medición en acoplador | el protocolo; recuadro: la norma es de control de calidad, no de verificación | IEC 60118-0:2022 | P | |
-| 98 | H21 | Tubo en la cámara | ~1,5 cm | el protocolo; longitud normativa del HA-2 sin verificar | — | A · verificar | |
-| 99 | H22 | Base del capítulo | "screening" y "operativo" son de salud, no ocupacionales | se enseña desde las normas (OSHA, NIOSH, ISO 1999, ISP 2026, PREXOR) | — | A · vacío | |
-| 100 | H3, H22 | Guía ISP | citada la v2.0 (2018): umbral "3 de 5" | ISP v3.0 (2026): Carhart-Jerger modificado, 2 de 3, inicio ≥ 30 dB HL, verificación subjetiva semanal con 2 sujetos | ISP 2026 | A · actualizado | hecho |
+| 85 | H20 | Ejercicios oculomotores con la cabeza quieta | "estimulan los núcleos vestibulares" | se mantienen; recuadro: la guía APTA recomienda (evidencia fuerte) no ofrecerlos como estabilización de la mirada | Hall 2022 | P · revisar | |
+| 86 | H20 | Para qué sirven los cefalomotores | "movilizar los líquidos endolinfáticos" | se mantienen los ejercicios; el mecanismo es el deslizamiento retiniano como señal de error | Hall 2022 | E (fundamento) | |
+| 87 | H20 | Agudeza visual dinámica | a 3 Hz | el protocolo; recuadro con la versión clínica a 2 Hz | RehabMeasures (verificar) | P | |
+| 88 | H20 | Dosis del programa | 3 a 6 semanas, una sesión semanal, sin dosis en casa | el protocolo + tabla con los mínimos diarios y las semanas de la guía | Hall 2022 | P | |
+| 89 | H20 | Berg | un solo ítem | se describe; recuadro: sin corte propio | Berg 1992 | A | |
+| 90 | H20 | "Test de Norré" | en el flujograma | no se identificó; el texto no lo nombra | — | A · preguntar | |
+| 91 | H21 | Ajuste del audífono | por comodidad ("¿más o menos fuerza?") | el protocolo; recuadro: objetivo prescriptivo y medición en oído real | BSA 2018; AAA 2006 | P | |
+| 92 | H21 | Molestia | grito o ruido cerca del oído | el protocolo; lo medible es el LDL con estímulo calibrado (→ H5) | — | P | |
+| 93 | H21 | Palabras | voz viva sin nivel | el protocolo; recuadro: material grabado al mismo nivel con y sin audífono | ISO 8253-3:2022 | P | |
+| 94 | H21 | Cuestionarios | ninguno | COSI, IOI-HA y APHAB en recuadro | Dillon 1997; Cox 2002 | A · vacío | |
+| 95 | H21, H22 | Nombres comerciales e institucionales | modelos, software, GES56, "Auditron" | generalizados (libro mundial) | — | A | |
+| 96 | H22 | Funciones adaptativas en la medición | no pide desactivarlas | el protocolo; recuadro: ANSI S3.22 las pide desactivadas; anotar lo activo | ANSI/ASA S3.22 | P | |
+| 97 | H22 | Conclusión "audibilidad buena/regular/mala" | desde la medición en acoplador | el protocolo; recuadro: la norma es de control de calidad, no de verificación | IEC 60118-0:2022 | P | |
+| 98 | H22 | Tubo en la cámara | ~1,5 cm | el protocolo; longitud normativa del HA-2 sin verificar | — | A · verificar | |
+| 99 | H23 | Base del capítulo | "screening" y "operativo" son de salud, no ocupacionales | se enseña desde las normas (OSHA, NIOSH, ISO 1999, ISP 2026, PREXOR) | — | A · vacío | |
+| 100 | H3, H23 | Guía ISP | citada la v2.0 (2018): umbral "3 de 5" | ISP v3.0 (2026): Carhart-Jerger modificado, 2 de 3, inicio ≥ 30 dB HL, verificación subjetiva semanal con 2 sujetos | ISP 2026 | A · actualizado | hecho |
 
 ## Nariz
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 101 | H23 | Síntoma de la anamnesis | "sufre descongestión y/o prurito nasal" | "congestión" | — | E | |
-| 102 | H23 | Aclimatación | 15 min en la preparación; "desde los 10 min" en la rinoscopía | ambos: la rinoscopía desde 10 min, para medir (H24, H25) completar 15 | Clement 2005 (tiempo sin verificar) | P | |
-| 103 | H23 | Limpieza del espéculo | alcohol y algodón | el protocolo; recuadro: instrumento semicrítico, pide desinfección de alto nivel o desechable | Rutala 2008 (CDC) | P | |
-| 104 | H23 | Síntomas | anamnesis cualitativa | el protocolo; recuadro: NOSE, SNOT-22 y escala visual análoga | Stewart 2004; Hopkins 2009 | A · vacío | |
-| 105 | H23 | Palpación de senos | se palpan | el protocolo; recuadro: poco valor diagnóstico por sí sola | EPOS 2020; AAO-HNS 2015 | P | |
-| 106 | H23 | Rinoscopía anterior frente a endoscopia | solo rinoscopía anterior | el protocolo; recuadro: la endoscopia la hace el especialista | EPOS 2020 | A | |
-| 107 | H23 | Maniobra de Cottle y vasoconstrictor en la rinoscopía | no los pide | recuadro (Cottle no es la rinomanometría de Cottle) | Rhee 2010 | A · vacío | |
-| 108 | H25 | Repetibilidad | 3 registros con diferencia ≤ 0,03 en MCA1 y MCA2 | el protocolo; recuadro: límites de error probados en una fosa estándar | Hilberg y Pedersen 2000 | P | |
-| 109 | H25 | Volúmenes | Vol 1 narina-segundo mínimo, Vol 2 primeros 5 cm (la clase da 32 y 64 mm: no calza con el protocolo) | el protocolo; recuadro: publicar volumen 0-5 cm (2-5 cm para mucosa) y los dos mínimos con su distancia | Hilberg y Pedersen 2000; Clement 2005 | P | |
-| 110 | H25 | Vasoconstrictor | solo si el reposo sale fuera de rango; 2 pulverizaciones y 15 min (la clase: 2 + 2 con 5 min) | el protocolo; recuadro: en estudios de referencia se descongestiona a todos; estandarizar | Corey 1998; Clement 2005 | P | |
-| 111 | H25 | "Disminuidos respecto del reposo" | resultado normal | poco habitual: revisar la técnica antes de informar | — (criterio del redactor) | P · revertir | |
-| 112 | H25 | Errata | "1.7" suelto | omitido | — | E | |
-| 113 | H25 | Valores de referencia de la clase | MCA1 0,4 cm², distancias ~0,22 cm, "30 %" con vasoconstrictor, CPAP 0,6 cm², "CSA1 = escotadura C" | no se usan: mezclan mm y cm y contradicen MCA1 = válvula; el libro dice que no hay norma universal | Corey 1998; Millqvist 1998 | E (clase) | |
-| 114 | H24 | Unidad de la resistencia | "Pa/seg/cm" | Pa/(cm³/s) | física: presión / flujo volumétrico | E | |
-| 115 | H24 | Valor de referencia | unilateral ≤ 0,4 Pa/(cm³/s) a 150 Pa | el protocolo; recuadro: Ren 2018 da 0,51 unilateral y 0,24 total en sanos; 4PR propone log Reff por percentiles | Ren 2018; Vogt 2016 | P | |
-| 116 | H24 | Espera tras el vasoconstrictor | 15 min | el protocolo; recuadro: 4PR mide a los 10 min con xilometazolina 0,1 %; el consenso pide estandarizar | Vogt 2016; Clement 2005 | P | |
-| 117 | H24 | Resistencia que sube tras el vasoconstrictor | "efecto rebote" | el protocolo; recuadro: el rebote es por uso crónico, primero descartar ciclo nasal, fuga o respiración distinta | — (verificar) | P | |
-| 118 | H24 | Plazos previos | 48 h sin fármacos, 24 h sin tabaco ni alcohol, 15 min de aclimatación | el protocolo; recuadro: los plazos varían entre fuentes | Clement 2005 | P | |
-| 119 | H24 | Vasoconstrictor en qué fosa | solo en la fosa que supera la referencia | el protocolo (4PR descongestiona ambas en la mayoría) | Vogt 2016 | P | |
-| 120 | H24 | "150 Pa = radio 2" (clase) | — | no se usa: el radio de Broms (200) no equivale a 150 Pa | Broms 1982 | E (clase) | |
-| 121 | H24 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
+| 101 | H24 | Síntoma de la anamnesis | "sufre descongestión y/o prurito nasal" | "congestión" | — | E | |
+| 102 | H24 | Aclimatación | 15 min en la preparación; "desde los 10 min" en la rinoscopía | ambos: la rinoscopía desde 10 min, para medir (H25, H26) completar 15 | Clement 2005 (tiempo sin verificar) | P | |
+| 103 | H24 | Limpieza del espéculo | alcohol y algodón | el protocolo; recuadro: instrumento semicrítico, pide desinfección de alto nivel o desechable | Rutala 2008 (CDC) | P | |
+| 104 | H24 | Síntomas | anamnesis cualitativa | el protocolo; recuadro: NOSE, SNOT-22 y escala visual análoga | Stewart 2004; Hopkins 2009 | A · vacío | |
+| 105 | H24 | Palpación de senos | se palpan | el protocolo; recuadro: poco valor diagnóstico por sí sola | EPOS 2020; AAO-HNS 2015 | P | |
+| 106 | H24 | Rinoscopía anterior frente a endoscopia | solo rinoscopía anterior | el protocolo; recuadro: la endoscopia la hace el especialista | EPOS 2020 | A | |
+| 107 | H24 | Maniobra de Cottle y vasoconstrictor en la rinoscopía | no los pide | recuadro (Cottle no es la rinomanometría de Cottle) | Rhee 2010 | A · vacío | |
+| 108 | H26 | Repetibilidad | 3 registros con diferencia ≤ 0,03 en MCA1 y MCA2 | el protocolo; recuadro: límites de error probados en una fosa estándar | Hilberg y Pedersen 2000 | P | |
+| 109 | H26 | Volúmenes | Vol 1 narina-segundo mínimo, Vol 2 primeros 5 cm (la clase da 32 y 64 mm: no calza con el protocolo) | el protocolo; recuadro: publicar volumen 0-5 cm (2-5 cm para mucosa) y los dos mínimos con su distancia | Hilberg y Pedersen 2000; Clement 2005 | P | |
+| 110 | H26 | Vasoconstrictor | solo si el reposo sale fuera de rango; 2 pulverizaciones y 15 min (la clase: 2 + 2 con 5 min) | el protocolo; recuadro: en estudios de referencia se descongestiona a todos; estandarizar | Corey 1998; Clement 2005 | P | |
+| 111 | H26 | "Disminuidos respecto del reposo" | resultado normal | poco habitual: revisar la técnica antes de informar | — (criterio del redactor) | P · revertir | |
+| 112 | H26 | Errata | "1.7" suelto | omitido | — | E | |
+| 113 | H26 | Valores de referencia de la clase | MCA1 0,4 cm², distancias ~0,22 cm, "30 %" con vasoconstrictor, CPAP 0,6 cm², "CSA1 = escotadura C" | no se usan: mezclan mm y cm y contradicen MCA1 = válvula; el libro dice que no hay norma universal | Corey 1998; Millqvist 1998 | E (clase) | |
+| 114 | H25 | Unidad de la resistencia | "Pa/seg/cm" | Pa/(cm³/s) | física: presión / flujo volumétrico | E | |
+| 115 | H25 | Valor de referencia | unilateral ≤ 0,4 Pa/(cm³/s) a 150 Pa | el protocolo; recuadro: Ren 2018 da 0,51 unilateral y 0,24 total en sanos; 4PR propone log Reff por percentiles | Ren 2018; Vogt 2016 | P | |
+| 116 | H25 | Espera tras el vasoconstrictor | 15 min | el protocolo; recuadro: 4PR mide a los 10 min con xilometazolina 0,1 %; el consenso pide estandarizar | Vogt 2016; Clement 2005 | P | |
+| 117 | H25 | Resistencia que sube tras el vasoconstrictor | "efecto rebote" | el protocolo; recuadro: el rebote es por uso crónico, primero descartar ciclo nasal, fuga o respiración distinta | — (verificar) | P | |
+| 118 | H25 | Plazos previos | 48 h sin fármacos, 24 h sin tabaco ni alcohol, 15 min de aclimatación | el protocolo; recuadro: los plazos varían entre fuentes | Clement 2005 | P | |
+| 119 | H25 | Vasoconstrictor en qué fosa | solo en la fosa que supera la referencia | el protocolo (4PR descongestiona ambas en la mayoría) | Vogt 2016 | P | |
+| 120 | H25 | "150 Pa = radio 2" (clase) | — | no se usa: el radio de Broms (200) no equivale a 150 Pa | Broms 1982 | E (clase) | |
+| 121 | H25 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
 
 ## Capítulos clínicos de ABR
 
@@ -243,9 +243,9 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 148 | 24 | Calórica mínima en la pérdida bilateral | informa solo la asimetría (≥ 25 %) | el protocolo; recuadro: suma tibia + fría < 6 °/s por oído y completar con bitérmica | Strupp 2017 | P | |
 | 149 | 24 | "Hipoexcitabilidad severa", "arreflexia" | sin número | se apoya en el criterio Bárány | Strupp 2017 | A | |
 | 150 | 24 | Corte del vHIT | "dentro de la normalidad", sin corte; ganancia a 60 ms | Bárány < 0,6 (150-300 °/s); muchos equipos marcan bajo 0,8 | Strupp 2017 | A | |
-| 151 | 24, H19 | Agudeza visual dinámica | 3 líneas o más | Bárány: ≥ 0,2 logMAR (2 líneas en tabla logMAR) | Strupp 2017 | P | |
+| 151 | 24, H20 | Agudeza visual dinámica | 3 líneas o más | Bárány: ≥ 0,2 logMAR (2 líneas en tabla logMAR) | Strupp 2017 | P | |
 | 152 | 25 | Posiciones de la mirada en la VNG | centro, derecha e izquierda (Frenzel sí pide arriba y abajo) | el protocolo; recuadro: mirar arriba y abajo y activar el canal vertical (nistagmo hacia abajo) | Eggers 2019 | P | |
-| 153 | 25 | Oculomotor | sin sacadas, seguimiento ni optocinético (ya en H15) | recuadro | Fife 2000 | A · vacío | |
+| 153 | 25 | Oculomotor | sin sacadas, seguimiento ni optocinético (ya en H16) | recuadro | Fife 2000 | A · vacío | |
 | 154 | 25 | Fármacos antes de la VNG | suspender 48 h antivertiginosos, antieméticos y ansiolíticos; nada de anticonvulsivantes ni alcohol | el protocolo; recuadro: anotar anticonvulsivantes y alcohol, suspender es decisión del médico | — (verificar) | P | |
 | 155 | 25 | Errata | "Otra forma desensibilizar esta prueba" (Frenzel) | "sensibilizar" | — | E | |
 
@@ -253,19 +253,19 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 156 | 28, H20 | Uno o dos audífonos | se adapta "el oído" y su preferencia | el protocolo; recuadro: dos audífonos si la pérdida es audible en ambos | NICE NG98 1.6.2, 1.7.3 | P | |
+| 156 | 28, H21 | Uno o dos audífonos | se adapta "el oído" y su preferencia | el protocolo; recuadro: dos audífonos si la pérdida es audible en ambos | NICE NG98 1.6.2, 1.7.3 | P | |
 | 157 | 28 | Control posterior | revisión visoauditiva a 1-2 años | el protocolo; recuadro: control presencial a las 6-12 semanas | NICE NG98 1.7.1 | P | |
 | 158 | 28, 29 | Alternativas al audífono | no contempla CROS, BiCROS, conducción ósea ni implante | se enseñan desde la literatura | NICE NG98; NICE TA566; Reinfeldt 2015 | A · vacío | |
 | 159 | 29 | Materiales de discriminación con audífono | bisílabos en voz viva | el protocolo; recuadro: los criterios de implante usan CNC/AzBio y no hay corte validado en español | Zwolan 2020; Zeitler 2024 | P | |
 | 160 | 31 | Cuándo medir en la rehabilitación | DHI y batería solo al inicio y al final | se repite al subir de fase (detecta la meseta) | Hall 2022 | A | |
-| 161 | 31, H19 | Velocidad de los ejercicios de estabilización | "tan rápido como se pueda mantener el blanco nítido" | el protocolo como techo; recuadro: empezar lento | Strupp 2001 | P | |
+| 161 | 31, H20 | Velocidad de los ejercicios de estabilización | "tan rápido como se pueda mantener el blanco nítido" | el protocolo como techo; recuadro: empezar lento | Strupp 2001 | P | |
 | 162 | 31 | Supresores e inactividad | no los menciona | se agregan (frenan la compensación) | Rascol 1995; Strupp 1998 | A · vacío | |
-| 163 | 32, H19 | Velocidad de marcha | no la mide | el protocolo; recuadro: < 0,8 m/s (o TUG > 15 s) marca riesgo; los 6 m del DGI permiten cronometrarla | Montero-Odasso 2022 (WFG) | A · vacío | |
-| 164 | 32, H19 | Examen vestibular previo (< 6 meses) | exigido antes de rehabilitar | vale para rehabilitación vestibular, no para un programa general de fuerza y equilibrio | WFG 2022 | P | |
-| 165 | H19, 32 | Corte del TUG | 13,5 s en H19 (fuente sin cotejar) | WFG usa > 15 s; unificar | WFG 2022 | A · verificar | |
+| 163 | 32, H20 | Velocidad de marcha | no la mide | el protocolo; recuadro: < 0,8 m/s (o TUG > 15 s) marca riesgo; los 6 m del DGI permiten cronometrarla | Montero-Odasso 2022 (WFG) | A · vacío | |
+| 164 | 32, H20 | Examen vestibular previo (< 6 meses) | exigido antes de rehabilitar | vale para rehabilitación vestibular, no para un programa general de fuerza y equilibrio | WFG 2022 | P | |
+| 165 | H20, 32 | Corte del TUG | 13,5 s en H20 (fuente sin cotejar) | WFG usa > 15 s; unificar | WFG 2022 | A · verificar | |
 | 166 | 35 | Lectura del vasoconstrictor | "igual que en reposo = mecánica" | se aclara que es estructural, no necesariamente tabique (también la válvula); se leen las dos fases | Rhee 2010 | A | |
 | 167 | 36 | "Disminución total = vasomotora" | rótulo del examen | se mantiene en el informe; recuadro: "rinitis vasomotora" es la idiopática y el término se desaconseja | Hellings 2017; Solé 2025 | P | |
-| 168 | 36, H24 | "Efecto rebote" (#117) | tras el vasoconstrictor | discutido: Graf 1995/1997 y Vaidyanathan 2010 lo muestran; Mortuaire 2013 y Hagen 2026 no; el `verificar` de H24 se puede cerrar con estas fuentes | ver cap. 36 | A | |
+| 168 | 36, H25 | "Efecto rebote" (#117) | tras el vasoconstrictor | discutido: Graf 1995/1997 y Vaidyanathan 2010 lo muestran; Mortuaire 2013 y Hagen 2026 no; el `verificar` de H25 se puede cerrar con estas fuentes | ver cap. 36 | A | |
 <!-- tanda 10: -->
 
 ## Encontradas fuera del texto de los capítulos

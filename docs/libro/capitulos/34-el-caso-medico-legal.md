@@ -9,7 +9,7 @@
 - Ubicar tu informe dentro del seguro de accidentes del trabajo y enfermedades profesionales: quién califica, quién evalúa la incapacidad, qué prestaciones siguen y ante quién se reclama.
 :::
 
-Hasta ahora, cuando un paciente llegaba con una pérdida, la pregunta era clínica: qué tiene y qué se hace. En un caso médico-legal la pregunta la hace un tercero. Una mutual quiere saber si el daño es del trabajo; una comisión, qué porcentaje de incapacidad corresponde; un juez, si lo que se reclama es lo que se midió. Tu informe se leerá meses después, por personas que no oyeron al paciente ni vieron el audiograma, y se leerá línea por línea. El oído es el mismo de siempre. Lo que cambia es que cada frase tiene que poder defenderse con un dato, y que hay frases que no te corresponde escribir. Este capítulo trata de cómo medir, cómo calcular y cómo escribir en ese terreno. Cómo se detecta que las respuestas no calzan está en el capítulo 19, y no se repite aquí; la vigilancia de los expuestos y la técnica de la audiometría ocupacional, en los capítulos 6 y 33 y en H22.
+Hasta ahora, cuando un paciente llegaba con una pérdida, la pregunta era clínica: qué tiene y qué se hace. En un caso médico-legal la pregunta la hace un tercero. Una mutual quiere saber si el daño es del trabajo; una comisión, qué porcentaje de incapacidad corresponde; un juez, si lo que se reclama es lo que se midió. Tu informe se leerá meses después, por personas que no oyeron al paciente ni vieron el audiograma, y se leerá línea por línea. El oído es el mismo de siempre. Lo que cambia es que cada frase tiene que poder defenderse con un dato, y que hay frases que no te corresponde escribir. Este capítulo trata de cómo medir, cómo calcular y cómo escribir en ese terreno. Cómo se detecta que las respuestas no calzan está en el capítulo 19, y no se repite aquí; la vigilancia de los expuestos y la técnica de la audiometría ocupacional, en los capítulos 6 y 33 y en H23.
 
 ## Técnica en foco
 
@@ -24,7 +24,7 @@ Son tres preguntas distintas, y conviene no mezclarlas, porque se contestan con 
 La técnica base es la de la audiometría diagnóstica (→ H3). En este libro, la evaluación completa parte con la acumetría y sigue con la audiometría aérea con fonos de inserción o supraurales calibrados, comenzando en 1.000 Hz, 40 dB, bajando de 10 en 10 y subiendo de 5 en 5, con umbral al percibir 2 de 3 estímulos; la ósea se mide **en los dos oídos**, con enmascaramiento; después vienen la logoaudiometría, el LDL y, si hay asimetría o la discriminación no calza, las pruebas supraliminares (→ H5, H6). Si lo que oye el paciente no coincide con los diapasones, se repite la acumetría; si sigue sin coincidir, se hace un Weber audiométrico en 500 Hz, 15 dB sobre el umbral óseo de esa frecuencia (→ H3). Y si los resultados no son confiables, **no se fuerzan**: se cita de nuevo con otra instrucción o se pasa a un estudio electrofisiológico.
 
 :::ojo Ojo clínico
-La audiometría de **screening** de un operativo (7 minutos, un solo nivel de 20 dB) no sirve para un informe médico-legal. La guía técnica chilena prohíbe usar la audiometría de vigilancia para fines médico-legales (ISP, 2026; → H22). Tampoco sirve una audiometría hecha sin enmascarar donde el tono puede cruzar.
+La audiometría de **screening** de un operativo (7 minutos, un solo nivel de 20 dB) no sirve para un informe médico-legal. La guía técnica chilena prohíbe usar la audiometría de vigilancia para fines médico-legales (ISP, 2026; → H23). Tampoco sirve una audiometría hecha sin enmascarar donde el tono puede cruzar.
 :::
 
 ### Estimar el umbral real
@@ -71,7 +71,7 @@ Las dos fórmulas miran el mismo audiograma desde ángulos distintos. La de la A
 Un informe médico-legal es un insumo de una cadena que lo usa otro. Primero alguien **califica** si la enfermedad es profesional; luego alguien **evalúa** cuánta capacidad de ganancia se perdió; después se pagan las **prestaciones** que corresponden a ese grado, y si alguna de las partes no está de acuerdo, un tercero **resuelve el reclamo**. El audiólogo aporta a la evaluación el audiograma y su interpretación; el resto de la cadena no es suyo.
 
 :::comentario En Chile
-**El seguro.** La Ley 16.744 (1968) es un seguro social obligatorio que cubre tres contingencias: el accidente del trabajo, el accidente de trayecto y la enfermedad profesional (Ley 16.744, arts. 1, 5 y 7; sus definiciones, en H22). Lo administran el Instituto de Seguridad Laboral y las mutualidades de empleadores (arts. 8, 10 y 11); las empresas que cumplen ciertas condiciones pueden ser administradoras delegadas (art. 72).
+**El seguro.** La Ley 16.744 (1968) es un seguro social obligatorio que cubre tres contingencias: el accidente del trabajo, el accidente de trayecto y la enfermedad profesional (Ley 16.744, arts. 1, 5 y 7; sus definiciones, en H23). Lo administran el Instituto de Seguridad Laboral y las mutualidades de empleadores (arts. 8, 10 y 11); las empresas que cumplen ciertas condiciones pueden ser administradoras delegadas (art. 72).
 
 **Prestaciones médicas.** Se otorgan gratuitamente hasta la curación completa o mientras subsistan los síntomas de las secuelas: atención médica, quirúrgica y dental; hospitalización; medicamentos; prótesis y aparatos ortopédicos y su reparación; rehabilitación física y reeducación profesional; y los gastos de traslado (art. 29).
 
@@ -95,7 +95,7 @@ Fuentes de la tabla: Ley 16.744, arts. 34 a 40; D.S. 109, art. 30. Las pensiones
 
 **Traslado y reclamo.** Quien resulte con una enfermedad profesional debe ser trasladado por su empresa a faenas donde no se exponga al agente (Ley 16.744, art. 71; D.S. 109, art. 17). Los afiliados y los organismos administradores pueden reclamar, dentro de **90 días hábiles**, ante la **Comisión Médica de Reclamos de Accidentes del Trabajo y Enfermedades Profesionales** contra las decisiones de los servicios de salud o de las mutualidades en cuestiones de hecho de orden médico; sus resoluciones se apelan ante la Superintendencia de Seguridad Social dentro de **30 días hábiles**, que resuelve sin ulterior recurso (art. 77).
 
-**Quién puede evaluar el oído para esto.** La evaluación audiológica médico-legal solo la hace un centro del programa PEECCA del ISP (→ H22), y las COMPIN solo resuelven con evaluaciones hechas en esos centros (Circular B33/47 de 2009, según las bases del programa; ISP, 2021). <!-- verificar: la Circular B33/47 no se leyó; lo que se dice viene de las bases del PEECCA. El texto de la Ley 16.744 es la versión consolidada de la BCN (fechaVersion 2021-12-10); no se revisaron modificaciones posteriores. -->
+**Quién puede evaluar el oído para esto.** La evaluación audiológica médico-legal solo la hace un centro del programa PEECCA del ISP (→ H23), y las COMPIN solo resuelven con evaluaciones hechas en esos centros (Circular B33/47 de 2009, según las bases del programa; ISP, 2021). <!-- verificar: la Circular B33/47 no se leyó; lo que se dice viene de las bases del PEECCA. El texto de la Ley 16.744 es la versión consolidada de la BCN (fechaVersion 2021-12-10); no se revisaron modificaciones posteriores. -->
 :::
 
 ### Escribir el informe

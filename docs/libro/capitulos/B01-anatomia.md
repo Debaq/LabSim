@@ -253,11 +253,11 @@ Tabla: Los canales semicirculares y sus pares coplanares
 
 | Canal | Par coplanar (en el oído contrario) | Se explora con |
 |---|---|---|
-| **Lateral** (horizontal) derecho | lateral izquierdo | giros de la cabeza en el plano horizontal (→ H15, H17) |
-| **Anterior** (= superior) derecho | **posterior** izquierdo | plano RALP (→ H17) |
-| **Posterior** derecho | **anterior** (= superior) izquierdo | plano LARP (→ H17) |
+| **Lateral** (horizontal) derecho | lateral izquierdo | giros de la cabeza en el plano horizontal (→ H16, H18) |
+| **Anterior** (= superior) derecho | **posterior** izquierdo | plano RALP (→ H18) |
+| **Posterior** derecho | **anterior** (= superior) izquierdo | plano LARP (→ H18) |
 
-El **canal posterior** es el que más se afecta en el vértigo posicional paroxístico benigno, del 85 al 95 % de los casos (Bhattacharyya y cols., 2017; → H18, cap. 22), y cada canal tiene su maniobra (→ H18).
+El **canal posterior** es el que más se afecta en el vértigo posicional paroxístico benigno, del 85 al 95 % de los casos (Bhattacharyya y cols., 2017; → H19, cap. 22), y cada canal tiene su maniobra (→ H19).
 
 ### Acueductos y saco endolinfático
 
@@ -300,14 +300,14 @@ Tabla: Rama superior e inferior del nervio vestibular
 
 | Rama | Receptores que inerva | Por qué importa |
 |---|---|---|
-| **Superior** | canal **lateral**, canal **superior** (anterior), **utrículo** y una parte del sáculo | la neuritis vestibular afecta casi siempre a esta rama, sola o junto con la inferior: en 43 pacientes estudiados con vHIT de los tres canales y VEMP, el 42 % tenía solo la superior y el 56 %, las dos (Taylor y cols., 2016). Cuando es solo la superior, fallan el vHIT de los canales lateral y superior y el VEMP ocular (utrículo), no el cervical (→ H12, H17, cap. 21). Se ha propuesto que su canal óseo, más largo y estrecho, la hace más vulnerable (Goebel y cols., 2001; Gianoli y cols., 2005) |
-| **Inferior** | canal **posterior** y la mayor parte del **sáculo** | la neuritis que la afecta sola es rara (1 de esos 43 pacientes; Taylor y cols., 2016); el VEMP cervical (sáculo) y el vHIT del canal posterior la exploran (→ H12, H17) |
+| **Superior** | canal **lateral**, canal **superior** (anterior), **utrículo** y una parte del sáculo | la neuritis vestibular afecta casi siempre a esta rama, sola o junto con la inferior: en 43 pacientes estudiados con vHIT de los tres canales y VEMP, el 42 % tenía solo la superior y el 56 %, las dos (Taylor y cols., 2016). Cuando es solo la superior, fallan el vHIT de los canales lateral y superior y el VEMP ocular (utrículo), no el cervical (→ H12, H18, cap. 21). Se ha propuesto que su canal óseo, más largo y estrecho, la hace más vulnerable (Goebel y cols., 2001; Gianoli y cols., 2005) |
+| **Inferior** | canal **posterior** y la mayor parte del **sáculo** | la neuritis que la afecta sola es rara (1 de esos 43 pacientes; Taylor y cols., 2016); el VEMP cervical (sáculo) y el vHIT del canal posterior la exploran (→ H12, H18) |
 
-La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recibe de las dos. Pero es el esquema que usan el VEMP y el vHIT para localizar la lesión (→ H12, H17).<!-- Pasada de fundamentos 2026-10-18: la tabla decía "la neuritis vestibular afecta casi siempre a esta rama sola". Se corrigió a "a esta rama, sola o junto con la inferior" con las cifras de Taylor y cols. (2016): 55,8 % ambas ramas, 41,9 % solo superior, 2,3 % solo inferior. -->
+La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recibe de las dos. Pero es el esquema que usan el VEMP y el vHIT para localizar la lesión (→ H12, H18).<!-- Pasada de fundamentos 2026-10-18: la tabla decía "la neuritis vestibular afecta casi siempre a esta rama sola". Se corrigió a "a esta rama, sola o junto con la inferior" con las cifras de Taylor y cols. (2016): 55,8 % ambas ramas, 41,9 % solo superior, 2,3 % solo inferior. -->
 
 ### La vía auditiva central
 
-Desde el nervio coclear, la señal pasa por una cadena de estaciones en el tronco, el mesencéfalo, el tálamo y la corteza. Casi todas están **repetidas a cada lado**, y casi todas reciben información de **los dos oídos**; por eso una lesión central de un lado rara vez produce una pérdida de umbral: altera, en cambio, la localización, la comprensión en ruido o la integración entre los oídos (→ H14, cap. 13).
+Desde el nervio coclear, la señal pasa por una cadena de estaciones en el tronco, el mesencéfalo, el tálamo y la corteza. Casi todas están **repetidas a cada lado**, y casi todas reciben información de **los dos oídos**; por eso una lesión central de un lado rara vez produce una pérdida de umbral: altera, en cambio, la localización, la comprensión en ruido o la integración entre los oídos (→ H15, cap. 13).
 
 :::imagen ilustraciones/b1-via-auditiva.svg ancho=100% La vía auditiva central y la estación que se asocia habitualmente a cada onda del PEAT (→ H10). Fíjate en que desde el complejo olivar la vía ya lleva información de los dos oídos. La asignación de las ondas es una guía, no un mapa literal.
 :::
@@ -323,7 +323,7 @@ Además de esta vía ascendente hay una **descendente**, con eferentes olivococl
 
 **Las ondas del PEAT.** Los registros intracraneales hechos durante cirugías permitieron asignar cada onda a una estación: la **I** a la porción distal del nervio, la **II** a la proximal, la **III** al núcleo coclear, la **IV** al complejo olivar superior y la **V** al lemnisco lateral al llegar al colículo inferior (Møller y cols., 1981; Møller y Jannetta, 1983). Es un mapa útil pero no literal: cada onda recibe aportes de varias estaciones, y una misma estación contribuye a más de una onda (Melcher y Kiang, 1996; → H10, cap. 12).
 
-**Lo que mide la batería de procesamiento central.** Cada prueba de la batería explora una parte de esta cadena: las que comparan los dos oídos y la localización dependen del tronco, y las que exigen reconocer patrones en el tiempo o combinar lo que llega por cada oído dependen de la corteza y del cuerpo calloso (→ H14).
+**Lo que mide la batería de procesamiento central.** Cada prueba de la batería explora una parte de esta cadena: las que comparan los dos oídos y la localización dependen del tronco, y las que exigen reconocer patrones en el tiempo o combinar lo que llega por cada oído dependen de la corteza y del cuerpo calloso (→ H15).
 
 ### La vía vestibular central
 
@@ -332,8 +332,8 @@ La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupac
 :::imagen ilustraciones/b1-via-vestibular.svg ancho=100% Las vías vestibulares centrales: desde los núcleos vestibulares la señal sale hacia los ojos, la médula, el cerebelo y la corteza.
 :::
 
-- **Núcleos oculomotores** (III, IV y VI), por el fascículo longitudinal medial: es el arco del **reflejo vestíbulo-ocular**, que mantiene la mirada fija mientras la cabeza se mueve. Solo tres neuronas separan el canal del ojo, y por eso el reflejo es tan rápido (→ H15, H17).
-- **Médula espinal**, por las vías vestibuloespinales lateral y medial: ajustan el tono de los músculos para mantener la postura (→ H19).
+- **Núcleos oculomotores** (III, IV y VI), por el fascículo longitudinal medial: es el arco del **reflejo vestíbulo-ocular**, que mantiene la mirada fija mientras la cabeza se mueve. Solo tres neuronas separan el canal del ojo, y por eso el reflejo es tan rápido (→ H16, H18).
+- **Médula espinal**, por las vías vestibuloespinales lateral y medial: ajustan el tono de los músculos para mantener la postura (→ H20).
 - **Cerebelo** (flóculo y nódulo): calibra el reflejo y lo suprime cuando conviene. Allí se compensa un déficit vestibular (→ cap. 31).
 - **Tálamo y corteza vestibular**: dan la percepción consciente del movimiento y de la vertical. También hay conexiones con la formación reticular y el núcleo del vago, y por eso el vértigo viene con náusea, palidez y sudor.
 
@@ -351,7 +351,7 @@ Son **arterias terminales**, sin circulación colateral importante, y el laberin
 
 ## La nariz
 
-La nariz es la puerta de entrada de la vía aérea, y la audiología la mira porque comparte con el oído medio la trompa, la mucosa y los problemas. Se estudia por partes: la **pirámide** (lo que se ve), el **vestíbulo** y las **válvulas** (donde el aire encuentra su mayor resistencia), la **cavidad** con el **tabique**, los **cornetes** y los **meatos**, las **coanas** y los **senos paranasales**. Su fisiología (calentar, humedecer y filtrar el aire, el ciclo nasal, la resistencia) está en B2 y en las herramientas de rinología (→ H23-H25).
+La nariz es la puerta de entrada de la vía aérea, y la audiología la mira porque comparte con el oído medio la trompa, la mucosa y los problemas. Se estudia por partes: la **pirámide** (lo que se ve), el **vestíbulo** y las **válvulas** (donde el aire encuentra su mayor resistencia), la **cavidad** con el **tabique**, los **cornetes** y los **meatos**, las **coanas** y los **senos paranasales**. Su fisiología (calentar, humedecer y filtrar el aire, el ciclo nasal, la resistencia) está en B2 y en las herramientas de rinología (→ H24-H26).
 
 ### La pirámide nasal
 
@@ -367,9 +367,9 @@ La nariz externa tiene forma de pirámide: la **raíz** arriba, el **dorso** has
 
 El **vestíbulo nasal** es la entrada: va de la narina a la **válvula nasal**. Está tapizado de piel con pelos gruesos, las **vibrisas**, que atrapan las partículas más grandes.
 
-La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. La forman el borde inferior del cartílago lateral superior y el **tabique**, con la cabeza del cornete inferior y el piso abajo, y en un corte frontal es un triángulo con el vértice hacia arriba, con un ángulo de **10 a 15°**; su área es de apenas **40 a 60 mm²**, y aporta de la mitad a dos tercios de la resistencia nasal total (Pirola y cols., 2025). Un cambio mínimo del ángulo cambia mucho el flujo (→ H24). La **válvula externa** es la parte de la pared lateral (cartílago alar y partes blandas del ala) que se colapsa si inspiras fuerte con la nariz tapada.
+La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. La forman el borde inferior del cartílago lateral superior y el **tabique**, con la cabeza del cornete inferior y el piso abajo, y en un corte frontal es un triángulo con el vértice hacia arriba, con un ángulo de **10 a 15°**; su área es de apenas **40 a 60 mm²**, y aporta de la mitad a dos tercios de la resistencia nasal total (Pirola y cols., 2025). Un cambio mínimo del ángulo cambia mucho el flujo (→ H25). La **válvula externa** es la parte de la pared lateral (cartílago alar y partes blandas del ala) que se colapsa si inspiras fuerte con la nariz tapada.
 
-**Por qué importa en el examen.** Cuando una persona dice que "no respira por la nariz", la causa puede estar en el tabique, en los cornetes o en las válvulas, y cada una se examina distinto. La maniobra de Cottle y la rinomanometría exploran esta región (→ H23, H24).
+**Por qué importa en el examen.** Cuando una persona dice que "no respira por la nariz", la causa puede estar en el tabique, en los cornetes o en las válvulas, y cada una se examina distinto. La maniobra de Cottle y la rinomanometría exploran esta región (→ H24, H25).
 
 ### El tabique nasal
 
@@ -402,7 +402,7 @@ Cada fosa tiene un **techo** (la lámina cribosa del etmoides, por donde pasan l
 - @92,66 | **Coana**: el límite posterior, donde la fosa se abre a la rinofaringe.
 :::
 
-Los **cornetes** hacen de acondicionadores de aire: ensanchan la superficie de la mucosa, y como son eréctiles (tienen plexos venosos), se hinchan y se contraen: de ahí el **ciclo nasal**, que alterna la congestión entre las dos fosas (→ B2, H24). Cuando la mucosa se inflama de forma persistente (alergia, vasoconstrictor), el cornete inferior obstruye (→ cap. 36).
+Los **cornetes** hacen de acondicionadores de aire: ensanchan la superficie de la mucosa, y como son eréctiles (tienen plexos venosos), se hinchan y se contraen: de ahí el **ciclo nasal**, que alterna la congestión entre las dos fosas (→ B2, H25). Cuando la mucosa se inflama de forma persistente (alergia, vasoconstrictor), el cornete inferior obstruye (→ cap. 36).
 
 ### Los meatos y el drenaje de los senos
 
@@ -455,10 +455,10 @@ Las **coanas** son las dos aberturas posteriores de las fosas, que las comunican
 - **Estapedio y reflejo acústico:** VII, VIII y tronco (→ H7).
 - **Trompa y adenoides:** otitis media con efusión, presión negativa (→ cap. 2, cap. 35).
 - **Cóclea (base-ápice):** tonotopía, audiometría, emisiones (→ H3, H9).
-- **Ramas del nervio vestibular:** VEMP y vHIT (→ H12, H17).
-- **Vía auditiva central:** ondas del PEAT, batería de procesamiento central (→ H10, H14).
+- **Ramas del nervio vestibular:** VEMP y vHIT (→ H12, H18).
+- **Vía auditiva central:** ondas del PEAT, batería de procesamiento central (→ H10, H15).
 - **AICA y arteria laberíntica:** hipoacusia súbita con vértigo (→ cap. 12).
-- **Válvula nasal, cornetes, tabique:** rinomanometría y rinometría (→ H23-H25).
+- **Válvula nasal, cornetes, tabique:** rinomanometría y rinometría (→ H24-H26).
 :::
 
 :::sabias ¿Sabías que?

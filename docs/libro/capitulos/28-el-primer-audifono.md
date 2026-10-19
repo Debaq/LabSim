@@ -11,7 +11,7 @@ Un audífono es el tratamiento más habitual de la hipoacusia del adulto, y aun 
 
 ## Técnica en foco
 
-Este capítulo no enseña de nuevo la prueba de audífonos: la técnica completa está en H20 (prueba y ganancia funcional), H21 (revisión y medición electroacústica) y H5 (discriminación y umbral de molestia). Lo que importa aquí es **cómo se usan sus resultados para decidir**.
+Este capítulo no enseña de nuevo la prueba de audífonos: la técnica completa está en H21 (prueba y ganancia funcional), H22 (revisión y medición electroacústica) y H5 (discriminación y umbral de molestia). Lo que importa aquí es **cómo se usan sus resultados para decidir**.
 
 ### Cuatro preguntas antes de hablar de modelos
 
@@ -21,7 +21,7 @@ La candidatura no se resuelve con el audiograma. Se resuelve contestando cuatro 
 | Pregunta | De dónde sale la respuesta | Qué cambia |
 |---|---|---|
 | ¿Hay algo médico que resolver antes? | Otoscopía y anamnesis (→ H1) | Una asimetría, una pérdida súbita, una otorrea o un vértigo van **primero** al especialista (→ cap. 7, cap. 11) |
-| ¿Qué le cuesta y qué quiere lograr? | La entrevista y los objetivos propios del paciente, que el cuestionario COSI ordena (→ H20) | Fija con qué se compara el resultado, semanas después |
+| ¿Qué le cuesta y qué quiere lograr? | La entrevista y los objetivos propios del paciente, que el cuestionario COSI ordena (→ H21) | Fija con qué se compara el resultado, semanas después |
 | ¿Alcanza la audibilidad? | Audiograma, campo dinámico y logoaudiometría (→ H3, H5) | Dice cuánto se puede amplificar y qué esperar de la discriminación |
 | ¿Cuánta disposición tiene? | Actitud, apoyo de la familia, destreza con las manos | Decide cuánta consejería necesita antes de entregar nada |
 :::
@@ -34,13 +34,13 @@ La guía NICE para adultos (NG98) pide ofrecer audífonos a quien tiene una pér
 
 ### La prueba, la ganancia funcional y el control
 
-La prueba de audífonos de este libro compara **las mismas cuatro tareas** sin y con audífono: palabras con lectura labial, palabras sin ella, voz conversacional y molestia ante lo fuerte (→ H20). Con ella se escribe una sugerencia (oído, molde, preferencia); el especialista indica. Tres cosas hay que recordar al leerla en un caso:
+La prueba de audífonos de este libro compara **las mismas cuatro tareas** sin y con audífono: palabras con lectura labial, palabras sin ella, voz conversacional y molestia ante lo fuerte (→ H21). Con ella se escribe una sugerencia (oído, molde, preferencia); el especialista indica. Tres cosas hay que recordar al leerla en un caso:
 
-- **La ganancia funcional** (umbral sin audífono menos umbral con audífono, frecuencia por frecuencia) muestra qué sonidos suaves vuelve audibles el audífono. No es una verificación: no dice si entrega lo que la pérdida necesita (→ H20, *Lo que dicen las normas*).
+- **La ganancia funcional** (umbral sin audífono menos umbral con audífono, frecuencia por frecuencia) muestra qué sonidos suaves vuelve audibles el audífono. No es una verificación: no dice si entrega lo que la pérdida necesita (→ H21, *Lo que dicen las normas*).
 - **El campo libre contesta el oído mejor.** El parlante habla a la cabeza y responde el oído que oye más (→ H8). En una pérdida unilateral, la curva del campo libre sale casi normal y **esconde** el oído que no oye: es lo que pasa en el caso 28.4.
 - **El LDL se mide con un estímulo calibrado** (→ H5). El "grito al oído" de la prueba conductual dice si el paciente tolera lo fuerte, no cuánto. El LDL es el que fija el techo de salida del audífono.
 
-El **control** tiene dos tiempos. Poco después de la entrega se ajusta lo que el paciente refiere. Después, a intervalos regulares, se hace la **revisión visoauditiva** (→ H21): que el paciente maneje el audífono delante de ti, el estado del molde y del aparato, la pila con probador y la escucha con estetoclip. En el protocolo de este libro la revisión se hace al uno o dos años de entregado el audífono, y su conclusión resume la **adherencia** (buena, parcial o mala), el manejo y la limpieza, lo que se enseñó o reforzó y la derivación que corresponde.
+El **control** tiene dos tiempos. Poco después de la entrega se ajusta lo que el paciente refiere. Después, a intervalos regulares, se hace la **revisión visoauditiva** (→ H22): que el paciente maneje el audífono delante de ti, el estado del molde y del aparato, la pila con probador y la escucha con estetoclip. En el protocolo de este libro la revisión se hace al uno o dos años de entregado el audífono, y su conclusión resume la **adherencia** (buena, parcial o mala), el manejo y la limpieza, lo que se enseñó o reforzó y la derivación que corresponde.
 
 :::comentario Lo que dicen las normas
 **Quién es candidato.** La recomendación 1.6.1 de NICE no fija un corte audiométrico; la candidatura es funcional (NICE, 2018). Kiessling y cols. (2003) piden que se considere también el entorno y la motivación, sobre todo en personas mayores. <!-- verificar: el artículo de Kiessling 2003 no tiene resumen en PubMed ni en Crossref y el texto completo está tras muro de pago (tandfonline 403); no se pudo confirmar que diga esto. -->
@@ -51,14 +51,14 @@ El **control** tiene dos tiempos. Poco después de la entrega se ajusta lo que e
 
 **El primer control.** NICE pide un control presencial a las 6 a 12 semanas de la entrega (1.7.1) y sugiere citar después a revisiones periódicas, sin fijar el intervalo (1.7.6). <!-- Pasada de fundamentos 2026-10-18: decía "antes de la revisión anual". NG98 no fija una revisión anual; 1.7.6 dice "Consider having a system in place for recalling people with hearing devices for regular reassessment" (NICE, 2018). --> El protocolo de este libro tiene la revisión visoauditiva al año o dos; el control temprano es de ajuste y de consejería, no de revisión del aparato.
 
-**Objetivos de ajuste y medición en oído real.** Un audífono se ajusta a un objetivo prescriptivo (NAL-NL2 o DSL) y se verifica en el oído del paciente con un micrófono sonda; la comodidad se afina alrededor de ese objetivo (BSA, 2018; Valente y cols., 2006). Este libro no entrega valores objetivo: salen del método y del programa del fabricante (→ H20).
+**Objetivos de ajuste y medición en oído real.** Un audífono se ajusta a un objetivo prescriptivo (NAL-NL2 o DSL) y se verifica en el oído del paciente con un micrófono sonda; la comodidad se afina alrededor de ese objetivo (BSA, 2018; Valente y cols., 2006). Este libro no entrega valores objetivo: salen del método y del programa del fabricante (→ H21).
 :::
 
 ### Rehabilitación aural: la persona, la familia y la comunicación
 
 El audífono es una parte de la rehabilitación. La otra parte es lo que la persona y su entorno hacen con él: expectativas realistas, estrategias de comunicación, ejercicio de la escucha y ayudas para los momentos en que el audífono no alcanza. La NICE pide conversar, tras la evaluación, las opciones de manejo —audífonos, ayudas de escucha y estrategias de comunicación— con sus beneficios y límites (NICE, 2018, 1.5.2), y dar información sobre cómo la pérdida afecta la comunicación y cómo se maneja (1.5.3).
 
-**Un modelo centrado en la persona.** Adultos mayores usuarios de audífonos describieron la rehabilitación centrada en la persona en tres dimensiones: la relación terapéutica, los actores (audiólogo y paciente) y los procesos clínicos; la atención individualizada une las tres (Grenness y cols., 2014; diez participantes, estudio cualitativo). En la práctica: las metas son del paciente (el COSI, → H20), el audiólogo explica opciones y límites, y la decisión es compartida (NICE, 2018, 1.6.3).
+**Un modelo centrado en la persona.** Adultos mayores usuarios de audífonos describieron la rehabilitación centrada en la persona en tres dimensiones: la relación terapéutica, los actores (audiólogo y paciente) y los procesos clínicos; la atención individualizada une las tres (Grenness y cols., 2014; diez participantes, estudio cualitativo). En la práctica: las metas son del paciente (el COSI, → H21), el audiólogo explica opciones y límites, y la decisión es compartida (NICE, 2018, 1.6.3).
 
 **La familia y la pareja.** La hipoacusia también afecta a quien conversa con la persona: en entrevistas con diez cónyuges, sus dificultades se describieron sobre todo en actividades y participación (Scarinci y cols., 2009). Por eso se ofrece la información también a la familia o a quienes lo cuidan, si el paciente lo desea (NICE, 2018, 1.5.3), y conviene que la pareja venga a la consulta, y las estrategias de abajo se enseñan a los dos.
 
@@ -76,11 +76,11 @@ El audífono es una parte de la rehabilitación. La otra parte es lo que la pers
 
 Las estrategias se enseñan, se practican y se repasan; no basta con entregarlas en una hoja. Una revisión de 12 estudios de programas grupales basados en consejería y estrategias de comunicación encontró evidencia razonablemente buena de una reducción a corto plazo de la restricción que el paciente percibe, y de mejor uso de las estrategias y de los audífonos, pero no está claro que la ventaja sobre el audífono solo se mantenga en el tiempo (Hawkins, 2005). El programa *Active Communication Education* (grupo de 2 horas por semana durante 5 semanas), evaluado en un ensayo con 178 adultos mayores, mejoró las medidas de restricción auditiva y de bienestar psicológico, con mejoras que se mantuvieron a los 6 meses, y el 75 % refirió alguna mejoría en su meta principal (Hickson y cols., 2007). En un ensayo con 114 adultos mayores chilenos usuarios de audífonos, el mismo programa aumentó el uso del audífono, hasta los 12 meses de seguimiento (Marcotti y cols., 2025).
 
-**Lectura labiofacial.** Ver la cara de quien habla ayuda a casi todos los adultos cuando el habla llega degradada, y el efecto es mayor en quien lee mejor los labios, que en los adultos que oyeron normal gran parte de su vida suele ser poco (Bernstein y cols., 2022). Se describe como limitada a **visemas**, grupos de sonidos que se ven iguales en la boca (por ejemplo, /p/, /b/ y /m/); sin embargo, hay evidencia de que se percibe información visual más fina que el visema y de que las palabras se leen apoyadas en el vocabulario, igual que al oído. Entrenar la lectura labial ha sido difícil de lograr, pero con retroalimentación y tareas adecuadas el entrenamiento puede funcionar y generalizar a oraciones audiovisuales en ruido (Bernstein y cols., 2022). Para el paciente significa: mirar la cara, tener luz sobre ella, y no esperar entender solo mirando. Para el clínico: el efecto de la lectura labial se separa del del audífono en la prueba (→ H20).
+**Lectura labiofacial.** Ver la cara de quien habla ayuda a casi todos los adultos cuando el habla llega degradada, y el efecto es mayor en quien lee mejor los labios, que en los adultos que oyeron normal gran parte de su vida suele ser poco (Bernstein y cols., 2022). Se describe como limitada a **visemas**, grupos de sonidos que se ven iguales en la boca (por ejemplo, /p/, /b/ y /m/); sin embargo, hay evidencia de que se percibe información visual más fina que el visema y de que las palabras se leen apoyadas en el vocabulario, igual que al oído. Entrenar la lectura labial ha sido difícil de lograr, pero con retroalimentación y tareas adecuadas el entrenamiento puede funcionar y generalizar a oraciones audiovisuales en ruido (Bernstein y cols., 2022). Para el paciente significa: mirar la cara, tener luz sobre ella, y no esperar entender solo mirando. Para el clínico: el efecto de la lectura labial se separa del del audífono en la prueba (→ H21).
 
 **Entrenamiento auditivo en el adulto.** Los programas por computador mejoran la tarea entrenada, con evidencia limitada de que lo hagan en la vida diaria (Henshaw y Ferguson, 2013), y el entrenamiento global con habla podría mejorar el reconocimiento en ruido (Sweetow y Palmer, 2005). Es el tema del cap. 30; aquí basta con saber que no sustituye a las estrategias ni al audífono.
 
-**Ayudas complementarias.** Cuando el audífono no alcanza, la NICE pide informar sobre las ayudas de escucha (bucles personales, comunicadores personales, amplificadores de televisión, dispositivos para el teléfono, alarmas de humo, sensores de timbre, *streamers* y aplicaciones) y sobre las instituciones que ayudan a conseguirlas, y volver a ver la eficacia de la ayuda en un control (NICE, 2018, 1.6.8, 1.6.9 y 1.7.4). Cómo funciona cada una (telebobina, bucle de inducción, micrófono remoto, alertas) está en H20.
+**Ayudas complementarias.** Cuando el audífono no alcanza, la NICE pide informar sobre las ayudas de escucha (bucles personales, comunicadores personales, amplificadores de televisión, dispositivos para el teléfono, alarmas de humo, sensores de timbre, *streamers* y aplicaciones) y sobre las instituciones que ayudan a conseguirlas, y volver a ver la eficacia de la ayuda en un control (NICE, 2018, 1.6.8, 1.6.9 y 1.7.4). Cómo funciona cada una (telebobina, bucle de inducción, micrófono remoto, alertas) está en H21.
 
 
 ## Fisiología
@@ -96,11 +96,11 @@ Es lo que muestra el OD del caso 28.2. Con un LDL de 110 dB HL en casi todas las
 
 ### Por qué un audífono comprime
 
-El habla no se achica porque el oído se haya dañado: entre sus sonidos más suaves y más fuertes hay del orden de **30 dB**, el rango que asume el índice de inteligibilidad del habla (Jin y cols., 2017). <!-- Pasada de fundamentos 2026-10-18: se cambió la cita de Dillon (2012), cuya página no se pudo confirmar, por Jin y cols. (2017): "The 30-dB DR commonly used in computing the SII is thus a reasonable assumption". --> Un audífono que sumara la misma ganancia a todo, es decir, **lineal**, tendría dos opciones malas en el 3.000 Hz de la figura: darle ganancia suficiente a lo suave para que se oiga, y entonces lo fuerte pasa el LDL y molesta; o cuidar lo fuerte, y entonces lo suave no se oye. La salida es la **compresión**: más ganancia para lo suave, menos para lo fuerte, de modo que los 30 dB del habla quepan en el campo dinámico que queda. Villchur (1973) propuso comprimir en varios canales para compensar el reclutamiento; hoy los métodos de ajuste se diseñan para audífonos con compresión (Keidser y cols., 2011; → H20). <!-- Pasada de fundamentos 2026-10-18: decía "fue quien propuso esta idea" y "hoy está en todos los audífonos": atribución exclusiva y absoluto sin respaldo. Keidser 2011: "NAL-NL2 is the second generation of prescription procedures ... for fitting wide dynamic range compression (WDRC) instruments". -->
+El habla no se achica porque el oído se haya dañado: entre sus sonidos más suaves y más fuertes hay del orden de **30 dB**, el rango que asume el índice de inteligibilidad del habla (Jin y cols., 2017). <!-- Pasada de fundamentos 2026-10-18: se cambió la cita de Dillon (2012), cuya página no se pudo confirmar, por Jin y cols. (2017): "The 30-dB DR commonly used in computing the SII is thus a reasonable assumption". --> Un audífono que sumara la misma ganancia a todo, es decir, **lineal**, tendría dos opciones malas en el 3.000 Hz de la figura: darle ganancia suficiente a lo suave para que se oiga, y entonces lo fuerte pasa el LDL y molesta; o cuidar lo fuerte, y entonces lo suave no se oye. La salida es la **compresión**: más ganancia para lo suave, menos para lo fuerte, de modo que los 30 dB del habla quepan en el campo dinámico que queda. Villchur (1973) propuso comprimir en varios canales para compensar el reclutamiento; hoy los métodos de ajuste se diseñan para audífonos con compresión (Keidser y cols., 2011; → H21). <!-- Pasada de fundamentos 2026-10-18: decía "fue quien propuso esta idea" y "hoy está en todos los audífonos": atribución exclusiva y absoluto sin respaldo. Keidser 2011: "NAL-NL2 is the second generation of prescription procedures ... for fitting wide dynamic range compression (WDRC) instruments". -->
 
 Hay dos consecuencias que explican gran parte de lo que se le dice al paciente:
 
-- **El LDL es el techo.** La salida máxima del audífono se fija por debajo del nivel que el paciente tolera. Por eso el LDL se mide con un estímulo calibrado y no con un grito (→ H20), y por eso un paciente con un campo estrecho es un ajuste más difícil.
+- **El LDL es el techo.** La salida máxima del audífono se fija por debajo del nivel que el paciente tolera. Por eso el LDL se mide con un estímulo calibrado y no con un grito (→ H21), y por eso un paciente con un campo estrecho es un ajuste más difícil.
 - **Donde el campo es más angosto que el habla, la audibilidad completa no cabe.** En 4.000 Hz del caso 28.2 el campo es de al menos 20 dB: menos que los 30 dB del habla. Los métodos prescriptivos lo saben: NAL-NL2 busca el mejor entendimiento posible sin que la sonoridad supere la de un oyente normal. Además cuenta con que, cuanto más severa es la pérdida, menos información se saca del habla aunque sea audible, y por eso donde la pérdida es muy severa le da menos peso a seguir subiendo la audibilidad (Keidser y cols., 2011). El audífono devuelve **audibilidad**, no la sintonía fina que se perdió con las células.
 
 ### Dos oídos y una cabeza
@@ -131,9 +131,9 @@ Pero que el audífono sirva en un ensayo no garantiza que se use. Entre quienes 
 
 De ahí el trabajo de la primera visita:
 
-- **Escuchar lo que le cuesta** y convertirlo en objetivos del propio paciente ("entender a mi nieta en la mesa"), que el COSI registra y que se vuelven a mirar después (→ H20).
+- **Escuchar lo que le cuesta** y convertirlo en objetivos del propio paciente ("entender a mi nieta en la mesa"), que el COSI registra y que se vuelven a mirar después (→ H21).
 - **Decir lo que el audífono hace y no hace.** Devuelve audibilidad, no la audición de antes; una discriminación pobre no sube por tener más volumen; el cerebro necesita semanas para acostumbrarse a sonidos que llevaba años sin oír.
-- **Anticipar lo que molesta**: el sonido de la propia voz, los ruidos fuertes, el silbido, y cómo se resuelve cada uno (→ H20).
+- **Anticipar lo que molesta**: el sonido de la propia voz, los ruidos fuertes, el silbido, y cómo se resuelve cada uno (→ H21).
 
 :::sabias ¿Sabías que?
 En el ensayo ACHIEVE, adultos de 70 a 84 años con pérdida sin tratar fueron asignados al azar a un audífono con consejería o a un programa de educación en salud. En la muestra completa **no hubo diferencia** en el deterioro cognitivo a tres años; en el grupo de mayor riesgo cognitivo, el análisis planteó que sí podría haberla (Lin y cols., 2023). El audífono se indica por la comunicación y la calidad de vida. Que prevenga la demencia no está demostrado.
@@ -175,7 +175,7 @@ Frente a un paciente con una pérdida que consulta por un audífono, el razonami
 :::ayuda-ancho Qué decide cada dato
 | Lo que ves | Qué te dice | Qué haces |
 |---|---|---|
-| Graves normales y agudos caídos | La amplificación se necesita arriba, no abajo | Molde o cúpula **abierta** (→ H20) |
+| Graves normales y agudos caídos | La amplificación se necesita arriba, no abajo | Molde o cúpula **abierta** (→ H21) |
 | LDL cerca del umbral en agudos | Campo dinámico estrecho | Compresión y salida máxima prudente; consejería sobre los ruidos fuertes |
 | Discriminación máxima menor al 100 % | Oír no será entender todo | Hablar de expectativas; lectura labial y de frente |
 | Pérdida leve en agudos con buena discriminación | Dificultad en el ruido, no en silencio | Estrategias, control; audífono si lo pide |
@@ -187,7 +187,7 @@ Frente a un paciente con una pérdida que consulta por un audífono, el razonami
 
 - **Decidir por el promedio tonal.** Un 20 y un 40 pueden estar en la misma situación o en dos opuestas; la queja y las metas deciden.
 - **Prometer claridad cuando solo se da volumen.** Una discriminación pobre no sube por más ganancia.
-- **Ajustar solo por comodidad.** El paciente sin amplificar prefiere menos de lo que necesita; la comodidad se afina alrededor de un objetivo (→ H20).
+- **Ajustar solo por comodidad.** El paciente sin amplificar prefiere menos de lo que necesita; la comodidad se afina alrededor de un objetivo (→ H21).
 - **Leer el campo libre en una pérdida unilateral.** Mide el oído que oye.
 - **Ofrecer un audífono convencional al oído que ya no tiene umbral útil.**
 - **No explicar el CROS antes de probarlo.**
@@ -235,7 +235,7 @@ Además de la audiometría, ¿qué logoaudiometría y qué LDL? ¿Qué pruebas h
 :::docente Guía del caso
 - **Datos clave:** 73 años, quejas en la mesa familiar y en el consultorio, sube la tele, no tiene acúfeno ni vértigo ni otorrea, otoscopía normal; su hermana tiene audífonos y no los usa; quiere entender a su nieta.
 - **Hipótesis:** presbiacusia bilateral simétrica; sin banderas rojas, no hay por qué demorar la prueba.
-- **Qué pedir:** audiometría con enmascaramiento, logoaudiometría en varios niveles, LDL y la prueba de audífonos con las cuatro tareas (→ H3, H5, H20). El COSI antes de entregar nada.
+- **Qué pedir:** audiometría con enmascaramiento, logoaudiometría en varios niveles, LDL y la prueba de audífonos con las cuatro tareas (→ H3, H5, H21). El COSI antes de entregar nada.
 - **Errores esperables:** quedarse con la comodidad como criterio de ajuste; prometer que "volverá a oír como antes"; no averiguar por qué su hermana abandonó el suyo.
 - **En LabSim:** cuadro *presbiacusia* moderada. El simulador no tiene audífono: la curva con audífono de la figura es un ejemplo, no una medición.
 :::
@@ -269,7 +269,7 @@ Hablar de audífonos con alguien que no los quiere, ¿por dónde empiezas? ¿Qu�
 :::docente Guía del caso
 - **Datos clave:** 68 años, mecánico jubilado, lo trajo su señora, dice que oye bien y que los audífonos "son para viejos" y "suenan a lata", ruidos fuertes que le "clavan" el oído, pitido agudo bilateral intermitente, teme que algo en el oído lo empeore.
 - **Hipótesis:** presbiacusia con componente de ruido; campo dinámico estrecho en agudos.
-- **Qué pedir:** audiometría, logoaudiometría y **LDL** (→ H5); en la prueba de audífonos, mirar con atención la molestia ante lo fuerte (→ H20).
+- **Qué pedir:** audiometría, logoaudiometría y **LDL** (→ H5); en la prueba de audífonos, mirar con atención la molestia ante lo fuerte (→ H21).
 - **Errores esperables:** discutir con él en vez de preguntarle por qué piensa así; empezar por el modelo; dar mucha ganancia en agudos para "que oiga", sin mirar el techo; negarle que el pitido existe.
 - **En LabSim:** cuadro *presbiacusia* moderada. El LDL es del paciente (se sortea entre 90 y 120 dB): en este caso es de 110.
 :::
@@ -355,21 +355,21 @@ Intenta resolver cada caso con los pasos del aprendizaje basado en problemas ant
 
 #### Razonamiento
 
-La entrevista no tiene banderas rojas: simétrica, sin acúfeno, sin vértigo, sin otorrea, con otoscopía normal. La curva baja desde 2 kHz y los graves están casi normales, lo que pide una amplificación que dé mucha ganancia arriba y poca abajo: una cúpula abierta (→ H20). El LDL no se encuentra hasta 120 dB y el campo dinámico no es el problema. Lo que decide el caso no es el audiograma, sino que ella **tiene objetivos propios** (su nieta), el apoyo de la hija y ganas de probar. La duda por la hermana se contesta preguntando por qué dejó el suyo: las razones más frecuentes son que no aportaba beneficio suficiente o que incomodaba (McCormack y Fortnum, 2013), y las dos se pueden anticipar. El 76 % de discriminación anticipa que el beneficio será grande en audibilidad y menor en entender todo.
+La entrevista no tiene banderas rojas: simétrica, sin acúfeno, sin vértigo, sin otorrea, con otoscopía normal. La curva baja desde 2 kHz y los graves están casi normales, lo que pide una amplificación que dé mucha ganancia arriba y poca abajo: una cúpula abierta (→ H21). El LDL no se encuentra hasta 120 dB y el campo dinámico no es el problema. Lo que decide el caso no es el audiograma, sino que ella **tiene objetivos propios** (su nieta), el apoyo de la hija y ganas de probar. La duda por la hermana se contesta preguntando por qué dejó el suyo: las razones más frecuentes son que no aportaba beneficio suficiente o que incomodaba (McCormack y Fortnum, 2013), y las dos se pueden anticipar. El 76 % de discriminación anticipa que el beneficio será grande en audibilidad y menor en entender todo.
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural bilateral simétrica moderada, descendente. Se sugiere adaptación **bilateral** con cúpula abierta, a indicación del especialista. Se acuerdan por escrito dos o tres objetivos con el COSI ("entender a mi nieta en la mesa"). Después de la entrega, un control a las semanas para ajustar y revisar los objetivos, y la revisión visoauditiva más adelante (→ H21). En 4 kHz el audífono deja el umbral en 60 dB: se le dice que algunas consonantes seguirán costándole.
+Hipoacusia sensorioneural bilateral simétrica moderada, descendente. Se sugiere adaptación **bilateral** con cúpula abierta, a indicación del especialista. Se acuerdan por escrito dos o tres objetivos con el COSI ("entender a mi nieta en la mesa"). Después de la entrega, un control a las semanas para ajustar y revisar los objetivos, y la revisión visoauditiva más adelante (→ H22). En 4 kHz el audífono deja el umbral en 60 dB: se le dice que algunas consonantes seguirán costándole.
 
 :::comentario Comentario
-En la figura la ganancia es un ejemplo. En un caso real, esa ganancia se prescribe con un método (NAL-NL2 o DSL), se verifica en el oído de la paciente con un micrófono sonda y se confirma con ella, tareas que pertenecen a la entrega, no a esta prueba (→ H20).
+En la figura la ganancia es un ejemplo. En un caso real, esa ganancia se prescribe con un método (NAL-NL2 o DSL), se verifica en el oído de la paciente con un micrófono sonda y se confirma con ella, tareas que pertenecen a la entrega, no a esta prueba (→ H21).
 :::
 
 ### Caso 28.2
 
 #### Razonamiento
 
-No es un problema de aparato: es una persona que no cree necesitarlo y que tiene, además, una razón de fondo para dudar, que es que los ruidos fuertes le molestan. Eso no es manía: con un LDL de 110 dB y un umbral de 80 en 3 kHz, el campo dinámico es de 30 dB. Un audífono lineal le daría ganancia a las voces suaves y le molestaría con las fuertes (→ H20). Ahí está lo que se le puede decir y que le importa: el audífono **comprime**, y el aparato se ajusta para que lo fuerte no pase de su umbral. También hay que contestar el temor por el pitido, sin prometer lo que no se sabe: se le explica que se va a vigilar y que, si molesta, se ajusta. Empezar por el modelo es perder: se empieza por lo que quiere lograr y por lo que ya no quiere que le pase.
+No es un problema de aparato: es una persona que no cree necesitarlo y que tiene, además, una razón de fondo para dudar, que es que los ruidos fuertes le molestan. Eso no es manía: con un LDL de 110 dB y un umbral de 80 en 3 kHz, el campo dinámico es de 30 dB. Un audífono lineal le daría ganancia a las voces suaves y le molestaría con las fuertes (→ H21). Ahí está lo que se le puede decir y que le importa: el audífono **comprime**, y el aparato se ajusta para que lo fuerte no pase de su umbral. También hay que contestar el temor por el pitido, sin prometer lo que no se sabe: se le explica que se va a vigilar y que, si molesta, se ajusta. Empezar por el modelo es perder: se empieza por lo que quiere lograr y por lo que ya no quiere que le pase.
 
 #### Diagnóstico y qué sigue
 

@@ -7,7 +7,7 @@
 - Explicar por qué lo que el paciente siente y lo que miden los equipos pueden no coincidir, y qué se hace con esa discordancia.
 :::
 
-"Tengo la nariz tapada" es una de las consultas más corrientes y una de las más difíciles de cerrar. Detrás de la misma frase hay un tabique que se desvió con un golpe, una pared lateral que cede cada vez que el paciente inspira fuerte, un cornete hinchado, o una nariz que por dentro está bien y que el paciente siente tapada igual. Ninguna de esas causas se ve con una sola prueba, y las tres se tratan de manera distinta. Este capítulo trata de cómo ordenar los exámenes de la nariz (→ H23, H24 y H25) para que cada uno responda la pregunta que sabe responder, y de qué hacer cuando entre ellos, o entre ellos y el paciente, hay desacuerdo.
+"Tengo la nariz tapada" es una de las consultas más corrientes y una de las más difíciles de cerrar. Detrás de la misma frase hay un tabique que se desvió con un golpe, una pared lateral que cede cada vez que el paciente inspira fuerte, un cornete hinchado, o una nariz que por dentro está bien y que el paciente siente tapada igual. Ninguna de esas causas se ve con una sola prueba, y las tres se tratan de manera distinta. Este capítulo trata de cómo ordenar los exámenes de la nariz (→ H24, H25 y H26) para que cada uno responda la pregunta que sabe responder, y de qué hacer cuando entre ellos, o entre ellos y el paciente, hay desacuerdo.
 
 ## Técnica en foco
 
@@ -19,17 +19,17 @@ Tabla: Qué le pregunta este capítulo a cada examen de la nariz
 
 | Pregunta | Quién la contesta | Qué NO puede decir |
 |---|---|---|
-| ¿Cuánto le molesta, cuándo y de qué lado? | La anamnesis y el cuestionario NOSE (→ H23) | Si hay un obstáculo y de qué tipo |
-| ¿Qué hay dentro, a la vista? | La rinoscopía anterior (→ H23) | Cómo se comporta la nariz con el aire en movimiento; lo que está más atrás de lo que alcanza el espéculo |
-| ¿Cuánto cuesta que pase el aire, en cada fosa y en cada fase? | La rinomanometría anterior (→ H24) | **Dónde** está el estrechamiento |
-| ¿Dónde está el estrechamiento y de qué tamaño es la fosa? | La rinometría acústica (→ H25) | Lo que pasa cuando el aire corre: se mide en apnea |
+| ¿Cuánto le molesta, cuándo y de qué lado? | La anamnesis y el cuestionario NOSE (→ H24) | Si hay un obstáculo y de qué tipo |
+| ¿Qué hay dentro, a la vista? | La rinoscopía anterior (→ H24) | Cómo se comporta la nariz con el aire en movimiento; lo que está más atrás de lo que alcanza el espéculo |
+| ¿Cuánto cuesta que pase el aire, en cada fosa y en cada fase? | La rinomanometría anterior (→ H25) | **Dónde** está el estrechamiento |
+| ¿Dónde está el estrechamiento y de qué tamaño es la fosa? | La rinometría acústica (→ H26) | Lo que pasa cuando el aire corre: se mide en apnea |
 | ¿Cuánto es mucosa y cuánto esqueleto? | La prueba con vasoconstrictor, en los dos exámenes | Si lo que queda es tabique o válvula: eso lo separan la forma de la curva y el relato |
 
 La técnica de cada examen está en su herramienta y aquí no se repite. Lo que sí importa de ella en este problema es una sola idea: **cada examen mira la misma nariz desde un lado distinto**, y el problema se resuelve cuando los lados concuerdan. Una cifra suelta rara vez decide algo.
 
 ### Lo que hay que cambiar de la rutina
 
-- **Se informa por fosa, no por total.** Dos fosas se combinan como resistencias en paralelo (→ H24): la total es siempre menor que la de la fosa más abierta, y una fosa muy obstruida puede esconderse detrás de un total aceptable. El caso 1 lo muestra con números.
+- **Se informa por fosa, no por total.** Dos fosas se combinan como resistencias en paralelo (→ H25): la total es siempre menor que la de la fosa más abierta, y una fosa muy obstruida puede esconderse detrás de un total aceptable. El caso 1 lo muestra con números.
 - **Se miran las dos fases.** La resistencia al inspirar y al espirar de la misma fosa casi siempre se parecen. Cuando no se parecen, la diferencia es el dato (caso 2).
 - **Se tiene presente qué ve cada examen.** La rinometría acústica se hace en apnea y la rinoscopía con el espéculo abierto: las dos miran una nariz que no está respirando. Para una válvula que cede solo al inspirar, eso es un límite que hay que decir en el informe.
 - **Se pregunta antes de medir.** El cuestionario NOSE ordena lo que el paciente siente en cinco ítems; la suma se lleva a 0-100 (Stewart y cols., 2004) y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Lipan y Most, 2013). Sirve para comparar al paciente consigo mismo y con el examen.
@@ -42,17 +42,17 @@ La técnica de cada examen está en su herramienta y aquí no se repite. Lo que 
 
 ### La válvula nasal: un estrechamiento que decide
 
-La anatomía de la válvula nasal y el efecto del radio sobre la resistencia están en H23 y en las Bases (→ B1, B4). Aquí interesa lo que de eso se desprende para razonar un caso.
+La anatomía de la válvula nasal y el efecto del radio sobre la resistencia están en H24 y en las Bases (→ B1, B4). Aquí interesa lo que de eso se desprende para razonar un caso.
 
 **Una desviación en la válvula pesa más que una grande al fondo.** Si el aire pasa casi todo por un solo punto estrecho, lo que se sume a ese punto cuenta mucho y lo que se sume lejos de él casi no cuenta. En 50 pacientes con desviación septal, tanto la rinometría acústica como la rinomanometría revelaron bien las desviaciones graves de la parte anterior de la fosa (hasta 2,5 cm de la columela) y fueron menos sensibles para las del medio y el fondo (Szücs y Clement, 1998).
 
-**El esqueleto fijo y la pared blanda se portan distinto al correr el aire.** Un tabique desviado es un obstáculo fijo: la fosa estorba igual cuando el aire entra que cuando sale. Una pared lateral blanda, en cambio, obedece a la presión. Al inspirar el aire se acelera en la válvula y la presión sobre la pared baja (Bernoulli): si la pared es débil, se mueve hacia dentro y el pasaje se estrecha más, con lo que el aire se acelera todavía más (Rhee y cols., 2010). Es como sorber por una bombilla de papel mojado: por más que chupes, llega un momento en que el sorbete se aplasta y deja de pasar más. En teoría, al espirar ocurre lo contrario: la presión de adentro empuja la pared hacia afuera y la válvula se abre; en el consenso clínico, la mayoría del panel rechazó que la obstrucción al espirar fuerte sea un signo de colapso, aunque sin llegar a consenso (Rhee y cols., 2010). <!-- Pasada de fundamentos 2026-10-18: decía "no encontró acuerdo en que la obstrucción al espirar fuerte sea un signo de colapso". Texto completo (PMC5943059): "While a majority of panelists disagreed or strongly disagreed that nasal obstruction associated with deep expiration may be consistent with NVC, no consensus was reached because three panelists were neutral or agreed with this statement." --> Por eso un colapso dinámico, mirado con el flujo, se espera como una nariz casi normal para espirar y limitada para inspirar. En la curva presión-flujo (→ H24) eso se ve como una **meseta**: el flujo inspiratorio deja de crecer aunque la presión siga subiendo.
+**El esqueleto fijo y la pared blanda se portan distinto al correr el aire.** Un tabique desviado es un obstáculo fijo: la fosa estorba igual cuando el aire entra que cuando sale. Una pared lateral blanda, en cambio, obedece a la presión. Al inspirar el aire se acelera en la válvula y la presión sobre la pared baja (Bernoulli): si la pared es débil, se mueve hacia dentro y el pasaje se estrecha más, con lo que el aire se acelera todavía más (Rhee y cols., 2010). Es como sorber por una bombilla de papel mojado: por más que chupes, llega un momento en que el sorbete se aplasta y deja de pasar más. En teoría, al espirar ocurre lo contrario: la presión de adentro empuja la pared hacia afuera y la válvula se abre; en el consenso clínico, la mayoría del panel rechazó que la obstrucción al espirar fuerte sea un signo de colapso, aunque sin llegar a consenso (Rhee y cols., 2010). <!-- Pasada de fundamentos 2026-10-18: decía "no encontró acuerdo en que la obstrucción al espirar fuerte sea un signo de colapso". Texto completo (PMC5943059): "While a majority of panelists disagreed or strongly disagreed that nasal obstruction associated with deep expiration may be consistent with NVC, no consensus was reached because three panelists were neutral or agreed with this statement." --> Por eso un colapso dinámico, mirado con el flujo, se espera como una nariz casi normal para espirar y limitada para inspirar. En la curva presión-flujo (→ H25) eso se ve como una **meseta**: el flujo inspiratorio deja de crecer aunque la presión siga subiendo.
 
 La consecuencia práctica es que **el esfuerzo es parte del examen** y que **hay que mirar las dos fases**. Medida solo al espirar, una fosa con la válvula blanda parece casi normal; la inspiración, y más todavía la inspiración con esfuerzo, es la que la delata. Una prueba que se hace sin aire en movimiento (como la rinometría) puede pasarla por alto. El consenso clínico sobre el compromiso de la válvula nasal dice algo parecido con otras palabras: lo evalúan mejor la historia y el examen físico, y no hay una prueba objetiva que sea el estándar de referencia (Rhee y cols., 2010).
 
 ### Mucosa y esqueleto: lo que el vasoconstrictor separa
 
-Todo lo que hincha la mucosa de los cornetes (alergia, resfrío, el ciclo nasal) cede con un vasoconstrictor; el esqueleto, el cartílago y la pared blanda no cambian (→ H24, H25). Dos cuidados para este capítulo:
+Todo lo que hincha la mucosa de los cornetes (alergia, resfrío, el ciclo nasal) cede con un vasoconstrictor; el esqueleto, el cartílago y la pared blanda no cambian (→ H25, H26). Dos cuidados para este capítulo:
 
 - Un cornete grande **del lado opuesto a una desviación** puede tener mucosa, pero también hueso. En 19 pacientes operados, el hueso del cornete inferior hipertrófico contralateral se había engrosado al doble y la mucosa aportaba poco al aumento de tamaño (Berger y cols., 2000). Si lo que crece es el hueso, el vasoconstrictor lo achica solo en parte.
 - Un resultado "igual que en reposo" dice **estructural**, no **tabique**: lo mismo sale con un colapso de válvula (caso 2).
@@ -70,19 +70,19 @@ El tabique se desvía de la línea media y estrecha una fosa. Se describen dos o
 Lo que la distingue en los exámenes es que **no depende de la mucosa**:
 
 - **Rinoscopía**: se ve el tabique desviado, a veces con un espolón, y el estrechamiento del lado afectado.
-- **Rinomanometría**: curva baja de un solo lado; la resistencia inspiratoria y la espiratoria son parecidas; después del vasoconstrictor casi no cambia (obstrucción **mecánica**, → H24).
-- **Rinometría acústica**: el primer mínimo (MCA1) es más chico en ese lado, a la distancia a la que está el obstáculo (→ H25).
+- **Rinomanometría**: curva baja de un solo lado; la resistencia inspiratoria y la espiratoria son parecidas; después del vasoconstrictor casi no cambia (obstrucción **mecánica**, → H25).
+- **Rinometría acústica**: el primer mínimo (MCA1) es más chico en ese lado, a la distancia a la que está el obstáculo (→ H26).
 
 :::imagen ilustraciones/cap35-tc-tabique.jpg ancho=46% Tomografía coronal de los senos paranasales de otra persona (no es el paciente de este capítulo): se ve el tabique desviado, los cornetes inferiores aumentados de tamaño, una concha bullosa y una duplicación del cornete inferior izquierdo, una variante rara. El tabique es hueso y cartílago: un vasoconstrictor no lo mueve. La tomografía la pide y la informa el médico; aquí sirve para ver lo que las curvas miden. Imagen: Simsim R y cols. (2026), J Surg Case Rep, doi:10.1093/jscr/rjag689, CC BY 4.0.
 :::
 
 :::sabias ¿Sabías que?
-La resistencia total engaña. Con una fosa en 0,53 y la otra en 0,33 Pa/(cm³/s), la total da **0,20**: más baja que la mejor de las dos, porque son dos caminos en paralelo (→ H24). Un paciente con una fosa obstruida de un solo lado puede tener una resistencia total que parece buena. Por eso el informe da cada fosa por separado.
+La resistencia total engaña. Con una fosa en 0,53 y la otra en 0,33 Pa/(cm³/s), la total da **0,20**: más baja que la mejor de las dos, porque son dos caminos en paralelo (→ H25). Un paciente con una fosa obstruida de un solo lado puede tener una resistencia total que parece buena. Por eso el informe da cada fosa por separado.
 :::
 
 ### Colapso de la válvula nasal: la obstrucción dinámica
 
-La pared lateral de la nariz (el cartílago lateral superior y el ala) se cierra hacia el tabique al inspirar. Se asocia a cartílagos debilitados por una cirugía, un golpe o la edad (→ H23). El relato es característico: obstrucción que **aparece al esforzarse** (correr, inspirar fuerte, dormir), con nariz aceptable en reposo, que **mejora al jalar la mejilla hacia el lado** o con una tira nasal, y que **no responde a los corticoides nasales si no hay rinitis** (Rhee y cols., 2010).
+La pared lateral de la nariz (el cartílago lateral superior y el ala) se cierra hacia el tabique al inspirar. Se asocia a cartílagos debilitados por una cirugía, un golpe o la edad (→ H24). El relato es característico: obstrucción que **aparece al esforzarse** (correr, inspirar fuerte, dormir), con nariz aceptable en reposo, que **mejora al jalar la mejilla hacia el lado** o con una tira nasal, y que **no responde a los corticoides nasales si no hay rinitis** (Rhee y cols., 2010).
 
 Los signos que el consenso acepta son: el colapso visible de la pared o del ala al inspirar; la mejoría subjetiva con la maniobra de Cottle (jalar la mejilla) o al levantar manualmente la pared lateral desde dentro de la nariz; y la obstrucción que aumenta con una inspiración profunda.
 
@@ -114,7 +114,7 @@ Tabla: Otras causas de nariz tapada y dónde se estudian
 | Cornetes hinchados (mucosa) | Bilateral, mucosa pálida o roja, cede con el vasoconstrictor | Cap. 36 |
 | Pólipos | Masas blandas grises; en la rinometría el segundo mínimo ya no es el cornete | Cap. 36; se deriva |
 | Una masa o síntomas de un solo lado, sangrado o pérdida del olfato de un lado | No se explican por el ciclo nasal ni por una alergia | Se deriva (Fokkens y cols., 2020) |
-| Perforación septal | La técnica anterior mide mal (→ H24) | Derivar y no informar la resistencia sin decirlo |
+| Perforación septal | La técnica anterior mide mal (→ H25) | Derivar y no informar la resistencia sin decirlo |
 
 ## Razonamiento
 
@@ -155,7 +155,7 @@ En el caso 2, la fosa derecha da 0,61 al inspirar y 0,36 al espirar. Si el exame
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. El valor de referencia es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H24; Ren y cols., 2018; Vogt y cols., 2016).
+Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. El valor de referencia es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H25; Ren y cols., 2018; Vogt y cols., 2016).
 
 {{caso cap35_desviacion}}
 
@@ -173,7 +173,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 
 #### Paso 4 · Los resultados
 
-**Rinoscopía anterior (→ H23).** Fosa derecha: tabique desviado hacia la derecha en el tercio anterior, que estrecha el paso a la altura de la válvula; mucosa rosada, sin secreción. Fosa izquierda: espacio amplio, con el cornete inferior de buen tamaño, y la pared del tabique cóncava. Sin masas ni perforación. NOSE 60 (grave).
+**Rinoscopía anterior (→ H24).** Fosa derecha: tabique desviado hacia la derecha en el tercio anterior, que estrecha el paso a la altura de la válvula; mucosa rosada, sin secreción. Fosa izquierda: espacio amplio, con el cornete inferior de buen tamaño, y la pared del tabique cóncava. Sin masas ni perforación. NOSE 60 (grave).
 
 :::ayuda-ancho Carlos, rinomanometría anterior a 150 Pa
 | | Fosa derecha | Fosa izquierda | Total |
@@ -199,7 +199,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 :::docente Guía del caso
 - **Datos clave:** antecedente de golpe, obstrucción **constante de un solo lado**, alternancia en el otro, mejora parcial y breve con el spray, ronquido en decúbito supino, NOSE grave.
 - **Hipótesis esperables:** desviación septal postraumática; hipertrofia de cornetes; rinitis; poliposis (no: no hay masas ni estornudos).
-- **Qué pedir:** rinoscopía mirando primero la fosa que dice estar mejor (→ H23); rinomanometría de reposo; vasoconstrictor **en la fosa sobre 0,4** (→ H24); rinometría para ubicar el obstáculo (→ H25).
+- **Qué pedir:** rinoscopía mirando primero la fosa que dice estar mejor (→ H24); rinomanometría de reposo; vasoconstrictor **en la fosa sobre 0,4** (→ H25); rinometría para ubicar el obstáculo (→ H26).
 - **Errores esperables:** informar solo la resistencia total (0,20); concluir "mecánica" sin mirar el relato; llamar "tabique" a lo que la prueba solo llama "estructural".
 - **Para discutir en clase:** el cornete izquierdo grande, ¿es compensación? ¿Cuánto es mucosa y cuánto hueso? (Berger y cols., 2000).
 :::
@@ -220,7 +220,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 
 #### Paso 4 · Los resultados
 
-**Rinoscopía anterior (→ H23).** Tabique casi recto, cornetes de tamaño normal y mucosa rosada, sin secreción. Al pedirle una inspiración profunda por la nariz, la pared lateral de **las dos narinas** se acerca al tabique y el paso se cierra; con la maniobra de Cottle (jalar suavemente la mejilla), respira mejor. NOSE 45 (moderado).
+**Rinoscopía anterior (→ H24).** Tabique casi recto, cornetes de tamaño normal y mucosa rosada, sin secreción. Al pedirle una inspiración profunda por la nariz, la pared lateral de **las dos narinas** se acerca al tabique y el paso se cierra; con la maniobra de Cottle (jalar suavemente la mejilla), respira mejor. NOSE 45 (moderado).
 
 :::ayuda-ancho Mónica, rinomanometría anterior a 150 Pa
 | | Fosa derecha | Fosa izquierda | Total |
@@ -245,7 +245,7 @@ Antes de pedir la rinomanometría, ¿qué mirarías en la rinoscopía? Con el re
 :::docente Guía del caso
 - **Datos clave:** cirugía previa de reducción, obstrucción **al esforzarse**, mejora jalando la mejilla o con tira nasal, sin síntomas alérgicos, corticoide sin efecto.
 - **Hipótesis esperables:** colapso de la válvula nasal (cirugía previa); rinitis (no: sin estornudos ni estacionalidad); desviación septal (el tabique es recto).
-- **Qué pedir:** rinoscopía con inspiración profunda y Cottle; rinomanometría con **las dos fases** y, si el equipo lo permite, con esfuerzo (→ H24).
+- **Qué pedir:** rinoscopía con inspiración profunda y Cottle; rinomanometría con **las dos fases** y, si el equipo lo permite, con esfuerzo (→ H25).
 - **Errores esperables:** informar "normal" mirando solo la espiración (0,36); pensar que la rinometría confirmará; llamar "mecánica" a la prueba con vasoconstrictor y detenerse ahí.
 - **Mira la curva:** los registros acústicos de la fosa derecha varían algo más de lo que pide el criterio del libro: en un caso real se repetirían.
 :::
@@ -266,7 +266,7 @@ Con un NOSE de 80 y una rinoscopía que no muestra nada, ¿qué pruebas harías?
 
 #### Paso 4 · Los resultados
 
-**Rinoscopía anterior (→ H23).** Tabique en la línea media, cornetes de tamaño medio, mucosa rosada y húmeda, sin secreción, sin masas. NOSE 80 (extrema).
+**Rinoscopía anterior (→ H24).** Tabique en la línea media, cornetes de tamaño medio, mucosa rosada y húmeda, sin secreción, sin masas. NOSE 80 (extrema).
 
 :::ayuda-ancho Rocío, rinomanometría anterior a 150 Pa
 | | Fosa derecha | Fosa izquierda | Total |
@@ -286,11 +286,11 @@ Con un NOSE de 80 y una rinoscopía que no muestra nada, ¿qué pruebas harías?
 - @47,50 | **MCA2 1,52 cm²**, igual en las dos. Ni estrechamientos ni asimetría.
 :::
 
-Con las dos fosas en 0,32 no hace falta la prueba con vasoconstrictor (→ H24): no hay nada que separar.
+Con las dos fosas en 0,32 no hace falta la prueba con vasoconstrictor (→ H25): no hay nada que separar.
 
 :::docente Guía del caso
 - **Datos clave:** NOSE 80, obstrucción "las 24 horas" desde un cuadro viral, **sin** respiración bucal, sin ronquidos, con deporte sin límite, olfato disminuido, rinoscopía normal.
-- **Hipótesis esperables:** rinitis (el cap. 36), alteración del olfato después de una infección (→ H23), problema de la percepción del aire, componente ansioso; no una obstrucción mecánica.
+- **Hipótesis esperables:** rinitis (el cap. 36), alteración del olfato después de una infección (→ H24), problema de la percepción del aire, componente ansioso; no una obstrucción mecánica.
 - **Qué pedir:** los mismos exámenes de los casos anteriores **más** una evaluación del olfato y, si el médico lo decide, una endoscopía. Una resistencia normal no es el final del estudio.
 - **Errores esperables:** "no tiene nada"; indicar una cirugía por el NOSE; pensar que el puntaje fue exagerado.
 - **Para discutir en clase:** ¿qué es lo que le dirías a Rocío cuando le entregas el informe? ¿Cómo se lo dirías sin invalidarla?

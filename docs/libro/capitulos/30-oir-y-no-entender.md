@@ -10,13 +10,13 @@
 
 Un niño de nueve años al que "se le va" lo que dice la profesora cuando hay ruido en la sala. Una mujer de setenta y uno que dejó de ir a los almuerzos familiares porque "oigo, pero no entiendo". Una niña de siete años a la que la escuela describe como distraída. Los tres llegan con la misma frase y la misma sospecha: un problema de procesamiento auditivo. Es la frase más fácil de pronunciar y la más difícil de sostener. Este capítulo trata de qué se puede afirmar con una batería de pruebas centrales, qué no, y qué hacer cuando la respuesta honesta es "es un perfil, no una causa".
 
-Aquí se usan las pruebas de la herramienta H14. El capítulo no repite cómo se aplican: se ocupa de **cuándo** se piden, **cómo se lee** lo que dan y **qué se hace después**. Dos diagnósticos diferenciales tienen capítulo propio: cuando el problema está en la sincronía del nervio (cap. 13) y cuando la respuesta del paciente no refleja su audición (cap. 19).
+Aquí se usan las pruebas de la herramienta H15. El capítulo no repite cómo se aplican: se ocupa de **cuándo** se piden, **cómo se lee** lo que dan y **qué se hace después**. Dos diagnósticos diferenciales tienen capítulo propio: cuando el problema está en la sincronía del nervio (cap. 13) y cuando la respuesta del paciente no refleja su audición (cap. 19).
 
 ## Técnica en foco
 
 ### Antes de la batería, todo lo demás
 
-La batería de procesamiento central es la **última** prueba de una cadena, no la primera (→ H14). Antes tiene que estar cerrado lo periférico y conocido el paciente:
+La batería de procesamiento central es la **última** prueba de una cadena, no la primera (→ H15). Antes tiene que estar cerrado lo periférico y conocido el paciente:
 
 - **Audiometría tonal con ósea, logoaudiometría, timpanometría y reflejos, emisiones** (→ H3, H5, H7, H9). Una pérdida, aun leve, o una curva de oído medio alterada mueve todos los puntajes.
 - **Lenguaje, atención y memoria**: no los mide el audiólogo, pero tiene que saber si alguien los midió. Si nadie lo hizo, el informe lo dice como lo que **no se pudo descartar**.
@@ -62,7 +62,7 @@ Lo realista: entrenar puede mejorar la tarea entrenada, a veces algo la confianz
 
 ### Planificar el entrenamiento
 
-El plan sale del perfil que dio la batería (→ H14), no de un programa genérico: se trabaja primero lo que dio bajo y tuvo mayor efecto en la vida diaria del paciente, y cada objetivo se escribe con la prueba o el cuestionario con que se medirá (AAA, 2010). Quien lo ejecuta suele ser un equipo (audiólogo, fonoaudiólogo, profesor, familia), porque parte del trabajo es de lenguaje y de aprendizaje y no solo de audición (AAA, 2010).
+El plan sale del perfil que dio la batería (→ H15), no de un programa genérico: se trabaja primero lo que dio bajo y tuvo mayor efecto en la vida diaria del paciente, y cada objetivo se escribe con la prueba o el cuestionario con que se medirá (AAA, 2010). Quien lo ejecuta suele ser un equipo (audiólogo, fonoaudiólogo, profesor, familia), porque parte del trabajo es de lenguaje y de aprendizaje y no solo de audición (AAA, 2010).
 
 **Dos direcciones que se combinan.** La guía de la AAA ordena las intervenciones en dos grupos (AAA, 2010):
 
@@ -77,7 +77,7 @@ Tabla: De la prueba alterada a la actividad de entrenamiento
 
 | Si en la batería bajó… | Una actividad posible | Cómo se grada |
 |---|---|---|
-| Resolución temporal (gaps, → H14) | Detección de intervalos silenciosos y discriminación de pares de sonidos que difieren en un rasgo | Intervalo más corto, pares más parecidos |
+| Resolución temporal (gaps, → H15) | Detección de intervalos silenciosos y discriminación de pares de sonidos que difieren en un rasgo | Intervalo más corto, pares más parecidos |
 | Escucha dicótica y transferencia entre hemisferios | Tareas dicóticas con una diferencia de intensidad entre oídos (DIID) | Se reduce la ventaja del oído peor a medida que su rendimiento se acerca al del mejor |
 | Habla degradada o en competencia (cierre auditivo) | Reconocer habla en ruido o con competidores | Relación señal/ruido más desfavorable |
 | Procesamiento espacial (separar la voz del ruido por su ubicación) | Reconocer oraciones en un ambiente tridimensional bajo audífonos, con el ruido desde otra dirección | El programa adapta el nivel del blanco a las respuestas |
@@ -132,7 +132,7 @@ La misma plasticidad que permite a la vía afinarse con la experiencia hace que 
 Un oído que detecta bien un tono en silencio puede igual fallar al entender habla en ruido, porque la inteligibilidad no depende solo de que el sonido supere el umbral. Plomp (1978) lo ordenó en dos componentes: la **atenuación**, que se corrige subiendo el volumen, y la **distorsión**, que no se corrige con volumen porque es pérdida de resolución (frecuencial, temporal), y que explica por qué algunos pacientes oyen "fuerte" pero no "claro". En el habla en ruido entran, además, la capacidad de agrupar las señales que vienen de una misma fuente, la de seleccionar una e ignorar otra, y las funciones cognitivas que sostienen la escucha: atención, memoria de trabajo, velocidad de procesamiento (Pichora-Fuller y cols., 1995; Pichora-Fuller y cols., 2016).
 
 - **La cóclea** aporta la resolución en frecuencia y la codificación temporal fina; la pérdida de células ciliadas externas las degrada además de subir el umbral.
-- **El tronco** compara los dos oídos: tiempo y nivel entre ellos (la base de la localización y del MLD) y la coordinación de las vías (→ H14).
+- **El tronco** compara los dos oídos: tiempo y nivel entre ellos (la base de la localización y del MLD) y la coordinación de las vías (→ H15).
 - **La corteza y las áreas de asociación** agrupan, separan, atienden, recuerdan y dan sentido: ahí el rendimiento se mezcla con la lengua y la cognición.
 
 **Separar voces en una mezcla.** Cuando hay varias personas hablando, el sistema auditivo agrupa lo que viene de una fuente y selecciona una. Tener dos oídos ayuda: en un estudio con voces virtuales, escuchar con los dos oídos redujo el umbral de reconocimiento de oraciones entre 2 y 4 dB frente al mejor oído solo, y entre 6 y 7 dB cuando había dos o tres competidores que hablaban, separados espacialmente del blanco (Hawley y cols., 2004). Es una ventaja que se pierde con una pérdida asimétrica (→ cap. 28) y que miden las pruebas de procesamiento espacial.
@@ -172,7 +172,7 @@ Es una consulta frecuente en adultos. Hay seis explicaciones, que se suman y no 
 **La sinaptopatía es una hipótesis con buena base animal y una base humana todavía incompleta.** En ratones, un ruido que solo sube el umbral por unos días destruye de forma permanente sinapsis entre las células ciliadas internas y las fibras del nervio (Kujawa y Liberman, 2009); en cobayos, la pérdida recae sobre las fibras de umbral alto (Furman y cols., 2013), y el envejecimiento hace lo mismo antes de que se pierdan células ciliadas (Sergeyenko y cols., 2013). En huesos temporales humanos se ha descrito pérdida de neuronas y sinapsis en el oído que envejece, con las células ciliadas todavía presentes (Wu y cols., 2019). Lo que falta es lo que importa en la clínica: **no hay una prueba validada que la identifique en una persona**; los candidatos (amplitud de la onda I del PEAT, relación SP/AP, respuestas de seguimiento de la envolvente) no han dado resultados consistentes en humanos, y la relación con entender en ruido es discutida (Liberman y cols., 2016; Bramhall y cols., 2019). Es una explicación posible en alguien con audiograma **normal** y queja de ruido; en alguien con una caída en agudos, el audiograma ya explica una parte, y no hace falta invocarla para entender el caso. Hay que decirlo así al paciente: "es una hipótesis" y no "usted tiene una pérdida oculta".
 :::
 
-El orden de trabajo en esta consulta es simple: se mide el umbral y la discriminación (→ H3, H5), se confirma el estado coclear con emisiones (→ H9), se mide el habla en ruido con una prueba de la lengua del paciente (→ H14), se agrega una prueba dicótica o de gaps con las normas de su edad, y se pide un tamizaje cognitivo al médico tratante cuando la queja y el perfil lo justifican. Se prueba la ayuda que corresponde (audífono con micrófono direccional, accesorios de micrófono remoto: → cap. 28), y se ofrece comunicación y entrenamiento sin prometer más de lo que muestran los estudios.
+El orden de trabajo en esta consulta es simple: se mide el umbral y la discriminación (→ H3, H5), se confirma el estado coclear con emisiones (→ H9), se mide el habla en ruido con una prueba de la lengua del paciente (→ H15), se agrega una prueba dicótica o de gaps con las normas de su edad, y se pide un tamizaje cognitivo al médico tratante cuando la queja y el perfil lo justifican. Se prueba la ayuda que corresponde (audífono con micrófono direccional, accesorios de micrófono remoto: → cap. 28), y se ofrece comunicación y entrenamiento sin prometer más de lo que muestran los estudios.
 
 :::sabias ¿Sabías que?
 En el modelo de Plomp (1978), la pérdida para el habla suma una parte de atenuación, que el audífono compensa, y una de distorsión, que equivale a necesitar más relación señal/ruido y que el audífono no compensa. En promedio, la distorsión es cerca de un tercio de la pérdida total, y es la que da las dificultades en ruido. Como esa parte no se ve en el umbral en silencio, las pruebas de habla en ruido son una parte del examen, no un extra. <!-- Pasada de fundamentos 2026-10-18: decía "El audiograma casi no predice cuánta relación señal/ruido necesita una persona ... dos pacientes con el mismo audiograma pueden necesitar relaciones señal/ruido distintas (Plomp, 1978)". Plomp 1978 no lo dice así. Resumen: "every hearing loss for speech can be interpreted as the sum of a loss class A (attenuation) ... and a loss D (distortion), comparable with a decrease in speech-to-noise ratio. On the average, the hearing loss of class D ... appears to be about one-third (in decibels) of the total hearing loss ... A hearing aid can compensate for class-A-hearing losses ... but not for class-D hearing losses, giving difficulties primarily in noise". verificar: buscar una fuente primaria para la variabilidad del SNR loss con el mismo audiograma (Killion y Niquette, Hear J 2000, no se pudo leer). -->
@@ -199,7 +199,7 @@ Frente a esta queja, el razonamiento sigue seis preguntas, en orden:
 2. **¿Se entiende en silencio?** La discriminación en silencio dice si hay una pérdida de claridad que no es de volumen. Si es mala desde el principio, el diferencial incluye el nervio (→ cap. 11, cap. 13).
 3. **¿Qué más puede producir esta queja?** Atención, lenguaje, memoria, motivación, lengua, cansancio. Si nadie los evaluó, se pide.
 4. **¿Hay edad para la batería?** Desde los 7 años de edad del desarrollo y con lenguaje suficiente para la tarea.
-5. **¿Qué procesos se miden y con qué pruebas?** Una prueba por proceso (→ H14), con las normas de su versión, su lengua y su edad.
+5. **¿Qué procesos se miden y con qué pruebas?** Una prueba por proceso (→ H15), con las normas de su versión, su lengua y su edad.
 6. **¿Qué se puede afirmar?** El perfil, la coherencia con la queja y lo que no se pudo descartar.
 
 :::ayuda-ancho Qué se debe pensar según lo que se encuentra
@@ -285,9 +285,9 @@ Durante la prueba, atendió bien las cuatro, sin cansarse. Las evaluaciones de o
 :::docente Guía del caso
 - **Datos clave:** 9 años, audiometría y oído medio normales, mala escucha en la sala y en el recreo, mejor en lo visual; evaluaciones de lenguaje y atención sin hallazgos importantes.
 - **Lo que enseña:** es el caso **limpio**, el que cumple los criterios de las guías (rendimiento bajo en dos pruebas, con queja documentada y periferia normal). Aun así el perfil es **parcial** (un oído, una prueba de secuencia) y la conciencia fonológica algo baja impide separar "procesamiento auditivo" de "procesamiento fonológico". Es el caso en que se escribe con cuidado.
-- **Qué pedir:** lo periférico, cuestionario de conducta de escucha a la familia y al docente, batería corta que cubra procesos distintos (→ H14).
+- **Qué pedir:** lo periférico, cuestionario de conducta de escucha a la familia y al docente, batería corta que cubra procesos distintos (→ H15).
 - **Errores esperables:** llamarlo "trastorno de procesamiento auditivo" con una causa; olvidar escribir lo que no se pudo descartar; prometer que el entrenamiento lo resolverá.
-- **En LabSim:** la parte periférica se puede armar como cuadro *normal* de 9 años; las pruebas centrales no están en el simulador (→ H14).
+- **En LabSim:** la parte periférica se puede armar como cuadro *normal* de 9 años; las pruebas centrales no están en el simulador (→ H15).
 :::
 
 {{caso cap30_mayor_ruido}}
@@ -343,7 +343,7 @@ El médico de cabecera, al que se derivó para un tamizaje cognitivo, aún no ti
 :::docente Guía del caso
 - **Datos clave:** 71 años, dificultad para entender en grupos y en lugares ruidosos, bien en silencio y por teléfono; empezó gradual; sin vértigo ni asimetría; audiograma con caída en agudos leve a moderada, simétrico.
 - **Lo que enseña:** un audiograma "leve" no es "normal". La caída en agudos y la distorsión coclear explican una parte; el resultado en ruido está más bajo que lo que predice el audiograma, y el oído izquierdo en lo dicótico y el tamizaje cognitivo pendiente dejan abierto el componente central y cognitivo. **No** es un caso de sinaptopatía: tiene pérdida en agudos que explica la caída, y esa hipótesis requiere audiograma normal y no tiene prueba clínica.
-- **Qué pedir:** logoaudiometría, emisiones, habla en ruido con material en español (→ H14), una prueba dicótica con normas de su edad y tamizaje cognitivo con el médico.
+- **Qué pedir:** logoaudiometría, emisiones, habla en ruido con material en español (→ H15), una prueba dicótica con normas de su edad y tamizaje cognitivo con el médico.
 - **Errores esperables:** "es solo la edad"; atribuir el cuadro a "pérdida oculta"; omitir el audífono con micrófono direccional y las estrategias; aplicar normas de adulto joven.
 - **En LabSim:** cuadro *presbiacusia* leve de 71 años; el habla en ruido y las pruebas centrales no están en el simulador.
 :::
@@ -394,7 +394,7 @@ Observaciones durante la prueba: se fatigó y perdió la atención hacia el fina
 
 :::docente Guía del caso
 - **Datos clave:** 7 años, resfríos frecuentes, ronquido y respiración bucal, empeora en invierno, pide repetir y sube el volumen del televisor; la escuela sospecha un trastorno de procesamiento.
-- **Lo que enseña:** el puntaje bajo **en todas las pruebas, en los dos oídos**, con falsas alarmas y fatiga al final, es lo que da una pérdida conductiva y una atención corta, no un perfil de procesamiento. Con curva C y gap de graves, la batería no se interpreta (→ H14). Primero se trata o se controla el oído medio, se repite el audiograma y se reevalúa.
+- **Lo que enseña:** el puntaje bajo **en todas las pruebas, en los dos oídos**, con falsas alarmas y fatiga al final, es lo que da una pérdida conductiva y una atención corta, no un perfil de procesamiento. Con curva C y gap de graves, la batería no se interpreta (→ H15). Primero se trata o se controla el oído medio, se repite el audiograma y se reevalúa.
 - **Qué pedir:** derivación a otorrinolaringología; control audiométrico y timpanométrico en semanas a meses; cuestionario de atención y lenguaje; si el cuadro persiste con el oído medio normal, recién ahí una batería, con edad de desarrollo suficiente.
 - **Errores esperables:** hacer la batería y llamar "central" al resultado; dar de alta por "audición normal en agudos"; olvidar mirar atención y lenguaje cuando el oído medio ya esté normal.
 - **En LabSim:** cuadro *disfunción tubaria* de 7 años, en los dos oídos, grado leve.
@@ -408,7 +408,7 @@ Intenta resolver cada caso con los pasos del aprendizaje basado en problemas ant
 
 #### Razonamiento
 
-La periferia está cerrada: umbrales, discriminación, oído medio y emisiones normales. El rendimiento es bajo en **dos pruebas que exigen cosas distintas** (escucha dicótica del lado izquierdo y secuencia de frecuencias) y normal en habla en ruido, gaps y duración. Es un perfil parcial y asimétrico: con competencia, el mensaje del oído izquierdo se pierde, y la secuencia de tonos se desordena. Esa combinación es la que suele atribuirse a la transferencia entre hemisferios (→ H14), pero con los datos de este caso solo se puede decir que el rendimiento es bajo en esos procesos. La conciencia fonológica algo baja de la evaluación de lenguaje lo vuelve un caso donde las dificultades auditiva y fonológica **no se pueden separar** con lo que hay.
+La periferia está cerrada: umbrales, discriminación, oído medio y emisiones normales. El rendimiento es bajo en **dos pruebas que exigen cosas distintas** (escucha dicótica del lado izquierdo y secuencia de frecuencias) y normal en habla en ruido, gaps y duración. Es un perfil parcial y asimétrico: con competencia, el mensaje del oído izquierdo se pierde, y la secuencia de tonos se desordena. Esa combinación es la que suele atribuirse a la transferencia entre hemisferios (→ H15), pero con los datos de este caso solo se puede decir que el rendimiento es bajo en esos procesos. La conciencia fonológica algo baja de la evaluación de lenguaje lo vuelve un caso donde las dificultades auditiva y fonológica **no se pueden separar** con lo que hay.
 
 #### Diagnóstico y qué sigue
 

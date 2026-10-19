@@ -16,7 +16,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
-# Lo vestibular del capítulo (vHIT, DHI, agudeza visual dinámica, batería de H19) no es de LabSim: son las
+# Lo vestibular del capítulo (vHIT, DHI, agudeza visual dinámica, batería de H20) no es de LabSim: son las
 # tablas con "cifras inventadas para el libro" y las hojas de seguimiento de ilustraciones/hacer_cap31.py.
 # De LabSim salen la ficha, la anamnesis, el audiograma y el VEMP de cada caso (audición normal: la neuritis
 # no toca la cóclea).

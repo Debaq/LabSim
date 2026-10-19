@@ -1,153 +1,95 @@
 #!/usr/bin/env python3
-"""Imágenes de H19 hechas con labyrinthus3d, sin su interfaz:
+"""Limpia los montajes de maniobras de H19 hechos con labyrinthus3d:
 
-    h19-romberg.png   paciente simulado sano de pie en la plataforma, su centro de presión y los dos balanceos
-    h19-sot.png       las seis condiciones del SOT, los puntajes y el análisis sensorial de un paciente simulado sano
+    h19-dix-hallpike.png, h19-lateral.png, h19-epley.png, h19-semont.png
 
-labyrinthus3d (~/Escritorio/Proyectos/labyrinthus3d) NO se toca: se sirve de solo lectura y se maneja
-por el protocolo de DevTools de chromium sin cabeza, con el reloj virtual de hacer_h19_capturas.py
-(cada captura cae en el mismo instante de la simulación). Se esconden los botones flotantes que
-caen encima de los gráficos y se recortan solo la escena 3D y los lienzos de los gráficos: sin
-pestañas, menús, botones ni el texto del panel. El script levanta y apaga el servidor y chromium.
+Los montajes (hacer_h18_capturas.py + hacer_h18_montajes.py) ya recortan solo la escena, el canal
+en 2D y el ojo, pero arrastraban dos rótulos de la interfaz del simulador: la etiqueta oscura con
+el nombre del caso sobre el canal («canalitiasis del canal …») y la de «OJO DERECHO» sobre el ojo.
+Este paso los borra: cada etiqueta se ubica por su color (gris oscuro #4a4a4c, en el canal) o por su
+lugar (la del ojo, que es semitransparente) y se rellena fila por fila interpolando entre los
+píxeles que la rodean; el halo claro de la etiqueta pasa al gris del fondo. Es idempotente: si ya no hay etiqueta, no cambia nada.
 
-    python3 docs/libro/ilustraciones/hacer_h19_simulador.py [carpeta-de-trabajo]
+    python3 docs/libro/ilustraciones/hacer_h18_simulador.py
 
-Los puntajes y las razones son del modelo del simulador, no valores normativos."""
-import asyncio
-import base64
-import io
-import json
-import os
+Si se rehacen las capturas con hacer_h18_montajes.py, hay que volver a correr este paso."""
+import collections
 import pathlib
-import subprocess
-import sys
-import time
-import urllib.request
 
-import websockets
-from PIL import Image, ImageDraw
+import numpy as np
+from PIL import Image
 
 AQUI = pathlib.Path(__file__).parent
-REPO = pathlib.Path(os.environ.get('LABYRINTHUS3D', pathlib.Path.home() / 'Escritorio/Proyectos/labyrinthus3d'))
-TRABAJO = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/h19_simulador')
-PUERTO_WEB, PUERTO_CDP = 8912, 9812
-DPR = 2
-
-INIT = """
-(()=>{ let vt=1000; const cbs=[]; performance.now=()=>vt;
- window.requestAnimationFrame=(cb)=>{cbs.push(cb);return cbs.length};
- window.cancelAnimationFrame=()=>{};
- window.__paso=(n,dt)=>{ for(let i=0;i<n;i++){ vt+=dt*1000; const l=cbs.splice(0); for(const f of l) f(vt);} return vt; };
-})();
-"""
-# Los botones flotantes del visor de gráficos (ampliar, panel, paciente) caen sobre el lienzo.
-ESCONDE = """(()=>{ for (const [x,y] of [[1038,75],[1038,115],[1038,155]]) {
-  let e = document.elementFromPoint(x,y); while (e && e.tagName !== 'BUTTON' && e.parentElement) e = e.parentElement;
-  if (e && e.tagName === 'BUTTON') e.style.visibility = 'hidden'; } return 1 })()"""
+ETIQUETA = (74, 74, 76)
+# La etiqueta «OJO DERECHO» en h19-dix-hallpike.png, relativa a la etiqueta del canal del mismo recuadro.
+OJO_REL = (-5, 275, -166, 284)
 
 
-class C:
-    async def start(self, url):
-        tabs = json.load(urllib.request.urlopen(f'http://127.0.0.1:{PUERTO_CDP}/json'))
-        t = [x for x in tabs if x['type'] == 'page'][0]
-        self.ws = await websockets.connect(t['webSocketDebuggerUrl'], max_size=None)
-        self.i = 0
-        await self.send('Page.enable')
-        await self.send('Runtime.enable')
-        await self.send('Page.addScriptToEvaluateOnNewDocument', source=INIT)
-        await self.send('Emulation.setDeviceMetricsOverride', width=1400, height=900, deviceScaleFactor=DPR, mobile=False)
-        await self.send('Page.navigate', url=url)
-        await asyncio.sleep(10)
-
-    async def send(self, m, **p):
-        self.i += 1
-        i = self.i
-        await self.ws.send(json.dumps({'id': i, 'method': m, 'params': p}))
-        while True:
-            r = json.loads(await self.ws.recv())
-            if r.get('id') == i:
-                return r
-
-    async def ev(self, js):
-        r = await self.send('Runtime.evaluate', expression=js, awaitPromise=True, returnByValue=True)
-        return r.get('result', {}).get('result', {}).get('value', r)
-
-    async def shot(self):
-        # que el compositor alcance a presentar lo que se dibujó con el reloj virtual
-        await self.ev('window.__paso(2,0.001)')
-        await asyncio.sleep(3)
-        r = await self.send('Page.captureScreenshot', format='png')
-        return Image.open(io.BytesIO(base64.b64decode(r['result']['data']))).convert('RGB')
-
-    async def click(self, js):
-        return await self.ev(f"(()=>{{const b={js}; if(b){{b.click();return 1}} return 0}})()")
+def etiquetas(a):
+    """Cajas (x0, y0, x1, y1) de las etiquetas grises del canal."""
+    m = np.all(np.abs(a[..., :3] - np.array(ETIQUETA)) <= 3, axis=-1)
+    alto, ancho = m.shape
+    visto = np.zeros_like(m)
+    cajas = []
+    for y, x in zip(*np.nonzero(m)):
+        if visto[y, x]:
+            continue
+        cola = collections.deque([(y, x)])
+        visto[y, x] = True
+        y0 = y1 = y
+        x0 = x1 = x
+        while cola:
+            cy, cx = cola.popleft()
+            y0, y1, x0, x1 = min(y0, cy), max(y1, cy), min(x0, cx), max(x1, cx)
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    ny, nx = cy + dy, cx + dx
+                    if 0 <= ny < alto and 0 <= nx < ancho and m[ny, nx] and not visto[ny, nx]:
+                        visto[ny, nx] = True
+                        cola.append((ny, nx))
+        if x1 - x0 > 80 and 10 <= y1 - y0 <= 30:
+            cajas.append((int(x0), int(y0), int(x1), int(y1)))
+    return cajas
 
 
-def recorte(im, caja):
-    return im.crop(tuple(round(v * DPR) for v in caja))
+def rellena(a, x0, y0, x1, y1, margen=4):
+    """Rellena la caja interpolando, en cada fila, entre el píxel de la izquierda y el de la derecha."""
+    x0, y0, x1, y1 = x0 - margen, y0 - margen, x1 + margen, y1 + margen
+    izq, der = a[y0:y1 + 1, x0 - 1].astype(float), a[y0:y1 + 1, x1 + 1].astype(float)
+    k = np.linspace(0, 1, x1 - x0 + 1)[None, :, None]
+    a[y0:y1 + 1, x0:x1 + 1] = (izq[:, None, :] * (1 - k) + der[:, None, :] * k).round().astype(a.dtype)
 
 
-async def capturas():
-    c = C()
-    await c.start(f'http://localhost:{PUERTO_WEB}/index.html')
-    await c.ev('window.__paso(5,0.05)')
-    await c.click("document.querySelector('[data-modulo-abre=postural]')")
-    await c.ev('window.__paso(30,0.05)')
-    await c.click("document.querySelector('[data-vista=romberg]')")
-    await c.ev('window.__paso(30,0.05)')
-    await c.click("document.getElementById('post-romberg')")
-    await c.ev('window.__paso(300,0.05)')
-    await c.ev(ESCONDE)
-    romberg = await c.shot()
-    print('romberg:', await c.ev("document.getElementById('post-resultados').innerText"))
-    await c.click("document.querySelector('[data-vista=posturografia]')")
-    await c.ev('window.__paso(30,0.05)')
-    await c.click("document.getElementById('post-sot-rapido')")
-    await c.ev('window.__paso(400,0.05)')
-    await c.ev(ESCONDE)
-    sot = await c.shot()
-    print('sot:', await c.ev("document.getElementById('post-sot-texto').innerText"))
-    return romberg, sot
+def sombra(a, x0, y0, x1, y1, margen=9):
+    """La etiqueta tiene un halo claro: los grises claros alrededor pasan al color del fondo del panel.
+    No toca lo que tiene color (el canal) ni el texto oscuro (los rótulos del dibujo)."""
+    x0, y0, x1, y1 = x0 - margen, max(0, y0 - margen), x1 + margen, y1 + margen
+    zona = a[y0:y1 + 1, x0:x1 + 1].astype(int)
+    croma = zona.max(-1) - zona.min(-1)
+    claro = (croma < 6) & (zona.min(-1) >= 200) & (zona.max(-1) <= 250)
+    valores, cuentas = np.unique(zona[claro].reshape(-1, 3), axis=0, return_counts=True)
+    if len(valores):
+        zona[claro] = valores[cuentas.argmax()]
+        a[y0:y1 + 1, x0:x1 + 1] = zona.astype(a.dtype)
 
 
-def montar(romberg, sot):
-    TRABAJO.mkdir(parents=True, exist_ok=True)
-    romberg.save(TRABAJO / 'romberg_completo.png')
-    sot.save(TRABAJO / 'sot_completo.png')
-    # Romberg: el paciente en la plataforma (escena 3D) y, al lado, el estabilograma y los balanceos
-    # (el lienzo, sin su título, la condición ni la nota de abajo, que van en el pie).
-    paciente = recorte(romberg, (95, 235, 420, 880))
-    graficos = recorte(romberg, (520, 98, 1056, 874))
-    alto = graficos.height
-    paciente = paciente.resize((round(paciente.width * alto / paciente.height), alto), Image.LANCZOS)
-    fondo = graficos.getpixel((graficos.width - 4, 4))
-    m = Image.new('RGB', (paciente.width + graficos.width, alto), fondo)
-    m.paste(paciente, (0, 0))
-    m.paste(graficos, (paciente.width, 0))
-    m.save(AQUI / 'h19-romberg.png', optimize=True)
-    print('h19-romberg.png', m.size)
-    # SOT: las seis condiciones, los puntajes, el análisis sensorial y el compuesto.
-    s = recorte(sot, (520, 98, 1056, 578))
-    s.save(AQUI / 'h19-sot.png', optimize=True)
-    print('h19-sot.png', s.size)
-
-
-def main():
-    perfil = TRABAJO / 'perfil-chromium'
-    web = subprocess.Popen([sys.executable, '-m', 'http.server', str(PUERTO_WEB), '-d', str(REPO)],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    cr = subprocess.Popen(['chromium', '--headless=new', '--use-gl=angle', '--use-angle=swiftshader',
-                           '--enable-unsafe-swiftshader', '--window-size=1400,900',
-                           f'--remote-debugging-port={PUERTO_CDP}', f'--user-data-dir={perfil}', 'about:blank'],
-                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    try:
-        time.sleep(4)
-        romberg, sot = asyncio.run(capturas())
-        montar(romberg, sot)
-    finally:
-        cr.terminate()
-        web.terminate()
+def limpia(nombre, con_ojo=False):
+    ruta = AQUI / nombre
+    a = np.array(Image.open(ruta).convert('RGB'))
+    cajas = etiquetas(a)
+    for x0, y0, x1, y1 in cajas:
+        if con_ojo:
+            dx0, dy0, dx1, dy1 = OJO_REL
+            # el primer recuadro (sentado) no tiene ojo
+            if x0 > 600:
+                rellena(a, x0 + dx0, y0 + dy0, x1 + dx1, y1 + dy1, margen=0)
+        rellena(a, x0, y0, x1, y1)
+        sombra(a, x0, y0, x1, y1)
+    Image.fromarray(a).save(ruta, optimize=True)
+    print(nombre, len(cajas), 'etiquetas')
 
 
 if __name__ == '__main__':
-    main()
+    limpia('h19-dix-hallpike.png', con_ojo=True)
+    for n in ('h19-lateral.png', 'h19-epley.png', 'h19-semont.png'):
+        limpia(n)

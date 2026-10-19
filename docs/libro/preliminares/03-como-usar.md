@@ -9,7 +9,7 @@ Es un solo libro que crece por **secciones**. Esta edición trae la audición: s
 ## Tres tipos de capítulo
 
 - **Bases (B).** La anatomía, la histología, la física y la fisiología auditiva y vestibular que necesitas para entender por qué cada examen se hace como se hace.
-- **Caja de herramientas (H1 a H25).** Cómo se hace cada examen: para qué sirve, su fundamento, qué preparar, el paso a paso, cómo se informa, los errores frecuentes y cómo practicarlo en LabSim. Cuando un capítulo clínico dice "→ H4", el detalle de esa técnica está en la herramienta H4.
+- **Caja de herramientas (H1 a H26).** Cómo se hace cada examen: para qué sirve, su fundamento, qué preparar, el paso a paso, cómo se informa, los errores frecuentes y cómo practicarlo en LabSim. Cuando un capítulo clínico dice "→ H4", el detalle de esa técnica está en la herramienta H4.
 - **Capítulos clínicos (1 a 36).** Parten de un problema y enseñan a razonar: qué mirar de la técnica en ese problema, el mecanismo, los cuadros y los casos.
 
 ## Los casos: aprendizaje basado en problemas
