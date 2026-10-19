@@ -309,33 +309,218 @@ La división no es absoluta: hay anastomosis entre las ramas, y el sáculo recib
 
 Desde el nervio coclear, la señal pasa por una cadena de estaciones en el tronco, el mesencéfalo, el tálamo y la corteza. Casi todas están **repetidas a cada lado**, y casi todas reciben información de **los dos oídos**; por eso una lesión central de un lado rara vez produce una pérdida de umbral: altera, en cambio, la localización, la comprensión en ruido o la integración entre los oídos (→ H15, cap. 13).
 
-:::imagen ilustraciones/b1-via-auditiva.svg ancho=100% La vía auditiva central y la estación que se asocia habitualmente a cada onda del PEAT (→ H10). Fíjate en que desde el complejo olivar la vía ya lleva información de los dos oídos. La asignación de las ondas es una guía, no un mapa literal.
+:::imagen ilustraciones/b1-sim-auditiva.png ancho=64% La vía auditiva central, de la cóclea a la corteza, de frente: a la izquierda de la figura queda el lado derecho del paciente. Sigue una fibra del oído derecho desde abajo: en el núcleo coclear se reparte y sube por los dos lados, y desde el complejo olivar cada lado ya lleva información de los dos oídos. Los cruces son las líneas que atraviesan el eje del centro. Rojo, conexión que excita; azul, la que inhibe. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @7,70 | **Núcleo coclear**: la primera estación; ahí termina el nervio.
+- @20.5,79.5 | **Nervio coclear** (VIII): lleva el orden de frecuencias de la cóclea.
+- @12,58 | **Complejo olivar superior**: primera estación con los dos oídos (LSO y MSO, con el núcleo trapezoide en medio).
+- @47.5,50.5 | **Cruces**: por aquí pasan al lado opuesto las fibras que van del núcleo coclear al olivar y al lemnisco.
+- @13,45 | **Lemnisco lateral**.
+- @18,33.5 | **Colículo inferior**: estación obligatoria del mesencéfalo.
+- @17,21.5 | **Cuerpo geniculado medial**, en el tálamo.
+- @10,8.5 | **Corteza auditiva**, en el lóbulo temporal.
 :::
 
-1. **Núcleos cocleares** (ventral y dorsal), en el bulbo, donde termina el nervio. Cada fibra hace sinapsis aquí.
-2. **Complejo olivar superior**, en la protuberancia: es la primera estación que recibe información de los **dos oídos**. Compara el tiempo y la intensidad con que llega el sonido a cada oído: de ahí sale la **localización** del sonido (→ B2).
-3. **Lemnisco lateral**, la vía que sube por el tronco hasta el colículo inferior.
-4. **Colículo inferior**, en el mesencéfalo: centro obligatorio de la vía, con comisura que une los dos lados.
-5. **Cuerpo geniculado medial**, en el tálamo.
-6. **Corteza auditiva primaria**, en el giro transverso del lóbulo temporal (giro de Heschl). Los dos hemisferios se comunican a través del **cuerpo calloso**.
+Estación por estación:
+
+1. **Nervio coclear** (rama coclear del VIII). Lleva los axones de las neuronas del ganglio espiral hasta el tronco, donde entra por el ángulo pontocerebeloso y termina en el núcleo coclear de su lado. Conserva el **orden de frecuencias** de la cóclea (la tonotopía), y ese orden se mantiene en todas las estaciones hasta la corteza (Møller, 2013).
+2. **Núcleos cocleares**, ventral y dorsal, en la unión del bulbo con la protuberancia. Cada fibra se divide y hace sinapsis en los dos. El **ventral** conserva el momento exacto en que llega el sonido y lo pasa a los olivares, que lo necesitan para comparar los dos oídos (Møller, 2013). El **dorsal** tiene una organización parecida a la del cerebelo: integra la forma espectral del sonido, que cambia con el ángulo según cómo lo refleja la oreja, con información del cuello y de la cabeza, y se le atribuye un papel en la localización con un solo oído, sobre todo en altura (Oertel y Young, 2004).
+3. **Complejo olivar superior**, en la protuberancia. Es la primera estación que recibe información de los **dos oídos**. La **oliva superior medial** (MSO) compara los tiempos de llegada del sonido a cada oído, y la **oliva superior lateral** (LSO), los niveles; de las dos sale la **localización** del sonido (Grothe y cols., 2010; → B2, H15). Aquí nacen también las eferentes olivococleares (→ H9).
+4. **Lemnisco lateral**. Es la vía que sube por el tronco con las fibras de los núcleos cocleares y del olivar, hasta el colículo inferior.
+5. **Colículo inferior**, en el mesencéfalo. Casi todas las fibras ascendentes hacen sinapsis aquí, y una **comisura** une el de un lado con el del otro; integra las claves de localización y la estructura temporal del sonido (Møller, 2013).
+6. **Cuerpo geniculado medial**, en el tálamo: el último relevo antes de la corteza. Su parte ventral lleva el mapa de frecuencias a la corteza primaria (Kaas y Hackett, 2000).
+7. **Corteza auditiva primaria**, en el giro transverso del lóbulo temporal (giro de Heschl): conserva el mapa de frecuencias. Alrededor de ella está la **corteza de asociación**, que procesa lo que el sonido significa: la voz, el lenguaje, la música (Kaas y Hackett, 2000, en primates, con un núcleo auditivo humano muy parecido). Los dos hemisferios se comunican a través del **cuerpo calloso**.<!-- verificar: Kaas y Hackett (2000) describen primates; el resumen dice que chimpancés y humanos tienen un núcleo auditivo parecido, pero no localiza el núcleo humano en el giro de Heschl. -->
+
+**Cruces y lateralidad.** La vía cruza en más de un nivel: las fibras del núcleo coclear van al olivar de los dos lados, el lemnisco y el colículo de cada lado se conectan por comisuras, y los dos hemisferios, por el cuerpo calloso. Cada oído llega, por tanto, a las dos cortezas, con predominio del lado opuesto (Møller, 2013). La consecuencia clínica es la del inicio: una lesión del nervio o del núcleo coclear de un lado afecta a **ese oído**; una lesión de un solo lado por encima del olivar deja los **umbrales normales** en los dos oídos y altera la localización, la comprensión en ruido o las tareas que comparan los oídos (→ H15, cap. 30).
+
+:::imagen ilustraciones/b1-lam-aud.svg ancho=100% La vía auditiva sana y con la lesión en tres estaciones, con el oído izquierdo a la derecha de cada esquema. A: la vía sana, con los cruces entre los núcleos cocleares, el olivar y el lemnisco. B: el nervio del lado izquierdo a medias (la raya verde), como en un schwannoma del VIII. C: el complejo olivar izquierdo perdido (cruces verdes). D: el colículo inferior izquierdo perdido. Mira que desde el olivar hacia arriba las dos vías están conectadas por los cruces, y que por eso en C y D lo que se pierde no es un oído: el esquema deja la vía del lado sano completa. En rojo viaja la excitación y en azul la inhibición (de la oliva superior lateral). Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
 
 Además de esta vía ascendente hay una **descendente**, con eferentes olivococleares que llegan hasta las células ciliadas (→ H9).
 
-**Las ondas del PEAT.** Los registros intracraneales hechos durante cirugías permitieron asignar cada onda a una estación: la **I** a la porción distal del nervio, la **II** a la proximal, la **III** al núcleo coclear, la **IV** al complejo olivar superior y la **V** al lemnisco lateral al llegar al colículo inferior (Møller y cols., 1981; Møller y Jannetta, 1983). Es un mapa útil pero no literal: cada onda recibe aportes de varias estaciones, y una misma estación contribuye a más de una onda (Melcher y Kiang, 1996; → H10, cap. 12).
+**Las ondas del PEAT.** Los registros intracraneales hechos durante cirugías permitieron asignar cada onda a una estación (Møller y cols., 1981; Møller y Jannetta, 1983):
+
+Tabla: Estación que genera cada onda del PEAT
+
+| Onda | Estación | En la figura |
+|---|---|---|
+| **I** | porción distal del nervio coclear (la parte cercana a la cóclea) | nervio coclear, bajo el núcleo |
+| **II** | porción proximal del nervio, donde entra al tronco | nervio coclear, al llegar al núcleo |
+| **III** | núcleo coclear | núcleo coclear |
+| **IV** | complejo olivar superior | complejo olivar |
+| **V** | lemnisco lateral, al llegar al colículo inferior | lemnisco lateral y colículo |
+
+Es un mapa útil pero no literal: cada onda recibe aportes de varias estaciones y una misma estación contribuye a más de una onda (Melcher y Kiang, 1996), y el PEAT recibe aporte de estructuras cruzadas y no cruzadas del tronco (Møller y cols., 1995; → H10, cap. 12). El geniculado y la corteza no generan ondas del PEAT: sus respuestas son las de latencia media y tardía (→ H14). Por eso un PEAT normal no descarta una lesión por encima del mesencéfalo.<!-- verificar: la última frase es la lectura habitual del PEAT (sus ondas terminan en el mesencéfalo); no se encontró una cita puntual en las fuentes ya verificadas del libro. -->
+
+:::imagen ilustraciones/b1-lam-peat.svg ancho=100% El PEAT que calcula el simulador para los mismos casos (clic a 80 dB, oído derecho arriba e izquierdo abajo). A: ondas I a V del oído sano. B: schwannoma izquierdo; la I queda y las ondas siguientes se atrasan y bajan, como en una lesión retrococlear (→ H10, cap. 11). C: complejo olivar izquierdo; baja la IV, la onda que se asigna a esa estación. D: colículo inferior izquierdo; el modelo no cambia las ondas. Compara cada trazo del oído izquierdo con el derecho de la misma lámina. Las cifras del eje son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
 
 **Lo que mide la batería de procesamiento central.** Cada prueba de la batería explora una parte de esta cadena: las que comparan los dos oídos y la localización dependen del tronco, y las que exigen reconocer patrones en el tiempo o combinar lo que llega por cada oído dependen de la corteza y del cuerpo calloso (→ H15).
 
 ### La vía vestibular central
 
-La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupaciones (superior, medial, lateral e inferior) en el tronco, en el límite entre la protuberancia y el bulbo. De ahí salen conexiones hacia cuatro destinos:
+La señal de cada receptor llega a los **núcleos vestibulares**, cuatro agrupaciones (superior, medial, lateral e inferior) en el tronco, en el límite entre la protuberancia y el bulbo. Reciben del nervio vestibular, del cerebelo y de la vista, y comparan lo que llega de los dos laberintos: el de un lado dispara más cuando la cabeza gira hacia él, y el del otro, menos, y lo que el tronco lee es esa diferencia. De ahí salen conexiones hacia cuatro destinos: los ojos, la médula, el cerebelo y la corteza. Las figuras de esta sección muestran el mismo esquema de frente (a la izquierda queda el lado derecho del paciente) con un destino cada vez; los puntos que corren por cada tramo son los impulsos.
 
-:::imagen ilustraciones/b1-via-vestibular.svg ancho=100% Las vías vestibulares centrales: desde los núcleos vestibulares la señal sale hacia los ojos, la médula, el cerebelo y la corteza.
+#### Hacia los ojos: el arco de tres neuronas del reflejo vestíbulo-ocular
+
+Es el **reflejo vestíbulo-ocular** (VOR), que mantiene la mirada fija mientras la cabeza se mueve (→ H16, H18). Cada canal tiene su arco, de **tres neuronas**: la del ganglio vestibular (el nervio), la del núcleo vestibular y la motoneurona del núcleo oculomotor. Tan pocas neuronas explican que el reflejo sea tan rápido (Leigh y Zee, 2015).
+
+:::imagen ilustraciones/b1-sim-vor.png ancho=50% El arco del reflejo vestíbulo-ocular del canal lateral: del canal al nervio, de ahí al núcleo vestibular, cruce hacia el núcleo del VI del otro lado y, de ahí, a los músculos de los dos ojos por el fascículo longitudinal medial. Sigue el trayecto desde el canal lateral derecho: termina en el recto lateral del ojo izquierdo y, por el fascículo, en el recto medial del derecho, y los dos ojos van hacia la izquierda cuando la cabeza gira a la derecha. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @31.5,91.5 | **Canal lateral**: el arco empieza en su cúpula.
+- @30.6,82 | **Nervio vestibular**, rama superior: lleva el lateral, el anterior y el utrículo.
+- @11,72 | **Núcleos vestibulares**: segunda neurona.
+- @50,64.5 | **Cruce** hacia el núcleo del VI del lado opuesto.
+- @29,60.5 | **Núcleo del VI** (abducens): mueve el recto lateral y manda interneuronas hacia el otro ojo.
+- @56,34 | **Fascículo longitudinal medial** (FLM): sube pegado a la línea media.
+- @35,39 | **Núcleo del III**: el recto medial.
+- @7,17 | **Recto lateral** y **recto medial**: los músculos que mueven el ojo en el plano horizontal.
+- @5,66 | **Flóculo**: el cerebelo frena el reflejo cuando hay algo que fijar.
 :::
 
-- **Núcleos oculomotores** (III, IV y VI), por el fascículo longitudinal medial: es el arco del **reflejo vestíbulo-ocular**, que mantiene la mirada fija mientras la cabeza se mueve. Solo tres neuronas separan el canal del ojo, y por eso el reflejo es tan rápido (→ H16, H18).
-- **Médula espinal**, por las vías vestibuloespinales lateral y medial: ajustan el tono de los músculos para mantener la postura (→ H20).
-- **Cerebelo** (flóculo y nódulo): calibra el reflejo y lo suprime cuando conviene. Allí se compensa un déficit vestibular (→ cap. 31).
-- **Tálamo y corteza vestibular**: dan la percepción consciente del movimiento y de la vertical. También hay conexiones con la formación reticular y el núcleo del vago, y por eso el vértigo viene con náusea, palidez y sudor.
+Para el canal **lateral** el arco es horizontal: el núcleo vestibular de un lado excita el núcleo del VI del **lado opuesto**, que mueve el recto lateral de ese ojo y, por interneuronas que suben por el FLM, el núcleo del III del primer lado, que mueve el recto medial del otro ojo. Los dos ojos giran juntos, en sentido contrario al de la cabeza (Leigh y Zee, 2015). Los canales verticales, anterior y posterior, siguen el mismo principio con otros núcleos y otros músculos, y por eso el fascículo, que también los lleva, lesionado, altera el VOR vertical:
+
+Tabla: Qué músculos activa cada canal vertical al excitarse
+
+| Canal (del lado derecho) | Músculo del ojo derecho | Músculo del ojo izquierdo | Hacia dónde se mueve la mirada |
+|---|---|---|---|
+| **Anterior** | recto superior | oblicuo inferior | arriba |
+| **Posterior** | oblicuo superior | recto inferior | abajo |
+
+<!-- verificar: la asignación de músculos de los canales verticales sigue Leigh y Zee (2015; el libro no se pudo cotejar por página); se coteja con la tabla de pares de canales de H16 y H18. -->
+
+Cada canal activa dos músculos, uno de cada ojo, que juntos mueven la mirada en el plano de ese canal.
+
+:::imagen ilustraciones/b1-lam-vor.svg ancho=100% Los tres arcos del reflejo vestíbulo-ocular, con un impulso de la cabeza a mitad de camino. A y B: el canal lateral derecho, excitado cuando la cabeza gira a la derecha (A) e inhibido cuando gira a la izquierda (B). C y D: los canales verticales por pares coplanares, LARP (anterior izquierdo y posterior derecho) y RALP (anterior derecho y posterior izquierdo). Mira que en cada par un canal se excita y el otro se inhibe, que el núcleo vestibular excitado recibe del compañero inhibido, y qué músculos de cada ojo se encienden: en C, el recto superior izquierdo y el oblicuo inferior derecho, los de la tabla de arriba. Rojo, excitado; azul, inhibido. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+
+#### Las vías otolíticas
+
+Por el mismo nervio vestibular van el **utrículo** (rama superior) y el **sáculo** (rama inferior). Cada uno tiene su vía de reflejo, y son las que exploran los potenciales evocados miogénicos vestibulares (→ H12):
+
+:::imagen ilustraciones/b1-sim-otolitos.png ancho=50% Las vías otolíticas: el utrículo (nervio superior) llega a los músculos de los ojos, y el sáculo (nervio inferior), al esternocleidomastoideo. Con los canales apagados, mira solo los dos órganos marcados abajo y los músculos que se iluminan arriba, en los ojos, y a los lados, en el cuello. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @40,92 | **Utrículo** y **sáculo**: los dos otolitos, de cada lado.
+- @33,82 | **Rama superior** (utrículo) y **rama inferior** (sáculo) del nervio vestibular.
+- @4,72 | **Esternocleidomastoideo (ECM)**: el músculo del cVEMP.
+- @17,11 | **Músculos de los ojos** de los dos verticales: la vía del oVEMP.
+:::
+
+- **Utrículo → músculos de los ojos** (la vía del **oVEMP**). La respuesta que se registra bajo el ojo sale sobre todo del oblicuo inferior del ojo **contrario** al oído estimulado, por una vía **cruzada** (Iwasaki y cols., 2007). Es también la vía de la **contrarrotación ocular**, el giro del ojo sobre su eje cuando la cabeza se inclina.
+- **Sáculo → esternocleidomastoideo** (la vía del **cVEMP**). Baja por el tronco, por el fascículo vestibuloespinal medial, hasta el músculo del **mismo lado** y **detiene su actividad** unos milisegundos (la onda P13-N23); es un reflejo de pocas sinapsis (Colebatch y cols., 1994; Kushiro y cols., 1999; Rosengren y cols., 2019; → H12).
+
+:::imagen ilustraciones/b1-lam-oto.svg ancho=100% Las dos vías otolíticas por separado. A: utrículo y sáculo sanos, con los dos nervios y sus músculos. B: sin los dos sáculos queda solo la rama superior, hacia los músculos de los ojos (la vía del oVEMP). C: sin los dos utrículos queda solo la rama inferior, hacia el esternocleidomastoideo del mismo lado (la vía del cVEMP). D: la neuritis del nervio superior izquierdo corta el utrículo de ese lado y deja el sáculo: cae el oVEMP y el cVEMP se conserva (Taylor y cols., 2016; → H12). Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+#### Hacia la médula: las vías vestibuloespinales
+
+Dos haces llevan el tono postural desde los núcleos vestibulares. El **vestibuloespinal lateral**, desde el núcleo vestibular lateral, baja por el mismo lado y activa los músculos que sostienen el cuerpo contra la gravedad, los extensores de las piernas y del tronco. El **vestibuloespinal medial**, desde el núcleo medial, baja por el fascículo longitudinal medial hasta el cuello y actúa sobre los músculos que mantienen estable la cabeza (Cullen, 2012; → H16 "El reflejo vestíbulo-espinal", H20).<!-- verificar: la distinción lateral/medial es la clásica de los textos; la revisión de Cullen (2012) la trata, pero no se cotejó la página. -->
+
+:::imagen ilustraciones/b1-lam-esp.svg ancho=100% Las vías vestibuloespinales y las que las acompañan en el control postural, del módulo Postural del simulador. A y B: la capa vestibular con el cuerpo inclinado a un lado (A) y adelante y atrás (B); desde los canales y los otolitos, los núcleos vestibulares (Deiters, medial e inferior) llegan a la médula cervical, hacia los músculos del cuello, y a la lumbar, hacia los extensores de las piernas y los tibiales. C: la vía propioceptiva, del tobillo y de la planta a la médula, al cerebelo y a la corteza. D: lo que las junta, con la visión y las áreas de la corteza. Mira qué fibras se calientan y cuáles se enfrían cuando cambia la inclinación, y compara A con B. Rojo, la vía dispara más que en reposo; azul, menos. Las cifras que escribe el esquema son del modelo, no valores de referencia (→ H16 "El reflejo vestíbulo-espinal", H20). Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+#### Hacia el cerebelo
+
+El cerebelo calibra el reflejo y lo suprime cuando conviene. Dos de sus partes importan aquí (Kheradmand y Zee, 2011):
+
+- El **flóculo** (con el paraflóculo) afina los movimientos que mantienen la mirada: la respuesta del VOR a movimientos rápidos, el **seguimiento** y el **sostén de la mirada** excéntrica. Recibe la visión y **frena** los núcleos vestibulares cuando hay un blanco fijo: es el freno por fijación (Leigh y Zee, 2015). Por eso un nistagmo periférico baja con la luz, y uno que viene de una lesión central, no (→ H16).
+- El **nódulo** y la **úvula ventral** controlan las respuestas lentas del reflejo: cuánto dura la señal vestibular después de un giro, un almacenamiento de velocidad que hace durar el reflejo más que el estímulo. El nódulo lo "descarga" cuando hay una referencia visual o la gravedad cambia (Raphan y cols., 1979; Waespe y cols., 1985). Sin nódulo, el reflejo puede volverse inestable, con un nistagmo que invierte su dirección cada cierto tiempo (nistagmo periódico alternante).
+
+:::imagen ilustraciones/b1-lam-flo.svg ancho=100% El flóculo como freno por fijación, sobre una neuritis izquierda recién instalada. A: fijando, el flóculo manda su freno (el rojo que termina en T) sobre el núcleo vestibular del lado que dispara de más. B: ocluido, sin un blanco que fijar, el freno se apaga (queda en gris). C y D: sin los dos flóculos (cruces verdes) no hay freno, con luz o sin luz. Eso explica en la clínica que un nistagmo periférico baje con la fijación y uno cerebeloso no (→ H16). Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+#### Mirada y fase rápida
+
+Un movimiento de los ojos solo, sin la cabeza, o la fase rápida de un nistagmo, la generan estaciones del tronco que el esquema del VOR no muestra. Son las que fallan en el nistagmo evocado por la mirada y en la parálisis de la mirada (Leigh y Zee, 2015):
+
+:::imagen ilustraciones/b1-sim-mirada.png ancho=50% Las estaciones que hacen las fases rápidas y sostienen la mirada: el generador horizontal (FRPP), el vertical (riMLF), las omnipausa, y los integradores horizontal (NPH) y vertical (Cajal). Los puntos que corren por los tramos son los impulsos de cada fase rápida. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @19.5,51.5 | **FRPP** (formación reticular pontina paramediana): genera las fases rápidas horizontales hacia su lado.
+- @32,47.5 | **riMLF**: genera las verticales y torsionales.
+- @60.5,68.5 | **Omnipausa**: frenan las ráfagas entre una fase rápida y otra.
+- @36.5,76 | **NPH**: el integrador horizontal, que sostiene el ojo en la posición a la que llegó.
+- @15.5,43.2 | **Cajal** (núcleo intersticial): el integrador vertical.
+:::
+
+- Las **fases rápidas** horizontales, hacia su lado, las genera la **formación reticular pontina paramediana** (FRPP); las verticales y torsionales, el **núcleo rostral intersticial del FLM** (riMLF). Entre una fase rápida y otra, las neuronas **omnipausa** frenan las dos.
+- Para **sostener** el ojo en una posición excéntrica hace falta una orden de posición, que construyen los **integradores**: el **núcleo prepósito del hipogloso** (NPH), con el núcleo vestibular medial, para lo horizontal, y el **núcleo intersticial de Cajal**, para lo vertical; el cerebelo los mantiene afinados (Robinson, 1981; Cannon y Robinson, 1987). Si filtran, el ojo vuelve al centro: es el **nistagmo evocado por la mirada** (→ H16, cap. 25).
+
+:::imagen ilustraciones/b1-lam-mir.svg ancho=100% Las estaciones de la mirada y de la fase rápida. A: en reposo, con los generadores (FRPP y riMLF), las omnipausa y los integradores (NPH y Cajal). B y C: durante una sacada horizontal y una vertical, vistas con el modo Oculomotor. D: los dos integradores a medias (rayas verdes), la causa del nistagmo evocado por la mirada. Mira que de cada generador salen las fibras al núcleo del VI (horizontal) y a los del III y IV (vertical), y que las omnipausa quedan entre los dos lados. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+#### Hacia el tálamo y la corteza vestibular
+
+Desde los núcleos vestibulares, la señal llega a varios núcleos del tálamo de los dos lados y de ahí a una red de áreas de la corteza, entre las que destaca la **corteza parieto-insular** (PIVC), en la región de la ínsula posterior (Lopez y Blanke, 2011; zu Eulenburg y cols., 2012). Allí se integran el laberinto, la propiocepción y la vista, y de ahí salen la percepción de **giro** y de **la vertical**:
+
+:::imagen ilustraciones/b1-sim-percepcion.png ancho=50% Del núcleo vestibular al tálamo y a la corteza vestibular, de los dos lados. Los puntos son los impulsos. Mira que la vía sube por los dos lados, con un cruce, y que cada corteza recibe de los dos laberintos. En una corteza normal, el trazo de la vertical subjetiva (en el círculo del centro) queda recto. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @8,20.5 | **Corteza vestibular** (PIVC), una por hemisferio.
+- @31.5,44 | **Tálamo**, con su cruce hacia el lado opuesto.
+- @58.5,26 | **Vertical visual subjetiva**: la línea que la persona ajusta hasta verla vertical.
+:::
+
+- **Vertical visual subjetiva.** Se pide a la persona que ponga una línea en lo que ve como vertical. La inclinación de esa línea es el signo más sensible de un desequilibrio vestibular en el plano frontal, y aparece con lesiones desde el laberinto hasta la corteza. Con una lesión del nervio, del laberinto o del tronco **por debajo del puente alto**, la inclinación es hacia el **lado de la lesión**; con lesiones del tronco por encima de ese nivel, hacia el **lado opuesto** (Dieterich y Brandt, 1993; Brandt y Dieterich, 1994). Las lesiones de la corteza parieto-insular dan inclinaciones moderadas, casi siempre hacia el lado opuesto (Brandt y Dieterich, 1999).
+- **Dominancia.** La corteza vestibular tiene un hemisferio dominante, el **no dominante** para la mano: el derecho, en las personas diestras (Dieterich y cols., 2003).
+
+:::imagen ilustraciones/b1-lam-perc.svg ancho=100% Tálamo y corteza vestibular en cuatro situaciones. A: sano, sin sensación de giro y con la vertical subjetiva recta. B: neuritis izquierda recién instalada: el esquema escribe una sensación de giro y la vertical subjetiva (la línea del círculo) sale torcida. C: pérdida unilateral compensada, a los tres meses: la sensación de giro se fue y la vertical casi no se desvía. D: la corteza vestibular izquierda lesionada, con el laberinto y el tronco sanos: sin sensación de giro y la vertical torcida (Brandt y Dieterich, 1999). Mira que la corteza lesionada deja el desvío de la vertical sin que haya nistagmo. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+### Las vías oculomotoras
+
+Los ojos se mueven de cuatro maneras: saltar a un blanco (**sacadas**), acompañar uno que se mueve (**seguimiento**), compensar la cabeza (el VOR) y mantener la posición (los integradores). Las dos primeras tienen un circuito que nace en la corteza y las examina la videonistagmografía (→ H16 "Qué pone a prueba cada examen oculomotor"); el **optocinético** usa parte del seguimiento. Las dos figuras siguientes muestran el recorrido, con las mismas estaciones del tronco que ya viste.
+
+:::imagen ilustraciones/b1-sim-sacadas.png ancho=42% La vía de las sacadas: la orden sale del campo ocular frontal y del colículo superior del lado opuesto, el generador (FRPP o riMLF) hace el pulso, las omnipausa lo detienen, y el vermis y el núcleo fastigio del cerebelo ajustan la precisión. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @11.5,33 | **Campo ocular frontal**: decide adónde se salta.
+- @14.5,42.7 | **Colículo superior**: también decide el destino de la sacada.
+- @27.5,51.7 | **FRPP**: el pulso horizontal.
+- @58.5,69.5 | **Omnipausa**: detienen el pulso.
+- @11,67 | **Vermis dorsal y núcleo fastigio** (cerebelo): la precisión.
+:::
+
+- **Sacadas.** El campo ocular frontal y el colículo superior de un lado dan la orden hacia el lado **opuesto**; el generador del tronco (FRPP, riMLF) la ejecuta. Una sacada **lenta** habla del tronco; una **imprecisa** (hipo o hipermétrica), del cerebelo (vermis dorsal y núcleo fastigio); una **tardía**, de la corteza (Leigh y Zee, 2015; Kheradmand y Zee, 2011).
+- **Seguimiento lento.** Pasa por el área de movimiento visual de la corteza (V5/MT y MST), el campo ocular frontal, los **núcleos pontinos dorsolaterales** y el flóculo, que llega a los núcleos vestibulares; cada lado lleva el seguimiento hacia su propio lado. Es la misma vía que **suprime el VOR** cuando se sigue con la vista un blanco que se mueve con la cabeza (Leigh y Zee, 2015).
+
+:::imagen ilustraciones/b1-sim-seguimiento.png ancho=42% La vía del seguimiento lento: la corteza de movimiento visual (V5/MT y MST) y el campo ocular frontal, los núcleos pontinos dorsolaterales y el flóculo, que desemboca en los núcleos vestibulares. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+- @11.5,24.9 | **V5/MT y MST**: el movimiento visto.
+- @13,33 | **Campo ocular frontal**.
+- @19.5,55.7 | **Núcleos pontinos dorsolaterales**: relevo hacia el cerebelo.
+- @15.5,62.4 | **Flóculo**: el último paso antes de los núcleos vestibulares.
+:::
+
+:::imagen ilustraciones/b1-lam-oc1.svg ancho=100% Las vías oculomotoras que examina la VNG (→ H16). A: el seguimiento lento, por V5/MT y MST, el campo ocular frontal, los núcleos pontinos dorsolaterales y el flóculo. B: las sacadas, por el campo ocular frontal y el colículo superior, los generadores del tronco, las omnipausa y, para la precisión, el vermis y el núcleo fastigio. C: la supresión del VOR, que usa la vía del seguimiento. D: el optocinético, con el núcleo del tracto óptico y el almacenamiento de velocidad. Compara A con C: es la misma vía con otro estímulo. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+:::imagen ilustraciones/b1-lam-oc2.svg ancho=100% El almacenamiento de velocidad en la silla rotatoria (Raphan y cols., 1979). A: la silla gira a la derecha y el almacenamiento se carga. B: al frenar, el almacenamiento se descarga y deja un nistagmo en sentido contrario (el post-rotatorio). C: la sacudida cefálica, que usa el mismo almacenamiento. D: sin nódulo (cruz verde), el almacenamiento no se descarga y el post-rotatorio queda alto, como en el nistagmo periódico alternante (Waespe y cols., 1985). Mira el recuadro del nódulo, bajo los núcleos vestibulares, y lo que escribe el esquema sobre el almacenamiento. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+### Dónde está la lesión
+
+Cada sitio que viste tiene su signo. La tabla une el sitio con lo que se ve y con dónde se aprende a leerlo; las láminas siguientes muestran, sobre el mismo esquema, cada lesión armada en el simulador y cómo cambia con los días.
+
+Tabla: Sitio de la lesión y el signo que deja
+
+| Sitio de la lesión | Signo | Dónde se aprende |
+|---|---|---|
+| **A. Nervio vestibular superior** (neuritis) | vértigo agudo con nistagmo espontáneo; falla el vHIT de los canales lateral y anterior y el VEMP ocular, y el cervical queda normal (Taylor y cols., 2016) | cap. 21; H12, H18 |
+| **B. Nervio vestibular inferior** (neuritis, rara) | falla el vHIT del canal posterior y el VEMP cervical (Taylor y cols., 2016) | cap. 21; H12, H18 |
+| **C. AICA** (arteria del laberinto y del flóculo) | cuadro que parece una neuritis, con hipoacusia del mismo oído, a veces antes que otros signos neurológicos; un flóculo sin función no frena el nistagmo con la fijación (Lee y cols., 2002; Lee, 2012; Leigh y Zee, 2015) | cap. 21 |
+| **D. Núcleos vestibulares** (por ejemplo, bulbo lateral) | inclinación de la vertical y de los ojos hacia el lado de la lesión, junto con otros signos del tronco (Dieterich y Brandt, 1993; Brandt y Dieterich, 1994) | cap. 21; H16 |
+| **E. FLM** (oftalmoplejía internuclear) | el ojo del lado de la lesión no aduce y el otro, que abduce, tiene nistagmo; la convergencia se conserva; las causas más frecuentes son la esclerosis múltiple y el infarto del tronco (Keane, 2005; Leigh y Zee, 2015) | cap. 25; H16 |
+| **F. Flóculos y cerebelo** | nistagmo evocado por la mirada, seguimiento sacádico, el reflejo que no se suprime con la fijación; con el nódulo, nistagmo periódico alternante (Kheradmand y Zee, 2011; Waespe y cols., 1985) | cap. 25; H16 |
+| **G. Integradores** (NPH y Cajal) | nistagmo evocado por la mirada, que cambia de dirección con ella (Cannon y Robinson, 1987) | cap. 25; H16 |
+| **Pérdida unilateral compensada** (los dos nervios) | desaparece el nistagmo espontáneo y queda el reflejo bajo hacia ese lado | cap. 31; H17, H18 |
+| **FRPP** (parálisis de la mirada horizontal) | no hay sacadas ni fases rápidas horizontales hacia el lado de la lesión (Leigh y Zee, 2015) | cap. 25; H16 |
+| **Tractos tegmentales ventrales** (nistagmo hacia arriba) | nistagmo vertical puro, que la fijación no frena | cap. 25; H16 |
+| **Los dos laberintos** (hipofunción o arreflexia bilateral) | el reflejo bajo hacia los dos lados y oscilopsia al mover la cabeza | cap. 24; H18 |
+| **Corteza parieto-insular** | inclinación moderada de la vertical subjetiva, casi siempre hacia el lado opuesto, y rara vez vértigo rotatorio (Brandt y Dieterich, 1999) | cap. 25 |
+
+:::imagen ilustraciones/b1-lam-pat1.svg ancho=100% Modo Patología, lesión por lesión (lado izquierdo del paciente a la derecha del esquema). A: neuritis del nervio superior; cae el utrículo, quedan el posterior y el sáculo. B: neuritis del nervio inferior; cae el sáculo. C: pérdida de los dos nervios a los 3 meses: el núcleo del lado enfermo recuperó su disparo. D: infarto de la AICA, con el laberinto entero y el flóculo del mismo lado sin función. Mira dónde está la cruz verde y qué canales y otolitos quedan sin vía: la tabla de arriba dice qué signo da cada una. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+:::imagen ilustraciones/b1-lam-pat2.svg ancho=100% Lesiones del tronco. A: los núcleos vestibulares izquierdos, con el nervio sano. B: oftalmoplejía internuclear, con la cruz en el fascículo longitudinal medial izquierdo. C: parálisis de la mirada horizontal izquierda, con la cruz en la FRPP. D: nistagmo hacia arriba, con la lesión de los tractos tegmentales ventrales. Mira cómo en B y C la cruz está en los generadores y no en el laberinto. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+:::imagen ilustraciones/b1-lam-pat3.svg ancho=100% Lesiones del cerebelo y de los dos laberintos. A: degeneración cerebelosa, con los dos flóculos perdidos. B: los integradores a medias (evocado por la mirada). C: hipofunción de los dos laberintos. D: arreflexia de los dos laberintos. Mira que en A y B no hay una cruz en el laberinto y la lesión es central, y que en C y D las dos mitades están afectadas por igual: no hay diferencia entre los núcleos que el tronco pueda leer como giro. Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
+
+:::imagen ilustraciones/b1-lam-pat4.svg ancho=100% La misma neuritis superior izquierda a las 6 horas (A), a los 3 días (B), a las 2 semanas (C) y a los 3 meses (D). Mira cómo el núcleo vestibular del lado enfermo, que al principio dispara menos, recupera su disparo aunque la cruz del nervio no se mueve: es la compensación central (→ cap. 31, H20). Rojo, la vía dispara más que en reposo; azul, menos; gris, igual. La cruz verde marca un sitio perdido y la raya verde, uno a medias. Las cifras que escribe el esquema son del modelo, no valores de referencia. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
+:::
 
 ### La irrigación del oído interno
 
@@ -471,7 +656,8 @@ El laberinto membranoso alcanza su tamaño de adulto a mitad del embarazo; lo qu
 - OpenStax, Anatomy and Physiology 2e: corte de la cóclea. El archivo figura como CC BY 4.0 en Wikimedia Commons; el sitio de OpenStax declara hoy para el libro CC BY-NC-SA 4.0, que es compatible con la licencia de este libro.
 - Gray H. Anatomy of the Human Body (1918), láminas 854, 856, 907, 911 y 920, dominio público.
 - Tomografías y resonancias del oído: figuras de artículos de acceso abierto (Feraco y cols., 2021; Touska y Connor, 2025; Johansson y cols., 2022; Aphiwatthanasumet y cols., 2025), CC BY 4.0, adaptadas.
-- Esquemas propios: pabellón, membrana timpánica, trompa, vías auditiva y vestibular, irrigación y válvula nasal.
+- Esquemas propios: pabellón, membrana timpánica, trompa, irrigación y válvula nasal.
+- Imágenes propias hechas con labyrinthus3d (→ Simuladores): las vías auditiva, vestibular y oculomotora y el panel de lesiones.
 
 ## Referencias
 
@@ -502,3 +688,26 @@ El laberinto membranoso alcanza su tamaño de adulto a mitad del embarazo; lo qu
 1. Taylor RL, McGarvie LA, Reid N, Young AS, Halmagyi GM, Welgampola MS. Vestibular neuritis affects both superior and inferior vestibular nerves. Neurology. 2016;87(16):1704-12. doi:10.1212/WNL.0000000000003223
 1. Adibelli ZH, Songu M, Adibelli H. Paranasal sinus development in children: a magnetic resonance imaging analysis. Am J Rhinol Allergy. 2011;25(1):30-5. doi:10.2500/ajra.2011.25.3552
 1. Nemzek WR, Brodie HA, Chong BW, Babcook CJ, Hecht ST, Salamat S, et al. Imaging findings of the developing temporal bone in fetal specimens. AJNR Am J Neuroradiol. 1996;17(8):1467-77. PMID 8883642
+1. Møller AR. Hearing: anatomy, physiology and disorders of the auditory system. 3.ª ed. San Diego: Plural Publishing; 2013.<!-- verificar: editorial y ISBN; la edición 3.ª de 2013 figura en la reseña de Atcherson (Int J Audiol 2015, doi:10.3109/14992027.2014.996828), no se pudo cotejar el ISBN -->
+1. Møller AR, Jho HD, Yokota M, Jannetta PJ. Contribution from crossed and uncrossed brainstem structures to the brainstem auditory evoked potentials: a study in humans. Laryngoscope. 1995;105(6):596-605. doi:10.1288/00005537-199506000-00007
+1. Oertel D, Young ED. What's a cerebellar circuit doing in the auditory system? Trends Neurosci. 2004;27(2):104-10. doi:10.1016/j.tins.2003.12.001
+1. Grothe B, Pecka M, McAlpine D. Mechanisms of sound localization in mammals. Physiol Rev. 2010;90(3):983-1012. doi:10.1152/physrev.00026.2009
+1. Kaas JH, Hackett TA. Subdivisions of auditory cortex and processing streams in primates. Proc Natl Acad Sci U S A. 2000;97(22):11793-9. doi:10.1073/pnas.97.22.11793
+1. Leigh RJ, Zee DS. The neurology of eye movements. 5.ª ed. Oxford: Oxford University Press; 2015. doi:10.1093/med/9780199969289.001.0001
+1. Cullen KE. The vestibular system: multimodal integration and encoding of self-motion for motor control. Trends Neurosci. 2012;35(3):185-96. doi:10.1016/j.tins.2011.12.001
+1. Colebatch JG, Halmagyi GM, Skuse NF. Myogenic potentials generated by a click-evoked vestibulocollic reflex. J Neurol Neurosurg Psychiatry. 1994;57(2):190-7. doi:10.1136/jnnp.57.2.190
+1. Kushiro K, Zakir M, Ogawa Y, Sato H, Uchino Y. Saccular and utricular inputs to sternocleidomastoid motoneurons of decerebrate cats. Exp Brain Res. 1999;126(3):410-6. doi:10.1007/s002210050747
+1. Iwasaki S, McGarvie LA, Halmagyi GM, Burgess AM, Kim J, Colebatch JG, et al. Head taps evoke a crossed vestibulo-ocular reflex. Neurology. 2007;68(15):1227-9. doi:10.1212/01.wnl.0000259064.80564.21
+1. Rosengren SM, Colebatch JG, Young AS, Govender S, Welgampola MS. Vestibular evoked myogenic potentials in practice: methods, pitfalls and clinical applications. Clin Neurophysiol Pract. 2019;4:47-68. doi:10.1016/j.cnp.2019.01.005
+1. Kheradmand A, Zee DS. Cerebellum and ocular motor control. Front Neurol. 2011;2:53. doi:10.3389/fneur.2011.00053
+1. Raphan T, Matsuo V, Cohen B. Velocity storage in the vestibulo-ocular reflex arc (VOR). Exp Brain Res. 1979;35(2):229-48. doi:10.1007/BF00236613
+1. Waespe W, Cohen B, Raphan T. Dynamic modification of the vestibulo-ocular reflex by the nodulus and uvula. Science. 1985;228(4696):199-202. doi:10.1126/science.3871968
+1. Robinson DA. The use of control systems analysis in the neurophysiology of eye movements. Annu Rev Neurosci. 1981;4:463-503. doi:10.1146/annurev.ne.04.030181.002335
+1. Cannon SC, Robinson DA. Loss of the neural integrator of the oculomotor system from brain stem lesions in monkey. J Neurophysiol. 1987;57(5):1383-409. doi:10.1152/jn.1987.57.5.1383
+1. Lopez C, Blanke O. The thalamocortical vestibular system in animals and humans. Brain Res Rev. 2011;67(1-2):119-46. doi:10.1016/j.brainresrev.2010.12.002
+1. zu Eulenburg P, Caspers S, Roski C, Eickhoff SB. Meta-analytical definition and functional connectivity of the human vestibular cortex. Neuroimage. 2012;60(1):162-9. doi:10.1016/j.neuroimage.2011.12.032
+1. Dieterich M, Brandt T. Ocular torsion and tilt of subjective visual vertical are sensitive brainstem signs. Ann Neurol. 1993;33(3):292-9. doi:10.1002/ana.410330311
+1. Brandt T, Dieterich M. Vestibular syndromes in the roll plane: topographic diagnosis from brainstem to cortex. Ann Neurol. 1994;36(3):337-47. doi:10.1002/ana.410360304
+1. Brandt T, Dieterich M. The vestibular cortex: its locations, functions, and disorders. Ann N Y Acad Sci. 1999;871:293-312. doi:10.1111/j.1749-6632.1999.tb09193.x
+1. Dieterich M, Bense S, Lutz S, Drzezga A, Stephan T, Bartenstein P, et al. Dominance for vestibular cortical function in the non-dominant hemisphere. Cereb Cortex. 2003;13(9):994-1007. doi:10.1093/cercor/13.9.994
+1. Keane JR. Internuclear ophthalmoplegia: unusual causes in 114 of 410 patients. Arch Neurol. 2005;62(5):714-7. doi:10.1001/archneur.62.5.714

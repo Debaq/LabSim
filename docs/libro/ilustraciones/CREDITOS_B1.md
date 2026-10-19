@@ -25,3 +25,25 @@ Generados con `hacer_b1.py` (misma carpeta): `b1-pabellon.svg`, `b1-membrana.svg
 - La versión en español de OpenStax "1406 Cochlea esp.jpg" figura como CC BY-SA 4.0 en Commons y no se usó.
 - Las copias de Servier Medical Art en Wikimedia Commons figuran como CC BY-SA 3.0; se tomaron directamente de smart.servier.com, donde la licencia vigente es CC BY 4.0.
 - Candidatas descartadas: "Auditory Pathway.png" de Peelle (CC BY 4.0, Commons) por tener rótulos en inglés y ser de otro autor; en su lugar se dibujó la vía con esquema propio.
+
+## Imágenes propias hechas con labyrinthus3d (2026-10-19)
+
+Software propio del autor, sin IA. Se generan con `hacer_b1_vias_simulador.py` (imágenes sueltas con globos) y `hacer_b1_laminas.py` (láminas de cuatro paneles): ambos sirven labyrinthus3d de solo lectura y leen el `<canvas>` de cada esquema con chromium sin cabeza (sin interfaz, sobre blanco; los paneles se recortan al esquema). Las constantes del simulador no son valores normativos: ninguna cifra del texto sale de él.
+
+Imágenes sueltas (con globos): `b1-sim-auditiva.png` (Audición, Tronco), `b1-sim-vor.png` (Vía, laterales), `b1-sim-otolitos.png`, `b1-sim-mirada.png`, `b1-sim-percepcion.png` (Vía, filtros homónimos), `b1-sim-sacadas.png`, `b1-sim-seguimiento.png` (Oculomotor).
+
+Láminas (`b1-lam-<nombre>.svg`, paneles A-D en JPEG dentro del SVG):
+
+| Lámina | Paneles |
+|---|---|
+| `vor` | canal lateral derecho excitado e inhibido; planos LARP y RALP, con un impulso de cabeza |
+| `oto` | utrículo y sáculo sanos; solo utrículo; solo sáculo; neuritis superior |
+| `esp` | módulo Postural, Vía: vestibular inclinado y adelante-atrás; propioceptiva; integración |
+| `flo` | neuritis izquierda fijando y ocluido, con y sin flóculos |
+| `mir` | mirada y fase rápida en reposo, en sacada horizontal y vertical, y con integradores a medias |
+| `perc` | tálamo y corteza: sano, neuritis reciente, pérdida compensada, corteza lesionada |
+| `oc1`, `oc2` | Oculomotor: seguimiento, sacadas, supresión del VOR, optocinético; silla rotatoria girando y frenando, sacudida cefálica, sin nódulo |
+| `aud`, `peat` | Audición: vía sana, schwannoma, olivar, colículo; y el PEAT de cada caso |
+| `pat1`-`pat4` | Patología: neuritis superior e inferior, pérdida unilateral, AICA; núcleos vestibulares, INO, FRPP, nistagmo hacia arriba; degeneración cerebelosa, evocado por la mirada, hipofunción y arreflexia bilaterales; la neuritis a las 6 horas, 3 días, 2 semanas y 3 meses |
+
+Los SVG `b1-via-auditiva.svg` y `b1-via-vestibular.svg` (esquemas propios de `hacer_b1.py`) siguen en el disco, sin uso en el capítulo.
