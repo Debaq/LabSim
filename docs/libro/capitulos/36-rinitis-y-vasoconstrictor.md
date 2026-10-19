@@ -71,6 +71,26 @@ La consecuencia práctica es doble. Una nariz con la mucosa congestionada es jus
 El modelo de las figuras lleva el vasoconstrictor al máximo y lo deja ahí: no simula su curso en el tiempo, ni que se pase, ni el rebote (la congestión que sigue a su efecto). En la nariz real el efecto empieza a los minutos y se va en horas; y con el uso repetido la respuesta se debilita. Eso es la **taquifilaxia**, y el caso 36.2 trata de ella.
 :::
 
+### Hipersensibilidad tipo I: lo que hace la alergia en la mucosa
+
+La rinitis alérgica es una reacción de **hipersensibilidad tipo I**, mediada por inmunoglobulina E (IgE), de la mucosa nasal frente a un alérgeno al que la persona ya está sensibilizada (Solé y cols., 2025). Pasa en tres tiempos, y conviene tenerlos separados porque la prueba cutánea, la anamnesis y la provocación miden cosas distintas:
+
+:::ayuda-ancho Las fases de la reacción alérgica en la nariz
+| Fase | Cuándo | Qué ocurre |
+|---|---|---|
+| **Sensibilización** | La primera exposición, o las repetidas, sin que la persona note nada | El alérgeno cruza el epitelio; las células dendríticas presentan sus péptidos a los linfocitos T CD4 vírgenes, que se orientan a una respuesta Th2 (IL-4, IL-5, IL-13); los linfocitos B se vuelven plasmáticos y producen **IgE específica**, que se fija a los receptores de alta afinidad (FcεRI) de **mastocitos y basófilos**. Las alarminas del epitelio (IL-25, IL-33, TSLP) activan células linfoides innatas tipo 2, que suman más IL-4, IL-5 e IL-13 |
+| **Fase temprana** | Segundos a minutos tras una nueva exposición | El alérgeno une dos IgE vecinas sobre el mastocito y lo hace **degranular**: libera histamina ya formada y, recién sintetizados, prostaglandinas, leucotrienos y factor activador de plaquetas; hay vasodilatación, aumento de la permeabilidad con edema y secreción de moco |
+| **Fase tardía** | De 2 a 6 horas después, con máximo hacia las 6 a 9 horas; se resuelve en 1 a 2 días; no aparece en todos | Llegan a la mucosa eosinófilos, basófilos y linfocitos Th2 desde la sangre, y los mastocitos siguen produciendo mediadores (IL-4, IL-5, IL-9, IL-13); las proteínas de los eosinófilos son tóxicas para el epitelio y lo lesionan |
+:::
+
+Con exposición persistente o repetida la inflamación se vuelve **crónica** y deja cambios en la estructura del órgano (Galli y cols., 2008). Los datos de esa tabla vienen de estudios de la reacción en general y de la nariz; las fases se estudiaron en la nariz humana con la provocación con alérgeno, midiendo en las secreciones los mediadores del mastocito (Solé y cols., 2025). <!-- verificar: el texto no atribuye síntomas nasales específicos a la fase tardía; en la bibliografía revisada aparece como estrechamiento de la vía aérea y moco en el pulmón. No se escribió qué síntoma nasal predomina en cada fase. -->
+
+Tres consecuencias para lo que se mide:
+
+- **La sensibilización no es la enfermedad.** Hay personas sensibilizadas sin síntomas (→ *Ojo clínico* de Patología). La IgE se demuestra en la piel o en la sangre; la reacción de la mucosa, con el alérgeno en la nariz.
+- **La nariz de hoy depende de la exposición reciente.** La exposición previa a un alérgeno cambia la permeabilidad, y la reacción tardía puede durar horas (Augé y cols., 2018). Por eso una medida en plena temporada y una fuera de ella no son comparables, y por eso la anamnesis pregunta por la estación (→ H23).
+- **El vasoconstrictor no distingue la causa.** Vacía los senos venosos sea cual sea el mediador que los llenó (→ Fisiología). Una rinitis alérgica y una no alérgica se abren igual.
+
 ## Patología
 
 ### Rinitis alérgica
@@ -132,6 +152,33 @@ Pero hay otra lectura. Un panel de especialistas que revisó la literatura concl
 
 En cuanto a la pauta, el consenso brasileño recomienda no pasar de 5 días y sugiere suspender a los 3 (Solé y cols., 2025); la guía estadounidense dice que los descongestionantes deben limitarse al corto plazo, y que en circunstancias limitadas pueden sumarse hasta 4 semanas a un corticoide nasal (Dykewicz y cols., 2020). **Lo que se enseña aquí**: se pregunta por el uso, no se diagnostica por la curva y no se fija un número de días en el informe.
 :::
+
+### Rinosinusitis aguda y crónica, con y sin pólipos
+
+La nariz y los senos paranasales comparten la misma mucosa y se comunican por aberturas estrechas, de modo que una inflamación de la nariz casi siempre alcanza a los senos: por eso se habla de **rinosinusitis**, no de sinusitis. Los criterios de duración y de síntomas están en H23 (→ H23, *Paso a paso*, 1): aguda si dura menos de 12 semanas, crónica si dura 12 o más (Fokkens y cols., 2020). Lo que cambia es el mecanismo.
+
+**La aguda.** La guía europea la divide en **viral** (el resfrío común), **posviral** y **bacteriana**, y reconoce que los mecanismos de las tres se superponen y que su estudio en pacientes reales es escaso (Fokkens y cols., 2020). El epitelio nasal es la puerta de entrada de los virus respiratorios y a la vez una parte activa de la defensa; la cascada inflamatoria que inicia produce edema, congestión, salida de líquido, moco y obstrucción de los senos (Fokkens y cols., 2020). Rinovirus y coronavirus son los más frecuentes en adultos, cerca de la mitad de los casos de rinosinusitis aguda viral (Fokkens y cols., 2020). Los virus dañan los cilios y alteran el epitelio, y esa pérdida de la depuración mucociliar es probablemente una causa importante de la sobreinfección bacteriana, que es una complicación poco frecuente: *Streptococcus pneumoniae*, *Haemophilus influenzae* y *Moraxella catarrhalis* son las bacterias más comunes (Fokkens y cols., 2020). La forma **posviral** es la que aumenta sus síntomas después del quinto día o persiste más de 10 días, con menos de 12 semanas de duración; no indica infección bacteriana, y solo una minoría de las rinosinusitis agudas es bacteriana (Fokkens y cols., 2020).
+
+**La crónica.** Es una enfermedad inflamatoria multifactorial de la mucosa de la nariz y los senos, comparable al asma en la vía aérea baja (Fokkens y cols., 2020). La visión actual no parte de una causa única, sino del tipo de inflamación que se sostiene: cuando la barrera del epitelio se rompe, hay una respuesta de defensa que normalmente se resuelve; en la rinosinusitis crónica no se resuelve y usa las vías tipo 1, 2 o 3, solas o combinadas (Fokkens y cols., 2020). La **inflamación tipo 2** (IL-4, IL-5 e IL-13, con eosinófilos y mastocitos) es la que la guía asocia a la rinosinusitis crónica con pólipos; los pacientes con endotipo tipo 2 puro o mezclado responden peor a los tratamientos actuales y recaen más (Fokkens y cols., 2020). La guía separa la rinosinusitis crónica primaria en **localizada** (de un lado) y **difusa** (de los dos lados), y la difusa por su endotipo, tipo 2 o no tipo 2 (Fokkens y cols., 2020).
+
+Tabla: Rinosinusitis aguda y crónica, con y sin pólipos
+
+| Cuadro | Qué lo mantiene | Qué sigue de ahí |
+|---|---|---|
+| Aguda viral y posviral | Daño del epitelio y de los cilios; edema y mucosa que obstruye los senos | Se resuelve sola en la mayoría; una minoría se sobreinfecta |
+| Aguda bacteriana | Depuración mucociliar dañada; sobreinfección | Es poco frecuente |
+| Crónica sin pólipos | Inflamación crónica de la mucosa; barrera alterada; con frecuencia sin predominio tipo 2 | Congestión, secreción, presión facial; el olfato se afecta menos que con pólipos |
+| Crónica con pólipos | Inflamación **tipo 2** con remodelación: pólipos, hiperplasia de células caliciformes, barrera más permeable | Obstrucción y pérdida del olfato marcadas; más recaídas |
+
+<!-- verificar: la fila "sin pólipos / sin predominio tipo 2" simplifica la guía: EPOS 2020 clasifica por endotipo y no equipara "sin pólipos" con "no tipo 2". El texto de la tabla describe lo que predomina, no una regla. -->
+
+Otras piezas aparecen en los textos, con un peso menor y discutido:
+
+- **Obstrucción del complejo ostiomeatal y variantes anatómicas.** Se ha propuesto que la obstrucción del complejo ostiomeatal es un factor de riesgo. Una revisión sistemática halló una asociación entre la desviación del tabique y la rinosinusitis, pero modesta, y con inflamación bilateral; en un estudio, 88,2 % de los pacientes con rinosinusitis crónica tenía el tabique desviado, una cifra cercana a la de la población general (Fokkens y cols., 2020). Una desviación del tabique **no explica sola** una rinosinusitis (→ cap. 35).
+- **Biofilm.** Se demostraron biofilms en la mucosa de pacientes con rinosinusitis crónica por primera vez en 2004, y la frecuencia estimada va de 29 a 72 %; *Staphylococcus aureus* es el que más se asocia a los casos graves y recurrentes, y los pacientes con biofilm tienen enfermedad más grave antes de operarse y más síntomas después (Fokkens y cols., 2020). Que un cultivo de la nariz dé microbios no prueba que ellos causen la enfermedad, porque la nariz no es estéril, y los antibióticos responden mal en la crónica (Fokkens y cols., 2020).
+- **Depuración mucociliar.** En la crónica los ciclos de infección e inflamación llevan a pérdida de cilios y a un moco más espeso, y los cilios que quedan funcionan peor (Fokkens y cols., 2020; → H23, *Cómo acondiciona el aire la nariz*).
+
+Esto importa en un capítulo de rinomanometría por tres razones. Primero, **la rinomanometría y la rinometría miden las consecuencias** (resistencia y área), no la causa: una rinosinusitis crónica con pólipos puede dar un cuadro mixto (→ *Lo que se ve como mucosa y no es solo mucosa*, abajo). Segundo, un paciente con **pérdida del olfato** y obstrucción debe leerse con ese contexto (→ H23, *Alteraciones del olfato*). Tercero, el médico, no quien mide, decide si hace falta endoscopia o imagen y cuál es el endotipo.
 
 ### Lo que se ve como mucosa y no es solo mucosa
 
@@ -430,6 +477,8 @@ Las guías de rinitis ponen los corticoides nasales como primera elección en la
 4. Una paciente embarazada o con un descongestionante contraindicado necesita el examen. ¿Qué cambia y qué le preguntarías al médico antes?
 5. El resultado "vasomotora" del examen puede ser una rinitis alérgica, una por descongestionantes, una no alérgica o un resfrío. ¿Qué pregunta de la anamnesis separa cada una?
 6. En el caso 36.3, ¿qué parte del problema tiene un tratamiento médico y qué parte solo una cirugía? ¿Qué le dices al paciente sobre la cirugía de los cornetes en un examen que dice "mixta"?
+7. Una persona tiene una prueba cutánea positiva al polen y ningún síntoma. ¿En cuál de las tres fases de la reacción alérgica está, y por qué la nariz puede estar normal en el examen?
+8. Explica por qué una rinosinusitis aguda viral deja a veces una secuela de semanas en la depuración mucociliar y cómo eso lleva a la sobreinfección bacteriana.
 :::
 
 :::ayuda Ayuda memoria del capítulo
@@ -464,6 +513,8 @@ Las guías de rinitis ponen los corticoides nasales como primera elección en la
 
 ### Patología
 
+1. Galli SJ, Tsai M, Piliponsky AM. The development of allergic inflammation. Nature. 2008;454(7203):445-54. doi:10.1038/nature07204. PMID: 18650915
+1. Augé J, Vent J, Agache I, Airaksinen L, Campo Mozo P, Chaker A, et al. EAACI Position paper on the standardization of nasal allergen challenges. Allergy. 2018;73(8):1597-608. doi:10.1111/all.13416. PMID: 29377177
 1. Bousquet J, Khaltaev N, Cruz AA, Denburg J, Fokkens WJ, Togias A, et al. Allergic Rhinitis and its Impact on Asthma (ARIA) 2008. Allergy. 2008;63(Suppl 86):8-160. doi:10.1111/j.1398-9995.2007.01620.x
 1. Bousquet J, Schünemann HJ, Samolinski B, Demoly P, Baena-Cagnani CE, Bachert C, et al. Allergic Rhinitis and its Impact on Asthma (ARIA): achievements in 10 years and future needs. J Allergy Clin Immunol. 2012;130(5):1049-62. doi:10.1016/j.jaci.2012.07.053. PMID: 23040884
 1. Bousquet J, Schünemann HJ, Togias A, Bachert C, Erhola M, Hellings PW, et al. Next-generation Allergic Rhinitis and Its Impact on Asthma (ARIA) guidelines for allergic rhinitis based on Grading of Recommendations Assessment, Development and Evaluation (GRADE) and real-world evidence. J Allergy Clin Immunol. 2020;145(1):70-80.e3. doi:10.1016/j.jaci.2019.06.049. PMID: 31627910

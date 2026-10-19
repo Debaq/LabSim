@@ -111,6 +111,33 @@ Los dos documentos definen también una forma **probable**: cumple el primer cri
 La migraña vestibular no lleva a una pérdida de audición importante: cuando aparece, suele ser leve y de los dos oídos (Lopez-Escamez y cols., 2015; Radtke y cols., 2012). Un paciente con mareos repetidos **y** una hipoacusia que avanza hasta moderada o más, o que es de un solo oído, no cabe en este diagnóstico solo: hay que buscar otra causa. <!-- Pasada de fundamentos 2026-10-18: decía "no tiene pérdida de audición progresiva y fija". Radtke 2012: "vestibulo-cochlear dysfunction progresses slowly in some patients with VM" (18 % con hipoacusia bilateral leve); Lopez-Escamez 2015: "SNHL does not typically progress to severe hearing loss over the years in migraine. When hearing loss develops in vestibular migraine, it is often bilateral". -->
 :::
 
+### Paroxismia vestibular
+
+Es la tercera causa de crisis que vuelven, y se distingue de las otras dos por la **duración**: las crisis duran segundos, en la mayoría de los pacientes entre un segundo y un minuto, y se repiten muchas veces. Se atribuye a descargas **efápticas** en la porción proximal del VIII par, la que está cubierta por oligodendroglía, parecidas a las de la neuralgia del trigémino o el espasmo hemifacial; el mecanismo habitual es el contacto de un vaso (en una serie de 20 pacientes con compresión, la arteria cerebelosa anteroinferior en 15), aunque también pueden producirla un tumor, un quiste o una desmielinización (Strupp y cols., 2016). La prevalencia no se conoce y se considera una enfermedad rara; en un centro terciario con más de 17.000 pacientes con vértigo, rondaba el 4 % (Strupp y cols., 2016).
+
+Los criterios de la Sociedad Bárány, que se basan sobre todo en la historia (Strupp y cols., 2016):
+
+1. **Diez o más** episodios de vértigo, giratorio o no, espontáneo.
+2. **Duración menor de un minuto.**
+3. **Cuadro estereotipado** en cada paciente: cada crisis se siente igual.
+4. **Respuesta a carbamazepina u oxcarbazepina.**
+5. Que otro diagnóstico no lo explique mejor.
+
+Sin haber probado el tratamiento no se puede cumplir el cuarto criterio; entonces el consenso define una forma **probable**: cinco o más episodios de menos de cinco minutos, espontáneos o provocados por ciertos movimientos de la cabeza, estereotipados y sin mejor explicación (Strupp y cols., 2016).
+
+Lo que se encuentra en el estudio:
+
+- **Entre crisis**, cerca de la mitad de los pacientes tiene una hipofunción unilateral leve a moderada en las pruebas vestibulares y auditivas; la pérdida de audición suele ser menor que en el Ménière, y identificar el lado afectado suele no ser posible (Strupp y cols., 2016).
+- **Durante una crisis**, quien llega a verla puede registrar un nistagmo horizontal-torsional, sincronizado con la crisis, que bate hacia el oído afectado (Strupp y cols., 2016).
+- **Síntomas del oído** durante la crisis (acúfeno o hiperacusia de un lado) ayudan a ubicar el nervio comprometido, y si se suman espasmos del rostro, el compromiso conjunto del VII y VIII en el conducto auditivo interno (Strupp y cols., 2016).
+- **La resonancia** de alta resolución (secuencias CISS o FIESTA) puede mostrar el contacto neurovascular, pero **no es diagnóstica**: el consenso señala que se observa en cerca del 30 % de los sujetos sanos sin síntomas, que puede ser bilateral y que no predice el lado enfermo. Se pide sobre todo para descartar un tumor del ángulo pontocerebeloso, una placa de esclerosis múltiple o un infarto del tronco (Strupp y cols., 2016).
+
+La **respuesta al fármaco** forma parte del criterio diagnóstico: la mayoría de los pacientes responde a dosis bajas de carbamazepina (200 a 800 mg al día) o de oxcarbazepina (300 a 900 mg al día) (Strupp y cols., 2016). Esa respuesta apoya el diagnóstico, pero no hay ensayos clínicos aleatorizados, de modo que no lo prueba. La indicación, la dosis y el seguimiento son del médico; quien evalúa debe saber que existe esa prueba terapéutica, porque cambia lo que se informa: el estudio no confirma la enfermedad, solo descarta otras (Strupp y cols., 2016).
+
+:::ojo Ojo clínico
+Las crisis de **segundos** que vienen con ciertos giros de cabeza, o con estornudo, tos o cambios de presión en el oído, tienen otras explicaciones que se descartan primero: un VPPB (→ cap. 22), una fístula perilinfática o una tercera ventana (→ cap. 26). El consenso pide considerar la fístula perilinfática o una tercera ventana cuando las crisis las provocan los cambios bruscos de presión intracraneal (estornudo, tos, Valsalva) o de presión en el conducto auditivo (Strupp y cols., 2016).
+:::
+
 ### Cuando las dos coexisten
 
 Las dos enfermedades son frecuentes y **no se excluyen**. En un servicio de mareo, de unos 147 pacientes con Ménière, migraña vestibular o ambas, 21 tenían las dos, cerca de un cuarto de los diagnosticados con cada enfermedad; un 38 % de los pacientes con solo migraña vestibular tenía síntomas del oído (pérdida, presión o zumbido) durante los episodios, y el 49 % de quienes tenían solo Ménière tenía rasgos de migraña: cefaleas migrañosas que no cumplían todos los criterios, síntomas migrañosos o un familiar directo con migraña (Neff y cols., 2012). <!-- Pasada de fundamentos 2026-10-18: decía "de 189 pacientes" (suma 76 + 92 + 21, que cuenta dos veces a los 21 con ambas; el resumen da "approximately 147") y "casi la mitad ... refería cefaleas con rasgos de migraña" (el 49 % incluye síntomas migrañosos o un familiar con migraña). --> En esa mezcla, el dato que ordena es **cuál crisis trae qué**: la que viene con el oído tapado y la audición que baja es del oído, y la que viene con cefalea, luz y ruido es migrañosa, aunque las dos hayan pasado en la misma persona.
@@ -121,7 +148,7 @@ Las dos enfermedades son frecuentes y **no se excluyen**. En un servicio de mare
 
 Frente a crisis de vértigo que vuelven, el razonamiento sigue cinco preguntas, en orden:
 
-1. **¿Cuánto dura una crisis?** De segundos, es otra cosa (→ cap. 22). De 20 minutos a 12 horas apunta al Ménière; de 5 minutos a 72 horas, la migraña vestibular también cabe.
+1. **¿Cuánto dura una crisis?** De segundos, es otra cosa: si se provoca con la posición de la cabeza, un VPPB (→ cap. 22); si es espontánea, estereotipada y repetida, una paroxismia vestibular. De 20 minutos a 12 horas apunta al Ménière; de 5 minutos a 72 horas, la migraña vestibular también cabe.
 2. **¿Qué trae consigo?** Oído tapado, zumbido grave y audición que baja: Ménière. Cefalea, luz, ruido, aura: migraña. Las dos cosas en crisis distintas: las dos.
 3. **¿Qué dice la serie de audiogramas?** Una pérdida de graves que fluctúa y se aplana es del oído. Audiogramas normales en todas las fechas, aun cerca de una crisis, no son de Ménière.
 4. **¿Qué dicen las pruebas entre crisis?** Calórica y vHIT juntos; cVEMP; ECochG si el oído todavía tiene respuesta. Un hallazgo del oído apoya el Ménière; una normalidad no lo descarta.
@@ -439,6 +466,7 @@ En una serie de un servicio de mareo, casi la mitad de los pacientes con Méniè
 - Las pruebas vestibulares van **entre** crisis; los resultados normales no descartan el Ménière.
 - Con **dos oídos** comprometidos, la comparación entre oídos engaña: se leen las velocidades de cada uno.
 - Migraña vestibular: **cinco crisis de 5 minutos a 72 horas** con rasgos de migraña; oído sano o una pérdida leve de los dos lados; una pérdida que avanza hasta moderada no es de ella.
+- Crisis de **menos de un minuto**, muy repetidas y espontáneas: piensa en **paroxismia vestibular**; la resonancia no la confirma.
 - Las dos enfermedades **coexisten**: se clasifica cada crisis por lo que trae.
 :::
 
@@ -463,6 +491,7 @@ En una serie de un servicio de mareo, casi la mitad de los pacientes con Méniè
 
 ### Patología
 
+1. Strupp M, Lopez-Escamez JA, Kim JS, Straumann D, Jen JC, Carey J, et al. Vestibular paroxysmia: diagnostic criteria. J Vestib Res. 2016;26(5-6):409-15. doi:10.3233/VES-160589
 1. Lempert T, Olesen J, Furman J, Waterston J, Seemungal B, Carey J, et al. Vestibular migraine: Diagnostic criteria. Consensus document of the Bárány Society and the International Headache Society. J Vestib Res. 2022;32(1):1-6. doi:10.3233/VES-201644
 1. Lempert T, Olesen J, Furman J, Waterston J, Seemungal B, Carey J, et al. Vestibular migraine: diagnostic criteria. J Vestib Res. 2012;22(4):167-72. doi:10.3233/VES-2012-0453
 1. Radtke A, von Brevern M, Neuhauser H, Hottenrott T, Lempert T. Vestibular migraine: validity of clinical diagnostic criteria. Cephalalgia. 2011;31(8):906-13. doi:10.1177/0333102411405228

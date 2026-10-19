@@ -104,6 +104,36 @@ La guía de la APTA recomienda evaluar, entre los factores que pueden modificar 
 
 La edad **no** es un freno por sí misma: la guía dice que los mayores mejoran igual que los jóvenes (Hall y cols., 2022), aunque pueden tardar más y tener más comorbilidades.
 
+### Qué hacen los fármacos sobre el reflejo y sobre la compensación
+
+Quien evalúa a un paciente con vértigo casi siempre recibe una lista de remedios. Conocer qué hace cada uno ayuda a leer el examen, porque un fármaco que deprime la respuesta del laberinto o del tronco cerebral cambia la calórica, el nistagmo y el rendimiento en la batería de equilibrio, y a interpretar por qué un paciente no avanza en la rehabilitación. Esta sección es informativa. **Indicar, ajustar y retirar un fármaco es decisión del médico**; lo que le corresponde a quien evalúa es registrar qué toma el paciente, desde cuándo y con qué horarios, y avisarlo (→ H19).
+
+El criterio que ordena las clases es qué hacen sobre la actividad de los núcleos vestibulares. Los **supresores vestibulares** reducen la respuesta del sistema vestibular y con ella el vértigo y el nistagmo, pero también reducen la señal de error que alimenta la compensación (Hall y cols., 2022; Rascol y cols., 1995). Los **antieméticos** calman las náuseas y el vómito sin tocar necesariamente el reflejo. Un tercer grupo, los **fármacos "de fondo"** (betahistina, cinarizina y flunarizina), se plantea como tratamiento de las crisis recurrentes, no del vértigo agudo.
+
+
+:::ayuda-ancho Fármacos de uso frecuente en vértigo, por clase
+| Clase y ejemplos | Mecanismo | Para qué se usa | Qué hay sobre la compensación |
+|---|---|---|---|
+| **Antihistamínicos H1**: meclizina, dimenhidrinato, prometazina | Bloquean receptores de histamina H1 y tienen también efecto anticolinérgico, más marcado en la prometazina; actúan sobre todo en el sistema nervioso central (Soto y Vega, 2010) | Vértigo agudo y náusea, por pocos días | Retrasan la compensación si se usan de manera prolongada; la guía acepta dosis bajas y por poco tiempo mientras se hacen los ejercicios (Rascol y cols., 1995; Hall y cols., 2022) |
+| **Anticolinérgicos**: escopolamina | Bloquean receptores muscarínicos de acetilcolina; no se ha precisado si actúan en el vestíbulo periférico o en el central (Soto y Vega, 2010) | Cinetosis y vértigo agudo | Mismo comentario que los antihistamínicos |
+| **Benzodiazepinas**: diazepam | Agonistas del receptor GABA-A, con efecto sobre neuronas diversas; la sedación y la ansiolisis contribuyen a la mejoría del paciente (Soto y Vega, 2010) | Vértigo agudo intenso, por pocos días | Son supresores; se consideran en el grupo que estorba la compensación si se prolongan (Hall y cols., 2022) |
+| **Antieméticos antidopaminérgicos**: fenotiazinas (prometazina, proclorperazina), droperidol, sulpirida | Antagonistas de receptores de dopamina (la sulpirida, de D2 en particular); en la prometazina se suma el bloqueo H1 (Soto y Vega, 2010) | Náuseas y vómito de una crisis | Según el fármaco, también deprimen el vestíbulo; por eso se usan por poco tiempo |
+| **Difenidol** | Efecto anticolinérgico por interacción con receptores muscarínicos m1 a m4 (Soto y Vega, 2010) | Vértigo y náuseas | No se encontró un dato propio sobre compensación en las fuentes de este capítulo |
+| **Betahistina** | Análogo de la histamina: antagonista de los receptores H3 y agonista parcial débil de H1 y H2 (Soto y Vega, 2010) | Se usa en la enfermedad de Ménière y en otros vértigos recurrentes | En gatos facilitó la compensación (Tighilet y cols., 1995); la revisión de Lacour (2013) explica el mecanismo; en personas, ver más abajo |
+| **Cinarizina y flunarizina** | Antihistamínicos que además bloquean canales de calcio y, la cinarizina, canales de potasio sensibles a presión; el bloqueo de canales de calcio tipo L podría interferir con la liberación de neurotransmisor en las células ciliadas (Soto y Vega, 2010) | Vértigo recurrente; la flunarizina se ha estudiado también en migraña vestibular | No se encontró un dato propio sobre compensación en las fuentes de este capítulo |
+:::
+
+<!-- verificar: registro/uso del difenidol en Chile; metoclopramida y ondansetrón no se incluyeron por falta de fuente. -->
+
+**Lo que dicen los ensayos sobre la betahistina.** La revisión Cochrane agrupó 17 ensayos con 1.025 participantes con vértigo de causas diversas: más pacientes con betahistina que con placebo refirieron menos síntomas de vértigo (RR 1,30; IC 95 % 1,05 a 1,60; 11 estudios, 606 participantes), con una heterogeneidad alta y evidencia de baja certeza; los efectos adversos fueron similares (16 % contra 15 %) (Murdin y cols., 2016). En enfermedad de Ménière, el ensayo BEMED comparó placebo con 2 × 24 mg y 3 × 48 mg diarios durante nueve meses en 221 pacientes: la razón de tasas de crisis frente a placebo fue 1,036 (IC 95 % 0,942 a 1,140) con la dosis baja y 1,012 (0,919 a 1,114) con la alta, y las crisis bajaron en los tres grupos, incluido el placebo (Adrion y cols., 2016). El resultado no dice que ningún paciente se beneficie; dice que, en ese diseño, la betahistina no redujo las crisis más que el placebo, y que las crisis de un Ménière disminuyen solas con el tiempo (→ cap. 23).
+
+**Lo que significa para quien evalúa.**
+
+- Un paciente con **supresor tomado a diario** puede tener una calórica y una prueba de equilibrio peores de lo que su laberinto permitiría; el informe lo anota en lugar de dar por "peor" el resultado.
+- Un paciente que **no avanza** en la rehabilitación y toma un supresor desde hace semanas es un motivo para avisar al médico, no para suspenderlo (→ "Lo que más se equivoca").
+- La **sedación** de varias de estas clases (antihistamínicos, benzodiazepinas) puede también sumar riesgo de caídas en el adulto mayor (→ cap. 32).
+- Los fármacos de fondo se evalúan por **cuántas crisis** tiene el paciente, no por la prueba de un día.
+
 ## Patología
 
 ### Qué queda de una neuritis
@@ -417,6 +447,11 @@ Es el caso que más se repite en la consulta: **un paciente con la función de v
 
 ### Fisiología
 
+1. Soto E, Vega R. Neuropharmacology of vestibular system disorders. Curr Neuropharmacol. 2010;8(1):26-40. doi:10.2174/157015910790909511
+1. Murdin L, Hussain K, Schilder AGM. Betahistine for symptoms of vertigo. Cochrane Database Syst Rev. 2016;(6):CD010696. doi:10.1002/14651858.CD010696.pub2
+1. Adrion C, Fischer CS, Wagner J, Gürkov R, Mansmann U, Strupp M. Efficacy and safety of betahistine treatment in patients with Meniere's disease: primary results of a long term, multicentre, double blind, randomised, placebo controlled, dose defining trial (BEMED trial). BMJ. 2016;352:h6816. doi:10.1136/bmj.h6816
+1. Tighilet B, Leonard J, Lacour M. Betahistine dihydrochloride treatment facilitates vestibular compensation in the cat. J Vestib Res. 1995;5(1):53-66. doi:10.3233/VES-1995-5106
+1. Lacour M. Betahistine treatment in managing vertigo and improving vestibular compensation: clarification. J Vestib Res. 2013;23(3):139-51. doi:10.3233/VES-130496
 1. Lacour M, Helmchen C, Vidal PP. Vestibular compensation: the neuro-otologist's best friend. J Neurol. 2016;263(Suppl 1):S54-64. doi:10.1007/s00415-015-7903-4
 1. Gonshor A, Jones GM. Extreme vestibulo-ocular adaptation induced by prolonged optical reversal of vision. J Physiol. 1976;256(2):381-414. doi:10.1113/jphysiol.1976.sp011330
 1. Miles FA, Lisberger SG. Plasticity in the vestibulo-ocular reflex: a new hypothesis. Annu Rev Neurosci. 1981;4:273-99. doi:10.1146/annurev.ne.04.030181.001421

@@ -89,11 +89,47 @@ La mucosa del cornete inferior no es una película: tiene debajo una red de **si
 :::imagen ilustraciones/h23-ciclo-corte.svg ancho=96% El ciclo nasal. Dos cortes frontales de la nariz, vistos desde delante: en A el cornete inferior de la fosa derecha está congestionado y el aire pasa sobre todo por la izquierda; unas horas después, B, se invierte. El flujo de cada lado cambia; la suma de los dos, mucho menos.
 :::
 
+### Cómo acondiciona el aire la nariz
+
+El aire llega a la nariz frío o caliente, seco o húmedo, y sale hacia la tráquea casi a la temperatura del cuerpo y casi saturado de vapor, es decir, en condiciones cercanas a las del alvéolo (Elad y cols., 2008). Lo logra en pocos centímetros y en fracciones de segundo, con cuatro piezas que trabajan juntas:
+
+- **Superficie y contacto.** La nariz es angosta y está llena de mucosa (cornetes, tabique): el aire pasa en capas finas cerca de la pared, donde puede ceder y recibir calor y agua. Es la misma forma que le da su resistencia (→ *La válvula nasal*).
+- **Calor y agua que vienen de la sangre.** Bajo el epitelio hay una red densa de capilares con poros entre las células, que aporta nutrientes y deja pasar agua a la superficie para que se evapore y humedezca el aire; hay además vasos de capacitancia (los senos venosos del cornete) y comunicaciones directas entre arterias y venas por las que la sangre pasa rápido por la mucosa, probablemente importantes para el acondicionamiento. Cuando los senos se llenan, el paso se cierra y cambian la filtración y el acondicionamiento (Widdicombe, 1997).
+- **Dónde ocurre.** No ocurre parejo a lo largo de la fosa. En 50 voluntarios, la temperatura del aire inspirado subió de forma logarítmica desde el vestíbulo hacia atrás, con el mayor aumento en la zona de la válvula, y llegó a unos 34 °C en la nasofaringe (Keck y cols., 2000a). En otros 23, la humedad relativa y la temperatura subieron sobre todo en el segmento anterior; entre los cornetes y la nasofaringe el aumento fue menor aunque el trayecto es más largo (Keck y cols., 2000b). Los autores destacan el espacio entre la válvula y el cornete medio. Es también la zona que se alcanza a ver con el espéculo.
+- **Moco, cilios y depuración.** La mucosa respiratoria es un epitelio cilíndrico seudoestratificado ciliado, con células caliciformes, apoyado en una lámina basal, y con glándulas seromucosas debajo (Solé y cols., 2025). Las glándulas serosas aportan la fase acuosa del moco ("sol") y las mucosas la fase espesa ("gel"); en la nariz la capa de moco mide de 10 a 15 µm y la producen las células caliciformes y las glándulas seromucosas (Solé y cols., 2025; Fokkens y cols., 2020). El moco es 97 % agua y 3 % sólidos (mucinas, proteínas, sales, lípidos y restos celulares) y se apoya sobre una capa periciliar de unos 7 µm, en la vía aérea de conducción: cuánta agua tenga esa capa decide con qué eficacia los cilios lo arrastran (Fahy y Dickey, 2010). El latido de los cilios tiene dos tiempos, uno efectivo con el cilio extendido, que empuja el gel, y uno de recuperación que lo devuelve a su posición, en ondas coordinadas entre cilios vecinos (Solé y cols., 2025). Así las partículas atrapadas en el moco llegan a la nasofaringe y se tragan, y es la parte "defensiva" del acondicionamiento.
+
+La pieza ciliar es la más frágil. En un resfrío común se describió una alteración de la depuración mucociliar nasal de hasta 32 días, con menos células ciliadas y cambios moderados y breves en la frecuencia de latido (Fokkens y cols., 2020, que cita ese estudio). Y cuando la depuración falla, la vía queda expuesta a un círculo de infección y obstrucción (Fokkens y cols., 2020). Es el puente hacia la rinosinusitis del cap. 36.
+
 ### La mucosa, el moco y el olfato
 
 El moco nasal es agua casi en su totalidad, con mucinas, electrolitos y defensas (IgA, lisozima, lactoferrina), y los cilios lo mueven hacia atrás, hacia la nasofaringe, a unos 4 mm por minuto en adultos sanos medidos con rinogammagrafía, con mucha variación según la técnica y la zona (Sun y cols., 2002; Boynuegri y cols., 2016). <!-- Verificación 2026-10-18: la pasada de fundamentos había quitado "a unos 6 mm por minuto", que viene de la clase de anatomía y fisiología nasal. Hay medidas humanas en mm/min: controles sanos 4,28 ± 1,38 (Sun) y 4,27 ± 0,76 (Boynuegri); otros métodos dan 4,5 a 7. Se restauró la velocidad con la cifra medida; la clase dice ~6. --> Cuando el moco cambia, cambia lo que ves y lo que cuenta el paciente: **claro y acuoso** en la rinitis alérgica y en un resfrío temprano; **espeso, amarillo o verdoso** en una infección; **con costras** cuando la mucosa está seca o atrófica.
 
 El **olfato** merece una pregunta aparte. El epitelio olfatorio está en el techo de la fosa y recibe solo una pequeña parte del aire que entra, por una hendidura estrecha. Cualquier cosa que cierre esa hendidura (mucosa hinchada, pólipos, un cornete medio grande) puede apagar el olfato **aunque el nervio esté sano** (Hummel y cols., 2017). Y el olfato perdido arrastra el gusto, porque lo que llamamos sabor es en gran parte aroma que sube por detrás del paladar.
+
+### Alteraciones del olfato: cómo se llaman y qué se pregunta
+
+El epitelio olfatorio tiene entre 6 y 30 millones de neuronas receptoras bipolares en el adulto joven. Sus cilios se extienden en una capa de moco, lo que les da una gran superficie para captar las moléculas del olor; sus axones atraviesan la lámina cribosa y hacen su primera sinapsis en el bulbo olfatorio, de donde las células mitrales y en penacho llevan la señal a la corteza olfatoria primaria. Estas neuronas pueden regenerarse a partir de las células basales del mismo epitelio (Hummel y cols., 2017). Eso ordena tres lugares donde puede fallar el olfato: la **llegada** de las moléculas hasta el epitelio, el **epitelio y el nervio**, y las **vías centrales**.
+
+Tabla: Cómo se llaman las alteraciones del olfato
+
+| Término | Qué es | Qué se pregunta |
+|---|---|---|
+| **Hiposmia** | Olfato reducido en cantidad | ¿Huele menos todos los olores o algunos? |
+| **Anosmia** | Ausencia de todo el olfato. La **anosmia funcional** es una pérdida tal que ya no sirve para la vida diaria | ¿Distingue olores fuertes (café, humo)? ¿Se arriesga por no oler (gas, comida echada a perder)? |
+| **Hiperosmia** | Olfato aumentado de forma anormal; es muy rara | ¿Hay olores que le molestan en exceso? |
+| **Parosmia** | Olor distorsionado **con** el estímulo presente | ¿Los olores cambiaron de calidad? ¿Desaparece al taparse la nariz? |
+| **Fantosmia** | Percepción de un olor **sin** estímulo (alucinación olfatoria) | ¿Huele algo cuando no hay nada? ¿Un lado, los dos? |
+| **Cacosmia** | Olor percibido como desagradable; se la considera una forma de parosmia (hay estímulo), de fantosmia (no lo hay) o ambas | ¿Huele mal permanente o solo con ciertas cosas? |
+
+Los términos tienen límites borrosos en la literatura: "parosmia" y "disosmia" se han usado con sentidos distintos, y la cacosmia puede ser cualquiera de las dos (Hummel y cols., 2017). Lo útil en la consulta es separar lo **cuantitativo** (menos olor) de lo **cualitativo** (olor distinto), porque pueden darse juntos, y la fantosmia de la parosmia con la pregunta de si el olor está presente con la nariz tapada (Hummel y cols., 2017). La pérdida funcional de olfato afecta a cerca de 5 % de la población general, y el envejecimiento contribuye (Hummel y cols., 2017). La **retronasal** (el aroma que sube por detrás del paladar al tragar) es la base del sabor, por eso quien pierde el olfato dice que "no tiene gusto" (Hummel y cols., 2017).
+
+Según dónde esté el problema, el olfato se clasifica en **conductivo** (se bloquea la llegada de las moléculas al epitelio), **sensorineural** (se daña el epitelio o el nervio) y **central** (se daña el procesamiento en el sistema nervioso) (Hummel y cols., 2017). La historia orienta cuál es:
+
+- **Enfermedad de la nariz y los senos** (rinosinusitis, sobre todo con pólipos; rinitis). La rinosinusitis crónica con pólipos es la que más afecta el olfato, seguida por la crónica sin pólipos, la rinitis no alérgica, la atrófica y la alérgica. Al inicio es conductiva (edema o pólipos cierran la hendidura), pero la inflamación del propio epitelio también interviene; suele instalarse de a poco, fluctúa y rara vez trae parosmia (Hummel y cols., 2017).
+- **Posinfecciosa.** Después de una infección respiratoria alta; el inicio suele ser brusco, con frecuencia hay parosmia y hay poca fluctuación; puede ser permanente, pero una parte mejora: en 262 pacientes seguidos 14 meses, mejoró cerca de un tercio (Hummel y cols., 2017).
+- **Postraumática.** Inicio brusco tras un golpe en la cabeza, a veces con un intervalo de días o semanas (Hummel y cols., 2017).
+
+La medición del olfato con pruebas psicofísicas no se trata en esta herramienta. Lo que sí se hace aquí es **preguntar**: cuándo empezó y cómo (brusco o gradual), si fluctúa, si es de un lado o de los dos, si hay obstrucción nasal o secreción, si hubo un resfrío o un golpe antes, y qué usa el paciente para la nariz. Esa historia orienta qué se espera ver en la rinoscopía y cuándo conviene derivar para una endoscopia, que es lo único que muestra la hendidura.
 
 ### Por qué se pregunta cada cosa
 
@@ -180,7 +216,7 @@ Se parte con una **pregunta abierta** ("¿qué le pasa en la nariz?") y se deja 
 10. **Apnea**: si ha tenido una polisomnografía.
 11. **Lugar de trabajo.**
 12. **Congestión o picazón** según la época del año. <!-- Protocolo ORL 2019: decía "Sufre descongestión y/o prurito nasal". Se corrigió a "congestión" (error de tipeo; la clase de nasal dice congestión). -->
-13. **Alteraciones del olfato.**
+13. **Alteraciones del olfato**: si es menos olfato o un olfato distinto, y si hay olores sin fuente (→ *Alteraciones del olfato*, en el Fundamento).
 14. **Asma.**
 15. **Cirugías nasales o de adenoides.**
 16. **Exámenes nasales anteriores.**
@@ -194,7 +230,7 @@ El **tiempo de evolución** ordena el resto. La definición de EPOS 2020 es que 
 La anamnesis de este libro es **cualitativa**: se pregunta si el síntoma existe. La literatura agrega **escalas** que lo cuantifican y que sirven para comparar antes y después de un tratamiento:
 
 - **NOSE** (Nasal Obstruction Symptom Evaluation): cinco ítems (congestión o sensación de nariz llena, bloqueo u obstrucción, dificultad para respirar por la nariz, dificultad para dormir y falta de aire por la nariz al hacer ejercicio), cada uno de 0 a 4; la suma se multiplica por 5 y da un puntaje de 0 a 100 (Stewart y cols., 2004).
-- **SNOT-22** (Sinonasal Outcome Test): 22 ítems de 0 a 5, con un puntaje total de 0 a 110 (Hopkins y cols., 2009).
+- **SNOT-22** (Sinonasal Outcome Test): mide el efecto de la enfermedad de la nariz y los senos sobre la persona, no solo la obstrucción. Tiene 22 ítems, cada uno de 0 a 5, y el puntaje total va de 0 a 110: más alto es peor. Sus ítems cubren síntomas de la nariz (congestión, secreción espesa, goteo posterior, necesidad de sonarse, disminución del olfato o del gusto), del oído y la cara, del sueño y del ánimo; el análisis por dominios los agrupa en cinco: rinológico, rinológico extranasal, oído y cara, psicológico y sueño (Lang y cols., 2025; Chowdhury y cols., 2019). Se validó en 3.128 adultos que iban a cirugía por rinosinusitis crónica y poliposis; distinguió a los enfermos de los controles sanos, su variación mínima percibida por el paciente fue de 8,9 puntos y el puntaje bajó de forma significativa a los 3 meses de la operación (Hopkins y cols., 2009). Para ubicar un puntaje se usa la estratificación de Toma y Hopkins (2016): **leve** de 8 a 20, **moderado** de más de 20 hasta 50 y **grave** sobre 50; la propusieron en 65 pacientes con rinosinusitis crónica y la ligaron a la clasificación leve-moderada-grave de la guía europea. Sirve para comparar antes y después de un tratamiento y para describir cuánto pesa la enfermedad; no diagnostica por sí solo. Para la obstrucción nasal sola, el NOSE es más corto y más específico.
 - **Escala visual análoga** de obstrucción, de 0 a 10, la más rápida de aplicar. <!-- verificar: sin fuente de validación citada. -->
 
 En este libro no se exige ninguna. Si tu centro usa una, regístrala; es una forma de que el síntoma quede en un número.
@@ -362,6 +398,9 @@ LabSim no genera datos nasales, y lo que registra de la anamnesis auditiva no in
 
 1. Stewart MG, Witsell DL, Smith TL, Weaver EM, Yueh B, Hannley MT. Development and validation of the Nasal Obstruction Symptom Evaluation (NOSE) scale. Otolaryngol Head Neck Surg. 2004;130(2):157-63. doi:10.1016/j.otohns.2003.09.016
 1. Hopkins C, Gillett S, Slack R, Lund VJ, Browne JP. Psychometric validity of the 22-item Sinonasal Outcome Test. Clin Otolaryngol. 2009;34(5):447-54. doi:10.1111/j.1749-4486.2009.01995.x
+1. Toma S, Hopkins C. Stratification of SNOT-22 scores into mild, moderate or severe and relationship with other subjective instruments. Rhinology. 2016;54(2):129-33. doi:10.4193/Rhino15.072. PMID: 27017484
+1. Chowdhury NI, Mace JC, Bodner TE, Alt JA, Deconde AS, Levy JM, et al. Does medical therapy improve SinoNasal Outcomes Test-22 domain scores? An analysis of clinically important differences. Laryngoscope. 2019;129(1):31-6. doi:10.1002/lary.27470. PMID: 30208209
+1. Lang A, Habenbacher M, Moser U, Pock J, Lampl T, et al. Impact of dupilumab on SNOT-22 domain and individual item scores in chronic rhinosinusitis with nasal polyps. Sci Rep. 2025;16:3772. doi:10.1038/s41598-025-33742-9. PMID: 41469500
 
 ### Fisiología nasal
 
@@ -376,3 +415,9 @@ LabSim no genera datos nasales, y lo que registra de la anamnesis auditiva no in
 1. Flanagan P, Eccles R. Spontaneous changes of unilateral nasal airflow in man. A re-examination of the "nasal cycle". Acta Otolaryngol. 1997;117(4):590-5. doi:10.3109/00016489709113443
 1. Sun SS, Hsieh JF, Tsai SC, Ho YJ, Kao CH. Evaluation of nasal mucociliary clearance function in allergic rhinitis patients with technetium 99m-labeled macroaggregated albumin rhinoscintigraphy. Ann Otol Rhinol Laryngol. 2002;111(1):77-9. doi:10.1177/000348940211100112
 1. Boynuegri S, Ozer S, Peksoy I, Acikalin A, Tuna EÜ, Dursun E, et al. Rhinoscintigraphic analysis of nasal mucociliary function in patients with Bell's palsy. Niger J Clin Pract. 2016;19(3):359-63. doi:10.4103/1119-3077.179287
+1. Elad D, Wolf M, Keck T. Air-conditioning in the human nasal cavity. Respir Physiol Neurobiol. 2008;163(1-3):121-7. doi:10.1016/j.resp.2008.05.002. PMID: 18565805
+1. Widdicombe J. Microvascular anatomy of the nose. Allergy. 1997;52(40 Suppl):7-11. doi:10.1111/j.1398-9995.1997.tb04877.x. PMID: 9353554
+1. Keck T, Leiacker R, Riechelmann H, Rettinger G. Temperature profile in the nasal cavity. Laryngoscope. 2000a;110(4):651-4. doi:10.1097/00005537-200004000-00021. PMID: 10764013
+1. Keck T, Leiacker R, Heinrich A, Kühnemann S, Rettinger G. Humidity and temperature profile in the nasal cavity. Rhinology. 2000b;38(4):167-71. PMID: 11190750
+1. Fahy JV, Dickey BF. Airway mucus function and dysfunction. N Engl J Med. 2010;363(23):2233-47. doi:10.1056/NEJMra0910061. PMID: 21121836
+1. Solé D, Kuschnir FC, Pastorino AC, Constantino CF, Galvão C, Chong E Silva DC, et al. V Brazilian Consensus on Rhinitis - 2024. Braz J Otorhinolaryngol. 2025;91(1):101500. doi:10.1016/j.bjorl.2024.101500. PMID: 39388827

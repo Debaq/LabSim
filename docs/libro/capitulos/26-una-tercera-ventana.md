@@ -100,6 +100,33 @@ Tabla: Tres oídos con gap aéreo-óseo y tímpano normal a la otoscopía
 | cVEMP aéreo | umbral alto o ausente | umbral bajo, amplitud grande | umbral bajo, amplitud alta |
 | Lo que cuenta el paciente | oye menos; su voz suena apagada | oye su voz, sus latidos y sus ojos; mareo con ruido o presión | oye menos, a escalones |
 
+### Fístula perilinfática
+
+La **fístula perilinfática** (FPL) es una comunicación anormal entre el espacio de perilinfa del oído interno y el oído medio, la mastoides o la cavidad intracraneal; se forma sobre todo en la ventana oval o en la redonda (Sarna y cols., 2020). A diferencia de la dehiscencia, aquí hay una **solución de continuidad de la membrana o de la pared** y perilinfa que puede salir, no un hueso faltante sobre un conducto con el laberinto membranoso intacto. Las dos pueden actuar como ventana extra, y por eso se parecen.
+
+**Causas.** Una clasificación clínica las agrupa en cuatro (Sarna y cols., 2020):
+
+- **Trauma, enfermedad o cirugía del oído medio o interno**: traumatismo craneal cerrado o penetrante, cirugía del estribo (cerca del 1 % de las estapedotomías y hasta un tercio de las estapedectomías de revisión), y la erosión del laberinto por un colesteatoma (→ cap. 15).
+- **Barotrauma desde afuera**: vuelo, buceo.
+- **Barotrauma desde adentro**: esfuerzo, estornudo, tos, Valsalva.
+- **Sin antecedente**: la FPL idiopática, que según las series antiguas sería de 24 a 51 % de los casos.
+
+**Lo que cuenta el paciente.** Suele partir de forma aguda con pérdida de audición de un oído, acúfeno, vértigo, plenitud del oído o inestabilidad; la plenitud puede ser un síntoma sensible (Sarna y cols., 2020). El **signo de la fístula** es el nistagmo que provoca la presión negativa sobre el conducto auditivo; la presión provoca el signo (Hennebert), y el sonido, el fenómeno de Tullio, que ya se vio en la dehiscencia. En las series su sensibilidad va de 0 a 77 %, de modo que un signo ausente no descarta la FPL, y la plataforma de posturografía con presión tiene poca sensibilidad (Sarna y cols., 2020).
+
+**Por qué el diagnóstico es difícil.**
+
+- **No hay criterios diagnósticos aceptados por todos**; la revisión propone criterios de FPL "definida" y "posible". La prueba de oro histórica, ver la fuga en la cirugía, es subjetiva y no tiene criterios de qué es una fuga (Sarna y cols., 2020).
+- La perilinfa del oído interno humano es de unos 150 µL, así que el líquido que se ve en el oído medio puede ser perilinfa, líquido cefalorraquídeo, anestésico o un trasudado que se junta sobre la platina (Sarna y cols., 2020).
+- La fístula puede ser **intermitente**, lo que suma falsos negativos (Sarna y cols., 2020).
+- Los marcadores bioquímicos tienen límites: la beta-2 transferrina se contamina con sangre, plasma o líquido cefalorraquídeo, y la cocleína-tomoproteína, específica de perilinfa, se aprobó en Japón en 2020 y no está disponible de manera general (Sarna y cols., 2020).
+- La tomografía de alta resolución tuvo más de 80 % de sensibilidad frente a la cirugía en un estudio de 17 pacientes (Sarna y cols., 2020).
+
+**Cómo se separa de la dehiscencia.** A favor de una tercera ventana y no de una FPL están la **autofonía** y el vértigo inducido por sonido o por presión; en la dehiscencia el hueso adelgazado se ve en cortes de tomografía de menos de 0,7 mm. El cVEMP con umbral bajo y amplitud alta aparece en las dos, y la ECochG con razón PS/PA alta no separa dehiscencia de Ménière (Sarna y cols., 2020). Una parte de los pacientes con dehiscencia (cerca de 59 %) refiere un evento desencadenante, de modo que otro 41 % se parece a una FPL idiopática: la historia sola no decide (Sarna y cols., 2020). Para quien evalúa, esto significa que un cuadro auditivo-vestibular que sigue a un trauma o a un barotrauma, con **gap y umbral de VEMP bajo**, se informa tal cual y se deriva; no se puede concluir cuál de las dos es, y tampoco la decide la audiometría.
+
+:::sabias ¿Sabías que?
+La FPL puede ser una de las pocas causas de mareo, acúfeno e hipoacusia que se tratan con cirugía: tras repararla, entre 80 y 95 % de los pacientes mejora los síntomas vestibulares y entre 20 y 49 % la audición (Sarna y cols., 2020).
+:::
+
 ## Razonamiento
 
 ### De un gap sin explicación a una tercera ventana
@@ -342,4 +369,5 @@ La historia del tubo sin efecto era la pista. Cuando el niño tiene una pérdida
 1. Zhou G, Gopen Q. Characteristics of vestibular evoked myogenic potentials in children with enlarged vestibular aqueduct. Laryngoscope. 2011;121(1):220-5. doi:10.1002/lary.21184
 1. Seo YJ, Kim J, Choi JY. Correlation of vestibular aqueduct size with air-bone gap in enlarged vestibular aqueduct syndrome. Laryngoscope. 2016;126(7):1633-8. doi:10.1002/lary.25664
 1. Forquer BD, Sheehy JL. The negative on/off effect in cochlear and early stapedial otosclerosis. Ear Hear. 1981;2(6):256-9. doi:10.1097/00003446-198111000-00003
+1. Sarna B, Abouzari M, Merna C, Jamshidi S, Saber T, Djalilian HR. Perilymphatic fistula: a review of classification, etiology, diagnosis, and treatment. Front Neurol. 2020;11:1046. doi:10.3389/fneur.2020.01046
 1. Halmagyi GM, Aw ST, McGarvie LA, Todd MJ, Bradshaw A, Yavor RA, et al. Superior semicircular canal dehiscence simulating otosclerosis. J Laryngol Otol. 2003;117(7):553-7. doi:10.1258/002221503322113003

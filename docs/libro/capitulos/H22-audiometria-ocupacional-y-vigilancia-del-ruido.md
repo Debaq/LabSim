@@ -7,6 +7,8 @@
 - Tomar una audiometría de vigilancia por vía aérea y reconocer cuándo no se puede creer.
 - Comparar un control con la base según tres criterios de cambio y decidir si corresponde repetir, confirmar o derivar.
 - Decir qué sigue a un cambio confirmado: revisión médica, aviso al trabajador, revisión del puesto y protección auditiva bien ajustada.
+- Usar el vocabulario de la seguridad ocupacional (accidente, enfermedad profesional, incidente, peligro, riesgo) y ubicar el ruido, las vibraciones y los químicos ototóxicos entre los agentes del puesto de trabajo.
+- Explicar cómo se mide el ruido en el puesto y cómo la vigilancia del ambiente alimenta a la de la salud.
 :::
 
 El ruido laboral es una de las pocas causas de hipoacusia que se puede **medir antes de que haga daño** y **detectar mientras todavía se puede detener**. Eso es lo que hace especial a esta audiometría: no busca diagnosticar una enfermedad, sino vigilar a una persona sana (o casi) que se expone cada día a un agente que se sabe dañino. La Organización Mundial de la Salud incluye los programas de conservación de la audición en el trabajo entre las medidas para prevenir la hipoacusia del adulto, y pide examinar de forma sistemática a quien trabaja expuesto a ruido o a químicos (OMS, ficha técnica). Se calcula que el ruido laboral explica alrededor del 16 % de la hipoacusia incapacitante del adulto en el mundo (Nelson y cols., 2005).
@@ -31,6 +33,68 @@ Tiene límites que conviene tener claros:
 - **No es el cribado de los operativos de salud** (→ H3). Allí se busca una pérdida cualquiera, a un nivel fijo y sin base previa. Aquí se busca un **cambio** respecto de la propia base, y por eso importa tanto cómo y cuándo se tomó la primera.
 
 ## Fundamento
+
+### De dónde viene la salud ocupacional
+
+La relación entre el oficio y la enfermedad se ordenó por primera vez en 1700, cuando Bernardino Ramazzini publicó en Módena *De morbis artificum diatriba* (la segunda edición salió en Padua, en 1713) y pidió a los médicos que preguntaran a cada paciente en qué trabaja (Franco y Franco, 2001). Esa pregunta sigue siendo la primera de la entrevista dirigida de esta herramienta (→ *El trabajador*). La vigilancia auditiva es su aplicación a un solo agente: se sabe qué hace el ruido, se mide cuánto recibe cada persona y se examina el oído antes de que el daño llegue a la conversación.
+
+:::comentario En Chile
+**La ley.** La Ley 3.170 de 1916 fue la primera ley chilena de accidentes del trabajo y no cubría las enfermedades profesionales; la Ley 4.055 de 1924 las incorporó. La Ley 16.744, publicada el 1 de febrero de 1968, creó el seguro social obligatorio que rige hoy: cubre los accidentes del trabajo, los de trayecto y las enfermedades profesionales (arts. 1, 5 y 7), lo administran el Instituto de Seguridad Laboral y las mutualidades de empleadores (arts. 8, 10 y 11) y su Título VII regula la prevención (Ley 16.744). <!-- verificar: las leyes 3.170 (1916) y 4.055 (1924) se tomaron de resúmenes de búsqueda (artículo de la Revista Chilena de Derecho de la UC y dictámenes de la SUSESO que citan la 4.055); no se leyó el texto de ninguna de las dos. La fecha de publicación de la Ley 16.744 (1 de febrero de 1968) viene de un dictamen de la SUSESO. -->
+
+**El reglamento de prevención.** El D.S. 40 de 1969 y el D.S. 54 de 1969 (comités paritarios) fueron derogados por el D.S. 44 del Ministerio del Trabajo, publicado el 27 de julio de 2024, que rige desde el 1 de febrero de 2025 (D.S. 44, art. segundo y primero transitorio). Obliga al empleador a identificar los peligros y evaluar los riesgos de cada puesto en una matriz que revisa al menos una vez al año (art. 7) y, si hay un agente capaz de causar una enfermedad profesional, a evaluar ese riesgo y a incorporar los programas de vigilancia del ambiente y de la salud que fijan los protocolos del Ministerio de Salud (art. 67). Para el ruido, ese protocolo es PREXOR (→ *Vigilar el ambiente y vigilar la salud*).
+:::
+
+### El vocabulario de la seguridad ocupacional
+
+Estas palabras se usan juntas en los informes, en las fichas y en las conversaciones con la empresa, y no son sinónimos:
+
+Tabla: Vocabulario de la seguridad ocupacional, con un ejemplo de cada una en un puesto con ruido
+
+| Término | Qué es | Ejemplo con ruido |
+|---|---|---|
+| **Peligro** | Fuente, situación o condición con potencial de causar una lesión o afectar la salud (D.S. 44, art. 2) | Una prensa que genera 100 dB(A) |
+| **Riesgo** | Posibilidad de que el peligro cause un daño, considerando la probabilidad y la gravedad (D.S. 44, art. 2) | La probabilidad de hipoacusia de quien trabaja ocho horas al lado de la prensa |
+| **Accidente del trabajo** | Lesión que una persona sufre a causa o con ocasión del trabajo y que le produce incapacidad o muerte (Ley 16.744, art. 5) | Trauma acústico agudo por una explosión en la faena |
+| **Accidente de trayecto** | El ocurrido en el camino directo entre la casa y el lugar de trabajo, o entre dos lugares de trabajo (Ley 16.744, art. 5) | Un choque camino a la faena |
+| **Enfermedad profesional** | La causada de manera directa por el ejercicio de la profesión o del trabajo, que produce incapacidad o muerte (Ley 16.744, art. 7). Se instala con el tiempo | Hipoacusia sensorioneural por años de exposición |
+| **Incidente o suceso peligroso** | Evento que puede tener como consecuencia un accidente o un daño a la salud, haya o no lesionados (D.S. 44, art. 2) | Una explosión o el fallo de un sistema de presión sin lesionados |
+| **Condición insegura** | Estado del lugar, de la máquina o del ambiente que puede causar daño | Una máquina sin encerramiento ni mantención |
+| **Acto inseguro** | Conducta de la persona que se aparta del procedimiento seguro | Sacarse el protector dentro de la zona ruidosa |
+
+La diferencia práctica entre accidente y enfermedad es el tiempo: el accidente es un evento y la enfermedad, una acumulación. Un trauma acústico agudo (→ cap. 6) se parece a lo primero; la hipoacusia por ruido crónico (→ cap. 33), a lo segundo. "Condición insegura" y "acto inseguro" son términos tradicionales de la prevención; el reglamento vigente habla de peligros y de factores de riesgo, y entre estos incluye la organización del trabajo (D.S. 44, art. 2). La pregunta útil ante un acto inseguro es qué condición lo produce: si el protector se saca porque incomoda, la medida es otro protector y no solo repetir la instrucción. <!-- verificar: no se encontró una fuente oficial chilena que defina "acto inseguro" y "condición insegura"; las dos definiciones de la tabla son el uso habitual en prevención. Se buscó en SUSESO, ISL, ACHS y Mutual sin éxito. -->
+
+:::comentario En Chile
+La Ley 16.744 define el accidente del trabajo como toda lesión que una persona sufra a causa o con ocasión del trabajo y que le produzca incapacidad o muerte (art. 5). Incluye el accidente de trayecto directo entre la casa y el trabajo, o entre dos lugares de trabajo, y el que sufren los dirigentes sindicales en sus cometidos gremiales. Quedan fuera la fuerza mayor extraña que no tenga relación con el trabajo y lo producido intencionalmente por la víctima, y esa prueba le corresponde al organismo administrador. La enfermedad profesional es la causada de manera directa por el ejercicio de la profesión o del trabajo (art. 7); el reglamento enumera las que se consideran tales, y el trabajador puede acreditar ante el organismo administrador que una enfermedad no enumerada también lo es. Esa lista es el D.S. 109 de 1968, que nombra como agentes específicos de riesgo, entre otros, el ruido y el ultrasonido, la vibración, varios metales y solventes, los asfixiantes químicos y un conjunto de agentes biológicos (D.S. 109, art. 18), y exige que la enfermedad haya tenido su origen en los trabajos que entrañan el riesgo, aunque ya no se estén desempeñando al momento del diagnóstico (art. 16). Cómo se califica y se evalúa se desarrolla en el cap. 34.
+:::
+
+### Higiene ocupacional: reconocer, evaluar, controlar
+
+La higiene ocupacional estudia los agentes del ambiente de trabajo que pueden enfermar, y su método tiene tres pasos: **reconocer** qué agentes hay en cada puesto, **evaluar** cuánta exposición recibe cada persona y **controlar** esa exposición. Es el mismo orden que el reglamento chileno exige al empleador: identificar peligros, evaluar riesgos y adoptar medidas preventivas en un orden de prelación (D.S. 44, arts. 7 y 9). Ese orden va de la medida más eficaz a la menos: evitar o eliminar el riesgo, controlarlo en su fuente con ingeniería, reducirlo con medidas administrativas y organizacionales y, solo mientras quede un riesgo residual, usar elementos de protección personal (D.S. 44, art. 9). En el ruido: apagar o reemplazar la máquina; encerrarla o amortiguarla; rotar o acortar la exposición; y, al final, el protector (→ *Qué hacer con un cambio confirmado*).
+
+Los agentes se agrupan por su naturaleza. Para quien examina oídos importan cuatro grupos:
+
+Tabla: Agentes del ambiente de trabajo con efecto posible sobre la audición
+
+| Grupo | Ejemplos de la lista de PREXOR y del D.S. 109 | Qué le importa al audiólogo |
+|---|---|---|
+| **Físicos: ruido** | Ruido continuo, fluctuante e impulsivo | Es el agente de esta herramienta (→ *Medir el ruido: la dosis*) |
+| **Físicos: vibraciones** | Mano-brazo (herramientas) y cuerpo entero (vehículos, maquinaria) | Suelen venir con ruido; pueden sumar al riesgo |
+| **Químicos: solventes orgánicos** | Tolueno, xileno, estireno, tricloroetileno | Pueden dañar la audición solos y sumarse al ruido |
+| **Químicos: metales** | Plomo, mercurio, manganeso, arsénico | Asociación con la audición en estudios de población |
+| **Químicos: asfixiantes** | Monóxido de carbono, cianuro de hidrógeno | El monóxido de carbono potencia el daño del ruido en animales |
+| **Biológicos** | Agentes infecto-contagiosos y parasitarios, vegetales (hongos, fibras) | Poca relación con el oído del trabajador; sí con la higiene de quien examina |
+
+**Vibraciones.** Una vibración es el movimiento oscilatorio de las partículas de un cuerpo sólido. Se distingue la que entra por la mano y el brazo, que viene de las herramientas manuales, de la de cuerpo entero, que viene del asiento o del piso (D.S. 594, arts. 83 y 84). Importan al audiólogo porque la misma herramienta suele hacer ruido y vibración a la vez. En un estudio de trabajadores de una industria pesada, con 189 expuestos a vibración mano-brazo, el riesgo de hipoacusia fue mayor en el tercer y el cuarto cuartil de exposición, y los autores concluyen que trabajar con máquinas que vibran en un ambiente con ruido aumenta el riesgo (Pettersson y cols., 2012). Ese diseño no permite atribuir el aumento a la vibración sola: lo que muestra es que, donde hay vibración y ruido juntos, el riesgo de ruido no se evalúa solo con el ruido.
+
+**Químicos ototóxicos laborales.** Son sustancias del puesto de trabajo que dañan el oído, además de los fármacos ototóxicos que se ven en el cap. 8. La lista de PREXOR agrupa los **solventes orgánicos** (tolueno, xileno, estireno, tricloroetileno), los **metales** (mercurio, manganeso, plomo, arsénico) y los **gases y sales** (monóxido de carbono, cianuro de hidrógeno y cianuros) (MINSAL, 2013, anexo 12.4). La evidencia varía de una clase a otra:
+
+- **Solventes.** En animales dañan sobre todo las células ciliadas externas; en trabajadores, las frecuencias afectadas no coinciden del todo con las del ruido, y los solventes pueden interactuar con él de forma sinérgica (Fuente y McPherson, 2006). En imprentas y fábricas de pintura, el riesgo ajustado de hipoacusia, frente a trabajadores no expuestos, fue 4 veces mayor con ruido solo, 11 veces con ruido más tolueno y 5 veces con una mezcla de solventes (Morata y cols., 1993). En 290 trabajadores de astilleros de yates y de una fábrica de plásticos expuestos a estireno, la probabilidad de hipoacusia casi se cuadruplicó (razón de probabilidades 3,9; IC 95 %: 2,4 a 6,2), y con ruido además fue de dos a tres veces mayor que con cada agente por separado (Śliwińska-Kowalska y cols., 2003).
+- **Metales.** En 3.698 adultos de la población general de EE. UU. (NHANES 1999-2004), el quintil más alto de plomo en sangre se asoció con un promedio tonal 18,6 % mayor (IC 95 %: 7,4 a 31,1) y el de cadmio, con uno 13,8 % mayor (IC 95 %: 4,6 a 23,8), ajustando por ruido laboral y no laboral (Choi y cols., 2012). Es un estudio transversal con exposiciones ambientales bajas, no ocupacionales. Para mercurio, manganeso y arsénico no se revisó evidencia en este libro.
+- **Asfixiantes.** En ratas, el monóxido de carbono potencia la pérdida inducida por ruido, aunque la potenciación deja de crecer cuando el ruido es más intenso (Rao y Fechter, 2000). Para el cianuro de hidrógeno no se revisó evidencia.
+
+En la práctica, el trabajador con exposición a estos agentes se pregunta por ellos en la entrevista (→ *El trabajador*), y PREXOR sube su nivel de seguimiento del I al II cuando la exposición a ototóxicos laborales es actual (MINSAL, 2013). Una pérdida que no calza con la muesca del ruido y viene con solventes se estudia con audiometría diagnóstica (→ cap. 33).
+
+**Agentes biológicos.** La lista del D.S. 109 incluye agentes infecto-contagiosos y parasitarios (brucela, bacilo tuberculoso, leptospira, rabia, tétano, virus de la inmunodeficiencia humana, de la hepatitis B y C, hantavirus), insectos y arácnidos ponzoñosos y vegetales (hongos y fibras), transmitidos por el trabajo agrícola, pecuario, minero, manufacturero y **sanitario** (art. 18). Para el oído de un trabajador expuesto a ruido tienen poca relevancia. El rubro sanitario sí incluye a quien examina: el contacto con secreciones del conducto, el cerumen con sangre y las superficies que tocan muchas personas (fonos, olivas, pulsador) son la exposición biológica del audiólogo, y las precauciones habituales son lavarse las manos, usar guantes ante secreciones y limpiar los transductores entre pacientes (→ H1). <!-- verificar: no se enlazó una norma chilena de precauciones estándar (por ejemplo, del Minsal) para la limpieza de fonos y olivas; la práctica es la de H1. -->
 
 ### Medir el ruido: la dosis
 
@@ -75,6 +139,21 @@ El riesgo detrás de esas cifras no es de todo o nada. En un análisis de NIOSH 
 **Chile.** El D.S. 594 (art. 74 y 75) limita la exposición a **85 dB(A) lento por 8 horas**, medidos en la posición del oído del trabajador, y da una tabla de tiempos para otros niveles que corresponde a una tasa de 3 dB (82 dB(A): 16 horas; 88: 4 horas; 100: 15 minutos), para trabajadores sin protección personal. El **criterio de acción** de PREXOR, desde el cual se entra a vigilancia de la salud, es una dosis de 50 % (82 dB(A) en 8 horas) o, si hay ruido de impulso, 135 dB(C) peak (MINSAL, 2013; Ministerio de Salud, 1999).
 :::
 
+### Medir en el puesto: sonómetro y dosímetro
+
+La dosis se calcula con niveles que alguien midió en el puesto de trabajo. Se usan dos instrumentos, que responden preguntas distintas:
+
+- **Sonómetro integrador.** Mide en un punto y durante un intervalo, y entrega el nivel equivalente de ese tramo. Describe un **lugar**: sirve para mapear la planta, ubicar las fuentes y medir tareas de nivel estable.
+- **Dosímetro.** Lo lleva puesto el trabajador, con el micrófono cerca de su oído, y acumula todo lo que recibe durante la jornada: da directamente la dosis o el nivel normalizado a 8 horas. Describe a la **persona**: sirve cuando el trabajador se mueve entre puestos o el ruido sube y baja.
+
+Para el ruido de impulso, el instrumento debe registrar el nivel **peak** en dB(C), que no se puede deducir de un promedio en dB(A). En un puesto con muchas personas se mide a un representante de cada **grupo de exposición similar** (quienes hacen la misma tarea en las mismas condiciones), y se describen las tareas, el tiempo de cada una y la presencia de ciclos de trabajo, porque dos ocho horas con el mismo promedio pueden esconder tareas muy distintas (MINSAL, 2013).
+
+La medición no la hace quien toma la audiometría. En el seguro chileno la hace el equipo de higiene industrial y prevención de riesgos del organismo administrador, o un proveedor externo que demuestra su competencia ante el ISP, y el resultado llega al equipo de salud como una **nómina** de expuestos con su puesto, su tarea y su dosis diaria (MINSAL, 2013; ISP, s. f.). Lo que sí le corresponde a quien examina es saber qué número recibe: de qué puesto es, cuándo se midió, con qué instrumento y con qué criterio. Un trabajador cuyo cambio de umbral no se explica con la dosis de su ficha pide una medición nueva, no solo un diagnóstico.
+
+:::comentario En Chile
+El D.S. 594 pide medir el ruido estable y el fluctuante con un **sonómetro integrador** o con un **dosímetro** de tipo 0, 1 o 2 según las normas IEC 651 (1979), IEC 804 (1985) y ANSI S1.4 (1983), y expresarlo como nivel de presión sonora continuo equivalente en dB(A) lento, en la posición del oído del trabajador (arts. 72 a 74). Define ruido estable como el que fluctúa 5 dB(A) lento o menos durante un minuto de observación, fluctuante como el que fluctúa más, e impulsivo como el de impulsos de menos de un segundo a intervalos de más de un segundo (art. 71). Para el impulsivo mide el nivel peak en dB(C) (art. 78): fija 95 dB(C) peak para 8 horas diarias, con tiempos menores a niveles mayores (por ejemplo, 2,79 segundos a 135 dB(C) peak), y prohíbe, sin protección, superar 140 dB(C) peak (arts. 79 a 81). En ningún caso se permite, sin protector, un nivel continuo equivalente sobre 115 dB(A) lento (art. 77). PREXOR manda que las evaluaciones ambientales sigan lo que indique el ISP, que publicó un instructivo para la aplicación del D.S. 594 en ruido y un protocolo para la medición del ruido impulsivo (MINSAL, 2013). Además, el ISP evalúa a los proveedores de evaluaciones de exposición a ruido ocupacional en un programa propio (PEECAPRO) (ISP, s. f.). <!-- verificar: los números y años de las resoluciones del ISP que oficializan el instructivo (Res. 1080 de 2011) y el protocolo de ruido impulsivo (Res. 171 de 2013) vienen de un texto escaneado de PREXOR con OCR dudoso, y la norma dice "o el vigente"; no se verificaron en ispch.cl. -->
+:::
+
 ### Desplazamiento temporal y desplazamiento permanente
 
 Al terminar un turno ruidoso el umbral está peor que al empezarlo. Es el **desplazamiento temporal del umbral** (TTS): el oído "tapado" y el pitido de la noche después de un concierto. Vuelve a lo anterior en minutos u horas si el oído descansa en silencio (NIOSH, 1998); otras revisiones lo dan por recuperado en 24 a 48 horas (Le y cols., 2017). Si la exposición se repite o es muy intensa, parte del desplazamiento **no revierte**: es el **desplazamiento permanente** (PTS), con pérdida de células ciliadas externas que no se regeneran (→ cap. 6, B2).
@@ -104,6 +183,45 @@ Tres razones, una detrás de otra, explican por qué toda la vigilancia se mide 
 3. **Lo que el oído ya traía.** Una pérdida que existía antes de la faena **no es de esa faena**, y solo una base bien tomada, con fecha y condiciones, lo puede demostrar. Por eso la base se hace al ingreso, en las mejores condiciones, y se guarda por años (→ cap. 34).
 
 Esto introduce una pregunta que las normas contestan distinto: ¿se debe **corregir por la edad** el cambio, restándole lo que habría perdido de todas formas un oído que envejece (→ cap. 5)? OSHA lo permite como opción, con tablas (apéndice F); NIOSH lo desaconseja y la guía chilena no lo contempla. Se discute con un ejemplo en *Cómo se informa*.
+
+### Vigilar el ambiente y vigilar la salud
+
+Un programa de conservación de la audición tiene dos vigilancias que se alimentan entre sí. La **vigilancia del ambiente** pregunta cuánto ruido hay y quién lo recibe; su resultado define quién entra a la **vigilancia de la salud**, que pregunta si el oído de esa persona cambió. A su vez, un cambio confirmado en un trabajador es el aviso de que el control del ruido no está funcionando y obliga a volver al ambiente. Esta herramienta trata sobre todo la segunda mitad; la primera es la que decide a quién se examina, con qué frecuencia y qué se hace después.
+
+El ciclo del ambiente tiene cinco momentos: **identificar** puestos, tareas y personas expuestas; **medir** y comparar con el criterio de acción; **controlar** si se lo alcanza o supera; **reevaluar** para comprobar que el control funcionó; y **repetir** a intervalos fijos, porque una exposición cambia cuando cambia el proceso.
+
+:::comentario En Chile
+PREXOR (Norma Técnica N.° 156, D.Ex. 1052 de 2013) define la **vigilancia ambiental** como el programa de evaluaciones ambientales periódicas y medidas de control, y la **vigilancia de la salud auditiva** como los controles médicos y audiométricos periódicos de quienes están expuestos a niveles iguales o superiores al criterio de acción (MINSAL, 2013, sección 7). El programa está a cargo de un equipo multidisciplinario de los administradores del seguro (salud ocupacional, prevención de riesgos e higiene industrial). Lo que dice sobre el ambiente:
+
+- **Criterios de acción:** dosis de 50 % (82 dB(A) en 8 horas) o, con ruido impulsivo, 135 dB(C) peak.
+- **Por debajo del criterio**, el ente evaluador verifica con chequeos periódicos que no pasen de **3 años**.
+- **Sobre el criterio**, recomienda medidas de control, y el empleador tiene un plazo máximo de **1 año** si la dosis está entre 50 % y 1.000 % (95 dB(A)), y de **6 meses** si llega a 1.000 % o si el ruido impulsivo alcanza los 135 dB(C) peak. El plazo corre desde el envío del informe de medición, que el evaluador debe mandar a la empresa dentro de **1 mes**.
+- **Reevaluación** para verificar que las medidas funcionaron; si cuando vence el plazo no se aplicó ninguna, el organismo administrador informa a la autoridad sanitaria.
+- **Programa de la empresa:** puestos, tareas, niveles, trabajadores, tiempos de exposición y medidas, con un **mapa de riesgo** cualitativo y cuantitativo, la información de los puestos actualizada al menos cada **6 meses** y el programa revisado al menos una vez al año.
+- **Retroalimentación:** si una audiometría de confirmación muestra una hipoacusia sensorioneural laboral, el empleador implementa de inmediato las medidas de control y verifica su efectividad (MINSAL, 2013, secciones 7.1 y 8.1).
+:::
+
+### El ruido fuera del trabajo
+
+Hay otro ruido, el **ambiental o comunitario**: el que emiten el tránsito, la industria, las faenas de construcción y los locales de entretención, y que reciben las personas en su casa, en la escuela o en la calle. Se regula con otra lógica que el laboral. Se mide fuera del lugar de trabajo, con límites por zona de la ciudad y por horario, y lo que protege es el descanso y la molestia más que la cóclea: los límites residenciales son de 55 dB(A) de día y 45 de noche, unos 30 dB bajo el límite laboral de 85. Aun así importa a quien vigila la audición, por dos razones: el ruido de ocio y el de la comunidad **suman** al laboral en la historia de cada trabajador (→ *El trabajador*), y es lo que denuncian los vecinos de una faena o de un local. La OMS publicó guías de ruido ambiental para la Región Europea con niveles recomendados para el ruido de transporte, de aerogeneradores y de ocio (OMS Europa, 2018).
+
+:::comentario En Chile
+El ruido de fuentes fijas (industrias, faenas de construcción, discotecas, talleres, parques eólicos) lo regula una **norma de emisión** del Ministerio del Medio Ambiente, que fiscaliza la Superintendencia del Medio Ambiente:
+
+- **D.S. 38 de 2011.** Es la norma de emisión de ruidos generados por fuentes que indica, elaborada a partir de la revisión del D.S. 146 de 1997 y publicada en el Diario Oficial el 12 de junio de 2012. Es la que rige hoy. Fija límites en dB(A) para el receptor, según la zona de uso de suelo; en zona residencial son 55 de día (7:00 a 20:59) y 45 de noche (21:00 a 6:59) (MMA, 2011).
+- **D.S. 14 de 2024.** Establece una nueva norma de emisión de ruido para fuentes fijas, elaborada a partir de la revisión del D.S. 38 de 2011, publicada el 27 de febrero de 2026. Deroga al D.S. 38 cuando entre en vigencia: **30 meses** después de su publicación (hacia fines de agosto de 2028), o **18 meses** para los proyectos que ingresen al Sistema de Evaluación de Impacto Ambiental desde esa fecha (arts. 31 y 32). Mantiene cuatro zonas urbanas, con los límites de la tabla siguiente (art. 6).
+:::
+
+Tabla: Límites de emisión por zona urbana en el D.S. 14 de 2024 del Ministerio del Medio Ambiente
+
+| Zona | Diurno, 7:00 a 20:59 | Nocturno, 21:00 a 6:59 |
+|---|---|---|
+| Zona I | 55 dB(A) | 45 dB(A) |
+| Zona II | 60 dB(A) | 45 dB(A) |
+| Zona III | 65 dB(A) | 50 dB(A) |
+| Zona IV | 70 dB(A) | 70 dB(A) |
+
+El nuevo decreto no regula como fuentes fijas el tránsito, el comportamiento ruidoso dentro de una vivienda, el uso del espacio público, las alarmas ni las tronaduras, que pueden quedar bajo normas específicas u ordenanzas municipales (considerando 7). Cerca del 50 % de las denuncias que recibe la Superintendencia del Medio Ambiente son de ruido de fuentes reguladas por el D.S. 38 (considerando 8). El D.S. 594, que es la norma del trabajo, no se aplica a la comunidad, ni estos límites al trabajador dentro de su faena. <!-- verificar: (1) la NCh 1619 del INN sobre evaluación del ruido en relación con la reacción de la comunidad no se pudo verificar (no apareció en bcn.cl ni en el INN en las búsquedas); por eso no se cita en el texto visible. (2) El D.S. 38/2011 no se leyó: su identificador en bcn.cl no se encontró; título, fecha de publicación y su origen en la revisión del D.S. 146/1997 vienen de resoluciones de la SMA y del propio D.S. 14/2024 (que lo cita como "decreto supremo N° 38, de 2011"); no se leyó la cláusula que deroga al D.S. 146. (3) Los límites del D.S. 38/2011 por zona no se leyeron; la tabla es la del D.S. 14/2024, y solo la zona residencial (55/45) se confirmó para el D.S. 38 en una fuente secundaria (BCN, Leyfácil). -->
 
 ## Antes de empezar
 
@@ -136,6 +254,20 @@ Estas son las fuentes: OSHA (29 CFR 1910.95, párrafos (g), (h) y apéndice D), 
 **Cuándo en el turno.** NIOSH recomienda tomar el control anual **durante el turno normal** del trabajador, al final de preferencia, para ver el desplazamiento temporal; la guía chilena pide, en cambio, reposo previo para las audiometrías en cámara, que son las que confirman. Son dos preguntas distintas: la de NIOSH es "¿se está protegiendo?" y la de la guía chilena es "¿el umbral es el permanente?".
 :::
 
+### Calidad del centro: quién verifica al que verifica
+
+Un resultado vale lo que vale el centro que lo produjo, y tres factores lo determinan: el **audiómetro** (calibración trazable), la **cabina** y el **examinador** (formación y práctica). La guía chilena llama al examinador un factor crítico de la evaluación sin enmascarar (ISP, 2026). Que esos tres factores se verifiquen desde fuera, y no solo desde dentro del centro, es lo que da peso a un informe que otra persona va a leer meses después (→ cap. 34).
+
+:::comentario En Chile
+**PEECCA** es el Programa de Evaluación de los Centros Audiométricos del Instituto de Salud Pública. Existe porque la Circular B33/47 de 2009 del Ministerio de Salud dispone que la evaluación audiológica médico-legal solo puede hacerla un centro participante, y que las COMPIN solo resuelven con evaluaciones hechas en esos centros (ISP, 2021). Por eso está destinado a los centros que quieren realizar evaluaciones audiológicas en el contexto médico-legal, y no es un requisito de la audiometría de vigilancia. Qué evalúa, según sus bases:
+
+- **Examinador:** profesional de la salud con especialidad en audiología y competencia verificable en otoscopía, umbrales aéreos y óseos, logoaudiometría, diapasones e impedanciometría, pruebas de adaptación patológica, reclutamiento y pseudoacusia, y cálculo de la incapacidad según la Circular 3G/40; además, interpretación de potenciales evocados de tronco cerebral y de estado estable y de emisiones otoacústicas, y **audiometría personal anual vigente**.
+- **Instrumentos:** audiómetro, cámara audiométrica, impedanciómetro y otoscopio, con su certificado de calibración, historial de mantenciones y condiciones ambientales.
+- **Etapas:** postulación, evaluación documental y en terreno o remota, plan de acciones y resultado. La participación dura 2 años la primera vez y 3 las siguientes. El ISP publica el listado de centros vigentes (ISP, 2021; ISP, s. f.).
+
+Para la vigilancia, la guía 3.0 pide que la verificación objetiva de la calibración, cada seis meses, se haga con los estándares del programa de evaluación de proveedores de servicios de audiometría del ISP (ISP, 2026). <!-- verificar: la página del ISP titula la resolución que actualiza las bases como "Resolución 1176/2021", y el archivo enlazado se rotula "Resolución 1179"; es un PDF escaneado que no se pudo leer. Las bases (v1, abril 2021) llaman al programa "PECA"; el ISP lo llama PEECCA en su sitio. -->
+:::
+
 ### Conoce tu equipo: el audiómetro
 
 El audiómetro es el de H3 (dos canales y un centro con lo común). En la vigilancia ocupacional solo se usa **un canal**, con tono por **vía aérea**, y todo lo demás queda apagado. La figura marca lo que se revisa en el chequeo del día y lo que no se toca.
@@ -160,6 +292,16 @@ El audiómetro es el de H3 (dos canales y un centro con lo común). En la vigila
 - **Cuándo fue su última exposición.** Se pregunta y se anota la hora. Si no cumple el reposo en un control de base, se reagenda.
 - **Instrucciones** como en H3. En vigilancia son más importantes, porque el trabajador suele temer que el resultado lo saque del puesto. Hay que decirle que el examen **no lo evalúa a él**, y que "aunque sea apenas" significa que responda a los tonos que casi no oye, y no a los que oye claros.
 - **Consentimiento y confidencialidad.** El trabajador consiente al examen de su salud, no a que **su** resultado individual llegue a la empresa. A la empresa le llegan datos agrupados y sin nombre: cuántos expuestos, cuántos evaluados, cuántos con alteración (MINSAL, 2013; SUSESO).
+
+### El puesto del examinador
+
+Quien examina también trabaja en un puesto. Pasa horas sentado en la misma postura, con el cuello flexionado para mirar la pantalla y al trabajador a la vez, el brazo extendido hacia el atenuador y el pulsador y el tronco girado hacia el paciente; en terreno, además, arma y desarma la cabina y traslada el audiómetro y los equipos. La **ergonomía** adapta el puesto a la persona para evitar que esa repetición se transforme en lesión. Se evalúan tres factores biomecánicos —la **fuerza**, la **postura** y la **repetitividad**— y la lesión que producen se llama trastorno musculoesquelético (TME): una alteración de las unidades músculo-tendinosas, de los nervios periféricos o del sistema vascular (D.S. 594, art. 110 a).
+
+Cuatro ajustes hacen la mayor parte del trabajo: la silla y la consola a una altura en que los antebrazos queden apoyados y los hombros relajados; la pantalla a la altura de los ojos, de frente y no de lado; lo que se usa en cada prueba (pulsador, atenuador, formulario) al alcance sin girar el tronco; y pausas breves y cambio de tarea entre trabajadores. Las cargas se reparten o se llevan en carro. <!-- verificar: estos cuatro ajustes son principios generales de ergonomía de oficina y no tienen una fuente específica para audiólogos; no se encontró un estudio verificado de TME en audiólogos. Falta una fuente que los respalde (por ejemplo, la guía de la norma técnica TMERT o una norma ISO de ergonomía). -->
+
+:::comentario En Chile
+El D.S. 594 obliga al empleador a evaluar la repetitividad, la fuerza y las posturas forzadas de las tareas que comprometen las extremidades superiores, mediante observación directa y conforme a la norma técnica del Ministerio de Salud (TMERT), a aplicar un programa de control para eliminar o mitigar el riesgo detectado, y a informar por escrito a los trabajadores los factores a los que están expuestos y los métodos correctos de trabajo (arts. 110 a.1 a 110 a.3). El manejo manual de carga lo regula la Ley 20.001 y su reglamento, el D.S. 63 de 2005 (modificado por el D.S. 48 de 2018; D.S. 44, considerando 9), y los riesgos ergonómicos deben figurar en la matriz de peligros de cada puesto (D.S. 44, art. 7). Las lesiones de huesos, articulaciones y músculos, entre ellas tendinitis, sinovitis y miositis, figuran en la lista de enfermedades profesionales del D.S. 109 (art. 19, n.° 12). <!-- verificar: no se leyó el texto de la norma técnica TMERT (la copia del ISL no se pudo descargar); su resolución y año varían entre fuentes (2011-2012), y el protocolo de vigilancia habría sido actualizado en diciembre de 2024 (Res. Ex. 1660, según una nota del IST) sin verificar. -->
+:::
 
 ## Paso a paso
 
@@ -387,6 +529,13 @@ LabSim tiene el **audiómetro** completo de H3 y los dos pacientes del capítulo
 1. Ministerio de Salud de Chile. Protocolo sobre normas mínimas para el desarrollo de programas de vigilancia de la pérdida auditiva por exposición a ruido en los lugares de trabajo (PREXOR). Norma Técnica N.° 156, aprobada por D.Ex. N.° 1052 del 14-10-2013. Santiago: MINSAL; 2013.
 1. Ministerio de Salud de Chile. Decreto Supremo N.° 594 de 1999: reglamento sobre condiciones sanitarias y ambientales básicas en los lugares de trabajo, arts. 74 y 75.
 1. Superintendencia de Seguridad Social. Compendio de normas del seguro social de accidentes del trabajo y enfermedades profesionales, Libro IV, Título II, Letra F, Capítulo VIII. Disponible en: https://www.suseso.cl/613/alt-propertyvalue-485138.pdf
+1. Ley 16.744 de 1968: establece normas sobre accidentes del trabajo y enfermedades profesionales. Biblioteca del Congreso Nacional. Disponible en: https://www.bcn.cl/leychile/navegar?idNorma=28650 (texto consolidado leído el 18-10-2026).
+1. Ministerio del Trabajo y Previsión Social. Decreto 109 de 1968: reglamento para la calificación y evaluación de los accidentes del trabajo y enfermedades profesionales (versión vigente desde el 07-03-2006, última modificación registrada en la BCN). Disponible en: https://www.bcn.cl/leychile/navegar?idNorma=9391
+1. Ministerio del Trabajo y Previsión Social. Decreto 44 de 2023 (publicado el 27-07-2024): nuevo reglamento sobre gestión preventiva de los riesgos laborales para un entorno de trabajo seguro y saludable. Disponible en: https://www.bcn.cl/leychile/navegar?idNorma=1205298
+1. Instituto de Salud Pública de Chile. Programa de Evaluación de los Centros Audiométricos (PEECCA) y Bases del programa (v1, abril de 2021). Disponible en: https://www.ispch.cl/salud-de-los-trabajadores/programa-de-evaluacion-externa-de-la-calidad/de-centros-audiometricos/
+1. Instituto de Salud Pública de Chile (s. f.). Programas de evaluación externa de la calidad: de proveedores de evaluaciones de exposición a ruido ocupacional (PEECAPRO) y de proveedores de servicios de audiometría. Disponible en: https://www.ispch.cl/salud-de-los-trabajadores/programa-de-evaluacion-externa-de-la-calidad/
+1. Ministerio del Medio Ambiente. Decreto Supremo N.° 38 de 2011: norma de emisión de ruidos generados por fuentes que indica, elaborada a partir de la revisión del D.S. 146 de 1997. Diario Oficial, 12-06-2012 (texto no leído; ver nota en el capítulo).
+1. Ministerio del Medio Ambiente. Decreto Supremo N.° 14 de 2024: establece norma de emisión de ruido para fuentes fijas, elaborada a partir de la revisión del D.S. 38 de 2011. Diario Oficial N.° 44.387, 27-02-2026 (CVE 2775000). Disponible en: https://www.diariooficial.interior.gob.cl/publicaciones/2026/02/27/44387/01/2775000.pdf
 1. Ministerio de Salud de Chile. Circular 3G/40 de 1983: instructivo para la calificación y evaluación de las enfermedades profesionales del reglamento D.S. N.° 109/1968 de la Ley 16.744 (citada por PREXOR y la SUSESO; no se leyó el original).
 
 ### Evidencia
@@ -397,3 +546,11 @@ LabSim tiene el **audiómetro** completo de H3 y los dos pacientes del capítulo
 1. Kujawa SG, Liberman MC. Adding insult to injury: cochlear nerve degeneration after "temporary" noise-induced hearing loss. J Neurosci. 2009;29(45):14077-85. doi:10.1523/JNEUROSCI.2845-09.2009
 1. Shaw EA. Transformation of sound pressure level from the free field to the eardrum in the horizontal plane. J Acoust Soc Am. 1974;56(6):1848-61. doi:10.1121/1.1903522
 1. Fettiplace R, Nam JH. Tonotopy in calcium homeostasis and vulnerability of cochlear hair cells. Hear Res. 2019;376:11-21. doi:10.1016/j.heares.2018.11.002
+1. Franco G, Franco F. Bernardino Ramazzini: the father of occupational medicine. Am J Public Health. 2001;91(9):1382. doi:10.2105/AJPH.91.9.1382. PMID 11527763
+1. Pettersson H, Hagberg M, Nilsson T, Burström L, Lundström R. Noise and hand-arm vibration exposure in relation to the risk of hearing loss. Noise Health. 2012;14(59):159-65. doi:10.4103/1463-1741.99887. PMID 22918146
+1. Fuente A, McPherson B. Organic solvents and hearing loss: the challenge for audiology. Int J Audiol. 2006;45(7):367-81. doi:10.1080/14992020600753205. PMID 16938795
+1. Morata TC, Dunn DE, Kretschmer LW, Lemasters GK, Keith RW. Effects of occupational exposure to organic solvents and noise on hearing. Scand J Work Environ Health. 1993;19(4):245-54. doi:10.5271/sjweh.1477. PMID 8235513
+1. Śliwińska-Kowalska M, Zamysłowska-Szmytke E, Szymczak W, Kotylo P, Fiszer M, Wesołowski W, et al. Ototoxic effects of occupational exposure to styrene and co-exposure to styrene and noise. J Occup Environ Med. 2003;45(1):15-24. doi:10.1097/00043764-200301000-00008. PMID 12553175
+1. Choi YH, Hu H, Mukherjee B, Miller J, Park SK. Environmental cadmium and lead exposures and hearing loss in U.S. adults: NHANES 1999-2004. Environ Health Perspect. 2012;120(11):1544-50. doi:10.1289/ehp.1104863. PMID 22851306
+1. Rao DB, Fechter LD. Increased noise severity limits potentiation of noise induced hearing loss by carbon monoxide. Hear Res. 2000;150(1-2):206-14. doi:10.1016/s0378-5955(00)00202-1. PMID 11077204
+1. World Health Organization Regional Office for Europe. Environmental noise guidelines for the European Region. Copenhague: WHO Europe; 2018 (publicado en enero de 2019). ISBN 9789289053563. Disponible en: https://www.who.int/europe/publications/i/item/9789289053563

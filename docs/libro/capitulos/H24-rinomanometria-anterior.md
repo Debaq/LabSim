@@ -65,9 +65,43 @@ Como la resistencia cambia a lo largo de la curva, hay que leerla en un **punto 
 
 ¿Por qué 150 Pa y no menos? A presiones muy bajas, el flujo recién se está poniendo en marcha, la señal es chica y el ruido pesa mucho. Pero a presiones muy altas no todos los pacientes llegan, sobre todo los de nariz amplia. En una serie de 20.069 mediciones en reposo, entre 4,5 y 8,6 % no alcanzó los 150 Pa según la fase del ciclo respiratorio (Vogt y cols., 2016). 150 Pa es un compromiso: suficientemente alto para tener señal, suficientemente bajo para que casi todos lleguen.
 
+### Cottle y Broms: dos maneras de leer la misma curva
+
+Los informes de rinomanometría anterior activa vienen en dos estilos, que parten de la misma medida (presión y flujo de cada fosa) y la leen distinto. Conviene reconocerlos porque un equipo, un texto o un informe antiguo pueden usar uno u otro.
+
+El **modelo de Cottle** es el más antiguo. Registra la presión y el flujo como trazados en el tiempo, igual que una cinta de electrocardiograma, con una velocidad de papel (5, 10 o 50 mm/s) y una calibración elegidas por quien mide, y los analiza **por su forma**: el patrón de la curva, la frecuencia, la amplitud, un "coeficiente de trabajo" y un "factor de cuatro respiraciones" (Tucker, 1977). Fija **presiones** (75, 100, 150 y 300 Pa) y lee **cuánto flujo pasa** en cada una. Su fuerte es la forma: una curva dice por sí sola si la obstrucción es anterior o posterior, o si la fosa es muy amplia. <!-- verificar: Tucker (1977) enumera los parámetros de Cottle (pattern, rate, amplitude, work coefficient, four breath factor) pero su resumen no los define; las presiones de lectura (75, 100, 150, 300 Pa), la velocidad de papel y la calibración vienen del material de clase y no se cotejaron con una fuente primaria. -->
+
+El **modelo de Broms** (→ siguiente apartado) integra presión y flujo en un gráfico X-Y, lee la curva donde la corta un **radio fijo** y entrega un **número**: la resistencia de cada fosa y la total. Su fuerte es la comparación: dos narices, o la misma nariz en dos días, quedan en la misma escala.
+
+Tabla: Cottle y Broms frente a frente
+
+| | Cottle | Broms |
+|---|---|---|
+| Qué se fija | Presiones (75, 100, 150, 300 Pa); se lee el flujo en cada una | Un radio en el gráfico presión-flujo; se lee la presión y el flujo donde la curva lo corta |
+| Cómo se registra | Trazados en el tiempo (velocidad de papel y calibración) | Gráfico X-Y de cuatro cuadrantes |
+| Qué entrega | La **forma** de la curva, y flujo o resistencia a esas presiones | Una **resistencia** por fosa y total |
+| Qué hace bien | Reconocer un patrón (dónde está la obstrucción) | Comparar entre pacientes, fosas y fechas |
+| Qué le falta | Un número único para comparar | El número solo no dice dónde está la obstrucción: para eso se mira la forma de la curva |
+
+Los dos usan la misma definición, R = ΔP / V̇, y los dos separan mucosa de estructura con el vasoconstrictor. La diferencia está en **qué punto de la curva se mira** y en **qué se hace con su forma**. Desde la escuela de Cottle se describen patrones de curva con un significado clínico aproximado:
+
+Tabla: Patrones de curva en la lectura de Cottle
+
+| Patrón | Se asocia a |
+|---|---|
+| Presiones altas y curvas irregulares | Obstrucciones nasales importantes |
+| Presiones inspiratorias altas | Obstrucción anterior (por ejemplo, desviación del tabique o un pólipo anterior) |
+| Pausa espiratoria prolongada (más de 1 s) | Obstrucción posterior |
+| Presiones muy bajas, flujo rápido | Fosa de luz amplia o rinitis atrófica |
+| Descanso a la mitad del ciclo | Enfermedad cardiopulmonar crónica |
+
+<!-- verificar: la tabla de patrones sale del material de clase (Cottle, citado a un tratado de ORL); no se encontró una fuente primaria que la respalde. No afirma un diagnóstico: orienta qué mirar en la rinoscopía. -->
+
+Una curva de aspecto anormal no sustituye a la rinoscopía ni a la endoscopía: orienta qué buscar. En este libro la resistencia se informa según Broms a 150 Pa (apartado siguiente y *Cómo se informa*), y la forma de la curva se lee como en *Leer la curva*.
+
 ### Broms: leer la resistencia en un radio, no en una presión
 
-Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en el consenso internacional, el "radio 2"; en otros textos, el "radio 200") (Clement y Gordts, 2005). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
+Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo, distinta de la de Cottle. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en el consenso internacional, el "radio 2"; en otros textos, el "radio 200") (Clement y Gordts, 2005). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
 
 :::imagen ilustraciones/h24-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
@@ -296,6 +330,24 @@ Se comprueba sumando flujos: 250 + 500 = 750 cm³/s, y 150 / 750 = 0,20. El tota
 
 > **Rinomanometría anterior activa.** Reposo 15 minutos; sin vasoconstrictores 48 horas antes. Resistencia a 150 Pa en reposo: FND 0,60; FNI 0,30; total 0,20 Pa/(cm³/s). **FND fuera del valor de referencia** (≤ 0,4); FNI dentro. Se aplica oximetazolina, 2 puff, en FND; tras 15 minutos, FND 0,38. **Conclusión:** obstrucción nasal de tipo **vasomotora en la fosa nasal derecha**; fosa nasal izquierda con buena permeabilidad.
 
+### Cuando lo que se mide es la respuesta a un estímulo: provocación y ejercicio
+
+Hasta aquí la rinomanometría compara una nariz con un valor de referencia o con ella misma después de un vasoconstrictor. También se usa para medir **cuánto cambia la nariz cuando se la expone a algo**: un alérgeno, un irritante o un ejercicio. El examen es el mismo (la misma máscara, los mismos 150 Pa); cambia la pregunta, y por eso cambia lo que se compara: la medida **antes** contra la medida **después** del estímulo (Gosepath y cols., 2005).
+
+**Provocación nasal con alérgeno.** Se aplica en cada fosa un extracto estandarizado del alérgeno sospechoso y se mide si la nariz se obstruye. La indica el médico, para confirmar que una sensibilización detectada en la piel o en la sangre es la que de verdad produce los síntomas, para estudiar la rinitis alérgica local (con prueba cutánea negativa), la rinitis ocupacional y para seguir el efecto de una inmunoterapia (Augé y cols., 2018). El protocolo de consenso europeo fija el orden: un reposo de 15 minutos en una sala a 20 ± 1,5 °C y 40-60 % de humedad, una medida basal, una **provocación de control** con el diluyente (si ya produce la mitad de una reacción positiva, el examen se detiene y se repite otro día) y recién entonces el alérgeno, con 0,1 mL por fosa; la medida se repite a los 10 minutos y el paciente queda en observación al menos media hora (Augé y cols., 2018). La rinomanometría anterior activa es una de las medidas aceptadas, junto con la rinometría acústica (→ H25) y el flujo inspiratorio máximo: la respuesta es **fuerte** si el flujo a 150 Pa baja 40 % o más y **moderada** si baja 20 % o más; el resultado es positivo si una medida objetiva o una escala de síntomas es claramente positiva, o si ambas son moderadas (Augé y cols., 2018).
+
+Las contraindicaciones son las que importan al que mide: no se hace con una reacción anafiláctica previa a ese alérgeno, con una inflamación aguda de la nariz o de los senos, con asma grave, en el embarazo. Se posterga hasta 4 semanas después de una infección viral o bacteriana aguda y 6 a 8 semanas después de una cirugía de la nariz o de los senos (Augé y cols., 2018). Atresia coanal, poliposis nasal, perforación del tabique o desviación grave, rinitis atrófica y adenoides que obstruyen alteran la permeabilidad y complican la lectura, así que se evalúa la basal antes de provocar (Augé y cols., 2018). La respuesta tardía, que puede llegar hasta 12 horas después, se avisa al paciente pero no entra en el resultado (Augé y cols., 2018).
+
+Esa reacción en dos tiempos, rápida y tardía, es la misma del cap. 36 (→ *Hipersensibilidad tipo I*): la provocación es el modelo experimental que permitió estudiarla en la nariz humana (Solé y cols., 2025).
+
+**Provocación inespecífica.** Mide la **hiperreactividad nasal**: cuánto responde la mucosa a un estímulo que en una nariz sana casi no la altera. Se usa histamina, metacolina o aire frío y seco, en dosis crecientes, y se mide la obstrucción con rinomanometría o rinometría acústica (Márquez y cols., 2000; Kim y cols., 2010). No identifica un alérgeno: sirve para separar a una persona con mucosa hiperreactiva de otra sin ella. En 16 pacientes con rinitis no alérgica perenne y 7 controles, el aire frío y seco separó mejor a los dos grupos que la histamina (Braat y cols., 1998). Lo que se compara aquí también es una curva de dosis y respuesta, no un único valor.
+
+**Prueba de ejercicio.** El ejercicio físico **descongestiona**: la nariz se abre y después vuelve a su estado de forma gradual. En personas sanas, tras un ejercicio de carga fija en cinta caminadora de 6 minutos, la resistencia nasal y el área mínima se midieron antes, inmediatamente después y cada 5 minutos hasta los 30; la mucosa se contrae después del ejercicio y luego se recupera de forma gradual (Kawano, 2002). En niños en edad preescolar, un esfuerzo de 8 minutos aumentó el volumen nasal en 15 % medido a los 10 minutos con rinometría acústica; el área mínima siguió siendo menor en los niños asmáticos y atópicos (Haavisto y cols., 2013). <!-- verificar: no se encontró una fuente que atribuya este efecto a la descarga simpática; la razón habitual (la mucosa se vacía como con un vasoconstrictor) es una inferencia de la fisiología del cornete (→ Fundamento) y no una afirmación de esos estudios. --> La prueba tiene dos usos. Uno es **clínico**: ver si la nariz de un paciente responde como la de un sano o queda más obstruida de lo que debería; los trabajos citados describen el cambio, no proponen un valor de corte. El otro es de **cuidado del examen**: el ejercicio reciente cambia la mucosa, y por eso una provocación con alérgeno hecha después de un esfuerzo puede dar un falso negativo (Augé y cols., 2018). Por eso se pide al paciente que llegue en reposo y que descanse antes de la medida basal.
+
+:::ayuda Qué se registra siempre en una prueba de estímulo
+La basal con su presión (150 Pa), el estímulo con su dosis o su carga, el tiempo entre el estímulo y cada medida, la fosa medida y el porcentaje de cambio contra la basal. Sin esos cinco datos no se puede comparar una prueba con otra.
+:::
+
 ## Errores frecuentes
 
 - **Informar la resistencia sin la presión.** La resistencia cambia con la presión: sin ella, el número no se puede comparar.
@@ -337,3 +389,12 @@ Se comprueba sumando flujos: 250 + 500 = 750 cm³/s, y 150 / 750 = 0,20. El tota
 1. Hasegawa M, Kern EB. The human nasal cycle. Mayo Clin Proc. 1977;52:28-34. PMID: 609283.
 1. Ferris BG Jr, Mead J, Opie LH. Partitioning of respiratory flow resistance in man. J Appl Physiol. 1964;19:653-8. PMID: 14195575.
 1. Rohrer F. Der Strömungswiderstand in den menschlichen Atemwegen und der Einfluss der unregelmässigen Verzweigung des Bronchialsystems auf den Atmungsverlauf in verschiedenen Lungenbezirken. Pflügers Arch. 1915;162:225-99. doi:10.1007/BF01681259.
+1. Tucker CA. A clinical evaluation of the Cottle rhinomanometry "flow" nozzle. Rhinology. 1977;15(2):73-9. PMID: 918516.
+1. Augé J, Vent J, Agache I, Airaksinen L, Campo Mozo P, Chaker A, et al. EAACI Position paper on the standardization of nasal allergen challenges. Allergy. 2018;73(8):1597-1608. doi:10.1111/all.13416. PMID: 29377177.
+1. Gosepath J, Amedee RG, Mann WJ. Nasal provocation testing as an international standard for evaluation of allergic and nonallergic rhinitis. Laryngoscope. 2005;115(3):512-6. doi:10.1097/01.mlg.0000149682.56426.6b. PMID: 15744168.
+1. Márquez F, Sastre J, Hernández G, Cenjor C, Sanchez-Hernandez JM, et al. Nasal hyperreactivity to methacholine measured by acoustic rhinometry in asymptomatic allergic and perennial nonallergic rhinitis. Am J Rhinol. 2000;14(4):251-6. doi:10.2500/105065800779954419. PMID: 10979499.
+1. Kim YH, Oh YS, Kim KJ, Jang TY. Use of cold dry air provocation with acoustic rhinometry in detecting nonspecific nasal hyperreactivity. Am J Rhinol Allergy. 2010;24(4):260-2. doi:10.2500/ajra.2010.24.3488. PMID: 20819462.
+1. Braat JP, Mulder PG, Fokkens WJ, van Wijk RG, Rijntjes E. Intranasal cold dry air is superior to histamine challenge in determining the presence and degree of nasal hyperreactivity in nonallergic noninfectious perennial rhinitis. Am J Respir Crit Care Med. 1998;157(6 Pt 1):1748-55. doi:10.1164/ajrccm.157.6.9701016. PMID: 9620901.
+1. Kawano M. [Changes in the nasal NO level, nasal resistance, and nasal patency before and after exercise in normal subjects]. Nihon Jibiinkoka Gakkai Kaiho. 2002;105(12):1216-22. doi:10.3950/jibiinkoka.105.1216. PMID: 12607284.
+1. Haavisto LE, Lukkarinen M, Lukkarinen H, Jartti T, Papadopoulos NG, et al. Physical exercise increases nasal patency in asthmatic and atopic preschool children. Am J Rhinol Allergy. 2013;27(6):451-6. doi:10.2500/ajra.2013.27.3956. PMID: 24274218.
+1. Solé D, Kuschnir FC, Pastorino AC, Constantino CF, Galvão C, Chong E Silva DC, et al. V Brazilian Consensus on Rhinitis - 2024. Braz J Otorhinolaryngol. 2025;91(1):101500. doi:10.1016/j.bjorl.2024.101500. PMID: 39388827.
