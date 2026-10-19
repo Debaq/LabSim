@@ -219,6 +219,7 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 181 | H30 | Criterio de obstrucción y de normalidad (clase) | FEV1/FVC < 0,70 y 80 % del previsto | LLN y z-score (GLI); el 0,70 fijo de GOLD va en el recuadro de normas | Stanojevic 2022; Quanjer 2012 | P (clase) | |
 | 182 | H30 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
 | 183 | H30 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
+| 194 | H28 | Olfato: cifras y afirmaciones de la clase sin fuente | "20-30 filetes del nervio olfatorio", "cortisol +100 %", "única neurona con regeneración continua", "sin pasar por el tálamo" | no se usan; la ausencia de relevo talámico obligatorio queda `verificar` | Whitcroft 2023 | verificar (clase) | |
 
 ## Sueño (H31, H32; clase de SAHOS, 2026-10-18)
 

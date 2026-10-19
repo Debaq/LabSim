@@ -15,7 +15,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from hacer_h25 import Lienzo, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
+from hacer_h26 import Lienzo, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
 
 PIEL, PIEL_BORDE = '#f3dcc8', '#b98f72'
 ROJO_FLARE, PAPULA = '#e8564a', '#fbeee6'

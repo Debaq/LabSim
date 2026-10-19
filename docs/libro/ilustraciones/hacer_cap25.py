@@ -17,7 +17,7 @@ import json
 import pathlib
 import subprocess
 
-from hacer_h15 import Eje, Lienzo, punta, pendiente_lenta, TINTA, TENUE, GRILLA, FUERTE, COCLEAR, RETRO, AVISO, AZUL  # noqa: F401
+from hacer_h16 import Eje, Lienzo, punta, pendiente_lenta, TINTA, TENUE, GRILLA, FUERTE, COCLEAR, RETRO, AVISO, AZUL  # noqa: F401
 
 AQUI = pathlib.Path(__file__).parent
 

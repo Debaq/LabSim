@@ -129,7 +129,7 @@ Según dónde esté el problema, el olfato se clasifica en **conductivo** (se bl
 - **Posinfecciosa.** Después de una infección respiratoria alta; el inicio suele ser brusco, con frecuencia hay parosmia y hay poca fluctuación; puede ser permanente, pero una parte mejora: en 262 pacientes seguidos 14 meses, mejoró cerca de un tercio (Hummel y cols., 2017).
 - **Postraumática.** Inicio brusco tras un golpe en la cabeza, a veces con un intervalo de días o semanas (Hummel y cols., 2017).
 
-La medición del olfato con pruebas psicofísicas no se trata en esta herramienta. Lo que sí se hace aquí es **preguntar**: cuándo empezó y cómo (brusco o gradual), si fluctúa, si es de un lado o de los dos, si hay obstrucción nasal o secreción, si hubo un resfrío o un golpe antes, y qué usa el paciente para la nariz. Esa historia orienta qué se espera ver en la rinoscopía y cuándo conviene derivar para una endoscopia, que es lo único que muestra la hendidura.
+La medición del olfato con pruebas psicofísicas está en H28. Lo que sí se hace aquí es **preguntar**: cuándo empezó y cómo (brusco o gradual), si fluctúa, si es de un lado o de los dos, si hay obstrucción nasal o secreción, si hubo un resfrío o un golpe antes, y qué usa el paciente para la nariz. Esa historia orienta qué se espera ver en la rinoscopía y cuándo conviene derivar para una endoscopia, que es lo único que muestra la hendidura.
 
 ### Por qué se pregunta cada cosa
 

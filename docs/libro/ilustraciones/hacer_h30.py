@@ -20,7 +20,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import re  # noqa: E402
-from hacer_h25 import Lienzo as _Lienzo, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
+from hacer_h26 import Lienzo as _Lienzo, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
 
 AQUI = pathlib.Path(__file__).parent
 GRIS = '#b9b6ae'

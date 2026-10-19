@@ -15,7 +15,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from hacer_h28 import Lienzo, Eje, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
+from hacer_h30 import Lienzo, Eje, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
 
 AQUI = pathlib.Path(__file__).parent
 AIRE = '#bcd8ec'       # luz de la vía aérea

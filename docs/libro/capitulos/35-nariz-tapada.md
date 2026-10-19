@@ -291,7 +291,7 @@ Con las dos fosas en 0,32 no hace falta la prueba con vasoconstrictor (→ H26):
 :::docente Guía del caso
 - **Datos clave:** NOSE 80, obstrucción "las 24 horas" desde un cuadro viral, **sin** respiración bucal, sin ronquidos, con deporte sin límite, olfato disminuido, rinoscopía normal.
 - **Hipótesis esperables:** rinitis (el cap. 36), alteración del olfato después de una infección (→ H25), problema de la percepción del aire, componente ansioso; no una obstrucción mecánica.
-- **Qué pedir:** los mismos exámenes de los casos anteriores **más** una evaluación del olfato y, si el médico lo decide, una endoscopía. Una resistencia normal no es el final del estudio.
+- **Qué pedir:** los mismos exámenes de los casos anteriores **más** una evaluación del olfato (→ H28) y, si el médico lo decide, una endoscopía. Una resistencia normal no es el final del estudio.
 - **Errores esperables:** "no tiene nada"; indicar una cirugía por el NOSE; pensar que el puntaje fue exagerado.
 - **Para discutir en clase:** ¿qué es lo que le dirías a Rocío cuando le entregas el informe? ¿Cómo se lo dirías sin invalidarla?
 :::

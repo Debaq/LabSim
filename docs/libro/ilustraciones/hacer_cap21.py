@@ -8,7 +8,7 @@
 
 Las cifras de las fichas son las de los pacientes inventados del capítulo (velocidad de fase lenta,
 ganancia del impulso), no normas ni datos de pacientes reales. Las trazas del impulso salen del mismo
-generador sintético de hacer_h17.py (cabeza gaussiana de 200 °/s, ojo = ganancia x cabeza + sacada).
+generador sintético de hacer_h18.py (cabeza gaussiana de 200 °/s, ojo = ganancia x cabeza + sacada).
 El nistagmo es un diente de sierra a 2 Hz: lo único que cambia entre casos es la velocidad de la fase
 lenta y el sentido de la fase rápida en cada mirada.  Uso:  python3 hacer_cap21.py"""
 import math
@@ -16,7 +16,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from hacer_h17 import (AVISO, CABEZA, FUERTE, OJO, OK, TENUE, TINTA, Ejes,  # noqa: E402
+from hacer_h18 import (AVISO, CABEZA, FUERTE, OJO, OK, TENUE, TINTA, Ejes,  # noqa: E402
                        Lienzo, cabeza, ojo)
 
 FREC = 2.0          # Hz: batidas por segundo del dibujo

@@ -14,7 +14,7 @@ import sys
 
 AQUI = pathlib.Path(__file__).parent
 sys.path.insert(0, str(AQUI))
-from hacer_h22 import Lienzo, TINTA, TENUE, GRILLA, FUERTE, ROJO, AZUL, VERDE, NARANJA, punta  # noqa: E402
+from hacer_h24 import Lienzo, TINTA, TENUE, GRILLA, FUERTE, ROJO, AZUL, VERDE, NARANJA, punta  # noqa: E402
 
 GEN = AQUI.parent / 'casos' / 'generados'
 FREQS = ('500', '1 k', '2 k', '3 k', '4 k', '6 k', '8 k')
