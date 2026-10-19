@@ -316,6 +316,15 @@ Hipoacusia sensorioneural bilateral simétrica, de configuración descendente, *
 "Es la edad" es la frase que más cierra casos antes de tiempo, y la dicen tanto el paciente como el profesional. Comparar la curva con la edad y el sexo toma un minuto y obliga a hacer la pregunta que falta: ¿qué más tiene esta persona?
 :::
 
+:::comentario Prevención
+- **Primaria:** la presbiacusia sola no se previene, pero sí se evita sumarle el ruido de toda una vida que la adelanta (→ cap. 6).
+- **Secundaria:** se busca la pérdida en quien consulta por no entender en grupo o con ruido, y se descartan las causas que la edad no explica (asimetría, gap, inicio brusco). Para el tamizaje de adultos de 50 años o más sin síntomas, el USPSTF concluyó que la evidencia es insuficiente para balancear beneficios y daños (USPSTF, 2021).
+- **Terciaria:** el audífono es el tratamiento cuando la pérdida limita la vida diaria. En el ensayo ACHIEVE (977 adultos de 70 a 84 años), el audífono con consejería no redujo el deterioro cognitivo a tres años en el análisis principal, y los autores plantean un posible efecto en el subgrupo de mayor riesgo (Lin y cols., 2023): se indica por la comunicación, no para evitar demencia.
+- **Para el paciente:** "Entender peor en grupo no es falta de atención: es una pérdida que se mide y que tiene ayuda."
+
+Cerca del 16 % de los adultos estadounidenses refiere dificultad para oír (USPSTF, 2021). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -365,3 +374,8 @@ Hipoacusia sensorioneural bilateral simétrica, de configuración descendente, *
 1. Horikawa C, Kodama S, Tanaka S, Fujihara K, Hirasawa R, Yachi Y, et al. Diabetes and risk of hearing impairment in adults: a meta-analysis. J Clin Endocrinol Metab. 2013;98(1):51-8. doi:10.1210/jc.2012-2119
 1. Lara-Sánchez H, Calvo DH, Sañudo EG, Mayo-Iscar A, Cordero MEP, Monfá-Bosch JM, et al. Characterization of Hearing Loss in Adult Patients With Nondialysis Chronic Kidney Disease. Otol Neurotol. 2020;41(7):e776-e782. doi:10.1097/MAO.0000000000002656
 1. Fukushima H, Cureoglu S, Schachern PA, Paparella MM, Harada T, Oktay MF. Effects of type 2 diabetes mellitus on cochlear structure in humans. Arch Otolaryngol Head Neck Surg. 2006;132(9):934-8. doi:10.1001/archotol.132.9.934
+
+### Prevención
+
+1. US Preventive Services Task Force (USPSTF); Krist AH, Davidson KW, Mangione CM, Cabana M, Caughey AB, Davis EM, et al. Screening for hearing loss in older adults: US Preventive Services Task Force recommendation statement. JAMA. 2021;325(12):1196-1201. doi:10.1001/jama.2021.2566. PMID 33755083
+1. Lin FR, Pike JR, Albert MS, Arnold M, Burgard S, Chisolm T, et al. Hearing intervention versus health education control to reduce cognitive decline in older adults with hearing loss in the USA (ACHIEVE): a multicentre, randomised controlled trial. Lancet. 2023;402(10404):786-797. doi:10.1016/S0140-6736(23)01406-X. PMID 37478886

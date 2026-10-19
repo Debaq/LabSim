@@ -594,6 +594,14 @@ Es el paciente que vuelve molesto porque "el audífono no le sirve". La discrimi
 :::
 
 
+:::comentario Prevención
+- **Secundaria:** el schwannoma y los demás tumores del ángulo se detectan antes por la sospecha clínica: la pérdida sensorioneural asimétrica, el acúfeno unilateral y persistente, y la súbita. La guía de acúfeno pide una audiometría completa y pronta cuando el acúfeno es unilateral, dura seis meses o más o se acompaña de dificultad para oír (Tunkel y cols., 2014); la de súbita pide estudiar la patología retrococlear con resonancia o PEAT (Chandrasekhar y cols., 2019). Una audición normal no descarta el tumor (Chiarovano y cols., 2014).
+- **Cuaternaria:** no se pide imagen de cabeza y cuello por un acúfeno que no se localiza en un oído, no es pulsátil, no trae signos neurológicos ni pérdida asimétrica (Tunkel y cols., 2014).
+- **Para el paciente:** "Un pitido o una pérdida de audición de un solo lado que no se va se estudia: es lo que permite encontrar a tiempo, si existe, una causa que tiene tratamiento."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -646,3 +654,7 @@ Es el paciente que vuelve molesto porque "el audífono no le sirve". La discrimi
 1. De Ridder D, Heijneman K, Haarman B, van der Loo E. Tinnitus in vascular conflict of the eighth cranial nerve: a surgical pathophysiological approach to ABR changes. Prog Brain Res. 2007;166:401-11. doi:10.1016/S0079-6123(07)66039-7
 1. De Ridder D, Ryu H, De Mulder G, Van de Heyning P, Verlooy J, Møller A. Frequency specific hearing improvement in microvascular decompression of the cochlear nerve. Acta Neurochir (Wien). 2005;147(5):495-501. doi:10.1007/s00701-005-0497-3
 1. Chandrasekhar SS, Tsai Do BS, Schwartz SR, Bontempo LJ, Faucett EA, Finestone SA, et al. Clinical practice guideline: sudden hearing loss (update). Otolaryngol Head Neck Surg. 2019;161(1 Suppl):S1-S45. doi:10.1177/0194599819859885
+
+### Prevención
+
+1. Tunkel DE, Bauer CA, Sun GH, Rosenfeld RM, Chandrasekhar SS, Cunningham ER Jr, et al. Clinical practice guideline: tinnitus. Otolaryngol Head Neck Surg. 2014;151(2 Suppl):S1-S40. doi:10.1177/0194599814545325. PMID 25273878

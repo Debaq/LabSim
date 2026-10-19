@@ -432,6 +432,15 @@ Hipoacusia **mixta** moderada del OI, con la ósea caída en los agudos, timpano
 La pérdida de un chofer suele atribuirse al ruido del motor. Aquí no calza: el ruido no da gap. Lo que tiene Luis viene del oído medio, y la ósea dice cuánto le costó.
 :::
 
+:::comentario Prevención
+- **Secundaria:** la otorrea fétida repetida, una bolsa de retracción o una costra en el ático y el acúfeno pulsátil se derivan para estudio; el colesteatoma no se cura con gotas y su daño es progresivo (Martins y cols., 2012).
+- **Terciaria:** la timpanoplastia, la osiculoplastia o el audífono limitan la discapacidad de la conductiva, y la audiometría sirve para planificarlas y seguirlas (Stankovic, 2008).
+- **Cuaternaria:** una perforación traumática no se opera de entrada: en una serie se cerró sola el 97 %, casi siempre en tres a cuatro semanas (Jellinge y cols., 2015). Con una perforación o un tubo, las gotas deben ser no ototóxicas (Rosenfeld y cols., 2014).
+- **Para el paciente:** "Si el oído operado o perforado supura, huele mal o aparece vértigo o debilidad de la cara, consulta el mismo día; no te pongas gotas que te sobraron."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -489,3 +498,7 @@ La pérdida de un chofer suele atribuirse al ruido del motor. Aquí no calza: el
 1. Elzinga HBE, van Oorschot HD, Stegeman I, Smit AL. Relation between otitis media and sensorineural hearing loss: a systematic review. BMJ Open. 2021;11(8):e050108. doi:10.1136/bmjopen-2021-050108
 1. Kim MB, Choi J, Lee JK, Park JY, Chu H, Cho YS, Hong SH, Chung WH. Hearing outcomes according to the types of mastoidectomy: a comparison between canal wall up and canal wall down mastoidectomy. Clin Exp Otorhinolaryngol. 2010;3(4):203-206. doi:10.3342/ceo.2010.3.4.203
 1. Jellinge ME, Kristensen S, Larsen K. Spontaneous closure of traumatic tympanic membrane perforations: observational study. J Laryngol Otol. 2015;129(10):950-4. doi:10.1017/S0022215115002303. PMID 26344019
+
+### Prevención
+
+1. Rosenfeld RM, Schwartz SR, Cannon CR, Roland PS, Simon GR, Kumar KA, et al. Clinical practice guideline: acute otitis externa. Otolaryngol Head Neck Surg. 2014;150(1 Suppl):S1-S24. doi:10.1177/0194599813517083. PMID 24491310

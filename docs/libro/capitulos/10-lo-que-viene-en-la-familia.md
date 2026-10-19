@@ -529,6 +529,15 @@ Hipoacusia sensorioneural moderada bilateral, simétrica, de configuración desc
 Carmen entiende hoy con el oído **y** con los labios. La retinosis le va a quitar primero la lectura labial en la penumbra y en la periferia, y con los años más. Cada decibel de audición que se le cuide vale más en ella que en otro paciente con el mismo audiograma: el informe lo dice, para que quien la siga lo tenga presente.
 :::
 
+:::comentario Prevención
+- **Primaria:** en las formas recesivas, como la conexina 26, los padres oyen bien y portan una copia alterada, así que el antecedente familiar puede faltar; el estudio genético y la consejería a la familia son lo que permite informar el riesgo de un próximo hijo. Con la mutación mitocondrial m.1555A>G se evitan los aminoglucósidos (→ cap. 8).
+- **Secundaria:** el tamizaje neonatal y la derivación temprana (JCIH, 2019). Pero una hipoacusia leve puede pasarlo, y la del acueducto vestibular dilatado puede aparecer o caer después: el niño que pasó el tamizaje y no responde o no habla igual se mide de nuevo. Un niño con sordera profunda congénita se estudia con electrocardiograma, porque el Jervell-Lange-Nielsen tiene un QT largo y el 86 % de 186 pacientes tuvo eventos cardíacos (Schwartz y cols., 2006). En la sordera con otros signos (retina, riñón, pigmento), esos signos se buscan.
+- **Terciaria:** el audífono o el implante coclear según el grado, con intervención temprana (JCIH, 2019).
+- **Para el paciente:** "Si en tu familia hay sordera de nacimiento, el estudio genético sirve para saber la causa y si hay algo más que revisar, como el corazón, la vista o el riñón. Si el niño tiene un acueducto dilatado y oye menos después de un golpe en la cabeza, consulta ese día (Noordman y cols., 2015)."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

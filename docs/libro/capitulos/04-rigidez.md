@@ -374,6 +374,15 @@ Hipoacusia mixta bilateral moderada, con predominio sensorioneural y gap de 10 a
 Las curvas A con reflejos ausentes son el punto de este caso. Si hubieras leído solo el timpanograma, habrías concluido que el oído medio era normal y que todo era cóclea. Los reflejos y el gap, juntos, dicen que algo más está frenando el sonido.
 :::
 
+:::comentario Prevención
+- **Primaria:** no hay una medida de prevención primaria demostrada para la otoesclerosis.
+- **Secundaria:** es de familia en cerca de 4 de cada 10 pacientes operados (Crompton y cols., 2019), así que una pérdida conductiva de graves en un adulto joven con otoscopía normal y un familiar afectado se estudia. Es bilateral en dos de cada tres (Xue y Sun, 2025).
+- **Terciaria:** la cirugía del estribo o un audífono, que en un oído de cóclea sana funciona muy bien (Toscano y cols., 2025).
+- **Para el paciente:** "Si alguien de tu familia tiene otoesclerosis y notas que oyes menos, pide una audiometría; hay tratamiento."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

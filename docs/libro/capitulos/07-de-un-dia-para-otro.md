@@ -488,6 +488,16 @@ Hipoacusia sensorioneural bilateral asimétrica: severa en el OD y leve en el OI
 En este caso la audiología no pone el nombre del cuadro: pone la **curva en el tiempo**. Dos audiometrías bien hechas y comparables muestran la velocidad de la pérdida mejor que cualquier relato, y de esa velocidad depende la decisión de tratar.
 :::
 
+:::comentario Prevención
+- **Primaria:** la vacuna triple vírica previene la parotiditis que llegaba a dejar una cófosis de un oído: su efectividad fue de 72 % con una dosis y 86 % con dos (Di Pietrantonj y cols., 2021). Es una causa de sordera que se evita antes de que exista.
+- **Secundaria:** la hipoacusia súbita se trata como urgencia: se separa de una conductiva en la primera consulta, la audiometría se pide dentro de los 14 días y se descartan las señas de alarma (bilateral, recurrente, signos neurológicos) (Chandrasekhar y cols., 2019).
+- **Terciaria:** la guía recomienda orientar sobre rehabilitación auditiva y otras ayudas a quien queda con pérdida residual o acúfeno (Chandrasekhar y cols., 2019).
+- **Cuaternaria:** en la evaluación inicial de una súbita no se piden tomografía de cabeza ni exámenes de laboratorio de rutina, y no se indican de rutina antivirales, trombolíticos ni vasodilatadores (Chandrasekhar y cols., 2019).
+- **Para el paciente:** "Si un día despiertas oyendo menos de un oído, no esperes a ver si se pasa: consulta ese mismo día."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -545,3 +555,7 @@ En este caso la audiología no pone el nombre del cuadro: pone la **curva en el 
 1. McCabe BF. Autoimmune sensorineural hearing loss. Ann Otol Rhinol Laryngol. 1979;88(5 Pt 1):585-9. doi:10.1177/000348947908800501
 1. Ramchandani MS, Litvack JR, Marra CM. Otosyphilis: a review of the literature. Sex Transm Dis. 2020;47(5):296-300. doi:10.1097/OLQ.0000000000001155
 1. Rauch SD. IL-1β inhibition in autoimmune inner ear disease: can you hear me now? J Clin Invest. 2014;124(9):3685-7. doi:10.1172/JCI77197
+
+### Prevención
+
+1. Di Pietrantonj C, Rivetti A, Marchione P, Debalini MG, Demicheli V. Vaccines for measles, mumps, rubella, and varicella in children. Cochrane Database Syst Rev. 2021;11(11):CD004407. doi:10.1002/14651858.CD004407.pub5. PMID 34806766

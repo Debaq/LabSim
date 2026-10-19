@@ -488,6 +488,14 @@ Hipoacusia neurosensorial bilateral de graves con acúfeno pulsátil, **sin hall
 **Acúfeno que late con el pulso, bilateral, con cefalea o visión borrosa** = pensar en la presión intracraneal antes que en un hidrops.
 :::
 
+:::comentario Prevención
+- **Primaria:** el casco reduce las lesiones de cabeza en ciclistas de todas las edades (63 % a 88 % menos de lesión de cabeza, cerebro o cerebral grave, en estudios de casos y controles; Thompson y cols., 2000), y con ello el riesgo de que un traumatismo toque el tronco. En la hipertensión intracraneal idiopática, bajar de peso se correlacionó con una menor presión intracraneal (Abbott y cols., 2023).
+- **Secundaria:** el ABR detecta lo que el audiograma no ve: en la esclerosis múltiple la hipoacusia es de solo 1,1 % (Mirmosayyeb y cols., 2022) y en el infarto pontino unilateral los umbrales no bajan (Häusler y Levine, 2000). Una pérdida súbita con vértigo, factores de riesgo vascular, cefalea o cualquier síntoma neurológico se deriva sin esperar la audiometría: puede ser un infarto de la AICA (→ cap. 7).
+- **Para el paciente:** "Usa casco en bicicleta, moto y deportes de riesgo. Si de pronto oyes menos y además te marea, tienes la cara dormida o dolor de cabeza fuerte, ve a urgencias."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -551,3 +559,8 @@ Hipoacusia neurosensorial bilateral de graves con acúfeno pulsátil, **sin hall
 1. Tyler GK, Martin TP, Baguley DM. Systematic review of outcome of cochlear implantation in superficial siderosis. Otol Neurotol. 2012;33(6):976-982. doi:10.1097/MAO.0b013e3182565a46
 1. Vartiainen E, Karjalainen S, Kärjä J. Auditory disorders following head injury in children. Acta Otolaryngol. 1985;99(5-6):529-536. doi:10.3109/00016488509182257
 1. Chen JX, Lindeborg M, Herman SD, Ishai R, Knoll RM, Remenschneider A, et al. Systematic review of hearing loss after traumatic brain injury without associated temporal bone fracture. Am J Otolaryngol. 2018;39(3):338-344. doi:10.1016/j.amjoto.2018.01.018
+
+### Prevención
+
+1. Thompson DC, Rivara FP, Thompson R. Helmets for preventing head and facial injuries in bicyclists. Cochrane Database Syst Rev. 2000;(2):CD001855. doi:10.1002/14651858.CD001855. PMID 10796827
+1. Abbott S, Chan J, Tahrani AA, Wong SH, Campbell A, Parmar C, et al. Weight management interventions for adults with idiopathic intracranial hypertension: a systematic review and practice recommendations. Neurology. 2023;101(21). doi:10.1212/WNL.0000000000207866. PMID 37813577

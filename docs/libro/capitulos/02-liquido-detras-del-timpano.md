@@ -443,6 +443,16 @@ Hipoacusia conductiva leve del OI, con curva B de volumen normal y vía ósea no
 El acúfeno grave e intermitente acompaña a la caja ocupada. Si después de la reabsorción persiste un acúfeno con la ósea normal, se estudia como cualquier acúfeno; si aparece con la ósea baja, el barotrauma llegó al oído interno.
 :::
 
+:::comentario Prevención
+- **Primaria:** la lactancia materna exclusiva durante los primeros seis meses se asoció con alrededor de 43 % menos otitis media aguda en los dos primeros años (Bowatte y cols., 2015). La vacuna neumocócica conjugada reduce con claridad la otitis por neumococo, pero su efecto sobre la otitis aguda de cualquier causa es incierto (Fortanier y cols., 2019).
+- **Secundaria:** a los niños con efusión se les observa tres meses y se les mide la audición si pasa ese plazo, antes en los de riesgo (fisura palatina, síndrome de Down, retraso del lenguaje); la lista completa está en Patología (Rosenfeld y cols., 2016).
+- **Terciaria:** si la efusión persistente deja una hipoacusia documentada, la opción es el tubo de ventilación, que decide el otorrinolaringólogo (Rosenfeld y cols., 2016).
+- **Cuaternaria:** no se tratan las efusiones con antibióticos, corticoides, antihistamínicos ni descongestionantes, porque no aceleran la resolución (Rosenfeld y cols., 2016).
+- **Para el paciente:** "Un oído que sigue tapado después de un resfrío o de una otitis no es mala educación del niño: hay que medirle la audición si dura más de tres meses."
+
+Entre 50 % y 90 % de los niños tiene al menos un episodio de efusión antes de los cinco años (Rosenfeld y cols., 2016). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -498,3 +508,8 @@ El acúfeno grave e intermitente acompaña a la caja ocupada. Si después de la 
 1. Mirza S, Richardson H. Otic barotrauma from air travel. J Laryngol Otol. 2005;119(5):366-370. doi:10.1258/0022215053945723
 1. Sohn JH, Cho KR. Middle Ear Barotrauma in Student Pilots. Aerosp Med Hum Perform. 2017;88(4):406-412. doi:10.3357/AMHP.4666.2017
 1. Shah S, Khalil A, Ahmed A, Mohamed S, Chawdhary G. Current management of adults with persistent unilateral otitis media with effusion: survey of UK otolaryngologists. Acta Otolaryngol. 2026;146(4):462-468. doi:10.1080/00016489.2025.2612020. PMID 41553000
+
+### Prevención
+
+1. Fortanier AC, Venekamp RP, Boonacker CW, Hak E, Schilder AG, Sanders EA, et al. Pneumococcal conjugate vaccines for preventing acute otitis media in children. Cochrane Database Syst Rev. 2019;5(5):CD001480. doi:10.1002/14651858.CD001480.pub5. PMID 31135969
+1. Bowatte G, Tham R, Allen KJ, Tan DJ, Lau M, Dai X, et al. Breastfeeding and childhood acute otitis media: a systematic review and meta-analysis. Acta Paediatr. 2015;104(467):85-95. doi:10.1111/apa.13151. PMID 26265016

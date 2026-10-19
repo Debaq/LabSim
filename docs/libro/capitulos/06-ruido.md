@@ -407,6 +407,15 @@ Hipoacusia sensorioneural bilateral simétrica, con muesca en 4 kHz y recuperaci
 Existen tapones que bajan el sonido parejo en todas las frecuencias, pensados para músicos: atenúan menos que uno de espuma, pero el habla y la música se siguen entendiendo. Para alguien que "tiene que escuchar los pedidos", un tapón que se usa vale más que uno que protege más y se queda en el bolsillo.
 :::
 
+:::comentario Prevención
+- **Primaria:** el ruido se reduce en su fuente: la mayor parte de la carga de pérdida por ruido ocupacional podría evitarse con controles de ingeniería (Nelson y cols., 2005). Con el protector, lo que mejor respaldo tiene es entrenar la colocación correcta del tapón, que redujo la exposición a corto plazo (evidencia de calidad moderada); la evidencia de que un programa completo reduzca la pérdida es de muy baja calidad (Tikka y cols., 2017).
+- **Secundaria:** la audiometría de vigilancia, con su línea de base y la comparación contra ella, detecta el cambio en 4 kHz antes de que afecte la conversación (PREXOR, MINSAL 2013; ISP, 2018; → H3 y H23).
+- **Terciaria:** al terminar la exposición la pérdida por ruido deja de avanzar más allá de la edad (ACOEM, 2003); el trabajador con pérdida que ya limita su comunicación se evalúa para audífonos (→ cap. 28).
+- **Para el paciente:** "El pitido después de un turno o de un concierto es una señal de daño: usa el protector bien puesto y pide tu audiometría de control."
+
+Alrededor del 16 % de la pérdida auditiva incapacitante del adulto se atribuye al ruido ocupacional (Nelson y cols., 2005). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -465,3 +474,8 @@ Existen tapones que bajan el sonido parejo en todas las frecuencias, pensados pa
 1. Yehudai N, Fink N, Shpriz M, Marom T. Acute acoustic trauma among soldiers during an intense combat. J Am Acad Audiol. 2017;28(5):436-43. doi:10.3766/jaaa.16043
 1. Zloczower E, Tsur N, Hershkovich S, Fink N, Marom T. Efficacy of oral steroids for acute acoustic trauma. Audiol Neurootol. 2022;27(4):312-20. doi:10.1159/000522051
 1. Segal S, Harell M, Shahar A, Englender M. Acute acoustic trauma: dynamics of hearing loss following cessation of exposure. Am J Otol. 1988;9(4):293-8.
+
+### Prevención
+
+1. Nelson DI, Nelson RY, Concha-Barrientos M, Fingerhut M. The global burden of occupational noise-induced hearing loss. Am J Ind Med. 2005;48(6):446-458. doi:10.1002/ajim.20223. PMID 16299704
+1. Tikka C, Verbeek JH, Kateman E, Morata TC, Dreschler WA, Ferrite S. Interventions to prevent occupational noise-induced hearing loss. Cochrane Database Syst Rev. 2017;7(7):CD006396. doi:10.1002/14651858.CD006396.pub4. PMID 28685503

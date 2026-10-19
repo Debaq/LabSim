@@ -422,6 +422,15 @@ Se sugiere evaluación por otorrinolaringología para el manejo de la efusión, 
 En un adulto, una otitis con efusión de un solo lado obliga a pensar en lo que puede estar tapando la trompa: entre sus causas están el cáncer de rinofaringe y otros tumores vecinos que infiltran la trompa, además de la radioterapia (Mills y Hathorn, 2016). En un paciente que tuvo un tumor de cabeza y cuello, eso incluye una recidiva: se informa y se deja la pregunta al médico.
 :::
 
+:::comentario Prevención
+- **Primaria:** en niños con hepatoblastoma de riesgo estándar, el tiosulfato de sodio 6 horas después del cisplatino redujo la hipoacusia (33 % contra 63 %) sin empeorar la supervivencia (Brock y cols., 2018). Con aminoglucósidos, hay que evitarlos en quien tiene una variante de MT-RNR1 (como m.1555A>G) asociada a riesgo, salvo que la infección sea tan grave que no haya alternativa segura (McDermott y cols., 2022).
+- **Secundaria:** una audiometría antes de empezar y controles seriados durante y después del tratamiento detectan la pérdida cuando aún está en los agudos; después de la radioterapia, los controles empiezan a los seis meses y se repiten al menos dos veces al año (Bhandare y cols., 2010). El acúfeno nuevo en plena quimioterapia es motivo de control.
+- **Terciaria:** la pérdida por platino o aminoglucósido es permanente (Brock y cols., 2012); la discapacidad se limita con audífono o implante según el grado.
+- **Para el paciente:** "Si vas a recibir quimioterapia con platino o un antibiótico inyectable fuerte, pide una audiometría antes y avisa si aparece un pitido nuevo; cuenta si en tu familia alguien quedó sordo después de un antibiótico."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -475,3 +484,8 @@ En un adulto, una otitis con efusión de un solo lado obliga a pensar en lo que 
 1. Petsuksiri J, Sermsree A, Thephamongkhol K, Keskool P, Thongyai K, Chansilpa Y, et al. Sensorineural hearing loss after concurrent chemoradiotherapy in nasopharyngeal cancer patients. Radiat Oncol. 2011;6:19. doi:10.1186/1748-717X-6-19
 1. Christensen JG, Wessel I, Gothelf AB, Homøe P. Otitis media with effusion after radiotherapy of the head and neck: a systematic review. Acta Oncol. 2018;57(8):1011-6. doi:10.1080/0284186X.2018.1468085
 1. Mills R, Hathorn I. Aetiology and pathology of otitis media with effusion in adult life. J Laryngol Otol. 2016;130(5):418-24. doi:10.1017/S0022215116000943
+
+### Prevención
+
+1. Brock PR, Maibach R, Childs M, Rajput K, Roebuck D, Sullivan MJ, et al. Sodium thiosulfate for protection from cisplatin-induced hearing loss. N Engl J Med. 2018;378(25):2376-2385. doi:10.1056/NEJMoa1801109. PMID 29924955
+1. McDermott JH, Wolf J, Hoshitsuki K, Huddart R, Caudle KE, Whirl-Carrillo M, et al. Clinical Pharmacogenetics Implementation Consortium guideline for the use of aminoglycosides based on MT-RNR1 genotype. Clin Pharmacol Ther. 2022;111(2):366-372. doi:10.1002/cpt.2309. PMID 34032273

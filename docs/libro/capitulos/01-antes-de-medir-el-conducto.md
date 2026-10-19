@@ -424,6 +424,16 @@ Hipoacusia mixta del OI con lesión del conducto sospechosa. El audiólogo no po
 Nunca limpies, aspires ni toques con instrumentos un conducto con tejido que sangra. Lo que te toca es reconocerlo y derivarlo el mismo día.
 :::
 
+:::comentario Prevención
+- **Primaria:** al paciente con cerumen se le explica la higiene correcta del oído, y las velas de oído se desaconsejan: no previenen ni tratan el tapón (Schwartz y cols., 2017).
+- **Secundaria:** el cerumen se busca en quien no puede contar síntomas (niños pequeños, personas con deterioro cognitivo) y en quien usa audífono (Schwartz y cols., 2017). Una atresia o una estenosis se sospecha al mirar el pabellón y se confirma con la audiometría de vía ósea enmascarada.
+- **Terciaria:** la pérdida conductiva de una atresia se rehabilita con cirugía, que mejora la vía aérea sin normalizarla (Jonas y cols., 2022), o con audífono.
+- **Cuaternaria:** el cerumen no se trata de rutina si el paciente no tiene síntomas y el oído se examina bien (Schwartz y cols., 2017). En una otitis externa difusa no complicada no se parte con antibiótico por vía general, sino con gotas (Rosenfeld y cols., 2014).
+- **Para el paciente:** "El oído se limpia solo hacia afuera (Alberti, 1964); los cotonitos empujan el cerumen hacia adentro. Si lo sientes tapado, consulta antes de meter nada."
+
+En el Reino Unido, unos 2,3 millones de personas tienen problemas de cerumen que requieren manejo (Guest y cols., 2004). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -470,6 +480,10 @@ Nunca limpies, aspires ni toques con instrumentos un conducto con tejido que san
 1. Ungar OJ, Santos F, Nadol JB, Horowitz G, Fliss DM, Faquin WC, Handzel O. Invasion Patterns of External Auditory Canal Squamous Cell Carcinoma: A Histopathology Study. Laryngoscope. 2021;131(2):E590-E597. doi:10.1002/lary.28676. PMID 32311775
 1. Jensen DR, Grames LM, Lieu JE. Effects of aural atresia on speech development and learning: retrospective analysis from a multidisciplinary craniofacial clinic. JAMA Otolaryngol Head Neck Surg. 2013;139(8):797-802. doi:10.1001/jamaoto.2013.3859. PMID 23868202
 1. Mahdyoun P, Pulcini C, Gahide I, Raffaelli C, Savoldelli C, Castillo L, Guevara N. Necrotizing otitis externa: a systematic review. Otol Neurotol. 2013;34(4):620-9. doi:10.1097/MAO.0b013e3182804aee. PMID 23598690
+
+### Prevención
+
+1. Rosenfeld RM, Schwartz SR, Cannon CR, Roland PS, Simon GR, Kumar KA, et al. Clinical practice guideline: acute otitis externa. Otolaryngol Head Neck Surg. 2014;150(1 Suppl):S1-S24. doi:10.1177/0194599813517083. PMID 24491310
 
 ### Fotos de otoscopía
 

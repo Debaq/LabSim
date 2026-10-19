@@ -443,6 +443,15 @@ OD: hipoacusia sensorioneural profunda, antigua. OI: hipoacusia sensorioneural l
 El audiograma de hoy está casi normal y es fácil tranquilizar al paciente. Pero el hidrops fluctúa: lo que Samuel cuenta de los días en que "no entiende a los clientes" no se ve en un examen hecho un mes y medio después de la última crisis. El informe tiene que decir **cuándo** fue la última crisis.
 :::
 
+:::comentario Prevención
+- **Primaria:** para la enfermedad de Ménière no se conoce una medida que la prevenga (su causa no está aclarada; Basura y cols., 2020). El hidrops retardado sí tiene un origen evitable: la laberintitis por paperas o sarampión que dejó sorda a la persona en la infancia (Schuknecht y cols., 1990), y esas infecciones las previene la vacuna triple vírica (→ cap. 7).
+- **Secundaria:** quien tiene un oído sordo desde la infancia debe consultar si años después aparece vértigo en ese oído o una fluctuación en el oído que oye (Schuknecht, 1978). En un Ménière sospechado, las audiometrías se repiten, de preferencia cerca de una crisis (Lopez-Escamez y cols., 2015).
+- **Terciaria:** cuando la pérdida se estabiliza se evalúa la rehabilitación con audífono (→ cap. 28); en la forma contralateral, que enferma el único oído útil, cada fluctuación pesa más.
+- **Para el paciente:** "Si siempre oíste mal de un oído y de pronto el otro empieza a fluctuar o te marea, consulta pronto: ese es el oído que usas."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -497,3 +506,7 @@ El audiograma de hoy está casi normal y es fácil tranquilizar al paciente. Per
 1. Merchant SN, Adams JC, Nadol JB Jr. Pathophysiology of Meniere's syndrome: are symptoms caused by endolymphatic hydrops? Otol Neurotol. 2005;26(1):74-81. doi:10.1097/00129492-200501000-00013. PMID 15699723.
 1. Schuknecht HF, Suzuka Y, Zimmermann C. Delayed endolymphatic hydrops and its relationship to Ménière's disease. Ann Otol Rhinol Laryngol. 1990;99(11):843-53. doi:10.1177/000348949009901101
 1. Baloh RW. Prosper Ménière and his disease. Arch Neurol. 2001;58(7):1151-6. doi:10.1001/archneur.58.7.1151
+
+### Prevención
+
+1. Basura GJ, Adams ME, Monfared A, Schwartz SR, Antonelli PJ, Burkard R, et al. Clinical practice guideline: Ménière's disease. Otolaryngol Head Neck Surg. 2020;162(2 Suppl):S1-S55. doi:10.1177/0194599820909438. PMID 32267799
