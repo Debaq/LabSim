@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Arma los montajes de maniobras de H19 a partir de capturas de labyrinthus3d.
 
-Las capturas (1400x900, vista VPPB) las saca `hacer_h18_capturas.py` con
+Las capturas (1400x900, vista VPPB) las saca `hacer_h19_capturas.py` con
 chromium sin cabeza. Uso:
 
-    python3 hacer_h18_montajes.py <carpeta-de-capturas>
+    python3 hacer_h19_montajes.py <carpeta-de-capturas>
 
 Cada recuadro: el paciente en la camilla (recorte de la escena), el canal
 afectado en 2D con sus partículas y la flecha de "abajo" (recorte del panel de

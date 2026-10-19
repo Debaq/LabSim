@@ -3,16 +3,16 @@
 
     h19-dix-hallpike.png, h19-lateral.png, h19-epley.png, h19-semont.png
 
-Los montajes (hacer_h18_capturas.py + hacer_h18_montajes.py) ya recortan solo la escena, el canal
+Los montajes (hacer_h19_capturas.py + hacer_h19_montajes.py) ya recortan solo la escena, el canal
 en 2D y el ojo, pero arrastraban dos rótulos de la interfaz del simulador: la etiqueta oscura con
 el nombre del caso sobre el canal («canalitiasis del canal …») y la de «OJO DERECHO» sobre el ojo.
 Este paso los borra: cada etiqueta se ubica por su color (gris oscuro #4a4a4c, en el canal) o por su
 lugar (la del ojo, que es semitransparente) y se rellena fila por fila interpolando entre los
 píxeles que la rodean; el halo claro de la etiqueta pasa al gris del fondo. Es idempotente: si ya no hay etiqueta, no cambia nada.
 
-    python3 docs/libro/ilustraciones/hacer_h18_simulador.py
+    python3 docs/libro/ilustraciones/hacer_h19_simulador.py
 
-Si se rehacen las capturas con hacer_h18_montajes.py, hay que volver a correr este paso."""
+Si se rehacen las capturas con hacer_h19_montajes.py, hay que volver a correr este paso."""
 import collections
 import pathlib
 

@@ -1,4 +1,4 @@
-# H31. CPAP y dispositivos de avance mandibular
+# H32. CPAP y dispositivos de avance mandibular
 
 :::objetivos En esta herramienta
 - Explicar qué problema resuelven la presión positiva y el avance mandibular en el síndrome de apnea obstructiva del sueño, y qué parte del proceso corresponde al médico y cuál al tecnólogo.
@@ -13,11 +13,11 @@
 
 Un paciente al que se le confirmó un síndrome de apnea obstructiva del sueño sale del estudio con una indicación y con un equipo que debe usar cada noche durante años. El estudio dice que la vía aérea se cierra; el tratamiento solo funciona si el paciente lo usa. Esta herramienta enseña cómo funciona la presión positiva, cómo se adapta y se ajusta el equipo, cómo se lee lo que registra y qué otras opciones existen cuando no se tolera.
 
-El sueño normal, la fisiopatología del colapso, el diagnóstico y el índice de apnea-hipopnea (IAH) se explican en → H30; aquí se explica solo lo que el tratamiento necesita.
+El sueño normal, la fisiopatología del colapso, el diagnóstico y el índice de apnea-hipopnea (IAH) se explican en → H31; aquí se explica solo lo que el tratamiento necesita.
 
 ## Para qué sirve
 
-**El problema.** Durante el sueño la faringe de algunos pacientes se cierra de forma repetida (apneas) o se estrecha lo suficiente para reducir el flujo (hipopneas). El resultado es sueño fragmentado, somnolencia de día y caídas de la saturación (→ H30). Los tratamientos de esta herramienta no corrigen la causa del cierre: mantienen la vía abierta mientras se usan. Como una férula, el efecto dura mientras el dispositivo está puesto.
+**El problema.** Durante el sueño la faringe de algunos pacientes se cierra de forma repetida (apneas) o se estrecha lo suficiente para reducir el flujo (hipopneas). El resultado es sueño fragmentado, somnolencia de día y caídas de la saturación (→ H31). Los tratamientos de esta herramienta no corrigen la causa del cierre: mantienen la vía abierta mientras se usan. Como una férula, el efecto dura mientras el dispositivo está puesto.
 
 **Qué trata cada uno.**
 
@@ -30,7 +30,7 @@ Tabla: Tratamientos del SAHOS y qué hace cada uno
 | **Terapia posicional** | Evita dormir de espaldas en pacientes cuyos eventos se concentran en esa posición | El médico | Educar y revisar el uso |
 | **Cirugía y estimulación del hipogloso** | Cambian la anatomía o activan la musculatura de la lengua | El especialista que las realiza | Contexto: no se hacen aquí |
 
-La guía de la Academia Americana de Medicina del Sueño (AASM) recomienda usar presión positiva, en comparación con no tratar, en adultos con SAHOS y somnolencia excesiva (recomendación fuerte), con alteración de la calidad de vida relacionada con el sueño (condicional) y con hipertensión asociada (condicional) (Patil y cols., 2019). La guía no fija un IAH mínimo para empezar: el diagnóstico y la gravedad vienen del estudio (→ H30) y la decisión es del médico. Para los dispositivos orales, la guía conjunta de la AASM y la Academia Americana de Medicina Dental del Sueño (AADSM) recomienda considerarlos en adultos con SAHOS que no toleran la presión positiva o que prefieren otra alternativa (Ramar y cols., 2015).
+La guía de la Academia Americana de Medicina del Sueño (AASM) recomienda usar presión positiva, en comparación con no tratar, en adultos con SAHOS y somnolencia excesiva (recomendación fuerte), con alteración de la calidad de vida relacionada con el sueño (condicional) y con hipertensión asociada (condicional) (Patil y cols., 2019). La guía no fija un IAH mínimo para empezar: el diagnóstico y la gravedad vienen del estudio (→ H31) y la decisión es del médico. Para los dispositivos orales, la guía conjunta de la AASM y la Academia Americana de Medicina Dental del Sueño (AADSM) recomienda considerarlos en adultos con SAHOS que no toleran la presión positiva o que prefieren otra alternativa (Ramar y cols., 2015).
 
 **Qué corresponde a cada uno.** La indicación, la prescripción y la decisión de cambiar de tratamiento son del médico. En el DAM, el médico del sueño prescribe y el dentista confecciona y vigila los efectos dentales (Ramar y cols., 2015). La adaptación de la interfaz, la educación, la lectura de datos y el seguimiento de uso los hace una persona entrenada, y qué profesional puede hacerlas, y bajo qué supervisión, depende de cada servicio y de la normativa de cada país. <!-- verificar: normativa chilena sobre quién puede titular y adaptar equipos de presión positiva; no se atribuyen competencias legales en el texto. -->
 
@@ -40,9 +40,9 @@ La guía de la Academia Americana de Medicina del Sueño (AASM) recomienda usar 
 
 ### Una vía aérea que se cierra y una férula de aire
 
-La faringe no tiene un esqueleto: sus paredes son músculo y mucosa. Despierto, el tono de esos músculos la mantiene abierta; dormido, ese tono baja. En cada inspiración el pecho crea una presión dentro de la vía aérea menor que la atmosférica, y esa presión negativa tiende a cerrar un conducto blando (→ H30 explica por qué en algunos pacientes cede). El paladar blando y la base de la lengua se apoyan en la pared posterior y la luz desaparece.
+La faringe no tiene un esqueleto: sus paredes son músculo y mucosa. Despierto, el tono de esos músculos la mantiene abierta; dormido, ese tono baja. En cada inspiración el pecho crea una presión dentro de la vía aérea menor que la atmosférica, y esa presión negativa tiende a cerrar un conducto blando (→ H31 explica por qué en algunos pacientes cede). El paladar blando y la base de la lengua se apoyan en la pared posterior y la luz desaparece.
 
-:::imagen ilustraciones/h31-ferula.svg ancho=100% A. Sin presión positiva, la luz de la faringe se cierra a la altura del paladar blando y de la base de la lengua. B. Con una mascarilla nasal y presión positiva, la luz queda abierta durante todo el ciclo respiratorio. Esquema: las proporciones son aproximadas. Imagen propia.
+:::imagen ilustraciones/h32-ferula.svg ancho=100% A. Sin presión positiva, la luz de la faringe se cierra a la altura del paladar blando y de la base de la lengua. B. Con una mascarilla nasal y presión positiva, la luz queda abierta durante todo el ciclo respiratorio. Esquema: las proporciones son aproximadas. Imagen propia.
 :::
 
 Si se hace que la presión dentro de la faringe **sea mayor que la atmosférica** durante todo el ciclo, la pared deja de colapsar. Eso fue lo que mostró la primera descripción del tratamiento: en cinco pacientes con apnea grave, una presión baja aplicada por la nariz, de 4,5 a 10 cmH₂O, impidió por completo el cierre de la vía aérea durante el sueño y permitió una noche entera sin interrupciones; los autores la describieron como una **férula neumática** para la faringe (Sullivan y cols., 1981). El nombre sigue siendo útil: la presión no ayuda a respirar ni mueve aire, solo mantiene abierto el tubo por donde el paciente respira solo. Por eso la presión necesaria es **la mínima que impide el cierre** de ese paciente, y varía entre personas, entre posiciones y entre fases del sueño. La cmH₂O es una unidad de presión: 10 cmH₂O equivalen a 1 kPa aproximadamente.
@@ -73,7 +73,7 @@ Tabla: Tres formas de entregar presión positiva
 
 La mandíbula, la lengua y el hueso hioides están unidos por músculos. Al adelantar la mandíbula, la base de la lengua se aleja de la pared posterior de la faringe y las paredes quedan más tensas. En un estudio de diez pacientes con un dispositivo de avance, la presión a la que la vía aérea se cierra durante el sueño pasó de −1,6 a −3,9 cmH₂O en sueño de etapa 2 y de −2,5 a −4,7 cmH₂O en sueño profundo, y el IAH bajó de 25,0 a 13,2 por hora (Ng y cols., 2003): la vía se volvió **menos colapsable**. Una presión de cierre más negativa significa que hace falta una succión mayor para cerrarla. El dispositivo no deja la vía abierta a presión como lo hace el equipo; la hace más resistente al cierre.
 
-:::imagen ilustraciones/h31-avance.svg ancho=100% A. Sin dispositivo, la base de la lengua queda cerca de la pared posterior de la faringe. B. Con la férula en las dos arcadas, la mandíbula avanza unos milímetros, la lengua se adelanta y la luz retrolingual se ensancha. Esquema: las proporciones son aproximadas. Imagen propia.
+:::imagen ilustraciones/h32-avance.svg ancho=100% A. Sin dispositivo, la base de la lengua queda cerca de la pared posterior de la faringe. B. Con la férula en las dos arcadas, la mandíbula avanza unos milímetros, la lengua se adelanta y la luz retrolingual se ensancha. Esquema: las proporciones son aproximadas. Imagen propia.
 :::
 
 ### Terapia posicional
@@ -92,7 +92,7 @@ El equipo se instala con una indicación escrita: el médico fijó la modalidad 
 
 La interfaz es la pieza que une al paciente con el equipo. La elección es práctica: la que sella con la menor presión de ajuste, y que el paciente tolera toda la noche.
 
-:::imagen ilustraciones/h31-interfaces.svg ancho=100% Las tres interfaces más usadas, de frente. A. Mascarilla nasal. B. Almohadillas nasales, que se apoyan en las narinas. C. Mascarilla oronasal, que cubre nariz y boca. Esquemas: las formas reales varían según el fabricante. Imagen propia.
+:::imagen ilustraciones/h32-interfaces.svg ancho=100% Las tres interfaces más usadas, de frente. A. Mascarilla nasal. B. Almohadillas nasales, que se apoyan en las narinas. C. Mascarilla oronasal, que cubre nariz y boca. Esquemas: las formas reales varían según el fabricante. Imagen propia.
 :::
 
 Tabla: Interfaces para presión positiva
@@ -134,7 +134,7 @@ La guía de la AASM recomienda dar educación **antes de empezar** la presión p
 
 La titulación es el procedimiento que busca la presión con la que el paciente no tiene eventos obstructivos. Hay dos caminos y la guía de la AASM acepta ambos en adultos sin comorbilidades significativas (Patil y cols., 2019):
 
-- **Titulación manual en polisomnografía.** Un técnico vigila el registro toda la noche y cambia la presión desde otra sala (→ H30 para el montaje y los eventos).
+- **Titulación manual en polisomnografía.** Un técnico vigila el registro toda la noche y cambia la presión desde otra sala (→ H31 para el montaje y los eventos).
 - **Titulación automática.** El paciente duerme en su casa con un equipo AutoCPAP. Después de un período de uso, se descargan los datos y se fija una presión a partir de ellos, o se deja el equipo en modo automático (Patil y cols., 2019). <!-- verificar: duración del período y criterio para fijar la presión a partir de los datos del AutoCPAP; la guía dice "determinada a partir de los datos de monitoreo" sin fijar un percentil ni un número de noches. -->
 
 **Titulación manual, reglas de la guía.** Las reglas de la AASM de 2008 para pacientes de 12 años o más son (Kushida y cols., 2008):
@@ -153,7 +153,7 @@ Tabla: Reglas de titulación manual (adultos y mayores de 12 años)
 
 (Kushida y cols., 2008). Los umbrales para menores de 12 años son más bajos y no se tratan aquí.
 
-:::imagen ilustraciones/h31-titulacion.svg ancho=100% Una titulación manual de ejemplo. Arriba, la presión sube un escalón de 1 cmH₂O cada 10 minutos desde 4 cmH₂O. Abajo, apneas, hipopneas y ronquido: a medida que sube la presión, los eventos disminuyen y desaparecen a partir de 10 cmH₂O (en el ejemplo, la presión eficaz). Los eventos son datos de ejemplo. Imagen propia.
+:::imagen ilustraciones/h32-titulacion.svg ancho=100% Una titulación manual de ejemplo. Arriba, la presión sube un escalón de 1 cmH₂O cada 10 minutos desde 4 cmH₂O. Abajo, apneas, hipopneas y ronquido: a medida que sube la presión, los eventos disminuyen y desaparecen a partir de 10 cmH₂O (en el ejemplo, la presión eficaz). Los eventos son datos de ejemplo. Imagen propia.
 :::
 
 En el ejemplo, el paciente tuvo 6 apneas e hipopneas en los primeros 10 minutos con 4 cmH₂O, 4 con 5, 2 con 6, 1 con 7 y ninguna desde 8; el ronquido persistió hasta 9 cmH₂O y desapareció con 10. Por eso la presión elegida fue 10 y no 8: la meta incluye el ronquido y los despertares, no solo las apneas.
@@ -179,7 +179,7 @@ Los dos caminos de titulación no son equivalentes en todos los pacientes. La gu
 
 El equipo guarda por noche las horas de uso, el IAH residual que calcula, las fugas y las presiones. La telemonitorización consiste en revisar esos datos a distancia para detectar problemas y dar apoyo, y la guía de la AASM la sugiere durante el período inicial (condicional) (Patil y cols., 2019).
 
-:::imagen ilustraciones/h31-descarga.svg ancho=100% Resumen de una descarga de 30 noches (datos de ejemplo). Cada barra es una noche; la línea punteada marca 4 horas. En el ejemplo, el promedio es 5,3 h, hay 23 noches de 30 con 4 h o más (77 %), el IAH residual es 3,1 por hora y la fuga no intencional (percentil 95) es 11 L/min. Imagen propia.
+:::imagen ilustraciones/h32-descarga.svg ancho=100% Resumen de una descarga de 30 noches (datos de ejemplo). Cada barra es una noche; la línea punteada marca 4 horas. En el ejemplo, el promedio es 5,3 h, hay 23 noches de 30 con 4 h o más (77 %), el IAH residual es 3,1 por hora y la fuga no intencional (percentil 95) es 11 L/min. Imagen propia.
 :::
 
 Tabla: Qué mirar en la descarga y qué preguntarse
@@ -250,7 +250,7 @@ El tecnólogo no gradúa el avance ni modifica el dispositivo: refuerza que se u
 
 ### 7. Terapia posicional y alternativas quirúrgicas (contexto)
 
-- **Terapia posicional.** Está indicada para el paciente cuyos eventos se concentran de espaldas, y se confirma en el estudio del sueño (→ H30). Los dispositivos de vibración reducen el IAH a corto plazo y son fáciles de usar, pero no hay datos de largo plazo y el CPAP reduce más el IAH (Ravesloot y cols., 2017; Ha y cols., 2014).
+- **Terapia posicional.** Está indicada para el paciente cuyos eventos se concentran de espaldas, y se confirma en el estudio del sueño (→ H31). Los dispositivos de vibración reducen el IAH a corto plazo y son fáciles de usar, pero no hay datos de largo plazo y el CPAP reduce más el IAH (Ravesloot y cols., 2017; Ha y cols., 2014).
 - **Cirugía.** La guía de la AASM indica que las alternativas a la presión positiva incluyen la pérdida de peso, la terapia posicional, los dispositivos orales y las intervenciones quirúrgicas (Patil y cols., 2019). Una revisión sistemática de las cirugías de la vía aérea superior en adultos halló reducciones sustanciales y consistentes del IAH con el avance maxilomandibular, y resultados menos consistentes con las cirugías faríngeas (Caples y cols., 2010); la mayor parte de la literatura son series de casos. La cirugía nasal sola rara vez normaliza el IAH, pero baja la presión que el paciente necesita (Camacho y cols., 2015). La indicación es del especialista.
 - **Estimulación del nervio hipogloso.** Es un implante que activa la musculatura de la lengua durante la inspiración. En un estudio de 126 pacientes con SAHOS moderado a grave que no aceptaban o no se adherían al CPAP, el IAH mediano a los 12 meses bajó 68 %, de 29,3 a 9,0 por hora (Strollo y cols., 2014). Es un estudio sin grupo control en su fase principal; se reserva para pacientes seleccionados.
 - **Pérdida de peso.** Una baja de peso del 10 % se asoció con una disminución del IAH del 26 % en un estudio de cohortes (Peppard y cols., 2000).

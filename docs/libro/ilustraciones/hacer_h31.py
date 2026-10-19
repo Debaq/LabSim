@@ -1,353 +1,524 @@
 #!/usr/bin/env python3
-"""Dibuja las ilustraciones de la herramienta H31 (CPAP y dispositivos de avance mandibular):
+"""Dibuja las ilustraciones de la herramienta H31 (polisomnografía y poligrafía respiratoria):
 
-    h31-ferula.svg        vía aérea superior colapsada frente a ferulizada por la presión positiva
-    h31-interfaces.svg    tres interfaces: mascarilla nasal, almohadillas nasales, mascarilla oronasal
-    h31-titulacion.svg    titulación manual: presión creciente y eventos por escalón
-    h31-descarga.svg      resumen de descarga de datos de uso de un equipo (30 noches de ejemplo)
-    h31-avance.svg        avance mandibular: la lengua y la pared faríngea se alejan de la pared posterior
+    h31-hipnograma.svg   hipnograma de una noche de ejemplo (etapas por época de 30 s agrupadas en minutos)
+    h31-eventos.svg      trazos de 30 s: apnea obstructiva, central, mixta e hipopnea, con flujo, esfuerzo y SpO2
+    h31-montaje.svg      EEG 10-20 (derivaciones recomendadas) y colocación de los demás sensores
+    h31-informe.svg      resumen gráfico de un informe de ejemplo: hipnograma, eventos, posición y SpO2
 
-SVG propios, no IA. Son esquemas: las proporciones anatómicas son aproximadas. Los datos de la
-titulación y de la descarga son de ejemplo (no de pacientes) y se generan de forma determinista;
-las cifras que aparecen en el capítulo salen de este script (se imprimen al correrlo)."""
+SVG propios, no IA. Todo se CALCULA: el hipnograma y los eventos del informe salen de una noche simulada con
+semilla fija (los números que usa el capítulo se imprimen al correr el script); los trazos de 30 s se generan
+con senoides de frecuencia respiratoria constante, atenuadas o desfasadas según el tipo de evento. Las cifras
+son de ejemplo, no de pacientes."""
 import math
 import pathlib
+import random
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from hacer_h28 import Lienzo, Eje, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
+import re  # noqa: E402
+from hacer_h25 import Lienzo as _Lienzo, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR  # noqa: E402
 
 AQUI = pathlib.Path(__file__).parent
-AIRE = '#bcd8ec'       # luz de la vía aérea
-PIEL = '#f3e4d8'
-TEJIDO = '#e8b9b0'     # lengua y paladar
-HUESO = '#d9cfa8'
+GRIS = '#b9b6ae'
+AZUL = '#2f5d9e'
 
 
-# ------------------------------------------------------------------ cabeza de perfil
-def ancho_luz(y, colapso_palatal=0.0, colapso_lingual=0.0, base=24.0):
-    """Ancho de la luz faríngea (px) a la altura y; dos estrechamientos: retropalatal y retrolingual."""
-    w = base
-    w -= base * 0.93 * colapso_palatal * math.exp(-((y - 178) / 11) ** 2)
-    w -= base * 0.93 * colapso_lingual * math.exp(-((y - 218) / 11) ** 2)
-    return w
+class Lienzo(_Lienzo):
+    """Igual que el de H26, con coma decimal en los textos."""
+
+    k = 1.0
+
+    def t(self, x, y, s, size=9, *a, **kw):
+        super().t(x, y, re.sub(r'(?<=\d)\.(?=\d)', ',', str(s)), size * self.k, *a, **kw)
 
 
-def cabeza(c, ox, oy, colapso_palatal=0.0, colapso_lingual=0.0, avance=0.0, ensanche_lingual=0.0):
-    """Perfil de cabeza mirando a la derecha, con la vía aérea. Coordenadas locales 0..300 x 0..270.
-    avance: desplazamiento (px) de la mandíbula y de la base de la lengua hacia delante."""
-    def P(x, y):
-        return f'{ox + x:.1f},{oy + y:.1f}'
-    a = avance
-    piel = (f'M{P(60, 262)} L{P(60, 170)} C{P(30, 140)} {P(30, 40)} {P(120, 20)} C{P(200, 5)} {P(240, 50)} {P(245, 90)} '
-            f'L{P(272, 135)} L{P(250, 146)} L{P(252, 165)} L{P(246 + a * .5, 183)} L{P(247 + a, 206)} '
-            f'L{P(226 + a, 226)} L{P(195, 236)} L{P(182, 262)}')
-    c.raw(f'<path d="{piel}" fill="{PIEL}" stroke="{TINTA}" stroke-width="1.6" stroke-linejoin="round"/>')
-    # vía aérea: nariz (banda horizontal) + faringe (banda vertical con estrechamientos)
-    ys = list(range(150, 262, 2))
-    atras = [(128, y) for y in ys]
-    # base de la lengua: el ensanche corre la pared anterior hacia delante a la altura lingual
-    adel = []
-    for y in ys:
-        w = ancho_luz(y, colapso_palatal, colapso_lingual)
-        w += ensanche_lingual * math.exp(-((y - 218) / 14) ** 2)
-        adel.append((128 + w, y))
-    poli = [(128, 138)] + [(262, 138)] + [(262, 150)] + [(128 + 24, 150)] + adel[::-1][:0]
-    cont = [(262, 138), (128, 138), (118, 150)] + [(128, y) for y in ys] + [(adel[-1][0], 262)] + adel[::-1] + [(150, 150), (262, 150)]
-    c.raw('<polygon points="%s" fill="%s" stroke="%s" stroke-width="1"/>' % (
-        ' '.join(P(x, y) for x, y in cont), AIRE, TENUE))
-    # lengua (cuerpo en la boca + base contra la faringe), se mueve con la mandíbula
-    lx = a
-    lengua = [(172 + lx, 188), (222 + lx, 190), (238 + lx, 200), (222 + lx, 212), (190 + lx, 222), (168 + lx, 232), (160 + lx, 228)]
-    # la base de la lengua forma la pared anterior de la faringe a la altura lingual
-    frente = 128 + ancho_luz(218, colapso_palatal, colapso_lingual) + ensanche_lingual * 1.0
-    lengua = [(x if x > 250 else x, y) for x, y in lengua]
-    base_len = [(frente, 206), (frente, 232)]
-    cont_l = [(172 + lx, 188), (222 + lx, 190), (238 + lx, 200), (222 + lx, 212), (200 + lx, 226), (frente + 8, 236),
-              (frente, 232), (frente, 206), (frente + 4, 196)]
-    c.raw('<polygon points="%s" fill="%s" stroke="%s" stroke-width="1.1" stroke-linejoin="round"/>' % (
-        ' '.join(P(x, y) for x, y in cont_l), TEJIDO, TINTA))
-    # paladar duro y blando
-    pb_fin = 128 + ancho_luz(178, colapso_palatal, colapso_lingual)
-    c.raw(f'<path d="M{P(246, 160)} L{P(190, 162)} L{P(150, 164)} Q{P(pb_fin + 6, 170)} {P(pb_fin, 190)} '
-          f'L{P(pb_fin - 2, 164)}" fill="none" stroke="none"/>')
-    paladar = [(246, 156), (190, 158), (150, 160), (pb_fin + 8, 166), (pb_fin + 2, 186), (pb_fin - 6, 190), (128 + 24 - 18, 168)]
-    c.raw('<polygon points="%s" fill="%s" stroke="%s" stroke-width="1.1" stroke-linejoin="round"/>' % (
-        ' '.join(P(x, y) for x, y in [(250, 152), (190, 154), (146, 156), (pb_fin + 10, 160), (pb_fin + 4, 186), (pb_fin - 6, 190),
-                                      (pb_fin - 9, 170), (150, 166), (190, 166), (250, 164)]), TEJIDO, TINTA))
-    # cavidad bucal (aire) entre paladar y lengua
-    c.raw('<polygon points="%s" fill="%s" stroke="none"/>' % (
-        ' '.join(P(x, y) for x, y in [(250, 166), (190, 168), (156, 170), (pb_fin - 4, 190), (172 + lx, 188), (222 + lx, 190), (240 + lx, 198), (252, 178)]), AIRE))
-    # dientes
-    c.raw(f'<rect x="{ox + 246:.1f}" y="{oy + 163:.1f}" width="5" height="12" rx="1.5" fill="#fff" stroke="{TINTA}" stroke-width=".9"/>')
-    c.raw(f'<rect x="{ox + 244 + a:.1f}" y="{oy + 178:.1f}" width="5" height="12" rx="1.5" fill="#fff" stroke="{TINTA}" stroke-width=".9"/>')
+# ------------------------------------------------------------------ noche simulada
+# (etapa, minutos). W = vigilia, N1-N3, R = REM. La primera W es la latencia de sueño.
+SECUENCIA = [
+    ('W', 14),
+    ('N1', 4), ('N2', 18), ('N3', 36), ('N2', 14), ('R', 10), ('W', 3),
+    ('N1', 3), ('N2', 22), ('N3', 26), ('N2', 18), ('R', 14), ('W', 4),
+    ('N2', 26), ('N3', 14), ('N2', 28), ('R', 18), ('N1', 4), ('W', 5),
+    ('N2', 30), ('N3', 4), ('N2', 30), ('R', 22), ('N1', 5), ('W', 6),
+    ('N2', 24), ('R', 30), ('N1', 4), ('N2', 12), ('W', 8),
+    ('N2', 14), ('N1', 4), ('N2', 6),
+]
+# posición corporal: (inicio min, fin min, posición)
+POSICIONES = [(0, 150, 'supino'), (150, 230, 'izquierda'), (230, 330, 'supino'), (330, 400, 'derecha'), (400, 600, 'supino')]
+TASA = {'N1': 16.0, 'N2': 11.0, 'N3': 3.0, 'R': 34.0}         # eventos/h de sueño en posición lateral (base)
+FACTOR_POS = {'supino': 1.7, 'izquierda': 0.5, 'derecha': 0.6}
+TIPOS = [('apnea obstructiva', 0.30), ('hipopnea', 0.62), ('apnea mixta', 0.05), ('apnea central', 0.03)]
+ORDEN_ETAPA = {'W': 4, 'R': 3, 'N1': 2, 'N2': 1, 'N3': 0}   # 0 abajo
+NOMBRE_ETAPA = {'W': 'Vigilia', 'R': 'REM', 'N1': 'N1', 'N2': 'N2', 'N3': 'N3'}
 
 
-def flecha(c, x1, y1, x2, y2, color=TINTA, w=1.6):
-    ang = math.atan2(y2 - y1, x2 - x1)
-    c.l(x1, y1, x2, y2, color, w)
-    for s in (-1, 1):
-        c.l(x2, y2, x2 - 7 * math.cos(ang + s * 0.45), y2 - 7 * math.sin(ang + s * 0.45), color, w)
+def posicion(t):
+    for a, b, p in POSICIONES:
+        if a <= t < b:
+            return p
+    return POSICIONES[-1][2]
 
 
-# ------------------------------------------------------------------ 1. vía aérea colapsada y ferulizada
-def sitio(c, x, y, texto, dx=0, dy=0):
-    """Marca de cierre: círculo rojo en el sitio donde la luz se cierra."""
-    c.raw(f'<circle cx="{x}" cy="{y}" r="9" fill="none" stroke="{AVISO}" stroke-width="2"/>')
-
-
-def ferula():
-    c = Lienzo(900, 350)
-    c.t(14, 20, 'A · Sin presión positiva: la luz se cierra', 10, TINTA, 'start', 700)
-    c.t(464, 20, 'B · Con presión positiva: la luz queda abierta', 10, TINTA, 'start', 700)
-    ax, ay, bx, by = 20, 40, 470, 40
-    cabeza(c, ax, ay, colapso_palatal=1.0, colapso_lingual=1.0)
-    cabeza(c, bx, by)
-    # A: sitios de cierre y rótulos
-    sitio(c, ax + 130, ay + 178, '')
-    sitio(c, ax + 130, ay + 218, '')
-    c.t(ax + 290, ay + 102, 'nariz', 8.5, TINTA, 'start')
-    c.l(ax + 286, ay + 99, ax + 262, ay + 128, TENUE, .8)
-    c.t(ax + 290, ay + 158, 'cierre retropalatal', 8.5, AVISO, 'start', 700)
-    c.l(ax + 286, ay + 155, ax + 140, ay + 176, AVISO, .8)
-    c.t(ax + 290, ay + 238, 'cierre retrolingual', 8.5, AVISO, 'start', 700)
-    c.l(ax + 286, ay + 235, ax + 140, ay + 220, AVISO, .8)
-    c.t(ax + 290, ay + 196, 'paladar blando', 8.5, TINTA, 'start')
-    c.l(ax + 286, ay + 193, ax + 200, ay + 160, TENUE, .8)
-    c.t(ax + 290, ay + 214, 'lengua', 8.5, TINTA, 'start')
-    c.l(ax + 286, ay + 211, ax + 214, ay + 204, TENUE, .8)
-    # B: mascarilla nasal y presión
-    c.raw(f'<path d="M{bx + 266:.1f},{by + 120:.1f} L{bx + 298:.1f},{by + 124:.1f} L{bx + 298:.1f},{by + 160:.1f} L{bx + 268:.1f},{by + 152:.1f} Z" '
-          f'fill="#fff" fill-opacity=".85" stroke="{COCLEAR}" stroke-width="2" stroke-linejoin="round"/>')
-    c.l(bx + 298, by + 142, bx + 340, by + 142, COCLEAR, 5)
-    c.t(bx + 290, by + 104, 'mascarilla nasal', 8.5, COCLEAR, 'start', 700)
-    c.t(bx + 290, by + 116, 'y tubo al equipo', 8.5, COCLEAR, 'start', 700)
-    for y in (178, 218):
-        for dx in (-1, 1):
-            xc = bx + 128 + 12
-            flecha(c, xc, by + y, xc + dx * 17, by + y, RETRO, 1.7)
-    for x in (bx + 190, bx + 218):
-        c.t(x, by + 148, '+', 13, RETRO, 'middle', 700)
-    c.t(bx + 140, by + 250, '+', 13, RETRO, 'middle', 700)
-    c.t(bx + 290, by + 196, 'la presión empuja', 8.5, RETRO, 'start', 700)
-    c.t(bx + 290, by + 208, 'las paredes hacia fuera', 8.5, RETRO, 'start', 700)
-    c.l(bx + 286, by + 205, bx + 170, by + 218, RETRO, .8)
-    c.t(14, 322, 'En la inspiración la presión dentro de la faringe baja bajo la atmosférica y la pared, sin soporte, se apoya en el paladar y en la lengua.', 8, TENUE, 'start')
-    c.t(14, 336, 'Con la presión positiva la luz queda a presión mayor que la atmosférica durante todo el ciclo: funciona como una férula neumática. Esquema; las proporciones son aproximadas.', 8, TENUE, 'start')
-    c.guardar('h31-ferula.svg')
-
-
-# ------------------------------------------------------------------ 2. interfaces
-def cara(c, ox, oy):
-    """Cara de frente (esquema)."""
-    c.raw(f'<ellipse cx="{ox + 90}" cy="{oy + 110}" rx="62" ry="86" fill="{PIEL}" stroke="{TINTA}" stroke-width="1.6"/>')
-    for dx in (-24, 24):
-        c.raw(f'<ellipse cx="{ox + 90 + dx}" cy="{oy + 82}" rx="9" ry="4.5" fill="#fff" stroke="{TINTA}" stroke-width="1.1"/>')
-        c.raw(f'<circle cx="{ox + 90 + dx}" cy="{oy + 82}" r="2.4" fill="{TINTA}"/>')
-    c.raw(f'<path d="M{ox + 90},{oy + 88} L{ox + 84},{oy + 120} Q{ox + 90},{oy + 126} {ox + 96},{oy + 120} Z" fill="none" stroke="{TENUE}" stroke-width="1"/>')
-    c.raw(f'<path d="M{ox + 70},{oy + 150} Q{ox + 90},{oy + 160} {ox + 110},{oy + 150}" fill="none" stroke="{TINTA}" stroke-width="1.6"/>')
-
-
-def interfaces():
-    c = Lienzo(760, 360)
-    titulos = ['A · Mascarilla nasal', 'B · Almohadillas nasales', 'C · Mascarilla oronasal']
-    for i, t in enumerate(titulos):
-        ox = 14 + i * 250
-        c.t(ox, 20, t, 10, TINTA, 'start', 700)
-        cara(c, ox + 20, 36)
-    col = COCLEAR
-    # A: triángulo sobre la nariz
-    ox = 34
-    c.raw(f'<path d="M{ox + 90},{36 + 80} L{ox + 66},{36 + 130} Q{ox + 90},{36 + 140} {ox + 114},{36 + 130} Z" fill="#fff" fill-opacity=".8" '
-          f'stroke="{col}" stroke-width="2.4" stroke-linejoin="round"/>')
-    c.l(ox + 90, 36 + 78, ox + 90, 36 + 52, col, 5)
-    for yy in (74, 98):
-        c.l(ox + 69, 36 + yy + 14, ox + 28, 36 + yy + 22, col, 1.5)
-        c.l(ox + 111, 36 + yy + 14, ox + 152, 36 + yy + 22, col, 1.5)
-    # B: dos óvalos en las narinas
-    ox = 284
-    for dx in (-9, 9):
-        c.raw(f'<ellipse cx="{ox + 90 + dx}" cy="{36 + 123}" rx="7" ry="5" fill="#fff" stroke="{col}" stroke-width="2.2"/>')
-    c.raw(f'<path d="M{ox + 81},{36 + 120} Q{ox + 90},{36 + 100} {ox + 99},{36 + 120}" fill="none" stroke="{col}" stroke-width="3"/>')
-    c.l(ox + 90, 36 + 104, ox + 90, 36 + 52, col, 5)
-    for yy in (74, 98):
-        c.l(ox + 72, 36 + yy + 10, ox + 28, 36 + yy + 18, col, 1.5)
-        c.l(ox + 108, 36 + yy + 10, ox + 152, 36 + yy + 18, col, 1.5)
-    # C: forma que cubre nariz y boca
-    ox = 534
-    c.raw(f'<path d="M{ox + 90},{36 + 80} L{ox + 62},{36 + 130} Q{ox + 58},{36 + 168} {ox + 90},{36 + 176} Q{ox + 122},{36 + 168} {ox + 118},{36 + 130} Z" '
-          f'fill="#fff" fill-opacity=".8" stroke="{col}" stroke-width="2.4" stroke-linejoin="round"/>')
-    c.l(ox + 90, 36 + 78, ox + 90, 36 + 52, col, 5)
-    for yy in (74, 98):
-        c.l(ox + 65, 36 + yy + 14, ox + 28, 36 + yy + 22, col, 1.5)
-        c.l(ox + 115, 36 + yy + 14, ox + 152, 36 + yy + 22, col, 1.5)
-    c.l(ox + 90, 36 + 52, ox + 90, 36 + 40, col, 5)
-    # textos
-    notas = [
-        ['cubre la nariz', 'exige respirar por la nariz:', 'con la boca abierta', 'el aire se escapa'],
-        ['se apoyan en las narinas', 'poco contacto con la cara', 'la presión entra por las narinas;', 'menos espacio muerto bajo la máscara'],
-        ['cubre nariz y boca', 'sirve si el paciente respira', 'por la boca; en un estudio se', 'asoció a presiones más altas'],
-    ]
-    for i, n in enumerate(notas):
-        ox = 14 + i * 250
-        for k, s in enumerate(n):
-            c.t(ox + 4, 268 + k * 13, s, 8.5, TINTA if k == 0 else TENUE, 'start', 700 if k == 0 else 400)
-    c.t(14, 346, 'Esquemas de frente. El tubo (arriba) va al equipo; las líneas laterales son el arnés que sujeta la interfaz.', 8, TENUE, 'start')
-    c.guardar('h31-interfaces.svg')
-
-
-# ------------------------------------------------------------------ 3. titulación
-def lcg(seed):
-    s = seed
-    while True:
-        s = (s * 1103515245 + 12345) % 2 ** 31
-        yield s / 2 ** 31
-
-
-def titulacion():
-    """Titulación manual de ejemplo: IAH basal 38/h; presión eficaz 10 cmH2O. Escalones de 1 cmH2O cada 10 min."""
-    p0, peff, dur = 4, 10, 10
-    escalones = list(range(p0, 12))                         # 4..11
-    base = 38.0
-    tasa = lambda p: base * math.exp(-(p - p0) / 1.7) if p < peff else 1.6
-    c = Lienzo(760, 420)
-    c.t(14, 20, 'Titulación manual de ejemplo: la presión sube hasta que desaparecen los eventos obstructivos', 10, TINTA, 'start', 700)
-    t_fin = len(escalones) * dur
-    ej1 = Eje(c, 130, 40, 600, 130, 0, t_fin, 0, 14)
-    ej1.marco(xt=list(range(0, t_fin + 1, 10)), yt=[0, 4, 8, 12], ylab='presión (cmH₂O)')
-    pts = []
-    for i, p in enumerate(escalones):
-        pts += [(ej1.X(i * dur), ej1.Y(p)), (ej1.X((i + 1) * dur), ej1.Y(p))]
-    c.poli(pts, COCLEAR, 2.6)
-    c.t(ej1.X(0.6), ej1.Y(4) - 8, 'inicio: 4 cmH₂O', 8.5, TINTA, 'start')
-    # zona de la presión eficaz
-    ie = escalones.index(peff)
-    c.raw(f'<rect x="{ej1.X(ie * dur):.1f}" y="{ej1.y0}" width="{ej1.X(t_fin) - ej1.X(ie * dur):.1f}" height="{ej1.h}" fill="{RETRO}" opacity=".10"/>')
-    c.t(ej1.X(ie * dur + 1), ej1.Y(13), 'presión sin eventos obstructivos', 8.5, RETRO, 'start', 700)
+def noche():
+    seg, t = [], 0
+    for e, d in SECUENCIA:
+        seg.append((e, t, t + d))
+        t += d
+    tib = t
     # eventos
-    ej2 = Eje(c, 130, 210, 600, 100, 0, t_fin, 0, 1)
-    ej2.marco(xt=list(range(0, t_fin + 1, 10)), yt=[], xlab='tiempo desde el inicio de la titulación (min)')
-    c.raw(f'<rect x="{ej2.X(ie * dur):.1f}" y="{ej2.y0}" width="{ej2.X(t_fin) - ej2.X(ie * dur):.1f}" height="{ej2.h}" fill="{RETRO}" opacity=".10"/>')
-    c.t(120, ej2.y0 + 25, 'apnea', 8.5, AVISO, 'end')
-    c.t(120, ej2.y0 + 55, 'hipopnea', 8.5, IZQ, 'end')
-    c.t(120, ej2.y0 + 85, 'ronquido', 8.5, TENUE, 'end')
-    r = lcg(7)
-    resumen = []
-    for i, p in enumerate(escalones):
-        n = tasa(p) * dur / 60
-        n_ap = round(n * 0.55)
-        n_hi = round(n * 0.45)
-        n_ro = round(n * 0.5 + (2 if p < peff else 0))
-        resumen.append((p, n_ap, n_hi, n_ro))
-        for fila, cant, col, yy in ((0, n_ap, AVISO, 18), (1, n_hi, IZQ, 48), (2, n_ro, TENUE, 78)):
-            for k in range(cant):
-                x = ej2.X(i * dur + 0.4 + (dur - 0.8) * next(r))
-                c.l(x, ej2.y0 + yy - 9, x, ej2.y0 + yy + 9, col, 2)
-    # recuento por escalón
-    for i, (p, a, h, ro) in enumerate(resumen):
-        x = ej2.X(i * dur + dur / 2)
-        c.t(x, ej2.y0 + ej2.h + 40, f'{p}', 8.5, TINTA, 'middle', 700)
-    c.t(ej2.x0 - 6, ej2.y0 + ej2.h + 40, 'presión:', 8.5, TENUE, 'end')
-    c.t(ej2.x0 - 6, ej2.y0 + ej2.h + 54, 'apneas + hipopneas:', 8.5, TENUE, 'end')
-    for i, (p, a, h, ro) in enumerate(resumen):
-        x = ej2.X(i * dur + dur / 2)
-        c.t(x, ej2.y0 + ej2.h + 54, f'{a + h}', 8.5, TINTA)
-    # reglas
-    c.t(14, 386, 'Cada escalón dura 10 min y sube 1 cmH₂O mientras persisten eventos obstructivos. La guía fija como mínimo 1 cmH₂O y 5 min por escalón,', 8, TENUE, 'start')
-    c.t(14, 398, 'partiendo de 4 cmH₂O (Kushida y cols., 2008). Las marcas y los recuentos son datos de ejemplo.', 8, TENUE, 'start')
-    c.guardar('h31-titulacion.svg')
-    print('titulación (presión, apneas, hipopneas, ronquido):', resumen)
-    print('tasa modelo (eventos/h):', {p: round(tasa(p), 1) for p in escalones})
-
-
-# ------------------------------------------------------------------ 4. descarga de datos
-def descarga():
-    """30 noches de ejemplo. Horas de uso; el patrón mejora a partir de la segunda semana."""
-    r = lcg(21)
-    horas = []
-    for n in range(30):
-        u = next(r)
-        if n in (3, 9, 17):
-            h = 0.0                                          # noches sin uso
-        elif n in (4, 10, 11, 18):
-            h = round(1.2 + 2.2 * u, 1)                      # uso corto
+    rng = random.Random(2910)
+    ev = []
+    for e, a, b in seg:
+        if e == 'W':
+            continue
+        for m in range(a, b):
+            lam = TASA[e] * FACTOR_POS[posicion(m)] / 60.0      # eventos por minuto
+            # cada evento ocupa ~25 s; se sortea como Poisson por minuto
+            n = 0
+            L = math.exp(-lam)
+            p = 1.0
+            while True:
+                p *= rng.random()
+                if p <= L:
+                    break
+                n += 1
+            for _ in range(n):
+                r, acc, tipo = rng.random(), 0, TIPOS[0][0]
+                for nom, pr in TIPOS:
+                    acc += pr
+                    if r <= acc:
+                        tipo = nom
+                        break
+                dur = rng.randint(10, 32) if tipo != 'hipopnea' else rng.randint(10, 40)
+                ev.append(dict(t=m + rng.random(), tipo=tipo, dur=dur, etapa=e, pos=posicion(m)))
+    # RERA (no cumplen apnea ni hipopnea)
+    sueno = [(e, a, b) for e, a, b in seg if e != 'W']
+    rera = []
+    for _ in range(26):
+        e, a, b = rng.choice(sueno)
+        m = a + rng.random() * (b - a)
+        rera.append(dict(t=m, tipo='RERA', dur=rng.randint(10, 20), etapa=e, pos=posicion(m)))
+    # SpO2 por segundo (3 min de margen de seguridad no hacen falta: se simula toda la noche)
+    N = tib * 60
+    spo2 = [95.6] * N
+    for x in ev:
+        if x['tipo'] == 'apnea central':
+            caida = rng.uniform(2.5, 5.0)
         else:
-            h = round(5.0 + 2.8 * u, 1)
-        horas.append(h)
-    uso_medio = sum(horas) / 30
-    noches4 = sum(1 for h in horas if h >= 4)
-    pct4 = 100 * noches4 / 30
-    con_uso = [h for h in horas if h > 0]
-    uso_dias_uso = sum(con_uso) / len(con_uso)
-    iah, fuga = 3.1, 11
-    c = Lienzo(760, 380)
-    c.t(14, 20, 'Resumen de 30 noches descargado del equipo (datos de ejemplo)', 10, TINTA, 'start', 700)
-    ej = Eje(c, 60, 44, 440, 230, 0.5, 30.5, 0, 10)
-    ej.marco(xt=[1, 5, 10, 15, 20, 25, 30], yt=[0, 2, 4, 6, 8, 10], ylab='horas de uso', xlab='noche')
-    c.l(ej.x0, ej.Y(4), ej.x0 + ej.w, ej.Y(4), AVISO, 1.4, '5 3')
-    c.t(ej.x0 + ej.w + 4, ej.Y(4) + 3, '4 h', 8.5, AVISO, 'start', 700)
-    bw = ej.w / 30 * 0.7
-    for i, h in enumerate(horas):
-        col = RETRO if h >= 4 else FUERTE
-        x = ej.X(i + 1) - bw / 2
-        c.raw(f'<rect x="{x:.1f}" y="{ej.Y(h):.1f}" width="{bw:.1f}" height="{ej.Y(0) - ej.Y(h):.1f}" fill="{col}"/>')
-    c.t(ej.x0, 318, 'Verde: noche con 4 h o más de uso. Gris: menos de 4 h (incluye 3 noches sin uso).', 8, TENUE, 'start')
-    # tarjetas con métricas
-    tarjetas = [
-        ('Uso promedio', f'{uso_medio:.1f} h'.replace('.', ','), 'de las 30 noches'),
-        ('Noches con ≥ 4 h', f'{noches4} de 30', f'({pct4:.0f} %)'),
-        ('IAH residual', f'{iah:.1f}'.replace('.', ','), 'eventos por hora'),
-        ('Fuga no intencional', f'{fuga} L/min', 'percentil 95'),
-    ]
-    for k, (a, b, d) in enumerate(tarjetas):
-        x, y = 524, 44 + k * 58
-        c.raw(f'<rect x="{x}" y="{y}" width="222" height="50" rx="6" fill="#faf8f4" stroke="{FUERTE}" stroke-width="1"/>')
-        c.t(x + 10, y + 17, a, 8.5, TENUE, 'start')
-        c.t(x + 10, y + 40, b, 15, TINTA, 'start', 700)
-        c.t(x + 212, y + 40, d, 8.5, TENUE, 'end')
-    c.t(524, 290, 'Modo: CPAP fijo, 10 cmH₂O', 8.5, TINTA, 'start')
-    c.t(524, 303, 'Interfaz: mascarilla nasal', 8.5, TINTA, 'start')
-    c.t(524, 316, 'Humidificador: nivel 3', 8.5, TINTA, 'start')
-    c.t(14, 346, 'El límite de fuga aceptable depende de la interfaz y del fabricante del equipo; el valor del ejemplo es ilustrativo.', 8, TENUE, 'start')
-    c.t(14, 360, 'Las cifras salen de las 30 barras: promedio de todas las noches, incluidas las de cero horas.', 8, TENUE, 'start')
-    c.guardar('h31-descarga.svg')
-    print('descarga: horas =', horas)
-    print('descarga: uso medio %.2f h; media en noches de uso %.2f h; noches >=4 h: %d de 30 (%.1f %%)' % (uso_medio, uso_dias_uso, noches4, pct4))
+            caida = 2.0 + 0.18 * x['dur'] + (2.5 if x['etapa'] == 'R' else 0) + rng.uniform(-1.0, 1.5)
+        if x['tipo'] == 'hipopnea':
+            caida *= 0.75
+        x['caida'] = max(1.0, caida)
+        ini = int(x['t'] * 60 + x['dur'] * 0.6)
+        baja = int(x['dur'] * 0.7 + 4)
+        sube = int(26 + caida * 2)
+        for k in range(baja + sube):
+            s = ini + k
+            if s >= N:
+                break
+            f = k / baja if k < baja else 1 - (k - baja) / sube
+            spo2[s] = min(spo2[s], 95.6 - caida * f)
+    for s in range(N):
+        spo2[s] += random.Random(s).uniform(-0.25, 0.25)
+    return dict(seg=seg, tib=tib, ev=ev, rera=rera, spo2=spo2)
 
 
-# ------------------------------------------------------------------ 5. avance mandibular
-def avance():
-    c = Lienzo(900, 350)
-    c.t(14, 20, 'A · Sin dispositivo: la lengua cae hacia atrás', 10, TINTA, 'start', 700)
-    c.t(464, 20, 'B · Con dispositivo: la mandíbula arrastra la lengua', 10, TINTA, 'start', 700)
-    ax, ay, bx, by = 20, 40, 470, 40
-    cabeza(c, ax, ay, colapso_palatal=0.35, colapso_lingual=0.9)
-    cabeza(c, bx, by, colapso_palatal=0.15, colapso_lingual=0.0, avance=9, ensanche_lingual=10)
-    c.t(ax + 290, ay + 214, 'luz retrolingual angosta', 8.5, AVISO, 'start', 700)
-    c.l(ax + 286, ay + 211, ax + 140, ay + 220, AVISO, .8)
-    c.t(ax + 290, ay + 238, 'mandíbula en reposo', 8.5, TINTA, 'start')
-    c.l(ax + 286, ay + 235, ax + 250, ay + 214, TENUE, .8)
-    # B: férulas, flecha de avance, ensanche
-    c.raw(f'<rect x="{bx + 242:.1f}" y="{by + 161:.1f}" width="9" height="4" rx="1.5" fill="{COCLEAR}"/>')
-    c.raw(f'<rect x="{bx + 251:.1f}" y="{by + 187:.1f}" width="9" height="4" rx="1.5" fill="{COCLEAR}"/>')
-    c.l(bx + 251, by + 163, bx + 255, by + 189, COCLEAR, 1.4)
-    c.t(bx + 290, by + 120, 'férula sobre', 8.5, COCLEAR, 'start', 700)
-    c.t(bx + 290, by + 132, 'las dos arcadas', 8.5, COCLEAR, 'start', 700)
-    c.l(bx + 286, by + 129, bx + 258, by + 170, COCLEAR, .8)
-    flecha(c, bx + 240, by + 250, bx + 272, by + 250, COCLEAR, 2)
-    c.t(bx + 290, by + 246, 'avance de la mandíbula', 8.5, COCLEAR, 'start', 700)
-    c.t(bx + 290, by + 258, '(unos milímetros)', 8.5, COCLEAR, 'start')
-    c.t(bx + 290, by + 206, 'la luz retrolingual', 8.5, RETRO, 'start', 700)
-    c.t(bx + 290, by + 218, 'se ensancha', 8.5, RETRO, 'start', 700)
-    c.l(bx + 286, by + 215, bx + 168, by + 220, RETRO, .8)
-    c.t(14, 322, 'La mandíbula y la base de la lengua van unidas por los músculos: al adelantar la mandíbula, la lengua se aleja de la pared posterior de la faringe.', 8, TENUE, 'start')
-    c.t(14, 336, 'Esquema; las proporciones son aproximadas. El avance real lo gradúa el dentista con el paciente, hasta el máximo que tolera.', 8, TENUE, 'start')
-    c.guardar('h31-avance.svg')
+def resumen(n):
+    seg, tib, ev, rera, spo2 = n['seg'], n['tib'], n['ev'], n['rera'], n['spo2']
+    tst = sum(b - a for e, a, b in seg if e != 'W')
+    lat = seg[0][2] - seg[0][1]
+    r = {}
+    r['TIB'], r['TST'], r['latencia'] = tib, tst, lat
+    r['eficiencia'] = 100 * tst / tib
+    rem_ini = next((a for e, a, b in seg if e == 'R'), None)
+    r['latencia REM'] = rem_ini - lat
+    r['WASO'] = sum(b - a for e, a, b in seg if e == 'W') - lat
+    for e in ('N1', 'N2', 'N3', 'R'):
+        r['min ' + e] = sum(b - a for ee, a, b in seg if ee == e)
+        r['% ' + e] = 100 * r['min ' + e] / tst
+    h = tst / 60.0
+    for nom, _ in TIPOS:
+        r[nom] = sum(1 for x in ev if x['tipo'] == nom)
+    r['RERA'] = len(rera)
+    r['eventos'] = len(ev)
+    r['IAH'] = len(ev) / h
+    r['IDR'] = (len(ev) + len(rera)) / h
+    r['IAH obstructivo'] = sum(1 for x in ev if x['tipo'] in ('apnea obstructiva', 'hipopnea')) / h
+    r['IAI'] = sum(1 for x in ev if x['tipo'].startswith('apnea')) / h
+    r['IH'] = r['hipopnea'] / h
+    r['IDO3'] = sum(1 for x in ev if x['caida'] >= 3) / h
+    r['IDO4'] = sum(1 for x in ev if x['caida'] >= 4) / h
+    # IAH por etapa y por posición
+    for e in ('N1', 'N2', 'N3', 'R'):
+        hh = r['min ' + e] / 60.0
+        r['IAH ' + e] = sum(1 for x in ev if x['etapa'] == e) / hh if hh else 0
+    for p in ('supino', 'izquierda', 'derecha'):
+        mins = sum(min(b, sb) - max(a, sa) for e, sa, sb in seg if e != 'W' for (a, b, pp) in POSICIONES if pp == p
+                   if min(b, sb) > max(a, sa))
+        r['min ' + p] = mins
+        r['IAH ' + p] = sum(1 for x in ev if x['pos'] == p) / (mins / 60.0) if mins else 0
+    # SpO2 solo durante el sueño
+    vals = []
+    for e, a, b in seg:
+        if e != 'W':
+            vals.extend(spo2[a * 60:b * 60])
+    r['SpO2 media'] = sum(vals) / len(vals)
+    r['SpO2 mín'] = min(vals)
+    r['T90'] = 100 * sum(1 for v in vals if v < 90) / len(vals)
+    r['IAH REM/NREM'] = (r['IAH R'], (len(ev) - sum(1 for x in ev if x['etapa'] == 'R')) / ((tst - r['min R']) / 60.0))
+    return r
+
+
+def gravedad(iah):
+    return 'normal' if iah < 5 else 'leve' if iah < 15 else 'moderado' if iah < 30 else 'grave'
+
+
+# ------------------------------------------------------------------ utilidades gráficas
+def hora(m):
+    """Minutos desde apagar luces → 'h' con una decimal."""
+    return m / 60.0
+
+
+def hipnograma(c, x0, y0, w, h, n, xmax=None, rotulos=True, eventos=False):
+    seg, tib = n['seg'], n['tib']
+    xmax = xmax or tib
+    X = lambda m: x0 + m / xmax * w
+    nivel = lambda e: y0 + h - ORDEN_ETAPA[e] / 4 * h
+    for k in range(5):
+        y = y0 + h - k / 4 * h
+        c.l(x0, y, x0 + w, y, GRILLA, 1)
+    if rotulos:
+        for e, k in ORDEN_ETAPA.items():
+            c.t(x0 - 6, y0 + h - k / 4 * h + 3, NOMBRE_ETAPA[e], 8, TINTA, 'end')
+    for hh in range(0, int(xmax / 60) + 1):
+        c.l(X(hh * 60), y0, X(hh * 60), y0 + h, GRILLA, 1)
+        c.t(X(hh * 60), y0 + h + 12, f'{hh}', 8, TENUE)
+    # REM sombreado
+    for e, a, b in seg:
+        if e == 'R':
+            c.raw(f'<rect x="{X(a):.1f}" y="{nivel("R") - 4:.1f}" width="{X(b) - X(a):.1f}" height="8" fill="{AVISO}" opacity=".45"/>')
+    pts = []
+    for e, a, b in seg:
+        pts.append((X(a), nivel(e)))
+        pts.append((X(b), nivel(e)))
+    c.poli(pts, TINTA, 1.7)
+    c.l(x0, y0 + h, x0 + w, y0 + h, TINTA, 1.2)
+    c.l(x0, y0, x0, y0 + h, TINTA, 1.2)
+    return X
+
+
+# ------------------------------------------------------------------ 1. hipnograma
+def fig_hipnograma(n, r):
+    c = Lienzo(740, 290)
+    c.t(14, 20, 'Hipnograma de una noche de ejemplo (8 h en cama)', 10, TINTA, 'start', 700)
+    X = hipnograma(c, 70, 40, 640, 170, n)
+    c.t(70 + 320, 40 + 170 + 28, 'horas desde que se apagan las luces', 8.5, TINTA)
+    # ciclos: cada REM cierra un ciclo
+    rems = [(a, b) for e, a, b in n['seg'] if e == 'R']
+    # un ciclo termina al terminar cada bloque REM que dure al menos 5 min
+    ini = n['seg'][0][2]
+    cortes = [ini] + [b for a, b in rems if b - a >= 5]
+    for i in range(len(cortes) - 1):
+        c.raw(f'<rect x="{X(cortes[i]):.1f}" y="{26}" width="{X(cortes[i + 1]) - X(cortes[i]):.1f}" height="9" fill="{COCLEAR if i % 2 == 0 else RETRO}" opacity=".35"/>')
+        c.t((X(cortes[i]) + X(cortes[i + 1])) / 2, 33.5, f'ciclo {i + 1}', 7.5, TINTA)
+    c.t(14, 252, f'En rojo, los períodos REM. El sueño profundo (N3) se concentra en los primeros ciclos y los REM se alargan hacia la mañana.', 8, TENUE, 'start')
+    c.t(14, 266, f'Tiempo total de sueño {r["TST"]} min de {r["TIB"]} min en cama; latencia de sueño {r["latencia"]} min; latencia REM {r["latencia REM"]} min.', 8, TENUE, 'start')
+    c.t(14, 280, 'Cifras de ejemplo, calculadas con el script que dibuja la figura.', 8, TENUE, 'start')
+    c.guardar('h31-hipnograma.svg')
+
+
+# ------------------------------------------------------------------ 2. eventos de 30 s
+def senales(tipo, dt=0.05, T=30.0):
+    """Devuelve dict canal → lista de (t, y), con la inspiración hacia arriba."""
+    f = 0.27                       # 16 resp/min
+    ph = lambda t: 2 * math.pi * f * t
+    nt = int(T / dt) + 1
+    ts = [i * dt for i in range(nt)]
+    # ventana del evento (s)
+    if tipo == 'obstructiva':
+        a, b = 6.0, 24.0
+    elif tipo == 'central':
+        a, b = 6.0, 22.0
+    elif tipo == 'mixta':
+        a, b = 5.0, 25.0
+    else:
+        a, b = 6.0, 26.0
+    cen = 12.0 if tipo == 'mixta' else None     # la parte central de la apnea mixta termina a los 13 s
+    out = {k: [] for k in ('termico', 'presion', 'torax', 'abdomen', 'spo2')}
+    rnd = random.Random(7)
+    for t in ts:
+        base = math.sin(ph(t))
+        env_fl = 1.0                       # amplitud del flujo
+        env_ef = 1.0                       # amplitud del esfuerzo
+        paradoja = 0.0                     # 0 = tórax y abdomen en fase; 1 = en oposición
+        limita = False
+        dentro = a <= t <= b
+        if dentro:
+            u = (t - a) / (b - a)
+            if tipo == 'obstructiva':
+                env_fl = 0.04
+                env_ef = 0.5 + 1.1 * u
+                paradoja = min(1.0, 0.4 + 0.8 * u)
+            elif tipo == 'central':
+                env_fl = 0.04
+                env_ef = 0.04
+            elif tipo == 'mixta':
+                env_fl = 0.04
+                if t < a + 8:
+                    env_ef = 0.04
+                else:
+                    uu = (t - a - 8) / (b - a - 8)
+                    env_ef = 0.5 + 1.1 * uu
+                    paradoja = min(1.0, 0.4 + 0.8 * uu)
+            else:   # hipopnea con limitación del flujo
+                env_fl = 0.5
+                env_ef = 0.75
+                paradoja = 0.35
+                limita = True
+        elif b < t <= b + 3.5:             # respiraciones de recuperación tras el despertar
+            env_fl = 1.45
+            env_ef = 1.45
+        # canales
+        sn = base
+        if limita:
+            # aplanamiento inspiratorio: se corta la parte alta
+            sn = max(-1, min(0.55, base)) / 0.55 * 0.8 if base > 0 else base
+        termico = env_fl * math.sin(ph(t) + 0.15) + rnd.uniform(-0.02, 0.02)
+        presion = env_fl * (sn if limita else base) + rnd.uniform(-0.03, 0.03)
+        if limita:
+            presion = env_fl * sn * 1.1 + rnd.uniform(-0.03, 0.03)
+        torax = env_ef * base + rnd.uniform(-0.02, 0.02)
+        # el abdomen oscila en fase con el tórax; con paradoja se invierte parcialmente
+        abd = env_ef * (math.sin(ph(t) + 0.2) * (1 - 2 * paradoja)) + rnd.uniform(-0.02, 0.02)
+        out['termico'].append((t, termico))
+        out['presion'].append((t, presion))
+        out['torax'].append((t, torax))
+        out['abdomen'].append((t, abd))
+    # SpO2: baja con retraso respecto del evento, nadir después de terminar
+    nadir = {'obstructiva': 91.0, 'central': 93.0, 'mixta': 90.0, 'hipopnea': 92.0}[tipo]
+    ini = a + 7.0
+    pico = b + 6.0
+    for t in ts:
+        if t < ini:
+            v = 96.0
+        elif t < pico:
+            v = 96.0 - (96.0 - nadir) * (t - ini) / (pico - ini)
+        else:
+            v = nadir + (t - pico) * 0.5
+        out['spo2'].append((t, min(96.0, v) + rnd.uniform(-0.1, 0.1)))
+    return out, (a, b), nadir
+
+
+def fig_eventos():
+    tipos = [('obstructiva', 'Apnea obstructiva', 'sin flujo, con esfuerzo'),
+             ('central', 'Apnea central', 'sin flujo, sin esfuerzo'),
+             ('mixta', 'Apnea mixta', 'primero sin esfuerzo, luego con esfuerzo'),
+             ('hipopnea', 'Hipopnea', 'flujo reducido y aplanado')]
+    W, H = 780, 470
+    c = Lienzo(W, H)
+    c.k = 1.08
+    x0, ancho, sep = 92, 158, 10
+    canales = [('termico', 'Flujo oronasal (térmico)'), ('presion', 'Presión nasal'), ('torax', 'Banda torácica'),
+               ('abdomen', 'Banda abdominal'), ('spo2', 'SpO₂ (%)')]
+    y0, alto, sepy = 78, 52, 12
+    for j, (k, nom) in enumerate(canales):
+        yy = y0 + j * (alto + sepy)
+        c.t(x0 - 8, yy + alto / 2 - 2, nom.split(' (')[0], 8, TINTA, 'end', 700)
+        if '(' in nom:
+            c.t(x0 - 8, yy + alto / 2 + 9, '(' + nom.split(' (')[1], 7.5, TENUE, 'end')
+    info = []
+    for i, (tp, tit, sub) in enumerate(tipos):
+        xi = x0 + i * (ancho + sep)
+        s, (a, b), nadir = senales(tp)
+        c.t(xi + ancho / 2, 22, tit, 9.5, TINTA, 'middle', 700)
+        c.t(xi + ancho / 2, 36, sub, 8, TENUE)
+        X = lambda t: xi + t / 30.0 * ancho
+        for j, (k, nom) in enumerate(canales):
+            yy = y0 + j * (alto + sepy)
+            c.raw(f'<rect x="{xi}" y="{yy}" width="{ancho}" height="{alto}" fill="#fff" stroke="{FUERTE}" stroke-width="1"/>')
+            for sg in (5, 10, 15, 20, 25):
+                c.l(X(sg), yy, X(sg), yy + alto, GRILLA, 1)
+            # evento sombreado
+            c.raw(f'<rect x="{X(a):.1f}" y="{yy}" width="{X(b) - X(a):.1f}" height="{alto}" fill="{AVISO}" opacity=".07"/>')
+            if k == 'spo2':
+                Y = lambda v: yy + alto - (v - 88) / (98 - 88) * alto
+                c.poli([(X(t), Y(v)) for t, v in s[k]], AZUL, 1.5)
+                c.l(xi, Y(96), xi + ancho, Y(96), FUERTE, 1, '3 3')
+                c.t(X(30) - 3, Y(nadir) + 10, f'{nadir:.0f} %', 7.5, AZUL, 'end', 700)
+            else:
+                Y = lambda v: yy + alto / 2 - v * (alto / 2 - 5) / 1.5
+                col = {'termico': COCLEAR, 'presion': COCLEAR, 'torax': RETRO, 'abdomen': TINTA}[k]
+                c.poli([(X(t), Y(v)) for t, v in s[k]], col, 1.3)
+        # corchete de duración
+        yb = y0 + 5 * (alto + sepy) - sepy + 12
+        c.l(X(a), yb, X(b), yb, AVISO, 1.6)
+        c.l(X(a), yb - 4, X(a), yb + 4, AVISO, 1.6)
+        c.l(X(b), yb - 4, X(b), yb + 4, AVISO, 1.6)
+        c.t((X(a) + X(b)) / 2, yb + 13, f'evento de {b - a:.0f} s', 8, AVISO, 'middle', 700)
+        for sg in (0, 10, 20, 30):
+            c.t(X(sg), yb + 28, f'{sg}', 7.5, TENUE)
+        info.append((tp, b - a, nadir))
+    c.t(x0, 458, 'segundos →   Ventanas de 30 s; la inspiración va hacia arriba; línea punteada de SpO₂: 96 %. Tórax y abdomen en oposición durante la apnea obstructiva (paradoja).', 8, TENUE, 'start')
+    c.guardar('h31-eventos.svg')
+    for tp, d, nadir in info:
+        print('EVENTO', tp, 'duración', d, 's; SpO2 nadir', nadir)
+
+
+# ------------------------------------------------------------------ 3. montaje
+def fig_montaje():
+    W, H = 800, 500
+    c = Lienzo(W, H)
+    c.k = 1.12
+    c.t(14, 20, 'A · Cuero cabelludo (10-20, visto desde arriba)', 10, TINTA, 'start', 700)
+    cx, cy, R = 172, 190, 100
+    c.raw(f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    c.raw(f'<polygon points="{cx - 14},{cy - R + 1} {cx + 14},{cy - R + 1} {cx},{cy - R - 18}" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    c.t(cx, cy - R - 24, 'nariz', 8, TENUE)
+    for sx in (-1, 1):
+        c.raw(f'<ellipse cx="{cx + sx * (R + 4)}" cy="{cy}" rx="6" ry="16" fill="#fff" stroke="{TINTA}" stroke-width="1.4"/>')
+    sitios = {'Fp1': (-0.31, 0.95), 'Fp2': (0.31, 0.95), 'F7': (-0.81, 0.59), 'F3': (-0.42, 0.5), 'Fz': (0, 0.5), 'F4': (0.42, 0.5),
+              'F8': (0.81, 0.59), 'T3': (-1.0, 0), 'C3': (-0.5, 0), 'Cz': (0, 0), 'C4': (0.5, 0), 'T4': (1.0, 0), 'T5': (-0.81, -0.59),
+              'P3': (-0.42, -0.5), 'Pz': (0, -0.5), 'P4': (0.42, -0.5), 'T6': (0.81, -0.59), 'O1': (-0.31, -0.95), 'O2': (0.31, -0.95)}
+    rec = {'F4', 'C4', 'O2'}
+    resp = {'F3', 'C3', 'O1'}
+    for nom, (x, y) in sitios.items():
+        px, py = cx + x * (R - 10), cy - y * (R - 10)
+        if nom in rec:
+            c.raw(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="11" fill="{COCLEAR}" stroke="#fff" stroke-width="1.2"/>')
+            c.t(px, py + 3, nom, 7.5, '#fff', 'middle', 700)
+        elif nom in resp:
+            c.raw(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="11" fill="#fff" stroke="{COCLEAR}" stroke-width="1.8"/>')
+            c.t(px, py + 3, nom, 7.5, COCLEAR, 'middle', 700)
+        else:
+            c.raw(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="9" fill="#fff" stroke="{GRIS}" stroke-width="1.2"/>')
+            c.t(px, py + 3, nom, 6.5, TENUE)
+    # mastoides
+    for nom, sx in (('M1', -1), ('M2', 1)):
+        px, py = cx + sx * (R + 44), cy + 24
+        c.raw(f'<circle cx="{px}" cy="{py}" r="11" fill="{RETRO}" stroke="#fff" stroke-width="1.2"/>')
+        c.t(px, py + 3, nom, 7.5, '#fff', 'middle', 700)
+    c.t(14, 340, 'Naranja lleno: derivaciones recomendadas (F4, C4, O2, cada una referida a M1).', 8, TINTA, 'start')
+    c.t(14, 353, 'Naranja vacío: respaldo (F3, C3, O1, cada una referida a M2).', 8, TINTA, 'start')
+    c.t(14, 366, 'M1 y M2: mastoides izquierda y derecha. En gris, el resto del sistema 10-20.', 8, TENUE, 'start')
+    # cuerpo
+    bx = 560
+    c.t(400, 20, 'B · Resto de los sensores', 10, TINTA, 'start', 700)
+    c.raw(f'<ellipse cx="{bx}" cy="85" rx="34" ry="42" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    c.raw(f'<rect x="{bx - 12}" y="124" width="24" height="18" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    c.raw(f'<path d="M{bx - 62},150 Q{bx - 62},140 {bx - 30},140 L{bx + 30},140 Q{bx + 62},140 {bx + 62},150 L{bx + 56},290 L{bx - 56},290 Z" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    c.raw(f'<rect x="{bx - 52}" y="290" width="46" height="150" rx="14" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    c.raw(f'<rect x="{bx + 6}" y="290" width="46" height="150" rx="14" fill="#fff" stroke="{TINTA}" stroke-width="1.6"/>')
+    # ojos
+    c.raw(f'<circle cx="{bx - 14}" cy="78" r="3" fill="{TINTA}"/><circle cx="{bx + 14}" cy="78" r="3" fill="{TINTA}"/>')
+    def punto(x, y, col, r=5):
+        c.raw(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{col}" stroke="#fff" stroke-width="1"/>')
+
+    def llamada(px, py, tx, ty, texto, col=TINTA, ancla='start'):
+        c.l(px, py, tx, ty, col, 1)
+        c.t(tx + (4 if ancla == 'start' else -4), ty + 3, texto, 8, col, ancla)
+
+    # EOG
+    punto(bx + 22, 70, RETRO); punto(bx - 22, 88, RETRO)
+    llamada(bx + 22, 70, bx + 70, 40, 'EOG E2 (canto externo der.)', RETRO)
+    llamada(bx - 22, 88, bx - 75, 56, 'EOG E1 (canto externo izq.)', RETRO, 'end')
+    # EMG mentoniano
+    for dx, dy in ((-8, 118), (8, 118), (0, 124)):
+        punto(bx + dx, dy, COCLEAR, 3.5)
+    llamada(bx + 8, 120, bx + 80, 108, 'EMG mentoniano', COCLEAR)
+    # cánula y termistor
+    c.raw(f'<path d="M{bx - 14},97 Q{bx},106 {bx + 14},97" fill="none" stroke="{AVISO}" stroke-width="2.2"/>')
+    c.raw(f'<path d="M{bx - 18},101 Q{bx},116 {bx + 18},101" fill="none" stroke="{AZUL}" stroke-width="1.6" stroke-dasharray="4 2"/>')
+    llamada(bx - 16, 98, bx - 120, 84, 'Cánula de presión nasal', AVISO, 'end')
+    llamada(bx - 18, 106, bx - 120, 112, 'Sensor térmico oronasal', AZUL, 'end')
+    # ronquido
+    punto(bx - 10, 134, TENUE, 4)
+    llamada(bx - 10, 134, bx - 112, 142, 'Ronquido (micrófono o piezo)', TINTA, 'end')
+    # ECG
+    punto(bx - 26, 190, AVISO, 4); punto(bx + 26, 232, AVISO, 4)
+    llamada(bx + 26, 232, bx + 80, 224, 'ECG (derivación II)', AVISO)
+    # bandas
+    c.raw(f'<rect x="{bx - 60}" y="166" width="120" height="12" rx="6" fill="{RETRO}" opacity=".55"/>')
+    c.raw(f'<rect x="{bx - 56}" y="250" width="112" height="12" rx="6" fill="{RETRO}" opacity=".55"/>')
+    llamada(bx + 60, 172, bx + 82, 160, 'Banda torácica (RIP)', RETRO)
+    llamada(bx + 56, 256, bx + 82, 270, 'Banda abdominal (RIP)', RETRO)
+    # posición
+    punto(bx, 206, TINTA, 4)
+    llamada(bx, 206, bx - 110, 200, 'Sensor de posición', TINTA, 'end')
+    # oxímetro
+    c.raw(f'<rect x="{bx + 50}" y="276" width="14" height="22" rx="3" fill="{AZUL}"/>')
+    llamada(bx + 58, 296, bx + 82, 316, 'Oxímetro de pulso (dedo)', AZUL)
+    # EMG tibial
+    punto(bx - 29, 380, COCLEAR, 4); punto(bx + 29, 380, COCLEAR, 4)
+    llamada(bx + 29, 380, bx + 80, 372, 'EMG tibial anterior', COCLEAR)
+    c.t(14, 470, 'Poligrafía respiratoria: solo flujo (presión nasal), bandas, oximetría y frecuencia cardíaca,', 8, TENUE, 'start')
+    c.t(14, 483, 'más ronquido y posición según el equipo. No lleva EEG, EOG ni EMG: no mide sueño.', 8, TENUE, 'start')
+    c.guardar('h31-montaje.svg')
+
+
+# ------------------------------------------------------------------ 4. informe
+def fig_informe(n, r):
+    c = Lienzo(780, 400)
+    c.k = 1.12
+    c.t(14, 20, 'Resumen gráfico de la noche de ejemplo', 10, TINTA, 'start', 700)
+    x0, w = 90, 640
+    tib = n['tib']
+    X = lambda m: x0 + m / tib * w
+    # A hipnograma
+    c.t(14, 44, 'Etapas', 8.5, TINTA, 'start', 700)
+    hipnograma(c, x0, 50, w, 90, n, rotulos=True)
+    # B eventos
+    ycol = {'apnea obstructiva': AVISO, 'hipopnea': COCLEAR, 'apnea mixta': TINTA, 'apnea central': AZUL}
+    c.t(14, 178, 'Eventos', 8.5, TINTA, 'start', 700)
+    filas = [('apnea obstructiva', 'AO'), ('apnea mixta', 'AM'), ('apnea central', 'AC'), ('hipopnea', 'H')]
+    yb = 170
+    for j, (tp, ab) in enumerate(filas):
+        y = yb + j * 13
+        c.t(x0 - 6, y + 7, ab, 8, ycol[tp], 'end', 700)
+        c.l(x0, y + 11, x0 + w, y + 11, GRILLA, 1)
+        for x in n['ev']:
+            if x['tipo'] == tp:
+                c.l(X(x['t']), y, X(x['t']), y + 10, ycol[tp], 1.1)
+    # RERA
+    y = yb + 4 * 13
+    c.t(x0 - 6, y + 7, 'RERA', 8, TENUE, 'end', 700)
+    c.l(x0, y + 11, x0 + w, y + 11, GRILLA, 1)
+    for x in n['rera']:
+        c.l(X(x['t']), y, X(x['t']), y + 10, TENUE, 1.1)
+    # C posición
+    yp = 250
+    c.t(14, yp + 10, 'Posición', 8.5, TINTA, 'start', 700)
+    col = {'supino': AVISO, 'izquierda': RETRO, 'derecha': AZUL}
+    for a, b, p in POSICIONES:
+        b = min(b, tib)
+        c.raw(f'<rect x="{X(a):.1f}" y="{yp}" width="{X(b) - X(a):.1f}" height="14" fill="{col[p]}" opacity=".6"/>')
+        c.t((X(a) + X(b)) / 2, yp + 11, p, 7.5, '#fff', 'middle', 700)
+    # D SpO2
+    ys, hs = 280, 70
+    c.t(14, ys + 8, 'SpO₂ (%)', 8.5, TINTA, 'start', 700)
+    Y = lambda v: ys + hs - (v - 80) / (100 - 80) * hs
+    for v in (80, 90, 100):
+        c.l(x0, Y(v), x0 + w, Y(v), GRILLA if v != 90 else FUERTE, 1, None if v != 90 else '4 3')
+        c.t(x0 - 6, Y(v) + 3, f'{v}', 7.5, TENUE, 'end')
+    sp = n['spo2']
+    pts = []
+    for m in range(0, tib * 60, 6):
+        pts.append((x0 + (m / 60.0) / tib * w, Y(max(80, min(100, min(sp[m:m + 6]))))))
+    c.poli(pts, AZUL, 0.9)
+    for hh in range(0, int(tib / 60) + 1):
+        c.t(X(hh * 60), ys + hs + 13, f'{hh}', 8, TENUE)
+    c.t(x0 + w / 2, ys + hs + 28, 'horas desde que se apagan las luces', 8.5, TINTA)
+    c.t(14, 392, 'AO apnea obstructiva · AM apnea mixta · AC apnea central · H hipopnea · RERA despertar por esfuerzo respiratorio. Cada marca es un evento.', 8, TENUE, 'start')
+    c.guardar('h31-informe.svg')
 
 
 if __name__ == '__main__':
-    ferula()
-    interfaces()
-    titulacion()
-    descarga()
-    avance()
+    n = noche()
+    r = resumen(n)
+    for k, v in r.items():
+        print(k, '=', round(v, 2) if isinstance(v, float) else v)
+    print('gravedad por IAH:', gravedad(r['IAH']))
+    fig_hipnograma(n, r)
+    fig_eventos()
+    fig_montaje()
+    fig_informe(n, r)

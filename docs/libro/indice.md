@@ -11,7 +11,7 @@ El libro es la nueva versión del protocolo técnico de ORL, con sentido
 pedagógico. Tiene dos tipos de capítulo, todos autónomos (se pueden leer
 sueltos) y con sus referencias al final (no hay bibliografía general):
 
-**Caja de herramientas (H1-H29): cómo se hace cada examen.** Una técnica por
+**Caja de herramientas (H1-H30): cómo se hace cada examen.** Una técnica por
 capítulo, con la misma secuencia:
 
 1. **Para qué sirve** — qué pregunta clínica responde
@@ -175,16 +175,19 @@ Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasocons
 ### H27. Rinometría acústica *(del protocolo)*
 Áreas de sección transversal de la fosa nasal por reflexión acústica: técnica, curva, áreas mínimas y volumen, prueba con vasoconstrictor.
 
-### H28. Prick test
+### H28. Olfatometría
+Fisiología del olfato (neuroepitelio, transducción, bulbo y vía central); disosmias cuantitativas y cualitativas; exploración psicofísica: umbral, discriminación e identificación de olores (pruebas validadas, normas por edad), preparación, técnica, puntaje e informe; olfato en la rinosinusitis, posviral y en enfermedades neurodegenerativas. Sin protocolo ni LabSim.
+
+### H29. Prick test
 Hipersensibilidad tipo I y su base inmunológica; técnica (preparación, controles positivo y negativo, aeroalérgenos, lectura de la pápula, criterio de positividad), indicaciones, contraindicaciones (fármacos que se suspenden) y reacciones adversas. Alcance: clase de prick test; contenido con literatura verificada.
 
-### H29. Espirometría
+### H30. Espirometría
 Mecánica ventilatoria, volúmenes y capacidades; FVC, FEV1, relación FEV1/FVC, FEF25-75; maniobra, curvas flujo-volumen y volumen-tiempo, aceptabilidad y repetibilidad (ATS/ERS); patrones y prueba broncodilatadora. Alcance: clase de espirometría; contenido con literatura verificada.
 
-### H30. Polisomnografía y poligrafía respiratoria
+### H31. Polisomnografía y poligrafía respiratoria
 Bases del sueño (etapas, hipnograma); SAHOS: fisiopatología del colapso, epidemiología y consecuencias; evaluación del roncador (antropometría, Mallampati/Friedman, STOP-Bang, Epworth); montaje y canales de la polisomnografía y de la poligrafía; eventos respiratorios (apnea obstructiva, central y mixta, hipopnea, RERA), IAH y gravedad; informe; SAHOS pediátrico. Alcance: clase de SAHOS; contenido con literatura verificada.
 
-### H31. CPAP y dispositivos de avance mandibular
+### H32. CPAP y dispositivos de avance mandibular
 Presión positiva continua (CPAP, AutoCPAP, BiPAP): principio, interfaces, titulación, educación, adherencia y efectos adversos; dispositivo de avance mandibular, tratamiento posicional y alternativas quirúrgicas como contexto. Alcance: clase de SAHOS; contenido con literatura verificada.
 
 ## Parte I — El oído que transmite

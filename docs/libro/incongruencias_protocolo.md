@@ -206,33 +206,33 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 121 | H26 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
 | 169 | H26 | Patrones de curva de Cottle (2026-10-18) | sin protocolo; la tabla sale solo de la clase de Cottle y Broms | se dejó con `verificar`: no se halló fuente primaria (Tucker 1977 solo resumen) | — | A · verificar | |
 | 170 | H26 | "Flujo inspiratorio laminar constante hasta 150 Pa" (clase) | — | no se usa: choca con la meseta de la curva que ya enseña H26 (flujo turbulento, ecuación de Rohrer) | Rohrer 1915; Clement 2005 | E (clase) | |
-| 171 | H28 | Qué se mide en el prick (clase) | sin protocolo; la clase mide el diámetro del **eritema** | se mide la **pápula** (diámetro mayor y perpendicular); el eritema no entra | Heinzerling 2013; Bernstein 2008 | E (clase) | |
-| 172 | H28 | Fármacos que se suspenden (clase) | la clase pide retirar teofilina y antihistamínicos H2 | teofilina no altera la reactividad cutánea y los H2 casi no: no se suspenden | Heinzerling 2013 | E (clase) | |
-| 173 | H28 | Omalizumab (clase) | suspender hasta 6 meses antes | más de 4 semanas | Heinzerling 2013 | A (clase) | |
-| 174 | H28 | Betabloqueadores (clase) | contraindicación absoluta | precaución (riesgo de anafilaxia más difícil de tratar); decide el médico | Heinzerling 2013; Bernstein 2008 | P (clase) | |
-| 175 | H28 | "El tamaño de la pápula no indica gravedad" (clase) | — | cierto para la gravedad clínica, pero una pápula mayor hace más probable que la sensibilización sea relevante | Bousquet 2012; Heinzerling 2013 | A (clase) | |
+| 171 | H29 | Qué se mide en el prick (clase) | sin protocolo; la clase mide el diámetro del **eritema** | se mide la **pápula** (diámetro mayor y perpendicular); el eritema no entra | Heinzerling 2013; Bernstein 2008 | E (clase) | |
+| 172 | H29 | Fármacos que se suspenden (clase) | la clase pide retirar teofilina y antihistamínicos H2 | teofilina no altera la reactividad cutánea y los H2 casi no: no se suspenden | Heinzerling 2013 | E (clase) | |
+| 173 | H29 | Omalizumab (clase) | suspender hasta 6 meses antes | más de 4 semanas | Heinzerling 2013 | A (clase) | |
+| 174 | H29 | Betabloqueadores (clase) | contraindicación absoluta | precaución (riesgo de anafilaxia más difícil de tratar); decide el médico | Heinzerling 2013; Bernstein 2008 | P (clase) | |
+| 175 | H29 | "El tamaño de la pápula no indica gravedad" (clase) | — | cierto para la gravedad clínica, pero una pápula mayor hace más probable que la sensibilización sea relevante | Bousquet 2012; Heinzerling 2013 | A (clase) | |
 | 176 | 36 | Rendimiento del prick frente a la provocación nasal | el cap. 36 atribuía 85 % / 77 % a Heinzerling 2013 | son de Nevis 2016 (7 estudios, 430 pacientes; no 609) | Nevis 2016 | A | |
-| 177 | 36 | "El prick no está en el flujo del libro y no lo hace quien mide la nariz" | — | quitado al escribir H28; el capítulo remite a H28 sin decir quién lo ejecuta | — | A | |
-| 178 | H29 | Meseta de fin de prueba (clase) | sin protocolo; la clase dice "< 0,025 ml durante ≥ 1 s" | 0,025 **L** (25 mL) en el último segundo | Graham 2019 | E (clase) | |
-| 179 | H29 | Repetibilidad (clase) | ≤ 150 mL "o 5 %" | ≤ 150 mL entre las dos mejores FVC y FEV1 (mayores de 6 años), sin el 5 % | Graham 2019 | A (clase) | |
-| 180 | H29 | Contraindicaciones "absolutas" (clase) | lista de absolutas y relativas | ATS/ERS 2019 solo da contraindicaciones relativas, que decide el médico; su lista incluye cirugía o infección de senos y oído medio en la última semana | Graham 2019 | A (clase) | |
-| 181 | H29 | Criterio de obstrucción y de normalidad (clase) | FEV1/FVC < 0,70 y 80 % del previsto | LLN y z-score (GLI); el 0,70 fijo de GOLD va en el recuadro de normas | Stanojevic 2022; Quanjer 2012 | P (clase) | |
-| 182 | H29 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
-| 183 | H29 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
+| 177 | 36 | "El prick no está en el flujo del libro y no lo hace quien mide la nariz" | — | quitado al escribir H29; el capítulo remite a H29 sin decir quién lo ejecuta | — | A | |
+| 178 | H30 | Meseta de fin de prueba (clase) | sin protocolo; la clase dice "< 0,025 ml durante ≥ 1 s" | 0,025 **L** (25 mL) en el último segundo | Graham 2019 | E (clase) | |
+| 179 | H30 | Repetibilidad (clase) | ≤ 150 mL "o 5 %" | ≤ 150 mL entre las dos mejores FVC y FEV1 (mayores de 6 años), sin el 5 % | Graham 2019 | A (clase) | |
+| 180 | H30 | Contraindicaciones "absolutas" (clase) | lista de absolutas y relativas | ATS/ERS 2019 solo da contraindicaciones relativas, que decide el médico; su lista incluye cirugía o infección de senos y oído medio en la última semana | Graham 2019 | A (clase) | |
+| 181 | H30 | Criterio de obstrucción y de normalidad (clase) | FEV1/FVC < 0,70 y 80 % del previsto | LLN y z-score (GLI); el 0,70 fijo de GOLD va en el recuadro de normas | Stanojevic 2022; Quanjer 2012 | P (clase) | |
+| 182 | H30 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
+| 183 | H30 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
 
-## Sueño (H30, H31; clase de SAHOS, 2026-10-18)
+## Sueño (H31, H32; clase de SAHOS, 2026-10-18)
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 184 | H31 | Tolerancia del CPAP (clase) | sin protocolo; "bien tolerado, efectos escasos y leves" | se matiza: no adherencia cercana a un tercio y abandono por efectos adversos de hasta un cuarto | Rotenberg 2016; Lebret 2017 | A (clase) | |
-| 185 | H31 | Primer control (clase) | a las 4 semanas | "control temprano": el patrón de uso se fija en los primeros días | Kribbs 1993; Weaver y Grunstein 2008 | P (clase) | |
-| 186 | H31 | IAH residual objetivo (clase) | < 5 objetivo, < 10 aceptable | son criterios de la titulación (Kushida 2008), no de seguimiento; queda `verificar` | Kushida 2008 | A (clase) · verificar | |
-| 187 | H31 | Terapia posicional "con mejor adherencia" (clase) | — | solo a corto plazo; el CPAP baja más el IAH | Ha 2014 | A (clase) | |
-| 188 | H31 | Epworth: mejoría de 2 puntos (clase, citando Cazan 2017 y Mickelson 2020) | — | no se pudo verificar; no entra al texto | — | verificar (clase) | |
-| 189 | H30 | Prevalencia del SAHOS (clase) | sin protocolo; "14 % hombres y 5 % mujeres con IAH ≥ 5 y síntomas" | Young 1993: IAH ≥ 5 en 24 % y 9 %; con somnolencia, 4 % y 2 %. En Chile, 49 % con IAH ≥ 5 por poligrafía | Young 1993; Saldías 2020 | E (clase) | |
-| 190 | H30 | Gravedad pediátrica (clase) | cortes 1 / 5 / 10 | no se verificaron; el capítulo da IAH > 1 como anormal (Marcus 2012) sin cortes de gravedad | Marcus 2012; Kaditis 2016 | verificar (clase) | |
-| 191 | H30 | Cifras de la clase sin fuente | obesidad "60-90 %", "≈ 80 % sin diagnosticar", poligrafía "válida en 75 %", canales de los tipos II y III | no se usan hasta tener fuente | — | verificar (clase) | |
-| 192 | H30 | Ondas lentas de N3 (clase) | delta 0,5-4 Hz | la regla de la AASM puntúa N3 con ondas de 0,5-2 Hz y > 75 µV: las dos, en el recuadro de normas | Berry 2012 | A (clase) | |
+| 184 | H32 | Tolerancia del CPAP (clase) | sin protocolo; "bien tolerado, efectos escasos y leves" | se matiza: no adherencia cercana a un tercio y abandono por efectos adversos de hasta un cuarto | Rotenberg 2016; Lebret 2017 | A (clase) | |
+| 185 | H32 | Primer control (clase) | a las 4 semanas | "control temprano": el patrón de uso se fija en los primeros días | Kribbs 1993; Weaver y Grunstein 2008 | P (clase) | |
+| 186 | H32 | IAH residual objetivo (clase) | < 5 objetivo, < 10 aceptable | son criterios de la titulación (Kushida 2008), no de seguimiento; queda `verificar` | Kushida 2008 | A (clase) · verificar | |
+| 187 | H32 | Terapia posicional "con mejor adherencia" (clase) | — | solo a corto plazo; el CPAP baja más el IAH | Ha 2014 | A (clase) | |
+| 188 | H32 | Epworth: mejoría de 2 puntos (clase, citando Cazan 2017 y Mickelson 2020) | — | no se pudo verificar; no entra al texto | — | verificar (clase) | |
+| 189 | H31 | Prevalencia del SAHOS (clase) | sin protocolo; "14 % hombres y 5 % mujeres con IAH ≥ 5 y síntomas" | Young 1993: IAH ≥ 5 en 24 % y 9 %; con somnolencia, 4 % y 2 %. En Chile, 49 % con IAH ≥ 5 por poligrafía | Young 1993; Saldías 2020 | E (clase) | |
+| 190 | H31 | Gravedad pediátrica (clase) | cortes 1 / 5 / 10 | no se verificaron; el capítulo da IAH > 1 como anormal (Marcus 2012) sin cortes de gravedad | Marcus 2012; Kaditis 2016 | verificar (clase) | |
+| 191 | H31 | Cifras de la clase sin fuente | obesidad "60-90 %", "≈ 80 % sin diagnosticar", poligrafía "válida en 75 %", canales de los tipos II y III | no se usan hasta tener fuente | — | verificar (clase) | |
+| 192 | H31 | Ondas lentas de N3 (clase) | delta 0,5-4 Hz | la regla de la AASM puntúa N3 con ondas de 0,5-2 Hz y > 75 µV: las dos, en el recuadro de normas | Berry 2012 | A (clase) | |
 
 ## Capítulos clínicos de ABR
 

@@ -6238,3 +6238,7 @@ Casanova-Torres. Corren un número: ocupacional H24, nariz H25-H27, prick H28,
 espirometría H29, polisomnografía H30, CPAP y DAM H31. Mismo script que el
 2026-10-18 (568 menciones, conteo cuadrado); las bitácoras anteriores conservan
 la numeración vieja.
+- 2026-10-19: entra **H28 Olfatometría** después de la rinometría; prick, espirometría,
+  polisomnografía y CPAP pasan a H29-H32. Arreglado además un efecto de las
+  renumeraciones: las referencias entre scripts de figuras (`hacer_hNN_*.py`)
+  no se habían actualizado (22 arreglos).

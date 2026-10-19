@@ -1,8 +1,8 @@
 // Datos para las figuras de H16: corre headless el modelo de labyrinthus3d
 // (del autor, Apache-2.0; se lee, no se modifica) y escribe JSON por stdout.
-// Lo usa hacer_h15.py. Las constantes del simulador son órdenes de magnitud
+// Lo usa hacer_h16.py. Las constantes del simulador son órdenes de magnitud
 // docentes, no valores normativos: las trazas ilustran el método.
-//   LABYRINTHUS3D=<ruta> node hacer_h15.mjs
+//   LABYRINTHUS3D=<ruta> node hacer_h16.mjs
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { homedir } from 'node:os';

@@ -17,7 +17,7 @@ Tabla: Dónde se usa cada sección
 |---|---|
 | Promoción y prevención | recuadros "Prevención" de todos los capítulos clínicos |
 | Tamizaje | H9, H10, cap. 16, H24 |
-| Epidemiología e indicadores | cap. 6, cap. 22, cap. 36, H30 |
+| Epidemiología e indicadores | cap. 6, cap. 22, cap. 36, H31 |
 | Sistema de salud y leyes en Chile | H1, H21, H24, cap. 16, cap. 34 |
 | Proyecto comunitario | cap. 6, cap. 32 |
 
@@ -143,7 +143,7 @@ Tabla: Cifras globales verificadas
 | Rinitis alérgica | entre 10 y 40 % de la población, según ARIA | Brożek y cols., 2017 |
 | Apnea obstructiva del sueño (30-69 años) | 936 millones con índice de apnea-hipopnea de 5 o más; 425 millones con 15 o más | Benjafield y cols., 2019 |
 
-Cada cifra viene de un diseño distinto, y eso limita las comparaciones. La del vértigo es de una encuesta en un solo país; la de apnea es una estimación a partir de 17 estudios en 16 países, extrapolada al resto (Benjafield y cols., 2019); la de rinitis es un rango amplio porque depende de la definición y del lugar. La hipoacusia "de cualquier grado" y la "incapacitante" no se suman ni se restan: son umbrales distintos. Para la apnea, el índice de apnea-hipopnea y la clínica se explican en → H30.
+Cada cifra viene de un diseño distinto, y eso limita las comparaciones. La del vértigo es de una encuesta en un solo país; la de apnea es una estimación a partir de 17 estudios en 16 países, extrapolada al resto (Benjafield y cols., 2019); la de rinitis es un rango amplio porque depende de la definición y del lugar. La hipoacusia "de cualquier grado" y la "incapacitante" no se suman ni se restan: son umbrales distintos. Para la apnea, el índice de apnea-hipopnea y la clínica se explican en → H31.
 
 :::comentario En Chile
 La Encuesta Nacional de Salud 2016-2017 midió la hipoacusia por autorreporte: 23,4 % entre los 45 y 64 años y 45,1 % desde los 65 (cifras citadas en Universidad de los Andes, 2026). <!-- verificar: cifra tomada de una revisión que cita la ENS; cotejar con la base de datos del MINSAL (epi.minsal.cl, ENS 2016-2017) antes de publicar. --> Una cifra de autorreporte no equivale a una medida audiométrica: la primera depende de cuánto la persona note su dificultad.

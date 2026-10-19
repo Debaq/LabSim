@@ -7,7 +7,7 @@ Esquema, no datos de un paciente. Los ojos se ven como los ve el examinador:
 el oído derecho del paciente queda a la izquierda del dibujo. Las flechas son
 la fase RÁPIDA (la que se ve y la que da nombre al nistagmo). Las
 imágenes de maniobras y de canales (h19-*.png) salen de labyrinthus3d con
-herramientas/ (ver hacer_h18_capturas.py)."""
+herramientas/ (ver hacer_h19_capturas.py)."""
 import math
 import pathlib
 

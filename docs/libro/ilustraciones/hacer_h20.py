@@ -6,7 +6,7 @@
     h20-vor-ejercicios.svg  deslizamiento retiniano y los ejercicios x1, x2 y de sustitución
 
 Son esquemas docentes, no datos de un paciente. Las trazas y las curvas del
-tiempo salen del modelo de labyrinthus3d (hacer_h19.mjs, solo lectura): sus
+tiempo salen del modelo de labyrinthus3d (hacer_h20.mjs, solo lectura): sus
 constantes son órdenes de magnitud para enseñar, no valores normativos, y por
 eso ningún eje lleva cifras."""
 import json
@@ -53,7 +53,7 @@ class Dib:
 
 
 def datos():
-    r = subprocess.run(['node', str(AQUI / 'hacer_h19.mjs')], capture_output=True, text=True, check=True)
+    r = subprocess.run(['node', str(AQUI / 'hacer_h20.mjs')], capture_output=True, text=True, check=True)
     return json.loads(r.stdout)
 
 

@@ -9,7 +9,7 @@ labyrinthus3d es software libre del autor y NO se toca: se sirve de solo lectura
         --remote-debugging-port=9331 --user-data-dir=/tmp/h19prof about:blank &
     python3 hacer_h19_capturas.py <carpeta de salida>
 
-Reloj virtual (igual que hacer_h18_capturas.py) para que cada captura caiga en el instante pedido."""
+Reloj virtual (igual que hacer_h19_capturas.py) para que cada captura caiga en el instante pedido."""
 import asyncio, base64, json, sys, urllib.request
 import websockets
 

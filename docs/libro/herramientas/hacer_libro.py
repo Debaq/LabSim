@@ -115,9 +115,9 @@ def _autoria():
         a[f'H{n}'] = ['poza']                            # vestibular
     for n in (21, 22, 23):
         a[f'H{n}'] = ['casanova']                        # audífonos
-    for n in (25, 26, 27, 28):
+    for n in (25, 26, 27, 28, 29):
         a[f'H{n}'] = ['uribe']                           # nasal
-    for n in (29, 30, 31):
+    for n in (30, 31, 32):
         a[f'H{n}'] = ['uribe', 'moreira']                # espirometría y sueño (él, 2026-10-18)
     for n in (1, 2, 3, 4, 5, 7, 8, 10, 19):
         a[str(n)] = ['uribe', 'vargas']

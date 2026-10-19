@@ -10,8 +10,8 @@
     h16-calibracion.svg      calibración de la VNG: por qué una mala ganancia falsea la velocidad (esquema)
 
 Las trazas salen del modelo de labyrinthus3d (software propio del autor, Apache-2.0) corrido sin
-pantalla por hacer_h15.mjs: su constantes son órdenes de magnitud docentes, no valores normativos.
-Los esquemas no son datos de pacientes.  Uso:  python3 hacer_h15.py"""
+pantalla por hacer_h16.mjs: su constantes son órdenes de magnitud docentes, no valores normativos.
+Los esquemas no son datos de pacientes.  Uso:  python3 hacer_h16.py"""
 import json
 import math
 import pathlib
@@ -62,7 +62,7 @@ def punta(id_, color):
 
 
 def datos():
-    r = subprocess.run(['node', str(AQUI / 'hacer_h15.mjs')], capture_output=True, text=True, check=True)
+    r = subprocess.run(['node', str(AQUI / 'hacer_h16.mjs')], capture_output=True, text=True, check=True)
     return json.loads(r.stdout)
 
 

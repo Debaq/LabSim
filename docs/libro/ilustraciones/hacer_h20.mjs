@@ -2,7 +2,7 @@
 // (del autor, Apache-2.0; se lee, no se modifica) y escribe JSON por stdout.
 // Lo usa hacer_h19.py. Las constantes del simulador son órdenes de magnitud
 // docentes, no valores normativos: las trazas ilustran el método.
-//   LABYRINTHUS3D=<ruta> node hacer_h19.mjs
+//   LABYRINTHUS3D=<ruta> node hacer_h20.mjs
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { homedir } from 'node:os';

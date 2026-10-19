@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H29 — Espirometría.
+"""Herramienta H32 — CPAP y dispositivos de avance mandibular.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF
@@ -17,4 +17,4 @@ CASOS = [
 ]
 
 if __name__ == '__main__':
-    Capitulo('H29').generar(CASOS)
+    Capitulo('H32').generar(CASOS)

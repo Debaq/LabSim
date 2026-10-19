@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H31 — CPAP y dispositivos de avance mandibular.
+"""Herramienta H31 — Polisomnografía y poligrafía respiratoria.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF

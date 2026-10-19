@@ -22,7 +22,7 @@
 // fuente, no se copian; ese modelo no es un módulo importable (Svelte), así que la fórmula se rehace
 // aquí sin el ruido aleatorio. Se muestrea igual a 200 Hz (las gafas) y a 30 Hz (una cámara web).
 //
-// Uso:  node docs/libro/ilustraciones/hacer_h17_simulador.mjs   (TRAINHIT=<ruta> para otra copia)
+// Uso:  node docs/libro/ilustraciones/hacer_h18_simulador.mjs   (TRAINHIT=<ruta> para otra copia)
 // cap. 24 importa `panelesLado` y `pulsosDe` para su caso bilateral (hacer_cap24_simulador.mjs).
 
 import { readFileSync, writeFileSync } from 'node:fs';

@@ -11,7 +11,7 @@ Esquemas propios, no IA. Los resultados son INVENTADOS para el libro: no son
 normas ni salen de ningún paciente. El recorrido adaptativo del Matrix es una
 simulación con una regla de pasos genérica (cada versión trae la suya).
 
-    python3 docs/libro/ilustraciones/hacer_h14_simulador.py
+    python3 docs/libro/ilustraciones/hacer_h15_simulador.py
 """
 import math
 import pathlib

@@ -8,13 +8,13 @@ lectura y se maneja con el protocolo de DevTools de chromium sin cabeza:
     chromium --headless=new --use-gl=angle --use-angle=swiftshader \\
         --enable-unsafe-swiftshader --window-size=1400,900 \\
         --remote-debugging-port=9334 --user-data-dir=/tmp/h18prof about:blank &
-    python3 hacer_h18_capturas.py <maniobra> <lado> <canal> <tipo> <prefijo> "<vistas>" <seg>
+    python3 hacer_h19_capturas.py <maniobra> <lado> <canal> <tipo> <prefijo> "<vistas>" <seg>
 
 Reloj virtual: se reemplazan requestAnimationFrame y performance.now para
 avanzar la simulación a pasos fijos, de modo que cada captura cae en el
 instante pedido (`seg` segundos después de llegar a cada postura) sin
 depender de la velocidad de la máquina. Las capturas son de 1400x900;
-hacer_h18_montajes.py las recorta y las junta."""
+hacer_h19_montajes.py las recorta y las junta."""
 import asyncio
 import base64
 import json
