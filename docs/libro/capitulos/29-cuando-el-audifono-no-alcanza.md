@@ -6,6 +6,7 @@
 - Explicar cómo estimula un implante al nervio auditivo y por qué no devuelve una audición normal.
 - Reconocer cuándo una pérdida conductiva o mixta que no se opera se rehabilita con un dispositivo de conducción ósea, y qué papel juega el umbral óseo.
 - Separar las opciones ante una sordera de un solo oído: nada, audífono con transmisión contralateral (→ cap. 28), conducción ósea o implante.
+- Describir en qué se distinguen los implantes de oído medio y de tronco encefálico del implante coclear.
 - Describir qué hace el audiólogo antes y después de la derivación: batería previa, expectativas y señales de alerta (neuropatía, osificación, CMV).
 :::
 
@@ -73,6 +74,12 @@ Lo que decide si un paciente es candidato es el **umbral óseo**: el dispositivo
 :::ayuda Ayuda memoria
 **Aérea alta, ósea baja, el audífono aéreo molesta o no es posible** (conducto que supura, atresia, molde que no se tolera): candidato a **conducción ósea**. **Ósea también alta**: el dispositivo se queda corto, y hay que pensar en amplificación aérea potente o en implante coclear.
 :::
+
+### Otros dos implantes: de oído medio y de tronco
+
+**Implante activo de oído medio.** Un transductor implantado, unido a la cadena de huesecillos o a la membrana de la ventana redonda, mueve directamente la estructura a la que está fijado; el procesador externo capta el sonido y lo envía al implante. No pone un altavoz en el conducto, de modo que no hay molde, y por eso se considera en quien no tolera el audífono aéreo. Con la estimulación de la ventana redonda, sus indicaciones pasaron de la pérdida sensorioneural a la pérdida mixta y a la conductiva, cuando no se puede operar el oído medio (Jenkins y cols., 2021). La indicación y la cirugía son del equipo médico; el audiólogo aporta la audiometría con vía ósea, la discriminación y la historia con el audífono. <!-- verificar: "no tolera el audífono aéreo" como indicación, y los rangos de umbral óseo de cada sistema, en la ficha vigente del dispositivo o en Wagner y cols. 2010 (doi:10.1159/000318518); Jenkins 2021 describe la estimulación de la ventana redonda en la pérdida mixta -->
+
+**Implante auditivo de tronco encefálico (ABI).** Pone los electrodos sobre el **núcleo coclear**, en el tronco encefálico, y se salta tanto la cóclea como el nervio. Se creó para la sordera retrococlear de la **neurofibromatosis tipo 2**, en que los schwannomas vestibulares bilaterales, o su extirpación, dejan sin nervio auditivo; se investigan resultados en grupos sin esa enfermedad, como la aplasia del nervio coclear o la osificación de la cóclea, donde el implante coclear no tiene a quién estimular (Shetty y cols., 2021). Es una cirugía de equipos muy especializados y con resultados distintos de los del implante coclear. Al audiólogo le toca reconocer el cuadro que lleva a pensarlo, un nervio ausente o un ABR sin respuesta con una cóclea que sí responde (→ cap. 13), y derivar. <!-- verificar: "resultados distintos de los del implante coclear" y el límite de edad de la indicación en la NF2, en una fuente primaria (p. ej. Shetty 2021, texto completo) -->
 
 ## Fisiología
 
@@ -441,3 +448,5 @@ Sordera unilateral derecha posparotiditis, con el OI normal. Las opciones son: n
 1. Dodge PR, Davis H, Feigin RD, Holmes SJ, Kaplan SL, Jubelirer DP, et al. Prospective evaluation of hearing impairment as a sequela of acute bacterial meningitis. N Engl J Med. 1984;311(14):869-74. doi:10.1056/NEJM198410043111401. PMID 6472398.
 1. Douglas SA, Sanli H, Gibson WP. Meningitis resulting in hearing loss and labyrinthitis ossificans: does the causative organism matter? Cochlear Implants Int. 2008;9(2):90-6. doi:10.1179/cim.2008.9.2.90. PMID 18246540.
 1. Teagle HFB, Roush PA, Woodard JS, Hatch DR, Zdanski CJ, Buss E, et al. Cochlear implantation in children with auditory neuropathy spectrum disorder. Ear Hear. 2010;31(3):325-35. doi:10.1097/AUD.0b013e3181ce693b. PMID 20090530.
+1. Jenkins HA, Greene NT, Tollin DJ. Round window stimulation of the cochlea. Front Neurol. 2021;12:777010. doi:10.3389/fneur.2021.777010
+1. Shetty M, Ridge S, Kanumuri VV, Zhu V, Brown MC, Lee DJ. Clinical and scientific innovations in auditory brainstem implants. World J Otorhinolaryngol Head Neck Surg. 2021;7(2):109-15. doi:10.1016/j.wjorl.2021.02.002. PMID 33997720

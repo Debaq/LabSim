@@ -47,6 +47,22 @@ TEOAE y DPOAE no nacen igual. La DPOAE sale sobre todo de la **distorsión**: el
 
 Las **SOAE** se registran sin estímulo, en una parte de los oídos normales y no en todos (Penner y Zhang, 1997). Su **ausencia no es patológica**.
 
+### El sistema eferente: la cóclea también recibe órdenes
+
+El nervio auditivo lleva información hacia el cerebro, pero también hay una vía que baja. Neuronas del **complejo olivar superior**, en el tronco, mandan axones de vuelta a la cóclea: son los **eferentes olivococleares**, y son dos grupos (Guinan, 2018):
+
+- **Mediales (MOC).** Hacen sinapsis directamente sobre las **células ciliadas externas**. Liberan acetilcolina, que aumenta la conductancia de la célula y la hiperpolariza; con eso la célula se mueve menos y el amplificador coclear **baja su ganancia** (Guinan, 2018). En la mayoría de los animales cerca de dos tercios de estos axones cruzan a la cóclea del lado opuesto y un tercio queda del mismo lado; en humanos no se conoce la proporción (Guinan, 2018).
+- **Laterales (LOC).** Terminan sobre las dendritas de las fibras del nervio, bajo las células ciliadas internas. Actúan lento y no hay una manera clínica de medirlos; su papel probable es reducir el daño del nervio por sonidos traumáticos (Guinan, 2018).
+
+Los MOC se activan por reflejo: un sonido en un oído sube por el nervio y el tronco, y las neuronas MOC frenan las células ciliadas externas, de manera que el sonido de un oído puede modificar la cóclea del oído contrario (Guinan, 2006). El efecto se arma y se deshace en unos 100 ms (Guinan, 2018).
+
+Como el MOC actúa sobre las mismas células que generan la emisión, **se puede ver desde el conducto**: si un sonido en el oído contrario activa el MOC, la ganancia coclear baja y la emisión del oído que se está midiendo **se achica**. Collet y cols. (1990) lo comprobaron en humanos: un ruido en el oído contrario reducía la amplitud de las OEA con intensidades desde 30 dB SPL, por debajo del umbral del reflejo estapedial, y en personas con sordera total de un oído y el otro sano no se vio caída con estímulos de hasta 80 dB SPL, lo que descarta que el ruido atraviese el cráneo hasta el oído medido.
+
+Qué hace el sistema por el paciente sigue en estudio. Hay dos funciones propuestas (Guinan, 2006, 2018):
+
+- **Proteger del ruido.** En animales, un reflejo MOC más fuerte se asocia a menos pérdida tras una exposición posterior a ruido (Maison y Liberman, 2000).
+- **Oír mejor en ruido.** Al bajar la ganancia ante el ruido de fondo constante, los transitorios del habla destacan. En personas con los eferentes cortados por cirugía vestibular, el ruido contralateral no mejoró la inteligibilidad, y en oídos normales la mejoría se asoció con la fuerza del reflejo (Giraud y cols., 1997). Sin embargo, algunos trabajos encuentran esa relación y otros no: las condiciones en que el MOC ayuda en ruido no están del todo claras (Guinan, 2018).
+
 ## Antes de empezar
 
 ### Equipo
@@ -136,6 +152,30 @@ Se registra el conducto **en silencio**, sin estímulo, por unos 30 segundos o m
 - **El DP-grama** recorre f2 de 1 a 8 kHz: 1, 2, 3, 4, 6 y 8 kHz como mínimo; muchos equipos agregan las intermedias. Aquí se parte por 8 kHz y se baja.
 - **Por qué f2 y no 2f1−f2:** el producto de distorsión se genera donde se superponen las ondas de los dos tonos, cerca del lugar de **f2**. Por eso cada punto del DP-grama se lee como el estado de la cóclea en f2, aunque el tono medido esté más abajo.
 - **La función de entrada/salida** (DP I/O) baja L2 de a 5 dB en una f2 fija. En un oído normal el DP crece de a poco y aparece con L2 bajos; con daño coclear aparece recién con L2 altos y crece más empinado.
+
+### 6. Supresión contralateral (opcional)
+
+Mide **cuánto baja la emisión cuando el oído contrario recibe ruido**. Es la forma de mirar el MOC con el mismo equipo de las OEA (Collet y cols., 1990; Guinan, 2006).
+
+**Cómo se hace.**
+
+1. **Emisión sin ruido.** Se registra la TEOAE (o la DPOAE) del oído que se mide, de la manera ya descrita.
+2. **Emisión con ruido contralateral.** Se repite con **ruido de banda ancha en el oído contrario**, por una segunda sonda o un fono de inserción. El ruido de banda ancha es más eficaz que los tonos, y en los estudios revisados por Guinan (2018) se usa de unos 60 dB SPL.
+3. **Se resta.** La **supresión** es la diferencia de amplitud, en dB, entre las dos condiciones: mientras mayor la caída, más fuerte el reflejo.
+4. **Se alternan las condiciones** varias veces, sin y con ruido, en orden aleatorio, para que la deriva del registro no se confunda con un efecto (Guinan, 2018).
+
+**Por qué así.** El ruido debe activar el MOC y **no el reflejo estapedial**: la contracción del músculo cambia la transmisión del oído medio y baja la emisión por otra vía. Una contracción débil basta para falsear la medida y puede ocurrir 10 a 15 dB bajo el umbral que mide la impedanciometría clínica (Guinan, 2018). Por eso se comprueba que la forma del click en el conducto no cambia entre las condiciones y se trabaja con ruido de nivel moderado (Guinan, 2018). El click mismo también activa el MOC del oído medido; no impide ver el efecto del ruido contralateral (Guinan, 2006).
+
+**Cómo se lee.** Se informa la emisión sin ruido, la emisión con ruido y la supresión en dB, por oído. Necesita OEA presentes y con buena relación señal-ruido, porque no se puede suprimir lo que no existe, y un oído medio normal. Esta herramienta no entrega valores de corte: cada equipo y cada protocolo traen los suyos.
+
+**Para qué se usa y qué no dice.**
+
+- Es una medida de **investigación** y de apoyo al estudio de las quejas de oír en ruido. En 15 niños de 8 a 13 años con trastorno de procesamiento auditivo y dificultades de aprendizaje, la supresión de la TEOAE fue menor que en 15 controles pareados, y sus TEOAE eran más grandes (Muchnik y cols., 2004). Es un hallazgo de grupo: no sirve para diagnosticar a un niño en particular. → H14, cap. 30.
+- **No es una prueba de vía auditiva completa.** Mira el último tramo del arco reflejo, la sinapsis sobre las células ciliadas externas.
+
+:::ojo La supresión es una medida poco estable
+Con equipos comerciales, la supresión de la TEOAE tuvo una variabilidad considerable: la repetibilidad empeoró al sacar y volver a poner la sonda, al repetir a la semana y al mirarla por frecuencia (Keppler y cols., 2021). Una diferencia de un par de dB en un solo oído no basta para concluir nada sobre el sistema eferente.
+:::
 
 :::ayuda Ayuda memoria
 - Otoscopía → sonda bien sellada → chequeo en verde.
@@ -256,6 +296,7 @@ Mira su historia: nació prematura, estuvo 20 días en la UCI neonatal y le hici
 - **Paciente que habla, traga o llora**: el piso de ruido sube, la reproducibilidad cae y la prueba refiere "por ruido", no por la cóclea.
 - **Informar "ausente" con un registro malo.** Con reproducibilidad baja y ruido alto, se informa **no concluyente** y se repite.
 - **Informar OEA ausentes sin mirar el oído medio.** Con un timpanograma B o C, la ausencia puede ser solo de transmisión.
+- **Concluir sobre el sistema eferente con una supresión de pocos dB** en un solo registro: la medida varía entre sesiones y el reflejo estapedial puede falsearla.
 - **Leer OEA presentes como audición normal.** La neuropatía auditiva pasa las OEA. Una pérdida leve también puede dejar emisiones.
 
 
@@ -269,7 +310,7 @@ El emisor otoacústico (**EOAS**) tiene una pestaña por prueba: **TEOAE**, **DP
 - Las **SOAE** aparecen en cerca de la mitad de los oídos normales, por sorteo. Si el docente necesita un resultado fijo, las deja **presentes** o **ausentes** y puede cargar los picos a mano.
 
 :::comentario Lo que el simulador no tiene
-La TEOAE no tiene modo lineal o no lineal, y el tamaño de la emisión no depende del nivel del click (viene en 60 dB SPL; súbelo al del protocolo igual). Tampoco hay rechazo de barridos: el ruido se ve en la reproducibilidad y el piso.
+La TEOAE no tiene modo lineal o no lineal, y el tamaño de la emisión no depende del nivel del click (viene en 60 dB SPL; súbelo al del protocolo igual). Tampoco hay rechazo de barridos: el ruido se ve en la reproducibilidad y el piso. La supresión contralateral no está simulada.
 :::
 
 Pacientes de práctica (★): Tomás, Hernán, Benjamín y Valentina. A Benjamín, mídele antes el timpanograma; a Valentina, después el ABR.
@@ -280,6 +321,7 @@ Pacientes de práctica (★): Tomás, Hernán, Benjamín y Valentina. A Benjamí
 3. Un recién nacido de 10 horas refiere en el OD y pasa en el OI. ¿Qué haces? ¿Qué cambia si estuvo una semana en la UCI?
 4. Un paciente refiere en la TEOAE con reproducibilidad de 30 % y estabilidad de 55 %. ¿Qué informas?
 5. ¿Por qué el examen de Valentina al nacer pudo "salir bueno"? ¿Qué prueba lo habría detectado?
+6. En la supresión contralateral, ¿por qué el ruido del oído contrario no puede acercarse al umbral del reflejo estapedial? ¿Qué se revisa en el registro para saberlo?
 :::
 
 ## Referencias
@@ -308,3 +350,13 @@ Pacientes de práctica (★): Tomás, Hernán, Benjamín y Valentina. A Benjamí
 1. Penner MJ, Zhang T. Prevalence of spontaneous otoacoustic emissions in adults revisited. Hear Res. 1997;103(1-2):28-34. doi:10.1016/s0378-5955(96)00162-1
 1. Starr A, Picton TW, Sininger Y, Hood LJ, Berlin CI. Auditory neuropathy. Brain. 1996;119(Pt 3):741-753. doi:10.1093/brain/119.3.741
 1. Yates GK, Withnell RH. The role of intermodulation distortion in transient-evoked otoacoustic emissions. Hear Res. 1999;136(1-2):49-64. doi:10.1016/s0378-5955(99)00108-2
+
+### Sistema eferente
+
+1. Guinan JJ Jr. Olivocochlear efferents: anatomy, physiology, function, and the measurement of efferent effects in humans. Ear Hear. 2006;27(6):589-607. doi:10.1097/01.aud.0000240507.83072.e7
+1. Guinan JJ Jr. Olivocochlear efferents: their action, effects, measurement and uses, and the impact of the new conception of cochlear mechanical responses. Hear Res. 2018;362:38-47. doi:10.1016/j.heares.2017.12.012
+1. Collet L, Kemp DT, Veuillet E, Duclaux R, Moulin A, Morgon A. Effect of contralateral auditory stimuli on active cochlear micro-mechanical properties in human subjects. Hear Res. 1990;43(2-3):251-61. doi:10.1016/0378-5955(90)90232-E
+1. Maison SF, Liberman MC. Predicting vulnerability to acoustic injury with a noninvasive assay of olivocochlear reflex strength. J Neurosci. 2000;20(12):4701-7. doi:10.1523/JNEUROSCI.20-12-04701.2000
+1. Giraud AL, Garnier S, Micheyl C, Lina G, Chays A, Chéry-Croze S. Auditory efferents involved in speech-in-noise intelligibility. Neuroreport. 1997;8(7):1779-83. doi:10.1097/00001756-199705060-00042
+1. Muchnik C, Ari-Even Roth D, Othman-Jebara R, Putter-Katz H, Shabtai EL, Hildesheimer M. Reduced medial olivocochlear bundle system function in children with auditory processing disorders. Audiol Neurootol. 2004;9(2):107-14. doi:10.1159/000076001
+1. Keppler H, Degeest S, Vinck B. Short-term test-retest reliability of contralateral suppression of click-evoked otoacoustic emissions in normal-hearing subjects. J Speech Lang Hear Res. 2021;64(3):1062-72. doi:10.1044/2020_JSLHR-20-00393

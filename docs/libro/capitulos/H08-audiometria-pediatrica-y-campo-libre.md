@@ -34,7 +34,7 @@ Cada etapa abre un método:
 :::ayuda-ancho Qué método conductual corresponde a cada edad
 | Edad de desarrollo | Qué puede hacer el niño | Método | Qué entrega |
 |---|---|---|---|
-| 0 a 6 meses | Reacciones reflejas a sonidos fuertes | Observación conductual | Conductas, **no umbrales**. Nunca sola: se cruza con pruebas objetivas |
+| 0 a 6 meses | Reacciones reflejas a sonidos fuertes | Observación conductual (**BOA**, *behavioural observation audiometry*) | Conductas, **no umbrales**. Nunca sola: se cruza con pruebas objetivas |
 | 6 meses a 2½ años | Sentarse y girar la cabeza hacia un lado | **VRA** (refuerzo visual) | Niveles mínimos de respuesta; por oído solo con insertos o fonos |
 | 2½ a 5 años | Hacer un juego simple cada vez que oye | **Juego condicionado** | Umbrales por oído y por frecuencia, aérea y ósea |
 | Desde 5 años | Entender la instrucción y avisar | Audiometría convencional (→ H3) | Umbrales como en el adulto |
@@ -77,6 +77,20 @@ La audiometría por juego la describió Barr (1955) en preescolares, muchos de e
 
 ![Sala de VRA vista desde arriba. El niño sentado en las rodillas de su mamá, en el punto calibrado (marca en el piso). A cada lado, a unos 90° y a 1 m de la cabeza del niño, un parlante con un cabinete de refuerzo visual encima (juguete iluminado). Frente al niño, una mesa baja con un segundo examinador que lo entretiene con un juguete silencioso. Tras un vidrio, en la sala de control, el examinador que maneja el audiómetro y los refuerzos. La mamá con un fono que le pasa música, para que no reaccione al sonido.](ilustraciones/h08-sala-vra.png)
 
+### Calibración de los parlantes
+
+Un parlante no se calibra como un fono. Un fono se acopla a un oído artificial y su nivel no depende de la sala; un parlante llena la sala de sonido, y el nivel que llega a la cabeza del paciente depende de la sala, de la distancia y de los objetos que reflejan. Por eso se calibra **en la sala donde se usa**, con el sonido que llega al punto donde va la cabeza (BSA, 2025b). El procedimiento sigue la ISO 8253-2 (2009) y las referencias de la ISO 389-7 (2019):
+
+1. **Define el punto de referencia.** Es el lugar donde queda el punto medio entre los dos oídos del paciente, a la altura de la cabeza y a **1 m o más** del parlante (ISO 8253-2, 2009, en BSA, 2025b). Es el mismo punto de la silla marcada en el piso.
+2. **Deja la sala como se usa.** Se mide **sin el paciente ni su silla**, pero con todo lo demás en su lugar: la mesa de juego, el cabinete de refuerzo visual sobre el parlante. Si algo de eso se mueve después, hay que calibrar de nuevo (BSA, 2025b).
+3. **Mide con un sonómetro.** Un sonómetro clase 1 con análisis de tercio de octava, con el micrófono en el punto de referencia, mide el nivel que entrega **cada parlante, con cada estímulo (tono modulado y ruido de banda estrecha) y en cada frecuencia** (BSA, 2025b).
+4. **Compara con el cero de campo libre.** Ese nivel se compara con el nivel de referencia de la ISO 389-7 (2019): el nivel en que oyentes jóvenes normales, escuchando con los dos oídos y con el sonido de frente, detectan ese estímulo. La BSA recomienda usar para el tono modulado y para el ruido de banda estrecha los valores de campo difuso, porque su espectro se parece más al de una banda de ruido que al de un tono puro; la diferencia con los valores de campo libre no es clínicamente significativa (BSA, 2025b).
+5. **Mide cuánto varía alrededor del punto.** Se repite la medición a 20 cm del punto de referencia, a izquierda, derecha, adelante, atrás, arriba y abajo en el adulto, y a 30 cm en el niño, que se mueve más. De la variación máxima sale la incertidumbre que el nivel de campo libre le suma a un umbral. Por ejemplo, si las diferencias van de +3,8 dB a −3,2 dB, la contribución es 3,8 dB dividido por la raíz de 3, unos ±2,7 dB (BSA, 2025b). Si no se midió, a 30 cm se puede suponer una variación de ±5 dB (BSA, 2025b).
+
+La norma define un **campo cuasi libre**: un parlante a 1 m o más y un nivel que se desvía menos de 2 dB de lo que da la ley de la distancia a 15 cm del punto hacia los lados, arriba y abajo, y menos de 1 dB a 10 cm adelante y atrás (ISO 8253-2, 2009, en BSA, 2025b). La BSA advierte que es poco probable que una sala clínica corriente lo cumpla, y por eso exige medir la variación en vez de suponerla (BSA, 2025b). Una calibración completa se hace cada año y es de un técnico; la verificación del día es la de la lista de *Equipo y sala*.
+
+<!-- verificar: la estructura en cinco pasos es una exposición del procedimiento tal como lo describe la BSA (2025b, secciones 3.2, 5.1, 5.3 y 5.4), leída completa en el PDF. La ISO 8253-2 y la ISO 389-7 son de pago y no se leyeron: lo que se atribuye a ellas viene citado por la BSA. -->
+
 ### Conoce tu equipo: el audiómetro en campo libre
 
 El audiómetro de LabSim tiene los mismos controles que uno clínico con campo libre. Para pasar de fonos a parlantes se cambia el **transductor** del canal; la **salida** elige entonces el parlante en vez del oído. En la figura, los dos controles propios del campo libre están en gris: el simulador todavía no los tiene.
@@ -100,9 +114,9 @@ El audiómetro de LabSim tiene los mismos controles que uno clínico con campo l
 
 ## Paso a paso
 
-### 1. Observación conductual (0 a 6 meses)
+### 1. Observación conductual (BOA, 0 a 6 meses)
 
-No es una audiometría: no da umbrales, no sirve como tamizaje y no permite indicar un audífono (AAA, 2020). Sirve para describir cómo responde el lactante: se presenta un estímulo calibrado y se anota **qué conducta** apareció (detenerse, abrir los ojos, sobresaltarse), **con qué estímulo** y **a qué nivel**.
+La observación conductual, en inglés *behavioural observation audiometry* (**BOA**), no es una audiometría: no da umbrales, no sirve como tamizaje y no permite indicar un audífono (AAA, 2020). Sirve para describir cómo responde el lactante: se presenta un estímulo calibrado y se anota **qué conducta** apareció (detenerse, abrir los ojos, sobresaltarse), **con qué estímulo** y **a qué nivel**.
 
 Una ausencia de sobresalto no significa sordera: puede tener hambre, sueño o estar demasiado entretenido. El informe la describe como observación, nunca como umbral, y siempre va con las pruebas objetivas: impedanciometría con sonda de 1.000 Hz (→ H7), emisiones (→ H9) y potenciales (→ H10, H13).
 

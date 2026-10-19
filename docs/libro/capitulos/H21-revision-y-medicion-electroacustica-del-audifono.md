@@ -70,6 +70,29 @@ La medición usa **tonos puros** que barren las frecuencias, porque un tono puro
 
 El acoplador responde a "¿cuánto entrega este audífono, cualquiera sea su dueño?". La adaptación necesita otra pregunta: "¿cuánta presión llega al tímpano de **este** paciente?". La diferencia entre las dos es la **diferencia oído real-acoplador** (RECD, *real-ear-to-coupler difference*): lo que, en decibeles y frecuencia por frecuencia, cambia entre la presión medida en el acoplador y la medida en el oído con el mismo transductor y la misma señal. Es mayor en las frecuencias altas y menor en las bajas, y se usa sobre todo en niños, para ajustar un audífono sin tener al niño sentado al lado (Chasin, 2015; Interacoustics, s. f.). Aquí queda solo como concepto: no se mide en esta herramienta. Lo que te dice es que **un resultado en el acoplador no se puede leer como "esto es lo que oye el paciente"**.
 
+### La medición en oído real: las curvas y qué responde cada una
+
+La medición en oído real se hace con un **micrófono sonda**: un tubo flexible y fino, conectado a un micrófono fuera del oído, cuya punta queda en el conducto, cerca de la membrana. Mide la presión sonora que de verdad llega, con el audífono y el molde de ese paciente puestos, mientras un altavoz de campo libre entrega la señal. Es lo que ni el acoplador ni la prueba de H20 miden (BSA, 2018). En las siglas, **G** es *gain* (ganancia: nivel de salida menos nivel de entrada) y **R** es *response* (respuesta: el nivel absoluto en dB SPL que hay en el conducto) (BSA, 2018). Las curvas son seis:
+
+Tabla: Las curvas de la medición en oído real
+
+| Sigla | Qué mide | Cómo se obtiene y para qué sirve |
+|---|---|---|
+| **REUR** (*real-ear unaided response*) | El nivel en el conducto, sin nada puesto | La respuesta del oído solo. Se obtiene sumando la REUG al nivel de la señal (BSA, 2018) |
+| **REUG** (*unaided gain*) | La amplificación **natural** del conducto y del pabellón | REUR menos la señal de entrada. Tiene un pico de resonancia cuyo lugar y tamaño varían de una persona a otra. Sirve de referencia de la REIG, y una muesca en la zona de 4 a 8 kHz indica que el tubo quedó a la profundidad adecuada (BSA, 2018) |
+| **REOR** y **REOG** (*occluded*) | La respuesta y la ganancia con el molde o la cúpula puestos y el audífono **apagado** | Muestran cuánto cierra el acoplamiento: si son parecidas a la REUG, la adaptación es abierta; si caen por debajo de ella en los agudos, el oído está ocluido (BSA, 2018) |
+| **REAR** (*aided response*) | El nivel en el conducto con el audífono **encendido** | Se mide con una señal de habla (lo recomendado es el ISTS, de al menos 10 s) y se compara con el objetivo de un método prescriptivo (→ H20) (BSA, 2018) |
+| **REAG** (*aided gain*) | La ganancia del conjunto audífono y oído | REAR menos la señal de entrada |
+| **REIG** (*insertion gain*) | Lo que **agrega** el audífono respecto de lo que el oído ya amplificaba | REAG menos REUG (BSA, 2018) |
+
+La REAR es la curva que se usa hoy para verificar, porque con una señal de habla modulada muestra cómo interactúa la señal con la compresión y dónde queda el habla respecto del umbral y del nivel de molestia del paciente, algo que la REIG no muestra (BSA, 2018). Se mide con el audífono en su programa de todos los días y, en la guía de la BSA, a tres niveles de entrada: uno moderado (65 dB SPL), uno suave (50 a 55 dB SPL) y uno fuerte (80 dB SPL), para comprobar que la compresión hace lo que debe (BSA, 2018). La compresión frecuencial se deja apagada para medir (BSA, 2018). El objetivo sale del método prescriptivo y el programa lo dibuja sobre la pantalla; en este libro no se copian sus valores.
+
+**Cómo se relaciona con la RECD.** La RECD es la diferencia entre la presión en el oído del paciente y la que el mismo transductor produce en un acoplador de 2 cc. Con ella, una medición hecha en el acoplador se puede **convertir** en lo que habría en ese oído, y se obtiene una curva parecida a la REAR sin tener al paciente con el audífono puesto (Interacoustics, s. f.). Es lo que permite verificar un audífono para un niño pequeño que no se queda quieto: se mide una vez la RECD y el resto se hace en el acoplador. En el adulto se mide directo la REAR.
+
+:::ojo Ojo clínico
+El tubo mal puesto falsea la medición. La REUG sirve de control: con la profundidad adecuada aparece una muesca en la zona alta, y si su punto más bajo cae bajo −5 dB, la colocación se repite (BSA, 2018). Si la curva sale inesperada o el tubo parece obstruido, se cambia el tubo y se repite la calibración (BSA, 2018). Terminada la medición, se saca el tubo con cuidado y se revisa el oído con el otoscopio (BSA, 2018).
+:::
+
 ## Antes de empezar
 
 ### Revisión visoauditiva
@@ -78,6 +101,29 @@ El acoplador responde a "¿cuánto entrega este audífono, cualquiera sea su due
 - **Dos sillas** de frente o de costado frente a un escritorio, con luz suficiente para ver el molde y el tubo.
 - **El paciente, con su audífono puesto.** Hace falta para la anamnesis: te entiende mejor con él, y así ves el estado real del equipo.
 - **Otoscopía primero** (→ H1). Si el paciente usa lentes, pídele que se los saque. Un tapón de cerumen oclusivo se extrae antes de seguir: sin eso, cualquier conclusión sobre el audífono es dudosa. Un conducto con secreción o inflamación puede ser la razón por la que ya no tolera el molde.
+
+### Las pilas del audífono
+
+El audífono retroauricular o intrauricular más común usa una **pila de aire** (zinc-aire): una celda en forma de botón que se activa al quitar el sello adhesivo y dejar entrar el aire. Su tensión nominal ronda 1,4 V: la ficha técnica de un fabricante para la 312 indica 1,45 V (Energizer, s. f.). El tamaño y el color del sello siguen una convención del sector, y por eso se piden por número:
+
+Tabla: Pilas de aire de uso habitual
+
+| Número | Color del sello | Tamaño (diámetro × alto) | Se encuentra en, en general |
+|---|---|---|---|
+| **10** | Amarillo | 5,8 × 3,6 mm | Los audífonos más pequeños (CIC, IIC) |
+| **312** | Café | 7,9 × 3,6 mm | Intrauriculares y de receptor en el conducto |
+| **13** | Naranja | 7,9 × 5,4 mm | Retroauriculares y intrauriculares mayores |
+| **675** | Azul | 11,6 × 5,4 mm | Retroauriculares de potencia |
+
+<!-- verificar: tamaños y usos por estilo tomados de una guía comercial (Audionova); confirmar con la norma IEC 60086-2 (designaciones PR70, PR41, PR48, PR44) o con fichas de fabricante. Pasada de contenidos 2026-10-18 -->
+
+La ficha del fabricante indica activarla quitando el sello y **esperando un minuto** antes de usarla (Energizer, s. f.). La duración depende del consumo del audífono y de cómo se usa: la ficha la da para condiciones de ensayo definidas, no para la vida diaria, y por eso la pila se prueba siempre con el probador (paso 4, abajo).
+
+Algunos audífonos usan, en cambio, una batería **recargable**, de dos tipos: de **plata-zinc**, con el tamaño de una pila de aire, que puede reemplazarse por una desechable si se agota, y que suele cambiarse cada cierto tiempo; y de **ion de litio**, sellada dentro del audífono y que se carga en un estuche, con la ventaja de una autonomía mayor y la desventaja de que, si se descarga, no se puede reemplazar por una pila común (Hearing Review, 2015). <!-- verificar: autonomía por carga, frecuencia de recambio de la celda de plata-zinc y efecto de la transmisión de audio; la nota de Hearing Review (2015) es de industria. Confirmar con una fuente independiente -->
+
+:::ojo Ojo clínico
+Las pilas de botón son un riesgo si las traga un niño o una mascota: se guardan fuera de su alcance, se tira la agotada de inmediato y, ante una ingestión, se va a urgencias sin esperar síntomas (NCPC, 2023).
+:::
 
 ### Medición electroacústica
 
@@ -237,3 +283,8 @@ Lo que sí puedes practicar en LabSim es lo que rodea a estas revisiones: la oto
 1. Cole B. A summary of ANSI S3.22 tests [Internet]. Etymonic Design / Audioscan; 2006. Resumen técnico de la edición 2003. Disponible en: https://docs.audioscan.com/library/misc/ANSI-S3_22-Tests-Summary.pdf
 1. Chasin M. Back to basics: a primer on equivalent volume, impedance, and couplers for hearing aids. Hear Rev. 2015;22(12):12. Disponible en: https://hearingreview.com/practice-building/practice-management/continuing-education/back-basics-primer-equivalent-volume-impedance-couplers-hearing-aids
 1. Interacoustics. Real-ear-to-coupler difference (RECD) [Internet]. Disponible en: https://www.interacoustics.com/hearing-aid-fitting/affinity/support/real-ear-to-coupler-difference
+1. British Society of Audiology. Practice guidance: guidance on the verification of hearing devices using probe microphone measurements. Bathgate (Reino Unido): BSA; 2018 may. Disponible en: https://www.baaudiology.org/app/uploads/2020/11/REMS-2018.pdf
+1. Energizer Brands. Product data sheet S6600584: 312 zinc air (IEC PR41), edición C. Westlake (OH): Energizer; s. f. Disponible en: https://www.123accu.nl/pdf/A1200018.pdf
+1. Audionova. Guide to hearing aid battery sizes [Internet]. s. f. Disponible en: https://www.audionova.com/blog/hearing-aids/guide-to-hearing-aid-battery-sizes/
+1. Hearing Review. A new door for rechargeable hearing aid battery solutions. Tech Topic [Internet]. 2015 ago. Disponible en: https://hearingreview.com/2015/07/new-door-rechargeable-hearing-aid-battery-solutions/
+1. National Capital Poison Center. Button battery ingestion guideline [Internet]. Washington (DC): NCPC; 2023. Disponible en: https://www.poison.org/battery/guideline

@@ -60,6 +60,50 @@ Lo que se sabe del entrenamiento, resumido:
 
 Lo realista: entrenar puede mejorar la tarea entrenada, a veces algo la confianza y la atención (Ferguson y Henshaw, 2015), y no hay buena razón para prometer más. Ninguna de las dos cosas reemplaza cambiar las condiciones de escucha.
 
+### Planificar el entrenamiento
+
+El plan sale del perfil que dio la batería (→ H14), no de un programa genérico: se trabaja primero lo que dio bajo y tuvo mayor efecto en la vida diaria del paciente, y cada objetivo se escribe con la prueba o el cuestionario con que se medirá (AAA, 2010). Quien lo ejecuta suele ser un equipo (audiólogo, fonoaudiólogo, profesor, familia), porque parte del trabajo es de lenguaje y de aprendizaje y no solo de audición (AAA, 2010).
+
+**Dos direcciones que se combinan.** La guía de la AAA ordena las intervenciones en dos grupos (AAA, 2010):
+
+- **De abajo hacia arriba** (*bottom-up*, guiada por el estímulo): mejoran la señal o la percepción. Incluye el **entrenamiento auditivo directo** (discriminar, ordenar secuencias, separar los oídos, entender en ruido) y las **modificaciones del ambiente** (acústica de la sala, habla clara, sistemas de micrófono remoto; ver la sección siguiente).
+- **De arriba hacia abajo** (*top-down*, guiada por la estrategia): enseñan a usar mejor los recursos centrales. Incluye estrategias de lenguaje, cognitivas y metacognitivas (anticipar el tema, usar el contexto, pedir una aclaración concreta), adaptaciones de la enseñanza y acuerdos en la casa o el trabajo (instrucciones escritas, tareas anotadas en una pizarra).
+
+La guía las considera **complementarias** y recomienda incorporar ambas (AAA, 2010). Un ensayo con 55 niños de 7 a 13 años con trastorno de procesamiento comparó los dos enfoques, con y sin FM personal, contra un grupo sin intervención: ambos entrenamientos fueron beneficiosos, el FM sumó beneficio, los resultados no se limitaron a las áreas entrenadas y el grupo control no cambió al repetir las pruebas (Sharma y cols., 2012).
+
+**Qué se entrena según lo que falló.** La misma guía propone ejemplos de cómo un hallazgo orienta la actividad; son ejemplos y no una receta (AAA, 2010; Cameron y Dillon, 2011).
+
+Tabla: De la prueba alterada a la actividad de entrenamiento
+
+| Si en la batería bajó… | Una actividad posible | Cómo se grada |
+|---|---|---|
+| Resolución temporal (gaps, → H14) | Detección de intervalos silenciosos y discriminación de pares de sonidos que difieren en un rasgo | Intervalo más corto, pares más parecidos |
+| Escucha dicótica y transferencia entre hemisferios | Tareas dicóticas con una diferencia de intensidad entre oídos (DIID) | Se reduce la ventaja del oído peor a medida que su rendimiento se acerca al del mejor |
+| Habla degradada o en competencia (cierre auditivo) | Reconocer habla en ruido o con competidores | Relación señal/ruido más desfavorable |
+| Procesamiento espacial (separar la voz del ruido por su ubicación) | Reconocer oraciones en un ambiente tridimensional bajo audífonos, con el ruido desde otra dirección | El programa adapta el nivel del blanco a las respuestas |
+
+**Frecuencia e intensidad.** Los principios son más firmes que las cifras. La guía pide práctica **intensiva**, es decir, frecuente (quizás diaria) y distribuida; tareas cercanas al umbral de habilidad del paciente, ni tan fáciles que aburran ni tan difíciles que desanimen; un nivel de acierto moderado con retroalimentación generosa; y no pasar a una tarea más exigente mientras el oído peor no rinda de forma comparable al mejor (AAA, 2010). Dice también que la cantidad de entrenamiento necesaria varía según la persona y la tarea, así que no hay una dosis única. Como referencia de lo que se ha estudiado: sesiones clínicas de una hora a la semana más 1-2 horas semanales de tarea para la casa durante seis semanas (Sharma y cols., 2012), o 15 minutos diarios de software durante 12 semanas en nueve niños con trastorno de procesamiento espacial, cuyo umbral dentro del propio programa mejoró en promedio 10 dB (Cameron y Dillon, 2011).
+
+**Cómo se mide el progreso.** Tres fuentes, que se miran juntas (AAA, 2010; Cameron y cols., 2015):
+
+1. **La prueba que originó el objetivo**, repetida: cambia lo que se entrenó, o no. Si se repite la misma versión, parte del cambio puede ser práctica con la prueba; el grupo control del ensayo de Sharma y cols. (2012) no cambió al repetirla, y por eso sus cambios se atribuyen a la intervención.
+2. **Medidas psicoacústicas o electrofisiológicas**, cuando el centro las tiene.
+3. **Cuestionarios de la vida diaria** (para el paciente, la familia y el profesor), que dicen si el cambio llega a la sala y a la casa. Un programa nacional australiano repitió la prueba diagnóstica y sumó el COSI y un cuestionario para profesores (Cameron y cols., 2015).
+
+La guía agrega que la eficacia **no se mide solo con notas ni con mejoras sociales**: esas tienen muchas otras causas (AAA, 2010). Todo esto va junto con lo que el capítulo ya dijo sobre la evidencia: mejorar en lo entrenado es esperable; que se transfiera a entender mejor en la vida diaria es lo que no está demostrado, y por eso el cuestionario no es opcional.
+
+### El aula, la señal sobre el ruido y las ayudas remotas
+
+**Por qué la sala importa.** Lo que entiende un niño depende de cuánto más fuerte que el ruido llega la voz del profesor al oído (la relación señal/ruido, SNR). La voz pierde nivel al alejarse del que habla; el ruido de fondo (ventiladores, pasillo, los propios compañeros) no. Además, las reflexiones en paredes y techo (la **reverberación**) llegan retrasadas y tapan los cambios rápidos del habla. El ruido, la reverberación y la distancia al que habla empeoran la percepción del habla tanto en niños con audición normal como con pérdida auditiva (Crandell y Smaldino, 2000), y un niño con un procesamiento auditivo más frágil tiene menos margen para compensar.
+
+**Qué pide la norma.** El estándar ANSI/ASA S12.60-2010, Parte 1, fija criterios para aulas y otros espacios de aprendizaje: en una sala de hasta 283 m³ (10.000 pies³), el ruido de fondo (sala sin ocupantes) no debe pasar de 35 dBA y el tiempo de reverberación de 0,6 s; entre 283 y 566 m³, el tiempo de reverberación admitido es 0,7 s (ANSI/ASA, 2010). <!-- verificar: valores 35 dBA / 0,6 s / 0,7 s leídos en resúmenes secundarios (blog.ansi.org y sitios de especificación); la norma completa es de pago y no pudo leerse. --> En 32 aulas vacías de ocho escuelas de Ohio, la mayoría **no cumplía** los límites de la versión anterior de esa norma (ANSI S12.60-2002) para ruido y reverberación (Knecht y cols., 2002). Por eso el audiólogo que recomienda "una sala silenciosa" puede tener que medirla o pedir que se mida.
+
+**Qué se puede hacer sin equipo.** Reducir el ruido (cerrar puertas, apagar lo que zumba), absorber (cortinas, cielos, alfombras, tapas en patas de sillas), acercar al niño al que habla, y dar la instrucción de frente y por escrito. Si el especialista valida que no basta, se pasa a la ayuda remota.
+
+**Sistemas de micrófono remoto (FM o digitales).** Un transmisor, que lleva el profesor cerca de la boca, manda la voz por radio directamente al receptor que lleva el niño. La voz llega sin atravesar la distancia, el ruido ni la reverberación de la sala, y eso sube la SNR en el oído del niño. En niños con trastorno de procesamiento, su uso durante el año escolar mejoró el reconocimiento del habla en el ruido de la sala (Johnston y cols., 2009) y sumó beneficio al entrenamiento (Sharma y cols., 2012). En adultos con audífonos, un sistema digital adaptativo superó al FM en el ruido más alto y la mayoría de los participantes lo prefirió en un ambiente real (Thibodeau, 2014, 11 adultos con pérdida). La AAA propone considerarlos sobre todo cuando hay déficit en habla de baja redundancia (habla en ruido, filtrada o comprimida) o en pruebas dicóticas, y pide capacitar al usuario y a quienes lo apoyan (profesor, clínico, padres) en el uso y cuidado del equipo, con listas de chequeo para comprobar que funciona (AAA, 2010).
+
+**Estrategias compensatorias.** Son las del grupo "de arriba hacia abajo": **habla clara** (más lenta, articulada, con palabras clave enfatizadas y más pausas, sola o junto con el FM), instrucciones cortas y repetidas con otras palabras, aviso del tema antes de explicarlo, apoyo visual y escrito, y más tiempo para responder (AAA, 2010). Se le enseñan también al paciente: sentarse cerca, mirar al que habla, decir con precisión qué parte no entendió. Ninguna de estas medidas reemplaza a la otra: se apilan.
+
 :::ayuda Ayuda memoria
 - Periferia primero: tonal, ósea, timpanometría, emisiones. Sin eso, no hay batería.
 - Bajo los 7 años de edad del desarrollo, cautela: casi no hay normas.
@@ -90,6 +134,8 @@ Un oído que detecta bien un tono en silencio puede igual fallar al entender hab
 - **La cóclea** aporta la resolución en frecuencia y la codificación temporal fina; la pérdida de células ciliadas externas las degrada además de subir el umbral.
 - **El tronco** compara los dos oídos: tiempo y nivel entre ellos (la base de la localización y del MLD) y la coordinación de las vías (→ H14).
 - **La corteza y las áreas de asociación** agrupan, separan, atienden, recuerdan y dan sentido: ahí el rendimiento se mezcla con la lengua y la cognición.
+
+**Separar voces en una mezcla.** Cuando hay varias personas hablando, el sistema auditivo agrupa lo que viene de una fuente y selecciona una. Tener dos oídos ayuda: en un estudio con voces virtuales, escuchar con los dos oídos redujo el umbral de reconocimiento de oraciones entre 2 y 4 dB frente al mejor oído solo, y entre 6 y 7 dB cuando había dos o tres competidores que hablaban, separados espacialmente del blanco (Hawley y cols., 2004). Es una ventaja que se pierde con una pérdida asimétrica (→ cap. 28) y que miden las pruebas de procesamiento espacial.
 
 Por eso cada prueba central "ensucia" al medir: lo que sale es lo que logra esa cadena completa en esa tarea, no el estado de un solo relevo.
 
@@ -441,6 +487,12 @@ El niño con otitis media con efusión fluctuante, en los años en que la vía s
 1. Cameron S, Dillon H. Development and evaluation of the LiSN & Learn auditory training software for deficit-specific remediation of binaural processing deficits in children: preliminary findings. J Am Acad Audiol. 2011;22(10):678-96. doi:10.3766/jaaa.22.10.6
 1. Ferguson MA, Henshaw H. Auditory training can improve working memory, attention, and communication in adverse conditions for adults with hearing loss. Front Psychol. 2015;6:556. doi:10.3389/fpsyg.2015.00556
 1. Rosenfeld RM, Shin JJ, Schwartz SR, Coggins R, Gagnon L, Hackell JM, et al. Clinical practice guideline: otitis media with effusion (update). Otolaryngol Head Neck Surg. 2016;154(1 Suppl):S1-S41. doi:10.1177/0194599815623467
+1. Sharma M, Purdy SC, Kelly AS. A randomized control trial of interventions in school-aged children with auditory processing disorders. Int J Audiol. 2012;51(7):506-18. doi:10.3109/14992027.2012.670272. PMID 22512470
+1. Cameron S, Glyde H, Dillon H, King A, Gillies K. Results from a national central auditory processing disorder service: a real-world assessment of diagnostic practices and remediation for central auditory processing disorder. Semin Hear. 2015;36(4):216-36. doi:10.1055/s-0035-1564457. PMID 27587910
+1. Crandell CC, Smaldino JJ. Classroom acoustics for children with normal hearing and with hearing impairment. Lang Speech Hear Serv Sch. 2000;31(4):362-70. doi:10.1044/0161-1461.3104.362. PMID 27764475
+1. Knecht HA, Nelson PB, Whitelaw GM, Feth LL. Background noise levels and reverberation times in unoccupied classrooms: predictions and measurements. Am J Audiol. 2002;11(2):65-71. doi:10.1044/1059-0889(2002/009). PMID 12691216
+1. American National Standards Institute / Acoustical Society of America. ANSI/ASA S12.60-2010/Part 1. Acoustical performance criteria, design requirements, and guidelines for schools, part 1: permanent schools. Melville (NY): ASA; 2010. Disponible en: https://webstore.ansi.org/preview-pages/ASA/preview_ANSI+ASA+S12.60-2010+Part+1.pdf
+1. Thibodeau L. Comparison of speech recognition with adaptive digital and FM remote microphone hearing assistance technology by listeners who use hearing aids. Am J Audiol. 2014;23(2):201-10. doi:10.1044/2014_AJA-13-0065. PMID 24699929
 
 ### Fisiología
 
@@ -457,6 +509,7 @@ El niño con otitis media con efusión fluctuante, en los años en que la vía s
 1. Pichora-Fuller MK, Kramer SE, Eckert MA, Edwards B, Hornsby BWY, Humes LE, et al. Hearing impairment and cognitive energy: the Framework for Understanding Effortful Listening (FUEL). Ear Hear. 2016;37(Suppl 1):5S-27S. doi:10.1097/AUD.0000000000000312
 1. Anderson S, Parbery-Clark A, White-Schwoch T, Kraus N. Aging affects neural precision of speech encoding. J Neurosci. 2012;32(41):14156-64. doi:10.1523/JNEUROSCI.2176-12.2012
 1. Frisina DR, Frisina RD. Speech recognition in noise and presbycusis: relations to possible neural mechanisms. Hear Res. 1997;106(1-2):95-104. doi:10.1016/S0378-5955(97)00006-3
+1. Hawley ML, Litovsky RY, Culling JF. The benefit of binaural hearing in a cocktail party: effect of location and type of interferer. J Acoust Soc Am. 2004;115(2):833-43. doi:10.1121/1.1639908. PMID 15000195
 
 ### Patología
 

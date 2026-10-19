@@ -56,6 +56,21 @@ Con eso se entienden las dos formas de medirlo:
 - **Otoscopio**, alcohol y algodón; el formulario y lápices rojo y azul.
 - **Verificación diaria** en las cavidades de prueba: el equipo debe leer 0,5, 2,0 y 5,0 cm³ dentro de su tolerancia, con una línea horizontal. Si la línea sube con la presión, hay una fuga. Una vez al año, calibración completa (BSA, 2024).
 
+### Tipos de impedanciómetro
+
+La IEC 60645-5 (2004) especifica **tres tipos** de instrumento según las pruebas que traen. En la práctica se distinguen por lo que miden:
+
+Tabla: Tipos de impedanciómetro según su uso
+
+| Tipo | Qué mide | Para qué se usa |
+|---|---|---|
+| **De screening** | Timpanograma con sonda de 226 Hz, sin reflejos o con reflejo a un nivel fijo; entrega pasa/deriva | Decidir a quién derivar en operativos (más abajo, *En operativos*) |
+| **Clínico o de diagnóstico** | Timpanogramas de 226 y 1000 Hz, reflejos ipsi y contralaterales con su umbral, deterioro del reflejo y función tubaria | Es el equipo de esta herramienta |
+| **Multifrecuencia** | Timpanogramas con varias frecuencias de sonda, o un barrido de frecuencia, para estimar la **frecuencia de resonancia** del oído medio (Margolis y Goycoolea, 1993) | Sospecha de problemas de cadena que el timpanograma de 226 Hz no distingue (Kaf y Fawzy, 2017) |
+| **De banda ancha** (mención) | En vez de un tono, un estímulo de banda ancha que mide cuánta energía **absorbe** o refleja el oído medio en cada frecuencia (Kaf y Fawzy, 2017) | Complementa a la timpanometría; la revisión de Kaf y Fawzy (2017) señala que podría evaluar el oído medio con mayor rapidez y exactitud, pero no es un examen de rutina de esta herramienta |
+
+<!-- verificar: la columna "Qué mide" de screening y clínico es descripción del uso habitual, no de la IEC 60645-5 (2004), cuyo texto es de pago; de la norma solo se confirmó que define tres tipos. Que la resonancia baja o alta oriente a cadena discontinua o rígida es conocimiento general: Margolis y Goycoolea (1993) estudian cómo estimarla, y solo su resumen se leyó. -->
+
 ### Conoce tu equipo: el impedanciómetro
 
 Todos los impedanciómetros tienen la misma lógica: una pantalla que cambia según la prueba, unas **teclas bajo la pantalla** cuya función aparece rotulada en la última línea, y unos controles fijos para elegir el oído, la sonda y la intensidad. La figura muestra el de LabSim con un timpanograma recién hecho en el oído derecho de Carolina, la paciente con otoesclerosis que vas a ver más abajo.
@@ -161,7 +176,7 @@ La trompa de Eustaquio ventila el oído medio: se abre un instante al tragar o b
 
 La **prueba de presión y deglución de Williams** hace lo mismo con la bomba del equipo: timpanograma de base, luego el conducto a **+400 daPa** mientras el paciente traga y timpanograma; después a **−400 daPa** y lo mismo (Williams, 1975). Si la trompa abre, el pico se corre **al lado contrario** de la presión aplicada. Los corrimientos son chicos: en sanos, la diferencia máxima entre picos tuvo una mediana de 11 daPa (rango intercuartil 6 a 17), y con disfunción tubaria de 0 daPa (0 a 2) (Lu y Wang, 2026).
 
-**Membrana perforada o con tubo.** Ya no hay pico que mirar: la presión del conducto **es** la del oído medio. Se presuriza el conducto y se mira si la trompa la libera (**prueba de inflación-deflación**):
+**Membrana perforada o con tubo.** Ya no hay pico que mirar: la presión del conducto **es** la del oído medio. Se presuriza el conducto y se mira si la trompa la libera (**prueba de inflación-deflación**; en la práctica en español, de **insuflación y aspiración**: insuflar es llevar el conducto a presión positiva y aspirar, a presión negativa):
 
 - Se lleva el conducto a **−200 daPa** y se le pide tragar al menos 3 veces. Si no compensa, se pide un Valsalva.
 - Luego a **+200 daPa**. Una trompa buena puede liberarla sola; si no, 3 degluciones y, si tampoco, un Toynbee.
@@ -420,6 +435,12 @@ Para practicar, los pacientes de práctica (★) de este capítulo son Carolina 
 1. Debruyne F. Clinical observations on the on-off effect of the acoustic stapedius reflex. Clin Otolaryngol Allied Sci. 1992;17(1):10-2. doi:10.1111/j.1365-2273.1992.tb00979.x
 1. Camicas M. Interprétation acoustique et mécanique de l'effet «on-off». Rev Laryngol Otol Rhinol (Bord). 1992;113(4):355-8.
 1. Colletti V, Fiorino FG. Stapedius reflex in the monitoring of NaF treatment of subclinical otosclerosis. Acta Otolaryngol. 1987;104(5-6):447-53.
+
+### Tipos de equipo
+
+1. International Electrotechnical Commission. IEC 60645-5:2004. Electroacoustics — Audiometric equipment — Part 5: Instruments for the measurement of aural acoustic impedance/admittance. Ginebra: IEC; 2004.
+1. Margolis RH, Goycoolea HG. Multifrequency tympanometry in normal adults. Ear Hear. 1993;14(6):408-13. doi:10.1097/00003446-199312000-00006. PMID 8307245.
+1. Kaf WA, Fawzy M. Middle ear function measures: from single component tympanometry to wideband acoustic immittance. Perspect ASHA Spec Interest Groups. 2017;2(6):37-49. doi:10.1044/persp2.sig6.37
 
 ### Función tubaria
 

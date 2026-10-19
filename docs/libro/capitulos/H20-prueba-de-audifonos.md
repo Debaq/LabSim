@@ -5,6 +5,8 @@
 - Decidir si un paciente es candidato a probar un audífono y qué debe resolverse antes.
 - Explicar por qué la amplificación tiene que ser distinta en cada frecuencia y comprimir el sonido, a partir del reclutamiento y del campo dinámico estrecho (→ H5, H6).
 - Explicar qué cambian el molde y la ventilación: la ganancia en graves, el efecto de oclusión y la retroalimentación.
+- Nombrar los tipos y materiales de molde, y tomar una impresión del conducto con seguridad.
+- Describir qué hacen la compresión (WDRC), los micrófonos direccionales, la reducción de ruido, la compresión frecuencial y la conectividad de un audífono, y qué se le puede prometer al paciente de cada una.
 - Hacer la prueba conductual: discriminación con y sin lectura labial, voz conversacional y molestia, sin y con audífono, y registrar los resultados.
 - Calcular e interpretar una ganancia funcional y decir por qué no sustituye a la medición en oído real.
 - Cerrar la prueba con una sugerencia (oído, características del molde, preferencia) y conocer lo que viene después: entrega, consejería y control.
@@ -63,6 +65,38 @@ Un método **prescriptivo** parte del audiograma y calcula una ganancia objetivo
 
 Dan objetivos distintos porque persiguen cosas distintas, y por eso un mismo audiograma puede dar dos prescripciones. Este libro no entrega valores ni tablas: los números salen de las reglas completas y del programa del fabricante, no de un libro de texto.
 
+### La tecnología del audífono, sin marcas
+
+Los fabricantes nombran las funciones con términos propios. Lo que sigue describe qué hace cada una por su principio, y qué se puede prometer al paciente.
+
+**Compresión de rango dinámico amplio (WDRC).** *Wide dynamic range compression* es la compresión de la sección anterior con un umbral bajo: aun los sonidos suaves y moderados reciben menos ganancia a medida que suben, y por eso el habla entera cabe en el campo dinámico del paciente. Se describe con cuatro parámetros: el **umbral de compresión**, desde el cual baja la ganancia; la **razón de compresión**, cuántos decibeles de entrada hacen falta para subir 1 dB la salida; el **tiempo de ataque**, lo que tarda el audífono en bajar la ganancia cuando entra un sonido fuerte; y el **tiempo de liberación**, lo que tarda en recuperarla cuando el sonido termina. En la literatura técnica el ataque suele ser de unos 5 a 30 ms, la liberación rápida de 50 a 100 ms y la lenta de 800 ms a 2 s, y la razón se mantiene en general bajo 4 porque valores mayores suenan poco claros (Patel y Panahi, 2020). Un audífono **multicanal** divide el espectro en bandas y comprime cada una por separado, de modo que los agudos pueden recibir una compresión distinta de la de los graves (Dillon, 2012).
+
+**Gamas.** Los fabricantes ofrecen el mismo audífono en varios niveles de tecnología, de básico a avanzado. No hay una definición común de qué incluye cada nivel; lo que suele cambiar entre ellos es esto: <!-- verificar: confirmar con Dillon 2012 o con una revisión que no existe una definición normada de las gamas de tecnología -->
+
+Tabla: Lo que suele cambiar entre un nivel básico y uno avanzado
+
+| Característica | Nivel básico | Nivel avanzado |
+|---|---|---|
+| Canales de compresión | Pocos | Más, con ajuste más fino por frecuencia |
+| Micrófonos direccionales | Fijos o sin ellos | Adaptativos, que siguen al ruido |
+| Reducción de ruido y de retroalimentación | Más simple | Más rápida y por bandas |
+| Programas y adaptación al ambiente | Pocos, elegidos a mano | Más, con cambio automático según el ambiente |
+| Conectividad | Limitada | Transmisión directa desde teléfono y televisor |
+
+Un nivel más alto no es una pérdida más grande: es más herramientas de ajuste. La elección sale de la queja y de la vida del paciente (→ cap. 28), no del precio.
+
+**Micrófonos direccionales.** Un micrófono **omnidireccional** recoge el sonido de todos lados por igual. Un sistema **direccional** usa dos puertos de entrada (o dos micrófonos) separados unos milímetros y retarda la señal de uno antes de restarla del otro: el sonido que llega de frente pasa, y el que llega de atrás se cancela en gran parte (Dillon, 2012). Su sensibilidad según el ángulo se dibuja como un **patrón polar** (cardioide, hipercardioide). En los **adaptativos**, el sistema orienta la zona de menor sensibilidad hacia donde está el ruido. El beneficio depende de dónde estén la voz y el ruido: en una revisión sistemática los estudios que midieron el efecto en la vida real eran pocos y de baja calidad, pero apoyaban que ayuda (Bentler, 2005), y en niños mejora el reconocimiento del habla en condiciones controladas (McCreery y cols., 2012). Favorece lo que llega de frente, y los audífonos con direccionales se adaptan con ventilaciones pequeñas o sin ellas (Pirzanski, 2006b). <!-- verificar: la caída de ganancia en graves de los sistemas direccionales (Dillon, 2012, cap. de micrófonos direccionales); no incluida en el texto hasta cotejarla -->
+
+**Reducción de ruido.** La mayoría de los esquemas es de **modulación**: el habla fluctúa en el tiempo de una forma característica y el ruido estable no, de modo que el audífono baja la ganancia en las bandas donde predomina lo estable (Bentler y Chiou, 2006). La evidencia de que mejore la comprensión del habla es equívoca (Bentler, 2005), y en niños no la mejora ni la empeora (McCreery y cols., 2012). Lo que se le puede ofrecer al paciente es un ruido de fondo menos invasor, no que entienda más en medio del ruido; para eso sirve el micrófono direccional y, mejor aún, un micrófono remoto (→ más abajo).
+
+**Cancelación de retroalimentación.** El audífono detecta el silbido naciente y genera una señal en oposición que lo resta, y con eso permite más ganancia o una ventilación mayor sin que silbe (Dillon, 2012). Los administradores de retroalimentación permiten ventilaciones de hasta unos 3 mm (Pirzanski, 2006b).
+
+**Reducción de ruidos impulsivos.** Baja la ganancia por un instante cuando detecta un golpe seco (una taza, una puerta). Actúa sobre sonidos breves y de gran amplitud. <!-- verificar: mecanismo y beneficio de la reducción de impulsos (Dillon, 2012); no se encontró una revisión sistemática -->
+
+**Compresión y transposición frecuencial.** En una pérdida severa de agudos, amplificar más no devuelve información: la cóclea de esa zona no la recibe o no la usa. La alternativa es llevar esa información a una zona donde aún hay audición. La **compresión frecuencial** comprime la banda alta hacia frecuencias más bajas; la **transposición** traslada una banda de agudos a una región más baja. La revisión de Simpson (2009) resume que las primeras versiones tuvieron resultados poco favorables, que los dispositivos recientes muestran mejor percepción del habla, y que siguen abiertas la pregunta de quién es candidato y si un entrenamiento mejora el resultado. El costo es que los sonidos agudos pasan a sonar distintos, y por eso la verificación en oído real se hace con esta función apagada (BSA, 2018). <!-- verificar: "los sonidos agudos pasan a sonar distintos"; Simpson 2009 y Bentler y cols. 2014 (doi:10.1097/AUD.0000000000000030) -->
+
+**Conectividad.** Los audífonos actuales reciben audio por radio desde el teléfono, el televisor o un micrófono remoto, directo o a través de un accesorio. Los estándares más nuevos del Bluetooth (LE Audio, desde la versión 5.2) incluyen audífonos estándar y la difusión de audio a muchos receptores a la vez (Auracast), con menor gasto de pila que el Bluetooth clásico (Canadian Audiologist, 2024). Transmitir audio gasta pila, y por eso importa en los modelos con pila de aire (→ H21, tabla de pilas).
+
 ### El molde, la ventilación y el efecto de oclusión
 
 El sonido amplificado entra al conducto por un **molde** (a medida) o por una **cúpula** o **domo** (una pieza de goma de fábrica). Lo que importa es cuánto del conducto queda cerrado:
@@ -76,21 +110,76 @@ El sonido amplificado entra al conducto por un **molde** (a medida) o por una **
 
 La elección del molde, entonces, es un compromiso entre **ganancia** (cerrar), **comodidad y voz natural** (abrir) y **retroalimentación** (cerrar). No se resuelve en abstracto: se decide con el audiograma y con la queja del paciente.
 
+### Tipos y materiales de molde, y modificaciones acústicas
+
+El molde a medida se clasifica por cuánto del pabellón ocupa y por el material.
+
+Tabla: Tipos de molde para un audífono retroauricular
+
+| Tipo | Qué ocupa | Lo que se busca con él |
+|---|---|---|
+| **Estándar** (concha completa) | Toda la concha y el conducto | El agarre más seguro y menos riesgo de retroalimentación |
+| **De concha parcial** (*shell*) | Igual que el estándar, con el cuenco vaciado | Más discreto; el agarre sigue siendo seguro y con poco riesgo de retroalimentación |
+| **Esqueleto** | Un anillo o medio anillo de concha, más el conducto | Menos volumen; el anillo debe apoyar contra la pared lateral de la concha para retener, y el de silicona absorbe el movimiento de la mandíbula |
+| **De hélix extendido** | Concha, con una extensión sobre el hélix | Más retención y sostén para un equipo pesado; más difícil de colocar |
+| **De media concha** | La cavidad de la concha (*cavum*) | Un molde de canal con un apoyo adicional |
+| **De canal** | Solo la entrada del conducto | Discreto; el agarre depende del conducto |
+| **De canal con cola** (*canal lock*) | Canal, con una pequeña cola plástica hacia la concha | La cola apoya contra el antitrago y evita que salga |
+
+(Pirzanski, 2006b).
+
+Tabla: Materiales de molde
+
+| Material | Dureza (Shore A) y contracción | A tener en cuenta |
+|---|---|---|
+| **Acrílico duro** | Se contrae un 2 a 4 % al polimerizar | Se pule; el laboratorio corrige la contracción |
+| **Resina duro fotocurada (UV)** | — | La resina clara es de las mejores opciones en pacientes alérgicos |
+| **Acrílico blando / resina blanda fotocurada** | 40 a 50 | Blando no es sinónimo de mejor sello ni de mayor comodidad |
+| **Silicona médica** | 20 a 70; se contrae un 0,2 % | Con menos de 25 puede quedar demasiado blanda para insertarla; la clara se usa en alérgicos |
+| **Vinilo** | 30 a 50 | — |
+| **Polietileno** | — | — |
+
+(Pirzanski, 2006b). Un material duro lo maneja mejor quien tiene dificultad para guiar un canal blando hacia el oído, porque los canales blandos se doblan hacia atrás al insertarlos. En los alérgicos se prueba el material con un parche cutáneo. En niños el molde se cambia con frecuencia porque la oreja crece, y el color elegido por el niño ayuda a que lo use (Pirzanski, 2006b).
+
+Al molde se le agregan **modificaciones acústicas** que cambian la curva de respuesta:
+
+- **El tubo y su resonancia.** El aire dentro del tubo del retroauricular resuena: en un tubo de unos 75 mm, la primera resonancia está cerca de 1.000 Hz y las siguientes en múltiplos impares (Chasin, 2013). Eso produce un pico en la respuesta.
+- **Dampers (amortiguadores).** Una pequeña resistencia acústica puesta en el tubo reduce los picos de resonancia y suaviza la respuesta, sobre todo entre 1 y 4 kHz. Funciona mejor puesta donde el pico es máximo que donde es nulo (Chasin, 2013; Pirzanski, 2006b).
+- **Efecto de bocina (*horn*).** Un tubo que se ensancha hacia el conducto hace de **bocina**: acopla la alta impedancia del receptor con la baja del conducto y realza las frecuencias altas (Pirzanski, 2006b).  Duplicar el diámetro interno da, como máximo, 6 dB más (Chasin, 2013). Este realce ocurre después del receptor, de modo que no cuesta pila (Chasin, 2013). Un ensanche en la punta del molde (*belling*) no es una opción acústica válida: junta cerumen (Pirzanski, 2006b).
+- **Ventilación.** Según su diámetro, afecta la ganancia grave y la salida máxima, y puede causar retroalimentación; los tapones de ventilación permiten cambiarla sin rehacer el molde (Pirzanski, 2006b). Un orificio de apenas 0,5 mm ya iguala la presión del conducto con el exterior.
+- **Manejo de la oclusión.** Además de ensanchar la ventilación se puede acortar o adelgazar el conducto del molde, o alargarlo hasta la zona ósea, o repetir la impresión con la boca abierta para un sello más ajustado. Ensanchar la ventilación tiene efectos poco predecibles sobre la oclusión (Pirzanski, 2006b).
+
+
 ### Los estilos de audífono
 
 El estilo cambia dónde está cada pieza, y con eso la potencia posible, el tamaño del molde y la facilidad de manejo. Todos tienen los mismos elementos: micrófono, procesador, receptor (el altavoz) y pila.
 
 Tabla: Estilos de audífono, de forma general
 
-| Estilo | Dónde va | Para quién, en general |
-|---|---|---|
-| **Retroauricular** (BTE) | Detrás de la oreja; un tubo lleva el sonido a un molde | Todo grado de pérdida, incluidas las profundas; el más robusto y el más fácil de manejar |
-| **Con receptor en el conducto** (RIC) | Detrás de la oreja; el receptor va en el conducto, unido por un hilo fino | Pérdidas leves a severas; cúpulas abiertas o cerradas |
-| **Intrauricular** (ITE, ITC, CIC) | Dentro de la oreja o del conducto, a medida | Pérdidas leves a moderadas; discretos, pero con menos espacio para pila, controles y ventilación |
+| Estilo | Dónde va | Para quién, en general | Ventajas y límites |
+|---|---|---|---|
+| **Retroauricular** (BTE) | Detrás de la oreja; un tubo lleva el sonido a un molde | Pérdidas leves a profundas, a toda edad | Robusto, fácil de manejar; más espacio para pila, controles y ventilación; el molde se cambia sin cambiar el equipo |
+| **Con receptor en el conducto** (RIC) | Detrás de la oreja; el receptor va en el conducto, unido por un hilo fino | Pérdidas leves a severas; cúpulas abiertas o cerradas | Cápsula pequeña y conducto poco ocluido; el cerumen puede dañar el receptor |
+| **Intrauricular** (ITE) | Dentro de la oreja, a medida | Pérdidas leves a severas | Admite telebobina y controles; poco usado en niños, porque la carcasa se cambia al crecer la oreja |
+| **De canal** (ITC y CIC) | Dentro del conducto, a medida | Pérdidas leves a moderadamente severas | Discretos; difíciles de manejar; poco espacio para pila y funciones; no para niños pequeños ni pérdidas severas a profundas |
+| **Invisible en el conducto** (IIC) | Muy profundo en el conducto, a medida | Pérdidas leves a moderadas, conducto amplio | Los más profundos del grupo anterior, con sus mismas limitaciones; no se ven |
 
-<!-- verificar: la tabla resume el uso habitual de cada estilo (Dillon, 2012); confirmar los rangos de pérdida por estilo con la fuente -->
+Los rangos de pérdida y las limitaciones de BTE, ITE y canal vienen de la ficha del NIDCD (2022). <!-- verificar: la fila RIC, la fila IIC y la columna de RIC en 'Ventajas y límites' no figuran en el NIDCD; confirmar con Dillon, 2012. Pasada de contenidos 2026-10-18: las filas de ITE/ITC/CIC decían 'leves a moderadas'; se alinearon al NIDCD (ITE leve a severa; canal leve a moderadamente severa). -->
 
 Los audífonos de **conducción ósea** son otra familia: llevan el sonido por vibración al hueso y se usan cuando el oído externo o medio no se puede amplificar por el camino aéreo (→ H3).
+
+### Ayudas complementarias: telebobina, bucle, micrófonos remotos y alertas
+
+El audífono no es siempre suficiente en el teléfono, en una sala grande o en la noche, y el usuario conoce otras ayudas que lo complementan. Se llaman, en conjunto, **dispositivos de ayuda para la escucha** (ALD, *assistive listening devices*):
+
+- **Telebobina.** Una pequeña bobina de alambre dentro del audífono (o del procesador de un implante) que recibe una señal electromagnética y la convierte en sonido. Nació para mejorar el teléfono, y se usa con bucles, sistemas FM y amplificadores personales (NIDCD, 2019). Se activa con un interruptor o un programa. Un audífono que quedó en la posición de telebobina no capta con el micrófono, y por eso "no suena" (→ H21, tabla de fallas).
+- **Bucle de inducción.** Un alambre delgado que rodea una sala, o el cuello del usuario, conectado a un amplificador y a una fuente de sonido (el sistema de altavoces, un micrófono, el televisor). Crea un campo magnético que recoge directamente la telebobina, y el sonido llega más limpio, con menos ruido de la sala (NIDCD, 2019). La norma IEC 60118-4 fija el campo magnético que debe producir el bucle para dar una buena relación señal-ruido sin saturar el audífono (IEC, 2014).
+- **Sistemas FM o de radio y micrófonos remotos.** El interlocutor lleva un micrófono con transmisor y el usuario, un receptor, conectado al audífono o con un collar de inducción. Sirven para entender a una persona en el ruido o a distancia, como el profesor en una sala (NIDCD, 2019).
+- **Infrarrojo.** Transmite el sonido con luz y no atraviesa paredes; se usa donde la información es confidencial o donde las señales de radio se mezclan (NIDCD, 2019).
+- **Alertas.** Dispositivos conectados al timbre, al teléfono o a una alarma que, en vez de sonar, emiten luz intermitente o vibran, para quien no usa audífonos en la noche o no oye el aviso (NIDCD, 2019).
+- **Amplificadores personales.** Aparatos del tamaño de un teléfono que suben el nivel del sonido y reducen el ruido, útiles en el auto o con el televisor (NIDCD, 2019).
+
+La rehabilitación auditiva más amplia (entrenamiento, estrategias de comunicación, ayudas en la casa) se trata en el cap. 28.
 
 ## Antes de empezar
 
@@ -126,6 +215,33 @@ La prueba de este capítulo se hace en una sala, con la voz del examinador, y no
 2. **Anamnesis**: nombre completo, edad y antecedentes de la pérdida (cuándo empezó, de qué lado, si usó audífono antes, qué le molesta).
 3. **Explicación**: que el examen es una prueba, que un médico decidirá si se prescribe, y que no se lleva un audífono.
 4. **Comodidad**: sentado a un costado de la estación de trabajo, sin tironear de los cables y con el pelo y los lentes apartados del oído.
+
+### La impresión del conducto, para el molde a medida
+
+El molde, y la carcasa de un audífono intrauricular, se fabrican a partir de una impresión del conducto y de la concha. Esta prueba no la toma, pero conviene saber cómo se hace y a quién no se le hace (BSA, 2024).
+
+**Antes.** Se examina el oído con el otoscopio (→ H1): el conducto, la membrana, y si hay cerumen o un cuerpo extraño, que se retira antes (BSA, 2024). El conducto no es recto. Tiene dos curvas, y el tope del tapón (el *otoblock*, abajo) va justo pasado el segundo recodo (→ B1, *El conducto auditivo externo*). En el lactante el conducto es más corto y más recto, y la impresión en menores de cinco años tiene un procedimiento aparte, con entrenamiento adicional (BSA, 2024).
+
+**Cuándo no.** Hay que consultar antes de tomar la impresión cuando hay (BSA, 2024):
+
+- una infección activa del oído externo, o secreción del oído medio;
+- un oído operado que no ha cicatrizado, o una cavidad de mastoidectomía, que debe sellarse para que no entre material;
+- una membrana perforada: no la contraindica por sí sola si no hay infección, pero el retiro pide más cuidado;
+- un conducto muy estrecho o con un recodo agudo, donde no se hace una impresión profunda.
+
+**Materiales.** La silicona es el material de la impresión. Hay de **condensación** (una masa a la que se agrega una pequeña cantidad de endurecedor) y de **adición** (dos componentes en partes iguales); la de adición se prefiere por la mezcla más fácil, el mejor flujo y la estabilidad en el tiempo (BSA, 2024). Se revisa la fecha de vencimiento, se mezcla según el fabricante y se comprueba el color parejo y la ausencia de burbujas. Los productos con azufre, como el látex de los guantes, pueden impedir que la silicona fragüe (Pirzanski, 2006a).
+
+**El otoblock.** Es un tapón de espuma o de algodón con un hilo, que protege la membrana y evita que el material pase a la profundidad. Se elige por tamaño según la otoscopia, de modo que llene el conducto sin presionar las paredes, y se coloca con una luz de otoscopio hasta pasado el segundo recodo, más o menos a la mitad del conducto, sin ir más profundo de lo necesario. Después se revisa con el otoscopio que no queden espacios por donde pase la silicona, y se anuda el hilo para sostenerlo (BSA, 2024; Pirzanski, 2006a).
+
+**La inyección.** Se pide al paciente que abra la boca antes y durante la inyección si se quiere un sello preciso, porque el conducto cambia de forma con la mandíbula y la impresión con la boca abierta suele salir más ancha (Pirzanski, 2006a). Con un soporte dental entre los dientes laterales, nuevo para cada paciente, se vuelve a revisar el otoblock (BSA, 2024). Con la jeringa o la pistola se parte con la punta cerca del otoblock, sin sellar el conducto con la punta, y se presiona el émbolo de modo firme y parejo, retirándola despacio con la punta siempre enterrada en el material. Se llena el conducto, luego la concha, desde el socavado del antitrago, después el hélix y el resto de la concha, en un solo movimiento continuo, sin empujar el material hacia adentro: empujar da un sello peor, no mejor (Pirzanski, 2006a; BSA, 2024). No se sobrellena la concha, porque el peso deforma la oreja (BSA, 2024). Se apoya la mano en la cabeza del paciente durante todo el gesto.
+
+**El fraguado y el retiro.** Se deja fraguar sin tocar según el fabricante; la silicona está lista cuando la uña no deja marca (BSA, 2024), lo que suele tomar entre 4 y 10 minutos según el producto (Pirzanski, 2006a). Para retirarla se rompe antes el sello de aire, con movimientos suaves de la mandíbula, se quita el soporte dental y se saca despacio, sin tirones, siguiendo el hilo. **La impresión no se vuelve a colocar en el oído por ningún motivo** (BSA, 2024).
+
+**Después.** Se revisa que la impresión esté completa, y se repite si no lo está; no se recorta. Se marca el largo deseado del molde y se rotula el envase. Se mira el oído con el otoscopio: ni material ni otoblock deben quedar; algo de enrojecimiento es normal, pero cualquier dolor o lesión se deriva (BSA, 2024).
+
+:::ojo Ojo clínico
+Los riesgos reales son pocos y graves. El barotrauma o el daño a la membrana ocurre por aire atrapado o por un conducto sellado, y también al retirar una membrana debilitada. El material puede pasar a través de una perforación hacia el oído medio y necesitar cirugía (Kim y cols., 2021). Un otoblock mal puesto es la causa de casi todos los accidentes: por eso se revisa antes de inyectar y se verifica al final que salió entero (BSA, 2024).
+:::
 
 ## Paso a paso
 
@@ -229,6 +345,25 @@ La prueba termina en una **sugerencia**. Lo que sigue es otro proceso, y convien
 3. **La entrega y la consejería.** Se programa el audífono, se verifica en oído real y se enseña al paciente a ponérselo, limpiarlo, cambiar la pila y cuidarlo. Se conversa de las **expectativas**: un audífono no devuelve la audición, y el cerebro necesita semanas para acostumbrarse a sonidos que llevaba años sin oír. Se dan estrategias de comunicación para él y para su familia. Y se pregunta qué le gustaría poder hacer, para tener contra qué comparar después.
 4. **El control.** Poco después de la entrega para ajustar, y a intervalos regulares para revisar el audífono (→ H21) y la audición.
 
+:::ayuda Consejería al usuario: lo que se le dice y se le deja por escrito
+- **Colocación y retiro.** Que lo haga frente a ti, hasta que lo logre.
+- **Limpieza.** Según las instrucciones del equipo; el cerumen y la secreción dañan el audífono (NIDCD, 2022). El molde y el tubo se limpian aparte (→ H21, paso 1).
+- **Humedad y calor.** Lejos de ambos; no se usa en la ducha ni se deja en el baño o al sol (NIDCD, 2022). Sin laca ni productos del pelo puestos mientras lo lleva (NIDCD, 2022).
+- **Apagado y pila.** Se apaga cuando no se usa (NIDCD, 2022). La pila de aire se activa al sacar el sello y conviene esperar un minuto antes de ponerla (Energizer, s. f.). La pila agotada se cambia de inmediato (NIDCD, 2022).
+- **Niños y mascotas.** Pilas y audífonos se guardan fuera de su alcance (NIDCD, 2022). Si se traga una pila, se va de inmediato a urgencias (NCPC, 2023).
+- **Adaptación.** Requiere tiempo y paciencia (NIDCD, 2022). Al comienzo, la propia voz suena fuerte o "tapada" (la oclusión) y el ruido de fondo no desaparece. Se usa a diario, con horas crecientes.
+- **Cuándo volver.** Si silba, si duele, si el oído supura, si no suena o si cambia el sonido.
+:::
+
+:::comentario En Chile
+Chile tiene varias vías de acceso a audífonos e implantes; la que corresponde depende de la edad, la causa y el sistema de salud del paciente. Esto es lo que dicen las fuentes oficiales, sin interpretarlo más allá de su texto.
+
+- **GES (Garantías Explícitas en Salud).** El portal del Minsal lista tres problemas de hipoacusia: la *hipoacusia bilateral en personas de 65 años y más que requieren uso de audífono* (problema 56), la *hipoacusia neurosensorial bilateral del prematuro* (59) y la *hipoacusia moderada, severa y profunda en personas menores de 4 años* (77) (Minsal, s. f.). En el 56, la garantía cubre insumos, ayudas técnicas y exámenes, con indicación médica; el tratamiento debe empezar dentro de 45 días de la confirmación diagnóstica, y la rehabilitación, dentro de 30 días de entregado el audífono (Superintendencia de Salud, s. f.-a). En el 77, el audífono se entrega dentro de 90 días de la confirmación diagnóstica y el implante coclear dentro de 180 días de la indicación médica (Superintendencia de Salud, s. f.-b). <!-- verificar: número y vigencia del decreto GES que rige hoy (el portal auge.minsal.cl habla de 'Nuevo Decreto GES 2025'; las páginas de la Superintendencia citan la norma técnica Decreto 53/2019); plazos y copagos pueden cambiar con cada decreto; leer el decreto vigente en bcn.cl -->
+- **Ley Ricarte Soto (Ley 20.850, 2015).** Sistema de protección financiera para diagnósticos y tratamientos de alto costo. Cubre el dispositivo de implante coclear unilateral en la hipoacusia sensorioneural bilateral severa o profunda poslocutiva, desde los 4 años, que cumplan los criterios de inclusión del protocolo del Minsal; el otorrinolaringólogo tratante postula al paciente en el sistema informático de la ley, en la web de Fonasa, y un comité de expertos clínicos del prestador aprobado evalúa la inclusión (Superintendencia de Salud, s. f.-c). <!-- verificar: criterios y vigencia del protocolo de implante coclear de la Ley Ricarte Soto; el decreto vigente de la ley y su protocolo, en minsal.cl y bcn.cl -->
+- **SENADIS (Ley 20.422).** Su Programa de Ayudas Técnicas financia audífonos con una convocatoria anual. Pide la indicación de un otorrinolaringólogo en un formulario único y un examen audiológico, y el listado de productos se fija cada año (SENADIS, s. f.). <!-- verificar: requisitos de la convocatoria vigente (anexo y formulario del año); la antigüedad máxima del examen y qué pruebas se aceptan -->
+- **JUNAEB.** Su Programa de Salud del Estudiante atiende otorrinolaringología en escolares. En enero de 2026 firmó un convenio con el Hospital de Niños Dr. Roberto del Río que permite adquirir audífonos o dispositivos implantables para estudiantes de 4 a 17 años afiliados a Fonasa, con hipoacusia severa, profunda o progresiva (Minsal, 2026). <!-- verificar: requisitos y vía de derivación del programa, en junaeb.cl -->
+:::
+
 Para saber si el audífono **funciona en la vida diaria** se usan cuestionarios. El protocolo de este libro no los incluye; estos son los más usados:
 
 :::comentario Lo que dicen las normas
@@ -250,6 +385,8 @@ Los tres miden lo que la logoaudiometría no puede: si el paciente **vive mejor*
 - **Prometer lo que el audífono no da.** Más volumen no es más claridad: una discriminación mala no sube por tener más ganancia.
 - **Cable cruzado en la interfaz**: el audífono derecho en el canal izquierdo del programa, y toda la prueba queda en el oído equivocado.
 - **Colocar un molde sobre un conducto con otorrea o con cerumen.**
+- **Tomar la impresión sin otoscopia previa o sin revisar el otoblock.** El material puede pasar más allá de lo que se ve; es el origen de casi todos los accidentes (BSA, 2024).
+- **Volver a poner en el oído una impresión que salió incompleta.** Se repite con material nuevo.
 - **Entregar el informe sin decir que es una prueba**, y que quien indica es el médico.
 
 ## En LabSim
@@ -305,3 +442,31 @@ El paciente de este capítulo (★, el 36 de la práctica) llega diciendo que oy
 1. Dillon H, James A, Ginis J. Client Oriented Scale of Improvement (COSI) and its relationship to several other measures of benefit and satisfaction provided by hearing aids. J Am Acad Audiol. 1997;8(1):27-43. PMID 9046067
 1. Cox RM, Alexander GC. The International Outcome Inventory for Hearing Aids (IOI-HA): psychometric properties of the English version. Int J Audiol. 2002;41(1):30-5. doi:10.3109/14992020209101309
 1. Cox RM, Alexander GC. The abbreviated profile of hearing aid benefit. Ear Hear. 1995;16(2):176-86. doi:10.1097/00003446-199504000-00005
+
+### Molde, impresión y tecnología
+
+1. British Society of Audiology. Recommended procedure: taking an aural impression. Bathgate (Reino Unido): BSA; 2024 ago. Disponible en: https://www.thebsa.org.uk/guidance-documents/taking-an-aural-impression/
+1. Pirzanski C. Earmolds and hearing aid shells: a tutorial. Part 2: impression taking techniques that result in fewer remakes. Hear Rev [Internet]. 2006a may. Disponible en: https://www.hearingreview.com/hearing-products/accessories/earmolds/earmolds-and-hearing-aid-shells-a-tutorial-part-2-impression-taking-techniques-that-result-in-fewer-remakes
+1. Pirzanski C. Earmolds and hearing aid shells: a tutorial. Part 4: BTE styles, materials, and acoustic modifications. Hear Rev [Internet]. 2006b. Disponible en: https://hearingreview.com/hearing-loss/earmolds-and-hearing-aid-shells-a-tutorial-part-4-bte-styles-materials-and-acoustic-modifications
+1. Chasin M. The acoustics of hearing aids: standing waves, damping, and flared tubes. Hear Rev [Internet]. 2013 may. Disponible en: https://hearingreview.com/2013/05/the-acoustics-of-hearing-aids-standing-waves-damping-and-flared-tubes/
+1. Kim J, Kim SH, Park SY, Choi SJ. Surgical removal of hearing aid earmold impression material in the middle ear. Ear Nose Throat J. 2021;102(6):NP284-6. doi:10.1177/01455613211009129
+1. Patel K, Panahi IMS. Frequency-based multi-band adaptive compression for hearing aid application. Proc Meet Acoust. 2020;39(1):055004. PMID 32714483
+1. Bentler RA. Effectiveness of directional microphones and noise reduction schemes in hearing aids: a systematic review of the evidence. J Am Acad Audiol. 2005;16(7):473-84. doi:10.3766/jaaa.16.7.7
+1. Bentler R, Chiou LK. Digital noise reduction: an overview. Trends Amplif. 2006;10(2):67-82. doi:10.1177/1084713806289514
+1. McCreery RW, Venediktov RA, Coleman JJ, Leech HM. An evidence-based systematic review of directional microphones and digital noise reduction hearing aids in school-age children with hearing loss. Am J Audiol. 2012;21(2):295-312. doi:10.1044/1059-0889(2012/12-0014)
+1. Simpson A. Frequency-lowering devices for managing high-frequency hearing loss: a review. Trends Amplif. 2009;13(2):87-106. doi:10.1177/1084713809336421
+1. Canadian Audiologist. Auracast: revolutionizing accessibility in audio [Internet]. 2024. Disponible en: https://canadianaudiologist.ca/auracast-revolutionizing-accessibility-in-audio/ <!-- verificar: año y autor de la nota -->
+1. Energizer Brands. Product data sheet S6600584: 312 zinc air (IEC PR41), edición C [Internet]. Westlake (OH): Energizer; s. f. Disponible en: https://www.123accu.nl/pdf/A1200018.pdf
+1. National Capital Poison Center. Button battery ingestion guideline [Internet]. Washington (DC): NCPC; 2023. Disponible en: https://www.poison.org/battery/guideline <!-- verificar: edición vigente de la guía -->
+
+### Ayudas complementarias y acceso en Chile
+
+1. National Institute on Deafness and Other Communication Disorders. Assistive devices for people with hearing, voice, speech, or language disorders. NIDCD fact sheet [Internet]. Bethesda (MD): NIH; 2019. Disponible en: https://www.nidcd.nih.gov/sites/default/files/Documents/publications/AssistiveDevices-508.pdf
+1. National Institute on Deafness and Other Communication Disorders. Hearing aids [Internet]. Bethesda (MD): NIH; actualizado el 11 de octubre de 2022. Disponible en: https://www.nidcd.nih.gov/health/hearing-aids
+1. International Electrotechnical Commission. IEC 60118-4:2014. Electroacoustics. Hearing aids. Part 4: induction loop systems for hearing aid purposes. System performance requirements. Ginebra: IEC; 2014. <!-- verificar: edición vigente de la norma -->
+1. Ministerio de Salud de Chile. Garantías Explícitas en Salud: problemas de salud [Internet]. Santiago: Minsal; s. f. Disponible en: https://auge.minsal.cl/problemasdesalud/index
+1. Superintendencia de Salud. Hipoacusia bilateral en personas de 65 años y más que requieren uso de audífono [Internet]. Santiago; s. f.-a. Disponible en: https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-bilateral-en-personas-de-65-anos-y-mas-que-requieren-uso-de-audifono/
+1. Superintendencia de Salud. Hipoacusia moderada, severa y profunda en personas menores de 4 años [Internet]. Santiago; s. f.-b. Disponible en: https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-moderada-severa-y-profunda-en-personas-menores-de-4-anos/
+1. Superintendencia de Salud. Hipoacusia sensorioneural bilateral severa o profunda poslocutiva: dispositivo de implante coclear unilateral (Ley Ricarte Soto) [Internet]. Santiago; s. f.-c. Disponible en: https://www.superdesalud.gob.cl/difusion/665/articles-18154_archivo_fuente.pdf <!-- verificar: el protocolo del Minsal con los criterios de inclusión (esta ficha solo los remite) -->
+1. Servicio Nacional de la Discapacidad. Programa de Ayudas Técnicas [Internet]. Santiago: SENADIS; s. f. Disponible en: https://www.senadis.gob.cl
+1. Ministerio de Salud de Chile. Hospital Dr. Roberto del Río y Junaeb fortalecen el acceso a implantes auditivos para estudiantes [Internet]. Santiago: Minsal; 2026. Disponible en: https://www.minsal.cl/hospital-dr-roberto-del-rio-y-junaeb-fortalecen-el-acceso-a-implantes-auditivos-para-estudiantes/

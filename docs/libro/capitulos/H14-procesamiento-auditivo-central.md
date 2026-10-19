@@ -34,6 +34,21 @@ Las pruebas son **conductuales**: dependen de que el paciente atienda, entienda 
 
 Esta herramienta explica la técnica. El caso clínico completo (qué pedir, cómo se razona con un paciente que "oye pero no entiende") está en el cap. 30; el patrón de la neuropatía auditiva, en el cap. 13.
 
+**De dónde puede venir.** Las causas conocidas son varias y muchas veces no se encuentra ninguna. La guía de la AAA las ordena así (AAA, 2010; Bamiou y cols., 2001):
+
+:::ayuda-ancho Causas y factores asociados a una dificultad de procesamiento central
+| Grupo | Ejemplos | Qué se sabe |
+|---|---|---|
+| **Lesión neurológica adquirida** | tumores, esclerosis múltiple y otras enfermedades degenerativas, epilepsias como el síndrome de Landau-Kleffner, traumatismo craneano, accidente cerebrovascular, trastornos metabólicos | Es el grupo donde las pruebas nacieron y donde mejor se conocen sus patrones (AAA, 2010) |
+| **Desarrollo y maduración** | anomalías cerebromorfológicas; retraso de la maduración neural, a menudo secundario a privación auditiva | Es una alteración sin lesión visible; la vía madura despacio, sobre todo la que cruza el cuerpo calloso (AAA, 2010) |
+| **Privación auditiva por otitis media** | otitis media con efusión repetida en la infancia | En niños de 6 años, solo quienes tuvieron efusión durante más de la mitad de los primeros cinco años mostraron una audición binaural alterada que persistía (Hogan y Moore, 2003). → cap. 30 |
+| **Perinatal** | hiperbilirrubinemia | Puede afectar los núcleos cocleares y otras neuronas del encéfalo (AAA, 2010) |
+| **Envejecimiento** | cambios de la función del sistema nervioso auditivo central con la edad, parte de la presbiacusia | La disfunción central es frecuente en adultos mayores (AAA, 2010; Humes y cols., 2012) |
+| **Sin causa identificable** | queja de escuchar mal, con dificultades de lenguaje, lectura o aprendizaje | Un número importante de las personas que se evalúan no tiene lesión identificable ni antecedente prenatal o perinatal que lo explique (AAA, 2010) |
+:::
+
+La última fila pesa en la lectura de la batería: que el perfil sea anormal no obliga a que haya una causa que encontrar, y que haya un factor de riesgo en la historia no prueba que sea la causa.
+
 :::sabias ¿Sabías que?
 Kimura (1961) hizo oír a cada oído un dígito distinto al mismo tiempo y comprobó que los dígitos del **oído derecho** se repetían mejor. Lo explicó por las vías auditivas: bajo competencia, el oído derecho llega directo al hemisferio izquierdo, que es el del lenguaje en la mayoría de las personas. Esa ventaja es el fundamento de toda la escucha dicótica clínica. La técnica de dos mensajes a la vez la había ideado Broadbent (1954) para estudiar la atención; Kimura la usó para estudiar cerebros, no oídos. <!-- Pasada de fundamentos 2026-10-18: decía "Esa ventaja [...] se inventó para estudiar cerebros, no oídos". La escucha dicótica nace con Broadbent (1954), que estudiaba la atención; la guía de la AAA (2010) da los dos como origen. -->
 :::
@@ -59,9 +74,10 @@ Cada prueba carga un proceso distinto de la vía. Por eso se usan varias: la **l
 |---|---|---|---|
 | **Secuencia temporal** | Patrones de frecuencia (FPT, PPS) y de duración (DPS) | Reconocer y nombrar el orden de tres tonos (grave o agudo; largo o corto) | Hay que percibir el patrón completo, retener el orden y nombrarlo: reconocer y nombrar son trabajos de hemisferios distintos |
 | **Resolución temporal** | GIN, RGD, detección de gap | Avisar cuando hay un silencio breve dentro de un ruido | Mide cuánto dura el silencio más corto que se nota; casi no depende de lenguaje ni de memoria |
-| **Escucha dicótica** | Dígitos dicóticos | Repetir los dígitos que llegan a la vez por los dos oídos | La competencia anula la vía directa del mismo lado: gana la cruzada, y el oído izquierdo depende además del cuerpo calloso |
+| **Escucha dicótica** | Dígitos dicóticos; SSW; oraciones dicóticas (DSI) | Repetir lo que llega a la vez por los dos oídos | La competencia anula la vía directa del mismo lado: gana la cruzada, y el oído izquierdo depende además del cuerpo calloso |
 | **Interacción binaural** | MLD | Detectar un tono dentro de un ruido, con el tono igual o invertido entre los oídos | Usa la comparación de los dos oídos que hace el tronco |
 | **Habla en ruido** | HINT, SinB, Matrix | Repetir frases con ruido de fondo | Es la prueba que más se parece a la queja; no ubica un sitio, mide un rendimiento |
+| **Habla de baja redundancia** | Habla filtrada, habla comprimida, SSI-ICM | Repetir o identificar habla a la que se le quitó información | Mide el cierre auditivo: completar lo que falta; es poco sensible por sí sola |
 | **Umbrales diferenciales** | DLF, DLD, DLI | Decir si dos sonidos son iguales o distintos | Mide el cambio mínimo en frecuencia, duración o intensidad que el sistema nota |
 :::
 
@@ -89,6 +105,20 @@ Un tono enterrado en un ruido se detecta mal cuando el tono y el ruido llegan **
 :::
 
 La comparación de fase entre los oídos la hace el tronco bajo. Por eso el MLD sale reducido con frecuencia en lesiones bajo la corteza, como la esclerosis múltiple, y no se altera en las lesiones corticales (Olsen y cols., 1976); y por eso la prueba se hace solo cuando la audición periférica es lo bastante simétrica como para no dar una diferencia artificial entre los oídos.
+
+### Oír con dos oídos: dónde está el sonido, cuál atender y qué eco ignorar
+
+La comparación entre oídos que hace el tronco (→ "Interacción binaural") sirve a tres tareas que la clínica nombra por separado.
+
+**Localizar.** Un sonido que viene de un lado llega antes y más fuerte al oído más cercano. La **diferencia interaural de tiempo (ITD)** sirve sobre todo en graves, donde se puede comparar la fase de la onda entre los dos oídos; la **diferencia interaural de nivel (ILD)** sirve sobre todo en agudos, porque la cabeza hace sombra a las ondas cortas y no a las largas (Rayleigh, 1907). Esa es la teoría de las dos pistas, la clásica. En el tronco, el núcleo olivar superior medial se asocia a la ITD y el lateral a la ILD, aunque los mecanismos son más complejos de lo que traen los textos clásicos (Grothe y cols., 2010). Ninguna de las dos pistas distingue adelante de atrás ni arriba de abajo: ahí intervienen los pliegues del pabellón (Blauert, 1997). → B1, B2.
+
+**Ignorar el eco.** En una sala, al sonido directo lo siguen reflexiones en paredes y techo, que por sí solas se oirían. El **efecto de precedencia** es el conjunto de fenómenos por los que el primer frente de onda que llega domina la percepción y la localización, y las reflexiones se fusionan con él (Litovsky y cols., 1999). Una prueba de localización basada en el efecto de precedencia se ha mostrado sensible a trastornos del sistema nervioso auditivo central (Cranford y cols., 1990, citado en AAA, 2010).
+
+**Separar y elegir.** Cherry (1953) llamó "problema de la fiesta de cóctel" a la capacidad de seguir una voz entre otras. Para seguirla hay que analizar la escena acústica, formar objetos auditivos y seleccionar uno (Shinn-Cunningham y Best, 2008). La ubicación ayuda: cuando la voz objetivo y el ruido vienen de lugares distintos hay una liberación del enmascaramiento. En una cámara sin eco, separar la voz de un ruido con espectro de habla en 60 grados mejoró el reconocimiento en 8 dB; con otra voz como interferencia la ventaja fue mucho mayor, al parecer porque diferenciar los lugares reduce el enmascaramiento por contenido y no solo el de energía (Freyman y cols., 1999). El sistema eferente podría ayudar también en este punto (→ H9).
+
+**Integración y separación binaural.** Las pruebas dicóticas piden dos cosas distintas, y la clínica les da nombre. En la **integración binaural** el paciente tiene que recibir y repetir lo que llega a los dos oídos a la vez: es el recuerdo libre de los dígitos dicóticos y la tarea del SSW. En la **separación binaural** tiene que atender a un oído e ignorar el otro: es el recuerdo dirigido. Una persona puede rendir bien en una y mal en la otra, por lo que conviene saber cuál de las dos pide la prueba que se usa. La guía de la AAA nombra ambas, junto a la localización, entre las habilidades que orientan el tratamiento (AAA, 2010).
+
+La guía de la AAA anota que faltan procedimientos comerciales válidos de localización y lateralización, y que el MLD se usa poco en la clínica, en parte porque no evalúa ninguna de las dos (AAA, 2010). Una medida de escucha con ruido espacializado, el LISN-S, existe como alternativa (Cameron y Dillon, 2007). Para la atención, que es un confusor de todas las pruebas, → "Antes de empezar" y cap. 30.
 
 ### Habla en ruido: la prueba que se parece a la queja
 
@@ -125,9 +155,10 @@ Tabla: Una prueba por proceso
 |---|---|---|---|
 | Secuencia temporal | FPT, PPS (frecuencia); DPS (duración) | verbal o tarareada | lenguaje para nombrar; memoria de tres elementos |
 | Resolución temporal | GIN; RGD; gap entre tonos | botón o "sí" | atención sostenida unos minutos |
-| Escucha dicótica | Dígitos dicóticos, recuerdo libre o dirigido | repetir | lenguaje, memoria; lateralidad |
+| Escucha dicótica | Dígitos dicóticos, recuerdo libre o dirigido; SSW; oraciones dicóticas | repetir | lenguaje, memoria; lateralidad |
 | Interacción binaural | MLD 500 Hz | "sí" / "no" | audición simétrica; atención en ruido |
 | Habla en ruido | HINT, SinB, Matrix | repetir frases o elegir palabras | lenguaje y vocabulario de las frases |
+| Habla de baja redundancia | habla filtrada, comprimida; SSI-ICM | repetir o señalar de una lista | lenguaje; audición periférica poco alterada |
 | Umbrales diferenciales | DLF, DLD, DLI | "igual" / "distinto" | atención; tarea abstracta |
 
 Un mismo proceso se puede explorar con dos pruebas para **confirmar un hallazgo dudoso**, pero no se hacen las seis familias a todos los pacientes.
@@ -207,6 +238,27 @@ El resultado es **por oído**: el puntaje total esconde justo lo que importa. Un
 :::imagen ilustraciones/h14-dicotico-oidos.svg ancho=92% Dos pacientes con el mismo puntaje total en dígitos dicóticos (78 %). En el primero los dos oídos rinden parecido; en el segundo el oído izquierdo rinde 36 puntos menos que el derecho. El total esconde la asimetría: mira siempre cada oído por separado.
 :::
 
+### Otras pruebas dicóticas: SSW, sílabas y oraciones
+
+La escucha dicótica no es solo de dígitos. La guía de la AAA registra pruebas con dígitos, palabras y oraciones, todas con larga historia de sensibilidad al trastorno central (Broadbent, 1954; Kimura, 1961; Katz, 1962; AAA, 2010). Lo que cambia entre ellas es el material, y con él cuánto lenguaje y memoria exigen.
+
+:::ayuda-ancho Pruebas dicóticas más usadas
+| Prueba | Material y presentación | Qué destaca |
+|---|---|---|
+| **Dígitos dicóticos** (Musiek, 1983) | Pares de dígitos, uno por oído | Poco lenguaje y poco afectada por una pérdida coclear (AAA, 2010). Recuerdo libre (integración) o dirigido (separación) |
+| **SSW** (*Staggered Spondaic Word*; Katz, 1962) | 40 series de cuatro palabras; la segunda y la tercera llegan a la vez, una por oído, y la serie empieza alternadamente por el oído derecho y el izquierdo | Evalúa la integración binaural. Se anotan los errores en cuatro condiciones: oído derecho e izquierdo sin competencia (palabra sola) y con competencia (Jutras y cols., 2012) |
+| **Sílabas consonante-vocal** (Berlin y cols., 1973) | Sílabas distintas, una por oído, a veces con un desfase entre ambas | Muestra la ventaja del oído derecho con sílabas. La guía de la AAA no lo incluye entre los materiales clínicos que lista (dígitos, palabras y oraciones) |
+| **Oraciones dicóticas** (DSI; Fifer y cols., 1983) | Oraciones sintéticas de tercer orden alineadas, una por oído | Resistente a la pérdida periférica mientras el promedio de 500, 1.000 y 2.000 Hz no pase de unos 50 dB (Fifer y cols., 1983) |
+:::
+
+**Por qué funciona.** Es la lógica de la figura H14.1: con dos mensajes distintos a la vez gana la vía cruzada, de modo que el oído derecho compite mejor y el izquierdo depende del cuerpo calloso. Las pruebas más largas o de palabras agregan memoria y atención, por lo que un mal resultado compartido por los dos oídos orienta más a esas funciones que a la vía.
+
+**Cómo se hace.** Igual que en los dígitos: fonos verificados, audición simétrica, instrucción con ejemplo, práctica, prueba sin retroalimentación y resultado **por oído**. En el SSW, la respuesta es repetir **todas** las palabras que oyó, en el orden en que las oyó (Jutras y cols., 2012).
+
+**Qué se mira.** El puntaje por condición y por oído, no el total. Además del puntaje por oído, el SSW permite calcular el sesgo de oído, el sesgo de palabra, el patrón "tipo A" y las inversiones, que alimentan el modelo de Buffalo (Jutras y cols., 2012; → "Cómo se informa").
+
+<!-- verificar: en el SSW original el solapamiento entre la segunda y la tercera palabra es parcial (de ahí "escalonado"); lo anotado en la fila SSW sale de la descripción de Jutras y cols. (2012), que dice "simultáneamente". -->
+
 ### Interacción binaural: MLD
 
 Se mide cuánto mejor se detecta un tono de 500 Hz en ruido cuando el tono llega **invertido de fase** a un oído que cuando llega igual a los dos, con el ruido siempre igual (SoNo frente a SπNo). El **MLD** es la diferencia entre los dos umbrales, en dB.
@@ -240,6 +292,24 @@ Se presentan frases con **ruido de fondo** y se busca el **SNR** en que el pacie
 2. **Nivel del ruido** y tipo de ruido los del manual: cambiarlos cambia el SNR de forma que no es comparable.
 3. **Instrucción**: "Va a oír frases con ruido de fondo. Repita lo que entienda, aunque no esté seguro."
 4. Se anota el **SNR para el 50 %** (o la pérdida de SNR) **por oído** y en campo libre si la prueba lo permite.
+
+### Habla de baja redundancia: filtrada, comprimida y con mensaje competitivo
+
+El habla es **redundante**: lleva más información de la que hace falta, de modo que un oyente con una vía central sana entiende aunque se le pierda parte de la señal. Esa capacidad de completar lo que falta es el **cierre auditivo**. Las pruebas de baja redundancia lo ponen a prueba quitándole información al habla, y fueron de las primeras en usarse para detectar disfunción central, en los años cincuenta (AAA, 2010). La guía de la AAA describe tres maneras de hacerlo (AAA, 2010):
+
+:::ayuda-ancho Cómo se le quita redundancia al habla
+| Estrategia | Qué se le quita | Cómo se presenta | Versiones |
+|---|---|---|---|
+| **Habla filtrada** | Información espectral: se deja pasar solo una parte de las frecuencias (filtro pasa-bajos, por ejemplo) | Palabras o frases filtradas, un oído a la vez | Hay una propuesta de normas chilenas para niños de 7 a 12 años (Marcotti y cols., 2022) |
+| **Habla comprimida en el tiempo** | Información temporal: se acelera la grabación | Palabras monosilábicas comprimidas, con compresiones como 40 y 60 % (Beasley y cols., 1972; Kurdziel y cols., 1976) | |
+| **Mensaje competitivo** | Se entierra la señal en ruido o en habla de otra persona | SSI-ICM: oraciones sintéticas con un cuento en el mismo oído | Jerger y Jerger (1974) |
+:::
+
+**El SSI-ICM.** Las oraciones son sintéticas: tienen la forma de una oración pero no tienen sentido, de modo que el paciente no puede adivinarlas por el contexto. En la versión descrita por Jutras y cols. (2012), las oraciones se presentan a 50-55 dB HL mientras un cuento suena en el **mismo oído** con una relación mensaje-competencia de +10, 0 y -10 dB; el paciente conoce las oraciones de antemano y marca en una lista cuál oyó. Mide la capacidad de separar figura y fondo (Jutras y cols., 2012; Jerger y Jerger, 1974).
+
+**Qué aportan y qué no.** La guía de la AAA es clara en dos puntos. Primero, como clase, estas pruebas son **menos sensibles** al trastorno central que las dicóticas o de patrones. Segundo, el filtrado y la compresión son menos vulnerables a factores de nivel superior que el habla en ruido o con competencia, pero el lenguaje y la cognición pueden influir en todas (AAA, 2010). Se usan para describir una habilidad real (el cierre auditivo) y para diseñar el manejo. Tienen un uso diagnóstico: un déficit del oído izquierdo en una prueba dicótica junto con un rendimiento normal en baja redundancia monoaural es un patrón clásico de disfunción del cuerpo calloso (AAA, 2010).
+
+**Cómo se hace.** Material y normas de la misma lengua (→ "Valores de referencia"), nivel y relación señal-ruido los de la versión, instrucción con ejemplo y práctica, y resultado **por oído**: la comparación entre oídos importa más que el total: un niño con sistema auditivo típico rinde parecido en los dos oídos en las pruebas de señal degradada, y es habitual una ventaja del derecho en las dicóticas (AAA, 2010).
 
 ### Umbrales diferenciales: DLF, DLD, DLI
 
@@ -275,6 +345,17 @@ El informe de una prueba de procesamiento central dice **qué se hizo, con qué 
 - **Observaciones**: atención, fatiga, comprensión de la instrucción.
 
 **Qué se concluye.** Se describe el **perfil**: por ejemplo, "rendimiento bajo en las pruebas de secuencia temporal con resolución temporal conservada", o "diferencia entre oídos en la prueba dicótica". Un resultado aislado no se interpreta: pesa la **coincidencia entre pruebas del mismo proceso** y la coherencia con la historia (AAA, 2010). Y se escribe qué **no** se pudo descartar: lenguaje, atención, memoria.
+
+### Modelos de subperfiles de la literatura
+
+Algunos autores proponen agrupar los resultados de la batería en **subperfiles**. Aquí se presentan como lo que son: modelos de trabajo, no diagnósticos. Dos son los más conocidos:
+
+- **Modelo de Buffalo** (Katz). Cuatro categorías: *decodificación* (procesar el habla rápido y bien, sobre todo en el nivel del fonema), *tolerancia-memoria que se desvanece* (entender en ruido y la memoria auditiva de corto plazo), *integración* (ligada al cuerpo calloso) y *organización* (problemas de secuencia). Se apoya sobre todo en tres pruebas: SSW, síntesis fonémica y habla en ruido (Katz, 2007).
+- **Modelo de Bellis y Ferre.** Tres perfiles primarios (déficit de decodificación auditiva, déficit prosódico y déficit de integración) y dos secundarios (asociativo y de organización de la salida), que se definen combinando los resultados de varias pruebas (Bellis y Ferre, 1999; Jutras y cols., 2007). <!-- verificar: las definiciones breves de cada perfil de Bellis y Ferre (decodificación, prosódico, integración, asociativo, organización de la salida) no se pudieron cotejar con el texto de 1999, solo con resúmenes secundarios; el artículo no se pudo abrir. -->
+
+:::comentario Lo que dice la literatura
+Los dos modelos no se construyeron con datos de fuentes con revisión por pares. Al aplicarlos a 48 historias clínicas de niños con diagnóstico de trastorno de procesamiento, más de 80 % cabía en una categoría de Buffalo y más de 90 % quedaba sin clasificar en Bellis y Ferre; la diferencia se explicó porque Buffalo clasifica sobre una sola prueba (el SSW) y Bellis y Ferre combinan varias. Los autores concluyeron que ambos modelos dan un marco conceptual que debe refinarse antes de aplicarse en la clínica (Jutras y cols., 2007). Por eso este libro describe el **perfil observado** en cada prueba y usa los subperfiles solo como lenguaje para pensar qué proceso falla, sin transformarlos en un diagnóstico.
+:::
 
 :::ayuda-ancho Qué mirar en el registro de una prueba de patrones
 | Parte del registro | Qué muestra |
@@ -325,6 +406,7 @@ Esta herramienta **no entrega valores de corte**. Hay tres razones:
 - **Instrucción sin ejemplo ni práctica.** El paciente que no entendió la tarea no mide su vía auditiva.
 - **Fonos invertidos o inestables.** Anulan el MLD, cambian los resultados dicóticos y deforman los silencios de pocos milisegundos.
 - **Cambiar el nivel, el ruido o la duración de una versión** y seguir comparando con sus normas.
+- **Tratar un subperfil de un modelo como un diagnóstico.** Los modelos agrupan resultados; no demuestran una causa ni un sitio de lesión.
 - **Una sesión de dos horas.** Se agregan fatiga y distracción, y baja la especificidad.
 - **Hacer muchas pruebas del mismo proceso** y llamar "confirmación" a lo que es repetir.
 - **Informar "trastorno de procesamiento auditivo"** con un solo resultado bajo y sin evaluar lenguaje, atención ni memoria.
@@ -347,6 +429,8 @@ Un mal resultado en estas pruebas **no dice dónde está el problema**. Dice que
 6. Tienes una prueba de habla en ruido con normas en inglés y un paciente que habla español de Chile. ¿Qué haces y qué pones en el informe?
 7. Una niña de 5 años con dificultades en clase. ¿Haces la batería central? ¿Qué haces en cambio?
 8. Un software marca "dentro de norma" en un patrón de duración. ¿Qué hay que revisar antes de escribirlo en un informe?
+9. ¿Qué diferencia hay entre la integración y la separación binaural? ¿Cuál de las dos pide el recuerdo dirigido de los dígitos?
+10. Un niño rinde bien en habla filtrada y comprimida, pero su oído izquierdo es mucho peor que el derecho en el SSW. ¿Qué patrón recuerda y qué no se puede afirmar?
 :::
 
 ## Referencias
@@ -400,3 +484,33 @@ Un mal resultado en estas pruebas **no dice dónde está el problema**. Dice que
 
 1. Pickles JO. An introduction to the physiology of hearing. 4.ª ed. Leiden: Brill; 2013. ISBN 978-90-04-24377-4
 1. Møller AR. Hearing: anatomy, physiology, and disorders of the auditory system. 3.ª ed. San Diego: Plural Publishing; 2013. ISBN 978-1-59756-427-4
+
+### Binaural, atención y dicótica
+
+1. Rayleigh Lord. On our perception of sound direction. Philos Mag. 1907;13(74):214-32. doi:10.1080/14786440709463595
+1. Blauert J. Spatial hearing: the psychophysics of human sound localization. Rev. ed. Cambridge (MA): MIT Press; 1997. doi:10.7551/mitpress/6391.001.0001
+1. Grothe B, Pecka M, McAlpine D. Mechanisms of sound localization in mammals. Physiol Rev. 2010;90(3):983-1012. doi:10.1152/physrev.00026.2009
+1. Litovsky RY, Colburn HS, Yost WA, Guzman SJ. The precedence effect. J Acoust Soc Am. 1999;106(4 Pt 1):1633-54. doi:10.1121/1.427914
+1. Cranford JL, Boose M, Moore CA. Tests of the precedence effect in sound localization reveal abnormalities in multiple sclerosis. Ear Hear. 1990;11(4):282-8. doi:10.1097/00003446-199008000-00005
+1. Cherry EC. Some experiments on the recognition of speech, with one and with two ears. J Acoust Soc Am. 1953;25(5):975-9. doi:10.1121/1.1907229
+1. Shinn-Cunningham BG, Best V. Selective attention in normal and impaired hearing. Trends Amplif. 2008;12(4):283-99. doi:10.1177/1084713808325306
+1. Freyman RL, Helfer KS, McCall DD, Clifton RK. The role of perceived spatial separation in the unmasking of speech. J Acoust Soc Am. 1999;106(6):3578-88. doi:10.1121/1.428211
+1. Cameron S, Dillon H. Development of the Listening in Spatialized Noise-Sentences Test (LISN-S). Ear Hear. 2007;28(2):196-211. doi:10.1097/AUD.0b013e318031267f
+1. Katz J. The use of staggered spondaic words for assessing the integrity of the central auditory nervous system. J Aud Res. 1962;2:327-37.
+1. Berlin CI, Lowe-Bell SS, Cullen JK Jr, Thompson CL, Loovis CF. Dichotic speech perception: an interpretation of right-ear advantage and temporal-offset effects. J Acoust Soc Am. 1973;53(3):699-709. doi:10.1121/1.1913381
+1. Fifer RC, Jerger JF, Berlin CI, Tobey EA, Campbell JC. Development of a dichotic sentence identification test for hearing-impaired adults. Ear Hear. 1983;4(6):300-5. doi:10.1097/00003446-198311000-00007
+1. Jutras B, Ducharme-Roy R, Trudel M, Lefebvre S, Normandin N. Étude des valeurs normatives des tests d'écoute de parole en compétition auprès d'enfants d'âge scolaire francophones. Rev Can Orthophon Audiol. 2012;36(2):124-41. Disponible en: https://cjslpa.ca/files/2012_CJSLPA_Vol_36/No_02_88_175/Jutras_Ducharme-Roy_Trudel_Lefebvre_Normandin-CJSLPA.pdf
+
+### Baja redundancia
+
+1. Jerger J, Jerger S. Auditory findings in brain stem disorders. Arch Otolaryngol. 1974;99(5):342-50. doi:10.1001/archotol.1974.00780030354006
+1. Beasley DS, Schwimmer S, Rintelmann WF. Intelligibility of time-compressed CNC monosyllables. J Speech Hear Res. 1972;15(2):340-50.
+1. Kurdziel S, Noffsinger D, Olsen W. Performance by cortical lesion patients on 40% and 60% time-compressed materials. J Am Audiol Soc. 1976;2:3-7.
+
+### Causas y subperfiles
+
+1. Bamiou DE, Musiek FE, Luxon LM. Aetiology and clinical presentations of auditory processing disorders: a review. Arch Dis Child. 2001;85(5):361-5. doi:10.1136/adc.85.5.361
+1. Hogan SC, Moore DR. Impaired binaural hearing in children produced by a threshold level of middle ear disease. J Assoc Res Otolaryngol. 2003;4(2):123-9. doi:10.1007/s10162-002-3007-9
+1. Katz J. APD evaluation to therapy: the Buffalo Model [Internet]. AudiologyOnline; 2007 May 14. Artículo 945. Disponible en: https://www.audiologyonline.com/articles/apd-evaluation-to-therapy-buffalo-945
+1. Bellis TJ, Ferre JM. Multidimensional approach to the differential diagnosis of central auditory processing disorders in children. J Am Acad Audiol. 1999;10(6):319-28. doi:10.1055/s-0042-1748503
+1. Jutras B, Loubert M, Dupuis JL, Marcoux C, Dumont V, Baril M. Applicability of central auditory processing disorder models. Am J Audiol. 2007;16(2):100-6. doi:10.1044/1059-0889(2007/014)

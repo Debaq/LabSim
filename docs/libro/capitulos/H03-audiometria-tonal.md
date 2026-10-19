@@ -193,6 +193,26 @@ Todo audiómetro clínico tiene la misma lógica: **dos canales** independientes
 **Salida → transductor → estímulo → intensidad.** Cuatro datos en la pantalla del canal. Si uno está mal, el umbral que anotas es de otro oído, otra vía u otro sonido.
 :::
 
+### Tipos de audiómetro
+
+No todos los audiómetros hacen lo mismo. La IEC 60645-1 los clasifica en **tipos 1 a 4** según lo que pueden generar y medir: los tipos 1 a 3 sirven para la audiometría diagnóstica de tono puro y el tipo 4 solo tiene vía aérea, que es lo que pide un screening (IEC 60645-1, 2017).
+
+<!-- verificar: la distinción "tipos 1 a 3 diagnósticos, tipo 4 solo aérea" viene de resúmenes de catálogos de normas (IEC 60645-1, ediciones 2012/2017), no del texto de la norma, que es de pago. No se pudo leer qué frecuencias y niveles exige cada tipo, por eso la tabla no los nombra. -->
+
+Tabla: Tipos de audiómetro según su uso
+
+| Tipo de equipo | Qué ofrece | Para qué se usa |
+|---|---|---|
+| **Screening** | Solo vía aérea, a un nivel fijo o con niveles limitados | Separar a quien responde a todo de quien no (más abajo, *Audiometría de screening*) |
+| **Clínico o diagnóstico** | Vía aérea y ósea, enmascaramiento, canal de habla y dos canales | Umbrales completos, tipo y grado de la pérdida: es el equipo de este capítulo |
+| **De alta frecuencia (rango extendido)** | Vía aérea sobre 8 kHz, con fonos especiales | Seguimiento de ototóxicos y de ruido (más abajo, *Audiometría de alta frecuencia*) |
+| **Automático** | El equipo presenta los tonos con el método ascendente y descendente y el paciente solo responde | Terminar más rápido una audiometría de screening o en terreno; en la vía aérea del adulto sus umbrales difieren poco de los manuales (Mahomed y cols., 2013) |
+| **De Békésy** | El paciente sube y baja el tono con un botón mientras la frecuencia barre el rango y el equipo dibuja el trazo | Hoy casi no se usa; buscaba distinguir lesiones cocleares de retrococleares por la forma del trazo (Békésy, 1947; Jerger, 1960) |
+
+Los de screening y clínicos pueden ser manuales o automáticos: lo que cambia no es el tipo de equipo sino quién lleva el método. Esta herramienta describe el método manual.
+
+<!-- verificar: que el Békésy se usaba para distinguir lesión coclear de retrococlear por la forma del trazo (tipos de Jerger) es conocimiento general; Jerger (1960) se citó por su título ("analysis of auditory disorders"), no se leyó el resumen. -->
+
 ### Paciente
 
 - **Otoscopía primero** (→ H1). Un tapón de cerumen o un cuerpo extraño fabrican un gap; un conducto que colapsa bajo el fono supraaural, también.
@@ -342,6 +362,9 @@ Su uso principal es **vigilar fármacos ototóxicos** (cisplatino, aminoglucósi
 1. **Línea de base** antes del tratamiento, o lo más cerca posible de su inicio.
 2. **Controles durante** el tratamiento.
 3. **Control después** de terminado.
+
+También se ha propuesto la alta frecuencia para detectar **antes** el daño por ruido, porque la base de la cóclea es la primera en lesionarse. En trabajadores de una textil, la pérdida fue más frecuente en la alta frecuencia que en las frecuencias convencionales (Mehrparvar y cols., 2011). Pero en 180 trabajadores con umbrales convencionales normales, la alta frecuencia no se diferenció según el nivel de exposición (menos de 85, 85 a 104 y 105 dBA o más) ni los años de servicio, y sí según la edad (Mkwanazi y cols., 2025). La evidencia es dividida y la edad pesa mucho sobre estos umbrales. El seguimiento del ruido en Chile se hace de 500 a 8.000 Hz (tabla de PREXOR, más arriba).
+
 
 Los umbrales de alta frecuencia varían mucho entre personas y con la edad. Por eso cada control se compara contra **la línea de base del mismo paciente**, no contra una norma. La guía de la AAA describe además una versión abreviada que en los controles sigue solo la octava más alta que el paciente oye, propia de cada uno y fijada en la línea de base; ahí aparecen casi 9 de cada 10 de los primeros cambios (Durrant y cols., 2009).
 
@@ -647,6 +670,15 @@ Para practicar, los pacientes de este capítulo están entre los de práctica (�
 1. Konrad-Martin D, James KE, Gordon JS, Reavis KM, Phillips DS, Bratt GW, et al. Evaluation of audiometric threshold shift criteria for ototoxicity monitoring. J Am Acad Audiol. 2010;21(5):301-14. doi:10.3766/jaaa.21.5.3
 1. Brock PR, Knight KR, Freyer DR, Campbell KC, Steyger PS, Blakley BW, et al. Platinum-induced ototoxicity in children: a consensus review on mechanisms, predisposition, and protection, including a new International Society of Pediatric Oncology Boston ototoxicity scale. J Clin Oncol. 2012;30(19):2408-17. doi:10.1200/JCO.2011.39.1110
 1. Fernandez K, Hoetink A, Konrad-Martin D, Berndtson D, Clark K, Dreisbach L, et al. Roadmap to a global template for implementation of ototoxicity management for cancer treatment. Ear Hear. 2025;46(2):286-97. doi:10.1097/AUD.0000000000001592
+
+1. Mehrparvar AH, Mirmohammadi SJ, Ghoreyshi A, Mollasadeghi A, Loukzadeh Z. High-frequency audiometry: a means for early diagnosis of noise-induced hearing loss. Noise Health. 2011;13(55):402-6. doi:10.4103/1463-1741.90295. PMID 22122956.
+1. Mkwanazi H, de Jager LB, Graham MA, Swanepoel W. Extended high-frequency audiometry in early detection of noise-induced hearing loss in occupational settings. Noise Health. 2025;27:665-78. doi:10.4103/nah.nah_29_25. PMID 41259615.
+
+### Tipos de equipo
+
+1. International Electrotechnical Commission. IEC 60645-1:2017. Electroacoustics — Audiometric equipment — Part 1: Equipment for pure-tone and speech audiometry. Ginebra: IEC; 2017.
+1. von Békésy G. A new audiometer. Acta Otolaryngol. 1947;35(5-6):411-22. doi:10.3109/00016484709123756
+1. Jerger J. Bekesy audiometry in analysis of auditory disorders. J Speech Hear Res. 1960;3:275-87. doi:10.1044/jshr.0303.275
 
 ### Fisiología y psicoacústica
 

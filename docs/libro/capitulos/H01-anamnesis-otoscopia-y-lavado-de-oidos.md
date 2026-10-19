@@ -120,6 +120,20 @@ Se lavan las manos antes y después de examinar. Se ordena el mesón en un **ár
 - **Tú también sentado**, a la altura del oído. Examinar de pie e inclinado sobre el paciente es la forma más fácil de lastimarlo (BSA, 2022).
 - **Niño pequeño**: sentado de lado en el regazo del adulto responsable, que le sujeta las manos con un brazo y la cabeza contra su pecho con el otro (BSA, 2022). Al niño mayor basta con pedirle que se quede quieto.
 
+:::comentario En Chile
+La Ley N° 20.584 regula los derechos y deberes de las personas en su atención de salud, en prestadores públicos y privados (Superintendencia de Salud, 2025). Lo que toca a quien examina:
+
+- **Trato digno** (art. 5): usar un lenguaje adecuado e inteligible, con cortesía, y llamar al paciente por su nombre.
+- **Información** (arts. 9 a 11): el paciente tiene derecho a que le expliquen lo que se le hace, en un lenguaje que entienda según su edad y su estado emocional. Para el audiólogo eso es explicar el examen antes de empezar y no anunciar diagnósticos que son del médico.
+- **Consentimiento informado** (arts. 14 a 16): nadie recibe un examen o procedimiento sin su permiso, que debe ser libre y claro; es verbal en un examen como una otoscopía y se deja por escrito en los procedimientos invasivos o de riesgo.
+- **Ficha clínica** (arts. 12 y 13): lleva la historia de salud y es **reservada**. Puede verla el paciente o su representante legal, y otras personas solo con su autorización por escrito, además de tribunales y otras instituciones que la ley autoriza. Debe guardarse al menos 15 años. Lo que anotas en la anamnesis y en el informe forma parte de ella.
+- **Menores** (art. 14): los padres o el representante legal dan el consentimiento, y el niño o adolescente tiene derecho a ser oído y a que se deje constancia de que se le informó, según su edad y madurez.
+
+Para el detalle y las excepciones, el texto de la ley en la Biblioteca del Congreso Nacional manda sobre este resumen. Los artículos de la ficha clínica (12 y 13) los modificó la Ley N° 21.668 (2024).
+:::
+
+<!-- Recuadro cotejado el 2026-10-18 con el texto vigente de la Ley 20.584 en LeyChile (versión 2026-02-16): arts. 5 b), 13 (15 años), 14 (escrito en invasivos; menores) y modificación de los arts. 12-13 por la Ley 21.668 (D.O. 28.05.2024). -->
+
 ## Paso a paso
 
 ### La anamnesis
@@ -132,6 +146,10 @@ Empieza con una pregunta abierta y deja hablar. Las preguntas cerradas vienen de
     - **Acúfeno**: de qué lado, si es permanente u ocasional, y si lo tiene **ahora**. Un acúfeno unilateral persistente obliga a pensar más allá de la cóclea (cap. 11); un acúfeno presente durante el examen puede confundir al paciente cuando busca el umbral (H3).
     - **Vértigo**: si gira todo o es inestabilidad, cuánto dura cada crisis, qué la gatilla y si viene con plenitud o cambios de audición (cap. 9, H15).
     - **Otalgia, otorrea, plenitud aural**: dolor y secreción cambian lo que se puede hacer hoy.
+    - **Intolerancia a los sonidos.** Pregunta si los sonidos corrientes le suenan demasiado fuertes (**hiperacusia**) o si le duelen o le molestan (**algiacusia**): la hiperacusia reúne reacciones de exceso de sonoridad, molestia, miedo y dolor (Tyler y cols., 2014). Cambia cómo se hace el examen: con ese paciente el nivel de los estímulos sube con cautela y las pruebas de umbral de molestia y los reflejos se hacen solo si importan (H5, H7).
+    - **Autofonía**: oír la propia voz, la respiración o el latido resonando dentro de la cabeza. Un oído tapado por cerumen la da (cap. 1); también una trompa de Eustaquio que queda abierta (Ward, 2023) y la dehiscencia del conducto semicircular superior (cap. 26).
+    - **Diplacusia**: oír un mismo sonido con distinto tono en cada oído, o doblado. Se describe en pérdidas cocleares, por ejemplo con una pérdida de graves en un oído (Ichimiya y cols., 2019), y en la pérdida súbita (Knight y cols., 2004). El paciente la cuenta como "las voces suenan metálicas" o "desafinadas".
+    - **Dificultad en ruido.** "Oigo pero no entiendo cuando hay ruido ambiente" es una queja frecuente que puede existir con un audiograma normal (Guest y cols., 2018). Si está, se pide logoaudiometría o una prueba de habla en ruido, porque el audiograma solo no la explica (H5, H14).
 4. **Antecedentes otológicos.** Otitis (cuántas, de qué tipo), perforaciones, **cirugías de oído**, tubos de ventilación, audífonos, exámenes anteriores. La cirugía y la perforación contraindican el lavado.
 5. **Antecedentes mórbidos.** Diabetes, hipertensión, enfermedades crónicas, traumatismos de cráneo, meningitis, radioterapia de cabeza y cuello, cirugías.
 6. **Fármacos.** Los que usa hoy y para qué, y los que usó antes. Pregunta en especial por **ototóxicos**: aminoglucósidos, derivados del platino (cisplatino), diuréticos de asa y salicilatos en dosis altas. Un paciente que va a recibir un ototóxico necesita una **audiometría de base** antes de empezar el tratamiento (Durrant y cols., 2009; cap. 8). Pregunta también por **anticoagulantes**, porque cambian el manejo de un tapón (Schwartz y cols., 2017).
@@ -163,6 +181,33 @@ La **preocupación de los padres** por la audición del niño es en sí un indic
 
 <!-- Pasada de fundamentos 2026-10-18: la última fila decía "La causa más frecuente de hipoacusia conductiva en el niño". Rosenfeld 2016 y NICE la llaman causa frecuente (common cause), no la más frecuente; se reformuló. -->
 :::
+
+### De la anamnesis a las hipótesis
+
+La anamnesis no termina cuando se acaban las preguntas: termina cuando puedes decir qué podría tener el paciente y qué examen lo confirmaría o lo descartaría. Un método simple, en cinco pasos:
+
+1. **Ordena lo que contó** en la estructura de la ficha: motivo de consulta, evolución, síntomas otológicos, antecedentes otológicos, mórbidos, fármacos, ruido, familia y, en el niño, antecedentes perinatales (más arriba). Separa lo que **dijo** de lo que **observaste**.
+2. **Pregunta por el sitio.** ¿Parece un problema de **transmisión** (tapón, efusión, perforación, cadena), de la **cóclea** (ruido, edad, fármacos, Ménière) o **retrococlear/central** (asimetría, acúfeno de un solo lado, mala discriminación)? Cada examen de la batería responde por un sitio (H2, H3, H7, H9, H10).
+3. **Pregunta por el tiempo.** Súbito, progresivo, fluctuante o estable. El tiempo separa causas con el mismo audiograma.
+4. **Pregunta por el lado.** Uno o los dos oídos. Lo unilateral y lo asimétrico se estudian más allá de la cóclea (cap. 11).
+5. **Escribe la hipótesis más probable, la que no puedes dejar pasar y qué examen decide entre ellas.** Es la lista que irás a confirmar o a descartar con la batería.
+
+Tabla: Datos de la anamnesis que orientan
+
+| Dato | Hipótesis | Qué la confirma o la descarta |
+|---|---|---|
+| Hipoacusia que apareció de un día para otro, en un oído | Hipoacusia súbita (urgencia) o causa conductiva (tapón, efusión) | Otoscopía y diapasón o audiograma, **al presentarse**, para separar sensorioneural de conductiva (Chandrasekhar y cols., 2019) |
+| Oído tapado desde el baño o el mar, cotonito, sin dolor | Tapón de cerumen | Otoscopía (H1) |
+| Dolor, fiebre y secreción en un niño | Otitis media aguda | Otoscopía; no se mide ese día (H1) |
+| Ruido laboral por años, acúfeno y pérdida en agudos | Pérdida por ruido | Audiograma con muesca en 3 a 6 kHz (H3, cap. 6) |
+| Crisis de vértigo de horas con plenitud y acúfeno grave | Hidrops endolinfático | Audiograma en graves, EOA, VEMP, entre otros (cap. 9) |
+| Acúfeno de un solo oído, pulsátil, o con síntomas neurológicos o pérdida asimétrica | Causa que obliga a estudiar más allá de la cóclea | Derivación; PEAT y reflejos (Tunkel y cols., 2014; cap. 11) |
+| "Oigo pero no entiendo" con audiograma normal | Alteración de la discriminación en ruido o del procesamiento central | Logoaudiometría y pruebas de habla en ruido (H5, H14) |
+| Autofonía y oír los latidos | Trompa abierta o tercera ventana | Impedanciometría, VEMP (cap. 26) |
+
+Una hipótesis no es un diagnóstico, y el diagnóstico es médico. Lo tuyo es que ningún dato de la entrevista quede sin una pregunta para el examen.
+
+<!-- verificar: la secuencia de cinco pasos y la tabla son síntesis propia de los capítulos clínicos del libro; las dos citas solo respaldan las filas de hipoacusia súbita (distinguir sensorioneural de conductiva al presentarse) y de acúfeno (la guía pide estudio dirigido ante un acúfeno de un solo oído, pulsátil, con anomalía neurológica focal o pérdida asimétrica). El resto remite a los capítulos que lo desarrollan. -->
 
 ### La otoscopía
 
@@ -391,6 +436,18 @@ LabSim no simula el lavado. Lo que practicas es **la decisión**: si ves cerumen
 1. Joint Committee on Infant Hearing. Year 2019 position statement: principles and guidelines for early hearing detection and intervention programs. J Early Hear Detect Interv. 2019;4(2):1-44. doi:10.15142/fptk-b748
 1. Durrant JD, Campbell K, Fausti S, Guthrie O, Jacobson G, Lonsbury-Martin BL, et al. American Academy of Audiology position statement and clinical practice guidelines: ototoxicity monitoring [Internet]. Reston (VA): AAA; 2009 Oct. Disponible en: https://www.audiology.org/wp-content/uploads/2021/06/AAA_OtoMonGuidelines_2009.pdf
 1. Sutton AE, Toscano ML, Launico MV. Ear irrigation. En: StatPearls [Internet]. Treasure Island (FL): StatPearls Publishing; 2026 [actualizado 2026 feb 23; citado 2026 oct 18]. Disponible en: https://www.ncbi.nlm.nih.gov/books/NBK459335/. PMID: 29083577.
+
+### Anamnesis y marco legal
+
+1. Tyler RS, Pienkowski M, Roncancio ER, Jun HJ, Brozoski T, Dauman N, et al. A review of hyperacusis and future directions: part I. Definitions and manifestations. Am J Audiol. 2014;23(4):402-19. doi:10.1044/2014_AJA-14-0010. PMID 25104073.
+1. Ward BK, Nieman CL, Poe DS. Patulous Eustachian tube and the differential diagnosis of autophony. En: Textbook of Otitis Media. Cham: Springer; 2023. p. 143-51. doi:10.1007/978-3-031-40949-3_15. <!-- verificar: solo se leyó el título en Crossref. -->
+1. Ichimiya I, Ichimiya H, et al. Complex tone stimulation may induce binaural diplacusis with low-tone hearing loss. PLoS One. 2019;14(1):e0210939. doi:10.1371/journal.pone.0210939. PMID 30682080.
+1. Knight RD. Diplacusis, hearing threshold and otoacoustic emissions in an episode of sudden, unilateral cochlear hearing loss. Int J Audiol. 2004;43(1):45-53. doi:10.1080/14992020400050007. <!-- verificar: solo se leyó el título en Crossref. -->
+1. Guest H, Munro KJ, Prendergast G, Millman RE, Plack CJ. Impaired speech perception in noise with a normal audiogram: no evidence for cochlear synaptopathy and no relation to lifetime noise exposure. Hear Res. 2018;364:142-51. doi:10.1016/j.heares.2018.03.008. PMID 29680183.
+1. Chandrasekhar SS, Tsai Do BS, Schwartz SR, Bontempo LJ, Faucett EA, Finestone SA, et al. Clinical practice guideline: sudden hearing loss (update). Otolaryngol Head Neck Surg. 2019;161(1 Suppl):S1-S45. doi:10.1177/0194599819859885. PMID 31369359.
+1. Tunkel DE, Bauer CA, Sun GH, Rosenfeld RM, Chandrasekhar SS, Cunningham ER Jr, et al. Clinical practice guideline: tinnitus. Otolaryngol Head Neck Surg. 2014;151(2 Suppl):S1-S40. doi:10.1177/0194599814545325. PMID 25273878.
+1. Superintendencia de Salud de Chile. Ley de Derechos y Deberes de las Personas, Ley N° 20.584 [presentación] [Internet]. Santiago: Superintendencia de Salud; 2025 jul 31. Disponible en: https://www.superdesalud.gob.cl/app/uploads/2025/06/ppt-dyd-final.pdf
+1. Biblioteca del Congreso Nacional de Chile. Ley 20.584: regula los derechos y deberes que tienen las personas en relación con acciones vinculadas a su atención en salud [Internet]. Santiago: BCN; 2012. Disponible en: https://www.bcn.cl/leychile/navegar?idNorma=1039348
 
 ### Fisiología
 

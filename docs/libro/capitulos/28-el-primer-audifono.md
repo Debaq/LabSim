@@ -54,6 +54,35 @@ El **control** tiene dos tiempos. Poco después de la entrega se ajusta lo que e
 **Objetivos de ajuste y medición en oído real.** Un audífono se ajusta a un objetivo prescriptivo (NAL-NL2 o DSL) y se verifica en el oído del paciente con un micrófono sonda; la comodidad se afina alrededor de ese objetivo (BSA, 2018; Valente y cols., 2006). Este libro no entrega valores objetivo: salen del método y del programa del fabricante (→ H20).
 :::
 
+### Rehabilitación aural: la persona, la familia y la comunicación
+
+El audífono es una parte de la rehabilitación. La otra parte es lo que la persona y su entorno hacen con él: expectativas realistas, estrategias de comunicación, ejercicio de la escucha y ayudas para los momentos en que el audífono no alcanza. La NICE pide conversar, tras la evaluación, las opciones de manejo —audífonos, ayudas de escucha y estrategias de comunicación— con sus beneficios y límites (NICE, 2018, 1.5.2), y dar información sobre cómo la pérdida afecta la comunicación y cómo se maneja (1.5.3).
+
+**Un modelo centrado en la persona.** Adultos mayores usuarios de audífonos describieron la rehabilitación centrada en la persona en tres dimensiones: la relación terapéutica, los actores (audiólogo y paciente) y los procesos clínicos; la atención individualizada une las tres (Grenness y cols., 2014; diez participantes, estudio cualitativo). En la práctica: las metas son del paciente (el COSI, → H20), el audiólogo explica opciones y límites, y la decisión es compartida (NICE, 2018, 1.6.3).
+
+**La familia y la pareja.** La hipoacusia también afecta a quien conversa con la persona: en entrevistas con diez cónyuges, sus dificultades se describieron sobre todo en actividades y participación (Scarinci y cols., 2009). Por eso se ofrece la información también a la familia o a quienes lo cuidan, si el paciente lo desea (NICE, 2018, 1.5.3), y conviene que la pareja venga a la consulta, y las estrategias de abajo se enseñan a los dos.
+
+**Expectativas.** Se dicen en la primera visita y se retoman en el control: el audífono devuelve audibilidad y no la audición previa; el cerebro necesita semanas para acostumbrarse; en ruido y en grupo seguirá costando; hay situaciones (teléfono, televisión, restaurantes) para las que se agrega otra ayuda (→ más abajo).
+
+:::ayuda-ancho Estrategias de comunicación
+| Quien oye mal | Quien habla con él |
+|---|---|
+| Elegir dónde sentarse: de espaldas a la luz de la ventana y con el oído mejor hacia el grupo | Hablar de frente, con la cara visible, sin taparse la boca ni masticar |
+| Avisar que oye mal, sin pedir disculpas, y decir qué ayuda | Llamar primero su atención y anunciar el tema |
+| Pedir la parte que no entendió ("¿a qué hora dijiste?") y no "¿qué?" | Hablar claro: algo más lento, articulando, con pausas y marcando las palabras clave (AAA, 2010) |
+| Reducir el ruido: apagar la televisión, elegir mesas del fondo, cerrar puertas | Si no entiende, decirlo con otras palabras en vez de repetir más fuerte |
+| Prepararse: conocer el tema o el menú antes | Escribir lo importante: fechas, horas, números |
+:::
+
+Las estrategias se enseñan, se practican y se repasan; no basta con entregarlas en una hoja. Una revisión de 12 estudios de programas grupales basados en consejería y estrategias de comunicación encontró evidencia razonablemente buena de una reducción a corto plazo de la restricción que el paciente percibe, y de mejor uso de las estrategias y de los audífonos, pero no está claro que la ventaja sobre el audífono solo se mantenga en el tiempo (Hawkins, 2005). El programa *Active Communication Education* (grupo de 2 horas por semana durante 5 semanas), evaluado en un ensayo con 178 adultos mayores, mejoró las medidas de restricción auditiva y de bienestar psicológico, con mejoras que se mantuvieron a los 6 meses, y el 75 % refirió alguna mejoría en su meta principal (Hickson y cols., 2007). En un ensayo con 114 adultos mayores chilenos usuarios de audífonos, el mismo programa aumentó el uso del audífono, hasta los 12 meses de seguimiento (Marcotti y cols., 2025).
+
+**Lectura labiofacial.** Ver la cara de quien habla ayuda a casi todos los adultos cuando el habla llega degradada, y el efecto es mayor en quien lee mejor los labios, que en los adultos que oyeron normal gran parte de su vida suele ser poco (Bernstein y cols., 2022). Se describe como limitada a **visemas**, grupos de sonidos que se ven iguales en la boca (por ejemplo, /p/, /b/ y /m/); sin embargo, hay evidencia de que se percibe información visual más fina que el visema y de que las palabras se leen apoyadas en el vocabulario, igual que al oído. Entrenar la lectura labial ha sido difícil de lograr, pero con retroalimentación y tareas adecuadas el entrenamiento puede funcionar y generalizar a oraciones audiovisuales en ruido (Bernstein y cols., 2022). Para el paciente significa: mirar la cara, tener luz sobre ella, y no esperar entender solo mirando. Para el clínico: el efecto de la lectura labial se separa del del audífono en la prueba (→ H20).
+
+**Entrenamiento auditivo en el adulto.** Los programas por computador mejoran la tarea entrenada, con evidencia limitada de que lo hagan en la vida diaria (Henshaw y Ferguson, 2013), y el entrenamiento global con habla podría mejorar el reconocimiento en ruido (Sweetow y Palmer, 2005). Es el tema del cap. 30; aquí basta con saber que no sustituye a las estrategias ni al audífono.
+
+**Ayudas complementarias.** Cuando el audífono no alcanza, la NICE pide informar sobre las ayudas de escucha (bucles personales, comunicadores personales, amplificadores de televisión, dispositivos para el teléfono, alarmas de humo, sensores de timbre, *streamers* y aplicaciones) y sobre las instituciones que ayudan a conseguirlas, y volver a ver la eficacia de la ayuda en un control (NICE, 2018, 1.6.8, 1.6.9 y 1.7.4). Cómo funciona cada una (telebobina, bucle de inducción, micrófono remoto, alertas) está en H20.
+
+
 ## Fisiología
 
 ### El amplificador que se pierde
@@ -82,6 +111,17 @@ Con dos oídos sanos el cerebro compara lo que llega a cada uno. La cabeza hace 
 :::
 
 ## Patología
+
+### Lo que la hipoacusia hace en la vida diaria
+
+La consulta suele partir por la audición, pero lo que hace sufrir al paciente es lo que cambia alrededor de ella. Cuatro cosas tienen respaldo en la literatura, con distinta firmeza:
+
+- **Esfuerzo y cansancio al escuchar.** Entender con una pérdida exige más atención y memoria de trabajo (→ cap. 30, modelo FUEL de Pichora-Fuller y cols., 2016). En 16 adultos con pérdida neurosensorial, con audífonos hubo menos esfuerzo auditivo medido con una tarea doble, y el desempeño no decayó a lo largo de una hora de escucha sostenida, como sí ocurrió sin ellos (Hornsby, 2013). Es un estudio pequeño y de laboratorio.
+- **Aislamiento y soledad.** En una revisión sistemática de 14 estudios, la mayoría transversales, la pérdida auditiva se asoció a mayor riesgo de soledad y de aislamiento social en la mayoría de los estudios ajustados (Shukla y cols., 2020).
+- **Depresión.** Un metaanálisis de 35 estudios y 147.148 participantes encontró que la pérdida auditiva se asociaba a mayor probabilidad de depresión en adultos mayores (OR 1,47; IC 95 % 1,31-1,65); la certeza de la estimación se clasificó como baja, y el uso de audífonos no modificó la asociación, con la advertencia de que ese hallazgo debe leerse con cautela (Lawrence y cols., 2020).
+- **Cognición.** Un metaanálisis de 36 estudios y unos 20.000 participantes halló una asociación pequeña pero significativa con el deterioro cognitivo y con la demencia (en los estudios de cohorte, OR 1,22 y 1,28), y la plantea como posible factor de riesgo modificable que requiere ensayos de tratamiento (Loughrey y cols., 2018). La pérdida auditiva de la edad media figura entre los factores de riesgo modificables de demencia (Livingston y cols., 2020). Son asociaciones: el ensayo ACHIEVE (recuadro más abajo) no mostró efecto del audífono en la muestra completa.
+
+Hay además un componente de **estigma**. En entrevistas a parejas en que uno tenía pérdida y aún no usaba audífonos, el estigma (cambio en la imagen de uno mismo, edadismo, vanidad) pesaba en decisiones tan concretas como hacerse el examen, qué audífono elegir y dónde usarlo (Wallhagen, 2010). Es una razón para que la consulta empiece por lo que el paciente quiere hacer y no por el aparato.
 
 ### Presbiacusia y primer audífono
 
@@ -395,6 +435,15 @@ Es el caso en que la técnica engaña: la prueba de campo libre sale normal y el
 1. Keidser G, Dillon H, Flax M, Ching T, Brewer S. The NAL-NL2 prescription procedure. Audiol Res. 2011;1(1):e24. doi:10.4081/audiores.2011.e24
 1. British Society of Audiology. Practice guidance: guidance on the verification of hearing devices using probe microphone measurements. Bathgate (Reino Unido): BSA; 2018 may. Disponible en: https://www.baaudiology.org/app/uploads/2020/11/REMS-2018.pdf
 1. Valente M, Abrams H, Benson D, Chisolm T, Citron D, Hampton D, et al. Guidelines for the audiologic management of adult hearing impairment. Audiol Today. 2006;18(5):1-44.
+1. Grenness C, Hickson L, Laplante-Lévesque A, Davidson B. Patient-centred audiological rehabilitation: perspectives of older adults who own hearing aids. Int J Audiol. 2014;53(Suppl 1):S68-75. doi:10.3109/14992027.2013.866280. PMID 24528290
+1. Scarinci N, Worrall L, Hickson L. The ICF and third-party disability: its application to spouses of older people with hearing impairment. Disabil Rehabil. 2009;31(25):2088-100. doi:10.3109/09638280902927028. PMID 19888839
+1. Hawkins DB. Effectiveness of counseling-based adult group aural rehabilitation programs: a systematic review of the evidence. J Am Acad Audiol. 2005;16(7):485-93. doi:10.3766/jaaa.16.7.8. PMID 16295235
+1. Hickson L, Worrall L, Scarinci N. A randomized controlled trial evaluating the Active Communication Education program for older people with hearing impairment. Ear Hear. 2007;28(2):212-30. doi:10.1097/AUD.0b013e31803126c8. PMID 17496672
+1. Marcotti A, Rivera S, Silva-Letelier C, Martinez-Amezcua P, Fuentes-López E. Effectiveness of active communication education to improve hearing aid usage among Chilean older adults: a randomised clinical trial. Int J Audiol. 2025;64(12):1259-70. doi:10.1080/14992027.2025.2496749. PMID 40324054
+1. Bernstein LE, Jordan N, Auer ET, Eberhardt SP. Lipreading: a review of its continuing importance for speech recognition with an acquired hearing loss and possibilities for effective training. Am J Audiol. 2022;31(2):453-69. doi:10.1044/2021_AJA-21-00112. PMID 35316072
+1. Henshaw H, Ferguson MA. Efficacy of individual computer-based auditory training for people with hearing loss: a systematic review of the evidence. PLoS One. 2013;8(5):e62836. doi:10.1371/journal.pone.0062836
+1. Sweetow R, Palmer CV. Efficacy of individual auditory training in adults: a systematic review of the evidence. J Am Acad Audiol. 2005;16(7):494-504. doi:10.3766/jaaa.16.7.9
+1. American Academy of Audiology. Clinical practice guidelines: diagnosis, treatment and management of children and adults with central auditory processing disorder. Reston (VA): AAA; 2010 ago. Disponible en: https://audiology-web.s3.amazonaws.com/migrated/CAPD%20Guidelines%208-2010.pdf_539952af956c79.73897613.pdf
 
 ### Fisiología
 
@@ -417,3 +466,10 @@ Es el caso en que la técnica engaña: la prueba de campo libre sale normal y el
 1. Lin LM, Bowditch S, Anderson MJ, May B, Cox KM, Niparko JK. Amplification in the rehabilitation of unilateral deafness: speech in noise and directional hearing effects with bone-anchored hearing and contralateral routing of signal amplification. Otol Neurotol. 2006;27(2):172-82. doi:10.1097/01.mao.0000196421.30275.73. PMID 16436986
 1. Kitterick PT, Smith SN, Lucas L. Hearing instruments for unilateral severe-to-profound sensorineural hearing loss in adults: a systematic review and meta-analysis. Ear Hear. 2016;37(5):495-507. doi:10.1097/AUD.0000000000000313. PMID 27232073
 1. Reinfeldt S, Håkansson B, Taghavi H, Eeg-Olofsson M. New developments in bone-conduction hearing implants: a review. Med Devices (Auckl). 2015;8:79-93. doi:10.2147/MDER.S39691. PMID 25653565
+1. Pichora-Fuller MK, Kramer SE, Eckert MA, Edwards B, Hornsby BWY, Humes LE, et al. Hearing impairment and cognitive energy: the Framework for Understanding Effortful Listening (FUEL). Ear Hear. 2016;37(Suppl 1):5S-27S. doi:10.1097/AUD.0000000000000312
+1. Hornsby BWY. The effects of hearing aid use on listening effort and mental fatigue associated with sustained speech processing demands. Ear Hear. 2013;34(5):523-34. doi:10.1097/AUD.0b013e31828003d8. PMID 23426091
+1. Shukla A, Harper M, Pedersen E, Goman A, Suen JJ, Price C, et al. Hearing loss, loneliness, and social isolation: a systematic review. Otolaryngol Head Neck Surg. 2020;162(5):622-33. doi:10.1177/0194599820910377. PMID 32151193
+1. Lawrence BJ, Jayakody DMP, Bennett RJ, Eikelboom RH, Gasson N, Friedland PL. Hearing loss and depression in older adults: a systematic review and meta-analysis. Gerontologist. 2020;60(3):e137-54. doi:10.1093/geront/gnz009. PMID 30835787
+1. Loughrey DG, Kelly ME, Kelley GA, Brennan S, Lawlor BA. Association of age-related hearing loss with cognitive function, cognitive impairment, and dementia: a systematic review and meta-analysis. JAMA Otolaryngol Head Neck Surg. 2018;144(2):115-26. doi:10.1001/jamaoto.2017.2513. PMID 29222544
+1. Livingston G, Huntley J, Sommerlad A, Ames D, Ballard C, Banerjee S, et al. Dementia prevention, intervention, and care: 2020 report of the Lancet Commission. Lancet. 2020;396(10248):413-46. doi:10.1016/S0140-6736(20)30367-6
+1. Wallhagen MI. The stigma of hearing loss. Gerontologist. 2010;50(1):66-75. doi:10.1093/geront/gnp107. PMID 19592638

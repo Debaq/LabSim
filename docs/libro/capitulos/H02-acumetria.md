@@ -4,6 +4,7 @@
 - Hacer el Weber y el Rinne con el diapasón de 512 Hz, en el orden y la posición que corresponden.
 - Predecir hacia dónde va el Weber en una pérdida conductiva y en una sensorioneural, y explicar por qué.
 - Reconocer un Rinne falso negativo y saber qué lo delata.
+- Hacer el Schwabach y el Bing, leerlos y saber por qué hoy se usan menos que el Weber y el Rinne.
 - Saber cuánta diferencia necesita cada prueba para cambiar y, por lo tanto, qué **no** puede descartar.
 - Contrastar el resultado del diapasón con el audiograma del mismo paciente.
 :::
@@ -36,6 +37,12 @@ El Weber conductivo se comprueba en uno mismo: tápese un oído con el dedo y ta
 
 :::imagen ilustraciones/h02-weber-conductivo.svg ancho=100% Por qué el Weber se va al oído con pérdida conductiva, en un corte frontal de la cabeza visto de frente (el OD queda a la izquierda). A: con los dos oídos sanos, la vibración del diapasón llega por el hueso igual a las dos cócleas y se oye al centro. B: con el conducto derecho tapado, la pared del conducto, que vibra con el cráneo, suena dentro de él; ese sonido queda encerrado y empuja el tímpano (efecto de oclusión), y el diapasón se oye en el oído tapado. El ruido del ambiente, que entra solo por el oído abierto, aporta poco.
 :::
+
+**El Schwabach compara dos cabezas.** Mide cuánto tiempo oye el paciente el diapasón por vía ósea, apoyado en la mastoides, y lo compara con el tiempo que lo oye el examinador, cuya audición se asume normal. Una cóclea con menos sensibilidad lo deja de oír antes que la normal: el tiempo se **acorta**. Con una pérdida conductiva la cóclea es normal y el tiempo es igual o **más largo** (ASA, terminología).
+
+**El Bing usa el efecto de oclusión como prueba.** Si tapas el conducto, la vía ósea mejora en los graves cuando el oído medio es normal (más arriba). Si el oído medio ya tiene una pérdida conductiva, tapar el conducto casi no agrega nada: el oído medio ya no deja escapar ni transmitir como uno sano (Swan y Browning, 1989). Se cambia así un tapón puesto por el examinador por la comparación con la vía aérea del Rinne.
+
+<!-- verificar: la frase "el oído medio ya no deja escapar ni transmitir como uno sano" es una explicación propia; Swan y Browning (1989) y Golabek y Stephens (1979) dan el principio (la oclusión mejora la ósea salvo que haya pérdida conductiva) y el punto de transición (aprox. 9 dB de gap), pero no el mecanismo. -->
 
 **El falso negativo nace de lo mismo.** La vibración apoyada en la mastoides llega también a la cóclea del otro lado. Si el oído examinado tiene una pérdida sensorioneural **severa**, frente al conducto no oye nada, pero en la mastoides el diapasón lo oye la **otra** cóclea. El paciente dice, con razón, que lo oye más fuerte "atrás": el Rinne sale negativo sin que haya ningún problema conductivo (BSA, 2022).
 
@@ -89,11 +96,36 @@ Frotar el trago del oído no examinado con el índice y el pulgar lo enmascara u
 **Weber** en la frente → **Rinne** empezando por el oído del Weber. Weber al oído del Rinne negativo = **conductiva**. Weber al **otro** oído = sospecha de **falso negativo**.
 :::
 
+### 4. Schwabach y Bing (cuando el Rinne y el Weber no bastan)
+
+Son pruebas clásicas de la acumetría, del siglo XIX. Hoy se piden menos, porque la vía ósea se mide con el audiómetro y los diapasones se usan para orientar, pero siguen en los programas de formación y sirven para entender qué compara cada prueba.
+
+**Schwabach.**
+
+1. Golpea el diapasón de 512 Hz y apoya la base en la **mastoides del paciente**, sin ocluir el conducto.
+2. Pídele que avise **apenas deje de oírlo**. En ese instante pasa el diapasón, sin volver a golpearlo, a **tu propia mastoides** y cuenta cuántos segundos más lo oyes (ASA, terminología).
+3. Compara: si lo oyes tú más tiempo, la ósea del paciente está **acortada**; si lo oye él tanto como tú, es **normal**; si lo oye más tiempo que tú, está **alargada**. Para estar seguro, repite empezando por tu mastoides.
+
+El resultado depende de **tu** audición y de una sala silenciosa. Como la vibración de la mastoides llega también a la otra cóclea, en una pérdida severa de un solo oído lo que el paciente deja de oír es lo que oye el oído contrario: el Schwabach no separa los oídos. Es una prueba **cualitativa**, que no entrega un umbral.
+
+**Bing.**
+
+1. Apoya la base del diapasón en la **mastoides** del oído que examinas (sirve también el vértex).
+2. Con el diapasón sonando, **ocluye el conducto** presionando el trago con el dedo, y suéltalo. Alterna dos o tres veces y pregunta **si lo oye más fuerte, igual o más débil con el conducto tapado**.
+3. Si lo oye **más fuerte tapado** (Bing **positivo**), el oído medio transmite normalmente, o la pérdida es sensorioneural. Si **no cambia** (Bing **negativo**), hay una pérdida conductiva (Swan y Browning, 1989).
+
+Un nombre confunde: aquí **positivo** es lo normal, igual que en el Rinne. El Bing se vuelve negativo con un gap de unos 9 dB (Golabek y Stephens, 1979), así que detecta pérdidas conductivas pequeñas que el Rinne todavía no muestra. Aun así, el Bing con diapasón fue menos sensible que el Rinne de 256 Hz (Swan y Browning, 1989), y en otro estudio ni el Weber ni el Bing sirvieron solos (Miltenburg, 1994): se lee como apoyo, no como reemplazo.
+
+<!-- verificar: el diapasón de 512 Hz para Schwabach y Bing es una elección del texto, igual que en el Rinne y el Weber. Swan y Browning (1989) compararon el Bing con el Rinne de 256 Hz; Golabek y Stephens (1979) no se pudo leer completo (solo el resumen). -->
+<!-- verificar: "del siglo XIX" (Schwabach confirmó el Rinne en 1885 según el resumen de Huizing, ORL 1975, PMID 1093081, doi:10.1159/000275210) y "se piden menos porque la vía ósea se mide con el audiómetro" es juicio propio sin cita. -->
+
 ## Cómo se informa
 
 Se anota **siempre la frecuencia** del diapasón, porque el resultado vale solo para ella, con **rojo para el OD y azul para el OI**:
 
 - **Rinne**: **(+)** positivo, **(−)** negativo y **"falso (−)"** el falso negativo.
+- **Schwabach**: **normal**, **acortado** o **alargado**, por oído.
+- **Bing**: **(+)** si lo oye más fuerte con el conducto tapado y **(−)** si no cambia.
 - **Weber**: una flecha hacia el oído al que lateraliza; las dos flechas, una hacia cada lado, si no lateraliza; y **"no lo oye"** si no lo oye. En las figuras de este capítulo la flecha de la izquierda es la del OD y la de la derecha la del OI.
 
 > Ejemplo: *Acumetría con diapasón de 512 Hz. Weber lateraliza al OD. Rinne negativo en el OD y positivo en el OI. Sugerente de componente conductivo en el OD; se complementa con audiometría tonal.*
@@ -112,6 +144,18 @@ Según la BSA (2022). Con una sensorioneural de larga data en un oído, el Weber
 :::
 
 <!-- Protocolo ORL 2019: el falso negativo era "en hipoacusia profunda/cofosis unilateral". La BSA 2022 lo describe con una sensorioneural severa del lado examinado, no solo con cófosis. -->
+
+:::ayuda-ancho Schwabach y Bing esperados según el tipo de pérdida
+| Situación | Schwabach | Bing |
+|---|---|---|
+| Audición normal | Normal | Positivo |
+| **Sensorioneural** | **Acortado** | Positivo |
+| **Conductiva** | Normal o **alargado** | **Negativo** |
+| **Mixta** | Variable: la cóclea lo acorta y el gap lo alarga | Negativo si el gap alcanza |
+
+Según ASA (terminología) para el Schwabach y Swan y Browning (1989) para el Bing.
+<!-- verificar: la fila "Mixta" es deducción del texto; no se encontró fuente que fije el resultado en la mixta. -->
+:::
 
 ### Cuánta diferencia hace falta
 
@@ -133,6 +177,8 @@ En 17 estudios con 3.158 participantes, la sensibilidad del Rinne de 512 Hz para
 - **Preguntar "¿lo oye?"** en vez de "¿dónde más fuerte?". Un oído normal lo oye en las dos posiciones.
 - **Hacer el Rinne sin el Weber.** Un falso negativo termina informado como conductiva.
 - **Descartar una conductiva por un Rinne positivo.** Con gaps menores de 17,5 dB el Rinne suele seguir positivo.
+- **Bing con el conducto mal ocluido.** Si el dedo no sella, no hay efecto de oclusión y un oído normal sale negativo.
+- **Schwabach sin examinador de audición normal**, o en una sala con ruido: el tiempo de comparación ya no vale.
 - **Atribuir al oído todo Weber lateralizado.** En adultos con sinusitis maxilar o frontal y oídos sanos, el Weber se fue en la mayoría hacia el lado de la sinusitis, y nunca hacia el seno sano (Ungar y cols., 2021). Si el oído no lo explica, pregunta por la nariz.
 
 :::ojo Ojo clínico
@@ -216,3 +262,7 @@ Es una cófosis del OD, sin componente conductivo. Con el Rinne solo, se habría
 1. Fagelson MA, Martin FN. The occlusion effect and ear canal sound pressure level. Am J Audiol. 1998;7(2):50-4. doi:10.1044/1059-0889(1998/010)
 1. Sichel JY, Freeman S, Sohmer H. Lateralization during the Weber test: animal experiments. Laryngoscope. 2002;112(3):542-6. doi:10.1097/00005537-200203000-00024. PMID 12148868.
 1. Carhart R. Clinical application of bone conduction audiometry. Arch Otolaryngol. 1950;51(6):798-808. doi:10.1001/archotol.1950.00700020824003. PMID 15419943.
+1. Swan IR, Browning GG. The Bing test in the detection of conductive hearing impairment. Clin Otolaryngol Allied Sci. 1989;14(6):539-41. doi:10.1111/j.1365-2273.1989.tb00420.x. PMID 2692884.
+1. Golabek W, Stephens SD. Some tuning fork tests revisited. Clin Otolaryngol Allied Sci. 1979;4(6):421-30. doi:10.1111/j.1365-2273.1979.tb01775.x. PMID 527244.
+1. Miltenburg DM. The validity of tuning fork tests in diagnosing hearing loss. J Otolaryngol. 1994;23(4):254-9. PMID 7996624.
+1. Acoustical Society of America. Standard acoustical and bioacoustical terminology database: Schwabach test (4.59) [Internet]. Melville (NY): ASA. Disponible en: https://asastandards.org/terms/schwabach-test/

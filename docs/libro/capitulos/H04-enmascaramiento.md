@@ -101,7 +101,7 @@ Aun con los oídos separados, un ruido fuerte en un oído sube unos pocos dB el 
 ### Efecto de oclusión
 
 Cuando tapas un oído con oído medio sano, su umbral **óseo mejora en los graves**. El conducto abierto deja escapar la energía de baja frecuencia que el hueso irradia hacia el conducto; tapado, esa energía queda atrapada y sube la presión sonora frente al tímpano (Fagelson y Martin, 1998). Es el fenómeno en que se basa la prueba de Bing y el que lleva el Weber al oído tapado (capítulo H2).
-<!-- Pasada de fundamentos 2026-10-18: decía "Es el mismo fenómeno de la prueba de Bing (capítulo H2)", pero H2 no describe la prueba de Bing; sí explica el efecto de oclusión en el Weber conductivo. Se ajustó la remisión. -->
+<!-- Pasada de fundamentos 2026-10-18: decía "Es el mismo fenómeno de la prueba de Bing (capítulo H2)" cuando H2 aún no describía el Bing. Pasada de contenidos 2026-10-18: H2 ya describe el Bing (sección "4. Schwabach y Bing"); la remisión quedó correcta. -->
 
 :::imagen ilustraciones/h04-efecto-oclusion.svg ancho=100% El efecto de oclusión. A: con el conducto abierto, la energía de baja frecuencia que el hueso irradia al conducto se escapa por la entrada. B: tapado por la copa de un fono, queda atrapada y sube la presión frente al tímpano: los graves se oyen mejor por vía ósea. C: cuánto mejora la ósea con fono supraaural, según la tabla de este capítulo; desde 2 kHz el efecto desaparece.
 :::

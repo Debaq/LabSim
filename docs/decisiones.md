@@ -6174,3 +6174,24 @@ y manda la del curso.
 - **Unión con guiones, pendiente de él:** la revisión del 2026-09-10 pidió el
   LDL unido con guiones largos; el audiograma de ejemplo de la misma clase
   lo deja sin unir. Se dejó como estaba hasta que lo decida.
+
+## Libro: pasada de contenidos contra el checklist de la carrera (2026-10-18)
+
+El libro se cotejó ítem por ítem con `docs/libro/checklist_de_contenidos_del_libro_de_orl.md`
+(14 asignaturas). Mapa en `docs/libro/investigacion/pasada_contenidos_2026-10-18/`
+(`CONSOLIDADO.md` y un informe por grupo). Lo que él decidió:
+
+- **Capítulos nuevos: todos entran, pero no ahora** ("es un checklist, esto es un
+  análisis"): acúfeno, potenciales de latencia media y larga, salud pública
+  (asignatura 14), sueño y espirometría, olfato y prick test. Quedan como
+  pendientes del índice; esta pasada solo llena huecos en capítulos que existen.
+- **Marco legal chileno fuera de lo ocupacional:** el texto explica el
+  principio general y la norma chilena va en un recuadro
+  `:::comentario En Chile` en el capítulo que la usa (H1, H20, H22, cap. 34...),
+  no en un apéndice. El libro sigue siendo de distribución mundial.
+- **Fisiología básica:** lo que falta (transducción, neurotransmisión,
+  codificación, binaural, eferente, cúpula, mácula, vías vestibulares
+  centrales, acondicionamiento del aire, olfacción) se agregó a la lista
+  "Qué tiene que tener" de B2 para la colega; no se duplica en otros
+  capítulos, salvo cuando es el fundamento de una prueba (eferente en H9,
+  binaural en H14). **B3 histología se escribe** (antes estaba fuera).
