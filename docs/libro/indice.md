@@ -175,6 +175,12 @@ Hipersensibilidad tipo I y su base inmunológica; técnica (preparación, contro
 ### H28. Espirometría
 Mecánica ventilatoria, volúmenes y capacidades; FVC, FEV1, relación FEV1/FVC, FEF25-75; maniobra, curvas flujo-volumen y volumen-tiempo, aceptabilidad y repetibilidad (ATS/ERS); patrones y prueba broncodilatadora. Alcance: clase de espirometría; contenido con literatura verificada.
 
+### H29. Polisomnografía y poligrafía respiratoria
+Bases del sueño (etapas, hipnograma); SAHOS: fisiopatología del colapso, epidemiología y consecuencias; evaluación del roncador (antropometría, Mallampati/Friedman, STOP-Bang, Epworth); montaje y canales de la polisomnografía y de la poligrafía; eventos respiratorios (apnea obstructiva, central y mixta, hipopnea, RERA), IAH y gravedad; informe; SAHOS pediátrico. Alcance: clase de SAHOS; contenido con literatura verificada.
+
+### H30. CPAP y dispositivos de avance mandibular
+Presión positiva continua (CPAP, AutoCPAP, BiPAP): principio, interfaces, titulación, educación, adherencia y efectos adversos; dispositivo de avance mandibular, tratamiento posicional y alternativas quirúrgicas como contexto. Alcance: clase de SAHOS; contenido con literatura verificada.
+
 ## Parte I — El oído que transmite
 
 ### 1. Antes de medir: el conducto

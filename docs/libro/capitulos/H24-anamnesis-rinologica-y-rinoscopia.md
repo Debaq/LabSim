@@ -147,7 +147,7 @@ Tabla: Por qué se pregunta cada cosa en la anamnesis nasal
 | **Epistaxis recurrente** | el tabique anterior tiene una malla de vasos muy superficiales (plexo de Kiesselbach) | cuidado con el espéculo y los instrumentos; mirar el tabique con atención |
 | **Descongestionantes, antialérgicos y otros fármacos (48 horas)** | un vasoconstrictor encoge el cornete; algunos antialérgicos secan la mucosa | si se mide hoy, la nariz **no** es la basal |
 | **Tabaco y alcohol (24 horas)** | irritan la mucosa y alteran el tono vascular | idem: la medida sale distinta |
-| **Ronquido y apnea (¿polisomnografía?)** | la obstrucción nasal es uno de los factores del ronquido; la polisomnografía dice si hay apnea | si el síntoma pesa más en el sueño que de día |
+| **Ronquido y apnea (¿polisomnografía?)** | la obstrucción nasal es uno de los factores del ronquido; la polisomnografía dice si hay apnea (→ H29; tratamiento, → H30) | si el síntoma pesa más en el sueño que de día |
 | **Lugar de trabajo** | polvo, químicos o irritantes que dañan la mucosa | exposición como causa o como agravante |
 | **Congestión o picazón según la época** | patrón alérgico estacional frente a uno que dura todo el año | lo mismo que alergias |
 | **Alteraciones del olfato** | la hendidura olfatoria se cierra con edema o pólipos; también hay causas del nervio | por qué la nariz puede estar "tapada" sin sentirse |

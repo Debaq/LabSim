@@ -219,6 +219,20 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 182 | H28 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
 | 183 | H28 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
 
+## Sueño (H29, H30; clase de SAHOS, 2026-10-18)
+
+| # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
+|---|---|---|---|---|---|---|---|
+| 184 | H30 | Tolerancia del CPAP (clase) | sin protocolo; "bien tolerado, efectos escasos y leves" | se matiza: no adherencia cercana a un tercio y abandono por efectos adversos de hasta un cuarto | Rotenberg 2016; Lebret 2017 | A (clase) | |
+| 185 | H30 | Primer control (clase) | a las 4 semanas | "control temprano": el patrón de uso se fija en los primeros días | Kribbs 1993; Weaver y Grunstein 2008 | P (clase) | |
+| 186 | H30 | IAH residual objetivo (clase) | < 5 objetivo, < 10 aceptable | son criterios de la titulación (Kushida 2008), no de seguimiento; queda `verificar` | Kushida 2008 | A (clase) · verificar | |
+| 187 | H30 | Terapia posicional "con mejor adherencia" (clase) | — | solo a corto plazo; el CPAP baja más el IAH | Ha 2014 | A (clase) | |
+| 188 | H30 | Epworth: mejoría de 2 puntos (clase, citando Cazan 2017 y Mickelson 2020) | — | no se pudo verificar; no entra al texto | — | verificar (clase) | |
+| 189 | H29 | Prevalencia del SAHOS (clase) | sin protocolo; "14 % hombres y 5 % mujeres con IAH ≥ 5 y síntomas" | Young 1993: IAH ≥ 5 en 24 % y 9 %; con somnolencia, 4 % y 2 %. En Chile, 49 % con IAH ≥ 5 por poligrafía | Young 1993; Saldías 2020 | E (clase) | |
+| 190 | H29 | Gravedad pediátrica (clase) | cortes 1 / 5 / 10 | no se verificaron; el capítulo da IAH > 1 como anormal (Marcus 2012) sin cortes de gravedad | Marcus 2012; Kaditis 2016 | verificar (clase) | |
+| 191 | H29 | Cifras de la clase sin fuente | obesidad "60-90 %", "≈ 80 % sin diagnosticar", poligrafía "válida en 75 %", canales de los tipos II y III | no se usan hasta tener fuente | — | verificar (clase) | |
+| 192 | H29 | Ondas lentas de N3 (clase) | delta 0,5-4 Hz | la regla de la AASM puntúa N3 con ondas de 0,5-2 Hz y > 75 µV: las dos, en el recuadro de normas | Berry 2012 | A (clase) | |
+
 ## Capítulos clínicos de ABR
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
