@@ -6251,3 +6251,13 @@ la numeración vieja.
 - **Casos integradores / diagnóstico diferencial** (asignatura 12): para después.
 - **Ergonomía del profesional**: se amplía en H24 ("nadie se preocupa del profesional").
 - **B3 histología**: se avanza un borrador para que lo revise López-Moncada.
+
+## El libro se muda a su propio repositorio (2026-10-19)
+
+El libro pasó de `docs/libro` a `~/Escritorio/Proyectos/libro-orl` (local, con
+su historia por `git subtree split` e imágenes en Git LFS). Arma sin LabSim:
+trae copia de las tipografías, `casos_demo.json` y las capturas que usa
+(`labsim/`), y versiona las figuras generadas. Para rearmar casos y figuras del
+motor usa este repositorio (`LABSIM`, por defecto `../LabSim`). Verificado:
+`libro.pdf` completo, 1428 páginas en los dos lados. Las decisiones del libro
+desde ahora van en `libro-orl` (`ESTADO.md` y su propio registro).
