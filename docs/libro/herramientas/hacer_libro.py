@@ -96,8 +96,8 @@ AUTORES = {
                   falta='área del magíster'),
     'vargas': dict(nombre='Cristina', apellidos='Vargas-Bustamante', areas='Audiología y electrofisiología',
                    titulo=['Tecnóloga Médica'], falta='afiliación y ORCID'),
-    'moreira': dict(nombre='Carlos', apellidos='Moreira', areas='Espirometría y sueño',
-                    titulo=['Tecnólogo Médico'], falta='segundo apellido, afiliación y ORCID'),
+    'moreira': dict(nombre='Carlos', apellidos='Moreira-Quichahual', areas='Espirometría y sueño',
+                    titulo=['Tecnólogo Médico'], falta='afiliación y ORCID'),
 }
 EDITOR = 'baier'
 REVISOR_CASOS = 'catipillan'   # firma la revisión de los casos de los capítulos clínicos
