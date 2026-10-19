@@ -50,6 +50,8 @@ En el audiograma se busca la **muesca**: 3, 4 o 6 kHz al menos 10 dB peor que 1 
 
 ### Acufenometría
 
+Cómo se mide el impacto del acúfeno y cómo se maneja está en H23.
+
 Muchos pacientes dañados por ruido tienen acúfeno, y varios consultan por él y no por la audición. La acufenometría describe ese sonido con el audiómetro: **qué tipo** de sonido es, **qué tono** tiene, **cuánto suena** y **qué lo tapa**. Se hace cuando el paciente tiene acúfeno en el momento del examen, después de la logoaudiometría y antes de las pruebas supraliminares, con los fonos todavía puestos (→ H3, orden de la batería).
 
 **¿En qué oído?** Los estímulos se presentan en el oído **sin acúfeno** o, si suena en los dos, en el que suena menos. Así el paciente compara el sonido del audiómetro con su acúfeno sin que uno tape al otro.

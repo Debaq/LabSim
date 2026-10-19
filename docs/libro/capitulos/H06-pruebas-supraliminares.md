@@ -23,7 +23,7 @@ Esta herramienta responde cuatro preguntas:
 
 Las supraliminares no son de rutina. Se piden ante una **asimetría sensorioneural** (15 dB o más entre los oídos en una o más frecuencias, sin causa conocida), un **acúfeno unilateral** persistente o una **discriminación que no calza con la curva** (→ H5). También son parte de la evaluación médico-legal de los trabajadores: la guía del ISP incluye el Fowler (ABLB), el SISI, la IWA, el Carhart y el STAT como pruebas de sitio de lesión, y el Stenger entre las de pseudohipoacusia (ISP, 2012).
 
-La acufenometría tiene su propia indicación, el acúfeno, y va en esta herramienta porque se hace en el mismo momento de la batería, con los mismos mandos del audiómetro y con la misma lógica: comparar un sonido externo con lo que el paciente siente.
+La acufenometría tiene su propia indicación, el acúfeno, y va en esta herramienta porque se hace en el mismo momento de la batería, con los mismos mandos del audiómetro y con la misma lógica: comparar un sonido externo con lo que el paciente siente. La acufenometría describe el acúfeno, pero no mide cuánto molesta: el impacto, los cuestionarios y el manejo están en H23.
 
 Las pruebas supraliminares tienen dos límites. Son **conductuales**: dependen de que el paciente entienda y coopere. Y ya no diagnostican: la resonancia ve tumores que todavía no alteran ninguna prueba. Su valor está en que se hacen en el box y ayudan a decidir **quién** necesita estudiarse más (→ cap. 11).
 

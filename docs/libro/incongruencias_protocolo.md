@@ -60,6 +60,7 @@ Estado: **libro** = lo que dice hoy el texto. **Decisión** = para el equipo.
 | 23 | H6, cap. 6 | Estímulo de la inhibición residual | tono o ruido una octava arriba o abajo del acúfeno, NME + 10 dB, 1 min | **protocolo** (corregido 2026-10-16); la literatura (ruido sobre el acúfeno) en el recuadro | Roberts 2007; Henry y Meikle 2000 | P | mantener (hecho) |
 | 24 | H6 | Cortes del SISI | 100-70 / 70-25 / 25-0 % (límites repetidos) | 70-100 / 25-65 / 0-20 % | Buus 1982 (verificar) | E | |
 | 25 | H6 | Inicio del Carhart | en el umbral o 10 dB sobre él | en el umbral | Carhart 1957 | P · revertir | |
+| 193 | H6, H23 | Pruebas psicoacústicas en el acúfeno | acufenometría (tono, sonoridad, NME, inhibición residual), LDL y reflejos como parte de la evaluación | se mantienen; recuadro: NICE NG155 (rec. 1.4.3-1.4.5) recomienda no ofrecerlas de rutina para evaluar el acúfeno | NICE 2020 | P | |
 
 ## Impedanciometría
 

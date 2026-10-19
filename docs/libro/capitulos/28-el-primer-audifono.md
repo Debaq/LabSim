@@ -373,7 +373,7 @@ No es un problema de aparato: es una persona que no cree necesitarlo y que tiene
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural bilateral simétrica moderada, abrupta en agudos, con campo dinámico estrecho en 3 y 4 kHz y acúfeno agudo bilateral. Se sugiere adaptación bilateral con compresión y salida máxima prudente. Hay que dar tiempo: consejería primero, con su señora presente, y una **demostración** corta antes de decidir. Un audífono que se deja en el cajón es un mal resultado, aunque la discriminación suba en la cabina.
+Hipoacusia sensorioneural bilateral simétrica moderada, abrupta en agudos, con campo dinámico estrecho en 3 y 4 kHz y acúfeno agudo bilateral (→ H23). Se sugiere adaptación bilateral con compresión y salida máxima prudente. Hay que dar tiempo: consejería primero, con su señora presente, y una **demostración** corta antes de decidir. Un audífono que se deja en el cajón es un mal resultado, aunque la discriminación suba en la cabina.
 
 :::ojo Ojo clínico
 El LDL del paciente no lo decide la pérdida: es suyo. En este caso quedó en 110 dB; en otro paciente con la misma curva puede estar en 100 o no encontrarse. Por eso se mide, y por eso no se asume.
