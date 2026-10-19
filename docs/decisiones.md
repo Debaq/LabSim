@@ -6242,3 +6242,12 @@ la numeración vieja.
   polisomnografía y CPAP pasan a H29-H32. Arreglado además un efecto de las
   renumeraciones: las referencias entre scripts de figuras (`hacer_hNN_*.py`)
   no se habían actualizado (22 arreglos).
+
+## Libro: lo que queda del checklist (2026-10-19, él)
+
+- **Técnicas emergentes** (asignatura 12): no entran al libro.
+- **Fisiología celular** (transducción, neurotransmisión, codificación, aceleración
+  lineal, olfacción): se le anotó a la colega en B2 ("lo que pide el checklist").
+- **Casos integradores / diagnóstico diferencial** (asignatura 12): para después.
+- **Ergonomía del profesional**: se amplía en H24 ("nadie se preocupa del profesional").
+- **B3 histología**: se avanza un borrador para que lo revise López-Moncada.

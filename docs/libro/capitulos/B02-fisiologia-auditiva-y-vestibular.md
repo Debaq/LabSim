@@ -12,6 +12,16 @@
 
 > ✍ Fuentes que ya usa el libro: Servier Medical Art (CC BY 4.0), OpenStax Anatomy and Physiology (CC BY 4.0 / CC BY-NC-SA 4.0), Gray's Anatomy de 1918 (dominio público), artículos CC BY de PubMed Central y esquemas propios. Para histología sirven además las láminas de dominio público de Commons y las figuras CC BY de artículos. Cada imagen lleva en su pie autor, fuente, licencia y si se modificó, y se anota en un archivo de créditos como `ilustraciones/CREDITOS_B1.md`. Si dudas de una licencia, déjala marcada y la revisamos antes de publicar.
 
+## Para la autora: lo que pide el checklist de la carrera
+
+> ✍ **Fernanda: el libro se cotejó contra el checklist de contenidos de las 14 asignaturas (2026-10-18/19). Lo que sigue lo pide la carrera y hoy solo lo cubre este capítulo**; el resto del libro lo usa y remite acá:
+> - Transducción mecanoeléctrica en las células ciliadas (Morfofisiopatología; Otoneurología, "mecanismos de transducción").
+> - Neurotransmisores e integración de señales bioeléctricas (Otoneurología).
+> - Codificación de frecuencia, intensidad y tiempo en el nervio coclear y los núcleos cocleares (Otoneurología).
+> - Procesamiento de la aceleración lineal (otolitos) además de la angular (Morfofisiopatología).
+> - Fisiología de la olfacción (Morfofisiopatología); H28 trae la técnica y una base, pero la transducción olfatoria va acá.
+> La anatomía de las vías ya está en B1 con las láminas de labyrinthus3d: conviene remitir a ellas en vez de dibujarlas de nuevo.
+
 ## Qué tiene que tener
 
 ### Oído externo y medio
