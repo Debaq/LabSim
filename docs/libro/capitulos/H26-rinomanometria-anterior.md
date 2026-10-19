@@ -1,4 +1,4 @@
-# H25. Rinomanometría anterior
+# H26. Rinomanometría anterior
 
 :::objetivos En esta herramienta
 - Explicar qué mide la rinomanometría (presión y flujo del aire que respira la nariz) y por qué la resistencia no es un número fijo sino una curva.
@@ -9,7 +9,7 @@
 - Distinguir una obstrucción vasomotora, mixta y mecánica por lo que cambia con el vasoconstrictor.
 :::
 
-La nariz es la puerta de entrada del aire y, cuando se tapa, el paciente lo nota antes que cualquier examen. Pero "tengo la nariz tapada" es un síntoma, y lo que se ve en una rinoscopía (→ H24) es una forma. La rinomanometría mide lo que falta entre las dos cosas: **cuánto aire pasa realmente por cada fosa y cuánta presión cuesta hacerlo pasar**. Esta herramienta enseña a medirlo, a escribirlo y, sobre todo, a entender por qué se hace como se hace.
+La nariz es la puerta de entrada del aire y, cuando se tapa, el paciente lo nota antes que cualquier examen. Pero "tengo la nariz tapada" es un síntoma, y lo que se ve en una rinoscopía (→ H25) es una forma. La rinomanometría mide lo que falta entre las dos cosas: **cuánto aire pasa realmente por cada fosa y cuánta presión cuesta hacerlo pasar**. Esta herramienta enseña a medirlo, a escribirlo y, sobre todo, a entender por qué se hace como se hace.
 
 ## Para qué sirve
 
@@ -21,7 +21,7 @@ La rinomanometría anterior responde tres preguntas:
 
 Se pide cuando el síntoma y lo que se ve no calzan: un tabique desviado que no molesta, o una nariz de aspecto normal que el paciente siente tapada. También para decidir si un paciente necesita cirugía o tratamiento médico, y para controlar el resultado.
 
-Tiene límites. Es un examen **funcional**: dice cuánta resistencia hay, no **por qué**. Para eso están la rinoscopía (→ H24), la endoscopía y las imágenes, y la rinometría acústica, que mide la geometría de la fosa (→ H26). Además, depende de que el paciente respire con naturalidad y de que la nariz esté en condiciones: una nariz en pleno resfrío o con el ciclo nasal en un extremo da un resultado que no representa al paciente. Y mide resistencia al aire, no la **sensación** de obstrucción: puede haber discordancia entre las dos, y ese hallazgo también informa.
+Tiene límites. Es un examen **funcional**: dice cuánta resistencia hay, no **por qué**. Para eso están la rinoscopía (→ H25), la endoscopía y las imágenes, y la rinometría acústica, que mide la geometría de la fosa (→ H27). Además, depende de que el paciente respire con naturalidad y de que la nariz esté en condiciones: una nariz en pleno resfrío o con el ciclo nasal en un extremo da un resultado que no representa al paciente. Y mide resistencia al aire, no la **sensación** de obstrucción: puede haber discordancia entre las dos, y ese hallazgo también informa.
 
 ## Fundamento
 
@@ -49,10 +49,10 @@ El primer término es lo laminar; el segundo, lo turbulento. Dividiendo por V̇ 
 
 Hay un segundo fenómeno que dobla la curva. Cuando el aire acelera por la válvula nasal, la presión de las paredes baja (principio de Bernoulli) y el tejido blando de la válvula puede cerrarse un poco. A mayor esfuerzo, el flujo deja de crecer: la curva forma una **meseta**. Por eso la curva normal tiene forma de S aplanada y no de recta.
 
-:::imagen ilustraciones/h25-rs-colapso.svg ancho=100% Una válvula blanda, con inspiración forzada. La rama inspiratoria (la fosa derecha, en rojo, en el cuadrante I; la izquierda, en azul, en el II) se aplana en una meseta: por más presión que se haga, el flujo ya no sube. La espiratoria (cuadrantes III y IV) sigue creciendo. A 150 Pa, la resistencia de la fosa derecha es cerca de 0,6 Pa/(cm³/s) al inspirar y 0,36 al espirar. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h26-rs-colapso.svg ancho=100% Una válvula blanda, con inspiración forzada. La rama inspiratoria (la fosa derecha, en rojo, en el cuadrante I; la izquierda, en azul, en el II) se aplana en una meseta: por más presión que se haga, el flujo ya no sube. La espiratoria (cuadrantes III y IV) sigue creciendo. A 150 Pa, la resistencia de la fosa derecha es cerca de 0,6 Pa/(cm³/s) al inspirar y 0,36 al espirar. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
-:::imagen ilustraciones/h25-rs-curvas.svg ancho=100% La relación presión-flujo de cada fosa. A: las curvas en los cuatro cuadrantes; la derecha (rojo) pasa por I y III, la izquierda (azul) por II y IV; las líneas verticales de rayas marcan 75 y 150 Pa y la diagonal punteada es la recta de la resistencia de referencia (0,4): una curva que pasa por encima de ella tiene menos resistencia que esa. B: la misma información como resistencia contra presión, en inspiración: sube a medida que la presión crece. A 150 Pa la fosa derecha da 0,35 y la izquierda 0,29 Pa/(cm³/s); el total, 0,16. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h26-rs-curvas.svg ancho=100% La relación presión-flujo de cada fosa. A: las curvas en los cuatro cuadrantes; la derecha (rojo) pasa por I y III, la izquierda (azul) por II y IV; las líneas verticales de rayas marcan 75 y 150 Pa y la diagonal punteada es la recta de la resistencia de referencia (0,4): una curva que pasa por encima de ella tiene menos resistencia que esa. B: la misma información como resistencia contra presión, en inspiración: sube a medida que la presión crece. A 150 Pa la fosa derecha da 0,35 y la izquierda 0,29 Pa/(cm³/s); el total, 0,16. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 ### De ahí salen los cuatro cuadrantes
@@ -103,7 +103,7 @@ Una curva de aspecto anormal no sustituye a la rinoscopía ni a la endoscopía: 
 
 Broms y cols. (1982) propusieron otra manera de elegir ese punto fijo, distinta de la de Cottle. La curva se traza como en la figura de arriba, presión contra flujo, y sobre el gráfico se dibuja un **círculo centrado en el origen**: el **radio de referencia** (en el consenso internacional, el "radio 2"; en otros textos, el "radio 200") (Clement y Gordts, 2005). La resistencia se lee en el punto donde el círculo corta la curva: es la pendiente de la recta que va del origen a ese punto.
 
-:::imagen ilustraciones/h25-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h26-rs-broms.svg ancho=100% La idea del gráfico polar de Broms. Las dos fosas cortan el mismo círculo de referencia (el dibujo lo muestra como elipse porque los dos ejes no miden lo mismo por unidad); la resistencia de cada una es la pendiente de la recta del origen a su punto. Una pendiente más empinada es menos resistencia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 ¿Qué se gana? Con un radio, cada nariz se mide a **una distancia similar del origen**, aunque el punto caiga a otra presión. Una nariz muy obstruida se lee a una presión más alta (en el dibujo, la fosa derecha, unos 118 Pa) y una muy abierta a una más baja (la izquierda, unos 43 Pa): la medición no depende de que el paciente alcance una presión fija. Es lo que hace el gráfico polar de los equipos que lo traen. El valor numérico del radio estándar depende de la escala con que el equipo dibuje los ejes. <!-- verificar: escala de ejes del "radio 200" de Broms y cols. (1982), no leída en el original. -->
@@ -158,7 +158,7 @@ El equipo se enciende y se configura antes de que entre el paciente, para que no
 
 Primero, el montaje. El dibujo muestra lo que se arma sobre el paciente: la máscara cubre la nariz y la boca; el neumotacógrafo, delante de la máscara, mide cuánto aire pasa; y el tubo de presión sale de la fosa contraria, tapada con el adaptador. En el equipo real el neumotacógrafo y los sensores van en un cabezal; el esquema separa las partes para que se vea cada una.
 
-:::imagen ilustraciones/h25-montaje.svg ancho=100% La rinomanometría anterior activa, midiendo la fosa derecha
+:::imagen ilustraciones/h26-montaje.svg ancho=100% La rinomanometría anterior activa, midiendo la fosa derecha
 - @36,68 | **Máscara.** Cubre nariz y boca, con una presión leve: si deja escapar aire, el flujo medido es menor que el real. Cubre también la boca para que todo el aire pase por el neumotacógrafo: por eso el paciente debe tener la boca cerrada, porque el aire que entra o sale por ella ya no es el de la nariz.
 - @29,47 | **Adaptador y tubo de presión.** Va en la fosa **contraria** a la que mides. Por ella no circula aire, así que el sensor detecta la presión de la nasofaringe. El tamaño no debe deformar la narina.
 - @40,62 | **Neumotacógrafo.** Un tubo con una resistencia conocida (una malla, en este dibujo): el aire que pasa deja una pequeña diferencia de presión entre sus dos lados, y de ella el equipo calcula el flujo.
@@ -171,7 +171,7 @@ Primero, el montaje. El dibujo muestra lo que se arma sobre el paciente: la más
 
 Después, el resultado. Lo que entrega el equipo es la curva de las dos fosas y una tabla con la resistencia de cada una; los equipos reales lo dibujan con otra disposición, pero con los mismos elementos.
 
-:::imagen ilustraciones/h25-rs-equipo.png ancho=96% El resultado de una rinomanometría anterior: curva de las dos fosas, resistencia según la presión y tabla. Paciente con desviación y cornetes congestionados, 4 ciclos por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h26-rs-equipo.png ancho=96% El resultado de una rinomanometría anterior: curva de las dos fosas, resistencia según la presión y tabla. Paciente con desviación y cornetes congestionados, 4 ciclos por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @84,19 | **Curva en reposo** de la fosa derecha (roja, continua): el promedio de los ciclos. Las líneas finas son cada ciclo.
 - @75,11 | **Con vasoconstrictor** (discontinua): la misma fosa después de la prueba. Más flujo con la misma presión es menos resistencia.
 - @80,69 | **Cuadrantes.** La fosa derecha (roja) va en I y III; la izquierda (azul), en II y IV. Presión en el eje horizontal, flujo en el vertical.
@@ -192,7 +192,7 @@ Lo que se le dice al paciente al darle la hora:
 - **Ningún vasoconstrictor, antialérgico ni descongestionante nasal en las 48 horas previas.**
 - **No fumar ni beber alcohol en las 24 horas previas.**
 
-Antes de medir, el paciente **se aclimata sentado 15 minutos** en la sala (cuentan los minutos de la anamnesis y de la rinoscopía). Se hace primero la anamnesis, la palpación y la rinoscopía anterior (→ H24). Una nariz recién llegada de la calle, con otro aire y otra temperatura, tiene la mucosa en otro estado que dentro de 15 minutos.
+Antes de medir, el paciente **se aclimata sentado 15 minutos** en la sala (cuentan los minutos de la anamnesis y de la rinoscopía). Se hace primero la anamnesis, la palpación y la rinoscopía anterior (→ H25). Una nariz recién llegada de la calle, con otro aire y otra temperatura, tiene la mucosa en otro estado que dentro de 15 minutos.
 
 Se descartan antes de empezar los impedimentos de la técnica: una enfermedad respiratoria aguda, una perforación del tabique y una atresia de coana. Tampoco se examina a quien acaba de fumar.
 
@@ -242,7 +242,7 @@ Hay además una crítica más de fondo. El grupo que desarrolló la **rinomanome
 
 1. **Explícale al paciente** qué le vas a hacer, para qué y qué va a sentir: el medicamento achica la mucosa y la nariz se siente más abierta. Si le escurre por la nariz, que **se seque con el pañuelo y no se suene**: sonarse fuerte cambia la mucosa y la medición.
 2. Saca la tapa del frasco y **bombea el atomizador hasta que salga neblina**, para que la dosis salga bien.
-3. Con la técnica de rinoscopía (→ H24), abre la fosa del paciente e introduce la punta del aplicador.
+3. Con la técnica de rinoscopía (→ H25), abre la fosa del paciente e introduce la punta del aplicador.
 4. Aplica **dos disparos** ("puff") mientras el paciente **inspira por la nariz**: así el aerosol acompaña al aire hacia el interior de la nariz.
 5. **Espera 15 minutos** para que el medicamento penetre y haga efecto. Puedes aprovechar el tiempo para repetir la rinoscopía (a los 10 minutos ya se puede).
 6. Repite la medición con el **mismo procedimiento** del reposo, con el mismo adaptador y el mismo orden.
@@ -290,20 +290,20 @@ Tabla: Qué indica la resistencia después del vasoconstrictor (PVC)
 | Baja del todo, hasta el valor de referencia | **Vasomotora** (mucosa) | Todo era mucosa |
 | Sube respecto del reposo | **Vasomotora**, sin descartar un componente mecánico ("efecto rebote") | Ver el recuadro |
 
-:::imagen ilustraciones/h25-rs-vasoconstrictor.svg ancho=86% Las tres respuestas al vasoconstrictor en la fosa derecha, como resistencia según la presión: reposo (línea continua) y con vasoconstrictor (discontinua). La raya horizontal punteada es el valor de referencia (0,4) y las verticales, 75 y 150 Pa. A: vasomotora, a 150 Pa baja de 0,57 a 0,29 y queda bajo la referencia. B: mixta, baja de 0,80 a 0,46 sin llegar a la referencia. C: mecánica, 0,53 y 0,48: casi no cambia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h26-rs-vasoconstrictor.svg ancho=86% Las tres respuestas al vasoconstrictor en la fosa derecha, como resistencia según la presión: reposo (línea continua) y con vasoconstrictor (discontinua). La raya horizontal punteada es el valor de referencia (0,4) y las verticales, 75 y 150 Pa. A: vasomotora, a 150 Pa baja de 0,57 a 0,29 y queda bajo la referencia. B: mixta, baja de 0,80 a 0,46 sin llegar a la referencia. C: mecánica, 0,53 y 0,48: casi no cambia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 :::comentario Lo que dicen las normas
 **El "efecto rebote".** Este libro interpreta una resistencia que **sube** después del vasoconstrictor como vasomotora con un posible componente mecánico oculto ("efecto rebote"). Es la lectura del protocolo, pero conviene saber que el rebote de los vasoconstrictores (la congestión que sigue a su efecto) se describe como una consecuencia del **uso repetido y prolongado**, no de una sola dosis medida a los 15 minutos. <!-- verificar: no se encontró una fuente que describa efecto rebote a los 10 a 15 minutos de una dosis única; la explicación habitual es el uso crónico (rinitis medicamentosa). --> Ante un aumento después del vasoconstrictor, lo primero es descartar los motivos prácticos: un cambio del ciclo nasal entre las dos mediciones, un adaptador que ya no sella o un paciente que respira distinto. Si se repite con la técnica bien hecha, se informa como indica la tabla.
 
-**"Disminución total".** Una fosa puede quedar dentro del valor de referencia y seguir teniendo una estructura alterada que no molesta; la rinomanometría informa de resistencia, no de anatomía. El informe lo dice así, y la causa se busca con la rinoscopía y la endoscopía (→ H24).
+**"Disminución total".** Una fosa puede quedar dentro del valor de referencia y seguir teniendo una estructura alterada que no molesta; la rinomanometría informa de resistencia, no de anatomía. El informe lo dice así, y la causa se busca con la rinoscopía y la endoscopía (→ H25).
 :::
 
 ### Leer la curva
 
 La curva dice más que el número. Una curva normal es regular, simétrica entre la inspiración y la espiración, y de forma de S aplanada: sube casi recta al principio y luego se aplana. Una curva empinada, pegada al eje del flujo, es una fosa muy amplia (también la de una nariz atrófica); una curva baja, pegada al eje de la presión, que casi no despega, es una fosa obstruida. <!-- Protocolo ORL 2019 / borrador: decía "muy plana y baja" para la fosa amplia, lo que contradice el Fundamento (fosa abierta = curva empinada, pegada al eje del flujo). Se corrigió al sentido del Fundamento. --> Una curva con **pausas** o saltos suele ser del paciente: respira a tirones, traga, o la máscara se mueve. En ese caso no se informa: se repite.
 
-:::imagen ilustraciones/h25-rs-irregular.svg ancho=100% Una respiración irregular. Los ciclos sueltos (las líneas finas) no se parecen entre sí, tienen pausas y saltos, y el promedio (la línea gruesa) se quiebra. Los ciclos varían 15 % en la fosa derecha y 18 % en la izquierda: no son reproducibles y se repite la medición. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h26-rs-irregular.svg ancho=100% Una respiración irregular. Los ciclos sueltos (las líneas finas) no se parecen entre sí, tienen pausas y saltos, y el promedio (la línea gruesa) se quiebra. Los ciclos varían 15 % en la fosa derecha y 18 % en la izquierda: no son reproducibles y se repite la medición. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 ### Ejercicios: de los números al informe
@@ -334,7 +334,7 @@ Se comprueba sumando flujos: 250 + 500 = 750 cm³/s, y 150 / 750 = 0,20. El tota
 
 Hasta aquí la rinomanometría compara una nariz con un valor de referencia o con ella misma después de un vasoconstrictor. También se usa para medir **cuánto cambia la nariz cuando se la expone a algo**: un alérgeno, un irritante o un ejercicio. El examen es el mismo (la misma máscara, los mismos 150 Pa); cambia la pregunta, y por eso cambia lo que se compara: la medida **antes** contra la medida **después** del estímulo (Gosepath y cols., 2005).
 
-**Provocación nasal con alérgeno.** Se aplica en cada fosa un extracto estandarizado del alérgeno sospechoso y se mide si la nariz se obstruye. La indica el médico, para confirmar que una sensibilización detectada en la piel (prick test, → H27) o en la sangre es la que de verdad produce los síntomas, para estudiar la rinitis alérgica local (con prueba cutánea negativa), la rinitis ocupacional y para seguir el efecto de una inmunoterapia (Augé y cols., 2018). El protocolo de consenso europeo fija el orden: un reposo de 15 minutos en una sala a 20 ± 1,5 °C y 40-60 % de humedad, una medida basal, una **provocación de control** con el diluyente (si ya produce la mitad de una reacción positiva, el examen se detiene y se repite otro día) y recién entonces el alérgeno, con 0,1 mL por fosa; la medida se repite a los 10 minutos y el paciente queda en observación al menos media hora (Augé y cols., 2018). La rinomanometría anterior activa es una de las medidas aceptadas, junto con la rinometría acústica (→ H26) y el flujo inspiratorio máximo: la respuesta es **fuerte** si el flujo a 150 Pa baja 40 % o más y **moderada** si baja 20 % o más; el resultado es positivo si una medida objetiva o una escala de síntomas es claramente positiva, o si ambas son moderadas (Augé y cols., 2018).
+**Provocación nasal con alérgeno.** Se aplica en cada fosa un extracto estandarizado del alérgeno sospechoso y se mide si la nariz se obstruye. La indica el médico, para confirmar que una sensibilización detectada en la piel (prick test, → H28) o en la sangre es la que de verdad produce los síntomas, para estudiar la rinitis alérgica local (con prueba cutánea negativa), la rinitis ocupacional y para seguir el efecto de una inmunoterapia (Augé y cols., 2018). El protocolo de consenso europeo fija el orden: un reposo de 15 minutos en una sala a 20 ± 1,5 °C y 40-60 % de humedad, una medida basal, una **provocación de control** con el diluyente (si ya produce la mitad de una reacción positiva, el examen se detiene y se repite otro día) y recién entonces el alérgeno, con 0,1 mL por fosa; la medida se repite a los 10 minutos y el paciente queda en observación al menos media hora (Augé y cols., 2018). La rinomanometría anterior activa es una de las medidas aceptadas, junto con la rinometría acústica (→ H27) y el flujo inspiratorio máximo: la respuesta es **fuerte** si el flujo a 150 Pa baja 40 % o más y **moderada** si baja 20 % o más; el resultado es positivo si una medida objetiva o una escala de síntomas es claramente positiva, o si ambas son moderadas (Augé y cols., 2018).
 
 Las contraindicaciones son las que importan al que mide: no se hace con una reacción anafiláctica previa a ese alérgeno, con una inflamación aguda de la nariz o de los senos, con asma grave, en el embarazo. Se posterga hasta 4 semanas después de una infección viral o bacteriana aguda y 6 a 8 semanas después de una cirugía de la nariz o de los senos (Augé y cols., 2018). Atresia coanal, poliposis nasal, perforación del tabique o desviación grave, rinitis atrófica y adenoides que obstruyen alteran la permeabilidad y complican la lectura, así que se evalúa la basal antes de provocar (Augé y cols., 2018). La respuesta tardía, que puede llegar hasta 12 horas después, se avisa al paciente pero no entra en el resultado (Augé y cols., 2018).
 

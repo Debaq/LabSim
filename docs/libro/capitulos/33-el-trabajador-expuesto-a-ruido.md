@@ -12,7 +12,7 @@ Un trabajador de planta llega a su control anual con la audiometría que se tom�
 
 ## Técnica en foco
 
-La técnica de la audiometría de vigilancia, sus condiciones y los criterios de cambio están en H23, y la audiometría tonal en H3. Aquí se mira lo que esa técnica entrega en tres situaciones distintas, y se hacen siempre las mismas preguntas, en este orden (→ H23):
+La técnica de la audiometría de vigilancia, sus condiciones y los criterios de cambio están en H24, y la audiometría tonal en H3. Aquí se mira lo que esa técnica entrega en tres situaciones distintas, y se hacen siempre las mismas preguntas, en este orden (→ H24):
 
 1. **¿El examen vale?** Otoscopía hecha, equipo y sala en regla, método igual al de la base y, sobre todo, **horas de reposo** y hora de la última exposición anotadas.
 2. **¿Cuánto cambió cada frecuencia?** Control menos base, por oído, sin mirar todavía si el resultado es "normal".
@@ -22,7 +22,7 @@ La técnica de la audiometría de vigilancia, sus condiciones y los criterios de
 
 :::ayuda Ayuda memoria
 - **Cambio = control − base**, frecuencia por frecuencia, y solo cuenta si supera la variabilidad de ±5 dB.
-- **OSHA**: promedio de 10 dB o más en 2, 3 y 4 kHz. **NIOSH**: 15 dB o más en cualquiera de 500 a 6.000 Hz. **PREXOR**: 15 dB o más que implique hipoacusia (→ H23, con la lectura que allí se discute).
+- **OSHA**: promedio de 10 dB o más en 2, 3 y 4 kHz. **NIOSH**: 15 dB o más en cualquiera de 500 a 6.000 Hz. **PREXOR**: 15 dB o más que implique hipoacusia (→ H24, con la lectura que allí se discute).
 - Cambio que llega al criterio: **reexplicar, recolocar, repetir**; si persiste, **confirmar en 30 días**, en cámara y con reposo.
 - Sin hora del reposo, **no hay comparación válida**.
 :::
@@ -43,15 +43,15 @@ El oído que trabaja en ruido no sufre un solo daño sino **dos tiempos** (→ c
 
 Tres consecuencias para quien examina:
 
-- **El TTS anuncia, pero no mide.** Su magnitud no permite predecir el PTS, pero es su precursor: un oído que cada tarde se desplaza 30 dB está recibiendo más de lo que su protección le permite (NIOSH, 1998, citado en H23).
+- **El TTS anuncia, pero no mide.** Su magnitud no permite predecir el PTS, pero es su precursor: un oído que cada tarde se desplaza 30 dB está recibiendo más de lo que su protección le permite (NIOSH, 1998, citado en H24).
 - **Que vuelva a la base no siempre es inocente.** En ratones, una exposición que solo desplazó el umbral por unos días dejó el audiograma normal y, aun así, se perdió una proporción importante de sinapsis (Kujawa y Liberman, 2009; → cap. 6). En humanos se discute cuánto pesa, así que un audiograma que vuelve a 0 dB HL **no dice** "sin daño": dice "sin daño que el umbral vea".
-- **El reposo es parte del método.** Una base y una confirmación quieren el umbral permanente: por eso se piden 12 a 14 horas sin ruido según la norma (→ H23). Si la exposición fue muy intensa, esas horas pueden no alcanzar y quedará un resto de TTS que se confunde con permanente: en ese caso el control se repite más adelante, en vez de dar el cambio por definitivo (Ryan y cols., 2016).
+- **El reposo es parte del método.** Una base y una confirmación quieren el umbral permanente: por eso se piden 12 a 14 horas sin ruido según la norma (→ H24). Si la exposición fue muy intensa, esas horas pueden no alcanzar y quedará un resto de TTS que se confunde con permanente: en ese caso el control se repite más adelante, en vez de dar el cambio por definitivo (Ryan y cols., 2016).
 
 <!-- Pasada de fundamentos 2026-10-18: NIOSH (1998, sección 2.2) dice que el TTS "typically returns to its former level within a few minutes to a few hours"; Ryan y cols. (2016): de minutos a horas o de días a semanas, con un tope de 30 días. No hay una cifra única para una jornada típica. -->
 
 ### Por qué se compara contra la propia base
 
-Una frecuencia con 20 dB HL puede ser lo normal para otro y un cambio de 20 dB para este trabajador. La variabilidad de la prueba (±5 dB), la que existe entre las personas (la muesca aparece también en no expuestos, → cap. 6) y lo que el oído ya traía hacen que **solo el cambio** diga algo. Y la base pierde su sentido si se tomó mal: por eso se hace con reposo, en cámara y con el método que usarán los controles (→ H23).
+Una frecuencia con 20 dB HL puede ser lo normal para otro y un cambio de 20 dB para este trabajador. La variabilidad de la prueba (±5 dB), la que existe entre las personas (la muesca aparece también en no expuestos, → cap. 6) y lo que el oído ya traía hacen que **solo el cambio** diga algo. Y la base pierde su sentido si se tomó mal: por eso se hace con reposo, en cámara y con el método que usarán los controles (→ H24).
 
 ## Patología
 
@@ -60,22 +60,22 @@ Una frecuencia con 20 dB HL puede ser lo normal para otro y un cambio de 20 dB p
 Es quien tiene una base y hoy, en un control, un umbral peor que cumple un criterio de cambio. Antes de decir "ruido" hay que pasar por las causas **que no son un cambio real**:
 
 - **Desplazamiento temporal**: control tomado al final del turno o sin reposo. Se separa con la audiometría de confirmación tras el reposo.
-- **Técnica**: un fono corrido, una instrucción mal entendida, una sala con ruido. En un estudio de NIOSH, repetir la prueba en el momento redujo en más del 70 % los trabajadores que cumplían el criterio de OSHA (Rink, 1989, citado en NIOSH, 1998; → H23).
-- **Oído externo y medio**: cerumen, otitis, un tapón de cerumen que oculta 80 % del conducto (→ H1, H23).
+- **Técnica**: un fono corrido, una instrucción mal entendida, una sala con ruido. En un estudio de NIOSH, repetir la prueba en el momento redujo en más del 70 % los trabajadores que cumplían el criterio de OSHA (Rink, 1989, citado en NIOSH, 1998; → H24).
+- **Oído externo y medio**: cerumen, otitis, un tapón de cerumen que oculta 80 % del conducto (→ H1, H24).
 
-Si el cambio **sobrevive** a la repetición y a la confirmación, es un cambio de umbral real. Entonces la pregunta ya no es de quien examina sino del **médico** (de salud ocupacional, en Chile; → H23) y del **puesto**: ¿es laboral, no laboral o mixto? ¿Cuál es el nivel de ruido y cómo se protege? Un cambio confirmado es la señal de que **falló el control del ruido**, no de que falló el trabajador.
+Si el cambio **sobrevive** a la repetición y a la confirmación, es un cambio de umbral real. Entonces la pregunta ya no es de quien examina sino del **médico** (de salud ocupacional, en Chile; → H24) y del **puesto**: ¿es laboral, no laboral o mixto? ¿Cuál es el nivel de ruido y cómo se protege? Un cambio confirmado es la señal de que **falló el control del ruido**, no de que falló el trabajador.
 
 :::sabias ¿Sabías que?
-La pérdida por ruido avanza más rápido al principio. La guía chilena la resume así: la pérdida más temprana está en 3, 4 y 6 kHz, alcanza su máximo entre los 10 y 15 años de exposición continua y después avanza más lento, y al terminar la exposición no hay progresión atribuible a ella (MINSAL, 2013, citado en H23). Por eso los primeros años son el mejor momento para encontrarla.
+La pérdida por ruido avanza más rápido al principio. La guía chilena la resume así: la pérdida más temprana está en 3, 4 y 6 kHz, alcanza su máximo entre los 10 y 15 años de exposición continua y después avanza más lento, y al terminar la exposición no hay progresión atribuible a ella (MINSAL, 2013, citado en H24). Por eso los primeros años son el mejor momento para encontrarla.
 :::
 
 ### Trabajador nuevo con la audiometría de ingreso alterada
 
-La base se toma **antes** (o al comienzo) de la exposición precisamente para dejar escrito cómo llega el oído. Si ya llega alterado, esa audiometría sigue siendo la base: es contra ella que se leerá todo lo que venga, y deja demostrado que esa pérdida **no es de esta faena** (NIOSH, 1998; → H23, cap. 34). Pero una base alterada no se archiva sin más:
+La base se toma **antes** (o al comienzo) de la exposición precisamente para dejar escrito cómo llega el oído. Si ya llega alterado, esa audiometría sigue siendo la base: es contra ella que se leerá todo lo que venga, y deja demostrado que esa pérdida **no es de esta faena** (NIOSH, 1998; → H24, cap. 34). Pero una base alterada no se archiva sin más:
 
-- **Si es simétrica y con la forma del ruido**, es una exposición previa (otro empleo, tiro, música): se anota, se informa al trabajador y entra al programa. El oído ya dañado no queda más sensible, pero tampoco protegido (→ H23).
+- **Si es simétrica y con la forma del ruido**, es una exposición previa (otro empleo, tiro, música): se anota, se informa al trabajador y entra al programa. El oído ya dañado no queda más sensible, pero tampoco protegido (→ H24).
 - **Si es asimétrica, con gap, plana o con acúfeno unilateral**, el ruido no es toda la explicación. La vía aérea sin enmascarar del cribado no sirve para estudiarla: con diferencias de 40 dB o más entre los oídos el tono puede estar cruzando al otro lado (ISP, 2026; → H3, H4). Va a audiometría diagnóstica y a otorrinolaringología, y a veces a la pregunta del cap. 11.
-- **Quién decide.** Quien toma la audiometría **informa el patrón**; no decide si el trabajador puede o no ocupar un puesto. En Chile, el protocolo manda que una base alterada o con un perfil de pérdida no laboral o mixto pase al médico de salud ocupacional (MINSAL, 2013; → H23). El resultado individual es del trabajador: a la empresa llegan datos agrupados y sin nombre. <!-- verificar: no se encontró una norma chilena que diga si una base alterada impide la contratación; el libro no lo afirma ni lo niega. Se revisaron el texto de PREXOR (NT 156) y la guía ISP 2026 (2026-10-18): ninguno lo trata. Falta revisar el Código del Trabajo o la Ley 16.744. -->
+- **Quién decide.** Quien toma la audiometría **informa el patrón**; no decide si el trabajador puede o no ocupar un puesto. En Chile, el protocolo manda que una base alterada o con un perfil de pérdida no laboral o mixto pase al médico de salud ocupacional (MINSAL, 2013; → H24). El resultado individual es del trabajador: a la empresa llegan datos agrupados y sin nombre. <!-- verificar: no se encontró una norma chilena que diga si una base alterada impide la contratación; el libro no lo afirma ni lo niega. Se revisaron el texto de PREXOR (NT 156) y la guía ISP 2026 (2026-10-18): ninguno lo trata. Falta revisar el Código del Trabajo o la Ley 16.744. -->
 
 :::ojo Ojo clínico
 La audiometría de vigilancia **no es un examen de diagnóstico**: la guía chilena prohíbe usarla para diagnosticar patología otorrinolaringológica, para calificar una enfermedad profesional o en un contexto médico-legal (ISP, 2026). Dice cómo está el umbral hoy. <!-- Pasada de fundamentos 2026-10-18: decía "no es un examen de aptitud ni de diagnóstico (ISP, 2026)". La guía (consideración 4) excluye el diagnóstico clínico, la calificación de enfermedad profesional y el uso médico-legal; no habla de aptitud. --> Lo que se hace con eso, para el trabajador y para el puesto, lo deciden un médico y el programa, con la historia y el nivel de exposición.
@@ -91,7 +91,7 @@ Frente a un control alterado el razonamiento va en este orden, y no se salta nin
 2. **¿Cumple un criterio contra la base?** Se calcula el cambio por frecuencia y se aplica el criterio del programa. Un cambio de 5 dB o menos cabe en la variabilidad.
 3. **¿Se confirma?** Reexplicar, recolocar, repetir; después, confirmación en 30 días en cámara.
 4. **¿Qué clase de cambio es?** Temporal (vuelve con el reposo), permanente que calza con ruido, o permanente que no calza (asimétrico, con gap, discriminación peor que el umbral).
-5. **¿Qué hay que hacer y con quién?** El trabajador recibe el resultado, el médico decide el origen y el puesto se revisa (control del ruido, ajuste de la protección, rotación). Si el cambio queda confirmado y validado, la confirmación pasa a ser la nueva base (NIOSH, 1998; → H23).
+5. **¿Qué hay que hacer y con quién?** El trabajador recibe el resultado, el médico decide el origen y el puesto se revisa (control del ruido, ajuste de la protección, rotación). Si el cambio queda confirmado y validado, la confirmación pasa a ser la nueva base (NIOSH, 1998; → H24).
 
 :::ayuda-ancho Tres situaciones, tres respuestas
 | Lo que sale | Qué significa | Qué se hace |
@@ -102,7 +102,7 @@ Frente a un control alterado el razonamiento va en este orden, y no se salta nin
 :::
 
 :::comentario Lo que dicen las normas
-Los tres criterios más usados difieren en qué frecuencias miran, cuántos dB piden y si corrigen por edad, y el mismo control puede ser un cambio significativo para una norma y no para otra (tabla y ejemplo en H23). Para el caso de este capítulo importa un punto: **ninguna** de las tres normas deja de pedir confirmación. OSHA acepta que la repetición dentro de 30 días reemplace al control; NIOSH pide el mismo cambio en la misma frecuencia y oído en una segunda prueba dentro de 30 días; PREXOR manda confirmar en cámara dentro de 30 días si el control fue en terreno (OSHA, 29 CFR 1910.95; NIOSH, 1998; MINSAL, 2013).
+Los tres criterios más usados difieren en qué frecuencias miran, cuántos dB piden y si corrigen por edad, y el mismo control puede ser un cambio significativo para una norma y no para otra (tabla y ejemplo en H24). Para el caso de este capítulo importa un punto: **ninguna** de las tres normas deja de pedir confirmación. OSHA acepta que la repetición dentro de 30 días reemplace al control; NIOSH pide el mismo cambio en la misma frecuencia y oído en una segunda prueba dentro de 30 días; PREXOR manda confirmar en cámara dentro de 30 días si el control fue en terreno (OSHA, 29 CFR 1910.95; NIOSH, 1998; MINSAL, 2013).
 :::
 
 ### Lo que más se equivoca
@@ -155,8 +155,8 @@ El cambio es mayor de 15 dB desde 2 kHz hacia arriba en los dos oídos, y los tr
 :::docente Guía del caso
 - **Datos clave:** 8 años de aserradero, base normal a los 33, siete años sin control por cambio de contratista, tapones usados "cuando se acuerda", sin ruido fuera del trabajo, sin pitido.
 - **Hipótesis:** hipoacusia por ruido laboral (esperable), otra causa sumada (por la magnitud), una causa conductiva (descartada por el timpanograma).
-- **Qué pedir:** otoscopía y timpanograma para descartar causa conductiva; confirmar que el examen se hizo con reposo y registrar la hora de la última exposición; comparar contra la base con los tres criterios (→ H23).
-- **Lo que enseña:** un cambio que no vino acompañado de vigilancia llega **grande**. Con vigilancia anual el mismo oído habría saltado al primer control. Además, 80 y 85 dB en 4 kHz están por encima de lo que la guía chilena describe como habitual en la pérdida por ruido (agudos hasta unos 75 dB HL; MINSAL, 2013, citado en H23): para ocho años de exposición es mucho y obliga a preguntar por otras causas.
+- **Qué pedir:** otoscopía y timpanograma para descartar causa conductiva; confirmar que el examen se hizo con reposo y registrar la hora de la última exposición; comparar contra la base con los tres criterios (→ H24).
+- **Lo que enseña:** un cambio que no vino acompañado de vigilancia llega **grande**. Con vigilancia anual el mismo oído habría saltado al primer control. Además, 80 y 85 dB en 4 kHz están por encima de lo que la guía chilena describe como habitual en la pérdida por ruido (agudos hasta unos 75 dB HL; MINSAL, 2013, citado en H24): para ocho años de exposición es mucho y obliga a preguntar por otras causas.
 - **Errores esperables:** decir "es ruido" y cerrar sin pasar al médico; olvidar que la pérdida es bilateral y por eso el criterio se aplica a los dos oídos; no revisar el puesto; no corregir la protección; olvidar el **aviso por escrito** al trabajador.
 - **En LabSim:** no está en la práctica del curso. La base no está en el simulador: se compara contra los números de la ficha.
 :::
@@ -194,9 +194,9 @@ El control del final del turno cumplía los criterios de OSHA (promedios de 16,7
 - **Datos clave:** tres años de molino, protección doble "cuando el jefe pasa", control del fin de turno con cambio, siseo bilateral que ya se queda de mañana, dificultad para entender en la planta.
 - **Hipótesis:** desplazamiento temporal (lo más probable), error de técnica (descartado: se repitió con reinstrucción y recolocación), cambio permanente temprano (descartado: la confirmación es la base).
 - **Qué pedir:** confirmación en cámara con reposo documentado; revisión de cómo usa la protección y, si el programa lo tiene, un ensayo de ajuste; adelantar el siguiente control; las emisiones otoacústicas pueden agregar información (→ H9, cap. 6).
-- **Lo que enseña:** un cambio que **no se confirma** no es un resultado tranquilizador: el oído se desplaza 30 dB cada turno, lo que quiere decir que lo que llega a la cóclea es más de lo que la protección debería dejar pasar. La medida es sobre el puesto, no sobre el oído (→ H23).
+- **Lo que enseña:** un cambio que **no se confirma** no es un resultado tranquilizador: el oído se desplaza 30 dB cada turno, lo que quiere decir que lo que llega a la cóclea es más de lo que la protección debería dejar pasar. La medida es sobre el puesto, no sobre el oído (→ H24).
 - **Errores esperables:** llamarlo permanente; llamarlo "normal" y cerrar; olvidar que el acúfeno nuevo es un dato (puede haber daño que el umbral no ve, → cap. 6); no anotar la hora del último turno.
-- **En LabSim:** el simulador no modela desplazamiento temporal ni reposo: el paciente responde con su umbral permanente, sin importar cuándo fue su última exposición (→ H23). La confirmación es el audiograma del paciente en el simulador.
+- **En LabSim:** el simulador no modela desplazamiento temporal ni reposo: el paciente responde con su umbral permanente, sin importar cuándo fue su última exposición (→ H24). La confirmación es el audiograma del paciente en el simulador.
 :::
 
 {{caso cap33_ingreso}}
@@ -259,7 +259,7 @@ El control de la tarde cumplía los criterios porque se tomó **sin reposo**: er
 
 #### Diagnóstico y qué sigue
 
-**Cambio de umbral no confirmado: desplazamiento temporal tras la jornada, con la base conservada.** No hay cambio de umbral permanente que informar. Corresponde: revisar el puesto y cómo se usa la protección (orejeras y tapones juntos "cuando pasa el jefe" no protegen), considerar un ensayo de ajuste individual si el programa lo tiene (→ H23), anotar el acúfeno nuevo y adelantar el siguiente control. El siseo con audiograma normal es una razón más para no cerrar el caso (→ cap. 6, sinaptopatía).
+**Cambio de umbral no confirmado: desplazamiento temporal tras la jornada, con la base conservada.** No hay cambio de umbral permanente que informar. Corresponde: revisar el puesto y cómo se usa la protección (orejeras y tapones juntos "cuando pasa el jefe" no protegen), considerar un ensayo de ajuste individual si el programa lo tiene (→ H24), anotar el acúfeno nuevo y adelantar el siguiente control. El siseo con audiograma normal es una razón más para no cerrar el caso (→ cap. 6, sinaptopatía).
 
 :::ojo Ojo clínico
 Si en la confirmación hubiera quedado un resto de 5 o 10 dB, no se lo llama TTS ni PTS: se anota como umbral de ese día, se repite más adelante y se compara. Una exposición muy intensa puede dejar un desplazamiento que tarda más que las 12 a 14 horas en recuperarse (Ryan y cols., 2016).

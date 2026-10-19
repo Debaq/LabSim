@@ -1,4 +1,4 @@
-# H24. Anamnesis rinológica y rinoscopía
+# H25. Anamnesis rinológica y rinoscopía
 
 :::objetivos En esta herramienta
 - Hacer la anamnesis nasal dirigida y explicar qué fisiología hay detrás de cada pregunta.
@@ -6,10 +6,10 @@
 - Preparar al paciente y el material, con las precauciones de limpieza y de aclimatación que pide el examen.
 - Hacer la inspección, la palpación de la cara y la rinoscopía anterior en las tres posiciones de cabeza, fosa por fosa.
 - Describir lo que ves con un orden fijo (vestíbulo, tabique, cornetes, meatos, mucosa y secreción) y comparar las dos fosas.
-- Reconocer qué no puede decir la rinoscopía anterior y cuándo hace falta medir (→ H25, H26) o mirar con endoscopio.
+- Reconocer qué no puede decir la rinoscopía anterior y cuándo hace falta medir (→ H26, H27) o mirar con endoscopio.
 :::
 
-La nariz no se parece a nada de lo que has medido hasta aquí: no tiene un umbral que buscar ni una curva que graficar. Antes de medir cuánto aire pasa por ella (→ H25) o qué tan ancha es por dentro (→ H26), se **pregunta** y se **mira**. Esa conversación y esa mirada deciden qué medida tiene sentido hacer, si hoy se puede hacer, y cómo se va a interpretar.
+La nariz no se parece a nada de lo que has medido hasta aquí: no tiene un umbral que buscar ni una curva que graficar. Antes de medir cuánto aire pasa por ella (→ H26) o qué tan ancha es por dentro (→ H27), se **pregunta** y se **mira**. Esa conversación y esa mirada deciden qué medida tiene sentido hacer, si hoy se puede hacer, y cómo se va a interpretar.
 
 ## Para qué sirve
 
@@ -49,7 +49,7 @@ La nariz tiene una parte externa, de hueso y cartílago, y una cavidad interna d
 
 Pegados a la pared lateral están los **cornetes**, tres láminas curvas de hueso cubiertas de mucosa. Bajo cada uno hay un **meato**, un pasaje por donde circula el aire y por donde desembocan las vías de drenaje: bajo el cornete inferior, el conducto nasolagrimal; bajo el medio, los senos maxilar, frontal y las celdillas etmoidales anteriores; bajo el superior, las celdillas etmoidales posteriores. El cornete **inferior** es el más grande y el más importante para el flujo, y su cabeza es lo primero que se ve al mirar con el espéculo.
 
-:::imagen ilustraciones/h24-fosa-lateral.svg ancho=100% Pared lateral de la fosa nasal derecha, con el tabique imaginariamente retirado. Se ven el vestíbulo, la válvula nasal (línea roja punteada), los tres cornetes con sus meatos, la hendidura olfatoria bajo la lámina cribosa (amarillo), la coana y, ya en la nasofaringe, la boca de la trompa de Eustaquio. Los senos aparecen solo como referencia.
+:::imagen ilustraciones/h25-fosa-lateral.svg ancho=100% Pared lateral de la fosa nasal derecha, con el tabique imaginariamente retirado. Se ven el vestíbulo, la válvula nasal (línea roja punteada), los tres cornetes con sus meatos, la hendidura olfatoria bajo la lámina cribosa (amarillo), la coana y, ya en la nasofaringe, la boca de la trompa de Eustaquio. Los senos aparecen solo como referencia.
 - @17,55 | **Entrada.** El vestíbulo tiene pelos y piel; la rinoscopía arranca aquí, con la punta del espéculo apenas pasada la narina.
 - @24,55 | **Válvula nasal.** La zona más angosta de la vía aérea. Si el pasaje se estrecha aquí, se nota más que en cualquier otro punto.
 - @34,62 | **Cornete inferior.** Su cabeza es lo primero que ves; su mucosa se hincha y se deshincha (ciclo nasal).
@@ -70,12 +70,12 @@ La física de ese punto cabe en dos ideas:
 - **El radio manda, y manda mucho.** En un tubo rígido con flujo laminar, la ley de Poiseuille dice que la resistencia crece con la **inversa del radio a la cuarta**: si el radio baja a la mitad, la resistencia se multiplica por 16. La nariz no es un tubo rígido ni su flujo es del todo laminar (en la nariz real, la relación entre presión y flujo tiene un término lineal y otro cuadrático), pero la **tendencia** es la misma: un pasaje que se estrecha un poco cuesta mucho más aire (Cole, 2000). Por eso una desviación pequeña **en la zona valvular** molesta más que una grande al fondo de la fosa.
 - **El aire rápido tira de las paredes blandas.** Cuando un fluido pasa por un estrechamiento, su velocidad sube y su presión lateral baja (efecto Bernoulli o Venturi). En la inspiración forzada, esa presión baja actúa sobre la pared lateral de la nariz: si el cartílago es débil o está debilitado (por una cirugía, un golpe o la edad), la pared se **colapsa hacia dentro** y cierra el pasaje (Rhee y cols., 2010). Es lo que le pasa a algunos pacientes cuando hacen ejercicio o inspiran fuerte.
 
-:::imagen ilustraciones/h24-valvula.svg ancho=100% La válvula nasal en tres miradas. A: el ángulo agudo que forman el tabique y el cartílago lateral superior. B: resistencia contra radio en un tubo rígido de flujo laminar; el punto rojo de la izquierda es el pasaje reducido a la mitad (16 veces más resistencia). C: en un estrechamiento el aire se acelera y su presión lateral baja; si la pared es blanda, se colapsa en la inspiración.
+:::imagen ilustraciones/h25-valvula.svg ancho=100% La válvula nasal en tres miradas. A: el ángulo agudo que forman el tabique y el cartílago lateral superior. B: resistencia contra radio en un tubo rígido de flujo laminar; el punto rojo de la izquierda es el pasaje reducido a la mitad (16 veces más resistencia). C: en un estrechamiento el aire se acelera y su presión lateral baja; si la pared es blanda, se colapsa en la inspiración.
 :::
 
 Dos consecuencias para el examen:
 
-- **La inspiración y la espiración se comportan distinto.** Al inspirar, la presión dentro de la nariz queda por debajo de la de afuera y tira de la pared lateral hacia dentro; al espirar, la empuja hacia fuera. Por eso un colapso valvular se nota al **inspirar**: el consenso acepta como propio del compromiso valvular que la obstrucción aumente con la inspiración profunda, y no llegó a acuerdo sobre la espiración (Rhee y cols., 2010). Por eso también H25 mide ambas fases. <!-- Pasada de fundamentos 2026-10-18: decía que la inspiración pasa por la válvula con flujo "más ordenado" y la espiración "con más turbulencia". El consenso de Clement y Gordts (2005) describe flujo laminar en el vestíbulo y la válvula al inspirar y turbulencia justo detrás, en la zona que se ensancha, y no apoya más turbulencia al espirar. Se reemplazó por el argumento de presiones y el consenso de Rhee y cols. (2010). -->
+- **La inspiración y la espiración se comportan distinto.** Al inspirar, la presión dentro de la nariz queda por debajo de la de afuera y tira de la pared lateral hacia dentro; al espirar, la empuja hacia fuera. Por eso un colapso valvular se nota al **inspirar**: el consenso acepta como propio del compromiso valvular que la obstrucción aumente con la inspiración profunda, y no llegó a acuerdo sobre la espiración (Rhee y cols., 2010). Por eso también H26 mide ambas fases. <!-- Pasada de fundamentos 2026-10-18: decía que la inspiración pasa por la válvula con flujo "más ordenado" y la espiración "con más turbulencia". El consenso de Clement y Gordts (2005) describe flujo laminar en el vestíbulo y la válvula al inspirar y turbulencia justo detrás, en la zona que se ensancha, y no apoya más turbulencia al espirar. Se reemplazó por el argumento de presiones y el consenso de Rhee y cols. (2010). -->
 - **Mirar con el espéculo cambia lo que se mira.** El espéculo abre el vestíbulo y la válvula, y con eso estás viendo una nariz que no es la que respira. La inspiración forzada con una pared blanda no se ve con las valvas abiertas. Para el colapso de la pared se usa otra maniobra (→ "Lo que dicen las normas", más abajo).
 
 ### Los cornetes: tejido eréctil y ciclo nasal
@@ -84,9 +84,9 @@ La mucosa del cornete inferior no es una película: tiene debajo una red de **si
 
 - **Los descongestionantes funcionan** porque son vasoconstrictores: encogen el cornete en minutos. También por eso, si se usan muchos días, el cornete **rebota** y se hincha más (rinitis medicamentosa; Graf, 1997). Y por eso importa saber qué usó el paciente en las últimas 48 horas: una medida de resistencia con un descongestionante puesto no es la nariz del paciente.
 - **La nariz se tapa y se destapa sola.** En muchas personas, los cornetes de una fosa se hinchan mientras los de la otra se encogen, y vuelven a cambiar al cabo de unas horas. Es el **ciclo nasal** (Hasegawa y Kern, 1977; Eccles, 1996). La **resistencia total** de las dos fosas juntas cambia mucho menos que la de cada una (Hasegawa y Kern, 1977). Cuánta gente lo tiene depende de cómo se defina: con un criterio amplio fue el 72 % (Hasegawa y Kern, 1977) y con uno estricto de alternancia regular, el 21 % (Flanagan y Eccles, 1997). La duración y la regularidad varían de una persona a otra. <!-- Pasada de fundamentos 2026-10-18: decía "En la mayoría de las personas". Se cambió a "En muchas" y se agregaron las dos cifras, que dependen de la definición (resúmenes de Hasegawa y Kern 1977 y de Flanagan y Eccles 1997). -->
-- **Un lado más hinchado que el otro no es una enfermedad.** En la rinoscopía puedes ver un cornete grande en una fosa y uno chico en la otra, y no por eso hay un problema. Se compara el **conjunto**, se pregunta si la obstrucción cambia de lado y, si de verdad importa, se repite la medida (→ H25).
+- **Un lado más hinchado que el otro no es una enfermedad.** En la rinoscopía puedes ver un cornete grande en una fosa y uno chico en la otra, y no por eso hay un problema. Se compara el **conjunto**, se pregunta si la obstrucción cambia de lado y, si de verdad importa, se repite la medida (→ H26).
 
-:::imagen ilustraciones/h24-ciclo-corte.svg ancho=96% El ciclo nasal. Dos cortes frontales de la nariz, vistos desde delante: en A el cornete inferior de la fosa derecha está congestionado y el aire pasa sobre todo por la izquierda; unas horas después, B, se invierte. El flujo de cada lado cambia; la suma de los dos, mucho menos.
+:::imagen ilustraciones/h25-ciclo-corte.svg ancho=96% El ciclo nasal. Dos cortes frontales de la nariz, vistos desde delante: en A el cornete inferior de la fosa derecha está congestionado y el aire pasa sobre todo por la izquierda; unas horas después, B, se invierte. El flujo de cada lado cambia; la suma de los dos, mucho menos.
 :::
 
 ### Cómo acondiciona el aire la nariz
@@ -147,7 +147,7 @@ Tabla: Por qué se pregunta cada cosa en la anamnesis nasal
 | **Epistaxis recurrente** | el tabique anterior tiene una malla de vasos muy superficiales (plexo de Kiesselbach) | cuidado con el espéculo y los instrumentos; mirar el tabique con atención |
 | **Descongestionantes, antialérgicos y otros fármacos (48 horas)** | un vasoconstrictor encoge el cornete; algunos antialérgicos secan la mucosa | si se mide hoy, la nariz **no** es la basal |
 | **Tabaco y alcohol (24 horas)** | irritan la mucosa y alteran el tono vascular | idem: la medida sale distinta |
-| **Ronquido y apnea (¿polisomnografía?)** | la obstrucción nasal es uno de los factores del ronquido; la polisomnografía dice si hay apnea (→ H29; tratamiento, → H30) | si el síntoma pesa más en el sueño que de día |
+| **Ronquido y apnea (¿polisomnografía?)** | la obstrucción nasal es uno de los factores del ronquido; la polisomnografía dice si hay apnea (→ H30; tratamiento, → H31) | si el síntoma pesa más en el sueño que de día |
 | **Lugar de trabajo** | polvo, químicos o irritantes que dañan la mucosa | exposición como causa o como agravante |
 | **Congestión o picazón según la época** | patrón alérgico estacional frente a uno que dura todo el año | lo mismo que alergias |
 | **Alteraciones del olfato** | la hendidura olfatoria se cierra con edema o pólipos; también hay causas del nervio | por qué la nariz puede estar "tapada" sin sentirse |
@@ -177,10 +177,10 @@ Antes de empezar, **lavado clínico de manos** y guantes puestos mientras dura e
 - Se le pide que **se limpie la nariz** antes del examen, para ver con la menor cantidad posible de mucosidad.
 - Ya sentado, se le hace la anamnesis (→ Paso a paso).
 
-La rinoscopía puede partir desde los 10 minutos de aclimatación: la anamnesis y la inspección ya ocupan buena parte de ese tiempo. Si después viene la rinomanometría (→ H25), conviene que el paciente haya completado los 15 minutos antes de medir.
+La rinoscopía puede partir desde los 10 minutos de aclimatación: la anamnesis y la inspección ya ocupan buena parte de ese tiempo. Si después viene la rinomanometría (→ H26), conviene que el paciente haya completado los 15 minutos antes de medir.
 
 :::comentario Lo que dicen las normas
-Para la rinomanometría, el consenso internacional pide medir con el paciente sentado y después de un periodo de **adaptación de 20 a 30 minutos** (Clement y Gordts, 2005), más largo que los 15 minutos de este libro; su efecto sobre la mucosa se trata en H25 y H26. <!-- Pasada de fundamentos 2026-10-18: el verificar decía "se recuerda 15 minutos". El texto completo del consenso (sección Measurement procedure) dice "after an adaptation period of 20-30 minutes". -->
+Para la rinomanometría, el consenso internacional pide medir con el paciente sentado y después de un periodo de **adaptación de 20 a 30 minutos** (Clement y Gordts, 2005), más largo que los 15 minutos de este libro; su efecto sobre la mucosa se trata en H26 y H27. <!-- Pasada de fundamentos 2026-10-18: el verificar decía "se recuerda 15 minutos". El texto completo del consenso (sección Measurement procedure) dice "after an adaptation period of 20-30 minutes". -->
 
 Sobre la **limpieza del espéculo**: las guías de desinfección clasifican como **semicríticos** los instrumentos que tocan mucosa intacta, y para ellos piden, como mínimo, desinfección de alto nivel (Rutala y Weber, 2008). Limpiar con alcohol y algodón, como se hace habitualmente, retira la secreción a la vista pero **no basta** para ese nivel: lo que valga en tu centro lo define su norma de control de infecciones. Una alternativa es usar espéculos desechables. <!-- verificar: la clasificación del espéculo nasal como semicrítico o no crítico depende de la guía local; confirmar en Rutala y Weber 2008 (CDC/HICPAC). -->
 :::
@@ -189,7 +189,7 @@ Sobre la **limpieza del espéculo**: las guías de desinfección clasifican como
 
 El equipo de la rinoscopía anterior son tres elementos, todos de uso manual.
 
-:::imagen ilustraciones/h24-equipo.svg ancho=100% Espéculo nasal bivalvo, espejo frontal y lámpara de cuello flexible. A la izquierda, el espéculo con las valvas abiertas y, abajo, visto de frente. En el centro, el espejo frontal, cóncavo y con un orificio. A la derecha, la lámpara. 
+:::imagen ilustraciones/h25-equipo.svg ancho=100% Espéculo nasal bivalvo, espejo frontal y lámpara de cuello flexible. A la izquierda, el espéculo con las valvas abiertas y, abajo, visto de frente. En el centro, el espejo frontal, cóncavo y con un orificio. A la derecha, la lámpara. 
 - @9,22 | **Valvas.** Entran en el vestíbulo y se abren apenas: lo justo para ver. Si las apoyas en el tabique, duele.
 - @27,31 | **Resorte y mangos.** Quedan en la mano izquierda; al soltar, las valvas se cierran.
 - @47,15 | **Espejo frontal.** Mira por el agujero central; la luz de la lámpara rebota en el espejo y cae en la nariz, en el mismo eje que tu vista.
@@ -270,7 +270,7 @@ La rinoscopía sigue siempre el mismo orden, y el porqué de cada paso es lo que
 7. **Déjalo en la bandeja sucia**, apaga la lámpara y retira el espejo frontal.
 8. **Informa** al docente lo que viste: el estado de las fosas y de la mucosa. Después se limpia el espéculo (→ "Antes de empezar").
 
-:::imagen ilustraciones/h24-posiciones.svg ancho=100% Hasta dónde llega la mirada. Cabeza recta (0°): el piso de la fosa, la cabeza del cornete inferior y el tabique. A 30° de extensión: el cornete medio y la entrada del meato medio. A 60°: el techo de la fosa y la parte alta del tabique. La luz entra por el vestíbulo, y al extender la cabeza la línea de visión sube dentro de la nariz.
+:::imagen ilustraciones/h25-posiciones.svg ancho=100% Hasta dónde llega la mirada. Cabeza recta (0°): el piso de la fosa, la cabeza del cornete inferior y el tabique. A 30° de extensión: el cornete medio y la entrada del meato medio. A 60°: el techo de la fosa y la parte alta del tabique. La luz entra por el vestíbulo, y al extender la cabeza la línea de visión sube dentro de la nariz.
 :::
 
 <!-- verificar: la correspondencia posición de la cabeza -> estructuras vistas es la que describe la enseñanza clásica de la rinoscopía anterior; no se encontró una cita primaria que fije qué se ve exactamente a 30° y a 60°. La figura es un esquema. -->
@@ -291,9 +291,9 @@ Siempre empieza por la **fosa que el paciente dice que está mejor**: ahí ves u
 :::comentario Lo que dicen las normas
 La **rinoscopía anterior** ve solo la parte delantera de la fosa. Para el diagnóstico de la rinosinusitis crónica, las guías piden la **endoscopia nasal** (rígida o flexible, con óptica de 0°, 30° o 70°), que ve el meato medio, la hendidura olfatoria y la nasofaringe (Fokkens y cols., 2020). Es un examen del especialista y no es parte de esta herramienta.
 
-Para el **colapso de la válvula** la clínica usa la **maniobra de Cottle**: con un dedo se tira suavemente de la mejilla hacia el lado, para abrir la válvula, y se le pide al paciente que respire. Si respira mejor, se interpreta como positiva. El consenso sobre la válvula acepta como compatible con un compromiso valvular la mejoría que el paciente siente con esa maniobra o al desplazar la pared lateral hacia fuera con un instrumento dentro de la nariz; las pruebas complementarias fueron el tema con menos acuerdo (Rhee y cols., 2010). <!-- Pasada de fundamentos 2026-10-18: decía "No hay una técnica única ni un valor de corte aceptados". El texto completo de Rhee y cols. (2010) describe la maniobra como "manual lateral retraction of the cheek" y da consenso a la mejoría subjetiva; no dice lo de la técnica única ni el valor de corte. --> **No confundas** esa maniobra con la "rinomanometría de Cottle" de H25: llevan el mismo apellido y no tienen nada que ver.
+Para el **colapso de la válvula** la clínica usa la **maniobra de Cottle**: con un dedo se tira suavemente de la mejilla hacia el lado, para abrir la válvula, y se le pide al paciente que respire. Si respira mejor, se interpreta como positiva. El consenso sobre la válvula acepta como compatible con un compromiso valvular la mejoría que el paciente siente con esa maniobra o al desplazar la pared lateral hacia fuera con un instrumento dentro de la nariz; las pruebas complementarias fueron el tema con menos acuerdo (Rhee y cols., 2010). <!-- Pasada de fundamentos 2026-10-18: decía "No hay una técnica única ni un valor de corte aceptados". El texto completo de Rhee y cols. (2010) describe la maniobra como "manual lateral retraction of the cheek" y da consenso a la mejoría subjetiva; no dice lo de la técnica única ni el valor de corte. --> **No confundas** esa maniobra con la "rinomanometría de Cottle" de H26: llevan el mismo apellido y no tienen nada que ver.
 
-Otra práctica habitual es mirar la nariz **antes y después de un vasoconstrictor**: lo que se abre es la parte de mucosa y lo que no se abre es estructura (tabique, hueso, válvula). Eso es lo que hace la rinomanometría con vasoconstrictor (→ H25). En este libro la rinoscopía se hace sin vasoconstrictor.
+Otra práctica habitual es mirar la nariz **antes y después de un vasoconstrictor**: lo que se abre es la parte de mucosa y lo que no se abre es estructura (tabique, hueso, válvula). Eso es lo que hace la rinomanometría con vasoconstrictor (→ H26). En este libro la rinoscopía se hace sin vasoconstrictor.
 :::
 
 :::ayuda Ayuda memoria
@@ -337,7 +337,7 @@ Fuera de la tabla quedan las señales que obligan a derivar: **los hallazgos de 
 >
 > **Rinoscopía anterior.** *Fosa derecha:* tabique desviado hacia la derecha en el tercio anterior, con un pequeño espolón; cornete inferior grande, pálido, edematoso, que contacta el tabique; secreción acuosa escasa. *Fosa izquierda:* tabique en la línea media; cornete inferior de tamaño medio, mucosa pálida; secreción acuosa escasa. Meato medio no visible en ambas fosas.
 >
-> **Observación.** Usó un descongestionante en las últimas 48 horas: la medida de resistencia de hoy no es la basal (→ H25). Se informa al docente.
+> **Observación.** Usó un descongestionante en las últimas 48 horas: la medida de resistencia de hoy no es la basal (→ H26). Se informa al docente.
 
 ## Errores frecuentes
 
@@ -350,7 +350,7 @@ Fuera de la tabla quedan las señales que obligan a derivar: **los hallazgos de 
 - **Retirar el espéculo cerrado.** Pellizca los pelos y la mucosa.
 - **Dar un diagnóstico.** La rinoscopía anterior describe; el diagnóstico es del médico.
 - **Olvidar la limpieza**: material usado en la bandeja limpia o espéculo sin limpiar entre pacientes.
-- **Medir sin mirar antes.** Una desviación importante, una masa o un tapón de secreción cambian el resultado de la rinomanometría (→ H25).
+- **Medir sin mirar antes.** Una desviación importante, una masa o un tapón de secreción cambian el resultado de la rinomanometría (→ H26).
 
 :::ojo Ojo clínico
 Una nariz **tapada de un solo lado y siempre del mismo**, sobre todo si hay sangrado, secreción con sangre o pérdida del olfato de ese lado, **no es el ciclo nasal ni una alergia**: puede ser una desviación grande, un cuerpo extraño (en un niño) o una masa. La rinoscopía anterior no lo descarta y la rinomanometría, tampoco. Es una derivación.

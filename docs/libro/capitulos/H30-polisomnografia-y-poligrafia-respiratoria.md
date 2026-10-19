@@ -1,4 +1,4 @@
-# H29. Polisomnografía y poligrafía respiratoria
+# H30. Polisomnografía y poligrafía respiratoria
 
 :::objetivos En esta herramienta
 - Explicar qué pregunta responde un estudio de sueño, cuándo se pide y por qué un libro de ORL lo incluye (la vía aérea superior colapsa dormida, y ahí actúan el diagnóstico y la cirugía).
@@ -11,7 +11,7 @@
 - Leer un informe de ejemplo y reconocer qué diferencias tiene el síndrome de apnea obstructiva en el niño.
 :::
 
-El ronquido, la nariz tapada y la garganta que se cierra al dormir son tres maneras de describir una misma vía aérea que se estrecha. Un estudio de sueño registra, durante la noche, **qué pasa con la respiración mientras el paciente duerme** y, en la polisomnografía, **cuánto y cómo duerme**. Esta herramienta enseña qué se registra, cómo se monta, cómo se cuentan los eventos y cómo se lee el informe. El tratamiento (presión positiva, dispositivos de avance mandibular y cirugía) está en → H30.
+El ronquido, la nariz tapada y la garganta que se cierra al dormir son tres maneras de describir una misma vía aérea que se estrecha. Un estudio de sueño registra, durante la noche, **qué pasa con la respiración mientras el paciente duerme** y, en la polisomnografía, **cuánto y cómo duerme**. Esta herramienta enseña qué se registra, cómo se monta, cómo se cuentan los eventos y cómo se lee el informe. El tratamiento (presión positiva, dispositivos de avance mandibular y cirugía) está en → H31.
 
 ## Para qué sirve
 
@@ -22,7 +22,7 @@ Un estudio de sueño responde cuatro preguntas: **¿se interrumpe o se reduce la
 **Por qué está en un libro de ORL.** Tres razones:
 
 - **El colapso ocurre en la vía aérea superior** (→ B1): nariz, faringe y base de la lengua son el territorio del otorrinolaringólogo, y el ronquido es el motivo de consulta más frecuente.
-- **El examen de la vía aérea orienta el tratamiento quirúrgico.** En una serie de 134 pacientes, una clasificación clínica que combina la posición del paladar, el tamaño de las amígdalas y el índice de masa corporal predijo el éxito de la uvulopalatofaringoplastía: 80,6 % en el estadio I, 37,9 % en el II y 8,1 % en el III (Friedman y cols., 2002). La cirugía se aborda en → H30.
+- **El examen de la vía aérea orienta el tratamiento quirúrgico.** En una serie de 134 pacientes, una clasificación clínica que combina la posición del paladar, el tamaño de las amígdalas y el índice de masa corporal predijo el éxito de la uvulopalatofaringoplastía: 80,6 % en el estadio I, 37,9 % en el II y 8,1 % en el III (Friedman y cols., 2002). La cirugía se aborda en → H31.
 - **En el niño, la causa más frecuente es la hipertrofia adenoamigdalina** y la adenoamigdalectomía es el tratamiento de primera línea (Marcus y cols., 2012), de modo que la decisión recae sobre quien examina la garganta (ver "SAHOS pediátrico" más abajo).
 
 **Polisomnografía y poligrafía.** La **polisomnografía (PSG)** registra sueño y respiración a la vez; con ella se calcula el IAH por hora de **sueño**. La **poligrafía respiratoria** registra solo la respiración y no mide sueño. En la nomenclatura clásica los estudios se agrupan en cuatro tipos (Kapur y cols., 2017):
@@ -68,7 +68,7 @@ La banda "delta" del EEG suele definirse como de 0,5 a 4 Hz, y así aparece en e
 
 El **hipnograma** grafica la etapa de cada época a lo largo de la noche. El sueño normal alterna sueño NREM y REM en **ciclos de unos 90 minutos**, cuatro a seis por noche (Hobson y Pace-Schott, 2002) <!-- verificar: la cifra se leyó a través de una revisión que cita a Hobson y Pace-Schott (2002); confirmar en el original. -->. En la primera mitad de la noche domina el sueño de ondas lentas (N3) y los períodos REM se alargan hacia la mañana.
 
-:::imagen ilustraciones/h29-hipnograma.svg ancho=100% Hipnograma de una noche de ejemplo de 8 horas en cama. La vigilia está arriba, N3 abajo y el REM, sombreado, entre la vigilia y N1 (como suele graficarse). Cada período REM cierra un ciclo; las interrupciones cortas de vigilia son despertares. Cifras de ejemplo, calculadas con el script que dibuja la figura. Imagen propia.
+:::imagen ilustraciones/h30-hipnograma.svg ancho=100% Hipnograma de una noche de ejemplo de 8 horas en cama. La vigilia está arriba, N3 abajo y el REM, sombreado, entre la vigilia y N1 (como suele graficarse). Cada período REM cierra un ciclo; las interrupciones cortas de vigilia son despertares. Cifras de ejemplo, calculadas con el script que dibuja la figura. Imagen propia.
 :::
 
 La edad cambia el hipnograma. En adultos sanos, el tiempo total de sueño, la eficiencia, el porcentaje de ondas lentas y el de REM disminuyen con la edad, mientras que la latencia de sueño, el porcentaje de N1 y N2 y la vigilia tras el inicio del sueño aumentan (Ohayon y cols., 2004). Por eso un informe no se juzga con un único valor "normal" para todos.
@@ -85,12 +85,12 @@ El resultado es un sueño **fragmentado** por despertares breves que el paciente
 
 **Los cuatro rasgos.** En un estudio de 75 adultos con y sin apnea, se midieron por separado las causas de que ocurra el cierre (Eckert y cols., 2013):
 
-- **Anatomía: la presión crítica de cierre (Pcrit).** Es la presión dentro de la faringe a la cual la vía **se cierra** cuando los músculos están relajados. Cuanto más alta, más colapsable es la vía: si la Pcrit está sobre 0 cmH₂O, la vía se cierra a la presión atmosférica y solo la abre una presión positiva (→ H30). En el estudio, la Pcrit de los pacientes con apnea fue de 0,3 cmH₂O (−1,5 a 1,9) frente a −6,2 cmH₂O (−12,4 a −3,6) en los controles (medianas, con el intervalo informado).
+- **Anatomía: la presión crítica de cierre (Pcrit).** Es la presión dentro de la faringe a la cual la vía **se cierra** cuando los músculos están relajados. Cuanto más alta, más colapsable es la vía: si la Pcrit está sobre 0 cmH₂O, la vía se cierra a la presión atmosférica y solo la abre una presión positiva (→ H31). En el estudio, la Pcrit de los pacientes con apnea fue de 0,3 cmH₂O (−1,5 a 1,9) frente a −6,2 cmH₂O (−12,4 a −3,6) en los controles (medianas, con el intervalo informado).
 - **Respuesta de los músculos dilatadores.** El 36 % de los pacientes con apnea tenía una respuesta mínima del geniogloso durante el sueño.
 - **Umbral de despertar bajo.** El 37 % despertaba antes de que el esfuerzo respiratorio alcanzara a abrir la vía, lo que fragmenta el sueño con poco estímulo.
 - **Control ventilatorio inestable (ganancia de lazo alta).** El 36 % tenía un sistema que reaccionaba de forma exagerada a los cambios de CO₂ (Eckert y cols., 2013).
 
-El 28 % de los pacientes con apnea tenía varias de esas características no anatómicas, y el 19 % tenía una vía poco colapsable, con una Pcrit entre −2 y −5 cmH₂O, similar a la de muchos controles. Es decir, **la apnea del sueño no es solo anatomía** (Eckert y cols., 2013). Esto importa para el tratamiento: si el rasgo dominante no es la estrechez, una cirugía de la vía aérea puede no resolver el problema (→ H30).
+El 28 % de los pacientes con apnea tenía varias de esas características no anatómicas, y el 19 % tenía una vía poco colapsable, con una Pcrit entre −2 y −5 cmH₂O, similar a la de muchos controles. Es decir, **la apnea del sueño no es solo anatomía** (Eckert y cols., 2013). Esto importa para el tratamiento: si el rasgo dominante no es la estrechez, una cirugía de la vía aérea puede no resolver el problema (→ H31).
 
 **Factores que empeoran el cuadro:** obesidad, sexo masculino y edad; cuello ancho, retrognatia, macroglosia, amígdalas grandes y obstrucción nasal; alcohol y sedantes, que disminuyen el tono muscular. <!-- verificar: lista de factores de riesgo (obesidad, sexo masculino, edad, cuello ancho, alteraciones craneofaciales, alcohol y sedantes); en la literatura leída solo se confirmó la asociación con sexo masculino y obesidad (Young y cols., 1993). Citar una revisión (p. ej. el documento internacional de consenso sobre apnea obstructiva, 2022) tras leerla. -->
 
@@ -100,7 +100,7 @@ El 28 % de los pacientes con apnea tenía varias de esas características no ana
 
 **En Chile**, un estudio con poligrafía domiciliaria en 205 adultos de la Región Metropolitana (Encuesta Nacional de Salud 2016-2017) estimó una prevalencia de **49 %** con IAH de 5 o más (62 % en hombres y 31 % en mujeres) y de **16 %** con IAH de 15 o más; la somnolencia diurna no se asoció con el riesgo de apnea (Saldías y cols., 2020). La diferencia entre "5 %" y "50 %" no es un error: cambia el umbral, la población y el equipo (poligrafía con denominador de tiempo de registro, regla de hipopnea), y por eso el informe debe decir cuáles se usaron.
 
-**Consecuencias.** La relación con la presión arterial es graduada: comparado con un IAH de 0, el riesgo de tener hipertensión cuatro años después fue 1,42 veces mayor con IAH de 0,1 a 4,9; 2,03 con IAH de 5 a 14,9; y 2,89 con IAH de 15 o más, tras ajustar por índice de masa corporal, cuello, edad, sexo, alcohol y tabaco (Peppard y cols., 2000). En una cohorte de hombres seguidos unos 10 años, los pacientes con apnea grave sin tratar tuvieron más eventos cardiovasculares fatales (1,06 por 100 personas-año) y no fatales (2,13) que los controles sanos (0,30 y 0,45) (Marin y cols., 2005). Son estudios observacionales: muestran asociación, y el efecto del tratamiento se discute en → H30.
+**Consecuencias.** La relación con la presión arterial es graduada: comparado con un IAH de 0, el riesgo de tener hipertensión cuatro años después fue 1,42 veces mayor con IAH de 0,1 a 4,9; 2,03 con IAH de 5 a 14,9; y 2,89 con IAH de 15 o más, tras ajustar por índice de masa corporal, cuello, edad, sexo, alcohol y tabaco (Peppard y cols., 2000). En una cohorte de hombres seguidos unos 10 años, los pacientes con apnea grave sin tratar tuvieron más eventos cardiovasculares fatales (1,06 por 100 personas-año) y no fatales (2,13) que los controles sanos (0,30 y 0,45) (Marin y cols., 2005). Son estudios observacionales: muestran asociación, y el efecto del tratamiento se discute en → H31.
 
 ## Antes de empezar
 
@@ -113,7 +113,7 @@ La consulta empieza con la historia y el examen, que deciden **si** conviene el 
 - **Examen de la boca y la orofaringe.** Dos clasificaciones se usan en la consulta de ORL:
   - **Mallampati modificado.** Con el paciente sentado, la boca abierta y la lengua afuera, se observa qué estructuras se ven: cuanto menos se ve, mayor la clase (de I a IV) y más ocupada está la orofaringe por la lengua. Nació para predecir la intubación difícil (Mallampati y cols., 1985; Samsoon y Young, 1987) y en roncadores se correlaciona con la gravedad (Friedman y cols., 1999). <!-- verificar: la descripción de las clases I-IV (I: se ven paladar blando, úvula, pilares; II: paladar blando y úvula; III: paladar blando y base de la úvula; IV: no se ve el paladar blando) viene de la práctica habitual y no figura en los resúmenes leídos; confirmar en Samsoon y Young (1987). -->
   - **Estadificación de Friedman.** Combina la **posición del paladar** (equivalente al Mallampati modificado, grados 1 a 4), el **tamaño de las amígdalas** (grados 0 a 4) y el IMC. El estadio I es paladar 1 o 2 con amígdalas 3 o 4; el II, paladar 3 o 4 con amígdalas 3 o 4; el III, paladar 3 o 4 con amígdalas 0, 1 o 2, o IMC mayor de 40 (Friedman y cols., 2002). Sirve para **estimar el éxito de la cirugía de paladar**, no para diagnosticar apnea. <!-- verificar: definición de los grados de amígdalas (0: operadas; 1: dentro de los pilares; 2: hasta los pilares; 3: más allá de los pilares; 4: llegan a la línea media); no figura en el resumen. Versión actualizada: Friedman y cols., 2017 (Adv Otorhinolaryngol 80:41-48, PMID 28738388). -->
-- **Examen nasal y de la vía aérea alta.** Desviación septal, hipertrofia de cornetes, válvula nasal y rinitis aumentan la resistencia al flujo y se examinan como en → H24 (ver también → cap. 35 y → cap. 36). Una nariz que no deja pasar el aire no se compensa con la boca sin consecuencias: obliga a respirar por la boca y desplaza la mandíbula y la lengua hacia atrás. <!-- verificar: mecanismo propuesto de la obstrucción nasal en la apnea (respiración bucal y retroposición lingual); la relación entre obstrucción nasal y apnea necesita una fuente (revisión) o debe reformularse. -->
+- **Examen nasal y de la vía aérea alta.** Desviación septal, hipertrofia de cornetes, válvula nasal y rinitis aumentan la resistencia al flujo y se examinan como en → H25 (ver también → cap. 35 y → cap. 36). Una nariz que no deja pasar el aire no se compensa con la boca sin consecuencias: obliga a respirar por la boca y desplaza la mandíbula y la lengua hacia atrás. <!-- verificar: mecanismo propuesto de la obstrucción nasal en la apnea (respiración bucal y retroposición lingual); la relación entre obstrucción nasal y apnea necesita una fuente (revisión) o debe reformularse. -->
 
 ### Cuestionarios
 
@@ -143,7 +143,7 @@ Tabla: Qué estudio elegir en un adulto (guía de la AASM, 2017)
 | Enfermedad cardiorrespiratoria significativa, debilidad neuromuscular, hipoventilación, opioides crónicos, accidente cerebrovascular previo o insomnio grave | **polisomnografía** en el laboratorio |
 | Prueba domiciliaria negativa, no concluyente o técnicamente inadecuada | **polisomnografía** |
 | Polisomnografía negativa con sospecha clínica persistente | considerar una segunda polisomnografía |
-| Apnea moderada o grave evidente en las primeras 2 horas de registro y quedan al menos 3 horas | *split-night*: diagnóstico y titulación de la presión positiva en la misma noche (→ H30) |
+| Apnea moderada o grave evidente en las primeras 2 horas de registro y quedan al menos 3 horas | *split-night*: diagnóstico y titulación de la presión positiva en la misma noche (→ H31) |
 
 (Kapur y cols., 2017). La guía no recomienda que los cuestionarios o los algoritmos reemplacen al estudio (Kapur y cols., 2017).
 
@@ -158,7 +158,7 @@ Tabla: Qué estudio elegir en un adulto (guía de la AASM, 2017)
 
 ### Montaje de la polisomnografía
 
-:::imagen ilustraciones/h29-montaje.svg ancho=100% A. Derivaciones de EEG recomendadas (F4, C4, O2, cada una referida a la mastoides izquierda M1) y de respaldo (F3, C3, O1, referidas a la derecha M2), sobre el sistema 10-20. B. Colocación de los demás sensores. Imagen propia.
+:::imagen ilustraciones/h30-montaje.svg ancho=100% A. Derivaciones de EEG recomendadas (F4, C4, O2, cada una referida a la mastoides izquierda M1) y de respaldo (F3, C3, O1, referidas a la derecha M2), sobre el sistema 10-20. B. Colocación de los demás sensores. Imagen propia.
 :::
 
 Cada canal responde a una pregunta distinta:
@@ -197,7 +197,7 @@ El Manual de la AASM recomienda usar **los dos** sensores de flujo a la vez, por
 
 ### Qué se ve en el registro
 
-:::imagen ilustraciones/h29-eventos.svg ancho=100% Trazos de 30 s calculados para mostrar cuatro eventos respiratorios (la inspiración va hacia arriba; el evento está sombreado; las cifras de saturación son de ejemplo). Obstructiva: el flujo desaparece, el esfuerzo aumenta y tórax y abdomen se mueven en oposición. Central: el flujo y el esfuerzo desaparecen. Mixta: primero sin esfuerzo y luego con esfuerzo creciente. Hipopnea: el flujo baja y se aplana, el esfuerzo continúa, y la saturación cae unos puntos. En los cuatro casos, tras el evento aparecen respiraciones grandes de recuperación. Imagen propia.
+:::imagen ilustraciones/h30-eventos.svg ancho=100% Trazos de 30 s calculados para mostrar cuatro eventos respiratorios (la inspiración va hacia arriba; el evento está sombreado; las cifras de saturación son de ejemplo). Obstructiva: el flujo desaparece, el esfuerzo aumenta y tórax y abdomen se mueven en oposición. Central: el flujo y el esfuerzo desaparecen. Mixta: primero sin esfuerzo y luego con esfuerzo creciente. Hipopnea: el flujo baja y se aplana, el esfuerzo continúa, y la saturación cae unos puntos. En los cuatro casos, tras el evento aparecen respiraciones grandes de recuperación. Imagen propia.
 :::
 
 ### Poligrafía domiciliaria
@@ -291,7 +291,7 @@ La polisomnografía agrega al informe la **arquitectura**:
 
 Un ejemplo de una noche de 8 horas, calculada con el script de la figura (cifras de ejemplo, no de un paciente):
 
-:::imagen ilustraciones/h29-informe.svg ancho=100% Resumen gráfico de la noche de ejemplo: hipnograma, eventos respiratorios (cada marca es un evento), posición corporal y saturación de oxígeno. Los eventos se acumulan en REM y en decúbito supino, y cada grupo de eventos deja su serie de desaturaciones. Imagen propia.
+:::imagen ilustraciones/h30-informe.svg ancho=100% Resumen gráfico de la noche de ejemplo: hipnograma, eventos respiratorios (cada marca es un evento), posición corporal y saturación de oxígeno. Los eventos se acumulan en REM y en decúbito supino, y cada grupo de eventos deja su serie de desaturaciones. Imagen propia.
 :::
 
 Tabla: Arquitectura del sueño de la noche de ejemplo
@@ -331,7 +331,7 @@ Tabla: IAH según posición y etapa en la noche de ejemplo
 
 > **Polisomnografía de noche completa, regla de hipopnea recomendada (≥ 30 % de caída de flujo, desaturación ≥ 3 % o despertar).** Tiempo en cama 480 min, tiempo total de sueño 440 min, eficiencia 91,7 %. Latencia de sueño 14 min, latencia REM 72 min. N1 5,5 %, N2 55,0 %, N3 18,2 %, REM 21,4 %. **IAH 20,5 por hora de sueño** (47 apneas obstructivas, 9 mixtas, 6 centrales y 88 hipopneas), IDR 24,0, IDO 20,1. El IAH es de 27,2 en decúbito supino y de 5,5 en decúbito lateral izquierdo, y de 47,2 en REM frente a 13,2 en NREM. SpO₂ media 94,8 %, mínima 85,4 %, 4,7 % del tiempo de sueño bajo 90 %. Se interpreta junto con la historia clínica.
 
-Por la tabla de gravedad, 20,5 corresponde a la categoría **moderada**, que en el informe es una **descripción** del registro. **Lo que no se escribe:** el diagnóstico clínico, el plan de tratamiento ni la causa. La interpretación la hace el médico con la historia, el examen y la comorbilidad (Kapur y cols., 2017). Del ejemplo se deduce algo que el IAH promedio no muestra: el cuadro depende de la posición y de la etapa, y esa información es la que orienta una medida posicional o un estudio de titulación (→ H30).
+Por la tabla de gravedad, 20,5 corresponde a la categoría **moderada**, que en el informe es una **descripción** del registro. **Lo que no se escribe:** el diagnóstico clínico, el plan de tratamiento ni la causa. La interpretación la hace el médico con la historia, el examen y la comorbilidad (Kapur y cols., 2017). Del ejemplo se deduce algo que el IAH promedio no muestra: el cuadro depende de la posición y de la etapa, y esa información es la que orienta una medida posicional o un estudio de titulación (→ H31).
 
 ### SAHOS pediátrico
 
@@ -341,7 +341,7 @@ La apnea obstructiva del niño es distinta de la del adulto en la causa, la clí
 - **Clínica.** El ronquido es el síntoma de entrada: la guía recomienda **preguntar por el ronquido a todos los niños** (Marcus y cols., 2012). La consecuencia de la apnea no es solo somnolencia: incluye alteraciones del sistema nervioso central (conducta, atención), retraso de crecimiento y enuresis (Kaditis y cols., 2016). <!-- verificar: lista de síntomas nocturnos y diurnos (respiración bucal, pausas, sudoración; hiperactividad y bajo rendimiento escolar más que somnolencia) y edad de mayor frecuencia (2 a 8 años); confirmar en Marcus 2012 o Kaditis 2016. -->
 - **Estudio.** La guía recomienda polisomnografía en el niño con ronquido y síntomas o signos de apnea; si no está disponible, pueden considerarse pruebas alternativas o derivar a un especialista (Marcus y cols., 2012).
 - **Números.** Las reglas de la AASM para niños difieren de las del adulto: una apnea obstructiva dura al menos el equivalente a **2 respiraciones** basales (no 10 s), una apnea central exige 20 s o 2 respiraciones con despertar o desaturación de 3 % o más, y la hipopnea (caída de ≥ 30 % durante al menos 2 respiraciones con desaturación de 3 % o despertar) se parece a la del adulto salvo por la duración (Berry y cols., 2012). Los cortes de gravedad son menores: en niños de hasta 13 años un IAH de **1 o más** se considera anormal, aunque se discute el significado de valores de 1 a 1,9 (Jadhav y cols., 2025). La prevalencia de apnea obstructiva diagnosticada con estudio de sueño en niños va de 1 a 4 %, según los criterios (Lumeng y Chervin, 2008). <!-- verificar: la fuente del IAH ≥ 1 como anormal en niños es una revisión terciaria (Cureus, 2025); confirmar en la guía de Marcus 2012, en la declaración de la ERS (Kaditis 2016) o en la clasificación internacional (ICSD-3). Además, esa revisión da cortes de gravedad (leve 1-4,9; moderada 5-9,9; grave > 9) que no se reproducen aquí hasta verificarlos. -->
-- **Tratamiento.** La adenoamigdalectomía es la primera línea en niños con hipertrofia adenoamigdalina; la presión positiva continua se indica si no se opera o si la apnea persiste; se agrega pérdida de peso si hay sobrepeso; los corticoides nasales son una opción en la apnea leve (Marcus y cols., 2012). Los niños con IAH mayor de 5, o con IAH de 1 a 5 y morbilidad o factores de persistencia, se benefician del tratamiento (Kaditis y cols., 2016). El detalle está en → H30.
+- **Tratamiento.** La adenoamigdalectomía es la primera línea en niños con hipertrofia adenoamigdalina; la presión positiva continua se indica si no se opera o si la apnea persiste; se agrega pérdida de peso si hay sobrepeso; los corticoides nasales son una opción en la apnea leve (Marcus y cols., 2012). Los niños con IAH mayor de 5, o con IAH de 1 a 5 y morbilidad o factores de persistencia, se benefician del tratamiento (Kaditis y cols., 2016). El detalle está en → H31.
 
 ## Errores frecuentes
 

@@ -1,4 +1,4 @@
-# H28. Espirometría
+# H29. Espirometría
 
 :::objetivos En esta herramienta
 - Explicar qué pregunta responde la espirometría, qué no mide, y por qué un libro de ORL la incluye (la vía aérea superior y la inferior son una sola vía).
@@ -20,7 +20,7 @@ Se pide para confirmar o descartar una **obstrucción del flujo de aire** (el as
 
 **Por qué está en un libro de ORL.** La nariz, la faringe, la laringe, la tráquea y los bronquios forman una sola vía por donde pasa el aire (→ B1). Tres razones prácticas:
 
-- **Rinitis y asma coexisten.** La rinitis suele preceder al asma y la empeora; la alteración de las vías aéreas bajas puede existir sin síntomas en pacientes con rinitis sola (Compalati y cols., 2010). En una serie de la literatura, entre el 60 % y el 78 % de los pacientes con asma tenían además rinitis alérgica (Grossman, 1997). Quien ve en la consulta una rinitis alérgica (→ cap. 36, → H27) puede necesitar saber si la vía aérea baja también está comprometida, y la espirometría es una de las formas de averiguarlo.
+- **Rinitis y asma coexisten.** La rinitis suele preceder al asma y la empeora; la alteración de las vías aéreas bajas puede existir sin síntomas en pacientes con rinitis sola (Compalati y cols., 2010). En una serie de la literatura, entre el 60 % y el 78 % de los pacientes con asma tenían además rinitis alérgica (Grossman, 1997). Quien ve en la consulta una rinitis alérgica (→ cap. 36, → H28) puede necesitar saber si la vía aérea baja también está comprometida, y la espirometría es una de las formas de averiguarlo.
 - **Una obstrucción de la vía aérea superior se ve en la curva.** Un estrechamiento en la laringe o la tráquea deja una forma característica de la curva flujo-volumen, a veces antes de que el FEV1 se altere (Stanojevic y cols., 2022; Miller y Hyatt, 1973). Una disnea que "parece asma" y no responde al tratamiento puede ser una obstrucción alta.
 - **Una maniobra mal hecha puede confundirse con enfermedad.** La guía de asma advierte que un FEV1 o un PEF reducidos pueden deberse a falta de esfuerzo o a una obstrucción laríngea inducible (Global Initiative for Asthma, 2024). Saber leer la curva evita una conclusión equivocada.
 
@@ -43,7 +43,7 @@ Dos propiedades del sistema respiratorio determinan cuánto aire se mueve con un
 
 Un espirómetro registra el aire que entra y sale por la boca. En reposo, el volumen de cada respiración es el **volumen corriente (TV)**, de unos 500 mL en un adulto (Betts y cols., 2022). Si se inspira al máximo se agrega el **volumen de reserva inspiratorio (IRV)**; si se espira al máximo, el **volumen de reserva espiratorio (ERV)**. Aun después de la espiración máxima queda aire en el pulmón: el **volumen residual (RV)**. Las **capacidades** son sumas de volúmenes (Wanger y cols., 2005; Betts y cols., 2022).
 
-:::imagen ilustraciones/h28-volumenes.svg ancho=100% Espirograma de un adulto de ejemplo (los litros son ilustrativos): respiración tranquila, inspiración máxima y espiración máxima. La capacidad vital (VC) es todo lo que se puede mover; el volumen residual, en gris, no sale del tórax y por eso el espirómetro no lo ve. Imagen propia.
+:::imagen ilustraciones/h29-volumenes.svg ancho=100% Espirograma de un adulto de ejemplo (los litros son ilustrativos): respiración tranquila, inspiración máxima y espiración máxima. La capacidad vital (VC) es todo lo que se puede mover; el volumen residual, en gris, no sale del tórax y por eso el espirómetro no lo ve. Imagen propia.
 :::
 
 Tabla: Volúmenes y capacidades pulmonares
@@ -75,7 +75,7 @@ En la **capacidad vital forzada** el paciente inspira al máximo hasta TLC y esp
 
 Al espirar con fuerza, los músculos suben la **presión pleural** (la que rodea al pulmón). Esa misma presión se transmite a la vía aérea intratorácica y la comprime desde fuera. Dentro de la vía aérea, la presión baja desde el alvéolo (presión alveolar) hasta cero en la boca. Hay un punto en el trayecto donde la presión dentro del tubo iguala a la presión pleural de fuera: el **punto de igual presión**. **De ese punto hacia la boca**, la vía aérea queda comprimida; **del alvéolo hasta ese punto**, la presión que empuja el aire es solo la **retracción elástica** del pulmón a ese volumen, porque la presión alveolar es la suma de la pleural y la elástica (Mead y cols., 1967).
 
-:::imagen ilustraciones/h28-esfuerzo.svg ancho=100% A. Con más esfuerzo sube la presión pleural y el punto de igual presión se corre hacia el alvéolo, pero la presión que empuja el aire hasta él, la retracción elástica, es la misma (10 cmH₂O en el ejemplo, cifras ilustrativas). B. Tres espiraciones con esfuerzos distintos: el pico cambia, el tramo final de la curva es el mismo. Imagen propia.
+:::imagen ilustraciones/h29-esfuerzo.svg ancho=100% A. Con más esfuerzo sube la presión pleural y el punto de igual presión se corre hacia el alvéolo, pero la presión que empuja el aire hasta él, la retracción elástica, es la misma (10 cmH₂O en el ejemplo, cifras ilustrativas). B. Tres espiraciones con esfuerzos distintos: el pico cambia, el tramo final de la curva es el mismo. Imagen propia.
 :::
 
 La consecuencia es la **independencia del esfuerzo**: a un volumen pulmonar dado, hay un flujo máximo que no se supera por más fuerza que se haga (Hyatt y cols., 1958; Mead y cols., 1967). Empujar más sube también la presión que comprime la vía aérea. Es la razón por la que la espirometría es **reproducible** y mide el pulmón y no la voluntad del paciente. Tiene una condición: que el esfuerzo sea máximo desde el principio. La parte inicial de la curva, y en particular el **PEF**, sí depende del esfuerzo; el tramo final no (figura B). Si el paciente no se esfuerza, la curva sale distinta y el examen es inválido.
@@ -151,7 +151,7 @@ Una maniobra **aceptable** es la que cumple los criterios de inicio, de transcur
 - **Fin.** Cualquiera de estas condiciones indica que la maniobra terminó bien: una **meseta** en la curva volumen-tiempo (el volumen cambia menos de 0,025 L en 1 segundo); un tiempo espiratorio de **15 segundos**; o, si el paciente no puede espirar tanto, que repetidamente alcance la misma FVC. Ya no hay una duración mínima exigida (Graham y cols., 2019).
 - **Maniobra «útil» (*usable*).** La que no cumple todos los criterios pero aun así sirve: por ejemplo, una con tos tras el primer segundo, cuya FVC es aprovechable pero cuyo FEV1 no (Graham y cols., 2019).
 
-:::imagen ilustraciones/h28-maniobra.svg ancho=100% Una maniobra normal de ejemplo. A. Curva flujo-volumen: sube hasta el PEF, baja hasta flujo cero en la FVC y vuelve por la inspiración forzada. B. Curva volumen-tiempo: el FEV1 se lee al primer segundo; la meseta (sombreada) marca el final. Los números son de ejemplo. Imagen propia.
+:::imagen ilustraciones/h29-maniobra.svg ancho=100% Una maniobra normal de ejemplo. A. Curva flujo-volumen: sube hasta el PEF, baja hasta flujo cero en la FVC y vuelve por la inspiración forzada. B. Curva volumen-tiempo: el FEV1 se lee al primer segundo; la meseta (sombreada) marca el final. Los números son de ejemplo. Imagen propia.
 :::
 
 ### Cuántas maniobras
@@ -262,7 +262,7 @@ La espirometría se interpreta mirando las **curvas**, no solo los números: la 
 - **Flujo-volumen.** Flujo en el eje vertical y volumen espirado en el horizontal. Se lee la forma: el pico, la caída y si el descenso es recto o cóncavo.
 - **Volumen-tiempo.** Volumen en el eje vertical y tiempo en el horizontal. Se lee el FEV1, el tiempo en llegar a la meseta y si la meseta existe.
 
-:::imagen ilustraciones/h28-patrones.svg ancho=100% Los tres patrones alterados, calculados a partir de un mismo modelo de espiración forzada (los valores son de ejemplo). Obstrucción: el flujo cae a cada volumen, la curva es cóncava y el volumen sale despacio (FEV1/FVC bajo). Restricción: la curva es pequeña pero conserva su forma y el aire sale rápido (la razón es normal o alta). Mixto: las dos cosas. Imagen propia.
+:::imagen ilustraciones/h29-patrones.svg ancho=100% Los tres patrones alterados, calculados a partir de un mismo modelo de espiración forzada (los valores son de ejemplo). Obstrucción: el flujo cae a cada volumen, la curva es cóncava y el volumen sale despacio (FEV1/FVC bajo). Restricción: la curva es pequeña pero conserva su forma y el aire sale rápido (la razón es normal o alta). Mixto: las dos cosas. Imagen propia.
 :::
 
 En la **obstrucción**, la curva flujo-volumen tiene una **forma cóncava** hacia el eje de volumen: la espiración se frena, porque las vías estrechadas se cierran antes. En la curva volumen-tiempo, el FEV1 es bajo en relación con la FVC y la meseta tarda en llegar (en el ejemplo, cerca de 9 segundos) (Stanojevic y cols., 2022). En la **restricción**, el volumen es menor, y la curva es pequeña y estrecha con el pico conservado; la meseta llega pronto. En la **obstrucción mixta** se suma lo bajo de las dos.
@@ -279,7 +279,7 @@ La forma de la curva depende de **dónde** está el estrechamiento y de **si ced
 
 (Stanojevic y cols., 2022). La relación **FIF50/FEF50** ayuda a distinguirlos: cercana a 1 en la fija, menor de 1 en la variable extratorácica y mayor de 1 en la intratorácica (Stanojevic y cols., 2022).
 
-:::imagen ilustraciones/h28-via-aerea.svg ancho=100% Curvas flujo-volumen con un tope de flujo de 3 L/s en la espiración, en la inspiración o en ambas. Debajo de cada curva, el PEF y la razón FIF50/FEF50 calculada con el modelo de ejemplo: 0,71 en la variable extratorácica, 2,17 en la intratorácica y 1,00 en la fija. Imagen propia.
+:::imagen ilustraciones/h29-via-aerea.svg ancho=100% Curvas flujo-volumen con un tope de flujo de 3 L/s en la espiración, en la inspiración o en ambas. Debajo de cada curva, el PEF y la razón FIF50/FEF50 calculada con el modelo de ejemplo: 0,71 en la variable extratorácica, 2,17 en la intratorácica y 1,00 en la fija. Imagen propia.
 :::
 
 La ausencia de estas formas **no descarta** una lesión de la vía aérea central; si hay sospecha, se deriva a una evaluación directa (endoscopia o imagen) (Stanojevic y cols., 2022). La espirometría no localiza ni diagnostica la lesión: lo hacen el examen laríngeo y la imagen. <!-- verificar: ejemplos clínicos para cada tipo (p. ej. estenosis traqueal posintubación, parálisis de cuerdas vocales, tumores, bocio); confirmar en una revisión y citar. -->
@@ -306,7 +306,7 @@ El cálculo del cambio del FEV1: (2,35 − 1,95) × 100 / 3,50 = 11,4 %. Observa
 
 Casi todos los errores se ven en la curva, y la curva se mira **durante** el examen, antes de que el paciente se levante, para corregir la siguiente maniobra.
 
-:::imagen ilustraciones/h28-errores.svg ancho=100% La forma que dejan los errores más comunes (flujo-volumen salvo el inicio lento, que se ve en la curva volumen-tiempo). La línea gris punteada es la maniobra normal. Los números del ejemplo salen del modelo de la figura. Imagen propia.
+:::imagen ilustraciones/h29-errores.svg ancho=100% La forma que dejan los errores más comunes (flujo-volumen salvo el inicio lento, que se ve en la curva volumen-tiempo). La línea gris punteada es la maniobra normal. Los números del ejemplo salen del modelo de la figura. Imagen propia.
 :::
 
 - **Tos.** Aparece como caídas bruscas en la rama descendente. Una tos durante el primer segundo afecta el FEV1; la FVC puede seguir siendo aprovechable (Graham y cols., 2019). Se repite la maniobra.

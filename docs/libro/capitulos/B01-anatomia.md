@@ -351,7 +351,7 @@ Son **arterias terminales**, sin circulación colateral importante, y el laberin
 
 ## La nariz
 
-La nariz es la puerta de entrada de la vía aérea, y la audiología la mira porque comparte con el oído medio la trompa, la mucosa y los problemas. Se estudia por partes: la **pirámide** (lo que se ve), el **vestíbulo** y las **válvulas** (donde el aire encuentra su mayor resistencia), la **cavidad** con el **tabique**, los **cornetes** y los **meatos**, las **coanas** y los **senos paranasales**. Su fisiología (calentar, humedecer y filtrar el aire, el ciclo nasal, la resistencia) está en B2 y en las herramientas de rinología (→ H24-H26).
+La nariz es la puerta de entrada de la vía aérea, y la audiología la mira porque comparte con el oído medio la trompa, la mucosa y los problemas. Se estudia por partes: la **pirámide** (lo que se ve), el **vestíbulo** y las **válvulas** (donde el aire encuentra su mayor resistencia), la **cavidad** con el **tabique**, los **cornetes** y los **meatos**, las **coanas** y los **senos paranasales**. Su fisiología (calentar, humedecer y filtrar el aire, el ciclo nasal, la resistencia) está en B2 y en las herramientas de rinología (→ H25-H27).
 
 ### La pirámide nasal
 
@@ -367,9 +367,9 @@ La nariz externa tiene forma de pirámide: la **raíz** arriba, el **dorso** has
 
 El **vestíbulo nasal** es la entrada: va de la narina a la **válvula nasal**. Está tapizado de piel con pelos gruesos, las **vibrisas**, que atrapan las partículas más grandes.
 
-La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. La forman el borde inferior del cartílago lateral superior y el **tabique**, con la cabeza del cornete inferior y el piso abajo, y en un corte frontal es un triángulo con el vértice hacia arriba, con un ángulo de **10 a 15°**; su área es de apenas **40 a 60 mm²**, y aporta de la mitad a dos tercios de la resistencia nasal total (Pirola y cols., 2025). Un cambio mínimo del ángulo cambia mucho el flujo (→ H25). La **válvula externa** es la parte de la pared lateral (cartílago alar y partes blandas del ala) que se colapsa si inspiras fuerte con la nariz tapada.
+La **válvula nasal interna** es el punto más estrecho de toda la vía aérea. La forman el borde inferior del cartílago lateral superior y el **tabique**, con la cabeza del cornete inferior y el piso abajo, y en un corte frontal es un triángulo con el vértice hacia arriba, con un ángulo de **10 a 15°**; su área es de apenas **40 a 60 mm²**, y aporta de la mitad a dos tercios de la resistencia nasal total (Pirola y cols., 2025). Un cambio mínimo del ángulo cambia mucho el flujo (→ H26). La **válvula externa** es la parte de la pared lateral (cartílago alar y partes blandas del ala) que se colapsa si inspiras fuerte con la nariz tapada.
 
-**Por qué importa en el examen.** Cuando una persona dice que "no respira por la nariz", la causa puede estar en el tabique, en los cornetes o en las válvulas, y cada una se examina distinto. La maniobra de Cottle y la rinomanometría exploran esta región (→ H24, H25).
+**Por qué importa en el examen.** Cuando una persona dice que "no respira por la nariz", la causa puede estar en el tabique, en los cornetes o en las válvulas, y cada una se examina distinto. La maniobra de Cottle y la rinomanometría exploran esta región (→ H25, H26).
 
 ### El tabique nasal
 
@@ -402,7 +402,7 @@ Cada fosa tiene un **techo** (la lámina cribosa del etmoides, por donde pasan l
 - @92,66 | **Coana**: el límite posterior, donde la fosa se abre a la rinofaringe.
 :::
 
-Los **cornetes** hacen de acondicionadores de aire: ensanchan la superficie de la mucosa, y como son eréctiles (tienen plexos venosos), se hinchan y se contraen: de ahí el **ciclo nasal**, que alterna la congestión entre las dos fosas (→ B2, H25). Cuando la mucosa se inflama de forma persistente (alergia, vasoconstrictor), el cornete inferior obstruye (→ cap. 36).
+Los **cornetes** hacen de acondicionadores de aire: ensanchan la superficie de la mucosa, y como son eréctiles (tienen plexos venosos), se hinchan y se contraen: de ahí el **ciclo nasal**, que alterna la congestión entre las dos fosas (→ B2, H26). Cuando la mucosa se inflama de forma persistente (alergia, vasoconstrictor), el cornete inferior obstruye (→ cap. 36).
 
 ### Los meatos y el drenaje de los senos
 
@@ -458,7 +458,7 @@ Las **coanas** son las dos aberturas posteriores de las fosas, que las comunican
 - **Ramas del nervio vestibular:** VEMP y vHIT (→ H12, H18).
 - **Vía auditiva central:** ondas del PEAT, batería de procesamiento central (→ H10, H15).
 - **AICA y arteria laberíntica:** hipoacusia súbita con vértigo (→ cap. 12).
-- **Válvula nasal, cornetes, tabique:** rinomanometría y rinometría (→ H24-H26).
+- **Válvula nasal, cornetes, tabique:** rinomanometría y rinometría (→ H25-H27).
 :::
 
 :::sabias ¿Sabías que?

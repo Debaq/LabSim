@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H26 — Rinometría acústica.
+"""Herramienta H25 — Anamnesis rinológica y rinoscopía.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF
@@ -17,4 +17,4 @@ CASOS = [
 ]
 
 if __name__ == '__main__':
-    Capitulo('H26').generar(CASOS)
+    Capitulo('H25').generar(CASOS)

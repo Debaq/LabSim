@@ -34,4 +34,4 @@
 - Mesénquima y vérnix en el recién nacido; maduración del órgano de Corti y de la mielina (→ cap. 16, cap. 17).
 
 ### Nariz
-- Epitelio respiratorio, glándulas y tejido eréctil de los cornetes: la base de la respuesta al vasoconstrictor (→ H25, H26).
+- Epitelio respiratorio, glándulas y tejido eréctil de los cornetes: la base de la respuesta al vasoconstrictor (→ H26, H27).

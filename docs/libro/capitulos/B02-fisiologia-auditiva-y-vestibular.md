@@ -60,6 +60,6 @@
 - Compensación central, adaptación y sustitución: la base de la rehabilitación (→ H20).
 
 ### Nariz
-- Ciclo nasal, resistencia al flujo y válvula nasal; mucosa y respuesta al vasoconstrictor (→ H24-H26).
-- Acondicionamiento del aire: calentamiento, humidificación, filtrado y depuración mucociliar; papel de los cornetes y del flujo sanguíneo de la mucosa (→ H24, cap. 36).
-- Olfacción: hendidura olfatoria, transducción en la neurona receptora, bulbo, vía y corteza olfatoria; por qué la obstrucción nasal quita el olfato (→ H24, cap. 35).
+- Ciclo nasal, resistencia al flujo y válvula nasal; mucosa y respuesta al vasoconstrictor (→ H25-H27).
+- Acondicionamiento del aire: calentamiento, humidificación, filtrado y depuración mucociliar; papel de los cornetes y del flujo sanguíneo de la mucosa (→ H25, cap. 36).
+- Olfacción: hendidura olfatoria, transducción en la neurona receptora, bulbo, vía y corteza olfatoria; por qué la obstrucción nasal quita el olfato (→ H25, cap. 35).

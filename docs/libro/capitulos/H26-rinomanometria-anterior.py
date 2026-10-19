@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H28 — Espirometría.
+"""Herramienta H26 — Rinomanometría anterior.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF
@@ -17,4 +17,4 @@ CASOS = [
 ]
 
 if __name__ == '__main__':
-    Capitulo('H28').generar(CASOS)
+    Capitulo('H26').generar(CASOS)

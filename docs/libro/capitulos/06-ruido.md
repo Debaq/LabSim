@@ -12,7 +12,7 @@ El ruido es una causa evitable de hipoacusia, y la hipoacusia por ruido es una d
 
 ## Técnica en foco
 
-Este capítulo usa tres herramientas: las **emisiones otoacústicas** (→ H9), la **audiometría tonal**, en su versión clínica y en la de vigilancia ocupacional (→ H3, H23), y la **acufenometría**, que se describe aquí.
+Este capítulo usa tres herramientas: las **emisiones otoacústicas** (→ H9), la **audiometría tonal**, en su versión clínica y en la de vigilancia ocupacional (→ H3, H24), y la **acufenometría**, que se describe aquí.
 
 ### Las emisiones, frecuencia por frecuencia
 
@@ -32,7 +32,7 @@ Para la vigilancia, las emisiones tienen la misma lógica que la audiometría: v
 
 ### La audiometría de vigilancia, en lo justo
 
-Un trabajador expuesto a ruido entra a un **programa de vigilancia**. En Chile lo regula el PREXOR (MINSAL, 2013), y la técnica es la de la guía del ISP (2018). El detalle está en H3 y el programa completo en H23; aquí basta lo que necesitan los casos:
+Un trabajador expuesto a ruido entra a un **programa de vigilancia**. En Chile lo regula el PREXOR (MINSAL, 2013), y la técnica es la de la guía del ISP (2018). El detalle está en H3 y el programa completo en H24; aquí basta lo que necesitan los casos:
 
 - **Base.** Se toma al ingresar a la exposición. Es la audiometría contra la que se compara todo lo que viene. Si ya trae una muesca, esa muesca **no es de esta faena**, y queda escrito.
 - **Seguimiento.** Se repite mientras dure la exposición y se compara **contra la base**, no contra lo normal. Un cambio en 4 kHz importa aunque el oído siga "dentro de rangos".
@@ -373,7 +373,7 @@ Todo calza con el ruido: años de exposición con protección irregular, una mue
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural bilateral simétrica, con muesca en 4 kHz y recuperación en 8 kHz, de características cocleares. Emisiones ausentes desde 3 kHz en ambos oídos. Se sugiere evaluación médica y la evaluación que corresponda en su programa de vigilancia (→ H23, cap. 33). La escopeta suma ruido fuera del trabajo: el informe registra las dos exposiciones y no decide cuál pesó más; eso se discute en el cap. 34.
+Hipoacusia sensorioneural bilateral simétrica, con muesca en 4 kHz y recuperación en 8 kHz, de características cocleares. Emisiones ausentes desde 3 kHz en ambos oídos. Se sugiere evaluación médica y la evaluación que corresponda en su programa de vigilancia (→ H24, cap. 33). La escopeta suma ruido fuera del trabajo: el informe registra las dos exposiciones y no decide cuál pesó más; eso se discute en el cap. 34.
 
 :::ojo Ojo clínico
 La historia de Jorge tiene una audiometría "dentro de rangos" y, seis años después, otra que obligó a reforzar la protección. Lo que importa es **cuánto** cambió y **dónde**, y eso solo se puede decir si cada control se compara contra la base, frecuencia por frecuencia.
@@ -401,7 +401,7 @@ La historia cuenta la fisiología: años de desplazamientos temporales que se re
 
 #### Diagnóstico y qué sigue
 
-Hipoacusia sensorioneural bilateral simétrica, con muesca en 4 kHz y recuperación en 8 kHz, de características cocleares, con acúfeno bilateral. Por promedio es leve, y por eso se describe la muesca con palabras. Se sugiere evaluación médica. Trabaja expuesta a ruido: su empleador debería tenerla en un programa de vigilancia como a cualquier otro trabajador (→ H23, cap. 33). Necesita protección auditiva que le permita seguir oyendo los pedidos.
+Hipoacusia sensorioneural bilateral simétrica, con muesca en 4 kHz y recuperación en 8 kHz, de características cocleares, con acúfeno bilateral. Por promedio es leve, y por eso se describe la muesca con palabras. Se sugiere evaluación médica. Trabaja expuesta a ruido: su empleador debería tenerla en un programa de vigilancia como a cualquier otro trabajador (→ H24, cap. 33). Necesita protección auditiva que le permita seguir oyendo los pedidos.
 
 :::sabias ¿Sabías que?
 Existen tapones que bajan el sonido parejo en todas las frecuencias, pensados para músicos: atenúan menos que uno de espuma, pero el habla y la música se siguen entendiendo. Para alguien que "tiene que escuchar los pedidos", un tapón que se usa vale más que uno que protege más y se queda en el bolsillo.
@@ -409,7 +409,7 @@ Existen tapones que bajan el sonido parejo en todas las frecuencias, pensados pa
 
 :::comentario Prevención
 - **Primaria:** el ruido se reduce en su fuente: la mayor parte de la carga de pérdida por ruido ocupacional podría evitarse con controles de ingeniería (Nelson y cols., 2005). Con el protector, lo que mejor respaldo tiene es entrenar la colocación correcta del tapón, que redujo la exposición a corto plazo (evidencia de calidad moderada); la evidencia de que un programa completo reduzca la pérdida es de muy baja calidad (Tikka y cols., 2017).
-- **Secundaria:** la audiometría de vigilancia, con su línea de base y la comparación contra ella, detecta el cambio en 4 kHz antes de que afecte la conversación (PREXOR, MINSAL 2013; ISP, 2018; → H3 y H23).
+- **Secundaria:** la audiometría de vigilancia, con su línea de base y la comparación contra ella, detecta el cambio en 4 kHz antes de que afecte la conversación (PREXOR, MINSAL 2013; ISP, 2018; → H3 y H24).
 - **Terciaria:** al terminar la exposición la pérdida por ruido deja de avanzar más allá de la edad (ACOEM, 2003); el trabajador con pérdida que ya limita su comunicación se evalúa para audífonos (→ cap. 28).
 - **Para el paciente:** "El pitido después de un turno o de un concierto es una señal de daño: usa el protector bien puesto y pide tu audiometría de control."
 

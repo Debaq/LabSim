@@ -157,7 +157,7 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 83 | H19 | Lempert "para el apogeotrópico" | variante de partir al lado afectado | se quitó "apogeotrópico" (la guía la pone en el geotrópico) | Bhattacharyya 2017, tabla 13 | E · preguntar | |
 | 84 | H19 | "Epley modificado" (45/15/0/15/45/135°, 3-5 min) | maniobra propia | se mantiene; no se halló en la literatura | — | A · verificar | |
 
-## Rehabilitación, audífonos y ocupacional (H20-H23, 2026-10-16)
+## Rehabilitación, audífonos y ocupacional (H20-H24, 2026-10-16)
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
@@ -175,63 +175,63 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 96 | H22 | Funciones adaptativas en la medición | no pide desactivarlas | el protocolo; recuadro: ANSI S3.22 las pide desactivadas; anotar lo activo | ANSI/ASA S3.22 | P | |
 | 97 | H22 | Conclusión "audibilidad buena/regular/mala" | desde la medición en acoplador | el protocolo; recuadro: la norma es de control de calidad, no de verificación | IEC 60118-0:2022 | P | |
 | 98 | H22 | Tubo en la cámara | ~1,5 cm | el protocolo; longitud normativa del HA-2 sin verificar | — | A · verificar | |
-| 99 | H23 | Base del capítulo | "screening" y "operativo" son de salud, no ocupacionales | se enseña desde las normas (OSHA, NIOSH, ISO 1999, ISP 2026, PREXOR) | — | A · vacío | |
-| 100 | H3, H23 | Guía ISP | citada la v2.0 (2018): umbral "3 de 5" | ISP v3.0 (2026): Carhart-Jerger modificado, 2 de 3, inicio ≥ 30 dB HL, verificación subjetiva semanal con 2 sujetos | ISP 2026 | A · actualizado | hecho |
+| 99 | H24 | Base del capítulo | "screening" y "operativo" son de salud, no ocupacionales | se enseña desde las normas (OSHA, NIOSH, ISO 1999, ISP 2026, PREXOR) | — | A · vacío | |
+| 100 | H3, H24 | Guía ISP | citada la v2.0 (2018): umbral "3 de 5" | ISP v3.0 (2026): Carhart-Jerger modificado, 2 de 3, inicio ≥ 30 dB HL, verificación subjetiva semanal con 2 sujetos | ISP 2026 | A · actualizado | hecho |
 
 ## Nariz
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 101 | H24 | Síntoma de la anamnesis | "sufre descongestión y/o prurito nasal" | "congestión" | — | E | |
-| 102 | H24 | Aclimatación | 15 min en la preparación; "desde los 10 min" en la rinoscopía | ambos: la rinoscopía desde 10 min, para medir (H25, H26) completar 15 | Clement 2005 (tiempo sin verificar) | P | |
-| 103 | H24 | Limpieza del espéculo | alcohol y algodón | el protocolo; recuadro: instrumento semicrítico, pide desinfección de alto nivel o desechable | Rutala 2008 (CDC) | P | |
-| 104 | H24 | Síntomas | anamnesis cualitativa | el protocolo; recuadro: NOSE, SNOT-22 y escala visual análoga | Stewart 2004; Hopkins 2009 | A · vacío | |
-| 105 | H24 | Palpación de senos | se palpan | el protocolo; recuadro: poco valor diagnóstico por sí sola | EPOS 2020; AAO-HNS 2015 | P | |
-| 106 | H24 | Rinoscopía anterior frente a endoscopia | solo rinoscopía anterior | el protocolo; recuadro: la endoscopia la hace el especialista | EPOS 2020 | A | |
-| 107 | H24 | Maniobra de Cottle y vasoconstrictor en la rinoscopía | no los pide | recuadro (Cottle no es la rinomanometría de Cottle) | Rhee 2010 | A · vacío | |
-| 108 | H26 | Repetibilidad | 3 registros con diferencia ≤ 0,03 en MCA1 y MCA2 | el protocolo; recuadro: límites de error probados en una fosa estándar | Hilberg y Pedersen 2000 | P | |
-| 109 | H26 | Volúmenes | Vol 1 narina-segundo mínimo, Vol 2 primeros 5 cm (la clase da 32 y 64 mm: no calza con el protocolo) | el protocolo; recuadro: publicar volumen 0-5 cm (2-5 cm para mucosa) y los dos mínimos con su distancia | Hilberg y Pedersen 2000; Clement 2005 | P | |
-| 110 | H26 | Vasoconstrictor | solo si el reposo sale fuera de rango; 2 pulverizaciones y 15 min (la clase: 2 + 2 con 5 min) | el protocolo; recuadro: en estudios de referencia se descongestiona a todos; estandarizar | Corey 1998; Clement 2005 | P | |
-| 111 | H26 | "Disminuidos respecto del reposo" | resultado normal | poco habitual: revisar la técnica antes de informar | — (criterio del redactor) | P · revertir | |
-| 112 | H26 | Errata | "1.7" suelto | omitido | — | E | |
-| 113 | H26 | Valores de referencia de la clase | MCA1 0,4 cm², distancias ~0,22 cm, "30 %" con vasoconstrictor, CPAP 0,6 cm², "CSA1 = escotadura C" | no se usan: mezclan mm y cm y contradicen MCA1 = válvula; el libro dice que no hay norma universal | Corey 1998; Millqvist 1998 | E (clase) | |
-| 114 | H25 | Unidad de la resistencia | "Pa/seg/cm" | Pa/(cm³/s) | física: presión / flujo volumétrico | E | |
-| 115 | H25 | Valor de referencia | unilateral ≤ 0,4 Pa/(cm³/s) a 150 Pa | el protocolo; recuadro: Ren 2018 da 0,51 unilateral y 0,24 total en sanos; 4PR propone log Reff por percentiles | Ren 2018; Vogt 2016 | P | |
-| 116 | H25 | Espera tras el vasoconstrictor | 15 min | el protocolo; recuadro: 4PR mide a los 10 min con xilometazolina 0,1 %; el consenso pide estandarizar | Vogt 2016; Clement 2005 | P | |
-| 117 | H25 | Resistencia que sube tras el vasoconstrictor | "efecto rebote" | el protocolo; recuadro: el rebote es por uso crónico, primero descartar ciclo nasal, fuga o respiración distinta | — (verificar) | P | |
-| 118 | H25 | Plazos previos | 48 h sin fármacos, 24 h sin tabaco ni alcohol, 15 min de aclimatación | el protocolo; recuadro: los plazos varían entre fuentes | Clement 2005 | P | |
-| 119 | H25 | Vasoconstrictor en qué fosa | solo en la fosa que supera la referencia | el protocolo (4PR descongestiona ambas en la mayoría) | Vogt 2016 | P | |
-| 120 | H25 | "150 Pa = radio 2" (clase) | — | no se usa: el radio de Broms (200) no equivale a 150 Pa | Broms 1982 | E (clase) | |
-| 121 | H25 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
-| 169 | H25 | Patrones de curva de Cottle (2026-10-18) | sin protocolo; la tabla sale solo de la clase de Cottle y Broms | se dejó con `verificar`: no se halló fuente primaria (Tucker 1977 solo resumen) | — | A · verificar | |
-| 170 | H25 | "Flujo inspiratorio laminar constante hasta 150 Pa" (clase) | — | no se usa: choca con la meseta de la curva que ya enseña H25 (flujo turbulento, ecuación de Rohrer) | Rohrer 1915; Clement 2005 | E (clase) | |
-| 171 | H27 | Qué se mide en el prick (clase) | sin protocolo; la clase mide el diámetro del **eritema** | se mide la **pápula** (diámetro mayor y perpendicular); el eritema no entra | Heinzerling 2013; Bernstein 2008 | E (clase) | |
-| 172 | H27 | Fármacos que se suspenden (clase) | la clase pide retirar teofilina y antihistamínicos H2 | teofilina no altera la reactividad cutánea y los H2 casi no: no se suspenden | Heinzerling 2013 | E (clase) | |
-| 173 | H27 | Omalizumab (clase) | suspender hasta 6 meses antes | más de 4 semanas | Heinzerling 2013 | A (clase) | |
-| 174 | H27 | Betabloqueadores (clase) | contraindicación absoluta | precaución (riesgo de anafilaxia más difícil de tratar); decide el médico | Heinzerling 2013; Bernstein 2008 | P (clase) | |
-| 175 | H27 | "El tamaño de la pápula no indica gravedad" (clase) | — | cierto para la gravedad clínica, pero una pápula mayor hace más probable que la sensibilización sea relevante | Bousquet 2012; Heinzerling 2013 | A (clase) | |
+| 101 | H25 | Síntoma de la anamnesis | "sufre descongestión y/o prurito nasal" | "congestión" | — | E | |
+| 102 | H25 | Aclimatación | 15 min en la preparación; "desde los 10 min" en la rinoscopía | ambos: la rinoscopía desde 10 min, para medir (H26, H27) completar 15 | Clement 2005 (tiempo sin verificar) | P | |
+| 103 | H25 | Limpieza del espéculo | alcohol y algodón | el protocolo; recuadro: instrumento semicrítico, pide desinfección de alto nivel o desechable | Rutala 2008 (CDC) | P | |
+| 104 | H25 | Síntomas | anamnesis cualitativa | el protocolo; recuadro: NOSE, SNOT-22 y escala visual análoga | Stewart 2004; Hopkins 2009 | A · vacío | |
+| 105 | H25 | Palpación de senos | se palpan | el protocolo; recuadro: poco valor diagnóstico por sí sola | EPOS 2020; AAO-HNS 2015 | P | |
+| 106 | H25 | Rinoscopía anterior frente a endoscopia | solo rinoscopía anterior | el protocolo; recuadro: la endoscopia la hace el especialista | EPOS 2020 | A | |
+| 107 | H25 | Maniobra de Cottle y vasoconstrictor en la rinoscopía | no los pide | recuadro (Cottle no es la rinomanometría de Cottle) | Rhee 2010 | A · vacío | |
+| 108 | H27 | Repetibilidad | 3 registros con diferencia ≤ 0,03 en MCA1 y MCA2 | el protocolo; recuadro: límites de error probados en una fosa estándar | Hilberg y Pedersen 2000 | P | |
+| 109 | H27 | Volúmenes | Vol 1 narina-segundo mínimo, Vol 2 primeros 5 cm (la clase da 32 y 64 mm: no calza con el protocolo) | el protocolo; recuadro: publicar volumen 0-5 cm (2-5 cm para mucosa) y los dos mínimos con su distancia | Hilberg y Pedersen 2000; Clement 2005 | P | |
+| 110 | H27 | Vasoconstrictor | solo si el reposo sale fuera de rango; 2 pulverizaciones y 15 min (la clase: 2 + 2 con 5 min) | el protocolo; recuadro: en estudios de referencia se descongestiona a todos; estandarizar | Corey 1998; Clement 2005 | P | |
+| 111 | H27 | "Disminuidos respecto del reposo" | resultado normal | poco habitual: revisar la técnica antes de informar | — (criterio del redactor) | P · revertir | |
+| 112 | H27 | Errata | "1.7" suelto | omitido | — | E | |
+| 113 | H27 | Valores de referencia de la clase | MCA1 0,4 cm², distancias ~0,22 cm, "30 %" con vasoconstrictor, CPAP 0,6 cm², "CSA1 = escotadura C" | no se usan: mezclan mm y cm y contradicen MCA1 = válvula; el libro dice que no hay norma universal | Corey 1998; Millqvist 1998 | E (clase) | |
+| 114 | H26 | Unidad de la resistencia | "Pa/seg/cm" | Pa/(cm³/s) | física: presión / flujo volumétrico | E | |
+| 115 | H26 | Valor de referencia | unilateral ≤ 0,4 Pa/(cm³/s) a 150 Pa | el protocolo; recuadro: Ren 2018 da 0,51 unilateral y 0,24 total en sanos; 4PR propone log Reff por percentiles | Ren 2018; Vogt 2016 | P | |
+| 116 | H26 | Espera tras el vasoconstrictor | 15 min | el protocolo; recuadro: 4PR mide a los 10 min con xilometazolina 0,1 %; el consenso pide estandarizar | Vogt 2016; Clement 2005 | P | |
+| 117 | H26 | Resistencia que sube tras el vasoconstrictor | "efecto rebote" | el protocolo; recuadro: el rebote es por uso crónico, primero descartar ciclo nasal, fuga o respiración distinta | — (verificar) | P | |
+| 118 | H26 | Plazos previos | 48 h sin fármacos, 24 h sin tabaco ni alcohol, 15 min de aclimatación | el protocolo; recuadro: los plazos varían entre fuentes | Clement 2005 | P | |
+| 119 | H26 | Vasoconstrictor en qué fosa | solo en la fosa que supera la referencia | el protocolo (4PR descongestiona ambas en la mayoría) | Vogt 2016 | P | |
+| 120 | H26 | "150 Pa = radio 2" (clase) | — | no se usa: el radio de Broms (200) no equivale a 150 Pa | Broms 1982 | E (clase) | |
+| 121 | H26 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
+| 169 | H26 | Patrones de curva de Cottle (2026-10-18) | sin protocolo; la tabla sale solo de la clase de Cottle y Broms | se dejó con `verificar`: no se halló fuente primaria (Tucker 1977 solo resumen) | — | A · verificar | |
+| 170 | H26 | "Flujo inspiratorio laminar constante hasta 150 Pa" (clase) | — | no se usa: choca con la meseta de la curva que ya enseña H26 (flujo turbulento, ecuación de Rohrer) | Rohrer 1915; Clement 2005 | E (clase) | |
+| 171 | H28 | Qué se mide en el prick (clase) | sin protocolo; la clase mide el diámetro del **eritema** | se mide la **pápula** (diámetro mayor y perpendicular); el eritema no entra | Heinzerling 2013; Bernstein 2008 | E (clase) | |
+| 172 | H28 | Fármacos que se suspenden (clase) | la clase pide retirar teofilina y antihistamínicos H2 | teofilina no altera la reactividad cutánea y los H2 casi no: no se suspenden | Heinzerling 2013 | E (clase) | |
+| 173 | H28 | Omalizumab (clase) | suspender hasta 6 meses antes | más de 4 semanas | Heinzerling 2013 | A (clase) | |
+| 174 | H28 | Betabloqueadores (clase) | contraindicación absoluta | precaución (riesgo de anafilaxia más difícil de tratar); decide el médico | Heinzerling 2013; Bernstein 2008 | P (clase) | |
+| 175 | H28 | "El tamaño de la pápula no indica gravedad" (clase) | — | cierto para la gravedad clínica, pero una pápula mayor hace más probable que la sensibilización sea relevante | Bousquet 2012; Heinzerling 2013 | A (clase) | |
 | 176 | 36 | Rendimiento del prick frente a la provocación nasal | el cap. 36 atribuía 85 % / 77 % a Heinzerling 2013 | son de Nevis 2016 (7 estudios, 430 pacientes; no 609) | Nevis 2016 | A | |
-| 177 | 36 | "El prick no está en el flujo del libro y no lo hace quien mide la nariz" | — | quitado al escribir H27; el capítulo remite a H27 sin decir quién lo ejecuta | — | A | |
-| 178 | H28 | Meseta de fin de prueba (clase) | sin protocolo; la clase dice "< 0,025 ml durante ≥ 1 s" | 0,025 **L** (25 mL) en el último segundo | Graham 2019 | E (clase) | |
-| 179 | H28 | Repetibilidad (clase) | ≤ 150 mL "o 5 %" | ≤ 150 mL entre las dos mejores FVC y FEV1 (mayores de 6 años), sin el 5 % | Graham 2019 | A (clase) | |
-| 180 | H28 | Contraindicaciones "absolutas" (clase) | lista de absolutas y relativas | ATS/ERS 2019 solo da contraindicaciones relativas, que decide el médico; su lista incluye cirugía o infección de senos y oído medio en la última semana | Graham 2019 | A (clase) | |
-| 181 | H28 | Criterio de obstrucción y de normalidad (clase) | FEV1/FVC < 0,70 y 80 % del previsto | LLN y z-score (GLI); el 0,70 fijo de GOLD va en el recuadro de normas | Stanojevic 2022; Quanjer 2012 | P (clase) | |
-| 182 | H28 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
-| 183 | H28 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
+| 177 | 36 | "El prick no está en el flujo del libro y no lo hace quien mide la nariz" | — | quitado al escribir H28; el capítulo remite a H28 sin decir quién lo ejecuta | — | A | |
+| 178 | H29 | Meseta de fin de prueba (clase) | sin protocolo; la clase dice "< 0,025 ml durante ≥ 1 s" | 0,025 **L** (25 mL) en el último segundo | Graham 2019 | E (clase) | |
+| 179 | H29 | Repetibilidad (clase) | ≤ 150 mL "o 5 %" | ≤ 150 mL entre las dos mejores FVC y FEV1 (mayores de 6 años), sin el 5 % | Graham 2019 | A (clase) | |
+| 180 | H29 | Contraindicaciones "absolutas" (clase) | lista de absolutas y relativas | ATS/ERS 2019 solo da contraindicaciones relativas, que decide el médico; su lista incluye cirugía o infección de senos y oído medio en la última semana | Graham 2019 | A (clase) | |
+| 181 | H29 | Criterio de obstrucción y de normalidad (clase) | FEV1/FVC < 0,70 y 80 % del previsto | LLN y z-score (GLI); el 0,70 fijo de GOLD va en el recuadro de normas | Stanojevic 2022; Quanjer 2012 | P (clase) | |
+| 182 | H29 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
+| 183 | H29 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
 
-## Sueño (H29, H30; clase de SAHOS, 2026-10-18)
+## Sueño (H30, H31; clase de SAHOS, 2026-10-18)
 
 | # | Cap. | Tema | Protocolo | Libro hoy | Fuente | Tipo | Decisión |
 |---|---|---|---|---|---|---|---|
-| 184 | H30 | Tolerancia del CPAP (clase) | sin protocolo; "bien tolerado, efectos escasos y leves" | se matiza: no adherencia cercana a un tercio y abandono por efectos adversos de hasta un cuarto | Rotenberg 2016; Lebret 2017 | A (clase) | |
-| 185 | H30 | Primer control (clase) | a las 4 semanas | "control temprano": el patrón de uso se fija en los primeros días | Kribbs 1993; Weaver y Grunstein 2008 | P (clase) | |
-| 186 | H30 | IAH residual objetivo (clase) | < 5 objetivo, < 10 aceptable | son criterios de la titulación (Kushida 2008), no de seguimiento; queda `verificar` | Kushida 2008 | A (clase) · verificar | |
-| 187 | H30 | Terapia posicional "con mejor adherencia" (clase) | — | solo a corto plazo; el CPAP baja más el IAH | Ha 2014 | A (clase) | |
-| 188 | H30 | Epworth: mejoría de 2 puntos (clase, citando Cazan 2017 y Mickelson 2020) | — | no se pudo verificar; no entra al texto | — | verificar (clase) | |
-| 189 | H29 | Prevalencia del SAHOS (clase) | sin protocolo; "14 % hombres y 5 % mujeres con IAH ≥ 5 y síntomas" | Young 1993: IAH ≥ 5 en 24 % y 9 %; con somnolencia, 4 % y 2 %. En Chile, 49 % con IAH ≥ 5 por poligrafía | Young 1993; Saldías 2020 | E (clase) | |
-| 190 | H29 | Gravedad pediátrica (clase) | cortes 1 / 5 / 10 | no se verificaron; el capítulo da IAH > 1 como anormal (Marcus 2012) sin cortes de gravedad | Marcus 2012; Kaditis 2016 | verificar (clase) | |
-| 191 | H29 | Cifras de la clase sin fuente | obesidad "60-90 %", "≈ 80 % sin diagnosticar", poligrafía "válida en 75 %", canales de los tipos II y III | no se usan hasta tener fuente | — | verificar (clase) | |
-| 192 | H29 | Ondas lentas de N3 (clase) | delta 0,5-4 Hz | la regla de la AASM puntúa N3 con ondas de 0,5-2 Hz y > 75 µV: las dos, en el recuadro de normas | Berry 2012 | A (clase) | |
+| 184 | H31 | Tolerancia del CPAP (clase) | sin protocolo; "bien tolerado, efectos escasos y leves" | se matiza: no adherencia cercana a un tercio y abandono por efectos adversos de hasta un cuarto | Rotenberg 2016; Lebret 2017 | A (clase) | |
+| 185 | H31 | Primer control (clase) | a las 4 semanas | "control temprano": el patrón de uso se fija en los primeros días | Kribbs 1993; Weaver y Grunstein 2008 | P (clase) | |
+| 186 | H31 | IAH residual objetivo (clase) | < 5 objetivo, < 10 aceptable | son criterios de la titulación (Kushida 2008), no de seguimiento; queda `verificar` | Kushida 2008 | A (clase) · verificar | |
+| 187 | H31 | Terapia posicional "con mejor adherencia" (clase) | — | solo a corto plazo; el CPAP baja más el IAH | Ha 2014 | A (clase) | |
+| 188 | H31 | Epworth: mejoría de 2 puntos (clase, citando Cazan 2017 y Mickelson 2020) | — | no se pudo verificar; no entra al texto | — | verificar (clase) | |
+| 189 | H30 | Prevalencia del SAHOS (clase) | sin protocolo; "14 % hombres y 5 % mujeres con IAH ≥ 5 y síntomas" | Young 1993: IAH ≥ 5 en 24 % y 9 %; con somnolencia, 4 % y 2 %. En Chile, 49 % con IAH ≥ 5 por poligrafía | Young 1993; Saldías 2020 | E (clase) | |
+| 190 | H30 | Gravedad pediátrica (clase) | cortes 1 / 5 / 10 | no se verificaron; el capítulo da IAH > 1 como anormal (Marcus 2012) sin cortes de gravedad | Marcus 2012; Kaditis 2016 | verificar (clase) | |
+| 191 | H30 | Cifras de la clase sin fuente | obesidad "60-90 %", "≈ 80 % sin diagnosticar", poligrafía "válida en 75 %", canales de los tipos II y III | no se usan hasta tener fuente | — | verificar (clase) | |
+| 192 | H30 | Ondas lentas de N3 (clase) | delta 0,5-4 Hz | la regla de la AASM puntúa N3 con ondas de 0,5-2 Hz y > 75 µV: las dos, en el recuadro de normas | Berry 2012 | A (clase) | |
 
 ## Capítulos clínicos de ABR
 
@@ -294,7 +294,7 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 165 | H20, 32 | Corte del TUG | 13,5 s en H20 (fuente sin cotejar) | WFG usa > 15 s; unificar | WFG 2022 | A · verificar | |
 | 166 | 35 | Lectura del vasoconstrictor | "igual que en reposo = mecánica" | se aclara que es estructural, no necesariamente tabique (también la válvula); se leen las dos fases | Rhee 2010 | A | |
 | 167 | 36 | "Disminución total = vasomotora" | rótulo del examen | se mantiene en el informe; recuadro: "rinitis vasomotora" es la idiopática y el término se desaconseja | Hellings 2017; Solé 2025 | P | |
-| 168 | 36, H25 | "Efecto rebote" (#117) | tras el vasoconstrictor | discutido: Graf 1995/1997 y Vaidyanathan 2010 lo muestran; Mortuaire 2013 y Hagen 2026 no; el `verificar` de H25 se puede cerrar con estas fuentes | ver cap. 36 | A | |
+| 168 | 36, H26 | "Efecto rebote" (#117) | tras el vasoconstrictor | discutido: Graf 1995/1997 y Vaidyanathan 2010 lo muestran; Mortuaire 2013 y Hagen 2026 no; el `verificar` de H26 se puede cerrar con estas fuentes | ver cap. 36 | A | |
 <!-- tanda 10: -->
 
 ## Encontradas fuera del texto de los capítulos

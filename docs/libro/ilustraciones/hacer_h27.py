@@ -1,258 +1,280 @@
 #!/usr/bin/env python3
-"""Dibuja las ilustraciones de la herramienta H27 (prick test):
+"""Dibuja las ilustraciones de la herramienta H27 (rinometria acustica):
 
-    h27-mapa.svg      antebrazo volar: zona útil, distancias y orden de las punciones
-    h27-lectura.svg   cómo se mide la pápula (diámetro mayor y perpendicular) y el umbral de 3 mm
-    h27-curso.svg     curso temporal de la reacción inmediata y ventana de lectura
-    h27-resultado.svg el mismo antebrazo a los 15 minutos, con las pápulas a escala
+    h27-equipo.svg       tubo, adaptador nasal, microfono y el eco que vuelve de la fosa nasal
+    h27-curva.svg        curva area-distancia normal: escotaduras I y C, MCA1/MCA2, volumenes
+    h27-vasoconstrictor.svg  reposo y post-vasoconstrictor en cuatro situaciones
+    h27-limites.svg      lo que la curva no ve: detras de un estrechamiento y mas alla de ~5 cm
 
-SVG propios, no IA. Las pápulas del ejemplo son inventadas (no son datos de un paciente);
-el curso temporal es un esquema cualitativo: el momento del máximo y de la lectura salen de
-Heinzerling y cols. (2013) y Bernstein y cols. (2008), la forma de la curva no es un dato.
-Las cifras que aparecen en el capítulo salen de este script (se imprimen al correrlo)."""
-import math
+SVG propios, no IA. Son ESQUEMAS: las curvas no son datos de nadie y no llevan escala de area;
+la unica cifra de distancia sostenida por la literatura es la ventana fiable de ~5 cm
+(Hilberg y Pedersen, 2000; Cakmak y cols., 2005)."""
 import pathlib
-import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from hacer_h25 import Lienzo, TINTA, TENUE, GRILLA, FUERTE, AVISO, RETRO, COCLEAR, IZQ  # noqa: E402
-
-PIEL, PIEL_BORDE = '#f3dcc8', '#b98f72'
-ROJO_FLARE, PAPULA = '#e8564a', '#fbeee6'
+TINTA, TENUE, GRILLA, FUERTE = '#24101a', '#8a8a90', '#e7e5e0', '#cfccc5'
+COCLEAR, RETRO, AVISO, AZUL = '#c0571c', '#21796c', '#c62f3a', '#2a5d9f'
+F = "font-family=\"'Plus Jakarta Sans', sans-serif\""
 AQUI = pathlib.Path(__file__).parent
-
-# Ejemplo: (sigla, nombre, ancho mm, alto mm). El mismo orden de punciones en el mapa y el resultado.
-SITIOS = [
-    ('NEG', 'Control negativo (suero)', 0, 0),
-    ('Dp', 'D. pteronyssinus', 8, 7),
-    ('Df', 'D. farinae', 6, 5),
-    ('Gato', 'Gato (epitelio)', 3, 3),
-    ('Perro', 'Perro (epitelio)', 2, 2),
-    ('Pasto', 'Mezcla de pastos', 5, 4),
-    ('Alt', 'Alternaria', 0, 0),
-    ('HIS', 'Control positivo (histamina)', 6, 5),
-]
-SUELO = 3  # mm: umbral de positividad
+ESCALA = 1.2
 
 
-def brazo(c, x0, x1, y0, y1, esc):
-    """Antebrazo en horizontal: codo a la izquierda, muñeca a la derecha."""
-    r = (y1 - y0) / 2
-    c.raw(f'<path d="M{x0},{y0 + 8} Q{x0 - 22},{(y0 + y1) / 2} {x0},{y1 - 8} L{x1},{y1 - 14} '
-          f'L{x1 + 90},{y1 - 20} Q{x1 + 112},{(y0 + y1) / 2} {x1 + 90},{y0 + 20} L{x1},{y0 + 14} Z" '
-          f'fill="{PIEL}" stroke="{PIEL_BORDE}" stroke-width="1.6" stroke-linejoin="round"/>')
-    c.l(x0 + 2, y0 + 9, x0 + 2, y1 - 9, PIEL_BORDE, 1.3, '4 3')      # pliegue del codo
-    c.l(x1, y0 + 14, x1, y1 - 14, PIEL_BORDE, 1.3, '4 3')            # pliegue de la muñeca
+class Lienzo:
+    def __init__(self, w, h):
+        self.w, self.h, self.out = w, h, []
+
+    def t(self, x, y, s, size=9, color=TINTA, anchor='middle', peso=400):
+        self.out.append(f'<text x="{x:.1f}" y="{y:.1f}" {F} font-size="{size * ESCALA:.1f}" fill="{color}" '
+                        f'text-anchor="{anchor}" font-weight="{peso}">{s}</text>')
+
+    def l(self, x1, y1, x2, y2, color=TINTA, w=1, dash=None, extra=''):
+        d = f' stroke-dasharray="{dash}"' if dash else ''
+        self.out.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
+                        f'stroke="{color}" stroke-width="{w}"{d}{extra}/>')
+
+    def poli(self, pts, color, w=2, dash=None, fill='none', extra=''):
+        d = f' stroke-dasharray="{dash}"' if dash else ''
+        p = ' '.join(f'{x:.1f},{y:.1f}' for x, y in pts)
+        self.out.append(f'<polyline points="{p}" fill="{fill}" stroke="{color}" stroke-width="{w}" '
+                        f'stroke-linejoin="round" stroke-linecap="round"{d}{extra}/>')
+
+    def rect(self, x, y, w, h, fill='none', stroke=None, sw=1, rx=0, extra=''):
+        s = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ''
+        self.out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{rx}" fill="{fill}"{s}{extra}/>')
+
+    def circ(self, x, y, r, fill='#fff', stroke=TINTA, sw=1.6):
+        self.out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>')
+
+    def guardar(self, nombre, defs=''):
+        svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {self.w} {self.h}" '
+               f'width="{self.w}" height="{self.h}"><defs>{defs}</defs>'
+               f'<rect width="{self.w}" height="{self.h}" fill="#fff"/>' + ''.join(self.out) + '</svg>')
+        (AQUI / nombre).write_text(svg, encoding='utf-8')
+        print(nombre)
 
 
-def mapa():
-    esc = 20  # px por cm
-    c = Lienzo(780, 330)
-    c.t(14, 20, 'Antebrazo, cara palmar (volar): el codo a la izquierda y la muñeca a la derecha', 10, TINTA, 'start', 700)
-    x0, x1, y0, y1 = 70, 410, 80, 230
-    brazo(c, x0, x1, y0, y1, esc)
-    # zonas sin puncionar: 3 cm desde cada pliegue
-    c.raw(f'<rect x="{x0 + 2}" y="{y0 + 10}" width="{3 * esc}" height="{y1 - y0 - 20}" fill="{AVISO}" opacity=".10"/>')
-    c.raw(f'<rect x="{x1 - 3 * esc}" y="{y0 + 14}" width="{3 * esc}" height="{y1 - y0 - 28}" fill="{AVISO}" opacity=".10"/>')
-    c.t(x0 + 3 * esc / 2 + 2, y0 - 8, 'pliegue del codo', 8, TENUE)
-    c.t(x1, y0 - 8, 'pliegue de la muñeca', 8, TENUE)
-    c.t(x0 + 3 * esc / 2 + 2, y1 + 18, '3 cm', 8, AVISO, 'middle', 700)
-    c.t(x1 - 3 * esc / 2, y1 + 18, '3 cm', 8, AVISO, 'middle', 700)
-    c.t((x0 + x1) / 2, y1 + 34, 'franjas rojas: no se punciona a menos de 3 cm de los pliegues', 8, AVISO)
-    paso = 2.5 * esc
-    xs0, ys = x0 + 3 * esc + 10, (y0 + 48, y0 + 48 + paso)
-    pos = []
-    for k, (sig, nom, a, b) in enumerate(SITIOS):
-        f, col = divmod(k, 4)
-        # fila 0: izquierda a derecha; fila 1: continúa de izquierda a derecha
-        x, y = xs0 + col * paso, ys[f]
-        pos.append((x, y))
-        c.raw(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{TINTA}"/>')
-        c.raw(f'<circle cx="{x - 0:.1f}" cy="{y - 17:.1f}" r="8.5" fill="#fff" stroke="{TINTA}" stroke-width="1.2"/>')
-        c.t(x, y - 13.8, str(k + 1), 8.5, TINTA, 'middle', 700)
-        c.t(x, y + 17, sig, 8, COCLEAR if sig in ('NEG', 'HIS') else TINTA, 'middle', 700)
-    # cota: distancia entre punciones
-    xa, ya = pos[1]
-    xb, yb = pos[2]
-    c.l(xa, ya - 34, xb, yb - 34, TINTA, 1, extra=' marker-start="url(#cota)" marker-end="url(#cota)"')
-    c.t((xa + xb) / 2, ya - 38, '2,5 cm', 8, TINTA, 'middle', 700)
-    xc, yc = pos[0]
-    xd, yd = pos[4]
-    c.l(xc - 20, yc, xd - 20, yd, TINTA, 1, extra=' marker-start="url(#cota)" marker-end="url(#cota)"')
-    c.t(xc - 26, (yc + yd) / 2 + 3, '2,5 cm', 8, TINTA, 'end', 700)
-    # escala
-    c.l(x1 - 4 * esc - 20, y1 + 58, x1 - 2 * esc - 20, y1 + 58, TINTA, 2)
-    c.t(x1 - 3 * esc - 20, y1 + 72, '2 cm (escala)', 8, TENUE)
-    # leyenda
-    lx, ly = 560, 74
-    c.t(lx, ly - 22, 'Orden de aplicación', 10, TINTA, 'start', 700)
-    for k, (sig, nom, a, b) in enumerate(SITIOS):
-        y = ly + k * 24
-        c.raw(f'<circle cx="{lx + 8}" cy="{y - 3}" r="8.5" fill="#fff" stroke="{TINTA}" stroke-width="1.2"/>')
-        c.t(lx + 8, y, str(k + 1), 8.5, TINTA, 'middle', 700)
-        c.t(lx + 24, y, f'{sig} · {nom}', 8.5, TINTA, 'start', 400)
-    c.t(lx, ly + 8 * 24 + 6, 'Se empieza por el negativo y se termina', 8, TENUE, 'start')
-    c.t(lx, ly + 8 * 24 + 18, 'por la histamina, que reacciona primero.', 8, TENUE, 'start')
-    cota = ('<marker id="cota" markerWidth="6" markerHeight="6" refX="3" refY="3" markerUnits="userSpaceOnUse" '
-            'orient="auto"><path d="M3,0 L3,6" stroke="#24101a" stroke-width="1.2"/></marker>')
-    c.guardar('h27-mapa.svg', cota)
-    return pos
+def punta(id_, color):
+    return (f'<marker id="{id_}" markerWidth="8" markerHeight="8" refX="6" refY="3.5" '
+            f'markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="{color}"/></marker>')
 
 
-def pap(c, x, y, a, b, esc, rot=-12, flare=True):
-    """Pápula (a × b mm) con su eritema, a escala esc px/mm."""
-    if a == 0:
-        c.raw(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.6" fill="#8d4a3e"/>')
-        return
-    if flare:
-        r = max(a, b) * esc * 1.2 + 4
-        c.raw(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{r:.1f}" ry="{r * .92:.1f}" fill="{ROJO_FLARE}" opacity=".28" '
-              f'transform="rotate({rot} {x:.1f} {y:.1f})"/>')
-    c.raw(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{a * esc / 2:.1f}" ry="{b * esc / 2:.1f}" fill="{PAPULA}" '
-          f'stroke="#d9a897" stroke-width="1" transform="rotate({rot} {x:.1f} {y:.1f})"/>')
-    c.raw(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.3" fill="#8d4a3e"/>')
+def spline(pts, n=14):
+    """Catmull-Rom por tramos (x creciente): curva suave que pasa por los puntos."""
+    P = [pts[0]] + list(pts) + [pts[-1]]
+    out = []
+    for i in range(1, len(P) - 2):
+        p0, p1, p2, p3 = P[i - 1], P[i], P[i + 1], P[i + 2]
+        for k in range(n):
+            u = k / n
+            u2, u3 = u * u, u * u * u
+            x = 0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * u + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * u2
+                       + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * u3)
+            y = 0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * u + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * u2
+                       + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * u3)
+            out.append((x, y))
+    out.append(pts[-1])
+    return out
 
 
-def regla(c, x, y, mm, esc, color=TINTA):
-    c.l(x, y, x + mm * esc, y, color, 1.2)
-    for k in range(mm + 1):
-        h = 9 if k % 5 == 0 else 5
-        c.l(x + k * esc, y, x + k * esc, y - h, color, 1)
-        if k % 2 == 0:
-            c.t(x + k * esc, y + 11, str(k), 8, color)
-    c.t(x + mm * esc + 14, y + 3, 'mm', 8, color, 'start')
+# Curvas esquematicas: (distancia en cm, area relativa 0-1). Sin escala de area.
+NORMAL = [(0, .34), (.5, .52), (1.0, .56), (1.7, .26), (2.4, .50), (2.9, .58), (3.4, .40), (4.2, .66), (5.0, .86), (6.0, .95), (7.0, 1.0)]
+VASOMOTOR_REPOSO = [(0, .30), (.5, .46), (1.0, .50), (1.7, .20), (2.4, .34), (2.9, .36), (3.4, .20), (4.2, .42), (5.0, .62), (6.0, .78), (7.0, .88)]
+SEPTAL_REPOSO = [(0, .30), (.5, .40), (1.0, .38), (1.7, .10), (2.4, .22), (2.9, .30), (3.4, .22), (4.2, .38), (5.0, .56), (6.0, .74), (7.0, .85)]
+SEPTAL_PVC = [(0, .31), (.5, .42), (1.0, .41), (1.7, .12), (2.4, .26), (2.9, .36), (3.4, .27), (4.2, .46), (5.0, .62), (6.0, .78), (7.0, .88)]
+MIXTA_PVC = [(0, .32), (.5, .50), (1.0, .52), (1.7, .17), (2.4, .38), (2.9, .46), (3.4, .30), (4.2, .54), (5.0, .72), (6.0, .86), (7.0, .94)]
+SEPTAL_V = SEPTAL_REPOSO  # alias
 
 
-def lectura():
-    esc = 20  # px por mm
+def ejes(c, x0, y0, w, h, xmax=7, ticks=range(0, 8), etiqueta=True, tam=8):
+    X = lambda d: x0 + d / xmax * w
+    c.l(x0, y0 + h, x0 + w, y0 + h, FUERTE, 1)
+    c.l(x0, y0, x0, y0 + h, FUERTE, 1)
+    for d in ticks:
+        c.l(X(d), y0 + h, X(d), y0 + h + 4, FUERTE, 1)
+        c.t(X(d), y0 + h + 15, d, tam, TENUE)
+    if etiqueta:
+        c.t(x0 + w / 2, y0 + h + 30, 'distancia desde la narina (cm)', tam + .5, TENUE)
+    return X
+
+
+def curva_pts(c_pts, X, Y):
+    return [(X(a), Y(b)) for a, b in spline(c_pts)]
+
+
+# ---------------------------------------------------------------- equipo
+def equipo():
     c = Lienzo(700, 330)
-    c.t(14, 20, 'A · Medir una pápula', 10, TINTA, 'start', 700)
-    c.t(380, 20, 'B · El umbral de 3 mm', 10, TINTA, 'start', 700)
-    # A: piel, pápula irregular y seudópodo
-    c.raw(f'<rect x="14" y="34" width="330" height="270" rx="10" fill="{PIEL}" stroke="{PIEL_BORDE}" stroke-width="1.4"/>')
-    cx, cy = 150, 170
-    c.raw(f'<ellipse cx="{cx}" cy="{cy}" rx="{12 * esc / 2:.0f}" ry="{9.5 * esc / 2:.0f}" fill="{ROJO_FLARE}" opacity=".25" '
-          f'transform="rotate(-25 {cx} {cy})"/>')
-    # pápula de 8 x 6 mm girada -25 grados, con un seudópodo
-    ang = math.radians(-25)
-    pts = []
-    for k in range(48):
-        t = 2 * math.pi * k / 48
-        rx, ry = 4 * esc, 3 * esc
-        x, y = rx * math.cos(t), ry * math.sin(t)
-        pts.append((cx + x * math.cos(ang) - y * math.sin(ang), cy + x * math.sin(ang) + y * math.cos(ang)))
-    c.poli(pts + [pts[0]], '#d9a897', 1.2, fill=PAPULA)
-    c.raw(f'<circle cx="{cx}" cy="{cy}" r="2" fill="#8d4a3e"/>')
-    # diámetro mayor y perpendicular
-    ux, uy = math.cos(ang), math.sin(ang)
-    vx, vy = -uy, ux
-    c.l(cx - 4 * esc * ux, cy - 4 * esc * uy, cx + 4 * esc * ux, cy + 4 * esc * uy, AVISO, 1.8)
-    c.l(cx - 3 * esc * vx, cy - 3 * esc * vy, cx + 3 * esc * vx, cy + 3 * esc * vy, IZQ, 1.8)
-    c.t(cx + 4 * esc * ux + 6, cy + 4 * esc * uy - 6, 'D mayor', 8.5, AVISO, 'start', 700)
-    c.t(cx - 3 * esc * vx - 6, cy - 3 * esc * vy - 8, 'D perpendicular', 8.5, IZQ, 'end', 700)
-    c.t(cx, cy + 112, 'Se anota 8 × 6 mm; el diámetro mayor (8 mm) manda', 8.5, TINTA, 'middle', 700)
-    c.t(cx, cy + 124, 'La zona roja tenue es el eritema: no se mide como pápula', 8, TENUE)
-    regla(c, 40, 60, 14, esc * 0.9)
-    # B: tres círculos a escala frente a la regla
-    c.raw(f'<rect x="380" y="34" width="306" height="270" rx="10" fill="{PIEL}" stroke="{PIEL_BORDE}" stroke-width="1.4"/>')
-    ex = 14
-    base = 120
-    datos = [('Negativo', 0, 'sin pápula', RETRO), ('Perro', 2, '2 mm', TENUE), ('Gato', 3, '3 mm', AVISO), ('Dp', 8, '8 mm', AVISO)]
-    xs = [412, 470, 530, 622]
-    for (nom, mm, rot, col), x in zip(datos, xs):
-        pap(c, x, base, mm, mm, ex, rot=0, flare=False)
-        c.t(x, base + 70, nom, 8.5, TINTA, 'middle', 700)
-        c.t(x, base + 82, rot, 8, col, 'middle', 700)
-    c.raw(f'<circle cx="{xs[2]}" cy="{base}" r="{SUELO * ex / 2 + 5}" fill="none" stroke="{AVISO}" stroke-width="1" stroke-dasharray="3 3"/>')
-    c.t(530, 218, '2 mm no alcanza; 3 mm sí', 9, TINTA, 'middle', 700)
-    c.t(530, 232, 'Positivo: pápula de 3 mm o más, y 3 mm', 8, TENUE)
-    c.t(530, 244, 'mayor que la del control negativo', 8, TENUE)
-    regla(c, 410, 270, 14, ex)
-    c.guardar('h27-lectura.svg')
+    c.t(14, 20, 'Cómo el sonido mide la nariz', 10.5, TINTA, 'start', 700)
+    yc = 120
+    # tubo
+    c.rect(70, yc - 16, 260, 32, '#f6f4ef', FUERTE, 1.4, 4)
+    c.t(200, yc + 4, 'tubo de onda (sección constante)', 8.5, TENUE)
+    # fuente
+    c.rect(34, yc - 22, 34, 44, '#fff', TINTA, 1.6, 4)
+    c.t(51, yc + 3, 'F', 11, TINTA, 'middle', 700)
+    # microfono en el tubo
+    c.rect(185, yc - 36, 14, 20, '#fff', TINTA, 1.6, 3)
+    c.t(192, yc - 41, 'M', 9, TINTA, 'middle', 700)
+    # adaptador
+    pts = [(330, yc - 16), (352, yc - 9), (352, yc + 9), (330, yc + 16)]
+    c.poli(pts, TINTA, 1.6, fill='#e7e5e0')
+    # fosa nasal: ancho segun la curva normal (esquema)
+    x0, xl = 352, 330
+    base = yc
+    def ancho(d):
+        sp = spline(NORMAL)
+        best = min(sp, key=lambda p: abs(p[0] - d))
+        return 4 + best[1] * 22
+    top, bot = [], []
+    for i in range(0, 331, 5):
+        d = i / 330 * 7
+        a = ancho(d)
+        top.append((x0 + i, base - a))
+        bot.append((x0 + i, base + a))
+    c.poli(top + bot[::-1], '#b9b4aa', 1.6, fill='#f3e3dc')
+    c.poli([(x0, base - ancho(0))] + [(x0, base + ancho(0))], '#b9b4aa', 1.0)
+    # notas anatomicas
+    xv = x0 + 1.7 / 7 * 330
+    xc = x0 + 3.4 / 7 * 330
+    c.l(xv, base - 44, xv, base - ancho(1.7) - 3, COCLEAR, 1.2)
+    c.t(xv, base - 48, 'válvula nasal', 8.5, COCLEAR, 'middle', 700)
+    c.l(xc, base + 50, xc, base + ancho(3.4) + 3, RETRO, 1.2)
+    c.t(xc, base + 62, 'cabeza del cornete inferior', 8.5, RETRO, 'middle', 700)
+    c.t(x0 + 300, base - 36, 'hacia la rinofaringe', 8, TENUE, 'middle')
+    c.l(x0 + 255, base - 28, x0 + 333, base - 28, TENUE, 1, extra=' marker-end="url(#pt)"')
+    # pulso y eco
+    c.l(80, yc - 6, 180, yc - 6, AZUL, 2, extra=' marker-end="url(#pa)"')
+    c.l(300, yc + 8, 215, yc + 8, AVISO, 2, extra=' marker-end="url(#pr)"')
+    c.t(130, yc - 20, 'pulso', 8.5, AZUL, 'middle', 700)
+    c.t(258, yc + 28, 'eco', 8.5, AVISO, 'middle', 700)
+    # leyenda inferior (panel de tiempo -> distancia)
+    y2 = 250
+    c.t(14, y2 - 24, 'Lo que registra el micrófono y lo que se hace con ello', 10.5, TINTA, 'start', 700)
+    c.l(34, y2 + 28, 330, y2 + 28, FUERTE, 1)
+    c.l(34, y2 - 12, 34, y2 + 28, FUERTE, 1)
+    eco = [(34, y2 + 10), (60, y2 + 10), (70, y2 - 6), (86, y2 + 20), (110, y2 + 8), (140, y2 + 14), (160, y2 - 4), (180, y2 + 18),
+           (210, y2 + 10), (260, y2 + 12), (330, y2 + 11)]
+    c.poli(spline(eco), AVISO, 1.6)
+    c.t(182, y2 + 44, 'tiempo en que vuelve cada eco →', 8.5, TENUE)
+    c.l(350, y2 + 8, 400, y2 + 8, TINTA, 1.4, extra=' marker-end="url(#pt)"')
+    c.t(375, y2 - 2, 'velocidad', 8, TENUE)
+    c.t(375, y2 + 22, 'del sonido', 8, TENUE)
+    c.t(540, y2 - 4, 'un eco más tardío viene de más adentro', 9, TINTA, 'middle', 600)
+    c.t(540, y2 + 12, 'un eco más fuerte o más débil dice si la sección', 9, TINTA, 'middle', 600)
+    c.t(540, y2 + 28, 'se estrechó o se ensanchó', 9, TINTA, 'middle', 600)
+    c.t(14, 322, 'F es la fuente del pulso, M el micrófono. La fosa dibujada usa la misma forma que la curva de la figura siguiente.', 8, TENUE, 'start')
+    defs = punta('pa', AZUL) + punta('pr', AVISO) + punta('pt', TINTA)
+    c.guardar('h27-equipo.svg', defs)
 
 
-def curso():
-    c = Lienzo(700, 335)
-    x0, y0, w, h = 70, 40, 580, 210
-    c.t(14, 20, 'Reacción inmediata de la piel según el tiempo (esquema cualitativo)', 10, TINTA, 'start', 700)
-    c.l(x0, y0 + h, x0 + w, y0 + h, TINTA, 1.4)
-    c.l(x0, y0, x0, y0 + h, TINTA, 1.4)
-    esc = w / 60
-    for m in range(0, 61, 10):
-        c.l(x0 + m * esc, y0 + h, x0 + m * esc, y0 + h + 5, TINTA, 1.2)
-        c.t(x0 + m * esc, y0 + h + 18, str(m), 8.5)
-    c.t(x0 + w / 2, y0 + h + 34, 'minutos desde la punción', 9, TINTA)
-    c.raw(f'<text x="22" y="{y0 + h / 2}" font-family="\'Plus Jakarta Sans\', sans-serif" font-size="10.8" fill="{TINTA}" '
-          f'text-anchor="middle" transform="rotate(-90 22 {y0 + h / 2})">tamaño de la pápula</text>')
-    # ventana de lectura 15-20
-    c.raw(f'<rect x="{x0 + 15 * esc}" y="{y0}" width="{5 * esc}" height="{h}" fill="{COCLEAR}" opacity=".16"/>')
-    c.t(x0 + 17.5 * esc, y0 + 12, 'lectura', 8.5, COCLEAR, 'middle', 700)
-    c.t(x0 + 17.5 * esc, y0 + 24, '15–20 min', 8.5, COCLEAR, 'middle', 700)
+# ---------------------------------------------------------------- curva normal
+def curva():
+    c = Lienzo(700, 400)
+    x0, y0, w, h = 70, 40, 560, 230
+    c.t(14, 20, 'La curva área-distancia de una fosa nasal', 10.5, TINTA, 'start', 700)
+    X = ejes(c, x0, y0, w, h)
+    Y = lambda a: y0 + h - a * h * 0.9
+    c.t(34, y0 + h / 2, 'área de la sección', 8.5, TENUE, 'middle', 400)
+    c.out[-1] = c.out[-1].replace(f'x="34.0" y="{y0 + h / 2:.1f}"', f'x="34.0" y="{y0 + h / 2:.1f}" transform="rotate(-90 34 {y0 + h / 2:.1f})"')
+    # zona 0-5 cm
+    c.rect(X(0), y0, X(5) - X(0), h, '#f4ece6')
+    c.rect(X(5), y0, X(7) - X(5), h, '#f1f1f1')
+    c.t(X(6), y0 + h - 34, 'cada vez menos fiable', 8.5, TENUE, 'middle', 700)
+    c.t(X(6), y0 + h - 21, '(senos, rinofaringe)', 8, TENUE)
+    pts = curva_pts(NORMAL, X, Y)
+    c.poli(pts, TINTA, 2.4)
+    # minimos
+    for d, a, nom, col, dx in ((1.7, .26, 'MCA1 · escotadura I', COCLEAR, 0), (3.4, .40, 'MCA2 · escotadura C', RETRO, 0)):
+        c.l(X(d), Y(a), X(d), y0 + h, col, 1.2, '3 3')
+        c.circ(X(d), Y(a), 5, '#fff', col, 2)
+    c.t(X(1.7) + 12, Y(.26) + 14, 'MCA1 · escotadura I', 9.5, COCLEAR, 'start', 700)
+    c.t(X(1.7) + 12, Y(.26) + 27, 'válvula nasal (istmo)', 8.5, COCLEAR, 'start', 600)
+    c.t(X(3.4) + 12, Y(.40) + 14, 'MCA2 · escotadura C', 9.5, RETRO, 'start', 700)
+    c.t(X(3.4) + 12, Y(.40) + 27, 'cabeza del cornete inferior', 8.5, RETRO, 'start', 600)
+    c.t(X(1.7) - 4, y0 + h - 6, 'Dist 1', 8, COCLEAR, 'middle', 700)
+    c.t(X(3.4) - 4, y0 + h - 6, 'Dist 2', 8, RETRO, 'middle', 700)
+    c.t(X(0) + 6, y0 + h - 6, 'narina', 8.5, TENUE, 'start')
+    # volumenes
+    yv = y0 + h + 46
+    c.l(X(0), yv, X(3.4), yv, RETRO, 2)
+    c.l(X(0), yv - 4, X(0), yv + 4, RETRO, 2); c.l(X(3.4), yv - 4, X(3.4), yv + 4, RETRO, 2)
+    c.t(X(1.7), yv + 14, 'Vol 1: de la narina al segundo mínimo', 8.5, RETRO, 'middle', 700)
+    c.l(X(0), yv + 24, X(5), yv + 24, COCLEAR, 2)
+    c.l(X(0), yv + 20, X(0), yv + 28, COCLEAR, 2); c.l(X(5), yv + 20, X(5), yv + 28, COCLEAR, 2)
+    c.t(X(2.5), yv + 38, 'Vol 2: los primeros 5 cm', 8.5, COCLEAR, 'middle', 700)
+    c.t(14, 392, 'Las distancias de los mínimos varían entre personas.', 8, TENUE, 'start')
+    c.guardar('h27-curva.svg')
 
-    def curva(pico_t, pico_h, sube, baja, cola):
-        pts = []
-        for k in range(0, 601):
-            t = k / 10
-            if t <= pico_t:
-                v = pico_h * (1 - math.exp(-sube * t)) / (1 - math.exp(-sube * pico_t))
-            else:
-                v = pico_h * math.exp(-baja * (t - pico_t)) if t < cola else pico_h * math.exp(-baja * (t - pico_t))
-            pts.append((x0 + t * esc, y0 + h - v * h))
-        return pts
-    # histamina: pico ~10 min; alérgeno: pico ~15-20 min y más sostenido
-    c.poli(curva(9, 0.62, .35, .05, 60), AVISO, 2.4)
-    c.poli(curva(17, 0.80, .18, .045, 60), IZQ, 2.4)
-    c.t(x0 + 26 * esc, y0 + h - 0.34 * h - 14, 'histamina (control positivo): máximo cerca de los 8–10 min', 8.5, AVISO, 'start', 700)
-    c.t(x0 + 26 * esc, y0 + h - 0.80 * h + 4, 'alérgeno: máximo a los 15–20 min', 8.5, IZQ, 'start', 700)
-    c.t(x0 + w / 2, 306, 'La pápula desaparece, habitualmente, en cerca de una hora.', 8.5, TINTA)
-    c.t(x0 + w / 2, 322, 'Después puede venir una fase tardía (horas), mediada por células y no por IgE; no se usa para leer el examen.', 8, TENUE)
-    c.guardar('h27-curso.svg')
 
-
-def resultado():
-    ex = 4.2       # px por mm
-    paso = 25 * ex  # 2,5 cm
-    c = Lienzo(700, 330)
-    c.t(14, 20, 'El mismo antebrazo a los 15 minutos (pápulas a escala)', 10, TINTA, 'start', 700)
-    x0, y0 = 36, 40
-    c.raw(f'<rect x="{x0}" y="{y0}" width="{4 * paso + 40}" height="{2 * paso + 30}" rx="16" fill="{PIEL}" '
-          f'stroke="{PIEL_BORDE}" stroke-width="1.6"/>')
-    for k, (sig, nom, a, b) in enumerate(SITIOS):
-        f, col = divmod(k, 4)
-        x, y = x0 + 40 + col * paso, y0 + 44 + f * (paso + 4)
-        pap(c, x, y, a, b, ex, rot=-15 if k % 2 else 10)
-        c.raw(f'<circle cx="{x - 34}" cy="{y - 24}" r="8.5" fill="#fff" stroke="{TINTA}" stroke-width="1.2"/>')
-        c.t(x - 34, y - 21, str(k + 1), 8.5, TINTA, 'middle', 700)
-        mx = max(a, b)
-        veredicto = 'control' if sig in ('NEG', 'HIS') else ('positivo' if mx >= SUELO else 'negativo')
-        txt = f'{a} × {b} mm' if a else 'sin pápula'
-        col_t = AVISO if veredicto == 'positivo' else TINTA
-        c.t(x, y + 36, sig, 8.5, TINTA, 'middle', 700)
-        c.t(x, y + 47, txt, 8, col_t, 'middle', 700 if veredicto == 'positivo' else 400)
-    # escala de 1 cm
-    c.l(x0 + 4, y0 + 2 * paso + 52, x0 + 4 + 10 * ex, y0 + 2 * paso + 52, TINTA, 2)
-    c.t(x0 + 4 + 5 * ex, y0 + 2 * paso + 66, '1 cm', 8, TENUE)
-    # lectura a la derecha
-    rx = x0 + 4 * paso + 70
-    c.t(rx, 66, 'Lectura', 10, TINTA, 'start', 700)
-    lineas = [
-        ('Negativo: sin pápula', 'el examen es interpretable', RETRO),
-        ('Histamina: 6 mm', 'la piel reaccionó (≥ 3 mm)', RETRO),
-        ('Positivos: Dp, Df, gato, pasto', 'pápula ≥ 3 mm', AVISO),
-        ('Negativos: perro, Alternaria', 'menos de 3 mm', TINTA),
+# ---------------------------------------------------------------- vasoconstrictor
+def vasoconstrictor():
+    c = Lienzo(700, 470)
+    c.t(14, 20, 'Reposo y después del vasoconstrictor', 10.5, TINTA, 'start', 700)
+    paneles = [
+        ('A · Sin estrechamiento', 'el descongestionante cambia poco', NORMAL, [(a, min(1, b + (.03 if .3 < a < 5 else 0))) for a, b in NORMAL]),
+        ('B · Vasomotora (mucosa)', 'sube hasta la curva normal', VASOMOTOR_REPOSO, NORMAL),
+        ('C · Mecánica (p. ej. tabique)', 'casi no se mueve', SEPTAL_REPOSO, SEPTAL_PVC),
+        ('D · Mixta', 'mejora, pero no llega', SEPTAL_REPOSO, MIXTA_PVC),
     ]
-    for k, (a, b, col) in enumerate(lineas):
-        c.t(rx, 90 + k * 40, a, 8.8, col, 'start', 700)
-        c.t(rx, 103 + k * 40, b, 8, TENUE, 'start')
-    c.guardar('h27-resultado.svg')
+    anchos, altos = 300, 120
+    pos = [(50, 55), (390, 55), (50, 270), (390, 270)]
+    for (tit, sub, rep, pvc), (x0, y0) in zip(paneles, pos):
+        c.t(x0 - 24, y0 - 10, tit, 9.5, TINTA, 'start', 700)
+        X = ejes(c, x0, y0, anchos, altos, etiqueta=False, ticks=range(0, 8, 1), tam=7.5)
+        Y = lambda a, y0=y0: y0 + altos - a * altos * 0.9
+        c.rect(X(0), y0, X(5) - X(0), altos, '#f7f1ec')
+        c.poli(curva_pts(NORMAL, X, Y), FUERTE, 1.4, '4 3') if tit[0] != 'A' else None
+        c.poli(curva_pts(rep, X, Y), COCLEAR, 2.2)
+        if tit[0] != 'A':
+            c.poli(curva_pts(pvc, X, Y), RETRO, 2.2, '6 3')
+        c.t(x0 + anchos / 2, y0 + altos + 29, f'distancia (cm) · {sub}', 8, TENUE)
+    # leyenda
+    ly = 450
+    c.l(54, ly - 3, 84, ly - 3, COCLEAR, 2.2); c.t(90, ly, 'reposo', 8.5, TINTA, 'start')
+    c.l(150, ly - 3, 180, ly - 3, RETRO, 2.2, '6 3'); c.t(186, ly, 'después del vasoconstrictor', 8.5, TINTA, 'start')
+    c.l(340, ly - 3, 370, ly - 3, FUERTE, 1.4, '4 3'); c.t(376, ly, 'curva normal de comparación (B, C y D)', 8.5, TINTA, 'start')
+    c.t(54, 466, 'Cuánto es "mejora" o "casi no se mueve" lo define el criterio de cada servicio (→ Cómo se informa).', 8, TENUE, 'start')
+    c.guardar('h27-vasoconstrictor.svg')
+
+
+# ---------------------------------------------------------------- limites
+def limites():
+    c = Lienzo(700, 300)
+    c.t(14, 20, 'Lo que la curva puede no ver', 10.5, TINTA, 'start', 700)
+    anchos, altos = 290, 140
+    verdadera = [(0, .34), (.5, .52), (1.0, .56), (1.7, .26), (2.4, .50), (2.9, .58), (3.4, .40), (4.2, .66), (5.0, .86), (6.0, .95), (7.0, 1.0)]
+    # A: detras de una valvula muy estrecha
+    x0, y0 = 50, 60
+    c.t(x0 - 24, y0 - 14, 'A · Detrás de un estrechamiento marcado', 9.5, TINTA, 'start', 700)
+    X = ejes(c, x0, y0, anchos, altos, etiqueta=False, tam=7.5)
+    Y = lambda a: y0 + altos - a * altos * .9
+    estrecha = [(0, .30), (.5, .40), (1.0, .38), (1.7, .06), (2.4, .22), (2.9, .30), (3.4, .24), (4.2, .40), (5.0, .56), (6.0, .66), (7.0, .72)]
+    real = [(0, .30), (.5, .40), (1.0, .38), (1.7, .06), (2.4, .50), (2.9, .62), (3.4, .46), (4.2, .74), (5.0, .92), (6.0, 1.0), (7.0, 1.04)]
+    c.poli(curva_pts(real, X, Y), FUERTE, 2, '4 3')
+    c.poli(curva_pts(estrecha, X, Y), COCLEAR, 2.2)
+    c.t(X(4.9), Y(.92) - 6, 'lo que hay', 8, TENUE, 'middle', 700)
+    c.t(X(5.6), Y(.60) + 22, 'lo que se mide', 8, COCLEAR, 'middle', 700)
+    c.t(x0 + anchos / 2, y0 + altos + 29, 'el pulso apenas pasa: lo de atrás se subestima o se confunde', 8, TENUE)
+    # B: mas alla de 5 cm
+    x0, y0 = 390, 60
+    c.t(x0 - 24, y0 - 14, 'B · Más allá de los 5 cm', 9.5, TINTA, 'start', 700)
+    X = ejes(c, x0, y0, anchos, altos, etiqueta=False, tam=7.5)
+    Y = lambda a: y0 + altos - a * altos * .9
+    c.rect(X(5), y0, X(7) - X(5), altos, '#f1f1f1')
+    real2 = [(0, .34), (.5, .52), (1.0, .56), (1.7, .26), (2.4, .50), (2.9, .58), (3.4, .40), (4.2, .62), (5.0, .72), (6.0, .76), (7.0, .78)]
+    medida = [(0, .34), (.5, .52), (1.0, .56), (1.7, .26), (2.4, .50), (2.9, .58), (3.4, .40), (4.2, .64), (5.0, .80), (6.0, 1.0), (7.0, 1.12)]
+    c.poli(curva_pts(real2, X, Y), FUERTE, 2, '4 3')
+    c.poli(curva_pts(medida, X, Y), COCLEAR, 2.2)
+    c.t(X(6), Y(.76) + 18, 'lo que hay', 8, TENUE, 'middle', 700)
+    c.t(X(5.8), Y(1.0) - 10, 'lo que se mide', 8, COCLEAR, 'middle', 700)
+    c.t(x0 + anchos / 2, y0 + altos + 29, 'senos y fosa contraria suman área: la curva sobreestima', 8, TENUE)
+    c.l(54, 262, 84, 262, FUERTE, 2, '4 3'); c.t(90, 265, 'anatomía real', 8.5, TINTA, 'start')
+    c.l(190, 262, 220, 262, COCLEAR, 2.2); c.t(226, 265, 'lo que dibuja el equipo', 8.5, TINTA, 'start')
+    c.t(54, 288, 'La magnitud del error depende de cada nariz (Cakmak y cols., 2005; Hilberg y Pedersen, 1996).', 8, TENUE, 'start')
+    c.guardar('h27-limites.svg')
 
 
 if __name__ == '__main__':
-    pos = mapa()
-    d = [math.dist(pos[i], pos[i + 1]) / 20 for i in range(3)]
-    print('distancia entre punciones (cm):', [round(v, 2) for v in d])
-    lectura()
-    curso()
-    resultado()
-    for sig, nom, a, b in SITIOS:
-        print(sig, f'{a}x{b}', 'positivo' if max(a, b) >= SUELO and sig not in ('NEG', 'HIS') else '')
+    equipo()
+    curva()
+    vasoconstrictor()
+    limites()

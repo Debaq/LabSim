@@ -1,4 +1,4 @@
-# H27. Prick test
+# H28. Prick test
 
 :::objetivos En esta herramienta
 - Explicar qué pregunta responde el prick test (sensibilización mediada por IgE) y qué pregunta no responde (si el paciente tiene una alergia clínica).
@@ -10,7 +10,7 @@
 - Reconocer una reacción adversa local, sistémica o vasovagal y saber qué hacer en los primeros minutos.
 :::
 
-La nariz tapada, el picor y los estornudos de una rinitis alérgica tienen un origen que no se ve en la rinoscopía (→ H24) ni se mide con el aire (→ H25): una molécula, la **inmunoglobulina E (IgE)**, pegada a unas células de la piel y de las mucosas. El prick test es una forma de averiguar si esa molécula está ahí, y lo hace en el antebrazo, con una gota y una punción. Esta herramienta enseña a hacerlo, a leerlo y, sobre todo, a entender por qué se hace como se hace.
+La nariz tapada, el picor y los estornudos de una rinitis alérgica tienen un origen que no se ve en la rinoscopía (→ H25) ni se mide con el aire (→ H26): una molécula, la **inmunoglobulina E (IgE)**, pegada a unas células de la piel y de las mucosas. El prick test es una forma de averiguar si esa molécula está ahí, y lo hace en el antebrazo, con una gota y una punción. Esta herramienta enseña a hacerlo, a leerlo y, sobre todo, a entender por qué se hace como se hace.
 
 ## Para qué sirve
 
@@ -20,7 +20,7 @@ Esa pregunta es más estrecha que la que se hace el paciente. **Sensibilización
 
 Se pide cuando la historia hace sospechar una hipersensibilidad de tipo I (→ cap. 36): rinoconjuntivitis, asma, urticaria, anafilaxia, eccema atópico, alergia a alimentos o a fármacos (Heinzerling y cols., 2013). En el contexto de la nariz sirve para tres decisiones: **confirmar la causa** de una rinitis cuya historia sugiere un alérgeno, **elegir qué evitar** y **seleccionar los extractos** si se plantea una inmunoterapia (Bernstein y cols., 2008). Para la rinitis alérgica y el asma existe una guía práctica conjunta de ARIA y GA²LEN sobre su uso diario (Bousquet y cols., 2012).
 
-¿Y los otros exámenes? Frente a la **IgE específica en sangre**, el prick test da el resultado en 15 a 20 minutos y la guía americana lo considera el método de tamizaje de IgE más conveniente, más barato y más específico por prueba (Bernstein y cols., 2008); la IgE sérica sirve cuando la piel no se puede usar: hay un tratamiento que no se puede suspender, un dermografismo, un eccema extenso o un riesgo alto de reacción (Heinzerling y cols., 2013; Bernstein y cols., 2008). Frente a la **provocación nasal** (→ H25), que reproduce la reacción en la propia nariz, el prick test es más simple pero no equivale: en una revisión sistemática, usando la provocación como referencia, su sensibilidad fue de 85 % y su especificidad de 77 % (Nevis y cols., 2016). La provocación responde si esa nariz reacciona a ese alérgeno; el prick, si hay IgE contra él.
+¿Y los otros exámenes? Frente a la **IgE específica en sangre**, el prick test da el resultado en 15 a 20 minutos y la guía americana lo considera el método de tamizaje de IgE más conveniente, más barato y más específico por prueba (Bernstein y cols., 2008); la IgE sérica sirve cuando la piel no se puede usar: hay un tratamiento que no se puede suspender, un dermografismo, un eccema extenso o un riesgo alto de reacción (Heinzerling y cols., 2013; Bernstein y cols., 2008). Frente a la **provocación nasal** (→ H26), que reproduce la reacción en la propia nariz, el prick test es más simple pero no equivale: en una revisión sistemática, usando la provocación como referencia, su sensibilidad fue de 85 % y su especificidad de 77 % (Nevis y cols., 2016). La provocación responde si esa nariz reacciona a ese alérgeno; el prick, si hay IgE contra él.
 
 El examen tiene límites que conviene tener claros desde el comienzo. No mide **la gravedad** de los síntomas: una pápula mayor hace más probable que la sensibilización sea relevante, pero no predice cuánto se enfermará el paciente (Bernstein y cols., 2008). No sirve para estudiar las reacciones que no dependen de IgE. Y depende de la piel: lo que la piel no puede hacer (por un fármaco, por la edad, por una lesión), el examen no lo muestra.
 
@@ -41,7 +41,7 @@ La histamina actúa sobre los vasos y los nervios de la piel vecina y produce lo
 
 Todo esto es la **fase inmediata**: empieza en minutos y es la que se lee. Después de unas horas puede venir una **fase tardía**, con hinchazón y enrojecimiento local que depende de la llegada de otras células y no de la IgE; no se usa para leer la prueba (Bernstein y cols., 2008). <!-- verificar: duración de la fase tardía (la literatura de las clases habla de 2 a 6 horas y resolución a las 24 h); contrastar con Bernstein 2008 (texto completo) y fijar. -->
 
-:::imagen ilustraciones/h27-curso.svg ancho=100% La reacción inmediata de la piel según el tiempo. La histamina del control positivo da su pápula máxima antes (cerca de los 8 a 10 minutos); la del alérgeno, entre los 15 y 20 minutos, que es la ventana de lectura. La forma de las curvas es un esquema, no son datos de un paciente. Imagen propia.
+:::imagen ilustraciones/h28-curso.svg ancho=100% La reacción inmediata de la piel según el tiempo. La histamina del control positivo da su pápula máxima antes (cerca de los 8 a 10 minutos); la del alérgeno, entre los 15 y 20 minutos, que es la ventana de lectura. La forma de las curvas es un esquema, no son datos de un paciente. Imagen propia.
 :::
 
 ### Por qué estos dos controles
@@ -90,7 +90,7 @@ Tabla: Cuándo no se hace, o no se hace así
 | Dermatitis o eccema activo en el lugar de la prueba | La piel enferma no sirve para leer (Bernstein y cols., 2008; Powrie, 2015) | Otra zona sana (la espalda) o IgE específica en sangre |
 | Dermografismo marcado | No se pueden separar las pápulas (Heinzerling y cols., 2013) | IgE específica en sangre |
 | Reacción sistémica reciente | Riesgo mayor; se aconseja esperar 4 a 6 semanas, sobre todo tras picaduras de himenópteros (Heinzerling y cols., 2013) | Diferir; decide el médico |
-| Asma no controlada o con flujo espiratorio máximo menor de 70 % (→ H28) | Una reacción sistémica sería más grave (Heinzerling y cols., 2013) | Diferir hasta controlar |
+| Asma no controlada o con flujo espiratorio máximo menor de 70 % (→ H29) | Una reacción sistémica sería más grave (Heinzerling y cols., 2013) | Diferir hasta controlar |
 | Tratamiento con betabloqueadores (y, con menos fuerza, inhibidores de la ECA) | Responden peor a la adrenalina si hay una reacción grave (Heinzerling y cols., 2013; Bernstein y cols., 2008) | Precaución especial; decide el médico |
 | Embarazo | Una reacción sistémica puede causar contracciones uterinas; se hace solo si el resultado tendrá consecuencias terapéuticas importantes e inmediatas (Bernstein y cols., 2008) | Decide el médico |
 | Antecedente de alergia grave a alimentos o fármacos | Mayor riesgo de reacción sistémica | Pruebas con diluciones del extracto y acceso venoso listo, indicado por el médico <!-- verificar: no hay en los textos leídos una fuente directa para la titulación con extractos diluidos; confirmar en Bernstein 2008 (texto completo) o en Heinzerling 2013. --> |
@@ -135,7 +135,7 @@ Antes de empezar, el paciente debe saber qué se le va a hacer y por qué, y dar
 
 ## Paso a paso
 
-:::imagen ilustraciones/h27-mapa.svg ancho=100% Dónde y en qué orden se hacen las punciones. Las ocho punciones del ejemplo van en el antebrazo volar, a 2,5 cm una de otra, sin acercarse a menos de 3 cm de los pliegues del codo y de la muñeca. Se empieza por el control negativo y se termina por la histamina. Imagen propia.
+:::imagen ilustraciones/h28-mapa.svg ancho=100% Dónde y en qué orden se hacen las punciones. Las ocho punciones del ejemplo van en el antebrazo volar, a 2,5 cm una de otra, sin acercarse a menos de 3 cm de los pliegues del codo y de la muñeca. Se empieza por el control negativo y se termina por la histamina. Imagen propia.
 :::
 
 1. **Sentar o acostar al paciente.** Cómodo y con el antebrazo apoyado sobre una superficie firme, con la cara palmar hacia arriba. Si tiene fobia a las agujas o se marea con facilidad, **acostado**: así una reacción vasovagal no termina en una caída (Powrie, 2015).
@@ -147,7 +147,7 @@ Antes de empezar, el paciente debe saber qué se le va a hacer y por qué, y dar
 7. **Leer a los 15 a 20 minutos.** Es el momento del máximo de la reacción a los alérgenos (Bernstein y cols., 2008; Heinzerling y cols., 2013). Se lee la pápula, no el enrojecimiento.
 8. **Medir.** Con la regla transparente se mide el **diámetro mayor** de la pápula, en milímetros; después se mide el diámetro **perpendicular** al anterior y se anotan los dos (por ejemplo, 8 × 6 mm). Los seudópodos (las prolongaciones irregulares) se anotan pero **no se incluyen** en la medida (Heinzerling y cols., 2013; Powrie, 2015). Otra forma de registrar es dibujar el contorno con el marcador y trasladarlo con una cinta adhesiva a la hoja (Powrie, 2015).
 
-:::imagen ilustraciones/h27-lectura.svg ancho=100% A: cómo se mide una pápula. Se mide el diámetro mayor (rojo) y el perpendicular (azul), en milímetros, hasta el borde de la pápula; la zona roja tenue es el eritema y no entra. La pápula del dibujo mide 8 × 6 mm. B: la misma regla frente a pápulas de distinto tamaño: 2 mm no llega al umbral; 3 mm sí. Imagen propia.
+:::imagen ilustraciones/h28-lectura.svg ancho=100% A: cómo se mide una pápula. Se mide el diámetro mayor (rojo) y el perpendicular (azul), en milímetros, hasta el borde de la pápula; la zona roja tenue es el eritema y no entra. La pápula del dibujo mide 8 × 6 mm. B: la misma regla frente a pápulas de distinto tamaño: 2 mm no llega al umbral; 3 mm sí. Imagen propia.
 :::
 
 9. **Revisar los controles antes que los alérgenos.** El negativo debe estar sin pápula; la histamina, con pápula de 3 mm o más. Solo entonces se leen los alérgenos. Si la histamina no reaccionó, se repite el control positivo: si sigue sin reaccionar, **la prueba no es válida** y se anota como tal (Powrie, 2015).
@@ -187,7 +187,7 @@ Tabla: Hoja de registro de ejemplo
 | 7 | *Alternaria alternata* | sin pápula | Negativo |
 | 8 | Control positivo (histamina 10 mg/mL) | 6 × 5 | Reaccionó (válido) |
 
-:::imagen ilustraciones/h27-resultado.svg ancho=100% El antebrazo del ejemplo a los 15 minutos, con las pápulas dibujadas a su tamaño real (la escala de 1 cm está abajo). La pápula está en el centro; el eritema la rodea. Imagen propia.
+:::imagen ilustraciones/h28-resultado.svg ancho=100% El antebrazo del ejemplo a los 15 minutos, con las pápulas dibujadas a su tamaño real (la escala de 1 cm está abajo). La pápula está en el centro; el eritema la rodea. Imagen propia.
 :::
 
 Un informe de ejemplo, completo y sin interpretar más allá de lo medido:

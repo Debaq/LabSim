@@ -6229,3 +6229,12 @@ Se hace después de los capítulos de sueño (H29, H30).
   (apoyo a pymes); B5 usa las de inclusión que corresponden: 21.168 (atención
   preferente), 21.303 (lengua de señas) y 21.380 (cuidadores), además de la
   20.422 y la 21.120. La "UAPO" de ORL se llama UAPORRINO.
+
+## Libro: acúfeno como H23; H23-H30 pasan a H24-H31 (2026-10-19)
+
+Para cerrar rehabilitación aural, el acúfeno (impacto, modelos, TRT y terapias
+sonoras) entra como **H23**, junto a audífonos (H21-H22), y lo firma
+Casanova-Torres. Corren un número: ocupacional H24, nariz H25-H27, prick H28,
+espirometría H29, polisomnografía H30, CPAP y DAM H31. Mismo script que el
+2026-10-18 (568 menciones, conteo cuadrado); las bitácoras anteriores conservan
+la numeración vieja.

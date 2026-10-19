@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H27 — Prick test.
+"""Herramienta H27 — Rinometría acústica.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF

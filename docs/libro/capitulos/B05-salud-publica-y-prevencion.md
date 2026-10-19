@@ -16,9 +16,9 @@ Tabla: Dónde se usa cada sección
 | Sección | Se usa sobre todo en |
 |---|---|
 | Promoción y prevención | recuadros "Prevención" de todos los capítulos clínicos |
-| Tamizaje | H9, H10, cap. 16, H23 |
-| Epidemiología e indicadores | cap. 6, cap. 22, cap. 36, H29 |
-| Sistema de salud y leyes en Chile | H1, H21, H23, cap. 16, cap. 34 |
+| Tamizaje | H9, H10, cap. 16, H24 |
+| Epidemiología e indicadores | cap. 6, cap. 22, cap. 36, H30 |
+| Sistema de salud y leyes en Chile | H1, H21, H24, cap. 16, cap. 34 |
 | Proyecto comunitario | cap. 6, cap. 32 |
 
 ## Promoción, prevención y salud pública
@@ -36,8 +36,8 @@ Leavell y Clark describieron toda enfermedad como un proceso con un período ant
 :::imagen ilustraciones/b5-niveles.svg ancho=100% Historia natural de una enfermedad (aquí, la hipoacusia) y los niveles de prevención. Cada nivel actúa en un tramo del proceso; la prevención cuaternaria cubre todos. Imagen propia.
 :::
 
-- **Prevención primaria:** actúa antes de que exista la enfermedad. Evita la exposición o aumenta la resistencia. Ejemplos ORL: protectores auditivos y control del ruido (→ H23), la inmunización y el manejo temprano de la otitis media, con los que se puede prevenir casi 60 % de la hipoacusia infantil (OMS, 2021).
-- **Prevención secundaria:** busca la enfermedad cuando todavía no da síntomas o recién empieza, para tratarla cuando el tratamiento cambia el curso. Ejemplos: el tamizaje auditivo neonatal (→ cap. 16) y la audiometría de vigilancia del trabajador expuesto (→ H23).
+- **Prevención primaria:** actúa antes de que exista la enfermedad. Evita la exposición o aumenta la resistencia. Ejemplos ORL: protectores auditivos y control del ruido (→ H24), la inmunización y el manejo temprano de la otitis media, con los que se puede prevenir casi 60 % de la hipoacusia infantil (OMS, 2021).
+- **Prevención secundaria:** busca la enfermedad cuando todavía no da síntomas o recién empieza, para tratarla cuando el tratamiento cambia el curso. Ejemplos: el tamizaje auditivo neonatal (→ cap. 16) y la audiometría de vigilancia del trabajador expuesto (→ H24).
 - **Prevención terciaria:** cuando la enfermedad ya está, limita el daño y devuelve función. Ejemplos: el audífono y el implante coclear, la rehabilitación auditiva y vestibular.
 - **Prevención cuaternaria:** protege a la persona del daño que puede causar la propia medicina. Jamoulle la definió como las acciones que identifican a las personas en riesgo de sobremedicalización, para protegerlas de nuevas intervenciones médicas inapropiadas y sugerirles alternativas éticamente aceptables (Jamoulle, 2015). Ejemplos ORL: no pedir una resonancia por un acúfeno simétrico sin otros signos si el resultado no cambia lo que se hará, no sobredimensionar un hallazgo audiométrico que no pasa del límite de lo normal.
 
@@ -143,7 +143,7 @@ Tabla: Cifras globales verificadas
 | Rinitis alérgica | entre 10 y 40 % de la población, según ARIA | Brożek y cols., 2017 |
 | Apnea obstructiva del sueño (30-69 años) | 936 millones con índice de apnea-hipopnea de 5 o más; 425 millones con 15 o más | Benjafield y cols., 2019 |
 
-Cada cifra viene de un diseño distinto, y eso limita las comparaciones. La del vértigo es de una encuesta en un solo país; la de apnea es una estimación a partir de 17 estudios en 16 países, extrapolada al resto (Benjafield y cols., 2019); la de rinitis es un rango amplio porque depende de la definición y del lugar. La hipoacusia "de cualquier grado" y la "incapacitante" no se suman ni se restan: son umbrales distintos. Para la apnea, el índice de apnea-hipopnea y la clínica se explican en → H29.
+Cada cifra viene de un diseño distinto, y eso limita las comparaciones. La del vértigo es de una encuesta en un solo país; la de apnea es una estimación a partir de 17 estudios en 16 países, extrapolada al resto (Benjafield y cols., 2019); la de rinitis es un rango amplio porque depende de la definición y del lugar. La hipoacusia "de cualquier grado" y la "incapacitante" no se suman ni se restan: son umbrales distintos. Para la apnea, el índice de apnea-hipopnea y la clínica se explican en → H30.
 
 :::comentario En Chile
 La Encuesta Nacional de Salud 2016-2017 midió la hipoacusia por autorreporte: 23,4 % entre los 45 y 64 años y 45,1 % desde los 65 (cifras citadas en Universidad de los Andes, 2026). <!-- verificar: cifra tomada de una revisión que cita la ENS; cotejar con la base de datos del MINSAL (epi.minsal.cl, ENS 2016-2017) antes de publicar. --> Una cifra de autorreporte no equivale a una medida audiométrica: la primera depende de cuánto la persona note su dificultad.
@@ -255,7 +255,7 @@ La educación para la salud entrega información, pero busca sobre todo que la p
 
 - **Cuidado del oído.** No introducir objetos en el conducto; no tratar sin indicación un dolor o una secreción; consultar ante pérdida súbita de la audición, que es una urgencia (→ cap. 7). El lavado de oídos tiene indicaciones y contraindicaciones (→ H1).
 - **Ruido recreacional.** La iniciativa de la OMS *Make Listening Safe* busca que se escuche con seguridad en los dispositivos personales y los locales de entretención, y pide a gobiernos, industria y sociedad civil estándares basados en evidencia (OMS, 2022). El estándar conjunto de la Unión Internacional de Telecomunicaciones y la OMS (UIT-T H.870, 2018) recomienda que los dispositivos personales midan la dosis semanal de sonido y la acompañen de un aviso. <!-- verificar: el límite de dosis semanal que fija la UIT-T H.870 (80 dB(A) durante 40 h por semana, según fuentes secundarias) se cotejó solo en reseñas; leer la recomendación (itu.int/rec/T-REC-H.870) antes de citar el valor. --> El mensaje práctico depende de dos variables, volumen y tiempo (→ B4, ruido ocupacional): menos de ambas.
-- **Higiene nasal.** Los lavados nasales con solución salina, el control de alérgenos en el dormitorio y evitar el humo de tabaco son medidas de prevención primaria y terciaria de la rinitis y la rinosinusitis; la evidencia de cada una se trata en → cap. 36 y → H24. El uso prolongado de descongestionantes tópicos tiene un efecto rebote que el mensaje educativo debe prevenir (→ cap. 36).
+- **Higiene nasal.** Los lavados nasales con solución salina, el control de alérgenos en el dormitorio y evitar el humo de tabaco son medidas de prevención primaria y terciaria de la rinitis y la rinosinusitis; la evidencia de cada una se trata en → cap. 36 y → H25. El uso prolongado de descongestionantes tópicos tiene un efecto rebote que el mensaje educativo debe prevenir (→ cap. 36).
 - **Prevención de caídas.** La hipoacusia se asocia a caídas: en un estudio de personas de 40 a 69 años de Estados Unidos, cada 10 dB de pérdida se asoció con 1,4 veces más probabilidad de haberse caído en el año previo (IC 95 % 1,3-1,5) (Lin y Ferrucci, 2012). La OMS recomienda para personas mayores entrenamiento de la marcha, el equilibrio y la funcionalidad, tai chi, evaluación y modificación del hogar, reducir los psicofármacos y las intervenciones multifactoriales (OMS, 2021; → cap. 32).
 
 **Cómo se evalúa el impacto.** Un taller con buena asistencia mide proceso. El cambio de conocimiento y de conducta se mide con la misma encuesta antes y después, y de preferencia con un grupo de comparación. El impacto sobre la salud (hipoacusia, caídas) exige seguimiento largo y a veces tamaños de muestra que un proyecto escolar no alcanza: en esos casos se informa lo que se midió y se dice qué no se pudo medir.

@@ -14,12 +14,12 @@ Una nariz que se tapa y se destapa, que cambia de lado en la noche, que mejora c
 
 ### Una pregunta, tres respuestas
 
-La técnica de la prueba con vasoconstrictor (cuándo aplicarlo, cuántos disparos, cuánto esperar y cómo se lee) está en la rinomanometría anterior (→ H25) y en la rinometría acústica (→ H26) y aquí no se repite. Lo que este capítulo agrega es **qué contesta** la prueba y qué se le queda sin contestar.
+La técnica de la prueba con vasoconstrictor (cuándo aplicarlo, cuántos disparos, cuánto esperar y cómo se lee) está en la rinomanometría anterior (→ H26) y en la rinometría acústica (→ H27) y aquí no se repite. Lo que este capítulo agrega es **qué contesta** la prueba y qué se le queda sin contestar.
 
 :::ayuda-ancho Qué contesta la prueba con vasoconstrictor y qué no
 | Pregunta | ¿La contesta la prueba? | Quién la contesta |
 |---|---|---|
-| ¿Cuánto de esta obstrucción es **mucosa** y cuánto es esqueleto? | **Sí**, fosa por fosa | La prueba (→ H25, H26) |
+| ¿Cuánto de esta obstrucción es **mucosa** y cuánto es esqueleto? | **Sí**, fosa por fosa | La prueba (→ H26, H27) |
 | ¿La mucosa está hinchada por alergia, por un resfrío, por un medicamento o "porque sí"? | **No**: todas se abren igual | La anamnesis y, si hace falta, el médico (pruebas de alergia) |
 | ¿Hay un componente estructural escondido? | Solo si **no** se abre del todo | La rinoscopía y la forma de las curvas (→ cap. 35) |
 | ¿Cómo evolucionará con tratamiento? | **No** | El médico; la prueba mide a los 15 minutos, no a las semanas |
@@ -28,9 +28,9 @@ La técnica de la prueba con vasoconstrictor (cuándo aplicarlo, cuántos dispar
 
 ### Lo que hay que cambiar de la rutina
 
-- **Se pregunta qué usó el paciente y cuándo, y se anota.** El libro pide al agendar que no use vasoconstrictores, descongestionantes ni antialérgicos en las 48 horas previas. Si llegó habiéndolos usado, la medición de reposo ya no es su nariz habitual (→ H24, H25); se escribe en el informe y se discute con el médico si se repite otro día.
-- **Se sabe en qué fosa y en qué fase del ciclo se está.** Una fosa que hoy aparece tapada puede estar, simplemente, en su fase congestionada (→ H25). Después del vasoconstrictor el ciclo se apaga y las dos fosas quedan en un estado comparable (Corey y cols., 1998; → H26). Parte del cambio que se ve en cada fosa es del ciclo y no solo de la patología.
-- **Una fosa dentro del valor no lleva vasoconstrictor.** Es la regla del libro (→ H25): la prueba se hace en la fosa que supera 0,4 Pa/(cm³/s) a 150 Pa. Lo que se pierde es saber cuánta mucosa tenía la otra. Una fosa "sana" también se abre con el vasoconstrictor (ver Fisiología).
+- **Se pregunta qué usó el paciente y cuándo, y se anota.** El libro pide al agendar que no use vasoconstrictores, descongestionantes ni antialérgicos en las 48 horas previas. Si llegó habiéndolos usado, la medición de reposo ya no es su nariz habitual (→ H25, H26); se escribe en el informe y se discute con el médico si se repite otro día.
+- **Se sabe en qué fosa y en qué fase del ciclo se está.** Una fosa que hoy aparece tapada puede estar, simplemente, en su fase congestionada (→ H26). Después del vasoconstrictor el ciclo se apaga y las dos fosas quedan en un estado comparable (Corey y cols., 1998; → H27). Parte del cambio que se ve en cada fosa es del ciclo y no solo de la patología.
+- **Una fosa dentro del valor no lleva vasoconstrictor.** Es la regla del libro (→ H26): la prueba se hace en la fosa que supera 0,4 Pa/(cm³/s) a 150 Pa. Lo que se pierde es saber cuánta mucosa tenía la otra. Una fosa "sana" también se abre con el vasoconstrictor (ver Fisiología).
 - **La palabra "vasomotora" del informe quiere decir "mucosa".** Es el nombre que da la prueba a una obstrucción que cede por completo al vasoconstrictor. No es el diagnóstico *rinitis vasomotora* (ver Patología): el informe describe la obstrucción, no la enfermedad.
 - **Se dice en el informe lo que la prueba no dice.** Una línea basta: la prueba separa mucosa de esqueleto; no identifica la causa de la hinchazón.
 
@@ -42,9 +42,9 @@ La técnica de la prueba con vasoconstrictor (cuándo aplicarlo, cuántos dispar
 
 ### El tejido eréctil de los cornetes
 
-El detalle anatómico de los cornetes está en las Bases (→ B1) y la física del flujo por un conducto estrecho, en B4 y en H25. Aquí interesa lo que de ellos se desprende para razonar un caso.
+El detalle anatómico de los cornetes está en las Bases (→ B1) y la física del flujo por un conducto estrecho, en B4 y en H26. Aquí interesa lo que de ellos se desprende para razonar un caso.
 
-La microcirculación de la nariz tiene tres sistemas: una red de capilares bajo el epitelio, con poros entre las células (por donde pasa el agua que humedece el aire), un sistema de **vasos de capacitancia o senos venosos** que, cuando se llenan, **cierran el paso del aire** y, cuando se vacían, lo abren, y unas comunicaciones entre arterias y venas (Widdicombe, 1997). Esos senos venosos son el **tejido eréctil** del cornete. Su llenado y vaciado alternan de una fosa a la otra: el **ciclo nasal**, que consiste en una congestión y descongestión periódicas de los senos venosos y se ha propuesto que cumple un papel de defensa respiratoria (Eccles, 1996; → H24, H25).
+La microcirculación de la nariz tiene tres sistemas: una red de capilares bajo el epitelio, con poros entre las células (por donde pasa el agua que humedece el aire), un sistema de **vasos de capacitancia o senos venosos** que, cuando se llenan, **cierran el paso del aire** y, cuando se vacían, lo abren, y unas comunicaciones entre arterias y venas (Widdicombe, 1997). Esos senos venosos son el **tejido eréctil** del cornete. Su llenado y vaciado alternan de una fosa a la otra: el **ciclo nasal**, que consiste en una congestión y descongestión periódicas de los senos venosos y se ha propuesto que cumple un papel de defensa respiratoria (Eccles, 1996; → H25, H26).
 
 Los vasos responden a los nervios y a los fármacos. La estimulación de los receptores α-adrenérgicos contrae los vasos y vacía los senos; los descongestionantes tópicos como la oximetazolina (una imidazolina) actúan así (Solé y cols., 2025; Vaidyanathan y cols., 2010). Eso es todo lo que hace la prueba: **vaciar los senos de sangre**. Lo que no es vaso (hueso, cartílago, tabique) no se mueve.
 
@@ -54,12 +54,12 @@ La prueba con vasoconstrictor no es un detector de enfermedad: una nariz sana se
 
 ### El mismo vaivén, otro efecto: el ciclo nasal en una nariz congestionada
 
-La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el paso (→ H25, B4; en el modelo de las figuras, el término laminar crece con el cubo del angostamiento). Por eso **un vaivén de la mucosa** pesa poco en una nariz amplia y mucho en una que parte estrecha. La figura lo muestra con un modelo que da a la congestión de la mucosa un valor de 0 (retraída) a 1 (al máximo). La nariz normal parte de 0,4 y oscila 0,3 hacia cada lado; la de cornetes congestionados parte de 0,8 y oscila la mitad (0,15). En la normal, cada fosa varía entre 0,29 y 0,35 Pa/(cm³/s) a lo largo del ciclo; en la congestionada, con un vaivén **menor**, una fosa pasa de poco más de 0,4 a unos 30 (casi se cierra) mientras la otra queda cerca del valor de trabajo, y la resistencia total se mueve poco.
+La resistencia de una fosa crece muchísimo más rápido de lo que se angosta el paso (→ H26, B4; en el modelo de las figuras, el término laminar crece con el cubo del angostamiento). Por eso **un vaivén de la mucosa** pesa poco en una nariz amplia y mucho en una que parte estrecha. La figura lo muestra con un modelo que da a la congestión de la mucosa un valor de 0 (retraída) a 1 (al máximo). La nariz normal parte de 0,4 y oscila 0,3 hacia cada lado; la de cornetes congestionados parte de 0,8 y oscila la mitad (0,15). En la normal, cada fosa varía entre 0,29 y 0,35 Pa/(cm³/s) a lo largo del ciclo; en la congestionada, con un vaivén **menor**, una fosa pasa de poco más de 0,4 a unos 30 (casi se cierra) mientras la otra queda cerca del valor de trabajo, y la resistencia total se mueve poco.
 
 :::imagen ilustraciones/cap36-rs-ciclo.svg ancho=92% Ciclo nasal: resistencia a 150 Pa de cada fosa y total, cada 5 minutos durante 300. A: nariz normal. B: nariz con los cornetes congestionados (parte de una mucosa mucho más hinchada y oscila la mitad que A); el eje es logarítmico. Compara A con B: con un vaivén menor, en B cada fosa se cierra por turnos mientras el total casi no se mueve, y una sola medición puede caer en cualquier punto de la curva. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @50,22 | **A: nariz normal.** Cada fosa se mueve entre 0,29 y 0,35: apenas cruza la raya del valor de trabajo (0,4). El total, en gris, queda en 0,16.
 - @26,50 | **B: fosa derecha.** En su fase congestionada el modelo la lleva de 0,6 a unos 30 Pa/(cm³/s): una sola medición caería en cualquier parte de esa curva.
-- @47,50 | **B: fosa izquierda.** Hace lo mismo desfasada: cuando una se cierra, la otra queda abierta. En la realidad el ciclo es regular solo en una parte de las personas (11 de 52 voluntarios en Flanagan y Eccles, 1997; → H25).
+- @47,50 | **B: fosa izquierda.** Hace lo mismo desfasada: cuando una se cierra, la otra queda abierta. En la realidad el ciclo es regular solo en una parte de las personas (11 de 52 voluntarios en Flanagan y Eccles, 1997; → H26).
 - @30,84 | **El total (gris)** sube y baja entre 0,28 y 0,42: casi no se entera, como en las personas sanas, en las que la resistencia total suele mantenerse bastante constante mientras los lados alternan (Hasegawa y Kern, 1977). Por eso el paciente con rinitis siente que "se tapa un lado y después el otro" y el total, a veces, sale aceptable.
 :::
 
@@ -88,7 +88,7 @@ Con exposición persistente o repetida la inflamación se vuelve **crónica** y 
 Tres consecuencias para lo que se mide:
 
 - **La sensibilización no es la enfermedad.** Hay personas sensibilizadas sin síntomas (→ *Ojo clínico* de Patología). La IgE se demuestra en la piel o en la sangre; la reacción de la mucosa, con el alérgeno en la nariz.
-- **La nariz de hoy depende de la exposición reciente.** La exposición previa a un alérgeno cambia la permeabilidad, y la reacción tardía puede durar horas (Augé y cols., 2018). Por eso una medida en plena temporada y una fuera de ella no son comparables, y por eso la anamnesis pregunta por la estación (→ H24).
+- **La nariz de hoy depende de la exposición reciente.** La exposición previa a un alérgeno cambia la permeabilidad, y la reacción tardía puede durar horas (Augé y cols., 2018). Por eso una medida en plena temporada y una fuera de ella no son comparables, y por eso la anamnesis pregunta por la estación (→ H25).
 - **El vasoconstrictor no distingue la causa.** Vacía los senos venosos sea cual sea el mediador que los llenó (→ Fisiología). Una rinitis alérgica y una no alérgica se abren igual.
 
 ## Patología
@@ -104,7 +104,7 @@ La rinitis alérgica es una inflamación de la mucosa nasal en personas predispu
 :::imagen ilustraciones/cap36-rinitis-endoscopia.jpg ancho=38% Endoscopías nasales de dos pacientes con rinitis alérgica, en la columna izquierda antes de empezar un tratamiento con inmunoterapia sublingual y a los 1,5 y 3 años en las otras dos. De arriba abajo: fosa izquierda, fosa derecha y rinofaringe de cada paciente. Recorre cada fila de izquierda a derecha: así luce la mucosa que las curvas miden, antes y durante el tratamiento. Imagen: Liu B y cols. (2026), Front Immunol, doi:10.3389/fimmu.2026.1828695, CC BY.
 :::
 
-**El aporte de la prueba con vasoconstrictor.** Como la inflamación hincha los senos y la mucosa, una rinitis alérgica pura cede por completo al vasoconstrictor (caso 36.1). El **diagnóstico de alergia** no sale de ahí. Lo da la historia y, si hace falta, una prueba cutánea (*prick test*): se pone una gota de extracto del alérgeno sobre la piel del antebrazo, se punza y, a los 15-20 minutos, se mide la pápula que se forma, con controles positivo y negativo (Heinzerling y cols., 2013; → H27). La prueba cutánea confirma **sensibilización**, y su relevancia clínica se interpreta con la historia; frente a la provocación nasal, en una revisión de siete estudios su sensibilidad fue de 85 % y su especificidad de 77 % (Nevis y cols., 2016). Algunos antihistamínicos distorsionan la prueba cutánea y se suspenden antes de hacerla (Heinzerling y cols., 2013), de modo que la indicación de dejarlos días antes del examen de la nariz tiene también ese sentido práctico.
+**El aporte de la prueba con vasoconstrictor.** Como la inflamación hincha los senos y la mucosa, una rinitis alérgica pura cede por completo al vasoconstrictor (caso 36.1). El **diagnóstico de alergia** no sale de ahí. Lo da la historia y, si hace falta, una prueba cutánea (*prick test*): se pone una gota de extracto del alérgeno sobre la piel del antebrazo, se punza y, a los 15-20 minutos, se mide la pápula que se forma, con controles positivo y negativo (Heinzerling y cols., 2013; → H28). La prueba cutánea confirma **sensibilización**, y su relevancia clínica se interpreta con la historia; frente a la provocación nasal, en una revisión de siete estudios su sensibilidad fue de 85 % y su especificidad de 77 % (Nevis y cols., 2016). Algunos antihistamínicos distorsionan la prueba cutánea y se suspenden antes de hacerla (Heinzerling y cols., 2013), de modo que la indicación de dejarlos días antes del examen de la nariz tiene también ese sentido práctico.
 
 :::ojo Ojo clínico
 Hay rinitis alérgica con prueba cutánea negativa. La **rinitis alérgica local** (*entopía*) es una reacción alérgica confinada a la mucosa nasal, sin signos sistémicos de sensibilización (Hellings y cols., 2017). Y hay personas sensibilizadas sin síntomas. Un prick positivo no es una rinitis, ni uno negativo la descarta.
@@ -127,7 +127,7 @@ La rinitis no alérgica es una inflamación sintomática de la mucosa nasal, con
 La rinitis **idiopática** es lo que antes se llamaba *rinitis vasomotora*; el término se propone abandonar porque no hay inflamación alérgica y la causa vasomotora no explica todos los casos (Solé y cols., 2025).
 
 :::comentario Lo que dicen las normas
-En este libro la palabra "vasomotora" se usa **para el resultado de la prueba**: una obstrucción que cede por completo al vasoconstrictor es "de tipo vasomotora", es decir, de la mucosa (→ H25). Esa lectura es de la técnica y se mantiene así. En la nomenclatura de las rinitis, en cambio, "vasomotora" fue el nombre de una enfermedad (la rinitis idiopática) y hoy se desaconseja (Hellings y cols., 2017; Solé y cols., 2025). Si el informe lo va a leer otro profesional, conviene que diga "obstrucción de tipo vasomotora (mucosa)" y no "rinitis vasomotora".
+En este libro la palabra "vasomotora" se usa **para el resultado de la prueba**: una obstrucción que cede por completo al vasoconstrictor es "de tipo vasomotora", es decir, de la mucosa (→ H26). Esa lectura es de la técnica y se mantiene así. En la nomenclatura de las rinitis, en cambio, "vasomotora" fue el nombre de una enfermedad (la rinitis idiopática) y hoy se desaconseja (Hellings y cols., 2017; Solé y cols., 2025). Si el informe lo va a leer otro profesional, conviene que diga "obstrucción de tipo vasomotora (mucosa)" y no "rinitis vasomotora".
 :::
 
 ### Rinitis por descongestionantes (rinitis medicamentosa)
@@ -155,11 +155,11 @@ En cuanto a la pauta, el consenso brasileño recomienda no pasar de 5 días y su
 
 ### Rinosinusitis aguda y crónica, con y sin pólipos
 
-La nariz y los senos paranasales comparten la misma mucosa y se comunican por aberturas estrechas, de modo que una inflamación de la nariz casi siempre alcanza a los senos: por eso se habla de **rinosinusitis**, no de sinusitis. Los criterios de duración y de síntomas están en H24 (→ H24, *Paso a paso*, 1): aguda si dura menos de 12 semanas, crónica si dura 12 o más (Fokkens y cols., 2020). Lo que cambia es el mecanismo.
+La nariz y los senos paranasales comparten la misma mucosa y se comunican por aberturas estrechas, de modo que una inflamación de la nariz casi siempre alcanza a los senos: por eso se habla de **rinosinusitis**, no de sinusitis. Los criterios de duración y de síntomas están en H25 (→ H25, *Paso a paso*, 1): aguda si dura menos de 12 semanas, crónica si dura 12 o más (Fokkens y cols., 2020). Lo que cambia es el mecanismo.
 
 **La aguda.** La guía europea la divide en **viral** (el resfrío común), **posviral** y **bacteriana**, y reconoce que los mecanismos de las tres se superponen y que su estudio en pacientes reales es escaso (Fokkens y cols., 2020). El epitelio nasal es la puerta de entrada de los virus respiratorios y a la vez una parte activa de la defensa; la cascada inflamatoria que inicia produce edema, congestión, salida de líquido, moco y obstrucción de los senos (Fokkens y cols., 2020). Rinovirus y coronavirus son los más frecuentes en adultos, cerca de la mitad de los casos de rinosinusitis aguda viral (Fokkens y cols., 2020). Los virus dañan los cilios y alteran el epitelio, y esa pérdida de la depuración mucociliar es probablemente una causa importante de la sobreinfección bacteriana, que es una complicación poco frecuente: *Streptococcus pneumoniae*, *Haemophilus influenzae* y *Moraxella catarrhalis* son las bacterias más comunes (Fokkens y cols., 2020). La forma **posviral** es la que aumenta sus síntomas después del quinto día o persiste más de 10 días, con menos de 12 semanas de duración; no indica infección bacteriana, y solo una minoría de las rinosinusitis agudas es bacteriana (Fokkens y cols., 2020).
 
-**La crónica.** Es una enfermedad inflamatoria multifactorial de la mucosa de la nariz y los senos, comparable al asma en la vía aérea baja (Fokkens y cols., 2020; la espirometría, → H28). La visión actual no parte de una causa única, sino del tipo de inflamación que se sostiene: cuando la barrera del epitelio se rompe, hay una respuesta de defensa que normalmente se resuelve; en la rinosinusitis crónica no se resuelve y usa las vías tipo 1, 2 o 3, solas o combinadas (Fokkens y cols., 2020). La **inflamación tipo 2** (IL-4, IL-5 e IL-13, con eosinófilos y mastocitos) es la que la guía asocia a la rinosinusitis crónica con pólipos; los pacientes con endotipo tipo 2 puro o mezclado responden peor a los tratamientos actuales y recaen más (Fokkens y cols., 2020). La guía separa la rinosinusitis crónica primaria en **localizada** (de un lado) y **difusa** (de los dos lados), y la difusa por su endotipo, tipo 2 o no tipo 2 (Fokkens y cols., 2020).
+**La crónica.** Es una enfermedad inflamatoria multifactorial de la mucosa de la nariz y los senos, comparable al asma en la vía aérea baja (Fokkens y cols., 2020; la espirometría, → H29). La visión actual no parte de una causa única, sino del tipo de inflamación que se sostiene: cuando la barrera del epitelio se rompe, hay una respuesta de defensa que normalmente se resuelve; en la rinosinusitis crónica no se resuelve y usa las vías tipo 1, 2 o 3, solas o combinadas (Fokkens y cols., 2020). La **inflamación tipo 2** (IL-4, IL-5 e IL-13, con eosinófilos y mastocitos) es la que la guía asocia a la rinosinusitis crónica con pólipos; los pacientes con endotipo tipo 2 puro o mezclado responden peor a los tratamientos actuales y recaen más (Fokkens y cols., 2020). La guía separa la rinosinusitis crónica primaria en **localizada** (de un lado) y **difusa** (de los dos lados), y la difusa por su endotipo, tipo 2 o no tipo 2 (Fokkens y cols., 2020).
 
 Tabla: Rinosinusitis aguda y crónica, con y sin pólipos
 
@@ -176,15 +176,15 @@ Otras piezas aparecen en los textos, con un peso menor y discutido:
 
 - **Obstrucción del complejo ostiomeatal y variantes anatómicas.** Se ha propuesto que la obstrucción del complejo ostiomeatal es un factor de riesgo. Una revisión sistemática halló una asociación entre la desviación del tabique y la rinosinusitis, pero modesta, y con inflamación bilateral; en un estudio, 88,2 % de los pacientes con rinosinusitis crónica tenía el tabique desviado, una cifra cercana a la de la población general (Fokkens y cols., 2020). Una desviación del tabique **no explica sola** una rinosinusitis (→ cap. 35).
 - **Biofilm.** Se demostraron biofilms en la mucosa de pacientes con rinosinusitis crónica por primera vez en 2004, y la frecuencia estimada va de 29 a 72 %; *Staphylococcus aureus* es el que más se asocia a los casos graves y recurrentes, y los pacientes con biofilm tienen enfermedad más grave antes de operarse y más síntomas después (Fokkens y cols., 2020). Que un cultivo de la nariz dé microbios no prueba que ellos causen la enfermedad, porque la nariz no es estéril, y los antibióticos responden mal en la crónica (Fokkens y cols., 2020).
-- **Depuración mucociliar.** En la crónica los ciclos de infección e inflamación llevan a pérdida de cilios y a un moco más espeso, y los cilios que quedan funcionan peor (Fokkens y cols., 2020; → H24, *Cómo acondiciona el aire la nariz*).
+- **Depuración mucociliar.** En la crónica los ciclos de infección e inflamación llevan a pérdida de cilios y a un moco más espeso, y los cilios que quedan funcionan peor (Fokkens y cols., 2020; → H25, *Cómo acondiciona el aire la nariz*).
 
-Esto importa en un capítulo de rinomanometría por tres razones. Primero, **la rinomanometría y la rinometría miden las consecuencias** (resistencia y área), no la causa: una rinosinusitis crónica con pólipos puede dar un cuadro mixto (→ *Lo que se ve como mucosa y no es solo mucosa*, abajo). Segundo, un paciente con **pérdida del olfato** y obstrucción debe leerse con ese contexto (→ H24, *Alteraciones del olfato*). Tercero, el médico, no quien mide, decide si hace falta endoscopia o imagen y cuál es el endotipo.
+Esto importa en un capítulo de rinomanometría por tres razones. Primero, **la rinomanometría y la rinometría miden las consecuencias** (resistencia y área), no la causa: una rinosinusitis crónica con pólipos puede dar un cuadro mixto (→ *Lo que se ve como mucosa y no es solo mucosa*, abajo). Segundo, un paciente con **pérdida del olfato** y obstrucción debe leerse con ese contexto (→ H25, *Alteraciones del olfato*). Tercero, el médico, no quien mide, decide si hace falta endoscopia o imagen y cuál es el endotipo.
 
 ### Lo que se ve como mucosa y no es solo mucosa
 
 Algunas obstrucciones que parecen de mucosa no se explican por ella y se derivan (→ cap. 35):
 
-- **Pólipos nasales.** Masas blandas que se ven a la rinoscopía o con endoscopia (→ H24). En el modelo de las figuras los pólipos no responden al vasoconstrictor: lo que baja es la mucosa de los cornetes que los rodea, por eso el resultado suele salir mixto. En la tomografía, que pide el médico, la rinosinusitis con pólipos puede llenar los senos y las fosas (figura).
+- **Pólipos nasales.** Masas blandas que se ven a la rinoscopía o con endoscopia (→ H25). En el modelo de las figuras los pólipos no responden al vasoconstrictor: lo que baja es la mucosa de los cornetes que los rodea, por eso el resultado suele salir mixto. En la tomografía, que pide el médico, la rinosinusitis con pólipos puede llenar los senos y las fosas (figura).
 - **Síntomas de un solo lado, sangrado o pérdida del olfato de un lado.** No se explican por el ciclo ni por una alergia y se derivan (Fokkens y cols., 2020).
 
 :::imagen ilustraciones/cap36-rs-polipos-ra.svg ancho=62% Rinometría acústica de la fosa derecha de una nariz con pólipos. El eje del área es logarítmico. Línea continua: reposo; discontinua: con vasoconstrictor. El segundo mínimo cae más atrás que el cornete y casi no se abre con el vasoconstrictor: el pólipo no es mucosa que se retraiga. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
@@ -205,9 +205,9 @@ Algunas obstrucciones que parecen de mucosa no se explican por ella y se derivan
 Frente a una nariz que se tapa y se destapa, el razonamiento sigue cinco preguntas, en este orden:
 
 1. **¿Cuándo, con qué y de qué lado?** Estacional o todo el año; con el polvo, los animales o los olores; con el frío; si cambia de lado. Lo que cambia con el ambiente y alterna entre las fosas apunta a la mucosa.
-2. **¿Qué usa y desde cuándo?** Descongestionantes, antihistamínicos, corticoides, otros fármacos (→ H24). Es la pregunta que más cambia la lectura de la prueba.
-3. **¿Qué se ve?** La rinoscopía descarta pólipos y un tabique desviado, y la mucosa de los cornetes (pálida, roja, edematosa) ayuda (→ H24).
-4. **¿Cuánto cede con el vasoconstrictor, en cada fosa?** Del todo: mucosa. A medias: mixta. Nada: estructural (→ H25, H26).
+2. **¿Qué usa y desde cuándo?** Descongestionantes, antihistamínicos, corticoides, otros fármacos (→ H25). Es la pregunta que más cambia la lectura de la prueba.
+3. **¿Qué se ve?** La rinoscopía descarta pólipos y un tabique desviado, y la mucosa de los cornetes (pálida, roja, edematosa) ayuda (→ H25).
+4. **¿Cuánto cede con el vasoconstrictor, en cada fosa?** Del todo: mucosa. A medias: mixta. Nada: estructural (→ H26, H27).
 5. **¿Quién decide la causa?** El médico, con la historia y, si corresponde, las pruebas de alergia. El informe describe la obstrucción.
 
 :::ayuda-ancho Mucosa por alergia, por descongestionantes y obstrucción mixta, lado a lado
@@ -228,7 +228,7 @@ Frente a una nariz que se tapa y se destapa, el razonamiento sigue cinco pregunt
 - **Interpretar una fosa en su fase congestionada como una obstrucción unilateral.** La asimetría que desaparece con el vasoconstrictor era del ciclo, no del tabique (caso 36.1).
 - **Concluir "sin mucosa" porque la fosa está dentro del valor.** Una fosa bajo 0,4 no lleva la prueba y puede tener mucosa que no se midió.
 - **Prometerle al paciente que su nariz quedará como la dejó el vasoconstrictor.** Es la mejor nariz que esa mucosa puede dar: no es lo que dará un tratamiento.
-- **Confiar en la rinometría cuando el primer mínimo está muy cerrado.** Lo que está detrás no se puede evaluar (→ H26): el equipo lo avisa (caso 36.3).
+- **Confiar en la rinometría cuando el primer mínimo está muy cerrado.** Lo que está detrás no se puede evaluar (→ H27): el equipo lo avisa (caso 36.3).
 
 :::pregunta Pregunta abierta
 Sofía (36.1) y Álvaro (36.2) dan casi la misma respuesta al vasoconstrictor: las dos fosas bajan a 0,28 o 0,29. ¿Qué información del informe, y no del examen, los separa? Y cuando uno de ellos te pregunte, a los 15 minutos, si le puedes vender el frasco porque "ahora sí respira", ¿qué le contestarías?
@@ -238,7 +238,7 @@ Sofía (36.1) y Álvaro (36.2) dan casi la misma respuesta al vasoconstrictor: l
 
 Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
 
-Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. El valor de referencia es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H25). La sensación de obstrucción se anota con el cuestionario NOSE, que va de 0 a 100 y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Stewart y cols., 2004; Lipan y Most, 2013; → H24). Hay dos límites del modelo que importan aquí: el vasoconstrictor **actúa entero e instantáneamente** (no tiene curso en el tiempo, ni rebote, ni taquifilaxia) y el modelo **no mide la sensación** de obstrucción. En el caso 36.2 eso se dice cuando importa.
+Los tres pacientes son de audición normal: la nariz no se estudia con LabSim. El valor de referencia es el de trabajo del libro (0,4 Pa/(cm³/s) a 150 Pa, → H26). La sensación de obstrucción se anota con el cuestionario NOSE, que va de 0 a 100 y se agrupa en leve (5 a 25), moderada (30 a 50), grave (55 a 75) y extrema (80 a 100) (Stewart y cols., 2004; Lipan y Most, 2013; → H25). Hay dos límites del modelo que importan aquí: el vasoconstrictor **actúa entero e instantáneamente** (no tiene curso en el tiempo, ni rebote, ni taquifilaxia) y el modelo **no mide la sensación** de obstrucción. En el caso 36.2 eso se dice cuando importa.
 
 {{caso cap36_alergica}}
 
@@ -256,7 +256,7 @@ Antes de medir, ¿qué mirarías en la rinoscopía? Si las dos fosas salen sobre
 
 #### Paso 4 · Los resultados
 
-**Rinoscopía anterior (→ H24).** Cornetes inferiores aumentados de tamaño en las dos fosas, con la mucosa **pálida** y húmeda y secreción clara y fluida; tabique en la línea media; sin pólipos ni masas. NOSE 50 (moderada).
+**Rinoscopía anterior (→ H25).** Cornetes inferiores aumentados de tamaño en las dos fosas, con la mucosa **pálida** y húmeda y secreción clara y fluida; tabique en la línea media; sin pólipos ni masas. NOSE 50 (moderada).
 
 :::ayuda-ancho Sofía, rinomanometría anterior a 150 Pa
 | | Fosa derecha | Fosa izquierda | Total |
@@ -291,7 +291,7 @@ Antes de medir, ¿qué mirarías en la rinoscopía? Si las dos fosas salen sobre
 :::docente Guía del caso
 - **Datos clave:** estornudos en salvas, picazón de nariz y ojos, secreción clara, peor en primavera y con el polvo y la mascota, obstrucción que alterna de lado, antihistamínico suspendido tres días antes, NOSE moderado.
 - **Hipótesis esperables:** rinitis alérgica (estacional y por exposición); rinitis no alérgica; hipertrofia de cornetes; desviación septal (no: el tabique es recto y la prueba lo dice).
-- **Qué pedir:** rinoscopía (→ H24); rinomanometría de reposo; vasoconstrictor **en las dos fosas**, porque las dos superan 0,4 (→ H25); rinometría si se quiere ubicar dónde está el estrechamiento (→ H26). El *prick test* **no** forma parte de estos exámenes: lo pide el médico (→ H27).
+- **Qué pedir:** rinoscopía (→ H25); rinomanometría de reposo; vasoconstrictor **en las dos fosas**, porque las dos superan 0,4 (→ H26); rinometría si se quiere ubicar dónde está el estrechamiento (→ H27). El *prick test* **no** forma parte de estos exámenes: lo pide el médico (→ H28).
 - **Errores esperables:** leer el total (0,29) como "nariz permeable"; llamar "unilateral" a la diferencia entre fosas (0,68 y 0,50), que es del ciclo; informar "rinitis alérgica" porque el vasoconstrictor funcionó.
 - **Para discutir en clase:** después del vasoconstrictor las dos fosas dan 0,29: ¿qué pasó con la diferencia de antes? ¿Qué dice el estudio de Corey y cols. (1997) sobre una nariz sana frente al vasoconstrictor?
 :::
@@ -312,7 +312,7 @@ Anota las causas de una obstrucción bilateral y constante que empezó con un re
 
 #### Paso 4 · Los resultados
 
-**Rinoscopía anterior (→ H24).** Cornetes inferiores muy aumentados de tamaño en las dos fosas, con la mucosa **roja y edematosa**, sin secreción; tabique en la línea media; sin pólipos ni masas. NOSE 85 (extrema).
+**Rinoscopía anterior (→ H25).** Cornetes inferiores muy aumentados de tamaño en las dos fosas, con la mucosa **roja y edematosa**, sin secreción; tabique en la línea media; sin pólipos ni masas. NOSE 85 (extrema).
 
 :::ayuda-ancho Álvaro, rinomanometría anterior a 150 Pa
 | | Fosa derecha | Fosa izquierda | Total |
@@ -348,7 +348,7 @@ Anota las causas de una obstrucción bilateral y constante que empezó con un re
 :::docente Guía del caso
 - **Datos clave:** ocho meses de spray descongestionante diario, desde un resfrío; efecto que dura cada vez menos; sin estornudos, picazón ni estación; sin antecedentes alérgicos; mucosa roja y edematosa; NOSE extremo.
 - **Hipótesis esperables:** rinitis por descongestionantes; rinitis alérgica persistente; rinitis no alérgica; estructural (no: cede por completo).
-- **Qué pedir:** la anamnesis del producto (→ H24); rinomanometría de reposo con las 48 horas cumplidas; vasoconstrictor en las dos fosas (→ H25); rinometría acústica (→ H26).
+- **Qué pedir:** la anamnesis del producto (→ H25); rinomanometría de reposo con las 48 horas cumplidas; vasoconstrictor en las dos fosas (→ H26); rinometría acústica (→ H27).
 - **Errores esperables:** informar "rinitis alérgica" porque la prueba dio vasomotora; no preguntar por el spray; medir con el spray puesto y leer "estructural"; decirle al paciente que el examen demostró que es medicamentosa.
 - **Para discutir en clase:** ¿qué le dices a un paciente que acaba de respirar perfecto gracias al vasoconstrictor del examen y quiere volver a usarlo en la casa? ¿Dónde cae tu responsabilidad y dónde la del médico?
 :::
@@ -369,7 +369,7 @@ Si las dos fosas no están igual, ¿en cuál harías la prueba con vasoconstrict
 
 #### Paso 4 · Los resultados
 
-**Rinoscopía anterior (→ H24).** Tabique desviado hacia la derecha en la zona anterior, con una fosa derecha estrecha; cornetes inferiores aumentados de tamaño en las dos fosas, con la mucosa rosada y algo hinchada; sin pólipos ni masas. NOSE 60 (grave).
+**Rinoscopía anterior (→ H25).** Tabique desviado hacia la derecha en la zona anterior, con una fosa derecha estrecha; cornetes inferiores aumentados de tamaño en las dos fosas, con la mucosa rosada y algo hinchada; sin pólipos ni masas. NOSE 60 (grave).
 
 :::ayuda-ancho Marcos, rinomanometría anterior a 150 Pa
 | | Fosa derecha | Fosa izquierda | Total |
@@ -380,7 +380,7 @@ Si las dos fosas no están igual, ¿en cuál harías la prueba con vasoconstrict
 | Con vasoconstrictor (solo FND), espiración | 0,44 | no se aplica | |
 :::
 
-:::imagen ilustraciones/cap36-rs-mixta-rm.svg ancho=78% Rinomanometría de Marcos. Línea continua: reposo; discontinua: con vasoconstrictor. Se muestran las dos fosas con vasoconstrictor; según la regla del libro (→ H25) solo se aplicaría en la derecha, que es la única sobre 0,4. La derecha baja a la mitad pero no llega al valor de trabajo: una respuesta mixta. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/cap36-rs-mixta-rm.svg ancho=78% Rinomanometría de Marcos. Línea continua: reposo; discontinua: con vasoconstrictor. Se muestran las dos fosas con vasoconstrictor; según la regla del libro (→ H26) solo se aplicaría en la derecha, que es la única sobre 0,4. La derecha baja a la mitad pero no llega al valor de trabajo: una respuesta mixta. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @79,40 | **FND en reposo**: a 150 Pa pasan unos 160 cm³/s: **0,95**, más del doble del valor de trabajo.
 - @25,36 | **FNI en reposo**: unos 420 cm³/s, **0,36**: dentro del valor, así que no lleva vasoconstrictor.
 - @82,22 | **FND con vasoconstrictor** (rayas): sube el flujo a unos 330 cm³/s, **0,46**. Bajó 52 %, pero **no llegó al valor de trabajo**: es la respuesta mixta.
@@ -399,13 +399,13 @@ Si las dos fosas no están igual, ¿en cuál harías la prueba con vasoconstrict
 - @9,66 | **FND, MCA1 0,23 cm²** a 1,3 cm de la narina: el estrechamiento más grande de las dos fosas, en la zona de la válvula.
 - @45,66 | **FND, MCA2 0,49 cm²** a 3,2 cm: el cornete derecho, congestionado.
 - @45,22 | Con vasoconstrictor (rayas) la FND hace dos cosas distintas: **MCA2 se abre a 1,93** (era mucosa) y **MCA1 solo sube a 0,41**: queda el estrechamiento de la válvula, que es estructura (→ cap. 35).
-- @60,56 | **El equipo avisó** que el primer mínimo de la FND en reposo está muy cerrado y que lo de atrás no se puede evaluar (→ H26): el MCA2 de 0,49 en reposo hay que tomarlo con cuidado; el de 1,93 con vasoconstrictor sí es más fiable.
+- @60,56 | **El equipo avisó** que el primer mínimo de la FND en reposo está muy cerrado y que lo de atrás no se puede evaluar (→ H27): el MCA2 de 0,49 en reposo hay que tomarlo con cuidado; el de 1,93 con vasoconstrictor sí es más fiable.
 :::
 
 :::docente Guía del caso
 - **Datos clave:** golpe a los 12 años, fosa derecha siempre peor, izquierda cambiante, empeoramiento en primavera, corticoide que abre solo la izquierda, descongestionante ocasional, ronquido, NOSE grave.
 - **Hipótesis esperables:** desviación septal con rinitis (mixta); rinitis alérgica sola (no: un lado nunca abre); hipertrofia de cornetes; rinitis medicamentosa (no: el uso es ocasional).
-- **Qué pedir:** rinoscopía; rinomanometría de reposo; vasoconstrictor **solo en la derecha** (la izquierda está en 0,36); rinometría para separar el nivel del estrechamiento (→ H25, H26).
+- **Qué pedir:** rinoscopía; rinomanometría de reposo; vasoconstrictor **solo en la derecha** (la izquierda está en 0,36); rinometría para separar el nivel del estrechamiento (→ H26, H27).
 - **Errores esperables:** concluir "vasomotora" porque bajó; concluir "mecánica" porque no llegó a 0,4; leer el MCA2 de reposo sin considerar que el primer mínimo está muy cerrado.
 - **Para discutir en clase:** si se operaran solo los cornetes, ¿qué quedaría? ¿Y si se operara solo el tabique? ¿Qué parte de la queja de Marcos es de la izquierda?
 :::
@@ -427,7 +427,7 @@ Obstrucción nasal **bilateral de tipo vasomotora (mucosa)**. El patrón es comp
 > **Informe.** Rinomanometría anterior activa. Sin antihistamínicos ni vasoconstrictores durante 48 horas antes del examen. Resistencia a 150 Pa en reposo: FND 0,68; FNI 0,50; total 0,29 Pa/(cm³/s). **Ambas fosas sobre el valor de referencia (≤ 0,4).** Con oximetazolina, 2 puff por fosa, y 15 minutos: FND 0,29; FNI 0,29; total 0,15. Rinometría acústica: MCA2 0,31 (FND) y 0,44 cm² (FNI) en reposo, que se abren a 1,92 y 1,91 cm² con vasoconstrictor; MCA1 de 0,44 y 0,46 a 0,67 cm². **Conclusión:** obstrucción nasal bilateral de tipo **vasomotora** (mucosa), sin componente mecánico. La diferencia entre fosas en reposo desaparece con el vasoconstrictor y es compatible con el ciclo nasal. El examen no identifica la causa de la hinchazón de la mucosa.
 
 :::comentario Lo que dicen las normas
-La técnica de la prueba cutánea está en H27. Cuando el médico la pide, la lectura de la pápula, a los 15-20 minutos, es de sensibilización, no de enfermedad: debe interpretarse con la historia (Heinzerling y cols., 2013), y frente a la provocación nasal como referencia tuvo una sensibilidad de 85 % y una especificidad de 77 % (Nevis y cols., 2016). La prueba de la nariz de este libro, a su vez, tampoco separa a un alérgico de un sano: ambos se abren, y pasado el primer mínimo, en la misma proporción (Corey y cols., 1997).
+La técnica de la prueba cutánea está en H28. Cuando el médico la pide, la lectura de la pápula, a los 15-20 minutos, es de sensibilización, no de enfermedad: debe interpretarse con la historia (Heinzerling y cols., 2013), y frente a la provocación nasal como referencia tuvo una sensibilidad de 85 % y una especificidad de 77 % (Nevis y cols., 2016). La prueba de la nariz de este libro, a su vez, tampoco separa a un alérgico de un sano: ambos se abren, y pasado el primer mínimo, en la misma proporción (Corey y cols., 1997).
 :::
 
 ### Caso 36.2

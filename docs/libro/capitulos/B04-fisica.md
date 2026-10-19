@@ -17,14 +17,14 @@ Tabla: Dónde se usa cada sección
 | Sección | Se usa sobre todo en |
 |---|---|
 | El sonido (ondas, estímulos, ruidos, filtros) | H3, H4, H8, H9, H10, H13 |
-| Decibeles y referencias | H3, H4, H5, H7, H10, H13, H23 |
+| Decibeles y referencias | H3, H4, H5, H7, H10, H13, H24 |
 | Del sonido a lo que se oye | H3, H5, H6, H15 |
 | Impedancia y admitancia | H7, cap. 3, cap. 4 |
 | Señal y ruido | H9, H10, cap. 18 |
 | Acústica de sala | H3, H8, H21 |
 | Electroacústica del audífono | H21, H22 |
-| Ruido ocupacional | H23, cap. 6, cap. 33 |
-| Flujo de aire en la nariz | H25, H26 |
+| Ruido ocupacional | H24, cap. 6, cap. 33 |
+| Flujo de aire en la nariz | H26, H27 |
 
 :::ayuda Los logaritmos que necesitas
 El logaritmo en base 10 (la tecla *log* de la calculadora) cuenta ceros: log 10 = 1, log 100 = 2, log 1.000 = 3, log 2 = 0,301. Convierte productos en sumas, log(a × b) = log a + log b, y divisiones en restas, log(a / b) = log a − log b. Con eso salen todas las cuentas de este capítulo. Para deshacer un logaritmo se usa la tecla *10^x*: 10^2,5 = 316.
@@ -40,7 +40,7 @@ Cinco números describen un tono puro:
 
 - **Frecuencia** (*f*, en hercios): cuántos ciclos de subida y bajada hay en un segundo. Es lo que el oído oye como grave o agudo.
 - **Período** (*T*): lo que dura un ciclo, *T* = 1 / *f*. A 1.000 Hz dura 1 ms; a 125 Hz, 8 ms.
-- **Longitud de onda** (λ): la distancia que recorre el sonido en un ciclo, λ = *c* / *f*, donde *c* es la velocidad del sonido. En el aire *c* es de unos **343 m/s a 20 °C** y cambia con la temperatura, *c* = 331,3 + 0,606 *T* (con *T* en °C): 331 m/s a 0 °C, 343 a 20 °C y 352 a 34 °C, la temperatura que alcanza el aire inspirado al llegar a la rinofaringe (Keck y cols., 2000; → H26).
+- **Longitud de onda** (λ): la distancia que recorre el sonido en un ciclo, λ = *c* / *f*, donde *c* es la velocidad del sonido. En el aire *c* es de unos **343 m/s a 20 °C** y cambia con la temperatura, *c* = 331,3 + 0,606 *T* (con *T* en °C): 331 m/s a 0 °C, 343 a 20 °C y 352 a 34 °C, la temperatura que alcanza el aire inspirado al llegar a la rinofaringe (Keck y cols., 2000; → H27).
 - **Amplitud**: cuánto sube y baja la presión. Se puede dar de pico, de pico a pico o **RMS** (*root mean square*, la raíz del promedio de los cuadrados). El RMS mide la potencia del sonido y es el que usan los decibeles; para un tono puro vale 0,707 veces el pico.
 - **Fase**: en qué punto del ciclo está la onda en un instante dado, de 0° a 360°.
 
@@ -217,7 +217,7 @@ Calibrar es comprobar que el audiómetro entrega esos niveles. Hay tres niveles 
 Una **atenuación** es la diferencia de nivel, en dB, entre lo que llega y lo que pasa. Dos barreras en paralelo no se suman en dB: se suman las **energías que dejan pasar**, y la barrera más débil manda.
 
 :::ayuda-ancho Ejemplo resuelto: una fuga pone el techo de un tapón
-Un tapón que por sí solo atenúa 30 dB deja pasar 10^(−3) de la energía. Si tiene una fuga que por sí sola atenuaría 20 dB (10^(−2)), el sonido pasa por las dos vías: 10⁻³ + 10⁻² = 1,1 × 10⁻². La atenuación total es −10 log (1,1 × 10⁻²) = **19,6 dB**. El tapón de 30 dB, con una fuga, **no atenúa ni 20**. Esa es la razón de insistir en que el protector y el molde estén bien puestos (→ H21, H23).
+Un tapón que por sí solo atenúa 30 dB deja pasar 10^(−3) de la energía. Si tiene una fuga que por sí sola atenuaría 20 dB (10^(−2)), el sonido pasa por las dos vías: 10⁻³ + 10⁻² = 1,1 × 10⁻². La atenuación total es −10 log (1,1 × 10⁻²) = **19,6 dB**. El tapón de 30 dB, con una fuga, **no atenúa ni 20**. Esa es la razón de insistir en que el protector y el molde estén bien puestos (→ H21, H24).
 :::
 
 **Atenuación interaural.** Un fono pone a vibrar la caja del fono y, con ella, el cráneo; esa vibración llega a la cóclea contraria. La atenuación interaural es lo que se pierde en ese camino. Depende del transductor, de la frecuencia y del paciente, y se toma el mínimo: **40 dB** con fono supraaural, **55 dB** o más con inserción y casi 0 con el vibrador óseo (BSA, 2018; Munro y Agnew, 1999; Stenfelt, 2012). Los decibeles se restan porque son una diferencia de niveles.
@@ -226,7 +226,7 @@ Un tapón que por sí solo atenúa 30 dB deja pasar 10^(−3) de la energía. Si
 Se presenta un tono de 80 dB HL al oído derecho. Con un fono supraaural (40 dB), llegan 80 − 40 = **40 dB** a la cóclea izquierda; si el umbral óseo del izquierdo es 30 dB, ese oído lo detecta y el umbral que se anota puede ser **del oído equivocado**. Con inserción (55 dB) llegan 80 − 55 = **25 dB**, bajo los 30 dB del umbral: el tono no cruza. Es la lógica de la decisión de enmascarar (→ H4).
 :::
 
-**Protector auditivo.** Su atenuación se mide, en personas, como la diferencia entre el umbral con y sin protector (ISO 4869-1, 2018). Crece con la frecuencia, porque las ondas cortas son las que mejor se frenan, y se pierde sobre todo por **fugas**. Lo que importa para el trabajador es el nivel que queda en el oído, que es el nivel del ambiente menos la atenuación *real*. Esa suele ser menor que la de la etiqueta, que se mide en laboratorio: NIOSH recomienda descontarle un 25 % en las orejeras, un 50 % en los tapones moldeables y un 70 % en los demás tapones (NIOSH, 1998; → H23).
+**Protector auditivo.** Su atenuación se mide, en personas, como la diferencia entre el umbral con y sin protector (ISO 4869-1, 2018). Crece con la frecuencia, porque las ondas cortas son las que mejor se frenan, y se pierde sobre todo por **fugas**. Lo que importa para el trabajador es el nivel que queda en el oído, que es el nivel del ambiente menos la atenuación *real*. Esa suele ser menor que la de la etiqueta, que se mide en laboratorio: NIOSH recomienda descontarle un 25 % en las orejeras, un 50 % en los tapones moldeables y un 70 % en los demás tapones (NIOSH, 1998; → H24).
 
 **Molde del audífono.** Un molde cerrado y bien sellado se comporta como un tapón: el audífono queda aislado del exterior y los graves se acumulan en el conducto. Una **ventilación** es un tubo angosto que atraviesa el molde: deja salir los graves (más cuanto más ancha), mejora la oclusión y reduce la ganancia grave, y deja volver sonido al micrófono (→ H21, H22; Dillon, 2012).
 
@@ -415,7 +415,7 @@ El silbido es una **realimentación**: el sonido que sale del molde vuelve al mi
 Un ruido de máquina mide, en bandas de octava, 90, 88, 85, 82, 78, 74 y 70 dB SPL en 125, 250, 500, 1.000, 2.000, 4.000 y 8.000 Hz. Sin ponderar, la suma de energías es **93,4 dB**. Con la ponderación A las bandas pasan a 73,9, 79,4, 81,8, 82,0, 79,2, 75,0 y 68,9, y la suma es **87,4 dB(A)**. El ruido es más grave que agudo, y la cifra que cuenta para la exposición es la ponderada.
 :::
 
-**El nivel equivalente y la dosis.** Un ruido real sube y baja. Se resume con el **nivel equivalente** (Leq): el nivel de un ruido constante que, en el mismo tiempo, trae la **misma energía total**: Leq = 10 log ((1/*T*) × Σ *t*ᵢ × 10^(*L*ᵢ/10)). Normalizado a una jornada de 8 horas se llama LEX,8h (→ H23).
+**El nivel equivalente y la dosis.** Un ruido real sube y baja. Se resume con el **nivel equivalente** (Leq): el nivel de un ruido constante que, en el mismo tiempo, trae la **misma energía total**: Leq = 10 log ((1/*T*) × Σ *t*ᵢ × 10^(*L*ᵢ/10)). Normalizado a una jornada de 8 horas se llama LEX,8h (→ H24).
 
 **La tasa de intercambio de 3 dB.** Como +3 dB es el doble de energía (10 log 2 = 3,01), la misma energía se logra duplicando el nivel en 3 dB y dividiendo el tiempo por dos: es "la misma energía, el mismo riesgo". Con 85 dB(A) como punto de partida para 8 horas, el tiempo permitido es *T* = 8 h / 2^((*L* − 85)/3).
 
@@ -425,21 +425,21 @@ Tabla: Tiempo permitido con la regla de 3 dB, con 85 dB(A) en 8 h
 |---|---|---|---|---|---|---|
 | Tiempo | 8 h | 4 h | 2 h | 1 h | 30 min | 15 min |
 
-Con una **regla de 5 dB** (la que mantiene OSHA, con 90 dB(A) en 8 h) el tiempo se divide por dos cada 5 dB: 95 dB(A) en 4 h, 100 en 2 h, 105 en 1 h. Un mismo día de trabajo da exposiciones distintas según la regla (→ H23).
+Con una **regla de 5 dB** (la que mantiene OSHA, con 90 dB(A) en 8 h) el tiempo se divide por dos cada 5 dB: 95 dB(A) en 4 h, 100 en 2 h, 105 en 1 h. Un mismo día de trabajo da exposiciones distintas según la regla (→ H24).
 
 :::ayuda-ancho Ejemplo resuelto: dosis y nivel equivalente son lo mismo
 Un trabajador pasa 4 horas a 91 dB(A) y 4 horas a 82 dB(A). Con la tabla de 3 dB, el tiempo permitido a 91 dB(A) es 2 h y a 82 es 16 h. La **dosis** es la suma de las fracciones del tiempo permitido: 4/2 + 4/16 = 2 + 0,25 = **2,25**, un 225 %. Su nivel para 8 horas es 85 + 10 log 2,25 = **88,5 dB(A)**. Por el otro camino, el nivel equivalente de la jornada es 10 log (½ × 10^9,1 + ½ × 10^8,2) = **88,5 dB(A)**. Son la misma cuenta. Y el trabajador tiene más del doble de la dosis permitida, aunque la mitad del día sea "tranquila".
 :::
 
-**El criterio de 85 dB(A).** No es un umbral de todo o nada: es el punto donde el riesgo ya es bajo y todavía no nulo. En el análisis de NIOSH para 40 años de exposición, el exceso de riesgo de hipoacusia es de 8 % a 85 dB(A) y de 25 % a 90 (NIOSH, 1998; → H23). Lo que ordena las normas es cuánto aceptan de ese riesgo. Los **ruidos de impulso** (golpes) se controlan además por su nivel de pico, en dB(C). El daño esperable para una exposición y una edad se estima con la ISO 1999 (2013; → cap. 6, cap. 33).
+**El criterio de 85 dB(A).** No es un umbral de todo o nada: es el punto donde el riesgo ya es bajo y todavía no nulo. En el análisis de NIOSH para 40 años de exposición, el exceso de riesgo de hipoacusia es de 8 % a 85 dB(A) y de 25 % a 90 (NIOSH, 1998; → H24). Lo que ordena las normas es cuánto aceptan de ese riesgo. Los **ruidos de impulso** (golpes) se controlan además por su nivel de pico, en dB(C). El daño esperable para una exposición y una edad se estima con la ISO 1999 (2013; → cap. 6, cap. 33).
 
 ## Flujo de aire en la nariz
 
 ### Presión, flujo y resistencia
 
-El aire entra por la nariz porque el tórax baja la presión de la nasofaringe. Esa **diferencia de presión** (ΔP, en Pa) empuja un **flujo** (V̇, en cm³/s), y su cociente es la **resistencia** (*R* = ΔP / V̇), como en un circuito eléctrico. Se mide en Pa/(cm³/s); 1 Pa/(cm³/s) son unos 10,2 cmH₂O/L/s (→ H25). La nariz es la parte más resistente de la vía aérea del adulto (Ferris y cols., 1964). <!-- verificar: Ferris y cols. (1964) no tiene abstract en PubMed y el texto completo no es de acceso libre; no se pudo leer qué fracción de la resistencia total atribuyen a la nariz. -->
+El aire entra por la nariz porque el tórax baja la presión de la nasofaringe. Esa **diferencia de presión** (ΔP, en Pa) empuja un **flujo** (V̇, en cm³/s), y su cociente es la **resistencia** (*R* = ΔP / V̇), como en un circuito eléctrico. Se mide en Pa/(cm³/s); 1 Pa/(cm³/s) son unos 10,2 cmH₂O/L/s (→ H26). La nariz es la parte más resistente de la vía aérea del adulto (Ferris y cols., 1964). <!-- verificar: Ferris y cols. (1964) no tiene abstract en PubMed y el texto completo no es de acceso libre; no se pudo leer qué fracción de la resistencia total atribuyen a la nariz. -->
 
-**Una pequeña reducción del radio cambia mucho.** En un tubo recto y liso con flujo ordenado (laminar), la resistencia es proporcional a **1 / r⁴** (ley de Poiseuille). Si el radio baja un 20 %, la resistencia sube ×2,4; si baja a la mitad, ×16. La nariz no es un tubo liso, pero es la razón de que unos milímetros de mucosa hinchada tapen y de que un vasoconstrictor que los reduzca pueda destapar (→ H25).
+**Una pequeña reducción del radio cambia mucho.** En un tubo recto y liso con flujo ordenado (laminar), la resistencia es proporcional a **1 / r⁴** (ley de Poiseuille). Si el radio baja un 20 %, la resistencia sube ×2,4; si baja a la mitad, ×16. La nariz no es un tubo liso, pero es la razón de que unos milímetros de mucosa hinchada tapen y de que un vasoconstrictor que los reduzca pueda destapar (→ H26).
 
 ### Por qué la resistencia depende de la presión, y por qué 150 Pa
 
@@ -450,11 +450,11 @@ El número de Reynolds dice dónde cambia el régimen: *Re* = ρ *v* *d* / μ. C
 :::imagen ilustraciones/b4-nariz.svg ancho=100% Presión contra flujo en una fosa nasal, y la resistencia de un tubo según su radio. La curva se dobla porque, al subir el flujo, la turbulencia pesa más; y basta achicar un poco el radio para que la resistencia se dispare.
 :::
 
-:::ayuda-ancho Ejemplo resuelto: separar lo laminar de lo turbulento con los números de H25
-La fosa derecha del paciente de H25 tiene una resistencia de 0,26 Pa/(cm³/s) a 75 Pa y de 0,35 a 150 Pa. Los flujos son 75 / 0,26 = 288 cm³/s y 150 / 0,35 = 429 cm³/s (26 L/min). Como *R* = *k*₁ + *k*₂ V̇, restando las dos resistencias: *k*₂ = (0,35 − 0,26) / (429 − 288) = 6,4 × 10⁻⁴, y *k*₁ = 0,26 − 6,4 × 10⁻⁴ × 288 = **0,075**. La parte laminar es 0,075 / 0,26 = **29 %** de la resistencia a 75 Pa y 0,075 / 0,35 = **21 %** a 150 Pa. A medida que la presión sube, el componente turbulento pesa más, y por eso la resistencia **sube** con la presión.
+:::ayuda-ancho Ejemplo resuelto: separar lo laminar de lo turbulento con los números de H26
+La fosa derecha del paciente de H26 tiene una resistencia de 0,26 Pa/(cm³/s) a 75 Pa y de 0,35 a 150 Pa. Los flujos son 75 / 0,26 = 288 cm³/s y 150 / 0,35 = 429 cm³/s (26 L/min). Como *R* = *k*₁ + *k*₂ V̇, restando las dos resistencias: *k*₂ = (0,35 − 0,26) / (429 − 288) = 6,4 × 10⁻⁴, y *k*₁ = 0,26 − 6,4 × 10⁻⁴ × 288 = **0,075**. La parte laminar es 0,075 / 0,26 = **29 %** de la resistencia a 75 Pa y 0,075 / 0,35 = **21 %** a 150 Pa. A medida que la presión sube, el componente turbulento pesa más, y por eso la resistencia **sube** con la presión.
 :::
 
-Un valor de referencia solo sirve si todos lo leen en el mismo punto, y 150 Pa es un compromiso: suficientemente alto para tener señal (con presiones muy bajas el flujo recién se pone en marcha y el ruido pesa), y suficientemente bajo para que casi todos los pacientes lleguen, con 75 Pa como alternativa (Clement, 1984; Clement y Gordts, 2005; Wong y Eccles, 2014; Vogt y cols., 2016; → H25).
+Un valor de referencia solo sirve si todos lo leen en el mismo punto, y 150 Pa es un compromiso: suficientemente alto para tener señal (con presiones muy bajas el flujo recién se pone en marcha y el ruido pesa), y suficientemente bajo para que casi todos los pacientes lleguen, con 75 Pa como alternativa (Clement, 1984; Clement y Gordts, 2005; Wong y Eccles, 2014; Vogt y cols., 2016; → H26).
 
 **Dos fosas en paralelo.** El aire elige dos caminos, y los **flujos se suman** a la misma presión, es decir, se suman las inversas de las resistencias: 1 / *R*total = 1 / *R*₁ + 1 / *R*₂. Con 0,35 y 0,29, 1 / 0,35 + 1 / 0,29 = 2,86 + 3,45 = 6,31 y *R*total = **0,16**. La resistencia total es siempre menor que la de la fosa más abierta, y si una fosa se tapa del todo (*R* → ∞), el total es la resistencia de la otra: 0,35.
 
@@ -464,7 +464,7 @@ Un sonido que viaja por un tubo "siente" su sección. La impedancia de una onda 
 
 *R* = (*A*₁ − *A*₂) / (*A*₁ + *A*₂)
 
-Si el tubo se **estrecha** (*A*₂ < *A*₁), *R* es positivo: el eco vuelve del mismo signo. Si se **ensancha**, *R* es negativo: el eco vuelve invertido (→ H26). Y la distancia sale del tiempo: el eco que vuelve demora *t* = 2*x* / *c* en ir y volver desde una distancia *x*.
+Si el tubo se **estrecha** (*A*₂ < *A*₁), *R* es positivo: el eco vuelve del mismo signo. Si se **ensancha**, *R* es negativo: el eco vuelve invertido (→ H27). Y la distancia sale del tiempo: el eco que vuelve demora *t* = 2*x* / *c* en ir y volver desde una distancia *x*.
 
 :::imagen ilustraciones/b4-reflexion.svg ancho=100% Ecos de un tubo con un estrechamiento, y cuánto del pulso llega hasta lo de atrás. El estrechamiento devuelve un eco del mismo signo y el ensanchamiento, uno invertido; el tiempo del eco dice a qué distancia está cada cambio.
 :::
@@ -473,7 +473,7 @@ Si el tubo se **estrecha** (*A*₂ < *A*₁), *R* es positivo: el eco vuelve del
 El tubo del equipo mide 1,5 cm² y una válvula nasal lo reduce a 0,6 cm², a 1,3 cm de la entrada. *R* = (1,5 − 0,6) / (1,5 + 0,6) = **+0,43**: vuelve el 43 % de la presión y el 18 % de la energía (*R*² = 0,18), y llega a los 2 × 0,013 / 343 = **76 µs**. Al revés, el programa deduce el área desde el eco: *A*₂ = *A*₁ × (1 − *R*) / (1 + *R*) = 1,5 × 0,57 / 1,43 = **0,60 cm²**. Cuando la sección vuelve a ensancharse, a 3,1 cm, la parte que llega allí y vuelve es de signo contrario y llega a los 181 µs. Su tamaño es −0,35, y no −0,43, porque el pulso ya perdió algo al pasar por la válvula. El equipo hace esta cuenta, corrigiendo lo que se perdió antes, en cada instante, y dibuja la **curva área-distancia** (Hilberg y cols., 1989; Jackson y cols., 1977; Fredberg y cols., 1980).
 :::
 
-Los límites del método que explica H26 salen de estas mismas cuentas. Después de un estrechamiento marcado, la energía que pasa y vuelve de lo de atrás es (1 − *R*²)². Con un estrechamiento a 0,4 del área del tubo, vuelve el 67 % de la energía; con 0,1, el **11 %** (−9,6 dB); con 0,02, el **0,6 %** (−22 dB). Una válvula muy cerrada deja casi a oscuras lo que hay detrás. Como la distancia depende de *c*, y *c* de la temperatura (0,6 m/s por °C, 0,18 % por grado), una sala a otra temperatura corre las distancias: 10 °C de error son un 1,8 % (→ H26).
+Los límites del método que explica H27 salen de estas mismas cuentas. Después de un estrechamiento marcado, la energía que pasa y vuelve de lo de atrás es (1 − *R*²)². Con un estrechamiento a 0,4 del área del tubo, vuelve el 67 % de la energía; con 0,1, el **11 %** (−9,6 dB); con 0,02, el **0,6 %** (−22 dB). Una válvula muy cerrada deja casi a oscuras lo que hay detrás. Como la distancia depende de *c*, y *c* de la temperatura (0,6 m/s por °C, 0,18 % por grado), una sala a otra temperatura corre las distancias: 10 °C de error son un 1,8 % (→ H27).
 
 ## Preguntas para practicar
 

@@ -1,4 +1,4 @@
-# H23. Audiometría ocupacional y vigilancia del ruido
+# H24. Audiometría ocupacional y vigilancia del ruido
 
 :::objetivos En esta herramienta
 - Explicar qué es la dosis de ruido (nivel equivalente, tasa de intercambio, promedio de 8 horas) y por qué cada 3 dB duplican la energía.
@@ -110,7 +110,7 @@ Un oído no se daña por "un ruido fuerte", sino por **cuánta energía sonora r
 
 donde *C* es el tiempo real a cada nivel y *T* el tiempo permitido a ese nivel (NIOSH, 1998). La dosis se vuelve a convertir en un nivel con *LEX,8h* = 85 + 10 · log₁₀(*D*/100) para la regla de 3 dB. Un ejemplo con la tabla chilena: 4 horas a 88 dB(A) (permitidas 4) más 4 horas a 82 dB(A) (permitidas 16) dan 4/4 + 4/16 = 1,25: una dosis de **125 %**, o 86 dB(A) para ocho horas. Un turno que parece "tranquilo" porque la mitad del día es suave igual se pasó del límite.
 
-:::imagen ilustraciones/h23-intercambio.svg ancho=90% Dos reglas para el tiempo permitido: 3 dB y 5 dB. Las dos dan 8 horas en su nivel de partida (85 y 90 dB(A)), pero a 100 dB(A) la de 3 dB permite 15 minutos y la de 5 dB, 2 horas: cuanto más fuerte el ruido, más se separan.
+:::imagen ilustraciones/h24-intercambio.svg ancho=90% Dos reglas para el tiempo permitido: 3 dB y 5 dB. Las dos dan 8 horas en su nivel de partida (85 y 90 dB(A)), pero a 100 dB(A) la de 3 dB permite 15 minutos y la de 5 dB, 2 horas: cuanto más fuerte el ruido, más se separan.
 :::
 
 :::ayuda Dos números para recordar
@@ -375,7 +375,7 @@ Fuentes: OSHA (29 CFR 1910.95, (g)(7), (g)(8) y (g)(10)); NIOSH (1998, secciones
 
 El criterio de NIOSH es el más sensible y el de OSHA el menos: el propio NIOSH lo señala, por haber mirado cómo identifican los distintos criterios a los trabajadores que realmente se dañan, y por eso agregó 6.000 Hz (donde el ruido suele cambiar el umbral primero) y quitó la corrección por edad (NIOSH, 1998). La figura muestra qué pasa con dos controles de un trabajador cuya base es la de Tomás:
 
-:::imagen ilustraciones/h23-cambio-umbral.svg ancho=100% Dos controles contra la misma base, y qué dice cada criterio. Con la muesca ya formada (A) los tres criterios coinciden; con la muesca incipiente (B) solo NIOSH, que mira una frecuencia sola, marca el cambio.
+:::imagen ilustraciones/h24-cambio-umbral.svg ancho=100% Dos controles contra la misma base, y qué dice cada criterio. Con la muesca ya formada (A) los tres criterios coinciden; con la muesca incipiente (B) solo NIOSH, que mira una frecuencia sola, marca el cambio.
 :::
 
 En el control **A**, los tres criterios coinciden: el cambio ya es grande en 4 kHz. En el **B**, que es una muesca incipiente, el promedio de 2, 3 y 4 kHz da 8,3 dB, bajo el criterio de OSHA; el cambio en una sola frecuencia llega a 20 dB y cumple el de NIOSH; y como el umbral resultante queda en 20 dB HL, bajo 25, PREXOR no lo tomaría como alterado. Un mismo oído, tres respuestas distintas. Por eso **lo primero que se anota** en un informe es qué criterio se usó.
@@ -391,7 +391,7 @@ NIOSH sostiene lo contrario, con cuatro argumentos (NIOSH, 1998):
 - En una vigilancia el fin es **prevenir**, no repartir una compensación, y corregir **retrasa** el momento en que el cambio salta.
 - En los juicios de compensación se usa para reducir lo que se paga, que no es la pregunta de un programa de prevención.
 
-Un ejercicio con los datos de Jorge (caso 6.2) muestra cuánto pesa. Si a los 25 años su base hubiera sido plana en 0 dB HL, como la de Tomás, hoy, a los 47, su oído derecho tendría 20, 40 y 55 dB en 2, 3 y 4 kHz (caso H23.2):
+Un ejercicio con los datos de Jorge (caso 6.2) muestra cuánto pesa. Si a los 25 años su base hubiera sido plana en 0 dB HL, como la de Tomás, hoy, a los 47, su oído derecho tendría 20, 40 y 55 dB en 2, 3 y 4 kHz (caso H24.2):
 
 :::ayuda-ancho Cuánto del cambio de Jorge explicaría la edad (ejercicio hipotético; base supuesta)
 | | 2.000 Hz | 3.000 Hz | 4.000 Hz | Promedio |
@@ -415,7 +415,7 @@ La edad explica unos **9 dB** del promedio, y el cambio corregido sigue siendo c
 
 ### Qué hacer con un cambio confirmado
 
-:::imagen ilustraciones/h23-flujo.svg ancho=100% Del control periódico al cambio confirmado. Un cambio no se informa en el primer control: se reexplica, se repite y se confirma en condiciones de base antes de mandarlo a revisión.
+:::imagen ilustraciones/h24-flujo.svg ancho=100% Del control periódico al cambio confirmado. Un cambio no se informa en el primer control: se reexplica, se repite y se confirma en condiciones de base antes de mandarlo a revisión.
 :::
 
 La revisión **no la hace quien examina**: la hace un médico o un audiólogo, que mira las audiometrías, la ficha y la historia ocupacional y decide si el cambio es de origen laboral, no laboral o mixto. NIOSH dice que, si sospecha otra causa, el trabajador recibe consejería y se le deriva a su médico (NIOSH, 1998). Los datos que cambian la conversación son los que ya aparecen en H3 y en el cap. 6: una **asimetría** que la exposición no explica, un **gap** aéreo-óseo (el ruido no lo da), una discriminación **peor** que el audiograma, un acúfeno unilateral, una pérdida que **sigue avanzando** sin exposición. Cualquiera de ellos va a otorrinolaringología.
@@ -479,17 +479,17 @@ LabSim tiene el **audiómetro** completo de H3 y los dos pacientes del capítulo
 
 **Lo que LabSim no tiene.** No simula el **reposo** ni el desplazamiento temporal: el paciente responde con su audición permanente, sin importar cuándo fue su última exposición. No mide el ruido de la sala ni el estado de calibración, y no guarda una audiometría **de base** para comparar con un control posterior: hay que llevar los números de una a la otra. Ni el protocolo de seguimiento ni los niveles de periodicidad están modelados. Lo que sí permite practicar es tomar umbrales **bien** en 3, 4 y 6 kHz y mirar la forma de un oído expuesto.
 
-{{caso h23_p33}}
+{{caso h24_p33}}
 
-:::figura h23_p33 audiograma
+:::figura h24_p33 audiograma
 - @OD 4000 | 0 dB HL en todas las frecuencias, también en 4 kHz, que es donde el ruido va a dejar su marca si la deja. Esta es la **base**: contra ella se leerá todo.
 - @OI 8000 | El OI es igual. Sin muesca: el audiograma no ve lo que el concierto de hace dos años haya podido dejar en las sinapsis (→ cap. 6).
 - Para la minera, esta es la audiometría de ingreso. El informe de una base lleva lo mismo que el de un control: el equipo, las horas de reposo, la sala, la otoscopía y la fecha.
 :::
 
-{{caso h23_p37}}
+{{caso h24_p37}}
 
-:::figura h23_p37 audiograma
+:::figura h24_p37 audiograma
 - @OD 3000 | A 3 kHz el OD está en 40 dB: ya cayó 35 dB desde 1 kHz (5 dB).
 - @OD 4000 | El fondo, en 55 dB. Si la base de Jorge hubiera sido la de Tomás, el cambio sería de 55 dB: más de tres veces el criterio de NIOSH (15 dB).
 - @OD 8000 | En 8 kHz el OD vuelve a 30 dB: la recuperación de la muesca.
@@ -499,7 +499,7 @@ LabSim tiene el **audiómetro** completo de H3 y los dos pacientes del capítulo
 :::pregunta Preguntas para practicar
 1. Un trabajador pasa 4 horas a 91 dB(A) y 4 horas a 82 dB(A). Con la tabla chilena (91 dB(A): 2 horas; 82: 16 horas), ¿cuál es su dosis y su nivel para 8 horas? ¿Y si la tasa fuera de 5 dB?
 2. A Tomás le hacen su primer control a los cinco años, sin reposo, justo al salir del turno. Sale 4 kHz en 30 dB HL en los dos oídos y 8 kHz en 10. ¿Qué dos explicaciones hay para ese cambio y qué haces antes de decir que es permanente?
-3. Imagina que hace cinco años Jorge (caso H23.2) tenía, en el oído derecho, 20, 30 y 45 dB HL en 2, 3 y 4 kHz, y hoy tiene 20, 40 y 55. Calcula el cambio y mira qué dicen OSHA, NIOSH y PREXOR. ¿Quiere decir que su oído está bien?
+3. Imagina que hace cinco años Jorge (caso H24.2) tenía, en el oído derecho, 20, 30 y 45 dB HL en 2, 3 y 4 kHz, y hoy tiene 20, 40 y 55. Calcula el cambio y mira qué dicen OSHA, NIOSH y PREXOR. ¿Quiere decir que su oído está bien?
 4. Un control sale con un cambio de 10 dB en 2 kHz y 5 dB en 3 y 4 kHz. ¿Qué dice cada criterio? ¿Y si es de 15 dB en 6 kHz?
 5. Explica a un jefe de turno por qué el protector que dice NRR 30 en la caja no baja el ruido 30 dB. ¿Qué le pedirías al ver que un trabajador tiene un cambio confirmado?
 6. La cámara pasó la medición de ruido hace cuatro meses, pero hoy hay una obra al lado. ¿Examinas? ¿Cómo lo compruebas sin un sonómetro?

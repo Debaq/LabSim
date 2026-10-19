@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Figuras de H25 y H26 hechas con RinoSim (curvas y pantallas de resultado, sin interfaz).
-# Reproduce exactamente lo que hay en docs/libro/ilustraciones/h25-rs-* y h26-rs-*.
-#   RINOSIM=/ruta/a/rinosim bash docs/libro/ilustraciones/hacer_h2526_rinosim.sh
+# Figuras de H26 y H27 hechas con RinoSim (curvas y pantallas de resultado, sin interfaz).
+# Reproduce exactamente lo que hay en docs/libro/ilustraciones/h26-rs-* y h27-rs-*.
+#   RINOSIM=/ruta/a/rinosim bash docs/libro/ilustraciones/hacer_h2627_rinosim.sh
 # No modifica RinoSim: las figuras salen a una carpeta temporal y de ahí se copian.
 # Con CAPTURAS=0 se saltan las capturas de pantalla (no hace falta chromium).
 set -euo pipefail
@@ -18,33 +18,33 @@ fig() { # fig <carpeta> <opciones de figuras.mjs...>
   (cd "$RINOSIM" && node tools/figuras.mjs "$@" --salida "$TMP/$n" >/dev/null)
 }
 
-# ---- H25 ----
-fig h25-normal      --cuadro normal --minuto 37 --sin-vc
-fig h25-broms       --cuadro mixta --sin-vc --broms
-fig h25-vasomotora  --cuadro cornetes --lado D
-fig h25-mixta       --cuadro mixta --lado D
-fig h25-mecanica    --cuadro desviacion_derecha --lado D
-fig h25-colapso     --cuadro colapso_valvular --forzada --sin-vc
-fig h25-irregular   --cuadro normal --sin-vc --errores irregular
 # ---- H26 ----
-fig h26-normal      --cuadro normal --sin-vc --lado D
-fig h26-mucosa      --cuadro cornetes --lado D
-fig h26-estructura  --cuadro desviacion_derecha --lado D
+fig h26-normal      --cuadro normal --minuto 37 --sin-vc
+fig h26-broms       --cuadro mixta --sin-vc --broms
+fig h26-vasomotora  --cuadro cornetes --lado D
 fig h26-mixta       --cuadro mixta --lado D
-fig h26-limite      --paciente "$RINOSIM/ejemplos/valvula-cerrada.json" --lado D
-fig h26-fuga        --cuadro normal --sin-vc --lado D --errores fuga
+fig h26-mecanica    --cuadro desviacion_derecha --lado D
+fig h26-colapso     --cuadro colapso_valvular --forzada --sin-vc
+fig h26-irregular   --cuadro normal --sin-vc --errores irregular
+# ---- H27 ----
+fig h27-normal      --cuadro normal --sin-vc --lado D
+fig h27-mucosa      --cuadro cornetes --lado D
+fig h27-estructura  --cuadro desviacion_derecha --lado D
+fig h27-mixta       --cuadro mixta --lado D
+fig h27-limite      --paciente "$RINOSIM/ejemplos/valvula-cerrada.json" --lado D
+fig h27-fuga        --cuadro normal --sin-vc --lado D --errores fuga
 
 # Los numeros.json quedan junto a las figuras por si hace falta releerlos.
 if [ -n "${NUMEROS:-}" ]; then mkdir -p "$NUMEROS"; for d in "$TMP"/h2*; do cp "$d/numeros.json" "$NUMEROS/$(basename "$d").json"; done; fi
 
 # Figuras sueltas
-cp "$TMP/h25-broms/rm-curva.svg"      "$ILUS/h25-rs-broms.svg"
-cp "$TMP/h25-colapso/rm-curva.svg"    "$ILUS/h25-rs-colapso.svg"
-cp "$TMP/h25-irregular/rm-curva.svg"  "$ILUS/h25-rs-irregular.svg"
-cp "$TMP/h26-normal/ra-curva.svg"     "$ILUS/h26-rs-curva.svg"
-cp "$TMP/h26-mixta/ra-curva.svg"      "$ILUS/h26-rs-mixta.svg"
-cp "$TMP/h26-limite/ra-curva.svg"     "$ILUS/h26-rs-limite.svg"
-cp "$TMP/h26-fuga/ra-curva.svg"       "$ILUS/h26-rs-fuga.svg"
+cp "$TMP/h26-broms/rm-curva.svg"      "$ILUS/h26-rs-broms.svg"
+cp "$TMP/h26-colapso/rm-curva.svg"    "$ILUS/h26-rs-colapso.svg"
+cp "$TMP/h26-irregular/rm-curva.svg"  "$ILUS/h26-rs-irregular.svg"
+cp "$TMP/h27-normal/ra-curva.svg"     "$ILUS/h27-rs-curva.svg"
+cp "$TMP/h27-mixta/ra-curva.svg"      "$ILUS/h27-rs-mixta.svg"
+cp "$TMP/h27-limite/ra-curva.svg"     "$ILUS/h27-rs-limite.svg"
+cp "$TMP/h27-fuga/ra-curva.svg"       "$ILUS/h27-rs-fuga.svg"
 
 # Figuras en paneles (A, B, C...) apiladas
 python3 - "$TMP" "$ILUS" <<'PY'
@@ -68,11 +68,11 @@ def paneles(destino, lista):
            + ''.join(partes) + '</svg>')
     open(f'{ilus}/{destino}', 'w', encoding='utf-8').write(out)
 
-paneles('h25-rs-curvas.svg', [('h25-normal/rm-curva.svg', 'A'), ('h25-normal/rm-resistencia.svg', 'B')])
-paneles('h25-rs-vasoconstrictor.svg', [('h25-vasomotora/rm-resistencia.svg', 'A'),
-                                       ('h25-mixta/rm-resistencia.svg', 'B'),
-                                       ('h25-mecanica/rm-resistencia.svg', 'C')])
-paneles('h26-rs-vasoconstrictor.svg', [('h26-mucosa/ra-curva.svg', 'A'), ('h26-estructura/ra-curva.svg', 'B')])
+paneles('h26-rs-curvas.svg', [('h26-normal/rm-curva.svg', 'A'), ('h26-normal/rm-resistencia.svg', 'B')])
+paneles('h26-rs-vasoconstrictor.svg', [('h26-vasomotora/rm-resistencia.svg', 'A'),
+                                       ('h26-mixta/rm-resistencia.svg', 'B'),
+                                       ('h26-mecanica/rm-resistencia.svg', 'C')])
+paneles('h27-rs-vasoconstrictor.svg', [('h27-mucosa/ra-curva.svg', 'A'), ('h27-estructura/ra-curva.svg', 'B')])
 PY
 
 # ---- Pantallas de resultado (curva + tabla), sin la interfaz del programa ----
@@ -93,7 +93,7 @@ CSS
       --virtual-time-budget=8000 --screenshot="$TMP/c.png" "$3" >/dev/null 2>&1
     magick "$TMP/c.png" -trim +repage -bordercolor white -border 10 "$1"
   }
-  cap "$ILUS/h25-rs-equipo.png" 2000 "http://localhost:$PUERTO/?vista=rm&cuadro=mixta&medir=1&vc=1&captura=1"
-  cap "$ILUS/h26-rs-equipo.png" 1700 "http://localhost:$PUERTO/?vista=ra&cuadro=cornetes&medir=1&vc=1&captura=1"
+  cap "$ILUS/h26-rs-equipo.png" 2000 "http://localhost:$PUERTO/?vista=rm&cuadro=mixta&medir=1&vc=1&captura=1"
+  cap "$ILUS/h27-rs-equipo.png" 1700 "http://localhost:$PUERTO/?vista=ra&cuadro=cornetes&medir=1&vc=1&captura=1"
 fi
 echo "listo"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H30 — CPAP y dispositivos de avance mandibular.
+"""Herramienta H31 — CPAP y dispositivos de avance mandibular.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF
@@ -17,4 +17,4 @@ CASOS = [
 ]
 
 if __name__ == '__main__':
-    Capitulo('H30').generar(CASOS)
+    Capitulo('H31').generar(CASOS)

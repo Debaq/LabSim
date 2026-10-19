@@ -11,7 +11,7 @@ El libro es la nueva versión del protocolo técnico de ORL, con sentido
 pedagógico. Tiene dos tipos de capítulo, todos autónomos (se pueden leer
 sueltos) y con sus referencias al final (no hay bibliografía general):
 
-**Caja de herramientas (H1-H28): cómo se hace cada examen.** Una técnica por
+**Caja de herramientas (H1-H29): cómo se hace cada examen.** Una técnica por
 capítulo, con la misma secuencia:
 
 1. **Para qué sirve** — qué pregunta clínica responde
@@ -156,32 +156,35 @@ Candidatura, selección y prueba del audífono: ganancia funcional en campo libr
 ### H22. Revisión y medición electroacústica del audífono *(del protocolo)*
 Revisión visoauditiva (molde, tubo, pila, micrófono, retroalimentación) y medición en acoplador: ganancia, salida máxima, distorsión y ruido interno.
 
+### H23. Acúfeno: impacto, modelos y terapias sonoras
+Etiología y modelos neurofisiológicos (Jastreboff y otros), impacto en la calidad de vida y cuestionarios (THI, TFI), manejo: consejería, terapia de reentrenamiento (TRT) y habituación, enriquecimiento sonoro (generadores, audífonos combinados), terapia cognitivo-conductual como referencia; hiperacusia. La acufenometría está en H6.
+
 **Salud ocupacional**
 
-### H23. Audiometría ocupacional y vigilancia del ruido
+### H24. Audiometría ocupacional y vigilancia del ruido
 Audiometría de screening y de operativo, evaluación de trabajadores expuestos a ruido (PREXOR, guía del ISP), criterios de daño y de derivación, protección auditiva; la parte médico-legal (SUSESO).
 
 **Nariz**
 
-### H24. Anamnesis rinológica y rinoscopía *(del protocolo)*
+### H25. Anamnesis rinológica y rinoscopía *(del protocolo)*
 Motivo de consulta nasal, síntomas y antecedentes; rinoscopía anterior.
 
-### H25. Rinomanometría anterior *(del protocolo)*
+### H26. Rinomanometría anterior *(del protocolo)*
 Resistencia nasal al flujo: técnica, curvas presión-flujo, prueba con vasoconstrictor e informe.
 
-### H26. Rinometría acústica *(del protocolo)*
+### H27. Rinometría acústica *(del protocolo)*
 Áreas de sección transversal de la fosa nasal por reflexión acústica: técnica, curva, áreas mínimas y volumen, prueba con vasoconstrictor.
 
-### H27. Prick test
+### H28. Prick test
 Hipersensibilidad tipo I y su base inmunológica; técnica (preparación, controles positivo y negativo, aeroalérgenos, lectura de la pápula, criterio de positividad), indicaciones, contraindicaciones (fármacos que se suspenden) y reacciones adversas. Alcance: clase de prick test; contenido con literatura verificada.
 
-### H28. Espirometría
+### H29. Espirometría
 Mecánica ventilatoria, volúmenes y capacidades; FVC, FEV1, relación FEV1/FVC, FEF25-75; maniobra, curvas flujo-volumen y volumen-tiempo, aceptabilidad y repetibilidad (ATS/ERS); patrones y prueba broncodilatadora. Alcance: clase de espirometría; contenido con literatura verificada.
 
-### H29. Polisomnografía y poligrafía respiratoria
+### H30. Polisomnografía y poligrafía respiratoria
 Bases del sueño (etapas, hipnograma); SAHOS: fisiopatología del colapso, epidemiología y consecuencias; evaluación del roncador (antropometría, Mallampati/Friedman, STOP-Bang, Epworth); montaje y canales de la polisomnografía y de la poligrafía; eventos respiratorios (apnea obstructiva, central y mixta, hipopnea, RERA), IAH y gravedad; informe; SAHOS pediátrico. Alcance: clase de SAHOS; contenido con literatura verificada.
 
-### H30. CPAP y dispositivos de avance mandibular
+### H31. CPAP y dispositivos de avance mandibular
 Presión positiva continua (CPAP, AutoCPAP, BiPAP): principio, interfaces, titulación, educación, adherencia y efectos adversos; dispositivo de avance mandibular, tratamiento posicional y alternativas quirúrgicas como contexto. Alcance: clase de SAHOS; contenido con literatura verificada.
 
 ## Parte I — El oído que transmite
@@ -468,14 +471,14 @@ Presión positiva continua (CPAP, AutoCPAP, BiPAP): principio, interfaces, titul
 ## Parte XI — Salud ocupacional
 
 ### 33. El trabajador expuesto a ruido
-- **Técnica en foco** (→ H23): audiometría de vigilancia, comparación con la basal y derivación
+- **Técnica en foco** (→ H24): audiometría de vigilancia, comparación con la basal y derivación
 - **Fisiología:** daño por ruido y desplazamiento temporal del umbral
 - **Casos:**
   - Trabajador en vigilancia con cambio significativo del umbral
   - Trabajador nuevo con audiometría de ingreso alterada
 
 ### 34. El caso médico-legal
-- **Técnica en foco** (→ H23, H6): evaluación de la pérdida no orgánica y del grado de daño
+- **Técnica en foco** (→ H24, H6): evaluación de la pérdida no orgánica y del grado de daño
 - **Fisiología:** lo que el ruido no explica
 - **Casos:**
   - Exageración de la pérdida en una evaluación laboral
@@ -483,14 +486,14 @@ Presión positiva continua (CPAP, AutoCPAP, BiPAP): principio, interfaces, titul
 ## Parte XII — La nariz
 
 ### 35. Nariz tapada
-- **Técnica en foco** (→ H24, H25, H26): rinoscopía, rinomanometría y rinometría acústica
+- **Técnica en foco** (→ H25, H26, H27): rinoscopía, rinomanometría y rinometría acústica
 - **Fisiología:** válvula nasal y resistencia al flujo
 - **Casos:**
   - Desviación septal
   - Colapso de la válvula nasal
 
 ### 36. Rinitis y vasoconstrictor
-- **Técnica en foco** (→ H25, H26): prueba con vasoconstrictor
+- **Técnica en foco** (→ H26, H27): prueba con vasoconstrictor
 - **Fisiología:** tejido eréctil de los cornetes y ciclo nasal
 - **Casos:**
   - Rinitis alérgica
@@ -507,8 +510,8 @@ Un solo libro que crece. Esta edición escribe la sección de **audición**
 (Bases, Caja de herramientas H1-H15 y Partes I-VII). Las demás ya tienen su
 lugar reservado en esqueleto, para que el libro crezca sin reordenarse:
 equilibrio (H16-H20, Parte VIII), rehabilitación auditiva (H21-H22,
-Parte IX), rehabilitación vestibular (Parte X), salud ocupacional (H23,
-Parte XI) y nariz (H24-H26, Parte XII). Plan y fuentes en
+Parte IX), rehabilitación vestibular (Parte X), salud ocupacional (H24,
+Parte XI) y nariz (H25-H27, Parte XII). Plan y fuentes en
 `investigacion/inventario_vestibular_nasal.md`. Simuladores: trainHIT y
 labyrinthus3d para lo vestibular (LabSim no se expande ahí), AudioPAC para
 el procesamiento central; para la nariz todavía no hay.

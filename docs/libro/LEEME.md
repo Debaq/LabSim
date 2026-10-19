@@ -7,7 +7,7 @@ que se arma un capítulo, así que siempre está al día.
 
 | Carpeta | Qué tiene |
 |---|---|
-| `capitulos/` | El texto: un `.md` por capítulo (B, H1-H28, 1-36) y su `.py`, que declara los casos y las figuras. |
+| `capitulos/` | El texto: un `.md` por capítulo (B, H1-H29, 1-36) y su `.py`, que declara los casos y las figuras. |
 | `preliminares/` | Prólogo, presentación, cómo usar el libro y abreviaturas. |
 | `indice.md` | El índice y el plan de cada capítulo. |
 | `casos/` | Un JSON por caso pedido por cuadro; `casos/generados/` es lo que armó el editor real de LabSim. |

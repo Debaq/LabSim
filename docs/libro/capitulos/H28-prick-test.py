@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Herramienta H25 — Rinomanometría anterior.
+"""Herramienta H28 — Prick test.
 
     python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
     python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF
@@ -17,4 +17,4 @@ CASOS = [
 ]
 
 if __name__ == '__main__':
-    Capitulo('H25').generar(CASOS)
+    Capitulo('H28').generar(CASOS)

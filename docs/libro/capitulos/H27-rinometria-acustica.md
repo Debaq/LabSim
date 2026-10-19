@@ -1,4 +1,4 @@
-# H26. Rinometría acústica
+# H27. Rinometría acústica
 
 :::objetivos En esta herramienta
 - Explicar cómo un pulso de sonido que entra a la nariz y vuelve convertido en eco permite dibujar el área de la fosa nasal a cada distancia.
@@ -19,9 +19,9 @@ La rinometría acústica responde tres preguntas:
 2. **¿Cuánto espacio hay?** Las áreas mínimas y el volumen de los primeros centímetros ponen número a la sensación de obstrucción.
 3. **¿Es la mucosa o es la estructura?** Si el estrechamiento se abre con un vasoconstrictor, el obstáculo es mucosa hinchada; si no se abre, es estructura (tabique, hueso, cartílago).
 
-Se pide cuando el paciente refiere obstrucción nasal, antes y después de una cirugía nasal (septoplastia, turbinoplastia, valvuloplastia) para ver qué cambió, y para estudiar la reactividad de la mucosa en la rinitis (Clement y Gordts, 2005). Se pide **después** de la anamnesis y la rinoscopía anterior (→ H24): la rinoscopía te dice qué se ve desde la entrada, y la rinometría, qué hay más atrás y de qué tamaño.
+Se pide cuando el paciente refiere obstrucción nasal, antes y después de una cirugía nasal (septoplastia, turbinoplastia, valvuloplastia) para ver qué cambió, y para estudiar la reactividad de la mucosa en la rinitis (Clement y Gordts, 2005). Se pide **después** de la anamnesis y la rinoscopía anterior (→ H25): la rinoscopía te dice qué se ve desde la entrada, y la rinometría, qué hay más atrás y de qué tamaño.
 
-Tiene límites que conviene saber desde el principio. Es una **medición estática**: dibuja la nariz quieta, en apnea, no cómo pasa el aire al respirar. Mide **geometría, no flujo ni resistencia**. Y su exactitud **cae por detrás de un estrechamiento marcado y más allá de los primeros 5 cm** (→ *Fundamento*). Por eso se lee junto con la rinoscopía, la historia del paciente y, cuando se dispone de ella, la rinomanometría anterior (→ H25).
+Tiene límites que conviene saber desde el principio. Es una **medición estática**: dibuja la nariz quieta, en apnea, no cómo pasa el aire al respirar. Mide **geometría, no flujo ni resistencia**. Y su exactitud **cae por detrás de un estrechamiento marcado y más allá de los primeros 5 cm** (→ *Fundamento*). Por eso se lee junto con la rinoscopía, la historia del paciente y, cuando se dispone de ella, la rinomanometría anterior (→ H26).
 
 ## Fundamento
 
@@ -34,7 +34,7 @@ De la demora y de la intensidad del eco salen los dos ejes de la curva:
 - **La distancia.** El eco que vuelve rápido viene de cerca; el que vuelve más tarde, de más adentro. Como la velocidad del sonido es conocida, el tiempo de ida y vuelta se convierte en distancia desde la narina. La velocidad depende de la temperatura del aire, por eso el equipo se calibra y la sala debe mantenerse a una temperatura estable.
 - **El área.** Un sonido que viaja por un conducto "siente" su sección: lo que se opone a su paso (la **impedancia**) cambia con el área. Si la sección se **estrecha**, parte del pulso rebota con el mismo signo y el eco vuelve reforzado; si se **ensancha**, el eco vuelve con signo invertido. Midiendo cuánto y en qué sentido cambia la presión, el programa calcula, tramo por tramo, cuánto vale el área.
 
-:::imagen ilustraciones/h26-equipo.svg ancho=96% Un tubo de sección constante, un adaptador nasal sellado contra la narina y un micrófono que registra el eco. Abajo, el eco que llega al micrófono: su demora dice a qué distancia está el cambio, y su tamaño, cuánto cambió la sección.
+:::imagen ilustraciones/h27-equipo.svg ancho=96% Un tubo de sección constante, un adaptador nasal sellado contra la narina y un micrófono que registra el eco. Abajo, el eco que llega al micrófono: su demora dice a qué distancia está el cambio, y su tamaño, cuánto cambió la sección.
 - @12,47 | **Tubo de onda.** Una fuente en un extremo lanza el pulso; el tubo lo lleva sin deformarlo hasta la nariz.
 - @27,9 | **Micrófono.** Registra el pulso que sale y los ecos que vuelven de la fosa nasal.
 - @53,45 | **Adaptador nasal.** Debe calzar la narina y sellarla sin deformarla: si el sonido se escapa o la entrada cambia de forma, la curva miente.
@@ -45,7 +45,7 @@ El resultado es la **curva área-distancia**: en el eje horizontal, los centíme
 
 ### La curva normal y sus dos mínimos
 
-:::imagen ilustraciones/h26-rs-curva.svg ancho=96% La curva área-distancia de la fosa derecha de un paciente sano, en reposo (el eje del área es logarítmico). Dos mínimos, MCA1 y MCA2, y la zona de más allá de unos 5 cm, que el equipo marca como poco fiable. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h27-rs-curva.svg ancho=96% La curva área-distancia de la fosa derecha de un paciente sano, en reposo (el eje del área es logarítmico). Dos mínimos, MCA1 y MCA2, y la zona de más allá de unos 5 cm, que el equipo marca como poco fiable. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @24.3,60.2 | **MCA1.** El primer mínimo: el valle de la válvula nasal. Aquí, unos 0,6 cm² a 1,3 cm de la narina. Su área y su distancia son el primer dato que se anota.
 - @40.7,43.1 | **MCA2.** El segundo mínimo, que corresponde al cornete inferior: aquí, unos 1,5 cm² a 3,1 cm. Su cambio después del vasoconstrictor dice cuánto de la mucosa se mueve.
 - @86.6,7.3 | **Zona poco fiable.** Más allá de unos 5 cm la curva ya no se lee como medida de áreas.
@@ -86,19 +86,19 @@ El método de la reflexión es muy repetible en la zona anterior: en el estudio 
 2. **Más allá de unos 5 cm, el sonido se escapa.** Pasada la zona de los cornetes, las ondas entran a los **senos maxilares** y a la rinofaringe, y esas cavidades suman área que no pertenece a la fosa. En modelos, la curva sobreestimó las áreas por detrás de 6,5 cm (Cakmak y cols., 2005); los senos maxilares aportan de forma significativa a las áreas de la parte posterior de la fosa y de la rinofaringe, sobre todo con descongestión (Hilberg y Pedersen, 1996; Cakmak y cols., 2003).
 3. **Si el sonido se pierde por fuera del adaptador, las áreas se alteran.** Un sello deficiente deja escapar energía; un adaptador que aprieta demasiado deforma la narina y cambia la forma de la entrada (Hilberg y Pedersen, 2000).
 
-:::imagen ilustraciones/h26-limites.svg ancho=96% Dos lugares donde la curva puede no mostrar lo que hay. A: detrás de un estrechamiento marcado. B: pasados los primeros centímetros, donde senos y rinofaringe suman área.
+:::imagen ilustraciones/h27-limites.svg ancho=96% Dos lugares donde la curva puede no mostrar lo que hay. A: detrás de un estrechamiento marcado. B: pasados los primeros centímetros, donde senos y rinofaringe suman área.
 :::
 
 El primer límite, visto en una fosa simulada con la válvula muy cerrada:
 
-:::imagen ilustraciones/h26-rs-limite.svg ancho=96% Una válvula muy cerrada. En reposo (línea continua) el equipo mide MCA1 de 0,12 cm² y, detrás, un MCA2 de 0,19 cm²; pero el área verdadera en ese lugar es 0,59 cm². Con vasoconstrictor (discontinua) la válvula se abre un poco (MCA1 de 0,33 cm²) y recién entonces aparece lo de atrás (MCA2 de 1,82 cm²). Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h27-rs-limite.svg ancho=96% Una válvula muy cerrada. En reposo (línea continua) el equipo mide MCA1 de 0,12 cm² y, detrás, un MCA2 de 0,19 cm²; pero el área verdadera en ese lugar es 0,59 cm². Con vasoconstrictor (discontinua) la válvula se abre un poco (MCA1 de 0,33 cm²) y recién entonces aparece lo de atrás (MCA2 de 1,82 cm²). Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 Por eso este libro enseña a **creer la curva en los primeros 5 cm** y a decir en el informe cuando la válvula está tan cerrada que lo de atrás no se puede evaluar.
 
 ### Anatomía contra función: la rinomanometría al lado
 
-La rinometría y la rinomanometría (→ H25) miran la misma nariz desde lados distintos:
+La rinometría y la rinomanometría (→ H26) miran la misma nariz desde lados distintos:
 
 Tabla: Rinometría acústica y rinomanometría anterior
 
@@ -118,7 +118,7 @@ Una nariz con buena geometría puede respirar mal, y una nariz con una geometrí
 - **Rinómetro acústico** con su tubo de onda, el micrófono y el programa.
 - **Tubo calibrador**, para comprobar el equipo antes de medir.
 - **Adaptadores nasales** de varios tamaños.
-- **Espéculos nasales**, espejo frontal y lámpara de cuello flexible (para la rinoscopía; → H24).
+- **Espéculos nasales**, espejo frontal y lámpara de cuello flexible (para la rinoscopía; → H25).
 - **Vasoconstrictor tópico** en atomizador (el protocolo usa oximetazolina).
 - **Pañuelos desechables**, guantes, alcohol y algodón, bandejas metálicas y los formularios.
 
@@ -134,7 +134,7 @@ Lo que tienen todos los equipos del mercado, con distinto aspecto:
 
 El resultado es la curva de las dos fosas y una tabla con los registros, su promedio y el cambio con el vasoconstrictor.
 
-:::imagen ilustraciones/h26-rs-equipo.png ancho=96% El resultado de una rinometría acústica: curva área-distancia y tabla. Paciente con hipertrofia de cornetes inferiores, tres registros por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Las dos fosas son iguales en este paciente, por eso las curvas se superponen. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h27-rs-equipo.png ancho=96% El resultado de una rinometría acústica: curva área-distancia y tabla. Paciente con hipertrofia de cornetes inferiores, tres registros por fosa, en reposo (línea continua) y con vasoconstrictor (discontinua). Las dos fosas son iguales en este paciente, por eso las curvas se superponen. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 - @15,34 | **MCA1.** El primer mínimo de cada fosa: la válvula, a 1,3 cm de la narina.
 - @32,37 | **MCA2.** El segundo mínimo: el cornete inferior, a unos 3,2 cm. En reposo es mucho más angosto que MCA1.
 - @42,15 | **Con vasoconstrictor** (discontinua). El segundo mínimo se abre casi del todo y el primero un poco: era mucosa.
@@ -179,7 +179,7 @@ El protocolo de este libro aplica el vasoconstrictor **solo si el resultado en r
 
 1. **Explícale al paciente** qué es el medicamento, por qué se le pone y qué efecto va a sentir: la nariz se destapa. Dile que **si escurre** solo debe secarse con el pañuelo y **no sonarse la nariz**, porque eso mueve la mucosa y cambia el examen. Pregunta por antecedentes que contraindiquen el producto y sigue la indicación del médico. <!-- verificar: contraindicaciones de la oximetazolina tópica -->
 2. **Prepara el atomizador.** Quita la tapa y bombea hasta que salga neblina fina.
-3. **Con la técnica de la rinoscopía** (→ H24), abre la fosa y pon la boquilla en la narina.
+3. **Con la técnica de la rinoscopía** (→ H25), abre la fosa y pon la boquilla en la narina.
 4. **Aplica dos pulverizaciones**, mientras el paciente **inspira por la nariz**, para que el producto se reparta por toda la mucosa.
 5. **Espera 15 minutos** a que el medicamento haga efecto. Una rinoscopía a los 10 minutos muestra el cambio en el color y el volumen de los cornetes.
 6. **Repite la medición** con el mismo procedimiento del reposo (adaptador, posición, apnea, tres registros).
@@ -225,12 +225,12 @@ Tabla: Cómo se describe el cambio con el vasoconstrictor
 | **Aumento total** | Mejoran hasta alcanzar la referencia | El estrechamiento era de la mucosa |
 | **Disminuidos respecto del reposo** | La obstrucción es aún mayor | Poco habitual: revisa la técnica antes de interpretar |
 
-:::imagen ilustraciones/h26-rs-vasoconstrictor.svg ancho=88% Dos respuestas frente al vasoconstrictor en la fosa derecha (el eje del área es logarítmico). Línea continua: reposo; discontinua: con vasoconstrictor. A: la mucosa explica el estrechamiento: el segundo mínimo pasa de 0,38 a 1,91 cm² y el primero, de 0,45 a 0,67. B: el obstáculo es estructural, un tabique desviado en la válvula: MCA1 pasa de 0,36 a 0,39 cm² y MCA2, de 1,78 a 1,98; casi nada cambia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h27-rs-vasoconstrictor.svg ancho=88% Dos respuestas frente al vasoconstrictor en la fosa derecha (el eje del área es logarítmico). Línea continua: reposo; discontinua: con vasoconstrictor. A: la mucosa explica el estrechamiento: el segundo mínimo pasa de 0,38 a 1,91 cm² y el primero, de 0,45 a 0,67. B: el obstáculo es estructural, un tabique desviado en la válvula: MCA1 pasa de 0,36 a 0,39 cm² y MCA2, de 1,78 a 1,98; casi nada cambia. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 Y la mezcla de los dos, como en la fila «Aumento parcial» de la tabla:
 
-:::imagen ilustraciones/h26-rs-mixta.svg ancho=88% Una desviación septal con cornetes congestionados. En reposo (continua), MCA1 de 0,26 y MCA2 de cerca de 0,7 cm²; con vasoconstrictor (discontinua), el segundo mínimo se abre casi del todo (1,94 cm²) pero el primero solo sube a 0,41 cm²: lo mucoso se fue y lo estructural queda. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h27-rs-mixta.svg ancho=88% Una desviación septal con cornetes congestionados. En reposo (continua), MCA1 de 0,26 y MCA2 de cerca de 0,7 cm²; con vasoconstrictor (discontinua), el segundo mínimo se abre casi del todo (1,94 cm²) pero el primero solo sube a 0,41 cm²: lo mucoso se fue y lo estructural queda. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 El renglón "mejoría total / parcial / ninguna" es lo que ordena el resto del informe. La rinometría **dice cuánto de la estrechez es reversible**, y eso es lo que más le sirve al médico que decide entre un tratamiento médico y una cirugía. En un estudio con fenilefrina, el área del primer mínimo de los alérgicos cambió más que la de los sanos (Corey y cols., 1997), y por eso la prueba interesa en la rinitis.
@@ -256,12 +256,12 @@ Que el área baje después de descongestionar es llamativo: el vasoconstrictor d
 El informe **describe lo que mide la curva**, no el diagnóstico: "estrechamiento del cornete que cede con vasoconstrictor" es un hallazgo; "rinitis alérgica" o "hipertrofia de cornetes" son diagnósticos del médico tratante.
 
 :::ojo Ojo clínico
-Antes de informar, mira la curva, no solo los números. Una curva con un mínimo anterior muy cerrado y casi nada de forma detrás **no dice que detrás esté todo bien**: dice que el equipo no pudo ver. Y una fosa que se "abre" mucho más allá de los 5 cm puede ser un seno, no la nariz. Lo que ves debe calzar con la rinoscopía (→ H24) y con lo que cuenta el paciente.
+Antes de informar, mira la curva, no solo los números. Una curva con un mínimo anterior muy cerrado y casi nada de forma detrás **no dice que detrás esté todo bien**: dice que el equipo no pudo ver. Y una fosa que se "abre" mucho más allá de los 5 cm puede ser un seno, no la nariz. Lo que ves debe calzar con la rinoscopía (→ H25) y con lo que cuenta el paciente.
 :::
 
 ## Errores frecuentes
 
-:::imagen ilustraciones/h26-rs-fuga.svg ancho=96% El error de un sello deficiente. Los tres registros (las líneas finas) no se parecen: MCA1 se separa 0,17 cm² entre un registro y otro y MCA2, 0,40, lejos del 0,03 que pide el criterio de repetición. Y las áreas salen sobreestimadas: MCA1 de 0,93 y MCA2 de 2,29 cm², cuando en la misma fosa sin fuga son cerca de 0,6 y de 1,5. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
+:::imagen ilustraciones/h27-rs-fuga.svg ancho=96% El error de un sello deficiente. Los tres registros (las líneas finas) no se parecen: MCA1 se separa 0,17 cm² entre un registro y otro y MCA2, 0,40, lejos del 0,03 que pide el criterio de repetición. Y las áreas salen sobreestimadas: MCA1 de 0,93 y MCA2 de 2,29 cm², cuando en la misma fosa sin fuga son cerca de 0,6 y de 1,5. Imagen propia hecha con RinoSim (→ Simuladores, en las preliminares).
 :::
 
 - **Adaptador del tamaño equivocado.** Uno chico se escapa y uno grande abre la narina y deforma la entrada.
@@ -284,7 +284,7 @@ Antes de informar, mira la curva, no solo los números. Una curva con un mínimo
 4. ¿Por qué el volumen de 2 a 5 cm es mejor que el de 0 a 5 cm para estudiar los cambios de la mucosa?
 5. Tu curva muestra un primer mínimo muy cerrado y, detrás, un segundo mínimo casi plano. ¿Qué puedes afirmar sobre el cornete y qué no?
 6. ¿Qué dos cosas pueden hacer que el área "después de los 5 cm" no sea la de la fosa?
-7. El paciente dice que respira peor por la izquierda, pero la rinometría de las dos fosas está dentro de rango. Nombra dos explicaciones posibles y qué examen sumarías (→ H25).
+7. El paciente dice que respira peor por la izquierda, pero la rinometría de las dos fosas está dentro de rango. Nombra dos explicaciones posibles y qué examen sumarías (→ H26).
 8. Después del vasoconstrictor, el área de una fosa **bajó**. Enumera, en orden, qué revisas antes de informarlo.
 :::
 
