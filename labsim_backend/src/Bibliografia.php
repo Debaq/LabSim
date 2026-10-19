@@ -100,15 +100,13 @@ final class Bibliografia
             'usa' => ['Vía ósea: corrección de latencia por nivel (+0,3 ms a 40 dB, +0,4 a 30, +0,5 a 20, +0,8 a 10; nada desde 55).'],
         ],
         'A03' => [
-            'cita' => 'Cobb KM, Stuart A. Neonate auditory brainstem responses to CE-Chirp and CE-Chirp octave band stimuli I y II. Ear Hear. 2016;37(6).',
+            'cita' => 'Cobb KM, Stuart A. Neonate auditory brainstem responses to CE-Chirp and CE-Chirp octave band stimuli I: versus click and tone burst stimuli. Ear Hear. 2016;37(6):710-723. doi:10.1097/AUD.0000000000000343. II: versus adult auditory brainstem responses. Ear Hear. 2016;37(6):724-743. doi:10.1097/AUD.0000000000000344.',
             'n' => '168 neonatos sanos y 20 adultos jóvenes normoyentes',
             'protocolo' => 'CE-Chirp por vía aérea y ósea, y CE-Chirp por octavas; comparación con click y tone burst.',
-            'enlace' => 'Sin enlace',
-            'verificada' => false,
-            'nota' => 'Autores, año y diseño confirmados; volumen y páginas a confirmar en el original.',
+            'enlace' => 'https://doi.org/10.1097/AUD.0000000000000344',
+            'nota' => 'Con CE-Chirp, no con click. Los ~15 dB de diferencia ósea-aérea del adulto NO salen de aquí (en Cobb y Stuart 2016, J Speech Lang Hear Res 59:853-9, con CE-Chirp, son 4 dB): salen de Stuart y cols. 1993 (A07).',
             'usa' => [
-                'Umbral óseo contra aéreo según la edad: en el adulto la vía ósea lee ~15 dB más alto; en el lactante, casi igual (generador de perfil).',
-                'Vía ósea del lactante: le sale más rápida que la aérea, al revés que en el adulto.',
+                'Vía ósea del lactante: le sale más rápida que la aérea, al revés que en el adulto (II: onda V ósea más corta en el lactante a 15 y 45 dB nHL).',
             ],
         ],
         'A04' => [
@@ -124,7 +122,7 @@ final class Bibliografia
             'protocolo' => 'Click por vía ósea, test-retest.',
             'enlace' => 'Sin enlace',
             'verificada' => false,
-            'nota' => 'En el código figura como "Stuart et al. 1993". Esta es la serie de 1993 de ese grupo que más se parece; confirmar que sea la que se quiso citar.',
+            'nota' => 'En el código figura como "Stuart et al. 1993" para la latencia ósea del lactante. La serie de umbrales de 1993 de ese grupo es A07 (no trae latencias en el resumen); confirmar cuál se quiso citar para la latencia.',
             'usa' => ['Vía ósea del lactante: más rápida que la aérea.'],
         ],
         'A06' => [
@@ -133,6 +131,15 @@ final class Bibliografia
             'protocolo' => 'ABR por vía ósea en lactantes, niños y adultos.',
             'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/29471611/',
             'usa' => ['Vía ósea: las ondas I y III rara vez se identifican; en la app salen más chicas y más anchas que por vía aérea.'],
+        ],
+        'A07' => [
+            'cita' => 'Stuart A, Yang EY, Stenstrom R, Reindorp AG. Auditory brainstem response thresholds to air and bone conducted clicks in neonates and adults. Am J Otol. 1993;14(2):176-182. PMID 8503493.',
+            'n' => '20 neonatos de término y 20 adultos jóvenes normoyentes',
+            'protocolo' => 'Umbral del ABR con click por vía aérea y ósea.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/8503493/',
+            'usa' => [
+                'Umbral óseo contra aéreo según la edad: adultos 3,75 dB nHL por aire y 18,75 por hueso (la vía ósea lee ~15 dB más alto); neonatos 3,75 y 1,25 (casi igual) (generador de perfil).',
+            ],
         ],
     ];
 

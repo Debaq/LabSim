@@ -158,8 +158,9 @@ final class CaseProfile
      * El 0 dB nHL de la vía ósea no está referenciado igual que el de la
      * aérea: la fuerza que define el cero se mide sobre cráneo adulto, y con
      * esa referencia un adulto normoyente da umbrales óseos MUCHO más altos
-     * que los aéreos. Cobb y Stuart 2016 lo miden con click: 3,75 dB nHL por
-     * aire contra 18,75 por hueso en adultos normales.
+     * que los aéreos. Stuart y cols. 1993 (Am J Otol 14:176-82) lo miden con
+     * click: 3,75 dB nHL por aire contra 18,75 por hueso en adultos normales.
+     * (Cobb y Stuart 2016, con CE-Chirp, dan solo 4 dB: no es la fuente.)
      *
      * Los mismos autores miden lactantes: 3,75 por aire y 1,25 por hueso.
      * O sea, en el bebé las dos vías dan casi lo mismo -- el cráneo sin
