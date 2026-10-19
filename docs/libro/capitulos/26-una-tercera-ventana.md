@@ -327,6 +327,14 @@ Hipoacusia sensorioneural bilateral con gap en graves y oído medio normal, **co
 La historia del tubo sin efecto era la pista. Cuando el niño tiene una pérdida con timpanograma A y el tubo no cambia nada, el gap no está en el oído medio.
 :::
 
+:::comentario Prevención
+- **Secundaria:** un gap con timpanograma A y reflejo presente, o autofonía y mareo con ruido o presión, se informa como patrón y se deriva para imagen (Zhou y cols., 2007; Halmagyi y cols., 2003).
+- **Cuaternaria:** un gap con reflejo presente no es, sin más, una indicación de estribo: en un caso publicado, una dehiscencia tratada como otoesclerosis llevó a una estapedectomía y dos revisiones sin resolver el cuadro (Halmagyi y cols., 2003).
+- **Para el paciente:** "Si oyes tus latidos o tu propia voz muy fuertes, o te marea el ruido o una presión, cuéntalo antes de cualquier cirugía de oído."
+
+En 1.000 huesos temporales de adultos había dehiscencia completa en el 0,5 % y hueso de 0,1 mm o menos en otro 1,4 % (Carey y cols., 2000). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

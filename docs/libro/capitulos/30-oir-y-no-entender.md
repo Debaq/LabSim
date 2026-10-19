@@ -448,6 +448,15 @@ Hipoacusia conductiva bilateral leve de graves, de origen del oído medio. Se de
 El niño con otitis media con efusión fluctuante, en los años en que la vía se organiza, es un caso donde la periferia puede dejar huellas más allá de la audición (Moore y cols., 1999; Hogan y Moore, 2003). Aun así, ningún estudio justifica hacerle una batería central al niño que tiene el tímpano retraído hoy.
 :::
 
+:::comentario Prevención
+- **Secundaria:** en el adulto que no entiende en ruido, lo primero es la audibilidad (una caída de agudos leve a moderada basta para perder consonantes) y es lo más tratable (→ cap. 28).
+- **Terciaria:** en el niño, ambiente y ayudas de escucha antes que entrenamiento: aula con ruido de fondo de 35 dBA o menos y reverberación de 0,6 s (ANSI/ASA S12.60-2010) y micrófono remoto (Johnston y cols., 2009).
+- **Cuaternaria:** con una pérdida conductiva fluctuante la batería no se interpreta hasta tratarla y repetir (Hogan y Moore, 2003); se informa un perfil, no una causa, y la sinaptopatía no se diagnostica.
+- **Para el paciente:** "Que oigas pero no entiendas tiene explicaciones que se miran una por una; primero se revisa el oído y se mejora el ambiente."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

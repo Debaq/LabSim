@@ -416,6 +416,15 @@ Hipoacusia sensorioneural del OI de grado leve con **signos retrococleares** e h
 Etiquetar a un paciente de "funcional" sin haber mirado la audición y el vestíbulo cierra la puerta al diagnóstico que sí se trata. El audiograma y los reflejos son los primeros que dicen "esto no es PPPD".
 :::
 
+:::comentario Prevención
+- **Secundaria:** tras una neuritis, un VPPB o una crisis de migraña vestibular, el mareo que sigue casi todos los días por 3 meses o más y empeora de pie o con lo visual se reconoce por los criterios clínicos, no por el examen (Staab y cols., 2017).
+- **Terciaria:** tiene tratamiento: rehabilitación vestibular, psicoterapia y fármacos, con evidencia todavía escasa (Popkirov y cols., 2018; Trinidade y Goebel, 2018).
+- **Cuaternaria:** el diagnóstico se hace por criterios positivos, no por descarte (Staab y cols., 2017): un examen normal no pide repetirlo ni se informa como "no tiene nada".
+- **Para el paciente:** "Tu oído funciona y el mareo es real; tiene tratamiento, y moverte de a poco es parte de él."
+
+Los cuadros que precedieron al PPPD eran el 15 a 20 % de los pacientes con síntomas vestibulares en centros terciarios (Staab y cols., 2017). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

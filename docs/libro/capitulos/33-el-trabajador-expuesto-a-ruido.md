@@ -279,6 +279,16 @@ La audiometría de ingreso no se parece a ninguna base típica: un oído en 0 dB
 La pérdida de este trabajador **no** es de la faena. Que esté escrito, con fecha y condiciones, es lo que evita después discutir si lo fue.
 :::
 
+:::comentario Prevención
+- **Primaria:** el ruido se reduce en su fuente (Nelson y cols., 2005); del protector, lo mejor respaldado es entrenar la colocación del tapón (Tikka y cols., 2017).
+- **Secundaria:** la audiometría de base y la comparación anual encuentran el cambio al principio, cuando avanza más rápido (MINSAL, 2013); repetir el control antes de derivar redujo en más del 70 % a quienes cumplían el criterio de OSHA (NIOSH, 1998).
+- **Terciaria:** al terminar la exposición no hay progresión atribuible a ella (MINSAL, 2013); si la comunicación ya se limita, se evalúa un audífono (→ cap. 28).
+- **Cuaternaria:** la audiometría de vigilancia no se usa para diagnosticar, calificar una enfermedad profesional ni en contexto médico-legal (ISP, 2026).
+- **Para el paciente:** "La pérdida por ruido no se recupera: usa el protector bien puesto y no te saltes tu control."
+
+Alrededor del 16 % de la pérdida auditiva incapacitante del adulto se atribuye al ruido ocupacional (Nelson y cols., 2005). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -318,3 +328,8 @@ La pérdida de este trabajador **no** es de la faena. Que esté escrito, con fec
 
 1. Rink T. Clinical review of patterns from 300,000 industrial audiograms. Presentado en: Industrial Hearing Conservation Conference; 12-14 abr 1989; Lexington (KY). Citado en NIOSH (1998); no se leyó el original.
 1. Meinke DK, Murphy WJ, Finan DS, Lankford JE, Flamme GA, Stewart M, et al. Auditory risk estimates for youth target shooting. Int J Audiol. 2014;53(Suppl 2):S16-25. doi:10.3109/14992027.2013.865845
+
+### Prevención
+
+1. Nelson DI, Nelson RY, Concha-Barrientos M, Fingerhut M. The global burden of occupational noise-induced hearing loss. Am J Ind Med. 2005;48(6):446-458. doi:10.1002/ajim.20223. PMID 16299704
+1. Tikka C, Verbeek JH, Kateman E, Morata TC, Dreschler WA, Ferrite S. Interventions to prevent occupational noise-induced hearing loss. Cochrane Database Syst Rev. 2017;7(7):CD006396. doi:10.1002/14651858.CD006396.pub4. PMID 28685503

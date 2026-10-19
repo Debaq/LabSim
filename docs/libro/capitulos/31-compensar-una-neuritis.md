@@ -416,6 +416,15 @@ El diagnóstico de **mareo postural-perceptual persistente** lo hace el médico,
 Es el caso que más se repite en la consulta: **un paciente con la función de vuelta que sigue mal**. La buena noticia es que sus pruebas dicen que el laberinto compensó; la mala es que eso no basta. Decirle "su examen está bien" sin explicar lo que viene sería dejarlo solo, justo cuando está por quedarse con el mareo (→ cap. 27).
 :::
 
+:::comentario Prevención
+- **Secundaria:** se sigue al paciente con las mismas medidas en cada visita para notar a tiempo el estancamiento, el miedo y la dependencia visual (Cousins y cols., 2014).
+- **Terciaria:** la guía recomienda ofrecer rehabilitación vestibular a quien tiene limitaciones por la hipofunción (Hall y cols., 2022); en la neuritis, los ejercicios mejoraron la compensación postural a los 30 días (Strupp y cols., 1998).
+- **Cuaternaria:** los supresores vestibulares de uso prolongado retrasan la compensación (Rascol y cols., 1995; Hall y cols., 2022); retirarlos es del médico, a quien se avisa con los datos.
+- **Para el paciente:** "Aunque dé miedo, moverte de a poco y hacer tus ejercicios ayuda a que el cerebro compense; el reposo largo no."
+
+En el seguimiento de Okinaka y cols. (1993), el 80 % tenía paresia canalicular a los 6 meses y cerca del 50 % seguía con ella a los 5 o 10 años. Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

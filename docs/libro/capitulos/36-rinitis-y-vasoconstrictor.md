@@ -468,6 +468,15 @@ Obstrucción nasal **mixta de la fosa derecha**: un componente mucoso, que respo
 Las guías de rinitis ponen los corticoides nasales como primera elección en la rinitis alérgica persistente (Dykewicz y cols., 2020), lo que dejaría la mucosa de Marcos tratada antes de pensar en una cirugía: eso coincide con lo que le pasó con el corticoide (abrió el lado que tenía mucosa). Hay cirugía del cornete y del tabique, y la revisión de las técnicas de cornete insiste en conservar la función de la mucosa (Hol y Huizing, 2000). Pero el reparto de qué se hace y en qué orden pertenece a la consulta con el médico, no al informe del examen.
 :::
 
+:::comentario Prevención
+- **Primaria:** los descongestionantes tópicos se usan pocos días: el consenso brasileño recomienda no pasar de 5 y sugiere suspender a los 3 (Solé y cols., 2025), y la guía estadounidense los limita al corto plazo (Dykewicz y cols., 2020). La rinitis medicamentosa es una entidad discutida (Mortuaire y cols., 2013), por eso en el informe se pregunta por el uso y no se fija un número.
+- **Secundaria:** los síntomas de un solo lado, el sangrado o la pérdida del olfato se derivan (Fokkens y cols., 2020; → cap. 35).
+- **Cuaternaria:** un prick positivo confirma sensibilización, no rinitis (Heinzerling y cols., 2013; Hellings y cols., 2017); y antes de reducir un cornete conviene saber cuánto es mucosa y cuánto hueso (Hol y Huizing, 2000).
+- **Para el paciente:** "Si el spray de la farmacia te destapa, úsalo solo unos días; si lo necesitas más, consulta."
+
+La rinitis alérgica afecta de 10 a 40 % de la población (Brożek y cols., 2017). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

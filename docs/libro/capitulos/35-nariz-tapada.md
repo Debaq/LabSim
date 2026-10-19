@@ -356,6 +356,14 @@ Ninguna norma pide operar a un paciente por un NOSE alto con una nariz normal. L
 Es la paciente que vuelve a otra consulta con el informe en la mano y la sensación de que "no le creyeron". El informe puede decir "sin obstrucción medible" y, en la misma hoja, **"la queja es real y sigue en estudio"**. Una cosa no cancela la otra.
 :::
 
+:::comentario Prevención
+- **Secundaria:** una obstrucción o síntomas de un solo lado, una masa, sangrado o pérdida del olfato de un lado no se explican por el ciclo nasal ni por una alergia: se derivan (Fokkens y cols., 2020).
+- **Cuaternaria:** la obstrucción nasal es un diagnóstico clínico y ninguna medida objetiva es un patrón de referencia (Mohan y cols., 2018); lo que se siente y lo que se mide no siempre coinciden (André y cols., 2009), así que se decide con la historia y el examen juntos, no con una cifra sola.
+- **Para el paciente:** "Tu nariz tapada es real aunque el equipo mida bien; si es de un solo lado, sangra o pierdes el olfato, consulta."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

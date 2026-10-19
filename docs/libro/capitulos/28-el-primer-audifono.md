@@ -407,6 +407,15 @@ Hipoacusia sensorioneural **profunda unilateral derecha** de larga data, secuela
 Es el caso en que la técnica engaña: la prueba de campo libre sale normal y el protocolo supone "un oído a adaptar". Hay que decir con claridad que esa prueba no responde la pregunta de este paciente.
 :::
 
+:::comentario Prevención
+- **Secundaria:** no hay evidencia suficiente para tamizar a adultos mayores sin síntomas (Krist y cols., 2021); se actúa sobre la queja, y la pérdida unilateral o asimétrica reciente o sin causa conocida va al especialista (NICE, 2018).
+- **Terciaria:** el audífono mejora, con un efecto grande, la calidad de vida relacionada con la audición en pérdidas leves a moderadas (Ferguson y cols., 2026); el obstáculo es la demora (Simpson y cols., 2019).
+- **Cuaternaria:** el audífono se indica por la comunicación, no como prevención de demencia: en ACHIEVE no hubo diferencia en la muestra completa (Lin y cols., 2023).
+- **Para el paciente:** "No hace falta esperar a que sea más grave: si te cuesta entender, consulta. El audífono devuelve audibilidad, no la audición de antes."
+
+En una cohorte seguida 28 años, pasaron casi nueve años entre ser candidato y comprar el audífono (Simpson y cols., 2019). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -473,3 +482,7 @@ Es el caso en que la técnica engaña: la prueba de campo libre sale normal y el
 1. Loughrey DG, Kelly ME, Kelley GA, Brennan S, Lawlor BA. Association of age-related hearing loss with cognitive function, cognitive impairment, and dementia: a systematic review and meta-analysis. JAMA Otolaryngol Head Neck Surg. 2018;144(2):115-26. doi:10.1001/jamaoto.2017.2513. PMID 29222544
 1. Livingston G, Huntley J, Sommerlad A, Ames D, Ballard C, Banerjee S, et al. Dementia prevention, intervention, and care: 2020 report of the Lancet Commission. Lancet. 2020;396(10248):413-46. doi:10.1016/S0140-6736(20)30367-6
 1. Wallhagen MI. The stigma of hearing loss. Gerontologist. 2010;50(1):66-75. doi:10.1093/geront/gnp107. PMID 19592638
+
+### Prevención
+
+1. Krist AH, Davidson KW, Mangione CM, Cabana M, Caughey AB, Davis EM, et al. Screening for hearing loss in older adults: US Preventive Services Task Force recommendation statement. JAMA. 2021;325(12):1196-1201. doi:10.1001/jama.2021.2566. PMID 33755083

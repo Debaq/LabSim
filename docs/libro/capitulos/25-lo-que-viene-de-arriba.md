@@ -484,6 +484,15 @@ Nistagmo evocado por la mirada simétrico con reflejo vestíbulo-ocular normal, 
 Es el paciente en quien un antivertiginoso no habría servido, y que sale del examen con una derivación y no con una receta. Lo que puso al paciente en el examen fue el mareo; lo que lo explica estaba en la lista de remedios.
 :::
 
+:::comentario Prevención
+- **Secundaria:** el mareo de minutos con visión doble, torpeza al hablar o debilidad, aunque ceda, se avisa al médico el mismo día: los síntomas transitorios aislados del tronco precedieron al 16 % de los infartos vertebrobasilares (Paul y cols., 2013).
+- **Terciaria:** en algunos pacientes el nistagmo hacia abajo tiene tratamiento farmacológico que baja la oscilopsia; lo indica el médico (Strupp y cols., 2003).
+- **Cuaternaria:** el protocolo no pide suspender un anticonvulsivante; si un fármaco explica el nistagmo, el cambio es del médico tratante (Remler y cols., 1990; Strupp y cols., 2014).
+- **Para el paciente:** "Si te marea, ves doble o se te traba el habla, aunque pase en minutos, consulta ese mismo día; no esperes a que se repita."
+
+En la población de Oxfordshire, los síntomas transitorios del tronco precedieron a 45 de 275 infartos vertebrobasilares y a 10 de 759 carotídeos (Paul y cols., 2013). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

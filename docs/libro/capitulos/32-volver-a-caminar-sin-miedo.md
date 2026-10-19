@@ -393,6 +393,16 @@ Isabel cae de noche y a oscuras, ve bien con sus lentes y tiene la presión norm
 Su miedo es **proporcionado**: tiene el equilibrio realmente comprometido y se cayó tres veces. Es la diferencia con el mareo persistente funcional del cap. 27, donde la función está y la confianza no. Aquí el tratamiento del miedo es devolverle función y condiciones seguras, no explicarle que "no tiene nada".
 :::
 
+:::comentario Prevención
+- **Primaria:** el ejercicio de equilibrio y funcional redujo la tasa de caídas un 24 % (certeza alta) (Sherrington y cols., 2019); la guía mundial pide tres veces por semana o más, por al menos 12 semanas, y continuar (Montero-Odasso y cols., 2022).
+- **Secundaria:** preguntar por la posición que marea y probar el VPPB: el 9 % de los pacientes de una clínica geriátrica tenía uno no reconocido (Oghalai y cols., 2000); medir la presión acostado y de pie.
+- **Terciaria:** el miedo a caer se mide (ABC, FES-I) y se baja devolviendo función (Tinetti y cols., 1990).
+- **Cuaternaria:** la lista de remedios es parte de la evaluación; las benzodiazepinas se asociaron con más caídas (OR 1,42) (Seppala y cols., 2018), y quien evalúa no los cambia: avisa.
+- **Para el paciente:** "No es 'la edad': se busca qué suma. Hacer ejercicio de equilibrio varias veces por semana es lo que mejor protege."
+
+En 336 personas de 75 años o más seguidas un año, el 32 % se cayó al menos una vez (Tinetti y cols., 1988). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

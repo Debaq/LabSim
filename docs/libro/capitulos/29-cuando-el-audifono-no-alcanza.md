@@ -406,6 +406,16 @@ Sordera unilateral derecha posparotiditis, con el OI normal. Las opciones son: n
 ¿Por qué la conducción ósea no devuelve la localización, si lleva el sonido a una cóclea sana? Piensa en qué diferencia a las dos orejas para el cerebro.
 :::
 
+:::comentario Prevención
+- **Primaria:** los candidatos y portadores de implante coclear deben recibir vacunación antineumocócica, porque los niños con implante tuvieron mayor riesgo de meningitis neumocócica (CDC, 2003).
+- **Secundaria:** tras una meningitis se estudia la audición pronto, antes de que la cóclea se osifique (Douglas y cols., 2008); la regla 60/60 es un tamiz generoso para derivar a evaluación (Zwolan y cols., 2020).
+- **Terciaria:** cuando el audífono ya no alcanza, el implante o un dispositivo de conducción ósea son la salida; la candidatura la define el equipo (Zeitler y cols., 2024).
+- **Cuaternaria:** antes de decir que "el audífono no alcanza" se verifica en oído real (Valente y cols., 2018).
+- **Para el paciente:** "Si usas audífonos todo el día y aun así no entiendes, pide evaluación para implante; 'ya no hay un audífono más fuerte' no es el final."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -450,3 +460,7 @@ Sordera unilateral derecha posparotiditis, con el OI normal. Las opciones son: n
 1. Teagle HFB, Roush PA, Woodard JS, Hatch DR, Zdanski CJ, Buss E, et al. Cochlear implantation in children with auditory neuropathy spectrum disorder. Ear Hear. 2010;31(3):325-35. doi:10.1097/AUD.0b013e3181ce693b. PMID 20090530.
 1. Jenkins HA, Greene NT, Tollin DJ. Round window stimulation of the cochlea. Front Neurol. 2021;12:777010. doi:10.3389/fneur.2021.777010
 1. Shetty M, Ridge S, Kanumuri VV, Zhu V, Brown MC, Lee DJ. Clinical and scientific innovations in auditory brainstem implants. World J Otorhinolaryngol Head Neck Surg. 2021;7(2):109-15. doi:10.1016/j.wjorl.2021.02.002. PMID 33997720
+
+### Prevención
+
+1. Centers for Disease Control and Prevention, Advisory Committee on Immunization Practices. Pneumococcal vaccination for cochlear implant candidates and recipients: updated recommendations of the Advisory Committee on Immunization Practices. MMWR Morb Mortal Wkly Rep. 2003;52(31):739-40. PMID 12908457

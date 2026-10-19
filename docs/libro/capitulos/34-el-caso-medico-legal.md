@@ -461,6 +461,16 @@ Hipoacusia sensorioneural bilateral en agudos, simétrica, estable desde el egre
 El 0,3 % no es "nada": es lo que la AMA entrega porque la fórmula se detiene en 3 kHz. Si el informe solo trajera ese número, un lector no sabría que Víctor tiene 60 dB en 4 kHz.
 :::
 
+:::comentario Prevención
+- **Primaria:** una audiometría de base documentada y el control del ruido en la fuente protegen al trabajador y dejan claro qué es de la faena (→ cap. 33).
+- **Secundaria:** una asimetría, una pérdida de graves o un empeoramiento después de terminada la exposición no se archivan como ruido: pueden ser Ménière o una lesión retrococlear que merecen estudio (ACOEM, 2002; → cap. 9, 11).
+- **Terciaria:** quien resulte con una enfermedad profesional debe ser trasladado por su empresa a faenas donde no se exponga al agente (Ley 16.744, art. 71).
+- **Cuaternaria:** el umbral objetivo se informa como rango (Herdman y Stapells, 2003) y no se atribuye al ruido lo que el patrón no sostiene.
+- **Para el paciente:** "Tu informe dice lo que se midió y sus límites; si algo no calza con el ruido, se sigue estudiando."
+
+Vigilancia, protección y epidemiología del ruido ocupacional: → cap. 33. Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
