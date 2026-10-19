@@ -290,7 +290,7 @@ Con todas las curvas registradas, marca en cada una las ondas que se repiten: la
 
 :::ayuda Ayuda memoria
 - Paciente dormido, piel bien limpia, impedancias **bajo 5 kΩ** y parecidas.
-- Click alternado, 21,1/s, 100-3.000 Hz, ventana de 10-12 ms, fonos de inserción.
+- Click alternado, 21,1/s, 100-3.000 Hz, ventana de 10-12 ms, fonos de inserción. Lo que sigue a la onda V, con otra ventana, otra tasa y otros filtros, está en H14.
 - **80 dB nHL**: ondas I a V, repetidas.
 - Baja **20 en 20**; sin V, sube **10 en 10**. Umbral = la V más baja que se repite.
 - Repite siempre el máximo y el umbral.

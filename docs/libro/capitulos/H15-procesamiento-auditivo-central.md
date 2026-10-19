@@ -19,7 +19,7 @@ La batería de procesamiento central responde tres preguntas:
 
 1. **¿Hay una dificultad auditiva que el audiograma no explica?** Queja de escuchar mal en ruido, de perder palabras o de "no entender" con umbrales normales.
 2. **¿Qué proceso falla?** Ordenar sonidos en el tiempo, detectar silencios breves, atender a un oído cuando llegan dos mensajes, juntar la información de los dos oídos o entender habla en ruido. Saber cuál sirve para orientar el manejo.
-3. **¿De qué lado o a qué nivel parece estar?** Algunas pruebas dan resultados distintos según el oído o según el hemisferio comprometido y ayudan a decidir si hay que seguir estudiando (→ H10, cap. 13).
+3. **¿De qué lado o a qué nivel parece estar?** Algunas pruebas dan resultados distintos según el oído o según el hemisferio comprometido y ayudan a decidir si hay que seguir estudiando (→ H10, cap. 13). Esta herramienta trata la batería conductual; los potenciales de latencia media y tardía, que miran la misma vía sin pedir una respuesta del paciente, están en H14, y pueden salir normales aunque la batería conductual esté alterada (AAA, 2010).
 
 **Cuándo se piensa en esto.**
 

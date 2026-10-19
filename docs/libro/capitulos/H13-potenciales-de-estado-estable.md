@@ -40,7 +40,7 @@ Las neuronas auditivas descargan con más probabilidad en cada subida de la envo
 Según el ritmo de modulación, la respuesta nace en lugares distintos (Picton y cols., 2003; BSA, 2023):
 
 - **Alrededor de 80 a 100 Hz** (en los equipos, "90 Hz"). La respuesta viene sobre todo del **tronco**, como el ABR. Está presente desde el nacimiento y **casi no cambia con el sueño**, la sedación ni la anestesia. Es la que se usa en lactantes y en cualquier paciente dormido. Su costo es que es **más chica**.
-- **Alrededor de 40 Hz**. Es similar a la respuesta de latencia media: más grande, pero **depende del estado de alerta** y **no se parece a la del adulto hasta la adolescencia**, aunque desde los 5 años ya se puede registrar (BSA, 2023). Es adecuada en adultos y niños mayores (más de unos 5 años) **despiertos**, y no sirve en recién nacidos ni se debe usar en quien duerme.
+- **Alrededor de 40 Hz**. Es similar a la respuesta de latencia media (→ H14): más grande, pero **depende del estado de alerta** y **no se parece a la del adulto hasta la adolescencia**, aunque desde los 5 años ya se puede registrar (BSA, 2023). Es adecuada en adultos y niños mayores (más de unos 5 años) **despiertos**, y no sirve en recién nacidos ni se debe usar en quien duerme.
 
 Por eso las pantallas de los equipos ofrecen protocolos distintos para el niño, el adulto dormido y el adulto despierto: no cambia el examen, cambia la familia de respuesta que se está buscando.
 

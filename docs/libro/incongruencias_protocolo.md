@@ -203,6 +203,15 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 119 | H25 | Vasoconstrictor en qué fosa | solo en la fosa que supera la referencia | el protocolo (4PR descongestiona ambas en la mayoría) | Vogt 2016 | P | |
 | 120 | H25 | "150 Pa = radio 2" (clase) | — | no se usa: el radio de Broms (200) no equivale a 150 Pa | Broms 1982 | E (clase) | |
 | 121 | H25 | Nombre comercial del vasoconstrictor | marca local | genérico (libro mundial) | — | A | |
+| 169 | H25 | Patrones de curva de Cottle (2026-10-18) | sin protocolo; la tabla sale solo de la clase de Cottle y Broms | se dejó con `verificar`: no se halló fuente primaria (Tucker 1977 solo resumen) | — | A · verificar | |
+| 170 | H25 | "Flujo inspiratorio laminar constante hasta 150 Pa" (clase) | — | no se usa: choca con la meseta de la curva que ya enseña H25 (flujo turbulento, ecuación de Rohrer) | Rohrer 1915; Clement 2005 | E (clase) | |
+| 171 | H27 | Qué se mide en el prick (clase) | sin protocolo; la clase mide el diámetro del **eritema** | se mide la **pápula** (diámetro mayor y perpendicular); el eritema no entra | Heinzerling 2013; Bernstein 2008 | E (clase) | |
+| 172 | H27 | Fármacos que se suspenden (clase) | la clase pide retirar teofilina y antihistamínicos H2 | teofilina no altera la reactividad cutánea y los H2 casi no: no se suspenden | Heinzerling 2013 | E (clase) | |
+| 173 | H27 | Omalizumab (clase) | suspender hasta 6 meses antes | más de 4 semanas | Heinzerling 2013 | A (clase) | |
+| 174 | H27 | Betabloqueadores (clase) | contraindicación absoluta | precaución (riesgo de anafilaxia más difícil de tratar); decide el médico | Heinzerling 2013; Bernstein 2008 | P (clase) | |
+| 175 | H27 | "El tamaño de la pápula no indica gravedad" (clase) | — | cierto para la gravedad clínica, pero una pápula mayor hace más probable que la sensibilización sea relevante | Bousquet 2012; Heinzerling 2013 | A (clase) | |
+| 176 | 36 | Rendimiento del prick frente a la provocación nasal | el cap. 36 atribuía 85 % / 77 % a Heinzerling 2013 | son de Nevis 2016 (7 estudios, 430 pacientes; no 609) | Nevis 2016 | A | |
+| 177 | 36 | "El prick no está en el flujo del libro y no lo hace quien mide la nariz" | — | quitado al escribir H27; el capítulo remite a H27 sin decir quién lo ejecuta | — | A | |
 
 ## Capítulos clínicos de ABR
 
