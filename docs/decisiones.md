@@ -6210,3 +6210,18 @@ H23, nariz H24-H26. Los nuevos de la nariz van al final: **H27 prick test** y
   índice, ESTADO, LEEME, incongruencias, autoría de `hacer_libro.py`.
 - **No se tocaron** esta bitácora ni los informes de `investigacion/` anteriores:
   ahí H14-H25 significan la numeración vieja (sumar uno).
+
+## Libro: promoción y prevención, mixto (2026-10-18)
+
+La asignatura 14 (promoción y prevención) entra de dos formas, decidido por él:
+
+- **Transversal:** cada capítulo clínico lleva un recuadro corto
+  `:::comentario Prevención` (nivel de prevención primaria, secundaria,
+  terciaria o cuaternaria; a quién; qué mensaje), con la epidemiología del cuadro
+  en su capítulo y los programas y el GES en su recuadro "En Chile".
+- **Base B5 "Salud pública y prevención en ORL"** (corta): historia natural y
+  niveles de prevención, determinantes sociales, sistema de salud chileno
+  (FONASA/ISAPRE, niveles de atención, redes, UAPO), indicadores, Leyes 19.966,
+  21.353, 21.120 y 20.422, y diseño de proyectos comunitarios. Los recuadros remiten a B5.
+
+Se hace después de los capítulos de sueño (H29, H30).
