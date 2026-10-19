@@ -188,8 +188,9 @@ BONE_LAT_CORRECTION = {55.0: 0.0, 40.0: 0.3, 30.0: 0.4, 20.0: 0.5, 10.0: 0.8}
 # Lactante: la osea le sale MAS RAPIDA que la aerea, al reves que en el
 # adulto. El craneo sin suturar transmite mejor y el vibrador saltea un oido
 # medio que todavia tiene mesenquima, asi que por via osea el bebe se parece
-# mucho mas a un adulto que por via aerea (Cobb y Stuart 2016; Yang,
-# Rupert y Moushegian 1987; Stuart et al. 1993).
+# mucho mas a un adulto que por via aerea (Cobb y Stuart 2016, II:
+# onda V osea mas corta en el neonato que en el adulto a 15 y 45 dB nHL;
+# Yang, Rupert y Moushegian 1987).
 #
 # El valor sale de cerrar contra la tabla de latencias publicada: con el
 # offset de adulto el neonato quedaba 0.5-0.6 ms tarde en los tres niveles
