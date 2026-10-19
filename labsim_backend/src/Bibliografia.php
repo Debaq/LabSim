@@ -114,8 +114,7 @@ final class Bibliografia
             'n' => 'Lactantes',
             'protocolo' => 'ABR por vía ósea en distintas edades.',
             'enlace' => 'https://doi.org/10.1097/00003446-198708000-00009',
-            'verificada' => false,
-            'nota' => 'El resumen (PMID 3653538) muestra la ubicación temporal del vibrador como la de latencia de V más corta en neonatos y la atenuación interaural ósea mayor en neonatos que en adultos; no compara la latencia ósea con la aérea. Esa comparación la respalda Cobb y Stuart 2016 II (A03).',
+            'nota' => 'El resumen (PMID 3653538) no lo dice; lo atribuye a este trabajo la revisión de Seo y cols. 2018 (A06, texto completo PMC5894486): "For infants, the wave V latencies evoked by BC clicks are shorter than those of AC clicks". El texto completo de Yang no se leyó.',
             'usa' => ['Vía ósea del lactante: más rápida que la aérea (cráneo sin suturar, oído medio con mesénquima).'],
         ],
         'A06' => [
