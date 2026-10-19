@@ -105,7 +105,7 @@ REVISOR_CASOS = 'catipillan'   # firma la revisión de los casos de los capítul
 
 def _autoria():
     """Capítulo -> autores, según en qué es experto cada uno (él, 2026-10-17)."""
-    a = {'B1': ['catipillan', 'uribe'], 'B2': ['lopez'], 'B3': ['lopez'], 'B4': ['baier'],
+    a = {'B1': ['catipillan', 'uribe'], 'B2': ['lopez'], 'B3': ['lopez'], 'B4': ['baier'], 'B5': ['casanova'],
          'H12': ['poza', 'baier'], 'H15': ['casanova'], 'H23': ['baier']}
     for n in range(1, 9):
         a[f'H{n}'] = ['uribe', 'vargas']                 # audiología
