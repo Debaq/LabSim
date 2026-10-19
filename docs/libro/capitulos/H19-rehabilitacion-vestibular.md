@@ -79,6 +79,11 @@ La base la puso Norré y De Weerdt (1980): la habituación se desarrolla repitie
 
 La habituación incluye también estímulos **optocinéticos** (patrones que se mueven, como un disco o un video de un entorno movido) y la **realidad virtual**. Ambos permiten graduar la dificultad, y la guía dice que se pueden ofrecer para metas específicas (Hall y cols., 2022).
 
+**Estímulo optocinético y realidad virtual, qué son.** El estímulo optocinético usa patrones que se repiten y se mueven: discos, habitaciones que giran, protectores de pantalla muy cargados o videos de entornos con mucho movimiento. La realidad virtual es "cualquier sistema de equipo y programas que genera simulaciones de entornos reales o imaginados con los que el participante interactúa con sus propios movimientos"; puede ser **inmersiva** (una cueva con proyecciones o un visor en la cabeza) o **no inmersiva** (un juego en pantalla) (Hall y cols., 2022). Ambos permiten **graduar** la exposición: la velocidad y el sentido del movimiento, el tamaño y el color de lo que se ve, la carga cognitiva y las instrucciones; y se pueden hacer de pie, cambiando el peso, en equilibrio o caminando (Hall y cols., 2022).
+
+**Qué evidencia hay.** La guía de la APTA dice que, con evidencia de moderada a fuerte, el terapeuta *puede* ofrecer realidad virtual o retroalimentación sensorial aumentada para metas específicas (Hall y cols., 2022). Con los estímulos optocinéticos, los cuatro estudios revisados usaron la SOT o el mCTSIB como medida, de modo que sus resultados no se pueden extender a caminar ni a las actividades diarias; la guía los considera un **complemento** de los ejercicios de baja tecnología (estabilización de la mirada, habituación, equilibrio y resistencia) y no un reemplazo (Hall y cols., 2022). En un ensayo aleatorizado con pérdida unilateral, los ejercicios de equilibrio basados en realidad virtual no fueron superiores a los convencionales, y ambos grupos mejoraron (Meldrum y cols., 2015). La dependencia visual y el mareo postural-perceptual persistente, donde estas herramientas se usan con más frecuencia, se tratan en el cap. 27.
+
+
 ### Equilibrio: repartir la confianza entre los sentidos
 
 De pie, el cuerpo se mantiene con tres fuentes: la **vista**, la **somatosensación** de los pies y el piso, y el **vestíbulo**. El cerebro no les cree a las tres por igual: da a cada una un **peso** que depende de la tarea y del entorno, y lo cambia cuando una falla o miente. A este reparto se le llama **repesada sensorial** (Peterka, 2002; Horak, 2006).
@@ -103,6 +108,8 @@ En una plataforma de fuerza, el balanceo se registra como el movimiento del **ce
 :::
 
 Esa lógica es también la del **entrenamiento**. La guía incluye entre los ejercicios de equilibrio y marcha el trabajo con **entradas sensoriales alteradas**: sin vista o con optocinéticos, con movimientos de cabeza que ponen a trabajar al vestíbulo, y con espuma o superficies móviles que desafían la somatosensación (Hall y cols., 2022). Se le pide al paciente que aprenda a **usar mejor** el sentido que le queda y a no depender de uno solo.
+
+**Los límites de estabilidad.** La SOT mide a quién le cree el cuerpo; la prueba de **límites de estabilidad** (LOS) mide hasta dónde puede **inclinarse a propósito** sin dar un paso ni caerse. De pie sobre la plataforma, el paciente desplaza su centro de presión hacia ocho blancos separados por 45°, alrededor de él, y el equipo registra el tiempo de reacción, la velocidad, la exactitud y el control de la dirección del movimiento (Sevilla-García y cols., 2009; Pickerill y Harter, 2011). Es el análogo computarizado del alcance funcional (más adelante): ve la **reserva** del paciente, el margen que tiene antes de perder el equilibrio. En 112 pacientes con enfermedad de Ménière unilateral, los resultados de la LOS diferían de los de 30 controles y se relacionaban con el tiempo desde la última crisis (Sevilla-García y cols., 2009). Su reproducibilidad es variable: en 23 sanos, el coeficiente de correlación intraclase fue de 0,48 a 0,82 según la medida, y los autores recomiendan que cada servicio establezca la confiabilidad de su equipo (Pickerill y Harter, 2011). <!-- verificar: la prueba de control motor y la de adaptación de la posturografía dinámica no se describen; no se encontró una fuente abierta que las explique. -->
 
 ### Qué sistema trabaja cada eje del programa
 
@@ -160,6 +167,15 @@ Para saber si un cambio es **real**, un cambio de 18 puntos o más se toma como 
 - **Versión breve.** Existe una versión de 13 ítems (Tesio y cols., 1999) y una de tamizaje (Jacobson y Calder, 1998), pero el programa de este libro usa el DHI completo.
 :::
 
+**Otros dos instrumentos.** El DHI mide cuánto limita el mareo. Dos escalas miran otra cosa y se usan para completar el perfil (el cap. 27 las aplica al mareo persistente):
+
+:::ayuda-ancho VSS y ABC
+| Escala | Qué mide | Cómo se contesta y se puntúa | Cómo se lee |
+|---|---|---|---|
+| **VSS** (*Vertigo Symptom Scale*) (Yardley y cols., 1992) | Con qué frecuencia el paciente tuvo síntomas de vértigo y equilibrio y síntomas autonómicos y de ansiedad | 36 ítems de frecuencia en los últimos 12 meses, en dos subescalas: vértigo-equilibrio y autonómica-ansiosa (Wilhelmsen y cols., 2008). La forma corta (VSS-SF) tiene 15 ítems de 0 a 4 sobre el último mes, con un total de 0 a 60 <!-- verificar: el período de la VSS-SF; Wilhelmsen 2008 y Noordzij 2026 dicen "último mes". --> | Las subescalas se leen por separado: una autonómica-ansiosa alta con una de vértigo-equilibrio modesta describe un mareo con activación del cuerpo; no dice qué lo causa. Para el seguimiento se compara el cambio entre dos aplicaciones |
+| **ABC** (*Activities-specific Balance Confidence*) (Powell y Myers, 1995) | Cuánta confianza tiene el paciente de no perder el equilibrio al hacer 16 actividades | Cada ítem de 0 a 100 %; se promedian | Menos de 50 se asocia con un nivel de función bajo; entre 50 y 80, moderado; más de 80, alto (Myers y cols., 1998). Una confianza baja con buena función es la brecha que el programa busca cerrar |
+:::
+
 ### 2. Batería de evaluación funcional
 
 Cada prueba de la batería mira un sistema distinto. Se hacen todas, en la primera sesión y en la última, y las que sean necesarias en las intermedias.
@@ -173,6 +189,8 @@ Cada prueba de la batería mira un sistema distinto. Se hacen todas, en la prime
 | **Berg: recoger un objeto** | Un cambio de postura con el centro de masa bajo los pies | Agacharse y volver a pararse es de las cosas que más marean |
 | **TUG** | Levantarse, caminar, girar y sentarse | Movilidad básica y riesgo de caída |
 | **DGI de 4 ítems** | La marcha con cambios de velocidad y de cabeza | Pone a prueba el vestíbulo en movimiento |
+| **DGI de 8 ítems** | Lo anterior más pivotar, sortear obstáculos y escaleras | Versión completa, más exigente |
+| **Tinetti (POMA)** | Equilibrio y marcha en una sola sesión | Riesgo de caída en el adulto mayor |
 :::
 
 #### Agudeza visual dinámica (DVA)
@@ -247,9 +265,56 @@ La versión de 4 ítems del índice toma los primeros cuatro ítems del DGI orig
 Las pruebas del examen vestibular de pie, como el **Romberg**, el **Unterberger-Fukuda** y la **posturografía con las seis condiciones del SOT**, no son parte de esta batería, que mide la **función**; el examen las describe (→ H15). Aun así, el Romberg, el apoyo monopodal y el tándem son los ejercicios que la guía menciona para **cambiar la base de apoyo** y subir el desafío del equilibrio (Hall y cols., 2022). Es decir: lo que en el examen es una prueba, en la rehabilitación es un ejercicio.
 :::
 
+#### Índice de Marcha Dinámica completo (8 ítems)
+
+El DGI original tiene **ocho tareas** de marcha, cada una puntuada de 0 (muy alterada) a 3 (normal), con un máximo de **24**. La persona que evalúa califica si mantiene el patrón y el ritmo de marcha sin desviarse ni tropezar (Herman y cols., 2009).
+
+Tabla: Las ocho tareas del DGI
+
+| N.° | Tarea | Qué agrega |
+|---|---|---|
+| 1 | Marcha en superficie plana | línea de base |
+| 2 | Cambio de velocidad | ritmo |
+| 3 | Giros horizontales de cabeza | vestíbulo en movimiento |
+| 4 | Giros verticales de cabeza | vestíbulo en movimiento |
+| 5 | Marcha con giro sobre el eje (pivote) | cambio brusco de dirección |
+| 6 | Pasar por encima de un obstáculo | paso alto |
+| 7 | Rodear obstáculos | trayectoria |
+| 8 | Subir escaleras | esfuerzo y apoyo |
+
+(Herman y cols., 2009). Las cuatro primeras son las de la versión de 4 ítems de arriba, que en personas con trastornos vestibulares tuvo propiedades psicométricas equivalentes o mejores (Marchetti y Whitney, 2006).
+
+**Cómo se lee.** En 247 personas con trastornos vestibulares, un puntaje de **19 o menos** sobre 24 se asoció con haber caído en los 6 meses previos, con una razón de momios de 2,58, sin importar la edad (Whitney y cols., 2000). Otros autores usan "menos de 19" como señal de alteración de la marcha y de riesgo de caída (Herman y cols., 2009). En adultos mayores sanos el puntaje es casi perfecto (en promedio, 23,3 en hombres y 22,5 en mujeres), de modo que la prueba tiene **efecto techo**: no distingue bien entre quienes están bien (Herman y cols., 2009).
+
+#### Tinetti (POMA)
+
+La **Evaluación de la Movilidad Orientada al Desempeño** de Tinetti mira, en una sola sesión, el **equilibrio** (sentarse, levantarse, estar de pie, girar) y la **marcha** (inicio, longitud y simetría de los pasos, desvío, tronco) (Tinetti, 1986). <!-- verificar: lista de ítems de la POMA; se tomó de la descripción resumida del cap. 32, no del artículo original (Tinetti 1986 no tiene resumen en PubMed). --> Suma un máximo de **28 puntos**. Los cortes que se usan son 18 o menos, riesgo alto de caída; 19 a 23, moderado; y 24 o más, bajo (Dziubek y cols., 2025). <!-- verificar: cortes de la POMA tomados de un estudio de adultos mayores en residencias que los cita (Dziubek 2025), no de la publicación original. --> En personas con enfermedad de Parkinson, la sensibilidad y la especificidad de la prueba para identificar a quienes caen fueron de 76 % y 66 % (Kegelmeyer y cols., 2007). Se usa más con adultos mayores que con pacientes vestibulares jóvenes, donde el DGI es más sensible a los cambios de cabeza.
+
 ### 3. El programa individual: los cuatro ejes
 
 Con los resultados se arma un programa individual. Los cuatro ejes se trabajan siempre, y lo que cambia es **cuánto** de cada uno.
+
+#### El protocolo clásico: Cawthorne-Cooksey
+
+Antes de los cuatro ejes, el programa que los precedió. Cawthorne y Cooksey lo diseñaron en los años cuarenta para pacientes con lesión del laberinto por cirugía o traumatismo, y observaron que los ejercicios de movimientos de cabeza y de ojos aceleraban la recuperación (Han y cols., 2011). Es una **serie fija y ordenada** que se hace igual para todos, y que avanza de la posición **acostada** a la sentada, de pie y caminando (Hall y cols., 2022):
+
+Tabla: Etapas del protocolo de Cawthorne-Cooksey
+
+| Etapa | Ejercicio |
+|---|---|
+| 1 | Movimientos de **ojos** solos |
+| 2 | Movimientos de **cabeza**, con los ojos abiertos y con los ojos cerrados |
+| 3 | **Agacharse** a recoger algo |
+| 4 | **Sentarse y pararse** |
+| 5 | **Lanzar una pelota** de una mano a otra |
+| 6 | **Subir** por una escalera o una rampa |
+| 7 | **Caminar**, con distintos obstáculos y cambios |
+
+<!-- verificar: el detalle de cada etapa (por ejemplo, cuántas repeticiones o qué distancia) está en Cooksey 1946, que no está en acceso abierto; la tabla sigue el resumen de Hall y cols. 2022. -->
+
+**En qué se diferencia del programa de este capítulo.** El programa por ejes **elige** los ejercicios según el déficit medido (la ganancia del reflejo, el equilibrio, la marcha), dosifica y progresa cada uno, y entrena el reflejo con ejercicios cefalomotores específicos (x1, x2). El Cawthorne-Cooksey no distingue déficits ni dosifica, y mezcla ejercicios de ojos solos, que la guía desaconseja como estabilización de la mirada, con otros de habituación y de equilibrio.
+
+**Qué dice la evidencia.** Las versiones modificadas del protocolo, y el protocolo original como programa para la casa, se usan en los estudios como **comparador**. En un estudio con pérdida unilateral crónica, el grupo con ejercicios de estabilización de la mirada y de equilibrio mejoró la estabilidad postural y la simetría vestibular y el que hizo solo Cawthorne-Cooksey en casa no mejoró, pero los grupos tenían supervisión distinta, lo que impide atribuir la diferencia al programa (Hall y cols., 2022). Para el paciente concreto, la elección depende del déficit que se midió, de la supervisión disponible y de la capacidad de hacer ejercicios más específicos: un paciente sin acceso a una evaluación completa puede partir de una serie fija, siempre que se reevalúe y se derive si no mejora.
 
 #### Ejercicios oculomotores
 
@@ -436,3 +501,16 @@ Un paciente que **empeora con los ejercicios** (más vértigo, nistagmo nuevo, v
 1. Norré ME, De Weerdt W. Treatment of vertigo based on habituation. 2. Technique and results of habituation training. J Laryngol Otol. 1980;94(9):971-7. doi:10.1017/s0022215100089726
 1. Peterka RJ. Sensorimotor integration in human postural control. J Neurophysiol. 2002;88(3):1097-118. doi:10.1152/jn.2002.88.3.1097
 1. Horak FB. Postural orientation and equilibrium: what do we need to know about neural control of balance to prevent falls? Age Ageing. 2006;35(Suppl 2):ii7-ii11. doi:10.1093/ageing/afl077
+1. Han BI, Song HS, Kim JS. Vestibular rehabilitation therapy: review of indications, mechanisms, and key exercises. J Clin Neurol. 2011;7(4):184-96. doi:10.3988/jcn.2011.7.4.184
+1. Herman T, Inbar-Borovsky N, Brozgol M, Giladi N, Hausdorff JM. The Dynamic Gait Index in healthy older adults: the role of stair climbing, fear of falling and gender. Gait Posture. 2009;29(2):237-41. doi:10.1016/j.gaitpost.2008.08.013
+1. Whitney SL, Hudak MT, Marchetti GF. The dynamic gait index relates to self-reported fall history in individuals with vestibular dysfunction. J Vestib Res. 2000;10(2):99-105. PMID 10939685 (sin DOI)
+1. Tinetti ME. Performance-oriented assessment of mobility problems in elderly patients. J Am Geriatr Soc. 1986;34(2):119-26. doi:10.1111/j.1532-5415.1986.tb05480.x
+1. Dziubek W, Filon T, Rogowski Ł, et al. Yearlong evaluation of fall risk determinants among 40 older adults in two residential assisted living facilities. Med Sci Monit. 2025;31. doi:10.12659/msm.948717
+1. Kegelmeyer DA, Kloos AD, Thomas KM, Kostyk SK. Reliability and validity of the Tinetti Mobility Test for individuals with Parkinson disease. Phys Ther. 2007;87(10):1369-78. doi:10.2522/ptj.20070007
+1. Yardley L, Masson E, Verschuur C, Haacke N, Luxon L. Symptoms, anxiety and handicap in dizzy patients: development of the vertigo symptom scale. J Psychosom Res. 1992;36(8):731-41. doi:10.1016/0022-3999(92)90131-K
+1. Wilhelmsen K, Strand LI, Nordahl SHG, Eide GE, Ljunggren AE. Psychometric properties of the Vertigo symptom scale - Short form. BMC Ear Nose Throat Disord. 2008;8:2. doi:10.1186/1472-6815-8-2
+1. Powell LE, Myers AM. The Activities-specific Balance Confidence (ABC) Scale. J Gerontol A Biol Sci Med Sci. 1995;50A(1):M28-34. doi:10.1093/gerona/50a.1.m28
+1. Myers AM, Fletcher PC, Myers AH, Sherk W. Discriminative and evaluative properties of the activities-specific balance confidence (ABC) scale. J Gerontol A Biol Sci Med Sci. 1998;53(4):M287-94. doi:10.1093/gerona/53a.4.m287
+1. Sevilla-García MA, Boleas-Aguirre MS, Pérez-Fernández N. The limits of stability in patients with Ménière's disease. Acta Otolaryngol. 2009;129(3):281-8. doi:10.1080/00016480802226171
+1. Pickerill ML, Harter RA. Validity and reliability of limits-of-stability testing: a comparison of 2 postural stability evaluation devices. J Athl Train. 2011;46(6):600-6. doi:10.4085/1062-6050-46.6.600
+1. Meldrum D, Herdman S, Vance R, et al. Effectiveness of conventional versus virtual reality-based balance exercises in vestibular rehabilitation for unilateral peripheral vestibular loss: results of a randomized controlled trial. Arch Phys Med Rehabil. 2015;96(7):1319-28. doi:10.1016/j.apmr.2015.02.032

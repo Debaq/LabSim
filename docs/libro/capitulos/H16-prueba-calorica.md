@@ -73,6 +73,20 @@ Al revés, en esa serie ningún paciente con un vHIT lateral alterado tuvo una c
 
 Lo que la calórica **no** mide: solo el canal lateral (los canales verticales y los otolitos no se estimulan de forma fiable); solo bajas frecuencias; y no estimula las frecuencias en que se mueve la cabeza en la vida diaria.
 
+:::ayuda-ancho Pruebas rotatorias: el mismo reflejo con otro estímulo
+La calórica estimula un oído a la vez y con un estímulo lentísimo. La **silla rotatoria** hace lo contrario: gira el cuerpo entero, en **oscuridad**, sobre un eje vertical, y estimula **los dos conductos horizontales a la vez** (Furman, 2016). El estímulo puede ser **sinusoidal** (la silla va y viene a distintas frecuencias) o **en escalón** (acelera, gira a velocidad constante y frena). No está en el protocolo de este libro; se explica aquí porque el cap. 24 la nombra como una de las tres pruebas que definen la pérdida vestibular bilateral.
+
+**Qué se mide**
+
+- **Ganancia:** la velocidad de la fase lenta del ojo dividida por la velocidad de la silla. Un reflejo sano mueve el ojo casi tan rápido como gira la silla, en sentido contrario.
+- **Fase:** el desfase en el tiempo entre el movimiento de la silla y el del ojo. Con una pérdida vestibular el ojo se **adelanta** a lo esperado; el efecto es mayor a bajas frecuencias, junto con la caída de la ganancia (Strupp y cols., 2017).
+- **Constante de tiempo:** en el escalón, cuánto dura el nistagmo después de que la silla ya gira a velocidad constante. Se toma como el tiempo en que el nistagmo cae al 37 % de su pico; se considera anormal bajo 10 s y suele ser menor de 5 s en la pérdida bilateral (Strupp y cols., 2017). Un sistema central de **almacenamiento de velocidad** alarga la respuesta más allá de lo que daría el conducto solo y extiende el tiempo en que el reflejo puede compensar un movimiento sostenido (Raphan y cols., 1979); cuando falta señal vestibular, la constante de tiempo se acorta.
+
+**Por qué es la prueba de la arreflexia bilateral.** Rota el cuerpo entero, de forma pasiva y en oscuridad. Eso evita lo que en el impulso cefálico puede disfrazar una pérdida: el reflejo cérvico-ocular, las sacadas anticipatorias y otros mecanismos que estabilizan la mirada sin el laberinto (Strupp y cols., 2017). Tampoco exige irrigar el oído ni mover la cabeza con rapidez, por lo que sirve cuando la calórica o el vHIT no se pueden hacer: limitaciones del cuello, ansiedad o lactantes (Strupp y cols., 2017).
+
+**Sus límites.** Como gira ambos oídos a la vez y con aceleraciones bajas (menos de unos 1000 °/s²), es **menos sensible que el vHIT y la calórica** para una pérdida de un solo lado con el otro laberinto sano (Strupp y cols., 2017). Sus parámetros varían entre y dentro de sujetos, y según el criterio usado solo el 53 % de los pacientes con vestibulopatía bilateral tuvo respuestas anormales (Strupp y cols., 2017). Los puntos de corte que definen la pérdida bilateral están en el cap. 24.
+:::
+
 ## Antes de empezar
 
 ### ¿Se puede hacer la prueba?
@@ -265,3 +279,5 @@ Una calórica caída con un vHIT normal **no es un error**: es el patrón de la 
 1. Lightfoot G, Barker F, Belcher K, Kennedy V, Nassar G, Tweedy F. The derivation of optimum criteria for use in the monothermal caloric screening test. Ear Hear. 2009;30(1):54-62. doi:10.1097/AUD.0b013e31818f006c
 1. Baloh RW. Robert Bárány and the controversy surrounding his discovery of the caloric reaction. Neurology. 2002;58(7):1094-9. doi:10.1212/wnl.58.7.1094
 1. Strupp M, Bisdorff A, Furman J, Hornibrook J, Jahn K, Maire R, et al. Acute unilateral vestibulopathy/vestibular neuritis: diagnostic criteria. J Vestib Res. 2022;32(5):389-406. doi:10.3233/VES-220201
+1. Furman JM. Rotational testing. Handb Clin Neurol. 2016;137:177-86. doi:10.1016/B978-0-444-63437-5.00012-1
+1. Raphan T, Matsuo V, Cohen B. Velocity storage in the vestibulo-ocular reflex arc (VOR). Exp Brain Res. 1979;35(2):229-48. doi:10.1007/BF00236613

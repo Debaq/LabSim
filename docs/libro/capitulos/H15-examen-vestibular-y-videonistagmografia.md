@@ -60,6 +60,16 @@ Los conductos tienen una segunda propiedad que conviene tener a mano: un conduct
 
 El desequilibrio de un lado **no dura para siempre**. En pocos días el cerebelo y los núcleos vestibulares rebalancean sus reposos y el nistagmo espontáneo baja, aunque el laberinto siga sin funcionar. Por eso un paciente con una pérdida vieja puede tener un examen espontáneo normal, y por eso el nistagmo de una neuritis aguda se ve mucho más fácil el primer día que a la semana (Leigh y Zee, 2015).
 
+### Las leyes de Ewald, en un solo lugar
+
+Tres reglas sobre cómo responde cada conducto, que reaparecen en todo este capítulo y en H17 y H18:
+
+- **I. Cada conducto mueve los ojos en su propio plano.** La excitación de un conducto produce un movimiento ocular en el plano de ese conducto (Ewald, 1892; Leigh y Zee, 2015). Por eso el nistagmo de cada conducto tiene una dirección propia (→ H18, que lo aplica a las maniobras, y H17, que lo aplica al impulso cefálico).
+- **II. En el conducto horizontal, excitar rinde más que inhibir.** El flujo de endolinfa hacia la ampolla da una fase lenta más rápida que el flujo que se aleja de ella (Baloh y cols., 1977).
+- **III. En los conductos verticales, al revés.** El flujo que se aleja de la ampolla estimula más que el que se dirige hacia ella. En 20 pacientes con canalitiasis del conducto posterior, la velocidad máxima de la fase lenta fue de 42,3 °/s en la posición colgada del Dix-Hallpike y de 15,6 °/s al sentarse, unas 2,7 veces menos (Ichijo, 2013).
+
+Algunos autores reúnen la II y la III en una sola ley; aquí se separan para poder nombrar cada caso. <!-- Pasada de contenidos 2026-10-18: Ichijo (2013) enuncia la tercera ley solo para el conducto posterior; H18 (l.51) agrupa horizontal y vertical bajo la segunda ley. Para los conductos anterior y lateral no se encontró una medición equivalente. -->
+
 ### La fijación lo frena
 
 Hay otro detalle que cambia cómo se examina: **un nistagmo periférico se apaga cuando el paciente mira un punto**. Lo que hace la fijación es avisarle al cerebelo que la imagen **se está deslizando** por la retina. El **flóculo** (con el paraflóculo) usa esa señal para oponerse a la deriva y frena la fase lenta. En monos, la lesión del flóculo hace perder la supresión por fijación (Takemori y Cohen, 1974) y, con ella, el seguimiento y el mantenimiento de la mirada excéntrica (Zee y cols., 1981).
@@ -119,6 +129,36 @@ Con todo lo anterior se puede armar una tabla para leer el nistagmo. Es una **gu
 
 Un nistagmo periférico **típico** es el de la neuritis vestibular: horizontal con componente torsional, de dirección fija y más intenso al quitar la fijación (Strupp y cols., 2022). Pero la tabla tiene una excepción conocida, que importa en el vértigo agudo: un ataque cerebrovascular de la fosa posterior puede dar un cuadro que parece periférico. Por eso el examen tiene más de una prueba, y por eso un paciente con vértigo continuo **no se tranquiliza** con una sola prueba normal (→ cap. 21).
 
+### Nistagmos que no vienen del laberinto: infantil y latente
+
+No todo nistagmo en un adulto es vestibular. Dos formas que empiezan en la infancia se parecen lo bastante a un nistagmo espontáneo como para confundirse con él, y se distinguen por sus rasgos (Eggers y cols., 2019):
+
+- El **nistagmo infantil** (llamado antes congénito) es horizontal y conjugado, y aparece en los primeros meses de vida, con más frecuencia entre las 8 y las 12 semanas que al nacer. Mezcla fases rápidas con velocidad creciente y movimientos pendulares, y en cada oscilación hay un breve **período de foveación**, en el que el ojo queda quieto sobre lo que mira.
+- El **nistagmo latente** no existe con los dos ojos abiertos y aparece al **tapar un ojo**; sus fases rápidas baten hacia el lado opuesto al ojo tapado. Se asocia con estrabismo (sobre todo esotropía) y ambliopía. El **latente manifiesto** está presente con los dos ojos abiertos, porque un ojo con mala visión funciona como un ojo tapado.
+
+:::ayuda-ancho Cómo separar el nistagmo infantil y el latente de uno vestibular periférico
+| Rasgo | Periférico agudo | Infantil | Latente |
+|---|---|---|---|
+| **Cuándo empieza** | de un día para otro, con vértigo | en los primeros meses de vida | en la infancia, con estrabismo o ambliopía |
+| **Fijación** | baja o se apaga con luz | aumenta con la atención y la excitación; baja con la **convergencia**, la desatención, los ojos cerrados y el sueño | aparece al **ocluir un ojo** |
+| **Forma** | diente de sierra con un solo sentido | mezcla de sacudida (velocidad creciente) y pendular, con períodos de foveación | sacudida con fase lenta de velocidad constante o decreciente |
+| **Mirada** | no cambia de sentido; sube hacia la fase rápida (Alexander) | cambia de sentido con la mirada y se atenúa en una **zona nula**, donde el paciente suele llevar la cabeza | suele seguir la ley de Alexander |
+| **Optocinético** | normal | se **invierte**: las fases rápidas van en el mismo sentido que las barras | — |
+:::
+
+Dos pistas prácticas. Un adulto con una cabeza que gira hacia un lado para mirar de frente probablemente tiene una zona nula. Y en un paciente con estrabismo, el nistagmo que aparece solo al tapar un ojo (por ejemplo, con unas gafas que cubren uno) no se informa como espontáneo: se describe como latente (Eggers y cols., 2019).
+
+### El reflejo vestíbulo-espinal: lo que examinan Romberg y Fukuda
+
+Los núcleos vestibulares no mandan señales solo a los ojos. Dos haces bajan a la médula y ajustan el tono de los músculos para mantener el cuerpo derecho:
+
+- El **haz vestíbulo-espinal lateral** nace en el núcleo vestibular lateral, recorre toda la médula y llega a los segmentos de los miembros; actúa sobre todo excitando a los músculos **extensores**, los que sostienen el cuerpo contra la gravedad (McCall y cols., 2017).
+- El **haz vestíbulo-espinal medial** nace en los núcleos medial y descendente y termina en la médula **cervical**, por lo que actúa sobre los músculos del cuello (McCall y cols., 2017; Jang y cols., 2018). Mantiene la cabeza estable cuando el cuerpo se mueve. Otra vía, la vestíbulo-cólica, es la que mide el VEMP cervical (→ H12).
+
+A diferencia del reflejo vestíbulo-ocular, que tiene tres neuronas, estos haces hacen relevo en interneuronas de la médula y la mayoría de sus conexiones con las motoneuronas de los miembros son polisinápticas (McCall y cols., 2017). Es un reflejo más lento y más modificable.
+
+Las pruebas de equilibrio se leen con esta lógica. En el **Romberg**, al cerrar los ojos quedan el laberinto y la propiocepción como únicas fuentes de información: si el tono de un lado cae, el cuerpo se va hacia ese lado. El **Unterberger-Fukuda** y la **marcha en estrella** (paso 2) amplifican esa asimetría con pasos repetidos y sin vista. Que la lógica sea clara no significa que la prueba rinda: en el caso de Fukuda y de la marcha en estrella, la evidencia es pobre (paso 2). Cómo se reparte el trabajo de mantener el equilibrio entre vestíbulo, vista y pies, y qué estrategias usa el cuerpo (tobillo, cadera, paso) se explica en H19.
+
 ## Antes de empezar
 
 ### Lo que se le pide al paciente
@@ -140,6 +180,18 @@ Los centros difieren en cuántas horas de ayuno piden y en qué fármacos suspen
 - **Lentes de Frenzel.** Gafas con lentes de **+20 dioptrías** y luz propia. Impiden la fijación del paciente y agrandan sus ojos para quien los mira. Se usan **con la luz de la sala atenuada**. No registran nada: lo que ves se anota a ojo, con tu criterio.
 - **Videonistagmógrafo.** Unas gafas cerradas con una **cámara infrarroja** frente a cada ojo (o frente a uno). La cámara sigue la pupila, el programa la convierte en grados y la muestra en el tiempo. Trae un **pedal** para marcar eventos sin soltar al paciente y un software donde se ingresan los datos y se corrigen los trazos.
 - **Una sala con luz controlada.** Con las lentes, luz **frontal atenuada**; con la VNG, una sala que se pueda oscurecer, y un punto o una luz que se mire **a 30 o 40 cm** a la altura de los ojos.
+
+**Cómo se registra el ojo.** La VNG es una de tres maneras de convertir el movimiento del ojo en una curva, y los tres métodos no dan los mismos números:
+
+:::ayuda-ancho Electro-oculografía, bobina escleral y videonistagmografía
+| | EOG (electronistagmografía) | Bobina escleral | VNG (video-oculografía) |
+|---|---|---|---|
+| **Principio** | La córnea y la retina tienen una diferencia de potencial eléctrico; al girar el ojo, electrodos de superficie junto a los ojos registran el cambio (Blakley y Chan, 2015) | Una lente de contacto con una bobina de alambre, dentro de un campo magnético: la corriente inducida depende de la posición del ojo (Robinson, 1963) | Una cámara infrarroja sigue la pupila y el programa la convierte en grados (Blakley y Chan, 2015) |
+| **Ventajas** | Equipo de décadas; los valores normales históricos de la calórica se hicieron con él | La más precisa; mide también la **torsión** y sirve para movimientos de alta frecuencia (Houben y cols., 2006) | Sin electrodos ni pegamento; se **ve** el ojo; sin deriva eléctrica de la línea base (Blakley y Chan, 2015) |
+| **Límites** | Deriva de la línea base; artefactos de parpadeo y de contracción muscular; electrodos que pierden contacto (Blakley y Chan, 2015). Solo registra movimientos horizontales y verticales <!-- verificar: que el EOG con electrodos de superficie no registra torsión; es consecuencia del principio (el dipolo no cambia al rotar sobre la línea de la mirada), no se encontró una fuente abierta que lo afirme. --> | Invasiva (lente de contacto), cara y propensa a fallas; no es de uso clínico corriente (Blakley y Chan, 2015) | Pierde la pupila con maquillaje, cejas y ojos cerrados; muestreo típico de 30 a 60 Hz; la torsión es inferior a la de la bobina (Blakley y Chan, 2015; Houben y cols., 2006) |
+:::
+
+Las velocidades **no son intercambiables**. En 19 sujetos sanos con calórica y registro simultáneo con EOG y VNG, las velocidades de la fase lenta de la VNG fueron en promedio 1,71 veces las del EOG, y el centro que hizo el estudio subió su límite de reducción calórica bilateral de 30 a 50 °/s al pasar a VNG (Blakley y Chan, 2015). Por eso los valores de referencia se toman del equipo con que se mide (→ H16).
 
 :::imagen ilustraciones/h15-simulador-frenzel.png ancho=80% Un paciente con una neuritis vestibular superior izquierda, a las 6 horas, sin fijación. A la izquierda, con las lentes de Frenzel puestas; a la derecha, su ojo derecho de cerca. Imagen propia hecha con labyrinthus3d (→ Simuladores, en las preliminares).
 - @40,29 | **Lentes de Frenzel.** Agrandan los ojos para quien mira y no dejan fijar al paciente.
@@ -188,6 +240,19 @@ Después viene lo que más orienta, que no es cómo se siente sino **cuándo y p
 
 Es una orientación, no un diagnóstico. El mismo paciente puede caber en dos filas, y la anamnesis se completa con el examen.
 
+Otra forma de ordenar lo mismo es por **tiempo y gatillo**, y no por el tipo de mareo: el paradigma TiTrATE agrupa a los pacientes en cuatro síndromes, cada uno con su diagnóstico diferencial y su examen más útil (Newman-Toker y Edlow, 2015).
+
+:::ayuda-ancho Los cuatro síndromes del mareo según tiempo y gatillo
+| Síndrome | Cómo es | Ejemplos | Qué examen pesa más |
+|---|---|---|---|
+| **Agudo continuo** | Mareo o vértigo continuo de horas o días, con náuseas e inestabilidad | neuritis vestibular, ataque cerebrovascular de la fosa posterior | nistagmo, impulso cefálico, *skew* (→ cap. 21) |
+| **Episódico espontáneo** | Crisis sin gatillo, de minutos a horas, con períodos normales entre ellas | enfermedad de Ménière, migraña vestibular | audiometría y examen entre crisis (→ cap. 9, cap. 23) |
+| **Episódico provocado** | Crisis breves que un movimiento o una postura desencadena | vértigo posicional paroxístico benigno | maniobras de posición (→ H18) |
+| **Crónico** | Semanas a meses de inestabilidad o mareo persistente | pérdida vestibular bilateral, mareo postural-perceptual persistente | pruebas del reflejo y de equilibrio (→ cap. 24, cap. 27, H19) |
+:::
+
+Los ejemplos de cada fila son los que desarrollan los capítulos a los que remite; la clasificación en cuatro grupos, por tiempo y gatillo, es la del artículo citado.
+
 ### 2. Equilibrio estático y dinámico
 
 Antes de los ojos, el paciente está de pie. Estas pruebas muestran **cómo se las arregla el equilibrio** cuando se le quita un sentido. Cada una se hace con la mano del examinador cerca, para sostener.
@@ -196,10 +261,13 @@ Antes de los ojos, el paciente está de pie. Estas pruebas muestran **cómo se l
 - **Romberg sensibilizado.** Para un paciente que compensa, se agrega dificultad: **un pie delante del otro** con las manos cruzadas sobre los hombros, o pequeños **empujones** del examinador mientras el paciente hace un **trabajo mental**. Queda a criterio del examinador qué usar.
 - **Brazos extendidos.** Con los brazos al frente y los índices paralelos, ojos cerrados. Se mira si los brazos **se desvían** hacia algún lado. Se recomienda apoyar el dorso del paciente para que el tronco no arrastre los brazos.
 - **Unterberger.** Con los brazos extendidos y los ojos cerrados, el paciente **marcha en el puesto**. Se mira si **gira** sobre su eje.
+- **Babinski-Weil (marcha en estrella).** Con los ojos cerrados, el paciente camina alternando pasos **hacia delante y hacia atrás** sobre la misma línea, varias pasadas. En los estudios de reproducibilidad se usaron 36 pasos en total (Paquet y cols., 2014); otros midieron la desviación con un transportador tras 10 pasos a 1 Hz (Miranda y cols., 2013). La prueba toma su nombre del trazo en estrella que dejan los pasos cuando el paciente se desvía de forma sistemática (Oliva y cols., 1998). Se anota hacia qué lado se desvía en cada tramo; una desviación que se repite en varias pasadas cuenta, una aislada no. <!-- verificar: patrón esperado por tramo (adelante/atrás) en una pérdida unilateral; las fuentes cotejadas (Paquet 2014, Miranda 2013, Oliva 1998) describen la prueba y su variabilidad, no el sentido de la desviación en cada tramo. -->
 - **Marcha** con los ojos abiertos hacia delante y hacia atrás, y con los ojos **cerrados** hacia delante y hacia atrás, varias veces.
 - **Marcha en línea (tándem):** talón con punta, ojos abiertos, ida y vuelta.
 
 En una pérdida unilateral reciente, la caída del Romberg va **hacia el lado enfermo**, el mismo lado hacia donde el nistagmo tiene su fase lenta (Strupp y cols., 2022), y el desvío de los brazos y el giro del Unterberger suelen ir hacia el mismo lado. En una lesión del **cerebelo**, en cambio, el paciente tambalea con **los ojos abiertos** también, y la marcha en tándem es la que más lo delata.
+
+**Qué tan útiles son el Fukuda y el Babinski-Weil.** Ninguno de los dos distingue bien a los sanos de los enfermos. En 50 adultos sin discapacidad, ambas pruebas mostraron desplazamientos y giros, con menos variabilidad en el Babinski-Weil (que tiene menos pasos) que en el Fukuda de 100 pasos (Paquet y cols., 2014). En 75 adultos sanos, la desviación media del Babinski-Weil fue de 5,3° en mujeres y de −3,1° en hombres, con desviaciones estándar de 16,3° y 12,4° (Miranda y cols., 2013): la variación normal es mayor que el desvío que se busca. Y en un cuestionario de cribado de 20 ítems de equilibrio, el Babinski-Weil fue el que menos aportó (Lomas-Vega y cols., 2020). Son pruebas de cabecera para describir, no para decidir.
 
 ### 3. Examen neocerebeloso
 
@@ -209,6 +277,22 @@ Cuatro pruebas rápidas para el cerebelo, que se hacen siempre y no cuestan nada
 - **Diadococinesia:** pronosupinación **rápida** de las manos. Un movimiento torpe, lento o irregular es disdiadococinesia.
 - **Sinergia:** coordinación de movimientos compuestos.
 - **Temblor intencional:** un temblor que **aparece al acercarse al blanco**.
+
+Cada una se hace con el examinador mirando **cómo** se mueve el miembro, no solo si llega:
+
+:::ayuda-ancho Cómo se hace y cómo se lee cada prueba cerebelosa
+| Prueba | Cómo se hace | Qué se ve si el cerebelo falla |
+|---|---|---|
+| **Metría** (dedo-nariz, dedo-dedo, talón-rodilla) | El paciente toca su nariz y después el dedo del examinador, que cambia de sitio; con la pierna, desliza el talón desde la rodilla por la espinilla | **Dismetría**: se pasa (hipermetría) o se queda corto (hipometría) (Manto, 2009). La trayectoria sale quebrada, con correcciones; el error está en el rango, la velocidad o la fuerza del movimiento (Manto, 2022) |
+| **Descomposición del movimiento** | La misma prueba, mirando la trayectoria | El movimiento se parte en tramos sucesivos en vez de salir de corrido; Holmes la describió entre los signos básicos de la lesión cerebelosa (Roe, 2025) |
+| **Temblor intencional** | Al final de dedo-nariz, mirando el último tramo | Oscilación que **aumenta al acercarse al blanco** (Bodranghien y cols., 2016) |
+| **Diadococinesia** | Pronosupinación rápida de las manos sobre los muslos o en el aire | Más lenta, irregular, de amplitud variable (**disdiadococinesia**); Babinski la describió (Manto, 2022) |
+| **Sinergia** | Una tarea que obliga a combinar varias articulaciones a la vez, como sentarse desde decúbito con los brazos cruzados sobre el pecho | **Asinergia**: los segmentos no se coordinan y la tarea se hace por partes; Babinski la describió en 1899 (Manto, 2022) <!-- verificar: ejemplo de la prueba de sinergia tronco-pierna (sentarse desde decúbito con los brazos cruzados; la pierna se eleva); no se encontró en acceso abierto una fuente que lo describa. --> |
+| **Rebote** (de Holmes) | El examinador resiste con una mano la flexión del codo del paciente y suelta de golpe | El brazo normal frena casi de inmediato; con una lesión cerebelosa **falta el freno** y el brazo se dispara hacia delante (Roe, 2025). Es el defecto de *check and rebound* (Manto, 2022) |
+| **Marcha** | Caminar libre y en tándem | Base ancha, tambaleo y tándem muy alterado (Bodranghien y cols., 2016) |
+:::
+
+Para ubicar la lesión, la pauta habitual es que las pruebas de los miembros (metría, diadococinesia, rebote) indican el hemisferio **del mismo lado**, y que la marcha y el tronco apuntan al **vermis**. <!-- verificar: lateralidad ipsilateral de los signos de miembro y atribución de marcha/tronco al vermis; Bodranghien 2016 (resumen) enumera los signos pero no los localiza. --> Los hallazgos de los ojos (seguimiento sacádico, sacadas dismétricas, nistagmo evocado por la mirada) completan el cuadro (→ paso 8 y cap. 25).
 
 ### 4. Antes de mirar el nistagmo: motilidad y conjugación de los ojos
 
@@ -232,6 +316,24 @@ Es el mismo recorrido, ahora **sin fijación**.
 En cada posición, **mira y anota**: ¿hay nistagmo? ¿a qué lado **bate**? ¿es horizontal, vertical, torsional o mezclado? ¿es **débil o intenso**? ¿cambia de **intensidad** o de **sentido** al mirar a un lado? ¿**baja** con fijación? Al sacar la fijación, el nistagmo de una lesión periférica **aparece o aumenta**; con fijación, **baja o desaparece**.
 
 Mantén al paciente **despierto y atento**: con las lentes y poca luz, un paciente que se relaja puede apagar el nistagmo. Pídele que cuente, que haga restas o que imagine el objeto.
+
+#### Nistagmo tras sacudir la cabeza (*head-shaking*)
+
+Si en reposo no hay nistagmo pero se sospecha un desequilibrio, se puede intentar sacarlo a la luz moviendo la cabeza.
+
+1. Con el paciente sentado y las lentes o la VNG puestas (sin fijación), **inclina su cabeza unos 30° hacia delante**: así los conductos horizontales quedan en el plano del movimiento.
+2. **Sacúdela horizontalmente con vigor**, de lado a lado, a unos **2 Hz** y durante unos **20 ciclos** (Eggers y cols., 2019).
+3. **Detén el movimiento de golpe** y mira los ojos. Si en lugar de ir y volver mueves la cabeza en círculos, provocas otro nistagmo (posrotatorio) y la prueba no sirve (Eggers y cols., 2019).
+
+**Por qué funciona.** Un mecanismo central de **almacenamiento de velocidad** perpetúa las señales vestibulares; sumado a que el conducto horizontal responde más a la excitación que a la inhibición (segunda ley de Ewald), la sacudida deja un residuo que un reposo asimétrico no basta para mostrar (Hain y cols., 1987; Katsarkas, 2000).
+
+**Qué se ve.**
+
+- En una lesión periférica con un lado inhibido, el nistagmo bate hacia el **oído mejor**, y a veces le sigue una fase más débil y más lenta, hacia el lado hipofuncionante (Hain y cols., 1987; Eggers y cols., 2019).
+- Si sacudes la cabeza **en vertical**, un conducto posterior puede producir un nistagmo con componente horizontal hacia el oído paralizado (Eggers y cols., 2019).
+- También puede salir en lesiones **centrales**: el nistagmo bate hacia el lado de la lesión, cambia de sentido pronto o aparece en otro plano (vertical tras una sacudida horizontal, el llamado nistagmo cruzado o perverso) (Eggers y cols., 2019). En 72 pacientes con un infarto cerebeloso aislado, el 51 % tuvo nistagmo tras la sacudida y, en el 62 % de ellos, fue perverso, casi siempre hacia abajo (Huh y Kim, 2011).
+
+**Para qué sirve y qué no.** Muestra una asimetría que el nistagmo espontáneo ya no deja ver, por ejemplo cuando el paciente se compensó. No dice por sí solo si la causa es periférica o central, ni reemplaza a la calórica ni al impulso cefálico (→ H16, H17); se lee con ellos.
 
 
 ### 6. Nistagmo espontáneo con VNG
@@ -327,7 +429,7 @@ El protocolo se queda en lo que se ve sentado y con la cabeza quieta. El examen 
 
 - **El impulso cefálico** (→ H17), que mide el reflejo directamente.
 - **El nistagmo evocado por la mirada** y la **prueba de oclusión alternada** de los ojos para ver una desviación vertical (*skew*). La desviación oblicua es un signo de lesión del tronco o del utrículo, y la reacción de inclinación ocular completa se ve también en lesiones periféricas (Halmagyi y cols., 1979; Brandt y Dieterich, 1994).
-- **El nistagmo tras sacudir la cabeza** (*head-shaking*), útil para sacar a la luz un desequilibrio que ya se compensó (Hain y cols., 1987).
+- **El nistagmo tras sacudir la cabeza** (*head-shaking*), útil para sacar a la luz un desequilibrio que ya se compensó (Hain y cols., 1987). Técnica y lectura en el paso 5.
 - **HINTS**: el impulso cefálico, el nistagmo de mirada y el *skew* juntos. Entre los pacientes con vértigo agudo continuo y un factor de riesgo vascular, un impulso normal, un nistagmo que cambia de sentido o un *skew* fue 100 % sensible para ataque cerebrovascular y 96 % específico (Kattah y cols., 2009). Esa serie era de 101 pacientes y la hizo un grupo experto: no se traslada sin más a cualquier examinador.
 - **La videooculografía** cuantificada puede aportar al HINTS (Newman-Toker y cols., 2013).
 
@@ -395,3 +497,19 @@ Un vértigo continuo con un nistagmo que **parece periférico** no es siempre un
 1. Baloh RW, Honrubia V, Kerber KA. Baloh and Honrubia's clinical neurophysiology of the vestibular system. 4.ª ed. Nueva York: Oxford University Press; 2011. ISBN 978-0-19-978083-9.
 1. Baloh RW, Honrubia V, Konrad HR. Ewald's second law re-evaluated. Acta Otolaryngol. 1977;83(5-6):475-9. doi:10.3109/00016487709128874
 1. Moschner C, Baloh RW. Age-related changes in visual tracking. J Gerontol. 1994;49(5):M235-8. doi:10.1093/geronj/49.5.m235
+1. Ichijo H. Asymmetry of positioning nystagmus in posterior canalolithiasis. Acta Otolaryngol. 2013;133(2):159-64. doi:10.3109/00016489.2012.728293
+1. Paquet N, Taillon-Hobson A, Lajoie Y. Fukuda and Babinski-Weil tests: within-subject variability and test-retest reliability in nondisabled adults. J Rehabil Res Dev. 2014;51(6):1013-22. doi:10.1682/JRRD.2013.09.0206
+1. Miranda CS, Stefani CP, Morimoto MM, Piemonte ME, Pereira CB. Assessment of gait deviation on the Babinski-Weill test in healthy Brazilians. Arq Neuropsiquiatr. 2013;71(9A):615-20. doi:10.1590/0004-282X20130106
+1. Oliva M, Martín García MA, Bartual J, Vázquez M, Ariza A, García Teno M. Star-gait measured by craniocorpography: patterns, classification, physiopathological considerations and clinical utility [en español]. Acta Otorrinolaringol Esp. 1998;49(5):357-62. PMID 9717323 (sin DOI)
+1. Lomas-Vega R, Rodríguez-Almagro D, et al. Joint assessment of equilibrium and neuromotor function: a validation study in patients with dizziness. Diagnostics (Basel). 2020;10(12):1057. doi:10.3390/diagnostics10121057
+1. Manto M. Mechanisms of human cerebellar dysmetria: experimental evidence and current conceptual bases. J Neuroeng Rehabil. 2009;6:10. doi:10.1186/1743-0003-6-10
+1. Manto M. The underpinnings of cerebellar ataxias. Clin Neurophysiol Pract. 2022;7:372-87. doi:10.1016/j.cnp.2022.11.002
+1. Bodranghien F, Bastian A, Casali C, Hallett M, Louis ED, Manto M, et al. Consensus paper: revisiting the symptoms and signs of cerebellar syndrome. Cerebellum. 2016;15(3):369-91. doi:10.1007/s12311-015-0687-3
+1. Roe SM. Paton Prize Lecture winner 2024: Gordon Holmes and the Irish spirit of adventure. Exp Physiol. 2025;110(4):511-20. doi:10.1113/ep092192
+1. Katsarkas A, Smith H, Galiana H. Head-shaking nystagmus (HSN): the theoretical explanation and the experimental proof. Acta Otolaryngol. 2000;120(2):177-81. doi:10.1080/000164800750000865
+1. Huh YE, Kim JS. Patterns of spontaneous and head-shaking nystagmus in cerebellar infarction: imaging correlations. Brain. 2011;134(12):3662-71. doi:10.1093/brain/awr269
+1. Blakley BW, Chan L. Methods considerations for nystagmography. J Otolaryngol Head Neck Surg. 2015;44:25. doi:10.1186/s40463-015-0078-2
+1. Robinson DA. A method of measuring eye movement using a scleral search coil in a magnetic field. IEEE Trans Biomed Eng. 1963;10(4):137-45. doi:10.1109/tbmel.1963.4322822
+1. Houben MMJ, Goumans J, van der Steen J. Recording three-dimensional eye movements: scleral search coils versus video oculography. Invest Ophthalmol Vis Sci. 2006;47(1):179-87. doi:10.1167/iovs.05-0234
+1. McCall AA, Miller DM, Yates BJ. Descending influences on vestibulospinal and vestibulosympathetic reflexes. Front Neurol. 2017;8:112. doi:10.3389/fneur.2017.00112
+1. Jang SH, Kwon JW, Yeo SS. Three dimensional identification of medial and lateral vestibulospinal tract in the human brain: a diffusion tensor tractography study. Front Hum Neurosci. 2018;12:229. doi:10.3389/fnhum.2018.00229

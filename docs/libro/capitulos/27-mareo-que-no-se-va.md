@@ -33,12 +33,15 @@ Cada uno mira algo distinto. Ninguno diagnostica; juntos arman el perfil.
 | Instrumento | Qué mide | Cómo se contesta |
 |---|---|---|
 | **DHI** (→ H19) (Jacobson y Newman, 1990) | Cuánto limita el mareo la vida diaria, con subescalas funcional, emocional y física | 25 ítems (sí, a veces, no); 0 a 100 |
-| **VSS** (escala de síntomas de vértigo) (Yardley y cols., 1992) | Con qué frecuencia hubo síntomas de vértigo-equilibrio y síntomas autonómicos y de ansiedad en el último año | Ítems de frecuencia; dos subescalas |
+| **VSS** (escala de síntomas de vértigo) (Yardley y cols., 1992) | Con qué frecuencia y con qué intensidad hubo síntomas de vértigo-equilibrio y síntomas autonómicos y de ansiedad en los últimos 12 meses | 36 ítems de frecuencia; dos subescalas (Wilhelmsen y cols., 2008) |
 | **VVAS** (escala análoga de vértigo visual) (Dannenbaum y cols., 2011) | Cuánto marean nueve situaciones visuales de la vida diaria: supermercado, multitud, pantallas, tráfico | Una escala análoga de 0 a 10 en cada situación |
 | **NPQ** (cuestionario de Niigata para el PPPD) (Yagi y cols., 2019) | La gravedad del PPPD en sus tres dominios: postura y marcha, movimiento y estímulos visuales | 12 ítems, cuatro por dominio, cada uno de 0 a 6; 0 a 24 por dominio |
 | **ABC** (confianza en el equilibrio) (Powell y Myers, 1995) | Cuán seguro se siente el paciente al hacer 16 actividades, de 0 a 100 % | 16 ítems; promedio en % |
 
-<!-- verificar: el período que pregunta la VSS ("el último año") y su número de ítems; los tramos del ABC; y el formato de cada instrumento en su versión en español. El resto se contrastó con los resúmenes originales en la pasada de fundamentos 2026-10-18. -->
+<!-- verificar: el formato de cada instrumento en su versión en español. VSS (36 ítems, 12 meses, dos subescalas) y tramos del ABC se cotejaron en la pasada de contenidos 2026-10-18 con Wilhelmsen 2008 (texto completo) y Myers 1998 (resumen). -->
+
+Cómo se puntúan y se leen la VSS y el ABC está en H19.
+
 
 La lectura útil no es el número solo, sino el **perfil**. Un DHI alto con mucho **emocional** y una VVAS alta, con la audición y el vestíbulo sanos, es el perfil de un mareo que se ha vuelto visual y de vigilancia. Un DHI moderado con una VVAS **baja** y un empeoramiento a oscuras apunta a otro sitio. El ABC dice qué ha dejado de hacer el paciente por miedo: una confianza baja con una función normal es justo la brecha que el tratamiento va a trabajar.
 
@@ -441,6 +444,7 @@ Etiquetar a un paciente de "funcional" sin haber mirado la audición y el vestí
 1. Dannenbaum E, Chilingaryan G, Fung J. Visual vertigo analogue scale: an assessment questionnaire for visual vertigo. J Vestib Res. 2011;21(3):153-9. doi:10.3233/VES-2011-0412
 1. Yagi C, Morita Y, Kitazawa M, Nonomura Y, Yamagishi T, Ohshima S, et al. A validated questionnaire to assess the severity of persistent postural-perceptual dizziness (PPPD): the Niigata PPPD Questionnaire (NPQ). Otol Neurotol. 2019;40(7):e747-52. doi:10.1097/MAO.0000000000002325
 1. Powell LE, Myers AM. The Activities-specific Balance Confidence (ABC) Scale. J Gerontol A Biol Sci Med Sci. 1995;50A(1):M28-34. doi:10.1093/gerona/50A.1.M28
+1. Wilhelmsen K, Strand LI, Nordahl SHG, Eide GE, Ljunggren AE. Psychometric properties of the Vertigo symptom scale - Short form. BMC Ear Nose Throat Disord. 2008;8:2. doi:10.1186/1472-6815-8-2
 1. Hall CD, Herdman SJ, Whitney SL, Anson ER, Carender WJ, Hoppes CW, et al. Vestibular rehabilitation for peripheral vestibular hypofunction: an updated clinical practice guideline from the Academy of Neurologic Physical Therapy of the American Physical Therapy Association. J Neurol Phys Ther. 2022;46(2):118-77. doi:10.1097/NPT.0000000000000382
 
 ### Fisiología

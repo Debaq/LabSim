@@ -227,6 +227,13 @@ Tabla: Del hallazgo a la maniobra
 | Nistagmo lateral **geotrópico** en el giro supino | canalitiasis del lateral | **Lempert (barbacoa)** o **Gufoni**, variante canalar |
 | Nistagmo lateral **apogeotrópico** | cupulolitiasis o partículas cerca de la ampolla | **Gufoni**, variante cupular |
 | Nistagmo hacia abajo y torsional hacia el lado afectado, colgando o Dix-Hallpike | canalitiasis del anterior | **Yacovino** |
+| Idem, si se sospecha que las partículas están pegadas a la cúpula | cupulolitiasis del anterior | **Ninguna con evidencia propia** (ver abajo) |
+
+**La liberación de la cupulolitiasis, canal por canal.**
+
+- **Posterior:** Semont, que hace de la propia maniobra un movimiento brusco que despega las partículas de la cúpula.
+- **Lateral apogeotrópico:** Gufoni, variante cupular.
+- **Anterior:** no hay una maniobra de liberación específica con evidencia. La única maniobra publicada para el canal anterior, la de Yacovino, se describió para la canalitiasis y en una serie de 13 pacientes (Yacovino y cols., 2009). Además, que las partículas se peguen de forma persistente a la cúpula sigue siendo una hipótesis: una revisión de 187 artículos concluyó que las masas de otoconias libres explican más del 98 % de los VPPB y que la adherencia duradera a la cúpula no está demostrada (Kalmanson y Foster, 2023). Un nistagmo del anterior que no cede con Yacovino es, antes que una cupulolitiasis, una razón para revisar el diagnóstico y descartar una causa central (→ "Canal anterior y nistagmo central").
 
 Cada una es un **protocolo cerrado**: mismo orden, misma dirección y mismos tiempos. Las que sirven al canal posterior no sirven al lateral, y la maniobra equivocada puede incluso mover las partículas a otro canal.
 
@@ -406,3 +413,4 @@ Si el nistagmo es **puro vertical hacia abajo, aparece sin latencia, no se cansa
 
 1. Büttner U, Helmchen C, Brandt T. Diagnostic criteria for central versus peripheral positioning nystagmus and vertigo: a review. Acta Otolaryngol. 1999;119(1):1-5. doi:10.1080/00016489950181855
 1. Macdonald NK, Kaski D, Saman Y, Al-Shaikh Sulaiman A, Anwer A, Bamiou DE. Central positional nystagmus: a systematic literature review. Front Neurol. 2017;8:141. doi:10.3389/fneur.2017.00141
+1. Kalmanson O, Foster CA. Cupulolithiasis: a critical reappraisal. OTO Open. 2023;7(1):e38. doi:10.1002/oto2.38

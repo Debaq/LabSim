@@ -237,6 +237,17 @@ En la práctica, lo que decide no es la ganancia sola sino **tres cosas juntas**
 
 Informa las sacadas de cada lado: si están, si son encubiertas, manifiestas o ambas, y si son pequeñas o grandes. Una ganancia baja con sacadas manifiestas grandes se lee como un déficit; una ganancia baja con solo sacadas encubiertas apunta a un déficit en que el paciente ya corrige mientras la cabeza gira; y en un sano no hay sacadas o son pequeñas; también pueden verse sacadas pequeñas hacia el lado **sano** de una pérdida unilateral, porque a ese giro le falta la desinhibición del oído dañado (Halmagyi y cols., 2017). → H19 sobre la compensación.
 
+### El PR score: qué tan ordenadas son las sacadas
+
+La ganancia y el tamaño de las sacadas no agotan lo que dice un impulso. También importa **cuándo** caen las sacadas, de un impulso a otro. El **PR score** (de Perez y Rey, sus autores) mide esa organización en el tiempo: se basa en la variabilidad de la latencia de las sacadas de refijación entre los impulsos de una misma serie (Guajardo-Vergara y Perez-Fernandez, 2020; Soriano-Reixach y cols., 2022).
+
+- Si el cerebro ya aprendió a corregir con un patrón fijo, las sacadas caen casi siempre en el mismo momento del impulso: están **agrupadas o sincronizadas** y el PR score es **bajo**.
+- Si cada impulso se corrige en un momento distinto, las sacadas están **dispersas** y el PR score es **alto** (Batuecas-Caletrio y cols., 2020).
+
+**Cómo se lee en la compensación.** En 28 personas con una pérdida vestibular unilateral aguda de origen periférico, el PR score distinguió a las que estaban compensadas de las que no, con diferencias que coincidieron con las de la silla rotatoria, el DHI y la situación clínica (Guajardo-Vergara y Perez-Fernandez, 2020). En 52 pacientes con hipofunción bilateral, el PR score fue la mejor variable para predecir **oscilopsia**, con independencia de la ganancia: los pacientes con sacadas poco sincronizadas la tenían con más frecuencia (Batuecas-Caletrio y cols., 2020). Es decir, dos pacientes con la misma ganancia pueden estar en etapas distintas de compensación, y las sacadas muestran la diferencia (→ H19 y cap. 31).
+
+**Qué falta.** Estos estudios son pequeños, de un solo grupo y en buena parte retrospectivos, y el cálculo depende del programa que lo entrega. El libro **no da valores normales ni puntos de corte**: los que proponen los autores salen de sus muestras y deben validarse en cada equipo antes de usarse para decidir. Se informa junto con la ganancia y las sacadas descritas, no en su lugar.
+
 ### Comparación con la calórica
 
 La calórica y el vHIT miran el mismo canal lateral de dos maneras muy distintas:
@@ -322,3 +333,6 @@ Dos cosas al revés de lo que parece. **Una ganancia normal no descarta un défi
 21. Baloh RW, Honrubia V, Konrad HR. Ewald's second law re-evaluated. Acta Otolaryngol. 1977;83(5-6):475-9. doi:10.3109/00016487709128874
 22. McGarvie LA, Curthoys IS, MacDougall HG, Halmagyi GM. What does the dissociation between the results of video head impulse versus caloric testing reveal about the vestibular dysfunction in Ménière's disease? Acta Otolaryngol. 2015;135(9):859-65. doi:10.3109/00016489.2015.1015606
 23. Strupp M, Bisdorff A, Furman J, Hornibrook J, Jahn K, Maire R, et al. Acute unilateral vestibulopathy/vestibular neuritis: diagnostic criteria. J Vestib Res. 2022;32(5):389-406. doi:10.3233/VES-220201
+1. Guajardo-Vergara C, Perez-Fernandez N. A new and faster method to assess vestibular compensation: a cross-sectional study. Laryngoscope. 2020;130(12):E911-7. doi:10.1002/lary.28505
+1. Soriano-Reixach MM, Rey-Martínez J, Altuna X, Perez-Fernandez N. Synchronized refixation saccades in enhanced VVOR test. A new application for PR score. J Vestib Res. 2022;32(5):443-51. doi:10.3233/VES-210127
+1. Batuecas-Caletrio A, Trinidad-Ruiz G, Rey-Martinez J, Matiño-Soler E, Martin Sanz E, Perez Fernandez N. Oscillopsia in bilateral vestibular hypofunction: not only gain but saccades too. Ear Hear. 2020;41(2):323-9. doi:10.1097/AUD.0000000000000760
