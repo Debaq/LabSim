@@ -420,6 +420,15 @@ Hipoacusia sensorioneural profunda del OD, de tipo coclear, tras un traumatismo 
 Un audiómetro con ósea enmascarada con 50 dB de ruido y una pérdida profunda unilateral: ¿qué le pasaría al paciente con un ruido de 80 dB sobre el oído sano? ¿Cuándo el ruido que enmascara deja de proteger y pasa a molestar?
 :::
 
+:::comentario Prevención
+- **Primaria:** la meningitis bacteriana puede dejar una sordera profunda con osificación del laberinto (Novak y cols., 1990); en una revisión, la mayoría de las secuelas descritas habría podido evitarse con las vacunas contra Hib, neumococo y meningococo (Edmond y cols., 2010).
+- **Secundaria:** el vértigo breve con la presión (al sonarse, al toser) en un oído con otorrea sugiere una fístula laberíntica y se deriva: en una serie de 44 pacientes, el 24 % de los oídos llegó sordo a la cirugía (Geerse y cols., 2017).
+- **Cuaternaria:** enmascarar la ósea antes de atribuir a la cóclea lo que es del oído medio evita informar un daño sensorioneural, y su pronóstico, que no existe.
+- **Para el paciente:** "Si un oído con secreción te produce mareo al sonarte o toser, consulta sin esperar."
+
+Tras una meningitis bacteriana, el riesgo mediano de al menos una secuela mayor fue de 12,8 % (Edmond y cols., 2010). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -468,3 +477,7 @@ Un audiómetro con ósea enmascarada con 50 dB de ruido y una pérdida profunda 
 1. Dahiya R, Keller JD, Litofsky NS, Bankey PE, Bonassar LJ, Megerian CA. Temporal bone fractures: otic capsule sparing versus otic capsule violating clinical and radiographic considerations. J Trauma. 1999;47(6):1079-83. doi:10.1097/00005373-199912000-00014. PMID 10608536.
 1. Little SC, Kesser BW. Radiographic classification of temporal bone fractures: clinical predictability using a new system. Arch Otolaryngol Head Neck Surg. 2006;132(12):1300-4. doi:10.1001/archotol.132.12.1300. PMID 17178939.
 1. Poupore NS, Britt AF, Nguyen SA, White DR. Complications after pediatric temporal bone fractures by classification system: a systematic review and meta-analysis. Otolaryngol Head Neck Surg. 2024;170(4):1009-19. doi:10.1002/ohn.638. PMID 38168743.
+
+### Prevención
+
+1. Edmond K, Clark A, Korczak VS, Sanderson C, Griffiths UK, Rudan I. Global and regional risk of disabling sequelae from bacterial meningitis: a systematic review and meta-analysis. Lancet Infect Dis. 2010;10(5):317-328. doi:10.1016/S1473-3099(10)70048-7. PMID 20417414

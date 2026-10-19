@@ -389,6 +389,15 @@ Hipoacusia sensorioneural moderada del OI con VEMP del mismo lado caído y **ske
 En el infarto de la AICA, la pérdida auditiva y vestibular juntas puede ser **el primer signo**: en 4 de 12 pacientes, el vértigo o los síntomas auditivos aparecieron aislados entre un día y dos meses antes del infarto (Lee y cols., 2002).<!-- Pasada de fundamentos 2026-10-18: decía "el primer signo, días antes de que aparezcan los signos del tronco (Lee, 2012)". Lee y cols. (2002), resumen: "Four patients had vertigo and/or acute auditory symptoms such as hearing loss or tinnitus as an isolated manifestation from 1 day to 2 months before infarction". --> Por eso un paciente con "laberintitis" y factores de riesgo vascular no es un paciente tranquilo.
 :::
 
+:::comentario Prevención
+- **Secundaria:** el HINTS separa la neuritis del ictus: entre 240 infartos cerebelosos, el 10,4 % se presentó como neuritis (Lee y cols., 2006), y una resonancia temprana normal no cierra un signo central (Kattah y cols., 2009). Con un solo signo central se avisa al médico en el momento.
+- **Terciaria:** los ejercicios vestibulares mejoraron la compensación tras una neuritis (Strupp y cols., 1998).
+- **Cuaternaria:** para los corticoides en la neuritis la evidencia es insuficiente (Fishman y cols., 2011); es decisión del médico.
+- **Para el paciente:** "Aunque el vértigo ceda en pocos días, el equilibrio se compensa en semanas: haz los ejercicios que te indiquen."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

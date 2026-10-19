@@ -363,6 +363,15 @@ Rescreening **REFIERE** con timpanograma plano y ABR aéreo elevado con ondas co
 Si se hubiera usado la sonda de 226 Hz, el timpanograma saldría "normal" y se habría descartado el oído medio. Con sonda de 1000 Hz, la curva plana es la señal.
 :::
 
+:::comentario Prevención
+- **Secundaria:** el tamizaje universal con la meta 1-3-6 y el seguimiento de quien pasa con indicadores de riesgo (JCIH, 2019); en el prematuro, lo que garantiza el GES 59 está en el párrafo sobre Chile de este capítulo.
+- **Terciaria:** los niños con pérdida identificada antes de los 6 meses tuvieron mejor lenguaje que los identificados después (Yoshinaga-Itano y cols., 1998).
+- **Cuaternaria:** un "refiere" no es un diagnóstico: el rescreening y la vía ósea evitan rotular de sordera un oído medio ocupado (64,5 % de los derivados por emisiones, Boone y cols., 2005), y el niño de UCI que refiere en el AABR va directo a diagnóstico, sin repetir con emisiones (JCIH, 2019).
+- **Para el paciente:** "Que tu bebé 'refiera' no quiere decir que sea sordo, pero hay que volver al control en la fecha que te den."
+
+En la serie multicéntrica con AABR, la hipoacusia sensorioneural se confirmó en 2,7 de cada mil recién nacidos (Stewart y cols., 2000). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -408,3 +417,7 @@ Si se hubiera usado la sonda de 226 Hz, el timpanograma saldría "normal" y se h
 1. Superintendencia de Salud de Chile. Problema de salud 59: hipoacusia neurosensorial bilateral del prematuro (GES) [Internet]. Santiago: Superintendencia de Salud; s. f. [consultado 18 oct 2026]. Disponible en: https://www.superdesalud.gob.cl/orientacion-en-salud/hipoacusia-neurosensorial-bilateral-del-prematuro-a/
 1. Boone RT, Bower CM, Martin PF. Failed newborn hearing screens as presentation for otitis media with effusion in the newborn population. Int J Pediatr Otorhinolaryngol. 2005;69(3):393-7. doi:10.1016/j.ijporl.2004.11.006
 1. Cohen BE, Durstenfeld A, Roehm PC. Viral causes of hearing loss: a review for hearing health professionals. Trends Hear. 2014;18:2331216514541361. doi:10.1177/2331216514541361
+
+### Prevención
+
+1. Yoshinaga-Itano C, Sedey AL, Coulter DK, Mehl AL. Language of early- and later-identified children with hearing loss. Pediatrics. 1998;102(5):1161-1171. doi:10.1542/peds.102.5.1161. PMID 9794949

@@ -393,6 +393,16 @@ Audición periférica normal con alteración de la conducción central bilateral
 ¿Qué le dirías a la mamá, que llegó pensando que su hijo "no oye"? ¿Cómo distingues lo que sabes del audiograma, de lo que sospechas del ABR?
 :::
 
+:::comentario Prevención
+- **Primaria:** la hiperbilirrubinemia grave del recién nacido es una de las causas de neuropatía auditiva (Shapiro y Popelka, 2011); su manejo oportuno sigue la guía clínica vigente de pediatría (Kemper y cols., 2022) y lo decide neonatología. <!-- verificar: la guía AAP 2022 no tiene resumen en PubMed ni se pudo abrir el texto; se cita por su título como marco de manejo, sin afirmar efecto sobre la audición. -->
+- **Secundaria:** en el recién nacido de más de cinco días en UCI el tamiz que la detecta es el AABR, no las emisiones, y quien tiene indicadores de riesgo se sigue aunque pase (JCIH, 2019; → cap. 16).
+- **Terciaria:** audífonos, implante coclear y comunicación visual, según el sitio de la lesión y por decisión de un equipo (Rance y Starr, 2015).
+- **Cuaternaria:** no fijar la audición ni la amplificación con el umbral del ABR, que en la neuropatía no estima el umbral tonal, ni llamar "sordo" a un ABR plano con emisiones presentes.
+- **Para el paciente:** "Oír un sonido y entender una palabra son cosas distintas; si tu hijo oye pero no entiende, pide que lo estudien con pruebas que no dependan de su respuesta."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -445,3 +455,7 @@ Audición periférica normal con alteración de la conducción central bilateral
 1. Pillion JP, Kharkar S, Mahmood A, Moser H, Shimizu H. Auditory brainstem response findings and peripheral auditory sensitivity in adrenoleukodystrophy. J Neurol Sci. 2006;247(2):130-137. doi:10.1016/j.jns.2006.04.001
 1. Das S, van Landeghem FKH. Clinicopathological spectrum of bilirubin encephalopathy/kernicterus. Diagnostics (Basel). 2019;9(1):24. doi:10.3390/diagnostics9010024
 1. Rance G, Corben LA, Du Bourg E, King A, Delatycki MB. Successful treatment of auditory perceptual disorder in individuals with Friedreich ataxia. Neuroscience. 2010;171(2):552-555. doi:10.1016/j.neuroscience.2010.09.013
+
+### Prevención
+
+1. Kemper AR, Newman TB, Slaughter JL, Maisels MJ, Watchko JF, Downs SM, et al. Clinical practice guideline revision: management of hyperbilirubinemia in the newborn infant 35 or more weeks of gestation. Pediatrics. 2022;150(3):e2022058859. doi:10.1542/peds.2022-058859. PMID 35927462

@@ -406,6 +406,14 @@ ABR del oído izquierdo con umbral de la onda V cerca de 30 a 35 dB nHL con la c
 El oído estaba bien: lo que estaba mal era el equipo. Por eso H10 insiste en que el equipo del simulador **no viene configurado**, y en que la norma que uses tiene que estar medida con los mismos filtros, polaridad, tasa y transductor.
 :::
 
+:::comentario Prevención
+- **Cuaternaria:** seguir promediando hasta tener ruido residual bajo antes de informar "sin respuesta", y exigir que la onda migre con el nivel, evita inventar una pérdida o un retrococlear que no existen (→ H10).
+- **Para el paciente:** "Quédate quieto, con los ojos cerrados y sin tensar el cuello ni la mandíbula: la tensión del músculo ensucia el registro."
+<!-- Recuadro sin citas nuevas: reutiliza lo que el capítulo ya trae (ruido residual, migración de la V, respuesta postauricular que cambia con la tensión del paciente). -->
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

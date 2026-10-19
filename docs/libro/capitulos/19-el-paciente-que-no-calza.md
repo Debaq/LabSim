@@ -433,6 +433,14 @@ Cófosis derecha, sensorioneural, probablemente posviral (paperas a los 6 años)
 Este caso importa por lo que **no** pasa: que una pérdida unilateral total no sea sospechosa por sí sola, y que lo que la hace creíble sea la coherencia entre todas las pruebas.
 :::
 
+:::comentario Prevención
+- **Secundaria:** en el niño conviene buscar el motivo: la pérdida no orgánica de niños y jóvenes se ha visto como reacción al estrés y, en algunos, como señal de un problema de fondo (Brooks y Geoghegan, 1992).
+- **Cuaternaria:** confirmar con pruebas objetivas que el oído está sano y dar un seguimiento de apoyo, sin confrontar, normalizó los umbrales de casi todos los niños sin derivación psiquiátrica (Bowdler y Rogers, 1989; Pracy y cols., 1996; Saravanappa y cols., 2005); el informe describe lo medido, no la intención.
+- **Para el paciente:** "Las pruebas que no dependen de tu respuesta muestran que tu oído está sano; no se te acusa de nada, y si algo te preocupa, cuéntalo."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

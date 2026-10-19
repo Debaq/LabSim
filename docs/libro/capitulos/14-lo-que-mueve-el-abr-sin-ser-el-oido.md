@@ -387,6 +387,14 @@ Informe:
 En el prematuro, "normal" cambia cada semana: la fila contra la que se compara a las 36 semanas corregidas no es la de las 40, y esa es otra de las razones para anotar siempre las semanas de gestación al nacer.
 :::
 
+:::comentario Prevención
+- **Secundaria:** ante una pérdida coclear bilateral y simétrica, el hipotiroidismo es una causa tratable: con levotiroxina los umbrales mejoraron, aunque el ABR no (Anand y cols., 1989); el estudio de sangre y el tratamiento son del médico.
+- **Cuaternaria:** anotar la edad corregida, la temperatura y los fármacos antes de leer los interpicos evita informar como lesión del tronco una hipotermia o la maduración de un prematuro (Markand y cols., 1987; Stipdonk y cols., 2016).
+- **Para el paciente:** "Antes del examen cuéntanos qué fármacos tomas, qué enfermedades tienes y si estuviste con fiebre alta o muy abrigado o enfriado: cambian el resultado."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

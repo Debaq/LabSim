@@ -331,6 +331,15 @@ Nistagmo posicional central con signos cerebelosos y cefalea reciente en una per
 Es el caso que justifica el capítulo. El VPPB es la causa más frecuente de vértigo posicional, y eso hace peligroso acostumbrarse: pasados los años, el examinador deja de ver lo que no calza.
 :::
 
+:::comentario Prevención
+- **Secundaria:** solo 8 % de los afectados por VPPB había recibido un tratamiento eficaz (von Brevern y cols., 2007): pregunta por el vértigo al acostarse o darse vuelta y deriva.
+- **Terciaria:** tras una maniobra exitosa, en un ensayo con 1.050 pacientes, suplementar vitamina D y calcio a quienes tenían 25-OH-vitamina D bajo 20 ng/mL redujo las recurrencias anuales (0,83 frente a 1,10 por persona-año); la evidencia fue de clase III y la indicación es médica (Jeong y cols., 2020).
+- **Cuaternaria:** quien cumple los criterios de VPPB y no tiene otros signos no necesita imágenes ni pruebas vestibulares, ni supresores vestibulares de rutina (Bhattacharyya y cols., 2017).
+- **Para el paciente:** "El vértigo al acostarte o darte vuelta suele tener tratamiento con una maniobra: consulta, no lo aguantes."
+
+La prevalencia a lo largo de la vida fue de 2,4 % y la incidencia anual de 0,6 % (von Brevern y cols., 2007). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -373,3 +382,7 @@ Es el caso que justifica el capítulo. El VPPB es la causa más frecuente de vé
 1. von Brevern M, Radtke A, Lezius F, Feldmann M, Ziese T, Lempert T, et al. Epidemiology of benign paroxysmal positional vertigo: a population based study. J Neurol Neurosurg Psychiatry. 2007;78(7):710-5. doi:10.1136/jnnp.2006.100420
 1. Büttner U, Helmchen C, Brandt T. Diagnostic criteria for central versus peripheral positioning nystagmus and vertigo: a review. Acta Otolaryngol. 1999;119(1):1-5. doi:10.1080/00016489950181855
 1. Macdonald NK, Kaski D, Saman Y, Al-Shaikh Sulaiman A, Anwer A, Bamiou DE. Central positional nystagmus: a systematic literature review. Front Neurol. 2017;8:141. doi:10.3389/fneur.2017.00141
+
+### Prevención
+
+1. Jeong SH, Kim JS, Kim HJ, Choi JY, Koo JW, Choi KD, et al. Prevention of benign paroxysmal positional vertigo with vitamin D supplementation: a randomized trial. Neurology. 2020;95(9):e1117-e1125. doi:10.1212/WNL.0000000000010343. PMID 32759193

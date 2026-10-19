@@ -450,6 +450,14 @@ Hipoacusia sensorioneural del OI de graves, etapa 2, con hallazgos de hidrops (E
 En una serie de un servicio de mareo, casi la mitad de los pacientes con Ménière sin migraña vestibular tenía rasgos de migraña, y cerca de un cuarto de los diagnosticados con Ménière o con migraña vestibular tenía las dos enfermedades (Neff y cols., 2012). <!-- Pasada de fundamentos 2026-10-18: decía "La coincidencia de las dos enfermedades es la regla más que la excepción"; la fuente da 21 de 76 con Ménière y 21 de 92 con migraña vestibular con ambas, frecuente pero no la regla. -->
 :::
 
+:::comentario Prevención
+- **Secundaria:** la audiometría seriada sigue la evolución, y el oído "bueno" también se vigila: la proporción con los dos oídos comprometidos llega a 35 % a los 10 años (Huppert y cols., 2010).
+- **Cuaternaria:** una pérdida que avanza hasta moderada, o de un solo oído, no se atribuye a la migraña vestibular sin seguir buscando (Radtke y cols., 2012).
+- **Para el paciente:** "Anota la fecha, la duración de cada crisis y si hubo dolor de cabeza o molestia por la luz y el ruido: ayuda a distinguir un Ménière de una migraña vestibular."
+
+La prevalencia a 12 meses de la migraña vestibular fue de 0,89 % (Neuhauser y cols., 2006). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

@@ -414,6 +414,16 @@ Patrón de neuropatía auditiva en un lactante con encefalopatía hipóxico-isqu
 La gentamicina es el distractor. Una cóclea dañada por ototóxicos habría perdido las emisiones; aquí están, y eso aleja el diagnóstico de una pérdida coclear.
 :::
 
+:::comentario Prevención
+- **Primaria:** la rubéola congénita deja hipoacusia y también cataratas y cardiopatía (Cohen y cols., 2014); una dosis de la vacuna da más de 95 % de inmunidad duradera (OMS, 2026).
+- **Secundaria:** un bebé con CMV puede pasar el tamizaje y perder la audición después: evaluación a más tardar a los 3 meses y luego cada 12 meses hasta los 3 años (JCIH, 2019).
+- **Terciaria:** en el CMV congénito sintomático, 6 meses de valganciclovir frente a 6 semanas dejó la audición mejor o normal a los 12 meses en 73 % frente a 57 % de los niños (Kimberlin y cols., 2015); la indicación es del médico.
+- **Cuaternaria:** descartar el oído medio antes de hablar de hipoacusia (Boone y cols., 2005).
+- **Para el paciente:** "Aunque tu hijo haya pasado el tamizaje, si tuvo CMV necesita controles de audición hasta los 3 años."
+
+La prevalencia al nacer de la infección congénita por CMV fue de 0,64 % y cerca del 11 % fue sintomática (Kenneson y Cannon, 2007). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
@@ -469,3 +479,9 @@ La gentamicina es el distractor. Una cóclea dañada por ototóxicos habría per
 1. Jiang ZD, Brosi DM, Wang J, Xu X, Chen GQ, Shao XM, Wilkinson AR. Time course of brainstem pathophysiology during first month in term infants after perinatal asphyxia, revealed by MLS BAER latencies and intervals. Pediatr Res. 2003;54(5):680-687. doi:10.1203/01.PDR.0000084084.62571.12
 1. Serrao F, Frezza S, Conti G, Fattore S, Corsello M, Lio A, et al. Hypoxic Ischemic Encephalopathy: Hearing Impairment and Related Risk Factors. J Clin Med. 2026;15(9):3180. doi:10.3390/jcm15093180
 1. Boone RT, Bower CM, Martin PF. Failed newborn hearing screens as presentation for otitis media with effusion in the newborn population. Int J Pediatr Otorhinolaryngol. 2005;69(3):393-7. doi:10.1016/j.ijporl.2004.11.006
+
+### Prevención
+
+1. Kenneson A, Cannon MJ. Review and meta-analysis of the epidemiology of congenital cytomegalovirus (CMV) infection. Rev Med Virol. 2007;17(4):253-276. doi:10.1002/rmv.535. PMID 17579921
+1. Kimberlin DW, Jester PM, Sánchez PJ, Ahmed A, Arav-Boger R, Michaels MG, et al. Valganciclovir for symptomatic congenital cytomegalovirus disease. N Engl J Med. 2015;372(10):933-943. doi:10.1056/NEJMoa1404599. PMID 25738669
+1. Organización Mundial de la Salud. Rubella [Internet]. Ginebra: OMS; actualizado 15 jul 2026 [consultado 19 oct 2026]. Disponible en: https://www.who.int/news-room/fact-sheets/detail/rubella

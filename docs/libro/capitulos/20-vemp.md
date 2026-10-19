@@ -366,6 +366,14 @@ Hipoacusia **conductiva bilateral** de otoesclerosis (gap simétrico, curva As, 
 La paciente dijo que oye mejor con ruido de fondo y la inestabilidad es de segundos. ¿Qué ganó con el VEMP óseo? ¿Y si el VEMP óseo también hubiera salido ausente, qué habrías pensado?
 :::
 
+:::comentario Prevención
+- **Secundaria:** una pérdida audiovestibular aguda con factores de riesgo vascular puede ser el aviso de un infarto de la AICA antes de que se extienda (Lee, 2012): se informa y se avisa al médico en el momento. Un VEMP ausente con audición casi normal puede ser un schwannoma; lo decide la imagen que pide el médico (Murofushi y cols., 1998).
+- **Cuaternaria:** no leer un cVEMP aéreo caído en un oído con gap como hipofunción sacular: se repite por vía ósea (Yang y Young, 2007).
+- **Para el paciente:** "Si el mareo intenso viene con una pérdida de oído de aparición brusca, consulta de inmediato."
+
+Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

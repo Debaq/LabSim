@@ -415,6 +415,16 @@ Presbiacusia bilateral leve, **e** hipofunción vestibular bilateral con signos 
 Lo que se aprende de Jorge es hasta dónde llega el estudio del oído. Que el audiograma sea el de la edad y los reflejos sean bajos no es una contradicción: son dos problemas, y el segundo es de quien estudia el sistema nervioso.
 :::
 
+:::comentario Prevención
+- **Primaria:** con la gentamicina no hay dosis segura, los niveles en sangre no predicen el daño, suspenderla al aparecer los síntomas podría reducir el daño permanente y, cuando se puede, se usa otro antibiótico (Black y cols., 2004; el monitoreo auditivo → cap. 8).
+- **Secundaria:** el daño no se reconoció antes del alta en 32 de 33 pacientes (Black y cols., 2004): se pregunta por inestabilidad y oscilopsia 1 a 3 semanas después de empezar, aunque el audiograma sea normal.
+- **Terciaria:** la rehabilitación vestibular tiene evidencia moderada en la estabilidad de la mirada y la postura (Porciuncula y cols., 2012); quienes tienen la pérdida bilateral tienen 31 veces más probabilidades de haberse caído (Ward y cols., 2013), y ese es el riesgo que se busca limitar.
+- **Cuaternaria:** evitar los fármacos que suprimen el sistema vestibular (Hain y cols., 2013).
+- **Para el paciente:** "Si te trataron con gentamicina y después el mundo 'salta' al caminar o te desequilibras a oscuras, avisa, aunque oigas bien."
+
+La prevalencia estimada por síntomas fue de 28 por 100.000 adultos, a partir de una encuesta (Ward y cols., 2013). Niveles de prevención y su marco: → B5.
+:::
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir
