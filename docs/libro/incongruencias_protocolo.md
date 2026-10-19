@@ -212,6 +212,12 @@ AudioPAC (procesamiento central), con las normas en sus recuadros.
 | 175 | H27 | "El tamaño de la pápula no indica gravedad" (clase) | — | cierto para la gravedad clínica, pero una pápula mayor hace más probable que la sensibilización sea relevante | Bousquet 2012; Heinzerling 2013 | A (clase) | |
 | 176 | 36 | Rendimiento del prick frente a la provocación nasal | el cap. 36 atribuía 85 % / 77 % a Heinzerling 2013 | son de Nevis 2016 (7 estudios, 430 pacientes; no 609) | Nevis 2016 | A | |
 | 177 | 36 | "El prick no está en el flujo del libro y no lo hace quien mide la nariz" | — | quitado al escribir H27; el capítulo remite a H27 sin decir quién lo ejecuta | — | A | |
+| 178 | H28 | Meseta de fin de prueba (clase) | sin protocolo; la clase dice "< 0,025 ml durante ≥ 1 s" | 0,025 **L** (25 mL) en el último segundo | Graham 2019 | E (clase) | |
+| 179 | H28 | Repetibilidad (clase) | ≤ 150 mL "o 5 %" | ≤ 150 mL entre las dos mejores FVC y FEV1 (mayores de 6 años), sin el 5 % | Graham 2019 | A (clase) | |
+| 180 | H28 | Contraindicaciones "absolutas" (clase) | lista de absolutas y relativas | ATS/ERS 2019 solo da contraindicaciones relativas, que decide el médico; su lista incluye cirugía o infección de senos y oído medio en la última semana | Graham 2019 | A (clase) | |
+| 181 | H28 | Criterio de obstrucción y de normalidad (clase) | FEV1/FVC < 0,70 y 80 % del previsto | LLN y z-score (GLI); el 0,70 fijo de GOLD va en el recuadro de normas | Stanojevic 2022; Quanjer 2012 | P (clase) | |
+| 182 | H28 | Respuesta al broncodilatador (clase) | ≥ 12 % y 200 mL | ERS/ATS 2022: > 10 % del previsto; GINA mantiene 12 % y 200 mL: las dos, en el recuadro | Stanojevic 2022; GINA 2024 | P (clase) | |
+| 183 | H28 | Unidad del PEF (clase) | en litros | es un flujo: L/s (o L/min) | Graham 2019 | E (clase) | |
 
 ## Capítulos clínicos de ABR
 

@@ -90,7 +90,7 @@ Tabla: Cuándo no se hace, o no se hace así
 | Dermatitis o eccema activo en el lugar de la prueba | La piel enferma no sirve para leer (Bernstein y cols., 2008; Powrie, 2015) | Otra zona sana (la espalda) o IgE específica en sangre |
 | Dermografismo marcado | No se pueden separar las pápulas (Heinzerling y cols., 2013) | IgE específica en sangre |
 | Reacción sistémica reciente | Riesgo mayor; se aconseja esperar 4 a 6 semanas, sobre todo tras picaduras de himenópteros (Heinzerling y cols., 2013) | Diferir; decide el médico |
-| Asma no controlada o con flujo espiratorio máximo menor de 70 % | Una reacción sistémica sería más grave (Heinzerling y cols., 2013) | Diferir hasta controlar |
+| Asma no controlada o con flujo espiratorio máximo menor de 70 % (→ H28) | Una reacción sistémica sería más grave (Heinzerling y cols., 2013) | Diferir hasta controlar |
 | Tratamiento con betabloqueadores (y, con menos fuerza, inhibidores de la ECA) | Responden peor a la adrenalina si hay una reacción grave (Heinzerling y cols., 2013; Bernstein y cols., 2008) | Precaución especial; decide el médico |
 | Embarazo | Una reacción sistémica puede causar contracciones uterinas; se hace solo si el resultado tendrá consecuencias terapéuticas importantes e inmediatas (Bernstein y cols., 2008) | Decide el médico |
 | Antecedente de alergia grave a alimentos o fármacos | Mayor riesgo de reacción sistémica | Pruebas con diluciones del extracto y acceso venoso listo, indicado por el médico <!-- verificar: no hay en los textos leídos una fuente directa para la titulación con extractos diluidos; confirmar en Bernstein 2008 (texto completo) o en Heinzerling 2013. --> |
