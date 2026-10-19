@@ -96,6 +96,8 @@ AUTORES = {
                   falta='área del magíster'),
     'vargas': dict(nombre='Cristina', apellidos='Vargas-Bustamante', areas='Audiología y electrofisiología',
                    titulo=['Tecnóloga Médica'], falta='afiliación y ORCID'),
+    'moreira': dict(nombre='Carlos', apellidos='Moreira', areas='Espirometría y sueño',
+                    titulo=['Tecnólogo Médico'], falta='segundo apellido, afiliación y ORCID'),
 }
 EDITOR = 'baier'
 REVISOR_CASOS = 'catipillan'   # firma la revisión de los casos de los capítulos clínicos
@@ -113,8 +115,10 @@ def _autoria():
         a[f'H{n}'] = ['poza']                            # vestibular
     for n in (21, 22):
         a[f'H{n}'] = ['casanova']                        # audífonos
-    for n in (24, 25, 26, 27, 28):
+    for n in (24, 25, 26, 27):
         a[f'H{n}'] = ['uribe']                           # nasal
+    for n in (28, 29, 30):
+        a[f'H{n}'] = ['uribe', 'moreira']                # espirometría y sueño (él, 2026-10-18)
     for n in (1, 2, 3, 4, 5, 7, 8, 10, 19):
         a[str(n)] = ['uribe', 'vargas']
     a['6'] = ['uribe', 'vargas', 'baier']                # ruido: también salud ocupacional
