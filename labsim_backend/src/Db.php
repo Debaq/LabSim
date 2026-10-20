@@ -745,7 +745,12 @@ final class Db
         // con una consulta a medio leer ("database table is locked"), y la
         // compartida siempre trae la del token (Auth::requireUser). Por eso
         // la migración de otoscopía dejó reports_old en producción.
-        $pdo = self::conexionAparte();
+        self::migrateReportsTipos(self::conexionAparte());
+    }
+
+    /** La migración de arriba sobre una conexión dada (la usan las pruebas). */
+    public static function migrateReportsTipos(PDO $pdo): void
+    {
         $stmt = $pdo->prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'reports'");
         $stmt->execute();
         $sql = (string) $stmt->fetchColumn();
@@ -762,15 +767,23 @@ final class Db
         if (strpos($sql, "'MMN'") !== false && $tieneVersion) {
             return;
         }
-        // Nombre propio para la copia: una migración vieja dejó una tabla
+        // Orden de la doc de SQLite ("Making Other Kinds Of Table Schema
+        // Changes"): tabla nueva, copia, DROP de la vieja y RENAME de la
+        // nueva, con las claves foráneas apagadas. Antes se renombraba
+        // reports a la copia: SQLite reescribe también el REFERENCES de
+        // report_versions para que apunte a la renombrada, y el DROP de
+        // esa fallaba con "FOREIGN KEY constraint failed" en cuanto había
+        // versiones guardadas (producción, 2026-10-20).
+        // Nombre propio para la nueva: una migración vieja dejó una tabla
         // reports_old en producción, y usar ese nombre fallaba siempre.
         // Esa tabla no se toca (puede tener datos).
-        $vieja = 'reports_migracion_' . date('YmdHis') . '_' . bin2hex(random_bytes(3));
+        $nueva = 'reports_migracion_' . date('YmdHis') . '_' . bin2hex(random_bytes(3));
+        // Fuera de la transacción: adentro, el PRAGMA no hace nada.
+        $pdo->exec('PRAGMA foreign_keys = OFF');
         $pdo->beginTransaction();
         try {
-            $pdo->exec("ALTER TABLE reports RENAME TO {$vieja}");
             $pdo->exec(
-                "CREATE TABLE reports (
+                "CREATE TABLE {$nueva} (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
                     tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'OTOSCOPIA')),
@@ -786,15 +799,30 @@ final class Db
             // dejaría cada informe apuntando a los archivos de otro.
             $version = $tieneVersion ? 'version' : '1';
             $pdo->exec(
-                "INSERT INTO reports (id, attendance_id, tipo, data, version, created_at, updated_at)
-                 SELECT id, attendance_id, tipo, data, {$version}, created_at, updated_at FROM {$vieja}"
+                "INSERT INTO {$nueva} (id, attendance_id, tipo, data, version, created_at, updated_at)
+                 SELECT id, attendance_id, tipo, data, {$version}, created_at, updated_at FROM reports"
             );
-            $pdo->exec("DROP TABLE {$vieja}");
+            $pdo->exec('DROP TABLE reports');
+            $pdo->exec("ALTER TABLE {$nueva} RENAME TO reports");
             $pdo->exec('CREATE INDEX IF NOT EXISTS idx_reports_attendance ON reports (attendance_id)');
+            // Con las claves apagadas nadie las revisó: se revisan antes del
+            // commit, y si algo quedó colgando no se confirma nada.
+            // Solo las dos tablas tocadas: la base entera tarda segundos con
+            // la escritura tomada.
+            $rotas = array_merge(
+                $pdo->query('PRAGMA foreign_key_check(reports)')->fetchAll(),
+                $pdo->query('PRAGMA foreign_key_check(report_versions)')->fetchAll()
+            );
+            if ($rotas) {
+                throw new RuntimeException('La migración de reports dejó claves foráneas rotas: '
+                    . json_encode(array_slice($rotas, 0, 5)));
+            }
             $pdo->commit();
         } catch (Throwable $e) {
             $pdo->rollBack();
             throw $e;
+        } finally {
+            $pdo->exec('PRAGMA foreign_keys = ON');
         }
     }
 
