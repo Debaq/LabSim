@@ -653,6 +653,11 @@ window.CASE_CONST = <?= json_encode([
     // Electrococleografía: el armado rápido escribe estos campos desde el
     // cuadro (ver generarEcochg en case/generator.js).
     'ecochgDefaults' => CaseBuilder::ECOCHG_DEFAULTS,
+    // Vía central del paciente y sus cuadros (ver generarCentral en
+    // case/generator.js).
+    'centralDefaults' => CaseBuilder::CENTRAL_DEFAULTS,
+    'centralLimits' => CaseBuilder::CENTRAL_LIMITS,
+    'centralEscenarios' => CaseProfile::CENTRAL_SCENARIOS,
     // Mismo JSON que carga VEMPGeneratorV1 en la app (fuera de public/: no
     // se puede pedir por HTTP, viaja serializado acá, igual que el banco de
     // nombres) -- lo usa la vista previa de la ficha VEMP.

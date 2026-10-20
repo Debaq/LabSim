@@ -101,6 +101,13 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if (in_array($tipo, ['PEALM', 'CAEP', 'P300', 'MMN'], true)) {
+            $y = self::corticalBody($pdf, $reportId, $data, $y, $contentW);
+            $y = self::technicalSection($pdf, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         // Imágenes: OD y OI lado a lado, Lat-Int abajo (todas opcionales).
         $imgW = ($contentW - 20) / 2;
         $imgH = $imgW * 0.6;
@@ -758,6 +765,162 @@ final class ReportPdfBuilder
         return $y;
     }
 
+    /**
+     * Cuerpo de los potenciales corticales y de latencia media (PEALM,
+     * CAEP, P300, MMN): imagen por oído y, por oído, una tabla con las
+     * marcas de la última captura medida. No interpreta nada (igual que
+     * ecochgBody): el docente evalúa contra lo que marcó el alumno.
+     *
+     * Las curvas se llaman 'R1.C3', 'R1.Cz', ... : la R/L es el oído (R =
+     * OD, L = OI), lo que va antes del punto es la captura y el canal es
+     * $curva['canal']. Cada curva trae $curva['Cortical'] = {lat, amp}.
+     */
+    private static function corticalBody(MiniPdf $pdf, int $reportId, array $data,
+                                         float $y, float $contentW): float
+    {
+        $imgW = ($contentW - 20) / 2;
+        $imgH = $imgW * 0.6;
+        $dibujo = false;
+        foreach ([['0', 'OD', self::MARGIN], ['1', 'OI', self::MARGIN + $imgW + 20]] as $lado) {
+            $path = ReportFile::imagePath($reportId, $lado[0]);
+            if (!is_file($path)) {
+                continue;
+            }
+            $pdf->text($lado[2], $y, $lado[1], 9, true);
+            $pdf->image($path, $lado[2], $y + 4, $imgW, $imgH);
+            $dibujo = true;
+        }
+        if ($dibujo) {
+            $y += $imgH + 24;
+        }
+
+        $curvas = is_array($data['curvas'] ?? null) ? $data['curvas'] : [];
+        // oído => [grupo => [[canal, latencias, amplitudes], ...]]; el orden
+        // de aparición manda (la última captura es la última del arreglo).
+        $porOido = ['OD' => [], 'OI' => []];
+        foreach ($curvas as $nombre => $curva) {
+            if (!is_array($curva) || !is_array($curva['Cortical'] ?? null)) {
+                continue;
+            }
+            $nombre = (string) $nombre;
+            $oido = strtoupper(substr($nombre, 0, 1)) === 'L' ? 'OI' : (strtoupper(substr($nombre, 0, 1)) === 'R' ? 'OD' : '');
+            if ($oido === '') {
+                continue;
+            }
+            $punto = strpos($nombre, '.');
+            $grupo = $punto === false ? $nombre : substr($nombre, 0, $punto);
+            $lat = is_array($curva['Cortical']['lat'] ?? null) ? $curva['Cortical']['lat'] : [];
+            $amp = is_array($curva['Cortical']['amp'] ?? null) ? $curva['Cortical']['amp'] : [];
+            $canal = (string) ($curva['canal'] ?? ($punto === false ? $nombre : substr($nombre, $punto + 1)));
+            $porOido[$oido][$grupo][] = [$canal, $lat, $amp];
+        }
+
+        $ordenMarcas = ['Na', 'Pa', 'Nb', 'Pb', 'P1', 'N1', 'P2', 'N2', 'P3', 'MMN'];
+        $ordenAmps = ['Na-Pa', 'N1-P2', 'P3', 'MMN'];
+        $fmtLat = function ($v) {
+            if (!is_numeric($v)) {
+                return '—';
+            }
+            return number_format((float) $v, (float) $v >= 100 ? 0 : 1, ',', '') . ' ms';
+        };
+        $fmtAmp = function ($v) {
+            return is_numeric($v) ? number_format((float) $v, 2, ',', '') . ' µV' : '—';
+        };
+
+        foreach ($porOido as $oido => $grupos) {
+            // Última captura que tenga alguna marca.
+            $canales = null;
+            foreach (array_reverse($grupos, true) as $cs) {
+                foreach ($cs as $c) {
+                    if (count($c[1]) > 0 || count($c[2]) > 0) {
+                        $canales = $cs;
+                        break 2;
+                    }
+                }
+            }
+            if ($canales === null) {
+                continue;
+            }
+            $filas = [];
+            foreach ($ordenMarcas as $m) {
+                $celdas = [];
+                $hay = false;
+                foreach ($canales as $c) {
+                    $hay = $hay || isset($c[1][$m]);
+                    $celdas[] = $fmtLat($c[1][$m] ?? null);
+                }
+                if ($hay) {
+                    $filas[] = [$m, $celdas];
+                }
+            }
+            foreach ($ordenAmps as $a) {
+                $celdas = [];
+                $hay = false;
+                foreach ($canales as $c) {
+                    $hay = $hay || isset($c[2][$a]);
+                    $celdas[] = $fmtAmp($c[2][$a] ?? null);
+                }
+                if ($hay) {
+                    $filas[] = [$a, $celdas];
+                }
+            }
+            if (count($filas) === 0) {
+                continue;
+            }
+            $y = self::ensureSpace($pdf, $y, 36 + 13 * (count($filas) + 1));
+            $pdf->text(self::MARGIN, $y, 'Medidas ' . $oido, 12, true);
+            $y += 18;
+            $colW = min(90.0, ($contentW - 70) / max(1, count($canales)));
+            $pdf->text(self::MARGIN, $y, 'Marca', 9, true);
+            foreach ($canales as $i => $c) {
+                $pdf->text(self::MARGIN + 70 + $i * $colW, $y, $c[0], 9, true);
+            }
+            $y += 13;
+            foreach ($filas as $fila) {
+                $y = self::ensureSpace($pdf, $y, 14);
+                $pdf->text(self::MARGIN, $y, $fila[0], 9);
+                foreach ($fila[1] as $i => $celda) {
+                    $pdf->text(self::MARGIN + 70 + $i * $colW, $y, $celda, 9);
+                }
+                $y += 13;
+            }
+            $y += 10;
+        }
+
+        // Efectos de lateralidad (solo PEALM): comparaciones entre
+        // electrodos/oídos, resueltas por el cliente.
+        $efectos = is_array($data['efectos'] ?? null) ? $data['efectos'] : [];
+        $lineas = [];
+        if (isset($efectos['electrodo']) && is_numeric($efectos['electrodo'])) {
+            $lineas[] = 'Efecto electrodo (C3/C4): ' . round((float) $efectos['electrodo'] * 100)
+                . '% menor en hemisferio ' . (string) ($efectos['hemisferio'] ?? 'N/D');
+        }
+        if (isset($efectos['oido']) && is_numeric($efectos['oido'])) {
+            $lineas[] = 'Efecto oído (OD/OI): ' . round((float) $efectos['oido'] * 100)
+                . '% menor en ' . (string) ($efectos['oido_menor'] ?? 'N/D');
+        }
+        foreach ($lineas as $l) {
+            $y = self::ensureSpace($pdf, $y, 16);
+            $pdf->text(self::MARGIN, $y, $l, 9);
+            $y += 14;
+        }
+
+        // Conteo de raros del paciente (solo P300), por oído.
+        $conteo = is_array($data['conteo'] ?? null) ? $data['conteo'] : [];
+        foreach (['OD', 'OI'] as $oido) {
+            $c = $conteo[$oido] ?? ($conteo[strtolower($oido)] ?? null);
+            if (!is_array($c) || !isset($c['dice'])) {
+                continue;
+            }
+            $y = self::ensureSpace($pdf, $y, 16);
+            $pdf->text(self::MARGIN, $y,
+                "Conteo del paciente ({$oido}): dice " . self::num($c['dice'])
+                . ' de ' . self::num($c['reales'] ?? null) . ' raros presentados', 9);
+            $y += 14;
+        }
+        return $y + 8;
+    }
+
     private static function tipoLabel(string $tipo): string
     {
         // Mapa y no match(): el hosting corre PHP 7.4 (ver el otro caso en
@@ -768,6 +931,10 @@ final class ReportPdfBuilder
             'EOA' => 'Emisiones Otoacústicas',
             'VEMP' => 'Potenciales Evocados Vestibulares Miogénicos',
             'ELECTROCOCLEO' => 'Electrococleografía',
+            'PEALM' => 'Potencial de latencia media (PEALM)',
+            'CAEP' => 'Potencial cortical (P1-N1-P2)',
+            'P300' => 'P300',
+            'MMN' => 'Negatividad de disparidad (MMN)',
             'OTOSCOPIA' => 'Otoscopia',
         ];
         return $etiquetas[$tipo] ?? $tipo;

@@ -206,6 +206,52 @@ final class CaseBuilder
     public const ECOCHG_TASA_MAX = 4.0;
     public const ECOCHG_RAR_COND_MAX_MS = 1.0;
 
+    /**
+     * Vía central del paciente: potenciales de latencia media (MLR) y
+     * tardía (CAEP, P300, MMN), ver src/abr/cortical.py en el cliente.
+     *
+     * Es del PACIENTE y no de un oído: lo que localiza el MLR es el
+     * hemisferio (efecto electrodo), y la P1, la P300 y la MMN son de la
+     * corteza. Sin este bloque el cliente no registra ninguna de las cuatro
+     * pruebas --`cortical.case_params` devuelve None-- igual que el ECochG
+     * sin el suyo. Los valores por defecto son una vía central sana en un
+     * paciente despierto.
+     *
+     * Espejo de cortical.CASE_DEFAULTS / CASE_LIMITS / CASE_OPTIONS.
+     */
+    public const CENTRAL_DEFAULTS = [
+        'estado' => 'despierto',
+        'tension_cervical' => 0.3,
+        'mlr_hemisferio' => 'ninguno',
+        'mlr_reduccion' => 0.0,
+        'mlr_pa_retardo_ms' => 0.0,
+        'mlr_oido' => 'ninguno',
+        'mlr_oido_reduccion' => 0.0,
+        'p1_retardo_ms' => 0.0,
+        'n1p2_reduccion' => 0.0,
+        'p300_retardo_ms' => 0.0,
+        'p300_reduccion' => 0.0,
+        'mmn_reduccion' => 0.0,
+        'conteo_error' => 0.0,
+    ];
+    public const CENTRAL_LIMITS = [
+        'tension_cervical' => [0.0, 1.0],
+        'mlr_reduccion' => [0.0, 1.0],
+        'mlr_pa_retardo_ms' => [0.0, 20.0],
+        'mlr_oido_reduccion' => [0.0, 1.0],
+        'p1_retardo_ms' => [0.0, 200.0],
+        'n1p2_reduccion' => [0.0, 1.0],
+        'p300_retardo_ms' => [0.0, 200.0],
+        'p300_reduccion' => [0.0, 1.0],
+        'mmn_reduccion' => [0.0, 1.0],
+        'conteo_error' => [0.0, 1.0],
+    ];
+    public const CENTRAL_OPTIONS = [
+        'estado' => ['despierto', 'somnoliento', 'dormido', 'sedado'],
+        'mlr_hemisferio' => ['ninguno', 'izquierdo', 'derecho', 'bilateral'],
+        'mlr_oido' => ['ninguno', 'OD', 'OI'],
+    ];
+
     // Entidades clínicas como punto de partida. Varias comparten patrón a
     // propósito -- el PEATC no las distingue entre sí, las separa la
     // imagen o la clínica --, y eso es justamente lo que el alumno tiene
@@ -1436,6 +1482,10 @@ final class CaseBuilder
             'ABR' => $form['abr'],
             'EOAS' => $form['eoas'],
             'VEMP' => $form['vemp'],
+            // Vía central (latencia media y tardía), del paciente y no de
+            // un oído. Un caso de create_a.py no lo trae: queda vacío y el
+            // cliente no registra esas pruebas (ver CENTRAL_DEFAULTS).
+            'Central' => $form['central'] ?? [],
             // Qué fichas del editor dio por revisadas el docente antes de
             // guardar, y quién (ver CaseReview). No lo lee ningún cliente:
             // es la trazabilidad de la revisión, y lo que evita que el
@@ -1788,6 +1838,14 @@ final class CaseBuilder
             foreach (self::ABR_NEURAL_DEFAULTS as $clave => $default) {
                 $v['abr'][$ladoForm]['neural'][$clave] = (string) ($neural[$clave] ?? $default);
             }
+        }
+
+        // Vía central: un caso sin el bloque no registra latencia media ni
+        // tardía, pero el FORMULARIO muestra una vía sana y guardar desde
+        // el editor la escribe (mismo criterio que el ECochG).
+        $central = is_array($data['Central'] ?? null) ? $data['Central'] : [];
+        foreach (self::CENTRAL_DEFAULTS as $clave => $default) {
+            $v['central'][$clave] = (string) ($central[$clave] ?? $default);
         }
 
         $eoas = $data['EOAS'] ?? [];

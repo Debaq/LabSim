@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 66).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 68).
 
 Revisado contra el código el 2026-09-24.
 
@@ -155,6 +155,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 50. Ficha PDF: tabla de umbrales por vía ósea (`umbral_por_estimulo_oseo`
       ya se calcula). § ABR: catálogo real de estímulos
 - [ ] 51. Ficha de estudio: mostrar el ECochG. § Electrococleografía: el motor
+- [ ] 67. Ficha de estudio y vista previa del editor para MLR/CAEP/P300/MMN
+      (hoy solo el bloque numérico en la ficha ABR). § Latencia media y tardía
+- [ ] 68. Estímulos de habla (/ba/, /da/) y complejo de cambio acústico (ACC)
+      para los tardíos: hoy solo click y burst. § Latencia media y tardía
 
 ### EOA
 - [ ] 52. Parámetros propios del TEOAE en la ficha (reproducibilidad,

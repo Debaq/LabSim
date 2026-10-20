@@ -6261,3 +6261,80 @@ trae copia de las tipografías, `casos_demo.json` y las capturas que usa
 motor usa este repositorio (`LABSIM`, por defecto `../LabSim`). Verificado:
 `libro.pdf` completo, 1428 páginas en los dos lados. Las decisiones del libro
 desde ahora van en `libro-orl` (`ESTADO.md` y su propio registro).
+
+## Latencia media y tardía: MLR, CAEP, P300 y MMN en el equipo del ABR (2026-10-20)
+
+Pedido para las clases 10 y 11 de Electrofisiología. Las cuatro pruebas estaban
+en el combo *Test* desde siempre, deshabilitadas; ahora tienen generador. Se
+integran como el ECochG: misma ventana, mismo equipo, generador propio
+(`src/abr/cortical.py` = morfología y medidas, sin Qt;
+`src/abr/Cortical_generator.py` = registro; `src/abr/CorticalTable.py` = tabla).
+
+**Decisiones (las tres primeras, del docente):**
+
+- **Las cuatro pruebas en la misma tanda**, no solo los exógenos.
+- **El MLR se registra en C3, Cz y C4 a la vez**: lo que localiza no es la
+  latencia sino la comparación entre hemisferios. Efecto electrodo (el
+  electrodo sobre la lesión pierde Na-Pa con cualquier oído) contra efecto oído
+  (un oído pierde en los tres). Los tardíos van en Fz, Cz y Pz (MMN máxima en
+  Fz, N1-P2 en Cz, P3b en Pz).
+- **Bloque `Central` a nivel paciente + cuadros propios.** No es por oído: el
+  caso 3 de la clase (presbiacusia con P300 prolongada) necesita combinar un
+  cuadro de oído con uno central. Los cuadros centrales viven en
+  `CaseProfile::CENTRAL_SCENARIOS` (normal, niño dormido, ACV temporal, TPAC,
+  privación/implante tardío, deterioro cognitivo) y se eligen aparte en el
+  Armado rápido; su bibliografía está en `CentralReferences`. Sin bloque no se
+  registra nada (`cortical.case_params` → None), igual que el ECochG: un caso
+  viejo no tiene corteza hasta que se guarde desde el editor.
+- **Cada canal es una curva del gráfico** (`R1.C3`, `R1.Cz`, `R1.C4`): se
+  marca, se mide, se guarda y se vuelve a dibujar como cualquier curva. La
+  captura (`R1`) lleva el FSP. En el oddball el frecuente (y en la MMN también
+  el raro) va superpuesto en gris; el trazo principal es el que se lee: el raro
+  en la P300, la diferencia en la MMN.
+- **La reducción del caso es la del Na-Pa medido** (0,6 = 60 % menos en ese
+  electrodo, el caso 1 de la clase). Medida pico a pico sobre un trazo con ruido
+  sale algo menor (~40-55 %): el ruido infla más al electrodo chico. Es lo que
+  pasa en clínica y no se corrige.
+- **Lo técnico que enseña la clase sale del modelo, no de reglas:** tasa alta →
+  habituación (período refractario 40 ms en el MLR, 1,5 s en los tardíos) y, a
+  40/s, la superposición arma la respuesta de 40 Hz sola; pasa-alto del ABR
+  (100 Hz) borra la Pa y 30 Hz la achica; PAM de 12-15 ms varias veces mayor
+  con referencia en mastoides; niño dormido = Pa según la etapa de sueño (se
+  sortea por captura); dormido o sedado no hay P300 ni conteo; frecuente igual
+  al raro = sin P300 ni MMN; la MMN necesita ≥150 desviantes (con 200 barridos
+  la diferencia es ruido).
+- **El equipo llega del ABR** (mastoides, ganancia ×100.000 = tope de 50 µV):
+  el alumno tiene que pasar a lóbulo y bajar la ganancia; con el rechazo apagado
+  entran los parpadeos al promedio. El docente encuentra el estándar de la clase
+  (`protocols.STANDARD_SETUP`); el alumno no, como en el resto del equipo.
+- **Filtros de fase cero, como en el ABR**: el pasa-alto achica la Pa pero no le
+  corre la latencia (ver "Plan artefactos ABR", por qué no hay filtrado causal).
+- **La época arranca en el estímulo**: no hay pre-estímulo. La línea de base de
+  la P3 y la MMN es el tramo inicial (0-40 / 0-60 ms).
+- **El ruido es EEG de verdad**: espectro 1/f^1,5 con alfa, 12 µV RMS por barrido
+  en 1-30 Hz (adulto despierto, más en el niño y dormido), EMG por la tensión
+  cervical, 50 % común entre canales, parpadeos de 150 µV en Fz. Con eso el MLR
+  sale con 1000 barridos y el CAEP con 150.
+- Informes con tipo propio: `PEALM`, `CAEP`, `P300`, `MMN` (CHECK de `reports`
+  migrado con `migrateReportsTiposIfNeeded`). El PDF no interpreta: tabla por
+  canal, efectos electrodo/oído y conteo de la P300.
+- No se modela el cruce del estímulo al otro oído (un oído muerto a 70 dB no da
+  respuesta cortical aunque en la realidad podría cruzar).
+
+Normas por edad (fuentes verificadas en PubMed el mismo día, en
+`labsim_backend/src/CentralReferences.php` → Bibliografía, sección central):
+
+- P1 = 155,6 − 32,746·ln(edad), la regresión publicada por Sharma 2002 (0,1-20
+  años; fuera de ese tramo se usa el borde). La curva esquemática de la
+  diapositiva 31 (300 ms al nacer, 125 a los 5 años) NO sale de ese trabajo: la
+  fórmula da 231 ms a los 0,1 años y 103 a los 5. El límite superior (media
+  + 24 %) es calculado: el trabajo dibuja el intervalo de 95 % pero no lo publica.
+- P300: 300 ms + 1,3 ms/año desde los 20 (Polich 1985: ~65 ms entre 20 y 70;
+  Duncan 2009: 300-400 ms). DE 20 ms calculada.
+- MLR adulto: Na 18, Pa 30, Nb 41, Pb 52 ms (medias de Pialarissi 2007; los
+  desvíos son calculados). Hall 2007 y Picton 2010 no respaldan números: solo
+  se confirmó la edición.
+- MMN 150-250 ms, 0,5-5 µV, ≥150 desviantes, rechazo ±100 µV: Duncan 2009.
+- **Efecto electrodo/oído 50 %: criterio del docente.** Musiek 1999 y Weihing
+  2012 leen la diferencia porcentual entre lados, pero el corte publicado no se
+  pudo verificar (texto completo inaccesible); no se le atribuye a Musiek.

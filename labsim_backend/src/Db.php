@@ -730,8 +730,9 @@ final class Db
 
     /**
      * Pone al día la tabla reports: el CHECK de reports.tipo acepta
-     * 'OTOSCOPIA' y 'AABR' (el AABR se subía desde 2026-10 y el CHECK lo
-     * rechazaba: cada informe de tamizaje fallaba), y existe la columna
+     * 'OTOSCOPIA', 'AABR' (el AABR se subía desde 2026-10 y el CHECK lo
+     * rechazaba: cada informe de tamizaje fallaba) y los potenciales de
+     * latencia media y tardía (PEALM, CAEP, P300, MMN), y existe la columna
      * version (ver report_versions en schema.sql). SQLite no permite
      * modificar un CHECK con ALTER TABLE: hay que reconstruir la tabla y
      * copiar las filas, como en migrateAppConfigCourseIdIfNeeded. Debe
@@ -756,7 +757,9 @@ final class Db
         }
         $cols = array_column($pdo->query('PRAGMA table_info(reports)')->fetchAll(), 'name');
         $tieneVersion = in_array('version', $cols, true);
-        if (strpos($sql, "'AABR'") !== false && $tieneVersion) {
+        // 'MMN' es el último tipo agregado (PEALM/CAEP/P300/MMN del módulo
+        // ABR): si el CHECK ya lo trae, trae también los anteriores.
+        if (strpos($sql, "'MMN'") !== false && $tieneVersion) {
             return;
         }
         // Nombre propio para la copia: una migración vieja dejó una tabla
@@ -770,7 +773,7 @@ final class Db
                 "CREATE TABLE reports (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
+                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'OTOSCOPIA')),
                     data TEXT NOT NULL,
                     version INTEGER NOT NULL DEFAULT 1,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

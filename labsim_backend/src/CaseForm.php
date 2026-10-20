@@ -599,6 +599,7 @@ final class CaseForm
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi, 'autor' => $abrAutor],
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
+                'central' => self::parseCentral($v),
                 // La pasada final del docente por el Resumen: qué fichas
                 // dio por buenas. Va adentro del caso, no al lado -- ver
                 // más abajo, es lo último que bloquea el guardado.
@@ -938,6 +939,28 @@ final class CaseForm
             return $default;
         }
         return round(max($min, min($max, (float) $valor)), 3);
+    }
+
+    /**
+     * Bloque de la vía central (ver CaseBuilder::CENTRAL_DEFAULTS). Los
+     * números se recortan a su rango y las opciones caen al default, como
+     * el resto de los parámetros de modelado: no frenan el guardado.
+     */
+    public static function parseCentral(array $v): array
+    {
+        $out = [];
+        foreach (CaseBuilder::CENTRAL_DEFAULTS as $clave => $default) {
+            if (isset(CaseBuilder::CENTRAL_OPTIONS[$clave])) {
+                $valor = (string) self::val($v, ['central', $clave], $default);
+                $out[$clave] = in_array($valor, CaseBuilder::CENTRAL_OPTIONS[$clave], true)
+                    ? $valor : $default;
+                continue;
+            }
+            $rango = CaseBuilder::CENTRAL_LIMITS[$clave];
+            $out[$clave] = self::clampNum($v, ['central', $clave], (float) $default,
+                                          $rango[0], $rango[1]);
+        }
+        return $out;
     }
 
     private static function parseAbr(array $v, string $lado): array

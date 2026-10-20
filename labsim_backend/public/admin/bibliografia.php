@@ -118,6 +118,18 @@ admin_header('Bibliografía', $me);
         <p class="help help--mt"><strong>Fuentes</strong></p>
         <?php endif; ?>
 
+        <?php if ($sid === 'central'): ?>
+        <p class="help help--mt"><strong>De dónde sale cada número</strong></p>
+        <?php foreach (CentralReferences::LIMITES as $lim): ?>
+        <div style="margin-top:0.5rem; font-size:0.9em;">
+            <strong><?= htmlspecialchars($lim['label']) ?>:</strong> <?= htmlspecialchars($lim['valor']) ?>
+            · <?= $lim['fuentes'] ? htmlspecialchars(implode(', ', $lim['fuentes'])) : 'calculado' ?>
+            <div style="opacity:0.8;"><?= htmlspecialchars($lim['nota']) ?></div>
+        </div>
+        <?php endforeach; ?>
+        <p class="help help--mt"><strong>Fuentes</strong></p>
+        <?php endif; ?>
+
         <?php if ($sid === 'acumetria'): ?>
         <?php $uAcu = CaseForm::umbralesAcumetria(); ?>
         <p class="help help--mt"><strong>Umbrales que usa hoy el automático del caso</strong> (se calibran en <a href="normativas.php#acumetria">Normativas</a>; un cambio vale para los casos que se guarden después, no reescribe los ya guardados)</p>

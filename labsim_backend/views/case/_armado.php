@@ -118,6 +118,18 @@
     <p class="help">El grado se mide sobre el <strong>promedio de <?= implode(', ', CaseProfile::GRADE_FREQS) ?> Hz en vía aérea</strong> (BIAP). Audición normal hasta 20 dB HL, así que el leve arranca en 21. <strong>Ojo:</strong> el equipo le muestra al alumno el promedio de Fletcher (mejores 2 de 500, 1000 y 2000), que ignora 4 kHz. En los cuadros descendentes el número del equipo va a dar más bajo que el grado que pediste acá: son dos escalas distintas, no un error.</p>
 
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">
+        <label style="max-width:28em;">Vía central (latencia media y tardía)
+            <select id="armado-central">
+                <?php foreach (CaseProfile::CENTRAL_SCENARIOS as $cKey => $cEsc): ?>
+                <option value="<?= htmlspecialchars($cKey) ?>"><?= htmlspecialchars($cEsc['label']) ?></option>
+                <?php endforeach; ?>
+                <option value="__random__">Cualquiera (al azar, según la edad)</option>
+            </select>
+        </label>
+        <p class="help">Es del paciente, no de un oído, y convive con cualquier cuadro de arriba (una presbiacusia con la P300 prolongada, por ejemplo). Escribe el bloque <em>Vía central</em> de la ficha <a href="#" class="tab-link" data-goto-tab="abr">ABR</a>, que alimenta el MLR, el CAEP, la P300 y la MMN.</p>
+    </div>
+
+    <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <button type="button" id="perfil-generar">Generar caso</button>
         <span id="armado-estado" class="help"></span>
     </div>

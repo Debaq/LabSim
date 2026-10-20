@@ -141,6 +141,78 @@
 <?php endforeach; ?>
 </div>
 <div class="card">
+    <strong>Vía central: latencia media y tardía</strong>
+    <p class="help">Es del <strong>paciente</strong>, no de un oído: el MLR (PEALM) se registra en C3, Cz y C4 y lo que localiza es el hemisferio; el CAEP, la P300 y la MMN son de la corteza. Son otras pruebas del mismo equipo (combo <em>Test</em> del panel del alumno). Un caso guardado antes de que existiera este bloque no registra ninguna de las cuatro hasta que se guarde de nuevo. El cuadro se sortea en <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a>; acá se ajusta a mano. De dónde sale cada número: <a href="bibliografia.php#central">Configuración &rsaquo; Bibliografía</a>.</p>
+    <?php
+    $cv = function (string $clave) use ($v): string {
+        return htmlspecialchars((string) ($v['central'][$clave] ?? CaseBuilder::CENTRAL_DEFAULTS[$clave]));
+    };
+    $cLim = CaseBuilder::CENTRAL_LIMITS;
+    $cOpt = function (string $clave, array $rotulos) use ($v): string {
+        $actual = (string) ($v['central'][$clave] ?? CaseBuilder::CENTRAL_DEFAULTS[$clave]);
+        $html = '';
+        foreach (CaseBuilder::CENTRAL_OPTIONS[$clave] as $op) {
+            $html .= '<option value="' . htmlspecialchars($op) . '"' . ($actual === $op ? ' selected' : '') . '>'
+                . htmlspecialchars($rotulos[$op] ?? $op) . '</option>';
+        }
+        return $html;
+    };
+    ?>
+    <div class="three-col">
+        <label>Estado durante el registro
+            <select name="central[estado]" title="Dormido o sedado, la Pa del niño puede no aparecer sin que haya lesión, y no hay P300 (no puede hacer la tarea).">
+                <?= $cOpt('estado', ['despierto' => 'Despierto', 'somnoliento' => 'Somnoliento', 'dormido' => 'Dormido', 'sedado' => 'Sedado']) ?>
+            </select>
+        </label>
+        <label>Tensión cervical (0-1)
+            <input type="number" step="0.05" min="<?= $cLim['tension_cervical'][0] ?>" max="<?= $cLim['tension_cervical'][1] ?>" name="central[tension_cervical]" value="<?= $cv('tension_cervical') ?>" title="Cuánto reflejo postauricular (PAM, 12-15 ms) aparece en el MLR. Con referencia en mastoides se ve varias veces más que con el lóbulo.">
+        </label>
+        <label>Error al contar los raros (fracción)
+            <input type="number" step="0.05" min="<?= $cLim['conteo_error'][0] ?>" max="<?= $cLim['conteo_error'][1] ?>" name="central[conteo_error]" value="<?= $cv('conteo_error') ?>" title="P300: cuánto se equivoca el paciente al contar. 0 = cuenta bien. Un conteo malo invalida la interpretación.">
+        </label>
+    </div>
+    <p class="help"><strong>PEALM.</strong> El hemisferio comprometido pierde Na-Pa en el electrodo que tiene encima (C3 izquierdo, C4 derecho) con <em>cualquier</em> oído: es el efecto electrodo. La reducción es la fracción de Na-Pa que pierde ese electrodo (0,6 = 60 % menos); Cz pierde un tercio de eso. El efecto oído baja el Na-Pa de un oído en los tres electrodos.</p>
+    <div class="three-col">
+        <label>Hemisferio comprometido
+            <select name="central[mlr_hemisferio]">
+                <?= $cOpt('mlr_hemisferio', ['ninguno' => 'Ninguno', 'izquierdo' => 'Izquierdo (C3)', 'derecho' => 'Derecho (C4)', 'bilateral' => 'Bilateral']) ?>
+            </select>
+        </label>
+        <label>Reducción del Na-Pa (0-1)
+            <input type="number" step="0.05" min="<?= $cLim['mlr_reduccion'][0] ?>" max="<?= $cLim['mlr_reduccion'][1] ?>" name="central[mlr_reduccion]" value="<?= $cv('mlr_reduccion') ?>">
+        </label>
+        <label>Retardo de Pa en ese electrodo (ms)
+            <input type="number" step="0.5" min="<?= $cLim['mlr_pa_retardo_ms'][0] ?>" max="<?= $cLim['mlr_pa_retardo_ms'][1] ?>" name="central[mlr_pa_retardo_ms]" value="<?= $cv('mlr_pa_retardo_ms') ?>">
+        </label>
+        <label>Efecto oído
+            <select name="central[mlr_oido]">
+                <?= $cOpt('mlr_oido', ['ninguno' => 'Ninguno', 'OD' => 'OD', 'OI' => 'OI']) ?>
+            </select>
+        </label>
+        <label>Reducción por oído (0-1)
+            <input type="number" step="0.05" min="<?= $cLim['mlr_oido_reduccion'][0] ?>" max="<?= $cLim['mlr_oido_reduccion'][1] ?>" name="central[mlr_oido_reduccion]" value="<?= $cv('mlr_oido_reduccion') ?>">
+        </label>
+    </div>
+    <p class="help"><strong>PEALT.</strong> La latencia normal de la P1 y de la P300 la pone el cliente por edad; acá va solo cuánto se aparta este paciente. La P1 atrasada es la privación auditiva (implante tardío); la P300 atrasada con exógenos normales, el deterioro cognitivo. Sin diferencia entre el estímulo frecuente y el raro no hay P300 ni MMN: eso lo decide el equipo, no el caso.</p>
+    <div class="three-col">
+        <label>Retardo de la P1 (ms)
+            <input type="number" step="5" min="<?= $cLim['p1_retardo_ms'][0] ?>" max="<?= $cLim['p1_retardo_ms'][1] ?>" name="central[p1_retardo_ms]" value="<?= $cv('p1_retardo_ms') ?>">
+        </label>
+        <label>Reducción del N1-P2 (0-1)
+            <input type="number" step="0.05" min="<?= $cLim['n1p2_reduccion'][0] ?>" max="<?= $cLim['n1p2_reduccion'][1] ?>" name="central[n1p2_reduccion]" value="<?= $cv('n1p2_reduccion') ?>">
+        </label>
+        <label>Retardo de la P300 (ms)
+            <input type="number" step="5" min="<?= $cLim['p300_retardo_ms'][0] ?>" max="<?= $cLim['p300_retardo_ms'][1] ?>" name="central[p300_retardo_ms]" value="<?= $cv('p300_retardo_ms') ?>">
+        </label>
+        <label>Reducción de la P300 (0-1)
+            <input type="number" step="0.05" min="<?= $cLim['p300_reduccion'][0] ?>" max="<?= $cLim['p300_reduccion'][1] ?>" name="central[p300_reduccion]" value="<?= $cv('p300_reduccion') ?>">
+        </label>
+        <label>Reducción de la MMN (0-1)
+            <input type="number" step="0.05" min="<?= $cLim['mmn_reduccion'][0] ?>" max="<?= $cLim['mmn_reduccion'][1] ?>" name="central[mmn_reduccion]" value="<?= $cv('mmn_reduccion') ?>">
+        </label>
+    </div>
+</div>
+<div class="card">
     <strong>Vista previa: serie 100&rarr;0 dBnHL</strong>
     <p class="help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y las desviaciones cargadas arriba. Se redibuja sola, en vivo, al tipear. Los marcadores verticales señalan dónde queda cada onda y la línea punteada sigue el pico a través de las intensidades (función latencia-intensidad). Es referencia visual para el docente: el generador real, con ruido, FSP y promediación, es el que corre en el equipo del alumno.</p>
     <div class="two-col">

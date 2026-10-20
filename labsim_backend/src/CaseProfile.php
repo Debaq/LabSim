@@ -491,6 +491,73 @@ final class CaseProfile
      * no. El filtro es del GENERADOR, no del modelo: un caso ya armado con
      * una edad rara sigue funcionando.
      */
+    /**
+     * Cuadros de la vía central, a nivel PACIENTE (ver
+     * CaseBuilder::CENTRAL_DEFAULTS y src/abr/cortical.py en el cliente).
+     *
+     * No van en SCENARIOS porque esos son por oído y deciden el audiograma:
+     * una lesión cortical convive con cualquier oído (el caso 3 de la clase
+     * es una presbiacusia con la P300 prolongada). Se eligen aparte en el
+     * Armado rápido y escriben el bloque `Central`.
+     *
+     * 'edad' es [mín, máx] en años (null = sin tope). En 'central', una
+     * lista de textos se sortea entre sus opciones y un par de números es
+     * un rango; lo que el cuadro no nombra queda en el default sano. La
+     * bibliografía de cada uno está en CentralReferences::CUADROS.
+     */
+    public const CENTRAL_SCENARIOS = [
+        'central_normal' => [
+            'label' => 'Sin compromiso central',
+            'edad' => [null, null],
+            'central' => [],
+        ],
+        'nino_dormido' => [
+            'label' => 'Sin compromiso, registrado dormido (niño)',
+            'edad' => [0, 9],
+            // Pregunta de la clase: un niño dormido con Pa ausente no tiene
+            // una lesión. El cliente sortea la etapa de sueño por captura.
+            'central' => ['estado' => ['dormido']],
+        ],
+        'acv_temporal' => [
+            'label' => 'Lesión cortical temporal (ACV)',
+            'edad' => [40, null],
+            // Efecto electrodo: el Na-Pa baja sobre el hemisferio lesionado
+            // con cualquier oído; la amplitud es más sensible que la latencia.
+            'central' => ['mlr_hemisferio' => ['izquierdo', 'derecho'],
+                          'mlr_reduccion' => [0.5, 0.7],
+                          'mlr_pa_retardo_ms' => [0.0, 3.0],
+                          'n1p2_reduccion' => [0.2, 0.5],
+                          'mmn_reduccion' => [0.3, 0.6]],
+        ],
+        'tpac' => [
+            'label' => 'Trastorno del procesamiento auditivo central',
+            'edad' => [7, null],
+            // Hallazgos leves y variables: efecto electrodo chico o ausente,
+            // MMN reducida y P300 algo tardía, con exógenos conservados.
+            'central' => ['mlr_hemisferio' => ['ninguno', 'izquierdo', 'derecho'],
+                          'mlr_reduccion' => [0.2, 0.45],
+                          'mmn_reduccion' => [0.4, 0.8],
+                          'p300_retardo_ms' => [20.0, 50.0]],
+        ],
+        'privacion_implante_tardio' => [
+            'label' => 'Privación auditiva / implante coclear tardío',
+            'edad' => [2, 17],
+            // P1 tardía para la edad: el biomarcador de maduración cortical.
+            'central' => ['p1_retardo_ms' => [60.0, 140.0],
+                          'n1p2_reduccion' => [0.3, 0.7]],
+        ],
+        'deterioro_cognitivo' => [
+            'label' => 'Deterioro cognitivo',
+            'edad' => [55, null],
+            // P300 prolongada y más chica con exógenos normales: la
+            // alteración es del procesamiento, no de la llegada del sonido.
+            'central' => ['p300_retardo_ms' => [40.0, 90.0],
+                          'p300_reduccion' => [0.3, 0.6],
+                          'mmn_reduccion' => [0.2, 0.5],
+                          'conteo_error' => [0.0, 0.15]],
+        ],
+    ];
+
     public const SCENARIO_EDAD = [
         // Adquiridos del adulto
         'presbiacusia' => [50, null],

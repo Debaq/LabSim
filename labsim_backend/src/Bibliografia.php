@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/AbrReferences.php';
 require_once __DIR__ . '/EcochgReferences.php';
+require_once __DIR__ . '/CentralReferences.php';
 require_once __DIR__ . '/CaseProfile.php';
 require_once __DIR__ . '/BibliografiaPatologias.php';
 
@@ -36,6 +37,10 @@ final class Bibliografia
         'ecochg' => [
             'titulo' => 'Electrococleografía',
             'resumen' => 'Límites de la razón PS/PA por electrodo, razón de áreas, separación entre polaridades y cuántos Ménière dan un ECochG normal.',
+        ],
+        'central' => [
+            'titulo' => 'Latencia media y tardía (MLR, CAEP, P300, MMN)',
+            'resumen' => 'Latencias normales por edad (P1, P300), MLR del adulto, MMN, cuántos estímulos hacen falta, el criterio del efecto electrodo y qué respalda cada cuadro central del generador.',
         ],
         'tamizaje' => [
             'titulo' => 'Tamizaje auditivo neonatal',
@@ -858,6 +863,24 @@ final class Bibliografia
                     foreach (EcochgReferences::LIMITES as $lim) {
                         if (in_array($fid, $lim['fuentes'], true)) {
                             $usa[] = $lim['label'] . ' (' . $lim['valor'] . ').';
+                        }
+                    }
+                    $out[$fid] = $f + ['usa' => $usa];
+                }
+                return $out;
+            case 'central':
+                $out = [];
+                foreach (CentralReferences::FUENTES as $fid => $f) {
+                    $usa = [];
+                    foreach (CentralReferences::LIMITES as $lim) {
+                        if (in_array($fid, $lim['fuentes'], true)) {
+                            $usa[] = $lim['label'] . ' (' . $lim['valor'] . ').';
+                        }
+                    }
+                    foreach (CentralReferences::CUADROS as $clave => $cuadro) {
+                        if (in_array($fid, $cuadro['fuentes'], true)) {
+                            $label = CaseProfile::CENTRAL_SCENARIOS[$clave]['label'] ?? $clave;
+                            $usa[] = 'Cuadro central «' . $label . '»: ' . $cuadro['respalda'];
                         }
                     }
                     $out[$fid] = $f + ['usa' => $usa];

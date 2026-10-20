@@ -1044,6 +1044,7 @@
         generarComentarioDocente(claveOd, escalasOd.grado, claveOi, escalasOi.grado);
         var tinnitus = generarTinnitus(claveOd, claveOi);
         generarRasgosPaciente(escOd, escOi);
+        var central = generarCentral();
 
         // Un caso generado nace coherente: las proyecciones se encienden.
         AUTO_MODULES.forEach(function (modulo) {
@@ -1103,11 +1104,62 @@
             estado.textContent = 'Listo: ' + (nombre ? nombre + ' -- ' : '') +
                 'OD ' + escOd.label + ', OI ' + escOi.label +
                 (tinnitus ? '. Con acúfeno (' + tinnitus + ')' : '. Sin acúfeno') +
+                (central ? '. Vía central: ' + central : '') +
                 (madre ? '. Es menor: viene con su madre (' + madre + '), revisá la pestaña Sala' : '') +
                 avisoContra +
                 '. Revisalo ficha por ficha en Resumen antes de guardar.';
         }
     });
+
+
+    // --- Vía central -------------------------------------------------------
+    // Cuadro del PACIENTE (CaseProfile::CENTRAL_SCENARIOS), aparte de los de
+    // cada oído. Escribe todos los campos del bloque: lo que el cuadro no
+    // nombra vuelve al default sano, para no arrastrar la vuelta anterior.
+    var CENTRAL_DEFAULTS = window.CASE_CONST.centralDefaults || {};
+    var CENTRAL_LIMITS = window.CASE_CONST.centralLimits || {};
+    var CENTRAL_ESCENARIOS = window.CASE_CONST.centralEscenarios || {};
+
+    function cuadrosCentralesParaEdad() {
+        var edad = edadEnAnios();
+        return Object.keys(CENTRAL_ESCENARIOS).filter(function (clave) {
+            var r = CENTRAL_ESCENARIOS[clave].edad || [null, null];
+            if (edad === null) { return true; }
+            return (r[0] === null || edad >= r[0]) && (r[1] === null || edad <= r[1]);
+        });
+    }
+
+    function generarCentral() {
+        var select = document.getElementById('armado-central');
+        if (!select) { return null; }
+        var clave = select.value;
+        if (clave === '__random__' || !CENTRAL_ESCENARIOS[clave]) {
+            var posibles = cuadrosCentralesParaEdad();
+            clave = posibles[Math.floor(Math.random() * posibles.length)] || 'central_normal';
+            // Que el docente vea con qué salió (mismo criterio que el cuadro
+            // de cada oído).
+            select.value = clave;
+        }
+        var cfg = CENTRAL_ESCENARIOS[clave].central || {};
+        Object.keys(CENTRAL_DEFAULTS).forEach(function (param) {
+            var campo = document.querySelector('#case-form [name="central[' + param + ']"]');
+            if (!campo) { return; }
+            var regla = cfg[param];
+            var valor = CENTRAL_DEFAULTS[param];
+            if (Array.isArray(regla) && regla.length && typeof regla[0] === 'string') {
+                valor = regla[Math.floor(Math.random() * regla.length)];
+            } else if (Array.isArray(regla) && regla.length === 2) {
+                valor = entre(regla[0], regla[1]);
+                valor = param.slice(-3) === '_ms' ? Math.round(valor) : Math.round(valor * 100) / 100;
+            } else if (param === 'tension_cervical') {
+                // La tensión es del paciente, no del cuadro: se sortea.
+                valor = Math.round(entre(0.1, 0.6) * 100) / 100;
+            }
+            campo.value = String(valor);
+            campo.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        return CENTRAL_ESCENARIOS[clave].label;
+    }
 
     // --- Arranque ----------------------------------------------------------
     // Desde la primera tecla el comentario docente es suyo y Generar no lo

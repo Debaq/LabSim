@@ -23,6 +23,10 @@ final class ReportFile
         'EOA' => 'Emisiones otoacústicas',
         'VEMP' => 'VEMP',
         'ELECTROCOCLEO' => 'Electrococleografía',
+        'PEALM' => 'Potencial de latencia media (PEALM)',
+        'CAEP' => 'Potencial cortical (P1-N1-P2)',
+        'P300' => 'P300',
+        'MMN' => 'Negatividad de disparidad (MMN)',
         'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
     ];
 
@@ -33,6 +37,10 @@ final class ReportFile
         'EOA' => 'EOA',
         'VEMP' => 'VEMP',
         'ELECTROCOCLEO' => 'ECochG',
+        'PEALM' => 'PEALM',
+        'CAEP' => 'CAEP',
+        'P300' => 'P300',
+        'MMN' => 'MMN',
         'OTOSCOPIA' => 'Otoscopia',
     ];
 
