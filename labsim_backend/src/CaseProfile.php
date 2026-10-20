@@ -121,35 +121,74 @@ final class CaseProfile
      * Corrección conductual -> electrofisiológico, en dB: cuánto MÁS alto
      * lee el umbral del ABR (dB nHL) que el umbral tonal real (dB HL).
      *
-     * Son los factores de corrección de la práctica clínica (Stapells y
-     * cía.): para estimar el audiograma a partir del ABR hay que RESTAR
-     * estos valores del umbral nHL obtenido. Acá se usan al revés, porque
-     * vamos del caso (que se define en dB HL, el audiograma) a lo que el
-     * equipo va a mostrar.
+     * Para estimar el audiograma a partir del ABR hay que RESTAR estos
+     * valores del umbral nHL obtenido. Acá se usan al revés, porque vamos del
+     * caso (que se define en dB HL, el audiograma) a lo que el equipo va a
+     * mostrar. La conversión nHL->eHL es contenido de la asignatura, no
+     * plomería.
      *
-     * Que un oído de 0 dB HL dé 20 dB nHL en burst de 500 y 10 en click no
-     * es un error: es el hallazgo. La conversión nHL->eHL es contenido de
-     * la asignatura, no plomería.
+     * Fuente: BSA. Recommended procedure: ABR testing for post-newborn and
+     * adult (OD104-84), 2019, Apéndice C, fonos de inserción. La tabla
+     * depende de la edad corregida (ver nhlCorrection()):
+     *
+     * - Esta es la de mayores de 24 semanas (Tablas 5 y 6: de 24 semanas a
+     *   2 años y mayores de 2 años dan lo mismo con inserción).
+     * - El CE-Chirp de banda ancha no tiene corrección publicada: se le
+     *   deja la del click, y un estímulo de banda ancha no estima el umbral
+     *   por frecuencia.
      */
     public const STIM_NHL_CORRECTION = [
         'tone_burst_500Hz'  => 20.0,
         'tone_burst_1000Hz' => 15.0,
         'tone_burst_2000Hz' => 10.0,
-        'tone_burst_4000Hz' => 5.0,
-        'click'             => 10.0,
-        // El chirp sincroniza mejor toda la partición coclear: misma
-        // respuesta con menos nivel, umbral algo más bajo que el click.
+        'tone_burst_4000Hz' => 10.0,
+        'click'             => 5.0,
         'ce_chirp'          => 5.0,
         'ce_chirp_ls'       => 5.0,
-        // El NB CE-Chirp LS mira la misma banda que el burst, pero como
-        // sincroniza el tramo coclear que le toca llega al umbral con
-        // menos nivel: la corrección nHL->eHL es ~5 dB menor que la del
-        // burst de esa frecuencia (en 4 kHz ya no queda margen).
+        // "Chirp" por frecuencia de la BSA (NB CE-Chirp): ~5 dB menos que el
+        // burst de la misma banda (Ferm y cols. 2013 y 2015).
         'nb_ce_chirp_ls_500Hz'  => 15.0,
         'nb_ce_chirp_ls_1000Hz' => 10.0,
         'nb_ce_chirp_ls_2000Hz' => 5.0,
         'nb_ce_chirp_ls_4000Hz' => 5.0,
     ];
+
+    /**
+     * Lactantes de 12 a 24 semanas de edad corregida (BSA 2019, Tabla 4,
+     * inserción): solo cambia lo que está acá, el resto es la tabla general.
+     */
+    public const STIM_NHL_CORRECTION_12_24_SEMANAS = [
+        'tone_burst_4000Hz'     => 5.0,
+        'nb_ce_chirp_ls_4000Hz' => 0.0,
+        'click'                 => 0.0,
+    ];
+
+    /**
+     * Menores de 12 semanas: las correcciones están en la guía BSA para
+     * recién nacidos (OD100, 2025), que todavía no se revisó. Mientras tanto
+     * se dejan las que el simulador usaba antes del 2026-10-19, para no
+     * cambiar los resultados del tamizaje (el AABR lee el CE-Chirp).
+     * PENDIENTE: reemplazar por la tabla de la guía.
+     */
+    public const STIM_NHL_CORRECTION_MENOS_12_SEMANAS = [
+        'tone_burst_4000Hz'     => 5.0,
+        'click'                 => 10.0,
+    ];
+
+    /** Corrección nHL de un estímulo a una edad (meses; null = adulto). */
+    public static function nhlCorrection(string $stim, $edadMeses = null): float
+    {
+        $tabla = self::STIM_NHL_CORRECTION;
+        if ($edadMeses !== null && $edadMeses !== '') {
+            $semanas = (float) $edadMeses * 30.0 / 7.0;
+            if ($semanas < 12.0) {
+                $tabla = self::STIM_NHL_CORRECTION_MENOS_12_SEMANAS + $tabla;
+            } elseif ($semanas <= 24.0) {
+                $tabla = self::STIM_NHL_CORRECTION_12_24_SEMANAS + $tabla;
+            }
+        }
+        return (float) $tabla[$stim];
+    }
 
     /**
      * Referencia de la vía ósea: cuánto más alto lee su umbral que el aéreo,
@@ -2491,7 +2530,7 @@ final class CaseProfile
                 $peso += $w;
             }
             $hl = $peso > 0 ? $suma / $peso : 0.0;
-            $nhl = $hl + self::STIM_NHL_CORRECTION[$stim];
+            $nhl = $hl + self::nhlCorrection($stim, $edadMeses);
             $nhl += $offsetOseo;
             if ($pathway === 'bone_conduction' && $nhl > self::BONE_MAX_OUTPUT_DB) {
                 // El vibrador no llega: no hay umbral que informar, hay
@@ -3301,7 +3340,7 @@ final class CaseProfile
             // otro no, que es lo que se ve en el turno).
             $transitorio = self::neonatalTransientDb($horasDeVida, $nacimiento, $lado);
 
-            $porEstimulo = self::abrThresholds($decomp[$lado], 'air_conduction');
+            $porEstimulo = self::abrThresholds($decomp[$lado], 'air_conduction', $edadMeses);
             if ($transitorio > 0.0) {
                 // Solo la vía aérea: el vibrador saltea conducto y oído
                 // medio, y ese contraste es el hallazgo.

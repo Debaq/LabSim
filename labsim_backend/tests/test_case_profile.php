@@ -32,9 +32,9 @@ function audiograma(array $porHz): array
 $normal = audiograma([125 => 0]);
 $d = CaseProfile::decompose($normal, $normal, 0, 100.0);
 $th = CaseProfile::abrThresholds($d);
-t_eq($th['click'], 10, 'Oído de 0 dB HL: click a 10 dB nHL (la corrección nHL no es cero)');
+t_eq($th['click'], 5, 'Oído de 0 dB HL: click a 5 dB nHL (la corrección nHL no es cero; BSA 2019)');
 t_eq($th['tone_burst_500Hz'], 20, 'Oído normal: burst de 500 Hz a 20 dB nHL');
-t_eq($th['tone_burst_4000Hz'], 5, 'Oído normal: burst de 4 kHz a 5 dB nHL');
+t_eq($th['tone_burst_4000Hz'], 10, 'Oído normal: burst de 4 kHz a 10 dB nHL en el adulto (BSA 2019)');
 t_eq($th['ce_chirp'], 5, 'Oído normal: chirp por debajo del click (sincroniza mejor)');
 
 // Descendente: lo que antes era imposible de representar -- un solo umbral
@@ -44,12 +44,23 @@ $d = CaseProfile::decompose($descendente, $descendente, 0, 100.0);
 $th = CaseProfile::abrThresholds($d);
 t_eq($th['tone_burst_500Hz'], 30, 'Descendente: burst de 500 Hz casi normal (10 dB HL + 20 de corrección)');
 t_eq($th['tone_burst_1000Hz'], 30, 'Descendente: burst de 1 kHz todavía bajo');
-t_eq($th['tone_burst_4000Hz'], 75, 'Descendente: burst de 4 kHz muy elevado');
+t_eq($th['tone_burst_4000Hz'], 80, 'Descendente: burst de 4 kHz muy elevado');
 t_true($th['tone_burst_4000Hz'] - $th['tone_burst_500Hz'] >= 40,
     'Descendente: 45 dB de diferencia entre 500 Hz y 4 kHz -- la evaluación frecuencia específica tiene algo que encontrar');
-t_eq($th['click'], 65, 'Descendente: el click lo domina la base coclear (2-4 kHz), no el promedio del audiograma');
+t_eq($th['click'], 60, 'Descendente: el click lo domina la base coclear (2-4 kHz), no el promedio del audiograma');
 t_true($th['ce_chirp'] < $th['click'],
     'Descendente: el chirp pesa los graves conservados y da mejor umbral que el click');
+
+// La corrección depende de la edad corregida (BSA 2019, Apéndice C).
+$d = CaseProfile::decompose($normal, $normal, 0, 100.0);
+t_eq(CaseProfile::abrThresholds($d, 'air_conduction', 4.0)['click'], 0,
+    'Lactante de 4 meses (12-24 semanas): el click no se corrige');
+t_eq(CaseProfile::abrThresholds($d, 'air_conduction', 4.0)['tone_burst_4000Hz'], 5,
+    'Lactante de 4 meses: burst de 4 kHz a 5 dB nHL');
+t_eq(CaseProfile::abrThresholds($d, 'air_conduction', 12.0)['click'], 5,
+    'Lactante de 1 año: la tabla general');
+t_eq(CaseProfile::abrThresholds($d, 'air_conduction', 1.0)['click'], 10,
+    'Menor de 12 semanas: queda la tabla anterior hasta revisar la guía BSA de recién nacidos');
 
 // ---------------------------------------------------------------------
 // Vía ósea: el gap conductivo del ABR sale del audiograma, sin campo nuevo.
@@ -62,12 +73,12 @@ t_close($d['gap'][1000], 40.0, 0.01, 'Conductiva: gap de 40 dB en 1 kHz');
 t_close($d['sn'][1000], 5.0, 0.01, 'Conductiva: componente sensorioneural mínimo');
 $thAir = CaseProfile::abrThresholds($d, 'air_conduction');
 $thBone = CaseProfile::abrThresholds($d, 'bone_conduction');
-t_eq($thAir['click'], 55, 'Conductiva: click aéreo elevado por el gap');
+t_eq($thAir['click'], 50, 'Conductiva: click aéreo elevado por el gap');
 // La ósea lleva su propia referencia de 0 dB nHL (ver boneNhlOffset): en un
 // adulto son ~15 dB más que la aérea, y por eso este 30 es "óseo normal" y
 // no un componente sensorioneural. Comparar los dos números de frente es
 // justamente el error que hay que saber no cometer.
-t_eq($thBone['click'], 30, 'Conductiva: click óseo normal para su propia referencia');
+t_eq($thBone['click'], 25, 'Conductiva: click óseo normal para su propia referencia');
 t_true(
     $thAir['click'] - $thBone['click'] >= 20,
     'Conductiva: el gap se ve igual comparando las dos vías, cada una contra su norma'
@@ -589,7 +600,7 @@ foreach (['decomp', 'abr', 'eoas', 'reflex', 'recruit'] as $clave) {
 }
 t_eq($p['abr']['OD']['type'], 'coclear', 'project(): OD descendente sale coclear');
 t_eq($p['abr']['OI']['type'], 'normal', 'project(): OI sano sale normal');
-t_eq($p['abr']['OD']['umbral_por_estimulo']['tone_burst_4000Hz'], 75,
+t_eq($p['abr']['OD']['umbral_por_estimulo']['tone_burst_4000Hz'], 80,
     'project(): el umbral por estímulo es el mismo que abrThresholds');
 t_eq($p['abr']['OD']['umbral'], $p['abr']['OD']['umbral_por_estimulo']['click'],
     'project(): el escalar queda alineado al click');
