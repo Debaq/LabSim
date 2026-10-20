@@ -22,17 +22,20 @@ from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
 from abr.ECochG_generator import ECochG_Curve, burst_ps_ms
+from abr.Cortical_generator import Cortical_Curve
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves
 from abr.AbrGraph import AbrGraph
 from abr.AbrLatIntGraph import GraphLatInt
 from abr.AbrReport import AbrReport
-from abr.AbrSessions import (curve_order, pack_trace,
-                             session_label, unpack_trace)
+from abr.AbrSessions import (REPORT_TIPOS, curve_group, curve_order,
+                             pack_trace, report_tipo, session_label,
+                             test_of_report, unpack_trace)
 from abr.AbrTable import AbrTable
+from abr.CorticalTable import CorticalTable
 from abr.EcochgTable import EcochgTable
 from abr.protocols import standard_setup
-from abr import ecochg
+from abr import cortical, ecochg
 from abr.EEG import EEG
 from abr.FSP import FSP
 from abr.UI.AbrMain_ui import Ui_MainWindow
@@ -67,6 +70,10 @@ ALTO_DOCK_DETALLE = 220
 
 
 
+# Tipos de informe que sube esta ventana (uno por prueba).
+INFORME_TIPOS = ['ABR'] + list(REPORT_TIPOS.values())
+
+
 def _retomar(appointment_id):
     """Sesiones anteriores + lo guardado de esta atencion, fuera del hilo
     de la ventana (hilos.en_fondo, ver AbrMainWindow.fetch_sessions).
@@ -85,7 +92,7 @@ def _retomar(appointment_id):
     except Exception as exc:  # noqa: BLE001
         # Sin conexion se atiende igual: solo no se ven las anteriores.
         print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
-    guardados = recuperar(appointment_id, ['ABR', 'ELECTROCOCLEO'], client)
+    guardados = recuperar(appointment_id, INFORME_TIPOS, client)
     return appointment_id, reports, guardados, respaldo_informes.usuario_de(client)
 
 class AbrMainWindow(QMainWindow, Ui_MainWindow):
@@ -106,6 +113,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # sintético, ver graph() para el guard antes de capturar.
         self.abr_od = None
         self.abr_oi = None
+        # Bloque `Central` del paciente (latencia media y tardía). No es
+        # por oído: el efecto electrodo es de un hemisferio.
+        self.central = None
 
         self.control = AbrControl()
         # Sin atención abierta al crear la ventana (recién montada, antes
@@ -153,6 +163,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.table_ec_l = EcochgTable(1)
         self.layout_dock_values_contents.addWidget(self.table_ec_r)
         self.layout_dock_values_contents.addWidget(self.table_ec_l)
+        # Y las de latencia media y tardia: canales en columnas y las
+        # comparaciones entre hemisferios y oidos (ver CorticalTable).
+        self.table_cx_r = CorticalTable(0)
+        self.table_cx_l = CorticalTable(1)
+        self.layout_dock_values_contents.addWidget(self.table_cx_r)
+        self.layout_dock_values_contents.addWidget(self.table_cx_l)
         self.layout_dock_values_contents.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         ########Conexiones de slots
@@ -168,6 +184,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.table_ec_l.sig_mark.connect(self.mark_ecochg)
         self.table_ec_r.sig_auto_mark.connect(self.auto_ecochg_mark)
         self.table_ec_l.sig_auto_mark.connect(self.auto_ecochg_mark)
+        # Misma mecanica: la marca va a la bandera A de la curva activa.
+        self.table_cx_r.sig_mark.connect(self.mark_ecochg)
+        self.table_cx_l.sig_mark.connect(self.mark_ecochg)
         self.graph_r.sig_data_info.connect(self.measure_data)
         self.graph_l.sig_data_info.connect(self.measure_data)
         self.graph_r.sig_change_value_mark.connect(self.table_r.change_value_lat)
@@ -228,6 +247,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.total_averages = 20
         self.current_measuring = [None, None]
         self.memory = {}
+        # Conteo de raros del paciente en la P300, por oido (ver
+        # Cortical_generator.patient_count).
+        self.cortical_conteo = {}
         # FSP por curva: el grafico del dock muestra el de la curva
         # seleccionada, no solo el de la ultima promediacion.
         self.fsp_tracks = {}
@@ -297,6 +319,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         abr_data = (data or {}).get('ABR') or {}
         self.abr_od = abr_data.get('OD')
         self.abr_oi = abr_data.get('OI')
+        self.central = (data or {}).get('Central')
         # Cuanto ruido trae este paciente: lo mismo que usa el generador
         # para la curva promediada, para que el EEG crudo y el promedio
         # cuenten la misma historia.
@@ -384,6 +407,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                                     burst=stim.startswith('Burst'))
         for tabla in (self.table_ec_r, self.table_ec_l):
             tabla.set_norms(norma_ec)
+        if self.es_cortical():
+            norma_cx = cortical.normative(self.test_actual,
+                                          cortical.age_years(self.data_current))
+            for tabla in (self.table_cx_r, self.table_cx_l):
+                tabla.set_norms(norma_cx)
 
     def refresh_eeg(self):
         """Un trozo nuevo de EEG crudo en el monitor de los dos canales."""
@@ -460,8 +488,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # electrococleografia. Decir "electrodo desconectado" mandaba
             # al alumno a revisar el montaje por algo que no es del equipo.
             partes.append("SIN REGISTRO (el caso no trae ECochG)")
+        elif metadata.get('cortical_sin_datos'):
+            # Igual que el ECochG: el caso no trae el bloque de via central
+            # (casos guardados antes de que existiera).
+            partes.append("SIN REGISTRO (el caso no trae vía central)")
         elif not metadata.get('recording', True):
             partes.append("SIN REGISTRO (electrodo desconectado)")
+        if metadata.get('rare_sweeps') is not None:
+            # Oddball: lo que limita es cuantos raros entraron, no el total.
+            partes.append(f"raros {int(metadata['rare_sweeps'])}")
+        if metadata.get('blinks_in_average'):
+            partes.append("parpadeos en el promedio")
         if metadata.get('mains'):
             partes.append("50 Hz")
         # El equipo real parpadea mientras descarta barridos: sin eso, el
@@ -578,7 +615,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         return jobs
 
     def report_tipo(self, test=None):
-        return 'ELECTROCOCLEO' if (test or self.test_actual) == 'ECochG' else 'ABR'
+        return report_tipo(test or self.test_actual)
 
     def export_images(self, prefijo='upload'):
         """JPEG de los graficos para el informe, tal como estan en pantalla."""
@@ -589,11 +626,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # llegaba nunca al backend.
         os.makedirs(temp_dir, exist_ok=True)
         exporters = {'0': self.graph_r, '1': self.graph_l, 'lat_int': self.graph_lat_int}
-        if self.es_ecochg():
+        if self.es_ecochg() or self.es_cortical():
             # El ECochG no se registra en serie descendente: se hace a
             # nivel alto, que es donde el potencial de sumacion es
             # medible. El grafico latencia-intensidad queda vacio y en el
-            # informe seria un cuadro en blanco con un titulo.
+            # informe seria un cuadro en blanco con un titulo. Lo mismo los
+            # corticales: se leen a un nivel, por canal.
             exporters.pop('lat_int')
         images = {}
         for suffix, exporter in exporters.items():
@@ -659,6 +697,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                          if shift]
             if polaridad:
                 data['polaridad'] = polaridad
+        if self.es_cortical():
+            # Las comparaciones del MLR (entre electrodos y entre oidos) y
+            # el conteo de la P300 no son de una curva: van ya resueltos.
+            if self.test_actual == 'MLR':
+                (d_e, hemi), (d_o, oido) = self.cortical_effects()
+                data['efectos'] = {'electrodo': d_e, 'hemisferio': hemi,
+                                   'oido': d_o, 'oido_menor': oido}
+            if self.test_actual == 'P300':
+                data['conteo'] = {lado: self.cortical_conteo.get(lado)
+                                  for lado in ('OD', 'OI')
+                                  if self.cortical_conteo.get(lado)}
         return data
 
     def draw_session(self, data):
@@ -684,15 +733,27 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             grafico.load_curve(nombre, unpack_trace(traza, entrada.get('int')),
                                entrada.get('int'), entrada,
                                traza.get('gap', 0.0), entrada.get('marcas_graf'))
-            getattr(self, f'curves_{letra}').append(nombre)
+            # En los multicanal la lista lleva capturas ('R1'), no canales.
+            lista = getattr(self, f'curves_{letra}')
+            if curve_group(nombre) not in lista:
+                lista.append(curve_group(nombre))
         if self.es_ecochg():
             for nombre in self.memory:
                 self.refresh_ecochg(nombre)
+        if self.es_cortical():
+            self.cortical_conteo = dict(data.get('conteo') or {})
+            for nombre in self.memory:
+                self.refresh_cortical(nombre)
         self.detail_all.process_and_fill_data(self.memory)
         self.report.text_edit_1.setPlainText(data.get('hallazgos', ''))
         self.report.text_edit_2.setPlainText(data.get('conclusion', ''))
-        for lista in (self.curves_R, self.curves_L):
-            if lista:
+        for letra, lista in (('R', self.curves_R), ('L', self.curves_L)):
+            if not lista:
+                continue
+            if self.es_cortical():
+                # Se selecciona el canal donde se lee la prueba.
+                self.selected_(f"{lista[-1]}.{cortical.READ_CHANNEL[self.test_actual]}")
+            else:
                 self.selected_(lista[-1])
 
     def set_test_silently(self, test, equipo=None):
@@ -773,8 +834,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def restore_current(self, client, appointment_id):
         """Retomar la atencion, sincronico (ver fetch_sessions y
         apply_restored)."""
-        tipos = ['ABR', 'ELECTROCOCLEO']
-        guardados = recuperar(appointment_id, tipos, client)
+        guardados = recuperar(appointment_id, INFORME_TIPOS, client)
         self.apply_restored(guardados, respaldo_informes.usuario_de(client), appointment_id)
 
     def apply_restored(self, guardados, usuario, appointment_id):
@@ -798,8 +858,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             data = informe.get('data')
             if not isinstance(data, dict) or not data.get('curvas'):
                 continue
-            test = data.get('prueba') or (
-                'ECochG' if informe.get('tipo') == 'ELECTROCOCLEO' else 'ABR')
+            test = data.get('prueba') or test_of_report(informe.get('tipo'))
             pruebas.setdefault(test, (data, informe))
         if not pruebas:
             return
@@ -908,6 +967,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.table_l.clear_all()
         self.table_ec_r.clear_all()
         self.table_ec_l.clear_all()
+        self.table_cx_r.clear_all()
+        self.table_cx_l.clear_all()
+        self.cortical_conteo = {}
         self.detail_all.clear_all()
 
         # Limpiar panel de detalle y estado de captura
@@ -923,6 +985,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             table = f'table_{table_letter}'
             getattr(self, table).clear_all()
             getattr(self, f'table_ec_{table_letter}').clear_all()
+            getattr(self, f'table_cx_{table_letter}').clear_all()
             self.detail_all.delete_row_by_header(curve)
             del self.memory[curve]
             self.fsp_tracks.pop(curve, None)
@@ -938,8 +1001,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # ANTES del lookup en memory: la curva recien creada todavia no
         # esta ahi (memory_curves corre despues de graph()) y el FSP en
         # vivo se quedaba dibujando en la curva anterior.
-        self.fsp_shown = curve
-        self.fmp.set_track(self.fsp_tracks.get(curve))
+        # El FSP es de la captura: en los multicanal, de 'R1' y no de
+        # 'R1.C3'.
+        self.fsp_shown = curve_group(curve)
+        self.fmp.set_track(self.fsp_tracks.get(self.fsp_shown))
         try:
             table = f'table_{table_letter}'
             data = self.memory[curve]
@@ -949,6 +1014,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # La tabla del ECochG muestra las medidas de la curva que se
             # esta mirando: son de la curva, no del oido.
             self.refresh_ecochg(curve)
+            self.update_detail_info(data)
+            return
+        if self.es_cortical():
+            self.refresh_cortical(curve)
             self.update_detail_info(data)
             return
         # Los rangos normativos dependen de la intensidad de ESA curva: una
@@ -1136,8 +1205,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.done = True
             self.count_averages = 0
             self.control.stop_capture()
-        i_xy, c_xy, repro, metadata = self.test_test(side)
         intencity = self.current_setting['int']
+        if self.es_cortical():
+            self.graph_cortical(side, intencity)
+            return
+        i_xy, c_xy, repro, metadata = self.test_test(side)
         self.last_metadata = metadata
 
         data_line = {self.current_capture_curve: {
@@ -1161,6 +1233,46 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if motivo and self.state_capture == 'record' and not self.done:
             # Parada automatica del equipo (Parametros avanzados): la curva
             # se cierra con lo que lleva, igual que al apretar Detener.
+            self.control.stop_capture()
+            self.lbl_info.setText(self.lbl_info.text() + "  ·  " + motivo)
+
+    def graph_cortical(self, side, intencity):
+        """Un tick de un potencial multicanal: una curva por canal.
+
+        Los canales son curvas del grafico ('R1.C3', 'R1.Cz', 'R1.C4'), asi
+        que cada uno se marca y se mide como cualquier curva; la captura
+        ('R1') es la que lleva el FSP y el estado.
+        """
+        prom = [min(self.count_averages / max(self.total_averages, 1), 1.0),
+                self.current_setting['average']]
+        case = self.abr_od if side == "OD" else self.abr_oi
+        t, trazos, metadata = Cortical_Curve(
+            self.test_actual, intencity, self.current_setting, case,
+            self.central, prom, done=self.done, patient=self.data_current,
+            capture_id=self.current_capture_curve, technical=self.technical)
+        self.last_metadata = metadata
+        grupo = self.current_capture_curve
+        data_line = {}
+        for canal in metadata['channels']:
+            subs = metadata['channel_subs'][canal]
+            data_line[f"{grupo}.{canal}"] = {
+                "ipsi_xy": (t, trazos[canal]), "contra_xy": None,
+                "sub_a": (t, subs['sub_a']), "sub_b": (t, subs['sub_b']),
+                "overlays": {k: (t, v[canal])
+                             for k, v in metadata['overlays'].items()},
+                "canal": canal, "repro": 0, "intencity": intencity,
+                "done": self.done}
+        grafico = self.graph_r if side == 'OD' else self.graph_l
+        grafico.create_line(data_line, intencity, self.current_setting)
+        if 'conteo' in metadata:
+            self.cortical_conteo[side] = metadata['conteo']
+            tabla = self.table_cx_r if side == 'OD' else self.table_cx_l
+            tabla.set_conteo(metadata['conteo'])
+        self.push_fsp(grupo, metadata)
+        self.update_capture_info(metadata)
+        self.update_detail_info(self.current_setting)
+        motivo = self.auto_stop_reason(metadata)
+        if motivo and self.state_capture == 'record' and not self.done:
             self.control.stop_capture()
             self.lbl_info.setText(self.lbl_info.text() + "  ·  " + motivo)
 
@@ -1268,9 +1380,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         getattr(self,label).setText(f'{data}')
 
     def update_memory_from_graph_mark(self, data):
-        if self.es_ecochg():
+        if self.es_ecochg() or self.es_cortical():
             # Las marcas del ECochG no son ondas: no entran en LatAmp ni en
-            # la tabla de todas las curvas, que esta armada sobre I-V.
+            # la tabla de todas las curvas, que esta armada sobre I-V. Las
+            # de los corticales tampoco (Na, Pa, P1, P3...).
             self.ecochg_mark_changed(data)
             return
         """
@@ -1336,6 +1449,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # test_changed), y esa se tiene que guardar con su propio tipo.
         return self.test_actual == 'ECochG'
 
+    def es_cortical(self):
+        """MLR, CAEP, P300 o MMN: multicanal, con su propio generador."""
+        return self.test_actual in cortical.TESTS
+
     def apply_test_widgets(self, test):
         """Muestra la tabla de la prueba activa y ajusta el marcado.
 
@@ -1345,12 +1462,25 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         comparten ninguna medida.
         """
         ecochg_on = test == 'ECochG'
+        cortical_on = test in cortical.TESTS
         for tabla in (self.table_r, self.table_l):
-            tabla.setVisible(not ecochg_on)
+            tabla.setVisible(not ecochg_on and not cortical_on)
         for tabla in (self.table_ec_r, self.table_ec_l):
             tabla.setVisible(ecochg_on)
+        for tabla in (self.table_cx_r, self.table_cx_l):
+            tabla.setVisible(cortical_on)
+            if cortical_on:
+                tabla.set_test(test)
         for grafico in (self.graph_r, self.graph_l):
-            if ecochg_on:
+            if cortical_on:
+                # Todas se pegan: son picos y valles, y la bandera de un
+                # componente de 30 ms de ancho cae siempre algo corrida.
+                marcas = cortical.MARKS[test]
+                grafico.set_marks_mode(
+                    marcas, snap=marcas, notify=True,
+                    signs={m: cortical.mark_polarity(m) for m in marcas},
+                    snap_ms=cortical.SNAP_MS[test])
+            elif ecochg_on:
                 # El PA se pega al pico; la base y el hombro del PS caen
                 # donde el alumno decida, que es la parte que se evalua.
                 grafico.set_marks_mode(ecochg.MARKS, snap=('PA',), notify=True)
@@ -1415,7 +1545,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                     guardadas.pop(marca, None)
                 else:
                     guardadas[marca] = list(coords)
-            self.refresh_ecochg(curve)
+            if self.es_cortical():
+                self.refresh_cortical(curve)
+            else:
+                self.refresh_ecochg(curve)
 
     def refresh_ecochg(self, curve):
         """Recalcula las medidas de esa curva y las muestra."""
@@ -1473,6 +1606,59 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                            'int': datos.get('int'),
                            'ap_lat': (datos.get('ECochG') or {}).get('ap_lat')})
         return ecochg.polarity_shift(curvas)
+
+    def refresh_cortical(self, curve):
+        """Medidas de la captura de esa curva (todos sus canales) en la
+        tabla de su oido, y las comparaciones entre hemisferios y oidos."""
+        if not curve or curve not in self.memory:
+            return
+        side = 0 if curve[0] == 'R' else 1
+        grafico = self.graph_r if side == 0 else self.graph_l
+        tabla = self.table_cx_r if side == 0 else self.table_cx_l
+        grupo = curve_group(curve)
+        medidas = {}
+        for nombre, entrada in self.memory.items():
+            if curve_group(nombre) != grupo:
+                continue
+            datos = grafico.data.get(nombre)
+            if datos is None:
+                continue
+            x, y = datos['ipsi_xy']
+            entrada['Cortical'] = cortical.measure(
+                self.test_actual, np.asarray(x), np.asarray(y),
+                entrada.get('marcas') or {})
+            medidas[entrada.get('canal')] = entrada['Cortical']
+        tabla.set_medidas(grupo, medidas)
+        tabla.set_conteo(self.cortical_conteo.get('OD' if side == 0 else 'OI'))
+        if self.test_actual == 'MLR':
+            electrodo, oido = self.cortical_effects()
+            for t in (self.table_cx_r, self.table_cx_l):
+                t.set_efectos({'electrodo': electrodo, 'oido': oido})
+
+    def cortical_effects(self):
+        """(efecto electrodo, efecto oido) del MLR con lo medido.
+
+        Por oido se usa la ULTIMA captura que tenga Na-Pa medido: es una
+        comparacion entre registros y el alumno tiene que haberlos marcado.
+        """
+        napa = {}
+        for oido, letra in (('OD', 'R'), ('OI', 'L')):
+            grupos = sorted({curve_group(n) for n in self.memory
+                             if n.startswith(letra)},
+                            key=curve_order, reverse=True)
+            for grupo in grupos:
+                valores = {}
+                for nombre, entrada in self.memory.items():
+                    if curve_group(nombre) != grupo:
+                        continue
+                    amp = ((entrada.get('Cortical') or {}).get('amp')
+                           or {}).get('Na-Pa')
+                    if amp is not None:
+                        valores[(oido, entrada.get('canal'))] = amp
+                if valores:
+                    napa.update(valores)
+                    break
+        return cortical.electrode_effect(napa), cortical.ear_effect(napa)
 
     def test_changed(self, test):
         """Cambio de prueba en el combo: cada potencial trae su protocolo.
@@ -1594,6 +1780,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         ventana = self.technical.get('window_ms', 12)
         if self.es_ecochg():
             escala = ecochg.display_scale_uv(self.technical.get('montage'))
+        elif self.es_cortical():
+            escala = cortical.DISPLAY_SCALE_UV[self.test_actual]
         else:
             escala = self.ESCALA_ABR_UV
         for grafico in (self.graph_r, self.graph_l):
@@ -1613,6 +1801,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             name_curve = getattr(self,graph).act_curve
             if value is not None:
                 self.memory[name_curve][key][c][column] = val
+        elif self.es_cortical():
+            # Una entrada por canal ('R1.C3'...). Las marcas y medidas que
+            # ya tenga se conservan: se puede marcar mientras promedia.
+            grupo = self.current_capture_curve
+            grafico = self.graph_r if grupo.startswith('R') else self.graph_l
+            for nombre, valores in grafico.data.items():
+                if curve_group(nombre) != grupo:
+                    continue
+                previa = self.memory.get(nombre) or {}
+                entrada = dict(self.current_setting, **model)
+                entrada.update({k: previa[k] for k in ('marcas', 'Cortical')
+                                if k in previa})
+                entrada['canal'] = valores.get('canal')
+                entrada['tecnica'] = self.recording_conditions()
+                entrada['fsp_track'] = self.fsp_tracks.get(grupo, {})
+                self.memory[nombre] = entrada
         else:
             name_curve = self.current_capture_curve
             sett = self.current_setting

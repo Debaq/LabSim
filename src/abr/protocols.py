@@ -29,8 +29,10 @@ inquieto -- es la banda --, y se paga promediando el triple para nada.
   mano en Parámetros avanzados, como en el equipo, y por eso su tope llega
   a 25 ms.
 - ABR/Stacked ABR: tronco, 10-15 ms.
-- MLR: respuesta de vía tálamo-cortical, decenas de ms.
-- CAEP/MMN/P300: corteza, cientos de ms y filtros muy bajos.
+- MLR: respuesta de vía tálamo-cortical, decenas de ms. Rechazo de ±50 uV:
+  con 10-300 Hz el EEG de un barrido ya es de varios uV.
+- CAEP/MMN/P300: corteza, cientos de ms y filtros muy bajos. Rechazo de
+  ±100 uV (Duncan 2009), que deja fuera los parpadeos. Ver abr/cortical.py.
 - ASSR no se lee en el tiempo sino en frecuencia; la ventana es nominal.
 """
 from dataclasses import dataclass
@@ -95,24 +97,24 @@ PROTOCOLS = {
         note='Se analiza en frecuencia (fase/amplitud del modulador), no en el tiempo.'),
     'MLR': Protocol(
         name='MLR', window_ms=100, filter_high=10, filter_low=300,
-        rate=7.1, averages=1000, montage='vertex_mastoid',
-        stimuli=(CLICK,) + BURSTS,
-        note='Na-Pa. Muy sensible al sueño y a la edad.'),
+        rate=7.1, averages=1000, montage='vertex_mastoid', reject_uv=50.0,
+        stimuli=(CLICK,) + BURSTS, implemented=True, window_max=200.0,
+        note='Na-Pa en C3, Cz y C4. Muy sensible al sueño y a la edad.'),
     'CAEP': Protocol(
         name='CAEP', window_ms=500, filter_high=1, filter_low=30,
-        rate=1.0, averages=150, montage='vertex_mastoid',
-        stimuli=(CLICK,) + BURSTS,
+        rate=1.0, averages=150, montage='vertex_mastoid', reject_uv=100.0,
+        stimuli=(CLICK,) + BURSTS, implemented=True, window_max=800.0,
         note='P1-N1-P2 cortical. Requiere paciente despierto.'),
     'MMN': Protocol(
         name='MMN', window_ms=500, filter_high=1, filter_low=30,
-        rate=1.5, averages=200, montage='vertex_mastoid',
-        stimuli=(CLICK,) + BURSTS,
-        note='Paradigma odd-ball; se lee la resta desviante menos frecuente.'),
+        rate=1.5, averages=800, montage='vertex_mastoid', reject_uv=100.0,
+        stimuli=(CLICK,) + BURSTS, implemented=True, window_max=800.0,
+        note='Oddball pasivo; se lee la resta desviante menos frecuente.'),
     'P300': Protocol(
         name='P300', window_ms=800, filter_high=0.5, filter_low=30,
-        rate=1.0, averages=50, montage='vertex_mastoid',
-        stimuli=(CLICK,) + BURSTS,
-        note='Odd-ball con tarea atencional: el paciente cuenta los estímulos raros.'),
+        rate=1.0, averages=250, montage='vertex_mastoid', reject_uv=100.0,
+        stimuli=(CLICK,) + BURSTS, implemented=True, window_max=1000.0,
+        note='Oddball con tarea: el paciente cuenta los estímulos raros.'),
 }
 
 DEFAULT_TEST = 'ABR'
@@ -133,6 +135,42 @@ STANDARD_SETUP = {
     },
 }
 
+# Latencia media y tardía (clase 10-11 de Electrofisiología): referencia en
+# el lóbulo, ganancia baja para que el EEG no sature el amplificador y
+# rechazo de ±50 (MLR) o ±100 uV (tardíos). El oddball es 1 kHz frecuente
+# contra 2 kHz raro, 80/20.
+_ODDBALL = {'oddball_rare': 'Burst 2 kHz', 'oddball_pct': 20.0}
+STANDARD_SETUP.update({
+    'MLR': {
+        'control': {'stim': CLICK, 'pol': 'Alternada', 'int': 70,
+                    'rate': 7.1, 'filter_passhigh': '10',
+                    'filter_down': '300', 'average': 1000},
+        'technical': {'montage': 'vertex_earlobe', 'window_ms': 100.0,
+                      'gain': 50000.0, 'artifact_reject_uv': 50.0},
+    },
+    'CAEP': {
+        'control': {'stim': 'Burst 1 kHz', 'pol': 'Alternada', 'int': 70,
+                    'rate': 1.0, 'filter_passhigh': '1',
+                    'filter_down': '30', 'average': 150},
+        'technical': {'montage': 'vertex_earlobe', 'window_ms': 500.0,
+                      'gain': 50000.0, 'artifact_reject_uv': 100.0},
+    },
+    'P300': {
+        'control': {'stim': 'Burst 1 kHz', 'pol': 'Alternada', 'int': 70,
+                    'rate': 1.0, 'filter_passhigh': '0.5',
+                    'filter_down': '30', 'average': 250},
+        'technical': dict(_ODDBALL, montage='vertex_earlobe', window_ms=800.0,
+                          gain=50000.0, artifact_reject_uv=100.0),
+    },
+    'MMN': {
+        'control': {'stim': 'Burst 1 kHz', 'pol': 'Alternada', 'int': 70,
+                    'rate': 1.5, 'filter_passhigh': '1',
+                    'filter_down': '30', 'average': 800},
+        'technical': dict(_ODDBALL, montage='vertex_earlobe', window_ms=500.0,
+                          gain=50000.0, artifact_reject_uv=100.0),
+    },
+})
+
 # Con burst el estándar cambia la envolvente y la ventana: el sumación dura
 # lo que dura el estímulo (1-10-1 ms = 12 ms) y en 10 ms no entra entero.
 STANDARD_BURST_TECHNICAL = {'burst_envelope': 'ms-1-10-1', 'window_ms': 20.0}
@@ -145,7 +183,9 @@ def standard_setup(test: str, stim: str = CLICK):
         return None
     control = dict(base['control'])
     technical = dict(base['technical'])
-    if stim in BURSTS:
+    # Solo el ECochG: en los corticales el burst es el estímulo de rutina y
+    # su ventana es la de la prueba, no la meseta del sumación.
+    if stim in BURSTS and test == 'ECochG':
         technical.update(STANDARD_BURST_TECHNICAL)
     return control, technical
 

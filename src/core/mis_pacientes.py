@@ -39,6 +39,10 @@ COLUMNAS = ("Fecha", "Paciente", "Procedimiento")
 NOMBRE_EXAMEN = {
     "ABR": "PEATC (ABR)",
     "ELECTROCOCLEO": "Electrococleografía",
+    "PEALM": "Potencial de latencia media (PEALM)",
+    "CAEP": "Potencial cortical (P1-N1-P2)",
+    "P300": "P300",
+    "MMN": "Negatividad de disparidad (MMN)",
     "AABR": "Tamizaje automatizado (AABR)",
     "EOA": "Emisiones otoacústicas",
     "VEMP": "VEMP",
@@ -46,7 +50,7 @@ NOMBRE_EXAMEN = {
 }
 # Los que se pueden abrir en el módulo para mirarlos: guardan las curvas
 # con su trazo y el ABR las vuelve a dibujar.
-SE_ABREN_EN_EL_ABR = ("ABR", "ELECTROCOCLEO")
+SE_ABREN_EN_EL_ABR = ("ABR", "ELECTROCOCLEO", "PEALM", "CAEP", "P300", "MMN")
 AVISO_PDF = ("El informe en PDF de cada examen lo ves en la web: "
              "<i>Pacientes que has atendido → la atención → Tus informes</i>.")
 

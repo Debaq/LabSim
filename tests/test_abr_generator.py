@@ -1106,9 +1106,11 @@ def test_protocol_table_covers_every_test_in_the_combo():
     esperados = {'ABR', 'ASSR', 'MLR', 'P300', 'MMN', 'ECochG', 'CAEP',
                  'Stacked ABR'}
     assert esperados == set(PROTOCOLS)
-    # Con generador detras: ABR y ECochG. El resto queda descrito pero
+    # Con generador detras: ABR, ECochG y los de latencia media y tardia
+    # (abr/Cortical_generator.py). El resto queda descrito pero
     # deshabilitado hasta que aparezca el suyo.
-    assert {n for n, p in PROTOCOLS.items() if p.implemented} == {'ABR', 'ECochG'}
+    assert {n for n, p in PROTOCOLS.items() if p.implemented} == {
+        'ABR', 'ECochG', 'MLR', 'CAEP', 'P300', 'MMN'}
     for nombre, p in PROTOCOLS.items():
         assert p.window_ms > 0, nombre
         assert p.filter_high < p.filter_low, nombre     # pasa-alto < pasa-bajo

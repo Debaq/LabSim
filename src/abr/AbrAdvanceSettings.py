@@ -63,6 +63,12 @@ ARTIFACT_REJECT = {
     "±20 µV": 20.0,
     "±25 µV": 25.0,
     "±40 µV": 40.0,
+    # Los de los potenciales de latencia media y tardía: el EEG de 1-30 Hz
+    # es de decenas de uV y con ±40 se iría casi todo barrido.
+    "±50 µV": 50.0,
+    "±75 µV": 75.0,
+    "±100 µV": 100.0,
+    "±150 µV": 150.0,
     "Desactivado": 0.0,
 }
 
@@ -147,6 +153,14 @@ MASKING_NOISE = {
 }
 
 CHANNELS = {"1 canal (ipsi)": 1, "2 canales (ipsi + contra)": 2}
+
+# Paradigma oddball (P300 y MMN): el estímulo infrecuente y cuántos de cada
+# cien lo son. El frecuente es el del panel. Si son el mismo, no hay nada
+# que discriminar y no aparecen ni la P300 ni la MMN.
+ODDBALL_RARE = {s: s for s in ("Burst 500 Hz", "Burst 1 kHz", "Burst 2 kHz",
+                               "Burst 4 kHz", "Click")}
+ODDBALL_PCT = {"10 %": 10.0, "15 %": 15.0, "20 %": 20.0, "30 %": 30.0,
+               "50 %": 50.0}
 
 GAINS = {"×10.000": 10000.0, "×50.000": 50000.0, "×100.000": 100000.0,
          "×150.000": 150000.0}
@@ -254,6 +268,8 @@ class AbrAdvanceSettings(QDialog):
         self.sb_masking_offset.setDecimals(0)
         self.sb_masking_offset.setSuffix(" dB")
         self.sb_masking_offset.setValue(float(settings.get('masking_offset_db') or 0.0))
+        self.cb_oddball_rare = _combo(ODDBALL_RARE, settings.get('oddball_rare'))
+        self.cb_oddball_pct = _combo(ODDBALL_PCT, settings.get('oddball_pct'))
         filas = (
             ("Duración del click", self.cb_click_us),
             ("Envolvente del tone burst", self.cb_burst_env),
@@ -263,6 +279,8 @@ class AbrAdvanceSettings(QDialog):
             ("Presentación", self.cb_presentation),
             ("Ruido de enmascaramiento", self.cb_masking_noise),
             ("Offset del enmascaramiento", self.sb_masking_offset),
+            ("Oddball: estímulo infrecuente", self.cb_oddball_rare),
+            ("Oddball: proporción de infrecuentes", self.cb_oddball_pct),
         )
         for row, (texto, widget) in enumerate(filas):
             self._fila(grid, row, texto, widget, pendiente=True)
@@ -386,6 +404,8 @@ class AbrAdvanceSettings(QDialog):
             'presentation': self.cb_presentation.currentData(),
             'masking_noise': self.cb_masking_noise.currentData(),
             'masking_offset_db': float(self.sb_masking_offset.value()),
+            'oddball_rare': self.cb_oddball_rare.currentData(),
+            'oddball_pct': float(self.cb_oddball_pct.currentData()),
             'channels': int(self.cb_channels.currentData()),
             'gain': float(self.cb_gain.currentData()),
             'notch_hz': float(self.cb_notch.currentData()),
@@ -411,6 +431,8 @@ class AbrAdvanceSettings(QDialog):
                            (self.cb_jitter, 'rate_jitter_pct'),
                            (self.cb_presentation, 'presentation'),
                            (self.cb_masking_noise, 'masking_noise'),
+                           (self.cb_oddball_rare, 'oddball_rare'),
+                           (self.cb_oddball_pct, 'oddball_pct'),
                            (self.cb_channels, 'channels'),
                            (self.cb_gain, 'gain'),
                            (self.cb_notch, 'notch_hz'),

@@ -36,6 +36,13 @@ def pack_trace(values: dict) -> dict:
                           ('sub_b', 'sub_b')):
         xy = values.get(clave)
         traza[nombre] = _serie(xy[1], DEC_UV) if xy is not None else None
+    # Potenciales multicanal: el canal y los trazos superpuestos del
+    # oddball (frecuente, raro), con el mismo eje de tiempo.
+    if values.get('canal'):
+        traza['canal'] = values['canal']
+    if values.get('overlays'):
+        traza['overlays'] = {k: _serie(xy[1], DEC_UV)
+                             for k, xy in values['overlays'].items()}
     return traza
 
 
@@ -47,17 +54,54 @@ def unpack_trace(traza: dict, intensidad) -> dict:
         serie = traza.get(nombre)
         return (t, np.asarray(serie, dtype=float)) if serie is not None else None
 
-    return {'ipsi_xy': xy('ipsi'), 'contra_xy': xy('contra'),
-            'sub_a': xy('sub_a'), 'sub_b': xy('sub_b'),
-            'repro': traza.get('repro', 0), 'intencity': intensidad,
-            # Una sesion guardada no se sigue promediando.
-            'done': True}
+    valores = {'ipsi_xy': xy('ipsi'), 'contra_xy': xy('contra'),
+               'sub_a': xy('sub_a'), 'sub_b': xy('sub_b'),
+               'repro': traza.get('repro', 0), 'intencity': intensidad,
+               # Una sesion guardada no se sigue promediando.
+               'done': True}
+    if traza.get('canal'):
+        valores['canal'] = traza['canal']
+    if traza.get('overlays'):
+        valores['overlays'] = {k: (t, np.asarray(v, dtype=float))
+                               for k, v in traza['overlays'].items()}
+    return valores
+
+
+# Orden de los canales dentro de una captura multicanal: de izquierda a
+# derecha (C3, Cz, C4) y de adelante hacia atras (Fz, Cz, Pz).
+CHANNEL_ORDER = ('Fz', 'C3', 'Cz', 'C4', 'Pz')
 
 
 def curve_order(nombre: str) -> tuple:
-    """R1, R2, ..., R10: por numero, no alfabetico (R10 no va antes de R2)."""
-    letra, numero = nombre[:1], nombre[1:]
-    return (letra, int(numero) if numero.isdigit() else 0)
+    """R1, R2, ..., R10: por numero, no alfabetico (R10 no va antes de R2).
+
+    Las curvas de un potencial multicanal son 'R1.C3', 'R1.Cz'...: van por
+    captura y, dentro de ella, por canal.
+    """
+    letra, resto = nombre[:1], nombre[1:]
+    numero, _, canal = resto.partition('.')
+    orden = CHANNEL_ORDER.index(canal) if canal in CHANNEL_ORDER else len(CHANNEL_ORDER)
+    return (letra, int(numero) if numero.isdigit() else 0, orden)
+
+
+def curve_group(nombre: str) -> str:
+    """La captura a la que pertenece la curva ('R1.C3' -> 'R1')."""
+    return nombre.partition('.')[0]
+
+
+# Tipo de informe (tabla `reports`) de cada prueba del modulo. Las que no
+# figuran se suben como ABR.
+REPORT_TIPOS = {'ECochG': 'ELECTROCOCLEO', 'MLR': 'PEALM', 'CAEP': 'CAEP',
+                'P300': 'P300', 'MMN': 'MMN'}
+TIPO_PRUEBA = {tipo: prueba for prueba, tipo in REPORT_TIPOS.items()}
+
+
+def report_tipo(test: str) -> str:
+    return REPORT_TIPOS.get(test, 'ABR')
+
+
+def test_of_report(tipo: str) -> str:
+    return TIPO_PRUEBA.get(tipo, 'ABR')
 
 
 def session_label(report: dict) -> str:
@@ -68,5 +112,5 @@ def session_label(report: dict) -> str:
     except ValueError:
         pass
     hora = (report.get('hora') or '')[:5]
-    prueba = 'ECochG' if report.get('tipo') == 'ELECTROCOCLEO' else 'ABR'
+    prueba = test_of_report(report.get('tipo'))
     return ' '.join(p for p in (fecha, hora, '·', prueba) if p)

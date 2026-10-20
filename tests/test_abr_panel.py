@@ -466,7 +466,10 @@ def test_scale_with_marks_on_another_curve():
     assert w.lbl_scale.text() == '3µV'
     assert abs(g.data['R2']['gap'] - gap / 2) < 1e-9
     item = g.mark_item('R1', 'V')
-    assert abs(item.pos().y() - (g.marks['R1']['V'][1] + g.data['R1']['gap'] + 0.1)) < 1e-9
+    # La flecha se despega del trazo en proporción a la escala (0.1 uV a
+    # los 6 del ABR; ver AbrGraph.place_mark).
+    despegue = g.get_scale() / 60.0
+    assert abs(item.pos().y() - (g.marks['R1']['V'][1] + g.data['R1']['gap'] + despegue)) < 1e-9
 
 
 def test_delete_all_marks_only_touches_the_active_curve():

@@ -47,6 +47,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     # oidos: no son senial del canal, son la replicabilidad.
     COLOR_SUB_A = (0, 140, 70)
     COLOR_SUB_B = (140, 90, 40)
+    # Trazos superpuestos del oddball (ver abr/cortical.build_traces).
+    OVERLAY_STYLE = {
+        'frecuente': ((120, 120, 120), Qt.PenStyle.SolidLine),
+        'raro': ((40, 40, 40), Qt.PenStyle.DashLine),
+    }
 
     def __init__(self, side):
         super().__init__()
@@ -67,6 +72,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # acertarle al punto; el hombro del PS y la linea de base NO se
         # pegan a nada, que es justamente la parte que el alumno decide.
         self.snap_marks = ()
+        # Hacia donde se pega cada marca (-1 minimo, +1 maximo) y cuanto
+        # busca. El PA del ECochG va al minimo con 0.4 ms; la Pa del MLR es
+        # un maximo y la P300 tiene decenas de ms de ancho.
+        self.snap_sign = {}
+        self.snap_ms = self.SNAP_MS
         # Si una marca recien puesta avisa. En el ABR NO: ahi la marca la
         # pone measure_action DESPUES de escribir la tabla con los valores
         # de los cursores (latencia A, amplitud pico-pico A-B), y avisar
@@ -187,6 +197,15 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                                else self.COLOR_SUB_B)
             color.setAlpha(255 if activa else 110)
             return pg.mkPen(color, width=1)
+        if clave.startswith('ov_'):
+            # Trazo superpuesto del oddball (frecuente, raro): gris, para
+            # que el de la prueba --el raro en la P300, la diferencia en la
+            # MMN-- sea el que se lee y se marca.
+            gris, estilo = self.OVERLAY_STYLE.get(
+                clave[3:], ((120, 120, 120), Qt.PenStyle.SolidLine))
+            color = pg.mkColor(*gris)
+            color.setAlpha(255 if activa else 120)
+            return pg.mkPen(color, width=1, style=estilo)
         base = self.active_color if activa else self.inactive_color
         if clave == 'contra':
             return pg.mkPen(base, width=1, style=Qt.PenStyle.DotLine)
@@ -280,6 +299,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 self.marks[name] = {}
                 self.curve_int[name] = intencity
                 self.curve_cfg[name] = self.read_config(setting)
+                # Canal de registro (C3, Cz...): lo trae cada curva de los
+                # potenciales multicanal y va en su etiqueta.
+                self.curve_cfg[name]['canal'] = values.get('canal')
                 self.traces[name] = self.create_traces(name, values)
                 label = self.create_label(name, values['gap'])
                 self.pw.addItem(label)
@@ -322,6 +344,12 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             x=xy[0] if xy else [], y=(np.asarray(xy[1]) + gap) if xy else [],
             pen=self.pen_for('contra'), name=f'{name}#contra')
         trazos['contra'].setVisible(self.show_contra)
+        # Superpuestos del oddball, debajo del promedio que se marca.
+        for nombre_ov, xy in (values.get('overlays') or {}).items():
+            clave = f'ov_{nombre_ov}'
+            trazos[clave] = self.pw.plot(
+                x=xy[0], y=np.asarray(xy[1]) + gap, pen=self.pen_for(clave),
+                name=f'{name}#{clave}')
         trazos['main'] = self.pw.plot(
             x=values['ipsi_xy'][0], y=np.asarray(values['ipsi_xy'][1]) + gap,
             pen=self.pen_for('main'), name=name)
@@ -334,6 +362,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         gap = self.data[graph_name]['gap']
         fuentes = {'main': data.get('ipsi_xy'), 'contra': data.get('contra_xy'),
                    'sub_a': data.get('sub_a'), 'sub_b': data.get('sub_b')}
+        for nombre_ov, xy in (data.get('overlays') or {}).items():
+            fuentes[f'ov_{nombre_ov}'] = xy
         for clave, xy in fuentes.items():
             item = trazos.get(clave)
             if item is None:
@@ -358,7 +388,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         d = self.data[curve]
         self.update_graph(curve, {
             'ipsi_xy': d['ipsi_xy'], 'contra_xy': d.get('contra_xy'),
-            'sub_a': d.get('sub_a'), 'sub_b': d.get('sub_b')})
+            'sub_a': d.get('sub_a'), 'sub_b': d.get('sub_b'),
+            'overlays': d.get('overlays')})
 
     def drag_curve(self, value):
         gap_y = value['pos'][1]
@@ -429,6 +460,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             nivel = self.level_text(intensidad, self.curve_cfg.get(key) or {})
         else:
             nivel = f"{intensidad} dB nHL"
+        canal = (self.curve_cfg.get(key) or {}).get('canal')
+        if canal:
+            nivel = f"<b>{canal}</b> · {nivel}"
         tokens = self.curve_tokens(key)
         extra = ''
         if tokens:
@@ -567,26 +601,38 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             # Actualizar la latencia actual
             self.current_lat = lat_a
 
-    def set_marks_mode(self, labels, snap=(), notify=False):
-        """Que marcas tiene esta prueba, cuales se pegan y si avisan."""
+    def set_marks_mode(self, labels, snap=(), notify=False, signs=None,
+                       snap_ms=None):
+        """Que marcas tiene esta prueba, cuales se pegan y si avisan.
+
+        `signs` dice hacia donde se pega cada marca (-1 al minimo, +1 al
+        maximo; por defecto al minimo, que es el PA del ECochG) y `snap_ms`
+        cuanto busca alrededor de la bandera.
+        """
         self.mark_labels = tuple(labels)
         self.snap_marks = tuple(snap)
         self.notify_create = bool(notify)
+        self.snap_sign = dict(signs or {})
+        self.snap_ms = float(snap_ms) if snap_ms else self.SNAP_MS
 
-    def snap_to_peak(self, x):
-        """Minimo del trazo cerca de x.
+    def snap_to_peak(self, x, mark=None):
+        """Extremo del trazo cerca de x: el minimo o el maximo segun la marca.
 
         En el ECochG el PA es una deflexion NEGATIVA (el electrodo activo
-        es el del oido, no el vertex), asi que el pico es un minimo.
+        es el del oido, no el vertex), asi que el pico es un minimo. En los
+        corticales la Pa, la P1 o la P3 son maximos.
         """
         datos = self.data.get(self.act_curve)
         if not datos:
             return x
         xs, ys = datos['ipsi_xy']
-        cerca = np.where(np.abs(xs - x) <= self.SNAP_MS)[0]
+        cerca = np.where(np.abs(xs - x) <= self.snap_ms)[0]
         if not len(cerca):
             return x
-        return float(xs[cerca[int(np.argmin(ys[cerca]))]])
+        valores = np.asarray(ys)[cerca]
+        if self.snap_sign.get(mark, -1) > 0:
+            return float(xs[cerca[int(np.argmax(valores))]])
+        return float(xs[cerca[int(np.argmin(valores))]])
 
     def mark_at_cursor(self, mark):
         """Pone `mark` en la curva activa, en la latencia de la bandera A.
@@ -601,7 +647,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                     "la etiqueta de la curva y vuelva a marcar")
         x = float(self.inf_a.getXPos())
         if mark in self.snap_marks:
-            x = self.snap_to_peak(x)
+            x = self.snap_to_peak(x, mark)
         self.current_lat = x
         self.create_marks(mark)
         return None
@@ -652,8 +698,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             return
         # La flecha va POR ENCIMA del trazo en pantalla: con el eje
         # invertido, "encima" es restar.
+        # El despegue sigue a la escala: 0.1 uV a los 6 del ABR, y a los
+        # 40 de la P300 una flecha a 0.1 uV quedaba encima del trazo.
+        despegue = self.scale_uv / 60.0
         y = y + self.data[curve_name].get('gap', 0.0) + (
-            -0.1 if self.y_inverted else 0.1)
+            -despegue if self.y_inverted else despegue)
         item = self.mark_item(curve_name, lbl_mark)
         if item is None:
             html = f"<span style='color: #000; font-size: 7pt;'><h3>&darr;<sup>{lbl_mark}</sup></h3></span>"
@@ -846,6 +895,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.window_ms = float(ms)
         self.pw.setXRange(0, self.window_ms + self.window_ms * 0.08,
                           padding=0)
+        self.apply_grid()
         # Una base sin FIN llega al borde: si el borde se movio, ella tambien.
         for nombre in list(self.base_lines):
             self.refresh_base_line(nombre)
@@ -862,7 +912,17 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         """La grilla sigue a la escala. Fija en 1 uV, a 48 uV eran ~70
         lineas y a 192 uV mas de 300: una mancha gris que tapaba las
         curvas, que ademas a esa escala ya eran casi planas."""
-        self.grid.setTickSpacing(x=[1.0], y=[self.scale_uv / self.GRID_DIVISIONS])
+        self.grid.setTickSpacing(x=[self.x_tick()],
+                                 y=[self.scale_uv / self.GRID_DIVISIONS])
+
+    def x_tick(self):
+        """Paso de la grilla en ms: 1 ms en el ABR, 10 en el MLR y 50 en
+        los tardios. Con 1 ms fijo, una ventana de 800 ms eran 800 lineas."""
+        if self.window_ms <= 30:
+            return 1.0
+        if self.window_ms <= 200:
+            return 10.0
+        return 50.0
 
     # Hasta cuantas mitades y dobles (en uV) de la escala base se llega.
     # Con los 6 uV del ABR: de 0.75 a 48 uV.

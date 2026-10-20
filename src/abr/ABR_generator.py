@@ -3449,6 +3449,10 @@ def default_settings(test='ABR'):
         # Envolvente del tone burst: la lee el ECochG (meseta del PS y
         # duracion de la MC). El ABR todavia no la mira.
         'burst_envelope': '2-1-2',
+        # Oddball de rutina de la P300 y la MMN: 2 kHz raro (el frecuente
+        # es el del panel), 20 % (ver abr/cortical.py).
+        'oddball_rare': 'Burst 2 kHz',
+        'oddball_pct': 20.0,
         # Equipo y presentacion (ver effective_reject_uv, equipment_grid,
         # masking_effect_db). Dos canales: el contralateral se registraba
         # desde siempre.

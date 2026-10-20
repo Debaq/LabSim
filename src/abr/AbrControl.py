@@ -19,6 +19,7 @@ class AbrControl(QWidget, Ui_Abr_Config):
         # visible pero no seleccionable. Se irán habilitando a medida que
         # se implemente cada prueba.
         self.disable_unimplemented_tests()
+        self.add_cortical_filters()
         # ESTACIÓN 3 OSCE: Todos los estímulos están habilitados
         # self.disable_unimplemented_stimuli()
 
@@ -48,6 +49,22 @@ class AbrControl(QWidget, Ui_Abr_Config):
                 item.setEnabled(False)
                 if protocol is not None:
                     item.setToolTip(f"{protocol.note} (en desarrollo)")
+
+    # Cortes de los potenciales de latencia media y tardía: pasa-alto de
+    # 0.5 y 1 Hz (P300 y CAEP) y pasa-bajo de 30, 100 y 300 Hz. En el .ui
+    # los combos traían solo los del ABR y el ECochG, así que el MLR y los
+    # tardíos no se podían configurar.
+    LOW_HIGHPASS = ('0.5', '1')
+    LOW_LOWPASS = ('30', '100', '300')
+
+    def add_cortical_filters(self) -> None:
+        for combo, valores in ((self.cb_filter_up, self.LOW_HIGHPASS),
+                               (self.cb_filter_down, self.LOW_LOWPASS)):
+            actual = combo.currentText()
+            for i, valor in enumerate(valores):
+                if combo.findText(valor) < 0:
+                    combo.insertItem(i, valor)
+            combo.setCurrentIndex(combo.findText(actual))
 
     def apply_protocol(self, test: str) -> None:
         """Deja seleccionables los estímulos que esta prueba usa en clínica.
