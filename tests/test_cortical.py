@@ -31,14 +31,19 @@ from abr.protocols import PROTOCOLS, STANDARD_SETUP, get_protocol
 OIDO = {'umbral': 10, 'type': 'normal'}
 
 
+def _tarea_estandar(test):
+    return STANDARD_SETUP[test]['control'].get('tarea')
+
+
 def _ctx(test, rate=None, sl=60, stim='Burst 1 kHz', rare='Burst 2 kHz',
-         fraccion=0.2, sueno=0.5):
+         fraccion=0.2, sueno=0.5, tarea=None):
     rate = rate or get_protocol(test).rate
     return {'rate': rate, 'refractory': cortical.refractory_factor(test, rate),
             'sl': cortical.sl_factor(test, sl),
             'stim_lat': cortical.stim_latency(stim),
             'deviance': cortical.deviance(stim, rare),
-            'rare_fraction': fraccion, 'sleep_draw': sueno}
+            'rare_fraction': fraccion, 'sleep_draw': sueno,
+            'tarea': tarea or _tarea_estandar(test) or 'ninguna'}
 
 
 def _t(test):
@@ -55,7 +60,7 @@ def _napa(t, y):
 
 def _captura(test, central, edad=30, avg=None, rate=None, hp=None, lp=None,
              stim=None, tecnica='estandar', capture='c1', lado='OD',
-             fraccion=1.0, oido=None):
+             fraccion=1.0, oido=None, tarea=None):
     proto = get_protocol(test)
     tec = (dict(STANDARD_SETUP[test]['technical']) if tecnica == 'estandar'
            else dict(tecnica or {}))
@@ -63,7 +68,8 @@ def _captura(test, central, edad=30, avg=None, rate=None, hp=None, lp=None,
                'pol': 'Alternada', 'rate': rate or proto.rate,
                'filter_down': lp or proto.filter_low,
                'filter_passhigh': hp or proto.filter_high,
-               'side': lado, 'clamp': False, 'mkg': 0}
+               'side': lado, 'clamp': False, 'mkg': 0,
+               'tarea': tarea or _tarea_estandar(test)}
     return Cortical_Curve(test, 70, control, oido or OIDO, central,
                           [fraccion, avg or proto.averages], fraccion >= 1,
                           patient={'edad': edad, 'gender': 0},
@@ -275,6 +281,67 @@ def test_asleep_there_is_no_p300_and_no_count():
                                'OD', _ctx('P300'))
     tramo = (t > 250) & (t < 450)
     assert tr['main']['Pz'][tramo].max() - tr['overlays']['frecuente']['Pz'][tramo].max() < 0.5
+
+
+def _p3(tr, t):
+    """Lo que el raro tiene de más que el frecuente en Pz (250-500 ms)."""
+    tramo = (t > 250) & (t < 500)
+    return float((tr['main']['Pz'] - tr['overlays']['frecuente']['Pz'])[tramo].max())
+
+
+def test_without_the_instruction_there_is_no_p3b_and_no_count():
+    """La P3b es endógena: sin pedirle que cuente o apriete, no sale."""
+    t = _t('P300')
+    central = cortical.case_params({'estado': 'despierto'})
+    contar = _p3(cortical.build_traces('P300', t, 25, central, 'OD',
+                                       _ctx('P300', tarea='contar')), t)
+    boton = _p3(cortical.build_traces('P300', t, 25, central, 'OD',
+                                      _ctx('P300', tarea='boton')), t)
+    for tarea in ('ninguna', 'pasiva'):
+        sin = _p3(cortical.build_traces('P300', t, 25, central, 'OD',
+                                        _ctx('P300', tarea=tarea)), t)
+        assert sin < 0.25 * contar, (tarea, sin, contar)
+        _, _, meta = _captura('P300', {'estado': 'despierto'}, tarea=tarea)
+        assert meta['conteo'] is None and meta['tarea'] == tarea
+    assert abs(boton - contar) < 1e-9
+
+
+def test_a_big_deviance_leaves_a_small_passive_p3a():
+    """Sin tarea, 1 kHz contra 4 kHz igual orienta: P3a chica y frontal."""
+    t = _t('P300')
+    central = cortical.case_params({'estado': 'despierto'})
+    tr = cortical.build_traces('P300', t, 25, central, 'OD',
+                               _ctx('P300', rare='Burst 4 kHz', tarea='ninguna'))
+    tramo = (t > 200) & (t < 350)
+    extra = {c: (tr['main'][c] - tr['overlays']['frecuente'][c])[tramo].max()
+             for c in ('Fz', 'Pz')}
+    assert 0.5 < extra['Fz'] < 3.0 and extra['Fz'] > extra['Pz'], extra
+
+
+def test_the_count_and_the_button_answer_the_task():
+    _, _, meta = _captura('P300', {'estado': 'despierto'}, tarea='contar')
+    assert meta['conteo']['tarea'] == 'contar' and meta['conteo']['dice'] == meta['conteo']['reales']
+    _, _, meta = _captura('P300', {'estado': 'despierto', 'conteo_error': 0.2},
+                          tarea='boton')
+    c = meta['conteo']
+    assert c['tarea'] == 'boton' and c['aciertos'] <= c['reales'] and c['falsas'] >= 0
+
+
+def test_attending_the_deviants_contaminates_the_mmn():
+    """Contar los raros suma N2b y P3b: la diferencia ya no es solo MMN."""
+    t = _t('MMN')
+    central = cortical.case_params({'estado': 'despierto'})
+    pasiva = cortical.build_traces('MMN', t, 25, central, 'OD',
+                                   _ctx('MMN', tarea='pasiva'))['main']
+    contando = cortical.build_traces('MMN', t, 25, central, 'OD',
+                                     _ctx('MMN', tarea='contar'))['main']
+    tardio = (t > 280) & (t < 450)
+    # Pasiva queda solo la cola del N1-P2 del raro (menos de 1.5 uV).
+    assert pasiva['Pz'][tardio].max() < 1.5, pasiva['Pz'][tardio].max()
+    assert contando['Pz'][tardio].max() > 5.0 * pasiva['Pz'][tardio].max()
+    # La MMN misma sigue ahí (Fz, 150-250 ms).
+    mmn = (t > 140) & (t < 230)
+    assert pasiva['Fz'][mmn].min() < -1.0
 
 
 def test_the_mmn_needs_many_deviants():

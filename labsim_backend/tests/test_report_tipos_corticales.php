@@ -60,6 +60,20 @@ $p300 = ReportPdfBuilder::build(999, 'P300', [
     'curvas' => [], 'conteo' => ['OD' => ['dice' => 18, 'reales' => 20]],
 ], $paciente, 'Alumno X', '11-09-2026');
 t_true(strpos($p300, 'dice 18 de 20 raros presentados') !== false, 'El conteo de la P300 va al PDF');
+$boton = ReportPdfBuilder::build(999, 'P300', [
+    'curvas' => [
+        'R1.Pz' => ['canal' => 'Pz', 'tarea' => 'boton', 'Cortical' => ['lat' => ['P3' => 330.0], 'amp' => ['P3' => 9.5]]],
+        'L1.Pz' => ['canal' => 'Pz', 'tarea' => 'contar', 'Cortical' => ['lat' => ['P3' => 335.0], 'amp' => []]],
+    ],
+    'conteo' => ['OD' => ['tarea' => 'boton', 'aciertos' => 47, 'falsas' => 2, 'reales' => 50]],
+], $paciente, 'Alumno X', '11-09-2026');
+t_true(strpos($boton, '47 aciertos de 50 raros, 2 falsas alarmas') !== false, 'El botón de la P300 va al PDF');
+t_true(strpos($boton, 'Apretar bot') !== false && strpos($boton, 'Contar los raros') !== false,
+       'Cada oído dice la tarea con que se registró');
+$mmn = ReportPdfBuilder::build(999, 'MMN', ['curvas' => [
+    'R1.Fz' => ['canal' => 'Fz', 'tarea' => 'pasiva', 'Cortical' => ['lat' => ['MMN' => 180.0], 'amp' => []]],
+]], $paciente, 'Alumno X', '11-09-2026');
+t_true(strpos($mmn, 'video sin sonido') !== false, 'La MMN dice la tarea pasiva');
 foreach (['CAEP', 'MMN'] as $t) {
     t_true(strpos(ReportPdfBuilder::build(999, $t, ['curvas' => []], $paciente, 'A', '11-09-2026'), '%PDF-1.4') === 0,
            "{$t} vacío igual genera PDF");

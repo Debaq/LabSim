@@ -6338,3 +6338,23 @@ Normas por edad (fuentes verificadas en PubMed el mismo día, en
 - **Efecto electrodo/oído 50 %: criterio del docente.** Musiek 1999 y Weihing
   2012 leen la diferencia porcentual entre lados, pero el corte publicado no se
   pudo verificar (texto completo inaccesible); no se le atribuye a Musiek.
+
+### Tarea del paciente en el oddball (2026-10-21)
+
+Hasta acá el simulador daba por hecha la instrucción: en la P300 el paciente
+contaba siempre y la MMN salía siempre pasiva. Ahora el panel trae el combo
+**Tarea** (solo en P300 y MMN): sin instrucción, pasiva (video sin sonido),
+contar los raros o apretar un botón con el raro.
+
+- La P3b es endógena: sale solo con contar o botón. Sin instrucción o pasiva
+  queda la P3a pasiva de una desviación grande y no hay conteo.
+- En la MMN atender a los raros suma N2b y P3b al desviante: la diferencia
+  queda contaminada (Duncan 2009 pide la atención en otra parte).
+- Contando, el paciente dice un número; con el botón quedan aciertos y falsas
+  alarmas. Las dos usan `conteo_error` del caso.
+- Arranca en "Sin instrucción" para todos (ninguna de las dos pruebas tiene
+  ahí su valor correcto); el docente la recibe puesta con el estándar
+  (contar en la P300, pasiva en la MMN). Viaja con cada captura (`tarea` en
+  la curva) y el PDF la dice por oído.
+- Se descartó dar la instrucción por el chat con la IA: más realista, pero
+  menos confiable y difícil de corregir.

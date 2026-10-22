@@ -1,6 +1,7 @@
 import random
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QComboBox, QLabel, QWidget
+from abr import cortical
 from abr.UI.AbrConfig_ui import Ui_Abr_Config
 from abr.ABR_generator import LEGACY_STIM_LABELS
 from abr.protocols import PROTOCOLS, get_protocol
@@ -20,6 +21,7 @@ class AbrControl(QWidget, Ui_Abr_Config):
         # se implemente cada prueba.
         self.disable_unimplemented_tests()
         self.add_cortical_filters()
+        self.add_task_selector()
         # ESTACIÓN 3 OSCE: Todos los estímulos están habilitados
         # self.disable_unimplemented_stimuli()
 
@@ -65,6 +67,30 @@ class AbrControl(QWidget, Ui_Abr_Config):
                 if combo.findText(valor) < 0:
                     combo.insertItem(i, valor)
             combo.setCurrentIndex(combo.findText(actual))
+
+    def add_task_selector(self) -> None:
+        """La instrucción al paciente en el oddball (P300 y MMN).
+
+        Va en la fila libre del .ui, entre Pinzar y Promediaciones, y solo
+        se ve en las pruebas con oddball. Arranca en "Sin instrucción" para
+        todos: decir qué hace el paciente es parte de lo que se evalúa (el
+        docente lo recibe puesto con el estándar, ver STANDARD_SETUP).
+        """
+        self.lbl_tarea = QLabel(tr("Abr_Config", "Tarea"), self)
+        self.cb_tarea = QComboBox(self)
+        for clave in cortical.TAREAS:
+            self.cb_tarea.addItem(tr("Abr_Config", cortical.TAREA_LABELS[clave]),
+                                  clave)
+        self.cb_tarea.setToolTip(tr(
+            "Abr_Config", "Qué se le pidió al paciente durante el registro"))
+        self.gridLayout.addWidget(self.lbl_tarea, 10, 0, 1, 1)
+        self.gridLayout.addWidget(self.cb_tarea, 10, 1, 1, 1)
+        self.set_task_visible('ABR')
+
+    def set_task_visible(self, test: str) -> None:
+        visible = test in cortical.ODDBALL_TESTS
+        self.lbl_tarea.setVisible(visible)
+        self.cb_tarea.setVisible(visible)
 
     def apply_protocol(self, test: str) -> None:
         """Deja seleccionables los estímulos que esta prueba usa en clínica.
@@ -118,11 +144,14 @@ class AbrControl(QWidget, Ui_Abr_Config):
         side = self.cb_side.currentText()
         atten = self.ch_atten.isChecked()
         clamp = self.ch_clamp.isChecked()
-
-        return {"test":test, "stim":stim, "pol":pol, "int":inty, "mkg":mkg,
+        data = {"test":test, "stim":stim, "pol":pol, "int":inty, "mkg":mkg,
                 "rate":rate, "filter_down":filter_passdown,
                 "filter_passhigh": filter_passhigh, "average" : average,
                 "side":side, "atten":atten, "clamp":clamp}
+        # Solo en el oddball: en el resto la instrucción no existe.
+        if test in cortical.ODDBALL_TESTS:
+            data["tarea"] = self.cb_tarea.currentData()
+        return data
 
     def set_data(self, config: dict) -> None:
         """Aplica configuración a los widgets del control"""
@@ -175,6 +204,11 @@ class AbrControl(QWidget, Ui_Abr_Config):
         if 'atten' in config:
             self.ch_atten.setChecked(config['atten'])
 
+        if 'tarea' in config:
+            idx = self.cb_tarea.findData(config['tarea'])
+            if idx >= 0:
+                self.cb_tarea.setCurrentIndex(idx)
+
     def disabled_all(self, value:bool=True) -> None:
         self.cb_test.setDisabled(value)
         self.cb_stim.setDisabled(value)
@@ -187,6 +221,7 @@ class AbrControl(QWidget, Ui_Abr_Config):
         self.sb_prom.setDisabled(value)
         self.cb_side.setDisabled(value)
         self.ch_atten.setDisabled(value)
+        self.cb_tarea.setDisabled(value)
         # ch_clamp NO se deshabilita a proposito: pinzar el tubo es una
         # maniobra que se hace mientras el equipo promedia, no antes.
 

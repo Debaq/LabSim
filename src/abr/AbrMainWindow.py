@@ -1264,10 +1264,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 "done": self.done}
         grafico = self.graph_r if side == 'OD' else self.graph_l
         grafico.create_line(data_line, intencity, self.current_setting)
+        tabla = self.table_cx_r if side == 'OD' else self.table_cx_l
         if 'conteo' in metadata:
             self.cortical_conteo[side] = metadata['conteo']
-            tabla = self.table_cx_r if side == 'OD' else self.table_cx_l
             tabla.set_conteo(metadata['conteo'])
+        if self.test_actual in cortical.ODDBALL_TESTS:
+            tabla.set_tarea(metadata.get('tarea'))
         self.push_fsp(grupo, metadata)
         self.update_capture_info(metadata)
         self.update_detail_info(self.current_setting)
@@ -1463,6 +1465,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         ecochg_on = test == 'ECochG'
         cortical_on = test in cortical.TESTS
+        self.control.set_task_visible(test)
         for tabla in (self.table_r, self.table_l):
             tabla.setVisible(not ecochg_on and not cortical_on)
         for tabla in (self.table_ec_r, self.table_ec_l):
@@ -1630,6 +1633,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             medidas[entrada.get('canal')] = entrada['Cortical']
         tabla.set_medidas(grupo, medidas)
         tabla.set_conteo(self.cortical_conteo.get('OD' if side == 0 else 'OI'))
+        tabla.set_tarea(next((e.get('tarea') for n, e in self.memory.items()
+                              if curve_group(n) == grupo), None))
         if self.test_actual == 'MLR':
             electrodo, oido = self.cortical_effects()
             for t in (self.table_cx_r, self.table_cx_l):

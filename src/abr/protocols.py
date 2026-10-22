@@ -138,7 +138,8 @@ STANDARD_SETUP = {
 # Latencia media y tardía (clase 10-11 de Electrofisiología): referencia en
 # el lóbulo, ganancia baja para que el EEG no sature el amplificador y
 # rechazo de ±50 (MLR) o ±100 uV (tardíos). El oddball es 1 kHz frecuente
-# contra 2 kHz raro, 80/20.
+# contra 2 kHz raro, 80/20. La tarea: contar los raros en la P300 y video
+# sin sonido en la MMN.
 _ODDBALL = {'oddball_rare': 'Burst 2 kHz', 'oddball_pct': 20.0}
 STANDARD_SETUP.update({
     'MLR': {
@@ -158,14 +159,16 @@ STANDARD_SETUP.update({
     'P300': {
         'control': {'stim': 'Burst 1 kHz', 'pol': 'Alternada', 'int': 70,
                     'rate': 1.0, 'filter_passhigh': '0.5',
-                    'filter_down': '30', 'average': 250},
+                    'filter_down': '30', 'average': 250,
+                    'tarea': 'contar'},
         'technical': dict(_ODDBALL, montage='vertex_earlobe', window_ms=800.0,
                           gain=50000.0, artifact_reject_uv=100.0),
     },
     'MMN': {
         'control': {'stim': 'Burst 1 kHz', 'pol': 'Alternada', 'int': 70,
                     'rate': 1.5, 'filter_passhigh': '1',
-                    'filter_down': '30', 'average': 800},
+                    'filter_down': '30', 'average': 800,
+                    'tarea': 'pasiva'},
         'technical': dict(_ODDBALL, montage='vertex_earlobe', window_ms=500.0,
                           gain=50000.0, artifact_reject_uv=100.0),
     },

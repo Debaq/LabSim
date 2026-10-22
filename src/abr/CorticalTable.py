@@ -11,7 +11,8 @@ canal haciendo clic en su etiqueta y se aprieta el botón del componente
 
 Abajo van las comparaciones, que no son de una curva: el efecto electrodo
 (C3 contra C4) y el efecto oído (OD contra OI) del MLR, que es lo que
-localiza; y el conteo del paciente en la P300, que valida la tarea.
+localiza; la tarea que se le dio al paciente en el oddball, y su respuesta
+en la P300 (conteo o botón), que valida la tarea.
 """
 # pylint: disable=no-name-in-module
 from PySide6.QtCore import QCoreApplication, Qt, Signal
@@ -51,6 +52,7 @@ class CorticalTable(QWidget):
         self.grupo = None
         self.efectos = {}
         self.conteo = None
+        self.tarea = None
         self._build()
 
     def _build(self) -> None:
@@ -133,6 +135,11 @@ class CorticalTable(QWidget):
         self.conteo = conteo
         self._pintar()
 
+    def set_tarea(self, tarea) -> None:
+        """Instrucción con que se registró la captura (P300 y MMN)."""
+        self.tarea = tarea
+        self._pintar()
+
     def clear_all(self) -> None:
         self.grupo = None
         self.medidas = {}
@@ -171,11 +178,18 @@ class CorticalTable(QWidget):
                 if limite and dif >= limite:
                     texto = f"<b style='color:#b00'>{texto}</b>"
                 partes.append(texto)
+        if self.test in cortical.ODDBALL_TESTS and self.tarea and self.medidas:
+            partes.append("Tarea: " + cortical.TAREA_LABELS.get(self.tarea, self.tarea))
         if self.test == 'P300' and self.conteo:
-            partes.append(f"Conteo del paciente: {self.conteo['dice']} raros "
-                          f"(presentados {self.conteo['reales']})")
+            if self.conteo.get('tarea') == 'boton':
+                partes.append(f"Botón: {self.conteo['aciertos']} aciertos de "
+                              f"{self.conteo['reales']} raros, "
+                              f"{self.conteo['falsas']} falsas alarmas")
+            else:
+                partes.append(f"Conteo del paciente: {self.conteo['dice']} raros "
+                              f"(presentados {self.conteo['reales']})")
         elif self.test == 'P300' and self.conteo is None and self.medidas:
-            partes.append("El paciente no contó los raros")
+            partes.append("El paciente no informó raros")
         return "<br>".join(partes)
 
     def _flag(self, item, tipo, clave, valor) -> None:

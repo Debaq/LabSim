@@ -336,6 +336,18 @@ MMN_AMP = -3.0
 MMN_SIGMA = 35.0
 P3A = {'lat': 270.0, 'amp': 1.5, 'sigma': 35.0,
        'topo': {'Fz': 1.0, 'Cz': 0.9, 'Pz': 0.5}}
+# Instrucción que el examinador le da al paciente en el oddball. La P3b
+# es endógena: sale solo si el paciente atiende a los raros (los cuenta o
+# aprieta un botón). La MMN es al revés: se registra con la atención en
+# otra parte (video sin sonido), porque atender a los raros suma N2b y P3b
+# encima y la diferencia ya no es solo MMN (Duncan 2009). Sin instrucción
+# no hay P3b: queda la P3a pasiva de una desviación grande.
+TAREAS = ('ninguna', 'pasiva', 'contar', 'boton')
+TAREA_LABELS = {'ninguna': "Sin instrucción",
+                'pasiva': "Pasiva: video sin sonido",
+                'contar': "Contar los raros",
+                'boton': "Apretar botón con el raro"}
+TAREAS_ATENTAS = ('contar', 'boton')
 # El raro encuentra la vía menos refractaria que el frecuente (otra
 # frecuencia, menos repeticiones): su N1 sale algo más grande.
 RARE_N1_GAIN = 1.15
@@ -534,11 +546,16 @@ def late_components(edad, central, ctx, rare=False):
     return comps
 
 
+def attends(ctx):
+    """¿El paciente atiende a los raros? Lo decide la instrucción."""
+    return ctx.get('tarea', 'ninguna') in TAREAS_ATENTAS
+
+
 def p300_component(edad, central, ctx):
     """P3b del raro, o None si no se puede generar."""
     estado = central['estado']
     dev = ctx['deviance']
-    if dev <= 0 or estado in ('dormido', 'sedado'):
+    if dev <= 0 or estado in ('dormido', 'sedado') or not attends(ctx):
         return None
     lat = p300_norm(edad)[0] + central['p300_retardo_ms']
     amp = p300_amp_norm(edad) * (1.0 - central['p300_reduccion'])
@@ -558,6 +575,21 @@ def p300_component(edad, central, ctx):
             'topo': dict(P3B_TOPO)}
 
 
+def p3a_component(central, ctx):
+    """P3a pasiva (orientación involuntaria a una desviación grande)."""
+    if ctx['deviance'] >= 0.9 and central['estado'] == 'despierto':
+        return {'P3a': dict(P3A, topo=dict(P3A['topo']))}
+    return {}
+
+
+def attended_components(edad, central, ctx):
+    """N2b y P3b del raro atendido, o {} si no atiende o no puede."""
+    p3 = p300_component(edad, central, ctx)
+    if p3 is None:
+        return {}
+    return {'N2b': dict(N2B, topo=dict(N2B['topo'])), 'P3': p3}
+
+
 def mmn_components(central, ctx):
     """MMN (y P3a pasiva) del desviante, o {} si no hay desviación."""
     dev = ctx['deviance']
@@ -571,8 +603,7 @@ def mmn_components(central, ctx):
     if amp < 0:
         out['MMN'] = {'lat': 170.0 + 40.0 * (1.0 - dev), 'amp': amp,
                       'sigma': MMN_SIGMA, 'topo': dict(MMN_TOPO)}
-    if dev >= 0.9 and central['estado'] == 'despierto':
-        out['P3a'] = dict(P3A, topo=dict(P3A['topo']))
+    out.update(p3a_component(central, ctx))
     return out
 
 
@@ -616,7 +647,7 @@ def build_traces(test, t, edad, central, side, ctx):
       promedios van superpuestos.
 
     `ctx` trae: sl (factor, retardo), refractory, stim_lat, deviance,
-    rare_fraction, sleep_draw.
+    rare_fraction, sleep_draw y tarea (la instrucción al paciente).
     """
     rate = ctx['rate']
     canales = CHANNELS[test]
@@ -629,13 +660,14 @@ def build_traces(test, t, edad, central, side, ctx):
                                    test, rate),
                 'overlays': {}}
     raros = late_components(edad, central, ctx, rare=bool(ctx['deviance']))
+    # Atendido (contar o botón), el raro suma N2b y P3b; si no, en la
+    # P300 queda la P3a pasiva y la MMN sale limpia.
+    atendidos = attended_components(edad, central, ctx)
     if test == 'P300':
-        p3 = p300_component(edad, central, ctx)
-        if p3 is not None:
-            raros['N2b'] = dict(N2B, topo=dict(N2B['topo']))
-            raros['P3'] = p3
+        raros.update(atendidos or p3a_component(central, ctx))
     else:
         raros.update(mmn_components(central, ctx))
+        raros.update(atendidos)
     # Lo que precede a cada estímulo es casi siempre un frecuente: es lo
     # que se superpone, tanto al frecuente como al raro.
     y_frec = _superpose(t, {c: frecuentes for c in canales}, test, rate)

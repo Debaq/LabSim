@@ -775,6 +775,15 @@ final class ReportPdfBuilder
      * OD, L = OI), lo que va antes del punto es la captura y el canal es
      * $curva['canal']. Cada curva trae $curva['Cortical'] = {lat, amp}.
      */
+    // Instrucción al paciente en el oddball: mismas claves y rótulos que
+    // cortical.TAREA_LABELS en el cliente.
+    private const TAREAS = [
+        'ninguna' => 'Sin instrucción',
+        'pasiva' => 'Pasiva: video sin sonido',
+        'contar' => 'Contar los raros',
+        'boton' => 'Apretar botón con el raro',
+    ];
+
     private static function corticalBody(MiniPdf $pdf, int $reportId, array $data,
                                          float $y, float $contentW): float
     {
@@ -798,6 +807,7 @@ final class ReportPdfBuilder
         // oído => [grupo => [[canal, latencias, amplitudes], ...]]; el orden
         // de aparición manda (la última captura es la última del arreglo).
         $porOido = ['OD' => [], 'OI' => []];
+        $tareas = ['OD' => [], 'OI' => []];
         foreach ($curvas as $nombre => $curva) {
             if (!is_array($curva) || !is_array($curva['Cortical'] ?? null)) {
                 continue;
@@ -813,6 +823,10 @@ final class ReportPdfBuilder
             $amp = is_array($curva['Cortical']['amp'] ?? null) ? $curva['Cortical']['amp'] : [];
             $canal = (string) ($curva['canal'] ?? ($punto === false ? $nombre : substr($nombre, $punto + 1)));
             $porOido[$oido][$grupo][] = [$canal, $lat, $amp];
+            // Instrucción al paciente del oddball (P300/MMN), por captura.
+            if (isset($curva['tarea']) && is_string($curva['tarea'])) {
+                $tareas[$oido][$grupo] = $curva['tarea'];
+            }
         }
 
         $ordenMarcas = ['Na', 'Pa', 'Nb', 'Pb', 'P1', 'N1', 'P2', 'N2', 'P3', 'MMN'];
@@ -830,10 +844,12 @@ final class ReportPdfBuilder
         foreach ($porOido as $oido => $grupos) {
             // Última captura que tenga alguna marca.
             $canales = null;
-            foreach (array_reverse($grupos, true) as $cs) {
+            $grupoElegido = null;
+            foreach (array_reverse($grupos, true) as $g => $cs) {
                 foreach ($cs as $c) {
                     if (count($c[1]) > 0 || count($c[2]) > 0) {
                         $canales = $cs;
+                        $grupoElegido = $g;
                         break 2;
                     }
                 }
@@ -870,6 +886,12 @@ final class ReportPdfBuilder
             $y = self::ensureSpace($pdf, $y, 36 + 13 * (count($filas) + 1));
             $pdf->text(self::MARGIN, $y, 'Medidas ' . $oido, 12, true);
             $y += 18;
+            $tarea = $tareas[$oido][$grupoElegido] ?? null;
+            if ($tarea !== null) {
+                $pdf->text(self::MARGIN, $y, 'Tarea del paciente: '
+                    . (self::TAREAS[$tarea] ?? $tarea), 9);
+                $y += 14;
+            }
             $colW = min(90.0, ($contentW - 70) / max(1, count($canales)));
             $pdf->text(self::MARGIN, $y, 'Marca', 9, true);
             foreach ($canales as $i => $c) {
@@ -905,17 +927,23 @@ final class ReportPdfBuilder
             $y += 14;
         }
 
-        // Conteo de raros del paciente (solo P300), por oído.
+        // Respuesta del paciente a la tarea (solo P300), por oído: conteo de
+        // raros o botón (aciertos y falsas alarmas).
         $conteo = is_array($data['conteo'] ?? null) ? $data['conteo'] : [];
         foreach (['OD', 'OI'] as $oido) {
             $c = $conteo[$oido] ?? ($conteo[strtolower($oido)] ?? null);
-            if (!is_array($c) || !isset($c['dice'])) {
+            if (is_array($c) && isset($c['aciertos'])) {
+                $texto = "Botón del paciente ({$oido}): " . self::num($c['aciertos'])
+                    . ' aciertos de ' . self::num($c['reales'] ?? null) . ' raros, '
+                    . self::num($c['falsas'] ?? 0) . ' falsas alarmas';
+            } elseif (is_array($c) && isset($c['dice'])) {
+                $texto = "Conteo del paciente ({$oido}): dice " . self::num($c['dice'])
+                    . ' de ' . self::num($c['reales'] ?? null) . ' raros presentados';
+            } else {
                 continue;
             }
             $y = self::ensureSpace($pdf, $y, 16);
-            $pdf->text(self::MARGIN, $y,
-                "Conteo del paciente ({$oido}): dice " . self::num($c['dice'])
-                . ' de ' . self::num($c['reales'] ?? null) . ' raros presentados', 9);
+            $pdf->text(self::MARGIN, $y, $texto, 9);
             $y += 14;
         }
         return $y + 8;

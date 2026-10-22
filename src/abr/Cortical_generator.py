@@ -248,6 +248,7 @@ class CorticalGenerator:
             'rare_fraction': rare_fraction,
             # Etapa de sueño del niño: cambia de una captura a otra.
             'sleep_draw': float(rng.uniform(0.0, 1.0)),
+            'tarea': stimulus_config.get('tarea') or 'ninguna',
         }
         if datos:
             traces = cortical.build_traces(test, t, edad, central, side, ctx)
@@ -431,28 +432,41 @@ class CorticalGenerator:
             'fsp_criterion': criterio,
             'fsp_pass': (fsp >= criterio) if criterio else None,
         }
+        meta['tarea'] = ctx['tarea']
         if test == 'P300' and datos:
             meta['conteo'] = self.patient_count(central, current_avg,
-                                                rare_fraction, rng)
+                                                rare_fraction, rng,
+                                                ctx['tarea'])
         return t, final, meta
 
     @staticmethod
-    def patient_count(central, presentados, rare_fraction, rng):
-        """Cuántos raros dice el paciente que contó (None si no contó).
+    def patient_count(central, presentados, rare_fraction, rng,
+                      tarea='contar'):
+        """Lo que respondió el paciente a la tarea (None si no hubo tarea).
 
-        La tarea es parte de la P300: dormido o sedado no hay conteo, y un
-        conteo muy lejos de lo presentado invalida la interpretación (ver
-        diapositiva 44: oye el estímulo, entiende la tarea, está atento).
+        La tarea es parte de la P300: sin instrucción de contar o apretar
+        no hay respuesta que revisar, dormido o sedado tampoco, y una
+        respuesta muy lejos de lo presentado invalida la interpretación
+        (ver diapositiva 44: oye el estímulo, entiende la tarea, está
+        atento). Contando dice un número; con el botón quedan los aciertos
+        y las falsas alarmas (botón con un frecuente).
         """
         estado = central['estado']
-        if estado in ('dormido', 'sedado'):
+        if estado in ('dormido', 'sedado') or tarea not in cortical.TAREAS_ATENTAS:
             return None
         reales = int(round(presentados * rare_fraction))
         error = float(central['conteo_error'])
         if estado == 'somnoliento':
             error = max(error, 0.3)
+        if tarea == 'boton':
+            perdidos = float(rng.uniform(0.0, error)) if error else 0.0
+            falsas = int(round(reales * float(rng.uniform(0.0, error * 0.3))))
+            return {'tarea': 'boton', 'reales': reales,
+                    'aciertos': max(int(round(reales * (1 - perdidos))), 0),
+                    'falsas': falsas}
         desvio = float(rng.uniform(-error, error * 0.3)) if error else 0.0
-        return {'reales': reales, 'dice': max(int(round(reales * (1 + desvio))), 0)}
+        return {'tarea': 'contar', 'reales': reales,
+                'dice': max(int(round(reales * (1 + desvio))), 0)}
 
 
 _generator = None
@@ -499,6 +513,7 @@ def Cortical_Curve(test, actual_intencity, control_setting, preferences,
         'pathway': 'air_conduction',
         'side': control_setting.get('side', 'OD'),
         'test': test,
+        'tarea': control_setting.get('tarea') or 'ninguna',
     }
     technical_config = default_settings(test)
     if technical:

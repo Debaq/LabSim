@@ -14,6 +14,8 @@ pruebas del mismo equipo. Lo que se cubre es la costura:
 5. La sesión se guarda y vuelve con canales, superpuestos y marcas, con su
    propio tipo de informe.
 6. Sin bloque `Central` no hay registro.
+7. La tarea del paciente (P300 y MMN) se elige en el panel, viaja con la
+   captura y la tabla muestra la respuesta del paciente.
 """
 
 import os
@@ -222,6 +224,41 @@ def test_changing_test_keeps_each_session():
     assert tipos == ['CAEP', 'PEALM'], tipos
     w.control.cb_test.setCurrentText('MLR')
     assert sorted(w.graph_r.data) == ['R1.C3', 'R1.C4', 'R1.Cz']
+
+
+def test_the_task_selector_shows_only_in_the_oddball():
+    if not HAS_UI:
+        return
+    w = _ventana('MLR')
+    assert not w.control.cb_tarea.isVisibleTo(w)
+    assert 'tarea' not in w.control.get_data()
+    w.control.cb_test.setCurrentText('P300')
+    assert w.control.cb_tarea.isVisibleTo(w)
+    # El docente la recibe en el estándar; el alumno, sin instrucción.
+    assert w.control.cb_tarea.currentData() == 'contar'
+    w.control.cb_test.setCurrentText('MMN')
+    assert w.control.cb_tarea.currentData() == 'pasiva'
+    alumno = _ventana('P300', login=ALUMNO)
+    assert alumno.control.cb_tarea.currentData() == 'ninguna'
+
+
+def test_the_task_travels_with_the_capture_and_the_answer_is_shown():
+    if not HAS_UI:
+        return
+    w = _ventana('P300', login=ALUMNO)
+    _capturar(w)
+    _marcar(w, 0, 'Pz', 'P3', 310.0)
+    assert w.memory['R1.Pz']['tarea'] == 'ninguna'
+    texto = w.table_cx_r.lbl_extra.text()
+    assert 'Sin instrucción' in texto and 'no informó raros' in texto, texto
+    w.control.cb_tarea.setCurrentIndex(w.control.cb_tarea.findData('boton'))
+    _capturar(w)
+    _marcar(w, 0, 'Pz', 'P3', 310.0)
+    texto = w.table_cx_r.lbl_extra.text()
+    assert 'Apretar botón' in texto and 'aciertos de' in texto, texto
+    data = w.session_payload()
+    assert data['curvas']['R2.Pz']['tarea'] == 'boton'
+    assert data['conteo']['OD']['tarea'] == 'boton'
 
 
 def test_without_central_block_there_is_no_recording():
