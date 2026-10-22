@@ -94,6 +94,12 @@ final class CentralReferences
             'protocolo' => 'Click alternado a 7/s, 1000 barridos, 10-1200 Hz, activos sobre cada hemisferio contra mastoides. Normales: Na 17,9; Pa 29,4; Nb 41,4; Pb 51,4 ms.',
             'enlace' => 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9443762/',
         ],
+        'C13' => [
+            'cita' => 'Eddins AC, Peterson JR. Time-intensity trading in the late auditory evoked potential. J Speech Lang Hear Res. 1999;42(3):516-525. PMID 10391619.',
+            'n' => '5 adultos jóvenes normoyentes',
+            'protocolo' => 'Tonos de 1 y 4 kHz de 8, 16, 32, 64 y 128 ms. Umbral del N1-P2: 24 dB menos a 1 kHz y 18 dB a 4 kHz de 8 a 128 ms (-4 a -6 dB por duplicación); a más duración, N1 y P2 más tempranos y más grandes.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/10391619/',
+        ],
     ];
 
     /**
@@ -148,6 +154,12 @@ final class CentralReferences
             'valor' => 'desde el umbral, entera a 40 dB SL',
             'fuentes' => ['C03'],
             'nota' => 'Lightfoot 2006: el N1-P2 estima el umbral conductual con un error medio de 6,5 dB. El cliente hace aparecer la respuesta en el umbral del oído y la deja entera a 40 dB por encima (calculado), atrasándose al bajar el nivel.',
+        ],
+        'duracion_estimulo' => [
+            'label' => 'Duración del tono en los tardíos (CAEP, P300, MMN)',
+            'valor' => '-6 dB (1 kHz) a -4,5 dB (4 kHz) por duplicación, entre 8 y 128 ms',
+            'fuentes' => ['C13'],
+            'nota' => 'El cliente lo aplica como nivel de sensación perdido contra el tono de rutina de 10-50-10 ms (60 ms efectivos: meseta más media rampa por lado): el 1-10-1 ms del ECochG pierde unos 15 dB y el 2-1-2 ciclos del ABR unos 17. El click cuenta como el tono de 8 ms. Las pendientes intermedias (2 kHz) y el recorte fuera de 8-128 ms son calculados.',
         ],
         'respuesta_40hz' => [
             'label' => 'Respuesta de 40 Hz',

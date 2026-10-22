@@ -6400,3 +6400,23 @@ por normal. Lo detectó la revisión del libro (H10, 14, 17).
 - Espejos: `select_population` (cliente), `CaseWaveforms::poblacion` y
   `public/js/case/abr.js` (editor); el VEMP la traduce a `child`, como al de
   1 a 3 años.
+
+### Duración del tono en los potenciales tardíos (2026-10-22)
+
+La envolvente del burst solo la leía el ECochG: en el CAEP, la P300 y la MMN
+daba lo mismo un 1-10-1 ms que el 2-1-2 ciclos del ABR (5 ms a 1 kHz), y el
+estándar ni la fijaba. Pero los tardíos integran la duración: de 8 a 128 ms
+el umbral del N1-P2 baja 24 dB a 1 kHz y 18 dB a 4 kHz, y a nivel fijo el
+tono más largo da N1 y P2 más tempranos y grandes (Eddins y Peterson 1999,
+CentralReferences C13).
+
+- Se modela como nivel de sensación perdido contra el tono de rutina de
+  10-50-10 ms (60 ms efectivos = meseta + media rampa por lado): 6 dB por
+  duplicación a 500 Hz-1 kHz, 5,25 a 2 kHz, 4,5 a 4 kHz, recortado a 8-128
+  ms. El 1-10-1 pierde ~15 dB y el 2-1-2 ciclos ~17; el click cuenta como 8
+  ms. El MLR no: es de inicio, como el ABR.
+- Efecto visible: a 70 dB en un normoyente el N1 se atrasa ~10 ms y la
+  amplitud casi no cambia (sobra sensación); a 40 dB el N1-P2 cae ~35 % y
+  el FSP a la mitad. Es lo que dice el trabajo, no un castigo inventado.
+- Envolventes nuevas en Parámetros avanzados: 10-30-10 y 10-50-10 ms. El
+  estándar del docente de CAEP, P300 y MMN trae 10-50-10.

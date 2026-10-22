@@ -235,6 +235,13 @@ class CorticalGenerator:
         umbral = abr.case_threshold(case_config, stimulus_config,
                                     'air_conduction', pathology)
         sl = nivel - umbral if umbral < NO_RESPONSE_DB else -1.0
+        # Los tardíos integran el estímulo en el tiempo: un burst corto
+        # rinde como uno más suave (ver cortical.duration_shift_db). El MLR
+        # no: es de inicio, como el ABR.
+        if sl > 0 and test != 'MLR':
+            sl = max(sl - cortical.duration_shift_db(
+                technical_config.get('burst_envelope'),
+                stimulus_config['label']), 0.0)
 
         datos = central is not None
         ctx = {

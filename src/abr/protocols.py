@@ -140,7 +140,11 @@ STANDARD_SETUP = {
 # rechazo de ±50 (MLR) o ±100 uV (tardíos). El oddball es 1 kHz frecuente
 # contra 2 kHz raro, 80/20. La tarea: contar los raros en la P300 y video
 # sin sonido en la MMN.
-_ODDBALL = {'oddball_rare': 'Burst 2 kHz', 'oddball_pct': 20.0}
+# Los tardíos con tono de 10-50-10 ms: integran la duración y con el
+# 2-1-2 ciclos del ABR (5 ms a 1 kHz) rinden como un tono ~17 dB más suave
+# (ver cortical.duration_shift_db).
+_ODDBALL = {'oddball_rare': 'Burst 2 kHz', 'oddball_pct': 20.0,
+            'burst_envelope': 'ms-10-50-10'}
 STANDARD_SETUP.update({
     'MLR': {
         'control': {'stim': CLICK, 'pol': 'Alternada', 'int': 70,
@@ -154,7 +158,8 @@ STANDARD_SETUP.update({
                     'rate': 1.0, 'filter_passhigh': '1',
                     'filter_down': '30', 'average': 150},
         'technical': {'montage': 'vertex_earlobe', 'window_ms': 500.0,
-                      'gain': 50000.0, 'artifact_reject_uv': 100.0},
+                      'gain': 50000.0, 'artifact_reject_uv': 100.0,
+                      'burst_envelope': 'ms-10-50-10'},
     },
     'P300': {
         'control': {'stim': 'Burst 1 kHz', 'pol': 'Alternada', 'int': 70,

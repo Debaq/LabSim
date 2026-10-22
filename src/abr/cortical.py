@@ -399,6 +399,45 @@ def sl_factor(test, sl):
     return amp, retardo
 
 
+# Integración temporal de los tardíos: el umbral del N1-P2 baja con la
+# duración del tono, de 8 a 128 ms unos 24 dB a 1 kHz y 18 dB a 4 kHz
+# (-4 a -6 dB por cada vez que se duplica), y a nivel fijo un tono más
+# largo da N1 y P2 más grandes y más tempranos (Eddins y Peterson 1999,
+# CentralReferences C13).
+# Se aplica como nivel de sensación perdido: un burst de 1-10-1 ms, o un
+# 2-1-2 ciclos heredado del ABR, rinde como un tono ~15 dB más suave que el
+# 10-50-10 ms de rutina. Fuera de 8-128 ms no hay datos y se recorta.
+DURATION_DB_PER_DOUBLING = {500.0: 6.0, 1000.0: 6.0, 2000.0: 5.25,
+                            4000.0: 4.5}
+DURATION_RANGE_MS = (8.0, 128.0)
+# Envolvente de rutina de los tardíos y su duración efectiva (meseta más
+# media rampa de cada lado): con ella el corrimiento es cero.
+STANDARD_ENVELOPE = 'ms-10-50-10'
+
+
+def effective_duration_ms(envelope, stim):
+    """Duración efectiva del estímulo en ms (meseta + media rampa por
+    lado). Un click o un chirp cuentan como el tono más corto medido."""
+    hz = _freq_hz(stim)
+    if hz is None:
+        return DURATION_RANGE_MS[0]
+    from abr.ecochg import burst_timing
+    rise, plateau, fall = burst_timing(envelope or '2-1-2', hz)
+    return float(plateau + (rise + fall) / 2.0)
+
+
+def duration_shift_db(envelope, stim):
+    """dB de sensación que se pierden (positivo) o se ganan (negativo)
+    contra la envolvente de rutina, por la duración del estímulo."""
+    lo, hi = DURATION_RANGE_MS
+    hz = _freq_hz(stim) or 1000.0
+    pendiente = DURATION_DB_PER_DOUBLING.get(hz, 6.0)
+    dur = float(np.clip(effective_duration_ms(envelope, stim), lo, hi))
+    ref = float(np.clip(effective_duration_ms(STANDARD_ENVELOPE,
+                                              'Burst 1 kHz'), lo, hi))
+    return float(pendiente * np.log2(ref / dur))
+
+
 def deviance(stim_a, stim_b):
     """Qué tan distintos son frecuente y raro (0 = iguales, 1 = una octava
     o más, o click contra burst). Es lo que el cerebro tiene que detectar."""

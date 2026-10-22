@@ -395,6 +395,40 @@ def test_measure_reads_the_marks():
     assert abs(m['amp']['MMN'] - 2.0) < 1e-9
 
 
+
+def test_a_short_burst_counts_as_a_softer_tone():
+    """Integración temporal de los tardíos (Eddins y Peterson 1999): el 10-50-10
+    ms de rutina no corre nada; el 1-10-1 del ECochG o el 2-1-2 ciclos del
+    ABR pierden ~15 dB de sensación, y un tono más largo gana un poco."""
+    assert cortical.duration_shift_db('ms-10-50-10', 'Burst 1 kHz') == 0.0
+    corto = cortical.duration_shift_db('ms-1-10-1', 'Burst 1 kHz')
+    ciclos = cortical.duration_shift_db('2-1-2', 'Burst 1 kHz')
+    assert 13 < corto < 16, corto
+    assert ciclos >= corto            # 5 ms: se recorta a los 8 medidos
+    assert cortical.duration_shift_db('ms-10-30-10', 'Burst 1 kHz') > 0
+    # A 4 kHz la pendiente es menor (18 dB en vez de 24 de 8 a 128 ms).
+    assert (cortical.duration_shift_db('ms-1-10-1', 'Burst 4 kHz')
+            < corto)
+    # Un click cuenta como el tono más corto.
+    assert cortical.duration_shift_db(None, 'Click') == ciclos
+
+
+def test_with_a_short_burst_n1_comes_later_and_not_bigger():
+    t = _t('CAEP')
+    central = cortical.case_params({'estado': 'despierto'})
+    sl = 40.0
+    largo = cortical.build_traces('CAEP', t, 30, central, 'OD',
+                                  _ctx('CAEP', sl=sl))['main']['Cz']
+    corto = cortical.build_traces(
+        'CAEP', t, 30, central, 'OD',
+        _ctx('CAEP', sl=sl - cortical.duration_shift_db(
+            'ms-1-10-1', 'Burst 1 kHz')))['main']['Cz']
+    tramo = (t > 60) & (t < 180)
+    lat = lambda y: t[tramo][np.argmin(y[tramo])]
+    n1p2 = lambda y: y[(t > 140) & (t < 280)].max() - y[tramo].min()
+    assert lat(corto) > lat(largo) + 5, (lat(corto), lat(largo))
+    assert n1p2(corto) < n1p2(largo), (n1p2(corto), n1p2(largo))
+
 if __name__ == "__main__":
     pruebas = [v for k, v in sorted(globals().items()) if k.startswith('test_')]
     for prueba in pruebas:
