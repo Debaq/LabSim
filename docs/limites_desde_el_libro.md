@@ -72,6 +72,13 @@ Entre paréntesis, el capítulo del libro donde aparecía.
   7.ª ed., cap. 6): 75-110 dB hasta 1 kHz y 50-95 dB sobre 1 kHz con el 3A
   de oliva profunda, conservador 75 y 50. Son tonos; los 65 dB del click
   quedan dentro.
+- **Fila del lactante de 3 meses a 3 años (2026-10-21):** `toddler` (I 1,52,
+  III 3,67, V 5,78; I-V 4,26) es casi de adulto y se aplica desde los 3
+  meses. Rosa y cols. (2014, tabla 4) dan a los 6 meses I 1,70 (DE 0,12),
+  III 4,37 (0,19), V 6,50 (0,27), I-III 2,65, III-V 2,16, I-V 4,81: un bebé de
+  4 a 12 meses sale en LabSim unos 0,7 ms más corto en la V. Falta una fila
+  publicada para 6 meses (Rosa) y revisar el tramo de 1 a 3 años. Por esto el
+  bebé de H10 se armó de 12 semanas (fila del recién nacido) (H10, 14, 17).
 
 ## Lo que falta
 
