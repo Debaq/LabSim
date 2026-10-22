@@ -188,17 +188,21 @@ if [ "${SKIP_WINDOWS:-0}" = "1" ]; then
 else
     # El workflow hace checkout del SHA exacto (para que el .exe salga del
     # mismo codigo que el .tar.gz) -- ya se pusheo arriba.
+    # Desde cuando vale un run: el nuestro se crea despues de este momento
+    # (10 s de margen por la diferencia de reloj con GitHub).
+    DISPARO=$(date -u -d '-10 seconds' +%Y-%m-%dT%H:%M:%SZ)
     run_with_spinner "Disparando build de Windows..." gh workflow run "$WIN_WORKFLOW" \
         --ref "$BRANCH" -f sha="$SHA" -f build_id="$BUILD_ID"
 
     # gh workflow run no devuelve el id del run: hay que buscarlo, y tarda
-    # unos segundos en aparecer en la API. Si hubo dispatches previos sobre
-    # el mismo commit (corrida repetida del script), el mas nuevo es el
-    # nuestro.
+    # unos segundos en aparecer en la API. Solo cuentan los creados despues
+    # del disparo: con una corrida repetida sobre el mismo commit, el run
+    # anterior (cancelado) aparecia antes que el nuestro, se esperaba ese y
+    # la release quedaba sin instalador de Windows (r1973b680, 2026-10-22).
     for _ in $(seq 1 20); do
         WIN_RUN_ID=$(gh run list --workflow "$WIN_WORKFLOW" --event workflow_dispatch --limit 20 \
             --json databaseId,headSha,createdAt \
-            -q "[.[] | select(.headSha == \"${SHA}\")] | sort_by(.createdAt) | last | .databaseId // empty" \
+            -q "[.[] | select(.headSha == \"${SHA}\" and .createdAt >= \"${DISPARO}\")] | sort_by(.createdAt) | last | .databaseId // empty" \
             2>/dev/null) || WIN_RUN_ID=""
         # 'test && break' no sirve aca: con set -e, el test fallido en la
         # ultima linea del cuerpo del loop mata el script.
