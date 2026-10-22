@@ -9,6 +9,7 @@ from abr.WidgetsMods import (GraphicsLayoutWidgetMod, InfiniteLineMod,
 from core.base import context
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QFont
+from PySide6.QtWidgets import QGraphicsRectItem
 
 
 # Como se abrevia cada parametro cuando hay que ponerlo en la etiqueta de
@@ -139,6 +140,19 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.area_fills = {}
         # Puntos de las marcas BL/INI/FIN: {(curva, marca): ScatterPlotItem}.
         self.dot_items = {}
+        # Guias de latencia normal sobre la curva activa (como las cajas de
+        # Interacoustics): {marca: (desde, hasta)} en ms y el signo de cada
+        # marca (+1 pico, -1 valle). No son ayuda: dicen donde se espera
+        # cada componente para ESTE paciente, no donde esta.
+        self.norm_lat = {}
+        self.norm_signs = {}
+        self.show_norms = True
+        # Las cajas y rotulos se crean una vez por marca y se reusan
+        # (ocultos cuando no van): crearlos y borrarlos en cada cambio de
+        # curva dejaba textos de Qt destruidos que el redimensionado de la
+        # vista todavia tocaba. norm_items son los que estan a la vista.
+        self.norm_pool = {}
+        self.norm_items = []
         # callable(intensidad, cfg) -> texto del nivel en la unidad del
         # equipo (lo pone la ventana; ver AbrMainWindow.level_text).
         self.level_text = None
@@ -308,6 +322,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 # La curva nueva puede estrenar un parametro distinto: ahi
                 # las que ya estaban tambien tienen que decir el suyo.
                 self.refresh_labels()
+                self.refresh_norm_guides()
                 self.apply_view()
 
     def load_curve(self, name, values, intencity, setting, gap, marks=None):
@@ -316,6 +331,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.data[name]['gap'] = float(gap)
         self.redraw(name)
         self.move_label(name)
+        if name == self.act_curve:
+            self.refresh_norm_guides()
         for etiqueta, xy in (marks or {}).items():
             self.recreate_mark(name, etiqueta, list(xy))
         self.apply_view()
@@ -479,7 +496,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             nivel = f"{intensidad} dB nHL"
         canal = (self.curve_cfg.get(key) or {}).get('canal')
         if canal:
-            nivel = f"<b>{canal}</b> · {nivel}"
+            # En dos lineas: en una ("Cz · 70 dB nHL") no cabia en el
+            # margen derecho y se cortaba en "Cz · 70 d".
+            nivel = f"<b>{canal}</b><br>{nivel}"
         tokens = self.curve_tokens(key)
         extra = ''
         if tokens:
@@ -554,6 +573,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.refresh_labels()
             self.sig_del_curve.emit(self.act_curve)
             self.act_curve = None
+            self.refresh_norm_guides()
             self.apply_view()
 
         
@@ -569,6 +589,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 item.setPen(self.pen_for(clave, activa))
         #se selecciona el label de la curva
         self.refresh_labels()
+        self.refresh_norm_guides()
         self.sig_curve_selected.emit(self.act_curve)
         #se actualizan los datos de las marcas
         #print(self.marks[self.act_curve])
@@ -816,6 +837,67 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             relleno._guias = (c1, c2)
         self.area_fills[curve_name] = (zonas, items)
 
+    def set_norm_guides(self, lat, signs=None):
+        """Rangos normales de latencia por marca ({} las saca)."""
+        self.norm_lat = dict(lat or {})
+        self.norm_signs = dict(signs or {})
+        self.refresh_norm_guides()
+
+    def set_norms_visible(self, visible):
+        self.show_norms = bool(visible)
+        self.refresh_norm_guides()
+
+    # Color de las cajas: gris azulado translucido, que no compita con el
+    # trazo ni con los subpromedios.
+    NORM_COLOR = (70, 110, 170)
+
+    def refresh_norm_guides(self):
+        """Una caja por marca sobre la curva activa: a lo ancho, el rango
+        normal de latencia; arriba de la linea de base si la marca es un
+        pico, abajo si es un valle. Solo en la activa: con seis curvas
+        apiladas, cajas en todas tapaban los trazos."""
+        for item in self.norm_items:
+            item.hide()
+        self.norm_items = []
+        curva = self.act_curve
+        if (not self.show_norms or not self.norm_lat
+                or curva not in self.data):
+            return
+        gap = self.data[curva].get('gap', 0.0)
+        alto = self.scale_uv * 0.12
+        for marca, (desde, hasta) in self.norm_lat.items():
+            if desde is None or hasta is None:
+                continue
+            caja, rotulo = self.norm_pair(marca)
+            signo = self.norm_signs.get(marca, 1)
+            y0 = gap if signo > 0 else gap - alto
+            caja.setRect(float(desde), y0, float(hasta) - float(desde), alto)
+            # El rotulo por fuera de la caja: arriba de un pico, abajo de
+            # un valle (en pantalla, con el eje como este).
+            afuera = (signo > 0) != self.y_inverted
+            rotulo.setAnchor((0.5, 1.0 if afuera else 0.0))
+            rotulo.setPos((float(desde) + float(hasta)) / 2,
+                          y0 + alto if signo > 0 else y0)
+            for item in (caja, rotulo):
+                item.show()
+                self.norm_items.append(item)
+
+    def norm_pair(self, marca):
+        par = self.norm_pool.get(marca)
+        if par is None:
+            borde = pg.mkPen((*self.NORM_COLOR, 160), width=1)
+            borde.setCosmetic(True)
+            caja = QGraphicsRectItem(0, 0, 1, 1)
+            caja.setPen(borde)
+            caja.setBrush(QBrush(QColor(*self.NORM_COLOR, 45)))
+            caja.setZValue(-6)
+            rotulo = pg.TextItem(marca, color=(*self.NORM_COLOR, 230))
+            rotulo.setZValue(-6)
+            for item in (caja, rotulo):
+                self.pw.addItem(item)
+            par = self.norm_pool[marca] = (caja, rotulo)
+        return par
+
     def remove_base_line(self, curve_name):
         linea = self.base_lines.pop(curve_name, None)
         if linea is not None:
@@ -832,6 +914,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         for mark in self.marks.get(name_curve, {}):
             self.place_mark(name_curve, mark)
         self.refresh_base_line(name_curve)
+        if name_curve == self.act_curve:
+            self.refresh_norm_guides()
         if name_curve in self.area_fills:
             self.set_area_shading(name_curve, self.area_fills[name_curve][0])
 
@@ -903,6 +987,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.move_marks(nombre)
         self.apply_view()
 
+    LABEL_MARGIN = 0.13
+    FLAG_MARGIN = 0.02
+
     def set_windows(self, ms: float) -> None:
         """Ajusta el eje a la ventana de registro configurada en el equipo.
 
@@ -911,7 +998,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         """
         anterior = self.window_ms
         self.window_ms = float(ms)
-        self.pw.setXRange(0, self.window_ms + self.window_ms * 0.08,
+        # El margen derecho es de las etiquetas de las curvas: con 8 % se
+        # cortaban ("70 dB n"). El izquierdo, para la bandera A: en 0 ms
+        # quedaba pegada al borde del eje y no habia de donde agarrarla.
+        self.pw.setXRange(-self.window_ms * self.FLAG_MARGIN,
+                          self.window_ms * (1 + self.LABEL_MARGIN),
                           padding=0)
         self.apply_grid()
         # Una base sin FIN llega al borde: si el borde se movio, ella tambien.
@@ -935,8 +1026,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         """La grilla sigue a la escala. Fija en 1 uV, a 48 uV eran ~70
         lineas y a 192 uV mas de 300: una mancha gris que tapaba las
         curvas, que ademas a esa escala ya eran casi planas."""
-        self.grid.setTickSpacing(x=[self.x_tick()],
-                                 y=[self.scale_uv / self.GRID_DIVISIONS])
+        self.grid.setTickSpacing(x=[self.x_tick()], y=[self.y_tick()])
+
+    def y_tick(self):
+        """Paso de la grilla en uV: la escala en seis. Si eso no da un
+        numero limpio (los 40 uV de la P300 daban 6.66667 y la grilla lo
+        escribia asi) se toma el paso redondo mas cercano."""
+        paso = self.scale_uv / self.GRID_DIVISIONS
+        if abs(paso * 8 - round(paso * 8)) < 1e-6:
+            return paso
+        magnitud = 10 ** np.floor(np.log10(paso))
+        redondos = np.array([1.0, 2.0, 2.5, 5.0, 10.0]) * magnitud
+        return float(redondos[np.argmin(np.abs(redondos - paso))])
 
     def x_tick(self):
         """Paso de la grilla en ms: 1 ms en el ABR, 10 en el MLR y 50 en
@@ -1036,6 +1137,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.curve_cfg = {}
         self.traces = {}
         self.act_curve = None
+        self.refresh_norm_guides()
         self.apply_view()
 
     def export_(self):
@@ -1055,9 +1157,17 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def export_jpg(self, path: str) -> None:
         """Como export_(), pero a JPEG (para subir el informe al backend --
-        ver ReportFile.php, que solo acepta JPEG para no depender de GD)."""
-        export = pg.exporters.ImageExporter(self.pw)
-        export.export(path)
+        ver ReportFile.php, que solo acepta JPEG para no depender de GD).
+
+        Las guias normativas no van al informe: son de la pantalla."""
+        for item in self.norm_items:
+            item.hide()
+        try:
+            export = pg.exporters.ImageExporter(self.pw)
+            export.export(path)
+        finally:
+            for item in self.norm_items:
+                item.show()
 
         self.inf_a.show()
         self.inf_b.show()

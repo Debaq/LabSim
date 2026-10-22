@@ -455,6 +455,11 @@ def test_cursor_a_can_be_dragged_before_any_mark():
     # curva, en el borde derecho, está su etiqueta de intensidad, y arriba
     # su bandera.
     from PySide6.QtCore import QPointF
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+    # Dos arrastres seguidos en menos de un doble clic: Qt toma el segundo
+    # apreton como doble clic y la bandera no se mueve (fallaba al azar).
+    QTest.qWait(QApplication.doubleClickInterval() + 50)
     arriba = -g.scale_uv * 0.3
     _arrastre(g, g.mapFromScene(g.pw.vb.mapViewToScene(
                   QPointF(g.inf_b.getXPos(), arriba))),

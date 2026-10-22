@@ -223,6 +223,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.btn_invert_y)
         self.btn_invert_y.toggled.connect(self.invert_y)
         self.show_negative_side(False)
+        # Rangos normales de latencia sobre la curva activa (latencia media
+        # y tardia): donde deberia estar cada componente, como las cajas de
+        # Interacoustics. Prendidos de entrada; el boton los apaga.
+        self.btn_norm_guides = QPushButton("N", self.verticalFrame)
+        self.btn_norm_guides.setObjectName("btn_norm_guides")
+        self.btn_norm_guides.setCheckable(True)
+        self.btn_norm_guides.setChecked(True)
+        self.btn_norm_guides.setToolTip(tr(
+            "AbrMainWindow",
+            "Rangos normales de latencia de cada componente sobre la curva "
+            "seleccionada"))
+        self.verticalLayout.insertWidget(
+            self.verticalLayout.indexOf(self.btn_invert_y) + 1,
+            self.btn_norm_guides)
+        self.btn_norm_guides.toggled.connect(self.toggle_norm_guides)
+        self.btn_norm_guides.setVisible(False)
         # Las etiquetas de las curvas dicen el nivel en la unidad del equipo.
         for grafico, lado in ((self.graph_r, 'OD'), (self.graph_l, 'OI')):
             grafico.level_text = (
@@ -386,6 +402,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """Banda normativa y rangos de la tabla, para ESTE paciente."""
         if self.data_current is None:
             return
+        self.apply_norm_guides()
         stim = self.control.cb_stim.currentText()
         try:
             x, lo, hi = latency_intensity_band(self.data_current, 'V', stim)
@@ -1038,6 +1055,28 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # Sin redondear a entero: la escala baja a 0.75 uV y el rotulo
         # decia "1µV".
         self.lbl_scale.setText(f"{round(self.graph_r.get_scale(), 2):g}µV")
+
+    def apply_norm_guides(self):
+        """Cajas de latencia normal en el grafico: solo en los corticales.
+
+        En el ABR la latencia depende de la intensidad de cada curva y los
+        rangos de la tabla son los del nivel del panel; una caja sobre una
+        curva de otro nivel diria un lugar equivocado."""
+        guias, signos = {}, {}
+        if self.es_cortical() and self.data_current is not None:
+            marcas = cortical.MARKS[self.test_actual]
+            lat = cortical.normative(
+                self.test_actual,
+                cortical.age_years(self.data_current))['lat']
+            guias = {m: lat[m] for m in marcas if m in lat}
+            signos = {m: cortical.mark_polarity(m) for m in marcas}
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.set_norm_guides(guias, signos)
+        self.btn_norm_guides.setVisible(self.es_cortical())
+
+    def toggle_norm_guides(self, visible):
+        self.graph_r.set_norms_visible(visible)
+        self.graph_l.set_norms_visible(visible)
 
     def toggle_sub(self, visible):
         """Subpromedios A/B a la vista en los dos oidos a la vez."""

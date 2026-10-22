@@ -204,6 +204,33 @@ def test_clicking_a_trace_selects_it_and_brings_flag_a():
     assert 'N1' in g.marks['R1.Cz'] and 'N1' not in g.marks['R1.Pz']
 
 
+def test_normal_latency_guides_follow_the_selected_curve():
+    """Cajas de latencia normal sobre la curva activa, solo en los
+    corticales; el botón N las apaga y no van al informe."""
+    if not HAS_UI:
+        return
+    w = _ventana('P300')
+    _capturar(w)
+    g = w.graph_r
+    assert w.btn_norm_guides.isVisibleTo(w)
+    assert sorted(g.norm_lat) == sorted(cortical.MARKS['P300'])
+    lo, hi = g.norm_lat['P3']
+    assert lo < 350 < hi
+    assert len(g.norm_items) == 2 * len(g.norm_lat)
+    # La caja sigue a la curva seleccionada.
+    g.active_curve('R1.Fz')
+    caja = g.norm_items[0]
+    assert abs(caja.rect().top() - g.data['R1.Fz']['gap']) < g.scale_uv * 0.2
+    w.btn_norm_guides.setChecked(False)
+    assert not g.norm_items
+    w.btn_norm_guides.setChecked(True)
+    assert g.norm_items
+    # La grilla no escribe 6.66667 a 40 uV.
+    assert g.y_tick() == 5.0
+    w.control.cb_test.setCurrentText('ABR')
+    assert not g.norm_items and not w.btn_norm_guides.isVisibleTo(w)
+
+
 def test_case_1_shows_an_electrode_effect_in_the_table():
     if not HAS_UI:
         return
