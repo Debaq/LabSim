@@ -6420,3 +6420,20 @@ CentralReferences C13).
   el FSP a la mitad. Es lo que dice el trabajo, no un castigo inventado.
 - Envolventes nuevas en Parámetros avanzados: 10-30-10 y 10-50-10 ms. El
   estándar del docente de CAEP, P300 y MMN trae 10-50-10.
+
+### Tardíos: menos ruido de fondo y P3 más grande (2026-10-22)
+
+Sesión del docente con el caso 46 (P300 a 250 barridos, 50 raros): "es
+imposible encontrar algo ahí". El residual del raro era de ~2 µV de ruido
+lento (1/f), con la misma forma ancha que la P3, contra una P3 de ~8 µV;
+replicabilidad 0,4 y FSP 2-5. Los dos números eran calculados, sin cita.
+
+- EEG de fondo de un barrido: 12 → 9 µV RMS (1-30 Hz, ojos abiertos con
+  tarea). Vale para MLR, CAEP, P300 y MMN.
+- P300 del joven: 12 → 15 µV (baja 0,08 µV por año desde los 20).
+- Resultado con el caso 46: replicabilidad 0,7, FSP 6-12, P3 a ~450 ms
+  visible en las dos capturas de cada oído. Normoyente: MMN clara en Fz; en
+  el caso 46 (MMN −60 %) casi no se ve, que es el hallazgo.
+- Después de capturar queda seleccionado el canal donde se lee la prueba
+  (Fz la MMN, Cz el CAEP, Pz la P300), y las marcas angostas (P1, N1, P2,
+  N2) buscan el pico a 8-12 ms del clic; la P3 y la MMN siguen a 20-25.

@@ -651,7 +651,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.snap_marks = tuple(snap)
         self.notify_create = bool(notify)
         self.snap_sign = dict(signs or {})
-        self.snap_ms = float(snap_ms) if snap_ms else self.SNAP_MS
+        # Un numero para todas, o {marca: ms} (los corticales).
+        if isinstance(snap_ms, dict):
+            self.snap_ms = {m: float(v) for m, v in snap_ms.items()}
+        else:
+            self.snap_ms = float(snap_ms) if snap_ms else self.SNAP_MS
 
     def snap_to_peak(self, x, mark=None):
         """Extremo del trazo cerca de x: el minimo o el maximo segun la marca.
@@ -664,7 +668,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         if not datos:
             return x
         xs, ys = datos['ipsi_xy']
-        cerca = np.where(np.abs(xs - x) <= self.snap_ms)[0]
+        radio = (self.snap_ms.get(mark, self.SNAP_MS)
+                 if isinstance(self.snap_ms, dict) else self.snap_ms)
+        cerca = np.where(np.abs(xs - x) <= radio)[0]
         if not len(cerca):
             return x
         valores = np.asarray(ys)[cerca]

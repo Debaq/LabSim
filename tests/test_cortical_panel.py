@@ -191,17 +191,23 @@ def test_clicking_a_trace_selects_it_and_brings_flag_a():
     # A' venía de los 12 ms del ABR y quedaba pegada a A, contra el eje.
     assert g.inf_b.getXPos() > 0.9 * g.window_ms, g.inf_b.getXPos()
     _capturar(w)
-    assert g.act_curve == 'R1.Pz'
+    # La captura queda en el canal donde se lee el CAEP, no en el último.
+    assert g.act_curve == 'R1.Cz', g.act_curve
     QApplication.processEvents()
     QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
-                     Qt.KeyboardModifier.NoModifier, _pixel(g, 100.0, 'R1.Cz'))
+                     Qt.KeyboardModifier.NoModifier, _pixel(g, 100.0, 'R1.Pz'))
     QApplication.processEvents()
-    assert g.act_curve == 'R1.Cz', g.act_curve
+    assert g.act_curve == 'R1.Pz', g.act_curve
     assert abs(g.inf_a.getXPos() - 100.0) < 8.0, g.inf_a.getXPos()
     boton = [b for b in w.table_cx_r.botones if b.text() == 'N1'][0]
     boton.click()
     QApplication.processEvents()
-    assert 'N1' in g.marks['R1.Cz'] and 'N1' not in g.marks['R1.Pz']
+    assert 'N1' in g.marks['R1.Pz'] and 'N1' not in g.marks['R1.Cz']
+    # El N1 busca cerca: la marca queda a menos de 10 ms del clic.
+    assert abs(g.marks['R1.Pz']['N1'][0] - g.inf_a.getXPos()) <= 10.0 + 1e-9
+    w.control.cb_test.setCurrentText('MMN')
+    _capturar(w)
+    assert g.act_curve == 'R1.Fz', g.act_curve
 
 
 def test_normal_latency_guides_follow_the_selected_curve():

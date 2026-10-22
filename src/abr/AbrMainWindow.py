@@ -1302,7 +1302,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 "canal": canal, "repro": 0, "intencity": intencity,
                 "done": self.done}
         grafico = self.graph_r if side == 'OD' else self.graph_l
+        lectura = f"{grupo}.{cortical.READ_CHANNEL[self.test_actual]}"
+        nueva = lectura not in grafico.data
         grafico.create_line(data_line, intencity, self.current_setting)
+        if nueva:
+            # La captura nueva queda seleccionada en el canal donde se lee
+            # la prueba (Fz la MMN, Cz el CAEP), no en el ultimo creado:
+            # ahi van las cajas de latencia normal y la proxima marca.
+            grafico.active_curve(lectura)
         tabla = self.table_cx_r if side == 'OD' else self.table_cx_l
         if 'conteo' in metadata:
             self.cortical_conteo[side] = metadata['conteo']
@@ -1521,7 +1528,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 grafico.set_marks_mode(
                     marcas, snap=marcas, notify=True,
                     signs={m: cortical.mark_polarity(m) for m in marcas},
-                    snap_ms=cortical.SNAP_MS[test])
+                    snap_ms=cortical.snap_ms(test))
             elif ecochg_on:
                 # El PA se pega al pico; la base y el hombro del PS caen
                 # donde el alumno decida, que es la parte que se evalua.

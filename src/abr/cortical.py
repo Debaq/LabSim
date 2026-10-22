@@ -210,8 +210,10 @@ P300_ADULT_MS = 300.0
 P300_MS_PER_YEAR = 1.3
 P300_CHILD_MS_PER_YEAR = 7.0
 P300_SD_MS = 20.0
-# Amplitud (uV, Pz, desde la línea de base): baja con la edad.
-P300_AMP_YOUNG = 12.0
+# Amplitud (uV, Pz, desde la línea de base): baja con la edad. Calculada
+# (era 12; con 15 la P3 del joven se encuentra con 40-50 raros, ver
+# Cortical_generator.EEG_UV).
+P300_AMP_YOUNG = 15.0
 P300_AMP_PER_YEAR = 0.08
 P300_AMP_MIN_FRACTION = 0.45
 
@@ -757,6 +759,19 @@ MARKS = {
 NEGATIVE_MARKS = ('Na', 'Nb', 'N1', 'N2', 'MMN')
 # Cuánto busca el pico alrededor de la bandera (ms).
 SNAP_MS = {'MLR': 3.0, 'CAEP': 15.0, 'P300': 25.0, 'MMN': 20.0}
+# Por componente en los tardíos: los angostos buscan cerca, para que la
+# marca quede donde se hizo clic (con ±25 ms un N1 marcado a 95 ms saltaba
+# a un valle de ruido en 116). La P3 es ancha y la MMN se lee en una onda
+# de diferencia con ruido: esos siguen buscando lejos.
+MARK_SNAP_MS = {'P1': 8.0, 'N1': 10.0, 'P2': 12.0, 'N2': 12.0, 'P3': 25.0,
+                'MMN': 20.0}
+
+
+def snap_ms(test):
+    """Radio de pegado de cada marca de la prueba, en ms."""
+    return {m: (SNAP_MS[test] if test == 'MLR'
+                else MARK_SNAP_MS.get(m, SNAP_MS[test]))
+            for m in MARKS[test]}
 # Tramo del inicio de la época que hace de línea de base (ms): antes de
 # que llegue nada cortical. La época arranca en el estímulo (el equipo no
 # guarda pre-estímulo en esta ventana).

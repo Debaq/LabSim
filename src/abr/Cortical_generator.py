@@ -33,9 +33,12 @@ from core.rng import case_fingerprint, stable_seed
 
 
 # EEG de fondo de UN barrido, uV RMS entre 1 y 30 Hz, adulto despierto en
-# Cz. Es lo que fija cuántos barridos hacen falta: con 150 el residual queda
-# en ~1 uV contra un N1-P2 de ~9.
-EEG_UV = 12.0
+# Cz con los ojos abiertos (contando o mirando el video: el alfa baja). Es
+# lo que fija cuántos barridos hacen falta: con 150 el residual queda en
+# ~0,8 uV contra un N1-P2 de ~9. Calculado. Era 12: con 40 raros la P300
+# quedaba bajo un ruido lento de 2 uV con su misma forma y no se encontraba
+# (sesión del docente con el caso 46, 2026-10-22).
+EEG_UV = 9.0
 # Pendiente del espectro de amplitud del EEG (potencia 1/f^(2*pendiente)).
 EEG_SLOPE = 0.75
 # Pico alfa: fracción de la potencia de 1-30 Hz que se suma alrededor de
