@@ -56,9 +56,17 @@ Entre paréntesis, el capítulo del libro donde aparecía.
 - ~~**Fila normativa del recién nacido (2026-10-21):**~~ **Reparado el
   2026-10-21.** La V del neonato pasó de 7,00 a 6,90 ms (Rosa y cols., 2014,
   39-40 semanas; verificado en el resumen de Crossref: I 1,79, III 4,56,
-  V 6,90). Interpicos 2,77 / 2,34 / 5,11. Se propagó a las ondas derivadas
+  V 6,90). Se propagó a las ondas derivadas
   (IV, VI, VII), a la vía ósea y al lactante de 1 a 3 años, que se interpola
   desde el neonato (V 5,78, I-V 4,26).
+  **Corrección (2026-10-21, más tarde):** los interpicos 2,34 / 5,11 eran
+  restas de I, III y V, no los publicados. La tabla 3 de Rosa y cols. (2014,
+  texto completo en SciELO) da, a 39-40 semanas: I 1,79 (DE 0,09), III 4,56
+  (0,22), V 6,90 (0,33), I-III 2,77 (0,21), III-V 2,42 (0,61), I-V 5,08
+  (0,31). El libro (cap. 14) ya usa 2,42 y 5,08. **Llevado a LabSim el
+  2026-10-21** (normativa del cliente y `CaseWaveforms`). Lo interpolado
+  desde el neonato (lactante de 1 a 3 años) sale de las latencias absolutas,
+  que no cambian: no hay que tocarlo.
 - ~~**Atenuación interaural del inserto (2026-10-21):**~~ **Reparado el
   2026-10-21.** El comentario de `ABR_generator.py` cita a Yacullo (Katz,
   7.ª ed., cap. 6): 75-110 dB hasta 1 kHz y 50-95 dB sobre 1 kHz con el 3A

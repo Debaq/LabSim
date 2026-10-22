@@ -6367,8 +6367,12 @@ semanas: I 1,79, III 4,56, V 6,90; 7,05 a las 37-38). Lo detectó la revisión
 del libro (`docs/limites_desde_el_libro.md`) y se verificó en Crossref.
 
 - Neonato aéreo: V 6,90; IV, VI y VII conservan su posición relativa (IV
-  5,786, VI 8,837, VII 10,319); interpicos 2,77 / 2,34 / 5,11. Ósea = aéreo
-  + 0,20, como antes.
+  5,786, VI 8,837, VII 10,319). Ósea = aéreo + 0,20, como antes.
+- Interpicos: los publicados en la tabla 3 de Rosa (texto completo en
+  SciELO), 2,77 / 2,42 / 5,08, y no la resta de las medias (2,34 / 5,11):
+  la media de los interpicos de cada niño no es la resta de las medias, y el
+  III-V trae un valor extremo (máx. 5,88, mediana 2,30). Solo centran los
+  rangos de la tabla; las curvas salen de las latencias absolutas.
 - Lactante de 1 a 3 años: se recalculó con la misma interpolación
   (neonato + f·(niño − neonato), f 0,88 a 0,80): V 5,78, I-V 4,26. Sigue entre
   los 4,81 de Rosa a los 6 meses y los 4,02 del niño.

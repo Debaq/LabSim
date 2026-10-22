@@ -51,7 +51,7 @@ final class CaseWaveforms
         'adult_female'     => ['I-III' => 2.19, 'III-V' => 1.89, 'I-V' => 4.08],
         'child'            => ['I-III' => 2.02, 'III-V' => 2.00, 'I-V' => 4.02],
         'toddler'          => ['I-III' => 2.15, 'III-V' => 2.11, 'I-V' => 4.26],
-        'neonate'          => ['I-III' => 2.77, 'III-V' => 2.34, 'I-V' => 5.11],
+        'neonate'          => ['I-III' => 2.77, 'III-V' => 2.42, 'I-V' => 5.08],
         'elderly_male'     => ['I-III' => 2.15, 'III-V' => 1.87, 'I-V' => 4.02],
         'elderly_female'   => ['I-III' => 2.00, 'III-V' => 2.00, 'I-V' => 4.00],
     ];
