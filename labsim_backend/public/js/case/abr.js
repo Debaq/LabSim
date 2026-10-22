@@ -40,6 +40,7 @@
             var horas = n * ({ horas: 1, dias: 24, meses: 720 }[uni ? uni.value : 'horas'] || 1);
             var meses = horas / 720;
             if (meses < 3) { return 'neonate'; }
+            if (meses < 12) { return 'infant'; }
             if (meses < 36) { return 'toddler'; }
         }
         if (age < 1) { return 'neonate'; }

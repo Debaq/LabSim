@@ -29,7 +29,8 @@ const ABR_POPULATION_LABELS = [
     'adult_female' => 'Adulto (mujer, 18-50)',
     'child' => 'Niño (3-17)',
     'toddler' => 'Primera infancia (1-3)',
-    'neonate' => 'Neonato (bajo 1 año)',
+    'infant' => 'Lactante (3-12 meses)',
+    'neonate' => 'Neonato (0-3 meses)',
     'elderly_male' => 'Adulto mayor (hombre, 60+)',
     'elderly_female' => 'Adulto mayor (mujer, 60+)',
 ];

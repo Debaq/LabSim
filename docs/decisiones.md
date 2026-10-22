@@ -6379,3 +6379,24 @@ del libro (`docs/limites_desde_el_libro.md`) y se verificó en Crossref.
 - Copias: `resources/abr/normative_data.json` (cliente) y
   `CaseWaveforms::CLICK_BASE`/`CLICK_INTERPICOS` (backend); el set de autor
   "Pediátrico" de `AbrReferences` suma la V.
+
+### Lactante de 3 a 12 meses: fila propia (2026-10-22)
+
+Desde los 3 meses se usaba la fila de 1 a 3 años (`toddler`, V 5,78), casi
+de adulto: un bebé de 6 meses salía 0,7 ms corto en la V contra los 6,50 que
+publica Rosa (2014, tabla 4) a esa edad, y una V atrasada para la edad pasaba
+por normal. Lo detectó la revisión del libro (H10, 14, 17).
+
+- Población nueva `infant` (3 a 12 meses, por horas de vida): I 1,70, III
+  4,37, V 6,50 e interpicos 2,65 / 2,16 / 4,81 de Rosa a los 6 meses. Las
+  ondas II, IV, VI y VII y las amplitudes se interpolan entre neonato y niño
+  con la fracción que da la latencia publicada (I 0,29, III 0,18, V 0,29).
+  Ósea = aéreo + 0,20, como las demás pediátricas.
+- Cráneo sin suturar (atenuación interaural ósea): 0,75, entre el neonato
+  (1) y el de 1 a 3 años (0,5). Ventana del FSP 4,8-11,6 ms, entre las dos.
+- La fila de 1 a 3 años no cambia: no hay serie publicada en las fuentes
+  del proyecto y su I-V (4,26) ya queda entre el de 6 meses y el del niño.
+- Sin horas de vida, "0 años" sigue siendo recién nacido.
+- Espejos: `select_population` (cliente), `CaseWaveforms::poblacion` y
+  `public/js/case/abr.js` (editor); el VEMP la traduce a `child`, como al de
+  1 a 3 años.

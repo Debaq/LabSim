@@ -928,7 +928,8 @@ final class Bibliografia
         $poblacion = [
             'adult_male' => 'adulto hombre', 'adult_female' => 'adulto mujer',
             'child' => 'niño (3-17)', 'toddler' => 'primera infancia (1-3)',
-            'neonate' => 'neonato', 'elderly_male' => 'adulto mayor hombre',
+            'neonate' => 'neonato', 'infant' => 'lactante (3-12 meses)',
+            'elderly_male' => 'adulto mayor hombre',
             'elderly_female' => 'adulto mayor mujer',
         ];
         $medida = ['lat' => 'Latencias', 'amp' => 'Amplitudes'];

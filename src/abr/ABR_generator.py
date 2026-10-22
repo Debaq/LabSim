@@ -485,6 +485,7 @@ NOISE_REF_SWEEPS = 1000.0
 FSP_WINDOW_MS = {
     'adulto': (4.0, 10.0),
     'neonate': (5.0, 12.0),
+    'infant': (4.8, 11.6),
     'toddler': (4.6, 11.3),
     'child': (4.3, 10.7),
 }
@@ -820,7 +821,8 @@ def select_population(age=None, gender=None, horas=None):
     El tramo de 1 a 3 anios tiene bloque propio ('toddler'): la via esta
     madurando --equivalencia adulta entre los 9 meses y los 3 anios, con la
     onda V ultima-- y meterlo en 'child', que ya es casi adulto, le borraba
-    justo eso. De 3 a 17 va 'child': a esa edad las latencias ya son
+    justo eso. De 3 a 12 meses va 'infant' (Rosa 2014 a los 6 meses): con
+    'toddler' un bebe de 6 meses salia 0.7 ms corto en la V. De 3 a 17 va 'child': a esa edad las latencias ya son
     practicamente de adulto.
 
     El sexo separa de los 18 en adelante, adulto mayor incluido. Antes el
@@ -831,8 +833,7 @@ def select_population(age=None, gender=None, horas=None):
     # Horas de vida: cuando estan, mandan. Sin esto un bebe de ocho meses
     # tomaba las latencias del recien nacido, porque los dos son "0 anios" y
     # el corte iba por ahi. El bloque 'neonate' es el del recien nacido de
-    # termino; pasados los tres meses la via ya arranco a madurar y lo que
-    # corresponde es 'toddler', que es justamente el tramo de la maduracion.
+    # termino; de 3 a 12 meses va 'infant' y de 1 a 3 anios 'toddler'.
     if horas not in (None, ''):
         try:
             meses = float(horas) / 720.0
@@ -841,6 +842,8 @@ def select_population(age=None, gender=None, horas=None):
         if meses is not None:
             if meses < 3:
                 return 'neonate'
+            if meses < 12:
+                return 'infant'
             if meses < 36:
                 return 'toddler'
     if age is None:
@@ -3564,8 +3567,9 @@ LEGACY_POPULATIONS = {
 # distinto (ver INFANT_BONE_LAT_MS).
 # Cuanto le queda de craneo sin suturar a cada poblacion, entre 0 y 1: es
 # lo que pondera la osea de lactante contra la de adulto. El de 1 a 3 anios
-# tiene las suturas a medio cerrar, asi que le toca la mitad de cada una.
-INFANT_POPULATIONS = {'neonate': 1.0, 'toddler': 0.5}
+# tiene las suturas a medio cerrar, asi que le toca la mitad de cada una;
+# el de 3 a 12 meses queda entre los dos.
+INFANT_POPULATIONS = {'neonate': 1.0, 'infant': 0.75, 'toddler': 0.5}
 
 
 # Tipo de patologia del caso (como lo guarda CaseBuilder.abrBuild) ->

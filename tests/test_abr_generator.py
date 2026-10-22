@@ -966,6 +966,26 @@ def test_toddler_sits_between_the_neonate_and_the_child():
     assert resta(tod) > resta_i
 
 
+def test_infant_follows_rosa_at_six_months():
+    """3 a 12 meses: Rosa 2014 a los 6 meses (tabla 4), entre el neonato y
+    el lactante de 1 a 3 años. Con la fila de 1-3 años salía 0.7 ms corto."""
+    g = _gen()
+    inf = g.get_baseline_values('infant', 'click', 'air_conduction')
+    for onda, lat in (('I', 1.70), ('III', 4.37), ('V', 6.50)):
+        assert abs(inf[onda]['lat'] - lat) < 1e-9, onda
+    assert inf['interpeak'] == {'I-III': 2.65, 'III-V': 2.16, 'I-V': 4.81}
+    orden = [g.get_baseline_values(p, 'click', 'air_conduction')
+             for p in ('neonate', 'infant', 'toddler', 'child')]
+    for onda in ('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'):
+        lats = [b[onda]['lat'] for b in orden]
+        assert lats == sorted(lats, reverse=True), (onda, lats)
+    oseo = g.get_baseline_values('infant', 'click', 'bone_conduction')
+    assert abs(oseo['V']['lat'] - 6.70) < 1e-9
+    assert (interaural_attenuation('bone_vibrator', 'neonate')
+            > interaural_attenuation('bone_vibrator', 'infant')
+            > interaural_attenuation('bone_vibrator', 'toddler'))
+
+
 def test_neonate_has_a_longer_wave_V_than_an_adult():
     """Vía auditiva inmadura: la onda V del neonato llega bastante después."""
     g = _gen()
@@ -2588,13 +2608,14 @@ def test_hours_of_life_beat_whole_years_for_the_population():
 
     Los dos son "0 años" -- la edad en años enteros los mete en la misma
     bolsa -- y no comparten normativa: 'neonate' es el bloque del recién
-    nacido de término y a los tres meses la vía ya arrancó a madurar, que es
-    para lo que está 'toddler'. Espejo de CaseWaveforms::poblacion.
+    nacido de término; de 3 a 12 meses va 'infant' y de 1 a 3 años
+    'toddler'. Espejo de CaseWaveforms::poblacion.
     """
     assert select_population(0, 1) == 'neonate'          # sin horas, se asume
     assert select_population(0, 1, horas=10) == 'neonate'
     assert select_population(0, 1, horas=24 * 30) == 'neonate'
-    assert select_population(0, 1, horas=24 * 240) == 'toddler'
+    assert select_population(0, 1, horas=24 * 240) == 'infant'
+    assert select_population(1, 1, horas=24 * 30 * 18) == 'toddler'
     assert select_population(2, 1, horas=None) == 'toddler'
     assert select_population(30, 0, horas='') == 'adult_male'
     # Basura en el campo no rompe: cae en el camino de siempre.

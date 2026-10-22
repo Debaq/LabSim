@@ -1059,6 +1059,96 @@
         }
       }
     },
+    "infant": {
+      "age_range": [
+        0.25,
+        1
+      ],
+      "sex": "ambos",
+      "description": "Lactantes 3-12 meses: Rosa 2014 a los 6 meses (I, III, V e interpicos)",
+      "air_conduction": {
+        "click": {
+          "I": {
+            "lat": 1.7,
+            "amp": 0.191
+          },
+          "II": {
+            "lat": 2.943,
+            "amp": 0.13
+          },
+          "III": {
+            "lat": 4.37,
+            "amp": 0.219
+          },
+          "IV": {
+            "lat": 5.536,
+            "amp": 0.164
+          },
+          "V": {
+            "lat": 6.5,
+            "amp": 0.331
+          },
+          "VI": {
+            "lat": 8.386,
+            "amp": 0.227
+          },
+          "VII": {
+            "lat": 9.821,
+            "amp": 0.19
+          },
+          "interpeak": {
+            "I-III": 2.65,
+            "III-V": 2.16,
+            "I-V": 4.81
+          }
+        },
+        "fuente": {
+          "lat": "F25",
+          "amp": "derivado"
+        }
+      },
+      "bone_conduction": {
+        "click": {
+          "I": {
+            "lat": 1.9,
+            "amp": 0.17
+          },
+          "II": {
+            "lat": 3.143,
+            "amp": 0.116
+          },
+          "III": {
+            "lat": 4.57,
+            "amp": 0.195
+          },
+          "IV": {
+            "lat": 5.736,
+            "amp": 0.146
+          },
+          "V": {
+            "lat": 6.7,
+            "amp": 0.294
+          },
+          "VI": {
+            "lat": 8.586,
+            "amp": 0.202
+          },
+          "VII": {
+            "lat": 10.021,
+            "amp": 0.169
+          },
+          "interpeak": {
+            "I-III": 2.65,
+            "III-V": 2.16,
+            "I-V": 4.81
+          }
+        },
+        "fuente": {
+          "lat": "derivado",
+          "amp": "derivado"
+        }
+      }
+    },
     "toddler": {
       "age_range": [
         1,

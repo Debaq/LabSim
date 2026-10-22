@@ -36,6 +36,7 @@ final class CaseWaveforms
         'adult_female'     => ['I' => [1.46, 0.440], 'III' => [3.65, 0.470], 'V' => [5.54, 0.540]],
         'child'            => ['I' => [1.48, 0.239], 'III' => [3.50, 0.282], 'V' => [5.50, 0.410]],
         'toddler'          => ['I' => [1.52, 0.231], 'III' => [3.67, 0.270], 'V' => [5.78, 0.388]],
+        'infant'           => ['I' => [1.70, 0.191], 'III' => [4.37, 0.219], 'V' => [6.50, 0.331]],
         'neonate'          => ['I' => [1.79, 0.171], 'III' => [4.56, 0.205], 'V' => [6.90, 0.299]],
         'elderly_male'     => ['I' => [1.83, 0.288], 'III' => [3.98, 0.333], 'V' => [5.85, 0.360]],
         'elderly_female'   => ['I' => [1.84, 0.396], 'III' => [3.84, 0.423], 'V' => [5.84, 0.486]],
@@ -51,6 +52,7 @@ final class CaseWaveforms
         'adult_female'     => ['I-III' => 2.19, 'III-V' => 1.89, 'I-V' => 4.08],
         'child'            => ['I-III' => 2.02, 'III-V' => 2.00, 'I-V' => 4.02],
         'toddler'          => ['I-III' => 2.15, 'III-V' => 2.11, 'I-V' => 4.26],
+        'infant'           => ['I-III' => 2.65, 'III-V' => 2.16, 'I-V' => 4.81],
         'neonate'          => ['I-III' => 2.77, 'III-V' => 2.42, 'I-V' => 5.08],
         'elderly_male'     => ['I-III' => 2.15, 'III-V' => 1.87, 'I-V' => 4.02],
         'elderly_female'   => ['I-III' => 2.00, 'III-V' => 2.00, 'I-V' => 4.00],
@@ -230,13 +232,16 @@ final class CaseWaveforms
     {
         // Horas de vida: cuando están, mandan. Sin esto un bebé de ocho
         // meses tomaba las latencias del recién nacido, porque los dos son
-        // "0 años". 'neonate' es el bloque del recién nacido de término;
-        // pasados los tres meses la vía ya arrancó a madurar y lo que
-        // corresponde es 'toddler', que es el tramo de la maduración.
+        // "0 años". 'neonate' es el bloque del recién nacido de término; de
+        // 3 a 12 meses va 'infant' (Rosa 2014 a los 6 meses) y de 1 a 3 años
+        // 'toddler', el tramo de la maduración.
         if ($horas !== null && $horas !== '' && is_numeric($horas)) {
             $meses = (float) $horas / 720.0;
             if ($meses < 3) {
                 return 'neonate';
+            }
+            if ($meses < 12) {
+                return 'infant';
             }
             if ($meses < 36) {
                 return 'toddler';
@@ -536,6 +541,7 @@ final class CaseWaveforms
      * un hombre de 70 se dibujaban con la p13 de una mujer adulta.
      */
     private const VEMP_POP_ALIAS = [
+        'infant' => 'child',
         'toddler' => 'child',
         'elderly_male' => 'elderly',
         'elderly_female' => 'elderly',

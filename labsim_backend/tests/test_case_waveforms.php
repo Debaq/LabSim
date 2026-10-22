@@ -270,10 +270,15 @@ t_close(CaseMasking::efectoOclusivo(2, $aereaOd, $oseaOd), 0.0, 0.001,
 
 // Las horas de vida mandan sobre los años enteros: un bebé de ocho meses y
 // un recién nacido son los dos "0 años" y no comparten normativa. 'neonate'
-// es el bloque del recién nacido de término; pasados los tres meses la vía
-// ya arrancó a madurar y lo que corresponde es 'toddler'.
+// es el bloque del recién nacido de término; de 3 a 12 meses va 'infant'.
 t_eq(CaseWaveforms::poblacion(0, 0, 10), 'neonate', 'Diez horas de vida: neonato');
 t_eq(CaseWaveforms::poblacion(0, 0, 24 * 30), 'neonate', 'Al mes todavía neonato');
-t_eq(CaseWaveforms::poblacion(0, 0, 24 * 240), 'toddler', 'A los ocho meses ya no: la vía maduró');
+t_eq(CaseWaveforms::poblacion(0, 0, 24 * 240), 'infant', 'A los ocho meses ya no: lactante (Rosa a los 6 meses)');
+t_eq(CaseWaveforms::poblacion(1, 0, 24 * 30 * 18), 'toddler', 'A los 18 meses, el tramo de 1 a 3 años');
+t_true(
+    CaseWaveforms::CLICK_BASE['neonate']['V'][0] > CaseWaveforms::CLICK_BASE['infant']['V'][0]
+    && CaseWaveforms::CLICK_BASE['infant']['V'][0] > CaseWaveforms::CLICK_BASE['toddler']['V'][0],
+    'La onda V del lactante queda entre la del neonato y la del tramo 1-3'
+);
 t_eq(CaseWaveforms::poblacion(0, 0, null), 'neonate', 'Sin horas cargadas, 0 años se asume recién nacido');
 t_eq(CaseWaveforms::poblacion(30, 0, ''), 'adult_male', 'Horas vacías no rompen al adulto');

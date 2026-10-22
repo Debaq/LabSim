@@ -207,6 +207,7 @@ final class AbrReferences
         'child'        => ['lat' => 'F04', 'amp' => 'calculada'],
         'toddler'        => ['lat' => 'calculada', 'amp' => 'calculada'],
         'neonate'      => ['lat' => 'F25', 'amp' => 'calculada'],
+        'infant'       => ['lat' => 'F25', 'amp' => 'calculada'],
         'elderly_male'   => ['lat' => 'F21', 'amp' => 'F09'],
         'elderly_female' => ['lat' => 'F21', 'amp' => 'F09'],
     ];
@@ -253,12 +254,13 @@ final class AbrReferences
             ],
         ],
         'pediatrico' => [
-            'label' => 'Pediátrico: Chalak 2013 (niño) y Rosa 2014 (neonato)',
+            'label' => 'Pediátrico: Chalak 2013 (niño) y Rosa 2014 (neonato y 6 meses)',
             'fuente' => 'F04',
-            'nota' => 'Chalak mide a 70 dB nHL, así que sus latencias son ~0.12 ms más largas que a 80; acá van tal como las publica. Rosa da el neonato de 39-40 semanas (I 1,79, III 4,56 y V 6,90 ms en el resumen).',
+            'nota' => 'Chalak mide a 70 dB nHL, así que sus latencias son ~0.12 ms más largas que a 80; acá van tal como las publica. Rosa da el neonato de 39-40 semanas (I 1,79, III 4,56, V 6,90 ms) y el lactante de 6 meses (I 1,70, III 4,37, V 6,50 ms), tablas 3 y 4.',
             'populations' => [
                 'child'   => ['I' => ['lat' => 1.66], 'III' => ['lat' => 3.67], 'V' => ['lat' => 5.62]],
                 'neonate' => ['I' => ['lat' => 1.79], 'III' => ['lat' => 4.56], 'V' => ['lat' => 6.90]],
+                'infant'  => ['I' => ['lat' => 1.70], 'III' => ['lat' => 4.37], 'V' => ['lat' => 6.50]],
             ],
         ],
     ];
