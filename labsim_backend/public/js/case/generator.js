@@ -1129,6 +1129,15 @@
         });
     }
 
+    // Redondea al `step` del campo: un valor fuera del paso (0,63 con paso
+    // 0,05, 62 ms con paso 5) el navegador lo marca inválido y el caso no
+    // se puede guardar.
+    function alPaso(campo, valor) {
+        var paso = parseFloat(campo.step) || 0.01;
+        var decimales = (String(paso).split('.')[1] || '').length;
+        return Number((Math.round(valor / paso) * paso).toFixed(decimales));
+    }
+
     function generarCentral() {
         var select = document.getElementById('armado-central');
         if (!select) { return null; }
@@ -1149,11 +1158,10 @@
             if (Array.isArray(regla) && regla.length && typeof regla[0] === 'string') {
                 valor = regla[Math.floor(Math.random() * regla.length)];
             } else if (Array.isArray(regla) && regla.length === 2) {
-                valor = entre(regla[0], regla[1]);
-                valor = param.slice(-3) === '_ms' ? Math.round(valor) : Math.round(valor * 100) / 100;
+                valor = alPaso(campo, entre(regla[0], regla[1]));
             } else if (param === 'tension_cervical') {
                 // La tensión es del paciente, no del cuadro: se sortea.
-                valor = Math.round(entre(0.1, 0.6) * 100) / 100;
+                valor = alPaso(campo, entre(0.1, 0.6));
             }
             campo.value = String(valor);
             campo.dispatchEvent(new Event('change', { bubbles: true }));
