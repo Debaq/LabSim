@@ -117,6 +117,34 @@ def test_intento_abierto_de_otra_vez_se_retoma():
         ITEMS[0]["abierto"] = None
 
 
+
+def test_rearmar_la_agenda_muchas_veces_no_deja_items_colgados():
+    """El sync rearma la tabla cada minuto. El 2026-10-22 (labsim3) se
+    cerró la app en setItem: Qt borraba el item viejo, creado en Python.
+    Ahora los items se sacan con takeItem antes de rearmar."""
+    import gc
+    ag, _ = _armar(lambda pid: {})
+    hoy = mod.QDate.currentDate().toString("dd-MM-yy")
+    for vuelta in range(60):
+        n = 1 + (vuelta * 7) % 9
+        ag.shedule = {"agenda_1": {
+            str(100 + i): AgendaEntry(fecha=hoy, hora=f"{8 + i:02d}:00", nombre=f"P{i}",
+                                      apellido="X", case_id="c1")
+            for i in range(n)}}
+        if vuelta % 3 == 0 and ag.tableWidget.rowCount():
+            ag.tableWidget.selectRow(0)
+        if vuelta % 5 == 0:
+            ag.tableWidget.sortItems(3, Qt.DescendingOrder)
+        ag.populate_shedule()
+        gc.collect()
+        APP.processEvents()
+        assert ag.tableWidget.rowCount() == n
+        assert sorted(_filas(ag)) == sorted(f"P{i}" for i in range(n))
+    ag.btn_practica.setChecked(True)
+    ag.btn_practica.setChecked(False)
+    gc.collect()
+    assert ag.tableWidget.rowCount() >= 1
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

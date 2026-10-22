@@ -297,9 +297,10 @@ class Agenda(QWidget, Ui_Form):
         self._selected_row_key = None
         self.tableWidget.blockSignals(True)
         self.tableWidget.clearSelection()
-        self.tableWidget.setRowCount(0)
+        sueltos = self._vaciar_tabla(0)
         self.tableWidget.blockSignals(False)
         self.populate_shedule()
+        del sueltos
 
     def _on_practica_fetched(self, items):
         self._practica = {f"practica:{it['id']}": it for it in items}
@@ -483,8 +484,7 @@ class Agenda(QWidget, Ui_Form):
         prev_key = self._selected_row_key
 
         self._loading = True
-        self.tableWidget.setSortingEnabled(False)
-        self.tableWidget.setRowCount(len(keys))
+        sueltos = self._vaciar_tabla(len(keys))
 
         username = self._current_username()
         for row_idx, key in enumerate(keys):
@@ -532,6 +532,7 @@ class Agenda(QWidget, Ui_Form):
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.tableWidget.setItem(row_idx, col_idx, item)
         self.tableWidget.setSortingEnabled(True)
+        del sueltos
         self._loading = False
 
         if prev_key is not None and prev_key in keys:
@@ -548,6 +549,23 @@ class Agenda(QWidget, Ui_Form):
             self._selected_key = None
             self._selected_row_key = None
 
+    def _vaciar_tabla(self, filas):
+        """Saca los items de la tabla antes de rearmarla y la deja en
+        `filas` filas vacias.
+
+        setItem sobre una celda ocupada hace que Qt borre el item viejo, y
+        ese item lo creo Python: el 2026-10-22 (labsim3, sync de las 14:12)
+        el borrado desde Qt reventó en shiboken (segfault en
+        unregisterWrapper) con el alumno recién entrado a su atención. Con
+        takeItem el item vuelve a Python y se libera de este lado, y Qt no
+        borra nada. Hay que guardar lo devuelto hasta terminar de llenar."""
+        tabla = self.tableWidget
+        tabla.setSortingEnabled(False)
+        sueltos = [tabla.takeItem(f, c) for f in range(tabla.rowCount())
+                   for c in range(tabla.columnCount())]
+        tabla.setRowCount(filas)
+        return sueltos
+
     def _populate_practica(self):
         """Llena la tabla con la lista de práctica (ver _on_toggle_practica)."""
         keys = list(self._practica.keys())
@@ -561,8 +579,7 @@ class Agenda(QWidget, Ui_Form):
         prev_key = self._selected_row_key
 
         self._loading = True
-        self.tableWidget.setSortingEnabled(False)
-        self.tableWidget.setRowCount(len(keys))
+        sueltos = self._vaciar_tabla(len(keys))
         for row_idx, key in enumerate(keys):
             it = self._practica[key]
             intentos = int(it.get("intentos") or 0)
@@ -580,6 +597,7 @@ class Agenda(QWidget, Ui_Form):
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.tableWidget.setItem(row_idx, col_idx, item)
         self.tableWidget.setSortingEnabled(True)
+        del sueltos
         self._loading = False
 
         if prev_key is not None and prev_key in keys:
@@ -666,6 +684,10 @@ class Agenda(QWidget, Ui_Form):
             self.chk_guardar_base.setEnabled(True)
 
     def _on_selection_changed(self):
+        if self._loading:
+            # Tabla a medio rearmar (ver _vaciar_tabla): las celdas estan
+            # vacias. populate recalcula el boton al terminar.
+            return
         selected_rows = self.tableWidget.selectionModel().selectedRows()
         if not selected_rows:
             self._reset_atender_button()
