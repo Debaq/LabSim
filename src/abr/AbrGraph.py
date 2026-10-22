@@ -353,7 +353,24 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         trazos['main'] = self.pw.plot(
             x=values['ipsi_xy'][0], y=np.asarray(values['ipsi_xy'][1]) + gap,
             pen=self.pen_for('main'), name=name)
+        # Clic sobre el trazo: esa curva pasa a ser la activa y la bandera A
+        # va adonde se hizo clic. Con tres canales por captura la activa era
+        # la ultima creada (Pz) y el alumno marcaba en Cz sin saber que la
+        # marca caia en otra curva; y la bandera, una linea de un pixel, se
+        # escapaba y el arrastre desplazaba el grafico.
+        trazos['main'].setCurveClickable(True, width=12)
+        trazos['main'].sigClicked.connect(
+            lambda _item, ev, curva=name: self.click_curve(curva, ev))
         return trazos
+
+    def click_curve(self, curve, ev):
+        if curve not in self.data or ev.button() != Qt.MouseButton.LeftButton:
+            return
+        ev.accept()
+        if curve != self.act_curve:
+            self.active_curve(curve)
+        x = self.pw.vb.mapSceneToView(ev.scenePos()).x()
+        self.inf_a.setPos((max(0.0, min(self.window_ms, x)), 0))
 
     def update_graph(self, graph_name, data):
         trazos = self.traces.get(graph_name)
@@ -892,6 +909,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         setXRange quiere (min, max); con un solo argumento no hacia nada,
         y de hecho nadie llamaba a este helper.
         """
+        anterior = self.window_ms
         self.window_ms = float(ms)
         self.pw.setXRange(0, self.window_ms + self.window_ms * 0.08,
                           padding=0)
@@ -899,10 +917,15 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # Una base sin FIN llega al borde: si el borde se movio, ella tambien.
         for nombre in list(self.base_lines):
             self.refresh_base_line(nombre)
+        # Las banderas guardan su lugar en proporcion a la ventana. Antes
+        # solo se recortaban al borde: del ABR (12 ms) al CAEP (500 ms)
+        # quedaban A en 0 y A' en 12, una encima de la otra contra el eje.
+        proporcion = self.window_ms / anterior if anterior > 0 else 1.0
         for item in (getattr(self, 'inf_a', None),
                      getattr(self, 'inf_b', None)):
-            if item is not None and item.getXPos() > self.window_ms:
-                item.setPos((self.window_ms, 0))
+            if item is not None:
+                x = item.getXPos() * proporcion
+                item.setPos((max(0.0, min(self.window_ms, x)), 0))
 
     # Divisiones de la grilla por ventana de escala: 6 da la grilla de
     # 1 uV del ABR a 6 uV.

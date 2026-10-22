@@ -174,6 +174,36 @@ def test_marking_with_the_real_mouse():
     assert w.table_cx_r.medidas['Cz']['lat']['N1'] == g.marks[curva]['N1'][0]
 
 
+def test_clicking_a_trace_selects_it_and_brings_flag_a():
+    """Clic sobre el trazo de Cz: esa curva se marca, no la última creada
+    (Pz). Y las banderas no quedan amontonadas al venir del ABR."""
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+    from test_ecochg_panel import _pixel
+    w = _ventana('CAEP')
+    w.resize(1400, 900)
+    w.show()
+    QApplication.processEvents()
+    g = w.graph_r
+    # A' venía de los 12 ms del ABR y quedaba pegada a A, contra el eje.
+    assert g.inf_b.getXPos() > 0.9 * g.window_ms, g.inf_b.getXPos()
+    _capturar(w)
+    assert g.act_curve == 'R1.Pz'
+    QApplication.processEvents()
+    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
+                     Qt.KeyboardModifier.NoModifier, _pixel(g, 100.0, 'R1.Cz'))
+    QApplication.processEvents()
+    assert g.act_curve == 'R1.Cz', g.act_curve
+    assert abs(g.inf_a.getXPos() - 100.0) < 8.0, g.inf_a.getXPos()
+    boton = [b for b in w.table_cx_r.botones if b.text() == 'N1'][0]
+    boton.click()
+    QApplication.processEvents()
+    assert 'N1' in g.marks['R1.Cz'] and 'N1' not in g.marks['R1.Pz']
+
+
 def test_case_1_shows_an_electrode_effect_in_the_table():
     if not HAS_UI:
         return
