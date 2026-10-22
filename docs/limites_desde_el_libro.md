@@ -53,6 +53,17 @@ Entre paréntesis, el capítulo del libro donde aparecía.
   (LabSim)" y "70 dB FL (LabSim)"; hoy rotula solo el transductor.
 - **Tope del dial de reflejos:** 120 dB SPL; la BSA recomienda no pasar de
   105 dB HL con tonos (105-117 dB SPL según frecuencia y vía) (04).
+- ~~**Fila normativa del recién nacido (2026-10-21):**~~ **Reparado el
+  2026-10-21.** La V del neonato pasó de 7,00 a 6,90 ms (Rosa y cols., 2014,
+  39-40 semanas; verificado en el resumen de Crossref: I 1,79, III 4,56,
+  V 6,90). Interpicos 2,77 / 2,34 / 5,11. Se propagó a las ondas derivadas
+  (IV, VI, VII), a la vía ósea y al lactante de 1 a 3 años, que se interpola
+  desde el neonato (V 5,78, I-V 4,26).
+- ~~**Atenuación interaural del inserto (2026-10-21):**~~ **Reparado el
+  2026-10-21.** El comentario de `ABR_generator.py` cita a Yacullo (Katz,
+  7.ª ed., cap. 6): 75-110 dB hasta 1 kHz y 50-95 dB sobre 1 kHz con el 3A
+  de oliva profunda, conservador 75 y 50. Son tonos; los 65 dB del click
+  quedan dentro.
 
 ## Lo que falta
 

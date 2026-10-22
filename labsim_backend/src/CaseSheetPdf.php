@@ -81,7 +81,7 @@ final class CaseSheetPdf
         'adult_male' => 'Referencia: latencias de Sanfins et al. 2026 (n=244, click 0.1 ms rarefacción, 80 dB nHL, ER-3A) y amplitudes de Da Silva Nunes y Gentile Matas 2005 (n=100 oídos).',
         'adult_female' => 'Referencia: latencias de Sanfins et al. 2026 (n=244, click 0.1 ms rarefacción, 80 dB nHL, ER-3A) y amplitudes de Da Silva Nunes y Gentile Matas 2005 (n=100 oídos).',
         'child' => 'Referencia: Chalak et al. 2013 (n=40 niños, media 7.6 años), medida a 70 dB nHL y llevada a 80 con la función latencia-intensidad.',
-        'neonate' => 'Referencia: Rosa et al. 2014 (n=80 lactantes, 39-40 semanas); la onda V a término se interpola con los grupos vecinos.',
+        'neonate' => 'Referencia: Rosa et al. 2014 (n=80 lactantes, 39-40 semanas): ondas I, III y V.',
         'toddler' => 'Referencia: derivada. Ninguna serie de la planilla cubre 1-3 años: se interpola entre el neonato de término (Rosa 2014) y el niño (Chalak 2013), con la onda V madurando última (Gorga 1988, n=535).',
         'elderly_male' => 'Referencia: Aguilar-Madrid et al. 2015 (n=196), hombres de 45 años o más; la amplitud aplica la caída del 10% de Jerger y Hall 1980.',
         'elderly_female' => 'Referencia: Aguilar-Madrid et al. 2015 (n=196), mujeres de 45 años o más; la amplitud aplica la caída del 10% de Jerger y Hall 1980.',

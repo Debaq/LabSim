@@ -255,10 +255,10 @@ final class AbrReferences
         'pediatrico' => [
             'label' => 'Pediátrico: Chalak 2013 (niño) y Rosa 2014 (neonato)',
             'fuente' => 'F04',
-            'nota' => 'Chalak mide a 70 dB nHL, así que sus latencias son ~0.12 ms más largas que a 80; acá van tal como las publica. Rosa da el neonato de 39-40 semanas y no publica su onda V.',
+            'nota' => 'Chalak mide a 70 dB nHL, así que sus latencias son ~0.12 ms más largas que a 80; acá van tal como las publica. Rosa da el neonato de 39-40 semanas (I 1,79, III 4,56 y V 6,90 ms en el resumen).',
             'populations' => [
                 'child'   => ['I' => ['lat' => 1.66], 'III' => ['lat' => 3.67], 'V' => ['lat' => 5.62]],
-                'neonate' => ['I' => ['lat' => 1.79], 'III' => ['lat' => 4.56]],
+                'neonate' => ['I' => ['lat' => 1.79], 'III' => ['lat' => 4.56], 'V' => ['lat' => 6.90]],
             ],
         ],
     ];

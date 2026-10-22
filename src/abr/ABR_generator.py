@@ -425,8 +425,14 @@ NEURAL_CM_SIGMA_GAIN = 3.5
 # hasta la coclea del otro lado. Por debajo de esto no hay curva sombra.
 # Insertos aislan mucho mas que los supraaurales, que es justamente el
 # argumento clinico para usarlos.
+# Inserto: Yacullo (Katz, Handbook of Clinical Audiology, 7.a ed., 2015,
+# cap. 6) da para el 3A con oliva profunda unos 75-110 dB hasta 1 kHz y
+# 50-95 dB sobre 1 kHz (Killion y cols., 1985), con 75 y 50 como estimacion
+# conservadora. Son tonos: para el click no hay cifra publicada, y los 65
+# quedan dentro de esos rangos (Van Campen 1990 halla una mejora modesta del
+# inserto frente al supraaural con click).
 INTERAURAL_ATTENUATION = {
-    'insert_earphone': 65.0,   # publicado 60-70
+    'insert_earphone': 65.0,   # ver arriba (Yacullo 2015)
     'TDH39_headphone': 45.0,   # publicado 40-50: cruza 20 dB antes
     'bone_vibrator': 5.0,      # publicado 0-10 en ADULTO: practicamente nula
 }
