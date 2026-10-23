@@ -82,6 +82,20 @@ Entre paréntesis, el capítulo del libro donde aparecía.
   4 a 12 meses sale en LabSim unos 0,7 ms más corto en la V. Falta una fila
   publicada para 6 meses (Rosa) y revisar el tramo de 1 a 3 años. Por esto el
   bebé de H10 se armó de 12 semanas (fila del recién nacido) (H10, 14, 17).
+- **Potenciales corticales, cifras sin fuente (2026-10-22, cap. 30):** la P300
+  pediátrica (300 ms + 7 ms por año bajo los 18, DE 20 ms) está marcada como
+  calculada y Polich y cols. (1985) no respaldan esa pendiente; el límite de
+  la P1 (media + 24 %), la DE de la P300, el rango de Na-Pa (0,5-2,0 µV), el
+  corte de 50 % del efecto electrodo y el corrimiento de la Pa de 0,8 ms por
+  año hasta los 10 años no tienen cita verificada. El libro dice "sin corte
+  validado" donde corresponde.
+- **Barridos y ruido en los corticales (2026-10-22):** al registrar MLR, P300
+  o MMN con 300 o con 2.000 barridos, la figura sale igual: el ruido del
+  promedio no baja con más barridos. En el ABR sí baja. Revisar el generador
+  cortical.
+- **Cuadro `tpac`:** puede salir sin efecto electrodo y con la MMN apenas
+  reducida; al armar un caso para enseñar el TPAC conviene poder fijar esos
+  parámetros.
 
 ## Lo que falta
 
