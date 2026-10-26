@@ -1162,7 +1162,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # y el ABR se queda en su alto natural (las fichas apretadas arriba).
         self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login), expand=True)
         self.subw_aabr = FrameSubMdi(AabrMainWindow(data_login=self.data_login))
-        self.subw_eoas = FrameSubMdi(OaeMainWindow(data_login=self.data_login))
+        self.subw_eoas = FrameSubMdi(OaeMainWindow(data_login=self.data_login), expand=True)
         self.subw_vemp = FrameSubMdi(VempMainWindow(data_login=self.data_login))
 
         self.subw.update({

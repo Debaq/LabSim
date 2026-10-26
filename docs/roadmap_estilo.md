@@ -109,6 +109,14 @@ Actualizado 2026-10-26 (noche).
   Los botones conservan el nombre `btn_<lista><n>[_2]` que usa `pushaudio`.
 - [ ] Probar en la app real: `Layout.php` cambió (W 440x420), hay que subir el backend.
 
+### EOAS (OAE)
+- [x] Solo el marco (2026-10-26): los gráficos de los cuatro paneles NO se tocan, el autor los da
+  por buenos. Pestañas con subrayado, grupos de parámetros como tarjetas, OD rojo / OI azul al
+  marcarse, Iniciar como botón principal (todo por QSS + propiedades desde `OaeMainWindow`, sin
+  tocar el armado de los paneles). Informe en tarjetas: cabecera con evaluador/fecha/atención y
+  lo capturado, hallazgos y conclusión lado a lado. `expand=True`.
+- [ ] Probar en la app real; los paneles siguen con sus colores inline de estado (SOAE, métricas).
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -120,7 +128,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] AABR, EOAS (OAE), Audiómetro, Z: paleta de
+- [ ] AABR, Audiómetro, Z: paleta de
   `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.

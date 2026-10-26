@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from core import tema
 from core.base import context
 from core.helpers import Preferences
 from backend.client import BackendClient
@@ -38,6 +39,56 @@ PRUEBAS = (
 )
 
 
+# Reglas propias del marco (el resto sale de core/tema.py). Los gráficos de
+# los paneles no se tocan: solo lo que los rodea.
+EXTRA_QSS = f"""
+QTabWidget::pane {{ border: none; background: transparent; top: 0px; }}
+QTabBar::tab {{
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 7px 14px;
+    margin-right: 2px;
+    font-size: 9pt;
+    font-weight: 600;
+    color: {tema.TEXTO_TENUE};
+}}
+QTabBar::tab:selected {{ color: {tema.ACENTO}; border-bottom-color: {tema.ACENTO}; }}
+QTabBar::tab:hover:!selected {{ color: {tema.TEXTO_SUAVE}; }}
+QGroupBox {{
+    background: {tema.TARJETA};
+    border: 1px solid {tema.BORDE};
+    border-radius: 10px;
+    margin-top: 16px;
+    padding: 12px 10px 8px 10px;
+}}
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 0 4px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    color: {tema.TEXTO_TENUE};
+}}
+QPushButton[lado="od"]:checked {{ background: {tema.OD_SUAVE}; border-color: {tema.OD}; color: {tema.OD}; }}
+QPushButton[lado="oi"]:checked {{ background: {tema.OI_SUAVE}; border-color: {tema.OI}; color: {tema.OI}; }}
+QPushButton[primario="true"] {{
+    background: {tema.ACENTO};
+    border-color: {tema.ACENTO};
+    color: white;
+    font-weight: 600;
+}}
+QPushButton[primario="true"]:hover {{ background: {tema.ACENTO_CLARO}; color: white; }}
+QPushButton[primario="true"]:disabled {{
+    background: {tema.TARJETA_ALT};
+    border-color: {tema.BORDE};
+    color: {tema.TEXTO_TENUE};
+}}
+QSplitter::handle {{ background: transparent; }}
+"""
+
+
 class OaeMainWindow(QMainWindow):
     """Emisor Otoacústico Clínico (EOAC) - ventana MDI."""
 
@@ -48,6 +99,7 @@ class OaeMainWindow(QMainWindow):
         self.appointment_id = None
         self.setWindowTitle("Emisor Otoacústico")
         self.resize(1200, 800)
+        tema.aplicar_estilo(self, EXTRA_QSS)
         self._build_ui()
         self._refresh_case()
 
@@ -55,7 +107,7 @@ class OaeMainWindow(QMainWindow):
         """Construye central widget: tabs por tipo de OEA."""
         central = QWidget()
         outer = QVBoxLayout(central)
-        outer.setContentsMargins(8, 8, 8, 8)
+        outer.setContentsMargins(12, 6, 12, 12)
         outer.setSpacing(8)
 
         self.tabs = QTabWidget()
@@ -81,8 +133,21 @@ class OaeMainWindow(QMainWindow):
         self.tabs.addTab(self.report, "Informe")
         self.tabs.currentChanged.connect(self._on_tab_changed)
         outer.addWidget(self.tabs, stretch=1)
+        self._estilo_paneles()
 
         self.setCentralWidget(central)
+
+    def _estilo_paneles(self) -> None:
+        """OD rojo / OI azul al marcarse e Iniciar como botón principal: por
+        propiedad, sin tocar el armado de cada panel."""
+        for _clave, attr, _label in PRUEBAS:
+            panel = getattr(self, attr)
+            for nombre, lado in (("btn_od", "od"), ("btn_oi", "oi")):
+                btn = getattr(panel, nombre, None)
+                if btn is not None:
+                    btn.setProperty("lado", lado)
+            if getattr(panel, "btn_start", None) is not None:
+                panel.btn_start.setProperty("primario", "true")
 
     def _refresh_case(self) -> None:
         """Manda a los paneles la patología por oído del caso abierto.

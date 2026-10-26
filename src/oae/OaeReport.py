@@ -9,8 +9,8 @@ un botón "Guardar informe" propio de EOA.
 from datetime import datetime
 
 from PySide6.QtWidgets import (
-    QFormLayout,
-    QGroupBox,
+    QFrame,
+    QHBoxLayout,
     QLabel,
     QTextEdit,
     QVBoxLayout,
@@ -18,6 +18,21 @@ from PySide6.QtWidgets import (
 )
 
 from core.estado_informe import EstadoInforme
+
+
+def _tarjeta():
+    tarjeta = QFrame()
+    tarjeta.setProperty("card", "true")
+    col = QVBoxLayout(tarjeta)
+    col.setContentsMargins(14, 10, 14, 12)
+    col.setSpacing(6)
+    return tarjeta, col
+
+
+def _seccion(texto):
+    lbl = QLabel(texto)
+    lbl.setProperty("role", "seccion")
+    return lbl
 
 
 class OaeReport(QWidget):
@@ -28,45 +43,61 @@ class OaeReport(QWidget):
         self.evaluador = ""
 
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(10, 10, 10, 10)
-        outer.setSpacing(8)
+        outer.setContentsMargins(0, 10, 0, 0)
+        outer.setSpacing(10)
 
-        cab = QGroupBox("Informe de emisiones otoacústicas")
-        form = QFormLayout(cab)
+        # Cabecera: quién, cuándo y de qué atención, más lo capturado. El
+        # alumno tiene que ver QUÉ se va a adjuntar (si olvidó capturar un
+        # oído, acá se nota; en el PDF ya sería tarde).
+        cab, col = _tarjeta()
+        col.addWidget(_seccion("INFORME DE EMISIONES OTOACÚSTICAS"))
+        datos = QHBoxLayout()
+        datos.setSpacing(24)
         self.lbl_eva = QLabel("-")
-        form.addRow("Evaluador/a:", self.lbl_eva)
         self.lbl_date = QLabel(datetime.now().strftime("%d/%m/%Y"))
-        form.addRow("Fecha:", self.lbl_date)
         # El módulo recibe el caso (data['EOAS']), no la ficha del paciente:
         # se identifica la atención, que es lo que ata el informe al perfil.
         self.lbl_atencion = QLabel("Sin atención abierta")
-        form.addRow("Atención:", self.lbl_atencion)
-        outer.addWidget(cab)
-
-        # Resumen de lo capturado: el alumno tiene que ver QUÉ se va a
-        # adjuntar (si olvidó capturar un oído, acá se
-        # nota; en el PDF ya sería tarde).
-        outer.addWidget(QLabel("Pruebas capturadas (se adjuntan al PDF):"))
+        for titulo, valor in (("Evaluador/a", self.lbl_eva), ("Fecha", self.lbl_date),
+                              ("Atención", self.lbl_atencion)):
+            campo = QVBoxLayout()
+            campo.setSpacing(0)
+            t = QLabel(titulo)
+            t.setProperty("role", "campo")
+            valor.setProperty("role", "titulo")
+            campo.addWidget(t)
+            campo.addWidget(valor)
+            datos.addLayout(campo)
+        datos.addStretch(1)
+        col.addLayout(datos)
+        col.addWidget(_seccion("PRUEBAS CAPTURADAS (SE ADJUNTAN AL PDF)"))
         self.lbl_capturas = QLabel("--")
         self.lbl_capturas.setWordWrap(True)
-        self.lbl_capturas.setStyleSheet("color: #444444;")
-        outer.addWidget(self.lbl_capturas)
+        col.addWidget(self.lbl_capturas)
+        outer.addWidget(cab)
 
-        outer.addWidget(QLabel("Descripción de los hallazgos:"))
+        # Hallazgos y conclusión lado a lado: sobra ancho, falta alto.
+        textos = QHBoxLayout()
+        textos.setSpacing(10)
+        tarjeta, col = _tarjeta()
+        col.addWidget(_seccion("DESCRIPCIÓN DE LOS HALLAZGOS"))
         self.text_edit_1 = QTextEdit()
         self.text_edit_1.setPlaceholderText(
             "TEOAE / DPOAE por oído: bandas o frecuencias presentes y ausentes, "
             "SNR, reproducibilidad, piso de ruido, calidad del sello..."
         )
-        outer.addWidget(self.text_edit_1, stretch=1)
-
-        outer.addWidget(QLabel("Conclusión:"))
+        col.addWidget(self.text_edit_1, 1)
+        textos.addWidget(tarjeta, 1)
+        tarjeta, col = _tarjeta()
+        col.addWidget(_seccion("CONCLUSIÓN"))
         self.text_edit_2 = QTextEdit()
         self.text_edit_2.setPlaceholderText(
             "Interpretación clínica: función coclear por oído, correlación con "
             "el resto de la evaluación y sugerencias."
         )
-        outer.addWidget(self.text_edit_2, stretch=1)
+        col.addWidget(self.text_edit_2, 1)
+        textos.addWidget(tarjeta, 1)
+        outer.addLayout(textos, 1)
 
         self.estado = EstadoInforme()
         outer.addWidget(self.estado)
