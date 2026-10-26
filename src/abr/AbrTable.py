@@ -1,16 +1,16 @@
-from PySide6.QtCore import QCoreApplication, Signal, Qt
+from PySide6.QtCore import QCoreApplication, QObject, Signal, Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QWidget, QTableWidgetItem, QHeaderView
-from abr.UI.AbrTableInfo_ui import Ui_TableData
-from core import tema
+from PySide6.QtWidgets import QTableWidgetItem
 
 tr = QCoreApplication.translate
 
-class AbrTable(QWidget, Ui_TableData):
+class AbrTable(QObject):
+    """Datos y normativa de las ondas de un oído. Se dibuja en la grilla
+    compartida `vista` (abr/MarcasAbr.py)."""
     sig_measure_value = Signal(dict)
-    def __init__(self, side) -> None:
-        QWidget.__init__(self)
-        self.setupUi(self)
+    def __init__(self, side, vista) -> None:
+        QObject.__init__(self)
+        self.vista = vista
         self.side = side
         self.side_text = 'OD' if side == 0 else 'OI'
         # Rangos de normalidad de ESTE paciente a ESTA intensidad (los
@@ -25,21 +25,20 @@ class AbrTable(QWidget, Ui_TableData):
                         ['', ''],
                         ['', '']]
 
-    def set_table(self)->None:
-        tables = [self.tw_latamp, self.tw_inter]
-        color = self.get_color_table()
-        s = f"QTableWidget::item{{ background-color:{color}; }}"
-        for i in tables:
-            i.cellClicked.connect(self.on_cell_clicked)
-            i.setStyleSheet(s)
-            i.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-            i.resizeColumnsToContents()
-            i.setMaximumWidth(16777215)
-            width = i.verticalHeader().width() + i.horizontalHeader().length() + 2 * i.frameWidth() + 2
-            i.setMinimumWidth(width)
+    def set_table(self) -> None:
+        self.tw_latamp = self.vista.ondas(self.side)
+        self.tw_inter = self.vista.interpicos(self.side)
+        self.vista.al_clic_en_onda(self.side, self.on_cell_clicked)
 
-        self.label.setText(self.side_text)
-        tema.pastilla_lado(self.label, self.side)
+    # La grilla es una sola para los dos oídos: se muestra o se esconde junta.
+    def setVisible(self, visible) -> None:
+        self.vista.setVisible(visible)
+
+    def isHidden(self) -> bool:
+        return self.vista.isHidden()
+
+    def isVisibleTo(self, ancestro) -> bool:
+        return self.vista.isVisibleTo(ancestro)
 
     # ------------------------------------------------------------ normativa
     WAVE_ROWS = {'I': 0, 'II': 1, 'III': 2, 'IV': 3, 'V': 4}
@@ -122,20 +121,14 @@ class AbrTable(QWidget, Ui_TableData):
         else:
             self.flag_cell(self.tw_inter, self.RATIO_ROW, 0, True, None)
 
-    def get_color_table(self) -> QColor:
-        return tema.OD_SUAVE if self.side == 0 else tema.OI_SUAVE
-
     def get_cols_rows(self, table) -> (int,int):
         cols = table.columnCount()
         rows = table.rowCount()
         return cols,rows
 
     def on_cell_clicked(self, row:int, column:int) -> None:
-        table = self.sender().objectName()
-        if table == 'tw_latamp':
-            coord = (row, column)
-            str_coords = self.curve_coord(coord)
-            self.request_values(str_coords)
+        str_coords = self.curve_coord((row, column))
+        self.request_values(str_coords)
 
     def curve_coord(self, coord:str|tuple) -> str|tuple:
         coords_text =   [['I_L', 'I_A'],

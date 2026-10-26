@@ -251,7 +251,7 @@ def test_an_ecochg_session_comes_back_with_its_marks_and_table():
     w2.fill_sessions([anterior])
     w2.select_session(0)
     assert w2.control.cb_test.currentText() == 'ECochG'
-    assert w2.es_ecochg() and w2.table_ec_r.isVisibleTo(w2)
+    assert w2.es_ecochg() and not w2.table_ec_r.isHidden()
     assert set(w2.graph_r.marks['R1']) == set(w.graph_r.marks['R1'])
     for clave in ('ap_lat', 'sp_ap_ratio'):
         if medidas.get(clave) is not None:

@@ -35,6 +35,7 @@ from abr.AbrSessions import (REPORT_TIPOS, curve_group, curve_order,
                              pack_trace, report_tipo, session_label,
                              test_of_report, unpack_trace)
 from abr.AbrTable import AbrTable
+from abr.MarcasAbr import MarcasAbr
 from abr.CorticalTable import CorticalTable
 from abr.EcochgTable import EcochgTable
 from abr.protocols import standard_setup
@@ -50,8 +51,10 @@ from core import hilos, respaldo_informes
 from core.report_autosave import recuperar, subir_ahora
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, Qt, QTimer
-from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QPushButton,
-                               QSizePolicy, QSpacerItem)
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import (QComboBox, QFrame, QHBoxLayout, QLabel, QMainWindow,
+                               QPushButton, QScrollArea, QSizePolicy, QSpacerItem,
+                               QTabWidget, QVBoxLayout, QWidget)
 
 tr = QCoreApplication.translate
 
@@ -70,6 +73,11 @@ TIEMPO_EEG = 300
 # dos graficos estaban vacios; con el EEG crudo y el FSP dibujando de
 # verdad, a esa altura no se lee ninguno de los dos.
 ALTO_DOCK_DETALLE = 220
+# Solo la barra de título del dock: con el monitor plegado.
+ALTO_DOCK_PLEGADO = 26
+# En pantallas más bajas que esto el monitor (EEG, FSP y datos de la curva)
+# arranca plegado: sus 220 px son lo que más falta le hace a las curvas.
+ALTO_PANTALLA_MONITOR_PLEGADO = 820
 
 
 
@@ -127,8 +135,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.control.setEnabled(False)
         self.detail = AbrDetail()
         self.report = AbrReport()
-        self.table_l = AbrTable(1)
-        self.table_r = AbrTable(0)
+        # Una grilla para los dos oídos; cada AbrTable guarda los datos de uno.
+        self.marcas_abr = MarcasAbr()
+        self.table_l = AbrTable(1, self.marcas_abr)
+        self.table_r = AbrTable(0, self.marcas_abr)
         self.eeg = EEG()
         self.fmp = FSP()
         self.detail_all = AbrDetailAllCurves()
@@ -160,26 +170,47 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.detail.layout_tab1_secction1.addWidget(self.eeg)
         self.detail.layout_tab1_secction2.addWidget(self.fmp)
         self.detail.layout_tab2.addWidget(self.detail_all)
-        self.layout_dock_parameter_content.addWidget(self.control)
+        # Panel izquierdo con dos fichas: lo que se configura y lo que se
+        # mide. Se usan en momentos distintos (registrando / marcando), y así
+        # las tablas dejan de comerse una columna entera de la ventana.
+        self.panel_tabs = QTabWidget()
+        self.panel_tabs.setObjectName("panelTabs")
+        self.panel_tabs.setDocumentMode(True)
+        self.panel_tabs.addTab(self.control, tr("AbrMainWindow", "Configuración"))
+        self.layout_dock_parameter_content.addWidget(self.panel_tabs)
         self.layout_dock_test_contents.addWidget(self.detail)
-        self.layout_dock_values_contents.addWidget(self.table_r)
-        self.layout_dock_values_contents.addWidget(self.table_l)
+        marcas = QWidget()
+        marcas.setObjectName("marcasPagina")
+        self.layout_marcas = QVBoxLayout(marcas)
+        self.layout_marcas.setContentsMargins(6, 6, 6, 6)
+        self.layout_marcas.setSpacing(8)
+        self.layout_marcas.addWidget(self.marcas_abr)
         # Las tablas del ECochG viven al lado de las del ABR y se muestran
         # segun la prueba activa (ver apply_test_widgets): son dos examenes
         # que no comparten NI UNA medida --ondas I-V contra razon PS/PA--
         # asi que no hay una tabla que sirva para los dos.
         self.table_ec_r = EcochgTable(0)
         self.table_ec_l = EcochgTable(1)
-        self.layout_dock_values_contents.addWidget(self.table_ec_r)
-        self.layout_dock_values_contents.addWidget(self.table_ec_l)
+        self.layout_marcas.addWidget(self.table_ec_r)
+        self.layout_marcas.addWidget(self.table_ec_l)
         # Y las de latencia media y tardia: canales en columnas y las
         # comparaciones entre hemisferios y oidos (ver CorticalTable).
         self.table_cx_r = CorticalTable(0)
         self.table_cx_l = CorticalTable(1)
-        self.layout_dock_values_contents.addWidget(self.table_cx_r)
-        self.layout_dock_values_contents.addWidget(self.table_cx_l)
-        self.layout_dock_values_contents.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.layout_marcas.addWidget(self.table_cx_r)
+        self.layout_marcas.addWidget(self.table_cx_l)
+        self.layout_marcas.addStretch(1)
+        marcas_scroll = QScrollArea()
+        marcas_scroll.setWidgetResizable(True)
+        marcas_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        marcas_scroll.setWidget(marcas)
+        self.panel_tabs.addTab(marcas_scroll, tr("AbrMainWindow", "Marcas"))
+        # El dock de valores de la derecha ya no existe: sus tablas viven en
+        # la ficha Marcas.
+        self.removeDockWidget(self.dock_values)
+        self.dock_values.deleteLater()
         tema.aplicar_estilo(self, QSS_ABR)
+        self.armar_barra_monitor()
         for nombre in TARJETAS:
             w = getattr(self, nombre, None)
             if w is not None:
@@ -325,7 +356,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.apply_test_widgets(self.control.cb_test.currentText())
         self.apply_window()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
-        self.dock_test.setFixedHeight(ALTO_DOCK_DETALLE)
+        self.aplicar_monitor()
 
     def la_super(self, data, appointment_id=None):
         """Recibe el caso del paciente en atención (o None al cerrarla/
@@ -1164,26 +1195,24 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def tab_change(self, sender):
         if sender == 1:
-            self.dock_values.setVisible(False)
             self.dock_parameter.setVisible(False)
             self.detail.tabWidget.setCurrentIndex(1)
-            self.dock_test.setFixedHeight(400)
+            self.aplicar_monitor(forzar_visible=400)
             self.dock_test.setVisible(True)
             self.graph_lat_int.clear_graph()
             self.graph_lat_int.plot_data(self.memory)
         elif sender == 2:
-            self.dock_values.setVisible(False)
             self.dock_parameter.setVisible(False)
             self.detail.tabWidget.setCurrentIndex(1)
-            self.dock_test.setFixedHeight(300)
+            self.aplicar_monitor(forzar_visible=300)
             self.dock_test.setVisible(True)
             self.report_svg()
 
         else:
-            self.dock_values.setVisible(not self.es_assr())
+            self.ver_marcas(not self.es_assr())
             self.dock_parameter.setVisible(True)
             self.detail.tabWidget.setCurrentIndex(0)
-            self.dock_test.setFixedHeight(ALTO_DOCK_DETALLE)
+            self.aplicar_monitor()
             self.dock_test.setVisible(not self.es_assr())
             self.graph_lat_int.clear_graph()
 
@@ -1548,8 +1577,56 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         Solo en la pestaña de graficos; las otras manejan sus propios docks."""
         if self.tabWidget.currentIndex() != 0:
             return
-        self.dock_values.setVisible(not on)
+        self.ver_marcas(not on)
         self.dock_test.setVisible(not on)
+
+    def armar_barra_monitor(self):
+        """Título del dock de abajo con el botón que pliega el monitor."""
+        pantalla = QGuiApplication.primaryScreen()
+        self.monitor_plegado = bool(
+            pantalla and pantalla.availableGeometry().height() < ALTO_PANTALLA_MONITOR_PLEGADO)
+        barra = QWidget()
+        fila = QHBoxLayout(barra)
+        fila.setContentsMargins(8, 4, 8, 2)
+        titulo = QLabel(tr("AbrMainWindow", "PRUEBA"))
+        titulo.setProperty("role", "seccion")
+        fila.addWidget(titulo)
+        fila.addStretch(1)
+        self.btn_monitor = QPushButton()
+        self.btn_monitor.setObjectName("btnMonitor")
+        self.btn_monitor.setFlat(True)
+        self.btn_monitor.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_monitor.clicked.connect(self.alternar_monitor)
+        fila.addWidget(self.btn_monitor)
+        self.dock_test.setTitleBarWidget(barra)
+        self.aplicar_monitor()
+
+    def alternar_monitor(self):
+        self.monitor_plegado = not self.monitor_plegado
+        self.aplicar_monitor()
+
+    def aplicar_monitor(self, forzar_visible=None):
+        """Deja el dock de abajo plegado o abierto. `forzar_visible` (alto):
+        las fichas Latencia/Intensidad y Conclusiones lo usan abierto y más
+        alto, sin tocar lo que el alumno eligió para la ficha de gráficos."""
+        if forzar_visible is not None:
+            self.dock_test_contents.setVisible(True)
+            self.btn_monitor.setVisible(False)
+            self.dock_test.setFixedHeight(forzar_visible)
+            return
+        self.btn_monitor.setVisible(True)
+        self.dock_test_contents.setVisible(not self.monitor_plegado)
+        self.btn_monitor.setText(tr("AbrMainWindow", "Mostrar monitor ▴")
+                                 if self.monitor_plegado
+                                 else tr("AbrMainWindow", "Ocultar monitor ▾"))
+        self.dock_test.setFixedHeight(
+            ALTO_DOCK_PLEGADO if self.monitor_plegado else ALTO_DOCK_DETALLE)
+
+    def ver_marcas(self, visible):
+        """Muestra u oculta la ficha Marcas (el ASSR no tiene tablas)."""
+        if not visible:
+            self.panel_tabs.setCurrentIndex(0)
+        self.panel_tabs.setTabVisible(1, visible)
 
     def es_assr(self):
         """ASSR: se lee en frecuencia, con panel propio (ver AssrPanel)."""

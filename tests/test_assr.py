@@ -171,7 +171,7 @@ def test_panel_replaces_the_graphs_and_runs_with_the_capture_tick():
         return
     w = _ventana()
     assert w.assr_panel.isVisibleTo(w)
-    assert not w.graph_r.isVisibleTo(w) and not w.table_r.isVisibleTo(w)
+    assert not w.graph_r.isVisibleTo(w) and w.table_r.isHidden()
     w.control.start_capture()
     for _ in range(40):
         w.capture()

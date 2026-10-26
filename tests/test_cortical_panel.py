@@ -85,8 +85,8 @@ def test_choosing_mlr_swaps_table_marks_and_window():
     if not HAS_UI:
         return
     w = _ventana('MLR')
-    assert w.table_cx_r.isVisibleTo(w) and not w.table_r.isVisibleTo(w)
-    assert not w.table_ec_r.isVisibleTo(w)
+    assert not w.table_cx_r.isHidden() and w.table_r.isHidden()
+    assert w.table_ec_r.isHidden()
     assert w.graph_r.mark_labels == cortical.MARKS['MLR']
     assert w.graph_r.snap_sign['Pa'] == 1 and w.graph_r.snap_sign['Na'] == -1
     assert w.graph_r.window_ms == 100
@@ -95,7 +95,7 @@ def test_choosing_mlr_swaps_table_marks_and_window():
     assert w.graph_r.window_ms == 800 and w.graph_r.x_tick() == 50.0
     assert w.table_cx_r.tabla.columnCount() == 3
     w.control.cb_test.setCurrentText('ABR')
-    assert w.table_r.isVisibleTo(w) and not w.table_cx_r.isVisibleTo(w)
+    assert not w.table_r.isHidden() and w.table_cx_r.isHidden()
 
 
 def test_the_teacher_gets_the_standard_and_the_student_does_not():

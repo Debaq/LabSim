@@ -17,6 +17,12 @@ QDockWidget::title {{
     text-align: left;
 }}
 
+QPushButton#btnMonitor {{
+    border: none; background: transparent; color: {TEXTO_SUAVE};
+    font-size: 8pt; font-weight: 600; padding: 2px 6px;
+}}
+QPushButton#btnMonitor:hover {{ color: {ACENTO}; }}
+
 QMainWindow::separator {{ background: transparent; width: 6px; height: 6px; }}
 
 QCheckBox {{ color: {TEXTO}; spacing: 6px; }}
@@ -27,11 +33,22 @@ QCheckBox::indicator {{
 }}
 QCheckBox::indicator:checked {{ background: {ACENTO}; border-color: {ACENTO}; }}
 
-QWidget#dock_parameter_contents, QWidget#dock_values_contents, QWidget#dock_test_contents {{
+QWidget#dock_parameter_contents, QWidget#dock_test_contents {{
     background: {TARJETA};
     border: 1px solid {BORDE};
     border-radius: 10px;
 }}
+
+QTabWidget#panelTabs::pane {{ border: none; background: transparent; }}
+QWidget#marcasPagina {{ background: transparent; }}
+QTableWidget#marcasAbr {{
+    background: {TARJETA};
+    border: 1px solid {BORDE};
+    border-radius: 6px;
+    gridline-color: {BORDE};
+}}
+QTableWidget#marcasAbr::item {{ padding: 0px; }}
+QScrollArea {{ background: transparent; }}
 
 QFrame#verticalFrame {{ background: transparent; border: none; }}
 QFrame#verticalFrame QPushButton {{ padding: 3px 0px; min-width: 26px; font-weight: 700; }}
@@ -39,4 +56,4 @@ QFrame#verticalFrame QPushButton {{ padding: 3px 0px; min-width: 26px; font-weig
 
 # Contenedores de los docks que se pintan como tarjeta: un QWidget plano no
 # dibuja fondo ni borde de QSS sin WA_StyledBackground.
-TARJETAS = ("dock_parameter_contents", "dock_values_contents", "dock_test_contents")
+TARJETAS = ("dock_parameter_contents", "dock_test_contents")

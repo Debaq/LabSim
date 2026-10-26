@@ -115,16 +115,16 @@ def test_choosing_ecochg_swaps_the_equipment_and_the_table():
     if not HAS_UI:
         return
     w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
-    assert w.table_r.isVisibleTo(w) and not w.table_ec_r.isVisibleTo(w)
+    assert not w.table_r.isHidden() and w.table_ec_r.isHidden()
     w.control.cb_test.setCurrentText('ECochG')
     assert w.technical['montage'] == 'tympanic'
     assert w.technical['window_ms'] == 10
-    assert not w.table_r.isVisibleTo(w) and w.table_ec_r.isVisibleTo(w)
+    assert w.table_r.isHidden() and not w.table_ec_r.isHidden()
     # Y el gráfico pasa a marcar los cuatro puntos del ECochG.
     assert w.graph_r.mark_labels == ecochg.MARKS
     assert w.graph_r.snap_marks == ('PA',)
     w.control.cb_test.setCurrentText('ABR')
-    assert w.table_r.isVisibleTo(w) and not w.table_ec_r.isVisibleTo(w)
+    assert not w.table_r.isHidden() and w.table_ec_r.isHidden()
     assert w.graph_r.mark_labels == ('I', 'II', 'III', 'IV', 'V')
 
 
@@ -165,7 +165,7 @@ def test_the_buttons_mark_where_the_flag_is():
     ap_lat = w.last_metadata['ecochg_ap_lat']
     for marca, lat in (('BL', 0.2), ('PS', ap_lat - 0.55),
                        ('PA', ap_lat + 0.15)):
-        _arrastre(g, _pixel(g, g.inf_a.getXPos()), _pixel(g, lat))
+        _poner_bandera(g, lat)
         QTest.mouseClick(_boton(w, 0, marca), Qt.MouseButton.LeftButton)
         assert marca in g.marks.get(curva, {}), (marca, g.marks.get(curva))
         if marca != 'PA':
@@ -412,6 +412,16 @@ def _pixel(g, lat, curva=None):
         xs, ys = g.data[curva]['ipsi_xy']
         y = float(np.interp(lat, xs, ys)) + g.data[curva].get('gap', 0.0)
     return g.mapFromScene(g.pw.vb.mapViewToScene(QPointF(lat, y)))
+
+
+def _poner_bandera(g, lat):
+    """Deja la bandera A en `lat`. Lo que prueba test_the_buttons_mark_where_
+    the_flag_is es que el botón marca donde está la bandera, no el arrastre
+    (eso es test_cursor_a_can_be_dragged_before_any_mark): agarrar una línea
+    de 3 px con un mouse simulado depende de dónde caiga el apretón."""
+    from PySide6.QtWidgets import QApplication
+    g.inf_a.setPos([lat, 0])
+    QApplication.processEvents()
 
 
 def _arrastre(g, desde, hasta, pasos=8):
