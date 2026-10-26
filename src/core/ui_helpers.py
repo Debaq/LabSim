@@ -265,6 +265,13 @@ GATED_MODULE_CODES = {
 MODULE_ALIAS = {"AABR": "ABR"}
 
 
+# Ventanas cuyo alto sigue al de la pantalla (ver SubWindow.activate_subwindow):
+# el alto del layout del servidor es el mínimo y se estiran hasta el área MDI
+# menos este margen.
+ALTO_ADAPTABLE = ("AGENDA",)
+MARGEN_ALTO = 16
+
+
 class SubWindow():
     """
     Clase para la sub-ventana"""
@@ -311,6 +318,10 @@ class SubWindow():
         width = viewport.width()
         height = viewport.height()
         _, name, pos_z, fix, size, _ = self.app[app]
+        if app in ALTO_ADAPTABLE and size != "max":
+            # El alto del servidor es el mínimo: en pantallas grandes la
+            # ventana crece hasta casi todo el alto del área MDI.
+            size = (size[0], max(size[1], height - MARGEN_ALTO))
         if size == "max":
             pos = [0, 0]
         else:

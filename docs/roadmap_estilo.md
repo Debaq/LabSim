@@ -70,6 +70,9 @@ Actualizado 2026-10-26 (tarde).
   evolución) y una pista de qué sigue. Piezas en `agenda/vista.py`.
 - [x] Iconos de línea propios en `core/iconos.py` (QPainter, sin QtSvg). Usarlos en los demás
   módulos en vez de texto o símbolos.
+- [x] Alto adaptable: el del servidor (580) es el mínimo y la agenda crece hasta casi todo el
+  alto del área MDI (`ALTO_ADAPTABLE` en `ui_helpers.py`); se fija al abrirla, no sigue un
+  cambio de tamaño de la ventana principal.
 - [x] Tamaño de la ventana en `Layout.php`: 940x580 (antes 900x400). `FrameSubMdi(expand=True)`
   ya no deja la franja de 40 px abajo.
 - [ ] Probar en la app real (solo renders offscreen con datos de prueba).
