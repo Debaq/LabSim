@@ -57,7 +57,8 @@ Actualizado 2026-10-26 (tarde).
   botón Ingresar/Cerrar Sesión en píldora, botones de ventana sin caja.
 - [x] Barra de módulos y acciones: fondo blanco con borde, botones con la paleta
   (activo = acento suave). Reglas por objectName en `dark.qss` para no filtrarse a los módulos.
-- [x] Lienzo del MDI con `tema.FONDO`; logo de marca de agua al 18 %.
+- [x] Paleta de neutros con tinte morado (gris azulado chocaba con la barra): `tema.py`
+  entero y `dark.qss` pasados; lienzo del MDI `tema.LIENZO_APP`; logo al 18 %.
 - [x] Login: campos y botón con la paleta, enlaces en el acento (tamaño intacto: lo fija el
   servidor, 410x140).
 

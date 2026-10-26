@@ -12,17 +12,17 @@ por eso la paleta son colores sueltos y no una hoja de estilo y nada más.
 """
 
 # --- Superficies -------------------------------------------------------
-FONDO = '#EDF1F5'          # lienzo del módulo
+FONDO = '#ECE6EC'          # lienzo del módulo
 LIENZO_APP = '#E6DFE5'     # fondo del MDI y barras de la app (más oscuro que FONDO)
 TARJETA = '#FFFFFF'        # panel/card
-TARJETA_ALT = '#F6F8FB'    # filas alternas, cabeceras de tabla
-BORDE = '#DCE3EB'
-BORDE_FUERTE = '#C3CDD9'
+TARJETA_ALT = '#FAF8FA'    # filas alternas, cabeceras de tabla
+BORDE = '#E4DCE3'
+BORDE_FUERTE = '#D2C7D1'
 
 # --- Texto -------------------------------------------------------------
-TEXTO = '#1F2933'
-TEXTO_SUAVE = '#5B6672'
-TEXTO_TENUE = '#8A96A3'
+TEXTO = '#2A2229'
+TEXTO_SUAVE = '#5E5360'
+TEXTO_TENUE = '#8F8391'
 
 # --- Acentos -----------------------------------------------------------
 # El morado es el de la barra de LabSim (dark.qss): el módulo tiene que
@@ -41,9 +41,9 @@ AVISO = '#D98324'
 ALERTA = '#C0392B'
 
 # --- Gráficos ----------------------------------------------------------
-GRILLA = '#E6EBF1'
-GRILLA_FUERTE = '#CFD8E3'
-TRAZO_INACTIVO = '#9AA6B2'
+GRILLA = '#EAE4EA'
+GRILLA_FUERTE = '#D9CFD8'
+TRAZO_INACTIVO = '#A89DAA'
 OD_INACTIVO = '#D99A9A'      # curva de OD no seleccionada
 OI_INACTIVO = '#93B4DD'      # curva de OI no seleccionada
 BANDA_NORMATIVA = (93, 16, 73, 38)   # RGBA del relleno normativo
