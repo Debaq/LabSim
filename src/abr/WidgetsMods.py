@@ -25,6 +25,14 @@ class TextItemMod(TextItem):
         self.tipo = tipo
         self.curve_parent = curve_parent
 
+    def hoverEvent(self, ev):
+        """La flecha de una marca se anuncia como arrastrable al pasarle el
+        mouse por encima. Sin esto, pyqtgraph deja el arrastre al ViewBox
+        (que sí lo anuncia, y desplaza el gráfico) en cuanto el puntero se
+        mueve un poco antes de que el arrastre arranque."""
+        if self.tipo == 'mark' and self.mark_label is not None and not ev.isExit():
+            ev.acceptDrags(Qt.MouseButton.LeftButton)
+
     def mouseDragEvent(self, ev):
         if self.tipo == 'mark':
             self._arrastrar_marca(ev)

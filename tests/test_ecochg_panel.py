@@ -425,7 +425,13 @@ def _poner_bandera(g, lat):
 
 
 def _arrastre(g, desde, hasta, pasos=8):
-    """Apretar, mover y soltar con el mouse, como en clase."""
+    """Apretar, mover y soltar con el mouse, como en clase.
+
+    Cada paso espera más que el intervalo mínimo entre movimientos de
+    pyqtgraph (`mouseRateLimit`, 100/s): sin la espera, en una máquina
+    rápida los movimientos llegan pegados, la escena descarta casi todos y
+    el arrastre nunca arranca (el test pasaba o no según la velocidad).
+    """
     from PySide6.QtCore import QPoint, Qt
     from PySide6.QtTest import QTest
     from PySide6.QtWidgets import QApplication
