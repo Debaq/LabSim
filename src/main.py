@@ -1139,7 +1139,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current))
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
-        self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login))
+        # expand: sin esto el marco reparte el alto sobrante con un espaciador
+        # y el ABR se queda en su alto natural (las fichas apretadas arriba).
+        self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login), expand=True)
         self.subw_aabr = FrameSubMdi(AabrMainWindow(data_login=self.data_login))
         self.subw_eoas = FrameSubMdi(OaeMainWindow(data_login=self.data_login))
         self.subw_vemp = FrameSubMdi(VempMainWindow(data_login=self.data_login))
