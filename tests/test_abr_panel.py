@@ -311,7 +311,8 @@ def test_fsp_clears_between_captures():
 # ------------------------------------------------ rechazos y estado visible
 
 def test_capture_state_reaches_the_labels():
-    """lbl_info/lbl_time estaban en el .ui y nadie les escribía nunca."""
+    """lbl_info estaba en el .ui y nadie le escribía nunca. El reloj
+    (lbl_time) ya no está: lo reemplaza el temporizador general de LabSim."""
     if not HAS_UI:
         return
     w = _ventana()
@@ -319,7 +320,7 @@ def test_capture_state_reaches_the_labels():
     info = w.lbl_info.text()
     for texto in ('barridos', 'aceptados', 'FSP', 'repro', 'nV'):
         assert texto in info, info
-    assert w.lbl_time.text() == '01:34'       # 2000 barridos a 21.1/s
+    assert w.lbl_time.isHidden()
 
 
 def test_artifact_rejection_is_visible():

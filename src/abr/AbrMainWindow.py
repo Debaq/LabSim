@@ -292,6 +292,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 lambda intensidad, cfg, lado=lado: self.level_text(
                     intensidad, cfg.get('stim'), cfg.get('transducer'), lado))
         self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
+        # El tiempo de la atención lo lleva el temporizador general de LabSim.
+        self.lbl_time.hide()
 
         ######Variables de Estado
         self.control.capture.connect(self.capture_state)
@@ -536,9 +538,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         presentados = metadata.get('current_avg') or 0
         aceptados = metadata.get('accepted_sweeps') or 0
         rechazo = 1.0 - (metadata.get('artifact_acceptance') or 1.0)
-        rate = float(self.current_setting.get('rate') or 21.1)
-        segundos = int(presentados / rate) if rate else 0
-        self.lbl_time.setText(f"{segundos // 60:02d}:{segundos % 60:02d}")
 
         partes = [f"{self.current_capture_curve}",
                   f"{self.level_text_for(self.current_setting)} "
@@ -1062,7 +1061,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.update_detail_info(None)
         self.last_metadata = {}
         self.lbl_info.setText("")
-        self.lbl_time.setText("")
 
     def update_delete_curve(self, curve):
         if curve in self.memory:
