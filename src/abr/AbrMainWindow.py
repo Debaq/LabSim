@@ -181,7 +181,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.panel_tabs = QTabWidget()
         self.panel_tabs.setObjectName("panelTabs")
         self.panel_tabs.setDocumentMode(True)
-        self.panel_tabs.addTab(self.control, tr("AbrMainWindow", "Configuración"))
+        # Parámetros avanzados era lo único del menú Archivo (el resto está
+        # oculto): el menú y la barra de estado se van y su alto es de las
+        # curvas; el botón queda al pie de la configuración.
+        pagina_config = QWidget()
+        columna_config = QVBoxLayout(pagina_config)
+        columna_config.setContentsMargins(0, 0, 0, 4)
+        columna_config.setSpacing(6)
+        columna_config.addWidget(self.control, 1)
+        self.btn_avanzados = QPushButton(tr("AbrMainWindow", "Parámetros avanzados…"))
+        self.btn_avanzados.setObjectName("btnAvanzados")
+        self.btn_avanzados.setToolTip(tr(
+            "AbrMainWindow", "Configuración del equipo: montaje, transductor, unidad del nivel…"))
+        columna_config.addWidget(self.btn_avanzados)
+        self.menubar.setVisible(False)
+        self.statusbar.setVisible(False)
+        self.panel_tabs.addTab(pagina_config, tr("AbrMainWindow", "Configuración"))
         self.layout_dock_parameter_content.addWidget(self.panel_tabs)
         self.layout_dock_test_contents.addWidget(self.detail)
         marcas = QWidget()
@@ -225,6 +240,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         ########Conexiones de slots
         self.actionP_rametros_Avanzados.triggered.connect(self.active_advance_setting)
+        self.btn_avanzados.clicked.connect(self.active_advance_setting)
         # "Cambiar Caso" y "Salir" ya no aplican: el caso lo trae el paciente
         # en atención (ver la_super) y la ventana se cierra con su ✕. Se
         # ocultan en vez de quedar en el menú sin hacer nada.
