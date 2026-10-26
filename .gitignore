@@ -28,6 +28,7 @@
 
 # Ignorar log de debug en runtime
 src/log_file.txt
+src/log_file.*.txt
 
 # Ignorar configuración local de Claude Code
 /.claude/
