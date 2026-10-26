@@ -194,8 +194,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             "AbrMainWindow", "Configuración del equipo: montaje, transductor, unidad del nivel…"))
         columna_config.addWidget(self.btn_avanzados)
         self.panel_tabs.addTab(pagina_config, tr("AbrMainWindow", "Configuración"))
-        self.layout_dock_parameter_content.addWidget(self.panel_tabs)
-        self.layout_dock_test_contents.addWidget(self.detail)
+        self.layout_panel_izquierdo.addWidget(self.panel_tabs)
+        self.layout_panel_monitor.addWidget(self.detail)
         marcas = QWidget()
         marcas.setObjectName("marcasPagina")
         self.layout_marcas = QVBoxLayout(marcas)
@@ -1200,23 +1200,23 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def tab_change(self, sender):
         if sender == 1:
-            self.dock_parameter.setVisible(False)
-            self.dock_test.setVisible(False)
+            self.panel_izquierdo.setVisible(False)
+            self.panel_monitor.setVisible(False)
             self.ubicar_resumen(self.layout_resumen_lat_int, compacto=False, alto=190)
             self.graph_lat_int.clear_graph()
             self.graph_lat_int.plot_data(self.memory)
         elif sender == 2:
-            self.dock_parameter.setVisible(False)
-            self.dock_test.setVisible(False)
+            self.panel_izquierdo.setVisible(False)
+            self.panel_monitor.setVisible(False)
             self.ubicar_resumen(self.report.layout_resumen, compacto=True)
 
         else:
             self.ver_marcas(not self.es_assr())
-            self.dock_parameter.setVisible(True)
+            self.panel_izquierdo.setVisible(True)
             self.detail.tabWidget.setCurrentIndex(0)
             self.ubicar_resumen(self.detail.layout_tab2, compacto=False)
             self.aplicar_monitor()
-            self.dock_test.setVisible(not self.es_assr())
+            self.panel_monitor.setVisible(not self.es_assr())
             self.graph_lat_int.clear_graph()
 
 
@@ -1581,7 +1581,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if self.tabWidget.currentIndex() != 0:
             return
         self.ver_marcas(not on)
-        self.dock_test.setVisible(not on)
+        self.panel_monitor.setVisible(not on)
 
     def ubicar_resumen(self, destino, compacto, alto=None):
         """El resumen de curvas es un solo widget: va al sitio de la ficha que
@@ -1610,7 +1610,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_monitor.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_monitor.clicked.connect(self.alternar_monitor)
         fila.addWidget(self.btn_monitor)
-        self.dock_test.setTitleBarWidget(barra)
+        self.layout_panel_monitor.insertWidget(0, barra)
         self.aplicar_monitor()
 
     def alternar_monitor(self):
@@ -1622,16 +1622,16 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         las fichas Latencia/Intensidad y Conclusiones lo usan abierto y más
         alto, sin tocar lo que el alumno eligió para la ficha de gráficos."""
         if forzar_visible is not None:
-            self.dock_test_contents.setVisible(True)
+            self.detail.setVisible(True)
             self.btn_monitor.setVisible(False)
-            self.dock_test.setFixedHeight(forzar_visible)
+            self.panel_monitor.setFixedHeight(forzar_visible)
             return
         self.btn_monitor.setVisible(True)
-        self.dock_test_contents.setVisible(not self.monitor_plegado)
+        self.detail.setVisible(not self.monitor_plegado)
         self.btn_monitor.setText(tr("AbrMainWindow", "Mostrar monitor ▴")
                                  if self.monitor_plegado
                                  else tr("AbrMainWindow", "Ocultar monitor ▾"))
-        self.dock_test.setFixedHeight(
+        self.panel_monitor.setFixedHeight(
             ALTO_DOCK_PLEGADO if self.monitor_plegado else ALTO_DOCK_DETALLE)
 
     def ver_marcas(self, visible):

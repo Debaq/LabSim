@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'AbrMain.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.0
+## Created by: Qt User Interface Compiler version 6.12.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -11,14 +11,12 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
-    QCursor, QFont, QFontDatabase, QGradient,
-    QIcon, QImage, QKeySequence, QLinearGradient,
-    QPainter, QPalette, QPixmap, QRadialGradient,
-    QTransform)
-from PySide6.QtWidgets import (QApplication, QDockWidget, QFrame, QHBoxLayout,
-    QLabel, QMainWindow, QMenu, QMenuBar,
-    QPushButton, QSizePolicy, QSpacerItem, QStatusBar,
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
+    QMainWindow, QPushButton, QSizePolicy, QSpacerItem,
     QTabWidget, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
@@ -27,13 +25,28 @@ class Ui_MainWindow(object):
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1016, 826)
         MainWindow.setDocumentMode(True)
-        MainWindow.setDockNestingEnabled(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_3 = QVBoxLayout(self.centralwidget)
         self.verticalLayout_3.setSpacing(0)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(2, 0, 2, 0)
+        self.layout_cuerpo = QHBoxLayout()
+        self.layout_cuerpo.setSpacing(6)
+        self.layout_cuerpo.setObjectName(u"layout_cuerpo")
+        self.panel_izquierdo = QWidget(self.centralwidget)
+        self.panel_izquierdo.setObjectName(u"panel_izquierdo")
+        self.panel_izquierdo.setMinimumSize(QSize(318, 0))
+        self.panel_izquierdo.setMaximumSize(QSize(318, 16777215))
+        self.layout_panel_izquierdo = QVBoxLayout(self.panel_izquierdo)
+        self.layout_panel_izquierdo.setObjectName(u"layout_panel_izquierdo")
+        self.layout_panel_izquierdo.setContentsMargins(3, 3, 3, 3)
+
+        self.layout_cuerpo.addWidget(self.panel_izquierdo)
+
+        self.layout_derecha = QVBoxLayout()
+        self.layout_derecha.setSpacing(0)
+        self.layout_derecha.setObjectName(u"layout_derecha")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(-1, 0, -1, -1)
@@ -42,12 +55,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.lbl_info)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
 
-        self.verticalLayout_3.addLayout(self.horizontalLayout)
+        self.layout_derecha.addLayout(self.horizontalLayout)
 
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
@@ -99,7 +112,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.btn_toggle_contra)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
@@ -156,35 +169,24 @@ class Ui_MainWindow(object):
         self.layout_report.setContentsMargins(-1, -1, -1, 0)
         self.tabWidget.addTab(self.conc, "")
 
-        self.verticalLayout_3.addWidget(self.tabWidget)
+        self.layout_derecha.addWidget(self.tabWidget)
+
+        self.panel_monitor = QWidget(self.centralwidget)
+        self.panel_monitor.setObjectName(u"panel_monitor")
+        self.layout_panel_monitor = QVBoxLayout(self.panel_monitor)
+        self.layout_panel_monitor.setSpacing(0)
+        self.layout_panel_monitor.setObjectName(u"layout_panel_monitor")
+        self.layout_panel_monitor.setContentsMargins(0, 0, 0, 0)
+
+        self.layout_derecha.addWidget(self.panel_monitor)
+
+
+        self.layout_cuerpo.addLayout(self.layout_derecha)
+
+
+        self.verticalLayout_3.addLayout(self.layout_cuerpo)
 
         MainWindow.setCentralWidget(self.centralwidget)
-        self.dock_parameter = QDockWidget(MainWindow)
-        self.dock_parameter.setObjectName(u"dock_parameter")
-        self.dock_parameter.setMinimumSize(QSize(180, 143))
-        self.dock_parameter.setFloating(False)
-        self.dock_parameter.setFeatures(QDockWidget.DockWidgetMovable)
-        self.dock_parameter_contents = QWidget()
-        self.dock_parameter_contents.setObjectName(u"dock_parameter_contents")
-        self.layout_dock_parameter_content = QVBoxLayout(self.dock_parameter_contents)
-        self.layout_dock_parameter_content.setObjectName(u"layout_dock_parameter_content")
-        self.layout_dock_parameter_content.setContentsMargins(3, 3, 3, 3)
-        self.dock_parameter.setWidget(self.dock_parameter_contents)
-        MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.dock_parameter)
-        self.dock_test = QDockWidget(MainWindow)
-        self.dock_test.setObjectName(u"dock_test")
-        self.dock_test.setMinimumSize(QSize(100, 100))
-        self.dock_test.setMaximumSize(QSize(524287, 150))
-        self.dock_test.setFeatures(QDockWidget.DockWidgetFloatable|QDockWidget.DockWidgetMovable)
-        self.dock_test.setAllowedAreas(Qt.BottomDockWidgetArea|Qt.TopDockWidgetArea)
-        self.dock_test_contents = QWidget()
-        self.dock_test_contents.setObjectName(u"dock_test_contents")
-        self.layout_dock_test_contents = QHBoxLayout(self.dock_test_contents)
-        self.layout_dock_test_contents.setSpacing(0)
-        self.layout_dock_test_contents.setObjectName(u"layout_dock_test_contents")
-        self.layout_dock_test_contents.setContentsMargins(0, 0, 0, 0)
-        self.dock_test.setWidget(self.dock_test_contents)
-        MainWindow.addDockWidget(Qt.BottomDockWidgetArea, self.dock_test)
 
         self.retranslateUi(MainWindow)
 
@@ -213,13 +215,5 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.abr), QCoreApplication.translate("MainWindow", u"Gr\u00e1ficos", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.lat), QCoreApplication.translate("MainWindow", u"Latencia/Intensidad", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.conc), QCoreApplication.translate("MainWindow", u"Conclusiones", None))
-#if QT_CONFIG(statustip)
-        self.dock_parameter.setStatusTip(QCoreApplication.translate("MainWindow", u"Par\u00e1metros", None))
-#endif // QT_CONFIG(statustip)
-        self.dock_parameter.setWindowTitle(QCoreApplication.translate("MainWindow", u"Par\u00e1metros", None))
-#if QT_CONFIG(statustip)
-        self.dock_test.setStatusTip(QCoreApplication.translate("MainWindow", u"Prueba Actual", None))
-#endif // QT_CONFIG(statustip)
-        self.dock_test.setWindowTitle(QCoreApplication.translate("MainWindow", u"Prueba", None))
     # retranslateUi
 

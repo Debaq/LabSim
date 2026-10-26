@@ -16,9 +16,6 @@
   <property name="documentMode">
    <bool>true</bool>
   </property>
-  <property name="dockNestingEnabled">
-   <bool>true</bool>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <property name="spacing">
@@ -36,6 +33,46 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
+    <item>
+     <layout class="QHBoxLayout" name="layout_cuerpo">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QWidget" name="panel_izquierdo">
+        <property name="minimumSize">
+         <size>
+          <width>318</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>318</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="layout_panel_izquierdo">
+         <property name="leftMargin">
+          <number>3</number>
+         </property>
+         <property name="topMargin">
+          <number>3</number>
+         </property>
+         <property name="rightMargin">
+          <number>3</number>
+         </property>
+         <property name="bottomMargin">
+          <number>3</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="layout_derecha">
+        <property name="spacing">
+         <number>0</number>
+        </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="topMargin">
@@ -291,94 +328,32 @@
       </widget>
      </widget>
     </item>
+      <item>
+       <widget class="QWidget" name="panel_monitor">
+        <layout class="QVBoxLayout" name="layout_panel_monitor">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
    </layout>
-  </widget>
-  <widget class="QDockWidget" name="dock_parameter">
-   <property name="minimumSize">
-    <size>
-     <width>180</width>
-     <height>143</height>
-    </size>
-   </property>
-   <property name="statusTip">
-    <string>Parámetros</string>
-   </property>
-   <property name="floating">
-    <bool>false</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="windowTitle">
-    <string>Parámetros</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dock_parameter_contents">
-    <layout class="QVBoxLayout" name="layout_dock_parameter_content">
-     <property name="leftMargin">
-      <number>3</number>
-     </property>
-     <property name="topMargin">
-      <number>3</number>
-     </property>
-     <property name="rightMargin">
-      <number>3</number>
-     </property>
-     <property name="bottomMargin">
-      <number>3</number>
-     </property>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="dock_test">
-   <property name="minimumSize">
-    <size>
-     <width>100</width>
-     <height>100</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>524287</width>
-     <height>150</height>
-    </size>
-   </property>
-   <property name="statusTip">
-    <string>Prueba Actual</string>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>Prueba</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="QWidget" name="dock_test_contents">
-    <layout class="QHBoxLayout" name="layout_dock_test_contents">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-    </layout>
-   </widget>
   </widget>
  </widget>
  <resources/>

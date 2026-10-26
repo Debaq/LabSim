@@ -33,7 +33,7 @@ QCheckBox::indicator {{
 }}
 QCheckBox::indicator:checked {{ background: {ACENTO}; border-color: {ACENTO}; }}
 
-QWidget#dock_parameter_contents, QWidget#dock_test_contents {{
+QWidget#panel_izquierdo, QWidget#panel_monitor {{
     background: {TARJETA};
     border: 1px solid {BORDE};
     border-radius: 10px;
@@ -56,4 +56,4 @@ QFrame#verticalFrame QPushButton {{ padding: 3px 0px; min-width: 26px; font-weig
 
 # Contenedores de los docks que se pintan como tarjeta: un QWidget plano no
 # dibuja fondo ni borde de QSS sin WA_StyledBackground.
-TARJETAS = ("dock_parameter_contents", "dock_test_contents")
+TARJETAS = ("panel_izquierdo", "panel_monitor")
