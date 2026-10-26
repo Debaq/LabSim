@@ -268,7 +268,7 @@ MODULE_ALIAS = {"AABR": "ABR"}
 # Ventanas cuyo alto sigue al de la pantalla (ver SubWindow.activate_subwindow):
 # el alto del layout del servidor es el mínimo y se estiran hasta el área MDI
 # menos este margen.
-ALTO_ADAPTABLE = ("AGENDA", "FICHA", "EVOLUCION", "CHAT")
+ALTO_ADAPTABLE = ("AGENDA", "FICHA", "EVOLUCION")
 MARGEN_ALTO = 16
 
 
