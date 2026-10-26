@@ -428,16 +428,25 @@ def _arrastre(g, desde, hasta, pasos=8):
     """Apretar, mover y soltar con el mouse, como en clase.
 
     Cada paso espera más que el intervalo mínimo entre movimientos de
-    pyqtgraph (`mouseRateLimit`, 100/s): sin la espera, en una máquina
-    rápida los movimientos llegan pegados, la escena descarta casi todos y
-    el arrastre nunca arranca (el test pasaba o no según la velocidad).
+    pyqtgraph (`mouseRateLimit`, 100/s = 10 ms): sin la espera, en una
+    máquina rápida los movimientos llegan pegados, la escena descarta casi
+    todos y el arrastre nunca arranca (el test pasaba o no según la
+    velocidad). El mouse pasa primero por `desde` sin apretar, como en la
+    vida real: así el ítem de abajo recibe el hover y es el que reclama el
+    arrastre (si no, pyqtgraph se lo da al ViewBox, que desplaza el gráfico).
     """
     from PySide6.QtCore import QPoint, Qt
     from PySide6.QtTest import QTest
     from PySide6.QtWidgets import QApplication
+    # qWait de verdad: el `delay` de QTest.mouseMove solo corre el reloj
+    # ficticio de QTest, no espera (los 8 movimientos caían en 4 ms).
+    espera_ms = 30
+    QTest.mouseMove(g.viewport(), desde)
+    QTest.qWait(espera_ms)
     QTest.mousePress(g.viewport(), Qt.MouseButton.LeftButton,
                      Qt.KeyboardModifier.NoModifier, desde)
     for k in range(1, pasos + 1):
+        QTest.qWait(espera_ms)
         QTest.mouseMove(g.viewport(), QPoint(
             int(desde.x() + (hasta.x() - desde.x()) * k / pasos),
             int(desde.y() + (hasta.y() - desde.y()) * k / pasos)))

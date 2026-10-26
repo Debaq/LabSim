@@ -872,14 +872,6 @@ def test_the_stimulus_combo_matches_the_generator():
         assert control.cb_stim.currentText() == nuevo, (viejo, nuevo)
 
 
-if __name__ == "__main__":
-    for name, fn in list(globals().items()):
-        if name.startswith("test_") and callable(fn):
-            fn()
-            print(f"  {name} OK")
-    print("TODOS LOS TESTS PASARON")
-
-
 def test_fsp_is_kept_per_curve():
     """Al seleccionar una curva ya registrada vuelve SU FSP.
 
@@ -969,15 +961,17 @@ def test_fsp_follows_the_curve_being_recorded():
 # ------------------------------------------------- etiquetas de las curvas
 
 def _etiqueta(graph, curva):
-    """El texto de la etiqueta de esa curva, sin el HTML."""
-    import re
+    """El texto de la etiqueta de esa curva, sin el HTML.
+
+    Se lee con toPlainText(): el toHtml() de Qt trae un bloque <style>
+    (`p, li { white-space: pre-wrap; }`) cuyo contenido no es un tag y
+    quedaba pegado delante del texto.
+    """
     from abr.WidgetsMods import TextItemMod
     for item in graph.pw.items:
         if isinstance(item, TextItemMod) and item.tipo == 'label' \
                 and item.curve_parent == curva:
-            html = item.textItem.toHtml()
-            texto = re.sub(r'<[^>]+>', ' ', html)
-            return ' '.join(texto.split())
+            return ' '.join(item.textItem.toPlainText().split())
     raise AssertionError(f'sin etiqueta para {curva}')
 
 
@@ -1046,3 +1040,14 @@ def test_deleting_the_odd_curve_restores_plain_labels():
     w.graph_r.act_curve = 'R2'
     w.graph_r.delete_curve()
     assert _etiqueta(w.graph_r, 'R1') == '80 dB nHL'
+
+
+if __name__ == "__main__":
+    # Va al final: los tests definidos después de este bloque no existían
+    # todavía en globals() y se salteaban sin aviso (pasó con los de las
+    # etiquetas y el FSP por curva).
+    for name, fn in list(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            fn()
+            print(f"  {name} OK")
+    print("TODOS LOS TESTS PASARON")
