@@ -2,7 +2,7 @@
 
 Rediseño visual de LabSim. Referencia: el módulo VEMP (tarjetas blancas sobre
 lienzo gris azulado, un solo acento morado, OD rojo y OI azul en todo).
-Actualizado 2026-10-26.
+Actualizado 2026-10-26 (tarde).
 
 ## Reglas
 
@@ -44,6 +44,10 @@ Actualizado 2026-10-26.
 - [x] `expand=True` en el marco MDI del ABR.
 - [x] Curvas OD/OI con la paleta, etiqueta de nivel suave.
 - [x] Ancho mínimo bajó de 1121 a ~830 px; alto mínimo de 748 a ~490 px.
+- [x] Lienzo más oscuro y paneles/tarjetas con borde marcado para distinguir sectores.
+- [x] Marcas arrastrables con el mouse (la flecha corre pegada al trazo) y la bandera A'
+  con Δ latencia/amplitud respecto de A. Las banderas A/A' se mantienen: son parte de lo
+  que se enseña.
 
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
