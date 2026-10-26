@@ -18,6 +18,9 @@ Actualizado 2026-10-26 (tarde).
 - **Sin código muerto:** si algo ya no se usa con la integración a LabSim, se borra.
 - **Marco MDI:** `FrameSubMdi(..., expand=True)` para que el módulo use todo el alto;
   sin eso queda en su alto natural y el sobrante se pierde en un espaciador.
+- **No todo claro:** el rediseño viene quedando demasiado blanco/claro (nota del autor,
+  2026-10-26). Blanco solo en tarjetas, botones y campos; barras, lienzos y fondos con
+  tinte (`tema.LIENZO_APP`, gris azulado) o con más carácter. Revisar esto en cada módulo.
 - **Paneles fijos, no QDockWidget:** los docks se anidaban mal (el monitor quedó en
   180 px de ancho). Layouts normales.
 
@@ -76,6 +79,8 @@ Actualizado 2026-10-26 (tarde).
 - [ ] Agenda y fichas (Ficha clínica, Evolución, Chat).
 
 ### Transversal
+- [ ] Bajar el exceso de blanco/claro en toda la app: la barra de estado, los módulos ya
+  hechos (ABR, VEMP) y lo que falta. Decidir si se tiñe más con morado suave.
 - [ ] Probar todo a 1366×768 / 1280×720 / 1024×768 con las resoluciones reales de los PC.
 - [ ] Rellenar `tema.py` con lo que falte al ir sumando módulos (que no se copie color
   entre módulos).
