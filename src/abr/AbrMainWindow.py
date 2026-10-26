@@ -220,6 +220,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         marcas_scroll = QScrollArea()
         marcas_scroll.setWidgetResizable(True)
         marcas_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        marcas_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         marcas_scroll.setWidget(marcas)
         self.panel_tabs.addTab(marcas_scroll, tr("AbrMainWindow", "Marcas"))
         tema.aplicar_estilo(self, QSS_ABR)

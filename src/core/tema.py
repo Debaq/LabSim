@@ -326,6 +326,17 @@ def aplicar_estilo(widget, extra=""):
     widget.setStyleSheet(QSS + extra + qss_flechas())
 
 
+def ajustar_alto(tabla):
+    """La tabla al alto exacto de sus filas, sin barra: en el panel angosto la
+    barra se comía el ancho y dejaba filas fuera de vista."""
+    from PySide6.QtCore import Qt
+    tabla.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    tabla.resizeRowsToContents()
+    alto = (tabla.horizontalHeader().sizeHint().height() + tabla.verticalHeader().length()
+            + 2 * tabla.frameWidth())
+    tabla.setFixedHeight(alto)
+
+
 def pastilla_lado(etiqueta, side):
     """Deja una QLabel como la píldora del oído (OD rojo, OI azul)."""
     from PySide6.QtCore import Qt

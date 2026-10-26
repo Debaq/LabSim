@@ -148,6 +148,11 @@ class EcochgTable(QWidget):
 
     # ------------------------------------------------------------ valores
 
+
+    def showEvent(self, event):
+        # Ya con el estilo aplicado: las medidas de las filas salen bien.
+        super().showEvent(event)
+        tema.ajustar_alto(self.tabla)
     def set_norms(self, norms) -> None:
         self.norms = norms or {}
         self._pintar()

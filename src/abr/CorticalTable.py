@@ -85,6 +85,11 @@ class CorticalTable(QWidget):
 
     # ------------------------------------------------------------ prueba
 
+
+    def showEvent(self, event):
+        # Ya con el estilo aplicado: las medidas de las filas salen bien.
+        super().showEvent(event)
+        tema.ajustar_alto(self.tabla)
     def set_test(self, test) -> None:
         """Botones y filas de la prueba."""
         if test not in cortical.TESTS:
