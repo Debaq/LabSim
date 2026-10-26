@@ -1,9 +1,9 @@
 # pylint: disable=no-name-in-module
 from PySide6.QtCore import QRegularExpression, Qt, Signal
-from PySide6.QtGui import QFont, QRegularExpressionValidator
+from PySide6.QtGui import QColor, QFont, QPainter, QRegularExpressionValidator
 from PySide6.QtWidgets import (QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
                                QStackedWidget, QVBoxLayout, QWidget)
-from core import hilos
+from core import hilos, tema
 
 from auth.func_login import LoginConnect
 from auth.login_busy_dialog import LoginBusyDialog
@@ -13,6 +13,22 @@ from auth import login_worker
 # plataforma del curso (Moodle u otra con LTI; ver
 # labsim_backend/public/lti/launch.php).
 LARGO_CODIGO = 6
+
+
+
+class _CampoCodigo(QLineEdit):
+    """Con el foco puesto (arranca ahí) Qt esconde el texto de ayuda de un
+    campo centrado: el alumno no veía que eran 6 dígitos. Se dibuja igual."""
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if self.text() or not self.placeholderText() or not self.hasFocus():
+            return
+        p = QPainter(self)
+        p.setFont(self.font())
+        p.setPen(QColor(tema.TEXTO_TENUE))
+        p.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.placeholderText())
+        p.end()
 
 
 class MainLogin(QWidget):
@@ -68,7 +84,7 @@ class MainLogin(QWidget):
 
         fila = QHBoxLayout()
         etiqueta = QLabel("Código de ingreso :")
-        self.Le_codigo = QLineEdit()
+        self.Le_codigo = _CampoCodigo()
         self.Le_codigo.setObjectName("Le_codigo")
         self.Le_codigo.setPlaceholderText("6 dígitos")
         self.Le_codigo.setMaxLength(LARGO_CODIGO)
