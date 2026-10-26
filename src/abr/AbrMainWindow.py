@@ -159,14 +159,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.assr_panel.setVisible(False)
         self.layout_abr.addWidget(self.assr_panel)
         self.assr_panel.finished.connect(self.assr_terminado)
-        self.layout_lat_int.addWidget(self.graph_lat_int)
+        # Ficha Latencia/Intensidad: el gráfico y, debajo, el resumen de curvas.
+        ficha_lat_int = QWidget()
+        columna_lat_int = QVBoxLayout(ficha_lat_int)
+        columna_lat_int.setContentsMargins(0, 0, 0, 0)
+        columna_lat_int.addWidget(self.graph_lat_int, 1)
+        self.layout_resumen_lat_int = QVBoxLayout()
+        columna_lat_int.addLayout(self.layout_resumen_lat_int)
+        self.layout_lat_int.addWidget(ficha_lat_int)
         self.layout_report.addWidget(self.report)
         # Se guarda solo (core/report_autosave.py); bajo la conclusion se ve
         # si quedo guardado, con una linea por prueba (ABR, ECochG).
         self.estado_informe = EstadoInforme()
-        self.report.verticalLayout.insertWidget(
-            self.report.verticalLayout.indexOf(self.report.text_edit_2) + 1,
-            self.estado_informe)
+        self.report.layout_estado.addWidget(self.estado_informe)
         self.detail.layout_tab1_secction1.addWidget(self.eeg)
         self.detail.layout_tab1_secction2.addWidget(self.fmp)
         self.detail.layout_tab2.addWidget(self.detail_all)
@@ -1196,22 +1201,21 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def tab_change(self, sender):
         if sender == 1:
             self.dock_parameter.setVisible(False)
-            self.detail.tabWidget.setCurrentIndex(1)
-            self.aplicar_monitor(forzar_visible=400)
-            self.dock_test.setVisible(True)
+            self.dock_test.setVisible(False)
+            self.ubicar_resumen(self.layout_resumen_lat_int, compacto=False, alto=190)
             self.graph_lat_int.clear_graph()
             self.graph_lat_int.plot_data(self.memory)
         elif sender == 2:
             self.dock_parameter.setVisible(False)
-            self.detail.tabWidget.setCurrentIndex(1)
-            self.aplicar_monitor(forzar_visible=300)
-            self.dock_test.setVisible(True)
+            self.dock_test.setVisible(False)
+            self.ubicar_resumen(self.report.layout_resumen, compacto=True)
             self.report_svg()
 
         else:
             self.ver_marcas(not self.es_assr())
             self.dock_parameter.setVisible(True)
             self.detail.tabWidget.setCurrentIndex(0)
+            self.ubicar_resumen(self.detail.layout_tab2, compacto=False)
             self.aplicar_monitor()
             self.dock_test.setVisible(not self.es_assr())
             self.graph_lat_int.clear_graph()
@@ -1579,6 +1583,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         self.ver_marcas(not on)
         self.dock_test.setVisible(not on)
+
+    def ubicar_resumen(self, destino, compacto, alto=None):
+        """El resumen de curvas es un solo widget: va al sitio de la ficha que
+        se está viendo (monitor de abajo, Latencia/Intensidad o Conclusiones)."""
+        destino.addWidget(self.detail_all)
+        self.detail_all.modo_compacto(compacto)
+        self.detail_all.setMinimumHeight(alto or 0)
+        self.detail_all.setMaximumHeight(alto or 16777215)
+        self.detail_all.show()
 
     def armar_barra_monitor(self):
         """Título del dock de abajo con el botón que pliega el monitor."""

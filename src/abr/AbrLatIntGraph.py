@@ -2,6 +2,7 @@
 import os
 import pyqtgraph as pg
 from pyqtgraph import exporters
+from core import tema
 from core.base import context
 
 
@@ -15,7 +16,8 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
 
     def configure_pyqtgraph(self):
         color_background = pg.mkColor(255, 255, 255, 255)
-        self.color_pen = pg.mkColor(0, 0, 0, 255)
+        self.color_pen = pg.mkColor(tema.GRILLA_FUERTE)
+        self.color_texto = pg.mkColor(tema.TEXTO_TENUE)
         self.setBackground(color_background)
     
     def setup_ui_elements(self):
@@ -23,8 +25,11 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         self.pw = self.addPlot(row=1,col=0)
 
         self.pw.setRange(yRange=(0, 12), xRange=(0, 100), disableAutoRange=True)
-        self.pw.setLabels(left='ms', bottom='dBnHL')
-        grid = pg.GridItem(pen=self.color_pen, textPen=self.color_pen)
+        self.pw.setLabels(left='ms', bottom='dB nHL')
+        for eje in ('left', 'bottom'):
+            self.pw.getAxis(eje).setPen(self.color_texto)
+            self.pw.getAxis(eje).setTextPen(self.color_texto)
+        grid = pg.GridItem(pen=self.color_pen, textPen=self.color_texto)
         self.pw.addItem(grid)
         grid.setTickSpacing(x=[10], y=[1.0])
 
@@ -38,8 +43,8 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         # Nota de color por oido: la leyenda muestra simbolo neutro por onda,
         # el color real (rojo/azul) va en los puntos graficados.
         note = pg.TextItem(
-            html='<span style="color:#c0392b;">&#9679;</span> OD &nbsp; '
-                 '<span style="color:#2980b9;">&#9679;</span> OI',
+            html=f'<span style="color:{tema.OD};">&#9679;</span> OD &nbsp; '
+                 f'<span style="color:{tema.OI};">&#9679;</span> OI',
             anchor=(1, 1),
         )
         note.setPos(100, 0)
@@ -61,9 +66,9 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         self.curve_top.is_band = True
         self.curve_bottom.is_band = True
         self.fill_between = pg.FillBetweenItem(self.curve_top, self.curve_bottom)
-        self.fill_between.setBrush(pg.mkColor(100, 100, 250, 80))
+        self.fill_between.setBrush(pg.mkColor(*tema.BANDA_NORMATIVA))
         self.pw.addItem(self.fill_between)
-        self.lbl_band = pg.TextItem(text='', color=(70, 70, 160), anchor=(0, 0))
+        self.lbl_band = pg.TextItem(text='', color=tema.ACENTO, anchor=(0, 0))
         self.lbl_band.setPos(2, 11.6)
         self.pw.addItem(self.lbl_band)
 
@@ -84,8 +89,8 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
             'V': 't3',
         }
         colors = {
-            'OD': (192, 57, 43),   # Rojo
-            'OI': (41, 128, 185),  # Azul
+            'OD': tema.OD,
+            'OI': tema.OI,
         }
 
         # Puntos agrupados por onda: un solo PlotDataItem por onda (no uno

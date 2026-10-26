@@ -15,6 +15,17 @@ class AbrDetailAllCurves(QWidget, Ui_DetailAllCurves):
         # Conectar la señal cellClicked a la función on_cell_clicked
         self.tw_curves_list.cellClicked.connect(self.on_cell_clicked)
     
+    # Columnas que quedan en la versión angosta (la del informe).
+    COMPACTAS = ('Oído', 'Intensidad (MKg)', 'I:lat(amp)', 'III:lat(amp)', 'V:lat(amp)')
+
+    def modo_compacto(self, compacto):
+        tabla = self.tw_curves_list
+        for col in range(tabla.columnCount()):
+            titulo = tabla.horizontalHeaderItem(col).text()
+            tabla.setColumnHidden(col, compacto and titulo not in self.COMPACTAS)
+        if compacto:
+            tabla.resizeColumnsToContents()
+
     def del_register(self):
         pass
 
