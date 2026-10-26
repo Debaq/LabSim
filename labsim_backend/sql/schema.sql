@@ -327,7 +327,7 @@ CREATE INDEX IF NOT EXISTS idx_attendances_student ON attendances (student_id);
 CREATE TABLE IF NOT EXISTS reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'OTOSCOPIA')),
+    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'ASSR', 'OTOSCOPIA')),
     data TEXT NOT NULL,                -- JSON: latencias/amplitudes marcadas, conclusión escrita
     -- Sube en cada guardado. La app manda la versión sobre la que armó el
     -- informe: si no coincide (otro equipo, un retomar sin red) la que se

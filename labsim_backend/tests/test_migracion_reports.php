@@ -60,6 +60,7 @@ t_eq((int) $pdo->query('PRAGMA foreign_keys')->fetchColumn(), 1, 'Deja las clave
 $otra = $abrir();
 $sql = (string) $otra->query("SELECT sql FROM sqlite_master WHERE name = 'reports'")->fetchColumn();
 t_true(strpos($sql, "'MMN'") !== false && strpos($sql, "'PEALM'") !== false, 'El CHECK acepta los tipos corticales');
+t_true(strpos($sql, "'ASSR'") !== false, 'El CHECK acepta el ASSR');
 t_eq($otra->query('SELECT group_concat(id || ":" || version) FROM (SELECT * FROM reports ORDER BY id)')->fetchColumn(),
      '7:3,9:1', 'Conserva ids y versiones');
 $rv = (string) $otra->query("SELECT sql FROM sqlite_master WHERE name = 'report_versions'")->fetchColumn();
@@ -72,6 +73,7 @@ t_eq((int) $otra->query("SELECT count(*) FROM sqlite_master WHERE name = 'idx_re
 t_eq((int) $otra->query("SELECT count(*) FROM sqlite_master WHERE name = 'reports_old'")->fetchColumn(),
      1, 'No toca reports_old');
 $otra->exec("INSERT INTO reports (attendance_id, tipo, data) VALUES (1, 'MMN', '{}')");
+$otra->exec("INSERT INTO reports (attendance_id, tipo, data) VALUES (1, 'ASSR', '{}')");
 $rechazada = false;
 try {
     $otra->exec("INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (999, 1, 'c', 'z')");

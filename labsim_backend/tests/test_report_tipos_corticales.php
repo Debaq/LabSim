@@ -12,7 +12,7 @@ require_once __DIR__ . '/../src/ReportPdfBuilder.php';
  * la tabla) o sale sin rótulo.
  */
 
-$nuevos = ['PEALM', 'CAEP', 'P300', 'MMN'];
+$nuevos = ['PEALM', 'CAEP', 'P300', 'MMN', 'ASSR'];
 $leer = function (string $ruta): string {
     return (string) file_get_contents(__DIR__ . '/../' . $ruta);
 };
@@ -35,9 +35,9 @@ foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
         t_true(strpos($c[1], "'{$t}'") !== false, "El CHECK de {$archivo} acepta {$t}");
     }
 }
-t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'MMN'\")") !== false,
+t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'ASSR'\")") !== false,
        'La migración detecta un CHECK sin los tipos corticales');
-t_true(strpos($leer('public/api/my_patient_reports.php'), "'MMN'") !== false,
+t_true(strpos($leer('public/api/my_patient_reports.php'), "'ASSR'") !== false,
        'my_patient_reports lista los tipos corticales');
 
 // PDF mínimo del PEALM.
@@ -78,3 +78,30 @@ foreach (['CAEP', 'MMN'] as $t) {
     t_true(strpos(ReportPdfBuilder::build(999, $t, ['curvas' => []], $paciente, 'A', '11-09-2026'), '%PDF-1.4') === 0,
            "{$t} vacío igual genera PDF");
 }
+
+// ASSR: las cuatro vistas son imágenes del informe y el endpoint las acepta.
+foreach (['assr_rastro', 'assr_fft', 'assr_polar', 'assr_audio'] as $suf) {
+    t_true(strpos($upload, "'{$suf}'") !== false, "report_upload acepta la imagen {$suf}");
+}
+$assr = ReportPdfBuilder::build(999, 'ASSR', [
+    'assr' => [
+        'n' => 600, 'rechazadas' => 22,
+        'correccion' => ['500' => 15.0, '1000' => 12.0, '2000' => 10.0, '4000' => 10.0],
+        'canales' => [
+            'OD:500' => ['nivel' => 30, 'umbral_hl' => 30, 'umbral_ehl' => 15,
+                         'stats' => ['n' => 300, 'amp_nv' => 58.2, 'noise_nv' => 14.1, 'f_ratio' => 17.3, 'p' => 0.0002, 'estado' => 'respuesta']],
+            'OD:4000' => ['nivel' => 90, 'umbral_hl' => null, 'umbral_ehl' => null,
+                          'stats' => ['n' => 500, 'amp_nv' => 9.0, 'noise_nv' => 11.0, 'f_ratio' => 0.7, 'p' => 0.52, 'estado' => 'sin respuesta']],
+        ],
+    ],
+    'hallazgos' => 'ASSR conservado en graves.', 'conclusion' => 'Descenso en agudos OD.',
+], $paciente, 'Alumno X', '11-09-2026');
+t_true(strpos($assr, '%PDF-1.4') === 0 && substr(trim($assr), -5) === '%%EOF', 'El informe ASSR sale como PDF');
+t_true(strpos($assr, 'Potenciales de estado estable') !== false, 'El PDF del ASSR lleva su título');
+t_true(strpos($assr, '600 ') !== false && strpos($assr, 'rechazadas por artefacto') !== false, 'El PDF del ASSR dice cuántas épocas');
+t_true(strpos($assr, 'Portadoras OD') !== false, 'El PDF del ASSR trae la tabla del oído derecho');
+t_true(strpos($assr, 'Portadoras OI') === false, 'Sin canales del OI no hay tabla del OI');
+t_true(strpos($assr, 'sin resp.') !== false, 'La portadora sin respuesta se informa como tal');
+t_true(strpos($assr, 'eHL aplicada: 500 Hz 15 dB') !== false, 'El PDF dice la corrección a eHL');
+t_true(strpos(ReportPdfBuilder::build(999, 'ASSR', [], $paciente, 'A', '11-09-2026'), '%PDF-1.4') === 0,
+       'ASSR vacío igual genera PDF');

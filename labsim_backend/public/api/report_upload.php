@@ -36,7 +36,7 @@ require_once __DIR__ . '/../../src/ReportFile.php';
  * Responde {ok, report_id, version}.
  */
 
-const REPORT_TIPOS = ['ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'OTOSCOPIA'];
+const REPORT_TIPOS = ['ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'ASSR', 'OTOSCOPIA'];
 // '0'/'1'/'lat_int': OD/OI/latencia-intensidad de ABR y VEMP. Los
 // <prueba>_<oido> son de EOA, que no tiene "un" gráfico por oído sino uno
 // por prueba (TEOAE/DPOAE/SOAE/SFOAE) y oído -- ver OaeMainWindow.
@@ -44,6 +44,8 @@ const REPORT_IMAGE_SUFFIXES = [
     '0', '1', 'lat_int',
     'teoae_od', 'teoae_oi', 'dpoae_od', 'dpoae_oi',
     'soae_od', 'soae_oi', 'sfoae_od', 'sfoae_oi',
+    // ASSR: las cuatro vistas del panel (rastro, FFT, vectores, audiograma).
+    'assr_rastro', 'assr_fft', 'assr_polar', 'assr_audio',
 ];
 
 $user = Auth::requireUser();

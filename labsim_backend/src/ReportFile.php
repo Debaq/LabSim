@@ -27,6 +27,7 @@ final class ReportFile
         'CAEP' => 'Potencial cortical (P1-N1-P2)',
         'P300' => 'P300',
         'MMN' => 'Negatividad de disparidad (MMN)',
+        'ASSR' => 'Potenciales de estado estable (ASSR)',
         'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
     ];
 
@@ -41,6 +42,7 @@ final class ReportFile
         'CAEP' => 'CAEP',
         'P300' => 'P300',
         'MMN' => 'MMN',
+        'ASSR' => 'ASSR',
         'OTOSCOPIA' => 'Otoscopia',
     ];
 

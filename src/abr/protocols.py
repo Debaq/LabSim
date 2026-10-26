@@ -93,7 +93,7 @@ PROTOCOLS = {
     'ASSR': Protocol(
         name='ASSR', window_ms=100, filter_high=30, filter_low=300,
         rate=80.0, averages=1000, montage='vertex_mastoid',
-        stimuli=BURSTS + NB_CHIRPS,
+        stimuli=BURSTS + NB_CHIRPS, implemented=True,
         note='Se analiza en frecuencia (fase/amplitud del modulador), no en el tiempo.'),
     'MLR': Protocol(
         name='MLR', window_ms=100, filter_high=10, filter_low=300,

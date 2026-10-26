@@ -762,9 +762,9 @@ final class Db
         }
         $cols = array_column($pdo->query('PRAGMA table_info(reports)')->fetchAll(), 'name');
         $tieneVersion = in_array('version', $cols, true);
-        // 'MMN' es el último tipo agregado (PEALM/CAEP/P300/MMN del módulo
-        // ABR): si el CHECK ya lo trae, trae también los anteriores.
-        if (strpos($sql, "'MMN'") !== false && $tieneVersion) {
+        // 'ASSR' es el último tipo agregado (después de PEALM/CAEP/P300/MMN
+        // del módulo ABR): si el CHECK ya lo trae, trae también los anteriores.
+        if (strpos($sql, "'ASSR'") !== false && $tieneVersion) {
             return;
         }
         // Orden de la doc de SQLite ("Making Other Kinds Of Table Schema
@@ -786,7 +786,7 @@ final class Db
                 "CREATE TABLE {$nueva} (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'OTOSCOPIA')),
+                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'ASSR', 'OTOSCOPIA')),
                     data TEXT NOT NULL,
                     version INTEGER NOT NULL DEFAULT 1,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -6437,3 +6437,54 @@ replicabilidad 0,4 y FSP 2-5. Los dos números eran calculados, sin cita.
 - Después de capturar queda seleccionado el canal donde se lee la prueba
   (Fz la MMN, Cz el CAEP, Pz la P300), y las marcas angostas (P1, N1, P2,
   N2) buscan el pico a 8-12 ms del clic; la P3 y la MMN siguen a 20-25.
+
+## ASSR de 80 Hz: panel propio con rastro, FFT, vectores y audiograma eHL (2026-10-26)
+
+Pedido: un estado estable más informativo que los equipos de hoy, que sólo
+muestran la tabla de umbrales: ver los rastros, entrar a la FFT, ver los
+vectores y llegar al audiograma en dB eHL.
+
+- **Es otra prueba del combo del ABR, pero no usa el gráfico de curvas.** El
+  ASSR no se lee en el tiempo: `AssrPanel` ocupa el lugar de los dos gráficos
+  y el Iniciar/Detener del panel de control corre su tick. El modelo está en
+  `abr/assr.py` (sin Qt).
+- **Ocho líneas a la vez** (500, 1000, 2000 y 4000 Hz por oído). Épocas de
+  1,024 s; cada modulación cae exacto en un bin (OD 82/90/98/106, OI
+  84/92/100/108 bins de 0,977 Hz), así que la respuesta tiene fase fija y el
+  ruido no. Las épocas se sortean en frecuencia (bins 0-200 Hz); el rastro es
+  la IFFT del promedio, o sea una suma de senoides.
+- **Detección:** razón F del bin contra 24+ bins vecinos, F(2, 2·vecinos) de
+  forma cerrada (sin scipy), alfa **0,005** y no 0,05: el equipo mira varias
+  veces mientras promedia y con 0,05 un tercio de las líneas sin respuesta
+  se "detectaba" en una corrida larga (medido 2026-10-26). "Sin respuesta" sólo
+  es concluyente con ruido residual ≤ 12 nV; antes es "en curso".
+- **Umbral del caso:** sale de `umbral_por_estimulo.tone_burst_<f>Hz` (nHL del
+  ABR) menos la corrección nHL→HL del backend; `null` = no responde a
+  ningún nivel. El umbral fisiológico del ASSR queda por encima del
+  conductual (offset de trabajo 14/11/9/11 dB, que se achica con la pérdida
+  por reclutamiento). Sin datos de un oído no se registra ese oído.
+- **Cruce de sonido:** una línea también la puede evocar la cóclea contraria
+  si `nivel − atenuación interaural (65 dB, inserto)` supera su umbral: un
+  oído sordo "responde" a 105 dB. Sin enmascaramiento, es parte de lo que se
+  aprende.
+- **Corrección a eHL calibrable** (500/1k/2k/4k = 15/12/10/10 dB): es criterio
+  de trabajo, no una cifra de fabricante ni una cita. El panel la deja editar
+  y el audiograma muestra el umbral crudo (rombo) y el eHL (O rojo OD, X azul
+  OI). El docente ve además el audiograma real del caso, el alumno no.
+- **Niveles automáticos** opcionales: baja 10 dB tras respuesta, sube 10 dB
+  tras "sin respuesta" concluyente, por portadora; termina con respuesta a L
+  y nada a L−10.
+- **Guardado e informe (2026-10-26):** tipo `ASSR` en `reports` (CHECK,
+  migración, endpoints, rótulos). El payload lleva `data['assr']` con, por
+  portadora, el espectro promedio, el vector y sus sub-promedios, el camino de
+  la punta, la estadística y el historial de niveles; no las épocas (serían
+  MB). Con eso se redibuja tal cual (`RecordingGuardado`): informe, sesiones
+  anteriores y retomar una atención. Un registro guardado es de solo lectura;
+  si había uno en vivo se aparta y vuelve al volver a la atención actual o a
+  la prueba. El PDF lleva las cuatro vistas (JPEG `assr_rastro/fft/polar/audio`)
+  y una tabla por oído con nivel, amplitud, ruido, F, p, estado, umbral HL y eHL.
+  Detener es una pausa: el tramo de cada portadora sigue abierto.
+- **Verificación de los seis informes del módulo** (`tests/test_informes_abr_e2e.py`):
+  ECochG, PEALM, CAEP, P300, MMN y ASSR se registran en la ventana, arman su
+  informe con su tipo e imágenes, y el backend (`ReportPdfBuilder`) los
+  convierte en PDF con las imágenes embebidas y sus tablas.

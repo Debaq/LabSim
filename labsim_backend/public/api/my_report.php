@@ -13,7 +13,7 @@ require_once __DIR__ . '/../bootstrap.php';
  * abierta ya no pierde las curvas: quedan en el servidor. Esto las
  * devuelve para que el módulo vuelva a mostrarlas.
  *
- * GET appointment_id=<la cita>&tipos=ABR,ELECTROCOCLEO,PEALM,CAEP,P300,MMN (opcional; sin
+ * GET appointment_id=<la cita>&tipos=ABR,ELECTROCOCLEO,PEALM,CAEP,P300,MMN,ASSR (opcional; sin
  * tipos, todos). Solo lo propio: el alumno sale del token.
  */
 

@@ -101,6 +101,13 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'ASSR') {
+            $y = self::assrBody($pdf, $reportId, $data, $y, $contentW);
+            $y = self::technicalSection($pdf, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if (in_array($tipo, ['PEALM', 'CAEP', 'P300', 'MMN'], true)) {
             $y = self::corticalBody($pdf, $reportId, $data, $y, $contentW);
             $y = self::technicalSection($pdf, $data, $y, $contentW);
@@ -949,6 +956,145 @@ final class ReportPdfBuilder
         return $y + 8;
     }
 
+    /**
+     * Cuerpo del informe de ASSR (potenciales de estado estable de 80 Hz).
+     *
+     * El cliente manda data['assr'] (ver abr/assr.py Recording.snapshot):
+     * por portadora ('OD:500', ...) la estadística de la línea (amplitud, ruido
+     * de los bins vecinos, razón F, p, estado), el nivel en que quedó, el
+     * historial de niveles probados y el umbral crudo (dB HL) y corregido
+     * (dB eHL). Las cuatro vistas del panel -- rastro, espectro, vectores y
+     * audiograma -- van como imágenes (assr_rastro/fft/polar/audio).
+     */
+    private static function assrBody(MiniPdf $pdf, int $reportId, array $data,
+                                     float $y, float $contentW): float
+    {
+        $imgW = ($contentW - 20) / 2;
+        $imgH = $imgW * 0.6;
+        $vistas = [
+            ['assr_rastro', 'Rastro (portadora elegida)'],
+            ['assr_fft', 'Espectro (FFT)'],
+            ['assr_polar', 'Vectores'],
+            ['assr_audio', 'Audiograma estimado (dB eHL)'],
+        ];
+        // Cada vista conserva su proporción (el gráfico de vectores es
+        // cuadrado, el espectro apaisado); la fila ocupa lo de la más alta.
+        $dibujadas = 0;
+        $altoFila = 0.0;
+        foreach ($vistas as $v) {
+            $path = ReportFile::imagePath($reportId, $v[0]);
+            if (!is_file($path)) {
+                continue;
+            }
+            $alto = $imgH;
+            $tam = @getimagesize($path);
+            if ($tam !== false && $tam[0] > 0) {
+                $alto = min($imgW * $tam[1] / $tam[0], $imgW * 1.1);
+            }
+            if ($dibujadas % 2 === 0) {
+                $y = self::ensureSpace($pdf, $y, $imgH + 24);
+                $altoFila = 0.0;
+            }
+            $x = self::MARGIN + ($dibujadas % 2) * ($imgW + 20);
+            $pdf->text($x, $y, $v[1], 9, true);
+            $pdf->image($path, $x, $y + 4, $imgW, $alto);
+            $altoFila = max($altoFila, $alto);
+            $dibujadas++;
+            if ($dibujadas % 2 === 0) {
+                $y += $altoFila + 24;
+            }
+        }
+        if ($dibujadas % 2 === 1) {
+            $y += $altoFila + 24;
+        }
+
+        $assr = is_array($data['assr'] ?? null) ? $data['assr'] : [];
+        $canales = is_array($assr['canales'] ?? null) ? $assr['canales'] : [];
+        if ($canales === []) {
+            $pdf->text(self::MARGIN, $y, 'Sin registro de portadoras.', 9);
+            return $y + 16;
+        }
+
+        $y = self::ensureSpace($pdf, $y, 30);
+        $segundos = (int) round(((float) ($assr['n'] ?? 0)) * 1.024);
+        $pdf->text(self::MARGIN, $y, 'Registro: ' . self::num((int) ($assr['n'] ?? 0))
+            . ' épocas aceptadas (' . sprintf('%02d:%02d', intdiv($segundos, 60), $segundos % 60)
+            . '), ' . self::num((int) ($assr['rechazadas'] ?? 0)) . ' rechazadas por artefacto', 9);
+        $y += 16;
+
+        $fmt = function ($v, int $dec = 0): string {
+            return is_numeric($v) ? number_format((float) $v, $dec, ',', '') : '—';
+        };
+        $fmtP = function ($v): string {
+            if (!is_numeric($v)) {
+                return '—';
+            }
+            return (float) $v < 0.001 ? '<0,001' : number_format((float) $v, 3, ',', '');
+        };
+        $frecs = [500, 1000, 2000, 4000];
+        // Columnas: x relativo, rótulo.
+        $cols = [
+            [0, 'Portadora'], [62, 'Nivel'], [100, 'Épocas'], [140, 'Amp. nV'],
+            [190, 'Ruido nV'], [245, 'F'], [280, 'p'], [330, 'Estado'],
+            [400, 'Umbral HL'], [465, 'eHL'],
+        ];
+        foreach (['OD', 'OI'] as $oido) {
+            $filas = [];
+            foreach ($frecs as $f) {
+                $c = $canales[$oido . ':' . $f] ?? null;
+                if (!is_array($c)) {
+                    continue;
+                }
+                $st = is_array($c['stats'] ?? null) ? $c['stats'] : [];
+                $filas[] = [
+                    ($f >= 1000 ? ($f / 1000) . ' kHz' : $f . ' Hz'),
+                    $fmt($c['nivel'] ?? null) . ' dB',
+                    $fmt($st['n'] ?? null),
+                    $fmt($st['amp_nv'] ?? null),
+                    $fmt($st['noise_nv'] ?? null),
+                    $fmt($st['f_ratio'] ?? null, 1),
+                    $fmtP($st['p'] ?? null),
+                    (string) ($st['estado'] ?? '—'),
+                    isset($c['umbral_hl']) && is_numeric($c['umbral_hl']) ? $fmt($c['umbral_hl']) . ' dB' : 'sin resp.',
+                    isset($c['umbral_ehl']) && is_numeric($c['umbral_ehl']) ? $fmt($c['umbral_ehl']) . ' dB' : 'sin resp.',
+                ];
+            }
+            if ($filas === []) {
+                continue;
+            }
+            $y = self::ensureSpace($pdf, $y, 36 + 13 * (count($filas) + 1));
+            $pdf->text(self::MARGIN, $y, 'Portadoras ' . $oido, 12, true);
+            $y += 18;
+            foreach ($cols as $i => $col) {
+                $pdf->text(self::MARGIN + $col[0], $y, $col[1], 8, true);
+            }
+            $y += 13;
+            foreach ($filas as $fila) {
+                foreach ($cols as $i => $col) {
+                    $pdf->text(self::MARGIN + $col[0], $y, $fila[$i], 8);
+                }
+                $y += 13;
+            }
+            $y += 10;
+        }
+
+        $corr = is_array($assr['correccion'] ?? null) ? $assr['correccion'] : [];
+        if ($corr !== []) {
+            $partes = [];
+            foreach ($frecs as $f) {
+                if (isset($corr[(string) $f]) && is_numeric($corr[(string) $f])) {
+                    $partes[] = ($f >= 1000 ? ($f / 1000) . ' kHz' : $f . ' Hz') . ' ' . $fmt($corr[(string) $f]) . ' dB';
+                }
+            }
+            if ($partes !== []) {
+                $y = self::ensureSpace($pdf, $y, 16);
+                $pdf->text(self::MARGIN, $y, 'Corrección a eHL aplicada: ' . implode(', ', $partes), 9);
+                $y += 14;
+            }
+        }
+        return $y + 8;
+    }
+
     private static function tipoLabel(string $tipo): string
     {
         // Mapa y no match(): el hosting corre PHP 7.4 (ver el otro caso en
@@ -963,6 +1109,7 @@ final class ReportPdfBuilder
             'CAEP' => 'Potencial cortical (P1-N1-P2)',
             'P300' => 'P300',
             'MMN' => 'Negatividad de disparidad (MMN)',
+            'ASSR' => 'Potenciales de estado estable (ASSR)',
             'OTOSCOPIA' => 'Otoscopia',
         ];
         return $etiquetas[$tipo] ?? $tipo;

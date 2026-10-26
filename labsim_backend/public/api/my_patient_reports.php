@@ -46,7 +46,7 @@ $stmt = $pdo->prepare(
      JOIN attendances a ON a.id = r.attendance_id
      JOIN appointments ap ON ap.id = a.appointment_id
      WHERE a.student_id = ? AND ap.case_id = ? AND ap.id <> ? AND {$mismoLado}
-       AND r.tipo IN ('ABR', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN')
+       AND r.tipo IN ('ABR', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'ASSR')
      ORDER BY ap.fecha DESC, ap.hora DESC, r.id DESC"
 );
 $stmt->execute([$user['id'], $caseId, $appointmentId]);

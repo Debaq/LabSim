@@ -87,6 +87,16 @@ class AbrControl(QWidget, Ui_Abr_Config):
         self.gridLayout.addWidget(self.cb_tarea, 10, 1, 1, 1)
         self.set_task_visible('ABR')
 
+    def set_assr_mode(self, on: bool) -> None:
+        """El ASSR registra los dos oídos a la vez y fija su estímulo, tasa y
+        filtros (ver abr/assr.py): del panel solo quedan la prueba y los
+        botones de registro. Los demás controles no hacen nada ahí."""
+        for i in range(self.gridLayout.count()):
+            item = self.gridLayout.itemAt(i)
+            fila = self.gridLayout.getItemPosition(i)[0]
+            if item.widget() is not None and 1 <= fila <= 12:
+                item.widget().setVisible(not on)
+
     def set_task_visible(self, test: str) -> None:
         visible = test in cortical.ODDBALL_TESTS
         self.lbl_tarea.setVisible(visible)

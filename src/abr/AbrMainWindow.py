@@ -18,6 +18,7 @@ from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
                                level_label, sl_reference,
                                case_quality, latency_intensity_band,
                                normative_limits, raw_eeg)
+from abr.AssrPanel import AssrPanel
 from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
@@ -140,6 +141,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         self.layout_abr.addWidget(self.graph_r)
         self.layout_abr.addWidget(self.graph_l)
+        # El ASSR no se lee en el tiempo: tiene su propio panel (rastro, FFT,
+        # vectores y audiograma eHL) en el lugar de los dos graficos.
+        self.assr_panel = AssrPanel()
+        self.assr_panel.setVisible(False)
+        self.layout_abr.addWidget(self.assr_panel)
+        self.assr_panel.finished.connect(self.assr_terminado)
         self.layout_lat_int.addWidget(self.graph_lat_int)
         self.layout_report.addWidget(self.report)
         # Se guarda solo (core/report_autosave.py); bajo la conclusion se ve
@@ -341,6 +348,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # cuenten la misma historia.
         self.quality = case_quality(self.abr_od or self.abr_oi or {})
         self.reset()
+        self.assr_panel.set_case(data, self.abr_od, self.abr_oi,
+                                 self.technical, self.docente)
         # La banda normativa del grafico latencia-intensidad sigue a la
         # poblacion del paciente: con la banda de adulto, un neonato queda
         # fuera de norma siempre.
@@ -367,7 +376,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         8 kOhm, sin tierra o con el rechazo apagado.
         """
         tec = self.technical
-        meta = self.last_metadata
+        # El ASSR no usa barridos ni FSP: la metadata es de otra prueba.
+        meta = {} if self.es_assr() else self.last_metadata
         peor, desbalance, ok = ABRGenerator.impedance_report(tec)
         etiqueta = {v: k for k, v in TRANSDUCERS.items()}
         montaje = {v: k for k, v in MONTAGES.items()}
@@ -593,7 +603,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         if self.session_idx is not None:
             return None
-        if not self.data_login or not self.memory:
+        if not self.data_login or not self.hay_registro():
             return None
         try:
             appointment_id = int(self.appointment_id)
@@ -624,12 +634,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         except (TypeError, ValueError):
             return jobs
         for test, guardada in self.otras_pruebas.items():
-            if not guardada['pendiente'] or not guardada['data'].get('curvas'):
+            if not guardada['pendiente'] or not (guardada['data'].get('curvas')
+                                                 or guardada['data'].get('assr')):
                 continue
             jobs.append({"appointment_id": appointment_id,
                          "tipo": self.report_tipo(test), "data": guardada['data'],
                          "images": lambda g=guardada: dict(g['images'])})
         return jobs
+
+    def hay_registro(self):
+        """Hay algo registrado en la prueba en pantalla (curvas o ASSR)."""
+        if self.es_assr():
+            return self.assr_panel.hay_registro()
+        return bool(self.memory)
 
     def report_tipo(self, test=None):
         return report_tipo(test or self.test_actual)
@@ -642,6 +659,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # reventaba al abrir un archivo inexistente. El informe del ABR no
         # llegaba nunca al backend.
         os.makedirs(temp_dir, exist_ok=True)
+        if self.es_assr():
+            return self.assr_panel.exportar(prefijo, temp_dir)
         exporters = {'0': self.graph_r, '1': self.graph_l, 'lat_int': self.graph_lat_int}
         if self.es_ecochg() or self.es_cortical():
             # El ECochG no se registra en serie descendente: se hace a
@@ -698,6 +717,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             'hallazgos': self.report.text_edit_1.toPlainText(),
             'conclusion': self.report.text_edit_2.toPlainText(),
         }
+        if self.es_assr():
+            # Sin curvas: el ASSR se guarda como lo que el panel muestra
+            # (espectro, vectores, estadistica por portadora y umbrales).
+            data['assr'] = self.assr_panel.snapshot()
         if self.es_ecochg():
             # El corrimiento por tasa es una comparacion entre dos curvas,
             # asi que no vive en ninguna: va aparte, ya resuelto, igual que
@@ -727,7 +750,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                                   if self.cortical_conteo.get(lado)}
         return data
 
-    def draw_session(self, data):
+    def draw_session(self, data, en_vivo=False):
         """Dibuja una sesion que vino del backend (o la actual, al volver a ella)."""
         self.reset()
         curvas = data.get('curvas') or {}
@@ -736,6 +759,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             primera = next(iter(curvas.values()), {})
             prueba = primera.get('test') or 'ABR'
         self.set_test_silently(prueba, data.get('equipo'))
+        if prueba == 'ASSR' and data.get('assr'):
+            if not (en_vivo and self.assr_panel.volver_vivo()):
+                self.assr_panel.cargar_snapshot(data['assr'])
         for nombre in sorted(curvas, key=curve_order):
             entrada = curvas[nombre]
             self.memory[nombre] = {k: v for k, v in entrada.items()
@@ -873,7 +899,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         pruebas = {}
         for informe in guardados:   # el mas nuevo primero
             data = informe.get('data')
-            if not isinstance(data, dict) or not data.get('curvas'):
+            if not isinstance(data, dict) or not (data.get('curvas')
+                                                  or data.get('assr')):
                 continue
             test = data.get('prueba') or test_of_report(informe.get('tipo'))
             pruebas.setdefault(test, (data, informe))
@@ -923,7 +950,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.live_snapshot = self.session_payload()
 
         if idx is None:
-            self.draw_session(self.live_snapshot)
+            self.draw_session(self.live_snapshot, en_vivo=True)
             self.live_snapshot = None
         else:
             self.draw_session(self.sessions[idx]['data'])
@@ -942,6 +969,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         de una sesion cerrada; se saco a pedido del docente.
         """
         self.view_only = on
+        self.assr_panel.set_read_only(on)
         self.control.setEnabled(not on and self.data_current is not None)
         for grafico in (self.graph_r, self.graph_l):
             grafico.curves_locked = on
@@ -1133,6 +1161,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.dock_parameter.setVisible(False)
             self.detail.tabWidget.setCurrentIndex(1)
             self.dock_test.setFixedHeight(400)
+            self.dock_test.setVisible(True)
             self.graph_lat_int.clear_graph()
             self.graph_lat_int.plot_data(self.memory)
         elif sender == 2:
@@ -1140,13 +1169,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.dock_parameter.setVisible(False)
             self.detail.tabWidget.setCurrentIndex(1)
             self.dock_test.setFixedHeight(300)
+            self.dock_test.setVisible(True)
             self.report_svg()
 
         else:
-            self.dock_values.setVisible(True)
+            self.dock_values.setVisible(not self.es_assr())
             self.dock_parameter.setVisible(True)
             self.detail.tabWidget.setCurrentIndex(0)
             self.dock_test.setFixedHeight(ALTO_DOCK_DETALLE)
+            self.dock_test.setVisible(not self.es_assr())
             self.graph_lat_int.clear_graph()
 
 
@@ -1158,6 +1189,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if state == 'record':
             self.state_capture = state
             self.current_setting = self.control.get_data()
+            self.assr_panel.actualizar_equipo(self.technical)
             # La via la define el transductor (Parametros Avanzados), no el
             # combo de estimulos: viaja pegada al setting de la captura
             # para que el detalle diga con que se registro esa curva.
@@ -1174,6 +1206,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         elif state == 'stopped':
             self.state_capture = state
             self.capture_timer.stop()
+            if self.es_assr():
+                self.assr_panel.detener()
             if self.count_averages:
                 self.close_cut_capture()
         else:
@@ -1201,6 +1235,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # que este flag se relee en cada tick aunque el resto del
             # setting quede congelado al iniciar la captura.
             self.current_setting['clamp'] = self.control.ch_clamp.isChecked()
+            if self.es_assr():
+                texto = self.assr_panel.tick()
+                self.lbl_info.setText(texto)
+                return
             side = self.current_setting["side"]
             self.graph(side)
             self.memory_curves()
@@ -1497,6 +1535,24 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # test_changed), y esa se tiene que guardar con su propio tipo.
         return self.test_actual == 'ECochG'
 
+    def fit_docks_for_assr(self, on):
+        """El ASSR no usa el dock de valores (sin tablas) ni el monitor de EEG
+        y FSP de abajo: el espacio es para el panel, que tiene cuatro graficos.
+        Solo en la pestaña de graficos; las otras manejan sus propios docks."""
+        if self.tabWidget.currentIndex() != 0:
+            return
+        self.dock_values.setVisible(not on)
+        self.dock_test.setVisible(not on)
+
+    def es_assr(self):
+        """ASSR: se lee en frecuencia, con panel propio (ver AssrPanel)."""
+        return self.test_actual == 'ASSR'
+
+    def assr_terminado(self, motivo):
+        if self.state_capture == 'record':
+            self.control.stop_capture()
+        self.lbl_info.setText(self.lbl_info.text() + "  ·  " + motivo)
+
     def es_cortical(self):
         """MLR, CAEP, P300 o MMN: multicanal, con su propio generador."""
         return self.test_actual in cortical.TESTS
@@ -1511,9 +1567,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         ecochg_on = test == 'ECochG'
         cortical_on = test in cortical.TESTS
+        assr_on = test == 'ASSR'
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.setVisible(not assr_on)
+        self.assr_panel.setVisible(assr_on)
+        self.fit_docks_for_assr(assr_on)
+        self.control.set_assr_mode(assr_on)
         self.control.set_task_visible(test)
         for tabla in (self.table_r, self.table_l):
-            tabla.setVisible(not ecochg_on and not cortical_on)
+            tabla.setVisible(not ecochg_on and not cortical_on and not assr_on)
         for tabla in (self.table_ec_r, self.table_ec_l):
             tabla.setVisible(ecochg_on)
         for tabla in (self.table_cx_r, self.table_cx_l):
@@ -1734,7 +1796,18 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.test_actual = test
         self.control.apply_protocol(test)
         guardada = self.otras_pruebas.pop(test, None)
-        if guardada is not None:
+        if (guardada is not None and test == 'ASSR'
+                and self.assr_panel.en_vivo()):
+            # El registro sigue en el panel (no se perdio al irse): se vuelve
+            # a el vivo, no a la foto guardada.
+            datos = guardada['data']
+            self.technical = dict(datos.get('equipo') or default_settings(test))
+            self.apply_test_widgets(test)
+            self.apply_window()
+            self.apply_norms()
+            self.report.text_edit_1.setPlainText(datos.get('hallazgos', ''))
+            self.report.text_edit_2.setPlainText(datos.get('conclusion', ''))
+        elif guardada is not None:
             self.draw_session(guardada['data'])
         else:
             self.technical = default_settings(test)
@@ -1758,10 +1831,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         texto = (self.report.text_edit_1.toPlainText().strip()
                  or self.report.text_edit_2.toPlainText().strip())
-        if not self.memory and not texto:
+        if not self.hay_registro() and not texto:
             self.otras_pruebas.pop(self.test_actual, None)
             return
-        imagenes = self.export_images(f'guardada_{self.report_tipo()}') if self.memory else {}
+        imagenes = (self.export_images(f'guardada_{self.report_tipo()}')
+                    if self.hay_registro() else {})
         self.otras_pruebas[self.test_actual] = {
             'data': self.session_payload(), 'images': imagenes, 'pendiente': True}
 

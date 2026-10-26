@@ -92,7 +92,7 @@ def curve_group(nombre: str) -> str:
 # Tipo de informe (tabla `reports`) de cada prueba del modulo. Las que no
 # figuran se suben como ABR.
 REPORT_TIPOS = {'ECochG': 'ELECTROCOCLEO', 'MLR': 'PEALM', 'CAEP': 'CAEP',
-                'P300': 'P300', 'MMN': 'MMN'}
+                'P300': 'P300', 'MMN': 'MMN', 'ASSR': 'ASSR'}
 TIPO_PRUEBA = {tipo: prueba for prueba, tipo in REPORT_TIPOS.items()}
 
 
