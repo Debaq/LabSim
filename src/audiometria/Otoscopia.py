@@ -10,12 +10,14 @@ from audiometria.OtoscopiaInforme import InformeOtoscopia
 from backend.client import BackendClient
 from core.base import context
 from core import hilos
+from core import iconos, tema
 from core.helpers import Preferences, foto_otoscopia
 from core.report_autosave import subir_ahora
-from PySide6.QtCore import QRect, Qt
-from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QRegion
+from PySide6.QtCore import QRect, QRectF, Qt
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap, QRegion
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -26,6 +28,29 @@ from PySide6.QtWidgets import (
 )
 
 SIN_IMAGEN_TEXTO = "Otoscopio sin batería"
+
+# Lo que el visor pinta fuera de la foto y como máscara: negro con un dejo
+# del tinte de la app, para que no sea un agujero en la tarjeta.
+NEGRO_VISOR = QColor("#0E0A0D")
+RADIO_VISOR = 8
+
+# Reglas propias de la ventana (el resto sale de core/tema.py).
+EXTRA_QSS = f"""
+QTabWidget::pane {{ border: none; background: transparent; top: 0px; }}
+QTabBar::tab {{
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 7px 16px;
+    margin-right: 4px;
+    font-size: 9pt;
+    font-weight: 600;
+    color: {tema.TEXTO_TENUE};
+}}
+QTabBar::tab:selected {{ color: {tema.ACENTO}; border-bottom-color: {tema.ACENTO}; }}
+QTabBar::tab:hover:!selected {{ color: {tema.TEXTO_SUAVE}; }}
+QCheckBox {{ spacing: 6px; color: {tema.TEXTO}; }}
+"""
 
 # Qué fase de otoscopia le corresponde ver a cada alumno según su propio
 # avance (derivación + aprobación docente) con este paciente todavía no
@@ -113,21 +138,31 @@ class _OtoscopioVisor(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         rect = self.rect()
 
+        borde = QPainterPath()
+        borde.addRoundedRect(QRectF(rect).adjusted(0.5, 0.5, -0.5, -0.5), RADIO_VISOR, RADIO_VISOR)
+
         if self._pixmap is None:
-            painter.fillRect(rect, QColor("#fafafa"))
-            painter.setPen(QPen(QColor("#cccccc")))
-            painter.drawRect(rect.adjusted(0, 0, -1, -1))
-            painter.setPen(QColor("#888888"))
-            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap, self._texto or "")
+            painter.fillPath(borde, QColor(tema.TARJETA_ALT))
+            painter.setPen(QPen(QColor(tema.BORDE), 1))
+            painter.drawPath(borde)
+            icono = iconos.pixmap("otoscopio", tema.TEXTO_TENUE, 44)
+            ancho_icono = icono.width() / icono.devicePixelRatio()
+            alto_icono = icono.height() / icono.devicePixelRatio()
+            painter.drawPixmap(int(rect.center().x() - ancho_icono / 2),
+                               int(rect.center().y() - alto_icono - 4), icono)
+            painter.setPen(QColor(tema.TEXTO_TENUE))
+            painter.drawText(rect.adjusted(12, int(rect.height() / 2 + 6), -12, 0),
+                             Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap,
+                             self._texto or "")
             painter.end()
             return
 
-        # Fondo negro (no el gris claro del estado vacío) -- así las franjas
-        # de letterbox (imagen con proporción distinta al widget) quedan del
-        # mismo negro que la máscara, en vez de un marco claro alrededor.
-        painter.fillRect(rect, QColor(0, 0, 0))
-        painter.setPen(QPen(QColor("#444444")))
-        painter.drawRect(rect.adjusted(0, 0, -1, -1))
+        # Todo lo que sigue recortado a las esquinas redondeadas. Fondo
+        # oscuro (no el claro del estado vacío) -- así las franjas de
+        # letterbox (imagen con proporción distinta al widget) quedan del
+        # mismo color que la máscara, en vez de un marco claro alrededor.
+        painter.setClipPath(borde)
+        painter.fillRect(rect, NEGRO_VISOR)
 
         scaled = self._pixmap_escalado()
         img_rect = QRect(0, 0, scaled.width(), scaled.height())
@@ -141,8 +176,9 @@ class _OtoscopioVisor(QWidget):
             r = int(min(rect.width(), rect.height()) * self._cono)
             circulo = QRect(self._mouse_pos.x() - r, self._mouse_pos.y() - r, r * 2, r * 2)
             mascara -= QRegion(circulo, QRegion.RegionType.Ellipse)
-        painter.setClipRegion(mascara)
-        painter.fillRect(rect, QColor(0, 0, 0))
+        painter.setClipRegion(mascara.intersected(QRegion(rect)))
+        painter.setClipPath(borde, Qt.ClipOperation.IntersectClip)
+        painter.fillRect(rect, NEGRO_VISOR)
         painter.end()
 
 
@@ -159,25 +195,38 @@ class Otoscopia(QWidget):
         self._fetch_thread = None
         self._case_id_pedido = None
 
+        tema.aplicar_estilo(self, EXTRA_QSS)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 8, 12, 12)
         self.tabs = QTabWidget()
-        self.tabs.addTab(self._build_tab_otoscopio(), "Otoscopio")
+        self.tabs.addTab(self._build_tab_otoscopio(), iconos.icono("otoscopio", tema.TEXTO_TENUE, 16), "Otoscopio")
         self.informe = InformeOtoscopia()
         # Lo actualiza el autoguardado (core/report_autosave.py).
         self.estado_informe = self.informe.estado
-        self.tabs.addTab(self.informe, "Informe")
+        self.tabs.addTab(self.informe, iconos.icono("evolucion", tema.TEXTO_TENUE, 16), "Informe")
+        self.tabs.currentChanged.connect(self._iconos_pestanas)
+        self._iconos_pestanas(0)
         layout.addWidget(self.tabs)
 
         self.la_super(thr)
 
+    def _iconos_pestanas(self, activa):
+        """El icono de la pestaña elegida va en el acento, el resto tenue."""
+        for i, nombre in enumerate(("otoscopio", "evolucion")):
+            color = tema.ACENTO if i == activa else tema.TEXTO_TENUE
+            self.tabs.setTabIcon(i, iconos.icono(nombre, color, 16))
+
     def _build_tab_otoscopio(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
+        layout.setContentsMargins(0, 10, 0, 0)
+        layout.setSpacing(10)
         fila_visores = QHBoxLayout()
+        fila_visores.setSpacing(10)
         self.lbl_od = self._build_slot()
         self.lbl_oi = self._build_slot()
-        fila_visores.addLayout(self._build_columna("Oído derecho (OD)", self.lbl_od))
-        fila_visores.addLayout(self._build_columna("Oído izquierdo (OI)", self.lbl_oi))
+        fila_visores.addWidget(self._build_tarjeta("OD", "Oído derecho", self.lbl_od), 1)
+        fila_visores.addWidget(self._build_tarjeta("OI", "Oído izquierdo", self.lbl_oi), 1)
         layout.addLayout(fila_visores, 1)
         layout.addLayout(self._build_conos())
         return tab
@@ -186,10 +235,16 @@ class Otoscopia(QWidget):
         """Elección del espéculo: el pediátrico deja el campo visible chico
         (lo de siempre) y el de adulto lo duplica en diámetro."""
         fila = QHBoxLayout()
+        fila.setSpacing(6)
         self.grupo_conos = QButtonGroup(self)
         self.grupo_conos.setExclusive(True)
         self.btn_cono_pediatrico = QPushButton("Cono pediátrico")
         self.btn_cono_adulto = QPushButton("Cono adulto")
+        pista = QLabel("Mueve el mouse sobre la imagen: el espéculo deja ver un círculo a la vez.")
+        pista.setProperty("role", "hint")
+        pista.setWordWrap(True)
+        lbl_cono = QLabel("ESPÉCULO")
+        lbl_cono.setProperty("role", "seccion")
         for btn, fraccion in (
             (self.btn_cono_pediatrico, _OtoscopioVisor.CONO_PEDIATRICO),
             (self.btn_cono_adulto, _OtoscopioVisor.CONO_ADULTO),
@@ -198,23 +253,34 @@ class Otoscopia(QWidget):
             self.grupo_conos.addButton(btn)
             btn.clicked.connect(lambda _checked=False, f=fraccion: self._set_cono(f))
         self.btn_cono_pediatrico.setChecked(True)
-        fila.addStretch(1)
+        fila.addWidget(pista, 1)
+        fila.addWidget(lbl_cono)
         fila.addWidget(self.btn_cono_pediatrico)
         fila.addWidget(self.btn_cono_adulto)
-        fila.addStretch(1)
         return fila
 
     def _set_cono(self, fraccion):
         self.lbl_od.setCono(fraccion)
         self.lbl_oi.setCono(fraccion)
 
-    def _build_columna(self, titulo, label):
-        col = QVBoxLayout()
-        titulo_lbl = QLabel(f"<b>{titulo}</b>")
-        titulo_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        col.addWidget(titulo_lbl)
-        col.addWidget(label, 1)
-        return col
+    def _build_tarjeta(self, lado, titulo, visor):
+        """Tarjeta de un oído: píldora OD/OI + título y el visor."""
+        tarjeta = QFrame()
+        tarjeta.setProperty("card", "true")
+        col = QVBoxLayout(tarjeta)
+        col.setContentsMargins(12, 10, 12, 12)
+        col.setSpacing(8)
+        cabecera = QHBoxLayout()
+        pastilla = QLabel(lado)
+        tema.pastilla_lado(pastilla, lado)
+        titulo_lbl = QLabel(titulo)
+        titulo_lbl.setProperty("role", "titulo")
+        cabecera.addWidget(pastilla)
+        cabecera.addWidget(titulo_lbl)
+        cabecera.addStretch(1)
+        col.addLayout(cabecera)
+        col.addWidget(visor, 1)
+        return tarjeta
 
     def _build_slot(self):
         return _OtoscopioVisor()

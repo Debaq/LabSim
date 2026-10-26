@@ -21,6 +21,7 @@ from PySide6.QtCore import QPoint, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import (
     QCheckBox,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -31,6 +32,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from core import iconos, tema
 from core.estado_informe import EstadoInforme
 
 # (clave, etiqueta, color, tipo) -- claves de FindingType de OtoReport.
@@ -334,18 +336,27 @@ class _DiagramaTimpanico(QWidget):
         }
 
 
-class _PanelOido(QWidget):
+class _PanelOido(QFrame):
     """Un oído del informe: esquema + paleta de hallazgos + CAE + notas."""
 
     def __init__(self, lado, titulo, parent=None):
         super().__init__(parent)
         self.lado = lado
         self._hallazgo_activo = None
+        self.setProperty("card", "true")
 
         raiz = QVBoxLayout(self)
-        lbl_titulo = QLabel(f"<b>{titulo}</b>")
-        lbl_titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        raiz.addWidget(lbl_titulo)
+        raiz.setContentsMargins(12, 10, 12, 12)
+        raiz.setSpacing(8)
+        cabecera = QHBoxLayout()
+        pastilla = QLabel(lado.upper())
+        tema.pastilla_lado(pastilla, lado.upper())
+        lbl_titulo = QLabel(titulo)
+        lbl_titulo.setProperty("role", "titulo")
+        cabecera.addWidget(pastilla)
+        cabecera.addWidget(lbl_titulo)
+        cabecera.addStretch(1)
+        raiz.addLayout(cabecera)
 
         # Esquema y paleta lado a lado (como en OtoReport): apilados, el
         # panel medía casi 700 px de alto y no entraba en la subventana
@@ -356,27 +367,35 @@ class _PanelOido(QWidget):
         fila.addWidget(self.diagrama, 1)
 
         columna = QVBoxLayout()
-        columna.addWidget(QLabel("Hallazgo a marcar:"))
+        columna.setSpacing(6)
+        lbl_hallazgo = QLabel("HALLAZGO A MARCAR")
+        lbl_hallazgo.setProperty("role", "seccion")
+        columna.addWidget(lbl_hallazgo)
         self.diagrama.setToolTip(
             "Cada click suma el hallazgo elegido al cuadrante. Volver a "
             "marcarlo lo saca; sin hallazgo elegido, el click vacía el "
             "cuadrante."
         )
         columna.addLayout(self._build_paleta())
-        self.btn_limpiar = QPushButton("Limpiar marcas")
+        self.btn_limpiar = QPushButton(" Limpiar marcas")
+        self.btn_limpiar.setIcon(iconos.icono("x", tema.TEXTO_SUAVE, 14))
         self.btn_limpiar.clicked.connect(self.limpiar_marcas)
         columna.addWidget(self.btn_limpiar)
         columna.addStretch(1)
         fila.addLayout(columna)
         raiz.addLayout(fila, 1)
 
-        raiz.addWidget(QLabel("<b>Conducto auditivo externo</b>"))
+        lbl_cae = QLabel("CONDUCTO AUDITIVO EXTERNO")
+        lbl_cae.setProperty("role", "seccion")
+        raiz.addWidget(lbl_cae)
         raiz.addLayout(self._build_cae())
 
-        raiz.addWidget(QLabel("Observaciones:"))
+        lbl_obs = QLabel("OBSERVACIONES")
+        lbl_obs.setProperty("role", "seccion")
+        raiz.addWidget(lbl_obs)
         self.txt_observaciones = QTextEdit()
         self.txt_observaciones.setPlaceholderText("Observaciones")
-        self.txt_observaciones.setMaximumHeight(64)
+        self.txt_observaciones.setMaximumHeight(56)
         raiz.addWidget(self.txt_observaciones)
 
     def _build_paleta(self):
@@ -385,15 +404,17 @@ class _PanelOido(QWidget):
         # _marcar_cuadrante), y un grupo exclusivo no permite quedar sin
         # ninguno tildado.
         grid = QGridLayout()
+        grid.setSpacing(5)
         self.botones_hallazgo = {}
         for i, (clave, etiqueta, color, _tipo) in enumerate(HALLAZGOS):
             btn = QPushButton(f"{glifo_hallazgo(clave)} {etiqueta}")
             btn.setCheckable(True)
             btn.setStyleSheet(
-                # 3 px: con 1 px el color del hallazgo casi no se veía en
-                # el botón, que es la única leyenda de qué color es cada uno.
-                f"QPushButton {{ border: 3px solid {color}; border-radius: 4px; padding: 3px; }}"
-                f"QPushButton:checked {{ background-color: {color}; color: white; }}"
+                # Borde de 2 px: el botón es la única leyenda de qué color es
+                # cada hallazgo y con 1 px casi no se veía.
+                f"QPushButton {{ border: 2px solid {color}; border-radius: 7px; padding: 4px 6px; }}"
+                f"QPushButton:hover {{ border-color: {color}; color: {tema.TEXTO}; background: {tema.TARJETA_ALT}; }}"
+                f"QPushButton:checked {{ background-color: {color}; border-color: {color}; color: white; }}"
             )
             btn.setToolTip(
                 "Rellena el cuadrante" if es_de_area(clave)
@@ -494,13 +515,16 @@ class InformeOtoscopia(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(0, 10, 0, 0)
+        raiz.setSpacing(8)
 
         oidos = QHBoxLayout()
-        self.panel_od = _PanelOido("od", "Oído derecho (OD)")
-        self.panel_oi = _PanelOido("oi", "Oído izquierdo (OI)")
+        oidos.setSpacing(10)
+        self.panel_od = _PanelOido("od", "Oído derecho")
+        self.panel_oi = _PanelOido("oi", "Oído izquierdo")
         oidos.addWidget(self.panel_od)
         oidos.addWidget(self.panel_oi)
-        raiz.addLayout(oidos)
+        raiz.addLayout(oidos, 1)
 
         # Se guarda solo (core/report_autosave.py): sin botón, como en
         # todos los módulos de examen; acá se ve si quedó guardado.

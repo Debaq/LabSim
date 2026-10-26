@@ -86,6 +86,14 @@ Actualizado 2026-10-26 (noche).
 - [x] Evolución: encabezado, pasos de la atención y botón Guardar con icono.
 - [ ] Chat con el paciente sigue con el diseño viejo.
 
+### Otoscopia
+- [x] Rehecha (2026-10-26): pestañas con subrayado y icono, una tarjeta por oído con píldora OD/OI,
+  visor con esquinas redondeadas y estado vacío con icono, selector de espéculo con rótulo y pista;
+  Informe con tarjetas por oído, rótulos de sección y paleta de hallazgos con la paleta de
+  `tema.py` (los colores por hallazgo y el esquema ocre se mantienen: son los de OtoReport).
+  `expand=True` en el marco MDI.
+- [ ] Probar en la app real (solo render offscreen a 1000x580 y 1024x560).
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -97,7 +105,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] AABR, EOAS (OAE), Audiómetro, Acumetría, Otoscopia, Z, Lista de palabras: paleta de
+- [ ] AABR, EOAS (OAE), Audiómetro, Acumetría, Z, Lista de palabras: paleta de
   `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
