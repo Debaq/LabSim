@@ -26,7 +26,7 @@ from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline
                           marcar_entry_no_show,
                           obtener_nota_atencion,
                           CreatePatient)
-from core.ficha import parse_fecha_agenda, render_ficha_html
+from core.ficha import parse_fecha_agenda, poner_html, render_ficha_html
 from core.practica import abrir_ficha_estudio
 
 DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
@@ -77,17 +77,57 @@ class FichaClinicaWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        layout = QVBoxLayout(self)
+        tema.aplicar_estilo(self, vista.QSS_FICHA)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(12, 12, 12, 12)
+        raiz.setSpacing(10)
+
+        cabecera = QFrame(self)
+        cabecera.setProperty("card", "true")
+        fila = QHBoxLayout(cabecera)
+        fila.setContentsMargins(14, 10, 14, 10)
+        fila.setSpacing(12)
+        marca = QLabel()
+        marca.setPixmap(iconos.pixmap("persona", tema.ACENTO, 34))
+        textos = QVBoxLayout()
+        textos.setSpacing(0)
+        self.lbl_nombre = QLabel("Ficha clínica")
+        self.lbl_nombre.setProperty("role", "titulo")
+        self.lbl_datos = QLabel("")
+        self.lbl_datos.setProperty("role", "campo")
+        self.lbl_datos.setWordWrap(True)
+        textos.addWidget(self.lbl_nombre)
+        textos.addWidget(self.lbl_datos)
+        fila.addWidget(marca)
+        fila.addLayout(textos, 1)
+        self.btn_chat = BotonAccion("Hablar con el paciente", "mensaje", parent=self)
+        self.btn_chat.setToolTip("Abre el chat con el paciente de este caso")
+        self.btn_chat.clicked.connect(self._on_chat_clicked)
+        self.btn_chat.hide()
+        fila.addWidget(self.btn_chat)
+        raiz.addWidget(cabecera)
 
         self.texto = QTextEdit(self)
+        self.texto.setObjectName("textoFicha")
         self.texto.setReadOnly(True)
-        layout.addWidget(self.texto)
+        raiz.addWidget(self.texto, 1)
 
         self._on_chat = None
 
-    def set_ficha(self, html, on_chat=None):
-        self.texto.setHtml(html)
+    def set_ficha(self, html, on_chat=None, cabecera=None):
+        """`cabecera`: (nombre, línea de datos) del paciente para el encabezado."""
+        poner_html(self.texto, html)
         self._on_chat = on_chat
+        self.btn_chat.setVisible(on_chat is not None)
+        nombre, datos = cabecera or ("Ficha clínica", "")
+        self.lbl_nombre.setText(nombre or "Paciente")
+        self.lbl_datos.setText(datos)
+        self.texto.verticalScrollBar().setValue(0)
+
+    def _on_chat_clicked(self):
+        if self._on_chat is not None:
+            self._on_chat()
 
 
 class EvolucionWidget(QWidget):
@@ -98,19 +138,49 @@ class EvolucionWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        tema.aplicar_estilo(self, vista.QSS_FICHA)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
 
+        cabecera = QFrame(self)
+        cabecera.setProperty("card", "true")
+        fila = QHBoxLayout(cabecera)
+        fila.setContentsMargins(14, 10, 14, 10)
+        fila.setSpacing(12)
+        marca = QLabel()
+        marca.setPixmap(iconos.pixmap("evolucion", tema.ACENTO, 30))
+        textos = QVBoxLayout()
+        textos.setSpacing(0)
+        titulo = QLabel("Evolución del paciente")
+        titulo.setProperty("role", "titulo")
         self.lbl_paciente = QLabel(self)
-        layout.addWidget(self.lbl_paciente)
+        self.lbl_paciente.setProperty("role", "campo")
+        textos.addWidget(titulo)
+        textos.addWidget(self.lbl_paciente)
+        fila.addWidget(marca)
+        fila.addLayout(textos, 1)
+        layout.addWidget(cabecera)
 
-        layout.addWidget(QLabel("Describe la evolución del paciente:", self))
+        pasos = vista.Pasos()
+        pasos.set_actual(len(vista.PASOS) - 1)
+        layout.addWidget(pasos)
 
         self.texto = QTextEdit(self)
-        layout.addWidget(self.texto)
+        self.texto.setObjectName("textoEvolucion")
+        self.texto.setPlaceholderText("Describe la evolución del paciente...")
+        layout.addWidget(self.texto, 1)
 
-        self.btn_guardar = QPushButton("Guardar evolución", self)
+        pie = QHBoxLayout()
+        ayuda = QLabel("Lo que escribes se guarda como borrador en este equipo mientras trabajas.")
+        ayuda.setProperty("role", "hint")
+        ayuda.setWordWrap(True)
+        pie.addWidget(ayuda, 1)
+        self.btn_guardar = BotonAccion("Guardar evolución", "check", principal=True, parent=self)
         self.btn_guardar.clicked.connect(self._on_guardar_clicked)
-        layout.addWidget(self.btn_guardar)
+        pie.addWidget(self.btn_guardar)
+        layout.addLayout(pie)
 
         self._on_guardar = None
         # (usuario, appointment_id) del borrador en el equipo, o None
@@ -130,7 +200,7 @@ class EvolucionWidget(QWidget):
         haya cerrado, se haya cerrado sesión o la app se haya caído."""
         self.guardar_borrador()   # lo pendiente del contexto anterior
         mismo = borrador is not None and borrador == self._borrador
-        self.lbl_paciente.setText(f"Paciente: {nombre_paciente}")
+        self.lbl_paciente.setText(nombre_paciente)
         self._on_guardar = on_guardar
         self._borrador = borrador
         if mismo and self.texto.toPlainText().strip():
@@ -1252,8 +1322,10 @@ class Agenda(QWidget, Ui_Form):
 
         html = render_ficha_html(row, caso, self.shedule, self._current_username(), self.is_admin)
         if self.main_window is not None and hasattr(self.main_window, "abrir_ficha_con"):
+            cuando = f"{row.fecha} {row.hora}".strip() if row.fecha and row.hora else None
             self.main_window.abrir_ficha_con(
-                html, lambda: self._abrir_chat_paciente(row, case_id, appointment_key)
+                html, lambda: self._abrir_chat_paciente(row, case_id, appointment_key),
+                (f"{row.nombre} {row.apellido}".strip(), self._datos_paciente(row.rut, row.procedimiento, cuando)),
             )
 
     def _abrir_chat_paciente(self, row, case_id, appointment_key):

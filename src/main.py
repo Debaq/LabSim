@@ -1394,10 +1394,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         else:
             self.activate_auto("ABR")
 
-    def abrir_ficha_con(self, html, on_chat=None):
+    def abrir_ficha_con(self, html, on_chat=None, cabecera=None):
         """Abre (o trae al frente) la subventana MDI de ficha clínica,
         reapuntada al paciente indicado."""
-        self.subw["FICHA"].obj.set_ficha(html, on_chat)
+        self.subw["FICHA"].obj.set_ficha(html, on_chat, cabecera)
         self.activate_auto("FICHA")
 
     def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None):

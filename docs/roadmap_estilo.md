@@ -76,7 +76,10 @@ Actualizado 2026-10-26 (tarde).
 - [x] Tamaño de la ventana en `Layout.php`: 940x580 (antes 900x400). `FrameSubMdi(expand=True)`
   ya no deja la franja de 40 px abajo.
 - [ ] Probar en la app real (solo renders offscreen con datos de prueba).
-- [ ] Fichas (Ficha clínica, Evolución, Chat) siguen con el diseño viejo.
+- [x] Ficha clínica: encabezado con el paciente y botón Hablar con el paciente; datos,
+  puntualidad e historial como tarjetas con iconos (`core/ficha.py`, también en Mis pacientes).
+- [x] Evolución: encabezado, pasos de la atención y botón Guardar con icono.
+- [ ] Chat con el paciente sigue con el diseño viejo.
 
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
@@ -93,7 +96,7 @@ Actualizado 2026-10-26 (tarde).
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
 - [ ] Probar la barra nueva en la app real (solo se vio en un render offscreen con botones de prueba).
-- [ ] Fichas (Ficha clínica, Evolución, Chat).
+- [ ] Chat con el paciente (`agenda/ChatPaciente.py`).
 
 ### Transversal
 - [ ] Bajar el exceso de blanco/claro en toda la app: la barra de estado, los módulos ya

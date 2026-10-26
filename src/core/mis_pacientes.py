@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QPushButton,
                                 QAbstractItemView, QTextEdit, QTabWidget, QLabel)
 
 from core.helpers import mis_atenciones, mi_conversacion, mis_informes, CasesOffline, Shedule
-from core.ficha import render_ficha_html
+from core.ficha import poner_html, render_ficha_html
 from core.practica import abrir_ficha_estudio
 
 BTN_OBJECT_NAME = "btn_mis_pacientes"
@@ -350,7 +350,7 @@ class MisPacientesWidget(QWidget):
         caso = self._cases.get(case_id, {})
         username = (self._main_window.data_login.get("user") if self._main_window and self._main_window.data_login else None)
         html_ficha = render_ficha_html(row, caso, self._shedule, username, False)
-        self.texto_ficha.setHtml(html_ficha)
+        poner_html(self.texto_ficha, html_ficha)
 
 
 def crear_boton(main_window, layout):

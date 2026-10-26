@@ -7,7 +7,10 @@ cambia de dónde sacan `shedule` (en memoria vs. recién pedido al backend)."""
 import html
 import re
 
-from PySide6.QtCore import QDate, QTime, QDateTime
+from PySide6.QtCore import QDate, QTime, QDateTime, QUrl
+from PySide6.QtGui import QTextDocument
+
+from core import iconos, tema
 
 from core.helpers import obtener_hora_real_atencion
 
@@ -135,39 +138,92 @@ def linea_tiempo(historia_clinica, fecha_cita, historial):
     return [dato for _, dato in entradas]
 
 
+# Iconos que usa el HTML de la ficha (<img src="ico:NOMBRE">): el documento que
+# lo muestra los tiene que registrar antes (ver poner_html).
+_ICONOS_FICHA = {"persona": tema.ACENTO, "reloj": tema.ACENTO, "libro": tema.ACENTO,
+                 "calendario": tema.ACENTO}
+
+
+def poner_html(editor, html_ficha):
+    """Muestra la ficha en un QTextEdit/QTextBrowser, con sus iconos."""
+    documento = editor.document()
+    for nombre, color in _ICONOS_FICHA.items():
+        documento.addResource(QTextDocument.ResourceType.ImageResource,
+                              QUrl(f"ico:{nombre}"), iconos.pixmap(nombre, color, 18))
+    editor.setHtml(html_ficha)
+
+
+def _etiqueta(texto):
+    return (f'<span style="font-size:7.5pt; font-weight:600; color:{tema.TEXTO_TENUE}; '
+            f'letter-spacing:1px;">{html.escape(texto.upper())}</span>')
+
+
+def _dato(titulo, valor):
+    """Un dato de la ficha: rótulo chico arriba, valor abajo."""
+    valor = html.escape(str(valor)) if valor else f'<span style="color:{tema.TEXTO_TENUE};">—</span>'
+    return (f'{_etiqueta(titulo)}<br>'
+            f'<span style="font-size:10pt; font-weight:600; color:{tema.TEXTO};">{valor}</span>')
+
+
+def _seccion(icono, titulo, cuerpo):
+    """Un bloque de la ficha: título con icono y una tarjeta blanca."""
+    return (
+        '<table width="100%" cellspacing="0" cellpadding="0"><tr>'
+        f'<td width="24"><img src="ico:{icono}" width="18" height="18"></td>'
+        f'<td>{_etiqueta(titulo)}</td></tr></table>'
+        '<table width="100%" cellspacing="0" cellpadding="12" '
+        f'style="background-color:{tema.TARJETA}; border:1px solid {tema.BORDE};"><tr><td>'
+        f'{cuerpo}</td></tr></table><p style="margin:0;">&nbsp;</p>')
+
+
+def _pastilla(texto, color):
+    return (f'<span style="color:{color}; font-weight:700;">&#9679; {html.escape(texto)}</span>')
+
+
+def edad_de_rut(rut):
+    """Edad en años del paciente a partir de su RUT (como lo hace el chat), o None."""
+    from core.helpers import CreatePatient
+    try:
+        return CreatePatient().get_age_from_rut(int(rut))[0]
+    except (TypeError, ValueError):
+        return None
+
+
 def render_ficha_html(row, caso, shedule, username, is_admin):
     """Arma el HTML de la ficha clínica para `row` (AgendaEntry) + `caso`
     (dict del caso clínico) -- datos del paciente, puntualidad de esta cita
     puntual y el historial de atenciones cerradas del paciente."""
-    rut = row.rut
-    nombre = row.nombre
-    apellidos = row.apellido
-    fecha_nac = row.fecha_nac
-    procedimiento = row.procedimiento
+    nombre = f"{row.nombre} {row.apellido}".strip()
+    edad = edad_de_rut(row.rut) if row.rut else None
+    nacimiento = row.fecha_nac + (f" ({edad} años)" if edad and row.fecha_nac else "")
     fecha_hora = f"{row.fecha} {row.hora}".strip()
 
-    partes = ["<h3>Datos del paciente</h3>"]
-    partes.append(f"<p><b>Nombre:</b> {nombre} {apellidos}<br>"
-                   f"<b>Rut:</b> {rut}<br>"
-                   f"<b>Fecha de nacimiento:</b> {fecha_nac}<br>"
-                   f"<b>Procedimiento:</b> {procedimiento}<br>"
-                   f"<b>Cita agendada:</b> {fecha_hora or 'sin agendar'}</p>")
+    datos = (
+        '<table width="100%" cellspacing="0" cellpadding="6">'
+        f'<tr><td width="50%">{_dato("Nombre", nombre)}</td>'
+        f'<td width="25%">{_dato("RUT", row.rut)}</td>'
+        f'<td width="25%">{_dato("Nacimiento", nacimiento)}</td></tr>'
+        f'<tr><td>{_dato("Procedimiento", row.procedimiento)}</td>'
+        f'<td colspan="2">{_dato("Cita agendada", fecha_hora or "sin agendar")}</td></tr>'
+        '</table>')
+    partes = [_seccion("persona", "Datos del paciente", datos)]
 
     hora_real = obtener_hora_real_atencion(row, username)
     if hora_real:
-        partes.append("<h3>Puntualidad</h3>")
         hora_agendada = QTime.fromString(row.hora, "HH:mm")
         hora_inicio = QTime.fromString(hora_real, "HH:mm:ss")
         if hora_agendada.isValid() and hora_inicio.isValid():
             minutos = hora_agendada.secsTo(hora_inicio) // 60
-            if minutos <= 0:
-                resumen = "a tiempo"
-            else:
-                resumen = f"{minutos} min de atraso"
+            resumen = (_pastilla("A tiempo", tema.OK) if minutos <= 0
+                       else _pastilla(f"{minutos} min de atraso", tema.AVISO))
         else:
             resumen = ""
-        partes.append(f"<p><b>Hora agendada:</b> {row.hora}<br>"
-                       f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
+        puntualidad = (
+            '<table width="100%" cellspacing="0" cellpadding="6"><tr>'
+            f'<td width="30%">{_dato("Hora agendada", row.hora)}</td>'
+            f'<td width="30%">{_dato("Inicio real", hora_real)}</td>'
+            f'<td>{resumen}</td></tr></table>')
+        partes.append(_seccion("reloj", "Puntualidad", puntualidad))
 
     # Una sola línea de tiempo: lo que le hicieron al paciente antes de
     # llegar (historia clínica del caso) y las atenciones cerradas, en orden.
@@ -175,10 +231,9 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     # atenciones previas, que es como se lee una ficha de verdad.
     historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
     entradas = linea_tiempo(historia_clinica, row.fecha,
-                            historial_atenciones(shedule, rut, username, is_admin,
+                            historial_atenciones(shedule, row.rut, username, is_admin,
                                                  getattr(row, "practice_id", None) is not None))
 
-    partes.append("<h3>Historial del paciente</h3>")
     if entradas:
         # Escapado: son textos libres (historia del caso, nota del alumno) y
         # un "<" suelto rompía el resto de la ficha sin dejar rastro de por
@@ -188,19 +243,25 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
         # el realismo que la ficha aporta. El docente sí ve quién escribió
         # cada nota -- ahí la ficha es una herramienta de corrección, no el
         # registro que el alumno está aprendiendo a leer.
-        items = "".join(
-            "<li><b>{fecha}{hora}</b>{quien} — {texto}</li>".format(
-                fecha=html.escape(e["fecha"] or "sin fecha"),
-                # Las entradas del caso no tienen hora: sin esto quedaba un
-                # espacio colgando dentro del <b>.
-                hora=f" {html.escape(e['hora'])}" if e["hora"] else "",
-                quien=f" {html.escape(e['alumno'])}" if (is_admin and e["alumno"]) else "",
-                texto=html.escape(e["texto"] or "sin comentario"),
-            )
-            for e in entradas
-        )
-        partes.append(f"<ul>{items}</ul>")
+        filas = []
+        for i, e in enumerate(entradas):
+            fondo = tema.TARJETA if i % 2 == 0 else tema.TARJETA_ALT
+            # Las entradas del caso no tienen hora: sin ella no se pone nada.
+            hora = (f'<br><span style="font-size:8pt; color:{tema.TEXTO_TENUE};">'
+                    f'{html.escape(e["hora"])}</span>') if e["hora"] else ""
+            quien = (f'<span style="color:{tema.OI}; font-weight:600;">{html.escape(e["alumno"])}</span><br>'
+                     if (is_admin and e["alumno"]) else "")
+            filas.append(
+                f'<tr><td width="90" valign="top" bgcolor="{fondo}" '
+                f'style="border-top:1px solid {tema.GRILLA};">'
+                f'<span style="font-weight:700; color:{tema.ACENTO};">'
+                f'{html.escape(e["fecha"] or "sin fecha")}</span>{hora}</td>'
+                f'<td valign="top" bgcolor="{fondo}" style="border-top:1px solid {tema.GRILLA};">'
+                f'{quien}{html.escape(e["texto"] or "sin comentario")}</td></tr>')
+        cuerpo = ('<table width="100%" cellspacing="0" cellpadding="8">' + "".join(filas) + "</table>")
     else:
-        partes.append("<p>Sin historial registrado para este paciente.</p>")
+        cuerpo = (f'<span style="color:{tema.TEXTO_SUAVE};">'
+                  'Sin historial registrado para este paciente.</span>')
+    partes.append(_seccion("libro", "Historial del paciente", cuerpo))
 
     return "".join(partes)

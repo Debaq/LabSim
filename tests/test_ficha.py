@@ -54,9 +54,9 @@ def _ficha(historia):
 
 
 def test_cada_atencion_previa_queda_en_su_propia_linea():
-    """Tres líneas en el campo = tres <li>, no un párrafo corrido."""
+    """Tres líneas en el campo = tres entradas, no un párrafo corrido."""
     html = _ficha(HISTORIA)
-    assert html.count("<li>") >= 3, html
+    assert html.count('<td width="90"') >= 3, html
     for trozo in ("Nace de 38 semanas", "Control con pediatra", "evaluación auditiva"):
         assert trozo in html, trozo
 
@@ -136,7 +136,7 @@ def test_sin_historia_ni_atenciones_lo_dice():
 
 def test_lineas_en_blanco_no_generan_items_vacios():
     html = _ficha("{{-3}} Una sola atención.\n\n\n")
-    assert html.count("<li>") == 1, html
+    assert html.count('<td width="90"') == 1, html
 
 
 def test_el_texto_del_caso_no_puede_romper_el_html():

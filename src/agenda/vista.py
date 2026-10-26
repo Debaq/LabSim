@@ -65,8 +65,8 @@ class BotonAccion(QPushButton):
 
     def _pintar_icono(self):
         nombre = self._icono
-        if self._principal:
-            nombre = "evolucion" if "evolucion" in self.text().lower() else "atender"
+        if self._principal and "cerrar/evolucionar" in self.text().lower():
+            nombre = "evolucion"
         color = tema.TEXTO_TENUE if not self.isEnabled() else self._color_icono()
         self.setIcon(iconos.icono(nombre, color, 18))
 
@@ -251,4 +251,24 @@ QLabel[pill="ok"] {{
     padding: 2px 10px; color: {tema.OK}; font-size: 8pt; font-weight: 600;
 }}
 QCheckBox {{ spacing: 6px; color: {tema.TEXTO_SUAVE}; font-size: 8.5pt; }}
+"""
+
+
+# Ficha clínica y evolución: mismo lienzo y tarjetas que la agenda.
+QSS_FICHA = f"""
+QTextEdit#textoFicha {{ background: {tema.FONDO}; border: none; padding: 0; }}
+QTextEdit#textoEvolucion {{
+    background: {tema.TARJETA}; border: 1px solid {tema.BORDE_FUERTE}; border-radius: 10px;
+    padding: 10px; font-size: 10pt;
+}}
+QTextEdit#textoEvolucion:focus {{ border-color: {tema.ACENTO}; }}
+QPushButton[accion="principal"] {{
+    background: {tema.ACENTO}; border: 1px solid {tema.ACENTO}; color: #FFFFFF;
+    font-weight: 700; padding: 8px 20px; border-radius: 8px; font-size: 10pt;
+}}
+QPushButton[accion="principal"]:hover {{ background: {tema.ACENTO_CLARO}; border-color: {tema.ACENTO_CLARO}; }}
+QLabel[pill="ok"] {{
+    background: #E6F4EC; border: 1px solid {tema.OK}; border-radius: 9px;
+    padding: 2px 10px; color: {tema.OK}; font-size: 8pt; font-weight: 600;
+}}
 """
