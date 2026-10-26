@@ -181,9 +181,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.panel_tabs = QTabWidget()
         self.panel_tabs.setObjectName("panelTabs")
         self.panel_tabs.setDocumentMode(True)
-        # Parámetros avanzados era lo único del menú Archivo (el resto está
-        # oculto): el menú y la barra de estado se van y su alto es de las
-        # curvas; el botón queda al pie de la configuración.
+        # Parámetros avanzados (antes en el menú Archivo, que ya no existe)
+        # queda como botón al pie de la configuración.
         pagina_config = QWidget()
         columna_config = QVBoxLayout(pagina_config)
         columna_config.setContentsMargins(0, 0, 0, 4)
@@ -194,8 +193,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_avanzados.setToolTip(tr(
             "AbrMainWindow", "Configuración del equipo: montaje, transductor, unidad del nivel…"))
         columna_config.addWidget(self.btn_avanzados)
-        self.menubar.setVisible(False)
-        self.statusbar.setVisible(False)
         self.panel_tabs.addTab(pagina_config, tr("AbrMainWindow", "Configuración"))
         self.layout_dock_parameter_content.addWidget(self.panel_tabs)
         self.layout_dock_test_contents.addWidget(self.detail)
@@ -225,10 +222,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         marcas_scroll.setFrameShape(QFrame.Shape.NoFrame)
         marcas_scroll.setWidget(marcas)
         self.panel_tabs.addTab(marcas_scroll, tr("AbrMainWindow", "Marcas"))
-        # El dock de valores de la derecha ya no existe: sus tablas viven en
-        # la ficha Marcas.
-        self.removeDockWidget(self.dock_values)
-        self.dock_values.deleteLater()
         tema.aplicar_estilo(self, QSS_ABR)
         # Los botones de escala no se pegan al borde de la ficha.
         self.layout_abr_frame.setContentsMargins(10, 10, 6, 6)
@@ -239,13 +232,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 w.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         ########Conexiones de slots
-        self.actionP_rametros_Avanzados.triggered.connect(self.active_advance_setting)
         self.btn_avanzados.clicked.connect(self.active_advance_setting)
-        # "Cambiar Caso" y "Salir" ya no aplican: el caso lo trae el paciente
-        # en atención (ver la_super) y la ventana se cierra con su ✕. Se
-        # ocultan en vez de quedar en el menú sin hacer nada.
-        self.actionCambiar_Caso.setVisible(False)
-        self.actionSalir.setVisible(False)
         self.table_r.sig_measure_value.connect(self.measure_action)
         self.table_l.sig_measure_value.connect(self.measure_action)
         self.table_ec_r.sig_mark.connect(self.mark_ecochg)
@@ -312,9 +299,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             grafico.level_text = (
                 lambda intensidad, cfg, lado=lado: self.level_text(
                     intensidad, cfg.get('stim'), cfg.get('transducer'), lado))
-        self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
-        # El tiempo de la atención lo lleva el temporizador general de LabSim.
-        self.lbl_time.hide()
 
         ######Variables de Estado
         self.control.capture.connect(self.capture_state)
@@ -1225,7 +1209,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.dock_parameter.setVisible(False)
             self.dock_test.setVisible(False)
             self.ubicar_resumen(self.report.layout_resumen, compacto=True)
-            self.report_svg()
 
         else:
             self.ver_marcas(not self.es_assr())
@@ -2067,14 +2050,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # corto el promedio en esa curva.
             self.memory[name_curve]['fsp_track'] = self.fsp_tracks.get(name_curve, {})
         self.detail_all.process_and_fill_data(self.memory)
-
-################Report
-    def report_svg(self):
-        # Deshabilitado: el PDF ahora se genera en el backend (report_pdf.php)
-        # al primer "descargar", no en el cliente. Ver commit 0ce3e30.
-        return
-
-
 
     def test_test(self, side):
 

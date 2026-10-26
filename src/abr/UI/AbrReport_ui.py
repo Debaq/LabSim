@@ -95,9 +95,6 @@ class Ui_AbrReport(object):
         self.verticalLayout.addWidget(self.le_eva)
 
         self.tabWidget.addTab(self.tab_1, "")
-        self.tab_2 = QWidget()
-        self.tab_2.setObjectName(u"tab_2")
-        self.tabWidget.addTab(self.tab_2, "")
 
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
@@ -135,6 +132,5 @@ class Ui_AbrReport(object):
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
         self.le_eva.setPlaceholderText(QCoreApplication.translate("AbrReport", u"Evaluador/a", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), QCoreApplication.translate("AbrReport", u"Conclusiones", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("AbrReport", u"Esquema", None))
     # retranslateUi
 

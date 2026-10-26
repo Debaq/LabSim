@@ -28,12 +28,6 @@ class Ui_MainWindow(object):
         MainWindow.resize(1016, 826)
         MainWindow.setDocumentMode(True)
         MainWindow.setDockNestingEnabled(True)
-        self.actionSalir = QAction(MainWindow)
-        self.actionSalir.setObjectName(u"actionSalir")
-        self.actionP_rametros_Avanzados = QAction(MainWindow)
-        self.actionP_rametros_Avanzados.setObjectName(u"actionP_rametros_Avanzados")
-        self.actionCambiar_Caso = QAction(MainWindow)
-        self.actionCambiar_Caso.setObjectName(u"actionCambiar_Caso")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_3 = QVBoxLayout(self.centralwidget)
@@ -51,26 +45,6 @@ class Ui_MainWindow(object):
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
-
-        self.lbl_time = QLabel(self.centralwidget)
-        self.lbl_time.setObjectName(u"lbl_time")
-
-        self.horizontalLayout.addWidget(self.lbl_time)
-
-        self.btn_skip_time_dev = QPushButton(self.centralwidget)
-        self.btn_skip_time_dev.setObjectName(u"btn_skip_time_dev")
-        self.btn_skip_time_dev.setVisible(False)  # Oculto por defecto
-
-        self.horizontalLayout.addWidget(self.btn_skip_time_dev)
-
-        self.btn_next_case = QPushButton(self.centralwidget)
-        self.btn_next_case.setObjectName(u"btn_next_case")
-
-        self.horizontalLayout.addWidget(self.btn_next_case)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout.addItem(self.horizontalSpacer_2)
 
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
@@ -185,12 +159,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.tabWidget)
 
         MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QMenuBar(MainWindow)
-        self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1016, 22))
-        self.menuArchivo = QMenu(self.menubar)
-        self.menuArchivo.setObjectName(u"menuArchivo")
-        MainWindow.setMenuBar(self.menubar)
         self.dock_parameter = QDockWidget(MainWindow)
         self.dock_parameter.setObjectName(u"dock_parameter")
         self.dock_parameter.setMinimumSize(QSize(180, 143))
@@ -203,20 +171,6 @@ class Ui_MainWindow(object):
         self.layout_dock_parameter_content.setContentsMargins(3, 3, 3, 3)
         self.dock_parameter.setWidget(self.dock_parameter_contents)
         MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.dock_parameter)
-        self.dock_values = QDockWidget(MainWindow)
-        self.dock_values.setObjectName(u"dock_values")
-        self.dock_values.setMaximumSize(QSize(260, 524287))
-        self.dock_values.setFeatures(QDockWidget.DockWidgetMovable)
-        self.dock_values_contents = QWidget()
-        self.dock_values_contents.setObjectName(u"dock_values_contents")
-        self.layout_dock_values_contents = QVBoxLayout(self.dock_values_contents)
-        self.layout_dock_values_contents.setObjectName(u"layout_dock_values_contents")
-        self.layout_dock_values_contents.setContentsMargins(3, 3, 3, 3)
-        self.dock_values.setWidget(self.dock_values_contents)
-        MainWindow.addDockWidget(Qt.RightDockWidgetArea, self.dock_values)
-        self.statusbar = QStatusBar(MainWindow)
-        self.statusbar.setObjectName(u"statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         self.dock_test = QDockWidget(MainWindow)
         self.dock_test.setObjectName(u"dock_test")
         self.dock_test.setMinimumSize(QSize(100, 100))
@@ -232,12 +186,6 @@ class Ui_MainWindow(object):
         self.dock_test.setWidget(self.dock_test_contents)
         MainWindow.addDockWidget(Qt.BottomDockWidgetArea, self.dock_test)
 
-        self.menubar.addAction(self.menuArchivo.menuAction())
-        self.menuArchivo.addAction(self.actionP_rametros_Avanzados)
-        self.menuArchivo.addAction(self.actionCambiar_Caso)
-        self.menuArchivo.addSeparator()
-        self.menuArchivo.addAction(self.actionSalir)
-
         self.retranslateUi(MainWindow)
 
         self.tabWidget.setCurrentIndex(0)
@@ -248,13 +196,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.actionSalir.setText(QCoreApplication.translate("MainWindow", u"Salir", None))
-        self.actionP_rametros_Avanzados.setText(QCoreApplication.translate("MainWindow", u"Par\u00e1metros Avanzados", None))
-        self.actionCambiar_Caso.setText(QCoreApplication.translate("MainWindow", u"Cambiar Caso", None))
         self.lbl_info.setText("")
-        self.lbl_time.setText("")
-        self.btn_skip_time_dev.setText(QCoreApplication.translate("MainWindow", u"\u23ed Saltar Tiempo (DEV)", None))
-        self.btn_next_case.setText(QCoreApplication.translate("MainWindow", u"Caso siguiente", None))
         self.btn_scale_plus.setText(QCoreApplication.translate("MainWindow", u"+", None))
         self.lbl_scale.setText(QCoreApplication.translate("MainWindow", u"8\u00b5V", None))
         self.btn_scale_minus.setText(QCoreApplication.translate("MainWindow", u"-", None))
@@ -271,15 +213,10 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.abr), QCoreApplication.translate("MainWindow", u"Gr\u00e1ficos", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.lat), QCoreApplication.translate("MainWindow", u"Latencia/Intensidad", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.conc), QCoreApplication.translate("MainWindow", u"Conclusiones", None))
-        self.menuArchivo.setTitle(QCoreApplication.translate("MainWindow", u"Archivo", None))
 #if QT_CONFIG(statustip)
         self.dock_parameter.setStatusTip(QCoreApplication.translate("MainWindow", u"Par\u00e1metros", None))
 #endif // QT_CONFIG(statustip)
         self.dock_parameter.setWindowTitle(QCoreApplication.translate("MainWindow", u"Par\u00e1metros", None))
-#if QT_CONFIG(statustip)
-        self.dock_values.setStatusTip(QCoreApplication.translate("MainWindow", u"Valores de las curvas", None))
-#endif // QT_CONFIG(statustip)
-        self.dock_values.setWindowTitle(QCoreApplication.translate("MainWindow", u"Valores", None))
 #if QT_CONFIG(statustip)
         self.dock_test.setStatusTip(QCoreApplication.translate("MainWindow", u"Prueba Actual", None))
 #endif // QT_CONFIG(statustip)
