@@ -8,12 +8,14 @@
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
 
-from PySide6.QtWidgets import QWidget
-from PySide6.QtWidgets import QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit
-from PySide6.QtCore import QTimer, QUrl
-from PySide6.QtGui import QTextDocument
+import re
+
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+                               QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtCore import QEvent, Qt, QTimer
+from agenda.vista import BotonAccion
 from core.helpers import chat_con_paciente, foto_paciente, sala_del_caso
-from core import hilos
+from core import hilos, iconos, tema
 from core.avatar import avatar_iniciales, avatar_circular_desde_bytes, color_por_nombre
 
 
@@ -21,6 +23,134 @@ from core.avatar import avatar_iniciales, avatar_circular_desde_bytes, color_por
 # cierres del 2026-10-09 en core/hilos.py). chat_con_paciente lanza
 # RuntimeError o requests.RequestException si no hubo respuesta; la sala y
 # las fotos devuelven vacío/None sin conexión (no es una falla).
+
+
+QSS_CHAT = f"""
+QWidget#listaChat {{ background: {tema.FONDO}; }}
+QFrame#burbujaPropia {{
+    background: {tema.ACENTO_SUAVE}; border: 1px solid #E3CFDD; border-radius: 12px;
+}}
+QFrame#burbujaOtro {{
+    background: {tema.TARJETA}; border: 1px solid {tema.BORDE}; border-radius: 12px;
+}}
+QFrame#burbujaPropia QLabel, QFrame#burbujaOtro QLabel {{ background: transparent; border: none; }}
+QLabel#vacioChat {{
+    color: {tema.TEXTO_SUAVE}; font-size: 9pt; background: {tema.TARJETA};
+    border: 1px dashed {tema.BORDE_FUERTE}; border-radius: 12px; padding: 18px;
+}}
+QLineEdit#entradaChat {{
+    background: {tema.TARJETA}; border: 1px solid {tema.BORDE_FUERTE}; border-radius: 19px;
+    padding: 8px 14px; font-size: 10pt;
+}}
+QLineEdit#entradaChat:focus {{ border-color: {tema.ACENTO}; }}
+QLineEdit#entradaChat:disabled {{ background: {tema.TARJETA_ALT}; color: {tema.TEXTO_TENUE}; }}
+QPushButton#btnEnviar {{
+    background: {tema.ACENTO}; border: none; border-radius: 19px; padding: 0;
+}}
+QPushButton#btnEnviar:hover {{ background: {tema.ACENTO_CLARO}; }}
+QPushButton#btnEnviar:disabled {{ background: {tema.BORDE_FUERTE}; }}
+QLabel#estadoChat {{ color: {tema.TEXTO_SUAVE}; font-size: 8.5pt; }}
+"""
+
+# Las burbujas ocupan como mucho esta fracción del ancho visible.
+FRACCION_BURBUJA = 0.72
+
+
+class _ListaMensajes(QScrollArea):
+    """Lista de burbujas con scroll. Ninguna fila ocupa más de
+    FRACCION_BURBUJA del ancho, así que el texto se parte solo cuando la
+    ventana es angosta en vez de salirse o quedar apretado."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWidgetResizable(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.contenido = QWidget()
+        self.contenido.setObjectName("listaChat")
+        self.fila = QVBoxLayout(self.contenido)
+        self.fila.setContentsMargins(12, 12, 12, 12)
+        self.fila.setSpacing(10)
+        self.fila.addStretch(1)
+        self.setWidget(self.contenido)
+        self._burbujas = []
+        # Cada vez que crece el contenido, se baja al último mensaje.
+        self._pegado = True
+        self.verticalScrollBar().rangeChanged.connect(self._al_cambiar_rango)
+
+    def ancho_maximo(self):
+        return max(160, int(self.viewport().width() * FRACCION_BURBUJA))
+
+    def agregar(self, fila, burbuja=None):
+        self.fila.insertWidget(self.fila.count() - 1, fila)
+        if burbuja is not None:
+            _ajustar(burbuja, self.ancho_maximo())
+            self._burbujas.append(burbuja)
+        self._pegado = True
+
+    def vaciar(self):
+        self._burbujas = []
+        # El aviso de "conversación vacía" se queda: solo se esconde y se muestra.
+        for i in reversed(range(self.fila.count())):
+            w = self.fila.itemAt(i).widget()
+            if w is not None and w.objectName() != "vacioChat":
+                self.fila.takeAt(i)
+                w.deleteLater()
+
+    def _al_cambiar_rango(self, _minimo, maximo):
+        if self._pegado:
+            self.verticalScrollBar().setValue(maximo)
+
+    def wheelEvent(self, event):
+        # Si el alumno sube a leer, no se le baja de vuelta con cada mensaje.
+        super().wheelEvent(event)
+        barra = self.verticalScrollBar()
+        self._pegado = barra.value() >= barra.maximum() - 4
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        ancho = self.ancho_maximo()
+        for burbuja in self._burbujas:
+            _ajustar(burbuja, ancho)
+
+
+def _ajustar(burbuja, ancho_disponible):
+    """Ancho de la burbuja y alto exacto de su texto a ese ancho. Sin fijar el
+    alto, un QLabel con saltos de línea automáticos le pide al scroll el alto
+    de su peor caso (angosto) y quedaba un hueco bajo el último mensaje."""
+    ancho = min(burbuja.ancho_natural, ancho_disponible)
+    burbuja.setFixedWidth(ancho)
+    burbuja.cuerpo.setFixedHeight(burbuja.cuerpo.heightForWidth(ancho - 12 - 12 - 2))
+
+
+def _burbuja(texto, propia, etiqueta=None, color=None):
+    """Una burbuja redondeada: texto plano (lo que dice el modelo no se
+    interpreta como HTML), seleccionable, con el nombre arriba si habla otro."""
+    marco = QFrame()
+    marco.setObjectName("burbujaPropia" if propia else "burbujaOtro")
+    col = QVBoxLayout(marco)
+    col.setContentsMargins(12, 8, 12, 9)
+    col.setSpacing(2)
+    if etiqueta:
+        nombre = QLabel(etiqueta)
+        nombre.setStyleSheet(f"color: {color}; font-size: 8pt; font-weight: 700;")
+        col.addWidget(nombre)
+    # Una palabra sin espacios (un enlace, "jajajaja...") no se parte sola y
+    # se salía de la burbuja: se le dan puntos de corte invisibles.
+    cuerpo = QLabel(re.sub(r"(\S{24})", "\\1\u200b", texto))
+    cuerpo.setTextFormat(Qt.TextFormat.PlainText)
+    cuerpo.setWordWrap(True)
+    cuerpo.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+    cuerpo.setStyleSheet(f"color: {tema.TEXTO}; font-size: 10pt;")
+    col.addWidget(cuerpo)
+    marco.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+    # Ancho que ocuparía el texto sin partirlo: un QLabel con saltos de línea
+    # automáticos pide poco ancho y la burbuja salía angosta y alta.
+    metricas = cuerpo.fontMetrics()
+    lineas = (texto.splitlines() or [""]) + ([etiqueta] if etiqueta else [])
+    marco.cuerpo = cuerpo
+    marco.ancho_natural = max(metricas.horizontalAdvance(linea) for linea in lineas) + 12 + 12 + 6
+    return marco
 
 
 class ChatPacienteWidget(QWidget):
@@ -42,7 +172,6 @@ class ChatPacienteWidget(QWidget):
 
     REINTENTOS_AUTOMATICOS = 1  # 1 reintento silencioso antes de pedirle al alumno que reintente a mano
     AVATAR_SIZE = 32
-    _AVATAR_USER_URL = "avatar:user"
     _PACIENTE_ID = "__paciente__"  # id de respaldo mientras no se sabe quién es quién en la sala
 
     def __init__(self, usuario_nombre=None, parent=None):
@@ -63,51 +192,83 @@ class ChatPacienteWidget(QWidget):
         # el nombre de cada burbuja, y el encabezado. Quién contesta cada
         # pregunta lo decide el modelo, no el cliente.
         self._sala = []
-        self._avatares = set()  # personas que ya tienen imagen cargada en el documento
+        self._avatares = set()  # personas que ya tienen su cara lista
         self._fotos = {}  # clave de foto -> pixmap ya traído (el paciente aparece como __paciente__ y como p1)
+        self._caras = {}  # persona_id -> pixmap que se muestra hoy
+        self._etiquetas_cara = {}  # persona_id -> los QLabel que la muestran (burbujas y encabezado)
 
+        tema.aplicar_estilo(self, QSS_CHAT)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
 
+        # Encabezado: la cara del paciente, con quién se habla y por qué consulta.
+        cabecera = QFrame(self)
+        cabecera.setProperty("card", "true")
+        fila_cab = QHBoxLayout(cabecera)
+        fila_cab.setContentsMargins(14, 10, 14, 10)
+        fila_cab.setSpacing(12)
+        self.cara_encabezado = QLabel()
+        self.cara_encabezado.setFixedSize(40, 40)
+        textos = QVBoxLayout()
+        textos.setSpacing(0)
         self.lbl_paciente = QLabel(self)
-        self.lbl_paciente.setStyleSheet("font-weight: bold;")
+        self.lbl_paciente.setProperty("role", "titulo")
         self.lbl_paciente.setWordWrap(True)
-        layout.addWidget(self.lbl_paciente)
+        self.lbl_motivo = QLabel(self)
+        self.lbl_motivo.setProperty("role", "campo")
+        self.lbl_motivo.setWordWrap(True)
+        textos.addWidget(self.lbl_paciente)
+        textos.addWidget(self.lbl_motivo)
+        fila_cab.addWidget(self.cara_encabezado)
+        fila_cab.addLayout(textos, 1)
+        layout.addWidget(cabecera)
 
-        self.transcript = QTextEdit(self)
-        self.transcript.setReadOnly(True)
-        self.transcript.setStyleSheet("background-color: #e9e2d6;")  # fondo tipo wsp, para que las burbujas blancas resalten
-        layout.addWidget(self.transcript)
+        self.lista = _ListaMensajes(self)
+        layout.addWidget(self.lista, 1)
+        self.vacio = QLabel(
+            "Aquí aparecerá la conversación.\nEscribe tu primera pregunta; si hay acompañantes, "
+            "di a quién te diriges («señora, ¿desde cuándo lo nota?»).", self)
+        self.vacio.setObjectName("vacioChat")
+        self.vacio.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.vacio.setWordWrap(True)
+        self.vacio.setMinimumHeight(96)
+        self.vacio.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.lista.fila.insertWidget(0, self.vacio)
 
-        self._registrar_avatar_usuario()
-
+        fila_estado = QHBoxLayout()
+        fila_estado.setSpacing(6)
+        self.icono_estado = QLabel()
+        self.icono_estado.setPixmap(iconos.pixmap("reloj", tema.TEXTO_SUAVE, 16))
         self.lbl_estado = QLabel(self)
-        self.lbl_estado.setStyleSheet("color: #888;")
-        self.lbl_estado.hide()
-        layout.addWidget(self.lbl_estado)
+        self.lbl_estado.setObjectName("estadoChat")
+        self.btn_reintentar = BotonAccion("Reintentar", "practica", parent=self)
+        self.btn_reintentar.clicked.connect(self._reintentar_manual)
+        fila_estado.addWidget(self.icono_estado)
+        fila_estado.addWidget(self.lbl_estado, 1)
+        fila_estado.addWidget(self.btn_reintentar)
+        self._fila_estado = (self.icono_estado, self.lbl_estado)
+        for w in (*self._fila_estado, self.btn_reintentar):
+            w.hide()
+        layout.addLayout(fila_estado)
 
         fila_input = QHBoxLayout()
+        fila_input.setSpacing(8)
         self.input = QLineEdit(self)
+        self.input.setObjectName("entradaChat")
         self.input.setPlaceholderText("Escribe tu pregunta al paciente...")
         self.input.returnPressed.connect(self._enviar)
-        fila_input.addWidget(self.input)
+        fila_input.addWidget(self.input, 1)
 
-        self.btn_enviar = QPushButton("➤", self)
-        self.btn_enviar.setToolTip("Enviar")
-        self.btn_enviar.setFixedSize(36, 36)
-        self.btn_enviar.setStyleSheet(
-            "QPushButton { background-color: #25d366; color: white; border: none; "
-            "border-radius: 18px; font-size: 14pt; padding-bottom: 2px; }"
-            "QPushButton:hover { background-color: #20bd5a; }"
-            "QPushButton:disabled { background-color: #a8dfb8; }"
-        )
+        self.btn_enviar = QPushButton(self)
+        self.btn_enviar.setObjectName("btnEnviar")
+        self.btn_enviar.setToolTip("Enviar (Enter)")
+        self.btn_enviar.setFixedSize(38, 38)
+        self.btn_enviar.setIcon(iconos.icono("enviar", "#FFFFFF", 20))
+        self.btn_enviar.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_enviar.clicked.connect(self._enviar)
         fila_input.addWidget(self.btn_enviar)
-
-        self.btn_reintentar = QPushButton("Reintentar", self)
-        self.btn_reintentar.clicked.connect(self._reintentar_manual)
-        self.btn_reintentar.hide()
-        fila_input.addWidget(self.btn_reintentar)
-
         layout.addLayout(fila_input)
 
         self._actualizar_encabezado()
@@ -127,15 +288,18 @@ class ChatPacienteWidget(QWidget):
         self._mensaje_pendiente = None
         self._intentos = 0
         self._sala = []
-        self._avatares = set()  # transcript.clear() más abajo borra también los avatares
+        self._avatares = set()
         self._fotos = {}
-        self.transcript.clear()  # ¡también borra los recursos (avatares) del documento, no solo el texto!
+        self._caras = {}
+        self._etiquetas_cara = {}
+        self.lista.vaciar()
+        self.vacio.show()
         self._ocultar_estado()
         self._actualizar_encabezado()
-        self._registrar_avatar_usuario()
         # Respaldo mientras no llega la sala: el paciente con sus iniciales,
         # que es exactamente el chat 1 a 1 de antes.
         self._asegurar_avatar(self._PACIENTE_ID, self._nombre)
+        self._poner_cara(self.cara_encabezado, self._PACIENTE_ID, 40)
         self._pedir_sala()
         self.input.setFocus()
 
@@ -154,6 +318,8 @@ class ChatPacienteWidget(QWidget):
         self._aplicar_sala(sala)
         for persona in self._sala:
             self._asegurar_avatar(persona["id"], persona["etiqueta"])
+            if persona.get("es_paciente"):
+                self._poner_cara(self.cara_encabezado, persona["id"], 40)
 
     def _aplicar_sala(self, sala):
         """Guarda quiénes están en la consulta, para poder ponerle cara y
@@ -173,14 +339,31 @@ class ChatPacienteWidget(QWidget):
     # Avatares
     # -----------------------------------------------------------------
 
-    def _avatar_url(self, persona_id):
-        return f"avatar:{persona_id}"
+    _CARA_USUARIO = "__usuario__"
 
-    def _registrar_avatar_usuario(self):
-        self.transcript.document().addResource(
-            QTextDocument.ImageResource, QUrl(self._AVATAR_USER_URL),
-            avatar_iniciales(self._usuario_nombre, self.AVATAR_SIZE).toImage(),
-        )
+    def _poner_cara(self, etiqueta_qlabel, persona_id, lado):
+        """Muestra la cara de `persona_id` en un QLabel y lo anota para
+        cambiarla si después llega la foto real."""
+        pixmap = self._caras.get(persona_id)
+        if pixmap is not None:
+            etiqueta_qlabel.setPixmap(pixmap.scaled(
+                lado, lado, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        # El encabezado puede cambiar de persona (respaldo -> p1): se saca de
+        # las demás listas para que no lo pise una cara que ya no le toca.
+        for pid, lista in self._etiquetas_cara.items():
+            if pid != persona_id:
+                lista[:] = [(e, l) for e, l in lista if e is not etiqueta_qlabel]
+        lista = self._etiquetas_cara.setdefault(persona_id, [])
+        if not any(e is etiqueta_qlabel for e, _ in lista):
+            lista.append((etiqueta_qlabel, lado))
+
+    def _cara_nueva(self, persona_id):
+        """Un QLabel redondo con la cara de esa persona, para una burbuja."""
+        etiqueta = QLabel()
+        etiqueta.setFixedSize(self.AVATAR_SIZE, self.AVATAR_SIZE)
+        etiqueta.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self._poner_cara(etiqueta, persona_id, self.AVATAR_SIZE)
+        return etiqueta
 
     def _asegurar_avatar(self, persona_id, etiqueta):
         """Deja lista la cara de esa persona: primero el círculo con sus
@@ -204,13 +387,11 @@ class ChatPacienteWidget(QWidget):
         self._pedir_avatar(persona_id)
 
     def _set_avatar(self, persona_id, pixmap):
-        self.transcript.document().addResource(
-            QTextDocument.ImageResource, QUrl(self._avatar_url(persona_id)), pixmap.toImage()
-        )
-        # Reemplazar el recurso no repinta solo: si la foto llegó después de
-        # la burbuja, sin esto la cara se sigue viendo con iniciales hasta
-        # que el alumno scrollea.
-        self.transcript.viewport().update()
+        self._caras[persona_id] = pixmap
+        # Si la foto llegó después de la burbuja, se cambia la cara ya mostrada.
+        for etiqueta, lado in self._etiquetas_cara.get(persona_id, []):
+            etiqueta.setPixmap(pixmap.scaled(
+                lado, lado, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def _foto_key(self, persona_id):
         """Con qué clave pedirle al backend la foto de esa persona.
@@ -247,25 +428,38 @@ class ChatPacienteWidget(QWidget):
     # -----------------------------------------------------------------
 
     def _actualizar_encabezado(self):
+        motivo = self._procedimiento or "sin motivo registrado"
         if len(self._sala) > 1:
             quienes = ", ".join(p["etiqueta"] for p in self._sala)
-            texto = f"Atendiendo a {quienes} ({self._procedimiento or 'sin motivo registrado'})"
+            self.lbl_paciente.setText(f"Atendiendo a {quienes}")
         else:
-            texto = f"Conversando con {self._nombre} ({self._procedimiento or 'sin motivo registrado'})"
-        self.lbl_paciente.setText(texto)
+            self.lbl_paciente.setText(f"Conversando con {self._nombre}")
+        self.lbl_motivo.setText(f"Motivo: {motivo}")
+
+    def _agregar_fila(self, burbuja, propia, persona_id):
+        """Pone una burbuja con su cara en la lista: las propias a la derecha
+        y las de los demás a la izquierda."""
+        self.vacio.hide()
+        self.lista.fila.invalidate()
+        fila = QWidget()
+        h = QHBoxLayout(fila)
+        h.setContentsMargins(0, 0, 0, 0)
+        h.setSpacing(8)
+        cara = self._cara_nueva(persona_id)
+        if propia:
+            h.addStretch(1)
+            h.addWidget(burbuja, 0, Qt.AlignmentFlag.AlignTop)
+            h.addWidget(cara, 0, Qt.AlignmentFlag.AlignTop)
+        else:
+            h.addWidget(cara, 0, Qt.AlignmentFlag.AlignTop)
+            h.addWidget(burbuja, 0, Qt.AlignmentFlag.AlignTop)
+            h.addStretch(1)
+        self.lista.agregar(fila, burbuja)
 
     def _burbuja_usuario(self, texto):
-        texto_html = texto.replace("\n", "<br>")
-        size = self.AVATAR_SIZE
-        self.transcript.append(
-            f'<table align="right" cellspacing="0" cellpadding="0" style="margin:3px 0;"><tr>'
-            f'<td valign="top" style="background-color:#dcf8c6; border:1px solid #cdeeb5; '
-            f'border-radius:9px; padding:6px 10px; max-width:340px;">{texto_html}</td>'
-            f'<td valign="top" style="padding-left:6px;">'
-            f'<img src="{self._AVATAR_USER_URL}" width="{size}" height="{size}"></td>'
-            f'</tr></table>'
-        )
-        self._al_final()
+        if self._CARA_USUARIO not in self._caras:
+            self._caras[self._CARA_USUARIO] = avatar_iniciales(self._usuario_nombre, self.AVATAR_SIZE)
+        self._agregar_fila(_burbuja(texto, True), True, self._CARA_USUARIO)
 
     def _burbuja_persona(self, persona_id, etiqueta, texto):
         """Burbuja de quien habla, estilo WhatsApp de grupo: cara a la
@@ -273,32 +467,17 @@ class ChatPacienteWidget(QWidget):
         sala el color es lo que deja seguir quién dijo qué sin leer cada
         etiqueta."""
         self._asegurar_avatar(persona_id, etiqueta)
-        texto_html = texto.replace("\n", "<br>")
-        size = self.AVATAR_SIZE
         color = color_por_nombre(etiqueta).darker(140).name()
-        self.transcript.append(
-            f'<table align="left" cellspacing="0" cellpadding="0" style="margin:3px 0;"><tr>'
-            f'<td valign="top" style="padding-right:6px;">'
-            f'<img src="{self._avatar_url(persona_id)}" width="{size}" height="{size}"></td>'
-            f'<td valign="top" style="background-color:#ffffff; border:1px solid #e2e2e2; '
-            f'border-radius:9px; padding:6px 10px; max-width:340px;">'
-            f'<span style="color:{color}; font-size:8pt; font-weight:bold;">{etiqueta}</span><br>'
-            f'{texto_html}</td>'
-            f'</tr></table>'
-        )
-        self._al_final()
-
-    def _al_final(self):
-        barra = self.transcript.verticalScrollBar()
-        barra.setValue(barra.maximum())
+        self._agregar_fila(_burbuja(texto, False, etiqueta, color), False, persona_id)
 
     def _mostrar_estado(self, texto):
         self.lbl_estado.setText(texto)
-        self.lbl_estado.show()
+        for w in self._fila_estado:
+            w.show()
 
     def _ocultar_estado(self):
-        self.lbl_estado.hide()
-        self.btn_reintentar.hide()
+        for w in (*self._fila_estado, self.btn_reintentar):
+            w.hide()
 
     # -----------------------------------------------------------------
     # Turnos
