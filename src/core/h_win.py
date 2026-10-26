@@ -1,7 +1,7 @@
 from core.base import context
-from core import tiempos
+from core import tema, tiempos
 from PySide6.QtCore import Qt, QEvent, QTimer, Signal
-from PySide6.QtGui import QPainter, QPixmap
+from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import QMdiArea, QWidget
 from core.UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
 
@@ -94,6 +94,7 @@ class MdiArea(QMdiArea):
     def __init__(self):
         super().__init__()
         self.setDocumentMode(True)
+        self.setBackground(QColor(tema.FONDO))
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         # Al clickear un modulo full Qt lo trae al frente y taparia a los
@@ -127,6 +128,8 @@ class MdiArea(QMdiArea):
         result = super().viewportEvent(event)
         if event.type() == QEvent.Type.Paint:
             painter = QPainter(self.viewport())
+            # Marca de agua: sobre el lienzo claro, el logo pleno pesa demasiado.
+            painter.setOpacity(0.18)
             width = self.viewport().width()
             height = self.viewport().height()
             img = QPixmap(context.get_resource("img/LogoBN.png"))

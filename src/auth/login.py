@@ -40,6 +40,8 @@ class MainLogin(QWidget):
     def __init__(self) -> None:
         QWidget.__init__(self)
         self.setObjectName("Login")
+        # QWidget plano no pinta el fondo del QSS (dark.qss: QWidget#Login).
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setMinimumSize(400, 90)
         self.login_func = LoginConnect()
 
@@ -83,7 +85,7 @@ class MainLogin(QWidget):
         col.addLayout(fila)
 
         ayuda = QLabel("Lo muestra la actividad LabSim de tu curso.")
-        ayuda.setStyleSheet("color: #666;")
+        ayuda.setObjectName("login_ayuda")
         col.addWidget(ayuda)
         col.addWidget(self._link("Ingresar con usuario y contraseña", self.PAGINA_USUARIO))
         return pagina
@@ -120,7 +122,8 @@ class MainLogin(QWidget):
         return pagina
 
     def _link(self, texto, pagina):
-        link = QLabel(f'<a href="#">{texto}</a>')
+        # El azul de enlace del sistema no es de la paleta: el acento de LabSim.
+        link = QLabel(f'<a href="#" style="color:#5D1049;">{texto}</a>')
         link.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
         link.linkActivated.connect(lambda _href: self.mostrar_pagina(pagina))
         return link

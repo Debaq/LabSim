@@ -10,34 +10,31 @@ QWidget#barra{
 }
 
 QWidget#barra QPushButton#btn_login{
-  font: 7pt "Noto Sans";
-  height: 18px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 2px;
-  padding-right: 2px;
-  border-radius: 3px; 
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(255, 255, 255);
-  color: rgb(255, 255, 255);
+  font: 600 7.5pt "Noto Sans";
+  padding: 2px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 140);
+  color: #fff;
+  background: rgba(255, 255, 255, 25);
 }
 
-
 QWidget#barra QPushButton#btn_login:hover{
-  font: 7pt "Noto Sans";
-  height: 18px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 2px;
-  padding-right: 2px;
-  border-radius: 3px; 
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(255, 255, 255);
-  color: rgb(255, 255, 255);
-  background-color: #a32529;
+  border-color: #fff;
+  background: rgba(255, 255, 255, 60);
+}
 
+QWidget#barra QPushButton#btn_min, QWidget#barra QPushButton#btn_max, QWidget#barra QPushButton#btn_salir{
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+}
+
+QWidget#barra QPushButton#btn_min:hover, QWidget#barra QPushButton#btn_max:hover{
+  background: rgba(255, 255, 255, 40);
+}
+
+QWidget#barra QPushButton#btn_salir:hover{
+  background: #a32529;
 }
 
 QWidget#barra QLabel{
@@ -65,29 +62,118 @@ QGroupBox#frame_Box_1 QPushButton{
 }
 
 QFrame#frame_sec QPushButton{
-  height: 20px;
-  padding-top: 1px;
-  padding-bottom: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  border-radius: 3px; 
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(255, 255, 255);
-  color: rgb(255, 255, 255);
-  border-bottom-style: none;
+  min-height: 26px;
+  padding: 0 16px;
+  margin-top: 4px;
+  border: none;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, 190);
+  font: 600 9pt "Noto Sans";
 }
-
 
 QFrame#frame_sec QPushButton:hover {
-  
-  background-color: #821057;
-  font: Bold 9pt "Noto Sans";
-
+  background: rgba(255, 255, 255, 30);
+  color: #fff;
 }
 
+/* La pestaña activa se funde con la barra de abajo. */
 QFrame#frame_sec QPushButton:checked {
-  
-  background-color: #821057;
+  background: #FFFFFF;
+  color: #5D1049;
+}
 
+/* ---- Barra de módulos y acciones ------------------------------------
+   Misma paleta que core/tema.py (ver docs/roadmap_estilo.md). Va por
+   objectName para no filtrarse a los módulos, que traen su propio estilo. */
+QFrame#tool{
+  background: #FFFFFF;
+  border-bottom: 1px solid #DCE3EB;
+}
+
+QFrame#tool QPushButton{
+  background: #FFFFFF;
+  border: 1px solid #C3CDD9;
+  border-radius: 7px;
+  padding: 2px 12px;
+  min-height: 20px;
+  color: #1F2933;
+  font: 8pt "Noto Sans";
+}
+
+QFrame#tool QPushButton:hover{
+  border-color: #5D1049;
+  color: #5D1049;
+}
+
+QFrame#tool QPushButton:checked{
+  background: #F3E9F0;
+  border-color: #5D1049;
+  color: #5D1049;
+  font-weight: 600;
+}
+
+QFrame#tool QPushButton:disabled{
+  background: #F6F8FB;
+  border-color: #DCE3EB;
+  color: #8A96A3;
+}
+
+QFrame#tool QLabel{
+  color: #5D1049;
+}
+
+/* ---- Ingreso ---------------------------------------------------------- */
+QWidget#Login{
+  background: #FFFFFF;
+  color: #1F2933;
+}
+
+QWidget#Login QLabel{
+  color: #5B6672;
+  font-size: 8.5pt;
+}
+
+QWidget#Login QLabel#login_ayuda{
+  color: #8A96A3;
+  font-size: 8pt;
+}
+
+QWidget#Login QLineEdit{
+  background: #F6F8FB;
+  border: 1px solid #C3CDD9;
+  border-radius: 7px;
+  padding: 3px 8px;
+  selection-background-color: #5D1049;
+  selection-color: #fff;
+}
+
+QWidget#Login QLineEdit:focus{
+  background: #FFFFFF;
+  border: 1px solid #5D1049;
+}
+
+QWidget#Login QLineEdit:disabled{
+  color: #8A96A3;
+}
+
+QWidget#Login QPushButton#btn_login{
+  background: #5D1049;
+  border: 1px solid #5D1049;
+  border-radius: 7px;
+  padding: 4px 16px;
+  color: #fff;
+  font-weight: 600;
+}
+
+QWidget#Login QPushButton#btn_login:hover{
+  background: #7C1C63;
+  border-color: #7C1C63;
+}
+
+QWidget#Login QPushButton#btn_login:disabled{
+  background: #DCE3EB;
+  border-color: #DCE3EB;
+  color: #8A96A3;
 }

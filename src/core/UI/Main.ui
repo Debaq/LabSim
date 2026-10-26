@@ -49,7 +49,7 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>30</height>
+          <height>34</height>
          </size>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">

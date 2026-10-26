@@ -49,6 +49,15 @@ Actualizado 2026-10-26 (tarde).
   con Δ latencia/amplitud respecto de A. Las banderas A/A' se mantienen: son parte de lo
   que se enseña.
 
+### Login y barra principal
+- [x] Barra superior (34 px): pestañas de sección que se funden con la barra de abajo,
+  botón Ingresar/Cerrar Sesión en píldora, botones de ventana sin caja.
+- [x] Barra de módulos y acciones: fondo blanco con borde, botones con la paleta
+  (activo = acento suave). Reglas por objectName en `dark.qss` para no filtrarse a los módulos.
+- [x] Lienzo del MDI con `tema.FONDO`; logo de marca de agua al 18 %.
+- [x] Login: campos y botón con la paleta, enlaces en el acento (tamaño intacto: lo fija el
+  servidor, 410x140).
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -63,7 +72,7 @@ Actualizado 2026-10-26 (tarde).
 - [ ] AABR, EOAS (OAE), Audiómetro, Acumetría, Otoscopia, Z, Lista de palabras.
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
-- [ ] Login y barra principal de la app (el `.qss` global es viejo).
+- [ ] Probar la barra nueva en la app real (solo se vio en un render offscreen con botones de prueba).
 - [ ] Agenda y fichas (Ficha clínica, Evolución, Chat).
 
 ### Transversal
