@@ -101,8 +101,21 @@ def test_un_cuelgue_que_no_termina_deja_las_pilas_de_todos_los_hilos():
     assert "tiempos" in ev[0]["pilas"] and ev[0]["candado_tomado"] is False
 
 
+def test_faulthandler_vuelca_sin_pedir_el_gil():
+    """Si el hilo de la ventana se traba del todo, el vigía de Python no
+    puede ni correr: el volcado lo hace faulthandler desde C."""
+    tiempos.CUELGUE_C_S = 0.4
+    _esperar_bucle(700)          # el latido arma el volcado
+    QTimer.singleShot(0, lambda: time.sleep(1.3))
+    _esperar_bucle(1600)
+    with open(tiempos._archivo_cuelgue.name, encoding="utf-8") as f:
+        texto = f.read()
+    assert "most recent call first" in texto and "test_tiempos.py" in texto, texto[:300]
+
+
 if __name__ == "__main__":
     test_ruta_sin_consulta_ni_ids()
     test_bloqueo_con_pila_y_http_en_ui()
     test_un_cuelgue_que_no_termina_deja_las_pilas_de_todos_los_hilos()
+    test_faulthandler_vuelca_sin_pedir_el_gil()
     print("ok")

@@ -20,6 +20,7 @@ Nada de lo que se escribe lleva datos del alumno ni del paciente: las rutas
 de red van sin consulta y con los números reemplazados por :n.
 """
 import atexit
+import faulthandler
 import functools
 import json
 import os
@@ -27,6 +28,7 @@ import platform
 import re
 import socket
 import sys
+import tempfile
 import threading
 import time
 from collections import Counter
@@ -40,6 +42,7 @@ UMBRAL_BLOQUEO_MS = 120   # más que esto sin latir = bloqueo
 SUSPENSION_MS = 30_000    # más que esto es el equipo dormido, no la app
 COLGADO_MS = 1500         # la ventana sigue sin latir: se vuelcan las pilas YA
 COLGADO_CADA_S = 3        # y de nuevo cada tanto mientras siga así
+CUELGUE_C_S = 5           # sin latir tanto: volcado de faulthandler, sin GIL
 UMBRAL_LENTO_MS = 150     # una operación medida más lenta que esto se escribe suelta
 RESUMEN_CADA_S = 60
 VACIAR_CADA_S = 2
@@ -60,6 +63,8 @@ _pilas = Counter()
 _marca = None             # (t_ms, texto) de la última acción marcada
 _hilo_ui = None
 _ultimo_latido = None
+_archivo_cuelgue = None   # texto: lo escribe faulthandler, sin necesitar el GIL
+_rearmado = 0.0
 _ultimo_cpu = (time.perf_counter(), time.process_time())
 _pg_parchado = False
 
@@ -92,7 +97,7 @@ def instalar(t0_wall=None):
 def iniciar_ui():
     """Empieza a medir el hilo de la ventana. Llamar desde ese hilo, con la
     QApplication ya creada."""
-    global _hilo_ui, _ultimo_latido
+    global _hilo_ui, _ultimo_latido, _archivo_cuelgue
     if not _activo or _hilo_ui is not None:
         return
     from PySide6.QtCore import QTimer, Qt, qVersion
@@ -104,6 +109,10 @@ def iniciar_ui():
         return
     _hilo_ui = threading.get_ident()
     _ultimo_latido = time.perf_counter()
+    try:
+        _archivo_cuelgue = open(str(_archivo.name).replace(".jsonl", ".cuelgue.txt"), "a", encoding="utf-8")
+    except OSError:
+        _archivo_cuelgue = None
     timer = QTimer(app)
     timer.setTimerType(Qt.TimerType.PreciseTimer)
     timer.setInterval(LATIDO_MS)
@@ -204,8 +213,15 @@ def _ms():
 def _latir():
     """Corre en el hilo de la ventana cada LATIDO_MS. Si llega tarde, el
     bucle de eventos estuvo ocupado (o bloqueado) ese rato."""
-    global _ultimo_latido
+    global _ultimo_latido, _rearmado
     ahora = time.perf_counter()
+    if _archivo_cuelgue is not None and ahora - _rearmado > 0.5:
+        # Si la ventana deja de latir más de CUELGUE_C_S, faulthandler (un hilo
+        # de C, que no pide el GIL) vuelca las pilas aunque Python esté trabado
+        # por completo: el vigía de Python no puede si el hilo de la ventana
+        # tiene el GIL tomado dentro de una llamada nativa.
+        faulthandler.dump_traceback_later(CUELGUE_C_S, repeat=True, file=_archivo_cuelgue)
+        _rearmado = ahora
     retraso = (ahora - _ultimo_latido) * 1000 - LATIDO_MS
     _ultimo_latido = ahora
     if retraso < 0:
@@ -227,14 +243,46 @@ def _latir():
     evento("bloqueo", **datos)
 
 
-def _pila(frame, limite=14):
-    partes = []
-    while frame is not None and len(partes) < limite:
-        codigo = frame.f_code
-        archivo = codigo.co_filename.replace("\\", "/").split("/")
-        partes.append(f"{'/'.join(archivo[-2:])}:{frame.f_lineno} {codigo.co_name}")
-        frame = frame.f_back
-    return " < ".join(partes) if partes else "(dentro de Qt)"
+_volcado = None   # archivo temporal donde faulthandler vuelca las pilas para leerlas
+
+
+def _volcado_texto():
+    """Pilas de Python de TODOS los hilos, como texto de faulthandler.
+
+    Antes se sacaban con sys._current_frames(), que en Python 3.14 detiene el
+    mundo (espera a que todos los hilos suelten el GIL): con el hilo de la
+    ventana dentro de una llamada de Qt que no lo suelta, el vigía quedó
+    colgado ahí y la app entera con él (cuelgues del 2026-10-26 al iniciar
+    sesión). faulthandler.dump_traceback lee las pilas sin detener a nadie."""
+    global _volcado
+    if _volcado is None:
+        _volcado = tempfile.TemporaryFile(mode="w+", encoding="utf-8")
+    _volcado.seek(0)
+    _volcado.truncate()
+    faulthandler.dump_traceback(file=_volcado, all_threads=True)
+    _volcado.flush()
+    _volcado.seek(0)
+    return _volcado.read()
+
+
+_ENCABEZADO_HILO = re.compile(r"^(?:Current thread|Thread) 0x([0-9a-fA-F]+)(?: \[(.*?)\])?")
+_MARCO = re.compile(r'^\s+File "(.*)", line (\d+) in (.*)$')
+
+
+def _hilos_del_volcado(texto, limite=14):
+    """{ident: (nombre, pila)}; la pila va de lo más interno a lo más externo."""
+    salida, actual = {}, None
+    for linea in texto.splitlines():
+        m = _ENCABEZADO_HILO.match(linea)
+        if m:
+            actual = int(m.group(1), 16)
+            salida[actual] = [m.group(2) or "", []]
+            continue
+        m = _MARCO.match(linea)
+        if m and actual is not None and len(salida[actual][1]) < limite:
+            archivo = m.group(1).replace("\\", "/").split("/")
+            salida[actual][1].append(f"{'/'.join(archivo[-2:])}:{m.group(2)} {m.group(3)}")
+    return {k: (v[0], " < ".join(v[1]) or "(dentro de Qt)") for k, v in salida.items()}
 
 
 def _vigia():
@@ -247,8 +295,8 @@ def _vigia():
             if _ultimo_latido is not None:
                 atraso = (time.perf_counter() - _ultimo_latido) * 1000
                 if LATIDO_MS + UMBRAL_BLOQUEO_MS < atraso < SUSPENSION_MS:
-                    frame = sys._current_frames().get(_hilo_ui)
-                    clave = _pila(frame)
+                    ui = _hilos_del_volcado(_volcado_texto()).get(_hilo_ui)
+                    clave = ui[1] if ui else "(sin pila)"
                     with _lock:
                         _pilas[clave] += 1
             ahora = time.monotonic()
@@ -269,15 +317,14 @@ def _vigia():
 
 def _volcar_colgado():
     """La ventana lleva más de COLGADO_MS sin volver al bucle: un bloqueo
-    normal se escribe recién al terminar, y uno que no termina (cuelgue, o
-    un candado cruzado) no se escribiría nunca. Acá se vuelcan las pilas de
-    TODOS los hilos directo al archivo, sin pasar por el candado de este
-    módulo (que podría ser justo el que está tomado)."""
-    hilos = {t.ident: t.name for t in threading.enumerate()}
+    normal se escribe recién al terminar, y uno que no termina no se
+    escribiría nunca. Acá se vuelcan las pilas de TODOS los hilos directo al
+    archivo, sin pasar por el candado de este módulo (que podría ser justo el
+    que está tomado)."""
+    nombres = {t.ident: t.name for t in threading.enumerate()}
     pilas = {}
-    for ident, frame in sys._current_frames().items():
-        nombre = "ui" if ident == _hilo_ui else hilos.get(ident, str(ident))
-        pilas[nombre] = _pila(frame, 10)
+    for ident, (_, pila) in _hilos_del_volcado(_volcado_texto(), 10).items():
+        pilas["ui" if ident == _hilo_ui else nombres.get(ident, hex(ident))] = pila
     tomado = not _lock.acquire(timeout=0.2)
     if not tomado:
         _lock.release()
@@ -327,6 +374,7 @@ def _vaciar():
 def _cerrar():
     if not _activo:
         return
+    faulthandler.cancel_dump_traceback_later()
     evento("fin", segundos=round(_ms() / 1000, 1))
     _resumen()
     _vaciar()
