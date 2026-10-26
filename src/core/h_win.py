@@ -94,7 +94,7 @@ class MdiArea(QMdiArea):
     def __init__(self):
         super().__init__()
         self.setDocumentMode(True)
-        self.setBackground(QColor(tema.FONDO))
+        self.setBackground(QColor(tema.LIENZO_APP))
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         # Al clickear un modulo full Qt lo trae al frente y taparia a los

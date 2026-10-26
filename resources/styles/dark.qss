@@ -80,7 +80,7 @@ QFrame#frame_sec QPushButton:hover {
 
 /* La pestaña activa se funde con la barra de abajo. */
 QFrame#frame_sec QPushButton:checked {
-  background: #FFFFFF;
+  background: #CBD3DE;
   color: #5D1049;
 }
 
@@ -88,8 +88,8 @@ QFrame#frame_sec QPushButton:checked {
    Misma paleta que core/tema.py (ver docs/roadmap_estilo.md). Va por
    objectName para no filtrarse a los módulos, que traen su propio estilo. */
 QFrame#tool{
-  background: #FFFFFF;
-  border-bottom: 1px solid #DCE3EB;
+  background: #CBD3DE;
+  border-bottom: 1px solid #AEB9C8;
 }
 
 QFrame#tool QPushButton{
@@ -115,8 +115,8 @@ QFrame#tool QPushButton:checked{
 }
 
 QFrame#tool QPushButton:disabled{
-  background: #F6F8FB;
-  border-color: #DCE3EB;
+  background: #D9DFE7;
+  border-color: #D0D8E1;
   color: #8A96A3;
 }
 
@@ -126,7 +126,7 @@ QFrame#tool QLabel{
 
 /* ---- Ingreso ---------------------------------------------------------- */
 QWidget#Login{
-  background: #FFFFFF;
+  background: #CBD3DE;
   color: #1F2933;
 }
 
@@ -136,12 +136,12 @@ QWidget#Login QLabel{
 }
 
 QWidget#Login QLabel#login_ayuda{
-  color: #8A96A3;
+  color: #5B6672;
   font-size: 8pt;
 }
 
 QWidget#Login QLineEdit{
-  background: #F6F8FB;
+  background: #FFFFFF;
   border: 1px solid #C3CDD9;
   border-radius: 7px;
   padding: 3px 8px;

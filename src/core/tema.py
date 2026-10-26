@@ -13,6 +13,7 @@ por eso la paleta son colores sueltos y no una hoja de estilo y nada más.
 
 # --- Superficies -------------------------------------------------------
 FONDO = '#EDF1F5'          # lienzo del módulo
+LIENZO_APP = '#DDE3EB'     # fondo del MDI y barras de la app (más oscuro que FONDO)
 TARJETA = '#FFFFFF'        # panel/card
 TARJETA_ALT = '#F6F8FB'    # filas alternas, cabeceras de tabla
 BORDE = '#DCE3EB'
