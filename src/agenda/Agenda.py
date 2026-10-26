@@ -10,15 +10,17 @@
 
 import requests
 from PySide6.QtWidgets import QWidget
-from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
-                                QDateEdit, QPushButton, QMessageBox, QLineEdit,
-                                QVBoxLayout, QLabel, QTextEdit,
-                                QCheckBox)
-from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QTimer
+from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView, QAbstractScrollArea,
+                                QButtonGroup, QDateEdit, QFrame, QHBoxLayout, QHeaderView,
+                                QLabel, QLineEdit, QMessageBox, QPushButton,
+                                QStackedWidget, QTextEdit, QVBoxLayout, QCheckBox)
+from PySide6.QtCore import QDate, QSize, QTime, QDateTime, Qt, QTimer
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
+from agenda import vista
+from agenda.vista import BotonAccion, Contador, PanelDetalle
 from core import feriados as feriados_cl
-from core import hilos, respaldo_informes
+from core import hilos, iconos, respaldo_informes, tema
 from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline, debug_print,
                           es_docente, lista_practica, iniciar_practica,
                           marcar_entry_no_show,
@@ -26,6 +28,21 @@ from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline
                           CreatePatient)
 from core.ficha import parse_fecha_agenda, render_ficha_html
 from core.practica import abrir_ficha_estudio
+
+DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
+MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+         "septiembre", "octubre", "noviembre", "diciembre")
+
+# Columnas de la tabla. 0 es siempre el estado; en práctica libre las demás
+# cambian de nombre pero no de lugar.
+ENCABEZADOS_AGENDA = ["Estado", "Fecha", "Hora", "RUT", "Nombre", "Apellidos",
+                      "Nacimiento", "Procedimiento"]
+ENCABEZADOS_PRACTICA = ["Estado", "Último intento", "Intentos", "RUT", "Nombre", "Apellidos",
+                        "Nacimiento", "Procedimiento"]
+
+
+def _plural(n, uno, varios):
+    return f"{n} {uno if n == 1 else varios}"
 
 
 def _traer_agenda(con_practica):
@@ -48,13 +65,6 @@ def _traer_agenda(con_practica):
     return data, practica
 
 
-PENDIENTE_COLOR = QColor(255, 244, 200)
-ATENDIENDO_COLOR = QColor(200, 224, 247)
-ATENDIDO_COLOR = QColor(210, 235, 210)
-NO_SHOW_COLOR = QColor(235, 190, 190)
-# Caso sin ninguna cita en la agenda (AgendaEntry.sin_cita) -- distinto del
-# amarillo PENDIENTE, que es una cita creada pero todavía sin fecha/hora.
-SIN_CITA_COLOR = QColor(232, 224, 240)
 # Feriados legales en el calendario del filtro por fecha (ver core/feriados.py).
 FERIADO_COLOR = QColor(176, 0, 32)
 FERIADO_FONDO = QColor(255, 228, 228)
@@ -196,12 +206,7 @@ class Agenda(QWidget, Ui_Form):
         # en el admin corre en modo prueba (ver atender_paciente()).
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.led_buscar = QLineEdit(self)
-        self.led_buscar.setPlaceholderText("Buscar por RUT, nombre o apellido...")
-        self.led_buscar.textChanged.connect(self._on_filtro_changed)
-        self.horizontalLayout.insertWidget(0, self.led_buscar)
-
-        self._build_atender_control()
+        self._construir_vista()
 
         self.tableWidget.itemSelectionChanged.connect(self._on_selection_changed)
 
@@ -210,58 +215,200 @@ class Agenda(QWidget, Ui_Form):
 
         self.pushButton.setVisible(False)
 
-    def _build_atender_control(self):
+    def _construir_vista(self):
+        """Arma la pantalla: cabecera (título, vista, día, búsqueda), contadores
+        por estado, la tabla y, abajo, el panel del paciente elegido con sus
+        botones. Los textos de los botones los sigue cambiando la lógica de
+        selección (Atender, Retomar, Practicar, Cerrar/Evolucionar...)."""
+        tema.aplicar_estilo(self, vista.QSS_AGENDA)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+
+        tabla = self.tableWidget
+        tabla.insertColumn(0)
+        tabla.setHorizontalHeaderLabels(ENCABEZADOS_AGENDA)
+        tabla.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
+        tabla.setShowGrid(False)
+        tabla.setIconSize(QSize(18, 18))
+        tabla.setWordWrap(False)
+        tabla.verticalHeader().setDefaultSectionSize(38)
+        tabla.horizontalHeader().setHighlightSections(False)
+        tabla.horizontalHeader().setStretchLastSection(False)
+        ancho = QHeaderView.ResizeMode
+        for col, modo in enumerate((ancho.ResizeToContents, ancho.ResizeToContents,
+                                    ancho.ResizeToContents, ancho.ResizeToContents,
+                                    ancho.ResizeToContents, ancho.ResizeToContents,
+                                    ancho.ResizeToContents, ancho.Stretch)):
+            tabla.horizontalHeader().setSectionResizeMode(col, modo)
+
+        raiz = self.verticalLayout
+        raiz.removeItem(self.horizontalLayout)
+        raiz.removeWidget(tabla)
+        raiz.setContentsMargins(12, 12, 12, 12)
+        raiz.setSpacing(10)
+
+        # -- Cabecera ---------------------------------------------------
+        cabecera = QFrame(self)
+        cabecera.setObjectName("cabeceraAgenda")
+        col = QVBoxLayout(cabecera)
+        col.setContentsMargins(14, 10, 14, 10)
+        col.setSpacing(8)
+
+        fila_titulo = QHBoxLayout()
+        fila_titulo.setSpacing(10)
+        marca = QLabel()
+        marca.setPixmap(iconos.pixmap("calendario", tema.ACENTO, 30))
+        textos = QVBoxLayout()
+        textos.setSpacing(0)
+        self.lbl_titulo = QLabel("Agenda")
+        self.lbl_titulo.setObjectName("tituloAgenda")
+        self.lbl_subtitulo = QLabel("")
+        self.lbl_subtitulo.setObjectName("subtituloAgenda")
+        textos.addWidget(self.lbl_titulo)
+        textos.addWidget(self.lbl_subtitulo)
+        fila_titulo.addWidget(marca)
+        fila_titulo.addLayout(textos, 1)
+
+        self.btn_vista_agenda = QPushButton(" Mi agenda", self)
+        self.btn_vista_agenda.setIcon(iconos.icono("calendario", tema.ACENTO, 18))
+        self.btn_vista_agenda.setToolTip("Las citas que te programó tu docente, por día")
+        self.btn_practica = QPushButton(" Práctica libre", self)
+        self.btn_practica.setIcon(iconos.icono("practica", tema.ACENTO, 18))
+        self.btn_practica.setToolTip("Pacientes que tu docente dejó para practicar cuando quieras, "
+                                     "las veces que quieras")
+        for boton, lado in ((self.btn_vista_agenda, "izq"), (self.btn_practica, "der")):
+            boton.setCheckable(True)
+            boton.setProperty("vista", "true")
+            boton.setProperty("lado", lado)
+            boton.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_vista_agenda.setChecked(True)
+        self._grupo_vista = QButtonGroup(self)
+        self._grupo_vista.setExclusive(True)
+        self._grupo_vista.addButton(self.btn_vista_agenda)
+        self._grupo_vista.addButton(self.btn_practica)
+        self.btn_practica.toggled.connect(self._on_toggle_practica)
+        self._icono_vista_activa()
+        self.btn_practica.toggled.connect(lambda _c: self._icono_vista_activa())
+        fila_titulo.addWidget(self.btn_vista_agenda)
+        fila_titulo.addWidget(self.btn_practica)
+        col.addLayout(fila_titulo)
+
+        fila_filtros = QHBoxLayout()
+        fila_filtros.setSpacing(8)
+        self.led_buscar = QLineEdit(self)
+        self.led_buscar.setObjectName("buscarAgenda")
+        self.led_buscar.setPlaceholderText("Buscar por RUT, nombre o apellido")
+        self.led_buscar.setClearButtonEnabled(True)
+        self.led_buscar.addAction(iconos.icono("buscar", tema.TEXTO_TENUE, 18),
+                                  QLineEdit.ActionPosition.LeadingPosition)
+        self.led_buscar.textChanged.connect(self._on_filtro_changed)
+        fila_filtros.addWidget(self.led_buscar, 1)
+
+        self.btn_dia_ant = QPushButton(self)
+        self.btn_dia_ant.setIcon(iconos.icono("izquierda", tema.TEXTO_SUAVE, 18))
+        self.btn_dia_ant.setToolTip("Día anterior")
         self.date_selector = QDateEdit(self)
         self.date_selector.setCalendarPopup(True)
+        self.date_selector.setDisplayFormat("dd-MM-yyyy")
         self.date_selector.setDate(QDate.currentDate())
         self.date_selector.dateChanged.connect(self._on_fecha_seleccionada)
-        self.horizontalLayout.insertWidget(1, self.date_selector)
+        self.btn_dia_sig = QPushButton(self)
+        self.btn_dia_sig.setIcon(iconos.icono("derecha", tema.TEXTO_SUAVE, 18))
+        self.btn_dia_sig.setToolTip("Día siguiente")
+        self.btn_hoy = QPushButton("Hoy", self)
+        self.btn_dia_ant.clicked.connect(lambda: self.date_selector.setDate(self.date_selector.date().addDays(-1)))
+        self.btn_dia_sig.clicked.connect(lambda: self.date_selector.setDate(self.date_selector.date().addDays(1)))
+        self.btn_hoy.clicked.connect(lambda: self.date_selector.setDate(QDate.currentDate()))
+        self._nav_dia = (self.btn_dia_ant, self.date_selector, self.btn_dia_sig, self.btn_hoy)
+        for boton in (self.btn_dia_ant, self.btn_dia_sig, self.btn_hoy):
+            boton.setProperty("nav", "true")
+            boton.setCursor(Qt.CursorShape.PointingHandCursor)
+        for w in self._nav_dia:
+            fila_filtros.addWidget(w)
         self._init_feriados()
 
         self.chk_ver_todas = QCheckBox("Ver todas las citas habilitadas", self)
+        self.chk_ver_todas.setToolTip("Todas las citas que ya tienen fecha y hora, sin filtrar por día")
         self.chk_ver_todas.toggled.connect(self._on_toggle_ver_todas)
-        self.horizontalLayout.insertWidget(2, self.chk_ver_todas)
+        fila_filtros.addWidget(self.chk_ver_todas)
+        col.addLayout(fila_filtros)
+        raiz.addWidget(cabecera)
 
-        self.btn_practica = QPushButton("Práctica libre", self)
-        self.btn_practica.setCheckable(True)
-        self.btn_practica.setToolTip("Pacientes que tu docente dejó para practicar cuando quieras, "
-                                     "las veces que quieras")
-        self.btn_practica.toggled.connect(self._on_toggle_practica)
-        self.horizontalLayout.insertWidget(3, self.btn_practica)
-        self._encabezados_agenda = [
-            self.tableWidget.horizontalHeaderItem(i).text()
-            for i in range(self.tableWidget.columnCount())
-        ]
+        # -- Contadores -------------------------------------------------
+        self._contadores = {clave: Contador(clave, self) for clave in
+                            ("por_atender", "atendiendo", "atendido", "no_show",
+                             "practica_nuevo", "practica_curso", "practica_hecho")}
+        fila_cont = QHBoxLayout()
+        fila_cont.setSpacing(8)
+        for contador in self._contadores.values():
+            fila_cont.addWidget(contador)
+        self._fila_contadores = fila_cont
+        raiz.addLayout(fila_cont)
 
-        self.btn_ver_ficha = QPushButton("Ver ficha", self)
-        self.btn_ver_ficha.setEnabled(False)
-        self.btn_ver_ficha.clicked.connect(self._ver_ficha_paciente)
-        self.horizontalLayout.insertWidget(4, self.btn_ver_ficha)
+        # -- Tabla / estado vacío ---------------------------------------
+        self._pila = QStackedWidget(self)
+        self._pila.addWidget(tabla)
+        vacio = QFrame(self)
+        vacio.setObjectName("vacioAgenda")
+        col_vacio = QVBoxLayout(vacio)
+        col_vacio.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        icono_vacio = QLabel()
+        icono_vacio.setPixmap(iconos.pixmap("calendario_vacio", tema.TEXTO_TENUE, 44))
+        icono_vacio.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_vacio = QLabel("")
+        self.lbl_vacio.setProperty("role", "titulo")
+        self.lbl_vacio.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_vacio_ayuda = QLabel("")
+        self.lbl_vacio_ayuda.setProperty("role", "hint")
+        self.lbl_vacio_ayuda.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_vacio_ayuda.setWordWrap(True)
+        col_vacio.addWidget(icono_vacio)
+        col_vacio.addWidget(self.lbl_vacio)
+        col_vacio.addWidget(self.lbl_vacio_ayuda)
+        self._pila.addWidget(vacio)
+        self._pila.setMinimumHeight(110)
+        raiz.addWidget(self._pila, 1)
 
-        self.btn_atender = QPushButton("Atender", self)
+        # -- Detalle y acciones -----------------------------------------
+        self.detalle = PanelDetalle(self)
+        self.btn_atender = BotonAccion("Atender", "atender", principal=True, parent=self)
+        self.btn_atender.setMinimumWidth(200)
         self.btn_atender.setEnabled(False)
         self.btn_atender.clicked.connect(self.atender_paciente)
-        self.horizontalLayout.insertWidget(5, self.btn_atender)
 
-        self.btn_no_show = QPushButton("No se presentó", self)
+        self.btn_ver_ficha = BotonAccion("Ver ficha", "ficha", parent=self)
+        self.btn_ver_ficha.setToolTip("Antecedentes y motivo de consulta del paciente. "
+                                      "Revísala antes de atender.")
+        self.btn_ver_ficha.setEnabled(False)
+        self.btn_ver_ficha.clicked.connect(self._ver_ficha_paciente)
+
+        self.btn_no_show = BotonAccion("No se presentó", "x", parent=self)
+        self.btn_no_show.setToolTip("Disponible cuando la hora de la cita ya pasó y no atendiste al paciente")
         self.btn_no_show.setEnabled(False)
         self.btn_no_show.clicked.connect(self._marcar_no_show)
-        self.horizontalLayout.insertWidget(6, self.btn_no_show)
 
-        self.btn_ficha_estudio = QPushButton("Ficha de estudio", self)
+        self.btn_ficha_estudio = BotonAccion("Ficha de estudio", "libro", parent=self)
         self.btn_ficha_estudio.setToolTip("Los resultados del caso, para comparar con tu último intento cerrado")
         self.btn_ficha_estudio.setVisible(False)
         self.btn_ficha_estudio.clicked.connect(self._ver_ficha_estudio)
-        self.horizontalLayout.insertWidget(7, self.btn_ficha_estudio)
+
+        acciones = self.detalle.acciones
+        acciones.addWidget(self.btn_atender, 0, 0, 1, 2)
+        acciones.addWidget(self.btn_ver_ficha, 1, 0)
+        acciones.addWidget(self.btn_no_show, 1, 1)
+        acciones.addWidget(self.btn_ficha_estudio, 2, 0, 1, 2)
+        raiz.addWidget(self.detalle)
+
+        self._edades = {}
 
         if self.is_admin:
             # El admin ve todos los pacientes siempre (ver _visible_keys):
             # el filtro por fecha / "ver todas" es solo para el estudiante.
             # La práctica libre también: el docente prueba los casos desde
             # sus filas de siempre.
-            self.date_selector.setVisible(False)
-            self.chk_ver_todas.setVisible(False)
-            self.btn_practica.setVisible(False)
+            for w in (*self._nav_dia, self.chk_ver_todas, self.btn_practica, self.btn_vista_agenda):
+                w.setVisible(False)
+            for contador in self._contadores.values():
+                contador.setVisible(False)
 
             # Solo admin/docente: elegir si su "Atender" es una prueba sin
             # rastro (por defecto, ver atender_paciente_prueba) o si queda
@@ -272,28 +419,42 @@ class Agenda(QWidget, Ui_Form):
             # mitad de camino.
             self.chk_guardar_base = QCheckBox("Guardar esta atención (base para comparar)", self)
             self.chk_guardar_base.toggled.connect(self._on_toggle_guardar_base)
-            self.horizontalLayout.insertWidget(8, self.chk_guardar_base)
+            acciones.addWidget(self.chk_guardar_base, 3, 0, 1, 2)
+        else:
+            self._mostrar_contadores(vista.CONT_AGENDA)
+
+    def _icono_vista_activa(self):
+        """El icono de la vista elegida va en blanco, sobre el fondo morado."""
+        for boton, nombre in ((self.btn_vista_agenda, "calendario"), (self.btn_practica, "practica")):
+            color = "#FFFFFF" if boton.isChecked() else tema.ACENTO
+            boton.setIcon(iconos.icono(nombre, color, 18))
+
+    def _mostrar_contadores(self, claves):
+        for clave, contador in self._contadores.items():
+            contador.setVisible(clave in claves)
 
     def _on_toggle_guardar_base(self, checked):
         self._guardar_base = checked
 
     def _on_toggle_ver_todas(self, checked):
         self._ver_todas = checked
-        self.date_selector.setEnabled(not checked)
+        for w in self._nav_dia:
+            w.setEnabled(not checked)
         self.populate_shedule()
 
     def _on_toggle_practica(self, checked):
         self._modo_practica = checked
-        self.date_selector.setVisible(not checked)
-        self.chk_ver_todas.setVisible(not checked)
+        for w in (*self._nav_dia, self.chk_ver_todas):
+            w.setVisible(not checked)
         self.btn_no_show.setVisible(not checked)
         self.btn_ficha_estudio.setVisible(checked)
+        # Sin "No se presentó", "Ver ficha" ocupa todo el ancho.
+        self.detalle.acciones.removeWidget(self.btn_ver_ficha)
+        self.detalle.acciones.addWidget(self.btn_ver_ficha, 1, 0, 1, 2 if checked else 1)
+        self._mostrar_contadores(vista.CONT_PRACTICA if checked else vista.CONT_AGENDA)
+        self.tableWidget.setHorizontalHeaderLabels(ENCABEZADOS_PRACTICA if checked else ENCABEZADOS_AGENDA)
         if checked:
-            self.tableWidget.setHorizontalHeaderLabels(
-                ["Intentos", "Último", "RUT", "Nombre", "Apellido", "Fecha nac.", "Procedimiento"])
             self._pedir_practica()
-        else:
-            self.tableWidget.setHorizontalHeaderLabels(self._encabezados_agenda)
         self._selected_row_key = None
         self.tableWidget.blockSignals(True)
         self.tableWidget.clearSelection()
@@ -487,53 +648,37 @@ class Agenda(QWidget, Ui_Form):
         sueltos = self._vaciar_tabla(len(keys))
 
         username = self._current_username()
+        conteo = {}
         for row_idx, key in enumerate(keys):
             user = rows[key]
-            pendiente = not (user.fecha and user.hora)
             estado = entry_estado_por(user, username)
-            color = None
-            tooltip = ""
-            if user.sin_cita:
-                # Caso creado en el panel que todavía no se agendó a nadie:
-                # el docente lo ve para poder probarlo, pero no se puede
-                # atender de verdad (no hay cita a la que colgar la atención).
-                color = SIN_CITA_COLOR
-                tooltip = "Caso sin cita: solo se puede probar, no queda registro."
-            elif pendiente:
-                color = PENDIENTE_COLOR
-                tooltip = "Cita creada sin fecha ni hora."
-            elif estado == "atendiendo":
-                color = ATENDIENDO_COLOR
-            elif estado == "atendido":
-                color = ATENDIDO_COLOR
-            elif estado == "no_show":
-                color = NO_SHOW_COLOR
+            clave = self._clave_estado(user, estado)
+            conteo[clave] = conteo.get(clave, 0) + 1
+            tooltip = {
+                "sin_cita": "Caso sin cita: solo se puede probar, no queda registro.",
+                "sin_fecha": "Cita creada sin fecha ni hora.",
+                "vencida": "La hora de la cita ya pasó.",
+            }.get(clave, "")
             # Cita agendada en feriado: se avisa en la celda de la fecha (no
-            # en toda la fila) para no tapar el color de estado. Es un error
-            # del docente al agendar, no del alumno -- nadie va a atender ese
-            # día, así que tiene que saltar a la vista en la tabla, que es lo
-            # único que ve el docente (su vista esconde el date_selector).
+            # en toda la fila). Es un error del docente al agendar, no del
+            # alumno -- nadie va a atender ese día, así que tiene que saltar
+            # a la vista en la tabla, que es lo único que ve el docente (su
+            # vista esconde el date_selector).
             feriado = self._descripcion_feriado(parse_fecha_agenda(user.fecha))
 
             columnas = (user.fecha or "sin agendar", user.hora, user.rut, user.nombre,
                         user.apellido, user.fecha_nac, user.procedimiento)
-            for col_idx, valor in enumerate(columnas):
-                item = QTableWidgetItem(valor)
-                item.setData(Qt.UserRole, key)
-                if color is not None:
-                    item.setBackground(color)
-                if tooltip:
-                    item.setToolTip(tooltip)
-                if feriado and col_idx == 0:
-                    item.setText(f"⚠ {valor}")
-                    item.setBackground(FERIADO_FONDO)
-                    item.setForeground(FERIADO_COLOR)
-                    item.setToolTip(f"Agendada en feriado: {feriado}")
-                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                self.tableWidget.setItem(row_idx, col_idx, item)
+            self._poner_fila(row_idx, key, clave, columnas, tooltip)
+            if feriado:
+                item = self.tableWidget.item(row_idx, 1)
+                item.setText(f"⚠ {user.fecha}")
+                item.setBackground(FERIADO_FONDO)
+                item.setForeground(FERIADO_COLOR)
+                item.setToolTip(f"Agendada en feriado: {feriado}")
         self.tableWidget.setSortingEnabled(True)
         del sueltos
         self._loading = False
+        self._actualizar_resumen(len(keys), conteo)
 
         if prev_key is not None and prev_key in keys:
             # Re-seleccionar la misma fila tras reconstruir la tabla. Si el índice
@@ -548,6 +693,162 @@ class Agenda(QWidget, Ui_Form):
             self._reset_atender_button()
             self._selected_key = None
             self._selected_row_key = None
+            self._actualizar_detalle()
+
+    def _clave_estado(self, user, estado):
+        """Cómo se ve esta fila (ver vista.ESTADOS)."""
+        if user.sin_cita:
+            return "sin_cita"
+        if not (user.fecha and user.hora):
+            return "sin_fecha"
+        if estado in ("atendiendo", "atendido", "no_show"):
+            return estado
+        return "vencida" if self._hora_vencida(user) else "por_atender"
+
+    @staticmethod
+    def _hora_vencida(user):
+        fecha = parse_fecha_agenda(user.fecha)
+        hora = QTime.fromString(user.hora, "HH:mm")
+        return (fecha.isValid() and hora.isValid()
+                and QDateTime(fecha, hora) < QDateTime.currentDateTime())
+
+    def _poner_fila(self, row_idx, key, clave, columnas, tooltip=""):
+        """Una fila: la celda de estado (icono + texto de color) y las demás."""
+        texto, _, color = vista.ESTADOS[clave]
+        celdas = [(texto, True)] + [(valor, False) for valor in columnas]
+        for col_idx, (valor, es_estado) in enumerate(celdas):
+            item = QTableWidgetItem(valor)
+            item.setData(Qt.UserRole, key)
+            if es_estado:
+                item.setIcon(vista.icono_estado(clave))
+                item.setForeground(QColor(color))
+                fuente = item.font()
+                fuente.setBold(True)
+                item.setFont(fuente)
+            if tooltip:
+                item.setToolTip(tooltip)
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            self.tableWidget.setItem(row_idx, col_idx, item)
+
+    def _actualizar_resumen(self, total, conteo):
+        """Subtítulo, contadores y el aviso de "no hay nada" tras llenar la tabla."""
+        for clave, contador in self._contadores.items():
+            contador.set_valor(conteo.get(clave, 0))
+        self.lbl_subtitulo.setText(self._subtitulo(total))
+        self.lbl_titulo.setText("Práctica libre" if self._modo_practica else "Agenda")
+        self._pila.setCurrentIndex(0 if total else 1)
+        if total:
+            return
+        if self._filtro_texto:
+            titulo, ayuda = "Nada coincide con tu búsqueda", "Prueba con otro nombre, apellido o RUT."
+        elif self._modo_practica:
+            titulo = "Aún no hay pacientes para practicar"
+            ayuda = "Tu docente todavía no dejó pacientes de práctica libre para este curso."
+        elif self.is_admin:
+            titulo, ayuda = "No hay citas ni casos", "Crea un caso o agenda una cita desde el panel web."
+        elif self._ver_todas:
+            titulo = "No tienes citas habilitadas"
+            ayuda = "Cuando tu docente te agende una cita con fecha y hora, aparecerá aquí."
+        else:
+            titulo = "No tienes citas para este día"
+            ayuda = "Cambia de día con las flechas, o marca «Ver todas las citas habilitadas»."
+        self.lbl_vacio.setText(titulo)
+        self.lbl_vacio_ayuda.setText(ayuda)
+
+    def _subtitulo(self, n):
+        if self._modo_practica:
+            return (f"{_plural(n, 'paciente', 'pacientes')} para practicar · "
+                    "sin horario, las veces que quieras")
+        if self.is_admin:
+            return f"{_plural(n, 'cita o caso', 'citas y casos')} · vista docente"
+        if self._ver_todas:
+            return f"{_plural(n, 'cita habilitada', 'citas habilitadas')} con fecha y hora"
+        fecha = self.date_selector.date()
+        texto = f"{DIAS[fecha.dayOfWeek() - 1].capitalize()} {fecha.day()} de {MESES[fecha.month() - 1]}"
+        if fecha == QDate.currentDate():
+            texto = f"Hoy · {texto}"
+        feriado = self._descripcion_feriado(fecha)
+        if feriado:
+            texto += f" · Feriado: {feriado}"
+        return f"{texto} · {_plural(n, 'cita', 'citas')}"
+
+    def _edad(self, rut):
+        if rut not in self._edades:
+            try:
+                self._edades[rut] = CreatePatient().get_age_from_rut(int(rut))[0]
+            except (TypeError, ValueError):
+                self._edades[rut] = None
+        return self._edades[rut]
+
+    def _actualizar_detalle(self):
+        """El panel de abajo: quién es el paciente elegido y qué sigue."""
+        key = self._selected_row_key
+        if self._modo_practica:
+            it = self._practica.get(key) if key else None
+            if it is None:
+                self.detalle.vacio("Elige un paciente para practicar. Puedes repetirlo las veces que quieras.")
+                return
+            intentos = int(it.get("intentos") or 0)
+            abierto = self._intento_abierto(key)
+            if abierto is not None and self._es_atencion_activa(abierto):
+                clave, paso = "practica_curso", 2
+                pista = "Cuando termines, presiona «Cerrar/Evolucionar» para registrar tu nota y cerrar el intento."
+            elif abierto is not None:
+                clave, paso = "practica_curso", 1
+                pista = "Dejaste este intento abierto. Presiona «Retomar» para seguir donde quedaste."
+            elif intentos:
+                clave, paso = "practica_hecho", None
+                pista = ("Ya lo practicaste. Puedes repetirlo cuando quieras"
+                         + ("; la ficha de estudio compara con tu último intento." if it.get("show_study_sheet") else "."))
+            else:
+                clave, paso = "practica_nuevo", 1
+                pista = "Presiona «Practicar» para abrir al paciente; después podrás revisar su ficha."
+            nombre = f"{it.get('nombre') or ''} {it.get('apellido') or ''}".strip()
+            datos = self._datos_paciente(it.get("rut"), it.get("procedimiento"),
+                                         _plural(intentos, "intento", "intentos"))
+            self.detalle.mostrar(nombre, datos, clave, pista, paso)
+            return
+
+        user = self.shedule.get("agenda_1", {}).get(key) if key else None
+        if user is None:
+            self.detalle.vacio("Selecciona una fila para ver su ficha y atender al paciente."
+                               if self._pila.currentIndex() == 0 else "")
+            return
+        estado = entry_estado_por(user, self._current_username())
+        clave = self._clave_estado(user, estado)
+        activa = self._es_atencion_activa(key)
+        paso = None
+        if clave in ("por_atender", "vencida"):
+            paso = 0
+            pista = "Antes de atender, revisa su ficha (antecedentes y motivo de consulta). Luego presiona «Atender»."
+            if clave == "vencida":
+                pista = ("La hora de la cita ya pasó. Si el paciente no llegó, marca «No se presentó»; "
+                         "si sí, puedes atenderlo igual.")
+        elif clave == "atendiendo":
+            paso = 2 if activa else 1
+            pista = ("Cuando termines, presiona «Cerrar/Evolucionar» para escribir tu nota de evolución."
+                     if activa else "Esta atención quedó abierta. Presiona «Atender» para retomarla.")
+        elif clave == "atendido":
+            paso = len(vista.PASOS)
+            pista = "Atención cerrada: tu nota de evolución quedó registrada."
+        elif clave == "no_show":
+            pista = "Quedó registrada como inasistencia del paciente."
+        elif clave == "sin_fecha":
+            pista = "Esta cita todavía no tiene fecha ni hora, así que no se puede atender."
+        else:
+            pista = "Caso sin cita: solo se puede probar, no queda registro."
+        if self.is_admin and clave not in ("sin_cita", "sin_fecha") and not self._guardar_base:
+            pista = "Modo prueba: no queda registro. " + pista
+        nombre = f"{user.nombre} {user.apellido}".strip()
+        cuando = f"{user.fecha} {user.hora}".strip() if user.fecha and user.hora else None
+        datos = self._datos_paciente(user.rut, user.procedimiento, cuando)
+        self.detalle.mostrar(nombre, datos, clave, pista, paso)
+
+    def _datos_paciente(self, rut, procedimiento, extra=None):
+        edad = self._edad(rut) if rut else None
+        partes = [f"RUT {rut}" if rut else None, f"{edad} años" if edad else None,
+                  procedimiento or None, extra]
+        return "  ·  ".join(p for p in partes if p)
 
     def _vaciar_tabla(self, filas):
         """Saca los items de la tabla antes de rearmarla y la deja en
@@ -580,25 +881,20 @@ class Agenda(QWidget, Ui_Form):
 
         self._loading = True
         sueltos = self._vaciar_tabla(len(keys))
+        conteo = {}
         for row_idx, key in enumerate(keys):
             it = self._practica[key]
             intentos = int(it.get("intentos") or 0)
             ultimo = (it.get("ultimo") or "")[:10]
-            color = ATENDIENDO_COLOR if it.get("abierto") else (ATENDIDO_COLOR if intentos else None)
-            columnas = (str(intentos), ultimo or "—", it.get("rut") or "", it.get("nombre") or "",
+            clave = "practica_curso" if it.get("abierto") else ("practica_hecho" if intentos else "practica_nuevo")
+            conteo[clave] = conteo.get(clave, 0) + 1
+            columnas = (ultimo or "—", str(intentos), it.get("rut") or "", it.get("nombre") or "",
                         it.get("apellido") or "", it.get("fecha_nac") or "", it.get("procedimiento") or "")
-            for col_idx, valor in enumerate(columnas):
-                item = QTableWidgetItem(valor)
-                item.setData(Qt.UserRole, key)
-                if color is not None:
-                    item.setBackground(color)
-                if it.get("curso"):
-                    item.setToolTip(f"Curso: {it['curso']}")
-                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                self.tableWidget.setItem(row_idx, col_idx, item)
+            self._poner_fila(row_idx, key, clave, columnas, f"Curso: {it['curso']}" if it.get("curso") else "")
         self.tableWidget.setSortingEnabled(True)
         del sueltos
         self._loading = False
+        self._actualizar_resumen(len(keys), conteo)
 
         if prev_key is not None and prev_key in keys:
             self.tableWidget.blockSignals(True)
@@ -612,6 +908,7 @@ class Agenda(QWidget, Ui_Form):
             self._reset_atender_button()
             self._selected_key = None
             self._selected_row_key = None
+            self._actualizar_detalle()
 
     def _intento_abierto(self, key):
         """Key de agenda del intento que el alumno dejó abierto en este
@@ -684,6 +981,11 @@ class Agenda(QWidget, Ui_Form):
             self.chk_guardar_base.setEnabled(True)
 
     def _on_selection_changed(self):
+        self._on_selection_changed_impl()
+        if not self._loading:
+            self._actualizar_detalle()
+
+    def _on_selection_changed_impl(self):
         if self._loading:
             # Tabla a medio rearmar (ver _vaciar_tabla): las celdas estan
             # vacias. populate recalcula el boton al terminar.

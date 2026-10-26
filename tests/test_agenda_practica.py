@@ -70,7 +70,7 @@ def _armar(monkey_iniciar):
 
 
 def _filas(ag):
-    return [ag.tableWidget.item(r, 3).text() for r in range(ag.tableWidget.rowCount())]
+    return [ag.tableWidget.item(r, 4).text() for r in range(ag.tableWidget.rowCount())]
 
 
 def test_los_intentos_no_aparecen_en_la_agenda():
@@ -100,7 +100,7 @@ def test_practicar_abre_un_intento_y_despues_se_cierra():
     ag.btn_atender.click()
     assert main.evoluciones == [("Ana Paz", "42")]
 
-    ag.btn_practica.setChecked(False)
+    ag.btn_vista_agenda.setChecked(True)
     assert _filas(ag) == ["Cita"]
 
 
@@ -141,7 +141,7 @@ def test_rearmar_la_agenda_muchas_veces_no_deja_items_colgados():
         assert ag.tableWidget.rowCount() == n
         assert sorted(_filas(ag)) == sorted(f"P{i}" for i in range(n))
     ag.btn_practica.setChecked(True)
-    ag.btn_practica.setChecked(False)
+    ag.btn_vista_agenda.setChecked(True)
     gc.collect()
     assert ag.tableWidget.rowCount() >= 1
 

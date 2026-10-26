@@ -1154,7 +1154,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "AABR": self.subw_aabr,
             "VEMP": self.subw_vemp,
             "EOAS": self.subw_eoas,
-            "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),
+            "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self), expand=True),
             "CVOICE": FrameSubMdi(ComandVoiceA()),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name"))),
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),

@@ -37,7 +37,7 @@ final class Layout
         'VHIT'       => [false, 'Video Head Impulse Test', 9, [false, true], [1000, 600], 'development'],
         'POS'        => [false, 'Posturografía', 10, [false, true], [1000, 600], 'development'],
         'CVOICE'     => [false, 'Comandos de Voz', 11, [true, true], [420, 200], 'pre'],
-        'AGENDA'     => [false, 'Agenda', 13, [true, true], [900, 400], 'pre'],
+        'AGENDA'     => [false, 'Agenda', 13, [true, true], [940, 580], 'pre'],
         'CHAT'       => [false, 'Hablar con el paciente', 14, [true, true], [480, 280], 'pre'],
         'AC'         => [false, 'Acumetría', 15, [true, true], [480, 420], 'pre'],
         'OT'         => [false, 'Otoscopia', 16, [false, true], [1000, 580], 'pre'],

@@ -63,6 +63,9 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
             # sobrante con el contenido: con stretch 1 el contenido se lo
             # lleva entero (texto que ocupa toda la subventana).
             self.verticalLayout_2.setStretchFactor(self.layout_content, 1)
+            # El espaciador (40 px de mínimo) ya no hace falta y dejaba una
+            # franja vacía abajo.
+            self.verticalLayout_2.takeAt(self.verticalLayout_2.count() - 1)
         # QWidget plano no pinta border/background de QSS sin esto (a
         # diferencia de QFrame, que lo hace solo) -- necesario para el
         # borde delgado que marca el límite de cada subventana MDI.

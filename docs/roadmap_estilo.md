@@ -62,6 +62,19 @@ Actualizado 2026-10-26 (tarde).
 - [x] Login: campos y botón con la paleta, enlaces en el acento (tamaño intacto: lo fija el
   servidor, 410x140).
 
+### Agenda
+- [x] Rehecha (2026-10-26): cabecera con título y subtítulo del día, vista Mi agenda | Práctica
+  libre, navegación de día (‹ Hoy ›) y búsqueda; contadores por estado; tabla con columna
+  Estado (icono + texto de color en vez de filas pintadas); estado vacío que explica qué hacer;
+  panel del paciente elegido con los tres pasos (revisa la ficha → atiende → registra la
+  evolución) y una pista de qué sigue. Piezas en `agenda/vista.py`.
+- [x] Iconos de línea propios en `core/iconos.py` (QPainter, sin QtSvg). Usarlos en los demás
+  módulos en vez de texto o símbolos.
+- [x] Tamaño de la ventana en `Layout.php`: 940x580 (antes 900x400). `FrameSubMdi(expand=True)`
+  ya no deja la franja de 40 px abajo.
+- [ ] Probar en la app real (solo renders offscreen con datos de prueba).
+- [ ] Fichas (Ficha clínica, Evolución, Chat) siguen con el diseño viejo.
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -77,7 +90,7 @@ Actualizado 2026-10-26 (tarde).
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
 - [ ] Probar la barra nueva en la app real (solo se vio en un render offscreen con botones de prueba).
-- [ ] Agenda y fichas (Ficha clínica, Evolución, Chat).
+- [ ] Fichas (Ficha clínica, Evolución, Chat).
 
 ### Transversal
 - [ ] Bajar el exceso de blanco/claro en toda la app: la barra de estado, los módulos ya
