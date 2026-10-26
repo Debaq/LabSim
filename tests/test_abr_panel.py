@@ -506,6 +506,61 @@ def test_a_mark_without_its_arrow_comes_back():
     assert _flechas(g) == ['R1_V']
 
 
+def test_a_mark_can_be_dragged_with_the_real_mouse():
+    """Agarrar la flecha de una marca y llevarla a otra latencia.
+
+    Antes había que volver a poner la bandera A y apretar el botón de la
+    onda. Al soltar, la tabla y la memoria reciben la latencia nueva, y la
+    marca queda en una curva del trazo (no en el aire).
+    """
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import QPointF
+    from PySide6.QtWidgets import QApplication
+    from test_ecochg_panel import _arrastre
+    w = _ventana()
+    w.resize(1400, 900)
+    w.show()
+    QApplication.processEvents()
+    _capturar(w, intensidad=80)
+    g = w.graph_r
+    _marcar(g, 'R1', 'V', 5.6)
+    QApplication.processEvents()
+    avisos = []
+    g.sig_change_value_mark.connect(avisos.append)
+    item = g.mark_item('R1', 'V')
+    centro = item.mapToScene(item.boundingRect().center())
+    desde = g.mapFromScene(centro)
+    destino = g.mapFromScene(g.pw.vb.mapViewToScene(
+        QPointF(6.2, g.pw.vb.mapSceneToView(centro).y())))
+    _arrastre(g, desde, destino)
+    lat, amp = g.marks['R1']['V']
+    xs, ys = g.data['R1']['ipsi_xy']
+    assert abs(lat - 6.2) < 0.4, lat
+    assert lat in xs and abs(amp - ys[list(xs).index(lat)]) < 1e-12
+    assert len(avisos) == 1 and avisos[0]['R1']['V'] == [lat, amp], avisos
+    assert abs(g.inf_a.getXPos() - lat) < 1e-9
+    # Solo lectura: la flecha no se mueve.
+    g.read_only = True
+    antes = list(g.marks['R1']['V'])
+    g.drag_mark('R1', 'V', 3.0, True)
+    assert g.marks['R1']['V'] == antes
+
+
+def test_flag_a_prime_says_the_distance_to_a():
+    """La etiqueta de A' trae Δ de latencia y amplitud respecto de A."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    g = w.graph_r
+    g.active_curve('R1')
+    g.inf_a.setPos((1.5, 0))
+    g.inf_b.setPos((5.5, 0))
+    texto = g.inf_b.label.format
+    assert "Δ 4.00 ms" in texto and "µV" in texto, texto
+
+
 def test_mouse_wheel_does_not_zoom_behind_the_scale():
     """La rueda no cambia la vista: el zoom es solo de los botones."""
     if not HAS_UI:

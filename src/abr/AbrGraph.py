@@ -624,6 +624,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             dif_amp = order_amp[1] - order_amp[0]
             dif_lat = order_lat[1] - order_lat[0]
 
+            # La bandera A' dice la distancia a A: es lo que se mide con las
+            # dos banderas y antes solo llegaba al panel de datos.
+            self.inf_b.label.setFormat(
+                f"A' {{value:.2f}} ms   Δ {dif_lat:.2f} ms · {dif_amp:.2f} µV")
+
             # Preparar la respuesta
             response = {
                 'curve': self.act_curve,
@@ -659,14 +664,14 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         else:
             self.snap_ms = float(snap_ms) if snap_ms else self.SNAP_MS
 
-    def snap_to_peak(self, x, mark=None):
+    def snap_to_peak(self, x, mark=None, curve=None):
         """Extremo del trazo cerca de x: el minimo o el maximo segun la marca.
 
         En el ECochG el PA es una deflexion NEGATIVA (el electrodo activo
         es el del oido, no el vertex), asi que el pico es un minimo. En los
         corticales la Pa, la P1 o la P3 son maximos.
         """
-        datos = self.data.get(self.act_curve)
+        datos = self.data.get(curve or self.act_curve)
         if not datos:
             return x
         xs, ys = datos['ipsi_xy']
@@ -697,6 +702,30 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.current_lat = x
         self.create_marks(mark)
         return None
+
+    def drag_mark(self, curve, lbl_mark, x, final):
+        """Corre una marca ya puesta arrastrando su flecha.
+
+        La flecha sigue al mouse pegada al trazo (a su pico si la marca se
+        pega); la tabla y la memoria se enteran al soltar, igual que cuando
+        se marca con el boton. La curva dueña pasa a ser la activa y la
+        bandera A acompaña a la marca, como al hacer clic en el trazo.
+        """
+        if (self.read_only or curve not in self.data
+                or lbl_mark not in self.marks.get(curve, {})):
+            return
+        if curve != self.act_curve:
+            self.active_curve(curve)
+        if lbl_mark in self.snap_marks:
+            x = self.snap_to_peak(x, lbl_mark, curve)
+        xs, ys = self.data[curve]['ipsi_xy']
+        i = self.find_idx(xs, x)
+        self.marks[curve][lbl_mark] = [xs[i], ys[i]]
+        self.place_mark(curve, lbl_mark)
+        self.current_lat = xs[i]
+        self.inf_a.setPos((max(0.0, min(self.window_ms, float(xs[i]))), 0))
+        if final:
+            self.update_value_mark(lbl_mark, curve=curve)
 
     # Cuanto se puede correr una marca que se pega al trazo, en ms.
     SNAP_MS = 0.4
@@ -757,6 +786,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             font = QFont()
             font.setPixelSize(13)
             item.setFont(font)
+            item.mark_label = lbl_mark
+            item.sigMarkDragged.connect(self.drag_mark)
             self.pw.addItem(item)
         item.setPos(x, y)
         if lbl_mark in ('BL', 'FIN'):

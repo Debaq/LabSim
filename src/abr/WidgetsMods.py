@@ -11,15 +11,24 @@ class TextItemMod(TextItem):
     sigDragged = Signal(dict)
     sigPositionChangeFinished = Signal(object)
     sigPositionChangeStarted= Signal(str)
+    # (curva, marca, latencia a la que va el mouse, ya soltó)
+    sigMarkDragged = Signal(str, str, float, bool)
 
     def __init__(self,name:str, tipo:str, curve_parent:str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.moving = False
+        # Solo las marcas: cual es (I, V, PA...) y cuanto separa del centro
+        # de la flecha el punto donde se la agarro.
+        self.mark_label = None
+        self._agarre_dx = 0.0
         self.name = name
         self.tipo = tipo
         self.curve_parent = curve_parent
 
     def mouseDragEvent(self, ev):
+        if self.tipo == 'mark':
+            self._arrastrar_marca(ev)
+            return
         if self.tipo != 'mark':
             if ev.button() == Qt.MouseButton.LeftButton:
                 if ev.isStart():
@@ -42,6 +51,25 @@ class TextItemMod(TextItem):
                     self.moving = False
                     self.sigPositionChangeFinished.emit(self)
         
+    def _arrastrar_marca(self, ev):
+        """Arrastrar la flecha de una marca la corre a lo largo del trazo.
+
+        Solo avisa adonde va el mouse: la curva decide a que punto del
+        trazo se pega.
+        """
+        vista = self.getViewBox()
+        if (ev.button() != Qt.MouseButton.LeftButton or vista is None
+                or self.mark_label is None):
+            ev.ignore()
+            return
+        ev.accept()
+        if ev.isStart():
+            self._agarre_dx = (self.pos().x()
+                               - vista.mapSceneToView(ev.buttonDownScenePos()).x())
+        x = vista.mapSceneToView(ev.scenePos()).x() + self._agarre_dx
+        self.sigMarkDragged.emit(self.curve_parent, self.mark_label,
+                                 float(x), bool(ev.isFinish()))
+
     def mouseDoubleClickEvent(self, ev):
         if self.tipo != 'mark':
             self.sigPositionChangeStarted.emit(self.name)
