@@ -210,6 +210,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.removeDockWidget(self.dock_values)
         self.dock_values.deleteLater()
         tema.aplicar_estilo(self, QSS_ABR)
+        # Los botones de escala no se pegan al borde de la ficha.
+        self.layout_abr_frame.setContentsMargins(10, 10, 6, 6)
         self.armar_barra_monitor()
         for nombre in TARJETAS:
             w = getattr(self, nombre, None)

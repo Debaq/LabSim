@@ -256,11 +256,74 @@ QScrollBar::handle:horizontal {{
 """
 
 
+def _flecha(ruta, hacia_abajo, color):
+    """Dibuja un chevron en un PNG (el QSS solo acepta imágenes de archivo)."""
+    from PySide6.QtCore import QPointF, Qt
+    from PySide6.QtGui import QColor, QImage, QPainter, QPen
+    img = QImage(32, 32, QImage.Format.Format_ARGB32)
+    img.fill(0)
+    p = QPainter(img)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
+    pen = QPen(QColor(color), 4.5)
+    pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+    pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+    p.setPen(pen)
+    y0, y1 = (11, 21) if hacia_abajo else (21, 11)
+    p.drawPolyline([QPointF(7, y0), QPointF(16, y1), QPointF(25, y0)])
+    p.end()
+    img.save(str(ruta))
+
+
+_flechas_qss = None
+
+
+def qss_flechas():
+    """Flechas de los spinbox y los combos. Los PNG se dibujan una vez en la
+    carpeta de datos (core/rutas.py) y el QSS los apunta por ruta."""
+    global _flechas_qss
+    if _flechas_qss is None:
+        from core import rutas
+        carpeta = rutas.carpeta("tema")
+        rutas_png = {}
+        for nombre, abajo, color in (("abajo", True, TEXTO_SUAVE), ("arriba", False, TEXTO_SUAVE),
+                                     ("abajo_off", True, BORDE_FUERTE), ("arriba_off", False, BORDE_FUERTE)):
+            ruta = carpeta / f"flecha_{nombre}_{color.lstrip('#')}.png"
+            if not ruta.exists():
+                _flecha(ruta, abajo, color)
+            rutas_png[nombre] = ruta.as_posix()
+        r = rutas_png
+        _flechas_qss = f"""
+QSpinBox, QDoubleSpinBox {{ padding-right: 20px; }}
+QSpinBox::up-button, QDoubleSpinBox::up-button {{
+    subcontrol-origin: border; subcontrol-position: top right;
+    width: 18px; border-left: 1px solid {BORDE}; border-bottom: 1px solid {BORDE};
+    border-top-right-radius: 5px; background: {TARJETA_ALT};
+}}
+QSpinBox::down-button, QDoubleSpinBox::down-button {{
+    subcontrol-origin: border; subcontrol-position: bottom right;
+    width: 18px; border-left: 1px solid {BORDE};
+    border-bottom-right-radius: 5px; background: {TARJETA_ALT};
+}}
+QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover,
+QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {{ background: {ACENTO_SUAVE}; }}
+QSpinBox::up-button:disabled, QDoubleSpinBox::up-button:disabled,
+QSpinBox::down-button:disabled, QDoubleSpinBox::down-button:disabled {{ background: {TARJETA_ALT}; }}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {{ image: url({r["arriba"]}); width: 8px; height: 8px; }}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {{ image: url({r["abajo"]}); width: 8px; height: 8px; }}
+QSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:disabled {{ image: url({r["arriba_off"]}); }}
+QSpinBox::down-arrow:disabled, QDoubleSpinBox::down-arrow:disabled {{ image: url({r["abajo_off"]}); }}
+QComboBox::drop-down {{ border: none; width: 22px; }}
+QComboBox::down-arrow {{ image: url({r["abajo"]}); width: 8px; height: 8px; }}
+QComboBox::down-arrow:disabled {{ image: url({r["abajo_off"]}); }}
+"""
+    return _flechas_qss
+
+
 def aplicar_estilo(widget, extra=""):
     """Aplica el QSS común a `widget` y a todo lo que cuelgue de él. `extra`:
     reglas propias del módulo, que se suman al final."""
     widget.setObjectName('labsimRoot')
-    widget.setStyleSheet(QSS + extra)
+    widget.setStyleSheet(QSS + extra + qss_flechas())
 
 
 def pastilla_lado(etiqueta, side):
