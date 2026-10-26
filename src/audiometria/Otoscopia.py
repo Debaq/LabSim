@@ -13,8 +13,8 @@ from core import hilos
 from core import iconos, tema
 from core.helpers import Preferences, foto_otoscopia
 from core.report_autosave import subir_ahora
-from PySide6.QtCore import QRect, QRectF, Qt
-from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap, QRegion
+from PySide6.QtCore import QPointF, QRect, QRectF, Qt
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap, QRadialGradient
 from PySide6.QtWidgets import (
     QButtonGroup,
     QFrame,
@@ -169,16 +169,27 @@ class _OtoscopioVisor(QWidget):
         img_rect.moveCenter(rect.center())
         painter.drawPixmap(img_rect.topLeft(), scaled)
 
-        # Máscara: negro en todo salvo el círculo alrededor del mouse (si el
-        # mouse no está encima, queda completamente tapado).
-        mascara = QRegion(rect)
-        if self._mouse_pos is not None:
-            r = int(min(rect.width(), rect.height()) * self._cono)
-            circulo = QRect(self._mouse_pos.x() - r, self._mouse_pos.y() - r, r * 2, r * 2)
-            mascara -= QRegion(circulo, QRegion.RegionType.Ellipse)
-        painter.setClipRegion(mascara.intersected(QRegion(rect)))
-        painter.setClipPath(borde, Qt.ClipOperation.IntersectClip)
-        painter.fillRect(rect, NEGRO_VISOR)
+        # Luz del otoscopio: sin mouse encima queda todo tapado; con él, un
+        # círculo de luz cálida cuyo borde se difumina hacia el negro (la luz
+        # real no corta en seco).
+        if self._mouse_pos is None:
+            painter.fillRect(rect, NEGRO_VISOR)
+        else:
+            # 1.15: el borde difuso se come parte del radio; así lo nítido queda como antes.
+            r = min(rect.width(), rect.height()) * self._cono * 1.15
+            centro = QPointF(self._mouse_pos)
+            tinte = QRadialGradient(centro, r)
+            tinte.setColorAt(0.0, QColor(255, 214, 120, 80))
+            tinte.setColorAt(0.8, QColor(255, 190, 80, 45))
+            tinte.setColorAt(1.0, QColor(255, 190, 80, 0))
+            painter.fillRect(rect, tinte)
+            mascara = QRadialGradient(centro, r)
+            negro = NEGRO_VISOR
+            mascara.setColorAt(0.0, QColor(negro.red(), negro.green(), negro.blue(), 0))
+            mascara.setColorAt(0.55, QColor(negro.red(), negro.green(), negro.blue(), 0))
+            mascara.setColorAt(0.8, QColor(negro.red(), negro.green(), negro.blue(), 150))
+            mascara.setColorAt(1.0, QColor(negro.red(), negro.green(), negro.blue(), 255))
+            painter.fillRect(rect, mascara)
         painter.end()
 
 
