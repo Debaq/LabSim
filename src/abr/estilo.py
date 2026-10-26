@@ -6,6 +6,11 @@ El ABR viene de un .ui de Designer: los widgets no traen propiedades `card` o
 from core.tema import (ACENTO, BORDE, BORDE_FUERTE, FONDO, TARJETA, TARJETA_ALT,
                        TEXTO, TEXTO_SUAVE, TEXTO_TENUE)
 
+# Lienzo del ABR: más oscuro que tema.FONDO.
+LIENZO = '#C9D2DD'
+BORDE_TARJETA = '#A9B6C6'
+FONDO_PANEL = '#E9EEF4'
+
 QSS_ABR = f"""
 QMenuBar {{ background: {FONDO}; color: {TEXTO_SUAVE}; }}
 QMenuBar::item:selected {{ background: {TARJETA}; color: {ACENTO}; }}
@@ -36,9 +41,14 @@ QCheckBox::indicator {{
 }}
 QCheckBox::indicator:checked {{ background: {ACENTO}; border-color: {ACENTO}; }}
 
+/* Fondo más oscuro que el del tema y tarjetas con borde marcado: sobre el
+   lienzo claro del VEMP los sectores del ABR (muchos, juntos) no se
+   distinguían. */
+QWidget#labsimRoot {{ background: {LIENZO}; }}
+QTabWidget::pane {{ border: 1px solid {BORDE_TARJETA}; }}
 QWidget#panel_izquierdo, QWidget#panel_monitor {{
-    background: {TARJETA};
-    border: 1px solid {BORDE};
+    background: {FONDO_PANEL};
+    border: 1px solid {BORDE_TARJETA};
     border-radius: 10px;
 }}
 
