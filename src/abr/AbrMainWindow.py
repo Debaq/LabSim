@@ -226,6 +226,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # Los botones de escala no se pegan al borde de la ficha.
         self.layout_abr_frame.setContentsMargins(10, 10, 6, 6)
         self.armar_barra_monitor()
+        self.detail.formFrame.setMinimumWidth(330)
+        self.detail.gridLayout.setHorizontalSpacing(10)
+        self.detail.gridLayout.setVerticalSpacing(4)
         for nombre in TARJETAS:
             w = getattr(self, nombre, None)
             if w is not None:

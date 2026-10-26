@@ -25,6 +25,7 @@ from PySide6.QtCore import Qt
 from pyqtgraph import GraphicsLayoutWidget
 
 from abr.ABR_generator import EEG_DISPLAY_FS
+from core import tema
 
 # Ventana visible del monitor (s). El muestreo sale del generador: 500 Hz
 # no alcanzaba para la banda del ABR (Nyquist 250) -- el EMG que dispara el
@@ -50,7 +51,7 @@ class EEG(GraphicsLayoutWidget):
     def __init__(self):
         GraphicsLayoutWidget.__init__(self)
         color_background = pg.mkColor(255, 255, 255, 255)
-        self.color_pen = pg.mkColor(0, 0, 0, 255)
+        self.color_pen = pg.mkColor(tema.GRILLA_FUERTE)
         self.setBackground(color_background)
         self.setAntialiasing(True)
         self.pw = self.addPlot(row=0, col=0)
@@ -71,7 +72,7 @@ class EEG(GraphicsLayoutWidget):
 
         self.buffers = {'R': np.zeros(self.n), 'L': np.zeros(self.n)}
         self.offsets = {'R': self.half, 'L': -self.half}
-        self.colors = {'R': pg.mkColor(192, 57, 43), 'L': pg.mkColor(41, 128, 185)}
+        self.colors = {'R': pg.mkColor(tema.OD), 'L': pg.mkColor(tema.OI)}
         self.curves = {}
         self.reject_lines = {}
         self.state_text = {}
@@ -97,7 +98,7 @@ class EEG(GraphicsLayoutWidget):
                                 fill=pg.mkBrush(255, 255, 255, 210))
             self.pw.addItem(texto)
             self.state_text[canal] = texto
-        self.lbl_title = pg.TextItem(text='EEG', color=(0, 0, 0), anchor=(0, 0),
+        self.lbl_title = pg.TextItem(text='EEG', color=tema.TEXTO_SUAVE, anchor=(0, 0),
                                      fill=pg.mkBrush(255, 255, 255, 210))
         self.peaks = {'R': 0.0, 'L': 0.0}
         self.pw.addItem(self.lbl_title)

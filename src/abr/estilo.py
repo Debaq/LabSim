@@ -23,6 +23,9 @@ QPushButton#btnMonitor {{
 }}
 QPushButton#btnMonitor:hover {{ color: {ACENTO}; }}
 
+QFrame#formFrame QLabel {{ color: {TEXTO_SUAVE}; }}
+QFrame#formFrame QLabel[objectName^="lbl_info_"] {{ color: {TEXTO}; font-weight: 600; }}
+
 QMainWindow::separator {{ background: transparent; width: 6px; height: 6px; }}
 
 QCheckBox {{ color: {TEXTO}; spacing: 6px; }}

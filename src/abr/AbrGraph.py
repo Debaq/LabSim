@@ -248,14 +248,14 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     def colors_side(self):
         if self.side == 0:
             self.active_color = pg.mkColor(tema.OD)
-            self.active_fill_color = '#0EFA00'
+            self.active_fill_color = '#BFE6D2'
             self.inactive_color = pg.mkColor(tema.OD_INACTIVO)
-            self.inactive_fill_color = '#B40000'
+            self.inactive_fill_color = '#F1C4C4'
         else:
             self.active_color = pg.mkColor(tema.OI)
-            self.active_fill_color = '#0EFA00'
+            self.active_fill_color = '#BFE6D2'
             self.inactive_color = pg.mkColor(tema.OI_INACTIVO)
-            self.inactive_fill_color = '#708EC7'
+            self.inactive_fill_color = '#C9DAF0'
     
     def inifine_ab(self, pos_A = 0, pos_B = None):
         pos_B = self.window_ms if pos_B is None else pos_B

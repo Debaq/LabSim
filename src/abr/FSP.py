@@ -29,12 +29,12 @@ from PySide6.QtGui import QFont
 NOISE_MIN_NV = 60.0
 # Colores: el verde es el FSP (y su eje), el gris el ruido (y el suyo), el
 # rojo el criterio del equipo.
-C_FSP = (0, 130, 60)
-C_FSP_FILL = (0, 130, 60, 45)
+C_FSP = (27, 138, 90)          # tema.OK
+C_FSP_FILL = (27, 138, 90, 45)
 C_NOISE = (120, 120, 120)
-C_CRIT = (200, 30, 30)
-C_OK = (0, 130, 60)
-C_AXIS = (60, 60, 60)
+C_CRIT = (192, 57, 43)         # tema.ALERTA
+C_OK = (27, 138, 90)
+C_AXIS = (138, 150, 163)       # tema.TEXTO_TENUE
 
 
 def _font(size, bold=False):
