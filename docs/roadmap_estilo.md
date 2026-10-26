@@ -78,7 +78,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Probar en la app real (solo renders offscreen con datos de prueba).
 - [x] Ficha clínica: encabezado con el paciente y botón Hablar con el paciente; datos,
   puntualidad e historial como tarjetas con iconos (`core/ficha.py`, también en Mis pacientes).
-- [x] Chat con el paciente: burbujas redondeadas que se adaptan al ancho (ventana de 520x560,
+- [x] Chat con el paciente: burbujas redondeadas que se adaptan al ancho (ventana de 440x500,
   antes 480x280), encabezado con la cara, estados, enviar con icono; tests en
   `tests/test_chat_ui.py`.
 - [x] Iconos por examen y módulo (`core/iconos.ICONO_MODULO`) en pestañas, botones de módulo
@@ -112,7 +112,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
 - [ ] Probar en la app real lo hecho el 2026-10-26: barra, login, agenda, ficha, evolución y
-  chat (solo renders offscreen). `Layout.php` cambió (Agenda 940x580, Chat 520x560): hay que
+  chat (solo renders offscreen). `Layout.php` cambió (Agenda 940x580, Chat 440x500): hay que
   subir el backend para que los equipos lo reciban.
 
 ### Transversal
