@@ -22,7 +22,7 @@ final class Layout
     public const APPS = [
         'LOGIN'      => [true, 'Ingreso', 0, [true, true], [410, 140], 'pre'],
         'A'          => [false, 'Audiómetro', 1, [true, true], [740, 560], 'pre'],
-        'W'          => [false, 'Lista de Palabras', 2, [true, true], [170, 500], 'pre'],
+        'W'          => [false, 'Lista de Palabras', 2, [true, true], [440, 420], 'pre'],
         'Z'          => [false, 'Impedanciómetro', 3, [true, true], [740, 560], 'pre'],
         'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], 'max', 'pre'],
         // Tamizaje automatizado: mismo equipo por dentro, otra prueba. No

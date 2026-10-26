@@ -100,6 +100,15 @@ Actualizado 2026-10-26 (noche).
   `conducto` y el resto del código usa `pabellon` (KeyError al comparar antes de cualquier cambio).
 - [ ] Probar en la app real (solo render offscreen a 900x520 y 700x420).
 
+### Lista de palabras
+- [x] Rehecha (2026-10-26): sin acordeón ni pestañas. Estado arriba ("Última: palabra" y si el
+  dictado del audiómetro está activo, con los dB), selector de las 5 listas y las 25 palabras de la
+  lista elegida en una grilla de 5x5 a la vista. Las palabras ya dictadas se atenúan para no
+  perder el hilo (se limpian al cambiar de caso). UI armada en código (`PALABRAS`, `GRUPOS`);
+  borrados `Ui_ListWord.py` y `ListWord.ui`. Ventana 440x420 (antes 170x500), `expand=True`.
+  Los botones conservan el nombre `btn_<lista><n>[_2]` que usa `pushaudio`.
+- [ ] Probar en la app real: `Layout.php` cambió (W 440x420), hay que subir el backend.
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -111,7 +120,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] AABR, EOAS (OAE), Audiómetro, Z, Lista de palabras: paleta de
+- [ ] AABR, EOAS (OAE), Audiómetro, Z: paleta de
   `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.

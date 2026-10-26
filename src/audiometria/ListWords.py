@@ -13,16 +13,76 @@ import re
 
 from PySide6 import QtCore
 from PySide6.QtMultimedia import QAudioBufferOutput, QAudioOutput, QMediaPlayer
-from PySide6.QtWidgets import QPushButton, QWidget
+from PySide6.QtWidgets import (
+    QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton,
+    QSizePolicy, QStackedWidget, QVBoxLayout, QWidget,
+)
 
 from audiometria.audio_player import audio_buffer_level
 from audiometria.h_audio import create_word, create_word_response, normalize
 from core.base import context
 from audiometria.logoaudiometry import CalculateLogo
-from audiometria.UI.Ui_ListWord import Ui_ListWords
+from core import tema
 
 
-class ListWords(QWidget, Ui_ListWords):
+# Las cinco listas de 25 palabras. Clave = (letra, sufijo) del objectName de
+# cada botón (btn_<letra><n><sufijo>, ver _BOTON_PALABRA); n = posición.
+# Grupos: (título, [(clave, rótulo de la lista)]).
+PALABRAS = {
+    ('l', ''): (
+            'Verde', 'Aire', 'Joya', 'Queso', 'Bronce',
+            'Campo', 'Lana', 'Dedo', 'Chispa', 'Lentes',
+            'Hilo', 'Cuentas', 'Gente', 'Mango', 'Nadie',
+            'Pila', 'Resta', 'Fibra', 'Sueldo', 'Doce',
+            'Serio', 'Nunca', 'Lima', 'Susto', 'Extra',
+        ),
+    ('f', ''): (
+            'Leña', 'Parque', 'Grano', 'Leyes', 'Balde',
+            'Rueda', 'Cinco', 'Viaje', 'Falda', 'Dientes',
+            'Micro', 'Chicle', 'Mundo', 'Once', 'Piso',
+            'Risa', 'Meses', 'Santo', 'Trueno', 'Pasto',
+            'Alga', 'Suerte', 'Tía', 'Bono', 'Rienda',
+        ),
+    ('f', '_2'): (
+            'Mesa', 'Cuerda', 'Noche', 'Mayo', 'Ángel',
+            'Brisa', 'Joven', 'Fiesta', 'Grieta', 'Isla',
+            'Celda', 'Lunes', 'Planta', 'Naipe', 'Marco',
+            'Senda', 'Nido', 'Buque', 'Sexto', 'Dato',
+            'Cerro', 'Río', 'Conde', 'Súper', 'Liso',
+        ),
+    ('g', ''): (
+            'Barco', 'Libro', 'Brazo', 'Pescado', 'Puerta',
+            'Pelota', 'Amigo', 'Automóvil', 'Palo', 'Mamadera',
+            'Silla', 'Plato', 'Taza', 'Ventana', 'Avión',
+            'Escuela', 'Perro', 'Guagua', 'Hospital', 'Mesa',
+            'Hermano', 'Cielo', 'Estufa', 'León', 'Luna',
+        ),
+    ('h', ''): (
+            'Sol', 'Montaña', 'Cortina', 'Moto', 'Loza',
+            'Cuaderno', 'Flor', 'Reloj', 'Tren', 'Leche',
+            'Cuchara', 'Tierra', 'Anillo', 'Payaso', 'Hoja',
+            'Compañero', 'Delantal', 'Cama', 'Pan', 'Árbol',
+            'Bandera', 'Colegio', 'Mantel', 'Televisión', 'Camión',
+        ),
+}
+GRUPOS = (
+    ("DISÍLABOS (PALACIOS)", (("l", ""), ("f", ""), ("f", "_2"))),
+    ("TÉRMINOS CONOCIDOS", (("g", ""), ("h", ""))),
+)
+COLUMNAS = 5
+
+EXTRA_QSS = f"""
+QPushButton[palabra="true"] {{ padding: 7px 2px; }}
+QPushButton[palabra="true"][usada="true"] {{
+    background: {tema.TARJETA_ALT};
+    color: {tema.TEXTO_TENUE};
+    border-color: {tema.BORDE};
+}}
+QPushButton[lista="true"] {{ padding: 5px 4px; }}
+"""
+
+
+class ListWords(QWidget):
     # nivel normalizado 0.0-1.0 de la palabra reproducida (no de la respuesta del paciente)
     level_changed = QtCore.Signal(float)
 
@@ -37,7 +97,7 @@ class ListWords(QWidget, Ui_ListWords):
         self.prev = None
         self.prev_int = 0
         self.la_super(data)
-        self.setupUi(self)
+        self.setupUi()
         # playable, intencity, side, with_mkg, int_mkg, stim_mkg
         # (es playable solo si esta en invertido)
         self.playable = [False, 0, None, False, None, None]
@@ -56,6 +116,106 @@ class ListWords(QWidget, Ui_ListWords):
         self.create_timer()
         
         
+    # ------------------------------------------------------------- UI ----
+
+    def setupUi(self):
+        """Todas las palabras de la lista elegida a la vista, sin acordeón:
+        se elige la lista arriba y las 25 palabras quedan en una grilla.
+        Las ya dictadas se atenúan para no perder el hilo."""
+        tema.aplicar_estilo(self, EXTRA_QSS)
+        raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(12, 10, 12, 12)
+        raiz.setSpacing(8)
+
+        # Estado del dictado + última palabra
+        estado, col = self._tarjeta()
+        fila = QHBoxLayout()
+        self.lbl_dictado = QLabel()
+        self.lbl_dictado.setProperty("pill", "neutro")
+        self.lbl_ultima = QLabel("Última: —")
+        self.lbl_ultima.setProperty("role", "titulo")
+        fila.addWidget(self.lbl_ultima, 1)
+        fila.addWidget(self.lbl_dictado)
+        col.addLayout(fila)
+        raiz.addWidget(estado)
+        self._mostrar_dictado()
+
+        # Selector de lista
+        selector, col = self._tarjeta()
+        self.grupo_listas = QButtonGroup(self)
+        self.grupo_listas.setExclusive(True)
+        self.paginas = QStackedWidget()
+        for titulo, listas in GRUPOS:
+            lbl = QLabel(titulo)
+            lbl.setProperty("role", "seccion")
+            fila = QHBoxLayout()
+            fila.setSpacing(6)
+            for clave in listas:
+                btn = QPushButton(f"Lista {listas.index(clave) + 1}")
+                btn.setCheckable(True)
+                btn.setProperty("lista", "true")
+                self.grupo_listas.addButton(btn, self.paginas.count())
+                fila.addWidget(btn, 1)
+                self.paginas.addWidget(self._pagina(clave))
+            if len(listas) < 3:
+                fila.addStretch(1)
+            col.addWidget(lbl)
+            col.addLayout(fila)
+        self.grupo_listas.button(0).setChecked(True)
+        self.grupo_listas.idClicked.connect(self.paginas.setCurrentIndex)
+        raiz.addWidget(selector)
+
+        # Palabras
+        grilla, col = self._tarjeta()
+        col.addWidget(self.paginas, 1)
+        raiz.addWidget(grilla, 1)
+
+    @staticmethod
+    def _tarjeta():
+        tarjeta = QFrame()
+        tarjeta.setProperty("card", "true")
+        col = QVBoxLayout(tarjeta)
+        col.setContentsMargins(12, 10, 12, 12)
+        col.setSpacing(6)
+        return tarjeta, col
+
+    def _pagina(self, clave):
+        pagina = QWidget()
+        grid = QGridLayout(pagina)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setSpacing(6)
+        letra, sufijo = clave
+        for i, palabra in enumerate(PALABRAS[clave]):
+            btn = QPushButton(palabra)
+            btn.setObjectName(f"btn_{letra}{i + 1}{sufijo}")
+            btn.setProperty("palabra", "true")
+            btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            grid.addWidget(btn, i // COLUMNAS, i % COLUMNAS)
+        return pagina
+
+    def _limpiar_usadas(self):
+        """Nuevo caso: las palabras vuelven a estar sin dictar."""
+        for btn in self.findChildren(QPushButton):
+            if btn.property("usada"):
+                self._marcar_usada(btn, False)
+
+    @staticmethod
+    def _marcar_usada(btn, usada=True):
+        btn.setProperty("usada", "true" if usada else "")
+        tema.repintar(btn)
+
+    def _mostrar_dictado(self, activo=False, intensidad=None):
+        """La píldora dice si lo que se pulse va a sonar: sin dictado activo
+        en el audiómetro no suena nada y no había cómo saberlo."""
+        if activo:
+            texto = "Dictado activo" if intensidad is None else f"Dictado activo · {intensidad} dB"
+            self.lbl_dictado.setProperty("pill", "acento")
+        else:
+            texto = "Sin dictado: actívalo en el audiómetro"
+            self.lbl_dictado.setProperty("pill", "neutro")
+        self.lbl_dictado.setText(texto)
+        tema.repintar(self.lbl_dictado)
+
     def create_channels(self):
         #self.channel_0 = QMediaPlayer(self)
         self.output_ch = QAudioOutput()
@@ -119,6 +279,7 @@ class ListWords(QWidget, Ui_ListWords):
     def la_super(self, data, appointment_id=None):
         if data is None:
             return
+        self._limpiar_usadas()
         self.is_response = data['sector'] == "Camara_sono"
         # TODO: solo existen audios de respuesta grabados como feme1/feme2
         # (resources/audio/LP_palacios_r_feme{1,2}_*.mp3). No hay voces "male"
@@ -149,6 +310,7 @@ class ListWords(QWidget, Ui_ListWords):
 
     def pushaudio(self):
         btn = self.sender()
+        self.sender_btn = btn
         self.num = int(self._BOTON_PALABRA.match(btn.objectName()).group(1))
         self.text = (btn.text()).lower()
         file = f"LP_palacios_1_{self.text}"
@@ -163,11 +325,8 @@ class ListWords(QWidget, Ui_ListWords):
             self.channel_0.setSource(word)
             self.channel_0.play()
             self.time_1.start(50)  # sin intervalo corria a 0 ms, a full CPU
-            self.lbl_list1.setText(f"Última : {self.text}")
-            self.lbl_list2.setText(f"Última : {self.text}")
-            self.lbl_list2_2.setText(f"Última : {self.text}")
-            self.lbl_list3.setText(f"Última : {self.text}")
-            self.lbl_list4.setText(f"Última : {self.text}")
+            self.lbl_ultima.setText(f"Última: {self.text}")
+            self._marcar_usada(self.sender_btn)
 
     #def processProbe(self, buff):
         #print(buff.constData())
@@ -185,6 +344,7 @@ class ListWords(QWidget, Ui_ListWords):
         self.playable[4] = int_mkg
         self.playable[5] = stim_mkg
         self.playable[0] = bool(state[1])
+        self._mostrar_dictado(self.playable[0], intencity)
         self.calculate(intencity, side, with_mkg, int_mkg, stim_mkg)
         
         
