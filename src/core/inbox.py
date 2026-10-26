@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (QPushButton, QWidget, QVBoxLayout, QTextEdit,
                                 QTableWidget, QTableWidgetItem, QHeaderView,
                                 QAbstractItemView)
 
+from core import iconos, tema
 from core.helpers import inbox_list, inbox_marcar_leido
 
 BTN_OBJECT_NAME = "btn_bandeja_oirs"
@@ -121,6 +122,7 @@ def crear_boton(main_window, layout):
     btn = QPushButton("Bandeja de entrada")
     btn.setObjectName(BTN_OBJECT_NAME)
     btn.setToolTip("Bandeja de entrada")
+    btn.setIcon(iconos.icono_boton("bandeja", tema.TEXTO_SUAVE, tema.ACENTO, 18))
     btn.setMaximumHeight(25)
     btn.clicked.connect(lambda: abrir(main_window))
     layout.addWidget(btn)

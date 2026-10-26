@@ -15,7 +15,7 @@ from PySide6.QtGui import QMouseEvent, QIcon, QPixmap, QPainter, QPen, QColor
 from PySide6.QtWidgets import QPushButton, QLayout, QFrame
 from PySide6.QtWidgets import QMdiArea, QMdiSubWindow
 from core.h_win import FrameSubMdi, MdiArea
-from core import inbox
+from core import iconos, inbox, tema
 from core import mis_pacientes
 from core.base import context
 from core.helpers import Preferences
@@ -446,6 +446,9 @@ class ToolBar(SubWindow):
                 btn = QPushButton()
                 btn.setObjectName(i)
                 btn.setText(self.boxs[i][2])
+                if i in iconos.ICONO_MODULO:
+                    btn.setIcon(iconos.icono_boton(iconos.ICONO_MODULO[i], "#FFFFFF", tema.ACENTO, 16))
+                    btn.setIconSize(QSize(16, 16))
                 btn.clicked.connect(self.changeArea)
                 btn.setMinimumHeight(30)
                 btn.setCheckable(True)
@@ -476,6 +479,9 @@ class ToolBar(SubWindow):
                 continue
             btn = QPushButton(f'{i}')
             btn.setObjectName(f"btn_{i}")
+            if i in iconos.ICONO_MODULO:
+                btn.setIcon(iconos.icono_boton(iconos.ICONO_MODULO[i], tema.TEXTO_SUAVE, tema.ACENTO, 18))
+                btn.setIconSize(QSize(18, 18))
             btn.clicked.connect(self.activate_soft)
             tooltip = self.apps[i][1]
             btn.setToolTip(tooltip)

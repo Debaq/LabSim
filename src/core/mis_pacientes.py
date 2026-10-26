@@ -30,6 +30,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QPushButton,
                                 QAbstractItemView, QTextEdit, QTabWidget, QLabel)
 
 from core.helpers import mis_atenciones, mi_conversacion, mis_informes, CasesOffline, Shedule
+from core import iconos, tema
 from core.ficha import poner_html, render_ficha_html
 from core.practica import abrir_ficha_estudio
 
@@ -360,6 +361,7 @@ def crear_boton(main_window, layout):
     btn = QPushButton("Mis pacientes")
     btn.setObjectName(BTN_OBJECT_NAME)
     btn.setToolTip("Pacientes que has atendido")
+    btn.setIcon(iconos.icono_boton("persona", tema.TEXTO_SUAVE, tema.ACENTO, 18))
     btn.setMaximumHeight(25)
     btn.clicked.connect(lambda: abrir(main_window))
     layout.addWidget(btn)

@@ -19,6 +19,7 @@ from audiometria.DebugMkg import DebugMkgDialog
 from auth import login as Ui_login
 from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
+from core import iconos, tema
 from core import inbox
 from core import mis_pacientes
 from core import app_config_store
@@ -400,6 +401,24 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         registro.marcar_salida()
         self.close()
         context.app.quit()
+
+    # Ancho de ventana bajo el cual los botones de acción pierden el texto.
+    ANCHO_ACCIONES_COMPACTO = 1280
+
+    def _compactar_acciones(self):
+        """Los botones de la derecha (Hablar con el paciente, Configuración...)
+        no caben con texto en los PC de poca resolución: se dejan solo con su
+        icono y el nombre pasa al tooltip."""
+        compacto = self.width() < self.ANCHO_ACCIONES_COMPACTO
+        for i in range(self.layoutAction.count()):
+            boton = self.layoutAction.itemAt(i).widget()
+            texto = boton.property("texto_completo") if boton is not None else None
+            if texto:
+                boton.setText("" if compacto else texto)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._compactar_acciones()
 
     def changeEvent(self, event):
         super().changeEvent(event)
@@ -1194,6 +1213,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
 
+    @staticmethod
+    def _icono_accion(boton, nombre):
+        """Icono de línea en un botón de la barra de acciones."""
+        boton.setIcon(iconos.icono_boton(nombre, tema.TEXTO_SUAVE, tema.ACENTO, 18))
+        boton.setIconSize(QSize(18, 18))
+        # Con poco ancho pasan a solo icono (ver _compactar_acciones).
+        boton.setProperty("texto_completo", boton.text())
+        if not boton.toolTip():
+            boton.setToolTip(boton.text())
+
     def btns_actions(self):
         for i in reversed(range(self.layoutAction.count())):
             widget = self.layoutAction.itemAt(i).widget()
@@ -1206,27 +1235,32 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_debug_mkg = None
         if self._module_visible("CHAT"):
             self.btn_chat_paciente = QPushButton("Hablar con el paciente")
+            self._icono_accion(self.btn_chat_paciente, "mensaje")
             self.btn_chat_paciente.setObjectName("btn_chat_paciente")
             self.btn_chat_paciente.clicked.connect(self.abrir_chat_paciente)
             self.layoutAction.addWidget(self.btn_chat_paciente)
         if self._module_visible("CVOICE"):
             self.btn_cmd_voice = QPushButton("Comandos de voz")
+            self._icono_accion(self.btn_cmd_voice, "microfono")
             self.btn_cmd_voice.setObjectName("btn_CVOICE")
             self.btn_cmd_voice.clicked.connect(self.activate_soft)
             self.layoutAction.addWidget(self.btn_cmd_voice)
         if self._module_visible("W"):
             self.btn_list_words = QPushButton("Listas de Palabras")
+            self._icono_accion(self.btn_list_words, "lista")
             self.btn_list_words.setObjectName("btn_W")
             self.btn_list_words.clicked.connect(self.activate_listWords)
             self.layoutAction.addWidget(self.btn_list_words)
         # Rescate: una subventana tapada o corrida se cierra desde acá sin
         # tener que encontrarle la ✕.
         self.btn_cerrar_ventanas = QPushButton("Cerrar ventanas")
+        self._icono_accion(self.btn_cerrar_ventanas, "cerrar")
         self.btn_cerrar_ventanas.setObjectName("btn_cerrar_ventanas")
         self.btn_cerrar_ventanas.clicked.connect(self.cerrar_ventanas)
         self.layoutAction.addWidget(self.btn_cerrar_ventanas)
         # Atajos de teclado y mouse para zurdos, guardados en el perfil.
         self.btn_configuracion = QPushButton("Configuración")
+        self._icono_accion(self.btn_configuracion, "engranaje")
         self.btn_configuracion.setObjectName("btn_configuracion")
         self.btn_configuracion.clicked.connect(lambda: configuracion.abrir(self))
         self.layoutAction.addWidget(self.btn_configuracion)
@@ -1235,10 +1269,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # enmascaramiento en vivo. Solo admin/docente -- al alumno le
             # entregaría las respuestas del caso.
             self.btn_debug_mkg = QPushButton("Depurar enmascaramiento")
+            self._icono_accion(self.btn_debug_mkg, "alerta")
             self.btn_debug_mkg.setObjectName("btn_debug_mkg")
             self.btn_debug_mkg.clicked.connect(self.abrir_debug_mkg)
             self.layoutAction.addWidget(self.btn_debug_mkg)
         self._update_action_buttons()
+        self._compactar_acciones()
 
     def cerrar_ventanas(self):
         """Oculta todas las subventanas normales, igual que su ✕ (el

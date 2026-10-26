@@ -78,6 +78,11 @@ Actualizado 2026-10-26 (tarde).
 - [ ] Probar en la app real (solo renders offscreen con datos de prueba).
 - [x] Ficha clínica: encabezado con el paciente y botón Hablar con el paciente; datos,
   puntualidad e historial como tarjetas con iconos (`core/ficha.py`, también en Mis pacientes).
+- [x] Chat con el paciente: burbujas redondeadas que se adaptan al ancho (ventana de 520x560,
+  antes 480x280), encabezado con la cara, estados, enviar con icono; tests en
+  `tests/test_chat_ui.py`.
+- [x] Iconos por examen y módulo (`core/iconos.ICONO_MODULO`) en pestañas, botones de módulo
+  y de acción; con poco ancho (<1280) las acciones quedan solo con icono.
 - [x] Evolución: encabezado, pasos de la atención y botón Guardar con icono.
 - [ ] Chat con el paciente sigue con el diseño viejo.
 
@@ -96,7 +101,6 @@ Actualizado 2026-10-26 (tarde).
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
 - [ ] Probar la barra nueva en la app real (solo se vio en un render offscreen con botones de prueba).
-- [ ] Chat con el paciente (`agenda/ChatPaciente.py`).
 
 ### Transversal
 - [ ] Bajar el exceso de blanco/claro en toda la app: la barra de estado, los módulos ya
