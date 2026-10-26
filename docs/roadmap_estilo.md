@@ -1,8 +1,8 @@
 # Roadmap de estilo
 
 Rediseño visual de LabSim. Referencia: el módulo VEMP (tarjetas blancas sobre
-lienzo gris azulado, un solo acento morado, OD rojo y OI azul en todo).
-Actualizado 2026-10-26 (tarde).
+lienzo gris con tinte morado, un solo acento morado, OD rojo y OI azul en todo).
+Actualizado 2026-10-26 (noche).
 
 ## Reglas
 
@@ -97,14 +97,22 @@ Actualizado 2026-10-26 (tarde).
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] AABR, EOAS (OAE), Audiómetro, Acumetría, Otoscopia, Z, Lista de palabras.
+- [ ] AABR, EOAS (OAE), Audiómetro, Acumetría, Otoscopia, Z, Lista de palabras: paleta de
+  `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
+- [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
+- [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
-- [ ] Probar la barra nueva en la app real (solo se vio en un render offscreen con botones de prueba).
+- [ ] Probar en la app real lo hecho el 2026-10-26: barra, login, agenda, ficha, evolución y
+  chat (solo renders offscreen). `Layout.php` cambió (Agenda 940x580, Chat 520x560): hay que
+  subir el backend para que los equipos lo reciban.
 
 ### Transversal
-- [ ] Bajar el exceso de blanco/claro en toda la app: la barra de estado, los módulos ya
-  hechos (ABR, VEMP) y lo que falta. Decidir si se tiñe más con morado suave.
+- [ ] Bajar el exceso de blanco/claro en toda la app: la barra de estado (sigue gris del
+  sistema), los módulos ya hechos (ABR, VEMP) y lo que falta. La paleta con tinte morado
+  gustó; falta aplicarla igual a lo que queda.
+- [ ] Dos textos con `#1f2933` fijo (`core/secretaria.py`, `core/actualizacion_kiosko.py`) y
+  el QSS de `abr/style_base.qss`: pasarlos a `tema.py`.
 - [ ] Probar todo a 1366×768 / 1280×720 / 1024×768 con las resoluciones reales de los PC.
 - [ ] Rellenar `tema.py` con lo que falte al ir sumando módulos (que no se copie color
   entre módulos).
