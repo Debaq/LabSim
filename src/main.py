@@ -1154,7 +1154,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         from vemp.VempMainWindow import VempMainWindow
 
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
-        self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current))
+        self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current), expand=True)
         self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current), expand=True)
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())

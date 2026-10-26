@@ -84,7 +84,6 @@ Actualizado 2026-10-26 (noche).
 - [x] Iconos por examen y módulo (`core/iconos.ICONO_MODULO`) en pestañas, botones de módulo
   y de acción; con poco ancho (<1280) las acciones quedan solo con icono.
 - [x] Evolución: encabezado, pasos de la atención y botón Guardar con icono.
-- [ ] Chat con el paciente sigue con el diseño viejo.
 
 ### Otoscopia
 - [x] Rehecha (2026-10-26): pestañas con subrayado y icono, una tarjeta por oído con píldora OD/OI,
@@ -93,6 +92,13 @@ Actualizado 2026-10-26 (noche).
   `tema.py` (los colores por hallazgo y el esquema ocre se mantienen: son los de OtoReport).
   `expand=True` en el marco MDI.
 - [ ] Probar en la app real (solo render offscreen a 1000x580 y 1024x560).
+
+### Acumetría
+- [x] Rehecha (2026-10-26): mandos en una tarjeta angosta (diapasón y oído como botones
+  segmentados, OD rojo / OI azul; pasos con icono) y la conversación en otra a todo el alto,
+  con "Tú" y "Paciente" coloreados. `expand=True`. De paso: `_rinne_probado` nacía con la clave
+  `conducto` y el resto del código usa `pabellon` (KeyError al comparar antes de cualquier cambio).
+- [ ] Probar en la app real (solo render offscreen a 900x520 y 700x420).
 
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
@@ -105,7 +111,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] AABR, EOAS (OAE), Audiómetro, Acumetría, Z, Lista de palabras: paleta de
+- [ ] AABR, EOAS (OAE), Audiómetro, Z, Lista de palabras: paleta de
   `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
