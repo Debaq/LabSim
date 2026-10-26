@@ -1,3 +1,6 @@
+import time as _time
+_T0_ARRANQUE = _time.time()  # core/tiempos.py cuenta desde acá
+
 from pathlib import Path
 import copy
 import faulthandler
@@ -25,7 +28,7 @@ from core.report_autosave import ReportAutosave, subir_pendientes
 from core.secretaria import Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
-from core import mouse_zurdo, configuracion, hilos, registro, respaldo_informes
+from core import mouse_zurdo, configuracion, hilos, registro, respaldo_informes, tiempos
 from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
@@ -97,6 +100,10 @@ sys.stderr = Logger(LOG_FILE, stream=sys.__stderr__, max_bytes=registro.MAX_BYTE
 # el mismo log antes de que el proceso se vaya.
 faulthandler.enable(file=open(LOG_FILE, 'a', buffering=1))
 print(registro.encabezado())
+# Tiempos de la app en terreno (core/tiempos.py): quedan en la carpeta de
+# datos para retirarlos del equipo; no se suben.
+tiempos.instalar(_T0_ARRANQUE)
+tiempos.hito("registro listo")
 # Si la vez anterior no terminó bien, al abrir se ofrece mandar el registro
 # (ver core/soporte.ofrecer_envio_por_cierre).
 CIERRE_PREVIO = registro.marcar_inicio(LOG_FILE)
@@ -1117,6 +1124,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 print(f"{attr}: no se pudo cargar el caso:")
                 traceback.print_exc()
 
+    @tiempos.medir("cargar subventanas")
     def load_sub_windows(self):
         """Carga las subventanas"""
         from abr.AabrMainWindow import AabrMainWindow
@@ -1509,6 +1517,7 @@ def _download_and_apply(update, silencioso=False):
         progress.close()
 
 
+@tiempos.medir("precarga de módulos")
 def _precargar_modulos():
     """Importa los módulos de examen mientras se muestra el login.
 
@@ -1613,12 +1622,19 @@ if __name__ == '__main__':
     # Windows Qt no encuentra uno en el .exe (PyInstaller no deja IDI_ICON1)
     # y queda el genérico. Ver scripts/generar_icono.py.
     context.app.setWindowIcon(QIcon(context.get_resource("img/icono_app.png")))
-    window = MainWindow()
-    Preferences.get_style(window)
-    if es_kiosko():
-        window.showFullScreen()
-    else:
-        window.show()
+    tiempos.iniciar_ui()
+    tiempos.hito("antes de MainWindow")
+    with tiempos.medir("arranque: MainWindow()"):
+        window = MainWindow()
+    with tiempos.medir("arranque: estilo (QSS)"):
+        Preferences.get_style(window)
+    with tiempos.medir("arranque: primer show"):
+        if es_kiosko():
+            window.showFullScreen()
+        else:
+            window.show()
+    tiempos.hito("ventana mostrada")
+    QTimer.singleShot(0, lambda: tiempos.hito("primera vuelta del bucle"))
     despertador = atender_apagado(window.cerrar_por_apagado)
     QTimer.singleShot(0, _precargar_modulos)
     if CIERRE_PREVIO:

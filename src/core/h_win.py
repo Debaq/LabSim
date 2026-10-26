@@ -1,4 +1,5 @@
 from core.base import context
+from core import tiempos
 from PySide6.QtCore import Qt, QEvent, QTimer, Signal
 from PySide6.QtGui import QPainter, QPixmap
 from PySide6.QtWidgets import QMdiArea, QWidget
@@ -79,6 +80,7 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         self.parent().hide()
 
     def showEvent(self, event):
+        tiempos.marca(f"mostrar {type(self.obj).__name__}")
         super().showEvent(event)
         self.visibility_changed.emit(True)
 
