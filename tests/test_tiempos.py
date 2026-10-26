@@ -87,7 +87,22 @@ def test_bloqueo_con_pila_y_http_en_ui():
     srv.shutdown()
 
 
+def test_un_cuelgue_que_no_termina_deja_las_pilas_de_todos_los_hilos():
+    """Un bloqueo se escribe al terminar; uno que no termina no se escribiría
+    nunca. El vigía vuelca las pilas mientras dura."""
+    tiempos.COLGADO_MS = 150
+    tiempos.COLGADO_CADA_S = 0.1
+    QTimer.singleShot(0, lambda: time.sleep(0.7))
+    _esperar_bucle(900)
+    ev = [e for e in _eventos() if e["tipo"] == "colgado"]
+    assert ev, "no hubo volcado"
+    assert any("lambda" in e["pilas"]["ui"] or "sleep" in e["pilas"]["ui"] or "test_tiempos" in e["pilas"]["ui"]
+               for e in ev), ev[0]["pilas"]
+    assert "tiempos" in ev[0]["pilas"] and ev[0]["candado_tomado"] is False
+
+
 if __name__ == "__main__":
     test_ruta_sin_consulta_ni_ids()
     test_bloqueo_con_pila_y_http_en_ui()
+    test_un_cuelgue_que_no_termina_deja_las_pilas_de_todos_los_hilos()
     print("ok")

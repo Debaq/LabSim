@@ -38,6 +38,8 @@ from core import rutas
 LATIDO_MS = 30            # cada cuánto el hilo de la ventana "late"
 UMBRAL_BLOQUEO_MS = 120   # más que esto sin latir = bloqueo
 SUSPENSION_MS = 30_000    # más que esto es el equipo dormido, no la app
+COLGADO_MS = 1500         # la ventana sigue sin latir: se vuelcan las pilas YA
+COLGADO_CADA_S = 3        # y de nuevo cada tanto mientras siga así
 UMBRAL_LENTO_MS = 150     # una operación medida más lenta que esto se escribe suelta
 RESUMEN_CADA_S = 60
 VACIAR_CADA_S = 2
@@ -238,7 +240,7 @@ def _pila(frame, limite=14):
 def _vigia():
     """Hilo aparte: mientras la ventana no late, le saca la pila; cada
     VACIAR_CADA_S escribe lo pendiente; cada RESUMEN_CADA_S el resumen."""
-    ultimo_vaciado = ultimo_resumen = time.monotonic()
+    ultimo_vaciado = ultimo_resumen = ultimo_colgado = time.monotonic()
     while True:
         time.sleep(0.04)
         try:
@@ -250,6 +252,11 @@ def _vigia():
                     with _lock:
                         _pilas[clave] += 1
             ahora = time.monotonic()
+            if (_ultimo_latido is not None and ahora - ultimo_colgado >= COLGADO_CADA_S
+                    and (time.perf_counter() - _ultimo_latido) * 1000 > COLGADO_MS
+                    and (time.perf_counter() - _ultimo_latido) * 1000 < SUSPENSION_MS):
+                ultimo_colgado = ahora
+                _volcar_colgado()
             if ahora - ultimo_resumen >= RESUMEN_CADA_S:
                 ultimo_resumen = ahora
                 _resumen()
@@ -258,6 +265,30 @@ def _vigia():
                 _vaciar()
         except Exception:  # noqa: BLE001 -- medir nunca tira abajo a la app
             pass
+
+
+def _volcar_colgado():
+    """La ventana lleva más de COLGADO_MS sin volver al bucle: un bloqueo
+    normal se escribe recién al terminar, y uno que no termina (cuelgue, o
+    un candado cruzado) no se escribiría nunca. Acá se vuelcan las pilas de
+    TODOS los hilos directo al archivo, sin pasar por el candado de este
+    módulo (que podría ser justo el que está tomado)."""
+    hilos = {t.ident: t.name for t in threading.enumerate()}
+    pilas = {}
+    for ident, frame in sys._current_frames().items():
+        nombre = "ui" if ident == _hilo_ui else hilos.get(ident, str(ident))
+        pilas[nombre] = _pila(frame, 10)
+    tomado = not _lock.acquire(timeout=0.2)
+    if not tomado:
+        _lock.release()
+    linea = json.dumps({"t": _ms(), "ts": datetime.now().strftime("%H:%M:%S.%f")[:-3],
+                        "tipo": "colgado", "sin_latir_ms": round((time.perf_counter() - _ultimo_latido) * 1000),
+                        "candado_tomado": tomado, "pilas": pilas}, ensure_ascii=False, default=str)
+    try:
+        _archivo.write(linea + "\n")
+        _archivo.flush()
+    except (OSError, ValueError):
+        pass
 
 
 def _percentil(ordenados, p):
