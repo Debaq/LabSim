@@ -18,6 +18,8 @@ from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
                                level_label, sl_reference,
                                case_quality, latency_intensity_band,
                                normative_limits, raw_eeg)
+from abr.estilo import QSS_ABR, TARJETAS
+from core import tema
 from abr.AssrPanel import AssrPanel
 from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
@@ -47,7 +49,7 @@ from core.helpers import Preferences, es_docente
 from core import hilos, respaldo_informes
 from core.report_autosave import recuperar, subir_ahora
 from core.rng import stable_seed
-from PySide6.QtCore import QCoreApplication, QTimer
+from PySide6.QtCore import QCoreApplication, Qt, QTimer
 from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QPushButton,
                                QSizePolicy, QSpacerItem)
 
@@ -177,6 +179,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.layout_dock_values_contents.addWidget(self.table_cx_r)
         self.layout_dock_values_contents.addWidget(self.table_cx_l)
         self.layout_dock_values_contents.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        tema.aplicar_estilo(self, QSS_ABR)
+        for nombre in TARJETAS:
+            w = getattr(self, nombre, None)
+            if w is not None:
+                w.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         ########Conexiones de slots
         self.actionP_rametros_Avanzados.triggered.connect(self.active_advance_setting)

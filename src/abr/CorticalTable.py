@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel,
                                QVBoxLayout, QWidget)
 
 from abr import cortical
+from core import tema
 
 tr = QCoreApplication.translate
 
@@ -62,6 +63,7 @@ class CorticalTable(QWidget):
         self.cabecera = QHBoxLayout()
         self.label = QLabel(self.side_text)
         self.cabecera.addWidget(self.label)
+        tema.pastilla_lado(self.label, self.side)
         self.cabecera.addStretch(1)
         layout.addLayout(self.cabecera)
         self.botones = []
@@ -72,7 +74,7 @@ class CorticalTable(QWidget):
             QHeaderView.ResizeMode.ResizeToContents)
         self.tabla.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.tabla.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
-        color = 'rgba(255, 0, 127, 30)' if self.side == 0 else '#9965f4'
+        color = tema.OD_SUAVE if self.side == 0 else tema.OI_SUAVE
         self.tabla.setStyleSheet(
             f"QTableWidget::item{{ background-color:{color}; }}")
         layout.addWidget(self.tabla)

@@ -2,6 +2,7 @@ from PySide6.QtCore import QCoreApplication, Signal, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QWidget, QTableWidgetItem, QHeaderView
 from abr.UI.AbrTableInfo_ui import Ui_TableData
+from core import tema
 
 tr = QCoreApplication.translate
 
@@ -38,6 +39,7 @@ class AbrTable(QWidget, Ui_TableData):
             i.setMinimumWidth(width)
 
         self.label.setText(self.side_text)
+        tema.pastilla_lado(self.label, self.side)
 
     # ------------------------------------------------------------ normativa
     WAVE_ROWS = {'I': 0, 'II': 1, 'III': 2, 'IV': 3, 'V': 4}
@@ -121,11 +123,7 @@ class AbrTable(QWidget, Ui_TableData):
             self.flag_cell(self.tw_inter, self.RATIO_ROW, 0, True, None)
 
     def get_color_table(self) -> QColor:
-        if self.side == 0:
-            color = 'rgba(255, 0, 127, 30)'
-        else:
-            color = '#9965f4'
-        return color
+        return tema.OD_SUAVE if self.side == 0 else tema.OI_SUAVE
 
     def get_cols_rows(self, table) -> (int,int):
         cols = table.columnCount()

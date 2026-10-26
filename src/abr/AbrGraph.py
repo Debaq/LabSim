@@ -6,6 +6,7 @@ import pyqtgraph as pg
 from abr.smooth import smooth_curve_gaussian
 from abr.WidgetsMods import (GraphicsLayoutWidgetMod, InfiniteLineMod,
                              TextItemMod)
+from core import tema
 from core.base import context
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QFont
@@ -163,7 +164,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def configure_pyqtgraph(self):
         self.color_background = pg.mkColor(255, 255, 255, 255)
-        self.color_pen = pg.mkColor(0, 0, 0, 255)
+        self.color_pen = pg.mkColor(tema.GRILLA_FUERTE)
+        self.color_texto = pg.mkColor(tema.TEXTO_TENUE)
         self.setBackground(self.color_background)
     
     def setup_ui_elements(self):
@@ -172,7 +174,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.pw.setRange(yRange=(-self.scale_uv / 2, self.scale_uv / 2),
                          xRange=(0, self.window_ms + 1),
                          disableAutoRange=True)
-        self.grid = pg.GridItem(pen=self.color_pen, textPen=self.color_pen)
+        self.grid = pg.GridItem(pen=self.color_pen, textPen=self.color_texto)
         self.pw.addItem(self.grid)
         self.grid.setTickSpacing(x=[1.0], y=[1.0])
         self.pw.setMouseEnabled(x=False, y=True)
@@ -245,21 +247,21 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def colors_side(self):
         if self.side == 0:
-            self.active_color = pg.mkColor(255, 0, 0, 255)
+            self.active_color = pg.mkColor(tema.OD)
             self.active_fill_color = '#0EFA00'
-            self.inactive_color = pg.mkColor(180, 0, 0, 255)
+            self.inactive_color = pg.mkColor(tema.OD_INACTIVO)
             self.inactive_fill_color = '#B40000'
         else:
-            self.active_color = pg.mkColor(106, 154, 242, 255)
+            self.active_color = pg.mkColor(tema.OI)
             self.active_fill_color = '#0EFA00'
-            self.inactive_color = pg.mkColor(112, 142, 199, 255)
+            self.inactive_color = pg.mkColor(tema.OI_INACTIVO)
             self.inactive_fill_color = '#708EC7'
     
     def inifine_ab(self, pos_A = 0, pos_B = None):
         pos_B = self.window_ms if pos_B is None else pos_B
         #Variables internas
-        pen1 = pg.mkPen('b', width=1, style=Qt.PenStyle.DashLine)
-        opst = {'position':0.9, 'color': (255,255,255), 'fill': (0,0,0,255), 'movable': True}
+        pen1 = pg.mkPen(tema.ACENTO, width=1, style=Qt.PenStyle.DashLine)
+        opst = {'position':0.9, 'color': (255,255,255), 'fill': pg.mkColor(tema.ACENTO), 'movable': True}
         name_a = f"A{self.side}"
         name_b = f"B{self.side}"
         # Lineas infinitas. La bandera dice su latencia ({value} lo
@@ -1083,7 +1085,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # La grilla escribe sus numeros con la transformacion de la vista:
         # invertida, salen espejados. Se apagan; la escala sigue en el
         # rotulo de la barra.
-        self.grid.setTextPen(None if self.y_inverted else self.color_pen)
+        self.grid.setTextPen(None if self.y_inverted else self.color_texto)
         for nombre in self.data:
             self.move_marks(nombre)
 
