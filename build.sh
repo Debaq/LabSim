@@ -8,9 +8,10 @@ micromamba activate labsim
 python -m PyInstaller LabSim.spec --noconfirm
 
 # Que lo que carga la app venga del dist y no del sistema (ver
-# docs/decisiones.md, "Build encapsulado"). Necesita sesión gráfica.
-if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+# docs/decisiones.md, "Build encapsulado"). Corre en un Xvfb, sin ventana
+# en pantalla; sin Xvfb ni sesión gráfica no se puede verificar.
+if command -v Xvfb >/dev/null || [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
     python scripts/verificar_bundle.py dist/LabSim --plataforma xcb
 else
-    echo "verificar_bundle: sin sesión gráfica, no se verificó el build" >&2
+    echo "verificar_bundle: sin Xvfb ni sesión gráfica, no se verificó el build" >&2
 fi

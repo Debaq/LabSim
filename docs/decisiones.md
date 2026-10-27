@@ -5131,7 +5131,9 @@ Ahora (`LabSim.spec`, "Build encapsulado"):
 - Al final del build se revisa cada ELF del dist: si alguno pide (NEEDED) una
   lib que no está en el dist ni en `SISTEMA_PERMITIDO` (glibc y el despachador
   GL de glvnd), el build se corta.
-- `scripts/verificar_bundle.py` (lo corre `build.sh` si hay sesión gráfica)
+- `scripts/verificar_bundle.py` (lo corre `build.sh`, en un Xvfb propio para
+  que no aparezca una ventana que alguien cierre a media medición: así se
+  cayó el release del 2026-10-27; sin Xvfb usa la sesión gráfica)
   arranca el dist unos segundos y lista lo que cargó de fuera; falla si hay
   algo más que glibc, sus módulos nss, glvnd y libpipewire (permitida: tiene
   que calzar con el daemon del equipo). Borra lo que la app escribe en el
