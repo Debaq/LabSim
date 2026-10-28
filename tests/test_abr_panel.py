@@ -114,8 +114,7 @@ def test_eeg_monitor_shows_a_disconnected_electrode():
     if not HAS_UI:
         return
     w = _ventana()
-    w.technical['electrodes'] = dict(w.technical['electrodes'],
-                                     right=DISCONNECTED)
+    w.montaje._quitar('ref_der')              # se saca de la cabeza, como el alumno
     w.refresh_eeg()
     _, y = w.eeg.curves['R'].getData()
     assert np.allclose(y, w.eeg.offsets['R'])
@@ -175,7 +174,7 @@ def test_dirty_eeg_means_the_average_does_not_advance():
         return
     w = _ventana()
     limpio, _ = _monitor(w)
-    w.technical['impedance'] = dict(w.technical['impedance'], vertex=8.0)
+    w.montaje.impedancias.z['activo'] = 8.0   # piel mal preparada bajo el activo
     sucio, rechazos = _monitor(w)
     assert sucio > limpio * 2
     assert rechazos > 0
@@ -194,8 +193,7 @@ def test_eeg_names_the_mains_hum():
         return
     w = _ventana()
     limpio, _ = _monitor(w)
-    w.technical['electrodes'] = dict(w.technical['electrodes'],
-                                     ground=DISCONNECTED)
+    w.montaje._quitar('tierra')
     sucio, _ = _monitor(w)
     assert sucio > limpio * 2
     assert '50 Hz' in w.eeg.state_text['R'].toPlainText()
@@ -613,8 +611,7 @@ def test_no_contra_trace_without_the_electrode():
     if not HAS_UI:
         return
     w = _ventana()
-    w.technical['electrodes'] = dict(w.technical['electrodes'],
-                                     left=DISCONNECTED)
+    w.montaje._quitar('ref_izq')
     _capturar(w, lado='OD')
     _, contra = w.graph_r.traces['R1']['contra'].getData()
     assert contra is None or len(contra) == 0
@@ -842,7 +839,7 @@ def test_report_carries_the_recording_conditions():
     if not HAS_UI:
         return
     w = _ventana()
-    w.technical['impedance'] = dict(w.technical['impedance'], vertex=8.0)
+    w.montaje.impedancias.z['activo'] = 8.0   # piel mal preparada bajo el activo
     _capturar(w)
     tec = w.recording_conditions()
     for clave in ('transductor', 'montaje', 'ventana_ms', 'electrodos',

@@ -550,6 +550,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """Un trozo nuevo de EEG crudo en el monitor de los dos canales."""
         if self.data_current is None:
             return
+        # Lo que está en la cabeza AHORA: hay caminos (sesiones anteriores,
+        # informes guardados antes de la pestaña Electrodos) que dejan el
+        # equipo con los electrodos de fábrica puestos.
+        self._con_montaje()
         self.eeg_tick += 1
         # stable_seed y no hash(): el trazo del mismo paciente arranca
         # igual en cualquier proceso (ver core.rng).
@@ -1358,12 +1362,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def capture(self) -> None:
         if self.state_capture == 'record':
+            # Idem refresh_eeg: se registra con lo que está en la cabeza.
+            self._con_montaje()
             # El tubo se pinza EN PLENA promediacion (ese es el punto de la
             # maniobra: ver si lo que esta en pantalla se cae o no), asi
             # que este flag se relee en cada tick aunque el resto del
             # setting quede congelado al iniciar la captura.
             self.current_setting['clamp'] = self.control.ch_clamp.isChecked()
             if self.es_assr():
+                self.assr_panel.actualizar_equipo(self.technical)
                 texto = self.assr_panel.tick()
                 self.lbl_info.setText(texto)
                 return

@@ -149,6 +149,22 @@ def test_el_eeg_se_ve_bajo_la_cabeza():
     assert w.montaje.ranura_eeg.indexOf(w.eeg) >= 0
 
 
+def test_aunque_algo_pise_el_equipo_manda_la_cabeza():
+    """Sesiones anteriores o informes guardados antes de la pestaña
+    Electrodos traen los electrodos de fábrica (Cz, A1, A2, Fpz): el EEG y la
+    captura igual usan lo que está puesto en la cabeza."""
+    from abr.AbrAdvanceSettings import default_settings
+    w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
+    w.la_super(_caso(), 42)
+    w.technical = default_settings('ABR')            # electrodos de fábrica
+    w.refresh_eeg()
+    assert w.technical['electrodes']['vertex'] == 'No Conectado'
+    w.technical = default_settings('ABR')
+    w.tabWidget.setCurrentWidget(w.abr)
+    _capturar(w, 80, 'OD')
+    assert w.last_metadata['accepted_sweeps'] == 0
+
+
 def test_paciente_nuevo_piel_nueva():
     w = _ventana(_de_libro)
     w.la_super(_caso(), 43)
