@@ -26,11 +26,14 @@ from PySide6.QtCore import QEasingCurve, QEvent, QObject, QPropertyAnimation, Qt
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout,
                                QLabel, QToolButton, QVBoxLayout)
 
-from core.avatar import avatar_iniciales
+from core.avatar import avatar_circular_desde_bytes, avatar_iniciales
 from core.base import context
 from core import app_config_store
 
 NOMBRE = "Karime"
+# Su foto de perfil, la misma de la versión Tauri (tauri-app/public/
+# img_karime.jpeg, 2026-03-22), recortada a la cara.
+FOTO = "img/karime.jpg"
 CONFIG_KEY = "secretaria.avisos"
 DURACION_MS = 9000
 FADE_MS = 350
@@ -42,6 +45,20 @@ _DEFAULT_SEGURO = {
     "con_paciente": ["{nombre} ya llegó y está en la sala de espera."],
     "sin_paciente": ["Ya van {minutos} minutos de atención."],
 }
+
+
+def foto_karime(size=40):
+    """La foto de Karime en círculo, o sus iniciales si no está."""
+    try:
+        with open(context.get_resource(FOTO), "rb") as archivo:
+            # Al doble y con devicePixelRatio 2: nítida también en pantallas
+            # de alta densidad.
+            foto = avatar_circular_desde_bytes(archivo.read(), size * 2)
+        if foto is not None:
+            foto.setDevicePixelRatio(2)
+    except OSError:
+        foto = None
+    return foto if foto is not None else avatar_iniciales(NOMBRE, size)
 
 
 def _defaults():
@@ -149,7 +166,7 @@ class AvisoSecretaria(QFrame):
         """)
 
         avatar = QLabel(self)
-        avatar.setPixmap(avatar_iniciales(NOMBRE, 40))
+        avatar.setPixmap(foto_karime(40))
         avatar.setFixedSize(40, 40)
 
         titulo = QLabel(f"{NOMBRE} · Secretaría", self)
