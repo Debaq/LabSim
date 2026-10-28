@@ -758,6 +758,7 @@ QPushButton[rol]:checked {{ background: {tema.ACENTO_SUAVE}; border-color: {tema
 QPushButton[segmento="true"] {{ padding: 4px 0px; }}
 QPushButton[herramienta="true"] {{ padding: 5px 0px; font-weight: 600; }}
 QPushButton[herramienta="true"]:checked {{ background: {tema.ACENTO}; border-color: {tema.ACENTO}; color: white; }}
+QLabel#credito {{ color: {tema.TEXTO_TENUE}; font-size: 7pt; font-style: italic; }}
 QLabel#puesto {{ color: {tema.TEXTO}; font-weight: 600; }}
 QLabel#puesto[vacio="true"] {{ color: {tema.TEXTO_TENUE}; font-weight: 400; }}
 QLabel#kohm {{ font-weight: 700; color: {tema.TEXTO_TENUE}; }}
@@ -850,6 +851,11 @@ class MontajeElectrodos(QWidget):
         self.pista.setProperty("role", "hint")
         self.pista.setAlignment(Qt.AlignmentFlag.AlignCenter)
         col.addWidget(self.pista)
+        # Mención: la preparación de la piel con alcohol y gel fue idea suya.
+        credito = QLabel("Preparación de la piel: idea de Margarita Asenjo")
+        credito.setObjectName("credito")
+        credito.setAlignment(Qt.AlignmentFlag.AlignRight)
+        col.addWidget(credito)
         raiz.addWidget(lienzo, 1)
 
         panel = QFrame()

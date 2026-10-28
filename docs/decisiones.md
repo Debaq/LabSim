@@ -6596,3 +6596,7 @@ piel irritada. La piel conserva lo hecho (impedancia, irritación, errores);
 se ve en el panel ("piel irritada", "alcohol ✓ · gel 7") y en el tooltip al
 pasar el mouse con alcohol o gel.
 
+**Mención (2026-10-28):** la preparación de la piel (alcohol y gel con
+algodón, siempre en la misma dirección, antes de los electrodos) fue idea de
+Margarita Asenjo; la cabeza lo dice en una línea al pie.
+
