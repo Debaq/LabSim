@@ -1165,7 +1165,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),
             "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget(), expand=True),
             "INBOX": FrameSubMdi(inbox.InboxWidget(self), expand=True),
-            "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self)),
+            "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self), expand=True),
             "W": self.subw_w,
             "Z": self.subw_z,
         })

@@ -178,6 +178,18 @@ Actualizado 2026-10-27.
   `tests/test_inbox_ui.py`.
 - [ ] Probar en la app real con mensajes de verdad.
 
+### Mis pacientes
+- [x] Rehecha (2026-10-27) con la forma de la bandeja: lista de atenciones (iniciales, paciente,
+  procedimiento, fecha corta, píldora "práctica") con buscador y ↑/↓, y a la derecha la cabecera
+  del paciente con pestañas de subrayado e icono. Resumen: horas de la cita, seis datos en
+  tarjetas (pausas largas en rojo si hay), la evolución y los comentarios del docente como notas
+  amarillas (`tema.NOTA_DOCENTE*`). Conversación con las mismas burbujas del chat y las notas del
+  docente bajo su turno. Exámenes: una fila por examen con icono, fecha y "Ver en el ABR" en los
+  que se abren. La red (atenciones, conversación, informes) va en segundo plano: antes las tres
+  consultas corrían en el hilo de la ventana al elegir cada paciente. `expand=True`.
+- [x] `_ListaMensajes.vaciar` (chat) esconde antes de borrar: lo viejo quedaba dibujado encima.
+- [ ] Probar en la app real con atenciones de verdad.
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -189,7 +201,6 @@ Actualizado 2026-10-27.
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] Mis pacientes (ventana interna) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.

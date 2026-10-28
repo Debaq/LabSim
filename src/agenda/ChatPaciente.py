@@ -95,6 +95,7 @@ class _ListaMensajes(QScrollArea):
             w = self.fila.itemAt(i).widget()
             if w is not None and w.objectName() != "vacioChat":
                 self.fila.takeAt(i)
+                w.hide()
                 w.deleteLater()
 
     def _al_cambiar_rango(self, _minimo, maximo):

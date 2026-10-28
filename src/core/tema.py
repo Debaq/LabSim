@@ -40,6 +40,11 @@ OK = '#1B8A5A'
 AVISO = '#D98324'
 ALERTA = '#C0392B'
 
+# Comentario del docente (notas amarillas sobre la conversación, la evolución...).
+NOTA_DOCENTE = '#FFF9EA'
+NOTA_DOCENTE_BORDE = '#F3DFA0'
+NOTA_DOCENTE_TEXTO = '#A3822F'
+
 # --- Gráficos ----------------------------------------------------------
 GRILLA = '#EAE4EA'
 GRILLA_FUERTE = '#D9CFD8'
