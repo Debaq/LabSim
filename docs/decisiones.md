@@ -6490,3 +6490,27 @@ vectores y llegar al audiograma en dB eHL.
   ECochG, PEALM, CAEP, P300, MMN y ASSR se registran en la ventana, arman su
   informe con su tipo e imágenes, y el backend (`ReportPdfBuilder`) los
   convierte en PDF con las imágenes embebidas y sus tablas.
+
+## Voces sintéticas con Google: plan (2026-10-27)
+
+Pregunta del autor, sin decidir todavía: generar con Google las voces que
+faltan. Queda como plan (TODO 69 y 70).
+
+- **Con qué:** Gemini TTS (`gemini-2.5-*-tts`; el proyecto ya usa Gemini para
+  los rostros del libro y el tono se pide con texto) o Google Cloud
+  Text-to-Speech (voz más repetible; sin voz chilena, la más cercana es
+  español latino de EE. UU.).
+- **Cómo entra a la app:** se generan una vez y se guardan como mp3 en
+  `resources/audio/` con el nombre que ya se busca. La app no llama a Google:
+  el laboratorio sigue funcionando sin internet.
+- **Instrucciones del talkback** (`<clave>.mp3`, ver `audiometria/comandos_voz.py`):
+  dos sin audio. Si se mezclan grabadas con sintéticas se nota la voz; la
+  alternativa es regenerar las 23 con una misma voz. Igualar el volumen a las
+  grabadas (vúmetro y nivel del talkback).
+- **Paciente en las listas de palabras** (`LP_palacios_r_<voz>_<palabra>.mp3`,
+  más `none1-3` para cuando no entiende): `ListWords` fija `gender = "feme"` e
+  `id = 1`, así que todos los pacientes responden con la voz `feme1`, que
+  tiene 50 de las 124 palabras de las cinco listas (`feme2`, sin usar, tiene
+  75). Con TTS se podrían tener todas las palabras y voces por sexo y edad
+  del caso (niños para las listas de términos conocidos), elegidas por
+  paciente y fijas para el mismo paciente.

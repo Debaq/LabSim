@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 68).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 70).
 
 Revisado contra el código el 2026-09-24.
 
@@ -183,6 +183,15 @@ gap significativo. § Parámetros de audiometría configurables por curso
       nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
 - [ ] 63. Tinnitumetría en el audiómetro, para que entre al orden (T00).
 - [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T03+).
+
+### Voces sintéticas (Google)
+§ Voces sintéticas con Google: plan
+- [ ] 69. Instrucciones del talkback que faltan (`ruido_blanco_contralateral`,
+      `rosemberg_bilateral`) o las 23 con una misma voz, para que no se note el
+      cambio entre grabada y sintética. Volumen igualado al de las actuales.
+- [ ] 70. Voces del paciente al repetir las listas de palabras: hoy una sola
+      voz fija (`feme1`) que tiene 50 de las 124 palabras; en las otras 74 el
+      paciente no dice nada.
 
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
