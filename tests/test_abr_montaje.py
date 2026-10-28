@@ -165,6 +165,29 @@ def test_aunque_algo_pise_el_equipo_manda_la_cabeza():
     assert w.last_metadata['accepted_sweeps'] == 0
 
 
+def test_otro_paciente_abre_en_abr_y_lo_suyo_si_se_recupera():
+    """Si el paciente anterior quedó en ASSR, el siguiente abría en ASSR y
+    parecía una sesión ajena (lo vio el autor, 2026-10-28). Paciente nuevo:
+    prueba ABR. Retomar SU atención sí trae lo que se guardó de ella."""
+    w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
+    w.la_super(_caso(), 16)
+    w.montaje.de_libro(1)
+    w.control.cb_test.setCurrentText('ASSR')
+    w.assr_panel.actualizar_equipo(w.technical)
+    for _ in range(5):
+        w.assr_panel.tick()
+    guardado = w.session_payload()
+    assert guardado['prueba'] == 'ASSR'
+
+    w.la_super(_caso(edad=50), 99)                    # otro paciente
+    assert w.test_actual == 'ABR' and w.control.cb_test.currentText() == 'ABR'
+    assert w.otras_pruebas == {}
+
+    w.la_super(_caso(), 16)                           # vuelve el primero
+    w.apply_restored([{'tipo': 'ASSR', 'data': guardado}], 'u', 16)
+    assert w.test_actual == 'ASSR'
+
+
 def test_paciente_nuevo_piel_nueva():
     w = _ventana(_de_libro)
     w.la_super(_caso(), 43)

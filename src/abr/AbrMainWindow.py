@@ -432,6 +432,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # stable_seed: la misma piel en cualquier proceso (core.rng).
             self.montaje_cita = appointment_id
             self.montaje.reiniciar(random.Random(stable_seed('piel', appointment_id)))
+            # Y la prueba vuelve al ABR: si el paciente anterior quedó en
+            # ASSR (o ECochG...), el nuevo abría en esa prueba y parecía una
+            # sesión ajena. Lo guardado de ESTA atención se recupera después
+            # (fetch_sessions -> apply_restored) y puede cambiarla.
+            if self.test_actual != 'ABR':
+                self.control.apply_protocol('ABR')
+                self.set_test_silently('ABR')
+            self.otras_pruebas = {}
+            self._con_montaje()
             if data is not None:
                 self.tabWidget.setCurrentWidget(self.montaje)
         self.clear_sessions()
