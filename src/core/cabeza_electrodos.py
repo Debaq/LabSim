@@ -260,6 +260,19 @@ def _remuestrear(puntos, paso=PASO_TRAZO_M):
 
 
 class Trazo:
+    @classmethod
+    def desde(cls, d):
+        """Un trazo guardado (ver Piel.estado): sin remuestrear de nuevo."""
+        t = cls.__new__(cls)
+        t.herramienta = d["herramienta"]
+        t.puntos = np.asarray(d["puntos"], dtype=float)
+        t.normales = np.asarray(d["normales"], dtype=float)
+        t.misma = bool(d["misma"])
+        neto = t.puntos[-1] - t.puntos[0]
+        t.direccion = neto / max(np.linalg.norm(neto), 1e-9)
+        t.cuando = -1e9           # viejo: no deja marca a la vista
+        return t
+
     def __init__(self, herramienta, puntos, normales, misma):
         puntos = np.asarray(puntos, dtype=float)
         self.herramienta = herramienta
@@ -343,6 +356,24 @@ class Piel:
                         self._irritados.add(sitio)
                         self.errores.append(("piel_irritada", sitio))
         return trazo
+
+    def estado(self):
+        """Todo lo de la piel, para guardarlo con la atención."""
+        redondo = lambda a: np.round(np.asarray(a), 5).tolist()
+        return {"base": self.base, "piso": self.piso,
+                "errores": [list(e) for e in self.errores],
+                "irritados": sorted(self._irritados),
+                "trazos": [{"herramienta": t.herramienta, "puntos": redondo(t.puntos),
+                            "normales": redondo(t.normales), "misma": t.misma}
+                           for t in self.trazos]}
+
+    def restaurar(self, d):
+        self.base = {k: float(v) for k, v in (d.get("base") or {}).items()}
+        self.piso = {k: float(v) for k, v in (d.get("piso") or {}).items()}
+        self.errores = [tuple(e) for e in d.get("errores") or []]
+        self._irritados = set(d.get("irritados") or [])
+        self.trazos = [Trazo.desde(t) for t in d.get("trazos") or []]
+        self._puntos_irritados = None
 
     def puntos_irritados(self, trazo):
         """(puntos, normales) de un trazo de gel que quedaron irritados."""
@@ -1165,6 +1196,38 @@ class MontajeElectrodos(QWidget):
         self._elegir_rol("activo")
         self.elegir_herramienta("girar")
         self._pintar()
+
+    def estado(self):
+        """Todo el montaje (piel, electrodos, canales, lo medido), para
+        guardarlo con la atención y seguir donde quedó si se cierra la app."""
+        return {"version": 1, "canales": self.canales,
+                "piel": self.impedancias.piel.estado(),
+                "colocados": {rol: {"punto": np.round(e.punto, 5).tolist(),
+                                    "normal": np.round(e.normal, 5).tolist()}
+                              for rol, e in self.colocados.items()},
+                "z": dict(self.impedancias.z), "medido": dict(self.impedancias.medido)}
+
+    def restaurar(self, estado):
+        """Vuelve un montaje guardado con estado(). False si no se pudo."""
+        try:
+            self.impedancias.piel.restaurar(estado.get("piel") or {})
+            self.canales = int(estado.get("canales") or 1)
+            self.botones_canales[self.canales].setChecked(True)
+            self.colocados = {rol: Electrodo(e["punto"], e["normal"])
+                              for rol, e in (estado.get("colocados") or {}).items()
+                              if rol in ROLES_POR_CANALES[self.canales]}
+            self.impedancias.z = {k: float(v) for k, v in (estado.get("z") or {}).items()
+                                  if k in self.colocados}
+            self.impedancias.medido = {k: float(v) for k, v in (estado.get("medido") or {}).items()
+                                       if k in self.colocados}
+        except (KeyError, TypeError, ValueError) as exc:
+            print(f"montaje: no se pudo restaurar: {exc!r}")
+            return False
+        self._mostrar_roles()
+        falta = next((c for c in self.roles() if c not in self.colocados), self.roles()[0])
+        self._elegir_rol(falta)
+        self._pintar()
+        return True
 
     def equipo(self):
         """Lo que el montaje le dice al equipo de potenciales (las claves del

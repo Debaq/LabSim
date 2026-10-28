@@ -541,6 +541,37 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self._start_log_uploader()
             self._start_sync_thread()
             self._subir_pendientes_en_fondo()
+            self._retomar_atencion_abierta()
+
+    def _retomar_atencion_abierta(self):
+        """La app se cerró (o se cortó) con un paciente en atención: al entrar
+        se vuelve a él directo, sin pasar por la agenda. Es la fila que quedó
+        "atendiendo" con este usuario; se abre igual que desde la agenda
+        (caso, módulos, lo guardado de la atención y los electrodos puestos,
+        ver AbrMainWindow.la_super)."""
+        if not self.data_login or self.data_current_key is not None:
+            return
+        user = self.data_login.get("user")
+        agenda_w = (self.subw or {}).get("AGENDA")
+        shedule = getattr(agenda_w.obj, "shedule", None) if agenda_w is not None else None
+        filas = (shedule or {}).get("agenda_1") or {}
+        abiertas = [(key, e) for key, e in filas.items()
+                    if getattr(e, "atencion", None) is not None
+                    and entry_estado_por(e, user) == "atendiendo"]
+        if not abiertas:
+            return
+        # Si quedara más de una (no debería: no se puede abrir otra), la
+        # última que se empezó.
+        key, entry = max(abiertas, key=lambda ke: (str(getattr(ke[1], "fecha", "")),
+                                                   str((ke[1].atencion.get(user) or {}).get("hora_real", ""))))
+        if es_docente(self.data_login.get("permission")):
+            self.atender_paciente_base(key)
+        else:
+            self.atender_paciente(key)
+        if self.data_current_key == key:
+            nombre = f"{getattr(entry, 'nombre', '')} {getattr(entry, 'apellido', '')}".strip()
+            self.statusbar.showMessage(
+                f"Retomaste la atención de {nombre or 'tu paciente'}: quedó abierta al cerrar LabSim.")
 
     def _warn_if_no_modules(self):
         """Aviso explícito cuando el backend devuelve modules=[]: la sesión

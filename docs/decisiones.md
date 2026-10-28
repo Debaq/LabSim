@@ -6638,3 +6638,20 @@ corticales y ASSR hacen eso: 0 barridos aceptados, curva plana, FSP 1, y el
 monitor de EEG dice "sin electrodo". Sin tierra (con activo y referencia)
 sí hay trazo, montado en la red: ese es otro error y se tiene que ver.
 
+## Retomar la atención al abrir LabSim, con los electrodos puestos (2026-10-28)
+
+El autor: si LabSim se cierra sin haber cerrado al paciente, al abrir hay
+que volver a ese paciente de inmediato, sin pasar por la agenda, y los
+electrodos tienen que seguir conectados. Al iniciar sesión
+(`MainWindow._retomar_atencion_abierta`) se busca en la agenda ya cargada la
+fila que quedó "atendiendo" con este usuario y se abre como desde la agenda
+(caso, módulos, informes guardados de esa atención); el docente retoma su
+atención base. El montaje (piel con sus pasadas, electrodos, canales,
+impedancias medidas) se guarda en el equipo con cada cambio
+(`montajes/<usuario>_<cita>.json`, 30 días) y viaja en el informe del ABR
+(`montaje_estado`): al volver a esa atención se restituye del equipo o, si
+no está (otro PC), del informe. Lo frotado vuelve sin marcas a la vista.
+Una atención de "prueba" del docente (sin cita) no se guarda.
+De paso: `test_informes_recuperar` todavía usaba el combo de oído del AABR
+que el rediseño del 2026-10-27 cambió por botones.
+

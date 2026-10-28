@@ -99,8 +99,8 @@ def test_aabr_volver_a_un_oido_ya_tamizado():
     import test_aabr as t
     w = t._ventana(t._oido(10), t._oido(10))
     t._tamizar(w)
-    w.cb_lado.setCurrentText('OI')
-    w.cb_lado.setCurrentText('OD')
+    w.btn_lado['OI'].click()
+    w.btn_lado['OD'].click()
     assert w.lbl_veredicto.text() == 'PASA'
 
 

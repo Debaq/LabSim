@@ -10,6 +10,7 @@ cronómetro propio, reacciona a la atención abierta en LabSim vía
 la_super(data_current, appointment_id). Cada paciente trae su propia
 definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
+import json
 import os
 import random
 
@@ -85,6 +86,42 @@ ALTO_PANTALLA_MONITOR_PLEGADO = 820
 
 # Tipos de informe que sube esta ventana (uno por prueba).
 INFORME_TIPOS = ['ABR'] + list(REPORT_TIPOS.values())
+
+
+# El montaje de electrodos de cada atención, en el equipo: si la app se
+# cierra con el paciente en atención, al volver los electrodos siguen puestos
+# y la piel preparada (ver _guardar_montaje / la_super). Se olvida a los 30
+# días; también viaja en el informe (session_payload['montaje_estado']).
+MONTAJE_OLVIDAR_DIAS = 30
+
+
+def _archivo_montaje(usuario, cita):
+    from core import rutas
+    seguro = "".join(c for c in str(usuario) if c.isalnum() or c in "._-") or "anonimo"
+    return rutas.carpeta("montajes") / f"{seguro}_{cita}.json"
+
+
+def leer_montaje(usuario, cita):
+    try:
+        with open(_archivo_montaje(usuario, cita), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
+def guardar_montaje(usuario, cita, estado):
+    import time
+    ruta = _archivo_montaje(usuario, cita)
+    try:
+        tmp = ruta.with_suffix(".tmp")
+        tmp.write_text(json.dumps(estado), encoding="utf-8")
+        tmp.replace(ruta)
+        limite = time.time() - MONTAJE_OLVIDAR_DIAS * 86400
+        for viejo in ruta.parent.glob("*.json"):
+            if viejo.stat().st_mtime < limite:
+                viejo.unlink()
+    except OSError as exc:
+        print(f"ABR: no se pudo guardar el montaje: {exc}")
 
 
 def _retomar(appointment_id):
@@ -364,6 +401,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.technical = default_settings(self.test_actual)
         self._con_montaje()
         self.montaje.montaje_cambio.connect(lambda _m: self._con_montaje())
+        # Cada cambio del montaje se guarda en el equipo (un poco después:
+        # frotar emite muchos cambios seguidos).
+        self._timer_montaje = QTimer(self)
+        self._timer_montaje.setSingleShot(True)
+        self._timer_montaje.setInterval(800)
+        self._timer_montaje.timeout.connect(self._guardar_montaje)
+        self.montaje.montaje_cambio.connect(lambda _m: self._timer_montaje.start())
         # Las pruebas de esta atencion que no estan en pantalla, por nombre
         # de prueba: {'data': payload, 'images': {sufijo: ruta},
         # 'pendiente': hay que subirla} (ver test_changed).
@@ -396,6 +440,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.apply_window()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
         self.aplicar_monitor()
+
+    def _usuario(self):
+        return (self.data_login or {}).get('user') or ''
+
+    def _guardar_montaje(self):
+        if self.appointment_id is None or self.data_current is None:
+            return
+        guardar_montaje(self._usuario(), self.appointment_id, self.montaje.estado())
 
     def _con_montaje(self):
         """Pone en el equipo lo que quedó en la pestaña Electrodos."""
@@ -431,7 +483,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # Paciente (o atención) nuevo: piel sin preparar, sin electrodos.
             # stable_seed: la misma piel en cualquier proceso (core.rng).
             self.montaje_cita = appointment_id
+            self._timer_montaje.stop()
             self.montaje.reiniciar(random.Random(stable_seed('piel', appointment_id)))
+            # La app se cerró con este paciente en atención: los electrodos
+            # siguen donde quedaron (ver guardar_montaje).
+            self.montaje_retomado = False
+            if data is not None and appointment_id is not None:
+                guardado = leer_montaje(self._usuario(), appointment_id)
+                if guardado:
+                    self.montaje_retomado = self.montaje.restaurar(guardado)
             # Y la prueba vuelve al ABR: si el paciente anterior quedó en
             # ASSR (o ECochG...), el nuevo abría en esa prueba y parecía una
             # sesión ajena. Lo guardado de ESTA atención se recupera después
@@ -835,6 +895,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # el procedimiento, para el docente.
             'electrodos': self.montaje.montaje(),
             'preparacion_errores': [list(e) for e in self.montaje.errores],
+            # Todo el montaje, para retomar la atención en otro equipo.
+            'montaje_estado': self.montaje.estado(),
             'hallazgos': self.report.text_edit_1.toPlainText(),
             'conclusion': self.report.text_edit_2.toPlainText(),
         }
@@ -1039,6 +1101,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             else:
                 self.otras_pruebas[test] = {'data': data, 'images': {}, 'pendiente': False}
         pruebas = {test: data for test, (data, _) in pruebas.items()}
+        if not getattr(self, 'montaje_retomado', False):
+            # En este equipo no estaba: el que viajó en el informe.
+            estado = next((d.get('montaje_estado') for d in pruebas.values()
+                           if isinstance(d.get('montaje_estado'), dict)), None)
+            if estado:
+                self.montaje_retomado = self.montaje.restaurar(estado)
         self.control.apply_protocol(actual)
         self.draw_session(pruebas[actual])
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
