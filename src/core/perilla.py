@@ -54,11 +54,12 @@ class Perilla(QDial):
         pista = QRectF(c.x() - r_pista, c.y() - r_pista, 2 * r_pista, 2 * r_pista)
         grosor = max(2.5, lado / 26)
         if self.wrapping():
-            # Con vuelta no hay recorrido que mostrar: marcas como en el equipo.
+            # Con vuelta (un encoder sin fin) no hay recorrido ni posición
+            # fija: marcas todas iguales, ninguna destacada.
             p.setPen(_pluma(tema.BORDE_FUERTE, 1.4))
             for i in range(24):
                 a = i * math.pi / 12
-                r0 = r_pista - (grosor * 1.6 if i % 6 == 0 else grosor)
+                r0 = r_pista - grosor
                 p.drawLine(QPointF(c.x() + r0 * math.cos(a), c.y() - r0 * math.sin(a)),
                            QPointF(c.x() + r_pista * math.cos(a), c.y() - r_pista * math.sin(a)))
         else:

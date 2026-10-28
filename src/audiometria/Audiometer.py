@@ -28,6 +28,7 @@ from backend.log_queue import get_log_queue
 from audiometria.response import ESTIMULO_ENCENDIDO
 from audiometria.response import ResponseAudiometry as Response
 from audiometria.UI.Ui_Audiometer import Ui_Audiometer
+from audiometria import panel_ui
 
 #context
 class_pref = Preferences()
@@ -57,6 +58,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         #self.response.button.connect(self.respa)
         self.la_super(thr)
         self.setupUi(self)
+        panel_ui.rearmar(self)
         self.supra("silencio")
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
@@ -271,6 +273,12 @@ class Audiometer(QWidget, Ui_Audiometer):
         if self.isVisible():
             self.install_key_filter(True)
 
+        # Las teclas marcan lo que está puesto en cada canal.
+        for lbl in (*self.lbl_output, *self.lbl_stim, *self.lbl_trans,
+                    *self.lbl_contin, *self.lbl_revers):
+            lbl.textChanged.connect(self._marcar_teclas)
+        self._marcar_teclas()
+
         # Conectar todos los labels que comienzan con "lbl" al slot
         for attribute_name in dir(self):
             if attribute_name.startswith("lbl"):
@@ -282,6 +290,9 @@ class Audiometer(QWidget, Ui_Audiometer):
         if getattr(self, "id", None) is not None:
             self._log("audio_caso_cargado", estado=self._estado())
 
+
+    def _marcar_teclas(self, *_):
+        panel_ui.marcar(self, output_list, stim_list, trans_list, tone_list, reverse_list)
 
     def install_key_filter(self, activo: bool) -> None:
         """Pone o saca el filtro global de teclas del audiometro."""

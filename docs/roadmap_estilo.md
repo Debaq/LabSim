@@ -143,6 +143,19 @@ Actualizado 2026-10-27.
   Para los diales del audiómetro también.
 - [ ] Probar en la app real; las capturas del manual del estudiante (§22) muestran el marco viejo.
 
+### Audiómetro
+- [x] Rehecho (2026-10-27) sin tocar la pantalla blanca del equipo (rótulos y vúmetros): va en una
+  tarjeta, sin el bisel oscuro del Z (al autor no le gustó acá). Un canal por tarjeta (Salida,
+  Estímulo, Transductor; perilla con Pulsado, Invertir y Estímulo; el canal 2 en espejo) y al
+  centro Frecuencia, Pasos, Tiempo, Logoaudiometría, Talkback/Alternado y las perillas chicas de
+  Monitor y Talkback. Las teclas marcan lo que está puesto, como las luces del equipo: Derecha
+  rojo, Izquierda azul, el resto en el acento (se lee de los rótulos de la pantalla).
+  Los widgets siguen saliendo de `Ui_Audiometer.py`; `audiometria/panel_ui.py` los reacomoda
+  después de setupUi. `expand=True`. Mínimo ~730x500.
+- [x] Perillas sin fin (intensidad, Leak del Z): marcas todas iguales; las gruesas sugerían una
+  posición fija que un encoder no tiene.
+- [ ] Probar en la app real con sonido.
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -154,8 +167,6 @@ Actualizado 2026-10-27.
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] Audiómetro: paleta de
-  `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
