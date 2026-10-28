@@ -323,7 +323,11 @@ QComboBox::down-arrow:disabled {{ image: url({r["abajo_off"]}); }}
 def aplicar_estilo(widget, extra=""):
     """Aplica el QSS común a `widget` y a todo lo que cuelgue de él. `extra`:
     reglas propias del módulo, que se suman al final."""
+    from PySide6.QtCore import Qt
     widget.setObjectName('labsimRoot')
+    # Un QWidget suelto no pinta el fondo del QSS sin esto: el módulo quedaba
+    # con el gris del sistema en vez del lienzo.
+    widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
     widget.setStyleSheet(QSS + extra + qss_flechas())
 
 

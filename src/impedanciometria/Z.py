@@ -12,7 +12,7 @@ from PySide6.QtCore import QTimer, Qt
 from datetime import datetime
 import numpy as np
 
-from impedanciometria.UI.Ui_Z_control import Ui_Z_control
+from impedanciometria.control_ui import UiControlZ
 from backend.log_queue import get_log_queue
 from impedanciometria.ZZscreen import ZZscreen
 from impedanciometria.ZRscreen import ZRscreen
@@ -33,7 +33,7 @@ from core import atajos, keyboard_monitor
 from core.preferencias import preferencias
 
 
-class ZControl(QWidget, Ui_Z_control):
+class ZControl(QWidget, UiControlZ):
     def __init__(self,):
         #QWidget.__init__(self)
         super(ZControl, self).__init__()
@@ -64,7 +64,8 @@ class ZControl(QWidget, Ui_Z_control):
         self.btn_226.clicked.connect(lambda: self.set_probe_freq('226'))
         self.btn_1000.clicked.connect(lambda: self.set_probe_freq('1000'))
 
-        self.btn_side.clicked.connect(self.side_change)
+        self.btn_od.clicked.connect(lambda: self._elegir_lado('OD'))
+        self.btn_oi.clicked.connect(lambda: self._elegir_lado('OI'))
         self.btn_1.clicked.connect(self.btn1_click)
         self.btn_2.clicked.connect(self.btn2_click)
         self.btn_stimulus.clicked.connect(self.stimulus_click)
@@ -77,8 +78,9 @@ class ZControl(QWidget, Ui_Z_control):
         self.btn_etf.clicked.connect(lambda: self.show_screen(self.Z_etf))
 
         self.reflex_mode = 'IPSI'
-        self.btn_reflex.setEnabled(False)
-        self.btn_reflex.clicked.connect(self.reflex_mode_change)
+        for btn, modo in ((self.btn_ipsi, 'IPSI'), (self.btn_contra, 'CONTRA')):
+            btn.setEnabled(False)
+            btn.clicked.connect(lambda _=False, m=modo: self.set_reflex_mode(m))
         self.Z_reflex.start_clicked.connect(self.stimulus_click)
         self.Z_reflex.ipsi_clicked.connect(lambda: self.set_reflex_mode('IPSI'))
         self.Z_reflex.contra_clicked.connect(lambda: self.set_reflex_mode('CONTRA'))
@@ -99,6 +101,7 @@ class ZControl(QWidget, Ui_Z_control):
         self.refresh_reflex_table()
 
         self.leak = self.dial.value()
+        self.leak_change(self.leak)
         self.dB = 85
         self.etf_pressure = 0
         self.reflex_pressure = 0
@@ -351,6 +354,7 @@ class ZControl(QWidget, Ui_Z_control):
             return
         self._log("z_probe_freq_change", freq=freq)
         self.probe_freq = freq
+        (self.btn_226 if freq == '226' else self.btn_1000).setChecked(True)
         self.Z.set_probe_freq(freq)
         if self.time_ch0.isActive():
             # barrido en curso: el tono de sonda cambia en caliente, como en
@@ -362,6 +366,10 @@ class ZControl(QWidget, Ui_Z_control):
         self.refresh()
         self.preCharger()
 
+    def _elegir_lado(self, lado):
+        if lado != self.Z.get_side():
+            self.side_change()
+
     def side_change(self):
         side_text = self.Z.get_side()
         self._log("z_side_change", side='OI' if side_text == 'OD' else 'OD')
@@ -369,6 +377,7 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z.set_side('OI')
         else:
             self.Z.set_side('OD')
+        (self.btn_od if self.Z.get_side() == 'OD' else self.btn_oi).setChecked(True)
         self.Z_reflex.set_side(self.Z.get_side())
         self.Z_decay.set_side(self.Z.get_side())
         self.Z_etf.set_side(self.Z.get_side())
@@ -522,6 +531,10 @@ class ZControl(QWidget, Ui_Z_control):
         self._log("z_screen_change", screen=screen_names.get(screen, '?'))
         for s in self.screens:
             s.setVisible(s is screen)
+        boton = {self.Z: self.btn_tymp, self.Z_reflex: self.btn_reflex_test,
+                 self.Z_decay: self.btn_toneDecay, self.Z_etf: self.btn_etf}.get(screen)
+        if boton is not None:
+            boton.setChecked(True)
         if self.current_screen is self.Z_reflex and screen is not self.Z_reflex:
             self.time_reflex.stop()
             self.reflex_tone.stop()
@@ -542,7 +555,8 @@ class ZControl(QWidget, Ui_Z_control):
             self.update_reflex_volume()
         elif screen is self.Z_etf:
             self.Z_etf.set_side(self.Z.get_side())
-        self.btn_reflex.setEnabled(screen in (self.Z_reflex, self.Z_decay))
+        self.btn_ipsi.setEnabled(screen in (self.Z_reflex, self.Z_decay))
+        self.btn_contra.setEnabled(screen in (self.Z_reflex, self.Z_decay))
         self.btn_up.setEnabled(screen in (self.Z_reflex, self.Z_decay))
         self.btn_down.setEnabled(screen in (self.Z_reflex, self.Z_decay))
 
@@ -581,14 +595,12 @@ class ZControl(QWidget, Ui_Z_control):
             self.etf_pressure = value
             self.Z_etf.set_pressure(self.etf_pressure)
 
-    def reflex_mode_change(self):
-        self.set_reflex_mode('CONTRA' if self.reflex_mode == 'IPSI' else 'IPSI')
-
     def set_reflex_mode(self, mode):
         if mode == self.reflex_mode:
             return
         self._log("z_reflex_mode_change", mode=mode)
         self.reflex_mode = mode
+        (self.btn_ipsi if mode == 'IPSI' else self.btn_contra).setChecked(True)
         freqs = self.reflex_freqs_for_mode()
         if self.reflex_freq_idx >= len(freqs):
             self.reflex_freq_idx = len(freqs) - 1
@@ -899,6 +911,7 @@ class ZControl(QWidget, Ui_Z_control):
         g = int(152 - ratio * 100)
         b = int(152 - ratio * 100)
         self.label.setText(str(value))
+        # Las esquinas y la letra vienen del QSS del panel (QLabel#leak).
         self.label.setStyleSheet(f"background-color: rgb({r}, {g}, {b});")
 
     def updown_change(self, delta):

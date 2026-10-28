@@ -126,7 +126,22 @@ Actualizado 2026-10-27.
   píldoras OD/OI. `expand=True`. Mínimo ~890x570, entra en la ventana del servidor (980x620).
 - [x] De paso, en `tema.py`: las flechas de los spinbox tapaban el borde derecho del campo y se
   veían "afuera" (`subcontrol-origin: border` → `padding`). Afecta a todos los módulos.
+- [x] `tema.aplicar_estilo` pone `WA_StyledBackground`: los módulos que son `QWidget` (Acumetría,
+  Otoscopia, Lista de palabras, Z) no pintaban el lienzo y quedaban con el gris del sistema.
 - [ ] Probar en la app real (solo renders offscreen a 980x620 y 1024x590).
+
+### Impedanciómetro (Z)
+- [x] Marco nuevo (2026-10-27); la pantalla azul y sus gráficos NO se tocan (son los del equipo).
+  La pantalla va en un bisel oscuro con las seis teclas blandas debajo, como teclas del equipo.
+  Mandos en tres tarjetas: Prueba (Timpanograma, Reflejos, Tone Decay, ETF, marcada la que se ve),
+  Mandos (perilla nueva, Leak, Presión ▲/▼, Estímulo como botón principal) y Equipo (oído OD/OI,
+  sonda 226/1000 e IPSI/CONTRA como botones segmentados que muestran el estado; antes eran
+  "OD/OI" e "IPSI/CONTRA" que alternaban sin decir cuál estaba puesto) e Imprimir.
+  UI armada en código (`impedanciometria/control_ui.py`); borrados `Ui_Z_control.py` y
+  `Z_control.ui`, y el botón Release, que no hacía nada. `expand=True`. Mínimo ~650x550.
+- [x] `core/perilla.py`: QDial dibujado con la paleta (arco de recorrido o marcas si da la vuelta).
+  Para los diales del audiómetro también.
+- [ ] Probar en la app real; las capturas del manual del estudiante (§22) muestran el marco viejo.
 
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
@@ -139,7 +154,7 @@ Actualizado 2026-10-27.
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] Audiómetro, Z: paleta de
+- [ ] Audiómetro: paleta de
   `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
