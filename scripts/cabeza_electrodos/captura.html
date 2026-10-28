@@ -52,6 +52,14 @@ try {
   const lista = sitios.map((s) => ({ id: s.id, nombre: s.nombre, corto: s.corto || s.id, sistema: s.sistema, zona: s.zona, lado: s.lado ?? null, craneo: s.craneo !== false }));
   const locales = sitios.map((s) => { const a = apoyados.get(s.id); return { pos: a.pos.clone().addScaledVector(a.normal, 0.001), normal: a.normal.clone() }; });
 
+  // La geometría para LabSim: dónde está cada sitio en 3D (marco de la
+  // cabeza) y la cámara, para proyectar zonas y electrodos libres.
+  await enviar('/sitios3d.json', JSON.stringify({
+    camara: { fov: camara.fov, posicion: camara.position.toArray(), mira: [0, -0.004, 0], tam: TAM },
+    sitios: sitios.map((s, i) => ({ id: s.id, pos: locales[i].pos.toArray(), normal: locales[i].normal.toArray() })),
+  }));
+  if (q.get('solo') === 'geometria') { await log('geometria'); await enviar('/fin.txt', 'fin'); throw 'listo'; }
+
   const yaws = []; for (let y = 0; y < 360; y += PASO_YAW) yaws.push(y);
   const rc = new T.Raycaster();
   const cuadros = {};
@@ -87,7 +95,7 @@ try {
   await enviar('/sitios.json', JSON.stringify({ tam: TAM, yaws, pitches: PITCHES, sitios: lista, cuadros }));
   await log(`listo ${n} cuadros, ${lista.length} sitios`);
 } catch (e) {
-  await log('ERROR ' + (e.stack || e));
+  if (e !== 'listo') await log('ERROR ' + (e.stack || e));
 }
 await enviar('/fin.txt', 'fin');
 </script></body></html>

@@ -6570,3 +6570,22 @@ se avisa con mensajes: se ve en la piel o en la impedancia y queda en
 límites que el generador del ABR (5 kΩ por electrodo, 2 kΩ de diferencia);
 el anillo del electrodo en la cabeza toma el color de lo medido.
 
+**Zonas libres en vez de puntos (2026-10-28, más tarde).** El autor: al
+limpiar "se hace snap con los puntos", y la limpieza es de una zona; los
+electrodos tienen que ir libres para ver si los ponen en su lugar y sobre lo
+que limpiaron. Con las fotos va ahora la piel de `cabeza.glb`
+(`resources/cabeza/malla.npz`, 48 mil caras) y la cámara exacta de la
+captura: proyectar un sitio cae a menos de 0,1 px de lo que guardó la foto.
+El mouse toca la piel 3D con un rayo (Möller-Trumbore en numpy, solo contra
+las caras cerca de la recta: ~5 ms), así que cada pasada guarda su recorrido
+sobre la piel y se dibuja en cualquier ángulo; un electrodo queda en el
+punto exacto del clic. La impedancia de un electrodo sale de las pasadas que
+cubrieron ese punto (algodón de 8 mm de radio), con la piel sin preparar de
+la zona del sitio de la norma más cercano. Los puntos de la norma se ven
+solo con **Ver puntos** (junto a 10-20 / 10-10), y entonces el panel dice a
+cuántos mm de qué sitio quedó cada electrodo; `MontajeElectrodos.montaje()`
+lo guarda siempre para la evaluación. Rayo rasante: un sitio visto de canto
+queda 1 mm sobre la piel y el rayo puede pasarle por encima (three.js
+también); en la práctica el clic cae en la piel de al lado. El autor
+comentó que "era mejor el modelo 3D" pero que se siga con las fotos.
+
