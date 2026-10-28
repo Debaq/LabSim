@@ -246,16 +246,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                     item.setVisible(self.show_contra)
 
     def colors_side(self):
+        # Etiqueta de nivel: la curva activa en el color de su oído, lleno y
+        # con letra blanca; las demás en el tono suave del mismo oído.
         if self.side == 0:
             self.active_color = pg.mkColor(tema.OD)
-            self.active_fill_color = '#BFE6D2'
+            self.active_fill_color = tema.OD
             self.inactive_color = pg.mkColor(tema.OD_INACTIVO)
-            self.inactive_fill_color = '#F1C4C4'
+            self.inactive_fill_color = tema.OD_SUAVE
         else:
             self.active_color = pg.mkColor(tema.OI)
-            self.active_fill_color = '#BFE6D2'
+            self.active_fill_color = tema.OI
             self.inactive_color = pg.mkColor(tema.OI_INACTIVO)
-            self.inactive_fill_color = '#C9DAF0'
+            self.inactive_fill_color = tema.OI_SUAVE
     
     def inifine_ab(self, pos_A = 0, pos_B = None):
         pos_B = self.window_ms if pos_B is None else pos_B
@@ -502,13 +504,14 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             # margen derecho y se cortaba en "Cz · 70 d".
             nivel = f"<b>{canal}</b><br>{nivel}"
         tokens = self.curve_tokens(key)
+        letra = 'white' if fill == self.active_fill_color else tema.color_lado(self.side)
         extra = ''
         if tokens:
-            extra = (f"<br><span style='color: #000; font-size: 6pt;'>"
+            extra = (f"<br><span style='color: {letra}; font-size: 6pt;'>"
                      f"{' · '.join(tokens)}</span>")
         return f"""
                 <div style='text-align: center; background-color: {fill};'>
-                <span style='color: #000; font-size: 7pt;'>
+                <span style='color: {letra}; font-size: 7pt;'>
                 {nivel}
                 </span>{extra}
                 </div>

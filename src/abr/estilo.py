@@ -6,10 +6,11 @@ El ABR viene de un .ui de Designer: los widgets no traen propiedades `card` o
 from core.tema import (ACENTO, BORDE, BORDE_FUERTE, FONDO, TARJETA, TARJETA_ALT,
                        TEXTO, TEXTO_SUAVE, TEXTO_TENUE)
 
-# Lienzo del ABR: más oscuro que tema.FONDO.
-LIENZO = '#C9D2DD'
-BORDE_TARJETA = '#A9B6C6'
-FONDO_PANEL = '#E9EEF4'
+# Lienzo del ABR: más oscuro que tema.FONDO, con el mismo tinte morado de la
+# paleta (era gris azulado y chocaba con la barra de la app).
+LIENZO = '#D8CED7'
+BORDE_TARJETA = '#BBADBA'
+FONDO_PANEL = '#F3EEF2'
 
 QSS_ABR = f"""
 QMenuBar {{ background: {FONDO}; color: {TEXTO_SUAVE}; }}

@@ -29,11 +29,12 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox,
                                QWidget)
 
 from abr import assr
+from core import tema
 from abr.ABR_generator import ABRGenerator, case_quality
 
 tr = QCoreApplication.translate
 
-COLOR = {'OD': '#c62828', 'OI': '#1565c0'}
+COLOR = {'OD': tema.OD, 'OI': tema.OI}
 COLUMNAS = ("Oído", "Portadora", "Mod. (Hz)", "Nivel (dB HL)", "Épocas",
             "Amp. (nV)", "Ruido (nV)", "F", "p", "Estado")
 EPOCAS_POR_TICK = 3
@@ -469,7 +470,7 @@ class AssrPanel(QWidget):
                 it = QTableWidgetItem(texto)
                 it.setTextAlignment(Qt.AlignCenter)
                 if col == 9 and st['estado'] == 'respuesta':
-                    it.setForeground(QColor('#2e7d32'))
+                    it.setForeground(QColor(tema.OK))
                 self.tabla.setItem(fila, col, it)
         self.dibujar_rastro()
         self.dibujar_fft()
@@ -515,7 +516,7 @@ class AssrPanel(QWidget):
             p.addItem(region)
         p.addItem(pg.InfiniteLine(
             pos=st['noise_nv'], angle=0,
-            pen=pg.mkPen('#e65100', width=1.2, style=Qt.DashLine)))
+            pen=pg.mkPen(tema.AVISO, width=1.2, style=Qt.DashLine)))
         for canal in assr.channels():
             if not rec.active(canal):
                 continue
@@ -569,7 +570,7 @@ class AssrPanel(QWidget):
         p.addItem(pg.InfiniteLine(pos=0, angle=90, pen=pg.mkPen('#ccc')))
         # Círculo de ruido (95 %).
         x, y = _circulo(radio_ruido)
-        color = '#2e7d32' if st['detected'] else '#e65100'
+        color = tema.OK if st['detected'] else tema.AVISO
         p.plot(x, y, pen=pg.mkPen(color, width=1.5, style=Qt.DashLine))
         # Camino de la punta del vector medio. Los primeros puntos (pocas
         # épocas) caen lejos y emborronan la escala: solo se dibuja lo que

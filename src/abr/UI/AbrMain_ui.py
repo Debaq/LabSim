@@ -128,29 +128,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addLayout(self.layout_abr)
 
-        self.horizontalWidget = QWidget(self.abr)
-        self.horizontalWidget.setObjectName(u"horizontalWidget")
-        self.horizontalWidget.setMaximumSize(QSize(16777215, 20))
-        self.horizontalLayout_2 = QHBoxLayout(self.horizontalWidget)
-        self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.lbl_coord_r = QLabel(self.horizontalWidget)
-        self.lbl_coord_r.setObjectName(u"lbl_coord_r")
-        self.lbl_coord_r.setFont(font)
-        self.lbl_coord_r.setStyleSheet(u"color: rgb(198, 198, 198);")
-
-        self.horizontalLayout_2.addWidget(self.lbl_coord_r)
-
-        self.lbl_coord_l = QLabel(self.horizontalWidget)
-        self.lbl_coord_l.setObjectName(u"lbl_coord_l")
-        self.lbl_coord_l.setFont(font)
-        self.lbl_coord_l.setStyleSheet(u"color: rgb(198, 198, 198);")
-
-        self.horizontalLayout_2.addWidget(self.lbl_coord_l)
-
-
-        self.verticalLayout_2.addWidget(self.horizontalWidget)
 
 
         self.layout_abr_frame.addLayout(self.verticalLayout_2)
@@ -210,8 +187,6 @@ class Ui_MainWindow(object):
         self.btn_toggle_contra.setToolTip(QCoreApplication.translate("MainWindow", u"Mostrar/ocultar canal contralateral", None))
 #endif // QT_CONFIG(tooltip)
         self.btn_toggle_contra.setText(QCoreApplication.translate("MainWindow", u"C", None))
-        self.lbl_coord_r.setText(QCoreApplication.translate("MainWindow", u"N/D", None))
-        self.lbl_coord_l.setText(QCoreApplication.translate("MainWindow", u"N/D", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.abr), QCoreApplication.translate("MainWindow", u"Gr\u00e1ficos", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.lat), QCoreApplication.translate("MainWindow", u"Latencia/Intensidad", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.conc), QCoreApplication.translate("MainWindow", u"Conclusiones", None))

@@ -1498,15 +1498,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def measure_data(self, data):
         side = data["curve"][0]
         side = 0 if side == 'R' else 1
-        side_letter = 'r' if side == 0 else 'l'
+        # Lo medido entre A y A' ya lo muestran las banderas del gráfico.
         self.current_measuring[side] = data['data']
-        label = f"lbl_coord_{side_letter}"
-
-        for key in data['data']:
-            if isinstance(data['data'][key], float):  # Solo redondear si el valor es un flotante
-                data['data'][key] = round(data['data'][key], 1)
-
-        getattr(self,label).setText(f'{data}')
 
     def update_memory_from_graph_mark(self, data):
         if self.es_ecochg() or self.es_cortical():

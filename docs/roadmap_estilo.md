@@ -48,6 +48,11 @@ Actualizado 2026-10-27.
 - [x] Curvas OD/OI con la paleta, etiqueta de nivel suave.
 - [x] Ancho mínimo bajó de 1121 a ~830 px; alto mínimo de 748 a ~490 px.
 - [x] Lienzo más oscuro y paneles/tarjetas con borde marcado para distinguir sectores.
+- [x] Colores al día con la paleta (2026-10-27): lienzo, paneles y bordes pasaron del gris azulado
+  al tinte morado (`abr/estilo.py`); la etiqueta de nivel de la curva activa va en el color de su
+  oído con letra blanca (era verde para los dos) y las demás en el tono suave; el ASSR usa las
+  constantes de `tema.py`. Fuera la franja bajo los gráficos que mostraba el diccionario crudo de
+  la medición A-A' (`lbl_coord_*`): las banderas ya dicen lo mismo.
 - [x] Marcas arrastrables con el mouse (la flecha corre pegada al trazo) y la bandera A'
   con Δ latencia/amplitud respecto de A. Las banderas A/A' se mantienen: son parte de lo
   que se enseña.
