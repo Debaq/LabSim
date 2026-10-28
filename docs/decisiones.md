@@ -6514,3 +6514,13 @@ faltan. Queda como plan (TODO 69 y 70).
   75). Con TTS se podrían tener todas las palabras y voces por sexo y edad
   del caso (niños para las listas de términos conocidos), elegidas por
   paciente y fijas para el mismo paciente.
+
+## "Cerrar ventanas" cierra también ABR, VEMP y EOAS (2026-10-27)
+
+El botón de la barra escondía solo las subventanas normales y dejaba las de
+pantalla completa, para no cerrar un examen por accidente. En el box de
+Electrofisiología, donde casi todo es de pantalla completa, parecía no hacer
+nada (lo reportó el autor como "no funciona"). Ahora esconde todas menos el
+login. No se pierde nada: esconder no destruye el contenido, cada ventana
+vuelve con su botón y al esconder un examen se sube su informe.
+

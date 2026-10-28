@@ -36,7 +36,7 @@ from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Sto
                           es_docente, entry_estado_por,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
-from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, is_full_window, raise_window
+from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, raise_window
 from audiometria.comandos_voz import ComandosVoz
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
@@ -1263,14 +1263,15 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._compactar_acciones()
 
     def cerrar_ventanas(self):
-        """Oculta todas las subventanas normales, igual que su ✕ (el
-        contenido se conserva). Los módulos a pantalla completa (ABR, VEMP,
-        EOAS) quedan: ocupan todo el MDI, no se pueden perder, y cerrarlos a
-        mitad de un examen sería un accidente."""
+        """Oculta todas las subventanas, igual que su ✕: el contenido se
+        conserva y cada una vuelve con su botón. También las de pantalla
+        completa (ABR, VEMP, EOAS): si quedaban, en el box de
+        Electrofisiología el botón parecía no hacer nada. Al esconder un
+        examen se sube su informe (ver load_sub_windows)."""
         login_pos_z = self.apps["LOGIN"][2]
         login = self.modules.get(login_pos_z)
         for sub in self.mdi_area.subWindowList():
-            if sub is login or sub.isHidden() or is_full_window(sub):
+            if sub is login or sub.isHidden():
                 continue
             sub.hide()
 
