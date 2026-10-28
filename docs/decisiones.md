@@ -6622,3 +6622,10 @@ superficie; solo el tipo de electrodo del ECochG. El informe lleva dónde
 quedó cada electrodo y los errores de la preparación. Tests en
 `tests/test_abr_montaje.py`.
 
+**EEG en la pestaña Electrodos (2026-10-28, el autor: "ponle un
+electroencefalograma").** Mientras se está en Electrodos, el monitor de EEG
+del ABR se muda bajo la cabeza (`AbrMainWindow.eeg_en_montaje`, una franja
+de 150 px) y vuelve al monitor al salir. Es el mismo trazo de siempre: sin
+activo o sin referencia no hay canal, sin tierra entra la red y con la piel
+mal preparada sale grande y sucio, así que se ve limpiarse al corregir.
+

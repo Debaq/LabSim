@@ -1249,8 +1249,26 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         graph = f'graph_{letter}'
         getattr(self, graph).active_curve(curve)
 
+    ALTO_EEG_MONTAJE = 150
+
+    def eeg_en_montaje(self, si):
+        """Mueve el monitor de EEG bajo la cabeza (si) o de vuelta a su lugar."""
+        if si and self.montaje.ranura_eeg.indexOf(self.eeg) < 0:
+            self.montaje.ranura_eeg.addWidget(self.eeg)
+            self.eeg.setFixedHeight(self.ALTO_EEG_MONTAJE)
+            self.eeg.show()
+        elif not si and self.montaje.ranura_eeg.indexOf(self.eeg) >= 0:
+            self.montaje.ranura_eeg.removeWidget(self.eeg)
+            self.eeg.setMinimumHeight(0)
+            self.eeg.setMaximumHeight(16777215)
+            self.detail.layout_tab1_secction1.addWidget(self.eeg)
+            self.eeg.show()
+
     def tab_change(self, sender):
         pagina = self.tabWidget.widget(sender)
+        # El EEG va bajo la cabeza mientras se ponen los electrodos, y vuelve
+        # al monitor al salir.
+        self.eeg_en_montaje(pagina is self.montaje)
         if pagina is self.montaje:
             # La cabeza necesita el ancho: sin panel ni monitor.
             self.panel_izquierdo.setVisible(False)

@@ -117,6 +117,19 @@ def test_el_informe_lleva_el_montaje():
     assert data['preparacion_errores'] == []
 
 
+def test_el_eeg_se_ve_bajo_la_cabeza():
+    """En la pestaña Electrodos el monitor de EEG va bajo la cabeza (se ve el
+    trazo limpiarse al corregir un electrodo) y vuelve a su lugar al salir."""
+    w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
+    w.la_super(_caso(), 42)
+    assert w.montaje.ranura_eeg.indexOf(w.eeg) >= 0
+    w.tabWidget.setCurrentWidget(w.abr)
+    assert w.montaje.ranura_eeg.indexOf(w.eeg) < 0
+    assert w.detail.layout_tab1_secction1.indexOf(w.eeg) >= 0
+    w.tabWidget.setCurrentWidget(w.montaje)
+    assert w.montaje.ranura_eeg.indexOf(w.eeg) >= 0
+
+
 def test_paciente_nuevo_piel_nueva():
     w = _ventana(_de_libro)
     w.la_super(_caso(), 43)

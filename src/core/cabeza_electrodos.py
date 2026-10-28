@@ -869,6 +869,12 @@ class MontajeElectrodos(QWidget):
         self.cabeza.punto_elegido.connect(self._poner_en)
         self.cabeza.pasada.connect(self._pasada)
         col.addWidget(self.cabeza, 1)
+        # Lugar para el monitor de EEG del equipo que use el montaje (el ABR
+        # pone acá el suyo mientras se está en esta pestaña): así se ve el
+        # trazo limpiarse al corregir un electrodo.
+        self.ranura_eeg = QVBoxLayout()
+        self.ranura_eeg.setContentsMargins(0, 0, 0, 0)
+        col.addLayout(self.ranura_eeg)
         herramientas = QHBoxLayout()
         herramientas.setSpacing(4)
         grupo_her = QButtonGroup(self)
