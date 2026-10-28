@@ -9,17 +9,20 @@ dónde cae cada sitio visible, así que los electrodos se dibujan encima y un
 clic elige el sitio más cercano.
 
     CabezaElectrodos  la cabeza sola: gira, marca sitios, avisa el clic
+    Impedancias       cuánto da cada electrodo y cómo baja al limpiar la piel
     MontajeElectrodos la cabeza con el panel para poner activo, referencia y
-                      tierra (prototipo: todavía no va conectado a los módulos)
+                      tierra y medir sus impedancias (prototipo: todavía no va
+                      conectado a los módulos)
 """
 import json
 import math
+import random
 from collections import OrderedDict
 
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QImage, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+                               QProgressBar, QPushButton, QSizePolicy, QVBoxLayout, QWidget)
 
 from core import iconos, tema
 from core.base import context
@@ -69,6 +72,80 @@ def nombre_sitio(sitio_id):
     return d["sitios"][i]["nombre"] if i is not None else sitio_id
 
 
+# Impedancia al poner el electrodo, en kΩ, según la piel del sitio: el cuero
+# cabelludo (con pelo y más grueso) da más que la frente o la mastoides. Se
+# sortea: no hay un valor de fábrica que el alumno pueda aprenderse.
+RANGO_KOHM = {
+    "frente": (3.0, 10.0), "lobulo": (3.0, 10.0), "mastoides": (3.0, 10.0),
+    "mejilla": (3.0, 9.0), "infraorbital": (3.0, 9.0), "menton": (3.0, 9.0),
+    "cae": (4.0, 12.0),
+}
+RANGO_CUERO_CABELLUDO = (6.0, 18.0)
+# Lo que deja cada pasada de pasta abrasiva, y hasta dónde puede bajar esa piel.
+LIMPIEZA = (0.35, 0.6)
+PISO_KOHM = (0.8, 2.0)
+ESCALA_KOHM = 20.0       # tope de la barra
+
+
+def limites():
+    """Los límites clínicos del generador del ABR: cada electrodo y el desbalance."""
+    from abr.ABR_generator import IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM
+    return IMPEDANCE_LIMIT_KOHM, IMPEDANCE_BALANCE_LIMIT_KOHM
+
+
+class Impedancias:
+    """La impedancia de cada electrodo puesto. Cambia al ponerlo (sorteo por
+    sitio) y al limpiar la piel; se ve solo después de medir, como en el
+    equipo: lo que cambió desde la última medición queda sin medir."""
+
+    def __init__(self, rng=None):
+        self.rng = rng or random.Random()
+        self.z = {}           # rol -> kΩ
+        self.piso = {}
+        self.medido = {}      # rol -> kΩ de la última medición (o falta)
+
+    def poner(self, rol, sitio):
+        d = datos()
+        zona = d["sitios"][d["por_id"][sitio]]["zona"]
+        lo, hi = RANGO_KOHM.get(zona, RANGO_CUERO_CABELLUDO)
+        self.z[rol] = self.rng.uniform(lo, hi)
+        self.piso[rol] = self.rng.uniform(*PISO_KOHM)
+        self.medido.pop(rol, None)
+
+    def quitar(self, rol):
+        for dic in (self.z, self.piso, self.medido):
+            dic.pop(rol, None)
+
+    def limpiar(self, rol):
+        if rol in self.z:
+            self.z[rol] = max(self.piso[rol], self.z[rol] * self.rng.uniform(*LIMPIEZA))
+            self.medido.pop(rol, None)
+
+    def medir(self):
+        self.medido = dict(self.z)
+        return self.medido
+
+    def informe(self):
+        """(peor, desbalance, dentro_de_norma) de lo medido, o None."""
+        if not self.medido or len(self.medido) < len(self.z):
+            return None
+        limite, balance = limites()
+        valores = list(self.medido.values())
+        peor, desbalance = max(valores), max(valores) - min(valores)
+        return peor, desbalance, peor <= limite and desbalance <= balance
+
+    def estado(self, rol):
+        """'ok', 'aviso' o 'alerta' de lo medido de un electrodo, o None."""
+        z = self.medido.get(rol)
+        if z is None:
+            return None
+        limite, _ = limites()
+        return "ok" if z <= limite else ("aviso" if z <= 2 * limite else "alerta")
+
+
+COLOR_ESTADO = {"ok": tema.OK, "aviso": tema.AVISO, "alerta": tema.ALERTA}
+
+
 class CabezaElectrodos(QWidget):
     """La cabeza: arrastrar gira, clic en un sitio emite `sitio_elegido`."""
     sitio_elegido = Signal(str)
@@ -82,7 +159,7 @@ class CabezaElectrodos(QWidget):
         self.inclinacion = 0.0
         self.sistema = "10-20"
         self.colocados = {}       # rol -> sitio
-        self.rol_actual = None    # el que se pone con el próximo clic (para el cursor)
+        self.estados = {}         # rol -> 'ok'/'aviso'/'alerta' de la impedancia medida
         self._sobre = None        # sitio bajo el mouse
         self._apretado = None
         self._arrastrando = False
@@ -152,8 +229,9 @@ class CabezaElectrodos(QWidget):
         self.sistema = sistema
         self.update()
 
-    def poner(self, colocados):
+    def poner(self, colocados, estados=None):
         self.colocados = dict(colocados)
+        self.estados = dict(estados or {})
         self.update()
 
     # ------------------------------------------------------------ dibujo
@@ -173,6 +251,12 @@ class CabezaElectrodos(QWidget):
             rol = rol_de.get(s["id"])
             sobre = s["id"] == self._sobre
             if rol:
+                estado = self.estados.get(rol)
+                if estado:
+                    # Anillo con lo que dio la impedancia, como la luz del equipo.
+                    p.setPen(QPen(QColor(COLOR_ESTADO[estado]), 3))
+                    p.setBrush(Qt.BrushStyle.NoBrush)
+                    p.drawEllipse(pt, 11, 11)
                 p.setPen(QPen(QColor("white"), 2))
                 p.setBrush(QColor(COLOR_ROL[rol]))
                 p.drawEllipse(pt, 7.5, 7.5)
@@ -254,6 +338,26 @@ QPushButton[rol]:checked {{ background: {tema.ACENTO_SUAVE}; border-color: {tema
 QPushButton[segmento="true"] {{ padding: 4px 0px; }}
 QLabel#puesto {{ color: {tema.TEXTO}; font-weight: 600; }}
 QLabel#puesto[vacio="true"] {{ color: {tema.TEXTO_TENUE}; font-weight: 400; }}
+QLabel#kohm {{ font-weight: 700; color: {tema.TEXTO_TENUE}; }}
+QLabel#kohm[estado="ok"] {{ color: {tema.OK}; }}
+QLabel#kohm[estado="aviso"] {{ color: {tema.AVISO}; }}
+QLabel#kohm[estado="alerta"] {{ color: {tema.ALERTA}; }}
+QProgressBar {{
+    background: {tema.GRILLA}; border: none; border-radius: 3px;
+    min-height: 6px; max-height: 6px;
+}}
+QProgressBar::chunk {{ border-radius: 3px; background: {tema.TEXTO_TENUE}; }}
+QProgressBar[estado="ok"]::chunk {{ background: {tema.OK}; }}
+QProgressBar[estado="aviso"]::chunk {{ background: {tema.AVISO}; }}
+QProgressBar[estado="alerta"]::chunk {{ background: {tema.ALERTA}; }}
+QPushButton[chico="true"] {{ padding: 2px 8px; font-size: 8pt; }}
+QPushButton[primario="true"] {{
+    background: {tema.ACENTO}; border-color: {tema.ACENTO}; color: white; font-weight: 600;
+}}
+QPushButton[primario="true"]:hover {{ background: {tema.ACENTO_CLARO}; color: white; }}
+QPushButton[primario="true"]:disabled {{
+    background: {tema.TARJETA_ALT}; border-color: {tema.BORDE}; color: {tema.TEXTO_TENUE};
+}}
 """
 
 
@@ -271,11 +375,13 @@ def _punto(color, tam=12):
 
 
 class MontajeElectrodos(QWidget):
-    """Prototipo: la cabeza y un panel para poner activo, referencia y tierra."""
+    """Prototipo: la cabeza y un panel para poner activo, referencia y tierra
+    y medir sus impedancias."""
     montaje_cambio = Signal(dict)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, rng=None):
         super().__init__(parent)
+        self.impedancias = Impedancias(rng)
         tema.aplicar_estilo(self, EXTRA_QSS)
         raiz = QHBoxLayout(self)
         raiz.setContentsMargins(12, 10, 12, 12)
@@ -353,6 +459,9 @@ class MontajeElectrodos(QWidget):
             grupo_sis.addButton(b)
             fila.addWidget(b, 1)
         pcol.addLayout(fila)
+
+        pcol.addSpacing(6)
+        pcol.addLayout(self._seccion_impedancias())
         pcol.addStretch(1)
         self.btn_limpiar = QPushButton(" Sacar todos")
         self.btn_limpiar.setIcon(iconos.icono_boton("cerrar", tema.TEXTO_SUAVE, tam=14))
@@ -364,6 +473,90 @@ class MontajeElectrodos(QWidget):
         self._elegir_rol("activo")
         self._pintar()
 
+    def _seccion_impedancias(self):
+        col = QVBoxLayout()
+        col.setSpacing(4)
+        cab = QHBoxLayout()
+        seccion = QLabel("IMPEDANCIAS")
+        seccion.setProperty("role", "seccion")
+        cab.addWidget(seccion, 1)
+        self.btn_medir = QPushButton("Medir")
+        self.btn_medir.setProperty("primario", "true")
+        self.btn_medir.setProperty("chico", "true")
+        self.btn_medir.clicked.connect(self.medir)
+        cab.addWidget(self.btn_medir)
+        col.addLayout(cab)
+        self.filas_imp = {}
+        grilla = QGridLayout()
+        grilla.setHorizontalSpacing(6)
+        grilla.setVerticalSpacing(2)
+        for i, (clave, nombre, color) in enumerate(ROLES):
+            punto = QLabel()
+            punto.setPixmap(_punto(color, 10))
+            valor = QLabel("—")
+            valor.setObjectName("kohm")
+            valor.setMinimumWidth(56)
+            barra = QProgressBar()
+            barra.setRange(0, int(ESCALA_KOHM * 10))
+            barra.setTextVisible(False)
+            limpiar = QPushButton("Limpiar piel")
+            limpiar.setProperty("chico", "true")
+            limpiar.setToolTip("Sacar el electrodo, limpiar con pasta abrasiva y volver a ponerlo")
+            limpiar.clicked.connect(lambda _=False, c=clave: self.limpiar_piel(c))
+            grilla.addWidget(punto, i * 2, 0)
+            grilla.addWidget(valor, i * 2, 1)
+            grilla.addWidget(limpiar, i * 2, 2)
+            grilla.addWidget(barra, i * 2 + 1, 0, 1, 3)
+            self.filas_imp[clave] = (valor, barra, limpiar)
+        grilla.setColumnStretch(1, 1)
+        col.addLayout(grilla)
+        self.lbl_desbalance = QLabel()
+        self.lbl_desbalance.setWordWrap(True)
+        self.lbl_desbalance.setProperty("role", "hint")
+        col.addWidget(self.lbl_desbalance)
+        return col
+
+    def medir(self):
+        self.impedancias.medir()
+        self._pintar()
+
+    def limpiar_piel(self, clave):
+        self.impedancias.limpiar(clave)
+        self._pintar()
+
+    def _pintar_impedancias(self):
+        limite, balance = limites()
+        for clave, (valor, barra, limpiar) in self.filas_imp.items():
+            puesto = clave in self.colocados
+            z = self.impedancias.medido.get(clave)
+            estado = self.impedancias.estado(clave)
+            if not puesto:
+                valor.setText("—")
+            elif z is None:
+                valor.setText("sin medir")
+            else:
+                valor.setText(f"{z:.1f} kΩ")
+            barra.setValue(int(min(z or 0, ESCALA_KOHM) * 10))
+            for w in (valor, barra):
+                w.setProperty("estado", estado or "")
+                tema.repintar(w)
+            limpiar.setEnabled(puesto)
+        self.btn_medir.setEnabled(bool(self.colocados))
+        informe = self.impedancias.informe()
+        if informe is None:
+            texto = (f"Cada electrodo bajo {limite:.0f} kΩ y entre ellos menos de "
+                     f"{balance:.0f} kΩ de diferencia.")
+            estado = ""
+        else:
+            peor, desbalance, ok = informe
+            texto = (f"Diferencia entre electrodos: {desbalance:.1f} kΩ. " +
+                     ("Listo para registrar." if ok else
+                      "Fuera de norma: limpia la piel del que esté alto y vuelve a medir."))
+            estado = "ok" if ok else "alerta"
+        self.lbl_desbalance.setText(texto)
+        self.lbl_desbalance.setProperty("estado", estado)
+        tema.repintar(self.lbl_desbalance)
+
     def _elegir_rol(self, clave):
         self.rol_actual = clave
         self.botones_rol[clave].setChecked(True)
@@ -373,7 +566,9 @@ class MontajeElectrodos(QWidget):
         for rol, s in list(self.colocados.items()):
             if s == sitio:
                 del self.colocados[rol]
+                self.impedancias.quitar(rol)
         self.colocados[self.rol_actual] = sitio
+        self.impedancias.poner(self.rol_actual, sitio)
         # Pasa solo al siguiente que falta, como quien va poniendo los tres.
         falta = next((c for c, _, _ in ROLES if c not in self.colocados), None)
         if falta:
@@ -382,11 +577,13 @@ class MontajeElectrodos(QWidget):
 
     def _quitar(self, clave):
         self.colocados.pop(clave, None)
+        self.impedancias.quitar(clave)
         self._elegir_rol(clave)
         self._pintar()
 
     def limpiar(self):
         self.colocados = {}
+        self.impedancias = Impedancias(self.impedancias.rng)
         self._elegir_rol("activo")
         self._pintar()
 
@@ -396,5 +593,8 @@ class MontajeElectrodos(QWidget):
             lbl.setText(nombre_sitio(sitio) if sitio else "sin poner")
             lbl.setProperty("vacio", "false" if sitio else "true")
             tema.repintar(lbl)
-        self.cabeza.poner(self.colocados)
+        estados = {rol: self.impedancias.estado(rol) for rol in self.colocados
+                   if self.impedancias.estado(rol)}
+        self.cabeza.poner(self.colocados, estados)
+        self._pintar_impedancias()
         self.montaje_cambio.emit(dict(self.colocados))

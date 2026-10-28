@@ -6545,3 +6545,12 @@ referencia azul, tierra verde (no son los de los oídos). Los sitios del
 cuerpo (ECM, esternón, clavícula, nuca) necesitan la persona de pie: no van
 todavía.
 
+Impedancias en el mismo panel (2026-10-28, "falta medir impedancias"): al
+poner un electrodo se sortea su impedancia según la piel del sitio (cuero
+cabelludo 6-18 kΩ, frente/mastoides/lóbulo 3-10, conducto 4-12) y se ve
+solo al **Medir**, como en el equipo. **Limpiar piel** (pasta abrasiva) la
+baja a un 35-60 % por pasada hasta un piso de 0,8-2 kΩ propio de esa piel;
+lo que cambió queda "sin medir". En norma con los mismos límites que usa el
+generador del ABR (5 kΩ por electrodo, 2 kΩ de diferencia); el anillo del
+electrodo en la cabeza toma el color de lo medido.
+

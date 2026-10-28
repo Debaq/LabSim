@@ -62,6 +62,49 @@ def test_arrastrar_gira_y_no_pone():
     assert m.colocados == {}
 
 
+def test_impedancias_se_ven_al_medir_y_bajan_al_limpiar():
+    import random
+    m = ce.MontajeElectrodos(rng=random.Random(4))
+    for sitio in ("Cz", "M2", "Fpz"):
+        m._poner(sitio)
+    assert m.impedancias.informe() is None            # todavía sin medir
+    m.medir()
+    antes = dict(m.impedancias.medido)
+    assert set(antes) == {"activo", "referencia", "tierra"}
+    m.limpiar_piel("activo")
+    assert "activo" not in m.impedancias.medido        # cambió: hay que volver a medir
+    assert m.impedancias.informe() is None
+    m.medir()
+    assert m.impedancias.medido["activo"] < antes["activo"]
+
+
+def test_limpiar_tiene_piso_y_el_cuero_cabelludo_da_mas():
+    import random
+    imp = ce.Impedancias(random.Random(1))
+    altos = []
+    for semilla in range(40):
+        imp.rng = random.Random(semilla)
+        imp.poner("activo", "Cz")
+        imp.poner("tierra", "Fpz")
+        altos.append(imp.z["activo"] > imp.z["tierra"])
+        for _ in range(12):
+            imp.limpiar("activo")
+        assert imp.z["activo"] >= ce.PISO_KOHM[0]
+    assert sum(altos) > 30      # el vértex con pelo casi siempre sale más alto
+
+
+def test_en_norma_con_los_limites_del_abr():
+    from abr.ABR_generator import IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM
+    imp = ce.Impedancias()
+    imp.z = {"activo": IMPEDANCE_LIMIT_KOHM - 0.1, "referencia": 3.5, "tierra": 3.5}
+    imp.medir()
+    assert imp.informe()[2]
+    imp.z["referencia"] = IMPEDANCE_LIMIT_KOHM - 0.1 - IMPEDANCE_BALANCE_LIMIT_KOHM - 0.5
+    imp.medir()
+    assert not imp.informe()[2]          # todos bajo el límite, pero desbalanceados
+    assert imp.estado("activo") == "ok"
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

@@ -189,7 +189,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 71. Conectar `core/cabeza_electrodos.MontajeElectrodos` a ABR, ECochG,
       corticales y AABR como paso antes de registrar, con la evaluación del
       montaje de labyrinthus3d (`evaluaMontaje`: invertido, sin onda I,
-      ruido de red sin tierra) y la impedancia del monitor de EEG.
+      ruido de red sin tierra). Las impedancias medidas en el panel
+      reemplazan las que hoy se escriben a mano en Parámetros avanzados
+      (`technical_config['impedance']`: activo → vertex, referencia →
+      right/left, tierra → ground).
 - [ ] 72. Sitios del cuerpo (ECM, esternón, clavícula, nuca) para el VEMP:
       fotografiar la persona de pie de labyrinthus3d.
 
