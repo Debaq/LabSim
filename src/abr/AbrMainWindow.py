@@ -176,6 +176,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.report.layout_estado.addWidget(self.estado_informe)
         self.detail.layout_tab1_secction1.addWidget(self.eeg)
         self.detail.layout_tab1_secction2.addWidget(self.fmp)
+        # EEG y FSP mitad y mitad, fijo. Los espaciadores del .ui repartían
+        # según lo que pidiera cada gráfico, y el EEG volvía de la pestaña
+        # Electrodos (más ancho) comiéndose al FSP.
+        monitor = self.detail.horizontalLayout_2
+        for espaciador in (self.detail.horizontalSpacer, self.detail.horizontalSpacer_2):
+            espaciador.changeSize(6, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        monitor.setStretch(monitor.indexOf(self.detail.layout_tab1_secction1), 1)
+        monitor.setStretch(monitor.indexOf(self.detail.layout_tab1_secction2), 1)
+        for grafico in (self.eeg, self.fmp):
+            grafico.setMinimumWidth(0)
+            politica = grafico.sizePolicy()
+            politica.setHorizontalPolicy(QSizePolicy.Policy.Ignored)
+            grafico.setSizePolicy(politica)
         self.detail.layout_tab2.addWidget(self.detail_all)
         # Panel izquierdo con dos fichas: lo que se configura y lo que se
         # mide. Se usan en momentos distintos (registrando / marcando), y así
