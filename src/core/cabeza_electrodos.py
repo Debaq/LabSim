@@ -106,7 +106,7 @@ GEL_MAX_PASADAS = 10                  # sobre esto la piel se irrita y ya no baj
 IDA_Y_VUELTA_PARA_IRRITAR = 3         # pasadas de ida y vuelta que irritan
 PASADA_MIN_PX = 25                    # un arrastre más corto no es una pasada
 IDA_Y_VUELTA = 1.6                    # recorrido / desplazamiento neto sobre esto
-BRILLO_S = 3.0                        # cuánto se ve húmedo el alcohol
+MARCA_S = 3.0                         # lo frotado se ve unos segundos y se va
 PASO_TRAZO_M = 0.002                  # los trazos se guardan con un punto cada 2 mm
 UN_ELECTRODO_M = 0.010                # dos electrodos a menos de 1 cm: el nuevo saca al otro
 
@@ -344,13 +344,16 @@ class Piel:
                         self.errores.append(("piel_irritada", sitio))
         return trazo
 
-    def puntos_irritados(self):
-        """(puntos, normales) de la piel irritada, para dibujarla."""
+    def puntos_irritados(self, trazo):
+        """(puntos, normales) de un trazo de gel que quedaron irritados."""
         if self._puntos_irritados is None:
-            pares = [(pt, n) for t in self.trazos if t.herramienta == "gel"
-                     for pt, n in zip(t.puntos[::2], t.normales[::2]) if self.irritada(pt)]
-            self._puntos_irritados = (np.array([a for a, _ in pares]), np.array([b for _, b in pares]))
-        return self._puntos_irritados
+            self._puntos_irritados = {}
+        if id(trazo) not in self._puntos_irritados:
+            pares = [(pt, n) for pt, n in zip(trazo.puntos[::2], trazo.normales[::2])
+                     if self.irritada(pt)]
+            self._puntos_irritados[id(trazo)] = (np.array([a for a, _ in pares]),
+                                                 np.array([b for _, b in pares]))
+        return self._puntos_irritados[id(trazo)]
 
     def preparada(self, punto):
         alcohol, gel, _ = self.pasadas(punto)
@@ -571,8 +574,7 @@ class CabezaElectrodos(QWidget):
         self.update()
 
     def _mientras_brilla(self):
-        if not self.piel or not any(time.monotonic() - t.cuando < BRILLO_S
-                                    for t in self.piel.trazos if t.herramienta == "alcohol"):
+        if not self.piel or not any(time.monotonic() - t.cuando < MARCA_S for t in self.piel.trazos):
             self._brillo.stop()
         self.update()
 
@@ -595,22 +597,22 @@ class CabezaElectrodos(QWidget):
         p.end()
 
     def _dibujar_piel(self, p, escala):
-        """Lo frotado: húmedo del alcohol unos segundos, rosado con el gel
-        (más intenso donde se pasó más veces), rojo donde se irritó."""
-        if self.piel is None or not self.piel.trazos:
+        """Lo recién frotado, unos segundos y se va (MARCA_S): húmedo del
+        alcohol, rosado del gel, rojo donde se irritó. La piel queda como
+        quedó (impedancia, irritación), pero no deja marcas a la vista."""
+        if self.piel is None:
+            return
+        ahora = time.monotonic()
+        recientes = [t for t in self.piel.trazos if ahora - t.cuando < MARCA_S]
+        if not recientes:
             return
         inc, giro = self._angulos()
         # Ancho del algodón en pantalla: 8 mm de radio a la distancia de la cabeza.
         ancho = 2 * PINCEL_M * self.geo.foco * self.geo.tam / 2 / self.geo.ojo[2] * escala
-        ahora = time.monotonic()
-        for t in self.piel.trazos:
-            if t.herramienta == "alcohol":
-                edad = ahora - t.cuando
-                if edad >= BRILLO_S:
-                    continue
-                color = QColor(235, 245, 255, int(150 * (1 - edad / BRILLO_S)))
-            else:
-                color = QColor(240, 140, 140, 45)
+        for t in recientes:
+            queda = 1 - (ahora - t.cuando) / MARCA_S
+            color = QColor(235, 245, 255, int(150 * queda)) if t.herramienta == "alcohol" \
+                else QColor(240, 140, 140, int(90 * queda))
             px, vis = self.geo.proyectar(t.puntos, t.normales, inc, giro)
             pen = QPen(color, ancho)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
@@ -626,15 +628,15 @@ class CabezaElectrodos(QWidget):
                     camino.lineTo(q)
                 abierto = bool(v)
             p.drawPath(camino)
-        # Lo irritado, encima.
-        puntos, normales = self.piel.puntos_irritados()
-        if len(puntos):
-            px, vis = self.geo.proyectar(puntos, normales, inc, giro)
-            p.setPen(Qt.PenStyle.NoPen)
-            p.setBrush(QColor(205, 30, 30, 70))
-            for xy, v in zip(px, vis):
-                if v:
-                    p.drawEllipse(self._a_pantalla(xy), ancho / 2, ancho / 2)
+            if t.herramienta == "gel":
+                puntos, normales = self.piel.puntos_irritados(t)
+                if len(puntos):
+                    ppx, pvis = self.geo.proyectar(puntos, normales, inc, giro)
+                    p.setPen(Qt.PenStyle.NoPen)
+                    p.setBrush(QColor(205, 30, 30, int(110 * queda)))
+                    for xy, v in zip(ppx, pvis):
+                        if v:
+                            p.drawEllipse(self._a_pantalla(xy), ancho / 2, ancho / 2)
 
     def _dibujar_sitios(self, p):
         fuente = QFont(self.font())
@@ -738,8 +740,7 @@ class CabezaElectrodos(QWidget):
         neto = math.hypot(pantalla[-1].x() - pantalla[0].x(), pantalla[-1].y() - pantalla[0].y())
         misma = recorrido <= IDA_Y_VUELTA * neto
         self.pasada.emit(self.herramienta, np.array(trazo["puntos"]), np.array(trazo["normales"]), misma)
-        if self.herramienta == "alcohol":
-            self._brillo.start()
+        self._brillo.start()
 
     def keyPressEvent(self, ev):
         paso = {Qt.Key.Key_Left: (-6, 0), Qt.Key.Key_Right: (6, 0),

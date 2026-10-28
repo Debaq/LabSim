@@ -6589,3 +6589,10 @@ queda 1 mm sobre la piel y el rayo puede pasarle por encima (three.js
 también); en la práctica el clic cae en la piel de al lado. El autor
 comentó que "era mejor el modelo 3D" pero que se siga con las fotos.
 
+**Sin marcas que queden (2026-10-28, el autor: "que no queden las
+marquitas").** Lo frotado se ve solo unos segundos (`MARCA_S` = 3 s) y se
+desvanece: el blanco húmedo del alcohol, el rosado del gel y el rojo de la
+piel irritada. La piel conserva lo hecho (impedancia, irritación, errores);
+se ve en el panel ("piel irritada", "alcohol ✓ · gel 7") y en el tooltip al
+pasar el mouse con alcohol o gel.
+

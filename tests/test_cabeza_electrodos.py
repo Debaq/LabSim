@@ -167,6 +167,21 @@ def test_frotar_con_el_mouse_limpia_una_zona():
     assert piel.pasadas(_sitio("Cz")[0]) == (1, 1.5, 1)
 
 
+def test_las_marcas_se_van_y_la_piel_queda():
+    m = _montaje()
+    m.cabeza.mirar(0, 60)
+    limpia = m.cabeza.grab().toImage()
+    cz = _en_pantalla(m, "Cz")
+    _frotar(m, cz, "alcohol")
+    for _ in range(4):
+        _frotar(m, cz, "gel", ida_y_vuelta=True)          # hasta irritar
+    assert m.cabeza.grab().toImage() != limpia             # recién frotado se ve
+    for t in m.impedancias.piel.trazos:
+        t.cuando -= ce.MARCA_S + 0.1
+    assert m.cabeza.grab().toImage() == limpia             # sin marquitas
+    assert m.impedancias.piel.irritada(_sitio("Cz")[0])    # pero la piel quedó irritada
+
+
 def test_el_electrodo_va_donde_se_hace_clic():
     m = _montaje()
     m.elegir_herramienta("electrodo")
