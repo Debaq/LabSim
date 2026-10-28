@@ -2082,10 +2082,13 @@ def test_no_contra_channel_without_the_electrode():
                   'ground': 'Fpz'}
     _, _, meta = _curva(technical={'electrodes': electrodos})
     assert meta['contra'] is None and meta['contra_channel'] is None
-    # Estimulando el otro oido, ese mismo electrodo pasa a ser el ipsi y el
-    # contra existe.
+    # Estimulando el otro oido, esa unica referencia queda del lado NO
+    # estimulado: el unico canal que hay es el contralateral (sin onda I),
+    # no un ipsi mas un contra.
     g = _gen()
-    assert g.contra_channel({'electrodes': electrodos}, 'OI') == 'right'
+    assert g.contra_channel({'electrodes': electrodos}, 'OI') is None
+    assert g.solo_referencia_contra({'electrodes': electrodos}, 'OI')
+    assert not g.solo_referencia_contra({'electrodes': electrodos}, 'OD')
 
 
 # ------------------------------------------------------ rechazos y monitor

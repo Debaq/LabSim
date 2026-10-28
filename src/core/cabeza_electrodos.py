@@ -450,6 +450,49 @@ class Impedancias:
 
 COLOR_ESTADO = {"ok": tema.OK, "aviso": tema.AVISO, "alerta": tema.ALERTA}
 
+# --- Del montaje al equipo ----------------------------------------------
+# Cuánto de la respuesta llega según dónde quedó cada electrodo, sobre el
+# Cz-mastoides de rutina. El activo lejos del vértex ve menos de los
+# generadores del tronco (Fz-mastoides 0,7, como en la normativa del ABR);
+# una referencia sobre el cuero cabelludo cerca del activo resta casi lo
+# mismo que registra; activo y referencia cambiados dan el registro al revés.
+GANANCIA_ACTIVO = {"Cz": 1.0, "vertice": 1.0, "Fz": 0.7, "frente": 0.7, "frontal": 0.7,
+                   "Pz": 0.8, "parietal": 0.8, "temporal": 0.5, "occipital": 0.5}
+GANANCIA_REFERENCIA = {"mastoides": 1.0, "lobulo": 0.9, "cae": 0.95,
+                       "mejilla": 0.6, "infraorbital": 0.6, "menton": 0.6}
+REFERENCIA_CERCA_M = 0.06            # referencia en el cuero cabelludo a menos de 6 cm del activo
+GANANCIA_REFERENCIA_CERCA = 0.15
+GANANCIA_REFERENCIA_LEJOS = 0.4
+GANANCIA_AL_REVES = -0.9             # activo en la mastoides y referencia en el vértex
+GANANCIA_ACTIVO_FUERA = 0.15         # activo fuera del cráneo sin referencia en el vértex
+DESCONECTADO = "No Conectado"        # el de ABR_generator.DISCONNECTED
+
+
+def zona_de(electrodo):
+    d = datos()
+    sitio, _ = electrodo.cercano()
+    return d["sitios"][d["por_id"][sitio]]["zona"]
+
+
+def ganancia_montaje(activo, referencias):
+    """Lo que el lugar de los electrodos le hace a la amplitud (con signo)."""
+    if activo is None or not referencias:
+        return 1.0                   # no hay registro: lo resuelve el generador
+    za = zona_de(activo)
+    if za not in GANANCIA_ACTIVO:
+        if any(zona_de(r) in ("Cz", "vertice") for r in referencias):
+            return GANANCIA_AL_REVES
+        return GANANCIA_ACTIVO_FUERA
+
+    def ref(r):
+        zr = zona_de(r)
+        if zr in GANANCIA_REFERENCIA:
+            return GANANCIA_REFERENCIA[zr]
+        cerca = np.linalg.norm(r.punto - activo.punto) < REFERENCIA_CERCA_M
+        return GANANCIA_REFERENCIA_CERCA if cerca else GANANCIA_REFERENCIA_LEJOS
+
+    return GANANCIA_ACTIVO[za] * float(np.mean([ref(r) for r in referencias]))
+
 HERRAMIENTAS = (
     ("girar", "Girar"),
     ("alcohol", "Alcohol"),
@@ -1107,6 +1150,58 @@ class MontajeElectrodos(QWidget):
     def errores(self):
         """Lo mal hecho en la preparación, para la evaluación (no se muestra)."""
         return list(self.impedancias.errores)
+
+    def reiniciar(self, rng=None):
+        """Paciente nuevo: piel sin preparar y sin electrodos."""
+        self.impedancias = Impedancias(rng or self.impedancias.piel.rng)
+        self.cabeza.piel = self.impedancias.piel
+        self.colocados = {}
+        self._elegir_rol("activo")
+        self.elegir_herramienta("girar")
+        self._pintar()
+
+    def equipo(self):
+        """Lo que el montaje le dice al equipo de potenciales (las claves del
+        technical_config de ABR_generator): qué electrodo está conectado y
+        dónde, la impedancia que tiene DE VERDAD (la de la piel donde quedó,
+        se haya medido o no), cuántos canales y la ganancia por el lugar."""
+        c = self.colocados
+        if self.canales == 2:
+            der, izq = c.get("ref_der"), c.get("ref_izq")
+        else:
+            ref = c.get("referencia")
+            der = ref if ref is not None and ref.lado() == "der" else None
+            izq = ref if ref is not None and ref.lado() == "izq" else None
+        por_clave = {"vertex": c.get("activo"), "right": der, "left": izq, "ground": c.get("tierra")}
+        rol_de = {id(e): rol for rol, e in c.items()}
+        electrodes, impedance = {}, {}
+        for clave, e in por_clave.items():
+            electrodes[clave] = corto_sitio(e.cercano()[0]) if e is not None else DESCONECTADO
+            impedance[clave] = float(self.impedancias.z[rol_de[id(e)]]) if e is not None else 2.0
+        referencias = [r for r in (der, izq) if r is not None]
+        return {"electrodes": electrodes, "impedance": impedance, "channels": self.canales,
+                "electrode_gain": ganancia_montaje(c.get("activo"), referencias)}
+
+    def de_libro(self, canales=2, activo="Cz"):
+        """Montaje de rutina bien hecho: activo (Cz; "cae_der" para el
+        ECochG), mastoides y Fpz, con alcohol y gel. Para los tests y para
+        mostrar cómo queda."""
+        self.sacar_todos()
+        self.poner_canales(canales)
+        sitios = (activo, "M2", "M1", "Fpz") if canales == 2 else (activo, "M2", "Fpz")
+        d = datos()
+        for sitio in sitios:
+            i = d["por_id"][sitio]
+            punto, normal = d["pos"][i], d["normales"][i]
+            eje = np.cross(normal, [0.0, 1.0, 0.0])
+            eje = eje / np.linalg.norm(eje) if np.linalg.norm(eje) > 1e-6 else np.array([1.0, 0.0, 0.0])
+            linea = np.array([punto + eje * (k / 9 - 0.5) * 0.02 for k in range(10)])
+            for herramienta, veces in (("alcohol", 2), ("gel", 8)):
+                for _ in range(veces):
+                    self.impedancias.piel.pasada(herramienta, linea, [normal] * 10)
+        for sitio in sitios:
+            self.poner_en_sitio(sitio)
+        self.medir()
 
     def montaje(self):
         """Dónde quedó cada electrodo, para la evaluación y el registro: el

@@ -59,6 +59,9 @@ def _caso(edad=34, gender=1, umbral=20, tipo='normal', repro=True):
 def _ventana(caso=None, average=2000):
     w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
     w.la_super(caso if caso is not None else _caso(), 42)
+    # Electrodos bien puestos (la pestaña Electrodos): sin ellos no hay registro.
+    w.montaje.de_libro()
+    w.tabWidget.setCurrentWidget(w.abr)   # puestos los electrodos, a registrar
     w.control.sb_prom.setValue(average)
     w.control.sb_rate.setValue(21.1)
     # Banda del ABR de rutina: el equipo ARRANCA en 3.3-1000 Hz a propósito

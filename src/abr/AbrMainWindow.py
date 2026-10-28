@@ -11,17 +11,19 @@ la_super(data_current, appointment_id). Cada paciente trae su propia
 definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
 import os
+import random
 
 import numpy as np
 
-from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
+from abr.ABR_generator import (DISCONNECTED, ABR_Curve, ABRGenerator, agitation_factor,
                                level_label, sl_reference,
                                case_quality, latency_intensity_band,
                                normative_limits, raw_eeg)
 from abr.estilo import QSS_ABR, TARJETAS
 from core import tema
+from core.cabeza_electrodos import MontajeElectrodos, zona_de
 from abr.AssrPanel import AssrPanel
-from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
+from abr.AbrAdvanceSettings import (ROTULO_MONTAJE, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
 from abr.ECochG_generator import ECochG_Curve, burst_ps_ms
@@ -191,7 +193,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_avanzados = QPushButton(tr("AbrMainWindow", "Parámetros avanzados…"))
         self.btn_avanzados.setObjectName("btnAvanzados")
         self.btn_avanzados.setToolTip(tr(
-            "AbrMainWindow", "Configuración del equipo: montaje, transductor, unidad del nivel…"))
+            "AbrMainWindow", "Configuración del equipo: transductor, ventana, unidad del nivel…"))
         columna_config.addWidget(self.btn_avanzados)
         self.panel_tabs.addTab(pagina_config, tr("AbrMainWindow", "Configuración"))
         self.layout_panel_izquierdo.addWidget(self.panel_tabs)
@@ -337,7 +339,18 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # y se descartaba: el generador quedaba fijo en fono de insercion,
         # impedancia 3 kOhm y ventana de 12 ms.
         self.test_actual = self.control.cb_test.currentText()
+        # Electrodos: se preparan y ponen en su pestaña, sobre la cabeza
+        # (core/cabeza_electrodos.py). Lo que quedó --dónde, cuántos
+        # canales, la impedancia real de cada uno-- entra al equipo y de
+        # ahí a las curvas y al monitor de EEG (ver _con_montaje). Va
+        # primera: es lo primero que se hace con el paciente.
+        self.montaje = MontajeElectrodos()
+        self.montaje_cita = None
+        self.tabWidget.insertTab(0, self.montaje, tr("AbrMainWindow", "Electrodos"))
+        self.tabWidget.setCurrentWidget(self.abr)
         self.technical = default_settings(self.test_actual)
+        self._con_montaje()
+        self.montaje.montaje_cambio.connect(lambda _m: self._con_montaje())
         # Las pruebas de esta atencion que no estan en pantalla, por nombre
         # de prueba: {'data': payload, 'images': {sufijo: ruta},
         # 'pendiente': hay que subirla} (ver test_changed).
@@ -371,6 +384,21 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
         self.aplicar_monitor()
 
+    def _con_montaje(self):
+        """Pone en el equipo lo que quedó en la pestaña Electrodos."""
+        equipo = self.montaje.equipo()
+        if self.test_actual == 'ECochG':
+            # El activo del ECochG va en el conducto (o la membrana, según el
+            # electrodo elegido en Parámetros avanzados). Puesto en el
+            # cuero cabelludo, lo que llega es un registro de superficie.
+            activo = self.montaje.colocados.get('activo')
+            if activo is None or zona_de(activo) != 'cae':
+                equipo['electrode_gain'] /= ecochg.ELECTRODE_GAIN.get(
+                    self.technical.get('montage'), 1.0)
+            else:
+                equipo['electrode_gain'] = 1.0
+        self.technical.update(equipo)
+
     def la_super(self, data, appointment_id=None):
         """Recibe el caso del paciente en atención (o None al cerrarla/
         deshidratar), mismo patrón que Audiometer.la_super/Z.la_super.
@@ -386,6 +414,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.control.stop_capture()
         self.capture_timer.stop()
         self.data_current = data
+        if appointment_id != self.montaje_cita:
+            # Paciente (o atención) nuevo: piel sin preparar, sin electrodos.
+            # stable_seed: la misma piel en cualquier proceso (core.rng).
+            self.montaje_cita = appointment_id
+            self.montaje.reiniciar(random.Random(stable_seed('piel', appointment_id)))
+            if data is not None:
+                self.tabWidget.setCurrentWidget(self.montaje)
         self.clear_sessions()
         # Las pruebas que quedaron aparte eran del paciente anterior.
         self.otras_pruebas = {}
@@ -431,10 +466,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         meta = {} if self.es_assr() else self.last_metadata
         peor, desbalance, ok = ABRGenerator.impedance_report(tec)
         etiqueta = {v: k for k, v in TRANSDUCERS.items()}
-        montaje = {v: k for k, v in MONTAGES.items()}
+        electrodos = tec.get('electrodes') or {}
+        if self.es_ecochg():
+            montaje = ROTULO_MONTAJE.get(tec.get('montage'), tec.get('montage'))
+        else:
+            # El montaje es el que quedó puesto en la pestaña Electrodos.
+            refs = [electrodos.get(k) for k in ('right', 'left')
+                    if electrodos.get(k) not in (None, DISCONNECTED)]
+            montaje = f"{electrodos.get('vertex', '—')} - {' / '.join(refs) or '—'}"
         datos = {
             'transductor': etiqueta.get(tec.get('transducer'), tec.get('transducer')),
-            'montaje': montaje.get(tec.get('montage'), tec.get('montage')),
+            'montaje': montaje,
             'ventana_ms': tec.get('window_ms'),
             'electrodos': dict(tec.get('electrodes') or {}),
             'impedancias_kohm': dict(tec.get('impedance') or {}),
@@ -762,6 +804,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # Cada curva ademas lleva las suyas (memory[curva]['tecnica']),
             # porque el alumno puede cambiar el equipo a mitad del examen.
             'tecnica': self.recording_conditions(),
+            # Dónde quedó cada electrodo (sitio de la norma más cercano y a
+            # cuántos mm, impedancia) y lo mal hecho al preparar la piel:
+            # el procedimiento, para el docente.
+            'electrodos': self.montaje.montaje(),
+            'preparacion_errores': [list(e) for e in self.montaje.errores],
             'hallazgos': self.report.text_edit_1.toPlainText(),
             'conclusion': self.report.text_edit_2.toPlainText(),
         }
@@ -1203,13 +1250,20 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         getattr(self, graph).active_curve(curve)
 
     def tab_change(self, sender):
-        if sender == 1:
+        pagina = self.tabWidget.widget(sender)
+        if pagina is self.montaje:
+            # La cabeza necesita el ancho: sin panel ni monitor.
+            self.panel_izquierdo.setVisible(False)
+            self.panel_monitor.setVisible(False)
+            self.graph_lat_int.clear_graph()
+            return
+        if pagina is self.lat:
             self.panel_izquierdo.setVisible(False)
             self.panel_monitor.setVisible(False)
             self.ubicar_resumen(self.layout_resumen_lat_int, compacto=False, alto=190)
             self.graph_lat_int.clear_graph()
             self.graph_lat_int.plot_data(self.memory)
-        elif sender == 2:
+        elif pagina is self.conc:
             self.panel_izquierdo.setVisible(False)
             self.panel_monitor.setVisible(False)
             self.ubicar_resumen(self.report.layout_resumen, compacto=True)
@@ -1551,6 +1605,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                                     self.control.cb_test.currentText(), self)
         if dialog.exec():
             self.technical = dialog.get_data()
+            self._con_montaje()
             self.apply_window()
             # La unidad del nivel puede haber cambiado: las etiquetas de las
             # curvas ya tomadas se reescriben (es solo como se muestra).
@@ -1575,7 +1630,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """El ASSR no usa el dock de valores (sin tablas) ni el monitor de EEG
         y FSP de abajo: el espacio es para el panel, que tiene cuatro graficos.
         Solo en la pestaña de graficos; las otras manejan sus propios docks."""
-        if self.tabWidget.currentIndex() != 0:
+        if self.tabWidget.currentWidget() is not self.abr:
             return
         self.ver_marcas(not on)
         self.panel_monitor.setVisible(not on)
@@ -1913,6 +1968,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # del ECochG quedaba como la del ABR nuevo.
             self.report.text_edit_1.clear()
             self.report.text_edit_2.clear()
+        self._con_montaje()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
     def guardar_prueba_actual(self):
@@ -1946,6 +2002,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         control, technical = setup
         self.technical.update(technical)
+        self._con_montaje()
         # Lo que el preset puso, para saber despues si el docente lo cambio
         # a mano (ver stim_changed).
         self.preset_tec = dict(technical)

@@ -56,6 +56,9 @@ def _caso(central=None, edad=58):
 def _ventana(test='MLR', caso=None, login=DOCENTE):
     w = AbrMainWindow(login)
     w.la_super(caso if caso is not None else _caso(), 42)
+    # Electrodos bien puestos (la pestaña Electrodos): sin ellos no hay registro.
+    w.montaje.de_libro()
+    w.tabWidget.setCurrentWidget(w.abr)   # puestos los electrodos, a registrar
     w.control.cb_test.setCurrentText(test)
     return w
 

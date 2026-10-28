@@ -2446,6 +2446,17 @@ class ABRGenerator:
         return contra
 
     @staticmethod
+    def solo_referencia_contra(technical_config, side):
+        """True si la unica referencia puesta es la del oido NO estimulado."""
+        electrodos = technical_config.get('electrodes') or {}
+        if not electrodos:
+            return False
+        ipsi = 'right' if side == 'OD' else 'left'
+        otro = 'left' if ipsi == 'right' else 'right'
+        return (electrodos.get(ipsi, 'A1') == DISCONNECTED
+                and electrodos.get(otro, 'A1') != DISCONNECTED)
+
+    @staticmethod
     def contra_channel(technical_config, side):
         """Clave del electrodo de referencia contralateral, o None.
 
@@ -2459,6 +2470,9 @@ class ABRGenerator:
         if electrodos.get(otro, 'A1') == DISCONNECTED:
             return None
         if electrodos.get('vertex', 'Cz') == DISCONNECTED:
+            return None
+        if electrodos and electrodos.get(ipsi, 'A1') == DISCONNECTED:
+            # La del otro lado ES el unico canal (ver solo_referencia_contra).
             return None
         return otro
 
@@ -2905,12 +2919,23 @@ class ABRGenerator:
         # montaje de electrodos. Van despues de polaridad/tasa porque son
         # del registro, no del paciente.
         lat_offset = TRANSDUCER_LATENCY_MS.get(transducer, 0.0)
+        # El montaje y DONDE quedaron los electrodos (electrode_gain, de
+        # core/cabeza_electrodos.py: activo lejos del vertex, referencia
+        # sobre el cuero cabelludo, electrodos cambiados -> con signo).
         montage_gain = self.montage_factor(
-            technical_config.get('montage', 'vertex_mastoid'))
+            technical_config.get('montage', 'vertex_mastoid')) * float(
+                technical_config.get('electrode_gain', 1.0))
         if lat_offset or montage_gain != 1.0:
             for v in values.values():
                 v['lat'] += lat_offset
                 v['amp'] *= montage_gain
+        # Un canal con la referencia del lado NO estimulado: lo que se
+        # registra es el canal contralateral (sin onda I), no el ipsi.
+        # (En el ECochG el activo va en el conducto: la regla no aplica.)
+        if (technical_config.get('montage') not in ecochg.ELECTRODE_GAIN
+                and self.solo_referencia_contra(technical_config,
+                                                stimulus_config.get('side', 'OD'))):
+            values = self.contra_values(values)
 
         # 8. Eje temporal. La ventana la fija el protocolo (12 ms en ABR,
         # 5 en ECochG, cientos en los corticales -- ver abr/protocols.py) y

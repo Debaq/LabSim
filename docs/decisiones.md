@@ -6600,3 +6600,25 @@ pasar el mouse con alcohol o gel.
 algodón, siempre en la misma dirección, antes de los electrodos) fue idea de
 Margarita Asenjo; la cabeza lo dice en una línea al pie.
 
+**Conectado al ABR (2026-10-28).** El autor pidió sacar de Parámetros
+avanzados los electrodos y su posición, y que la limpieza y el
+posicionamiento se noten en las curvas. El ABR tiene una pestaña
+**Electrodos**, la primera, con la cabeza; al abrir un paciente nuevo
+arranca ahí, con la piel sin preparar (sembrada por atención). Lo que queda
+puesto entra al `technical_config` (`MontajeElectrodos.equipo()`): qué
+electrodo está conectado (vertex, right, left, ground), su impedancia
+**real** --la de la piel donde quedó, se haya medido o no--, 1 o 2 canales y
+una ganancia por el lugar (`electrode_gain`, con signo: activo en vértex 1,
+en la frente 0,7, referencia en mastoides 1, lóbulo 0,9, sobre el cuero
+cabelludo cerca del activo 0,15, activo y referencia cambiados −0,9). Con la
+única referencia del lado no estimulado el registro es el canal
+contralateral (sin onda I; `ABRGenerator.solo_referencia_contra`, no aplica
+al ECochG). En el ECochG el activo tiene que ir en el conducto; en el cuero
+cabelludo da un registro de superficie. Todo lo demás (sin electrodos no
+hay registro, sin tierra entra la red, impedancia alta o desbalanceada da
+ruido y zumbido) ya lo modelaba el generador y ahora lo alimenta el
+montaje. Parámetros avanzados ya no tiene electrodos, canales ni montaje de
+superficie; solo el tipo de electrodo del ECochG. El informe lleva dónde
+quedó cada electrodo y los errores de la preparación. Tests en
+`tests/test_abr_montaje.py`.
+

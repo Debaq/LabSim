@@ -162,6 +162,8 @@ def _caso():
 def _ventana(login=DOCENTE):
     w = AbrMainWindow(login)
     w.la_super(_caso(), 7)
+    w.montaje.de_libro()
+    w.tabWidget.setCurrentWidget(w.abr)   # puestos los electrodos, a registrar
     w.control.cb_test.setCurrentText('ASSR')
     return w
 
@@ -242,6 +244,8 @@ def test_the_saved_assr_comes_back_as_it_was():
     data = w.session_payload()
     w2 = AbrMainWindow(DOCENTE)
     w2.la_super(_caso(), 7)
+    w2.montaje.de_libro()
+    w2.tabWidget.setCurrentWidget(w2.abr)   # puestos los electrodos, a registrar
     w2.apply_restored([{'tipo': 'ASSR', 'data': data}], 'u', 7)
     assert w2.test_actual == 'ASSR' and w2.assr_panel.isVisibleTo(w2)
     rec = w2.assr_panel.rec

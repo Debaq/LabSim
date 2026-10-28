@@ -24,9 +24,9 @@ try:
     # core.base crea el QApplication al importarse; por eso este import va
     # antes de tocar cualquier widget.
     from abr.AbrAdvanceSettings import (ARTIFACT_REJECT, AbrAdvanceSettings,
-                                        MONTAGES, TRANSDUCERS,
+                                        MONTAGES, ROTULO_MONTAJE, TRANSDUCERS,
                                         default_settings)
-    from abr.ABR_generator import DISCONNECTED, UNCONNECTED_SETTINGS
+    from abr.ABR_generator import UNCONNECTED_SETTINGS
     HAS_QT = True
 except ImportError as exc:          # sin PySide6 instalado
     print(f"  (tests de UI salteados: {exc})")
@@ -50,18 +50,38 @@ CLAVES = {'transducer', 'montage', 'window_ms', 'electrodes', 'impedance',
 # y sacarla de esta lista.
 PENDIENTES = set(UNCONNECTED_SETTINGS)
 
+# Las que pone el montaje de la pestaña Electrodos (core/cabeza_electrodos.py),
+# no el diálogo.
+DEL_MONTAJE = {'electrodes', 'impedance', 'channels'}
+
+
+def _sin_montaje(config):
+    return {k: v for k, v in config.items() if k not in DEL_MONTAJE}
+
 
 def test_get_data_returns_a_technical_config():
     """Las claves son exactamente las que consume el generador."""
     if not HAS_QT:
         return
     data = AbrAdvanceSettings(test='ABR').get_data()
-    assert set(data) == CLAVES | PENDIENTES
-    assert set(data['electrodes']) == {'vertex', 'right', 'left', 'ground'}
-    assert set(data['impedance']) == set(data['electrodes'])
+    assert set(data) == (CLAVES | PENDIENTES) - DEL_MONTAJE
     # Y coincide con el default del protocolo, que es lo que usa ABR_Curve
     # mientras nadie abra el diálogo.
-    assert data == default_settings('ABR')
+    assert data == _sin_montaje(default_settings('ABR'))
+
+
+def test_the_electrodes_are_not_here_anymore():
+    """Posición, impedancia y canales se ponen sobre la cabeza (pestaña
+    Electrodos); el diálogo solo guarda el electrodo del ECochG."""
+    if not HAS_QT:
+        return
+    from PySide6.QtWidgets import QLabel
+    for test, montaje in (('ABR', False), ('P300', False), ('ECochG', True)):
+        d = AbrAdvanceSettings(test=test)
+        rotulos = {w.text() for w in d.findChildren(QLabel)}
+        assert not hasattr(d, 'electrode_widgets') and not hasattr(d, 'cb_channels')
+        assert 'Canales' not in rotulos and 'Montaje' not in rotulos
+        assert ('Electrodo del ECochG' in rotulos) == montaje, test
 
 
 def test_window_range_comes_from_the_protocol():
@@ -86,14 +106,13 @@ def test_round_trip_keeps_every_field():
         transducer='TDH39_headphone', montage='forehead_mastoid',
         window_ms=15.0, artifact_reject_uv=10.0, residual_noise_nv=100.0,
         fsp_criterion=4.0,
-        electrodes={'vertex': 'Cz', 'right': 'A2', 'left': DISCONNECTED,
-                    'ground': DISCONNECTED},
-        impedance={'vertex': 7.5, 'right': 2.0, 'left': 3.5, 'ground': 2.0},
     )
+    custom = _sin_montaje(custom)
     dialog = AbrAdvanceSettings(custom, test='ABR')
+    # El montaje de superficie no se edita acá: viaja tal cual.
     assert dialog.get_data() == custom
     # set_data sobre un diálogo ya construido hace lo mismo.
-    otro = AbrAdvanceSettings(test='ABR')
+    otro = AbrAdvanceSettings(custom, test='ABR')
     otro.set_data(custom)
     assert otro.get_data() == custom
 
@@ -113,10 +132,9 @@ def test_restore_defaults_goes_back_to_the_protocol():
     if not HAS_QT:
         return
     dialog = AbrAdvanceSettings(test='ABR')
-    dialog.set_data({'transducer': 'bone_vibrator', 'window_ms': 20.0,
-                     'impedance': {'vertex': 9.0}})
+    dialog.set_data({'transducer': 'bone_vibrator', 'window_ms': 20.0})
     dialog.restore_defaults()
-    assert dialog.get_data() == default_settings('ABR')
+    assert dialog.get_data() == _sin_montaje(default_settings('ABR'))
 
 
 def test_the_dialog_gives_no_hints():
@@ -131,13 +149,7 @@ def test_the_dialog_gives_no_hints():
         return
     from PySide6.QtWidgets import QLabel
 
-    dialog = AbrAdvanceSettings(test='ABR')
-    dialog.set_data({'impedance': {'vertex': 9.0, 'right': 2.0, 'left': 2.0,
-                                   'ground': 2.0}})
-
-    # Ningún spinbox se pinta según su valor.
-    for _, spin in dialog.electrode_widgets.values():
-        assert not spin.styleSheet(), spin.value()
+    dialog = AbrAdvanceSettings(test='ECochG')
 
     # Ningún texto del diálogo menciona límites, consecuencias ni consejos,
     # y ningún rótulo delata cuál es el valor "bueno" (nada de "estándar",
@@ -148,8 +160,6 @@ def test_the_dialog_gives_no_hints():
     textos = [w.text() for w in dialog.findChildren(QLabel)]
     for combo in (dialog.cb_transducer, dialog.cb_montage, dialog.cb_reject,
                   dialog.cb_noise, dialog.cb_fsp):
-        textos += [combo.itemText(i) for i in range(combo.count())]
-    for combo, _ in dialog.electrode_widgets.values():
         textos += [combo.itemText(i) for i in range(combo.count())]
 
     for texto in textos:
@@ -163,7 +173,8 @@ def test_labels_map_to_the_keys_the_generator_uses():
         return
     assert set(TRANSDUCERS.values()) == {'insert_earphone', 'TDH39_headphone',
                                          'bone_vibrator'}
-    assert 'vertex_mastoid' in MONTAGES.values()
+    assert set(MONTAGES.values()) == {'extratympanic', 'tympanic', 'transtympanic'}
+    assert 'vertex_mastoid' in ROTULO_MONTAJE
     assert 0.0 in ARTIFACT_REJECT.values()      # "Desactivado"
 
 
@@ -208,11 +219,12 @@ def test_the_pending_parameters_survive_a_round_trip():
         default_settings('ABR'),
         burst_envelope='5-0-5', burst_window='hanning', click_us=200.0,
         level_unit='peSPL', rate_jitter_pct=10.0, presentation='binaural',
-        masking_noise='narrow', masking_offset_db=-10.0, channels=2,
+        masking_noise='narrow', masking_offset_db=-10.0,
         gain=50000.0, notch_hz=50.0, filter_slope=24.0,
         sample_rate_hz=48000.0, weighted_averaging=True, auto_stop='fsp',
         fsp_window_ms=8.0, smoothing=5.0,
     )
+    custom = _sin_montaje(custom)
     assert AbrAdvanceSettings(custom, test='ABR').get_data() == custom
 
 

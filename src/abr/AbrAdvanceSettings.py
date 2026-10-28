@@ -12,11 +12,13 @@ los rangos salen de abr/protocols.py. get_data() devuelve directamente el
 Lo que el alumno puede romper acá es a propósito, y el diálogo NO se lo
 avisa: ni mensajes, ni valores en rojo, ni notas de qué conviene usar. Lo
 tiene que reconocer en el trazo y corregirlo, que es el ejercicio.
-- Electrodo activo o las dos referencias desconectadas: no hay registro.
-- Sin tierra: entra la red eléctrica (50 Hz).
-- Impedancia alta: ruido de fondo. Desbalanceada: zumbido de 50 Hz.
 - Rechazo de artefacto muy estrecho: el promedio no avanza.
 - Rechazo apagado: entra basura al promedio.
+
+Los electrodos (dónde, cuántos canales, sus impedancias) ya no van acá: se
+ponen en la pestaña Electrodos del ABR, sobre la cabeza, después de
+preparar la piel (core/cabeza_electrodos.py). get_data() no devuelve esas
+claves; las pone AbrMainWindow desde el montaje.
 """
 # pylint: disable=no-name-in-module
 from PySide6.QtCore import QCoreApplication
@@ -24,7 +26,6 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
                                QDoubleSpinBox, QGridLayout, QGroupBox, QLabel,
                                QPushButton, QTabWidget, QVBoxLayout, QWidget)
 
-from abr.ABR_generator import DISCONNECTED
 from abr.ABR_generator import default_settings as _generator_defaults
 from abr.protocols import get_protocol
 
@@ -38,24 +39,24 @@ TRANSDUCERS = {
     "Vibrador óseo": 'bone_vibrator',
 }
 
-# Los tres primeros son montajes de superficie (el ABR y los corticales); los
-# tres últimos son los del ECochG, y no son "otra posición de electrodo" sino
+# El electrodo activo del ECochG no es "otra posición en la cabeza" sino
 # otra distancia a la cóclea: cuanto más cerca, más grande la respuesta y más
 # bajo el límite de la razón PS/PA (ver abr/ecochg.py). Elegir ECochG deja el
-# equipo en el timpánico, que es el de rutina; las otras dos posiciones se
-# eligen acá.
+# equipo en el timpánico, que es el de rutina; los otros dos se eligen acá.
+# Los montajes de superficie (Cz, Fz, mastoides, lóbulo) salen de dónde se
+# pusieron los electrodos en la pestaña Electrodos.
 MONTAGES = {
-    "Cz - mastoides": 'vertex_mastoid',
-    "Fz - mastoides": 'forehead_mastoid',
-    "Cz - lóbulo": 'vertex_earlobe',
-    "Conducto / TipTrode (ECochG)": 'extratympanic',
-    "Timpánico (ECochG)": 'tympanic',
-    "Transtimpánico / promontorio (ECochG)": 'transtympanic',
+    "Conducto / TipTrode": 'extratympanic',
+    "Timpánico": 'tympanic',
+    "Transtimpánico / promontorio": 'transtympanic',
 }
-
-# Posiciones de electrodo. La ultima sale del generador para que
-# "desconectado" signifique lo mismo de los dos lados.
-POSITIONS = ("A1", "A2", "Cz", "Fz", "Fpz", "Ceja izquierda", DISCONNECTED)
+# Para los informes: todos los montajes que puede traer el technical_config.
+ROTULO_MONTAJE = {
+    'vertex_mastoid': "Cz - mastoides",
+    'forehead_mastoid': "Fz - mastoides",
+    'vertex_earlobe': "Cz - lóbulo",
+    **{v: k for k, v in MONTAGES.items()},
+}
 
 ARTIFACT_REJECT = {
     "±10 µV": 10.0,
@@ -84,13 +85,6 @@ FSP_CRITERIA = {
     "Detección 99.5% (FSP 3.5)": 3.5,
     "Detección 99.9% (FSP 4.0)": 4.0,
 }
-
-ELECTRODES = (
-    ('vertex', "Electrodo activo (vértex)", "Cz"),
-    ('right', "Referencia derecha", "A2"),
-    ('left', "Referencia izquierda", "A1"),
-    ('ground', "Tierra", "Fpz"),
-)
 
 # ---------------------------------------------------------------------
 # Parámetros que el equipo real tiene y el modelo todavía NO usa.
@@ -156,8 +150,6 @@ MASKING_NOISE = {
     "Banda estrecha": 'narrow',
     "Ruido de habla": 'speech',
 }
-
-CHANNELS = {"1 canal (ipsi)": 1, "2 canales (ipsi + contra)": 2}
 
 # Paradigma oddball (P300 y MMN): el estímulo infrecuente y cuántos de cada
 # cien lo son. El frecuente es el del panel. Si son el mismo, no hay nada
@@ -295,6 +287,9 @@ class AbrAdvanceSettings(QDialog):
         caja = QGroupBox()
         grid = QGridLayout(caja)
         self.cb_transducer = _combo(TRANSDUCERS, settings.get('transducer'))
+        # El montaje de superficie lo da la pestaña Electrodos; acá solo el
+        # electrodo del ECochG. El de los demás viaja tal cual.
+        self.montaje_base = settings.get('montage') or self.protocol.montage
         self.cb_montage = _combo(MONTAGES, settings.get('montage'))
         self.sb_window = QDoubleSpinBox()
         lo, hi = self.protocol.window_range
@@ -303,50 +298,26 @@ class AbrAdvanceSettings(QDialog):
         self.sb_window.setSuffix(" ms")
         self.sb_window.setValue(float(settings.get('window_ms', self.protocol.window_ms)))
         self._fila(grid, 0, "Transductor", self.cb_transducer)
-        self._fila(grid, 1, "Montaje", self.cb_montage)
-        self._fila(grid, 2, "Ventana", self.sb_window)
+        fila = 1
+        if self.test == 'ECochG':
+            self._fila(grid, fila, "Electrodo del ECochG", self.cb_montage)
+            fila += 1
+        self._fila(grid, fila, "Ventana", self.sb_window)
 
-        self.cb_channels = _combo(CHANNELS, settings.get('channels'))
         self.cb_gain = _combo(GAINS, settings.get('gain'))
         self.cb_notch = _combo(NOTCH, settings.get('notch_hz'))
         self.cb_slope = _combo(FILTER_SLOPES, settings.get('filter_slope'))
         self.cb_sample_rate = _combo(SAMPLE_RATES, settings.get('sample_rate_hz'))
         for row, (texto, widget) in enumerate((
-                ("Canales", self.cb_channels),
                 ("Ganancia del amplificador", self.cb_gain),
                 ("Filtro de red (notch)", self.cb_notch),
                 ("Pendiente del filtro", self.cb_slope),
                 ("Frecuencia de muestreo", self.cb_sample_rate)), start=3):
             self._fila(grid, row, texto, widget, pendiente=True)
 
-        electrodos = QGroupBox("Electrodos (posición e impedancia)")
-        egrid = QGridLayout(electrodos)
-        self.electrode_widgets = {}
-        posiciones = settings.get('electrodes') or {}
-        impedancias = settings.get('impedance')
-        if not isinstance(impedancias, dict):
-            impedancias = {}
-        for row, (key, label, default) in enumerate(ELECTRODES):
-            combo = QComboBox()
-            combo.addItems(POSITIONS)
-            actual = posiciones.get(key, default)
-            idx = combo.findText(actual)
-            combo.setCurrentIndex(idx if idx >= 0 else 0)
-            spin = QDoubleSpinBox()
-            spin.setRange(0.5, 20.0)
-            spin.setSingleStep(0.5)
-            spin.setDecimals(1)
-            spin.setSuffix(" kΩ")
-            spin.setValue(float(impedancias.get(key, 2.0)))
-            egrid.addWidget(QLabel(label), row, 0)
-            egrid.addWidget(combo, row, 1)
-            egrid.addWidget(spin, row, 2)
-            self.electrode_widgets[key] = (combo, spin)
-
         envoltorio = QWidget()
         vbox = QVBoxLayout(envoltorio)
         vbox.addWidget(caja)
-        vbox.addWidget(electrodos)
         vbox.addStretch(1)
         return envoltorio
 
@@ -384,16 +355,11 @@ class AbrAdvanceSettings(QDialog):
 
     def get_data(self) -> dict:
         """technical_config listo para ABR_generator.generate_curve."""
-        electrodes, impedance = {}, {}
-        for key, (combo, spin) in self.electrode_widgets.items():
-            electrodes[key] = combo.currentText()
-            impedance[key] = float(spin.value())
         return {
             'transducer': self.cb_transducer.currentData(),
-            'montage': self.cb_montage.currentData(),
+            'montage': (self.cb_montage.currentData() if self.test == 'ECochG'
+                        else self.montaje_base),
             'window_ms': float(self.sb_window.value()),
-            'electrodes': electrodes,
-            'impedance': impedance,
             # 0 = rechazo desactivado; el generador lo trata como "sin rechazo".
             'artifact_reject_uv': float(self.cb_reject.currentData()) or 0.0,
             'residual_noise_nv': float(self.cb_noise.currentData()),
@@ -411,7 +377,6 @@ class AbrAdvanceSettings(QDialog):
             'masking_offset_db': float(self.sb_masking_offset.value()),
             'oddball_rare': self.cb_oddball_rare.currentData(),
             'oddball_pct': float(self.cb_oddball_pct.currentData()),
-            'channels': int(self.cb_channels.currentData()),
             'gain': float(self.cb_gain.currentData()),
             'notch_hz': float(self.cb_notch.currentData()),
             'filter_slope': float(self.cb_slope.currentData()),
@@ -438,7 +403,6 @@ class AbrAdvanceSettings(QDialog):
                            (self.cb_masking_noise, 'masking_noise'),
                            (self.cb_oddball_rare, 'oddball_rare'),
                            (self.cb_oddball_pct, 'oddball_pct'),
-                           (self.cb_channels, 'channels'),
                            (self.cb_gain, 'gain'),
                            (self.cb_notch, 'notch_hz'),
                            (self.cb_slope, 'filter_slope'),
@@ -456,14 +420,4 @@ class AbrAdvanceSettings(QDialog):
             self.sb_masking_offset.setValue(float(settings['masking_offset_db'] or 0.0))
         if 'fsp_window_ms' in settings:
             self.sb_fsp_window.setValue(float(settings['fsp_window_ms'] or 0.0))
-        posiciones = settings.get('electrodes') or {}
-        impedancias = settings.get('impedance')
-        if not isinstance(impedancias, dict):
-            impedancias = {}
-        for key, (combo, spin) in self.electrode_widgets.items():
-            if key in posiciones:
-                idx = combo.findText(posiciones[key])
-                if idx >= 0:
-                    combo.setCurrentIndex(idx)
-            if key in impedancias:
-                spin.setValue(float(impedancias[key]))
+

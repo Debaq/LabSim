@@ -186,14 +186,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
 
 ### Montaje de electrodos
 § Electrodos sobre una cabeza giratoria, sin 3D en vivo
-- [ ] 71. Conectar `core/cabeza_electrodos.MontajeElectrodos` a ABR, ECochG,
-      corticales y AABR como paso antes de registrar, con la evaluación del
-      montaje de labyrinthus3d (`evaluaMontaje`: invertido, sin onda I,
-      ruido de red sin tierra). Las impedancias medidas en el panel
-      reemplazan las que hoy se escriben a mano en Parámetros avanzados
-      (`technical_config['impedance']`: activo → vertex, ref. derecha →
-      right, ref. izquierda → left, tierra → ground; con un canal, la
-      referencia va al lado donde se puso).
+- [ ] 71. Montaje en el AABR (hoy impedancia fija de 20 kΩ) y, en el ECochG,
+      que el activo en el conducto cuente solo si está en el oído que se
+      estimula. ABR, ECochG y corticales ya registran con lo puesto en la
+      pestaña Electrodos.
 - [ ] 72. Sitios del cuerpo (ECM, esternón, clavícula, nuca) para el VEMP:
       fotografiar la persona de pie de labyrinthus3d.
 

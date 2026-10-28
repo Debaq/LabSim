@@ -53,6 +53,9 @@ def _caso(sp_ap=0.25, con_ecochg=True, umbral=20):
 def _ventana(caso=None, rate=11.1):
     w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
     w.la_super(caso if caso is not None else _caso(), 42)
+    # TipTrode en el conducto (pestaña Electrodos): sin él no hay ECochG.
+    w.montaje.de_libro(1, activo='cae_der')
+    w.tabWidget.setCurrentWidget(w.abr)   # puestos los electrodos, a registrar
     w.control.cb_test.setCurrentText('ECochG')
     w.control.sb_prom.setValue(1500)
     w.control.sb_rate.setValue(rate)
@@ -332,6 +335,8 @@ def test_the_polarity_shift_needs_a_rarefaction_and_a_condensation():
 def _ventana_con_permiso(permiso):
     w = AbrMainWindow({'name': 'X', 'user': 'x', 'permission': permiso})
     w.la_super(_caso(), 42)
+    w.montaje.de_libro(1, activo='cae_der')
+    w.tabWidget.setCurrentWidget(w.abr)   # puestos los electrodos, a registrar
     w.control.cb_test.setCurrentText('ECochG')
     return w
 
