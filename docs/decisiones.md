@@ -6540,8 +6540,11 @@ finos ("menos grados para mayor fluidez"): la primera propuesta era cada 10°.
 Si los datos de terreno muestran que los PC aguantan OpenGL, se puede pasar
 a 3D en vivo sin tocar la lógica de los electrodos.
 
-Colores de los cables como en el equipo y en labyrinthus3d: activo rojo,
-referencia azul, tierra verde (no son los de los oídos). Los sitios del
+Cables (corregido por el autor el mismo día): con dos canales son **Ref.
+derecha** y **Ref. izquierda**, no ipsi y contra (eso lo arma el equipo
+según el oído que se estimula). Colores: activo blanco, derecha roja,
+izquierda azul (como OD/OI en todo LabSim), tierra verde; con un canal la
+referencia va azul. Los sitios del
 cuerpo (ECM, esternón, clavícula, nuca) necesitan la persona de pie: no van
 todavía.
 

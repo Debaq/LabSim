@@ -191,8 +191,9 @@ gap significativo. § Parámetros de audiometría configurables por curso
       montaje de labyrinthus3d (`evaluaMontaje`: invertido, sin onda I,
       ruido de red sin tierra). Las impedancias medidas en el panel
       reemplazan las que hoy se escriben a mano en Parámetros avanzados
-      (`technical_config['impedance']`: activo → vertex, referencia →
-      right/left, tierra → ground).
+      (`technical_config['impedance']`: activo → vertex, ref. derecha →
+      right, ref. izquierda → left, tierra → ground; con un canal, la
+      referencia va al lado donde se puso).
 - [ ] 72. Sitios del cuerpo (ECM, esternón, clavícula, nuca) para el VEMP:
       fotografiar la persona de pie de labyrinthus3d.
 

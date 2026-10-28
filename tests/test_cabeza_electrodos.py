@@ -109,21 +109,27 @@ def test_uno_y_dos_canales():
     import random
     m = ce.MontajeElectrodos(rng=random.Random(2))
     m._poner("Cz")
-    m._poner("M2")
+    m._poner("M1")                       # mastoides izquierda
     z_ref = m.impedancias.z["referencia"]
     m.poner_canales(2)
-    # La referencia puesta pasa a ser la ipsilateral, con su misma impedancia.
-    assert m.colocados == {"activo": "Cz", "ref_ipsi": "M2"}
-    assert m.impedancias.z["ref_ipsi"] == z_ref
-    assert m.rol_actual == "ref_contra"
-    assert not m.botones_rol["ref_contra"].isHidden() and m.botones_rol["referencia"].isHidden()
-    m._poner("M1")
+    # Dos canales: cables de lado. La referencia puesta queda como la de su lado.
+    assert m.colocados == {"activo": "Cz", "ref_izq": "M1"}
+    assert m.impedancias.z["ref_izq"] == z_ref
+    assert m.rol_actual == "ref_der"
+    assert not m.botones_rol["ref_der"].isHidden() and m.botones_rol["referencia"].isHidden()
+    m._poner("M2")
     m._poner("Fpz")
-    assert set(m.colocados) == {"activo", "ref_ipsi", "ref_contra", "tierra"}
+    assert m.colocados == {"activo": "Cz", "ref_izq": "M1", "ref_der": "M2", "tierra": "Fpz"}
     m.poner_canales(1)
-    # Vuelve a una referencia; la contralateral se saca.
+    # Vuelve a una referencia (la derecha); la izquierda se saca.
     assert m.colocados == {"activo": "Cz", "referencia": "M2", "tierra": "Fpz"}
     assert set(m.impedancias.z) == {"activo", "referencia", "tierra"}
+
+
+def test_colores_de_los_cables():
+    assert ce.COLOR_ROL["ref_der"] == ce.tema.OD and ce.COLOR_ROL["ref_izq"] == ce.tema.OI
+    assert ce.COLOR_ROL["activo"].upper() == "#FFFFFF"
+    assert "ref_ipsi" not in ce.COLOR_ROL and "ref_contra" not in ce.COLOR_ROL
 
 
 if __name__ == "__main__":

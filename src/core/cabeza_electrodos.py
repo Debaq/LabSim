@@ -27,23 +27,33 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
 from core import iconos, tema
 from core.base import context
 
-# Colores de los cables, como en el equipo y en labyrinthus3d (COLOR_ROL):
-# no son los de los oídos aunque se parezcan.
+# Colores de los cables: derecha roja e izquierda azul como OD/OI en todo
+# LabSim; el activo blanco para no confundirse con la derecha (decidido por
+# el autor, 2026-10-28). Con dos canales los cables son de lado (derecha e
+# izquierda), no ipsi y contra: eso lo arma el equipo según el oído que se
+# estimula.
+BLANCO_BORDE = "#5E5360"
 ROLES = (
-    ("activo", "Activo (+)", "#E0302A"),
-    ("referencia", "Referencia (−)", "#2F7FE0"),
-    ("ref_ipsi", "Ref. ipsilateral (−)", "#2F7FE0"),
-    ("ref_contra", "Ref. contralateral (−)", "#E3B341"),
+    ("activo", "Activo (+)", "#FFFFFF"),
+    ("referencia", "Referencia (−)", tema.OI),
+    ("ref_der", "Ref. derecha (−)", tema.OD),
+    ("ref_izq", "Ref. izquierda (−)", tema.OI),
     ("tierra", "Tierra", "#3AA655"),
 )
 COLOR_ROL = {clave: color for clave, _, color in ROLES}
 NOMBRE_ROL = {clave: nombre for clave, nombre, _ in ROLES}
 # Un canal: activo menos su referencia. Dos canales: el mismo activo contra
-# la mastoides (o el lóbulo) de cada lado, ipsi y contra al oído estimulado.
+# la mastoides (o el lóbulo) de cada lado.
 ROLES_POR_CANALES = {
     1: ("activo", "referencia", "tierra"),
-    2: ("activo", "ref_ipsi", "ref_contra", "tierra"),
+    2: ("activo", "ref_der", "ref_izq", "tierra"),
 }
+
+
+def _borde(color):
+    """El blanco necesita borde oscuro para verse sobre la piel y la tarjeta."""
+    return BLANCO_BORDE if color.upper() == "#FFFFFF" else "white"
+
 
 # Vistas rápidas: (giro, inclinación). Con giro 90 se ve el lado derecho del
 # paciente (la cabeza gira hacia su izquierda).
@@ -277,7 +287,7 @@ class CabezaElectrodos(QWidget):
                     p.setPen(QPen(QColor(COLOR_ESTADO[estado]), 3))
                     p.setBrush(Qt.BrushStyle.NoBrush)
                     p.drawEllipse(pt, 11, 11)
-                p.setPen(QPen(QColor("white"), 2))
+                p.setPen(QPen(QColor(_borde(COLOR_ROL[rol])), 2))
                 p.setBrush(QColor(COLOR_ROL[rol]))
                 p.drawEllipse(pt, 7.5, 7.5)
             else:
@@ -292,7 +302,9 @@ class CabezaElectrodos(QWidget):
                 p.setPen(Qt.PenStyle.NoPen)
                 p.setBrush(QColor(255, 255, 255, 225))
                 p.drawRoundedRect(caja, 4, 4)
-                p.setPen(QColor(COLOR_ROL[rol]) if rol else QColor(tema.ACENTO))
+                texto_color = BLANCO_BORDE if rol and _borde(COLOR_ROL[rol]) == BLANCO_BORDE \
+                    else (COLOR_ROL[rol] if rol else tema.ACENTO)
+                p.setPen(QColor(texto_color))
                 p.drawText(caja, Qt.AlignmentFlag.AlignCenter, texto)
         p.end()
 
@@ -386,7 +398,7 @@ def _punto(color, tam=12):
     pm.fill(Qt.GlobalColor.transparent)
     p = QPainter(pm)
     p.setRenderHint(QPainter.RenderHint.Antialiasing)
-    p.setPen(QPen(QColor("white"), 3))
+    p.setPen(QPen(QColor(_borde(color)), 3))
     p.setBrush(QColor(color))
     p.drawEllipse(QRectF(2, 2, tam * 2 - 4, tam * 2 - 4))
     p.end()
@@ -522,14 +534,23 @@ class MontajeElectrodos(QWidget):
         return ROLES_POR_CANALES[self.canales]
 
     def poner_canales(self, n):
-        """1 o 2 canales. La referencia ya puesta pasa a ser la ipsilateral (y
-        al revés); la contralateral se saca al volver a un canal."""
+        """1 o 2 canales. Al pasar a dos, la referencia ya puesta queda como
+        la del lado donde está (derecha si está en la línea media); al volver
+        a uno, queda la derecha (o la izquierda si es la única) y la otra se
+        saca."""
         if n == self.canales:
             return
-        viejo, nuevo = ("referencia", "ref_ipsi") if n == 2 else ("ref_ipsi", "referencia")
-        if viejo in self.colocados:
-            self.colocados[nuevo] = self.colocados.pop(viejo)
-            self.impedancias.renombrar(viejo, nuevo)
+        if n == 2 and "referencia" in self.colocados:
+            d = datos()
+            lado = d["sitios"][d["por_id"][self.colocados["referencia"]]].get("lado")
+            nuevo = "ref_izq" if lado == "izq" else "ref_der"
+            self.colocados[nuevo] = self.colocados.pop("referencia")
+            self.impedancias.renombrar("referencia", nuevo)
+        elif n == 1:
+            viejo = "ref_der" if "ref_der" in self.colocados else "ref_izq"
+            if viejo in self.colocados:
+                self.colocados["referencia"] = self.colocados.pop(viejo)
+                self.impedancias.renombrar(viejo, "referencia")
         for rol in list(self.colocados):
             if rol not in ROLES_POR_CANALES[n]:
                 self.colocados.pop(rol)
