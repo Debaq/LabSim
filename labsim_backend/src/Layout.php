@@ -36,7 +36,7 @@ final class Layout
         'VNG'        => [false, 'Videonistagmografía', 8, [false, true], [1000, 600], 'development'],
         'VHIT'       => [false, 'Video Head Impulse Test', 9, [false, true], [1000, 600], 'development'],
         'POS'        => [false, 'Posturografía', 10, [false, true], [1000, 600], 'development'],
-        'CVOICE'     => [false, 'Comandos de Voz', 11, [true, true], [420, 200], 'pre'],
+        'CVOICE'     => [false, 'Comandos de Voz', 11, [true, true], [600, 530], 'pre'],
         'AGENDA'     => [false, 'Agenda', 13, [true, true], [940, 580], 'pre'],
         'CHAT'       => [false, 'Hablar con el paciente', 14, [true, true], [440, 500], 'pre'],
         'AC'         => [false, 'Acumetría', 15, [true, true], [480, 420], 'pre'],

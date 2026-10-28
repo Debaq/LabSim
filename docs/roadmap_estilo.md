@@ -156,6 +156,17 @@ Actualizado 2026-10-27.
   posición fija que un encoder no tiene.
 - [ ] Probar en la app real con sonido.
 
+### Comandos de voz
+- [x] Rehecho (2026-10-27): arriba la frase elegida, con la pista de que se dice con Talkback, y
+  Silencio aparte (o volver a tocar la frase). Buscador (sin tildes ni signos; Enter elige la
+  primera). Frases en tres grupos, Preparar | Instrucciones | Preguntas, en tres columnas; la
+  elegida en el acento. Rótulos arreglados ("Aérea", "¿Dejó…?", mayúsculas) sin cambiar las claves,
+  que son el nombre del audio y lo que lee `response.py`: fijadas en `tests/test_comandos_voz.py`.
+  Clase a `audiometria/comandos_voz.py`; borrados `Ui_command_voice_A.py` y su `.ui`. Ventana
+  600x530 en `Layout.php` (antes 420x200: hay que subir el backend). `expand=True`.
+- [ ] `ruido_blanco_contralateral` y `rosemberg_bilateral` no tienen audio: el talkback no dice
+  nada (la prueba igual corre). Ya pasaba antes.
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -167,7 +178,7 @@ Actualizado 2026-10-27.
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
+- [ ] Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.

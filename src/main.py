@@ -37,7 +37,7 @@ from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Sto
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, is_full_window, raise_window
-from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
+from audiometria.comandos_voz import ComandosVoz
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
 from backend import client as backend_client
@@ -140,20 +140,6 @@ LAYOUT_SOURCE = app_layout.last_source
 # en memoria con un docente logueado (_apply_admin_overrides_if_any), y
 # comparar contra eso daba "la configuración cambió" sin haber cambiado.
 _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
-
-
-class ComandVoiceA(QWidget, commandVoiceA):
-    btn_checked = Signal(str)
-
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.buttonGroup.buttonClicked.connect(self.state)
-
-    def state(self):
-        btn = self.buttonGroup.checkedButton()
-        text = btn.text().replace(" ", "_").replace("?", "").replace("¿", "").lower()
-        self.btn_checked.emit(text)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
@@ -1174,7 +1160,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "VEMP": self.subw_vemp,
             "EOAS": self.subw_eoas,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self), expand=True),
-            "CVOICE": FrameSubMdi(ComandVoiceA()),
+            "CVOICE": FrameSubMdi(ComandosVoz(), expand=True),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")), expand=True),
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),
             "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget(), expand=True),
