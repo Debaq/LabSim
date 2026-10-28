@@ -105,6 +105,27 @@ def test_en_norma_con_los_limites_del_abr():
     assert imp.estado("activo") == "ok"
 
 
+def test_uno_y_dos_canales():
+    import random
+    m = ce.MontajeElectrodos(rng=random.Random(2))
+    m._poner("Cz")
+    m._poner("M2")
+    z_ref = m.impedancias.z["referencia"]
+    m.poner_canales(2)
+    # La referencia puesta pasa a ser la ipsilateral, con su misma impedancia.
+    assert m.colocados == {"activo": "Cz", "ref_ipsi": "M2"}
+    assert m.impedancias.z["ref_ipsi"] == z_ref
+    assert m.rol_actual == "ref_contra"
+    assert not m.botones_rol["ref_contra"].isHidden() and m.botones_rol["referencia"].isHidden()
+    m._poner("M1")
+    m._poner("Fpz")
+    assert set(m.colocados) == {"activo", "ref_ipsi", "ref_contra", "tierra"}
+    m.poner_canales(1)
+    # Vuelve a una referencia; la contralateral se saca.
+    assert m.colocados == {"activo": "Cz", "referencia": "M2", "tierra": "Fpz"}
+    assert set(m.impedancias.z) == {"activo", "referencia", "tierra"}
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

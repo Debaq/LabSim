@@ -32,10 +32,18 @@ from core.base import context
 ROLES = (
     ("activo", "Activo (+)", "#E0302A"),
     ("referencia", "Referencia (−)", "#2F7FE0"),
+    ("ref_ipsi", "Ref. ipsilateral (−)", "#2F7FE0"),
+    ("ref_contra", "Ref. contralateral (−)", "#E3B341"),
     ("tierra", "Tierra", "#3AA655"),
 )
 COLOR_ROL = {clave: color for clave, _, color in ROLES}
 NOMBRE_ROL = {clave: nombre for clave, nombre, _ in ROLES}
+# Un canal: activo menos su referencia. Dos canales: el mismo activo contra
+# la mastoides (o el lóbulo) de cada lado, ipsi y contra al oído estimulado.
+ROLES_POR_CANALES = {
+    1: ("activo", "referencia", "tierra"),
+    2: ("activo", "ref_ipsi", "ref_contra", "tierra"),
+}
 
 # Vistas rápidas: (giro, inclinación). Con giro 90 se ve el lado derecho del
 # paciente (la cabeza gira hacia su izquierda).
@@ -70,6 +78,12 @@ def nombre_sitio(sitio_id):
     d = datos()
     i = d["por_id"].get(sitio_id)
     return d["sitios"][i]["nombre"] if i is not None else sitio_id
+
+
+def corto_sitio(sitio_id):
+    d = datos()
+    i = d["por_id"].get(sitio_id)
+    return d["sitios"][i]["corto"] if i is not None else sitio_id
 
 
 # Impedancia al poner el electrodo, en kΩ, según la piel del sitio: el cuero
@@ -115,6 +129,12 @@ class Impedancias:
     def quitar(self, rol):
         for dic in (self.z, self.piso, self.medido):
             dic.pop(rol, None)
+
+    def renombrar(self, viejo, nuevo):
+        """El mismo electrodo cambia de papel (al pasar de 1 a 2 canales)."""
+        for dic in (self.z, self.piso, self.medido):
+            if viejo in dic:
+                dic[nuevo] = dic.pop(viejo)
 
     def limpiar(self, rol):
         if rol in self.z:
@@ -414,14 +434,35 @@ class MontajeElectrodos(QWidget):
         pcol = QVBoxLayout(panel)
         pcol.setContentsMargins(12, 10, 12, 12)
         pcol.setSpacing(6)
+        seccion = QLabel("CANALES")
+        seccion.setProperty("role", "seccion")
+        pcol.addWidget(seccion)
+        fila = QHBoxLayout()
+        fila.setSpacing(4)
+        grupo_can = QButtonGroup(self)
+        self.botones_canales = {}
+        for n, texto in ((1, "1 canal"), (2, "2 canales")):
+            b = QPushButton(texto)
+            b.setCheckable(True)
+            b.setChecked(n == 1)
+            b.setProperty("segmento", "true")
+            b.clicked.connect(lambda _=False, c=n: self.poner_canales(c))
+            grupo_can.addButton(b)
+            fila.addWidget(b, 1)
+            self.botones_canales[n] = b
+        pcol.addLayout(fila)
+        pcol.addSpacing(4)
         seccion = QLabel("ELECTRODO")
         seccion.setProperty("role", "seccion")
         pcol.addWidget(seccion)
         self.grupo = QButtonGroup(self)
         self.botones_rol = {}
         self.lbl_puesto = {}
+        self.widgets_rol = {}     # rol -> widgets de su fila (se esconden según los canales)
         grilla = QGridLayout()
+        grilla.setHorizontalSpacing(4)
         grilla.setVerticalSpacing(4)
+        grilla.setColumnStretch(0, 1)
         for i, (clave, nombre, color) in enumerate(ROLES):
             b = QPushButton(" " + nombre)
             b.setIcon(_punto(color))
@@ -433,14 +474,16 @@ class MontajeElectrodos(QWidget):
             puesto = QLabel()
             puesto.setObjectName("puesto")
             self.lbl_puesto[clave] = puesto
-            grilla.addWidget(b, i * 2, 0, 1, 2)
-            grilla.addWidget(puesto, i * 2 + 1, 0)
+            puesto.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            grilla.addWidget(b, i, 0)
+            grilla.addWidget(puesto, i, 1)
             quitar = QPushButton()
             quitar.setIcon(iconos.icono_boton("cerrar", tema.TEXTO_TENUE, tam=12))
             quitar.setToolTip("Quitar este electrodo")
             quitar.setFixedSize(24, 22)
             quitar.clicked.connect(lambda _=False, c=clave: self._quitar(c))
-            grilla.addWidget(quitar, i * 2 + 1, 1)
+            grilla.addWidget(quitar, i, 2)
+            self.widgets_rol[clave] = [b, puesto, quitar]
         pcol.addLayout(grilla)
 
         pcol.addSpacing(6)
@@ -470,8 +513,38 @@ class MontajeElectrodos(QWidget):
         raiz.addWidget(panel)
 
         self.colocados = {}
+        self.canales = 1
+        self._mostrar_roles()
         self._elegir_rol("activo")
         self._pintar()
+
+    def roles(self):
+        return ROLES_POR_CANALES[self.canales]
+
+    def poner_canales(self, n):
+        """1 o 2 canales. La referencia ya puesta pasa a ser la ipsilateral (y
+        al revés); la contralateral se saca al volver a un canal."""
+        if n == self.canales:
+            return
+        viejo, nuevo = ("referencia", "ref_ipsi") if n == 2 else ("ref_ipsi", "referencia")
+        if viejo in self.colocados:
+            self.colocados[nuevo] = self.colocados.pop(viejo)
+            self.impedancias.renombrar(viejo, nuevo)
+        for rol in list(self.colocados):
+            if rol not in ROLES_POR_CANALES[n]:
+                self.colocados.pop(rol)
+                self.impedancias.quitar(rol)
+        self.canales = n
+        self.botones_canales[n].setChecked(True)
+        self._mostrar_roles()
+        falta = next((c for c in self.roles() if c not in self.colocados), self.roles()[0])
+        self._elegir_rol(falta)
+        self._pintar()
+
+    def _mostrar_roles(self):
+        for rol, widgets in self.widgets_rol.items():
+            for w in widgets + list(self.filas_imp[rol]) + [self.puntos_imp[rol]]:
+                w.setVisible(rol in self.roles())
 
     def _seccion_impedancias(self):
         col = QVBoxLayout()
@@ -487,6 +560,7 @@ class MontajeElectrodos(QWidget):
         cab.addWidget(self.btn_medir)
         col.addLayout(cab)
         self.filas_imp = {}
+        self.puntos_imp = {}
         grilla = QGridLayout()
         grilla.setHorizontalSpacing(6)
         grilla.setVerticalSpacing(2)
@@ -508,6 +582,7 @@ class MontajeElectrodos(QWidget):
             grilla.addWidget(limpiar, i * 2, 2)
             grilla.addWidget(barra, i * 2 + 1, 0, 1, 3)
             self.filas_imp[clave] = (valor, barra, limpiar)
+            self.puntos_imp[clave] = punto
         grilla.setColumnStretch(1, 1)
         col.addLayout(grilla)
         self.lbl_desbalance = QLabel()
@@ -570,7 +645,7 @@ class MontajeElectrodos(QWidget):
         self.colocados[self.rol_actual] = sitio
         self.impedancias.poner(self.rol_actual, sitio)
         # Pasa solo al siguiente que falta, como quien va poniendo los tres.
-        falta = next((c for c, _, _ in ROLES if c not in self.colocados), None)
+        falta = next((c for c in self.roles() if c not in self.colocados), None)
         if falta:
             self._elegir_rol(falta)
         self._pintar()
@@ -590,7 +665,8 @@ class MontajeElectrodos(QWidget):
     def _pintar(self):
         for clave, lbl in self.lbl_puesto.items():
             sitio = self.colocados.get(clave)
-            lbl.setText(nombre_sitio(sitio) if sitio else "sin poner")
+            lbl.setText(corto_sitio(sitio) if sitio else "—")
+            lbl.setToolTip(nombre_sitio(sitio) if sitio else "Sin poner")
             lbl.setProperty("vacio", "false" if sitio else "true")
             tema.repintar(lbl)
         estados = {rol: self.impedancias.estado(rol) for rol in self.colocados
