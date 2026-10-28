@@ -167,6 +167,17 @@ Actualizado 2026-10-27.
 - [ ] `ruido_blanco_contralateral` y `rosemberg_bilateral` no tienen audio: el talkback no dice
   nada (la prueba igual corre). Ya pasaba antes.
 
+### Bandeja de entrada
+- [x] Rehecha (2026-10-27) como un correo: lista a la izquierda (remitente, fecha corta, asunto y
+  el comienzo del texto; punto y negrita en los no leídos) y el mensaje a la derecha (tipo como
+  píldora, asunto, de quién y cuándo, la atención si la hay, el aviso de la OIRS simulada y el
+  texto). Ya no hay que abrir mensaje por mensaje: al abrirla se muestra el primer no leído,
+  ↑/↓ pasan de uno a otro, filtro Todos | Sin leer y "Marcar todo como leído" (marca uno por uno
+  en el servidor, sin endpoint nuevo). La red va en segundo plano: antes la lista y el contador
+  del botón se pedían en el hilo de la ventana y la congelaban. `expand=True`. Tests en
+  `tests/test_inbox_ui.py`.
+- [ ] Probar en la app real con mensajes de verdad.
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -178,7 +189,7 @@ Actualizado 2026-10-27.
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
+- [ ] Mis pacientes (ventana interna) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
 - [ ] Los que se crean sin `expand=True` en `main.py` probablemente tienen el mismo
   espacio vacío abajo: revisar cada uno.
