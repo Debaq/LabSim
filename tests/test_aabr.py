@@ -139,7 +139,7 @@ def test_each_ear_keeps_its_own_result():
         return
     w = _ventana(_oido(10), _oido(85, 'coclear'))
     _tamizar(w)
-    w.cb_lado.setCurrentText('OI')
+    w.btn_lado['OI'].click()
     _tamizar(w)
     assert w.resultado['OD']['veredicto'] == 'PASA'
     assert w.resultado['OI']['veredicto'] == 'REFIERE'
@@ -263,7 +263,7 @@ def test_changing_ear_goes_back_to_the_probe():
     w = _ventana(_oido(10), _oido(10))
     _tamizar(w)
     assert w.sonda_ok
-    w.cb_lado.setCurrentText('OI')
+    w.btn_lado['OI'].click()
     assert not w.sonda_ok
     assert w.paso == 0
 

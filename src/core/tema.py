@@ -296,12 +296,12 @@ def qss_flechas():
         _flechas_qss = f"""
 QSpinBox, QDoubleSpinBox {{ padding-right: 20px; }}
 QSpinBox::up-button, QDoubleSpinBox::up-button {{
-    subcontrol-origin: border; subcontrol-position: top right;
+    subcontrol-origin: padding; subcontrol-position: top right;
     width: 18px; border-left: 1px solid {BORDE}; border-bottom: 1px solid {BORDE};
     border-top-right-radius: 5px; background: {TARJETA_ALT};
 }}
 QSpinBox::down-button, QDoubleSpinBox::down-button {{
-    subcontrol-origin: border; subcontrol-position: bottom right;
+    subcontrol-origin: padding; subcontrol-position: bottom right;
     width: 18px; border-left: 1px solid {BORDE};
     border-bottom-right-radius: 5px; background: {TARJETA_ALT};
 }}

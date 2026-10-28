@@ -33,16 +33,18 @@ import pyqtgraph as pg
 from abr.ABR_generator import ABR_Curve
 from abr.AbrAdvanceSettings import TRANSDUCERS, default_settings
 from backend.client import BackendClient
+from core import iconos, tema
 from core.base import context
 from core.estado_informe import EstadoInforme
 from core.helpers import Preferences
 from core.report_autosave import subir_ahora
 from oae.generators.base import oae_probe_fit
 from oae.widgets.probe_check import ProbeCheckWidget
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout,
-                               QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QMainWindow, QPlainTextEdit, QProgressBar,
+from PySide6.QtCore import QRectF, Qt, QTimer
+from PySide6.QtGui import QColor, QFont, QPainter, QPixmap
+from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox,
+                               QFormLayout, QFrame, QGridLayout, QHBoxLayout,
+                               QLabel, QMainWindow, QPlainTextEdit, QProgressBar,
                                QPushButton, QSpinBox, QVBoxLayout, QWidget)
 
 # Protocolo de tamizaje de rutina. Son los defaults del equipo, no una
@@ -76,7 +78,96 @@ TICK_MS = 250
 EFICIENCIA_BARRIDOS = 0.35
 
 LADOS = ('OD', 'OI')
-PASOS = ("1 · Sonda", "2 · Impedancias", "3 · Registro", "4 · Resultado")
+PASOS = ("Sonda", "Impedancias", "Registro", "Resultado")
+
+# Reglas propias de la ventana (el resto sale de core/tema.py).
+EXTRA_QSS = f"""
+QFrame#panelConfig {{ background: {tema.TARJETA_ALT}; }}
+QPushButton[lado="od"]:checked {{ background: {tema.OD_SUAVE}; border-color: {tema.OD}; color: {tema.OD}; }}
+QPushButton[lado="oi"]:checked {{ background: {tema.OI_SUAVE}; border-color: {tema.OI}; color: {tema.OI}; }}
+QPushButton[lado] {{ font-weight: 700; padding: 6px 0px; }}
+QPushButton[primario="true"] {{
+    background: {tema.ACENTO};
+    border-color: {tema.ACENTO};
+    color: white;
+    font-weight: 600;
+    padding: 6px 16px;
+}}
+QPushButton[primario="true"]:hover {{ background: {tema.ACENTO_CLARO}; color: white; }}
+QPushButton[primario="true"]:disabled {{
+    background: {tema.TARJETA_ALT};
+    border-color: {tema.BORDE};
+    color: {tema.TEXTO_TENUE};
+}}
+QCheckBox {{ color: {tema.TEXTO}; spacing: 6px; }}
+QCheckBox::indicator {{
+    width: 14px; height: 14px; border-radius: 4px;
+    border: 1px solid {tema.BORDE_FUERTE}; background: {tema.TARJETA};
+}}
+QCheckBox::indicator:checked {{ background: {tema.ACENTO}; border-color: {tema.ACENTO}; }}
+QLabel[paso="pendiente"] {{ color: {tema.TEXTO_TENUE}; font-weight: 600; }}
+QLabel[paso="activo"] {{ color: {tema.ACENTO}; font-weight: 700; }}
+QLabel[paso="hecho"] {{ color: {tema.OK}; font-weight: 600; }}
+QFrame#pasoLinea {{ background: {tema.BORDE_FUERTE}; border: none; }}
+QFrame#panelConfig QLabel#paciente {{ font-weight: 600; color: {tema.TEXTO}; }}
+QProgressBar {{
+    background: {tema.GRILLA};
+    border: none;
+    border-radius: 5px;
+    min-height: 14px;
+    max-height: 14px;
+    text-align: center;
+    color: {tema.TEXTO_SUAVE};
+    font-size: 7.5pt;
+}}
+QProgressBar::chunk {{ background: {tema.ACENTO_SUAVE}; border-radius: 5px; }}
+QProgressBar#barraBarridos {{ min-height: 8px; max-height: 8px; border-radius: 4px; }}
+QProgressBar#barraBarridos::chunk {{ background: {tema.ACENTO}; border-radius: 4px; }}
+QPlainTextEdit {{
+    background: {tema.TARJETA};
+    border: 1px solid {tema.BORDE_FUERTE};
+    border-radius: 8px;
+    padding: 4px;
+}}
+QPlainTextEdit:focus {{ border-color: {tema.ACENTO}; }}
+QFrame#veredicto {{
+    background: {tema.TARJETA_ALT};
+    border: 1px solid {tema.BORDE};
+    border-radius: 10px;
+}}
+QFrame#veredicto[resultado="pasa"] {{ background: #E3F3EA; border-color: {tema.OK}; }}
+QFrame#veredicto[resultado="refiere"] {{ background: #FBE6E3; border-color: {tema.ALERTA}; }}
+QLabel#veredictoTexto {{ font-size: 11pt; font-weight: 600; color: {tema.TEXTO_TENUE}; }}
+QFrame#veredicto[resultado="pasa"] QLabel#veredictoTexto {{ font-size: 20pt; font-weight: 700; color: {tema.OK}; }}
+QFrame#veredicto[resultado="refiere"] QLabel#veredictoTexto {{ font-size: 20pt; font-weight: 700; color: {tema.ALERTA}; }}
+QLabel#veredictoLado {{ font-size: 8pt; color: {tema.TEXTO_SUAVE}; }}
+"""
+
+
+def _numero(n, color, relleno, tam=16):
+    """Círculo con el número del paso: relleno si es el paso en curso."""
+    escala = 2
+    pm = QPixmap(tam * escala, tam * escala)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    r = QRectF(1.5, 1.5, tam * escala - 3, tam * escala - 3)
+    if relleno:
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor(color))
+    else:
+        p.setPen(QColor(color))
+        p.setBrush(Qt.NoBrush)
+    p.drawEllipse(r)
+    fuente = QFont()
+    fuente.setPixelSize(int(tam * escala * 0.58))
+    fuente.setBold(True)
+    p.setFont(fuente)
+    p.setPen(QColor("white") if relleno else QColor(color))
+    p.drawText(r, Qt.AlignCenter, str(n))
+    p.end()
+    pm.setDevicePixelRatio(escala)
+    return pm
 
 
 class AabrMainWindow(QMainWindow):
@@ -96,6 +187,7 @@ class AabrMainWindow(QMainWindow):
         self.paso = 0
         self.sonda_ok = False
         self.technical = default_settings('ABR')
+        tema.aplicar_estilo(self, EXTRA_QSS)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._tick)
@@ -114,185 +206,310 @@ class AabrMainWindow(QMainWindow):
     def _build(self):
         central = QWidget()
         raiz = QHBoxLayout(central)
+        raiz.setContentsMargins(12, 10, 12, 12)
+        raiz.setSpacing(10)
         raiz.addWidget(self._panel_config(), 0)
 
         derecha = QVBoxLayout()
-        self.lbl_paciente = QLabel("Sin atención abierta")
-        self.lbl_paciente.setStyleSheet("color:#666;")
-        derecha.addWidget(self.lbl_paciente)
-        derecha.addLayout(self._barra_pasos())
+        derecha.setSpacing(8)
+        derecha.addLayout(self._cabecera())
         derecha.addWidget(self._pantalla(), 1)
+        derecha.addWidget(self._lectura())
         derecha.addWidget(self._informe())
+        raiz.addLayout(derecha, 1)
+        self.setCentralWidget(central)
+
+    @staticmethod
+    def _tarjeta(tipo="true"):
+        tarjeta = QFrame()
+        tarjeta.setProperty("card", tipo)
+        col = QVBoxLayout(tarjeta)
+        col.setContentsMargins(12, 10, 12, 12)
+        col.setSpacing(6)
+        return tarjeta, col
+
+    @staticmethod
+    def _seccion(texto):
+        lbl = QLabel(texto)
+        lbl.setProperty("role", "seccion")
+        return lbl
+
+    def _cabecera(self):
+        """La fase en curso y el único botón de la prueba."""
+        fila = QHBoxLayout()
+        fila.setSpacing(8)
+        self.lbl_pasos = []
+        for i, texto in enumerate(PASOS):
+            if i:
+                linea = QFrame()
+                linea.setObjectName("pasoLinea")
+                linea.setFixedHeight(2)
+                linea.setMinimumWidth(10)
+                fila.addWidget(linea, 1)
+            marca = QLabel()
+            nombre = QLabel(texto)
+            nombre.setProperty("paso", "pendiente")
+            fila.addWidget(marca)
+            fila.addWidget(nombre)
+            self.lbl_pasos.append((marca, nombre))
+        fila.addSpacing(6)
 
         # UN botón: la secuencia la corre el equipo. Detener es para
         # abortarla a mitad de camino.
-        fila = QHBoxLayout()
-        self.btn_start = QPushButton("Iniciar")
+        self.btn_start = QPushButton(" Iniciar")
+        self.btn_start.setIcon(iconos.icono_boton("atender", "white", tam=14))
+        self.btn_start.setProperty("primario", "true")
         self.btn_start.clicked.connect(self.start)
-        self.btn_stop = QPushButton("Detener")
+        self.btn_stop = QPushButton(" Detener")
+        self.btn_stop.setIcon(iconos.icono_boton("detener", tema.TEXTO_SUAVE, tam=14))
         self.btn_stop.setEnabled(False)
         self.btn_stop.clicked.connect(self.abortar)
         fila.addWidget(self.btn_start)
         fila.addWidget(self.btn_stop)
-        derecha.addLayout(fila)
-
-        self.lbl_resumen = QLabel("")
-        self.lbl_resumen.setWordWrap(True)
-        self.lbl_resumen.setStyleSheet("color:#444;")
-        derecha.addWidget(self.lbl_resumen)
-        raiz.addLayout(derecha, 1)
-        self.setCentralWidget(central)
-
-    def _barra_pasos(self):
-        fila = QHBoxLayout()
-        self.lbl_pasos = []
-        for texto in PASOS:
-            lbl = QLabel(texto)
-            lbl.setAlignment(Qt.AlignCenter)
-            fila.addWidget(lbl)
-            self.lbl_pasos.append(lbl)
         return fila
 
     def _panel_config(self):
-        caja = QGroupBox("Configuración del equipo")
-        form = QFormLayout(caja)
+        panel, col = self._tarjeta()
+        panel.setObjectName("panelConfig")
+        panel.setFixedWidth(242)
 
-        self.cb_lado = QComboBox()
-        self.cb_lado.addItems(LADOS)
-        self.cb_lado.currentTextChanged.connect(self._cambiar_lado)
-        form.addRow("Oído", self.cb_lado)
+        col.addWidget(self._seccion("PACIENTE"))
+        self.lbl_paciente = QLabel("Sin atención abierta")
+        self.lbl_paciente.setObjectName("paciente")
+        self.lbl_paciente.setWordWrap(True)
+        col.addWidget(self.lbl_paciente)
+        col.addSpacing(4)
 
+        col.addWidget(self._seccion("OÍDO"))
+        fila = QHBoxLayout()
+        fila.setSpacing(6)
+        grupo = QButtonGroup(self)
+        self.btn_lado = {}
+        for lado in LADOS:
+            btn = QPushButton(lado)
+            btn.setCheckable(True)
+            btn.setProperty("lado", lado.lower())
+            btn.clicked.connect(lambda _=False, l=lado: self._cambiar_lado(l))
+            grupo.addButton(btn)
+            fila.addWidget(btn, 1)
+            self.btn_lado[lado] = btn
+        self.btn_lado['OD'].setChecked(True)
+        col.addLayout(fila)
+
+        def formulario():
+            form = QFormLayout()
+            form.setContentsMargins(0, 0, 0, 0)
+            form.setHorizontalSpacing(8)
+            form.setVerticalSpacing(5)
+            form.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            return form
+
+        def fila_form(form, texto, widget):
+            lbl = QLabel(texto)
+            lbl.setProperty("role", "campo")
+            # Mismo ancho en los dos bloques: cada QFormLayout mide el suyo.
+            lbl.setFixedWidth(74)
+            form.addRow(lbl, widget)
+
+        col.addSpacing(4)
+        col.addWidget(self._seccion("ESTÍMULO"))
+        form = formulario()
         # TRANSDUCERS es {etiqueta: clave} (ver AbrAdvanceSettings).
         self.cb_transducer = QComboBox()
         self.cb_transducer.addItems(list(TRANSDUCERS.keys()))
         self._transducer_keys = list(TRANSDUCERS.values())
         self.cb_transducer.setCurrentIndex(
             self._transducer_keys.index('insert_earphone'))
-        form.addRow("Transductor", self.cb_transducer)
+        fila_form(form, "Transductor", self.cb_transducer)
 
         self.cb_stim = QComboBox()
         self.cb_stim.addItems(ESTIMULOS)
-        form.addRow("Estímulo", self.cb_stim)
+        fila_form(form, "Estímulo", self.cb_stim)
 
         self.sb_nivel = QSpinBox()
         self.sb_nivel.setRange(0, 70)
         self.sb_nivel.setSingleStep(5)
         self.sb_nivel.setValue(NIVEL_DB)
         self.sb_nivel.setSuffix(" dB nHL")
-        form.addRow("Nivel", self.sb_nivel)
+        fila_form(form, "Nivel", self.sb_nivel)
 
         self.sb_tasa = QDoubleSpinBox()
         self.sb_tasa.setRange(5.0, 100.0)
         self.sb_tasa.setDecimals(1)
         self.sb_tasa.setValue(TASA_HZ)
         self.sb_tasa.setSuffix(" /s")
-        form.addRow("Tasa", self.sb_tasa)
+        fila_form(form, "Tasa", self.sb_tasa)
+        col.addLayout(form)
 
+        col.addSpacing(4)
+        col.addWidget(self._seccion("REGISTRO"))
+        form = formulario()
         self.sb_barridos = QSpinBox()
         self.sb_barridos.setRange(200, 20000)
         self.sb_barridos.setSingleStep(500)
         self.sb_barridos.setValue(BARRIDOS_MAX)
-        form.addRow("Barridos máximos", self.sb_barridos)
+        fila_form(form, "Barridos máx.", self.sb_barridos)
 
         self.sb_criterio = QDoubleSpinBox()
         self.sb_criterio.setRange(1.5, 10.0)
         self.sb_criterio.setDecimals(1)
         self.sb_criterio.setSingleStep(0.1)
         self.sb_criterio.setValue(CRITERIO_FSP)
-        form.addRow("Criterio FSP", self.sb_criterio)
+        fila_form(form, "Criterio FSP", self.sb_criterio)
 
         self.sb_rechazo = QDoubleSpinBox()
         self.sb_rechazo.setRange(0.0, 100.0)
         self.sb_rechazo.setDecimals(1)
         self.sb_rechazo.setValue(RECHAZO_UV)
         self.sb_rechazo.setSuffix(" µV")
-        form.addRow("Rechazo de artefacto", self.sb_rechazo)
+        fila_form(form, "Rechazo", self.sb_rechazo)
 
         self.sb_pasa_alto = QDoubleSpinBox()
         self.sb_pasa_alto.setRange(0.5, 500.0)
         self.sb_pasa_alto.setDecimals(1)
         self.sb_pasa_alto.setValue(FILTRO_ALTO)
         self.sb_pasa_alto.setSuffix(" Hz")
-        form.addRow("Filtro pasa-alto", self.sb_pasa_alto)
+        fila_form(form, "Pasa-alto", self.sb_pasa_alto)
 
         self.sb_pasa_bajo = QDoubleSpinBox()
         self.sb_pasa_bajo.setRange(200.0, 6000.0)
         self.sb_pasa_bajo.setDecimals(0)
         self.sb_pasa_bajo.setValue(FILTRO_BAJO)
         self.sb_pasa_bajo.setSuffix(" Hz")
-        form.addRow("Filtro pasa-bajo", self.sb_pasa_bajo)
+        fila_form(form, "Pasa-bajo", self.sb_pasa_bajo)
+        col.addLayout(form)
 
         self.chk_auto = QCheckBox("Parar al cruzar el criterio")
         self.chk_auto.setChecked(True)
-        form.addRow(self.chk_auto)
+        col.addWidget(self.chk_auto)
+        col.addStretch(1)
 
         # Devuelve los controles de arriba a como vienen de fábrica.
-        self.btn_protocolo = QPushButton("Restaurar valores de fábrica")
+        self.btn_protocolo = QPushButton(" Valores de fábrica")
+        self.btn_protocolo.setIcon(iconos.icono_boton("practica", tema.TEXTO_SUAVE, tam=14))
         self.btn_protocolo.clicked.connect(self.restore_protocol)
-        form.addRow(self.btn_protocolo)
-        return caja
+        col.addWidget(self.btn_protocolo)
+        return panel
 
     def _pantalla(self):
         """Todo en una sola pantalla: sonda a un lado, curva al otro."""
-        caja = QWidget()
-        vbox = QVBoxLayout(caja)
-
+        caja, col = self._tarjeta()
         fila = QHBoxLayout()
+        fila.setSpacing(12)
+
+        sonda = QVBoxLayout()
+        sonda.setSpacing(4)
         self.probe = ProbeCheckWidget()
-        self.probe.setFixedWidth(280)
-        fila.addWidget(self.probe)
+        self.probe.setFixedWidth(240)
+        # El estado de la sonda lo dice lbl_sonda, con el resultado del
+        # chequeo: el del widget se queda en "sin chequear" al detenerlo.
+        self.probe.status_label.hide()
+        self.probe.layout().setContentsMargins(0, 0, 0, 0)
+        sonda.addWidget(self.probe, 1)
+        self.lbl_sonda = QLabel("Sonda: sin chequear")
+        self.lbl_impedancias = QLabel(
+            f"Impedancias: OK (≤ {IMPEDANCIA_KOHM:.0f} kΩ)")
+        for lbl in (self.lbl_sonda, self.lbl_impedancias):
+            lbl.setProperty("role", "hint")
+            sonda.addWidget(lbl)
+        fila.addLayout(sonda)
 
         # La curva SÍ se ve: los equipos de tamizaje la muestran mientras
         # promedian. Lo que no hay es marcado de ondas ni escala de
         # intensidades: una sola curva, al nivel del tamizaje.
         self.plot = pg.PlotWidget()
-        self.plot.setBackground((255, 255, 255))
-        self.plot.setLabel("bottom", "Tiempo", units="ms")
+        self.plot.setBackground(tema.TARJETA)
         self.plot.setMouseEnabled(x=False, y=False)
         self.plot.setMenuEnabled(False)
         self.plot.hideButtons()
-        self.plot.showGrid(x=True, y=True, alpha=0.25)
-        self.curva = self.plot.plot(pen=pg.mkPen((41, 128, 185), width=2))
+        item = self.plot.getPlotItem()
+        item.showGrid(x=True, y=True, alpha=0.35)
+        for eje in ("left", "bottom"):
+            axis = item.getAxis(eje)
+            axis.setPen(pg.mkPen(tema.GRILLA_FUERTE))
+            axis.setTextPen(pg.mkPen(tema.TEXTO_SUAVE))
+        item.setLabel("bottom", "Tiempo", units="ms", color=tema.TEXTO_SUAVE)
+        item.setLabel("left", "µV", color=tema.TEXTO_SUAVE)
+        # Sin el prefijo automático el eje dice "µV (x0.001)".
+        item.getAxis("left").enableAutoSIPrefix(False)
+        # La ventana del registro, también antes de que haya curva.
+        item.setXRange(0, 12, padding=0.02)
+        self.curva = self.plot.plot(pen=pg.mkPen(tema.color_lado(self.lado_activo), width=2))
         fila.addWidget(self.plot, 1)
-        vbox.addLayout(fila, 1)
+        col.addLayout(fila, 1)
+        return caja
 
-        self.lbl_sonda = QLabel("Sonda: sin chequear")
-        self.lbl_impedancias = QLabel(
-            f"Impedancias: OK (≤ {IMPEDANCIA_KOHM:.0f} kΩ)")
-        for lbl in (self.lbl_sonda, self.lbl_impedancias):
-            lbl.setStyleSheet("color:#666;")
-        estado = QHBoxLayout()
-        estado.addWidget(self.lbl_sonda)
-        estado.addWidget(self.lbl_impedancias)
-        vbox.addLayout(estado)
+    def _lectura(self):
+        """Barridos, lo que mide el equipo y el veredicto."""
+        caja = QWidget()
+        fila = QHBoxLayout(caja)
+        fila.setContentsMargins(0, 0, 0, 0)
+        fila.setSpacing(8)
 
+        datos, col = self._tarjeta()
+        avance = QHBoxLayout()
+        avance.setSpacing(10)
         self.barra = QProgressBar()
         self.barra.setRange(0, BARRIDOS_MAX)
-        self.barra.setFormat("%v de %m barridos")
-        vbox.addWidget(self.barra)
+        self.barra.setTextVisible(False)
+        self.barra.setObjectName("barraBarridos")
+        self.lbl_barridos = QLabel()
+        self.lbl_barridos.setProperty("role", "hint")
+        self.barra.valueChanged.connect(self._pintar_barridos)
+        avance.addWidget(self.barra, 1)
+        avance.addWidget(self.lbl_barridos)
+        col.addLayout(avance)
 
         grid = QGridLayout()
+        grid.setHorizontalSpacing(12)
+        grid.setVerticalSpacing(0)
         self.lbl_fsp = QLabel("—")
         self.lbl_ruido = QLabel("—")
         self.lbl_aceptados = QLabel("—")
         self.lbl_tiempo = QLabel("—")
-        for col, (titulo, widget) in enumerate((
+        for c, (titulo, widget) in enumerate((
                 ("FSP", self.lbl_fsp),
-                ("Ruido residual", self.lbl_ruido),
-                ("Barridos aceptados", self.lbl_aceptados),
-                ("Tiempo", self.lbl_tiempo))):
-            titulo_lbl = QLabel(titulo)
-            titulo_lbl.setStyleSheet("color:#666;")
-            grid.addWidget(titulo_lbl, 0, col)
-            widget.setStyleSheet("font-size:15px; font-weight:bold;")
-            grid.addWidget(widget, 1, col)
-        vbox.addLayout(grid)
+                ("RUIDO RESIDUAL", self.lbl_ruido),
+                ("ACEPTADOS", self.lbl_aceptados),
+                ("TIEMPO", self.lbl_tiempo))):
+            grid.addWidget(self._seccion(titulo), 0, c)
+            widget.setProperty("role", "dato")
+            grid.addWidget(widget, 1, c)
+        self.lbl_criterio = QLabel()
+        self.lbl_criterio.setProperty("role", "unidad")
+        grid.addWidget(self.lbl_criterio, 2, 0)
+        col.addLayout(grid)
 
+        self.lbl_resumen = QLabel("")
+        self.lbl_resumen.setWordWrap(True)
+        self.lbl_resumen.setProperty("role", "hint")
+        col.addWidget(self.lbl_resumen)
+        fila.addWidget(datos, 1)
+
+        # El veredicto, grande: es lo único que entrega el equipo.
+        self.caja_veredicto = QFrame()
+        self.caja_veredicto.setObjectName("veredicto")
+        self.caja_veredicto.setFixedWidth(170)
+        vcol = QVBoxLayout(self.caja_veredicto)
+        vcol.setContentsMargins(10, 10, 10, 10)
+        vcol.setSpacing(2)
+        self.ico_veredicto = QLabel()
+        self.ico_veredicto.setAlignment(Qt.AlignCenter)
         self.lbl_veredicto = QLabel("—")
+        self.lbl_veredicto.setObjectName("veredictoTexto")
         self.lbl_veredicto.setAlignment(Qt.AlignCenter)
-        self.lbl_veredicto.setMinimumHeight(70)
+        self.lbl_veredicto_lado = QLabel()
+        self.lbl_veredicto_lado.setObjectName("veredictoLado")
+        self.lbl_veredicto_lado.setAlignment(Qt.AlignCenter)
+        vcol.addStretch(1)
+        vcol.addWidget(self.ico_veredicto)
+        vcol.addWidget(self.lbl_veredicto)
+        vcol.addWidget(self.lbl_veredicto_lado)
+        vcol.addStretch(1)
+        fila.addWidget(self.caja_veredicto)
         self._pintar_veredicto(None)
-        vbox.addWidget(self.lbl_veredicto)
+        self._pintar_criterio()
+        self.sb_criterio.valueChanged.connect(self._pintar_criterio)
         return caja
 
     def _informe(self):
@@ -300,31 +517,42 @@ class AabrMainWindow(QMainWindow):
         algo hay que dejar escrito: sin esto el alumno tamizaba y no quedaba
         nada --ni el resultado, ni con qué nivel, ni qué decidió-- cuando se
         cerraba la atención."""
-        caja = QGroupBox("Informe")
-        grid = QGridLayout(caja)
+        caja, col = self._tarjeta()
+        cab = QHBoxLayout()
+        cab.setSpacing(8)
+        cab.addWidget(self._seccion("INFORME"))
+        cab.addStretch(1)
         self.cb_informe = {}
-        for col, lado in enumerate(LADOS):
+        for lado in LADOS:
+            pill = QLabel(lado)
+            tema.pastilla_lado(pill, lado)
             combo = QComboBox()
             combo.addItems(["No realizado", "PASA", "REFIERE"])
-            grid.addWidget(QLabel(f"Resultado {lado}"), 0, col * 2)
-            grid.addWidget(combo, 0, col * 2 + 1)
+            combo.setMinimumWidth(120)
+            cab.addWidget(pill)
+            cab.addWidget(combo)
+            cab.addSpacing(6)
             self.cb_informe[lado] = combo
+        col.addLayout(cab)
+
         self.lbl_condiciones = QLabel("")
         self.lbl_condiciones.setWordWrap(True)
-        self.lbl_condiciones.setStyleSheet("color:#666;")
-        grid.addWidget(self.lbl_condiciones, 1, 0, 1, 4)
+        self.lbl_condiciones.setProperty("role", "hint")
+        col.addWidget(self.lbl_condiciones)
 
+        textos = QHBoxLayout()
+        textos.setSpacing(8)
         self.txt_observaciones = QPlainTextEdit()
         self.txt_observaciones.setPlaceholderText("Observaciones del registro")
-        self.txt_observaciones.setFixedHeight(54)
         self.txt_conducta = QPlainTextEdit()
         self.txt_conducta.setPlaceholderText("Conducta")
-        self.txt_conducta.setFixedHeight(54)
-        grid.addWidget(self.txt_observaciones, 2, 0, 1, 2)
-        grid.addWidget(self.txt_conducta, 2, 2, 1, 2)
+        for txt in (self.txt_observaciones, self.txt_conducta):
+            txt.setFixedHeight(50)
+            textos.addWidget(txt)
+        col.addLayout(textos)
         # Se guarda solo (core/report_autosave.py); acá se ve si quedó.
         self.estado_informe = EstadoInforme()
-        grid.addWidget(self.estado_informe, 3, 0, 1, 4)
+        col.addWidget(self.estado_informe)
         return caja
 
     # -------------------------------------------------------------- pasos
@@ -332,11 +560,16 @@ class AabrMainWindow(QMainWindow):
         """Pinta el indicador de fase. No es navegación: la secuencia la
         mueve el equipo, no el alumno."""
         self.paso = paso
-        for i, lbl in enumerate(self.lbl_pasos):
-            activo = i == paso
-            color = "#1b5e20" if i < paso else ("#000" if activo else "#999")
-            peso = "bold" if activo else "normal"
-            lbl.setStyleSheet(f"color:{color}; font-weight:{peso};")
+        for i, (marca, nombre) in enumerate(self.lbl_pasos):
+            if i < paso:
+                marca.setPixmap(iconos.pixmap("check", tema.OK, 16))
+                estado = "hecho"
+            else:
+                activo = i == paso
+                marca.setPixmap(_numero(i + 1, tema.ACENTO if activo else tema.TEXTO_TENUE, activo))
+                estado = "activo" if activo else "pendiente"
+            nombre.setProperty("paso", estado)
+            tema.repintar(nombre)
 
     # ------------------------------------------------------ la secuencia
     def start(self):
@@ -353,6 +586,7 @@ class AabrMainWindow(QMainWindow):
         self.barridos = 0.0
         self.barra.setRange(0, int(self.sb_barridos.value()))
         self.barra.setValue(0)
+        self._pintar_barridos()
         self.curva.clear()
         self.lbl_tiempo.setText("0 s")
         self.btn_start.setEnabled(False)
@@ -520,7 +754,7 @@ class AabrMainWindow(QMainWindow):
             self._transducer_keys.index('insert_earphone'))
 
     def _set_enabled(self, on):
-        for w in (self.btn_start, self.cb_lado):
+        for w in (self.btn_start, *self.btn_lado.values()):
             w.setEnabled(on)
 
     def la_super(self, data, appointment_id=None):
@@ -554,8 +788,12 @@ class AabrMainWindow(QMainWindow):
         self._ir_a(0)
 
     def _cambiar_lado(self, lado):
+        if lado == self.lado_activo:
+            return
         self._detener()
         self.lado_activo = lado
+        self.btn_lado[lado].setChecked(True)
+        self.curva.setPen(pg.mkPen(tema.color_lado(lado), width=2))
         # Oído nuevo, sonda nueva: la oliva se saca y se pone del otro lado.
         self.sonda_ok = False
         self._reset_lectura()
@@ -565,6 +803,7 @@ class AabrMainWindow(QMainWindow):
         self.barridos = 0.0
         self.barra.setRange(0, int(self.sb_barridos.value()))
         self.barra.setValue(0)
+        self._pintar_barridos()
         self.curva.clear()
         for lbl in (self.lbl_fsp, self.lbl_ruido, self.lbl_aceptados,
                     self.lbl_tiempo):
@@ -577,16 +816,20 @@ class AabrMainWindow(QMainWindow):
         self._pintar_resumen()
 
     def _pintar_veredicto(self, veredicto):
-        colores = {
-            'PASA': ("#1b5e20", "#c8e6c9"),
-            'REFIERE': ("#b71c1c", "#ffcdd2"),
-            None: ("#555", "#eceff1"),
-        }
-        color, fondo = colores.get(veredicto, colores[None])
-        self.lbl_veredicto.setText(veredicto or "—")
-        self.lbl_veredicto.setStyleSheet(
-            f"font-size:30px; font-weight:bold; color:{color};"
-            f"background:{fondo}; border-radius:8px;")
+        icono, color = {'PASA': ("check", tema.OK),
+                        'REFIERE': ("x", tema.ALERTA)}.get(veredicto, ("onda_check", tema.TEXTO_TENUE))
+        self.ico_veredicto.setPixmap(iconos.pixmap(icono, color, 30))
+        self.lbl_veredicto.setText(veredicto or "Sin resultado")
+        self.lbl_veredicto_lado.setText(f"Oído {'derecho' if self.lado_activo == 'OD' else 'izquierdo'}")
+        self.caja_veredicto.setProperty("resultado", (veredicto or "").lower())
+        for w in (self.caja_veredicto, self.lbl_veredicto):
+            tema.repintar(w)
+
+    def _pintar_barridos(self, *_):
+        self.lbl_barridos.setText(f"{self.barra.value()} de {self.barra.maximum()} barridos")
+
+    def _pintar_criterio(self, *_):
+        self.lbl_criterio.setText(f"criterio ≥ {self.sb_criterio.value():.1f}")
 
     def _pintar_resumen(self):
         partes = []

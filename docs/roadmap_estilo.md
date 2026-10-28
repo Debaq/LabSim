@@ -2,7 +2,7 @@
 
 Rediseño visual de LabSim. Referencia: el módulo VEMP (tarjetas blancas sobre
 lienzo gris con tinte morado, un solo acento morado, OD rojo y OI azul en todo).
-Actualizado 2026-10-26 (noche).
+Actualizado 2026-10-27.
 
 ## Reglas
 
@@ -117,6 +117,17 @@ Actualizado 2026-10-26 (noche).
   lo capturado, hallazgos y conclusión lado a lado. `expand=True`.
 - [ ] Probar en la app real; los paneles siguen con sus colores inline de estado (SOAE, métricas).
 
+### AABR
+- [x] Rehecho (2026-10-27): panel de configuración angosto (242 px) con el paciente arriba, oído
+  como botones OD/OI y bloques Estímulo | Registro; cabecera con los cuatro pasos como stepper
+  (número → check verde) e Iniciar/Detener; sonda y curva en una tarjeta (curva del color del oído,
+  eje en µV sin el "x0.001", X fijo en 0-12 ms); barridos con barra fina, cuatro datos grandes y el
+  veredicto en una caja propia (PASA verde / REFIERE rojo, con icono); informe en tarjeta con las
+  píldoras OD/OI. `expand=True`. Mínimo ~890x570, entra en la ventana del servidor (980x620).
+- [x] De paso, en `tema.py`: las flechas de los spinbox tapaban el borde derecho del campo y se
+  veían "afuera" (`subcontrol-origin: border` → `padding`). Afecta a todos los módulos.
+- [ ] Probar en la app real (solo renders offscreen a 980x620 y 1024x590).
+
 ### Otros
 - [x] VEMP: referencia, sin cambios de diseño.
 
@@ -128,7 +139,7 @@ Actualizado 2026-10-26 (noche).
 - [ ] Revisar el panel de Marcas con ECochG y corticales con curvas marcadas de verdad.
 
 ### Resto de módulos
-- [ ] AABR, Audiómetro, Z: paleta de
+- [ ] Audiómetro, Z: paleta de
   `tema.py`, tarjetas, y los iconos de `core/iconos.py` en vez de texto o símbolos.
 - [ ] Comandos de voz, Bandeja de entrada y Mis pacientes (ventanas internas) con el diseño nuevo.
 - [ ] Decidir si los botones de módulo (OT, AC, A, Z...) muestran el nombre en vez del código.
