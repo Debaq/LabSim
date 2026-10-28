@@ -6548,12 +6548,25 @@ referencia va azul. Los sitios del
 cuerpo (ECM, esternón, clavícula, nuca) necesitan la persona de pie: no van
 todavía.
 
-Impedancias en el mismo panel (2026-10-28, "falta medir impedancias"): al
-poner un electrodo se sortea su impedancia según la piel del sitio (cuero
-cabelludo 6-18 kΩ, frente/mastoides/lóbulo 3-10, conducto 4-12) y se ve
-solo al **Medir**, como en el equipo. **Limpiar piel** (pasta abrasiva) la
-baja a un 35-60 % por pasada hasta un piso de 0,8-2 kΩ propio de esa piel;
-lo que cambió queda "sin medir". En norma con los mismos límites que usa el
-generador del ABR (5 kΩ por electrodo, 2 kΩ de diferencia); el anillo del
-electrodo en la cabeza toma el color de lo medido.
+Impedancias y preparación de la piel (2026-10-28, "falta medir
+impedancias" y después cómo se limpia de verdad): el orden es el de la
+práctica, **alcohol con algodón, gel exfoliante con algodón siempre en la
+misma dirección, electrodos, medir**. Herramientas bajo la cabeza (Girar,
+Alcohol, Gel exfoliante, Electrodo): con alcohol o gel, arrastrar sobre un
+sitio es una pasada. Cuenta entera si va para un solo lado y para el mismo
+lado que la anterior en ese sitio; de ida y vuelta cuenta media. La piel sin
+preparar se sortea por sitio (cuero cabelludo 15-40 kΩ, frente/mastoides/
+lóbulo 8-25, conducto 10-30): sin preparar ningún electrodo queda en norma.
+Alcohol: 85 % con una pasada, 70 % con dos o más. Gel: 78 % por pasada (90 %
+sin alcohol antes, la grasa sigue ahí), hasta un piso de 0,8-2 kΩ propio de
+esa piel. Más de 10 pasadas de gel, o 3 de ida y vuelta, irritan la piel (se
+ve roja) y ya no baja. Con el electrodo puesto no se frota: hay que sacarlo
+(el botón "Limpiar piel" del primer prototipo se fue). Estas cifras son
+criterio de trabajo para que el ejercicio funcione, no de una norma
+(constantes al principio de `core/cabeza_electrodos.py`). Lo mal hecho
+(gel sin alcohol, ida y vuelta, piel irritada, electrodo sin preparar) no
+se avisa con mensajes: se ve en la piel o en la impedancia y queda en
+`MontajeElectrodos.errores` para la evaluación. En norma con los mismos
+límites que el generador del ABR (5 kΩ por electrodo, 2 kΩ de diferencia);
+el anillo del electrodo en la cabeza toma el color de lo medido.
 

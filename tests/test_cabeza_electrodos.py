@@ -40,6 +40,7 @@ def test_clic_y_un_electrodo_por_sitio():
     m = ce.MontajeElectrodos()
     m.resize(760, 520)
     m.show()
+    m.elegir_herramienta("electrodo")
     m.cabeza.mirar(0, 30)
     sitio, punto = next((s, p) for s, p in m.cabeza._visibles() if s["id"] == "Cz")
     QTest.mouseClick(m.cabeza, Qt.MouseButton.LeftButton, pos=punto.toPoint())
@@ -62,35 +63,103 @@ def test_arrastrar_gira_y_no_pone():
     assert m.colocados == {}
 
 
-def test_impedancias_se_ven_al_medir_y_bajan_al_limpiar():
+def _montaje(semilla=4):
     import random
-    m = ce.MontajeElectrodos(rng=random.Random(4))
+    m = ce.MontajeElectrodos(rng=random.Random(semilla))
+    m.resize(840, 600)
+    m.show()
+    return m
+
+
+def _frotar(m, sitio, herramienta, ida_y_vuelta=False, dx=40):
+    """Una pasada de verdad con el mouse sobre el sitio."""
+    c = m.cabeza
+    m.elegir_herramienta(herramienta)
+    p0 = next(p for s, p in c._visibles() if s["id"] == sitio).toPoint()
+    pasos = [p0 + QPoint(dx * k // 8, 0) for k in range(1, 9)]
+    if ida_y_vuelta:
+        pasos += [p0 + QPoint(dx * k // 8, 0) for k in range(7, -1, -1)]
+    QTest.mousePress(c, Qt.MouseButton.LeftButton, pos=p0)
+    for q in pasos:
+        QTest.mouseMove(c, q)
+    QTest.mouseRelease(c, Qt.MouseButton.LeftButton, pos=pasos[-1])
+
+
+def test_las_impedancias_se_ven_al_medir():
+    m = _montaje()
     for sitio in ("Cz", "M2", "Fpz"):
         m._poner(sitio)
     assert m.impedancias.informe() is None            # todavía sin medir
     m.medir()
-    antes = dict(m.impedancias.medido)
-    assert set(antes) == {"activo", "referencia", "tierra"}
-    m.limpiar_piel("activo")
-    assert "activo" not in m.impedancias.medido        # cambió: hay que volver a medir
-    assert m.impedancias.informe() is None
-    m.medir()
-    assert m.impedancias.medido["activo"] < antes["activo"]
+    assert set(m.impedancias.medido) == {"activo", "referencia", "tierra"}
+    # Sin preparar la piel ninguno queda en norma, y queda anotado.
+    assert all(m.impedancias.estado(r) != "ok" for r in m.impedancias.medido)
+    assert ("electrodo_sin_preparar", "Cz") in m.errores
 
 
-def test_limpiar_tiene_piso_y_el_cuero_cabelludo_da_mas():
+def test_alcohol_y_gel_bajan_la_impedancia():
+    piel = ce.Piel(__import__("random").Random(1))
+    sin = piel.impedancia("Cz")
+    piel.pasada("Cz", "alcohol")
+    piel.pasada("Cz", "alcohol")
+    con_alcohol = piel.impedancia("Cz")
+    assert abs(con_alcohol - sin * ce.ALCOHOL_FACTOR[2]) < 1e-9
+    piel.pasada("Cz", "alcohol")                       # más alcohol no baja más
+    assert piel.impedancia("Cz") == con_alcohol
+    for _ in range(8):
+        piel.pasada("Cz", "gel")
+    assert piel.impedancia("Cz") < ce.limites()[0]
+    assert piel.errores == []
+
+
+def test_gel_sin_alcohol_rinde_menos():
     import random
-    imp = ce.Impedancias(random.Random(1))
-    altos = []
-    for semilla in range(40):
-        imp.rng = random.Random(semilla)
-        imp.poner("activo", "Cz")
-        imp.poner("tierra", "Fpz")
-        altos.append(imp.z["activo"] > imp.z["tierra"])
-        for _ in range(12):
-            imp.limpiar("activo")
-        assert imp.z["activo"] >= ce.PISO_KOHM[0]
-    assert sum(altos) > 30      # el vértex con pelo casi siempre sale más alto
+    con, sin = ce.Piel(random.Random(3)), ce.Piel(random.Random(3))
+    con.pasada("Fpz", "alcohol")
+    for _ in range(5):
+        con.pasada("Fpz", "gel")
+        sin.pasada("Fpz", "gel")
+    assert sin.impedancia("Fpz") > con.impedancia("Fpz") / ce.ALCOHOL_FACTOR[1]
+    assert ("gel_sin_alcohol", "Fpz") in sin.errores
+
+
+def test_de_mas_irrita_y_no_baja():
+    piel = ce.Piel(__import__("random").Random(2))
+    piel.pasada("Cz", "alcohol")
+    for _ in range(ce.GEL_MAX_PASADAS):
+        piel.pasada("Cz", "gel")
+    tope = piel.impedancia("Cz")
+    assert "Cz" not in piel.irritada
+    piel.pasada("Cz", "gel")
+    assert "Cz" in piel.irritada and piel.impedancia("Cz") == tope
+    assert piel.impedancia("Cz") >= piel.piso["Cz"]
+
+
+def test_la_pasada_con_el_mouse():
+    m = _montaje()
+    m.cabeza.mirar(0, 20)
+    piel = m.impedancias.piel
+    _frotar(m, "Cz", "alcohol")
+    assert piel.alcohol["Cz"] == 1
+    _frotar(m, "Cz", "gel")
+    _frotar(m, "Cz", "gel")                            # misma dirección: cuentan enteras
+    assert piel.gel["Cz"] == 2.0 and not piel.ida_vuelta.get("Cz")
+    _frotar(m, "Cz", "gel", ida_y_vuelta=True)         # frotar como lija: media
+    assert piel.gel["Cz"] == 2.5 and piel.ida_vuelta["Cz"] == 1
+    _frotar(m, "Cz", "gel", dx=-40)                    # al revés que la anterior
+    assert piel.ida_vuelta["Cz"] == 2
+    assert m.cabeza.giro == 0                          # frotar no gira la cabeza
+
+
+def test_con_el_electrodo_puesto_no_se_frota():
+    m = _montaje()
+    m.cabeza.mirar(0, 20)
+    m._poner("Cz")
+    _frotar(m, "Cz", "gel")
+    assert not m.impedancias.piel.gel.get("Cz")
+    m._quitar("activo")
+    _frotar(m, "Cz", "gel")
+    assert m.impedancias.piel.gel["Cz"] == 1.0
 
 
 def test_en_norma_con_los_limites_del_abr():
