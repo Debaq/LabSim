@@ -1193,36 +1193,21 @@ def test_montage_scales_amplitude():
 
 
 def test_disconnected_active_electrode_leaves_no_response():
-    """Sin activo no hay diferencia de potencial: solo ruido, por más que promedie."""
+    """Sin activo las entradas quedan abiertas: el amplificador satura y el
+    rechazo de artefacto descarta todos los barridos, como en el equipo. El
+    promedio no avanza y no hay trazo -- ni respuesta ni ruido. (Antes
+    quedaba un barrido sin promediar y la curva salía llena de ruido sin
+    nada conectado.)"""
     electrodos = {'vertex': 'No Conectado', 'right': 'A2', 'left': 'A1',
                   'ground': 'Fpz'}
     t, y, meta = _curva(technical={'electrodes': electrodos})
-    _, y_ok, _ = _curva()
     assert meta['recording'] is False
-    assert y[t > 9].std() > 5 * y_ok[t > 9].std()
-
-    # Y sobre todo: no hay onda. Con respuesta real el pico cae siempre en
-    # la misma latencia; acá cada captura lo pone en otro lado, que es como
-    # se reconoce que lo que se está viendo es ruido.
-    # Se pide MAYORIA y no unanimidad: a 80 dB la III mide el 86% de la V,
-    # asi que en una captura ruidosa el maximo del trazo puede caer en la
-    # III sin que eso sea "no hay respuesta". Lo que distingue ruido de
-    # respuesta es que la respuesta repite, no que no falle nunca.
-    def picos(**kw):
-        salida = []
-        for i in range(1, 6):
-            t_i, y_i, _ = _curva(capture=f"R{i}", **kw)
-            salida.append(t_i[np.argmax(y_i)])
-        return salida
-
-    def repiten(picos_, span=0.2):
-        return max(sum(1 for q in picos_ if abs(q - p) <= span) for p in picos_)
-
-    sin_electrodo = picos(technical={'electrodes': electrodos})
-    con_electrodo = picos()
-    assert max(sin_electrodo) - min(sin_electrodo) > 0.5, sin_electrodo
-    assert repiten(sin_electrodo) <= 2, sin_electrodo
-    assert repiten(con_electrodo) >= 4, con_electrodo
+    assert meta['accepted_sweeps'] == 0 and meta['rejected_sweeps'] > 0
+    assert np.allclose(y, 0)
+    assert meta['fsp'] == 1.0
+    # Con el activo puesto, el mismo registro sí tiene respuesta.
+    _, y_ok, meta_ok = _curva()
+    assert meta_ok['recording'] is not False and y_ok.std() > 0
 
 
 def test_missing_ground_brings_mains_hum():

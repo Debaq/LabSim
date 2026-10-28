@@ -3291,6 +3291,22 @@ class ABRGenerator:
             # explicito porque es el punto de la maniobra.
             fsp_esperado = fsp_actual = 1.0
 
+        if not hay_registro:
+            # Entradas abiertas (sin activo o sin ninguna referencia): el
+            # amplificador satura y el rechazo de artefacto descarta todos
+            # los barridos, como en el equipo. El promedio no avanza y no
+            # hay trazo que dibujar, ni siquiera ruido: antes quedaba un
+            # barrido sin promediar y la curva salia llena de ruido sin
+            # nada conectado. El monitor de EEG dice "sin electrodo".
+            y_final = np.zeros_like(y_final)
+            sub_a = np.zeros_like(sub_a)
+            sub_b = np.zeros_like(sub_b)
+            y_contra = None
+            accepted = 0.0
+            acceptance = 0.0
+            residual_nv = 0.0
+            fsp_esperado = fsp_actual = 1.0
+
         # Muestreo del equipo: el trazo que se entrega es el de SU grilla
         # (30 kHz = un punto cada 0.033 ms). Lo que esta por debajo de esa
         # resolucion no se puede marcar. El filtro pasa-bajo ya esta, asi

@@ -51,6 +51,25 @@ def test_sin_electrodos_no_hay_registro():
     w = _ventana(lambda m: None)
     assert set(w.technical['electrodes'].values()) == {'No Conectado'}
     assert w.last_metadata['fsp'] < 1.5
+    # Entradas abiertas: el rechazo descarta todo y no hay trazo, ni de ruido.
+    assert w.last_metadata['accepted_sweeps'] == 0
+    _x, y = w.graph_r.data[list(w.graph_r.data)[-1]]['ipsi_xy']
+    assert np.allclose(y, 0)
+
+
+def test_sin_electrodos_el_assr_no_registra():
+    w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
+    w.la_super(_caso(), 42)
+    w.control.cb_test.setCurrentText('ASSR')
+    w.assr_panel.actualizar_equipo(w.technical)
+    assert w.assr_panel.rec is not None
+    w.assr_panel.tick()
+    assert w.assr_panel.rec.n == 0
+    assert 'SIN ELECTRODOS' in w.assr_panel.lbl_estado.text()
+    w.montaje.de_libro(1)
+    w.assr_panel.actualizar_equipo(w.technical)
+    w.assr_panel.tick()
+    assert w.assr_panel.rec.n > 0
 
 
 def test_bien_hecho_hay_respuesta():

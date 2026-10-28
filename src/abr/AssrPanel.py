@@ -291,6 +291,12 @@ class AssrPanel(QWidget):
         """Un paso del registro. Devuelve el texto de estado."""
         if self.rec is None:
             return ""
+        hay_registro = ABRGenerator.electrode_state(self.technical)[0] if self.technical else True
+        if not hay_registro:
+            # Entradas abiertas (sin activo o sin referencia): el rechazo
+            # descarta todo y no entra ninguna época, como en el ABR.
+            self.lbl_estado.setText(tr("AssrPanel", "SIN ELECTRODOS · no entra ninguna época"))
+            return self.lbl_estado.text()
         self.rec.step(epocas)
         motivo = None
         if self.chk_auto.isChecked():

@@ -376,6 +376,17 @@ class CorticalGenerator:
                         for c in canales}
             barridos_raros = aceptados * rare_fraction
 
+        if not hay_registro and not clamp:
+            # Entradas abiertas (sin activo o sin referencia): el amplificador
+            # satura y el rechazo descarta todo barrido, como en el ABR (ver
+            # ABR_generator). No hay trazo, ni siquiera ruido.
+            cero = np.zeros_like(t)
+            final = {c: cero for c in canales}
+            overlays = {k: {c: cero for c in canales} for k in overlays}
+            subs = {c: (cero, cero) for c in canales}
+            aceptados = 0.0
+            if barridos_raros is not None:
+                barridos_raros = 0.0
         sub_a_l, sub_b_l = subs[lectura]
         residual_nv = float(np.std(sub_a_l - sub_b_l) / 2.0 * 1000.0)
         senial_l = abr.apply_filters(traces['main'][lectura], lp, hp, fs,

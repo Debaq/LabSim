@@ -6629,3 +6629,12 @@ de 150 px) y vuelve al monitor al salir. Es el mismo trazo de siempre: sin
 activo o sin referencia no hay canal, sin tierra entra la red y con la piel
 mal preparada sale grande y sucio, así que se ve limpiarse al corregir.
 
+**Sin electrodos no se dibuja nada (2026-10-28).** El autor vio la curva
+llena de ruido sin nada conectado. El generador, sin registro, dejaba un
+barrido sin promediar ("ruido del amplificador al aire"). En el equipo, con
+las entradas abiertas el amplificador satura y el rechazo de artefacto
+descarta todos los barridos: el promedio no avanza. Ahora ABR, ECochG,
+corticales y ASSR hacen eso: 0 barridos aceptados, curva plana, FSP 1, y el
+monitor de EEG dice "sin electrodo". Sin tierra (con activo y referencia)
+sí hay trazo, montado en la red: ese es otro error y se tiene que ver.
+
