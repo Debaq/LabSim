@@ -6524,3 +6524,24 @@ nada (lo reportó el autor como "no funciona"). Ahora esconde todas menos el
 login. No se pierde nada: esconder no destruye el contenido, cada ventana
 vuelve con su botón y al esconder un examen se sube su informe.
 
+## Electrodos sobre una cabeza giratoria, sin 3D en vivo (2026-10-28)
+
+Pedido del autor: poner los electrodos como en labyrinthus3d (cabeza 3D con
+los sitios 10-20 y 10-10). labyrinthus3d dibuja con three.js en el
+navegador; LabSim evita OpenGL a propósito (`LabSim.spec`: sin el plugin GL
+de Wayland, build encapsulado, PC del laboratorio modestos) y un navegador
+embebido sumaría ~150 MB. Se eligió **fotografiar la escena**: la misma
+cabeza (`modelos/cabeza.glb`) y los mismos sitios (`js/electrodos.js`,
+`apoyaSitios`) desde 1.620 ángulos (cada 2° de giro, cada 10° de inclinación
+de -20° a 60°), con dónde cae cada sitio visible en cada cuadro
+(`scripts/cabeza_electrodos/`, ~7,8 MB en `resources/cabeza/`). Al arrastrar
+gira como 3D (~4 ms por cuadro) y anda en cualquier PC. El autor pidió pasos
+finos ("menos grados para mayor fluidez"): la primera propuesta era cada 10°.
+Si los datos de terreno muestran que los PC aguantan OpenGL, se puede pasar
+a 3D en vivo sin tocar la lógica de los electrodos.
+
+Colores de los cables como en el equipo y en labyrinthus3d: activo rojo,
+referencia azul, tierra verde (no son los de los oídos). Los sitios del
+cuerpo (ECM, esternón, clavícula, nuca) necesitan la persona de pie: no van
+todavía.
+

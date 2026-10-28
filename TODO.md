@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 70).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 72).
 
 Revisado contra el código el 2026-09-24.
 
@@ -183,6 +183,15 @@ gap significativo. § Parámetros de audiometría configurables por curso
       nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
 - [ ] 63. Tinnitumetría en el audiómetro, para que entre al orden (T00).
 - [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T03+).
+
+### Montaje de electrodos
+§ Electrodos sobre una cabeza giratoria, sin 3D en vivo
+- [ ] 71. Conectar `core/cabeza_electrodos.MontajeElectrodos` a ABR, ECochG,
+      corticales y AABR como paso antes de registrar, con la evaluación del
+      montaje de labyrinthus3d (`evaluaMontaje`: invertido, sin onda I,
+      ruido de red sin tierra) y la impedancia del monitor de EEG.
+- [ ] 72. Sitios del cuerpo (ECM, esternón, clavícula, nuca) para el VEMP:
+      fotografiar la persona de pie de labyrinthus3d.
 
 ### Voces sintéticas (Google)
 § Voces sintéticas con Google: plan

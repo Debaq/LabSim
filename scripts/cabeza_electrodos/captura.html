@@ -1,0 +1,93 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
+<style>html,body{margin:0;background:transparent}</style></head><body>
+<canvas id="c"></canvas>
+<script type="module">
+import * as T from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SITIOS, apoyaSitios } from './js/electrodos.js';
+import { OJO } from './js/cabeza.js';
+
+const q = new URLSearchParams(location.search);
+const TAM = +(q.get('tam') || 440);
+const PASO_YAW = +(q.get('yaw') || 4);
+const PITCHES = (q.get('pitch') || '-20,0,20,40,60').split(',').map(Number);
+const enviar = (ruta, cuerpo) => fetch(ruta, { method: 'POST', body: cuerpo });
+const log = (m) => enviar('/log.txt', String(m));
+
+try {
+  const lienzo = document.getElementById('c');
+  const renderer = new T.WebGLRenderer({ canvas: lienzo, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(TAM, TAM);
+  renderer.setClearColor(0x000000, 0);
+  const escena = new T.Scene();
+  const camara = new T.PerspectiveCamera(26, 1, 0.01, 10);
+  camara.position.set(0, 0.0, 0.78);
+  camara.lookAt(0, -0.004, 0);
+  escena.add(new T.HemisphereLight(0xffffff, 0x303038, 1.4));
+  const sol = new T.DirectionalLight(0xffffff, 1.6); sol.position.set(0.6, 1, 1.2); escena.add(sol);
+  const contra = new T.DirectionalLight(0xffffff, 0.5); contra.position.set(-0.8, 0.3, -1); escena.add(contra);
+
+  const cabeza = new T.Group(); escena.add(cabeza);
+  const gltf = await new GLTFLoader().loadAsync('./modelos/cabeza.glb');
+  gltf.scene.updateMatrixWorld(true);
+  let geo = null;
+  gltf.scene.traverse((o) => { if (!geo && o.isMesh) geo = o.geometry.clone().applyMatrix4(o.matrixWorld); });
+  const piel = new T.Mesh(geo, new T.MeshStandardMaterial({ color: 0xd9b89c, roughness: 0.75 }));
+  cabeza.add(piel);
+  for (const s of [1, -1]) {
+    const ojo = new T.Group(); ojo.position.set(s * OJO.x, OJO.y, OJO.z);
+    ojo.add(new T.Mesh(new T.SphereGeometry(OJO.radio, 32, 24), new T.MeshStandardMaterial({ color: 0xf4f1ec, roughness: 0.35 })));
+    const iris = new T.Mesh(new T.CircleGeometry(0.0056, 32), new T.MeshStandardMaterial({ color: 0x7a5a3a, roughness: 0.5 }));
+    iris.position.z = OJO.radio + 0.0001; ojo.add(iris);
+    const pupila = new T.Mesh(new T.CircleGeometry(0.0024, 32), new T.MeshBasicMaterial({ color: 0x050505 }));
+    pupila.position.z = OJO.radio + 0.00015; ojo.add(pupila);
+    cabeza.add(ojo);
+  }
+
+  // Sitios de la cabeza (los del cuerpo necesitan la persona de pie: fuera por ahora).
+  const sitios = SITIOS.filter((s) => !s.cuerpo);
+  const apoyados = apoyaSitios(T, [piel], sitios);
+  const lista = sitios.map((s) => ({ id: s.id, nombre: s.nombre, corto: s.corto || s.id, sistema: s.sistema, zona: s.zona, lado: s.lado ?? null, craneo: s.craneo !== false }));
+  const locales = sitios.map((s) => { const a = apoyados.get(s.id); return { pos: a.pos.clone().addScaledVector(a.normal, 0.001), normal: a.normal.clone() }; });
+
+  const yaws = []; for (let y = 0; y < 360; y += PASO_YAW) yaws.push(y);
+  const rc = new T.Raycaster();
+  const cuadros = {};
+  let n = 0;
+  for (const p of PITCHES) {
+    for (const y of yaws) {
+      // Gira la cabeza, no la cámara: la luz queda fija, como en un estudio.
+      cabeza.rotation.set(p * Math.PI / 180, y * Math.PI / 180, 0, 'XYZ');
+      cabeza.updateMatrixWorld(true);
+      renderer.render(escena, camara);
+      const blob = await new Promise((r) => lienzo.toBlob(r, 'image/webp', 0.82));
+      await enviar(`/f_${p}_${y}.webp`, blob);
+      const fila = [];
+      for (const l of locales) {
+        const w = l.pos.clone().applyMatrix4(cabeza.matrixWorld);
+        const nw = l.normal.clone().transformDirection(cabeza.matrixWorld);
+        const hacia = w.clone().sub(camara.position).normalize();
+        let visible = nw.dot(hacia) < -0.05;
+        if (visible) {
+          rc.set(camara.position, hacia);
+          const h = rc.intersectObject(cabeza, true)[0];
+          visible = !h || h.distance > camara.position.distanceTo(w) - 0.004;
+        }
+        const ndc = w.clone().project(camara);
+        const x = Math.round(((ndc.x + 1) / 2) * TAM * 10) / 10;
+        const yy = Math.round(((1 - ndc.y) / 2) * TAM * 10) / 10;
+        fila.push(visible ? [x, yy] : null);
+      }
+      cuadros[`${p}_${y}`] = fila;
+      n++;
+    }
+  }
+  await enviar('/sitios.json', JSON.stringify({ tam: TAM, yaws, pitches: PITCHES, sitios: lista, cuadros }));
+  await log(`listo ${n} cuadros, ${lista.length} sitios`);
+} catch (e) {
+  await log('ERROR ' + (e.stack || e));
+}
+await enviar('/fin.txt', 'fin');
+</script></body></html>
