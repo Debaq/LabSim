@@ -227,3 +227,15 @@ Actualizado 2026-10-27.
 
 - Medición de tiempos en terreno: `core/tiempos.py`, `scripts/resumir_tiempos.py`. Con los
   datos de los PC se decide si el cuello es el dibujo, la red o los motores (Rust).
+
+## Configuración (2026-10-29)
+
+- [x] Rehecha con el estilo común: encabezado en tarjeta (engranaje, título y
+  dónde se guarda), secciones en una lista a la izquierda como las carpetas
+  de la práctica libre (ícono blanco en la elegida), cada grupo de atajos en
+  su tarjeta, "Guardar" como botón principal y solo en las secciones que
+  guardan (en "Reportar un problema" queda "Cerrar"). Sin cuenta, "Guardar"
+  se apaga y el encabezado lo dice.
+- [x] "Reportar un problema" cabe a lo ancho: la casilla de aceptación tenía
+  el texto en el QCheckBox (no se parte) y la ruta del registro no tenía
+  puntos de corte.

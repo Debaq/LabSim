@@ -8,8 +8,9 @@ ticket es para que el equipo de LabSim abra un issue.
 """
 import gzip
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QCheckBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox,
-                               QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget)
+                               QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget)
 
 from core import equipo, hilos, registro
 from core.base import context
@@ -112,7 +113,12 @@ def _caja_que_se_envia(parent, info_equipo, detalle):
     btn_ver = QPushButton(f"Ver el registro ({kb} KB)", box)
     btn_ver.clicked.connect(lambda: _ver_registro(parent))
     form.addRow("Registro de la app:", btn_ver)
-    form.addRow("", QLabel(f"Se guarda en: {registro.archivo()}", box))
+    # La ruta no tiene espacios: sin puntos de corte (\u200b después de cada
+    # carpeta) no se partía y obligaba a la ventana a su ancho.
+    ruta = str(registro.archivo()).replace("/", "/\u200b").replace("\\", "\\\u200b")
+    donde = QLabel(f"Se guarda en: {ruta}", box)
+    donde.setWordWrap(True)
+    form.addRow("", donde)
     return box
 
 
@@ -160,11 +166,20 @@ class PaginaSoporte(QWidget):
 
         caja.addWidget(self._caja_que_se_envia())
 
-        self.chk_acepto = QCheckBox(
+        # La casilla sin texto y el texto aparte: un QCheckBox no parte su
+        # texto en líneas y obligaba a la ventana a medir 670 px de ancho.
+        # Un clic en el texto también la marca.
+        fila_acepto = QHBoxLayout()
+        self.chk_acepto = QCheckBox(self)
+        self.chk_acepto.toggled.connect(self._actualizar_boton)
+        texto_acepto = QLabel(
             "Acepto enviar al servidor de LabSim la información de este equipo que aparece "
             "arriba y el registro de la aplicación.", self)
-        self.chk_acepto.toggled.connect(self._actualizar_boton)
-        caja.addWidget(self.chk_acepto)
+        texto_acepto.setWordWrap(True)
+        texto_acepto.mousePressEvent = lambda _e: self.chk_acepto.toggle()
+        fila_acepto.addWidget(self.chk_acepto, 0, Qt.AlignmentFlag.AlignTop)
+        fila_acepto.addWidget(texto_acepto, 1)
+        caja.addLayout(fila_acepto)
 
         self.btn_enviar = QPushButton("Enviar reporte", self)
         self.btn_enviar.clicked.connect(self._enviar)
