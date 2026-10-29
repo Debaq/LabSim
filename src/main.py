@@ -1602,9 +1602,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """La hoja de un examen previo del paciente (ver core.ficha.HojaPrevia)."""
         if "PREVIO" not in self.apps:
             return
-        self.subw["PREVIO"].obj.set_hoja(ruta)
-        self.activate_auto("PREVIO")
-        self.subw["PREVIO"].lbl_title.setText(f"{examen} del paciente")
+        frame = self.subw["PREVIO"]
+        frame.obj.set_hoja(ruta)
+        if self._subventana_visible("PREVIO"):
+            # activate_auto es un interruptor: con la hoja ya abierta la
+            # escondía, y pinchar otro examen cerraba la ventana en vez de
+            # cambiarlo.
+            raise_window(frame.parent())
+        else:
+            self.activate_auto("PREVIO")
+        frame.lbl_title.setText(f"{examen} del paciente")
 
     def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None):
         """Abre (o trae al frente) la subventana MDI de evolución, reapuntada
