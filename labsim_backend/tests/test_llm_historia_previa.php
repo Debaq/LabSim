@@ -44,3 +44,17 @@ t_true(strpos(LlmConfig::historiaPrevia('{{-12}} ORL deriva.', ['Audiometría'])
 $dos = LlmConfig::historiaPrevia('', ['Audiometría', 'Impedanciometría', 'Inventado']);
 t_true(strpos($dos, 'te hicieron un examen de audición en cabina (audiometría) y un examen del oído con una sonda') !== false
        && strpos($dos, 'traes los informes impresos') !== false, 'Varios exámenes: en plural, y lo desconocido no entra');
+
+// Entrega de los informes por el chat
+$conTrae = LlmConfig::historiaPrevia('', ['Audiometría', 'Impedanciometría']);
+t_true(strpos($conTrae, '[ENTREGA: Audiometría, Impedanciometría]') !== false, 'El prompt dice cómo entregar, con los nombres exactos');
+t_true(strpos(LlmConfig::historiaPrevia('{{-5}} ORL.', []), 'ENTREGA') === false, 'Sin nada que traer no hay marca');
+[$t, $e] = LlmConfig::separarEntrega("Sí, aquí tiene los papeles. [ENTREGA: Audiometria, impedanciometría]", ['Audiometría', 'Impedanciometría']);
+t_eq($t, 'Sí, aquí tiene los papeles.', 'La marca no llega a la burbuja');
+t_eq($e, ['Audiometría', 'Impedanciometría'], 'Se reconoce aunque falte la tilde o cambie la mayúscula');
+[, $e] = LlmConfig::separarEntrega('Tome. [ENTREGA: VEMP, Audiometría]', ['Audiometría']);
+t_eq($e, ['Audiometría'], 'No entrega lo que no trae');
+[, $e] = LlmConfig::separarEntrega('Todo lo que traigo. [ENTREGA: todos]', ['Audiometría', 'EOA']);
+t_eq($e, ['Audiometría', 'EOA'], '"todos" entrega todo lo que trae');
+[$t, $e] = LlmConfig::separarEntrega('Me hicieron una audiometría hace poco.', ['Audiometría']);
+t_eq([$t, $e], ['Me hicieron una audiometría hace poco.', []], 'Contarlo no es entregarlo');

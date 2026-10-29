@@ -667,7 +667,8 @@ class MisPacientesWidget(QWidget):
         caso = self._cases.get(case_id, {})
         username = (self._main_window.data_login.get("user")
                     if self._main_window and getattr(self._main_window, "data_login", None) else None)
-        poner_html(self.texto_ficha, render_ficha_html(row, caso, self._shedule, username, False))
+        # Una atención ya hecha: lo que trajo el paciente se ve entero
+        poner_html(self.texto_ficha, render_ficha_html(row, caso, self._shedule, username, False, todos=True))
 
     # ------------------------------------------------------------ exámenes
     def _atencion_actual(self):

@@ -46,6 +46,7 @@ from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
 from core import app_layout
+from core import ficha as ficha_clinica
 from core.ficha import HojaPrevia, examenes_que_trae, fila_de_practica
 from core.app_layout import LayoutRetryThread, fetch_layout
 
@@ -970,6 +971,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if practica:
             # Solo para leer: en prueba no se escribe nada en la cita
             entry = fila_de_practica(entry, practica)
+        # Atención nueva (o retomada, con el chat de cero): los informes que
+        # trae vuelven a estar en su mano hasta que se los pidan.
+        ficha_clinica.olvidar_entregas(entry.case_id)
 
         case_id = entry.case_id or None
         if not case_id:
@@ -1024,7 +1028,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.paciente_actual = {
             "case_id": case_id, "nombre": nombre or "el paciente",
             "edad": edad, "procedimiento": procedimiento, "appointment_id": appointment_id,
-            "trae": [examen for examen, _ in examenes_que_trae(entry, self.data_current)],
+            "trae": [examen for examen, _ in examenes_que_trae(entry, self.data_current, todos=True)],
         }
 
         if es_prueba:
@@ -1240,6 +1244,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self), expand=True),
         })
 
+        self.subw["CHAT"].obj.entrego.connect(self._al_entregar_informes)
+        # Con chat, los informes que trae el paciente se piden (ver
+        # core.ficha.entrega_por_chat); sin el módulo, salen en la ficha.
+        ficha_clinica.entrega_por_chat = self._module_visible("CHAT")
         # El botón Ver/Cerrar ficha de la agenda sigue a la ficha, también
         # cuando se cierra con su ✕.
         self.subw["FICHA"].visibility_changed.connect(
@@ -1582,6 +1590,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         cuelga de ella."""
         self.close_sub_window("FICHA")
         self.close_sub_window("PREVIO")
+
+    def _al_entregar_informes(self, case_id, examenes):
+        """El paciente entregó informes en el chat: entran a su ficha."""
+        ficha_clinica.registrar_entrega(case_id, examenes)
+        agenda = self.subw.get("AGENDA") if self.subw else None
+        if agenda is not None and self.ficha_abierta():
+            agenda.obj._seguir_con_la_ficha()
 
     def abrir_previo(self, ruta, examen="Examen"):
         """La hoja de un examen previo del paciente (ver core.ficha.HojaPrevia)."""

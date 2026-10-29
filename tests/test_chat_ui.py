@@ -196,6 +196,22 @@ def test_tamanos_de_pantalla_chicos_no_rompen_nada():
         w.close()
 
 
+def test_el_paciente_entrega_sus_informes_en_el_chat():
+    """Lo que el backend marca como entregado sale como papeles en la
+    conversación y avisa (main lo pone en la ficha). Solo lo que trae."""
+    w = _chat(lambda *a, **k: {"sala": SALA, "entrega": ["Audiometría", "VEMP"],
+                               "respuestas": [{"persona_id": "p1", "etiqueta": "Juan", "texto": "Tome."}]})
+    w.set_paciente("c1", "Juan Pérez", 67, "PEATC", 5, ["Audiometría", "Impedanciometría"])
+    avisos = []
+    w.entrego.connect(lambda caso, examenes: avisos.append((caso, examenes)))
+    w.input.setText("¿Me muestra los exámenes que trae?")
+    w._enviar()
+    assert avisos == [("c1", ["Audiometría"])], avisos
+    papeles = _filas(w)[-1].findChild(C.QFrame, "papelesChat")
+    assert papeles is not None
+    assert [b.text() for b in papeles.findChildren(C.BotonAccion)] == ["Audiometría"]
+
+
 if __name__ == "__main__":
     pruebas = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_") and callable(f)]
     fallos = 0

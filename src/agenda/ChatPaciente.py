@@ -12,10 +12,10 @@ import re
 
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
-from PySide6.QtCore import QEvent, Qt, QTimer
+from PySide6.QtCore import QEvent, Qt, QTimer, Signal
 from agenda.vista import BotonAccion
 from core.helpers import chat_con_paciente, foto_paciente, sala_del_caso
-from core import hilos, iconos, tema
+from core import ficha, hilos, iconos, tema
 from core.avatar import avatar_iniciales, avatar_circular_desde_bytes, color_por_nombre
 
 
@@ -34,6 +34,10 @@ QFrame#burbujaOtro {{
     background: {tema.TARJETA}; border: 1px solid {tema.BORDE}; border-radius: 12px;
 }}
 QFrame#burbujaPropia QLabel, QFrame#burbujaOtro QLabel {{ background: transparent; border: none; }}
+QFrame#papelesChat {{
+    background: {tema.TARJETA_ALT}; border: 1px dashed {tema.BORDE_FUERTE}; border-radius: 12px;
+}}
+QFrame#papelesChat QLabel {{ background: transparent; border: none; color: {tema.TEXTO_SUAVE}; font-size: 8.5pt; }}
 QLabel#vacioChat {{
     color: {tema.TEXTO_SUAVE}; font-size: 9pt; background: {tema.TARJETA};
     border: 1px dashed {tema.BORDE_FUERTE}; border-radius: 12px; padding: 18px;
@@ -170,6 +174,10 @@ class ChatPacienteWidget(QWidget):
     vez de un diálogo emergente -- set_paciente() la reapunta a otro caso
     cada vez que se abre desde una ficha distinta, reseteando la
     conversación anterior."""
+
+    # El paciente entregó informes en este turno: (case_id, [examen]). main
+    # los pone en la ficha (ver core.ficha.registrar_entrega).
+    entrego = Signal(str, list)
 
     REINTENTOS_AUTOMATICOS = 1  # 1 reintento silencioso antes de pedirle al alumno que reintente a mano
     AVATAR_SIZE = 32
@@ -548,6 +556,40 @@ class ChatPacienteWidget(QWidget):
                 "speaker_label": etiqueta, "speaker_id": r.get("persona_id", ""),
             })
             self._burbuja_persona(persona_id, etiqueta, texto)
+        entrega = [e for e in (resultado.get("entrega") or []) if e in self._trae]
+        if entrega:
+            self._papeles(entrega)
+            self.entrego.emit(str(self._case_id), entrega)
+
+    def _papeles(self, examenes):
+        """Los informes que el paciente acaba de entregar, como papeles en la
+        conversación: un clic abre la hoja (la misma de la ficha)."""
+        marco = QFrame()
+        marco.setObjectName("papelesChat")
+        col = QVBoxLayout(marco)
+        col.setContentsMargins(12, 8, 12, 10)
+        col.setSpacing(6)
+        col.addWidget(QLabel("Te entrega " + ("su informe" if len(examenes) == 1 else "sus informes")))
+        fila_botones = QHBoxLayout()
+        fila_botones.setSpacing(6)
+        for examen in examenes:
+            boton = BotonAccion(examen, "ficha", parent=marco)
+            boton.clicked.connect(lambda _=False, e=examen: self._ver_papel(e))
+            fila_botones.addWidget(boton)
+        fila_botones.addStretch(1)
+        col.addLayout(fila_botones)
+        fila = QWidget()
+        h = QHBoxLayout(fila)
+        h.setContentsMargins(self.AVATAR_SIZE + 8, 0, 0, 0)
+        h.addWidget(marco, 0, Qt.AlignmentFlag.AlignTop)
+        h.addStretch(1)
+        self.lista.agregar(fila)
+
+    def _ver_papel(self, examen):
+        ruta = ficha.ruta_de_lo_que_trae(self._case_id, examen)
+        ventana = self.window()
+        if ruta is not None and ruta.is_file() and hasattr(ventana, "abrir_previo"):
+            ventana.abrir_previo(ruta, examen)
 
     def _on_fallo(self, case_id_solicitado, mensaje, error):
         self.input.setEnabled(True)

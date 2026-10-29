@@ -400,6 +400,20 @@ TXT;
         if ($lineas === []) {
             return '';
         }
+        $entrega = '';
+        $nombres = array_values(array_filter(array_map('strval', $trae), static function (string $e): bool {
+            return isset(self::EXAMEN_PREVIO[$e]);
+        }));
+        if ($nombres !== []) {
+            // La app muestra los informes en la ficha solo cuando el paciente
+            // los entrega (core.ficha.examenes_que_trae): la marca es cómo se
+            // entera. separarEntrega() la saca del texto antes de mostrarlo.
+            $entrega = "\n\n" . ($sala ? 'Los informes los tiene quien acompaña al paciente o el paciente mismo. ' : '')
+                . 'Si el estudiante pide los exámenes o informes que traes, o quiere verlos, entrégaselos: '
+                . 'termina ' . ($sala ? 'el texto de quien los entrega' : 'tu respuesta')
+                . ' con la marca [ENTREGA: ' . implode(', ', $nombres) . '] (solo los que entregas, escritos así). '
+                . 'Sin que te los pidan no pongas la marca: cuéntalo con palabras si viene al caso.';
+        }
         $encabezado = $sala
             ? 'Lo que le pasó al paciente antes de esta cita (lo saben quienes lo acompañaron a esas atenciones). '
               . 'Si preguntan, se cuenta con palabras de paciente: qué le hicieron, quién lo mandó y cuándo, '
@@ -407,7 +421,36 @@ TXT;
             : 'Lo que te pasó antes de esta cita (de ahí viene la derivación). Si te preguntan, cuéntalo con tus '
               . 'palabras: qué te hicieron, quién te mandó y cuándo, sin fechas exactas, sin diagnósticos ni '
               . 'resultados técnicos que un paciente no sabría explicar:';
-        return "\n\n" . $encabezado . "\n" . implode("\n", $lineas);
+        return "\n\n" . $encabezado . "\n" . implode("\n", $lineas) . $entrega;
+    }
+
+    /**
+     * Saca de un texto del modelo la marca [ENTREGA: …] (ver historiaPrevia)
+     * y devuelve [texto sin la marca, exámenes entregados]. Solo cuenta lo
+     * que el paciente trae (`$trae`, lo que mandó la app): el modelo no puede
+     * entregar un examen que no existe. Acepta los nombres sin tildes y
+     * "todos".
+     *
+     * @return array{0:string, 1:list<string>}
+     */
+    public static function separarEntrega(string $texto, array $trae): array
+    {
+        $entregados = [];
+        $plano = static function (string $s): string {
+            return strtr(mb_strtolower(trim($s)), ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u']);
+        };
+        $texto = (string) preg_replace_callback('/\[\s*ENTREGA\s*:\s*([^\]]*)\]/iu',
+            static function (array $m) use ($trae, $plano, &$entregados): string {
+                $pedidos = array_map($plano, explode(',', $m[1]));
+                foreach ($trae as $examen) {
+                    $examen = (string) $examen;
+                    if (in_array($plano($examen), $pedidos, true) || array_intersect($pedidos, ['todos', 'todo'])) {
+                        $entregados[$examen] = true;
+                    }
+                }
+                return '';
+            }, $texto);
+        return [trim((string) preg_replace('/[ \t]+\n/', "\n", $texto)), array_keys($entregados)];
     }
 
     /**

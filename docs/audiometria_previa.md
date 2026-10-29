@@ -24,6 +24,8 @@ texto: no había nada que revisar.
 | Procedimiento en los capítulos que enseñan un examen | Todo lo de las figuras: "Audiometría + Impedanciometría + PEATC" | Solo lo que enseña el capítulo: "PEATC" (ver "Foco por capítulo") |
 | Procedimiento de H21 (ficha 36) | "Otoscopía + Acumetría" (el valor por defecto) | "Prueba de audífonos" |
 | Lo que el paciente trae | Nada | Los exámenes del libro que su procedimiento no nombra, en una entrada del historial: "Audiometría e impedanciometría. Trae los informes. **Ver audiometría · Ver impedanciometría**", 14 días antes de la cita (o justo después de quien los pidió, si eso fue más cerca) |
+| Cuándo aparecen en la ficha | — | Con cuenta y chat: cuando el paciente los entrega en el chat (hay que pedírselos). Sin cuenta o en un curso sin chat: desde el principio. En "Mis pacientes" (atención cerrada): enteros |
+| En el chat | El paciente decía "traigo los papeles" pero no los podía pasar | Si se los piden, los entrega: aparecen como papeles en la conversación ("Te entrega sus informes: Audiometría · Impedanciometría") y entran a la ficha |
 | Exámenes que cuenta la historia | Solo texto | La línea lleva su hoja: "Audiometría de base: normal… **Ver audiometría · Ver EOA**" |
 | Tamizajes de la historia | Solo texto | Tarjeta con el resultado de cada oído ("AABR · Oído derecho: Refiere"), sin curva |
 | "Ver …" | — | Subventana del MDI, "<Examen> del paciente", con la hoja del libro |
@@ -72,8 +74,8 @@ cambia en `FOCO` (`scripts/libro/procedimientos.py`).
 - **No se bloquea nada.** Si el alumno repite un examen, queda en su
   historial y se puede evaluar.
 - **Se ve dentro de la app.** Los kioskos solo tienen LabSim: las hojas van
-  empaquetadas con la app (`resources/libro/previos/<ficha>/`, unos 9 MB de
-  SVG) y no se bajan de internet.
+  empaquetadas con la app (`resources/libro/previos/<ficha>/`, 1,7 MB) y no
+  se bajan de internet.
 - **Es la hoja del libro.** Se dibuja con el mismo motor de figuras del libro
   y con los mismos datos cargados en prod (`scripts/libro/previos.py`): lo
   que ve el alumno coincide con lo que mide si repite el examen.
@@ -92,6 +94,16 @@ cambia en `FOCO` (`scripts/libro/procedimientos.py`).
   son la historia del caso.
 - **Si viene a otoscopía, no trae nada** (corrección tuya): todo va después
   de mirarle el oído.
+- **Los informes se piden** (lo elegiste): en la consulta el paciente los
+  entrega cuando se los piden, y pedirlos es parte de la anamnesis. Sin chat
+  no hay a quién pedírselos, así que salen en la ficha desde el principio.
+  El modelo marca la entrega y el backend solo acepta lo que el paciente
+  trae: no puede entregar un examen que no existe. Cada atención nueva
+  empieza con los papeles en la mano del paciente, como el chat empieza de
+  cero. Las hojas de la historia no se piden: son el registro del caso.
+- **Peso:** las hojas van comprimidas (`.svgz`, que Qt lee directo): 1,7 MB
+  en vez de 8,5. Con la fecha del gzip fija, una hoja que no cambia no viaja
+  en la actualización.
 - **La historia va al chat fuera de la plantilla.** Así una plantilla que
   edites en el panel no la pierde. Vale para todos los casos.
 
@@ -123,8 +135,10 @@ pacientes en LabSim":
 - Ficha que sigue a la agenda y botón Ver/Cerrar: `src/agenda/Agenda.py`.
 - Subventana: `PREVIO` en `labsim_backend/src/Layout.php`; `src/main.py` la
   agrega si el backend todavía no la manda.
-- Chat: `LlmConfig::historiaPrevia` y `EXAMEN_PREVIO`
-  (`labsim_backend/src/LlmConfig.php`); la app manda `trae` en `llm_chat.php`.
+- Chat: `LlmConfig::historiaPrevia`, `EXAMEN_PREVIO` y `separarEntrega`
+  (`labsim_backend/src/LlmConfig.php`); la app manda `trae` y recibe
+  `entrega` en `llm_chat.php`. En la app: `ChatPacienteWidget.entrego` →
+  `main._al_entregar_informes` → `core.ficha.registrar_entrega`.
 - Hojas: `scripts/libro/previos.py` (con `historia_examenes.json`, la tabla de
   las líneas de la historia) → `resources/libro/previos/`. Se vuelve a correr
   si cambia un caso o el dibujo del libro.

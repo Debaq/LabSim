@@ -182,6 +182,16 @@ $respuestas = $acompanado
     ? Sala::intervenciones($raw, $sala)
     : [['persona_id' => '', 'etiqueta' => '', 'texto' => $raw]];
 
+// Los informes que el paciente entregó en este turno (ver
+// LlmConfig::separarEntrega): la marca no llega a la burbuja; la app los
+// pone en la ficha y en el chat.
+$entrega = [];
+foreach ($respuestas as $i => $r) {
+    [$texto, $dados] = LlmConfig::separarEntrega($r['texto'], $trae);
+    $respuestas[$i]['texto'] = $texto;
+    $entrega = array_values(array_unique(array_merge($entrega, $dados)));
+}
+
 if ($appointmentId > 0) {
     // La respuesta ya existe (se pagó el LLM): si la base está bloqueada
     // se reintenta, y si aun así no se puede anotar, el alumno la recibe
@@ -216,4 +226,5 @@ Response::json([
     'reply' => $respuestas ? $respuestas[0]['texto'] : '',
     'respuestas' => $respuestas,
     'sala' => Sala::paraCliente($sala),
+    'entrega' => $entrega,
 ]);

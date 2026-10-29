@@ -1732,5 +1732,5 @@ class Agenda(QWidget, Ui_Form):
 
         if self.main_window is not None and hasattr(self.main_window, "abrir_chat_con"):
             self.main_window.abrir_chat_con(case_id, nombre or "el paciente", edad, procedimiento, appointment_id,
-                                            [e for e, _ in examenes_que_trae(row, {"id": case_id})])
+                                            [e for e, _ in examenes_que_trae(row, {"id": case_id}, todos=True)])
 

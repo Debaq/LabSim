@@ -6,16 +6,18 @@
 (el PEATC necesita PySide6 y pyqtgraph: el python del libro, ver
 libro.python_figuras.)
 
-Escribe resources/libro/previos/<ficha>/<examen>.svg con la hoja de cada
+Escribe resources/libro/previos/<ficha>/<examen>.svgz con la hoja de cada
 examen que el libro muestra de ese paciente (audiometría, impedanciometría,
 emisiones, PEATC, ECochG, VEMP, corticales), las hojas de los exámenes que
 cuenta su historia clínica (historia_examenes.json, al lado de este script) y
-resources/libro/previos/indice.json:
+resources/libro/previos/indice.json. Comprimidas (svgz, que Qt lee directo):
+1,7 MB en vez de 8,5; con la fecha del gzip fija, una hoja que no cambió da
+el mismo archivo y no viaja en la actualización.
 
-    {"<ficha>": {"trae": {"Audiometría": "<ficha>/audiometria.svg", ...},
+    {"<ficha>": {"trae": {"Audiometría": "<ficha>/audiometria.svgz", ...},
                  "por_procedimiento": {"PEATC": ["Audiometría", "Impedanciometría"], ...},
                  "historia": [{"dias": -138, "examen": "Audiometría",
-                               "svg": "<ficha>/historia_138_audiometria.svg"}, ...]}}
+                               "svg": "<ficha>/historia_138_audiometria.svgz"}, ...]}}
 
 En historia_examenes.json cada línea de la historia que cuenta un examen
 lleva su hoja: "tamizaje" (una tarjeta con pasa/refiere por oído, lo mismo
@@ -33,6 +35,7 @@ Sale de los mismos datos que se cargaron en el backend (generados/, no
 propios/: sql_practica.py carga los generados) y de los demo 33-42. Se
 vuelve a correr cuando cambia un caso o el dibujo del libro.
 """
+import gzip
 import json
 import pathlib
 import re
@@ -88,6 +91,10 @@ def _specs():
             origen, ficha = f"archivo:{CASOS / 'generados' / f'{clave}.json'}", ids.get(clave)
         if ficha is not None:
             yield clave, ficha, origen, spec['figuras']
+
+
+def _guardar(ruta, svg):
+    (salida / ruta).write_bytes(gzip.compress(svg.encode('utf-8'), 9, mtime=0))
 
 
 def _apilar(svgs):
@@ -151,8 +158,8 @@ def main():
             break
         (salida / ficha).mkdir(parents=True, exist_ok=True)
         for examen, (clave, origen, figuras) in examenes.items():
-            ruta = f'{ficha}/{ARCHIVO[examen]}.svg'
-            (salida / ruta).write_text(_hoja(cargar_caso(origen), examen, figuras), encoding='utf-8')
+            ruta = f'{ficha}/{ARCHIVO[examen]}.svgz'
+            _guardar(ruta, _hoja(cargar_caso(origen), examen, figuras))
             indice.setdefault(ficha, {}).setdefault('trae', {})[examen] = ruta
             print(f'  {ruta:30} {clave}')
     # Qué trae en cada carpeta: lo que muestra la ficha del libro en ese
@@ -173,7 +180,7 @@ def main():
     for h in tabla:
         ficha, examen = h['ficha'], h['examen']
         trae = indice.get(ficha, {}).get('trae', {})
-        ruta = f"{ficha}/historia_{-h['dias']}_{ARCHIVO[examen]}.svg"
+        ruta = f"{ficha}/historia_{-h['dias']}_{ARCHIVO[examen]}.svgz"
         if h['hoja'] == 'tamizaje':
             svg = tarjeta_tamizaje(h['prueba'], h['OD'], h['OI'])
         elif h['hoja'] == 'actual' and examen in trae:
@@ -185,7 +192,7 @@ def main():
             svg = _hoja(cargar_caso(origen), examen, figuras)
         if svg is not None:
             (salida / ficha).mkdir(parents=True, exist_ok=True)
-            (salida / ruta).write_text(svg, encoding='utf-8')
+            _guardar(ruta, svg)
         entrada = {'dias': h['dias'], 'examen': examen, 'svg': ruta}
         if h.get('revisar'):
             entrada['revisar'] = True

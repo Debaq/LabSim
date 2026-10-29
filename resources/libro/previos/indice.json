@@ -1,11 +1,11 @@
 {
  "33": {
   "trae": {
-   "Audiometría": "33/audiometria.svg",
-   "EOA": "33/eoa.svg",
-   "PEATC": "33/peatc.svg",
-   "ECochG": "33/ecochg.svg",
-   "VEMP": "33/vemp.svg"
+   "Audiometría": "33/audiometria.svgz",
+   "EOA": "33/eoa.svgz",
+   "PEATC": "33/peatc.svgz",
+   "ECochG": "33/ecochg.svgz",
+   "VEMP": "33/vemp.svgz"
   },
   "por_procedimiento": {
    "Audiometría + EOA": [
@@ -35,10 +35,10 @@
  },
  "34": {
   "trae": {
-   "Audiometría": "34/audiometria.svg",
-   "Impedanciometría": "34/impedanciometria.svg",
-   "PEATC": "34/peatc.svg",
-   "VEMP": "34/vemp.svg"
+   "Audiometría": "34/audiometria.svgz",
+   "Impedanciometría": "34/impedanciometria.svgz",
+   "PEATC": "34/peatc.svgz",
+   "VEMP": "34/vemp.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -67,9 +67,9 @@
  },
  "35": {
   "trae": {
-   "Audiometría": "35/audiometria.svg",
-   "Impedanciometría": "35/impedanciometria.svg",
-   "EOA": "35/eoa.svg"
+   "Audiometría": "35/audiometria.svgz",
+   "Impedanciometría": "35/impedanciometria.svgz",
+   "EOA": "35/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -95,16 +95,16 @@
    {
     "dias": -1600,
     "examen": "Tamizaje",
-    "svg": "35/historia_1600_tamizaje.svg"
+    "svg": "35/historia_1600_tamizaje.svgz"
    }
   ]
  },
  "36": {
   "trae": {
-   "Audiometría": "36/audiometria.svg",
-   "Impedanciometría": "36/impedanciometria.svg",
-   "PEATC": "36/peatc.svg",
-   "EOA": "36/eoa.svg"
+   "Audiometría": "36/audiometria.svgz",
+   "Impedanciometría": "36/impedanciometria.svgz",
+   "PEATC": "36/peatc.svgz",
+   "EOA": "36/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -129,8 +129,8 @@
  },
  "37": {
   "trae": {
-   "Audiometría": "37/audiometria.svg",
-   "EOA": "37/eoa.svg"
+   "Audiometría": "37/audiometria.svgz",
+   "EOA": "37/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + EOA": [
@@ -145,17 +145,17 @@
    {
     "dias": -2900,
     "examen": "Audiometría",
-    "svg": "37/historia_2900_audiometria.svg",
+    "svg": "37/historia_2900_audiometria.svgz",
     "revisar": true
    }
   ]
  },
  "38": {
   "trae": {
-   "Audiometría": "38/audiometria.svg",
-   "Impedanciometría": "38/impedanciometria.svg",
-   "ECochG": "38/ecochg.svg",
-   "VEMP": "38/vemp.svg"
+   "Audiometría": "38/audiometria.svgz",
+   "Impedanciometría": "38/impedanciometria.svgz",
+   "ECochG": "38/ecochg.svgz",
+   "VEMP": "38/vemp.svgz"
   },
   "por_procedimiento": {
    "ECochG + VEMP": [
@@ -179,10 +179,10 @@
  },
  "39": {
   "trae": {
-   "Audiometría": "39/audiometria.svg",
-   "Impedanciometría": "39/impedanciometria.svg",
-   "EOA": "39/eoa.svg",
-   "PEATC": "39/peatc.svg"
+   "Audiometría": "39/audiometria.svgz",
+   "Impedanciometría": "39/impedanciometria.svgz",
+   "EOA": "39/eoa.svgz",
+   "PEATC": "39/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -199,8 +199,8 @@
  },
  "40": {
   "trae": {
-   "PEATC": "40/peatc.svg",
-   "EOA": "40/eoa.svg"
+   "PEATC": "40/peatc.svgz",
+   "EOA": "40/eoa.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -216,14 +216,14 @@
    {
     "dias": -5480,
     "examen": "Tamizaje",
-    "svg": "40/historia_5480_tamizaje.svg"
+    "svg": "40/historia_5480_tamizaje.svgz"
    }
   ]
  },
  "41": {
   "trae": {
-   "Audiometría": "41/audiometria.svg",
-   "Impedanciometría": "41/impedanciometria.svg"
+   "Audiometría": "41/audiometria.svgz",
+   "Impedanciometría": "41/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -237,10 +237,10 @@
  },
  "42": {
   "trae": {
-   "Audiometría": "42/audiometria.svg",
-   "Impedanciometría": "42/impedanciometria.svg",
-   "VEMP": "42/vemp.svg",
-   "EOA": "42/eoa.svg"
+   "Audiometría": "42/audiometria.svgz",
+   "Impedanciometría": "42/impedanciometria.svgz",
+   "VEMP": "42/vemp.svgz",
+   "EOA": "42/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + VEMP": [
@@ -267,8 +267,8 @@
  },
  "49": {
   "trae": {
-   "Audiometría": "49/audiometria.svg",
-   "Impedanciometría": "49/impedanciometria.svg"
+   "Audiometría": "49/audiometria.svgz",
+   "Impedanciometría": "49/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -279,8 +279,8 @@
  },
  "50": {
   "trae": {
-   "Audiometría": "50/audiometria.svg",
-   "Impedanciometría": "50/impedanciometria.svg"
+   "Audiometría": "50/audiometria.svgz",
+   "Impedanciometría": "50/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -291,8 +291,8 @@
  },
  "51": {
   "trae": {
-   "Audiometría": "51/audiometria.svg",
-   "Impedanciometría": "51/impedanciometria.svg"
+   "Audiometría": "51/audiometria.svgz",
+   "Impedanciometría": "51/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -304,13 +304,13 @@
    {
     "dias": -2900,
     "examen": "Tamizaje",
-    "svg": "51/historia_2900_tamizaje.svg"
+    "svg": "51/historia_2900_tamizaje.svgz"
    }
   ]
  },
  "52": {
   "trae": {
-   "Audiometría": "52/audiometria.svg"
+   "Audiometría": "52/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -320,8 +320,8 @@
  },
  "53": {
   "trae": {
-   "Audiometría": "53/audiometria.svg",
-   "Impedanciometría": "53/impedanciometria.svg"
+   "Audiometría": "53/audiometria.svgz",
+   "Impedanciometría": "53/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -332,8 +332,8 @@
  },
  "54": {
   "trae": {
-   "Audiometría": "54/audiometria.svg",
-   "Impedanciometría": "54/impedanciometria.svg"
+   "Audiometría": "54/audiometria.svgz",
+   "Impedanciometría": "54/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -344,8 +344,8 @@
  },
  "55": {
   "trae": {
-   "Audiometría": "55/audiometria.svg",
-   "Impedanciometría": "55/impedanciometria.svg"
+   "Audiometría": "55/audiometria.svgz",
+   "Impedanciometría": "55/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -356,8 +356,8 @@
  },
  "56": {
   "trae": {
-   "Audiometría": "56/audiometria.svg",
-   "Impedanciometría": "56/impedanciometria.svg"
+   "Audiometría": "56/audiometria.svgz",
+   "Impedanciometría": "56/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -368,8 +368,8 @@
  },
  "57": {
   "trae": {
-   "Audiometría": "57/audiometria.svg",
-   "Impedanciometría": "57/impedanciometria.svg"
+   "Audiometría": "57/audiometria.svgz",
+   "Impedanciometría": "57/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -380,8 +380,8 @@
  },
  "58": {
   "trae": {
-   "Audiometría": "58/audiometria.svg",
-   "Impedanciometría": "58/impedanciometria.svg"
+   "Audiometría": "58/audiometria.svgz",
+   "Impedanciometría": "58/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -392,8 +392,8 @@
  },
  "59": {
   "trae": {
-   "Audiometría": "59/audiometria.svg",
-   "Impedanciometría": "59/impedanciometria.svg"
+   "Audiometría": "59/audiometria.svgz",
+   "Impedanciometría": "59/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -404,8 +404,8 @@
  },
  "60": {
   "trae": {
-   "Audiometría": "60/audiometria.svg",
-   "Impedanciometría": "60/impedanciometria.svg"
+   "Audiometría": "60/audiometria.svgz",
+   "Impedanciometría": "60/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -417,14 +417,14 @@
    {
     "dias": -60,
     "examen": "Tamizaje",
-    "svg": "60/historia_60_tamizaje.svg"
+    "svg": "60/historia_60_tamizaje.svgz"
    }
   ]
  },
  "61": {
   "trae": {
-   "Audiometría": "61/audiometria.svg",
-   "Impedanciometría": "61/impedanciometria.svg"
+   "Audiometría": "61/audiometria.svgz",
+   "Impedanciometría": "61/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -435,8 +435,8 @@
  },
  "62": {
   "trae": {
-   "Audiometría": "62/audiometria.svg",
-   "Impedanciometría": "62/impedanciometria.svg"
+   "Audiometría": "62/audiometria.svgz",
+   "Impedanciometría": "62/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -447,9 +447,9 @@
  },
  "63": {
   "trae": {
-   "Audiometría": "63/audiometria.svg",
-   "Impedanciometría": "63/impedanciometria.svg",
-   "EOA": "63/eoa.svg"
+   "Audiometría": "63/audiometria.svgz",
+   "Impedanciometría": "63/impedanciometria.svgz",
+   "EOA": "63/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA": [
@@ -461,8 +461,8 @@
  },
  "64": {
   "trae": {
-   "Audiometría": "64/audiometria.svg",
-   "EOA": "64/eoa.svg"
+   "Audiometría": "64/audiometria.svgz",
+   "EOA": "64/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + EOA": [
@@ -473,8 +473,8 @@
  },
  "65": {
   "trae": {
-   "Audiometría": "65/audiometria.svg",
-   "Impedanciometría": "65/impedanciometria.svg"
+   "Audiometría": "65/audiometria.svgz",
+   "Impedanciometría": "65/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -485,9 +485,9 @@
  },
  "66": {
   "trae": {
-   "Audiometría": "66/audiometria.svg",
-   "Impedanciometría": "66/impedanciometria.svg",
-   "VEMP": "66/vemp.svg"
+   "Audiometría": "66/audiometria.svgz",
+   "Impedanciometría": "66/impedanciometria.svgz",
+   "VEMP": "66/vemp.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + VEMP": [
@@ -499,8 +499,8 @@
  },
  "67": {
   "trae": {
-   "Audiometría": "67/audiometria.svg",
-   "Impedanciometría": "67/impedanciometria.svg"
+   "Audiometría": "67/audiometria.svgz",
+   "Impedanciometría": "67/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -511,8 +511,8 @@
  },
  "68": {
   "trae": {
-   "Audiometría": "68/audiometria.svg",
-   "Impedanciometría": "68/impedanciometria.svg"
+   "Audiometría": "68/audiometria.svgz",
+   "Impedanciometría": "68/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -523,8 +523,8 @@
  },
  "69": {
   "trae": {
-   "Audiometría": "69/audiometria.svg",
-   "EOA": "69/eoa.svg"
+   "Audiometría": "69/audiometria.svgz",
+   "EOA": "69/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + EOA": [
@@ -536,27 +536,27 @@
    {
     "dias": -138,
     "examen": "Audiometría",
-    "svg": "69/historia_138_audiometria.svg",
+    "svg": "69/historia_138_audiometria.svgz",
     "revisar": true
    },
    {
     "dias": -138,
     "examen": "EOA",
-    "svg": "69/historia_138_eoa.svg",
+    "svg": "69/historia_138_eoa.svgz",
     "revisar": true
    },
    {
     "dias": -116,
     "examen": "Audiometría",
-    "svg": "69/historia_116_audiometria.svg",
+    "svg": "69/historia_116_audiometria.svgz",
     "revisar": true
    }
   ]
  },
  "70": {
   "trae": {
-   "Audiometría": "70/audiometria.svg",
-   "EOA": "70/eoa.svg"
+   "Audiometría": "70/audiometria.svgz",
+   "EOA": "70/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + EOA": [
@@ -568,14 +568,14 @@
    {
     "dias": -1095,
     "examen": "Tamizaje",
-    "svg": "70/historia_1095_tamizaje.svg"
+    "svg": "70/historia_1095_tamizaje.svgz"
    }
   ]
  },
  "71": {
   "trae": {
-   "Audiometría": "71/audiometria.svg",
-   "Impedanciometría": "71/impedanciometria.svg"
+   "Audiometría": "71/audiometria.svgz",
+   "Impedanciometría": "71/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -586,10 +586,10 @@
  },
  "72": {
   "trae": {
-   "Audiometría": "72/audiometria.svg",
-   "Impedanciometría": "72/impedanciometria.svg",
-   "ECochG": "72/ecochg.svg",
-   "VEMP": "72/vemp.svg"
+   "Audiometría": "72/audiometria.svgz",
+   "Impedanciometría": "72/impedanciometria.svgz",
+   "ECochG": "72/ecochg.svgz",
+   "VEMP": "72/vemp.svgz"
   },
   "por_procedimiento": {
    "ECochG + VEMP": [
@@ -602,9 +602,9 @@
  },
  "73": {
   "trae": {
-   "Audiometría": "73/audiometria.svg",
-   "Impedanciometría": "73/impedanciometria.svg",
-   "EOA": "73/eoa.svg"
+   "Audiometría": "73/audiometria.svgz",
+   "Impedanciometría": "73/impedanciometria.svgz",
+   "EOA": "73/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA": [
@@ -617,20 +617,20 @@
    {
     "dias": -1125,
     "examen": "Tamizaje",
-    "svg": "73/historia_1125_tamizaje.svg"
+    "svg": "73/historia_1125_tamizaje.svgz"
    },
    {
     "dias": -1065,
     "examen": "Impedanciometría",
-    "svg": "73/impedanciometria.svg"
+    "svg": "73/impedanciometria.svgz"
    }
   ]
  },
  "74": {
   "trae": {
-   "Impedanciometría": "74/impedanciometria.svg",
-   "EOA": "74/eoa.svg",
-   "PEATC": "74/peatc.svg"
+   "Impedanciometría": "74/impedanciometria.svgz",
+   "EOA": "74/eoa.svgz",
+   "PEATC": "74/peatc.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC": [
@@ -643,19 +643,19 @@
    {
     "dias": -240,
     "examen": "Tamizaje",
-    "svg": "74/historia_240_tamizaje.svg"
+    "svg": "74/historia_240_tamizaje.svgz"
    },
    {
     "dias": -210,
     "examen": "Tamizaje",
-    "svg": "74/historia_210_tamizaje.svg"
+    "svg": "74/historia_210_tamizaje.svgz"
    }
   ]
  },
  "75": {
   "trae": {
-   "Audiometría": "75/audiometria.svg",
-   "Impedanciometría": "75/impedanciometria.svg"
+   "Audiometría": "75/audiometria.svgz",
+   "Impedanciometría": "75/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -667,23 +667,23 @@
    {
     "dias": -2165,
     "examen": "Tamizaje",
-    "svg": "75/historia_2165_tamizaje.svg"
+    "svg": "75/historia_2165_tamizaje.svgz"
    },
    {
     "dias": -1080,
     "examen": "Audiometría",
-    "svg": "75/audiometria.svg"
+    "svg": "75/audiometria.svgz"
    },
    {
     "dias": -1080,
     "examen": "Impedanciometría",
-    "svg": "75/impedanciometria.svg"
+    "svg": "75/impedanciometria.svgz"
    }
   ]
  },
  "76": {
   "trae": {
-   "Audiometría": "76/audiometria.svg"
+   "Audiometría": "76/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -693,8 +693,8 @@
  },
  "77": {
   "trae": {
-   "Audiometría": "77/audiometria.svg",
-   "VEMP": "77/vemp.svg"
+   "Audiometría": "77/audiometria.svgz",
+   "VEMP": "77/vemp.svgz"
   },
   "por_procedimiento": {
    "Audiometría + VEMP": [
@@ -706,21 +706,21 @@
    {
     "dias": -4380,
     "examen": "Audiometría",
-    "svg": "77/audiometria.svg"
+    "svg": "77/audiometria.svgz"
    },
    {
     "dias": -2190,
     "examen": "Audiometría",
-    "svg": "77/audiometria.svg"
+    "svg": "77/audiometria.svgz"
    }
   ]
  },
  "78": {
   "trae": {
-   "Audiometría": "78/audiometria.svg",
-   "Impedanciometría": "78/impedanciometria.svg",
-   "PEATC": "78/peatc.svg",
-   "VEMP": "78/vemp.svg"
+   "Audiometría": "78/audiometria.svgz",
+   "Impedanciometría": "78/impedanciometria.svgz",
+   "PEATC": "78/peatc.svgz",
+   "VEMP": "78/vemp.svgz"
   },
   "por_procedimiento": {
    "PEATC + VEMP": [
@@ -733,9 +733,9 @@
  },
  "79": {
   "trae": {
-   "Audiometría": "79/audiometria.svg",
-   "Impedanciometría": "79/impedanciometria.svg",
-   "PEATC": "79/peatc.svg"
+   "Audiometría": "79/audiometria.svgz",
+   "Impedanciometría": "79/impedanciometria.svgz",
+   "PEATC": "79/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -747,9 +747,9 @@
  },
  "80": {
   "trae": {
-   "Audiometría": "80/audiometria.svg",
-   "Impedanciometría": "80/impedanciometria.svg",
-   "PEATC": "80/peatc.svg"
+   "Audiometría": "80/audiometria.svgz",
+   "Impedanciometría": "80/impedanciometria.svgz",
+   "PEATC": "80/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -761,9 +761,9 @@
  },
  "81": {
   "trae": {
-   "Audiometría": "81/audiometria.svg",
-   "Impedanciometría": "81/impedanciometria.svg",
-   "PEATC": "81/peatc.svg"
+   "Audiometría": "81/audiometria.svgz",
+   "Impedanciometría": "81/impedanciometria.svgz",
+   "PEATC": "81/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -775,9 +775,9 @@
  },
  "82": {
   "trae": {
-   "Audiometría": "82/audiometria.svg",
-   "Impedanciometría": "82/impedanciometria.svg",
-   "PEATC": "82/peatc.svg"
+   "Audiometría": "82/audiometria.svgz",
+   "Impedanciometría": "82/impedanciometria.svgz",
+   "PEATC": "82/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -789,10 +789,10 @@
  },
  "83": {
   "trae": {
-   "Audiometría": "83/audiometria.svg",
-   "Impedanciometría": "83/impedanciometria.svg",
-   "EOA": "83/eoa.svg",
-   "PEATC": "83/peatc.svg"
+   "Audiometría": "83/audiometria.svgz",
+   "Impedanciometría": "83/impedanciometria.svgz",
+   "EOA": "83/eoa.svgz",
+   "PEATC": "83/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -806,15 +806,15 @@
    {
     "dias": -90,
     "examen": "Audiometría",
-    "svg": "83/audiometria.svg"
+    "svg": "83/audiometria.svgz"
    }
   ]
  },
  "84": {
   "trae": {
-   "Audiometría": "84/audiometria.svg",
-   "Impedanciometría": "84/impedanciometria.svg",
-   "PEATC": "84/peatc.svg"
+   "Audiometría": "84/audiometria.svgz",
+   "Impedanciometría": "84/impedanciometria.svgz",
+   "PEATC": "84/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -826,10 +826,10 @@
  },
  "85": {
   "trae": {
-   "Audiometría": "85/audiometria.svg",
-   "Impedanciometría": "85/impedanciometria.svg",
-   "PEATC": "85/peatc.svg",
-   "VEMP": "85/vemp.svg"
+   "Audiometría": "85/audiometria.svgz",
+   "Impedanciometría": "85/impedanciometria.svgz",
+   "PEATC": "85/peatc.svgz",
+   "VEMP": "85/vemp.svgz"
   },
   "por_procedimiento": {
    "PEATC + VEMP": [
@@ -842,9 +842,9 @@
  },
  "86": {
   "trae": {
-   "Audiometría": "86/audiometria.svg",
-   "Impedanciometría": "86/impedanciometria.svg",
-   "PEATC": "86/peatc.svg"
+   "Audiometría": "86/audiometria.svgz",
+   "Impedanciometría": "86/impedanciometria.svgz",
+   "PEATC": "86/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -856,10 +856,10 @@
  },
  "87": {
   "trae": {
-   "Audiometría": "87/audiometria.svg",
-   "Impedanciometría": "87/impedanciometria.svg",
-   "PEATC": "87/peatc.svg",
-   "VEMP": "87/vemp.svg"
+   "Audiometría": "87/audiometria.svgz",
+   "Impedanciometría": "87/impedanciometria.svgz",
+   "PEATC": "87/peatc.svgz",
+   "VEMP": "87/vemp.svgz"
   },
   "por_procedimiento": {
    "PEATC + VEMP": [
@@ -872,9 +872,9 @@
  },
  "88": {
   "trae": {
-   "Audiometría": "88/audiometria.svg",
-   "Impedanciometría": "88/impedanciometria.svg",
-   "PEATC": "88/peatc.svg"
+   "Audiometría": "88/audiometria.svgz",
+   "Impedanciometría": "88/impedanciometria.svgz",
+   "PEATC": "88/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -886,11 +886,11 @@
  },
  "89": {
   "trae": {
-   "Audiometría": "89/audiometria.svg",
-   "Impedanciometría": "89/impedanciometria.svg",
-   "EOA": "89/eoa.svg",
-   "PEATC": "89/peatc.svg",
-   "Corticales": "89/corticales.svg"
+   "Audiometría": "89/audiometria.svgz",
+   "Impedanciometría": "89/impedanciometria.svgz",
+   "EOA": "89/eoa.svgz",
+   "PEATC": "89/peatc.svgz",
+   "Corticales": "89/corticales.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC + Corticales": [
@@ -905,17 +905,17 @@
    {
     "dias": -5470,
     "examen": "Tamizaje",
-    "svg": "89/historia_5470_tamizaje.svg"
+    "svg": "89/historia_5470_tamizaje.svgz"
    }
   ]
  },
  "90": {
   "trae": {
-   "Audiometría": "90/audiometria.svg",
-   "Impedanciometría": "90/impedanciometria.svg",
-   "EOA": "90/eoa.svg",
-   "PEATC": "90/peatc.svg",
-   "VEMP": "90/vemp.svg"
+   "Audiometría": "90/audiometria.svgz",
+   "Impedanciometría": "90/impedanciometria.svgz",
+   "EOA": "90/eoa.svgz",
+   "PEATC": "90/peatc.svgz",
+   "VEMP": "90/vemp.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC + VEMP": [
@@ -929,10 +929,10 @@
  },
  "91": {
   "trae": {
-   "Audiometría": "91/audiometria.svg",
-   "Impedanciometría": "91/impedanciometria.svg",
-   "EOA": "91/eoa.svg",
-   "PEATC": "91/peatc.svg"
+   "Audiometría": "91/audiometria.svgz",
+   "Impedanciometría": "91/impedanciometria.svgz",
+   "EOA": "91/eoa.svgz",
+   "PEATC": "91/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC": [
@@ -945,10 +945,10 @@
  },
  "92": {
   "trae": {
-   "Audiometría": "92/audiometria.svg",
-   "Impedanciometría": "92/impedanciometria.svg",
-   "EOA": "92/eoa.svg",
-   "PEATC": "92/peatc.svg"
+   "Audiometría": "92/audiometria.svgz",
+   "Impedanciometría": "92/impedanciometria.svgz",
+   "EOA": "92/eoa.svgz",
+   "PEATC": "92/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC": [
@@ -961,10 +961,10 @@
  },
  "93": {
   "trae": {
-   "Audiometría": "93/audiometria.svg",
-   "Impedanciometría": "93/impedanciometria.svg",
-   "EOA": "93/eoa.svg",
-   "PEATC": "93/peatc.svg"
+   "Audiometría": "93/audiometria.svgz",
+   "Impedanciometría": "93/impedanciometria.svgz",
+   "EOA": "93/eoa.svgz",
+   "PEATC": "93/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -977,8 +977,8 @@
  },
  "94": {
   "trae": {
-   "EOA": "94/eoa.svg",
-   "PEATC": "94/peatc.svg"
+   "EOA": "94/eoa.svgz",
+   "PEATC": "94/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -989,8 +989,8 @@
  },
  "95": {
   "trae": {
-   "EOA": "95/eoa.svg",
-   "PEATC": "95/peatc.svg"
+   "EOA": "95/eoa.svgz",
+   "PEATC": "95/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1001,9 +1001,9 @@
  },
  "96": {
   "trae": {
-   "Impedanciometría": "96/impedanciometria.svg",
-   "EOA": "96/eoa.svg",
-   "PEATC": "96/peatc.svg"
+   "Impedanciometría": "96/impedanciometria.svgz",
+   "EOA": "96/eoa.svgz",
+   "PEATC": "96/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1016,15 +1016,15 @@
    {
     "dias": -28,
     "examen": "Tamizaje",
-    "svg": "96/historia_28_tamizaje.svg"
+    "svg": "96/historia_28_tamizaje.svgz"
    }
   ]
  },
  "97": {
   "trae": {
-   "Audiometría": "97/audiometria.svg",
-   "Impedanciometría": "97/impedanciometria.svg",
-   "PEATC": "97/peatc.svg"
+   "Audiometría": "97/audiometria.svgz",
+   "Impedanciometría": "97/impedanciometria.svgz",
+   "PEATC": "97/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + PEATC": [
@@ -1036,8 +1036,8 @@
  },
  "98": {
   "trae": {
-   "Audiometría": "98/audiometria.svg",
-   "Impedanciometría": "98/impedanciometria.svg"
+   "Audiometría": "98/audiometria.svgz",
+   "Impedanciometría": "98/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -1048,9 +1048,9 @@
  },
  "99": {
   "trae": {
-   "Audiometría": "99/audiometria.svg",
-   "Impedanciometría": "99/impedanciometria.svg",
-   "PEATC": "99/peatc.svg"
+   "Audiometría": "99/audiometria.svgz",
+   "Impedanciometría": "99/impedanciometria.svgz",
+   "PEATC": "99/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + PEATC": [
@@ -1062,8 +1062,8 @@
  },
  "100": {
   "trae": {
-   "Audiometría": "100/audiometria.svg",
-   "Impedanciometría": "100/impedanciometria.svg"
+   "Audiometría": "100/audiometria.svgz",
+   "Impedanciometría": "100/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -1074,9 +1074,9 @@
  },
  "101": {
   "trae": {
-   "Audiometría": "101/audiometria.svg",
-   "Impedanciometría": "101/impedanciometria.svg",
-   "PEATC": "101/peatc.svg"
+   "Audiometría": "101/audiometria.svgz",
+   "Impedanciometría": "101/impedanciometria.svgz",
+   "PEATC": "101/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + PEATC": [
@@ -1088,8 +1088,8 @@
  },
  "102": {
   "trae": {
-   "EOA": "102/eoa.svg",
-   "PEATC": "102/peatc.svg"
+   "EOA": "102/eoa.svgz",
+   "PEATC": "102/peatc.svgz"
   },
   "por_procedimiento": {
    "EOA + PEATC": [
@@ -1100,8 +1100,8 @@
  },
  "103": {
   "trae": {
-   "EOA": "103/eoa.svg",
-   "PEATC": "103/peatc.svg"
+   "EOA": "103/eoa.svgz",
+   "PEATC": "103/peatc.svgz"
   },
   "por_procedimiento": {
    "EOA + PEATC": [
@@ -1112,8 +1112,8 @@
  },
  "104": {
   "trae": {
-   "EOA": "104/eoa.svg",
-   "PEATC": "104/peatc.svg"
+   "EOA": "104/eoa.svgz",
+   "PEATC": "104/peatc.svgz"
   },
   "por_procedimiento": {
    "EOA + PEATC": [
@@ -1124,9 +1124,9 @@
  },
  "105": {
   "trae": {
-   "EOA": "105/eoa.svg",
-   "PEATC": "105/peatc.svg",
-   "Impedanciometría": "105/impedanciometria.svg"
+   "EOA": "105/eoa.svgz",
+   "PEATC": "105/peatc.svgz",
+   "Impedanciometría": "105/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC": [
@@ -1139,15 +1139,15 @@
    {
     "dias": -18,
     "examen": "Tamizaje",
-    "svg": "105/historia_18_tamizaje.svg"
+    "svg": "105/historia_18_tamizaje.svgz"
    }
   ]
  },
  "106": {
   "trae": {
-   "Impedanciometría": "106/impedanciometria.svg",
-   "EOA": "106/eoa.svg",
-   "PEATC": "106/peatc.svg"
+   "Impedanciometría": "106/impedanciometria.svgz",
+   "EOA": "106/eoa.svgz",
+   "PEATC": "106/peatc.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC": [
@@ -1160,20 +1160,20 @@
    {
     "dias": -82,
     "examen": "Tamizaje",
-    "svg": "106/historia_82_tamizaje.svg"
+    "svg": "106/historia_82_tamizaje.svgz"
    },
    {
     "dias": -54,
     "examen": "Tamizaje",
-    "svg": "106/historia_54_tamizaje.svg"
+    "svg": "106/historia_54_tamizaje.svgz"
    }
   ]
  },
  "107": {
   "trae": {
-   "Impedanciometría": "107/impedanciometria.svg",
-   "EOA": "107/eoa.svg",
-   "PEATC": "107/peatc.svg"
+   "Impedanciometría": "107/impedanciometria.svgz",
+   "EOA": "107/eoa.svgz",
+   "PEATC": "107/peatc.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC": [
@@ -1186,15 +1186,15 @@
    {
     "dias": -82,
     "examen": "Tamizaje",
-    "svg": "107/historia_82_tamizaje.svg"
+    "svg": "107/historia_82_tamizaje.svgz"
    }
   ]
  },
  "108": {
   "trae": {
-   "Impedanciometría": "108/impedanciometria.svg",
-   "EOA": "108/eoa.svg",
-   "PEATC": "108/peatc.svg"
+   "Impedanciometría": "108/impedanciometria.svgz",
+   "EOA": "108/eoa.svgz",
+   "PEATC": "108/peatc.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC": [
@@ -1207,15 +1207,15 @@
    {
     "dias": -75,
     "examen": "Tamizaje",
-    "svg": "108/historia_75_tamizaje.svg"
+    "svg": "108/historia_75_tamizaje.svgz"
    }
   ]
  },
  "109": {
   "trae": {
-   "Impedanciometría": "109/impedanciometria.svg",
-   "EOA": "109/eoa.svg",
-   "PEATC": "109/peatc.svg"
+   "Impedanciometría": "109/impedanciometria.svgz",
+   "EOA": "109/eoa.svgz",
+   "PEATC": "109/peatc.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC": [
@@ -1228,15 +1228,15 @@
    {
     "dias": -70,
     "examen": "Tamizaje",
-    "svg": "109/historia_70_tamizaje.svg"
+    "svg": "109/historia_70_tamizaje.svgz"
    }
   ]
  },
  "110": {
   "trae": {
-   "Audiometría": "110/audiometria.svg",
-   "Impedanciometría": "110/impedanciometria.svg",
-   "PEATC": "110/peatc.svg"
+   "Audiometría": "110/audiometria.svgz",
+   "Impedanciometría": "110/impedanciometria.svgz",
+   "PEATC": "110/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1249,14 +1249,14 @@
    {
     "dias": -14,
     "examen": "Audiometría",
-    "svg": "110/audiometria.svg"
+    "svg": "110/audiometria.svgz"
    }
   ]
  },
  "111": {
   "trae": {
-   "Audiometría": "111/audiometria.svg",
-   "PEATC": "111/peatc.svg"
+   "Audiometría": "111/audiometria.svgz",
+   "PEATC": "111/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1268,14 +1268,14 @@
    {
     "dias": -60,
     "examen": "Audiometría",
-    "svg": "111/audiometria.svg"
+    "svg": "111/audiometria.svgz"
    }
   ]
  },
  "112": {
   "trae": {
-   "Audiometría": "112/audiometria.svg",
-   "PEATC": "112/peatc.svg"
+   "Audiometría": "112/audiometria.svgz",
+   "PEATC": "112/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1286,9 +1286,9 @@
  },
  "113": {
   "trae": {
-   "Audiometría": "113/audiometria.svg",
-   "Impedanciometría": "113/impedanciometria.svg",
-   "PEATC": "113/peatc.svg"
+   "Audiometría": "113/audiometria.svgz",
+   "Impedanciometría": "113/impedanciometria.svgz",
+   "PEATC": "113/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1300,9 +1300,9 @@
  },
  "114": {
   "trae": {
-   "Audiometría": "114/audiometria.svg",
-   "Impedanciometría": "114/impedanciometria.svg",
-   "PEATC": "114/peatc.svg"
+   "Audiometría": "114/audiometria.svgz",
+   "Impedanciometría": "114/impedanciometria.svgz",
+   "PEATC": "114/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1314,10 +1314,10 @@
  },
  "115": {
   "trae": {
-   "Impedanciometría": "115/impedanciometria.svg",
-   "EOA": "115/eoa.svg",
-   "PEATC": "115/peatc.svg",
-   "Corticales": "115/corticales.svg"
+   "Impedanciometría": "115/impedanciometria.svgz",
+   "EOA": "115/eoa.svgz",
+   "PEATC": "115/peatc.svgz",
+   "Corticales": "115/corticales.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA + PEATC + Corticales": [
@@ -1330,10 +1330,10 @@
  },
  "116": {
   "trae": {
-   "Audiometría": "116/audiometria.svg",
-   "Impedanciometría": "116/impedanciometria.svg",
-   "EOA": "116/eoa.svg",
-   "PEATC": "116/peatc.svg"
+   "Audiometría": "116/audiometria.svgz",
+   "Impedanciometría": "116/impedanciometria.svgz",
+   "EOA": "116/eoa.svgz",
+   "PEATC": "116/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC": [
@@ -1347,15 +1347,15 @@
    {
     "dias": -2200,
     "examen": "Audiometría",
-    "svg": "116/historia_2200_audiometria.svg",
+    "svg": "116/historia_2200_audiometria.svgz",
     "revisar": true
    }
   ]
  },
  "117": {
   "trae": {
-   "Impedanciometría": "117/impedanciometria.svg",
-   "EOA": "117/eoa.svg"
+   "Impedanciometría": "117/impedanciometria.svgz",
+   "EOA": "117/eoa.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría + EOA": [
@@ -1367,16 +1367,16 @@
    {
     "dias": -25,
     "examen": "Tamizaje",
-    "svg": "117/historia_25_tamizaje.svg"
+    "svg": "117/historia_25_tamizaje.svgz"
    }
   ]
  },
  "118": {
   "trae": {
-   "Audiometría": "118/audiometria.svg",
-   "Impedanciometría": "118/impedanciometria.svg",
-   "EOA": "118/eoa.svg",
-   "PEATC": "118/peatc.svg"
+   "Audiometría": "118/audiometria.svgz",
+   "Impedanciometría": "118/impedanciometria.svgz",
+   "EOA": "118/eoa.svgz",
+   "PEATC": "118/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC": [
@@ -1389,10 +1389,10 @@
  },
  "119": {
   "trae": {
-   "Audiometría": "119/audiometria.svg",
-   "Impedanciometría": "119/impedanciometria.svg",
-   "VEMP": "119/vemp.svg",
-   "ECochG": "119/ecochg.svg"
+   "Audiometría": "119/audiometria.svgz",
+   "Impedanciometría": "119/impedanciometria.svgz",
+   "VEMP": "119/vemp.svgz",
+   "ECochG": "119/ecochg.svgz"
   },
   "por_procedimiento": {
    "VEMP": [
@@ -1405,9 +1405,9 @@
  },
  "120": {
   "trae": {
-   "Audiometría": "120/audiometria.svg",
-   "Impedanciometría": "120/impedanciometria.svg",
-   "VEMP": "120/vemp.svg"
+   "Audiometría": "120/audiometria.svgz",
+   "Impedanciometría": "120/impedanciometria.svgz",
+   "VEMP": "120/vemp.svgz"
   },
   "por_procedimiento": {
    "VEMP": [
@@ -1419,9 +1419,9 @@
  },
  "121": {
   "trae": {
-   "Audiometría": "121/audiometria.svg",
-   "Impedanciometría": "121/impedanciometria.svg",
-   "VEMP": "121/vemp.svg"
+   "Audiometría": "121/audiometria.svgz",
+   "Impedanciometría": "121/impedanciometria.svgz",
+   "VEMP": "121/vemp.svgz"
   },
   "por_procedimiento": {
    "VEMP": [
@@ -1433,9 +1433,9 @@
  },
  "122": {
   "trae": {
-   "Audiometría": "122/audiometria.svg",
-   "Impedanciometría": "122/impedanciometria.svg",
-   "VEMP": "122/vemp.svg"
+   "Audiometría": "122/audiometria.svgz",
+   "Impedanciometría": "122/impedanciometria.svgz",
+   "VEMP": "122/vemp.svgz"
   },
   "por_procedimiento": {
    "VEMP": [
@@ -1447,7 +1447,7 @@
  },
  "123": {
   "trae": {
-   "Audiometría": "123/audiometria.svg"
+   "Audiometría": "123/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1457,7 +1457,7 @@
  },
  "124": {
   "trae": {
-   "Audiometría": "124/audiometria.svg"
+   "Audiometría": "124/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1467,7 +1467,7 @@
  },
  "125": {
   "trae": {
-   "Audiometría": "125/audiometria.svg"
+   "Audiometría": "125/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1477,8 +1477,8 @@
  },
  "126": {
   "trae": {
-   "Audiometría": "126/audiometria.svg",
-   "Impedanciometría": "126/impedanciometria.svg"
+   "Audiometría": "126/audiometria.svgz",
+   "Impedanciometría": "126/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -1489,9 +1489,9 @@
  },
  "127": {
   "trae": {
-   "Audiometría": "127/audiometria.svg",
-   "Impedanciometría": "127/impedanciometria.svg",
-   "EOA": "127/eoa.svg"
+   "Audiometría": "127/audiometria.svgz",
+   "Impedanciometría": "127/impedanciometria.svgz",
+   "EOA": "127/eoa.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA": [
@@ -1503,7 +1503,7 @@
  },
  "128": {
   "trae": {
-   "Audiometría": "128/audiometria.svg"
+   "Audiometría": "128/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1513,10 +1513,10 @@
  },
  "129": {
   "trae": {
-   "Audiometría": "129/audiometria.svg",
-   "Impedanciometría": "129/impedanciometria.svg",
-   "EOA": "129/eoa.svg",
-   "Corticales": "129/corticales.svg"
+   "Audiometría": "129/audiometria.svgz",
+   "Impedanciometría": "129/impedanciometria.svgz",
+   "EOA": "129/eoa.svgz",
+   "Corticales": "129/corticales.svgz"
   },
   "por_procedimiento": {
    "Corticales": [
@@ -1529,9 +1529,9 @@
  },
  "130": {
   "trae": {
-   "Audiometría": "130/audiometria.svg",
-   "Impedanciometría": "130/impedanciometria.svg",
-   "Corticales": "130/corticales.svg"
+   "Audiometría": "130/audiometria.svgz",
+   "Impedanciometría": "130/impedanciometria.svgz",
+   "Corticales": "130/corticales.svgz"
   },
   "por_procedimiento": {
    "Corticales": [
@@ -1544,15 +1544,15 @@
    {
     "dias": -90,
     "examen": "Audiometría",
-    "svg": "130/audiometria.svg"
+    "svg": "130/audiometria.svgz"
    }
   ]
  },
  "131": {
   "trae": {
-   "Audiometría": "131/audiometria.svg",
-   "Impedanciometría": "131/impedanciometria.svg",
-   "Corticales": "131/corticales.svg"
+   "Audiometría": "131/audiometria.svgz",
+   "Impedanciometría": "131/impedanciometria.svgz",
+   "Corticales": "131/corticales.svgz"
   },
   "por_procedimiento": {
    "Corticales": [
@@ -1564,8 +1564,8 @@
  },
  "132": {
   "trae": {
-   "Audiometría": "132/audiometria.svg",
-   "Impedanciometría": "132/impedanciometria.svg"
+   "Audiometría": "132/audiometria.svgz",
+   "Impedanciometría": "132/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -1577,25 +1577,25 @@
    {
     "dias": -30,
     "examen": "Audiometría",
-    "svg": "132/audiometria.svg"
+    "svg": "132/audiometria.svgz"
    },
    {
     "dias": -2920,
     "examen": "Audiometría",
-    "svg": "132/historia_2920_audiometria.svg",
+    "svg": "132/historia_2920_audiometria.svgz",
     "revisar": true
    },
    {
     "dias": -2555,
     "examen": "Audiometría",
-    "svg": "132/historia_2555_audiometria.svg",
+    "svg": "132/historia_2555_audiometria.svgz",
     "revisar": true
    }
   ]
  },
  "133": {
   "trae": {
-   "Audiometría": "133/audiometria.svg"
+   "Audiometría": "133/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1606,25 +1606,25 @@
    {
     "dias": -1095,
     "examen": "Audiometría",
-    "svg": "133/audiometria.svg"
+    "svg": "133/audiometria.svgz"
    },
    {
     "dias": -365,
     "examen": "Audiometría",
-    "svg": "133/audiometria.svg"
+    "svg": "133/audiometria.svgz"
    },
    {
     "dias": -14,
     "examen": "Audiometría",
-    "svg": "133/historia_14_audiometria.svg",
+    "svg": "133/historia_14_audiometria.svgz",
     "revisar": true
    }
   ]
  },
  "134": {
   "trae": {
-   "Audiometría": "134/audiometria.svg",
-   "Impedanciometría": "134/impedanciometria.svg"
+   "Audiometría": "134/audiometria.svgz",
+   "Impedanciometría": "134/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -1636,17 +1636,17 @@
    {
     "dias": -1,
     "examen": "Audiometría",
-    "svg": "134/audiometria.svg"
+    "svg": "134/audiometria.svgz"
    }
   ]
  },
  "135": {
   "trae": {
-   "Audiometría": "135/audiometria.svg",
-   "Impedanciometría": "135/impedanciometria.svg",
-   "EOA": "135/eoa.svg",
-   "PEATC": "135/peatc.svg",
-   "Corticales": "135/corticales.svg"
+   "Audiometría": "135/audiometria.svgz",
+   "Impedanciometría": "135/impedanciometria.svgz",
+   "EOA": "135/eoa.svgz",
+   "PEATC": "135/peatc.svgz",
+   "Corticales": "135/corticales.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + EOA + PEATC + Corticales": [
@@ -1660,10 +1660,10 @@
  },
  "136": {
   "trae": {
-   "Audiometría": "136/audiometria.svg",
-   "Impedanciometría": "136/impedanciometria.svg",
-   "ECochG": "136/ecochg.svg",
-   "PEATC": "136/peatc.svg"
+   "Audiometría": "136/audiometria.svgz",
+   "Impedanciometría": "136/impedanciometria.svgz",
+   "ECochG": "136/ecochg.svgz",
+   "PEATC": "136/peatc.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + PEATC + ECochG": [
@@ -1677,20 +1677,20 @@
    {
     "dias": -30,
     "examen": "Audiometría",
-    "svg": "136/audiometria.svg"
+    "svg": "136/audiometria.svgz"
    },
    {
     "dias": -1100,
     "examen": "Audiometría",
-    "svg": "136/historia_1100_audiometria.svg",
+    "svg": "136/historia_1100_audiometria.svgz",
     "revisar": true
    }
   ]
  },
  "137": {
   "trae": {
-   "Audiometría": "137/audiometria.svg",
-   "Impedanciometría": "137/impedanciometria.svg"
+   "Audiometría": "137/audiometria.svgz",
+   "Impedanciometría": "137/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría": [
@@ -1702,13 +1702,13 @@
    {
     "dias": -2920,
     "examen": "Audiometría",
-    "svg": "137/audiometria.svg"
+    "svg": "137/audiometria.svgz"
    }
   ]
  },
  "139": {
   "trae": {
-   "Audiometría": "139/audiometria.svg"
+   "Audiometría": "139/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1718,7 +1718,7 @@
  },
  "140": {
   "trae": {
-   "Impedanciometría": "140/impedanciometria.svg"
+   "Impedanciometría": "140/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría": [
@@ -1728,7 +1728,7 @@
  },
  "141": {
   "trae": {
-   "Impedanciometría": "141/impedanciometria.svg"
+   "Impedanciometría": "141/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría": [
@@ -1738,7 +1738,7 @@
  },
  "142": {
   "trae": {
-   "Impedanciometría": "142/impedanciometria.svg"
+   "Impedanciometría": "142/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Impedanciometría": [
@@ -1749,18 +1749,18 @@
    {
     "dias": -58,
     "examen": "Tamizaje",
-    "svg": "142/historia_58_tamizaje.svg"
+    "svg": "142/historia_58_tamizaje.svgz"
    },
    {
     "dias": -38,
     "examen": "Tamizaje",
-    "svg": "142/historia_38_tamizaje.svg"
+    "svg": "142/historia_38_tamizaje.svgz"
    }
   ]
  },
  "143": {
   "trae": {
-   "Audiometría": "143/audiometria.svg"
+   "Audiometría": "143/audiometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría": [
@@ -1771,13 +1771,13 @@
    {
     "dias": -1460,
     "examen": "Tamizaje",
-    "svg": "143/historia_1460_tamizaje.svg"
+    "svg": "143/historia_1460_tamizaje.svgz"
    }
   ]
  },
  "144": {
   "trae": {
-   "EOA": "144/eoa.svg"
+   "EOA": "144/eoa.svgz"
   },
   "por_procedimiento": {
    "EOA": [
@@ -1787,7 +1787,7 @@
  },
  "145": {
   "trae": {
-   "PEATC": "145/peatc.svg"
+   "PEATC": "145/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1798,13 +1798,13 @@
    {
     "dias": -84,
     "examen": "Tamizaje",
-    "svg": "145/historia_84_tamizaje.svg"
+    "svg": "145/historia_84_tamizaje.svgz"
    }
   ]
  },
  "146": {
   "trae": {
-   "PEATC": "146/peatc.svg"
+   "PEATC": "146/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1815,13 +1815,13 @@
    {
     "dias": -30,
     "examen": "Audiometría",
-    "svg": "146/historia_30_audiometria.svg"
+    "svg": "146/historia_30_audiometria.svgz"
    }
   ]
  },
  "147": {
   "trae": {
-   "PEATC": "147/peatc.svg"
+   "PEATC": "147/peatc.svgz"
   },
   "por_procedimiento": {
    "PEATC": [
@@ -1831,9 +1831,9 @@
  },
  "148": {
   "trae": {
-   "PEATC": "148/peatc.svg",
-   "Impedanciometría": "148/impedanciometria.svg",
-   "EOA": "148/eoa.svg"
+   "PEATC": "148/peatc.svgz",
+   "Impedanciometría": "148/impedanciometria.svgz",
+   "EOA": "148/eoa.svgz"
   },
   "por_procedimiento": {
    "ASSR": [
@@ -1846,20 +1846,20 @@
    {
     "dias": -120,
     "examen": "Tamizaje",
-    "svg": "148/historia_120_tamizaje.svg"
+    "svg": "148/historia_120_tamizaje.svgz"
    },
    {
     "dias": -100,
     "examen": "PEATC",
-    "svg": "148/peatc.svg"
+    "svg": "148/peatc.svgz"
    }
   ]
  },
  "149": {
   "trae": {
-   "PEATC": "149/peatc.svg",
-   "Impedanciometría": "149/impedanciometria.svg",
-   "EOA": "149/eoa.svg"
+   "PEATC": "149/peatc.svgz",
+   "Impedanciometría": "149/impedanciometria.svgz",
+   "EOA": "149/eoa.svgz"
   },
   "por_procedimiento": {
    "ASSR": [
@@ -1871,9 +1871,9 @@
  },
  "150": {
   "trae": {
-   "Audiometría": "150/audiometria.svg",
-   "PEATC": "150/peatc.svg",
-   "Impedanciometría": "150/impedanciometria.svg"
+   "Audiometría": "150/audiometria.svgz",
+   "PEATC": "150/peatc.svgz",
+   "Impedanciometría": "150/impedanciometria.svgz"
   },
   "por_procedimiento": {
    "Audiometría + Impedanciometría + PEATC + ASSR": [

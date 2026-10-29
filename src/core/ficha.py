@@ -123,6 +123,27 @@ EN_PROCEDIMIENTO = {"Audiometría": "audiometr", "Impedanciometría": "impedanci
                     "AABR": "aabr", "PEATC": "peatc", "ECochG": "ecochg", "VEMP": "vemp",
                     "Corticales": "cortical"}
 _indice = None
+# Con chat, los informes que trae el paciente salen en la ficha recién cuando
+# se los entrega (se los pidieron en el chat, ver LlmConfig::separarEntrega):
+# pedirlos es parte de la anamnesis. Sin chat (sin cuenta, o un curso sin el
+# módulo) no hay a quién pedírselos y salen desde el principio. main lo pone
+# al iniciar sesión.
+entrega_por_chat = False
+_entregados = {}        # ficha -> {examen}, mientras dura la atención
+
+
+def registrar_entrega(case_id, examenes):
+    _entregados.setdefault(str(case_id), set()).update(examenes)
+
+
+def olvidar_entregas(case_id):
+    """Atención nueva: el paciente vuelve a tener sus papeles en la mano."""
+    _entregados.pop(str(case_id), None)
+
+
+def ruta_de_lo_que_trae(case_id, examen):
+    ruta = indice_previos().get(str(case_id), {}).get("trae", {}).get(examen)
+    return PREVIOS_DIR / ruta if ruta else None
 
 
 def indice_previos():
@@ -148,7 +169,7 @@ def _ficha_de(row, caso):
     return str(case_id) if case_id else None
 
 
-def examenes_que_trae(row, caso):
+def examenes_que_trae(row, caso, todos=False):
     """[(examen, ruta)] de lo que el paciente llega con hecho, en orden.
 
     Solo en la práctica libre, y solo lo que su procedimiento no nombra: el
@@ -159,6 +180,9 @@ def examenes_que_trae(row, caso):
 
     Si viene a otoscopía no trae nada: todo lo demás va después de mirarle
     el oído.
+
+    Con chat, solo lo que ya entregó (`todos`: lo que trae, se lo haya
+    entregado o no: lo que sabe el paciente, o una atención ya cerrada).
     """
     if getattr(row, "practice_id", None) is None:
         return []
@@ -176,9 +200,13 @@ def examenes_que_trae(row, caso):
     # Lo que ya cuenta su historia (el PEAT que le hicieron hace tres meses)
     # tiene su hoja en esa línea: no se repite como algo que trae.
     en_la_historia = {h["examen"] for h in hojas.get("historia", [])}
-    return [(examen, PREVIOS_DIR / trae[examen]) for examen, clave in EN_PROCEDIMIENTO.items()
-            if examen in trae and examen not in en_la_historia and clave not in procedimiento
-            and (PREVIOS_DIR / trae[examen]).is_file()]
+    lista = [(examen, PREVIOS_DIR / trae[examen]) for examen, clave in EN_PROCEDIMIENTO.items()
+             if examen in trae and examen not in en_la_historia and clave not in procedimiento
+             and (PREVIOS_DIR / trae[examen]).is_file()]
+    if entrega_por_chat and not todos:
+        dados = _entregados.get(_ficha_de(row, caso) or "", set())
+        lista = [(e, r) for e, r in lista if e in dados]
+    return lista
 
 
 def audiometria_previa(row, caso):
@@ -203,10 +231,10 @@ def _enlace_a(examen, ruta):
     return (f"Ver {_nombre(examen)}", f"previo:{ruta.relative_to(PREVIOS_DIR).as_posix()}")
 
 
-def entrada_lo_que_trae(row, caso, historia_clinica):
+def entrada_lo_que_trae(row, caso, historia_clinica, todos=False):
     """(días, texto, enlaces) de la entrada "Audiometría e impedanciometría.
     Trae los informes.", o None si no trae nada."""
-    trae = examenes_que_trae(row, caso)
+    trae = examenes_que_trae(row, caso, todos)
     if not trae:
         return None
     nombres = _y([_nombre(e) for e, _ in trae])
@@ -320,7 +348,7 @@ _EXAMEN_DE_ARCHIVO = {"audiometria": "Audiometría", "impedanciometria": "Impeda
 
 
 def abrir_enlace(url, editor):
-    """Un enlace de la ficha: "previo:<ficha>/<hoja>.svg" abre esa hoja en su
+    """Un enlace de la ficha: "previo:<ficha>/<hoja>.svgz" abre esa hoja en su
     subventana del MDI (main.abrir_previo)."""
     if url.scheme() != "previo":
         return
@@ -424,7 +452,7 @@ def edad_de_rut(rut):
         return None
 
 
-def render_ficha_html(row, caso, shedule, username, is_admin):
+def render_ficha_html(row, caso, shedule, username, is_admin, todos=False):
     """Arma el HTML de la ficha clínica para `row` (AgendaEntry) + `caso`
     (dict del caso clínico) -- datos del paciente, puntualidad de esta cita
     puntual y el historial de atenciones cerradas del paciente."""
@@ -470,7 +498,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     # Antes quedaba la llave a la vista, con "sin fecha" al lado.
     fecha_base = (row.fecha if parse_fecha_agenda(row.fecha).isValid()
                   else QDate.currentDate().toString("dd-MM-yy"))
-    trae = entrada_lo_que_trae(row, caso, historia_clinica)
+    trae = entrada_lo_que_trae(row, caso, historia_clinica, todos)
     previos = [trae] if trae else []
     entradas = linea_tiempo(historia_clinica, fecha_base,
                             historial_atenciones(shedule, row.rut, username, is_admin,

@@ -7010,3 +7010,18 @@ Resumen para leer: `docs/audiometria_previa.md`.
 - **Chat:** la app manda `trae` (lista) en vez de `trae_audiometria`; el
   backend acepta los dos. `LlmConfig::EXAMEN_PREVIO` dice cada examen en
   palabras de paciente.
+
+## Los informes que trae el paciente se piden en el chat (2026-10-29)
+
+- Con cuenta y el módulo de chat, lo que el paciente trae no está en la ficha
+  hasta que lo entrega: el alumno se lo pide en el chat. El prompt le dice al
+  modelo que, al entregar, cierre con `[ENTREGA: Audiometría, …]` (los nombres
+  que manda la app en `trae`); `LlmConfig::separarEntrega` saca la marca del
+  texto y devuelve `entrega`, filtrada a lo que trae (acepta sin tildes y
+  "todos"). La app pone los papeles en la conversación (un clic abre la hoja)
+  y en la ficha (`core.ficha.registrar_entrega`), solo en la memoria de la
+  atención: una atención nueva o retomada los olvida, como el chat.
+- Sin chat (sin cuenta, o un curso sin el módulo CHAT: `entrega_por_chat`)
+  salen desde el principio. "Mis pacientes" (atención cerrada) los muestra
+  enteros. Las hojas de la historia no se piden: son el registro del caso.
+- Hojas en `.svgz` (gzip con mtime 0): 1,7 MB en vez de 8,5.
