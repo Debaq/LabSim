@@ -48,18 +48,32 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 
 ## Fases
 
-- [ ] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
+- [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
       el botón del admin revienta con KeyError.
-- [ ] **F1. Modelo de RinoSim en Python** (`src/nasal/`): `modelo.py`,
+- [x] **F1. Modelo de RinoSim en Python** (`src/nasal/`): `modelo.py`,
       `rinomanometria.py`, `rinometria.py`, `azar.py` (mulberry32 + FNV-1a,
-      idéntico al JS). Pruebas: las de RinoSim portadas y la equivalencia
-      contra números generados con node.
-- [ ] **F2. Rinomanometría y rinometría acústica** como equipos: sello,
-      medir FND/FNI, vasoconstrictor, errores de técnica, curva en cuatro
-      cuadrantes, tabla a 75/150 Pa, Broms; calibrar, tres registros, MCA1 y
-      MCA2. Informe con autosave como los demás.
-- [ ] **F3. Caso nasal en el backend:** ficha "Nariz" en `case_create.php`
+      idéntico al JS). Pruebas: las de RinoSim portadas
+      (`tests/test_nasal_{modelo,rinomanometria,rinometria}.py`) y la
+      equivalencia contra el JS (`tests/test_nasal_equivalencia.py`, máx.
+      3e-12 relativo; regenerar con `node scripts/nasal/exportar_referencia.mjs
+      tests/data/nasal_referencia.json`). Seis rarezas del JS anotadas en el
+      encabezado de cada archivo, portadas tal cual.
+- [x] **F2. Rinomanometría y rinometría acústica** como equipos
+      (`nasal/equipos.py`, `nasal/graficos.py`, `nasal/sesion.py`): sello,
+      medir FND/FNI, vasoconstrictor, errores de técnica "simulados" a mano,
+      curva en cuatro cuadrantes, resistencia según la presión, tabla a
+      75/150 Pa, Broms; calibrar, tres registros, MCA1 y MCA2, cambio con VC.
+      Las dos ventanas comparten la nariz de la atención (el VC de una vale
+      para la otra) y el ciclo nasal corre con el reloj. "Lo que el equipo no
+      sabe" solo para docente/admin. La medición corre en `hilos.en_fondo`
+      (una fosa de RM tarda ~0,7 s). Probado a 1366 y 1024 de ancho
+      (`tests/test_nasal_equipos.py`). **Sin informe todavía:** sumar los
+      tipos a `reports.tipo` es una migración (CHECK en la tabla); va en F3.
+- [ ] **F3. Caso nasal en el backend:** tipos de informe `RINOMANOMETRIA` y
+      `RINOMETRIA` (migración del CHECK de `reports.tipo` con cuidado, ver
+      § Auditoría de estabilidad en decisiones.md) y `report_job` de los dos
+      equipos; ficha "Nariz" en `case_create.php`
       (los parámetros de RinoSim con sus cuadros de ejemplo como punto de
       partida), validación en `CaseForm`, y los pacientes de los caps. 35 y
       36 cargados con su bloque `NASAL` (fuera de la práctica libre).

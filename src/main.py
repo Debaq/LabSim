@@ -1193,7 +1193,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
         for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr",
-                     "subw_aabr", "subw_eoas", "subw_vemp"):
+                     "subw_aabr", "subw_eoas", "subw_vemp", "subw_rm", "subw_ra"):
             frame = getattr(self, attr, None)
             if frame is None:
                 continue
@@ -1219,6 +1219,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         from abr.AbrMainWindow import AbrMainWindow
         from audiometria import Audiometer, ListWords
         from impedanciometria import Z
+        from nasal.equipos import RinomanometriaWindow, RinometriaWindow
         from oae.OaeMainWindow import OaeMainWindow
         from vemp.VempMainWindow import VempMainWindow
 
@@ -1242,6 +1243,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             OaeMainWindow(data_login=self.data_login), expand=True))
         self._modulo_diferido("VEMP", "subw_vemp", lambda: FrameSubMdi(
             VempMainWindow(data_login=self.data_login)))
+        # Nariz: demo interna, solo se arma para quien la puede abrir (admin).
+        if self._module_visible("RM"):
+            self._modulo_diferido("RM", "subw_rm", lambda: FrameSubMdi(
+                RinomanometriaWindow(data_login=self.data_login), expand=True))
+        if self._module_visible("RA"):
+            self._modulo_diferido("RA", "subw_ra", lambda: FrameSubMdi(
+                RinometriaWindow(data_login=self.data_login), expand=True))
 
         self.subw.update({
             "AC": self.subw_ac,
