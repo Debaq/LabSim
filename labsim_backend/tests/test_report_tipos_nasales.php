@@ -13,7 +13,7 @@ require_once __DIR__ . '/../src/ReportPdfBuilder.php';
  * un CHECK viejo, sin ellos.
  */
 
-$nasales = ['RINOMANOMETRIA', 'RINOMETRIA'];
+$nasales = ['RINOMANOMETRIA', 'RINOMETRIA', 'RINOSCOPIA'];
 $leer = function (string $ruta): string {
     return (string) file_get_contents(__DIR__ . '/../' . $ruta);
 };
@@ -35,7 +35,7 @@ foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
         t_true(strpos($c[1], "'{$t}'") !== false, "El CHECK de {$archivo} acepta {$t}");
     }
 }
-t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'RINOMETRIA'\")") !== false,
+t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'RINOSCOPIA'\")") !== false,
        'La migración detecta un CHECK sin los tipos nasales');
 
 $paciente = ['nombre' => 'Ana', 'apellido' => 'Pérez', 'rut' => '11.111.111-1', 'fecha_nac' => '1986-01-01'];
@@ -59,3 +59,16 @@ foreach ($nasales as $t) {
     t_true(strpos(ReportPdfBuilder::build(999, $t, [], $paciente, 'A', '29-10-2026'), '%PDF-1.4') === 0,
            "{$t} vacío igual genera PDF");
 }
+
+$rs = ReportPdfBuilder::build(999, 'RINOSCOPIA', [
+    'D' => ['tabique' => 'desviado', 'cornete_inferior' => 'contacta', 'mucosa' => 'rosada', 'secrecion' => 'no',
+            'perforacion' => false, 'observaciones' => 'Desviación en el tercio anterior.'],
+    'I' => ['tabique' => 'centrado', 'cornete_inferior' => 'hipertrofico', 'mucosa' => 'palida'],
+    'tecnica' => ['primera_fosa' => 'D', 'posiciones' => ['D' => [0, 30, 60], 'I' => [0]]],
+    'conclusion' => 'Desviación septal derecha.',
+], $paciente, 'Alumno X', '29-10-2026');
+t_true(strpos($rs, '%PDF-1.4') === 0, 'El informe de rinoscopía sale como PDF');
+t_true(strpos($rs, 'Desviado hacia esta fosa') !== false && strpos($rs, 'Contacta el tabique') !== false,
+       'Trae lo que el alumno marcó en cada fosa');
+t_true(strpos($rs, 'Primero la fosa derecha') !== false, 'Dice qué fosa miró primero');
+t_true(strpos($rs, 'FNI: cabeza en 0') !== false, 'Dice en qué posiciones miró cada fosa');

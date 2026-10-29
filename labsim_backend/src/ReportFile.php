@@ -31,6 +31,7 @@ final class ReportFile
         'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
         'RINOMANOMETRIA' => 'Rinomanometría anterior',
         'RINOMETRIA' => 'Rinometría acústica',
+        'RINOSCOPIA' => 'Rinoscopía anterior',
     ];
 
     /** Rótulo corto, para una celda de tabla. */
@@ -48,6 +49,7 @@ final class ReportFile
         'OTOSCOPIA' => 'Otoscopia',
         'RINOMANOMETRIA' => 'Rinomanometría',
         'RINOMETRIA' => 'Rinometría',
+        'RINOSCOPIA' => 'Rinoscopía',
     ];
 
     public static function dir(): string

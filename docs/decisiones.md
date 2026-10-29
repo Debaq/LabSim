@@ -7108,3 +7108,20 @@ de H25 a H32 entran como equipos de LabSim.
   sacados del JS. RinoSim sigue siendo la fuente de las figuras del libro.
 - Fases y módulos en `docs/roadmap_nasal.md` (TODO 73).
 
+## Rinoscopía dibujada en 3D desde la nariz del caso (2026-10-29)
+
+Las fotos libres no sirven para la rinoscopía anterior: lo que hay con
+licencia (Commons, PMC CC BY, UAAL) es casi todo endoscopía y no cubre
+tabique desviado de frente, espolón, cornete hipertrófico ni pus en el
+meato. Y aunque las hubiera, él lo dijo: "la rinoscopía tiene niveles: de
+frente, se ve algo hacia atrás y muy atrás el techo; eso no lo logramos con
+las imágenes que existen". Retocar fotos tampoco lo resuelve.
+
+Se dibuja la fosa en 3D desde `cases.data['NASAL']` (la misma nariz de la RM
+y la RA), trazando rayos con numpy: el examinador mira desde ~25 cm por el
+espéculo y la extensión de la cabeza sube la mirada (recta: piso, cornete
+inferior y tabique; 30°: cornete y meato medios; 60°: techo). Sin IA
+generativa y sin módulos de Qt nuevos. Prototipo mirado y aprobado por él
+antes de armar el módulo. Las formas son órdenes de magnitud para que se
+lea como una rinoscopía, no una anatomía medida.
+

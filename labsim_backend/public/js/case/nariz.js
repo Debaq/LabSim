@@ -64,10 +64,33 @@
                 d.ruta + '" min="' + d.min + '" max="' + d.max + '" step="' + d.paso + '" value="' + redondea(lee(paciente, d.ruta)) + '"></td></tr>';
         });
         tabla.innerHTML = '<table class="grid-table"><thead><tr><th class="side-label">Parámetro</th><th>FND</th><th>FNI</th></tr></thead><tbody>' +
-            filas.join('') + extras.join('') + '</tbody></table>';
+            filas.join('') + extras.join('') + filasRinoscopia() + '</tbody></table>';
     }
 
     function redondea(v) { return typeof v === 'number' ? +v.toFixed(3) : ''; }
+
+    // Lo que se ve en la rinoscopía y la geometría no dice. Mismas claves que
+    // nasal/rinoscopia.py (MUCOSAS, SECRECIONES) y CaseForm::NASAL_*.
+    var RINOSCOPIA = [
+        ['mucosa', 'Mucosa (rinoscopía)', [['rosada', 'Rosada'], ['palida', 'Pálida'], ['violacea', 'Violácea'], ['roja', 'Roja']]],
+        ['secrecion', 'Secreción (rinoscopía)', [['no', 'Sin secreción'], ['acuosa', 'Acuosa'], ['mucosa', 'Mucosa'], ['purulenta', 'Purulenta']]]
+    ];
+
+    function aspecto(lado, campo) {
+        var r = (paciente.rinoscopia || {})[lado] || {};
+        return r[campo] || (campo === 'mucosa' ? 'rosada' : 'no');
+    }
+
+    function filasRinoscopia() {
+        return RINOSCOPIA.map(function (c) {
+            return '<tr><td class="side-label">' + escapa(c[1]) + '</td>' + LADOS.map(function (l) {
+                var actual = aspecto(l[0], c[0]);
+                return '<td><select data-rinoscopia="' + c[0] + '" data-lado="' + l[0] + '">' + c[2].map(function (o) {
+                    return '<option value="' + o[0] + '"' + (o[0] === actual ? ' selected' : '') + '>' + escapa(o[1]) + '</option>';
+                }).join('') + '</select></td>';
+            }).join('') + '</tr>';
+        }).join('');
+    }
 
     function dibuja() {
         campos.classList.toggle('bloque-apagado', !presente.checked);
@@ -140,6 +163,15 @@
     // Tocar un número: el paciente pasa a "<cuadro> (editado)", como en
     // RinoSim. Un campo vacío o no numérico no se escribe (el valor anterior
     // sigue en el hidden).
+    tabla.addEventListener('change', function (e) {
+        var sel = e.target;
+        if (!sel.matches || !sel.matches('select[data-rinoscopia]') || !paciente) return;
+        paciente.rinoscopia = paciente.rinoscopia || {};
+        paciente.rinoscopia[sel.dataset.lado] = paciente.rinoscopia[sel.dataset.lado] || {};
+        paciente.rinoscopia[sel.dataset.lado][sel.dataset.rinoscopia] = sel.value;
+        guarda();
+    });
+
     tabla.addEventListener('input', function (e) {
         var input = e.target;
         if (!input.matches || !input.matches('input[data-ruta]') || !paciente) return;

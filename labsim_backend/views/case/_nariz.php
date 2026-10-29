@@ -16,7 +16,7 @@
 <div class="tab-panel" data-tab="nariz">
 <div class="card">
     <strong>Nariz (equipos nasales)</strong>
-    <p class="help">Demo interna: solo la ve el administrador. Sin la casilla, el caso se guarda sin nariz y los equipos nasales (rinomanometría y rinometría acústica) no miden nada. Con ella, el paciente lleva los números de abajo; el equipo simulado calcula la curva de cada fosa a partir de ellos.</p>
+    <p class="help">Demo interna: solo la ve el administrador. Sin la casilla, el caso se guarda sin nariz y los equipos nasales (rinoscopía, rinomanometría y rinometría acústica) no tienen nariz que mirar ni medir. Con ella, el paciente lleva los números de abajo: el equipo simulado calcula la curva de cada fosa y dibuja lo que se ve por el espéculo a partir de ellos.</p>
     <label class="inline-check" style="margin-left:0;">
         <input type="checkbox" id="nariz-presente">
         El paciente trae nariz para los equipos nasales
@@ -34,7 +34,7 @@
     </div>
     <p class="help" id="nariz-descripcion"></p>
     <p class="help"><strong>Paciente:</strong> <span id="nariz-nombre"></span></p>
-    <p class="help">FND es la fosa nasal derecha y FNI la izquierda. Narina, válvula, cornete, desviación, meato y pólipos son las áreas de la sección de cada fosa a lo largo de la nariz (distancias desde la narina); la congestión es cuánto de la mucosa del cornete está hinchada (el vasoconstrictor la lleva a cero). El colapso de la válvula es cuánto se cierra al inspirar fuerte. El ciclo nasal oscila la congestión de las dos fosas en contrafase, con ese periodo. La perforación septal pone un área de comunicación entre las fosas a esa distancia; con área 0 no hay perforación.</p>
+    <p class="help">FND es la fosa nasal derecha y FNI la izquierda. Narina, válvula, cornete, desviación, meato y pólipos son las áreas de la sección de cada fosa a lo largo de la nariz (distancias desde la narina); la congestión es cuánto de la mucosa del cornete está hinchada (el vasoconstrictor la lleva a cero). El colapso de la válvula es cuánto se cierra al inspirar fuerte. El ciclo nasal oscila la congestión de las dos fosas en contrafase, con ese periodo. La perforación septal pone un área de comunicación entre las fosas a esa distancia; con área 0 no hay perforación. Mucosa y secreción solo cambian lo que se ve en la rinoscopía (no las curvas): el color de la mucosa de toda la fosa y la secreción en el piso y el meato medio.</p>
     <div id="nariz-parametros"></div>
     </div>
 </div>

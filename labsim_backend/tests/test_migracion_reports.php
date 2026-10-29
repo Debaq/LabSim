@@ -61,7 +61,8 @@ $otra = $abrir();
 $sql = (string) $otra->query("SELECT sql FROM sqlite_master WHERE name = 'reports'")->fetchColumn();
 t_true(strpos($sql, "'MMN'") !== false && strpos($sql, "'PEALM'") !== false, 'El CHECK acepta los tipos corticales');
 t_true(strpos($sql, "'ASSR'") !== false, 'El CHECK acepta el ASSR');
-t_true(strpos($sql, "'RINOMANOMETRIA'") !== false && strpos($sql, "'RINOMETRIA'") !== false,
+t_true(strpos($sql, "'RINOMANOMETRIA'") !== false && strpos($sql, "'RINOMETRIA'") !== false
+       && strpos($sql, "'RINOSCOPIA'") !== false,
        'El CHECK acepta los informes nasales');
 t_eq($otra->query('SELECT group_concat(id || ":" || version) FROM (SELECT * FROM reports ORDER BY id)')->fetchColumn(),
      '7:3,9:1', 'Conserva ids y versiones');

@@ -32,7 +32,7 @@ Revierte la decisión del 2026-10-16 de dejar lo nasal fuera de LabSim
 
 | Código | Examen | Libro | Box |
 |---|---|---|---|
-| `RS` | Rinoscopía anterior (y endoscopía) | H25 | Box Rinología |
+| `RS` | Rinoscopía anterior | H25 | Box Rinología |
 | `RM` | Rinomanometría anterior | H26 | Box Rinología |
 | `RA` | Rinometría acústica | H27 | Box Rinología |
 | `OLF` | Olfatometría | H28 | Box Rinología |
@@ -94,10 +94,24 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       figuras (`scripts/nasal/sql_pacientes.py`). El minuto del ciclo de
       cada atención es otro que el de la figura: los números pueden no ser
       los del libro hasta poner vasoconstrictor.
-- [ ] **F4. Rinoscopía:** fotos de bancos con licencia verificada
-      (`libro-orl/trabajo/investigacion/imagenes_nasales.md`), visor como la
-      otoscopía, informe por fosa (tabique, cornetes, meatos, mucosa,
-      secreción). Lo que no tenga foto libre queda sin foto, no con IA.
+- [x] **F4. Rinoscopía** (hecho 2026-10-29, sin ver en la app real).
+      Fotos libres no alcanzan: la rinoscopía de H25 se mira recta, a 30° y
+      a 60°, y ninguna foto trae esas miradas del mismo paciente (lo libre
+      es casi todo endoscopía; ver `libro-orl/trabajo/investigacion/imagenes_nasales.md`).
+      Decidido con él: **la fosa se arma en 3D desde la misma nariz del caso**
+      y se dibuja trazando rayos con numpy (`nasal/rinoscopia.py`, sin
+      módulos de Qt nuevos). Tabique (desviación, espolón, concavidad del
+      otro lado, perforación), cornetes (el inferior con su hueso y su
+      mucosa: el vasoconstrictor de la RM lo achica aquí también), pólipos
+      en el meato medio, color de la mucosa y secreción (`NASAL.rinoscopia`,
+      editable en la ficha Nariz). El visor (`nasal/RinoscopiaWindow.py`):
+      fosa + cabeza (recta, 30°, 60°, o de a 10°), imágenes en segundo
+      plano y guardadas en el equipo. Informe por fosa (tabique, cornetes,
+      meato medio, mucosa, secreción, perforación, observaciones) +
+      conclusión, tipo `RINOSCOPIA` con PDF; anota solo qué fosa miró
+      primero y en qué posiciones. "Lo que hay" para el docente.
+      Pendiente: textura de mucosa sacada de fotos reales con licencia (hoy
+      es ruido procedural) y suavizar los bordes (se ve dentado al agrandar).
 - [ ] **F5. Olfatometría y prick test.**
 - [ ] **F6. Espirometría** (maniobra, aceptabilidad y repetibilidad, prueba
       broncodilatadora, LIN y z-score); caso del cap. 37.

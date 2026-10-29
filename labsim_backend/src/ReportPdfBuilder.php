@@ -80,6 +80,12 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'RINOSCOPIA') {
+            $y = self::rinoscopiaBody($pdf, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'RINOMANOMETRIA' || $tipo === 'RINOMETRIA') {
             $y = self::nasalBody($pdf, $reportId, $tipo, $data, $y, $contentW);
             self::textSections($pdf, $data, $y, $contentW);
@@ -696,6 +702,79 @@ final class ReportPdfBuilder
         return $y + 10;
     }
 
+    /** Qué dice cada valor del informe de rinoscopía (nasal/RinoscopiaWindow.py). */
+    private const RINOSCOPIA_CAMPOS = [
+        'tabique' => ['Tabique', ['centrado' => 'Centrado', 'desviado' => 'Desviado hacia esta fosa', 'espolon' => 'Espolón', 'no_se_ve' => 'No se ve']],
+        'cornete_inferior' => ['Cornete inferior', ['normal' => 'Normal', 'hipertrofico' => 'Hipertrófico', 'contacta' => 'Contacta el tabique', 'no_se_ve' => 'No se ve']],
+        'cornete_medio' => ['Cornete medio', ['normal' => 'Normal', 'aumentado' => 'Aumentado', 'no_se_ve' => 'No se ve']],
+        'meato_medio' => ['Meato medio', ['libre' => 'Libre', 'polipos' => 'Pólipos', 'secrecion' => 'Secreción', 'no_se_ve' => 'No se ve']],
+        'mucosa' => ['Mucosa', ['rosada' => 'Rosada', 'palida' => 'Pálida', 'violacea' => 'Violácea', 'roja' => 'Roja']],
+        'secrecion' => ['Secreción', ['no' => 'Sin secreción', 'acuosa' => 'Acuosa', 'mucosa' => 'Mucosa', 'purulenta' => 'Purulenta']],
+    ];
+
+    /**
+     * Cuerpo del informe de rinoscopía: lo que el alumno dice haber visto en
+     * cada fosa, y cómo miró (qué fosa primero, en qué posiciones de la
+     * cabeza: H25 pide la derecha primero y recta, 30° y 60°).
+     */
+    private static function rinoscopiaBody(MiniPdf $pdf, array $data, float $y, float $contentW): float
+    {
+        $pdf->text(self::MARGIN, $y, 'Hallazgos por fosa', 12, true);
+        $y += 18;
+        $cols = [150.0, ($contentW - 150.0) / 2, ($contentW - 150.0) / 2];
+        $fila = function (array $celdas, bool $negrita) use ($pdf, $cols, &$y) {
+            $x = self::MARGIN;
+            foreach ($celdas as $i => $texto) {
+                $pdf->text($x, $y, (string) $texto, 9, $negrita || $i === 0);
+                $x += $cols[$i];
+            }
+            $y += 14;
+        };
+        $fila(['', 'Fosa derecha', 'Fosa izquierda'], true);
+        $fosa = static function (string $lado) use ($data): array {
+            return is_array($data[$lado] ?? null) ? $data[$lado] : [];
+        };
+        foreach (self::RINOSCOPIA_CAMPOS as $clave => [$rotulo, $textos]) {
+            $celdas = [$rotulo];
+            foreach (['D', 'I'] as $lado) {
+                $v = (string) ($fosa($lado)[$clave] ?? '');
+                $celdas[] = $v === '' ? '—' : ($textos[$v] ?? $v);
+            }
+            $fila($celdas, false);
+        }
+        $fila(['Perforación septal', !empty($fosa('D')['perforacion']) ? 'Sí' : 'No', !empty($fosa('I')['perforacion']) ? 'Sí' : 'No'], false);
+        $y += 6;
+        foreach (['D' => 'Fosa derecha', 'I' => 'Fosa izquierda'] as $lado => $nombre) {
+            $obs = trim((string) ($fosa($lado)['observaciones'] ?? ''));
+            if ($obs !== '') {
+                $y = $pdf->textBlock(self::MARGIN, $y, "{$nombre}: {$obs}", $contentW, 9);
+                $y += 4;
+            }
+        }
+        $tec = is_array($data['tecnica'] ?? null) ? $data['tecnica'] : [];
+        if ($tec !== []) {
+            $y = self::ensureSpace($pdf, $y, 50.0);
+            $pdf->text(self::MARGIN, $y + 6, 'Cómo se miró', 12, true);
+            $y += 24;
+            $primera = ['D' => 'la fosa derecha', 'I' => 'la fosa izquierda'][$tec['primera_fosa'] ?? ''] ?? '—';
+            $pdf->text(self::MARGIN, $y, "Primero {$primera}.", 9);
+            $y += 13;
+            foreach (['D' => 'FND', 'I' => 'FNI'] as $lado => $sigla) {
+                $pos = is_array($tec['posiciones'][$lado] ?? null) ? $tec['posiciones'][$lado] : [];
+                $texto = $pos === [] ? 'no se miró' : implode(', ', array_map(static function ($g) {
+                    return ((int) $g) . '°';
+                }, $pos));
+                $pdf->text(self::MARGIN, $y, "{$sigla}: cabeza en {$texto}.", 9);
+                $y += 13;
+            }
+            if (!empty($data['vasoconstrictor'])) {
+                $pdf->text(self::MARGIN, $y, 'Mirada con vasoconstrictor puesto.', 9);
+                $y += 13;
+            }
+        }
+        return $y + 10;
+    }
+
     private static function aabrBody(MiniPdf $pdf, array $data, float $y, float $contentW): float
     {
         $pdf->text(self::MARGIN, $y, 'Resultado del tamizaje', 13, true);
@@ -1193,6 +1272,7 @@ final class ReportPdfBuilder
             'OTOSCOPIA' => 'Otoscopia',
             'RINOMANOMETRIA' => 'Rinomanometría anterior',
             'RINOMETRIA' => 'Rinometría acústica',
+            'RINOSCOPIA' => 'Rinoscopía anterior',
         ];
         return $etiquetas[$tipo] ?? $tipo;
     }

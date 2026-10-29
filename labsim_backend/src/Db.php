@@ -742,7 +742,7 @@ final class Db
      * 'OTOSCOPIA', 'AABR' (el AABR se subía desde 2026-10 y el CHECK lo
      * rechazaba: cada informe de tamizaje fallaba) y los potenciales de
      * latencia media y tardía (PEALM, CAEP, P300, MMN), el ASSR y los
-     * equipos nasales (RINOMANOMETRIA, RINOMETRIA), y existe la columna
+     * equipos nasales (RINOMANOMETRIA, RINOMETRIA, RINOSCOPIA), y existe la columna
      * version (ver report_versions en schema.sql). SQLite no permite
      * modificar un CHECK con ALTER TABLE: hay que reconstruir la tabla y
      * copiar las filas, como en migrateAppConfigCourseIdIfNeeded. Debe
@@ -772,10 +772,10 @@ final class Db
         }
         $cols = array_column($pdo->query('PRAGMA table_info(reports)')->fetchAll(), 'name');
         $tieneVersion = in_array('version', $cols, true);
-        // 'RINOMETRIA' es el último tipo agregado (los equipos nasales, después
+        // 'RINOSCOPIA' es el último tipo agregado (los equipos nasales, después
         // del ASSR y de PEALM/CAEP/P300/MMN del módulo ABR): si el CHECK ya lo
         // trae, trae también los anteriores.
-        if (strpos($sql, "'RINOMETRIA'") !== false && $tieneVersion) {
+        if (strpos($sql, "'RINOSCOPIA'") !== false && $tieneVersion) {
             return;
         }
         // Orden de la doc de SQLite ("Making Other Kinds Of Table Schema
@@ -797,7 +797,7 @@ final class Db
                 "CREATE TABLE {$nueva} (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'ASSR', 'OTOSCOPIA', 'RINOMANOMETRIA', 'RINOMETRIA')),
+                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'PEALM', 'CAEP', 'P300', 'MMN', 'ASSR', 'OTOSCOPIA', 'RINOMANOMETRIA', 'RINOMETRIA', 'RINOSCOPIA')),
                     data TEXT NOT NULL,
                     version INTEGER NOT NULL DEFAULT 1,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

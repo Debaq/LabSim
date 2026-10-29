@@ -1106,6 +1106,10 @@ final class CaseForm
      * @param mixed       $raw   El texto del hidden.
      * @param string|null $error Mensaje para el docente; null si está bien.
      */
+    /** Claves de nasal/rinoscopia.py (MUCOSAS, SECRECIONES): mantener iguales. */
+    public const NASAL_MUCOSAS = ['rosada', 'palida', 'violacea', 'roja'];
+    public const NASAL_SECRECIONES = ['no', 'acuosa', 'mucosa', 'purulenta'];
+
     public static function parseNasal($raw, ?string &$error = null): ?array
     {
         $error = null;
@@ -1188,6 +1192,21 @@ final class CaseForm
         }
         $resto['ciclo']['fase'] = $fase + 0;
 
+        // Lo que se ve en la rinoscopía y la geometría no dice: el color de
+        // la mucosa y la secreción de cada fosa (nasal/rinoscopia.py,
+        // MUCOSAS y SECRECIONES: mismas claves). Lo desconocido cae en lo
+        // normal, como en la app.
+        $rinoscopia = [];
+        foreach (['D', 'I'] as $lado) {
+            $r = is_array($json['rinoscopia'][$lado] ?? null) ? $json['rinoscopia'][$lado] : [];
+            $mucosa = $r['mucosa'] ?? 'rosada';
+            $secrecion = $r['secrecion'] ?? 'no';
+            $rinoscopia[$lado] = [
+                'mucosa' => in_array($mucosa, self::NASAL_MUCOSAS, true) ? $mucosa : 'rosada',
+                'secrecion' => in_array($secrecion, self::NASAL_SECRECIONES, true) ? $secrecion : 'no',
+            ];
+        }
+
         $nombre = is_string($json['nombre'] ?? null) ? trim($json['nombre']) : '';
         $cuadro = $json['cuadro'] ?? null;
         $semilla = $json['semilla'] ?? null;
@@ -1198,6 +1217,7 @@ final class CaseForm
             'lados' => $lados,
             'ciclo' => $resto['ciclo'],
             'perforacion' => $resto['perforacion'],
+            'rinoscopia' => $rinoscopia,
         ];
     }
 
