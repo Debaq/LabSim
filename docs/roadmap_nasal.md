@@ -87,8 +87,13 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       - **Al desplegar:** la primera subida de informe (de cualquiera)
         reconstruye la tabla `reports`; mejor correr antes "Aplicar schema"
         en `admin/database.php` con respaldo y sin clases.
-- [ ] **F3b. Pacientes de los caps. 35 y 36** con su bloque `NASAL` en
-      producción, fuera de la práctica libre.
+- [x] **F3b. Pacientes de los caps. 35 y 36** con su bloque `NASAL`, en
+      producción desde el 2026-10-29: fichas 151-156 (Carlos, Mónica, Rocío,
+      Sofía, Álvaro, Marcos), carpeta "Libro · nariz (demo)", fuera de la
+      práctica libre. La nariz es el cuadro y la semilla de RinoSim de sus
+      figuras (`scripts/nasal/sql_pacientes.py`). El minuto del ciclo de
+      cada atención es otro que el de la figura: los números pueden no ser
+      los del libro hasta poner vasoconstrictor.
 - [ ] **F4. Rinoscopía:** fotos de bancos con licencia verificada
       (`libro-orl/trabajo/investigacion/imagenes_nasales.md`), visor como la
       otoscopía, informe por fosa (tabique, cornetes, meatos, mucosa,
