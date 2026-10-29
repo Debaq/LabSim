@@ -270,10 +270,16 @@ CREATE TABLE IF NOT EXISTS appointments (
     -- así atención, informes, chat y técnica funcionan sin cambios. Toda
     -- vista de la agenda o estadística de prácticos filtra
     -- `practice_id IS NULL` (ver Practica::sinPractica).
-    practice_id INTEGER REFERENCES practice_cases(id)
+    practice_id INTEGER REFERENCES practice_cases(id),
+    -- Intento de un paciente de la práctica libre por carpetas (ver
+    -- practice_items). Los de practice_id quedan como historia. Hacia la app
+    -- los dos salen como practice_id (Db::castAppointment): para ella solo
+    -- dice "es un intento".
+    practice_item_id INTEGER REFERENCES practice_items(id)
 );
 CREATE INDEX IF NOT EXISTS idx_appointments_updated ON appointments (updated_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_practice ON appointments (practice_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_practice_item ON appointments (practice_item_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_fecha ON appointments (fecha);
 CREATE INDEX IF NOT EXISTS idx_appointments_rut ON appointments (rut);
 CREATE INDEX IF NOT EXISTS idx_appointments_patient_id ON appointments (patient_id);
@@ -298,6 +304,36 @@ CREATE TABLE IF NOT EXISTS practice_cases (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (course_id, case_id)
 );
+
+-- Práctica libre (2026-10-28): los pacientes del libro, en carpetas (una por
+-- capítulo) con el orden que se les dé. Es la misma para todos, con o sin
+-- curso; reemplaza a la lista por curso de practice_cases. Un paciente puede
+-- estar en más de una carpeta (los del libro aparecen en varios capítulos).
+-- Quitar uno o borrar una carpeta los desactiva: los intentos siguen
+-- apuntando acá. Ver Practica.php.
+CREATE TABLE IF NOT EXISTS practice_folders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    orden INTEGER NOT NULL DEFAULT 0,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(id),
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS practice_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    folder_id INTEGER NOT NULL REFERENCES practice_folders(id),
+    case_id TEXT NOT NULL REFERENCES cases(id),
+    procedimiento TEXT NOT NULL DEFAULT '',
+    show_study_sheet INTEGER NOT NULL DEFAULT 0,
+    orden INTEGER NOT NULL DEFAULT 0,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(id),
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (folder_id, case_id)
+);
+CREATE INDEX IF NOT EXISTS idx_practice_items_folder ON practice_items (folder_id, orden);
 
 -- Progreso de CADA alumno sobre una cita (antes entry[8], el dict por
 -- username). Varios alumnos pueden tener fila propia para la misma cita.

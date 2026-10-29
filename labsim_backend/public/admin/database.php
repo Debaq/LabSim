@@ -62,6 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'carpetas y archivado de fichas' => static fn() => Db::migrateCaseLibraryIfNeeded(),
                 // Antes de schema.sql por el índice sobre appointments(practice_id).
                 'práctica deliberada' => static fn() => Db::migratePracticeIfNeeded(),
+                // Antes de schema.sql por el índice sobre appointments(practice_item_id).
+                'práctica libre por carpetas' => static fn() => Db::migratePracticeFoldersIfNeeded(),
                 // El schema en sí: crea las tablas que falten. Va en el medio
                 // porque los pasos de abajo agregan columnas a tablas que
                 // recién acá existen (CREATE TABLE IF NOT EXISTS no toca una

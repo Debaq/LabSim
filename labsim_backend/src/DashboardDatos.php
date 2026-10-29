@@ -54,7 +54,7 @@ final class DashboardDatos
         $stmt = Db::get()->prepare(
             'SELECT att.id AS attendance_id, att.student_id, att.estado, att.hora_real, att.updated_at, att.nota,
                     a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento, a.case_id, a.course_id,
-                    ' . (Practica::listo() ? 'a.practice_id' : 'NULL AS practice_id') . ',
+                    ' . Practica::marca('a') . ' AS practice_id,
                     u.display_name, c.name AS course_name
                FROM attendances att
                JOIN appointments a ON a.id = att.appointment_id

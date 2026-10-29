@@ -121,6 +121,15 @@ final class Db
         if (array_key_exists('practice_id', $row)) {
             $row['practice_id'] = $row['practice_id'] !== null ? (int) $row['practice_id'] : null;
         }
+        if (array_key_exists('practice_item_id', $row)) {
+            // Para la app un intento es un intento, venga de la lista vieja
+            // por curso o de las carpetas: lo mira en practice_id.
+            $item = $row['practice_item_id'] !== null ? (int) $row['practice_item_id'] : null;
+            $row['practice_item_id'] = $item;
+            if ($row['practice_id'] === null && $item !== null) {
+                $row['practice_id'] = $item;
+            }
+        }
         return $row;
     }
 
@@ -906,6 +915,60 @@ final class Db
         }
         self::addColumnIfMissing($pdo, 'appointments', 'practice_id', 'INTEGER REFERENCES practice_cases(id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_appointments_practice ON appointments (practice_id)');
+    }
+
+    /**
+     * Práctica libre por carpetas (practice_folders, practice_items y
+     * appointments.practice_item_id en schema.sql). La llaman "Aplicar
+     * schema" (antes de schema.sql, por el índice sobre practice_item_id) y
+     * la página de la práctica libre del panel, como migrateCaseLibraryIfNeeded.
+     * Nunca un endpoint de la app: mientras no corra, la práctica libre sale
+     * vacía (Practica::carpetasListas).
+     */
+    public static function migratePracticeFoldersIfNeeded(): void
+    {
+        $pdo = self::get();
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS practice_folders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL,
+                orden INTEGER NOT NULL DEFAULT 0,
+                active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER REFERENCES users(id),
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )'
+        );
+        // Instalación nueva: cases y appointments los crea schema.sql, que
+        // corre después y ya trae todo.
+        $hay = static function (string $tabla) use ($pdo): bool {
+            $stmt = $pdo->prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?");
+            $stmt->execute([$tabla]);
+            $existe = $stmt->fetchColumn() !== false;
+            $stmt->closeCursor();
+            return $existe;
+        };
+        if (!$hay('cases') || !$hay('appointments')) {
+            return;
+        }
+        $pdo->exec(
+            "CREATE TABLE IF NOT EXISTS practice_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                folder_id INTEGER NOT NULL REFERENCES practice_folders(id),
+                case_id TEXT NOT NULL REFERENCES cases(id),
+                procedimiento TEXT NOT NULL DEFAULT '',
+                show_study_sheet INTEGER NOT NULL DEFAULT 0,
+                orden INTEGER NOT NULL DEFAULT 0,
+                active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER REFERENCES users(id),
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (folder_id, case_id)
+            )"
+        );
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_practice_items_folder ON practice_items (folder_id, orden)');
+        self::addColumnIfMissing($pdo, 'appointments', 'practice_item_id', 'INTEGER REFERENCES practice_items(id)');
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_appointments_practice_item ON appointments (practice_item_id)');
     }
 
     public static function migrateDemoStudentIfNeeded(): void

@@ -22,7 +22,7 @@ $pdo = Db::get();
 $stmt = $pdo->prepare(
     "SELECT att.id, att.nota, att.hora_real, att.updated_at,
             a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento, a.case_id,
-            " . (Practica::listo() ? 'a.practice_id' : 'NULL') . " AS practice_id
+            " . Practica::marca('a') . " AS practice_id
      FROM attendances att
      JOIN appointments a ON a.id = att.appointment_id
      WHERE att.student_id = ? AND att.estado = 'atendido'

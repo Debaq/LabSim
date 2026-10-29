@@ -26,8 +26,7 @@ if ($appointmentId <= 0) {
 
 $pdo = Db::get();
 
-$esPractica = Practica::listo();
-$stmt = $pdo->prepare('SELECT case_id, ' . ($esPractica ? 'practice_id' : 'NULL AS practice_id') . ' FROM appointments WHERE id = ?');
+$stmt = $pdo->prepare('SELECT case_id, ' . Practica::marca() . ' AS practice_id FROM appointments WHERE id = ?');
 $stmt->execute([$appointmentId]);
 $filas = $stmt->fetchAll();
 $caseId = $filas ? $filas[0]['case_id'] : null;

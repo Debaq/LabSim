@@ -206,7 +206,7 @@ final class CourseAvance
 
         $stmt = $pdo->prepare(
             "SELECT att.id AS attendance_id, att.student_id, att.estado, att.hora_real, att.updated_at,
-                    a.id AS appointment_id, a.practice_id
+                    a.id AS appointment_id, " . Practica::marca('a') . " AS practice_id
                FROM attendances att JOIN appointments a ON a.id = att.appointment_id
               WHERE a.course_id = ? AND att.student_id IN ({$ph})
               ORDER BY att.updated_at"
@@ -348,7 +348,7 @@ final class CourseAvance
     {
         $stmt = Db::get()->prepare(
             "SELECT att.updated_at, att.hora_real FROM attendances att JOIN appointments a ON a.id = att.appointment_id
-              WHERE a.course_id = ? AND att.estado = 'atendido' AND a.practice_id IS NULL"
+              WHERE a.course_id = ? AND att.estado = 'atendido' AND " . Practica::sinPractica('a')
         );
         $stmt->execute([$courseId]);
         $semanas = $durSemana = [];

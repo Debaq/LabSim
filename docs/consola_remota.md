@@ -46,6 +46,16 @@ python3 scripts/consola.py esquema                 CREATE de toda la base
 python3 scripts/consola.py backup                  copia en data/backups/ (antes de cambios grandes)
 python3 scripts/consola.py archivos [ruta]         listado dentro de data/
 python3 scripts/consola.py leer ruta [-o archivo]  un archivo de data/ (.gz descomprimido)
+python3 scripts/consola.py otoscopia 41 oi 0 foto.jpg   la otoscopía de un oído y fase (0 = única o primera)
+python3 scripts/consola.py rostro 41 cara.png [--persona id]   la cara del paciente o de un acompañante
+```
+
+Las fotos van por el mismo camino que el panel (`OtoscopiaPhoto::save`,
+`PatientPhoto::save`): mismo tamaño final y mismo recorte. Sin `--recorte
+x,y,lado` (píxeles de la imagen) se usa el cuadrado centrado más grande. Al
+registro va qué foto fue, no la imagen. Hasta 12 MB por foto.
+
+```
 python3 scripts/consola.py revocar                 corta el token
 ```
 

@@ -261,6 +261,81 @@ final class Consola
         ];
     }
 
+    /** Una foto de celular ronda 3-8 MB: mismo tope que el panel. */
+    public const MAX_FOTO_BYTES = 12 * 1024 * 1024;
+
+    /**
+     * Sube la foto de otoscopía de un oído y fase, o la cara de una persona
+     * de la sala, por el mismo camino que el panel (OtoscopiaPhoto::save,
+     * PatientPhoto::save), para cargar en lote las del libro sin pasar ficha
+     * por ficha. $datos: tipo ('otoscopia' | 'rostro'), case_id, imagen
+     * (base64), y para otoscopía side ('od' | 'oi') y fase (0 = la única o
+     * la primera); para la cara, persona (vacío = el paciente). recorte
+     * [x, y, lado] en píxeles de la imagen; sin él, el cuadrado centrado más
+     * grande. Devuelve qué se guardó.
+     */
+    public static function subirFoto(array $datos): array
+    {
+        require_once __DIR__ . '/OtoscopiaPhoto.php';
+        require_once __DIR__ . '/PatientPhoto.php';
+        $tipo = (string) ($datos['tipo'] ?? '');
+        if ($tipo !== 'otoscopia' && $tipo !== 'rostro') {
+            throw new InvalidArgumentException('"tipo" tiene que ser otoscopia o rostro');
+        }
+        $caseId = trim((string) ($datos['case_id'] ?? ''));
+        $stmt = Db::get()->prepare('SELECT id FROM cases WHERE id = ?');
+        $stmt->execute([$caseId]);
+        $existe = $stmt->fetchColumn() !== false;
+        $stmt->closeCursor();
+        if ($caseId === '' || !$existe) {
+            throw new InvalidArgumentException("No existe el caso {$caseId}");
+        }
+        $bytes = base64_decode((string) ($datos['imagen'] ?? ''), true);
+        if ($bytes === false || $bytes === '') {
+            throw new InvalidArgumentException('"imagen" tiene que ser la imagen en base64');
+        }
+        if (strlen($bytes) > self::MAX_FOTO_BYTES) {
+            throw new InvalidArgumentException('La imagen pesa más de 12 MB');
+        }
+        $tmp = tempnam(sys_get_temp_dir(), 'lsc_foto_');
+        if ($tmp === false || file_put_contents($tmp, $bytes) === false) {
+            throw new RuntimeException('No se pudo escribir la imagen en el servidor');
+        }
+        try {
+            $info = @getimagesize($tmp);
+            if ($info === false) {
+                throw new InvalidArgumentException('El archivo no es una imagen');
+            }
+            $recorte = $datos['recorte'] ?? null;
+            if (is_array($recorte) && count($recorte) === 3) {
+                [$x, $y, $lado] = array_map('floatval', array_values($recorte));
+            } else {
+                $lado = (float) min($info[0], $info[1]);
+                $x = ($info[0] - $lado) / 2;
+                $y = ($info[1] - $lado) / 2;
+            }
+            if ($tipo === 'otoscopia') {
+                $side = (string) ($datos['side'] ?? '');
+                $fase = (int) ($datos['fase'] ?? 0);
+                if ($side !== 'od' && $side !== 'oi') {
+                    throw new InvalidArgumentException('"side" tiene que ser od u oi');
+                }
+                if ($fase < 0) {
+                    throw new InvalidArgumentException('"fase" no puede ser negativa');
+                }
+                OtoscopiaPhoto::save($caseId, $side, $fase, $tmp, $x, $y, $lado);
+                return ['tipo' => $tipo, 'case_id' => $caseId, 'side' => $side, 'fase' => $fase,
+                        'ancho' => $info[0], 'alto' => $info[1]];
+            }
+            $persona = trim((string) ($datos['persona'] ?? ''));
+            PatientPhoto::save(PatientPhoto::key($caseId, $persona), $tmp, $x, $y, $lado);
+            return ['tipo' => $tipo, 'case_id' => $caseId, 'persona' => $persona,
+                    'ancho' => $info[0], 'alto' => $info[1]];
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
     /** Anota la llamada y el uso del token. Que no se pueda anotar no corta la respuesta. */
     public static function registrar(int $tokenId, string $tipo, string $texto, ?array $resultado, ?string $error, string $ip): void
     {

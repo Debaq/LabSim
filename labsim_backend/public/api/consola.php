@@ -16,6 +16,9 @@ require_once __DIR__ . '/../../src/Consola.php';
  *   {"accion": "backup"}                           copia de la base (data/backups/)
  *   {"accion": "archivos", "ruta": "tickets"}      listado dentro de data/
  *   {"accion": "leer", "ruta": "tickets/x.log.gz"} un archivo de data/
+ *   {"accion": "foto", "tipo": "otoscopia"|"rostro", "case_id": .., "imagen": base64,
+ *    "side": "od"|"oi", "fase": 0, "persona": "", "recorte": [x, y, lado]}
+ *                                                  una otoscopía o una cara (Consola::subirFoto)
  *   {"accion": "ping"}                             datos del token
  *   {"accion": "revocar"}                          corta este mismo token
  */
@@ -75,6 +78,14 @@ try {
             $resultado = ['ruta' => $texto, 'entradas' => Consola::listarArchivos($texto)];
         } elseif ($tipo === 'leer') {
             $resultado = Consola::leerArchivo($texto);
+        } elseif ($tipo === 'foto') {
+            $resultado = Consola::subirFoto($body);
+            // Al registro va qué foto fue, no la imagen
+            $texto = implode(' ', array_filter([
+                (string) ($body['tipo'] ?? ''), (string) ($body['case_id'] ?? ''),
+                (string) ($body['side'] ?? ''), isset($body['fase']) ? 'fase ' . (int) $body['fase'] : '',
+                (string) ($body['persona'] ?? ''),
+            ], 'strlen'));
         } elseif ($tipo === 'revocar') {
             Consola::revocar($tokenId);
             $resultado = ['revocado' => true];

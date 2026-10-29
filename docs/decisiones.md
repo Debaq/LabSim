@@ -6655,3 +6655,169 @@ Una atención de "prueba" del docente (sin cita) no se guarda.
 De paso: `test_informes_recuperar` todavía usaba el combo de oído del AABR
 que el rediseño del 2026-10-27 cambió por botones.
 
+
+## Audios ordenados por carpeta y voces de niños (2026-10-28)
+
+`resources/audio` tenía 291 archivos sueltos y para saber de qué voz era un
+mp3 había que leer el sufijo. Ahora va por carpeta (el árbol está anotado en
+`audiometria/h_audio.py`, sobre `create_voice`):
+
+- `comandos/<clave>.mp3`: lo que dice el examinador por talkback
+  (`create_command`, antes `create_word`).
+- `paciente/<voz>/<frase>.mp3`: frases sueltas del paciente (`create_voice`).
+- `logo/estimulos/<palabra>.mp3`: la palabra de la lista (`create_word`).
+- `logo/respuestas/<voz>/<palabra>.mp3`: el paciente la repite
+  (`create_word_response`); `none1-3` es cuando no la entendió.
+
+El prefijo `LP_palacios_` se fue del nombre: la carpeta ya dice qué es. El
+cache `_panned` queda en la raíz de `audio/` (si no, se armaba uno dentro de
+`logo/estimulos/` y el `.gitignore` no lo cubría).
+
+Voces de niño (`nino1`) y niña (`nina1`) para las 124 palabras. Gemini TTS
+(`gemini-2.5-flash-preview-tts`) se probó y se descartó: no suenan a niño.
+Se usó `edge-tts` (gratis, sin clave): `es-CL-LorenzoNeural` a +45 Hz y
+`es-CL-CatalinaNeural` a +40 Hz, las dos a -45 % de velocidad, silencio de
+los bordes recortado y mp3 a 96 kbit/s. Edge no tiene voces infantiles en
+español; son adultas con el tono subido y algunas suenan mal, se mejoran
+después. Todavía no las usa nadie: `ListWords` sigue fijando `feme1`.
+
+## Práctica libre también para el docente, aparte de su agenda (2026-10-28)
+
+El autor quiere ver en la app la lista de práctica deliberada como la ven
+los alumnos, para trabajar en mejorarla: separada de la lista general y
+ordenada. Antes el docente no tenía el botón "Práctica libre" y esos
+pacientes le salían mezclados en su agenda (la fila "sin cita" del caso y
+cada intento de cada alumno).
+
+- **Backend:** `GET api/practica.php` con rol admin devuelve
+  `Practica::paraDocente()`: los pacientes de práctica de los cursos que
+  dicta (el admin completo, de todos), en el orden del alumno (curso,
+  apellido, nombre). Intentos, alumnos y último intento son de todos los
+  alumnos; `abierto` y `ultimo_cerrado` van en null porque el docente no
+  hace intentos.
+- **App:** el docente tiene "Práctica libre", con la columna Curso en vez
+  de "Último intento" (un paciente puede estar en dos cursos). "Atender
+  (prueba)" lo abre como cualquier prueba del docente, sin crear intento ni
+  dejar rastro, con la fila del caso (oculta en su agenda). Sin "Guardar esta
+  atención" (pide una cita) ni ficha de estudio (está en Fichas del panel web).
+- **Su agenda** ya no muestra los intentos de los alumnos ni la fila "sin
+  cita" de los pacientes de práctica; las citas de prácticos con el mismo
+  caso siguen.
+- **Orden:** la tabla se ordenaba sola por la columna Estado, al revés
+  (indicador de Qt en la columna 0 por defecto), también para el alumno. En
+  práctica libre el indicador queda en -1 y se respeta el orden del backend;
+  un clic en el encabezado la sigue ordenando.
+
+## Agenda que se congelaba al rearmarse, y la prueba del docente sin informes (2026-10-28)
+
+Leído de `core/tiempos.py` en el equipo del autor (40 arranques).
+
+- **Agenda cuadrática.** Con las columnas en `ResizeToContents`, cada
+  `takeItem`/`setItem` recalculaba los anchos mirando todas las filas. La
+  primera carga era rápida, pero cada rearmado del sync con la tabla llena
+  costaba: 300 filas, 80 s en la prueba (6,9 s de ventana congelada en la
+  sesión del docente). Ahora las columnas quedan fijas mientras se llena y
+  se ajustan al contenido una vez al final (`Agenda._poner_anchos`): 300
+  filas en 0,2 s, 600 en 0,4 s.
+- **La prueba del docente subía informes.** `report_autosave.iniciar()`
+  corría también en modo prueba: sin atención en el servidor, cada subida
+  respondía 404, el informe quedaba pendiente en el equipo y se reintentaba
+  con cada sync para siempre (7 informes, unas 8 peticiones por minuto).
+  Ahora `iniciar(prueba=True)` no respalda ni sube nada, tampoco al
+  esconder un módulo; la prueba no deja rastro, como dice su nombre.
+- **La agenda ya no se baja al construirla.** `Agenda.__init__` hacía
+  `Shedule()` (el estado completo, ~450 KB) en el hilo de la ventana, dentro
+  del login: 1,2 s congelado en la sesión medida. Ahora arranca vacía con
+  "Cargando la agenda…", la baja con `refresh_async` y, con la primera carga,
+  llama a `main.agenda_cargada()`, que retoma la atención abierta (antes se
+  retomaba en el login mismo, con la agenda ya bajada). Si el servidor no
+  responde lo dice y se reintenta con el sync. Lo que sigue congelando el
+  login es construir los módulos: unos 2,6 s (EOAS 0,8, ABR 0,7, VEMP y
+  audiómetro 0,3 cada uno, Z 0,3).
+- **Los módulos de examen se arman después del login.** `load_sub_windows`
+  deja pendientes audiómetro, listas de palabras, Z, ABR, AABR, EOAS y VEMP
+  (`core/subventanas.py`) y `_armar_modulos_en_fondo` los arma de a uno,
+  con 30 ms de bucle de eventos entre cada uno: el login baja de unos 4,5 s
+  congelado a 0,3 s, y el resto tarda unos 2,4 s sin trabar la ventana
+  (lo más largo, el EOAS, 0,8 s). `subw[nombre]` arma en el momento el que
+  todavía falte (un clic en su botón), y antes de cargar un paciente
+  (`_atender_caso`, ver un ABR anterior) se arman todos: tienen que existir
+  para recibir el caso y lo guardado de la atención. Lo que load_sub_windows
+  les hacía al crearlos (la_super, subir al esconder, las señales del
+  audiómetro) va en el `despues` de cada uno.
+
+## Limpieza de fichas en prod y fotos por la consola (2026-10-28)
+
+Por la consola remota, con backups `labsim_2026-10-28_232431.sqlite` y
+`labsim_2026-10-28_233720.sqlite`:
+
+- Archivadas las fichas sin trabajo de alumnos (7, 8, 20-25, 27, 29, 30,
+  43, 44, 47, 48) y borradas sus 4 citas vacías (11, 14, 16, 18, sin nada
+  colgando). Las 10-17 ya estaban archivadas.
+- Archivados los pacientes de práctica 33-42 y apagada toda la lista de
+  práctica de los dos cursos: la práctica libre se rehace con los pacientes
+  del libro (`docs/roadmap_practica_libro.md`). Sus 5 intentos (uno abierto
+  en ese momento) se conservan: el sync sigue mandando las fichas
+  archivadas y cerrar, subir informes y chatear no miran el archivado.
+- Quedan activas las 11 fichas de prácticos con alumnos. Atenciones antes y
+  después: 152.
+
+La consola suma `otoscopia` y `rostro` (`Consola::subirFoto`): suben una foto
+por el mismo camino que el panel, para cargar en lote las del libro.
+
+## Práctica libre por carpetas (2026-10-28)
+
+La práctica libre deja de ser una lista por curso y pasa a carpetas
+globales (una por capítulo del libro), con orden propio de carpetas y de
+pacientes dentro de cada una (`docs/roadmap_practica_libro.md`).
+
+- **Tablas nuevas, no `practice_cases`:** su `course_id` es NOT NULL y la base
+  corre con `foreign_keys = ON`, así que no sirve para algo sin curso sin
+  rehacer la tabla. `practice_folders` + `practice_items` (UNIQUE por
+  carpeta y caso: un paciente del libro aparece en varios capítulos) y
+  `appointments.practice_item_id` para los intentos nuevos. Los viejos
+  siguen en `practice_id`, como historia.
+- **Hacia la app los dos son `practice_id`** (`Db::castAppointment`): para
+  ella solo dice "es intento", y así las apps instaladas tampoco muestran un
+  intento nuevo como cita. En el backend, lo que preguntaba
+  `practice_id IS NULL` pasa por `Practica::sinPractica()` o `marca()`.
+- **El intento no pide curso:** la cita lleva el primer curso activo del
+  alumno, si tiene, para que su docente la vea.
+- **Las tablas no se crean desde un endpoint de la app** (incidente de
+  informes): las crea "Aplicar schema" o la página del panel; mientras
+  tanto la práctica sale vacía (`Practica::carpetasListas`).
+- **App:** el orden lo da el backend; la tabla no se reordena sola (ver la
+  entrada del orden por Estado). N° va como número, para que un clic en el
+  encabezado no ponga el 10 antes que el 2.
+
+## Práctica libre: el Tomo II cargado (2026-10-29)
+
+Una carpeta por capítulo del Tomo II, con sus pacientes en el orden del
+libro, y el **N° es el número del caso en el libro** (caso 1.4 → 4) aunque
+falten los que LabSim no simula: así el alumno encuentra en la app el mismo
+caso que lee. Por eso subir/bajar en el panel intercambia los dos números en
+vez de renumerar, y la app no les pone número a las carpetas (el nombre ya
+dice "Cap. N"). Un paciente que aparece en dos capítulos es una sola ficha
+en dos carpetas (Luis 41, Matías 42). Entran los pacientes con al menos un
+examen de LabSim; los capítulos vestibulares (salvo el 20, VEMP) y los
+nasales quedan fuera hasta que haya módulo. Detalle en
+`docs/roadmap_practica_libro.md` (F2a).
+
+## Ficha sin cita: la historia se cuenta desde hoy (2026-10-29)
+
+Las líneas `{{-N}}` de la historia clínica son "hace N días" respecto de la
+cita. Un caso sin cita con fecha (la práctica libre abierta por el docente,
+un caso sin agendar) dejaba la llave a la vista con "sin fecha" al lado.
+Ahora `render_ficha_html` usa la fecha de hoy cuando la fila no tiene una
+válida: a ese paciente se lo está viendo hoy. `resolver_fechas_historia_clinica`
+sigue dejando la llave si le llega una fecha inválida. El alumno no lo veía:
+su intento de práctica es una cita con la fecha en que lo abrió, y la ficha
+web (`HistoriaClinica.php`) siempre parte de una cita.
+- **Tomo I (mismo día):** una carpeta por herramienta con pacientes (H1-H12,
+  H21, H24), antes de los capítulos, como en el libro. Sus pacientes son
+  casi todos los mismos del Tomo II (una ficha, varias carpetas). Los
+  menores traen a la madre en la sala y el libro solo tenía la cara del
+  paciente: las de las madres se generaron a partir de la cara del hijo
+  (`scripts/libro/caras_acompanantes.py`) y se subieron por la consola.
+  Los oídos sin otoscopía en el libro quedan sin foto en LabSim (decisión
+  del autor, por ahora).

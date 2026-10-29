@@ -5,20 +5,23 @@ declare(strict_types=1);
 require_once __DIR__ . '/CaseCompleteness.php';
 
 /**
- * Práctica deliberada: pacientes que el docente deja disponibles en un curso
- * para que el alumno los abra cuando quiera (en su casa, por ejemplo) y
- * cuantas veces quiera. Ver practice_cases en sql/schema.sql.
+ * Práctica libre: pacientes que el alumno abre cuando quiera (en su casa,
+ * por ejemplo) y cuantas veces quiera. Desde el 2026-10-28 son los pacientes
+ * del libro, en carpetas (una por capítulo) con el orden que se les dé, y la
+ * misma para todos: ver practice_folders y practice_items en sql/schema.sql
+ * y docs/roadmap_practica_libro.md. La lista por curso de antes
+ * (practice_cases) quedó solo como historia de los intentos viejos.
  *
- * Cada intento es una cita propia en appointments (practice_id = el
- * paciente de la lista, asignada al alumno, con la fecha y hora en que la
+ * Cada intento es una cita propia en appointments (practice_item_id = el
+ * paciente de la carpeta, asignada al alumno, con la fecha y hora en que la
  * abrió). Así la atención, los informes, el chat, la técnica de audiometría
  * y la OIRS funcionan igual que en un práctico, sin un camino aparte. El
  * costo es que toda vista de agenda o estadística de PRÁCTICOS tiene que
- * dejar fuera estas citas: para eso está sinPractica().
+ * dejar fuera estas citas: para eso están sinPractica() y marca().
  *
- * Decidido con el docente (2026-10-08): intentos ilimitados y separados;
- * al cerrar, la ficha de estudio del caso se libera o no según la casilla
- * de cada paciente; en las estadísticas va aparte de los prácticos.
+ * Intentos ilimitados y separados; al cerrar, la ficha de estudio del caso
+ * se libera o no según la casilla de cada paciente; en las estadísticas va
+ * aparte de los prácticos.
  */
 final class Practica
 {
@@ -56,13 +59,40 @@ final class Practica
         return $listo;
     }
 
+    /**
+     * ¿La base ya tiene las carpetas (practice_items y
+     * appointments.practice_item_id)? No las crea: eso lo hace "Aplicar
+     * schema" o la página de la práctica libre (Db::migratePracticeFoldersIfNeeded).
+     * Sin ellas, la práctica libre sale vacía.
+     */
+    public static function carpetasListas(): bool
+    {
+        static $listas = null;
+        if ($listas !== null) {
+            return $listas;
+        }
+        try {
+            $pdo = Db::get();
+            $tabla = $pdo->query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'practice_items'")->fetchColumn();
+            $cols = array_column($pdo->query('PRAGMA table_info(appointments)')->fetchAll(), 'name');
+            $listas = $tabla !== false && in_array('practice_item_id', $cols, true);
+        } catch (Throwable $e) {
+            error_log('[Practica::carpetasListas] ' . $e->getMessage());
+            $listas = false;
+        }
+        return $listas;
+    }
+
     /** Condición SQL "es cita de práctico" (no intento de práctica). */
     public static function sinPractica(string $alias = ''): string
     {
         if (!self::listo()) {
             return '1=1';
         }
-        return ($alias !== '' ? $alias . '.' : '') . 'practice_id IS NULL';
+        $a = $alias !== '' ? $alias . '.' : '';
+        return self::carpetasListas()
+            ? "({$a}practice_id IS NULL AND {$a}practice_item_id IS NULL)"
+            : "{$a}practice_id IS NULL";
     }
 
     /** Condición SQL "es intento de práctica". */
@@ -71,39 +101,173 @@ final class Practica
         if (!self::listo()) {
             return '0=1';
         }
-        return ($alias !== '' ? $alias . '.' : '') . 'practice_id IS NOT NULL';
+        $a = $alias !== '' ? $alias . '.' : '';
+        return self::carpetasListas()
+            ? "({$a}practice_id IS NOT NULL OR {$a}practice_item_id IS NOT NULL)"
+            : "{$a}practice_id IS NOT NULL";
     }
 
     /**
-     * Pacientes de la lista de un curso (activos), con cuántos alumnos los
-     * practicaron y cuántos intentos cerrados suman.
+     * Expresión SQL que no es NULL justo en los intentos de práctica, de la
+     * lista vieja o de las carpetas: para leerla como `... AS practice_id`
+     * donde solo importa si es intento o no.
      */
-    public static function delCurso(int $courseId): array
+    public static function marca(string $alias = ''): string
     {
         if (!self::listo()) {
-            return [];
+            return 'NULL';
         }
-        $stmt = Db::get()->prepare(
-            "SELECT pc.id, pc.case_id, pc.procedimiento, pc.show_study_sheet, pc.created_at,
-                    p.nombre, p.apellido, p.rut,
-                    (SELECT COUNT(*) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
-                      WHERE a.practice_id = pc.id AND att.estado = 'atendido') AS intentos,
-                    (SELECT COUNT(DISTINCT att.student_id) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
-                      WHERE a.practice_id = pc.id AND att.estado = 'atendido') AS alumnos
-               FROM practice_cases pc
-               JOIN cases c ON c.id = pc.case_id
-               LEFT JOIN patients p ON p.id = c.patient_id
-              WHERE pc.course_id = ? AND pc.active = 1
-              ORDER BY pc.id"
-        );
-        $stmt->execute([$courseId]);
-        return $stmt->fetchAll();
+        $a = $alias !== '' ? $alias . '.' : '';
+        return self::carpetasListas() ? "COALESCE({$a}practice_id, {$a}practice_item_id)" : "{$a}practice_id";
     }
 
-    /** Fichas que se pueden sumar a la lista: no archivadas y que no estén ya. */
-    public static function casosParaAgregar(int $courseId): array
+    // -- Carpetas: lo que arma el admin en el panel (admin/practica.php) -----
+
+    /**
+     * Las carpetas activas en orden, cada una con sus pacientes activos en
+     * orden, con cuántos alumnos los practicaron y cuántos intentos cerrados
+     * suman. Para el panel.
+     */
+    public static function carpetas(): array
     {
-        if (!self::listo()) {
+        if (!self::carpetasListas()) {
+            return [];
+        }
+        $pdo = Db::get();
+        $carpetas = $pdo->query(
+            'SELECT id, nombre, orden FROM practice_folders WHERE active = 1 ORDER BY orden, id'
+        )->fetchAll();
+        $stmt = $pdo->query(
+            "SELECT pi.id, pi.folder_id, pi.case_id, pi.procedimiento, pi.show_study_sheet, pi.orden,
+                    c.archived_at, p.nombre, p.apellido,
+                    (SELECT COUNT(*) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
+                      WHERE a.practice_item_id = pi.id AND att.estado = 'atendido') AS intentos,
+                    (SELECT COUNT(DISTINCT att.student_id) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
+                      WHERE a.practice_item_id = pi.id AND att.estado = 'atendido') AS alumnos
+               FROM practice_items pi
+               JOIN cases c ON c.id = pi.case_id
+               LEFT JOIN patients p ON p.id = c.patient_id
+              WHERE pi.active = 1
+              ORDER BY pi.orden, pi.id"
+        );
+        $porCarpeta = [];
+        foreach ($stmt->fetchAll() as $it) {
+            $porCarpeta[(int) $it['folder_id']][] = $it;
+        }
+        foreach ($carpetas as &$c) {
+            $c['id'] = (int) $c['id'];
+            $c['items'] = $porCarpeta[$c['id']] ?? [];
+        }
+        unset($c);
+        return $carpetas;
+    }
+
+    public static function crearCarpeta(string $nombre, int $userId): ?string
+    {
+        $nombre = trim($nombre);
+        if ($nombre === '') {
+            return 'Falta el nombre de la carpeta.';
+        }
+        if (!self::carpetasListas()) {
+            return 'La base todavía no tiene las carpetas: aplica el schema en Base de datos.';
+        }
+        Db::reintentar(static function () use ($nombre, $userId): void {
+            $pdo = Db::get();
+            $orden = (int) $pdo->query('SELECT COALESCE(MAX(orden), 0) + 1 FROM practice_folders WHERE active = 1')->fetchColumn();
+            $pdo->prepare('INSERT INTO practice_folders (nombre, orden, created_by) VALUES (?, ?, ?)')
+                ->execute([$nombre, $orden, $userId]);
+        });
+        return null;
+    }
+
+    public static function renombrarCarpeta(int $folderId, string $nombre): ?string
+    {
+        $nombre = trim($nombre);
+        if ($nombre === '') {
+            return 'Falta el nombre de la carpeta.';
+        }
+        Db::reintentar(static function () use ($folderId, $nombre): void {
+            Db::get()->prepare('UPDATE practice_folders SET nombre = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([$nombre, $folderId]);
+        });
+        return null;
+    }
+
+    /** Solo una carpeta vacía: sacar primero sus pacientes es lo que se ve venir. */
+    public static function borrarCarpeta(int $folderId): ?string
+    {
+        $stmt = Db::get()->prepare('SELECT COUNT(*) FROM practice_items WHERE folder_id = ? AND active = 1');
+        $stmt->execute([$folderId]);
+        $n = (int) $stmt->fetchColumn();
+        $stmt->closeCursor();
+        if ($n > 0) {
+            return 'La carpeta todavía tiene pacientes: sácalos primero.';
+        }
+        Db::reintentar(static function () use ($folderId): void {
+            Db::get()->prepare('UPDATE practice_folders SET active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([$folderId]);
+        });
+        return null;
+    }
+
+    /** Sube (-1) o baja (+1) una carpeta un lugar. */
+    public static function moverCarpeta(int $folderId, int $sentido): void
+    {
+        self::mover('practice_folders', $folderId, $sentido, 'active = 1');
+    }
+
+    /** Sube (-1) o baja (+1) un paciente un lugar dentro de su carpeta. */
+    public static function moverPaciente(int $itemId, int $sentido): void
+    {
+        $stmt = Db::get()->prepare('SELECT folder_id FROM practice_items WHERE id = ?');
+        $stmt->execute([$itemId]);
+        $folderId = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        if ($folderId !== false) {
+            self::mover('practice_items', $itemId, $sentido, 'active = 1 AND folder_id = ' . (int) $folderId);
+        }
+    }
+
+    /**
+     * Cambia de lugar con el vecino intercambiando sus números, sin
+     * renumerar el resto: el número de un paciente es el de su caso en el
+     * libro (caso 1.4), y los huecos (los que LabSim no simula) se respetan.
+     * Solo si dos tienen el mismo número se renumera 1..n antes, porque si
+     * no el intercambio no movería nada.
+     */
+    private static function mover(string $tabla, int $id, int $sentido, string $donde): void
+    {
+        Db::reintentar(static function () use ($tabla, $id, $sentido, $donde): void {
+            $pdo = Db::get();
+            $filas = $pdo->query("SELECT id, orden FROM {$tabla} WHERE {$donde} ORDER BY orden, id")->fetchAll();
+            $ordenes = array_map('intval', array_column($filas, 'orden', 'id'));
+            if (count(array_unique($ordenes)) < count($ordenes)) {
+                $ordenes = array_combine(array_keys($ordenes), range(1, count($ordenes)));
+            }
+            $ids = array_keys($ordenes);
+            $i = array_search($id, $ids, true);
+            $j = $i === false ? false : $i + ($sentido < 0 ? -1 : 1);
+            if ($j !== false && isset($ids[$j])) {
+                [$ordenes[$ids[$i]], $ordenes[$ids[$j]]] = [$ordenes[$ids[$j]], $ordenes[$ids[$i]]];
+            }
+            $pdo->beginTransaction();
+            try {
+                $upd = $pdo->prepare("UPDATE {$tabla} SET orden = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+                foreach ($ordenes as $cada => $orden) {
+                    $upd->execute([$orden, $cada]);
+                }
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+        });
+    }
+
+    /** Fichas que se pueden sumar a una carpeta: no archivadas y que no estén ya en ella. */
+    public static function casosParaAgregar(int $folderId): array
+    {
+        if (!self::carpetasListas()) {
             return [];
         }
         $stmt = Db::get()->prepare(
@@ -111,18 +275,18 @@ final class Practica
                FROM cases c
                LEFT JOIN patients p ON p.id = c.patient_id
               WHERE c.archived_at IS NULL
-                AND c.id NOT IN (SELECT case_id FROM practice_cases WHERE course_id = ? AND active = 1)
+                AND c.id NOT IN (SELECT case_id FROM practice_items WHERE folder_id = ? AND active = 1)
               ORDER BY p.apellido, p.nombre, c.id"
         );
-        $stmt->execute([$courseId]);
+        $stmt->execute([$folderId]);
         return $stmt->fetchAll();
     }
 
-    /** Suma un paciente a la lista. Devuelve el error para el docente, o null. */
-    public static function agregar(int $courseId, string $caseId, string $procedimiento, bool $mostrarFicha, int $userId): ?string
+    /** Suma un paciente al final de una carpeta. Devuelve el error para el admin, o null. */
+    public static function agregarPaciente(int $folderId, string $caseId, string $procedimiento, bool $mostrarFicha, int $userId): ?string
     {
-        if (!self::listo()) {
-            return 'La base todavía no tiene la práctica deliberada: aplica el schema en Base de datos.';
+        if (!self::carpetasListas()) {
+            return 'La base todavía no tiene las carpetas: aplica el schema en Base de datos.';
         }
         $pdo = Db::get();
         $stmt = $pdo->prepare('SELECT data, archived_at FROM cases WHERE id = ?');
@@ -142,84 +306,102 @@ final class Practica
             return 'El caso ' . $caseId . ' está incompleto y no se puede dejar para práctica: ' . implode(' | ', $faltantes);
         }
         $procedimiento = trim($procedimiento) !== '' ? trim($procedimiento) : 'Audiometría';
-        // Si ya estuvo y se quitó, vuelve la misma fila: sus intentos viejos
-        // siguen colgando de ella.
-        Db::reintentar(static function () use ($pdo, $courseId, $caseId, $procedimiento, $mostrarFicha, $userId): void {
+        // Si ya estuvo y se sacó, vuelve la misma fila (al final): sus
+        // intentos viejos siguen colgando de ella.
+        Db::reintentar(static function () use ($pdo, $folderId, $caseId, $procedimiento, $mostrarFicha, $userId): void {
+            $stmt = $pdo->prepare('SELECT COALESCE(MAX(orden), 0) + 1 FROM practice_items WHERE folder_id = ? AND active = 1');
+            $stmt->execute([$folderId]);
+            $orden = (int) $stmt->fetchColumn();
+            $stmt->closeCursor();
             $pdo->prepare(
-                'INSERT INTO practice_cases (course_id, case_id, procedimiento, show_study_sheet, created_by)
-                 VALUES (?, ?, ?, ?, ?)
-                 ON CONFLICT(course_id, case_id) DO UPDATE SET
-                    active = 1, procedimiento = excluded.procedimiento,
+                'INSERT INTO practice_items (folder_id, case_id, procedimiento, show_study_sheet, orden, created_by)
+                 VALUES (?, ?, ?, ?, ?, ?)
+                 ON CONFLICT(folder_id, case_id) DO UPDATE SET
+                    active = 1, procedimiento = excluded.procedimiento, orden = excluded.orden,
                     show_study_sheet = excluded.show_study_sheet, updated_at = CURRENT_TIMESTAMP'
-            )->execute([$courseId, $caseId, $procedimiento, $mostrarFicha ? 1 : 0, $userId]);
+            )->execute([$folderId, $caseId, $procedimiento, $mostrarFicha ? 1 : 0, $orden, $userId]);
         });
         return null;
     }
 
-    public static function quitar(int $itemId, int $courseId): void
+    public static function quitarPaciente(int $itemId): void
     {
-        if (!self::listo()) {
-            return;
-        }
-        Db::reintentar(static function () use ($itemId, $courseId): void {
-            Db::get()->prepare(
-                'UPDATE practice_cases SET active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND course_id = ?'
-            )->execute([$itemId, $courseId]);
+        Db::reintentar(static function () use ($itemId): void {
+            Db::get()->prepare('UPDATE practice_items SET active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([$itemId]);
         });
     }
 
-    public static function setMostrarFicha(int $itemId, int $courseId, bool $mostrar): void
+    public static function setMostrarFicha(int $itemId, bool $mostrar): void
     {
-        if (!self::listo()) {
-            return;
-        }
-        Db::reintentar(static function () use ($itemId, $courseId, $mostrar): void {
-            Db::get()->prepare(
-                'UPDATE practice_cases SET show_study_sheet = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND course_id = ?'
-            )->execute([$mostrar ? 1 : 0, $itemId, $courseId]);
+        Db::reintentar(static function () use ($itemId, $mostrar): void {
+            Db::get()->prepare('UPDATE practice_items SET show_study_sheet = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([$mostrar ? 1 : 0, $itemId]);
         });
     }
+
+    // -- Lo que ve la app ------------------------------------------------------
 
     /**
-     * Lo que ve el alumno: los pacientes de práctica de sus cursos activos,
-     * con sus propios intentos (cerrados, el último, y el que tenga abierto).
+     * Las carpetas con pacientes, en orden, para la app. El alumno ve sus
+     * propios intentos (cerrados, el último y el que tenga abierto); el
+     * docente (`$docente`), los de todos los alumnos, sin abierto: él la abre
+     * en modo prueba. Las carpetas sin pacientes no salen.
+     *
+     * @return array<int, array{id:int, nombre:string, orden:int, items:array}>
      */
-    public static function paraAlumno(int $userId): array
+    public static function lista(int $userId, bool $docente): array
     {
-        if (!self::listo()) {
+        if (!self::carpetasListas()) {
             return [];
         }
-        $stmt = Db::get()->prepare(
-            "SELECT pc.id, pc.case_id, pc.procedimiento, pc.show_study_sheet,
-                    co.name AS curso,
+        $pdo = Db::get();
+        $deQuien = $docente ? '' : ' AND att.student_id = :me';
+        $stmt = $pdo->prepare(
+            "SELECT pi.id, pi.folder_id, pi.case_id, pi.procedimiento, pi.show_study_sheet, pi.orden,
+                    f.nombre AS carpeta,
                     p.nombre, p.apellido, p.rut, p.fecha_nac,
                     (SELECT COUNT(*) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
-                      WHERE a.practice_id = pc.id AND att.student_id = :me AND att.estado = 'atendido') AS intentos,
+                      WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'{$deQuien}) AS intentos,
+                    (SELECT COUNT(DISTINCT att.student_id) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
+                      WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'{$deQuien}) AS alumnos,
                     (SELECT MAX(att.updated_at) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
-                      WHERE a.practice_id = pc.id AND att.student_id = :me AND att.estado = 'atendido') AS ultimo,
+                      WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'{$deQuien}) AS ultimo,
                     (SELECT a.id FROM attendances att JOIN appointments a ON a.id = att.appointment_id
-                      WHERE a.practice_id = pc.id AND att.student_id = :me AND att.estado = 'atendido'
+                      WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'{$deQuien}
                       ORDER BY att.updated_at DESC, a.id DESC LIMIT 1) AS ultimo_cerrado
-               FROM practice_cases pc
-               JOIN courses co ON co.id = pc.course_id AND co.active = 1
-               JOIN course_students cs ON cs.course_id = pc.course_id AND cs.user_id = :me
-               JOIN cases c ON c.id = pc.case_id AND c.archived_at IS NULL
+               FROM practice_items pi
+               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1
+               JOIN cases c ON c.id = pi.case_id AND c.archived_at IS NULL
                LEFT JOIN patients p ON p.id = c.patient_id
-              WHERE pc.active = 1
-              ORDER BY co.name, p.apellido, p.nombre, pc.id"
+              WHERE pi.active = 1
+              ORDER BY f.orden, f.id, pi.orden, pi.id"
         );
-        $stmt->bindValue(':me', $userId, PDO::PARAM_INT);
-        $stmt->execute();
-        $items = $stmt->fetchAll();
-        foreach ($items as &$it) {
-            $it['id'] = (int) $it['id'];
-            $it['intentos'] = (int) $it['intentos'];
-            $it['show_study_sheet'] = (bool) $it['show_study_sheet'];
-            $it['ultimo_cerrado'] = $it['ultimo_cerrado'] !== null ? (int) $it['ultimo_cerrado'] : null;
-            $it['abierto'] = self::intentoAbierto($it['id'], $userId);
+        if (!$docente) {
+            $stmt->bindValue(':me', $userId, PDO::PARAM_INT);
         }
-        unset($it);
-        return $items;
+        $stmt->execute();
+        $filas = $stmt->fetchAll();
+        $carpetas = [];
+        foreach ($filas as $it) {
+            $fid = (int) $it['folder_id'];
+            if (!isset($carpetas[$fid])) {
+                $carpetas[$fid] = ['id' => $fid, 'nombre' => (string) $it['carpeta'],
+                                   'orden' => count($carpetas) + 1, 'items' => []];
+            }
+            $it['id'] = (int) $it['id'];
+            $it['folder_id'] = $fid;
+            // El número del caso en su capítulo (caso 1.4 -> 4), aunque falten
+            // los que LabSim no simula: así calza con el libro.
+            $it['orden'] = (int) $it['orden'];
+            $it['intentos'] = (int) $it['intentos'];
+            $it['alumnos'] = (int) $it['alumnos'];
+            $it['show_study_sheet'] = (bool) $it['show_study_sheet'];
+            $it['ultimo_cerrado'] = !$docente && $it['ultimo_cerrado'] !== null ? (int) $it['ultimo_cerrado'] : null;
+            $it['abierto'] = $docente ? null : self::intentoAbierto($it['id'], $userId);
+            $carpetas[$fid]['items'][] = $it;
+        }
+        return array_values($carpetas);
     }
 
     /**
@@ -233,7 +415,7 @@ final class Practica
         $stmt = Db::get()->prepare(
             "SELECT a.id FROM appointments a
                LEFT JOIN attendances att ON att.appointment_id = a.id AND att.student_id = ?
-              WHERE a.practice_id = ? AND a.assigned_student_id = ?
+              WHERE a.practice_item_id = ? AND a.assigned_student_id = ?
                 AND (att.id IS NULL OR att.estado = 'atendiendo')
               ORDER BY a.id DESC LIMIT 1"
         );
@@ -244,44 +426,52 @@ final class Practica
 
     /**
      * Abre un intento: devuelve la cita (la que quedó abierta, o una nueva).
+     * La práctica libre es de todos: no pide curso. La cita lleva el primer
+     * curso activo del alumno, si tiene, para que su docente la vea.
      * Lanza RuntimeException con un texto para el alumno si no corresponde.
      */
     public static function iniciar(int $userId, int $itemId): array
     {
-        if (!self::listo()) {
-            throw new RuntimeException('La práctica todavía no está disponible en el servidor.');
+        if (!self::carpetasListas()) {
+            throw new RuntimeException('La práctica libre todavía no está disponible en el servidor.');
         }
         $pdo = Db::get();
         $stmt = $pdo->prepare(
-            "SELECT pc.id, pc.course_id, pc.case_id, pc.procedimiento, c.patient_id, c.data
-               FROM practice_cases pc
-               JOIN courses co ON co.id = pc.course_id AND co.active = 1
-               JOIN course_students cs ON cs.course_id = pc.course_id AND cs.user_id = ?
-               JOIN cases c ON c.id = pc.case_id AND c.archived_at IS NULL
-              WHERE pc.id = ? AND pc.active = 1"
+            "SELECT pi.id, pi.case_id, pi.procedimiento, c.patient_id, c.data
+               FROM practice_items pi
+               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1
+               JOIN cases c ON c.id = pi.case_id AND c.archived_at IS NULL
+              WHERE pi.id = ? AND pi.active = 1"
         );
-        $stmt->execute([$userId, $itemId]);
+        $stmt->execute([$itemId]);
         $filas = $stmt->fetchAll();
         if (!$filas) {
-            throw new RuntimeException('Este paciente ya no está en tu lista de práctica.');
+            throw new RuntimeException('Este paciente ya no está en la práctica libre.');
         }
         $item = $filas[0];
 
         $abierto = self::intentoAbierto($itemId, $userId);
         if ($abierto === null) {
+            $stmt = $pdo->prepare(
+                'SELECT cs.course_id FROM course_students cs JOIN courses co ON co.id = cs.course_id AND co.active = 1
+                  WHERE cs.user_id = ? ORDER BY cs.course_id LIMIT 1'
+            );
+            $stmt->execute([$userId]);
+            $curso = $stmt->fetchColumn();
+            $stmt->closeCursor();
             $identidad = self::identidad($item);
-            $abierto = (int) Db::reintentar(static function () use ($pdo, $item, $identidad, $userId): int {
+            $abierto = (int) Db::reintentar(static function () use ($pdo, $item, $identidad, $userId, $curso): int {
                 // fecha 'dd-MM-yy' y hora 'HH:mm', como toda cita: es cuándo
                 // lo abrió, y así se ordena con lo demás en su historial.
                 $pdo->prepare(
                     'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id,
-                                               course_id, assigned_student_id, patient_id, practice_id)
+                                               course_id, assigned_student_id, patient_id, practice_item_id)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                 )->execute([
                     date('d-m-y'), date('H:i'),
                     $identidad['rut'], $identidad['nombre'], $identidad['apellido'], $identidad['fecha_nac'],
                     (string) $item['procedimiento'], (string) $item['case_id'],
-                    (int) $item['course_id'], $userId,
+                    $curso !== false ? (int) $curso : null, $userId,
                     $item['patient_id'] !== null ? (int) $item['patient_id'] : null,
                     (int) $item['id'],
                 ]);
@@ -351,22 +541,24 @@ final class Practica
 
     /**
      * ¿El alumno puede bajar la ficha de estudio de esta cita? Solo si es un
-     * intento suyo de práctica, ya cerrado, y el docente tiene marcada la
-     * casilla en ese paciente. Devuelve el case_id, o null.
+     * intento suyo de práctica, ya cerrado, y el paciente tiene marcada la
+     * casilla (en su carpeta, o en la lista vieja por curso). Devuelve el
+     * case_id, o null.
      */
     public static function fichaDeEstudioPermitida(int $appointmentId, int $userId): ?string
     {
         if (!self::listo()) {
             return null;
         }
-        $stmt = Db::get()->prepare(
-            "SELECT a.case_id
-               FROM appointments a
-               JOIN practice_cases pc ON pc.id = a.practice_id
-               JOIN attendances att ON att.appointment_id = a.id AND att.student_id = ?
-              WHERE a.id = ? AND a.assigned_student_id = ? AND att.estado = 'atendido'
-                AND pc.show_study_sheet = 1"
-        );
+        $carpetas = self::carpetasListas();
+        $sql = "SELECT a.case_id
+                  FROM appointments a
+                  LEFT JOIN practice_cases pc ON pc.id = a.practice_id"
+             . ($carpetas ? ' LEFT JOIN practice_items pi ON pi.id = a.practice_item_id' : '') . "
+                  JOIN attendances att ON att.appointment_id = a.id AND att.student_id = ?
+                 WHERE a.id = ? AND a.assigned_student_id = ? AND att.estado = 'atendido'
+                   AND " . ($carpetas ? 'COALESCE(pc.show_study_sheet, pi.show_study_sheet)' : 'pc.show_study_sheet') . ' = 1';
+        $stmt = Db::get()->prepare($sql);
         $stmt->execute([$userId, $appointmentId, $userId]);
         $filas = $stmt->fetchAll();
         return $filas && $filas[0]['case_id'] !== null ? (string) $filas[0]['case_id'] : null;

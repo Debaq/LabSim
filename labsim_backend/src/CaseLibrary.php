@@ -225,6 +225,9 @@ final class CaseLibrary
             if (Practica::listo()) {
                 $pdo->prepare("DELETE FROM practice_cases WHERE case_id IN ({$in})")->execute($params);
             }
+            if (Practica::carpetasListas()) {
+                $pdo->prepare("DELETE FROM practice_items WHERE case_id IN ({$in})")->execute($params);
+            }
             $pdo->prepare("DELETE FROM cases WHERE id IN ({$in})")->execute($params);
             if ($propia) {
                 $pdo->commit();
