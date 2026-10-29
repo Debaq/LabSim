@@ -110,8 +110,14 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       meato medio, mucosa, secreción, perforación, observaciones) +
       conclusión, tipo `RINOSCOPIA` con PDF; anota solo qué fosa miró
       primero y en qué posiciones. "Lo que hay" para el docente.
-      Pendiente: textura de mucosa sacada de fotos reales con licencia (hoy
-      es ruido procedural) y suavizar los bordes (se ve dentado al agrandar).
+      Después (mismo día, a pedido de él): la cara de frente
+      (`resources/rinoscopia`, cuadros de labyrinthus3d de 0° a 60°), ▲/▼
+      "Reclinar" mantenidas, el espéculo es el mouse sobre la narina y el
+      interior se abre al costado. **En pausa: "está feísimo, déjalo por
+      ahora"** (2026-10-29). Pendiente cuando se retome: el aspecto general
+      (la bata celeste, el interior), textura de mucosa de fotos reales con
+      licencia (hoy ruido procedural), bordes dentados al agrandar, y el
+      interior que cambia cada 10° aunque la cabeza vaya de a 2°.
 - [ ] **F5. Olfatometría y prick test.**
 - [ ] **F6. Espirometría** (maniobra, aceptabilidad y repetibilidad, prueba
       broncodilatadora, LIN y z-score); caso del cap. 37.
