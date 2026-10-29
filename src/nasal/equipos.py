@@ -9,9 +9,13 @@ libro.
 
 Demo interna (docs/roadmap_nasal.md): solo el admin abre estos equipos. Los
 errores de técnica se ponen a mano ("Simular"), como en RinoSim: el alumno
-todavía no los comete con sus manos. Sin subida de informe todavía:
-`reports.tipo` tiene un CHECK en la base y sumar tipos es una migración (ver
-docs/decisiones.md, el incidente de reports_old); va con la ficha Nariz.
+todavía no los comete con sus manos.
+
+El informe (RINOMANOMETRIA / RINOMETRIA) se sube solo como los demás (ver
+core/report_autosave.py). Guarda la tabla tal como se vio, para el PDF, y
+CÓMO se tomó cada medición (lado, estado, opciones, semilla): al retomar la
+atención se vuelven a calcular con el modelo y salen idénticas, en vez de
+guardar miles de puntos de cada curva.
 
 Sin `cases.data['NASAL']` el equipo no mide.
 """
@@ -19,11 +23,15 @@ Sin `cases.data['NASAL']` el equipo no mide.
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QFrame, QHBoxLayout, QHeaderView,
-                               QMainWindow, QPushButton, QScrollArea, QSpinBox,
+                               QMainWindow, QPlainTextEdit, QPushButton, QScrollArea, QSpinBox,
                                QSplitter, QTableWidget, QTableWidgetItem, QTabWidget,
                                QVBoxLayout, QWidget)
 
+import os
+
 from core import hilos, tema
+from core.base import context
+from core.estado_informe import EstadoInforme
 from nasal import modelo, sesion
 from nasal import rinomanometria as RM
 from nasal import rinometria as RA
@@ -80,6 +88,8 @@ class Tabla(QTableWidget):
 
     def poblar(self, cabeceras, filas):
         """filas: [(celdas, lado o None, {columna: 'fuera'|'ok'})]."""
+        # Lo que se ve, en texto: es lo que va al PDF del informe.
+        self.contenido = {'cabeceras': list(cabeceras), 'filas': [list(c) for c, _, _ in filas]}
         self.clear()
         self.setColumnCount(len(cabeceras))
         self.setHorizontalHeaderLabels(cabeceras)
@@ -155,6 +165,7 @@ class EquipoNasal(QMainWindow):
 
         self.tabs = QTabWidget()
         self.tabs.addTab(self._pantalla(), 'Registro')
+        self.tabs.addTab(self._pestana_informe(), 'Informe')
         if self.es_docente:
             self.verdad = etiqueta('', rol='hint')
             self.verdad.setWordWrap(True)
@@ -167,6 +178,22 @@ class EquipoNasal(QMainWindow):
         else:
             self.verdad = None
         cuerpo.addWidget(self.tabs, 1)
+
+    def _pestana_informe(self):
+        caja = Tarjeta('Informe')
+        caja.agregar(etiqueta('Hallazgos', rol='campo'))
+        self.txt_hallazgos = QPlainTextEdit()
+        caja.agregar(self.txt_hallazgos, 1)
+        caja.agregar(etiqueta('Conclusión', rol='campo'))
+        self.txt_conclusion = QPlainTextEdit()
+        caja.agregar(self.txt_conclusion, 1)
+        self.estado_informe = EstadoInforme()
+        caja.agregar(self.estado_informe)
+        contenedor = QWidget()
+        layout = QVBoxLayout(contenedor)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.addWidget(caja)
+        return contenedor
 
     def _encabezado(self):
         caja = Tarjeta()
@@ -230,7 +257,12 @@ class EquipoNasal(QMainWindow):
     def la_super(self, data, appointment_id=None):
         """Entra (o sale) el paciente en atención."""
         self.sesion = sesion.para(data, appointment_id)
+        self.appointment_id = appointment_id
         self.res = _vacio()
+        self.mediciones = []
+        self.txt_hallazgos.clear()
+        self.txt_conclusion.clear()
+        self.estado_informe.limpiar()
         if self.sesion is None or not self.sesion.hay_paciente:
             self._sin_caso(con_paciente=data is not None)
             return
@@ -253,8 +285,88 @@ class EquipoNasal(QMainWindow):
             self._mensaje('Abre una atención para medir.')
         self.dibujar()
 
+    # --- Informe (contrato de core/report_autosave.py) -----------------
+
     def report_job(self):
-        return None   # sin informe todavía (ver el docstring del módulo)
+        """El informe tal como se sube, o None si no hay nada medido."""
+        if not self.data_login or not self.mediciones or self.sesion is None:
+            return None
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return None
+        avisos = [a.lstrip('• ') for a in self.avisos.text().split('\n') if a.strip()]
+        data = {
+            'mediciones': self.mediciones,
+            'vasoconstrictor': self.sesion.vc,
+            'tabla': getattr(self.tabla, 'contenido', {}),
+            'avisos': avisos + self._avisos_informe(),
+            'hallazgos': self.txt_hallazgos.toPlainText(),
+            'conclusion': self.txt_conclusion.toPlainText(),
+        }
+        data.update(self._extra_informe())
+        return {'appointment_id': appointment_id, 'tipo': self.TIPO, 'data': data,
+                'images': self._exportar_imagenes}
+
+    def _avisos_informe(self):
+        return []
+
+    def _extra_informe(self):
+        return {}
+
+    def restore_report(self, data):
+        """Retomar la atención: las mediciones guardadas se vuelven a
+        calcular (fuera de la ventana) y vuelve el texto del informe. Solo si
+        en esta vuelta todavía no se midió nada."""
+        if self.sesion is None or not self.sesion.hay_paciente or self.mediciones:
+            return False
+        recetas = [m for m in (data.get('mediciones') or []) if isinstance(m, dict)
+                   and m.get('lado') in LADOS and m.get('fase') in ('reposo', 'vc')]
+        self.txt_hallazgos.setPlainText(data.get('hallazgos') or '')
+        self.txt_conclusion.setPlainText(data.get('conclusion') or '')
+        if data.get('vasoconstrictor'):
+            self.sesion.aplicar_vasoconstrictor()
+        self._restaurar_extra(data)
+        if not recetas:
+            self.dibujar()
+            return False
+        paciente, funcion, sesion_actual = self.sesion.paciente, self.FUNCION, self.sesion
+
+        def calcular():
+            return [(m, funcion(paciente, m['lado'], m.get('estado') or {}, m.get('opciones') or {}))
+                    for m in recetas]
+
+        def listo(resultados):
+            self._midiendo(False)
+            if self.sesion is not sesion_actual or self.mediciones:
+                return
+            for m, r in resultados:
+                self.res[m['fase']][m['lado']] = r
+            self.mediciones = [m for m, _ in resultados]
+            self._mensaje('Se recuperaron las mediciones guardadas de esta atención.', 'ok')
+            self.dibujar()
+
+        self._midiendo(True)
+        self.tarea = hilos.en_fondo(calcular, listo=listo, fallo=lambda _e: self._midiendo(False),
+                                    dueno=self, nombre=f'recuperar {self.EQUIPO}')
+        return True
+
+    def _restaurar_extra(self, data):
+        pass
+
+    def _exportar_imagenes(self):
+        temp = context.get_resource('local_cache/nasal/temp')
+        os.makedirs(temp, exist_ok=True)
+        imagenes = {}
+        for sufijo, grafico in self._graficos_informe():
+            ruta = os.path.join(temp, f'upload_{sufijo}.jpg')
+            try:
+                grafico.exportar(ruta)
+            except Exception as exc:  # noqa: BLE001 -- sin imagen el informe sube igual
+                print(f'{self.TIPO}: no se pudo exportar {sufijo}: {exc}')
+                continue
+            imagenes[sufijo] = ruta
+        return imagenes
 
     def showEvent(self, evento):
         # El vasoconstrictor pudo ponerse desde el otro equipo.
@@ -294,6 +406,9 @@ class EquipoNasal(QMainWindow):
             return
         funcion, args = pedido
         sesion_de_la_medicion, fase = self.sesion, self.sesion.fase()
+        # Cómo se tomó: con esto restore_report la vuelve a calcular igual.
+        _p, _lado, estado, opciones = args
+        receta = {'lado': lado, 'fase': fase, 'estado': dict(estado), 'opciones': opciones}
         self._midiendo(True)
         self._mensaje(f'Midiendo la {SIGLA[lado]}…')
 
@@ -302,6 +417,8 @@ class EquipoNasal(QMainWindow):
             if self.sesion is not sesion_de_la_medicion:
                 return   # cambió la atención mientras medía
             self.res[fase][lado] = r
+            self.mediciones = [m for m in self.mediciones
+                               if (m['lado'], m['fase']) != (lado, fase)] + [receta]
             self._al_medir(lado, r)
             self.dibujar()
 
@@ -347,6 +464,11 @@ class EquipoNasal(QMainWindow):
 class RinomanometriaWindow(EquipoNasal):
     TITULO = 'Rinomanometría anterior'
     EQUIPO = 'rm'
+    TIPO = 'RINOMANOMETRIA'
+    FUNCION = staticmethod(RM.mide_fosa)
+
+    def _graficos_informe(self):
+        return [('rm_curva', self.g_curva), ('rm_resistencia', self.g_resistencia)]
     INDICACION = ('Comprueba el sello y mide cada fosa: primero la derecha (adaptador en la '
                   'izquierda), después la izquierda.')
 
@@ -547,6 +669,26 @@ def series_con_datos(res):
 class RinometriaWindow(EquipoNasal):
     TITULO = 'Rinometría acústica'
     EQUIPO = 'ra'
+    TIPO = 'RINOMETRIA'
+    FUNCION = staticmethod(RA.mide_fosa)
+
+    def _graficos_informe(self):
+        return [('ra_curva', self.g_curva)]
+
+    def _avisos_informe(self):
+        """El cambio con vasoconstrictor va como línea: el PDF lleva una tabla."""
+        contenido = getattr(self.tabla_vc, 'contenido', None)
+        if not contenido or not contenido['filas']:
+            return []
+        cab = contenido['cabeceras'][1:]
+        return [f'Cambio con vasoconstrictor {fila[0]}: '
+                + ', '.join(f'{c} {v}' for c, v in zip(cab, fila[1:])) for fila in contenido['filas']]
+
+    def _extra_informe(self):
+        return {'calibrado': self.calibrado}
+
+    def _restaurar_extra(self, data):
+        self.calibrado = bool(data.get('calibrado')) or bool(data.get('mediciones'))
     INDICACION = ('Calibra con el tubo calibrador y mide cada fosa: primero la derecha. Tres '
                   'registros en apnea por fosa.')
 

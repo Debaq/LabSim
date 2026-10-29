@@ -35,7 +35,9 @@ foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
         t_true(strpos($c[1], "'{$t}'") !== false, "El CHECK de {$archivo} acepta {$t}");
     }
 }
-t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'ASSR'\")") !== false,
+// La migración mira el ÚLTIMO tipo agregado (hoy los nasales, ver
+// test_report_tipos_nasales.php): un CHECK que lo trae trae los corticales.
+t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'RINOMETRIA'\")") !== false,
        'La migración detecta un CHECK sin los tipos corticales');
 t_true(strpos($leer('public/api/my_patient_reports.php'), "'ASSR'") !== false,
        'my_patient_reports lista los tipos corticales');

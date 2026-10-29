@@ -33,8 +33,9 @@ final class CaseReview
      * en dos lados dejaba listar en el Resumen una ficha que no existe (o
      * peor, olvidarse de listar una que sí).
      *
-     * `revisable` en false son las dos que no son parte del caso: el
-     * Armado rápido (herramienta, no dato) y el Resumen mismo.
+     * `revisable` en false son las que no se revisan: el Armado rápido
+     * (herramienta, no dato), el Resumen mismo y la Nariz (demo interna).
+     * `solo_admin` marca las que el editor no dibuja para un docente.
      */
     public const TABS = [
         'armado' => ['grupo' => 'Empezar acá', 'label' => 'Armado rápido', 'revisable' => false],
@@ -48,6 +49,10 @@ final class CaseReview
         'eoas' => ['grupo' => 'Exámenes', 'label' => 'EOA'],
         'vemp' => ['grupo' => 'Exámenes', 'label' => 'VEMP'],
         'tinnitus' => ['grupo' => 'Exámenes', 'label' => 'Tinnitus'],
+        // Demo interna de los equipos nasales: solo la ve el admin (777) y no
+        // entra en la revisión, así el docente no la necesita para guardar y
+        // los números de las otras fichas no cambian.
+        'nariz' => ['grupo' => 'Exámenes', 'label' => 'Nariz', 'revisable' => false, 'solo_admin' => true],
         'anamnesis' => ['grupo' => 'Entrevista', 'label' => 'Anamnesis'],
         'resumen' => ['grupo' => 'Cerrar', 'label' => 'Resumen', 'revisable' => false],
     ];

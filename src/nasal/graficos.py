@@ -10,6 +10,7 @@ import math
 
 import numpy as np
 import pyqtgraph as pg
+import pyqtgraph.exporters  # noqa: F401  (pg.exporters)
 from PySide6.QtCore import Qt
 
 from core import tema
@@ -29,6 +30,13 @@ TOPES_R = [0.5, 0.8, 1.0, 1.5, 2, 3, 5]
 
 def _tope(v, lista):
     return next((x for x in lista if x >= v), lista[-1])
+
+
+def exportar(plot, ruta):
+    """El gráfico a JPEG para el informe, al doble del tamaño en pantalla."""
+    exportador = pg.exporters.ImageExporter(plot.getPlotItem())
+    exportador.parameters()['width'] = max(800, int(plot.width() * 2))
+    exportador.export(ruta)
 
 
 def _plot(etiqueta_x, etiqueta_y):
@@ -75,6 +83,9 @@ class GraficoRinomanometria:
 
     def __init__(self):
         self.widget = _plot('presión (Pa)', 'flujo (cm³/s)')
+
+    def exportar(self, ruta):
+        exportar(self.widget, ruta)
 
     def dibujar(self, series, ciclos=True, referencia=True, broms=False):
         """series: [(fosas {D, I} de mide_fosa o None, vc bool)]."""
@@ -144,6 +155,9 @@ class GraficoResistencia:
     def __init__(self):
         self.widget = _plot('presión (Pa)', 'R, Pa/(cm³/s)')
 
+    def exportar(self, ruta):
+        exportar(self.widget, ruta)
+
     def dibujar(self, series):
         plot = self.widget
         plot.clear()
@@ -182,6 +196,9 @@ class GraficoRinometria:
 
     def __init__(self):
         self.widget = _plot('distancia desde la narina (cm)', 'área (cm²)')
+
+    def exportar(self, ruta):
+        exportar(self.widget, ruta)
 
     def dibujar(self, series, log=True, registros=True, verdad=False):
         """series: [(fosas {D, I} de rinometria.mide_fosa o None, vc bool)]."""

@@ -70,13 +70,25 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       (una fosa de RM tarda ~0,7 s). Probado a 1366 y 1024 de ancho
       (`tests/test_nasal_equipos.py`). **Sin informe todavía:** sumar los
       tipos a `reports.tipo` es una migración (CHECK en la tabla); va en F3.
-- [ ] **F3. Caso nasal en el backend:** tipos de informe `RINOMANOMETRIA` y
-      `RINOMETRIA` (migración del CHECK de `reports.tipo` con cuidado, ver
-      § Auditoría de estabilidad en decisiones.md) y `report_job` de los dos
-      equipos; ficha "Nariz" en `case_create.php`
-      (los parámetros de RinoSim con sus cuadros de ejemplo como punto de
-      partida), validación en `CaseForm`, y los pacientes de los caps. 35 y
-      36 cargados con su bloque `NASAL` (fuera de la práctica libre).
+- [x] **F3. Caso nasal e informe** (hecho 2026-10-29, sin ver en navegador):
+      - Ficha **Nariz** en `case_create.php`, solo para el admin
+        (`CaseReview::TABS['nariz']`: `solo_admin`, no revisable, no
+        renumera las 11). Cuadros de RinoSim con 8 variantes precalculadas
+        (`scripts/nasal/cuadros_backend.py` → `resources/nasal/cuadros.json`;
+        las variantes que se salían de los rangos de la tabla se recortan
+        al rango, solo en el editor). `CaseForm::parseNasal` valida.
+        El hidden `nasal_json` viaja para todos: un docente que edita un
+        caso con nariz no la borra. `case_import.php` no lo trae.
+      - Informes `RINOMANOMETRIA` y `RINOMETRIA`: CHECK de `reports.tipo`
+        (schema + migración, centinela `'RINOMETRIA'`; probada con el sqlite
+        de Python porque aquí no hay pdo_sqlite), endpoint, rótulos, PDF con
+        gráficos + tabla + avisos. En la app, pestaña Informe, autosave y
+        retomar: se guarda CÓMO se tomó cada medición y se recalcula igual.
+      - **Al desplegar:** la primera subida de informe (de cualquiera)
+        reconstruye la tabla `reports`; mejor correr antes "Aplicar schema"
+        en `admin/database.php` con respaldo y sin clases.
+- [ ] **F3b. Pacientes de los caps. 35 y 36** con su bloque `NASAL` en
+      producción, fuera de la práctica libre.
 - [ ] **F4. Rinoscopía:** fotos de bancos con licencia verificada
       (`libro-orl/trabajo/investigacion/imagenes_nasales.md`), visor como la
       otoscopía, informe por fosa (tabique, cornetes, meatos, mucosa,

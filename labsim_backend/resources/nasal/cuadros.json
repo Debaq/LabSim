@@ -1,0 +1,4351 @@
+{
+ "parametros": [
+  {
+   "ruta": "narina",
+   "nombre": "Narina (escala del vestíbulo)",
+   "min": 0.5,
+   "max": 1.6,
+   "paso": 0.05
+  },
+  {
+   "ruta": "valvula.pos",
+   "nombre": "Válvula: distancia (cm)",
+   "min": 0.8,
+   "max": 2.2,
+   "paso": 0.05
+  },
+  {
+   "ruta": "valvula.area",
+   "nombre": "Válvula: área (cm²)",
+   "min": 0.15,
+   "max": 1.2,
+   "paso": 0.01
+  },
+  {
+   "ruta": "valvula.colapso",
+   "nombre": "Válvula: colapso al inspirar (0-1)",
+   "min": 0,
+   "max": 0.9,
+   "paso": 0.01
+  },
+  {
+   "ruta": "cornete.pos",
+   "nombre": "Cornete inferior: cabeza (cm)",
+   "min": 2.4,
+   "max": 4.2,
+   "paso": 0.05
+  },
+  {
+   "ruta": "cornete.oseo",
+   "nombre": "Cornete: componente óseo (cm²)",
+   "min": 0,
+   "max": 1.5,
+   "paso": 0.05
+  },
+  {
+   "ruta": "cornete.mucosa",
+   "nombre": "Cornete: mucosa máxima (cm²)",
+   "min": 0,
+   "max": 2.2,
+   "paso": 0.05
+  },
+  {
+   "ruta": "desviacion.pos",
+   "nombre": "Desviación: distancia (cm)",
+   "min": 0.8,
+   "max": 6,
+   "paso": 0.05
+  },
+  {
+   "ruta": "desviacion.area",
+   "nombre": "Desviación: área que quita (cm²)",
+   "min": 0,
+   "max": 1.5,
+   "paso": 0.01
+  },
+  {
+   "ruta": "desviacion.ancho",
+   "nombre": "Desviación: ancho (cm; chico = espolón)",
+   "min": 0.3,
+   "max": 3,
+   "paso": 0.05
+  },
+  {
+   "ruta": "meato",
+   "nombre": "Meato medio (cm²)",
+   "min": 0,
+   "max": 1.2,
+   "paso": 0.05
+  },
+  {
+   "ruta": "polipos",
+   "nombre": "Pólipos (cm²)",
+   "min": 0,
+   "max": 2.5,
+   "paso": 0.05
+  },
+  {
+   "ruta": "congestion",
+   "nombre": "Congestión de la mucosa (0-1)",
+   "min": 0,
+   "max": 1,
+   "paso": 0.01
+  }
+ ],
+ "extras": [
+  {
+   "ruta": "ciclo.amplitud",
+   "nombre": "Ciclo nasal: amplitud (0-0,5)",
+   "min": 0,
+   "max": 0.5,
+   "paso": 0.01
+  },
+  {
+   "ruta": "ciclo.periodo",
+   "nombre": "Ciclo nasal: periodo (min)",
+   "min": 1,
+   "max": 600,
+   "paso": 5
+  },
+  {
+   "ruta": "perforacion.pos",
+   "nombre": "Perforación septal: distancia (cm)",
+   "min": 0,
+   "max": 10,
+   "paso": 0.05
+  },
+  {
+   "ruta": "perforacion.area",
+   "nombre": "Perforación septal: área (cm²; 0 = sin)",
+   "min": 0,
+   "max": 5,
+   "paso": 0.05
+  }
+ ],
+ "cuadros": {
+  "normal": {
+   "nombre": "Normal",
+   "descripcion": "Dos fosas sin obstrucción, con ciclo nasal: una algo más congestionada que la otra según el minuto.",
+   "tipo": {
+    "nombre": "Normal",
+    "cuadro": "normal",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.3
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.3
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 0.9395,
+       "valvula": {
+        "pos": 1.2773,
+        "area": 0.6104,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3033,
+        "oseo": 0.3943,
+        "mucosa": 1.4072
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3786
+      },
+      "I": {
+       "narina": 1.065,
+       "valvula": {
+        "pos": 1.3961,
+        "area": 0.6583,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.107,
+        "oseo": 0.2549,
+        "mucosa": 1.1429
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4486
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 175.7349,
+      "fase": 0.5322937033236059
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 1.0492,
+       "valvula": {
+        "pos": 1.2549,
+        "area": 0.6294,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3155,
+        "oseo": 0.2803,
+        "mucosa": 1.2236
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3478
+      },
+      "I": {
+       "narina": 0.9995,
+       "valvula": {
+        "pos": 1.4278,
+        "area": 0.7111,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2096,
+        "oseo": 0.297,
+        "mucosa": 1.1912
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3592
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 125.13,
+      "fase": 5.400774547663825
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 1.0773,
+       "valvula": {
+        "pos": 1.3403,
+        "area": 0.6557,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2782,
+        "oseo": 0.2891,
+        "mucosa": 1.0984
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4141
+      },
+      "I": {
+       "narina": 1.0755,
+       "valvula": {
+        "pos": 1.3592,
+        "area": 0.7022,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3244,
+        "oseo": 0.2965,
+        "mucosa": 1.3885
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4187
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 168.0661,
+      "fase": 4.068960626553949
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 0.8964,
+       "valvula": {
+        "pos": 1.4269,
+        "area": 0.6419,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1487,
+        "oseo": 0.3037,
+        "mucosa": 1.2391
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3407
+      },
+      "I": {
+       "narina": 1.02,
+       "valvula": {
+        "pos": 1.3147,
+        "area": 0.6012,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3088,
+        "oseo": 0.3217,
+        "mucosa": 1.2387
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3947
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 179.7977,
+      "fase": 3.216756111763811
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 1.0648,
+       "valvula": {
+        "pos": 1.3873,
+        "area": 0.6718,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2025,
+        "oseo": 0.3272,
+        "mucosa": 1.0872
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4025
+      },
+      "I": {
+       "narina": 0.9474,
+       "valvula": {
+        "pos": 1.399,
+        "area": 0.6428,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2495,
+        "oseo": 0.1719,
+        "mucosa": 1.4105
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4093
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 159.9511,
+      "fase": 3.223110801147845
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 0.9895,
+       "valvula": {
+        "pos": 1.3183,
+        "area": 0.6654,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.9944,
+        "oseo": 0.2777,
+        "mucosa": 1.103
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4416
+      },
+      "I": {
+       "narina": 1.0548,
+       "valvula": {
+        "pos": 1.3027,
+        "area": 0.6471,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.258,
+        "oseo": 0.2438,
+        "mucosa": 1.2566
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3764
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 147.1316,
+      "fase": 5.017420614450902
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 1.0595,
+       "valvula": {
+        "pos": 1.23,
+        "area": 0.6964,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1014,
+        "oseo": 0.2821,
+        "mucosa": 1.1569
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4058
+      },
+      "I": {
+       "narina": 1.0539,
+       "valvula": {
+        "pos": 1.2952,
+        "area": 0.6479,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1273,
+        "oseo": 0.2624,
+        "mucosa": 1.1725
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4008
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 182.7961,
+      "fase": 3.2012171114963635
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Normal",
+     "cuadro": "normal",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 0.9245,
+       "valvula": {
+        "pos": 1.1252,
+        "area": 0.6964,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1024,
+        "oseo": 0.2309,
+        "mucosa": 1.2386
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3139
+      },
+      "I": {
+       "narina": 0.9991,
+       "valvula": {
+        "pos": 1.2742,
+        "area": 0.6773,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1158,
+        "oseo": 0.2967,
+        "mucosa": 1.2062
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4822
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 128.0759,
+      "fase": 1.7819475528110011
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "desviacion_derecha": {
+   "nombre": "Desviación septal derecha",
+   "descripcion": "El tabique se desvía hacia la fosa derecha en la zona de la válvula. Es esqueleto: el vasoconstrictor casi no la mueve. El cornete izquierdo, grande (compensador), sí responde.",
+   "tipo": {
+    "nombre": "Desviación septal derecha",
+    "cuadro": "desviacion_derecha",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 0.6
+      },
+      "desviacion": {
+       "pos": 1.55,
+       "area": 0.35,
+       "ancho": 0.8
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.8
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 0.9755,
+       "valvula": {
+        "pos": 1.3241,
+        "area": 0.5943,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2267,
+        "oseo": 0.3135,
+        "mucosa": 0.6129
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3109,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4046
+      },
+      "I": {
+       "narina": 0.9312,
+       "valvula": {
+        "pos": 1.2518,
+        "area": 0.6313,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3849,
+        "oseo": 0.2488,
+        "mucosa": 1.7521
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3634
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 134.723,
+      "fase": 3.11480084356908
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 1.0156,
+       "valvula": {
+        "pos": 1.2916,
+        "area": 0.6713,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2392,
+        "oseo": 0.291,
+        "mucosa": 0.7457
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.342,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3641
+      },
+      "I": {
+       "narina": 0.9939,
+       "valvula": {
+        "pos": 1.3992,
+        "area": 0.6327,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2811,
+        "oseo": 0.2958,
+        "mucosa": 1.5529
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4163
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 145.0303,
+      "fase": 3.9771113895559824
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 1.0305,
+       "valvula": {
+        "pos": 1.4148,
+        "area": 0.565,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2603,
+        "oseo": 0.2591,
+        "mucosa": 0.4407
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.4314,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3137
+      },
+      "I": {
+       "narina": 0.9213,
+       "valvula": {
+        "pos": 1.3872,
+        "area": 0.6656,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0392,
+        "oseo": 0.3323,
+        "mucosa": 1.6702
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3892
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 205.2714,
+      "fase": 1.001048794386116
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 0.933,
+       "valvula": {
+        "pos": 1.2896,
+        "area": 0.6643,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3199,
+        "oseo": 0.2168,
+        "mucosa": 0.5172
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3786,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4331
+      },
+      "I": {
+       "narina": 1.1119,
+       "valvula": {
+        "pos": 1.2441,
+        "area": 0.5777,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0845,
+        "oseo": 0.3161,
+        "mucosa": 1.7039
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3542
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 102.216,
+      "fase": 2.3586926978412923
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 1.0315,
+       "valvula": {
+        "pos": 1.3026,
+        "area": 0.6186,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1565,
+        "oseo": 0.2878,
+        "mucosa": 0.7377
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3448,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.306
+      },
+      "I": {
+       "narina": 0.987,
+       "valvula": {
+        "pos": 1.3322,
+        "area": 0.622,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3294,
+        "oseo": 0.2675,
+        "mucosa": 2.0483
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4802
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 141.8938,
+      "fase": 4.182924453833366
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 0.9155,
+       "valvula": {
+        "pos": 1.3122,
+        "area": 0.7052,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0389,
+        "oseo": 0.3163,
+        "mucosa": 0.5484
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3205,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4333
+      },
+      "I": {
+       "narina": 1.1002,
+       "valvula": {
+        "pos": 1.3197,
+        "area": 0.6294,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0428,
+        "oseo": 0.305,
+        "mucosa": 1.3699
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3133
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 215.543,
+      "fase": 6.268745707403725
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 1.034,
+       "valvula": {
+        "pos": 1.4329,
+        "area": 0.6592,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3132,
+        "oseo": 0.3672,
+        "mucosa": 0.7604
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.4161,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3649
+      },
+      "I": {
+       "narina": 0.9906,
+       "valvula": {
+        "pos": 1.2283,
+        "area": 0.5912,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1865,
+        "oseo": 0.1648,
+        "mucosa": 1.7368
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3752
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 144.8774,
+      "fase": 2.2726944353484706
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal derecha",
+     "cuadro": "desviacion_derecha",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 0.9322,
+       "valvula": {
+        "pos": 1.2955,
+        "area": 0.6039,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2533,
+        "oseo": 0.2935,
+        "mucosa": 0.6102
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3407,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4302
+      },
+      "I": {
+       "narina": 1.0153,
+       "valvula": {
+        "pos": 1.319,
+        "area": 0.679,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2552,
+        "oseo": 0.2805,
+        "mucosa": 1.5901
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3765
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 107.4097,
+      "fase": 2.820419965561037
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "desviacion_izquierda": {
+   "nombre": "Desviación septal izquierda",
+   "descripcion": "El mismo cuadro, hacia la fosa izquierda, con el cornete derecho compensador.",
+   "tipo": {
+    "nombre": "Desviación septal izquierda",
+    "cuadro": "desviacion_izquierda",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.8
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 0.6
+      },
+      "desviacion": {
+       "pos": 1.55,
+       "area": 0.35,
+       "ancho": 0.8
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 1.0425,
+       "valvula": {
+        "pos": 1.3756,
+        "area": 0.6476,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0404,
+        "oseo": 0.2852,
+        "mucosa": 2.0107
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3755
+      },
+      "I": {
+       "narina": 0.8962,
+       "valvula": {
+        "pos": 1.2691,
+        "area": 0.6289,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.9684,
+        "oseo": 0.2995,
+        "mucosa": 0.4881
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3372,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3317
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 179.7706,
+      "fase": 4.418359894675922
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 0.9502,
+       "valvula": {
+        "pos": 1.3201,
+        "area": 0.6644,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2832,
+        "oseo": 0.2393,
+        "mucosa": 1.6341
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4051
+      },
+      "I": {
+       "narina": 0.904,
+       "valvula": {
+        "pos": 1.3104,
+        "area": 0.6395,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1388,
+        "oseo": 0.2422,
+        "mucosa": 0.5706
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3112,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3618
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 125.399,
+      "fase": 0.8179202337750772
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 0.9863,
+       "valvula": {
+        "pos": 1.3628,
+        "area": 0.6212,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0053,
+        "oseo": 0.3354,
+        "mucosa": 1.6876
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.5101
+      },
+      "I": {
+       "narina": 1.0078,
+       "valvula": {
+        "pos": 1.2682,
+        "area": 0.7111,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1064,
+        "oseo": 0.3333,
+        "mucosa": 0.474
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.419,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3374
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 160.7361,
+      "fase": 0.976117671333341
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 1.0399,
+       "valvula": {
+        "pos": 1.305,
+        "area": 0.7782,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1956,
+        "oseo": 0.3652,
+        "mucosa": 1.7884
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.391
+      },
+      "I": {
+       "narina": 0.9419,
+       "valvula": {
+        "pos": 1.408,
+        "area": 0.5954,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2782,
+        "oseo": 0.2447,
+        "mucosa": 0.5462
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3364,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.5027
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 238.8586,
+      "fase": 4.522481561681287
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 0.9962,
+       "valvula": {
+        "pos": 1.2145,
+        "area": 0.605,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.187,
+        "oseo": 0.2806,
+        "mucosa": 1.8773
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4634
+      },
+      "I": {
+       "narina": 0.9269,
+       "valvula": {
+        "pos": 1.2299,
+        "area": 0.6239,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1842,
+        "oseo": 0.2804,
+        "mucosa": 0.6426
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3322,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.2802
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 150.6621,
+      "fase": 0.6662234862880765
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 0.9509,
+       "valvula": {
+        "pos": 1.3734,
+        "area": 0.6861,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2745,
+        "oseo": 0.2899,
+        "mucosa": 1.8491
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3541
+      },
+      "I": {
+       "narina": 1.0754,
+       "valvula": {
+        "pos": 1.1624,
+        "area": 0.6003,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3036,
+        "oseo": 0.3428,
+        "mucosa": 0.5996
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3631,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3779
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 181.0144,
+      "fase": 2.6299832338381943
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 0.9474,
+       "valvula": {
+        "pos": 1.2931,
+        "area": 0.6305,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.4852,
+        "oseo": 0.3412,
+        "mucosa": 1.8483
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4425
+      },
+      "I": {
+       "narina": 1.0213,
+       "valvula": {
+        "pos": 1.3595,
+        "area": 0.6267,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2314,
+        "oseo": 0.2527,
+        "mucosa": 0.6459
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.4097,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4307
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 86.848,
+      "fase": 4.444128694861312
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Desviación septal izquierda",
+     "cuadro": "desviacion_izquierda",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 0.9559,
+       "valvula": {
+        "pos": 1.2404,
+        "area": 0.6007,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2114,
+        "oseo": 0.2524,
+        "mucosa": 1.9396
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3631
+      },
+      "I": {
+       "narina": 1.0637,
+       "valvula": {
+        "pos": 1.3561,
+        "area": 0.7164,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3731,
+        "oseo": 0.289,
+        "mucosa": 0.5392
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3151,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3669
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 116.6653,
+      "fase": 5.073959346567465
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "cornetes": {
+   "nombre": "Hipertrofia de cornetes inferiores",
+   "descripcion": "Rinitis vasomotora o alérgica: mucosa de los cornetes muy congestionada en las dos fosas. Responde al vasoconstrictor.",
+   "tipo": {
+    "nombre": "Hipertrofia de cornetes inferiores",
+    "cuadro": "cornetes",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 2.1
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.8
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 2.1
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.8
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.15,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 1.0496,
+       "valvula": {
+        "pos": 1.4293,
+        "area": 0.6694,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0351,
+        "oseo": 0.2866,
+        "mucosa": 2.0067
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.823
+      },
+      "I": {
+       "narina": 0.9477,
+       "valvula": {
+        "pos": 1.4092,
+        "area": 0.6983,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0494,
+        "oseo": 0.3062,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.9125
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 112.5438,
+      "fase": 0.8970863148115461
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 0.9872,
+       "valvula": {
+        "pos": 1.3227,
+        "area": 0.5386,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0087,
+        "oseo": 0.2781,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.801
+      },
+      "I": {
+       "narina": 0.9891,
+       "valvula": {
+        "pos": 1.2776,
+        "area": 0.6917,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3413,
+        "oseo": 0.2877,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.8043
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 116.1005,
+      "fase": 0.7806246002622402
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 0.9593,
+       "valvula": {
+        "pos": 1.2898,
+        "area": 0.6011,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2117,
+        "oseo": 0.2782,
+        "mucosa": 1.9608
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7455
+      },
+      "I": {
+       "narina": 0.9414,
+       "valvula": {
+        "pos": 1.5125,
+        "area": 0.6736,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0284,
+        "oseo": 0.2781,
+        "mucosa": 2.098
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7992
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 170.3383,
+      "fase": 4.753252981231492
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 1.093,
+       "valvula": {
+        "pos": 1.3341,
+        "area": 0.6641,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2121,
+        "oseo": 0.2979,
+        "mucosa": 1.7983
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.8083
+      },
+      "I": {
+       "narina": 0.9432,
+       "valvula": {
+        "pos": 1.2407,
+        "area": 0.6695,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0505,
+        "oseo": 0.3241,
+        "mucosa": 2.189
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.8105
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 171.6587,
+      "fase": 3.8294453983090153
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 1.0273,
+       "valvula": {
+        "pos": 1.4325,
+        "area": 0.6971,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1437,
+        "oseo": 0.2559,
+        "mucosa": 1.6359
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7677
+      },
+      "I": {
+       "narina": 0.9917,
+       "valvula": {
+        "pos": 1.1894,
+        "area": 0.6043,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2831,
+        "oseo": 0.2501,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7382
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 149.8288,
+      "fase": 1.0799595771998178
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 1.0916,
+       "valvula": {
+        "pos": 1.1818,
+        "area": 0.6734,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2489,
+        "oseo": 0.2647,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6372
+      },
+      "I": {
+       "narina": 0.9521,
+       "valvula": {
+        "pos": 1.4,
+        "area": 0.6273,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0531,
+        "oseo": 0.2897,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.8399
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 186.2061,
+      "fase": 5.824874952347979
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 1.0269,
+       "valvula": {
+        "pos": 1.3337,
+        "area": 0.6716,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2196,
+        "oseo": 0.2764,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.8169
+      },
+      "I": {
+       "narina": 1.1029,
+       "valvula": {
+        "pos": 1.3186,
+        "area": 0.6476,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3613,
+        "oseo": 0.3282,
+        "mucosa": 2.0933
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7528
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 143.9955,
+      "fase": 0.32883721720716114
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Hipertrofia de cornetes inferiores",
+     "cuadro": "cornetes",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 0.9907,
+       "valvula": {
+        "pos": 1.3356,
+        "area": 0.6935,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2799,
+        "oseo": 0.2534,
+        "mucosa": 2.2
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7967
+      },
+      "I": {
+       "narina": 1.015,
+       "valvula": {
+        "pos": 1.1096,
+        "area": 0.6421,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2874,
+        "oseo": 0.204,
+        "mucosa": 1.9338
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.8525
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.15,
+      "periodo": 145.4114,
+      "fase": 4.521983144028763
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "colapso_valvular": {
+   "nombre": "Colapso de la válvula nasal",
+   "descripcion": "Válvula estrecha y blanda: se cierra al inspirar, más cuanto más fuerte. Peor con la inspiración forzada; el vasoconstrictor casi no la cambia.",
+   "tipo": {
+    "nombre": "Colapso de la válvula nasal",
+    "cuadro": "colapso_valvular",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.52,
+       "colapso": 0.7
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 0.9
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.52,
+       "colapso": 0.7
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 0.9
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 0.9671,
+       "valvula": {
+        "pos": 1.2838,
+        "area": 0.5743,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.1574,
+        "oseo": 0.3014,
+        "mucosa": 0.9496
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4139
+      },
+      "I": {
+       "narina": 0.9471,
+       "valvula": {
+        "pos": 1.1773,
+        "area": 0.4709,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.306,
+        "oseo": 0.4452,
+        "mucosa": 0.9614
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3523
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 134.35,
+      "fase": 5.71917118186451
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 0.9806,
+       "valvula": {
+        "pos": 1.3935,
+        "area": 0.5669,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.2525,
+        "oseo": 0.2708,
+        "mucosa": 0.848
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3656
+      },
+      "I": {
+       "narina": 1.0156,
+       "valvula": {
+        "pos": 1.3684,
+        "area": 0.4943,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.2191,
+        "oseo": 0.2532,
+        "mucosa": 0.7585
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3284
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 124.6866,
+      "fase": 4.358878674004329
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 1.0542,
+       "valvula": {
+        "pos": 1.1534,
+        "area": 0.5417,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.2742,
+        "oseo": 0.2688,
+        "mucosa": 1.0288
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4654
+      },
+      "I": {
+       "narina": 1.061,
+       "valvula": {
+        "pos": 1.3553,
+        "area": 0.5188,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.0402,
+        "oseo": 0.2824,
+        "mucosa": 0.8901
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4028
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 152.5124,
+      "fase": 3.393011258572433
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 1.0941,
+       "valvula": {
+        "pos": 1.2346,
+        "area": 0.5059,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 2.9572,
+        "oseo": 0.3667,
+        "mucosa": 1.1019
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4484
+      },
+      "I": {
+       "narina": 0.9682,
+       "valvula": {
+        "pos": 1.3276,
+        "area": 0.5249,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.0424,
+        "oseo": 0.2378,
+        "mucosa": 1.0007
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3581
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 201.8074,
+      "fase": 3.052799919130283
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 0.9215,
+       "valvula": {
+        "pos": 1.3295,
+        "area": 0.5075,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.1288,
+        "oseo": 0.3119,
+        "mucosa": 1.06
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3366
+      },
+      "I": {
+       "narina": 0.9533,
+       "valvula": {
+        "pos": 1.3364,
+        "area": 0.5295,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.3735,
+        "oseo": 0.3256,
+        "mucosa": 0.9656
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3837
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 152.5237,
+      "fase": 4.926755219038975
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 1.0297,
+       "valvula": {
+        "pos": 1.22,
+        "area": 0.579,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.1028,
+        "oseo": 0.3208,
+        "mucosa": 0.9717
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3916
+      },
+      "I": {
+       "narina": 0.9746,
+       "valvula": {
+        "pos": 1.2973,
+        "area": 0.4921,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.2283,
+        "oseo": 0.3224,
+        "mucosa": 0.7915
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3991
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 88.0837,
+      "fase": 4.0543873848227925
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 0.9564,
+       "valvula": {
+        "pos": 1.2249,
+        "area": 0.5764,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.279,
+        "oseo": 0.3111,
+        "mucosa": 0.8284
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4142
+      },
+      "I": {
+       "narina": 0.9861,
+       "valvula": {
+        "pos": 1.1667,
+        "area": 0.5067,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.1781,
+        "oseo": 0.3351,
+        "mucosa": 0.7842
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3576
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 161.1145,
+      "fase": 0.9656847525546829
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Colapso de la válvula nasal",
+     "cuadro": "colapso_valvular",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 0.9824,
+       "valvula": {
+        "pos": 1.2842,
+        "area": 0.4432,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.2679,
+        "oseo": 0.2385,
+        "mucosa": 0.6872
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4566
+      },
+      "I": {
+       "narina": 0.9115,
+       "valvula": {
+        "pos": 1.1798,
+        "area": 0.565,
+        "colapso": 0.7
+       },
+       "cornete": {
+        "pos": 3.2341,
+        "oseo": 0.2838,
+        "mucosa": 0.7239
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3987
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 124.6861,
+      "fase": 1.054216723329482
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "polipos": {
+   "nombre": "Poliposis nasal",
+   "descripcion": "Pólipos que llenan el meato medio y la parte posterior de las dos fosas. Los pólipos no responden al vasoconstrictor; lo que baja es la mucosa de los cornetes que los rodea.",
+   "tipo": {
+    "nombre": "Poliposis nasal",
+    "cuadro": "polipos",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.3
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 2.4,
+      "congestion": 0.4
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.3
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 2.1,
+      "congestion": 0.4
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 0.8967,
+       "valvula": {
+        "pos": 1.3348,
+        "area": 0.6253,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2975,
+        "oseo": 0.2917,
+        "mucosa": 1.0869
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.5,
+       "congestion": 0.3525
+      },
+      "I": {
+       "narina": 0.9641,
+       "valvula": {
+        "pos": 1.2948,
+        "area": 0.6896,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1672,
+        "oseo": 0.3029,
+        "mucosa": 1.1547
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 1.7871,
+       "congestion": 0.4569
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 181.4123,
+      "fase": 6.050760444951143
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 0.9953,
+       "valvula": {
+        "pos": 1.3702,
+        "area": 0.5828,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0456,
+        "oseo": 0.2799,
+        "mucosa": 1.3198
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.4335,
+       "congestion": 0.44
+      },
+      "I": {
+       "narina": 0.9579,
+       "valvula": {
+        "pos": 1.214,
+        "area": 0.6136,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0537,
+        "oseo": 0.28,
+        "mucosa": 1.4249
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.4463,
+       "congestion": 0.4279
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 151.0107,
+      "fase": 3.4771488150793814
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 0.963,
+       "valvula": {
+        "pos": 1.4244,
+        "area": 0.7051,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2258,
+        "oseo": 0.2709,
+        "mucosa": 1.521
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.5,
+       "congestion": 0.4532
+      },
+      "I": {
+       "narina": 1.021,
+       "valvula": {
+        "pos": 1.3985,
+        "area": 0.6617,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.352,
+        "oseo": 0.278,
+        "mucosa": 1.3236
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.1608,
+       "congestion": 0.4037
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 118.6681,
+      "fase": 1.6668777053356887
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 0.9682,
+       "valvula": {
+        "pos": 1.3847,
+        "area": 0.6724,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.111,
+        "oseo": 0.2793,
+        "mucosa": 1.2275
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.1695,
+       "congestion": 0.3633
+      },
+      "I": {
+       "narina": 0.9365,
+       "valvula": {
+        "pos": 1.2994,
+        "area": 0.6378,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1605,
+        "oseo": 0.2681,
+        "mucosa": 1.3244
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.0558,
+       "congestion": 0.4947
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 206.2769,
+      "fase": 0.3578914651474946
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 0.9976,
+       "valvula": {
+        "pos": 1.3708,
+        "area": 0.6822,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2206,
+        "oseo": 0.2566,
+        "mucosa": 1.4378
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.1178,
+       "congestion": 0.3712
+      },
+      "I": {
+       "narina": 1.0889,
+       "valvula": {
+        "pos": 1.3872,
+        "area": 0.5788,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2528,
+        "oseo": 0.2547,
+        "mucosa": 1.2321
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 1.7648,
+       "congestion": 0.4141
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 158.8902,
+      "fase": 3.4347870099458757
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 0.9185,
+       "valvula": {
+        "pos": 1.2581,
+        "area": 0.691,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0788,
+        "oseo": 0.366,
+        "mucosa": 1.029
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.5,
+       "congestion": 0.4735
+      },
+      "I": {
+       "narina": 1.0122,
+       "valvula": {
+        "pos": 1.254,
+        "area": 0.5926,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2682,
+        "oseo": 0.2965,
+        "mucosa": 1.4253
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 1.7736,
+       "congestion": 0.4536
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 205.4696,
+      "fase": 4.620922624158101
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 1.1271,
+       "valvula": {
+        "pos": 1.3297,
+        "area": 0.6137,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3248,
+        "oseo": 0.3572,
+        "mucosa": 1.3094
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.462,
+       "congestion": 0.3756
+      },
+      "I": {
+       "narina": 0.9632,
+       "valvula": {
+        "pos": 1.2319,
+        "area": 0.6867,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3109,
+        "oseo": 0.25,
+        "mucosa": 1.2541
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.385,
+       "congestion": 0.3737
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 112.6931,
+      "fase": 1.959118849140928
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Poliposis nasal",
+     "cuadro": "polipos",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 1.0279,
+       "valvula": {
+        "pos": 1.2229,
+        "area": 0.7211,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.9042,
+        "oseo": 0.2738,
+        "mucosa": 1.399
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.0385,
+       "congestion": 0.4465
+      },
+      "I": {
+       "narina": 0.9393,
+       "valvula": {
+        "pos": 1.3353,
+        "area": 0.7601,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.9006,
+        "oseo": 0.275,
+        "mucosa": 1.5458
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 2.1908,
+       "congestion": 0.4467
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 138.7676,
+      "fase": 4.645716275336049
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "mixta": {
+   "nombre": "Mixta: desviación y cornetes",
+   "descripcion": "Desviación septal derecha y cornetes congestionados en las dos fosas: el vasoconstrictor baja la resistencia pero no la normaliza en la derecha.",
+   "tipo": {
+    "nombre": "Mixta: desviación y cornetes",
+    "cuadro": "mixta",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.6
+      },
+      "desviacion": {
+       "pos": 1.55,
+       "area": 0.32,
+       "ancho": 0.8
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.7
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.6
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.7
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.6,
+     "area": 0
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 0.9679,
+       "valvula": {
+        "pos": 1.3956,
+        "area": 0.6479,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3971,
+        "oseo": 0.403,
+        "mucosa": 1.3131
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3528,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6313
+      },
+      "I": {
+       "narina": 0.9668,
+       "valvula": {
+        "pos": 1.4632,
+        "area": 0.5604,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2064,
+        "oseo": 0.3567,
+        "mucosa": 1.3074
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6565
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 134.885,
+      "fase": 1.4269978798695315
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 1.0006,
+       "valvula": {
+        "pos": 1.2944,
+        "area": 0.7003,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.144,
+        "oseo": 0.3732,
+        "mucosa": 1.7712
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.2975,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7062
+      },
+      "I": {
+       "narina": 1.0165,
+       "valvula": {
+        "pos": 1.1997,
+        "area": 0.5984,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0167,
+        "oseo": 0.2377,
+        "mucosa": 1.8648
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6989
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 110.7193,
+      "fase": 3.0130853125375077
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 1.0685,
+       "valvula": {
+        "pos": 1.3307,
+        "area": 0.6787,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2879,
+        "oseo": 0.2874,
+        "mucosa": 1.5104
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3185,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7152
+      },
+      "I": {
+       "narina": 1.0073,
+       "valvula": {
+        "pos": 1.3839,
+        "area": 0.7322,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.4813,
+        "oseo": 0.3115,
+        "mucosa": 1.6213
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7771
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 145.5787,
+      "fase": 0.3807062241137818
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 0.9293,
+       "valvula": {
+        "pos": 1.416,
+        "area": 0.6229,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2193,
+        "oseo": 0.2225,
+        "mucosa": 1.5126
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.2469,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.692
+      },
+      "I": {
+       "narina": 0.9569,
+       "valvula": {
+        "pos": 1.2494,
+        "area": 0.6465,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3454,
+        "oseo": 0.3374,
+        "mucosa": 1.4368
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7097
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 172.6621,
+      "fase": 3.887891699529202
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 1.0981,
+       "valvula": {
+        "pos": 1.3467,
+        "area": 0.5772,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0502,
+        "oseo": 0.2563,
+        "mucosa": 1.5066
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3492,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7631
+      },
+      "I": {
+       "narina": 0.9549,
+       "valvula": {
+        "pos": 1.3751,
+        "area": 0.8001,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0657,
+        "oseo": 0.2195,
+        "mucosa": 1.8582
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7215
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 157.7908,
+      "fase": 1.2967555969728115
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 1.0432,
+       "valvula": {
+        "pos": 1.3182,
+        "area": 0.6594,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.9903,
+        "oseo": 0.2669,
+        "mucosa": 1.9949
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3458,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6057
+      },
+      "I": {
+       "narina": 1.0232,
+       "valvula": {
+        "pos": 1.3805,
+        "area": 0.6234,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2504,
+        "oseo": 0.3881,
+        "mucosa": 1.3788
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6784
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 123.9136,
+      "fase": 2.349922948683182
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 1.0221,
+       "valvula": {
+        "pos": 1.322,
+        "area": 0.6727,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.9663,
+        "oseo": 0.3219,
+        "mucosa": 1.6535
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.26,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.6076
+      },
+      "I": {
+       "narina": 0.9489,
+       "valvula": {
+        "pos": 1.3566,
+        "area": 0.6523,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.341,
+        "oseo": 0.4464,
+        "mucosa": 1.5995
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7003
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 154.1939,
+      "fase": 4.718260555702226
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    },
+    {
+     "nombre": "Mixta: desviación y cornetes",
+     "cuadro": "mixta",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 1.0062,
+       "valvula": {
+        "pos": 1.3455,
+        "area": 0.6389,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1634,
+        "oseo": 0.3495,
+        "mucosa": 1.5454
+       },
+       "desviacion": {
+        "pos": 1.55,
+        "area": 0.3764,
+        "ancho": 0.8
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7288
+      },
+      "I": {
+       "narina": 1.0116,
+       "valvula": {
+        "pos": 1.3332,
+        "area": 0.5994,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1583,
+        "oseo": 0.2313,
+        "mucosa": 1.8062
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.7789
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 112.5063,
+      "fase": 2.0850127616534246
+     },
+     "perforacion": {
+      "pos": 1.6,
+      "area": 0.0
+     }
+    }
+   ]
+  },
+  "perforacion": {
+   "nombre": "Perforación septal",
+   "descripcion": "Perforación anterior del tabique. La rinomanometría anterior deja de ser válida: el tubo de presión ya no lee la rinofaringe.",
+   "tipo": {
+    "nombre": "Perforación septal",
+    "cuadro": "perforacion",
+    "semilla": null,
+    "lados": {
+     "D": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.3
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     },
+     "I": {
+      "narina": 1.0,
+      "valvula": {
+       "pos": 1.3,
+       "area": 0.65,
+       "colapso": 0.08
+      },
+      "cornete": {
+       "pos": 3.2,
+       "oseo": 0.3,
+       "mucosa": 1.3
+      },
+      "desviacion": {
+       "pos": 1.9,
+       "area": 0,
+       "ancho": 1.0
+      },
+      "meato": 0.5,
+      "polipos": 0,
+      "congestion": 0.4
+     }
+    },
+    "ciclo": {
+     "amplitud": 0.3,
+     "periodo": 150,
+     "fase": 0
+    },
+    "perforacion": {
+     "pos": 1.25,
+     "area": 0.6
+    }
+   },
+   "variantes": [
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 1,
+     "lados": {
+      "D": {
+       "narina": 0.9849,
+       "valvula": {
+        "pos": 1.3896,
+        "area": 0.5932,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.4032,
+        "oseo": 0.278,
+        "mucosa": 1.399
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3579
+      },
+      "I": {
+       "narina": 1.0861,
+       "valvula": {
+        "pos": 1.3308,
+        "area": 0.6722,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3684,
+        "oseo": 0.2954,
+        "mucosa": 1.4403
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3518
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 86.1741,
+      "fase": 0.6980282630618333
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.5491
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 2,
+     "lados": {
+      "D": {
+       "narina": 0.9986,
+       "valvula": {
+        "pos": 1.3481,
+        "area": 0.6199,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1545,
+        "oseo": 0.2662,
+        "mucosa": 1.261
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3929
+      },
+      "I": {
+       "narina": 1.02,
+       "valvula": {
+        "pos": 1.2076,
+        "area": 0.6137,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1359,
+        "oseo": 0.3427,
+        "mucosa": 1.2917
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4059
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 110.8212,
+      "fase": 0.2931055177298828
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.5918
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 3,
+     "lados": {
+      "D": {
+       "narina": 0.9767,
+       "valvula": {
+        "pos": 1.3577,
+        "area": 0.7053,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1179,
+        "oseo": 0.3391,
+        "mucosa": 1.2493
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3271
+      },
+      "I": {
+       "narina": 0.9318,
+       "valvula": {
+        "pos": 1.1043,
+        "area": 0.6434,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.0413,
+        "oseo": 0.2869,
+        "mucosa": 1.4595
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4537
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 86.2335,
+      "fase": 2.141584368465064
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.556
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 4,
+     "lados": {
+      "D": {
+       "narina": 1.0954,
+       "valvula": {
+        "pos": 1.3475,
+        "area": 0.5959,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1544,
+        "oseo": 0.275,
+        "mucosa": 1.3529
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.2944
+      },
+      "I": {
+       "narina": 0.9158,
+       "valvula": {
+        "pos": 1.2428,
+        "area": 0.6126,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.038,
+        "oseo": 0.3124,
+        "mucosa": 1.2996
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.517
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 111.9004,
+      "fase": 6.179440082643132
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.5133
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 5,
+     "lados": {
+      "D": {
+       "narina": 1.0723,
+       "valvula": {
+        "pos": 1.2994,
+        "area": 0.6913,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2577,
+        "oseo": 0.3148,
+        "mucosa": 1.1522
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.2759
+      },
+      "I": {
+       "narina": 0.9031,
+       "valvula": {
+        "pos": 1.2396,
+        "area": 0.6215,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.148,
+        "oseo": 0.3369,
+        "mucosa": 1.3208
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3621
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 117.8029,
+      "fase": 5.460358251598542
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.6046
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 6,
+     "lados": {
+      "D": {
+       "narina": 0.9694,
+       "valvula": {
+        "pos": 1.411,
+        "area": 0.6677,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1925,
+        "oseo": 0.3478,
+        "mucosa": 1.2195
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4373
+      },
+      "I": {
+       "narina": 0.9192,
+       "valvula": {
+        "pos": 1.2778,
+        "area": 0.5997,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.2303,
+        "oseo": 0.222,
+        "mucosa": 1.1795
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4518
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 102.4849,
+      "fase": 0.9159924565682377
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.6177
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 7,
+     "lados": {
+      "D": {
+       "narina": 1.0032,
+       "valvula": {
+        "pos": 1.3415,
+        "area": 0.6466,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.1429,
+        "oseo": 0.4094,
+        "mucosa": 1.2503
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4277
+      },
+      "I": {
+       "narina": 1.0588,
+       "valvula": {
+        "pos": 1.3695,
+        "area": 0.6264,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.3379,
+        "oseo": 0.3346,
+        "mucosa": 1.1955
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.379
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 173.1493,
+      "fase": 1.5819730062913169
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.5927
+     }
+    },
+    {
+     "nombre": "Perforación septal",
+     "cuadro": "perforacion",
+     "semilla": 8,
+     "lados": {
+      "D": {
+       "narina": 1.1095,
+       "valvula": {
+        "pos": 1.2654,
+        "area": 0.6123,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 3.222,
+        "oseo": 0.2483,
+        "mucosa": 1.2866
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.3973
+      },
+      "I": {
+       "narina": 1.0902,
+       "valvula": {
+        "pos": 1.2652,
+        "area": 0.7284,
+        "colapso": 0.08
+       },
+       "cornete": {
+        "pos": 2.951,
+        "oseo": 0.2815,
+        "mucosa": 1.4874
+       },
+       "desviacion": {
+        "pos": 1.9,
+        "area": 0.0,
+        "ancho": 1.0
+       },
+       "meato": 0.5,
+       "polipos": 0.0,
+       "congestion": 0.4626
+      }
+     },
+     "ciclo": {
+      "amplitud": 0.3,
+      "periodo": 208.6383,
+      "fase": 3.96275388874273
+     },
+     "perforacion": {
+      "pos": 1.25,
+      "area": 0.6145
+     }
+    }
+   ]
+  }
+ }
+}

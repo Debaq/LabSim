@@ -419,6 +419,11 @@ final class CaseForm
         $vempOd = self::parseVemp($v, 'od');
         $vempOi = self::parseVemp($v, 'oi');
 
+        // Nariz de los equipos nasales (demo interna). El hidden viaja para
+        // todos, también para el docente que no ve la ficha: ver parseNasal.
+        $nasalError = null;
+        $nasal = self::parseNasal($v['nasal_json'] ?? '', $nasalError);
+
         // Edad 0 es válida SI viene la edad exacta: es un recién nacido o un
         // lactante, no un campo sin llenar. Sin esa excepción no se podía
         // guardar ningún caso de maternidad -- el formulario los rechazaba
@@ -459,6 +464,8 @@ final class CaseForm
             $error = $soaeError;
         } elseif (!in_array($vempOd['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true) || !in_array($vempOi['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true)) {
             $error = 'Patología VEMP inválida.';
+        } elseif ($nasalError !== null) {
+            $error = $nasalError;
         } elseif (($neuralError = CaseBuilder::neuralParamsError($abrOd['neural'], 'OD')
                 ?? CaseBuilder::neuralParamsError($abrOi['neural'], 'OI')) !== null) {
             $error = $neuralError;
@@ -600,6 +607,7 @@ final class CaseForm
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
                 'central' => self::parseCentral($v),
+                'nasal' => $nasal,
                 // La pasada final del docente por el Resumen: qué fichas
                 // dio por buenas. Va adentro del caso, no al lado -- ver
                 // más abajo, es lo último que bloquea el guardado.
@@ -1081,6 +1089,116 @@ final class CaseForm
                 'soae_mode' => (string) self::val($v, ['eoas', $lado, 'soae_mode'], CaseBuilder::EOAS_DEFAULTS['soae_mode']),
                 'soae_peaks' => $soaePicos,
             ];
+    }
+
+    /**
+     * La nariz de RinoSim desde el hidden `nasal_json` -> cases.data['NASAL'].
+     *
+     * Vacío (casilla apagada: el JS lo deja en blanco) es "este caso no trae
+     * nariz" y devuelve null sin error. Si trae algo, tiene que ser la
+     * estructura entera: {nombre, cuadro, semilla, lados: {D, I}, ciclo,
+     * perforacion}, con cada número finito y dentro del rango de su fila
+     * (los de CaseBuilder::nasalCuadros(), que son los PARAMETROS de la app).
+     * Un valor que no cierra da $error y null; la app descartaría el bloque
+     * entero igual (nasal.sesion.desde_caso), así que se avisa acá y no en
+     * la sala. Se guardan solo las claves conocidas.
+     *
+     * @param mixed       $raw   El texto del hidden.
+     * @param string|null $error Mensaje para el docente; null si está bien.
+     */
+    public static function parseNasal($raw, ?string &$error = null): ?array
+    {
+        $error = null;
+        $raw = is_string($raw) ? trim($raw) : '';
+        if ($raw === '') {
+            return null;
+        }
+        $json = json_decode($raw, true);
+        if (!is_array($json)) {
+            $error = 'Nariz: el paciente nasal no se pudo leer (JSON inválido).';
+            return null;
+        }
+        $tabla = CaseBuilder::nasalCuadros();
+        $numero = static function ($x): bool {
+            return (is_int($x) || is_float($x)) && is_finite((float) $x);
+        };
+        $lee = static function (array $o, string $ruta) {
+            foreach (explode('.', $ruta) as $k) {
+                if (!is_array($o) || !array_key_exists($k, $o)) {
+                    return null;
+                }
+                $o = $o[$k];
+            }
+            return $o;
+        };
+        $pon = static function (array &$o, string $ruta, $valor): void {
+            $ks = explode('.', $ruta);
+            $ultimo = array_pop($ks);
+            $ref = &$o;
+            foreach ($ks as $k) {
+                if (!isset($ref[$k]) || !is_array($ref[$k])) {
+                    $ref[$k] = [];
+                }
+                $ref = &$ref[$k];
+            }
+            $ref[$ultimo] = $valor;
+        };
+
+        $lados = [];
+        foreach (['D' => 'FND', 'I' => 'FNI'] as $lado => $rotulo) {
+            if (!is_array($json['lados'][$lado] ?? null)) {
+                $error = "Nariz: falta la fosa $rotulo.";
+                return null;
+            }
+            $out = [];
+            foreach ($tabla['parametros'] as $p) {
+                $x = $lee($json['lados'][$lado], $p['ruta']);
+                if (!$numero($x)) {
+                    $error = "Nariz: $rotulo, \"{$p['nombre']}\" tiene que ser un número.";
+                    return null;
+                }
+                if ($x < $p['min'] || $x > $p['max']) {
+                    $error = "Nariz: $rotulo, \"{$p['nombre']}\" va entre {$p['min']} y {$p['max']} (vale $x).";
+                    return null;
+                }
+                $pon($out, $p['ruta'], $x + 0);
+            }
+            $lados[$lado] = $out;
+        }
+
+        // Ciclo y perforación: las filas "extras" de la tabla. La fase del
+        // ciclo no es una fila (la sortea la semilla): opcional, 0 si falta.
+        $resto = [];
+        foreach ($tabla['extras'] as $p) {
+            $x = $lee($json, $p['ruta']);
+            if (!$numero($x)) {
+                $error = "Nariz: \"{$p['nombre']}\" tiene que ser un número.";
+                return null;
+            }
+            if ($x < $p['min'] || $x > $p['max']) {
+                $error = "Nariz: \"{$p['nombre']}\" va entre {$p['min']} y {$p['max']} (vale $x).";
+                return null;
+            }
+            $pon($resto, $p['ruta'], $x + 0);
+        }
+        $fase = $json['ciclo']['fase'] ?? 0;
+        if (!$numero($fase)) {
+            $error = 'Nariz: la fase del ciclo nasal tiene que ser un número.';
+            return null;
+        }
+        $resto['ciclo']['fase'] = $fase + 0;
+
+        $nombre = is_string($json['nombre'] ?? null) ? trim($json['nombre']) : '';
+        $cuadro = $json['cuadro'] ?? null;
+        $semilla = $json['semilla'] ?? null;
+        return [
+            'nombre' => $nombre !== '' ? mb_substr($nombre, 0, 120) : 'Paciente editado',
+            'cuadro' => is_string($cuadro) && isset($tabla['cuadros'][$cuadro]) ? $cuadro : null,
+            'semilla' => is_int($semilla) || is_string($semilla) ? $semilla : null,
+            'lados' => $lados,
+            'ciclo' => $resto['ciclo'],
+            'perforacion' => $resto['perforacion'],
+        ];
     }
 
     /**

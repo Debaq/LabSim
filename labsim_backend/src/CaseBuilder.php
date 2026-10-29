@@ -570,6 +570,32 @@ final class CaseBuilder
         ];
     }
 
+    /**
+     * Los parámetros de la nariz de RinoSim y sus cuadros de ejemplo, para la
+     * ficha Nariz: qué número va en cada fosa (ruta, nombre, mínimo, máximo,
+     * paso), el ciclo nasal y la perforación, y por cuadro el paciente tipo
+     * más 8 variantes ya calculadas.
+     *
+     * Lo genera scripts/nasal/cuadros_backend.py desde src/nasal/modelo.py
+     * (la app lo lee de ahí); si cambia el modelo hay que regenerarlo. Vive
+     * en resources/ y no en public/ para que no se sirva por HTTP: lo leen
+     * CaseForm::parseNasal (los rangos que validan) y la ficha, vía
+     * window.CASE_CONST.nasalCuadros. Mismo mecanismo que vempNormative().
+     */
+    public static function nasalCuadros(): array
+    {
+        $path = __DIR__ . '/../resources/nasal/cuadros.json';
+        $datos = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        if (!is_array($datos)) {
+            return ['parametros' => [], 'extras' => [], 'cuadros' => []];
+        }
+        return [
+            'parametros' => $datos['parametros'] ?? [],
+            'extras' => $datos['extras'] ?? [],
+            'cuadros' => $datos['cuadros'] ?? [],
+        ];
+    }
+
     // Acumetría (diapasones 500 y 1000 Hz) -- se guarda dentro de
     // audiometría, no es tab aparte. Rinne es por oído (CA vs CO en ese
     // oído); Weber es un único resultado por frecuencia (a qué lado
@@ -1409,7 +1435,7 @@ final class CaseBuilder
         $gender = (int) $form['gender'];
         $age = (int) $form['age'];
 
-        return [
+        $data = [
             'gender' => $gender,
             'id' => (int) $form['id'],
             'Aerea' => $form['aerea'],
@@ -1493,6 +1519,13 @@ final class CaseBuilder
             'Revision' => $form['revision'] ?? [],
             'tipo' => 'normal',
         ];
+        // La nariz de los equipos nasales (demo interna, ver CaseForm::
+        // parseNasal). Sin ella no hay clave: la app lee la ausencia como
+        // "este paciente no trae nariz" y el módulo no mide.
+        if (!empty($form['nasal']) && is_array($form['nasal'])) {
+            $data['NASAL'] = $form['nasal'];
+        }
+        return $data;
     }
 
     /**
@@ -1931,6 +1964,13 @@ final class CaseBuilder
                 $ladoFormArr[$subtipo] = $subForm;
             }
             $v['vemp'][$ladoForm] = $ladoFormArr;
+        }
+
+        // La nariz, tal cual está guardada. Viaja en un hidden para todos, no
+        // solo para el admin que ve la ficha: un docente que edita un caso
+        // con nariz la devuelve en el POST y no la pierde.
+        if (is_array($data['NASAL'] ?? null)) {
+            $v['nasal_json'] = (string) json_encode($data['NASAL'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         }
 
         // Las tildes del Resumen, para que reeditar un caso ya revisado no

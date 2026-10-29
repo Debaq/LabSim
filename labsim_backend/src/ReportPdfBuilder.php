@@ -80,6 +80,12 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'RINOMANOMETRIA' || $tipo === 'RINOMETRIA') {
+            $y = self::nasalBody($pdf, $reportId, $tipo, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'AABR') {
             $y = self::aabrBody($pdf, $data, $y, $contentW);
             $y = self::technicalSection($pdf, $data, $y, $contentW);
@@ -616,6 +622,80 @@ final class ReportPdfBuilder
      * el resultado, el nivel al que se tamizó y cuántos barridos costó: con
      * eso se puede discutir el procedimiento, que es lo que se evalúa.
      */
+    /**
+     * Cuerpo de los informes nasales: los gráficos del equipo y la tabla tal
+     * como la vio el alumno. La tabla llega armada desde la app
+     * (data['tabla'] = {cabeceras, filas}, ver nasal/equipos.py): el
+     * backend no recalcula resistencias ni áreas, que salen del modelo de
+     * RinoSim y solo existe en la app.
+     */
+    private static function nasalBody(MiniPdf $pdf, int $reportId, string $tipo, array $data, float $y, float $contentW): float
+    {
+        if ($tipo === 'RINOMANOMETRIA') {
+            $imgW = ($contentW - 20) / 2;
+            $imgH = $imgW * 0.75;
+            $dibujo = false;
+            foreach ([['rm_curva', 'Presión-flujo', 0.0], ['rm_resistencia', 'Resistencia según la presión', $imgW + 20]] as [$suf, $titulo, $dx]) {
+                $ruta = ReportFile::imagePath($reportId, $suf);
+                if (is_file($ruta)) {
+                    $pdf->text(self::MARGIN + $dx, $y, $titulo, 9, true);
+                    $pdf->image($ruta, self::MARGIN + $dx, $y + 4, $imgW, $imgH);
+                    $dibujo = true;
+                }
+            }
+            if ($dibujo) {
+                $y += $imgH + 24;
+            }
+        } else {
+            $ruta = ReportFile::imagePath($reportId, 'ra_curva');
+            if (is_file($ruta)) {
+                $imgH = $contentW * 0.45;
+                $pdf->text(self::MARGIN, $y, 'Área-distancia', 9, true);
+                $pdf->image($ruta, self::MARGIN, $y + 4, $contentW, $imgH);
+                $y += $imgH + 24;
+            }
+        }
+
+        if (!empty($data['vasoconstrictor'])) {
+            $pdf->text(self::MARGIN, $y, 'Con prueba de vasoconstrictor.', 10);
+            $y += 16;
+        }
+        $tabla = is_array($data['tabla'] ?? null) ? $data['tabla'] : [];
+        $cabeceras = is_array($tabla['cabeceras'] ?? null) ? array_map('strval', $tabla['cabeceras']) : [];
+        $filas = is_array($tabla['filas'] ?? null) ? $tabla['filas'] : [];
+        if ($cabeceras !== [] && $filas !== []) {
+            $y = self::ensureSpace($pdf, $y, 40.0);
+            $pdf->text(self::MARGIN, $y, 'Resultados', 12, true);
+            $y += 18;
+            // La primera columna lleva el nombre de la fila (fosa, registro):
+            // más ancha que las de números.
+            $n = count($cabeceras);
+            $primera = min(150.0, $contentW * 0.3);
+            $resto = $n > 1 ? ($contentW - $primera) / ($n - 1) : 0.0;
+            $fila = function (array $celdas, bool $negrita) use ($pdf, $primera, $resto, &$y, $n) {
+                $x = self::MARGIN;
+                for ($i = 0; $i < $n; $i++) {
+                    $pdf->text($x, $y, (string) ($celdas[$i] ?? ''), 8, $negrita || $i === 0);
+                    $x += $i === 0 ? $primera : $resto;
+                }
+                $y += 13;
+            };
+            $fila($cabeceras, true);
+            foreach ($filas as $celdas) {
+                if (is_array($celdas)) {
+                    $y = self::ensureSpace($pdf, $y, 14.0);
+                    $fila($celdas, false);
+                }
+            }
+            $y += 8;
+        }
+        foreach (is_array($data['avisos'] ?? null) ? $data['avisos'] : [] as $aviso) {
+            $y = $pdf->textBlock(self::MARGIN, $y, '• ' . (string) $aviso, $contentW, 9);
+            $y += 2;
+        }
+        return $y + 10;
+    }
+
     private static function aabrBody(MiniPdf $pdf, array $data, float $y, float $contentW): float
     {
         $pdf->text(self::MARGIN, $y, 'Resultado del tamizaje', 13, true);
@@ -1111,6 +1191,8 @@ final class ReportPdfBuilder
             'MMN' => 'Negatividad de disparidad (MMN)',
             'ASSR' => 'Potenciales de estado estable (ASSR)',
             'OTOSCOPIA' => 'Otoscopia',
+            'RINOMANOMETRIA' => 'Rinomanometría anterior',
+            'RINOMETRIA' => 'Rinometría acústica',
         ];
         return $etiquetas[$tipo] ?? $tipo;
     }

@@ -1478,7 +1478,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     # Informes de examen (ver core/report_autosave.py)
     # -----------------------------------------------------------------
 
-    _ATTRS_EXAMEN = ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas", "subw_ot")
+    _ATTRS_EXAMEN = ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas", "subw_ot",
+                     "subw_rm", "subw_ra")
 
     def _modulos_examen(self):
         return [getattr(self, a).obj for a in self._ATTRS_EXAMEN
@@ -1508,7 +1509,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     # El ABR recupera lo suyo solo (AbrMainWindow.restore_current), junto
     # con la lista de sesiones anteriores.
     _TIPO_POR_MODULO = {"subw_aabr": "AABR", "subw_vemp": "VEMP",
-                        "subw_eoas": "EOA", "subw_ot": "OTOSCOPIA"}
+                        "subw_eoas": "EOA", "subw_ot": "OTOSCOPIA",
+                        "subw_rm": "RINOMANOMETRIA", "subw_ra": "RINOMETRIA"}
 
     def _recuperar_informes(self, key):
         """Retomar una atención: vuelve lo que ya se había guardado solo."""

@@ -29,6 +29,8 @@ final class ReportFile
         'MMN' => 'Negatividad de disparidad (MMN)',
         'ASSR' => 'Potenciales de estado estable (ASSR)',
         'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
+        'RINOMANOMETRIA' => 'Rinomanometría anterior',
+        'RINOMETRIA' => 'Rinometría acústica',
     ];
 
     /** Rótulo corto, para una celda de tabla. */
@@ -44,6 +46,8 @@ final class ReportFile
         'MMN' => 'MMN',
         'ASSR' => 'ASSR',
         'OTOSCOPIA' => 'Otoscopia',
+        'RINOMANOMETRIA' => 'Rinomanometría',
+        'RINOMETRIA' => 'Rinometría',
     ];
 
     public static function dir(): string

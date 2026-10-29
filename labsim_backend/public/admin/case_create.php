@@ -25,6 +25,10 @@ require_once __DIR__ . '/../../src/Sala.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
+// Fichas con CaseReview::TABS[..]['solo_admin'] (la Nariz, demo interna de
+// los equipos nasales): se dibujan solo con permission 777. Un docente (555)
+// no las ve, pero el hidden nasal_json sí viaja en su formulario.
+$esAdminCompleto = (int) ($me['permission'] ?? 0) === Auth::PERMISSION_ADMIN;
 
 // Editar un caso existente: ?edit=<id> precarga el formulario con lo ya
 // guardado (reverso de CaseBuilder::buildCaseData). En un POST el id viaja
@@ -448,6 +452,9 @@ admin_add_js('case/profile-preview.js');
 admin_add_js('case/abr.js');
 admin_add_js('case/oae.js');
 admin_add_js('case/vemp.js');
+if ($esAdminCompleto) {
+    admin_add_js('case/nariz.js');
+}
 admin_add_js('case/patient-photo.js');
 admin_add_js('case/sala.js');
 admin_add_js('case/otoscopia.js');
@@ -520,6 +527,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php else: ?><input type="hidden" name="upload_temp_id" value="<?= htmlspecialchars($uploadTempId) ?>">
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
+<?php // La nariz del caso (cases.data['NASAL']), para todos: la ficha Nariz es solo del admin, pero un docente que edita un caso con nariz la devuelve en el POST y no la pierde (ver CaseForm::parseNasal). ?>
+<input type="hidden" id="nasal-json" name="nasal_json" value="<?= htmlspecialchars((string) ($v['nasal_json'] ?? '')) ?>">
 <?php
 // La barra sale de CaseReview::TABS (misma fuente que usa el Resumen para
 // listar las fichas): escrita a mano acá, el Resumen podía listar una ficha
@@ -529,6 +538,7 @@ $tabsGrupoActual = null;
 ?>
 <div class="tabs" role="tablist">
 <?php foreach (CaseReview::TABS as $tabKey => $tabMeta): ?>
+    <?php if (!empty($tabMeta['solo_admin']) && !$esAdminCompleto) { continue; } ?>
     <?php if ($tabMeta['grupo'] !== $tabsGrupoActual): ?>
         <?= $tabsGrupoActual === null ? '' : "</div>\n    </div>" ?>
     <div class="tab-group">
@@ -560,6 +570,7 @@ $tabsGrupoActual = null;
 <?php include __DIR__ . '/../../views/case/_eoas.php'; ?>
 <?php include __DIR__ . '/../../views/case/_vemp.php'; ?>
 <?php include __DIR__ . '/../../views/case/_tinnitus.php'; ?>
+<?php if ($esAdminCompleto) { include __DIR__ . '/../../views/case/_nariz.php'; } ?>
 <?php include __DIR__ . '/../../views/case/_anamnesis.php'; ?>
 <?php include __DIR__ . '/../../views/case/_resumen.php'; ?>
 
@@ -662,6 +673,8 @@ window.CASE_CONST = <?= json_encode([
     // se puede pedir por HTTP, viaja serializado acá, igual que el banco de
     // nombres) -- lo usa la vista previa de la ficha VEMP.
     'vempNormative' => CaseBuilder::vempNormative(),
+    // Cuadros de RinoSim de la ficha Nariz; solo el admin la dibuja.
+    'nasalCuadros' => $esAdminCompleto ? CaseBuilder::nasalCuadros() : null,
     'vempBaselineOverride' => $vempBaselineOverride,
     'escenarios' => CaseProfile::SCENARIOS,
     // Qué se le puede ofrecer a esta edad y qué va primero en el turno del

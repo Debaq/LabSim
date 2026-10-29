@@ -13,6 +13,9 @@
    estables, no hash()).
 7. La pestaña "Lo que el equipo no sabe" es solo para docente/admin.
 8. El minuto del ciclo corre con el reloj de la sesión.
+9. El informe: sin mediciones o sin atención real no hay nada que subir;
+   con mediciones sube la tabla que se ve, cómo se tomó cada medición y las
+   imágenes, y al retomar la atención las mediciones vuelven idénticas.
 """
 
 import os
@@ -124,7 +127,7 @@ def test_verdad_solo_docente():
     assert RinomanometriaWindow(data_login={'permission': 555}).verdad is not None
     alumno = RinometriaWindow(data_login=ALUMNO)
     assert alumno.verdad is None and alumno.chk_verdad is None
-    assert alumno.tabs.count() == 1
+    assert [alumno.tabs.tabText(i) for i in range(alumno.tabs.count())] == ['Registro', 'Informe']
 
 
 def test_minuto_corre_con_el_reloj():
@@ -134,6 +137,70 @@ def test_minuto_corre_con_el_reloj():
     t[0] += 30 * 60
     assert s.minuto() == m0 + 30
     assert 0 <= s.minuto_llegada < 150
+
+
+def esperar(w):
+    while w.midiendo:
+        context.app.processEvents()
+        w.tarea.esperar(20)
+    context.app.processEvents()
+
+
+def test_informe_y_retomar():
+    data = caso('cornetes')
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super(data, '123')
+    assert w.report_job() is None
+    medir(w, 'D')
+    medir(w, 'I')
+    w._vasoconstrictor()
+    medir(w, 'D')
+    w.txt_conclusion.setPlainText('Obstrucción derecha que mejora con VC.')
+    job = w.report_job()
+    assert job['tipo'] == 'RINOMANOMETRIA' and job['appointment_id'] == 123
+    d = job['data']
+    assert d['vasoconstrictor'] and len(d['mediciones']) == 3
+    assert d['tabla']['filas'][-1][0] == 'Total'
+    imagenes = job['images']()
+    assert set(imagenes) == {'rm_curva', 'rm_resistencia'}
+    assert all(os.path.getsize(r) > 1000 for r in imagenes.values())
+
+    # Otra vuelta de la misma atención (la app se cerró): vuelve todo igual.
+    sesion._actual = None
+    otra = RinomanometriaWindow(data_login=ADMIN)
+    otra.la_super(data, '123')
+    assert otra.restore_report(d)
+    esperar(otra)
+    for fase, lado in (('reposo', 'D'), ('reposo', 'I'), ('vc', 'D')):
+        assert otra.res[fase][lado]['lecturas'] == w.res[fase][lado]['lecturas'], (fase, lado)
+    assert otra.sesion.vc and otra.txt_conclusion.toPlainText().startswith('Obstrucción')
+    assert not otra.restore_report(d)   # ya tiene mediciones: no pisa
+
+    # Prueba del docente (sin cita): no sube nada.
+    prueba = RinomanometriaWindow(data_login=ADMIN)
+    prueba.la_super(data, None)
+    medir(prueba, 'D')
+    assert prueba.report_job() is None
+
+
+def test_informe_rinometria():
+    data = caso('mixta')
+    w = RinometriaWindow(data_login=ADMIN)
+    w.la_super(data, '77')
+    w._calibrar()
+    medir(w, 'D')
+    w._vasoconstrictor()
+    medir(w, 'D')
+    d = w.report_job()['data']
+    assert d['calibrado'] and any(a.startswith('Cambio con vasoconstrictor FND') for a in d['avisos'])
+    assert set(w.report_job()['images']()) == {'ra_curva'}
+    sesion._actual = None
+    otra = RinometriaWindow(data_login=ADMIN)
+    otra.la_super(data, '77')
+    otra.restore_report(d)
+    esperar(otra)
+    assert otra.calibrado
+    assert otra.res['vc']['D']['promedio'] == w.res['vc']['D']['promedio']
 
 
 if __name__ == '__main__':

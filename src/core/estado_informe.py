@@ -14,7 +14,8 @@ from PySide6.QtWidgets import QLabel
 # Rótulo corto por tipo, para el módulo que sube más de uno (ABR + ECochG).
 ROTULOS = {"ABR": "ABR", "ELECTROCOCLEO": "ECochG", "AABR": "AABR",
            "EOA": "EOA", "VEMP": "VEMP", "OTOSCOPIA": "Otoscopia",
-           "PEALM": "PEALM", "CAEP": "CAEP", "P300": "P300", "MMN": "MMN", "ASSR": "ASSR"}
+           "PEALM": "PEALM", "CAEP": "CAEP", "P300": "P300", "MMN": "MMN", "ASSR": "ASSR",
+           "RINOMANOMETRIA": "Rinomanometría", "RINOMETRIA": "Rinometría"}
 
 
 class EstadoInforme(QLabel):
