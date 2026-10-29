@@ -374,8 +374,15 @@ class Agenda(QWidget, Ui_Form):
         self.btn_practica.toggled.connect(self._on_toggle_practica)
         self._icono_vista_activa()
         self.btn_practica.toggled.connect(lambda _c: self._icono_vista_activa())
-        fila_titulo.addWidget(self.btn_vista_agenda)
-        fila_titulo.addWidget(self.btn_practica)
+        # Pegados, como un solo control: el de la derecha se monta un píxel
+        # sobre el otro (margin-left: -1px en vista.QSS_AGENDA) para compartir
+        # la línea. Con el espacio de la fila entre ellos, esa línea no
+        # existía y a "Práctica libre" le faltaba el borde izquierdo.
+        segmentado = QHBoxLayout()
+        segmentado.setSpacing(0)
+        segmentado.addWidget(self.btn_vista_agenda)
+        segmentado.addWidget(self.btn_practica)
+        fila_titulo.addLayout(segmentado)
         col.addLayout(fila_titulo)
 
         fila_filtros = QHBoxLayout()
