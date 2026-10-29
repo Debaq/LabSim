@@ -7039,3 +7039,8 @@ Resumen para leer: `docs/audiometria_previa.md`.
   lo más una palabra suelta) e interrumpe 0, y la mamá contesta por él
   (interrumpe 85). En prod (respaldo `labsim_2026-10-29_162720.sqlite`) y en
   `generados/h13_nino_tea.json` del libro.
+- Lo mismo para Adrián (cap. 10 GJB2, ficha 73, 3 años, hipoacusia severa,
+  frases de dos palabras): la mamá estaba como "callada, deja hablar al
+  paciente". Respaldo `labsim_2026-10-29_165221.sqlite`; libro
+  `generados/cap10_gjb2.json`. Los demás niños de 3 a 7 años de la práctica
+  tienen acompañantes que ya contestan o el niño puede hablar.
