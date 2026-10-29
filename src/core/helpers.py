@@ -278,6 +278,14 @@ class CasesOffline():
         _cases_snapshot = deepcopy(data)
         return data
 
+    @staticmethod
+    def en_memoria(case_id) -> dict | None:
+        """El caso tal como llegó en el último get_cases(), sin ir a la red
+        (None si todavía no se pidió). Para lo que se refresca a cada clic,
+        como la ficha que sigue a la fila elegida en la agenda."""
+        caso = _cases_snapshot.get(case_id)
+        return deepcopy(caso) if caso is not None else None
+
     def set_cases(self, cases:dict) -> None:
         """Guarda la base de casos compartida en el backend."""
         global _cases_snapshot

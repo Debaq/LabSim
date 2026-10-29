@@ -6910,8 +6910,17 @@ VEMP.
   19, 34…) la siguen pidiendo.
 - **En la ficha:** una entrada "Audiometría. Trae el informe." 14 días antes
   de la cita, con "Ver informe", que abre la hoja auditiva del libro
-  (audiograma con Fowler, diapasones, logo y supraliminares) en una ventana
-  no modal, para tenerla al lado mientras se examina.
+  (audiograma con Fowler, diapasones, logo y supraliminares) en su
+  subventana del MDI, `PREVIO` (`core.ficha.HojaPrevia`), para tenerla al
+  lado mientras se examina. Está en `Layout.php` (pos_z 22, sin botón ni
+  switch por curso) y main.py la agrega si el backend todavía no la manda.
+  Si la ficha pasa a otro paciente, la hoja abierta se cierra.
+- **La ficha sigue a la agenda:** con la ficha abierta, elegir otro paciente
+  la cambia sin traerla al frente (`Agenda._seguir_con_la_ficha`). El caso
+  sale de lo ya bajado (`CasesOffline.en_memoria`); si no está, se pide en
+  segundo plano y solo se muestra si la fila sigue elegida. Un paciente de
+  práctica sin intento muestra que todavía no tiene ficha, en vez de dejar la
+  del anterior.
 - **La hoja va con la app**, no con el backend: `resources/libro/previos/<ficha>.svg`,
   hecha con el motor de figuras del libro (`scripts/libro/previos.py`, desde
   `generados/` y los demo, que son los mismos datos cargados en prod). Así la

@@ -1285,6 +1285,7 @@ class Agenda(QWidget, Ui_Form):
         self._on_selection_changed_impl()
         if not self._loading:
             self._actualizar_detalle()
+            self._seguir_con_la_ficha()
 
     def _on_selection_changed_impl(self):
         if self._loading:
@@ -1528,24 +1529,34 @@ class Agenda(QWidget, Ui_Form):
                                 f"No hay conexión con el servidor. Inténtalo de nuevo.\n\n{exc}")
         self.actualizar()
 
-    def _ver_ficha_paciente(self):
+    def _fila_para_ficha(self):
+        """(fila, cita) de la ficha de lo elegido, o None si no tiene: un
+        paciente de práctica que el alumno todavía no abrió."""
         if self._selected_row_key is None:
-            return
-
+            return None
         appointment_key = self._selected_row_key
         item_practica = None
         if self._modo_practica and self.is_admin:
             item_practica = self._practica.get(appointment_key, {})
             appointment_key = self._clave_caso_practica(item_practica)
             if appointment_key is None:
-                return
+                return None
         elif self._modo_practica:
             appointment_key = self._intento_abierto(self._selected_row_key)
             if appointment_key is None or appointment_key not in self.shedule.get("agenda_1", {}):
-                return
-        row = self.shedule["agenda_1"][appointment_key]
+                return None
+        row = self.shedule.get("agenda_1", {}).get(appointment_key)
+        if row is None:
+            return None
         if item_practica:
             row = fila_de_practica(row, item_practica)
+        return row, appointment_key
+
+    def _ver_ficha_paciente(self):
+        elegido = self._fila_para_ficha()
+        if elegido is None:
+            return
+        row, appointment_key = elegido
         case_id = row.case_id or None
         if not case_id:
             QMessageBox.information(
@@ -1563,14 +1574,50 @@ class Agenda(QWidget, Ui_Form):
         debug_print(f"[agenda_ficha] case_id={case_id!r} (type={type(case_id).__name__}) "
               f"cases_keys_sample={list(cases.keys())[:10]!r} "
               f"historia_clinica={caso.get('historia_clinica')!r}")
+        self._mostrar_ficha(row, appointment_key, caso, abrir=True)
 
+    def _mostrar_ficha(self, row, appointment_key, caso, abrir):
+        metodo = "abrir_ficha_con" if abrir else "actualizar_ficha_con"
+        if self.main_window is None or not hasattr(self.main_window, metodo):
+            return
         html = render_ficha_html(row, caso, self.shedule, self._current_username(), self.is_admin)
-        if self.main_window is not None and hasattr(self.main_window, "abrir_ficha_con"):
-            cuando = f"{row.fecha} {row.hora}".strip() if row.fecha and row.hora else None
-            self.main_window.abrir_ficha_con(
-                html, lambda: self._abrir_chat_paciente(row, case_id, appointment_key),
-                (f"{row.nombre} {row.apellido}".strip(), self._datos_paciente(row.rut, row.procedimiento, cuando)),
-            )
+        cuando = f"{row.fecha} {row.hora}".strip() if row.fecha and row.hora else None
+        case_id = row.case_id
+        args = (html, lambda: self._abrir_chat_paciente(row, case_id, appointment_key),
+                (f"{row.nombre} {row.apellido}".strip(), self._datos_paciente(row.rut, row.procedimiento, cuando)))
+        getattr(self.main_window, metodo)(*args)
+
+    def _seguir_con_la_ficha(self):
+        """Con la ficha abierta, la ficha sigue al paciente que se elige en la
+        agenda. Antes quedaba la del anterior, y se leía como si fuera la del
+        nuevo. Sin red: el caso sale de lo ya bajado; si no está, se pide en
+        segundo plano y solo se muestra si la fila sigue elegida."""
+        mw = self.main_window
+        if mw is None or not hasattr(mw, "ficha_abierta") or not mw.ficha_abierta():
+            return
+        if self._selected_row_key is None:
+            return      # tabla rearmándose o sin selección: queda la que estaba
+        elegido = self._fila_para_ficha()
+        if elegido is None or not elegido[0].case_id:
+            mw.actualizar_ficha_con(
+                f'<p style="color:{tema.TEXTO_SUAVE};">'
+                + ("Este paciente todavía no tiene ficha: se abre con «Practicar»."
+                   if self._modo_practica and elegido is None
+                   else "Elige un paciente con caso clínico para ver su ficha.") + "</p>",
+                None, ("Ficha clínica", ""))
+            return
+        row, appointment_key = elegido
+        caso = CasesOffline.en_memoria(row.case_id)
+        if caso is not None:
+            self._mostrar_ficha(row, appointment_key, caso, abrir=False)
+            return
+        clave = self._selected_row_key
+
+        def _listo(cases):
+            if self._selected_row_key == clave and mw.ficha_abierta():
+                self._mostrar_ficha(row, appointment_key, cases.get(row.case_id, {}), abrir=False)
+
+        hilos.en_fondo(CasesOffline().get_cases, dueno=self, nombre="ficha", listo=_listo)
 
     def _abrir_chat_paciente(self, row, case_id, appointment_key):
         rut = row.rut

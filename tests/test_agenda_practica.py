@@ -175,8 +175,9 @@ class _MainDocente(_Main):
         self.data_login = {"user": "profe", "permission": 555}
         self.pruebas = []
 
-    def atender_paciente_prueba(self, key):
+    def atender_paciente_prueba(self, key, practica=None):
         self.pruebas.append(key)
+        self.practicas = getattr(self, "practicas", []) + [practica and practica["id"]]
         self.data_current_key = key
 
 
@@ -241,6 +242,7 @@ def test_docente_abre_la_practica_en_prueba():
     assert ag.btn_ver_ficha.isEnabled()
     ag.btn_atender.click()
     assert main.pruebas == ["case:c3"], main.pruebas
+    assert main.practicas == [2], "la prueba lleva el paciente de la carpeta, como lo ve el alumno"
     assert ag.btn_atender.text() == "Cerrar/Evolucionar", ag.btn_atender.text()
     ag.btn_atender.click()
     assert main.evoluciones == [("Ana Abarca", None)], main.evoluciones
@@ -315,6 +317,42 @@ def test_la_agenda_no_se_baja_en_el_hilo_de_la_ventana():
     ag.refresh_async()
     _primera_carga(ag)
     assert cargadas == [1]          # solo la primera vez
+
+
+class _MainConFicha(_MainDocente):
+    """La ficha abierta en el MDI: guarda lo que se le muestra."""
+
+    def __init__(self):
+        super().__init__()
+        self.fichas = []
+
+    def ficha_abierta(self):
+        return True
+
+    def actualizar_ficha_con(self, html, on_chat=None, cabecera=None):
+        self.fichas.append((cabecera[0], html))
+
+
+def test_la_ficha_abierta_sigue_al_paciente_elegido():
+    """Con la ficha abierta, elegir otro paciente en la agenda la cambia; antes
+    quedaba la del anterior. El caso sale de lo ya bajado, sin red."""
+    ag, _ = _armar_docente()
+    main = _MainConFicha()
+    ag.main_window = main
+    casos = {"c1": {}, "c4": {}, "c2": {"historia_clinica": "{{-3}} HISTORIA-ZOE"},
+             "c3": {"historia_clinica": "{{-3}} HISTORIA-ANA"}}
+    mod.CasesOffline.en_memoria = staticmethod(lambda case_id: casos.get(case_id))
+    ag.btn_practica.setChecked(True)
+    ag.tableWidget.selectRow(0)
+    ag.tableWidget.selectRow(1)
+    nombres = [n for n, _ in main.fichas]
+    assert nombres[-2:] == ["Intento Alumno", "Ana Abarca"], nombres
+    assert "HISTORIA-ANA" in main.fichas[-1][1]
+    assert "Impedanciometría" in main.fichas[-1][1], "el procedimiento de la carpeta"
+
+    ag.btn_vista_agenda.setChecked(True)
+    ag.tableWidget.selectRow(0)
+    assert main.fichas[-1][0] in ("Cita Normal", "Otro Caso"), main.fichas[-1][0]
 
 
 if __name__ == "__main__":

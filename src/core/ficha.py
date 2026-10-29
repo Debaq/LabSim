@@ -9,10 +9,10 @@ import html
 import re
 from pathlib import Path
 
-from PySide6.QtCore import QDate, QTime, QDateTime, QRectF, QSize, Qt, QUrl
-from PySide6.QtGui import QGuiApplication, QPainter, QPixmap, QTextDocument
+from PySide6.QtCore import QDate, QTime, QDateTime, QRectF, Qt, QUrl
+from PySide6.QtGui import QPainter, QPixmap, QTextDocument
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QLabel, QTextBrowser, QVBoxLayout
+from PySide6.QtWidgets import QLabel, QTextBrowser, QVBoxLayout, QWidget
 
 from core import iconos, tema
 
@@ -213,49 +213,62 @@ def poner_html(editor, html_ficha):
     editor.setHtml(html_ficha)
 
 
-def abrir_enlace(url, parent):
-    """Un enlace de la ficha: "previo:<ficha>" abre la audiometría que trae."""
+def abrir_enlace(url, editor):
+    """Un enlace de la ficha: "previo:<ficha>" abre la audiometría que trae,
+    en su subventana del MDI (main.abrir_previo)."""
     if url.scheme() != "previo":
         return
     ruta = PREVIOS_DIR / f"{url.path()}.svg"
-    if ruta.is_file():
-        VentanaPrevio(ruta, parent).show()
+    ventana = editor.window()
+    if ruta.is_file() and hasattr(ventana, "abrir_previo"):
+        ventana.abrir_previo(ruta)
 
 
-class VentanaPrevio(QDialog):
+class HojaPrevia(QWidget):
     """El informe de un examen que el paciente trae hecho, como lo dibuja el
-    libro. No es modal: se puede tener al lado mientras se examina."""
+    libro. Vive en el MDI (self.subw["PREVIO"] en main.py) para tenerlo al
+    lado mientras se examina; se dibuja al ancho de la subventana."""
 
-    def __init__(self, ruta, parent=None):
-        super().__init__(parent)
-        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        self.setWindowTitle("Audiometría que trae el paciente")
-        self.setStyleSheet(f"QDialog {{ background: {tema.TARJETA}; }}")
+    def __init__(self):
+        super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setStyleSheet(f"HojaPrevia {{ background: white; }}")
         raiz = QVBoxLayout(self)
-        raiz.setContentsMargins(16, 16, 16, 12)
-        hoja = QLabel(self)
-        hoja.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        hoja.setPixmap(self._dibujar(QSvgRenderer(str(ruta)), parent))
-        raiz.addWidget(hoja, 1)
-        botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, self)
-        botones.rejected.connect(self.close)
-        raiz.addWidget(botones)
+        raiz.setContentsMargins(8, 8, 8, 8)
+        self.hoja = QLabel(self)
+        self.hoja.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.hoja.setMinimumSize(1, 1)
+        raiz.addWidget(self.hoja, 1)
+        self.ruta = None
+        self._svg = None
 
-    @staticmethod
-    def _dibujar(svg, parent):
-        """La hoja a la mayor escala que entra en la pantalla (los PC del
-        laboratorio llegan a 1024x768), nítida en pantallas con escala."""
-        pantalla = (parent.screen() if parent is not None else None) or QGuiApplication.primaryScreen()
-        libre = pantalla.availableGeometry().size() - QSize(80, 140)
-        tam = svg.defaultSize().scaled(libre, Qt.AspectRatioMode.KeepAspectRatio)
-        escala = pantalla.devicePixelRatio()
+    def set_hoja(self, ruta):
+        self.ruta = Path(ruta)
+        self._svg = QSvgRenderer(str(ruta))
+        self._dibujar()
+
+    def ficha(self):
+        """Número de ficha de la hoja que se ve, o None."""
+        return self.ruta.stem if self.ruta else None
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._dibujar()
+
+    def _dibujar(self):
+        if self._svg is None or not self._svg.isValid():
+            return
+        tam = self._svg.defaultSize().scaled(self.hoja.size(), Qt.AspectRatioMode.KeepAspectRatio)
+        if tam.isEmpty():
+            return
+        escala = self.devicePixelRatioF()
         pixmap = QPixmap(tam * escala)
         pixmap.setDevicePixelRatio(escala)
         pixmap.fill(Qt.GlobalColor.white)
         pintor = QPainter(pixmap)
-        svg.render(pintor, QRectF(0, 0, tam.width(), tam.height()))
+        self._svg.render(pintor, QRectF(0, 0, tam.width(), tam.height()))
         pintor.end()
-        return pixmap
+        self.hoja.setPixmap(pixmap)
 
 
 def _etiqueta(texto):

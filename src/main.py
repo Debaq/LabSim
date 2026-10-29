@@ -46,7 +46,7 @@ from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
 from core import app_layout
-from core.ficha import audiometria_previa, fila_de_practica
+from core.ficha import HojaPrevia, audiometria_previa, fila_de_practica
 from core.app_layout import LayoutRetryThread, fetch_layout
 
 # Definir la raíz del proyecto
@@ -145,6 +145,12 @@ LAYOUT_SOURCE = app_layout.last_source
 # en memoria con un docente logueado (_apply_admin_overrides_if_any), y
 # comparar contra eso daba "la configuración cambió" sin haber cambiado.
 _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
+# El examen que trae el paciente (ver core.ficha.HojaPrevia). Va también en
+# Layout.php; acá queda por si el backend todavía no lo manda. Después de
+# la copia de arriba: si no, volver la red con un backend sin PREVIO se
+# leía como "la configuración cambió".
+if LAYOUT_AVAILABLE:
+    APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [760, 450], "pre"])
 
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
@@ -1220,6 +1226,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "CVOICE": FrameSubMdi(ComandosVoz(), expand=True),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")), expand=True),
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),
+            "PREVIO": FrameSubMdi(HojaPrevia(), expand=True),
             "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget(), expand=True),
             "INBOX": FrameSubMdi(inbox.InboxWidget(self), expand=True),
             "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self), expand=True),
@@ -1526,8 +1533,33 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def abrir_ficha_con(self, html, on_chat=None, cabecera=None):
         """Abre (o trae al frente) la subventana MDI de ficha clínica,
         reapuntada al paciente indicado."""
-        self.subw["FICHA"].obj.set_ficha(html, on_chat, cabecera)
+        self.actualizar_ficha_con(html, on_chat, cabecera)
         self.activate_auto("FICHA")
+
+    def actualizar_ficha_con(self, html, on_chat=None, cabecera=None):
+        """Como abrir_ficha_con, sin traerla al frente: la agenda la reapunta
+        al paciente elegido mientras está abierta. La audiometría de otro
+        paciente que quedara abierta se cierra con ella."""
+        self.subw["FICHA"].obj.set_ficha(html, on_chat, cabecera)
+        previo = self.subw.get("PREVIO")
+        ficha = previo.obj.ficha() if previo is not None else None
+        if ficha and f"previo:{ficha}\"" not in html:
+            self.close_sub_window("PREVIO")
+
+    def _subventana_visible(self, nombre):
+        frame = self.subw.get(nombre) if self.subw else None
+        sub = frame.parent() if frame is not None else None
+        return sub is not None and sub.isVisible()
+
+    def ficha_abierta(self):
+        return self._subventana_visible("FICHA")
+
+    def abrir_previo(self, ruta):
+        """El examen que trae el paciente (ver core.ficha.HojaPrevia)."""
+        if "PREVIO" not in self.apps:
+            return
+        self.subw["PREVIO"].obj.set_hoja(ruta)
+        self.activate_auto("PREVIO")
 
     def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None):
         """Abre (o trae al frente) la subventana MDI de evolución, reapuntada

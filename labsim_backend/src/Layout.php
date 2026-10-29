@@ -45,6 +45,10 @@ final class Layout
         'FICHA'      => [false, 'Ficha clínica', 18, [false, true], [480, 560], 'pre'],
         'EVOLUCION'  => [false, 'Evolución', 19, [false, true], [420, 340], 'pre'],
         'MIS_PACIENTES' => [false, 'Mis pacientes', 20, [true, true], [900, 560], 'pre'],
+        // El examen que el paciente trae hecho (la audiometría de los pacientes
+        // del libro, ver core/ficha.HojaPrevia en la app). Se abre desde la
+        // ficha, no tiene botón ni switch por curso.
+        'PREVIO'     => [false, 'Examen que trae el paciente', 22, [false, true], [760, 450], 'pre'],
     ];
 
     public const SECTORS = [
