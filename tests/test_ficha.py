@@ -314,13 +314,16 @@ def test_con_chat_los_informes_salen_cuando_el_paciente_los_entrega():
     ficha.entrega_por_chat = True
     try:
         ficha.olvidar_entregas("78")
-        assert "Trae" not in ver(), "todavía no los entrega"
+        antes = ver()
+        assert "Audiometría e impedanciometría. Informes no adjuntos." in antes, "se sabe que se los hizo"
+        assert "previo:" not in antes, "pero los informes los tiene él"
         assert "previo:78/audiometria.svgz" in ver(todos=True)
         ficha.registrar_entrega("78", ["Audiometría"])
         html = ver()
-        assert "Audiometría. Trae el informe." in html and "impedanciometria" not in html
+        assert "Audiometría e impedanciometría. Trae los informes." in html
+        assert "previo:78/audiometria.svgz" in html and "previo:78/impedanciometria" not in html
         ficha.olvidar_entregas("78")
-        assert "Trae" not in ver(), "atención nueva: los vuelve a tener en la mano"
+        assert "previo:" not in ver(), "atención nueva: los vuelve a tener en la mano"
     finally:
         ficha.entrega_por_chat = False
         ficha.olvidar_entregas("78")

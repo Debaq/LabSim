@@ -24,7 +24,7 @@ texto: no había nada que revisar.
 | Procedimiento en los capítulos que enseñan un examen | Todo lo de las figuras: "Audiometría + Impedanciometría + PEATC" | Solo lo que enseña el capítulo: "PEATC" (ver "Foco por capítulo") |
 | Procedimiento de H21 (ficha 36) | "Otoscopía + Acumetría" (el valor por defecto) | "Prueba de audífonos" |
 | Lo que el paciente trae | Nada | Los exámenes del libro que su procedimiento no nombra, en una entrada del historial: "Audiometría e impedanciometría. Trae los informes. **Ver audiometría · Ver impedanciometría**", 14 días antes de la cita (o justo después de quien los pidió, si eso fue más cerca) |
-| Cuándo aparecen en la ficha | — | Con cuenta y chat: cuando el paciente los entrega en el chat (hay que pedírselos). Sin cuenta o en un curso sin chat: desde el principio. En "Mis pacientes" (atención cerrada): enteros |
+| Cuándo aparecen en la ficha | — | La ficha dice siempre qué exámenes se hizo ("Impedanciometría y EOA. Informes no adjuntos."). Con cuenta y chat, las hojas aparecen cuando el paciente (o quien lo acompaña) las entrega en el chat: hay que pedírselas. Sin cuenta o en un curso sin chat: desde el principio. En "Mis pacientes" (atención cerrada): enteros |
 | En el chat | El paciente decía "traigo los papeles" pero no los podía pasar | Si se los piden, los entrega: aparecen como papeles en la conversación ("Te entrega sus informes: Audiometría · Impedanciometría") y entran a la ficha |
 | Exámenes que cuenta la historia | Solo texto | La línea lleva su hoja: "Audiometría de base: normal… **Ver audiometría · Ver EOA**" |
 | Tamizajes de la historia | Solo texto | Tarjeta con el resultado de cada oído ("AABR · Oído derecho: Refiere"), sin curva |

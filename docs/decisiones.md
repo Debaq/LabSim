@@ -7025,3 +7025,17 @@ Resumen para leer: `docs/audiometria_previa.md`.
   salen desde el principio. "Mis pacientes" (atención cerrada) los muestra
   enteros. Las hojas de la historia no se piden: son el registro del caso.
 - Hojas en `.svgz` (gzip con mtime 0): 1,7 MB en vez de 8,5.
+
+## La ficha dice qué exámenes trae aunque no los haya entregado (2026-10-29)
+
+- Antes de la entrega la entrada de lo que trae no salía, y sin preguntar no
+  había cómo saber que se los hizo (lo notó él con la mamá de César, H13). En
+  una ficha real se anota el examen aunque el informe lo tenga el paciente:
+  "Impedanciometría, EOA y PEATC. Informes no adjuntos." Los enlaces aparecen
+  con la entrega ("… Trae los informes.").
+- Sala de César (H13, ficha 149): el niño de 4 años con TEA contestaba
+  preguntas. Su persona no decía cómo se comporta y la mamá estaba como
+  "callada, deja hablar al paciente". Ahora él no conversa con desconocidos (a
+  lo más una palabra suelta) e interrumpe 0, y la mamá contesta por él
+  (interrumpe 85). En prod (respaldo `labsim_2026-10-29_162720.sqlite`) y en
+  `generados/h13_nino_tea.json` del libro.

@@ -232,15 +232,25 @@ def _enlace_a(examen, ruta):
 
 
 def entrada_lo_que_trae(row, caso, historia_clinica, todos=False):
-    """(días, texto, enlaces) de la entrada "Audiometría e impedanciometría.
-    Trae los informes.", o None si no trae nada."""
-    trae = examenes_que_trae(row, caso, todos)
+    """(días, texto, enlaces) de la entrada de lo que trae, o None si no trae
+    nada.
+
+    La ficha dice siempre qué exámenes se hizo: lo que falta hasta que los
+    entrega es el informe, que tiene él (o quien lo acompaña). Sin entregar:
+    "Impedanciometría y EOA. Informes no adjuntos." Entregados: "… Trae los
+    informes." con un enlace a cada uno.
+    """
+    trae = examenes_que_trae(row, caso, todos=True)
     if not trae:
         return None
+    entregados = trae if todos else examenes_que_trae(row, caso)
     nombres = _y([_nombre(e) for e, _ in trae])
-    texto = (nombres[0].upper() + nombres[1:] + ". "
-             + ("Trae el informe." if len(trae) == 1 else "Trae los informes."))
-    return dias_audiometria_previa(historia_clinica), texto, [_enlace_a(e, r) for e, r in trae]
+    if entregados:
+        cierre = "Trae el informe." if len(trae) == 1 else "Trae los informes."
+    else:
+        cierre = "Informe no adjunto." if len(trae) == 1 else "Informes no adjuntos."
+    texto = nombres[0].upper() + nombres[1:] + ". " + cierre
+    return dias_audiometria_previa(historia_clinica), texto, [_enlace_a(e, r) for e, r in entregados]
 
 
 def enlaces_de_la_historia(row, caso):
