@@ -6894,3 +6894,34 @@ quedaba rastro, así que lo más rápido era instalar a mano.
   delta no pasa, no se publica; si el completo no pasa, el build falla. La
   primera release con esto no tiene delta (la anterior no tiene
   manifest-windows): la cadena empieza en la siguiente.
+
+## Audiometría previa en la práctica libre (2026-10-29)
+
+Los pacientes del libro traen todos los exámenes y el procedimiento salía de
+las figuras del capítulo, así que casi todos decían "Audiometría + …" y en el
+chat el paciente creía que venía a eso, también en los capítulos de PEATC o
+VEMP.
+
+- **El paciente llega con la audiometría hecha** en los capítulos 9, 11, 12,
+  14, 18, 20 y 30 y en H12 (`AUDIOMETRIA_PREVIA` en
+  `scripts/libro/sql_practica.py`). Ahí el procedimiento ya no la nombra
+  (27 `practice_items` en prod, respaldo `labsim_2026-10-29_102210.sqlite`).
+  Los capítulos donde la audiometría es parte de lo que se resuelve (13, 15,
+  19, 34…) la siguen pidiendo.
+- **En la ficha:** una entrada "Audiometría. Trae el informe." 14 días antes
+  de la cita, con "Ver informe", que abre la hoja auditiva del libro
+  (audiograma con Fowler, diapasones, logo y supraliminares) en una ventana
+  no modal, para tenerla al lado mientras se examina.
+- **La hoja va con la app**, no con el backend: `resources/libro/previos/<ficha>.svg`,
+  hecha con el motor de figuras del libro (`scripts/libro/previos.py`, desde
+  `generados/` y los demo, que son los mismos datos cargados en prod). Así la
+  ve el kiosko. Se vuelve a correr si cambia un caso o el dibujo.
+- **Regla en la app** (`core.ficha.audiometria_previa`): práctica libre +
+  procedimiento sin "audiometr" + hay hoja para esa ficha. Por eso sale
+  también en las herramientas que no son de audiometría (H7, H9) cuando el
+  paciente tiene hoja, y nunca en un lactante sin audiograma en el libro ni
+  en una cita del docente: qué trae el paciente en sus prácticos lo decide él.
+- **No se bloquea nada:** si el alumno repite la audiometría, queda como una
+  atención más en su historial.
+- Falta: el chat no sabe que trae la audiometría (el prompt no lee la
+  historia clínica); si el alumno le pregunta, puede contestar que no.

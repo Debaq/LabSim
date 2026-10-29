@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView, QAbstractScrollArea,
                                 QButtonGroup, QDateEdit, QFrame, QHBoxLayout, QHeaderView,
                                 QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
-                                QStackedWidget, QTextEdit, QVBoxLayout, QCheckBox)
+                                QStackedWidget, QTextBrowser, QTextEdit, QVBoxLayout, QCheckBox)
 from PySide6.QtCore import QDate, QSize, QTime, QDateTime, Qt, QTimer
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
@@ -115,7 +115,9 @@ class FichaClinicaWidget(QWidget):
         fila.addWidget(self.btn_chat)
         raiz.addWidget(cabecera)
 
-        self.texto = QTextEdit(self)
+        # QTextBrowser y no QTextEdit: la audiometría que trae el paciente se
+        # abre con un enlace del historial (ver core/ficha.poner_html)
+        self.texto = QTextBrowser(self)
         self.texto.setObjectName("textoFicha")
         self.texto.setReadOnly(True)
         raiz.addWidget(self.texto, 1)

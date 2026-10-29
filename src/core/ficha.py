@@ -6,9 +6,12 @@ cambia de dónde sacan `shedule` (en memoria vs. recién pedido al backend)."""
 
 import html
 import re
+from pathlib import Path
 
-from PySide6.QtCore import QDate, QTime, QDateTime, QUrl
-from PySide6.QtGui import QTextDocument
+from PySide6.QtCore import QDate, QTime, QDateTime, QRectF, QSize, Qt, QUrl
+from PySide6.QtGui import QGuiApplication, QPainter, QPixmap, QTextDocument
+from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QLabel, QTextBrowser, QVBoxLayout
 
 from core import iconos, tema
 
@@ -99,14 +102,44 @@ _ORDEN_PRIMERO = QDateTime(QDate(1, 1, 1), QTime(0, 0))
 _ORDEN_ULTIMO = QDateTime(QDate(9999, 12, 31), QTime(23, 59))
 
 
-def linea_tiempo(historia_clinica, fecha_cita, historial):
+# Audiometría que el paciente del libro trae hecha: la hoja auditiva del libro,
+# una por ficha (scripts/libro/previos.py). Va con la app y no con el backend
+# para que el kiosko la vea igual que todo lo demás de la ficha.
+PREVIOS_DIR = Path("resources/libro/previos")
+# Días antes de la cita en que se hizo: lo bastante cerca para que la deriven
+# con ella, y antes que la cita a la que viene.
+PREVIA_DIAS = 14
+
+
+def audiometria_previa(row, caso):
+    """La audiometría que trae el paciente (ruta del SVG), o None.
+
+    Solo en la práctica libre y cuando el procedimiento no la nombra: el
+    paciente viene derivado a otro examen (un PEATC, un VEMP) con la
+    audiometría hecha, y no a hacérsela. Si el alumno la repite, queda como
+    una atención más en su historial. En una cita del docente no sale nunca:
+    el caso puede ser el mismo, pero qué trae el paciente lo decide él.
+    """
+    if getattr(row, "practice_id", None) is None:
+        return None
+    if "audiometr" in (getattr(row, "procedimiento", "") or "").lower():
+        return None
+    case_id = getattr(row, "case_id", None) or (caso.get("id") if isinstance(caso, dict) else None)
+    ruta = PREVIOS_DIR / f"{case_id}.svg"
+    return ruta if case_id and ruta.is_file() else None
+
+
+def linea_tiempo(historia_clinica, fecha_cita, historial, previos=()):
     """Atenciones previas del caso + atenciones cerradas, en un solo orden.
 
-    Devuelve dicts {fecha, hora, alumno, texto}: `alumno` vacío en las
-    entradas que vienen de la historia clínica del caso, que no son de
-    nadie en particular.
+    Devuelve dicts {fecha, hora, alumno, texto, enlace}: `alumno` vacío en
+    las entradas que vienen de la historia clínica del caso, que no son de
+    nadie en particular. `previos`: (días respecto a la cita, texto, enlace)
+    de los exámenes que el paciente trae hechos; `enlace` es el href que
+    abre el informe desde la ficha.
     """
     entradas = []
+    fecha_cita_q = parse_fecha_agenda(fecha_cita)
 
     for linea in resolver_fechas_historia_clinica(historia_clinica or "", fecha_cita).splitlines():
         linea = linea.strip()
@@ -117,7 +150,13 @@ def linea_tiempo(historia_clinica, fecha_cita, historial):
         texto = match.group(2).strip() if match else linea
         orden = QDateTime(QDate.fromString(fecha, "dd-MM-yyyy"), QTime(0, 0)) if fecha else None
         entradas.append((orden if orden and orden.isValid() else _ORDEN_PRIMERO,
-                         {"fecha": fecha, "hora": "", "alumno": "", "texto": texto}))
+                         {"fecha": fecha, "hora": "", "alumno": "", "texto": texto, "enlace": ""}))
+
+    for dias, texto, enlace in previos:
+        fecha_q = fecha_cita_q.addDays(dias) if fecha_cita_q.isValid() else QDate()
+        entradas.append((QDateTime(fecha_q, QTime(0, 0)) if fecha_q.isValid() else _ORDEN_PRIMERO,
+                         {"fecha": fecha_q.toString("dd-MM-yyyy") if fecha_q.isValid() else "",
+                          "hora": "", "alumno": "", "texto": texto, "enlace": enlace}))
 
     for fecha, hora_real, alumno, nota in historial:
         fecha_q = parse_fecha_agenda(fecha)
@@ -130,7 +169,8 @@ def linea_tiempo(historia_clinica, fecha_cita, historial):
         # formatos distintos de fechas distintas.
         fecha_txt = fecha_q.toString("dd-MM-yyyy") if fecha_q.isValid() else fecha
         entradas.append((orden if fecha_q.isValid() else _ORDEN_ULTIMO,
-                         {"fecha": fecha_txt, "hora": hora_real, "alumno": alumno, "texto": nota}))
+                         {"fecha": fecha_txt, "hora": hora_real, "alumno": alumno, "texto": nota,
+                          "enlace": ""}))
 
     # sorted es estable: a igual fecha, la historia del caso queda antes que
     # las atenciones, que es el orden en que se cargaron.
@@ -145,12 +185,63 @@ _ICONOS_FICHA = {"persona": tema.ACENTO, "reloj": tema.ACENTO, "libro": tema.ACE
 
 
 def poner_html(editor, html_ficha):
-    """Muestra la ficha en un QTextEdit/QTextBrowser, con sus iconos."""
+    """Muestra la ficha en un QTextBrowser, con sus iconos y sus enlaces
+    (la audiometría que trae el paciente se abre desde el historial)."""
     documento = editor.document()
     for nombre, color in _ICONOS_FICHA.items():
         documento.addResource(QTextDocument.ResourceType.ImageResource,
                               QUrl(f"ico:{nombre}"), iconos.pixmap(nombre, color, 18))
+    if isinstance(editor, QTextBrowser) and not editor.property("enlaces_ficha"):
+        # Sin esto el QTextBrowser "navega" al href y deja la ficha en blanco
+        editor.setOpenLinks(False)
+        editor.anchorClicked.connect(lambda url: abrir_enlace(url, editor))
+        editor.setProperty("enlaces_ficha", True)
     editor.setHtml(html_ficha)
+
+
+def abrir_enlace(url, parent):
+    """Un enlace de la ficha: "previo:<ficha>" abre la audiometría que trae."""
+    if url.scheme() != "previo":
+        return
+    ruta = PREVIOS_DIR / f"{url.path()}.svg"
+    if ruta.is_file():
+        VentanaPrevio(ruta, parent).show()
+
+
+class VentanaPrevio(QDialog):
+    """El informe de un examen que el paciente trae hecho, como lo dibuja el
+    libro. No es modal: se puede tener al lado mientras se examina."""
+
+    def __init__(self, ruta, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        self.setWindowTitle("Audiometría que trae el paciente")
+        self.setStyleSheet(f"QDialog {{ background: {tema.TARJETA}; }}")
+        raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(16, 16, 16, 12)
+        hoja = QLabel(self)
+        hoja.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hoja.setPixmap(self._dibujar(QSvgRenderer(str(ruta)), parent))
+        raiz.addWidget(hoja, 1)
+        botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, self)
+        botones.rejected.connect(self.close)
+        raiz.addWidget(botones)
+
+    @staticmethod
+    def _dibujar(svg, parent):
+        """La hoja a la mayor escala que entra en la pantalla (los PC del
+        laboratorio llegan a 1024x768), nítida en pantallas con escala."""
+        pantalla = (parent.screen() if parent is not None else None) or QGuiApplication.primaryScreen()
+        libre = pantalla.availableGeometry().size() - QSize(80, 140)
+        tam = svg.defaultSize().scaled(libre, Qt.AspectRatioMode.KeepAspectRatio)
+        escala = pantalla.devicePixelRatio()
+        pixmap = QPixmap(tam * escala)
+        pixmap.setDevicePixelRatio(escala)
+        pixmap.fill(Qt.GlobalColor.white)
+        pintor = QPainter(pixmap)
+        svg.render(pintor, QRectF(0, 0, tam.width(), tam.height()))
+        pintor.end()
+        return pixmap
 
 
 def _etiqueta(texto):
@@ -174,6 +265,14 @@ def _seccion(icono, titulo, cuerpo):
         '<table width="100%" cellspacing="0" cellpadding="12" '
         f'style="background-color:{tema.TARJETA}; border:1px solid {tema.BORDE};"><tr><td>'
         f'{cuerpo}</td></tr></table><p style="margin:0;">&nbsp;</p>')
+
+
+def _enlace(href):
+    """"Ver informe" al final de una entrada del historial que lo tiene."""
+    if not href:
+        return ""
+    return (f' <a href="{html.escape(href)}" style="color:{tema.ACENTO}; font-weight:700;">'
+            'Ver informe</a>')
 
 
 def _pastilla(texto, color):
@@ -235,9 +334,13 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     # Antes quedaba la llave a la vista, con "sin fecha" al lado.
     fecha_base = (row.fecha if parse_fecha_agenda(row.fecha).isValid()
                   else QDate.currentDate().toString("dd-MM-yy"))
+    previa = audiometria_previa(row, caso)
+    previos = [(-PREVIA_DIAS, "Audiometría. Trae el informe.",
+                f"previo:{previa.stem}")] if previa else []
     entradas = linea_tiempo(historia_clinica, fecha_base,
                             historial_atenciones(shedule, row.rut, username, is_admin,
-                                                 getattr(row, "practice_id", None) is not None))
+                                                 getattr(row, "practice_id", None) is not None),
+                            previos)
 
     if entradas:
         # Escapado: son textos libres (historia del caso, nota del alumno) y
@@ -262,7 +365,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
                 f'<span style="font-weight:700; color:{tema.ACENTO};">'
                 f'{html.escape(e["fecha"] or "sin fecha")}</span>{hora}</td>'
                 f'<td valign="top" bgcolor="{fondo}" style="border-top:1px solid {tema.GRILLA};">'
-                f'{quien}{html.escape(e["texto"] or "sin comentario")}</td></tr>')
+                f'{quien}{html.escape(e["texto"] or "sin comentario")}{_enlace(e["enlace"])}</td></tr>')
         cuerpo = ('<table width="100%" cellspacing="0" cellpadding="8">' + "".join(filas) + "</table>")
     else:
         cuerpo = (f'<span style="color:{tema.TEXTO_SUAVE};">'

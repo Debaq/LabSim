@@ -102,6 +102,10 @@ Libro: `~/Escritorio/Proyectos/libro-orl`.
   La app deja hacer cualquier examen a cualquier edad (una audiometría
   tonal a un recién nacido "responde"): elegir el que corresponde es parte
   de lo que se evalúa.
+- [x] **Audiometría previa (2026-10-29).** En los caps. 9, 11, 12, 14, 18,
+  20, 30 y H12 el paciente llega con la audiometría hecha: el procedimiento
+  no la nombra y la ficha la muestra con "Ver informe" (hoja del libro en
+  `resources/libro/previos`, `scripts/libro/previos.py`). Ver decisiones.md.
 - [ ] **F2. Llenar las carpetas con el libro.** Importar los casos del libro
   al backend (fichas con clave fija) y crear una carpeta por capítulo con
   sus pacientes en el orden del libro, por la consola o un script. Las

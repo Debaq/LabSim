@@ -8,6 +8,7 @@ tres o cuatro atenciones previas quedaban como un párrafo corrido.
 """
 
 import os
+import pathlib
 import sys
 
 SRC = os.path.join(os.path.dirname(__file__), '..', 'src')
@@ -182,6 +183,65 @@ def test_practica_y_practicos_no_se_mezclan_en_el_historial():
     otra.practice_id = 4
     html_intento = render_ficha_html(otra, {}, shedule, "alumno1", False)
     assert "NOTA-PRACTICA" in html_intento and "NOTA-PRACTICO" not in html_intento
+
+
+def _con_previos(fn):
+    """Corre fn con PREVIOS_DIR absoluto: la app lo abre relativo a su carpeta."""
+    from core import ficha
+    antes = ficha.PREVIOS_DIR
+    ficha.PREVIOS_DIR = pathlib.Path(__file__).resolve().parents[1] / "resources/libro/previos"
+    try:
+        return fn()
+    finally:
+        ficha.PREVIOS_DIR = antes
+
+
+def _intento_libro(procedimiento, case_id="78"):
+    row = FilaFalsa()
+    row.practice_id = 7
+    row.case_id = case_id
+    row.procedimiento = procedimiento
+    return row
+
+
+def test_el_paciente_del_libro_trae_la_audiometria_si_no_viene_a_eso():
+    """Cap. 11: viene al PEATC con la audiometría hecha, y se abre desde el historial."""
+    html = _con_previos(lambda: render_ficha_html(
+        _intento_libro("Impedanciometría + PEATC"), {}, {"agenda_1": {}}, "alumno1", False))
+    assert 'href="previo:78"' in html, html
+    assert "27-08-2026" in html, "14 días antes de la cita del 10-09-26"
+
+
+def test_no_trae_audiometria_si_viene_a_hacersela():
+    html = _con_previos(lambda: render_ficha_html(
+        _intento_libro("Audiometría + Impedanciometría + PEATC"), {}, {"agenda_1": {}}, "alumno1", False))
+    assert "previo:" not in html
+
+
+def test_en_una_cita_del_docente_no_aparece_la_audiometria_del_libro():
+    """El mismo caso agendado por el docente: lo que trae lo decide él."""
+    row = _intento_libro("PEATC")
+    row.practice_id = None
+    html = _con_previos(lambda: render_ficha_html(row, {}, {"agenda_1": {}}, "alumno1", False))
+    assert "previo:" not in html
+
+
+def test_sin_hoja_del_libro_no_hay_audiometria_previa():
+    """Un recién nacido del cap. 16 no trae audiometría tonal: el libro no la tiene."""
+    html = _con_previos(lambda: render_ficha_html(
+        _intento_libro("Impedanciometría + EOA + PEATC", case_id="105"), {}, {"agenda_1": {}}, "alumno1", False))
+    assert "previo:" not in html
+
+
+def test_las_hojas_previas_las_lee_qtsvg():
+    from PySide6.QtSvg import QSvgRenderer
+    from PySide6.QtWidgets import QApplication
+    QApplication.instance() or QApplication([])
+    carpeta = pathlib.Path(__file__).resolve().parents[1] / "resources/libro/previos"
+    hojas = sorted(carpeta.glob("*.svg"))
+    assert hojas
+    for hoja in hojas:
+        assert QSvgRenderer(str(hoja)).isValid(), hoja.name
 
 
 if __name__ == "__main__":

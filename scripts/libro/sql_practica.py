@@ -27,9 +27,19 @@ q = lambda s: "'" + str(s).replace("'", "''") + "'"
 CON_ASSR = {'h13_lactante', 'h13_nino_tea', 'cap28_no_colabora'}
 
 
-def procedimiento(figs, clave=''):
+# Capítulos en los que el paciente llega con la audiometría hecha: viene
+# derivado a otro examen y la trae en la ficha (resources/libro/previos, ver
+# scripts/libro/previos.py). El procedimiento no la nombra, para que el
+# paciente no crea que viene a eso; hacerla igual queda como repetición.
+AUDIOMETRIA_PREVIA = {9, 11, 12, 14, 18, 20, 30, 'H12'}
+AUDIOMETRIA = {'audiosupra', 'audiograma', 'logoaudiometria'}
+
+
+def procedimiento(figs, clave='', cap=None):
+    if cap in AUDIOMETRIA_PREVIA:
+        figs = [f for f in figs if f not in AUDIOMETRIA]
     if clave in CON_ASSR:
-        return procedimiento(figs) + ' + ASSR'
+        return _procedimiento(figs) + ' + ASSR'
     return _procedimiento(figs)
 
 
@@ -86,7 +96,7 @@ for cap in cat:
             snap = dict(data['paciente_snapshot'])
             if p['clave'] in RUT_NUEVO:
                 snap['rut'] = RUT_NUEVO[p['clave']]
-            snap['procedimiento'] = procedimiento(p['figuras'], p['clave'])
+            snap['procedimiento'] = procedimiento(p['figuras'], p['clave'], cap['cap'])
             data['paciente_snapshot'] = snap
             data['id'] = int(case_id)
             sql.append(
@@ -99,7 +109,7 @@ for cap in cat:
                 f"({q(case_id)}, {q(json.dumps(data, ensure_ascii=False))}, CURRENT_TIMESTAMP, "
                 f"(SELECT id FROM patients WHERE rut = {q(snap['rut'])}), CURRENT_TIMESTAMP, {ADMIN}, {ADMIN}, "
                 "(SELECT id FROM case_folders WHERE name = 'Libro' COLLATE NOCASE));")
-        filas.append((case_id, p['clave'], procedimiento(p['figuras'], p['clave']), p['n']))
+        filas.append((case_id, p['clave'], procedimiento(p['figuras'], p['clave'], cap['cap']), p['n']))
     sql.append(f"INSERT INTO practice_folders (nombre, orden, created_by) SELECT {q(carpeta)}, {orden_carpeta}, {ADMIN} "
                f"WHERE NOT EXISTS (SELECT 1 FROM practice_folders WHERE nombre = {q(carpeta)} AND active = 1);")
     for case_id, clave, proc, orden in filas:
