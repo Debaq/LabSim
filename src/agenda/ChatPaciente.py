@@ -570,14 +570,11 @@ class ChatPacienteWidget(QWidget):
         col.setContentsMargins(12, 8, 12, 10)
         col.setSpacing(6)
         col.addWidget(QLabel("Te entrega " + ("su informe" if len(examenes) == 1 else "sus informes")))
-        fila_botones = QHBoxLayout()
-        fila_botones.setSpacing(6)
+        # Uno debajo del otro: en fila, con tres o más se salían del chat angosto
         for examen in examenes:
             boton = BotonAccion(examen, "ficha", parent=marco)
             boton.clicked.connect(lambda _=False, e=examen: self._ver_papel(e))
-            fila_botones.addWidget(boton)
-        fila_botones.addStretch(1)
-        col.addLayout(fila_botones)
+            col.addWidget(boton)
         fila = QWidget()
         h = QHBoxLayout(fila)
         h.setContentsMargins(self.AVATAR_SIZE + 8, 0, 0, 0)

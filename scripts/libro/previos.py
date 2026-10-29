@@ -2,6 +2,7 @@
 
     QT_QPA_PLATFORM=offscreen ~/.local/share/labsim/libro-venv/bin/python -I scripts/libro/previos.py
     ... previos.py --solo-historia     (rehace solo las hojas de la historia)
+    ... previos.py --examen EOA        (rehace solo las hojas de ese examen)
 
 (el PEATC necesita PySide6 y pyqtgraph: el python del libro, ver
 libro.python_figuras.)
@@ -97,13 +98,26 @@ def _guardar(ruta, svg):
     (salida / ruta).write_bytes(gzip.compress(svg.encode('utf-8'), 9, mtime=0))
 
 
-def _apilar(svgs):
-    """Dos hojas una sobre otra (las emisiones: TEOAE y DPOAE en un informe)."""
+def _apilar(svgs, titulos=()):
+    """Dos hojas una sobre otra (las emisiones: TEOAE y DPOAE en un informe).
+    Cada una entra como un grupo desplazado, no como un <svg> dentro de otro:
+    el lector de Qt (SVG Tiny) no dibuja los anidados y la hoja salía en blanco."""
     partes, alto, ancho = [], 0.0, 0.0
-    for svg in svgs:
-        w = float(re.search(r'width="([\d.]+)"', svg).group(1))
-        h = float(re.search(r'height="([\d.]+)"', svg).group(1))
-        partes.append(re.sub(r'^<svg ', f'<svg y="{alto}" ', svg, count=1))
+    for i, svg in enumerate(svgs):
+        if i < len(titulos):
+            # En el libro lo dice el pie de figura; en el informe, un rótulo
+            partes.append(f'<text x="12" y="{alto + 15}" font-size="{E.T_TITULO}" font-weight="700" '
+                          f'fill="{E.TINTA}" font-family="{E.FUENTE}">{titulos[i]}</text>')
+            alto += 24
+        raiz = re.match(r'<svg ([^>]*)>', svg)
+        at = dict(re.findall(r'([\w-]+)="([^"]*)"', raiz.group(1)))
+        w, h = float(at['width']), float(at['height'])
+        vx, vy, vw, vh = (float(v) for v in at.get('viewBox', f'0 0 {w} {h}').split())
+        cuerpo = svg[raiz.end():svg.rindex('</svg>')]
+        cuerpo = re.sub(r'<metadata[^>]*>.*?</metadata>', '', cuerpo, flags=re.S)
+        fuente = f' font-family="{at["font-family"]}"' if 'font-family' in at else ''
+        partes.append(f'<g transform="translate(0,{alto}) scale({w / vw},{h / vh}) translate({-vx},{-vy})"{fuente}>'
+                      f'{cuerpo}</g>')
         alto += h + 12
         ancho = max(ancho, w)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{ancho}" height="{alto - 12}" '
@@ -120,7 +134,8 @@ def _hoja(caso, examen, figuras):
         f = next(f for f in figuras if f['tipo'] in ('impedancia', 'timpanograma'))
         return hacer_figuras.figura(caso, {'tipo': 'impedancia', 'sonda': f.get('sonda', 226)})
     if examen == 'EOA':
-        return _apilar([hacer_figuras.figura(caso, {'tipo': t, 'tomo2': True}) for t in ('teoae', 'dpoae')])
+        return _apilar([hacer_figuras.figura(caso, {'tipo': t, 'tomo2': True}) for t in ('teoae', 'dpoae')],
+                       ('Emisiones otoacústicas transitorias (TEOAE)', 'Productos de distorsión (DPOAE)'))
     f = next(f for f in figuras if EXAMEN.get(f['tipo']) == examen)
     return hacer_figuras.figura(caso, {**f, 'tomo2': True})
 
@@ -149,15 +164,18 @@ def main():
             if examen and examen not in de_la_ficha:
                 de_la_ficha[examen] = (clave, origen, [g for g in figuras if EXAMEN.get(g['tipo']) == examen])
     indice = {}
-    if '--solo-historia' in sys.argv:
+    solo = sys.argv[sys.argv.index('--examen') + 1] if '--examen' in sys.argv else None
+    if '--solo-historia' in sys.argv or solo:
         # Las hojas de lo que traen ya están (dibujarlas tarda: el PEATC)
         viejo = json.loads((salida / 'indice.json').read_text(encoding='utf-8'))
         indice = {f: {'trae': v['trae']} for f, v in viejo.items() if v.get('trae')}
     for ficha, examenes in sorted(hojas.items(), key=lambda x: int(x[0])):
-        if indice:
+        if indice and not solo:
             break
         (salida / ficha).mkdir(parents=True, exist_ok=True)
         for examen, (clave, origen, figuras) in examenes.items():
+            if solo and examen != solo:
+                continue
             ruta = f'{ficha}/{ARCHIVO[examen]}.svgz'
             _guardar(ruta, _hoja(cargar_caso(origen), examen, figuras))
             indice.setdefault(ficha, {}).setdefault('trae', {})[examen] = ruta
