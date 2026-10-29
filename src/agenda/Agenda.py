@@ -33,13 +33,19 @@ DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "doming
 MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre")
 
-# Columnas de la tabla. 0 es siempre el estado; en práctica libre las demás
-# cambian de nombre pero no de lugar.
-ENCABEZADOS_AGENDA = ["Estado", "Fecha", "Hora", "RUT", "Nombre", "Apellidos",
+# Columnas de la tabla. 0 es siempre el estado, solo el icono (el texto va en
+# el tooltip y en los contadores); Nombre es siempre la 4.
+ENCABEZADOS_AGENDA = ["", "Fecha", "Hora", "RUT", "Nombre", "Apellidos",
                       "Nacimiento", "Procedimiento"]
-# N° = el lugar del paciente en su carpeta (el orden del libro)
-ENCABEZADOS_PRACTICA = ["Estado", "N°", "Intentos", "RUT", "Nombre", "Apellidos",
-                        "Nacimiento", "Procedimiento"]
+# Práctica libre: el procedimiento primero (angosto, completo en el
+# tooltip). N° = el lugar del paciente en su carpeta: oculto, solo da el
+# orden del libro (la tabla llega ordenada por él).
+ENCABEZADOS_PRACTICA = ["", "Procedimiento", "Intentos", "RUT", "Nombre", "Apellidos",
+                        "Nacimiento", "N°"]
+COL_N_PRACTICA = 7
+ANCHO_ESTADO = 40
+ANCHO_PROCEDIMIENTO = 210
+ANCHO_INTENTOS = 72
 
 
 def _plural(n, uno, varios):
@@ -877,8 +883,8 @@ class Agenda(QWidget, Ui_Form):
         """Una fila: la celda de estado (icono + texto de color) y las demás.
         Un int va como número, para que ordenar por esa columna no ponga el
         10 antes que el 2."""
-        texto, _, color = vista.ESTADOS[clave]
-        celdas = [(texto, True)] + [(valor, False) for valor in columnas]
+        texto, _, _color = vista.ESTADOS[clave]
+        celdas = [("", True)] + [(valor, False) for valor in columnas]
         for col_idx, (valor, es_estado) in enumerate(celdas):
             if isinstance(valor, int):
                 item = QTableWidgetItem()
@@ -887,13 +893,17 @@ class Agenda(QWidget, Ui_Form):
                 item = QTableWidgetItem(valor)
             item.setData(Qt.UserRole, key)
             if es_estado:
+                # Solo el icono: el estado se lee en el tooltip
                 item.setIcon(vista.icono_estado(clave))
-                item.setForeground(QColor(color))
-                fuente = item.font()
-                fuente.setBold(True)
-                item.setFont(fuente)
-            if tooltip:
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                item.setToolTip(texto + (f" · {tooltip}" if tooltip else ""))
+            elif self._modo_practica and col_idx == 1:
+                # El procedimiento va angosto: completo al pasar el mouse
+                item.setToolTip(str(valor) + (f"\n{tooltip}" if tooltip else ""))
+            elif tooltip:
                 item.setToolTip(tooltip)
+            if self._modo_practica and col_idx == 2:
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             self.tableWidget.setItem(row_idx, col_idx, item)
 
@@ -1073,12 +1083,22 @@ class Agenda(QWidget, Ui_Form):
         300 filas ya puestas). Al terminar se vuelven a ajustar, una vez."""
         ancho = QHeaderView.ResizeMode
         cabecera = self.tableWidget.horizontalHeader()
+        # Fijas en las dos vistas: el icono del estado; en práctica libre,
+        # también el procedimiento (angosto) y los intentos. La última
+        # visible se estira.
+        fijas = {0: ANCHO_ESTADO}
+        if self._modo_practica:
+            fijas.update({1: ANCHO_PROCEDIMIENTO, 2: ANCHO_INTENTOS})
+        ultima = COL_N_PRACTICA - 1 if self._modo_practica else cabecera.count() - 1
         for col in range(cabecera.count()):
-            if llenando:
-                modo = ancho.Interactive
+            if col in fijas:
+                cabecera.setSectionResizeMode(col, ancho.Interactive)
+                cabecera.resizeSection(col, fijas[col])
+            elif llenando:
+                cabecera.setSectionResizeMode(col, ancho.Interactive)
             else:
-                modo = ancho.Stretch if col == cabecera.count() - 1 else ancho.ResizeToContents
-            cabecera.setSectionResizeMode(col, modo)
+                cabecera.setSectionResizeMode(col, ancho.Stretch if col == ultima else ancho.ResizeToContents)
+        self.tableWidget.setColumnHidden(COL_N_PRACTICA, self._modo_practica)
 
     def _terminar_llenado(self):
         self._poner_anchos()
@@ -1129,8 +1149,8 @@ class Agenda(QWidget, Ui_Form):
             clave = "practica_curso" if abierto else ("practica_hecho" if intentos else "practica_nuevo")
             conteo[clave] = conteo.get(clave, 0) + 1
             orden = it.get("orden")
-            columnas = (int(orden) if orden else "", str(intentos), it.get("rut") or "", it.get("nombre") or "",
-                        it.get("apellido") or "", it.get("fecha_nac") or "", it.get("procedimiento") or "")
+            columnas = (it.get("procedimiento") or "", str(intentos), it.get("rut") or "", it.get("nombre") or "",
+                        it.get("apellido") or "", it.get("fecha_nac") or "", int(orden) if orden else "")
             pista = [f"Carpeta: {it['carpeta']}" if it.get("carpeta") else "",
                      f"Último intento: {ultimo}" if ultimo else ""]
             self._poner_fila(row_idx, key, clave, columnas, " · ".join(p for p in pista if p))

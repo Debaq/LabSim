@@ -215,8 +215,10 @@ def test_docente_tiene_practica_libre_y_su_agenda_no_la_mezcla():
     ag.btn_practica.setChecked(True)
     # El orden de la carpeta, no el de la columna Estado
     assert _filas(ag) == ["Zoe", "Ana"], _filas(ag)
-    assert ag.tableWidget.item(0, 1).text() == "1"
-    assert ag.tableWidget.horizontalHeaderItem(1).text() == "N°"
+    assert ag.tableWidget.item(0, 1).text() == "Audiometría"     # el procedimiento primero
+    assert ag.tableWidget.horizontalHeaderItem(1).text() == "Procedimiento"
+    assert ag.tableWidget.item(0, 0).text() == ""                  # el estado: solo el icono
+    assert ag.tableWidget.isColumnHidden(mod.COL_N_PRACTICA)        # N° oculto
     assert ag.chk_guardar_base.isHidden()
     # El docente ve siempre la ficha de estudio del caso, en las dos vistas
     assert not ag.btn_ficha_estudio.isHidden()
@@ -273,7 +275,7 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     lista.setCurrentRow(1)
     assert _filas(ag) == [f"P{n}" for n in range(1, 12)]
     # N° es número: ordenar por esa columna no pone el 10 antes que el 2
-    ag.tableWidget.sortItems(1, Qt.AscendingOrder)
+    ag.tableWidget.sortItems(mod.COL_N_PRACTICA, Qt.AscendingOrder)
     assert _filas(ag) == [f"P{n}" for n in range(1, 12)]
     ag.led_buscar.setText("ana")
     assert _filas(ag) == ["Ana"]
@@ -286,7 +288,7 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     assert len(_filas(ag)) == len(items) - 1
     ag.led_buscar.setText("")
     ag.btn_vista_agenda.setChecked(True)
-    assert lista.isHidden()
+    assert lista.isHidden() and not ag.tableWidget.isColumnHidden(mod.COL_N_PRACTICA)
 
 
 def test_la_agenda_no_se_baja_en_el_hilo_de_la_ventana():
