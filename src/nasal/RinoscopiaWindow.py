@@ -57,7 +57,11 @@ METAL = '#8E9098'
 
 PASO_RECLINAR = 2                     # grados por paso de las flechas
 REPETIR_MS = 70                       # cada cuánto avanza con la flecha apretada
-RADIO_NARINA = 13.0                   # px de la foto de 600: dónde "entra" el espéculo
+RADIO_NARINA = 16.0                   # px de la foto de 600: dónde "entra" el espéculo
+# Ya adentro, el espéculo sigue puesto mientras el mouse no se aleje más que
+# esto, y el recorrido de la fosa se reparte en este radio: con el de
+# entrada solo, un movimiento chico ya lo sacaba.
+RADIO_RECORRIDO = 48.0
 LUPA = 0.27                           # radio del círculo, en fracción del lado de la cara
 RECORTE = 0.62                        # qué parte del campo calculado entra en el círculo
 BATA = '#A9C4C8'
@@ -172,9 +176,17 @@ class Cara(QWidget):
         d = narinas[lado] - pos
         return lado if (d.x() ** 2 + d.y() ** 2) ** 0.5 <= RADIO_NARINA * k else None
 
+    def _sigue_en(self, lado, pos):
+        narinas, k = self._narinas()
+        d = narinas[lado] - pos
+        return (d.x() ** 2 + d.y() ** 2) ** 0.5 <= RADIO_RECORRIDO * k
+
     def mouseMoveEvent(self, evento):
         self._mouse = evento.position()
-        self._fosa = self.fosa_bajo(self._mouse) if self.activa else None
+        if not self.activa:
+            self._fosa = None
+        elif not (self._fosa and self._sigue_en(self._fosa, self._mouse)):
+            self._fosa = self.fosa_bajo(self._mouse)
         self.setCursor(Qt.CursorShape.BlankCursor if self._fosa else Qt.CursorShape.ArrowCursor)
         if self._fosa:
             self.miro.emit(self._fosa)
@@ -256,8 +268,8 @@ class Cara(QWidget):
             # Mover el mouse dentro de la narina inclina el espéculo: se
             # recorre el campo calculado.
             d = self._mouse - centro
-            dx = max(-1.0, min(1.0, d.x() / (RADIO_NARINA * k)))
-            dy = max(-1.0, min(1.0, d.y() / (RADIO_NARINA * k)))
+            dx = max(-1.0, min(1.0, d.x() / (RADIO_RECORRIDO * k)))
+            dy = max(-1.0, min(1.0, d.y() / (RADIO_RECORRIDO * k)))
             w = img.width() * RECORTE
             libre = (img.width() - w) / 2
             fuente = QRectF(libre + dx * libre, libre + dy * libre, w, w)

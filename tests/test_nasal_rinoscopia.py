@@ -154,6 +154,9 @@ def test_narinas_eligen_la_fosa():
         assert narinas['D'].x() < narinas['I'].x()      # la derecha del paciente, a mi izquierda
         lejos = narinas['D'] + QPointF(0, 60 * k)
         assert w.cara.fosa_bajo(lejos) is None
+        # Ya adentro, moverse un poco no lo saca (sí alejarse de la nariz).
+        assert w.cara._sigue_en('D', narinas['D'] + QPointF(35 * k, 20 * k))
+        assert not w.cara._sigue_en('D', narinas['D'] + QPointF(0, 80 * k))
     esperar(w)
 
 
