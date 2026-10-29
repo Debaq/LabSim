@@ -7044,3 +7044,21 @@ Resumen para leer: `docs/audiometria_previa.md`.
   paciente". Respaldo `labsim_2026-10-29_165221.sqlite`; libro
   `generados/cap10_gjb2.json`. Los demás niños de 3 a 7 años de la práctica
   tienen acompañantes que ya contestan o el niño puede hablar.
+
+## Build de macOS, sin firmar y a mano (2026-10-29)
+
+- `.github/workflows/build-macos.yml`, solo con `gh workflow run` (no lo
+  dispara la release): Apple Silicon (macos-14), Python 3.14, un `LabSim.app`
+  sin firmar en `LabSim-macos-arm64.zip`, como artifact del run. Prueba que
+  abra sin pantalla 25 s. Para quizás algún alumno con Mac: sin cuenta de
+  desarrollador de Apple, la primera vez se abre con clic derecho → Abrir.
+- La app escribe en `resources/` (cachés de audio, `local_cache`): dentro del
+  `.app` rompería la firma. El `.app` trae `resources/` de solo lectura y el
+  runtime hook `installer/hooks/rth_macos.py` lo copia, una vez por build
+  (`version_build.txt`), a `~/Library/Application Support/LabSim/app`, y la
+  app trabaja ahí (`chdir` + `LABSIM_RECURSOS`, que lee `core.rutas.recursos()`
+  para los que ubicaban resources junto al código: layout y feriados).
+- Datos del usuario en macOS: `~/Library/Application Support/LabSim`.
+- Sin actualización automática: `check_for_update` no busca nada en macOS
+  (si no, bajaría el paquete de Linux).
+- No se probó en un Mac: solo lo que corra el runner.

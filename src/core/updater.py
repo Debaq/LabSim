@@ -335,6 +335,10 @@ def check_for_update(current_version: str, estricto: bool = False,
     GitHub una vez cada 10 min por todos los clientes, ver AppReleases.php),
     y si no responde, GitHub directo: primero el feed Atom (sin limite de
     consultas) por si dice que la local es la ultima, y si no, la API."""
+    if sys.platform == "darwin":
+        # No hay paquete de actualización para macOS (el .app se baja a mano
+        # de la release): sin esto bajaría y aplicaría el de Linux.
+        return None
     releases = None
     if backend_url:
         try:

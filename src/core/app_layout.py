@@ -21,7 +21,7 @@ from pathlib import Path
 
 import requests
 
-from core import hilos
+from core import hilos, rutas
 
 # Primer intento corto: si hay cache preferimos abrir ya y reintentar en
 # background. Sin cache no hay alternativa, así que damos un segundo
@@ -32,7 +32,7 @@ LAYOUT_TIMEOUT_RETRY = 8
 # Misma convención que backend/log_queue.py: resources/local_cache/ es la
 # data dinámica del usuario, y updater.apply_update_and_restart() la
 # preserva al actualizar (no la pisa con la del release).
-CACHE_PATH = Path(__file__).resolve().parents[2] / 'resources' / 'local_cache' / 'layout.json'
+CACHE_PATH = rutas.recursos() / 'local_cache' / 'layout.json'
 
 last_error: "LayoutFetchError | None" = None
 last_source: "str | None" = None

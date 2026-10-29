@@ -24,10 +24,12 @@ from pathlib import Path
 
 import requests
 
+from core import rutas
+
 FERIADOS_URL = "https://feriados-cl.netlify.app/api/holidays/{year}"
 FERIADOS_TIMEOUT = 5
 
-_RESOURCES = Path(__file__).resolve().parents[2] / 'resources'
+_RESOURCES = rutas.recursos()
 # Misma convención que core/app_layout.py: local_cache/ es data dinámica del
 # usuario y el updater la preserva entre versiones.
 CACHE_DIR = _RESOURCES / 'local_cache'

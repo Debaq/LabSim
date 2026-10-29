@@ -1,0 +1,81 @@
+name: Build macOS (Python)
+
+# Empaqueta LabSim para macOS (Apple Silicon) con PyInstaller: un LabSim.app
+# sin firmar, en un zip. Solo a mano, mientras no haya alumnos con Mac que lo
+# pidan (no lo dispara scripts/release_pyinstaller.sh):
+#   gh workflow run build-macos.yml -f sha=$(git rev-parse HEAD)
+#
+# Sin firma de Apple: la primera vez se abre con clic derecho -> Abrir (o
+# xattr -dr com.apple.quarantine LabSim.app). No se actualiza solo
+# (core/updater.py no busca nada en macOS): se baja el zip nuevo.
+#
+# resources/ va dentro del .app y la app trabaja sobre una copia en
+# ~/Library/Application Support/LabSim/app (installer/hooks/rth_macos.py).
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit a compilar (default: HEAD de la rama elegida)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.sha }}
+
+      # Misma versión de Python que Linux y Windows
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      # Pillow: PyInstaller pasa el ícono PNG a .icns
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller pillow
+
+      - name: Build PyInstaller
+        run: python -m PyInstaller LabSim.spec --noconfirm
+
+      # Que abra: la ventana de ingreso sin pantalla, unos segundos. Si se cae
+      # antes (falta una lib, resources mal copiado) el build falla.
+      - name: Probar que abre
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python - <<'PY'
+          import subprocess, sys
+          app = "dist/LabSim.app/Contents/MacOS/LabSim"
+          p = subprocess.Popen([app])
+          try:
+              codigo = p.wait(timeout=25)
+          except subprocess.TimeoutExpired:
+              p.kill()
+              print("LabSim siguió abierto 25 s: arranca bien")
+              sys.exit(0)
+          print(f"LabSim se cerró solo con código {codigo}")
+          sys.exit(1)
+          PY
+          ls "$HOME/Library/Application Support/LabSim/app/resources" | head
+          tail -40 "$HOME/Library/Application Support/LabSim/logs/labsim.log" || true
+
+      - name: Empaquetar zip
+        run: ditto -c -k --keepParent dist/LabSim.app dist/LabSim-macos-arm64.zip
+
+      - name: Subir zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: labsim-macos
+          path: dist/LabSim-macos-arm64.zip
+          if-no-files-found: error

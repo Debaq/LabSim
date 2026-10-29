@@ -1,14 +1,38 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os as _os
+import sys as _sys
+import tempfile as _tempfile
+import time as _time
+
+# macOS: resources/ va dentro del .app (en Linux y Windows se copia al lado
+# del programa, al final de este archivo) y el runtime hook rth_macos.py lo
+# pasa a la carpeta de datos del usuario, donde la app escribe. Sin lo que es
+# del PC donde se compila (local_cache, session.json) ni los cachés de audio.
+_datas_mac = []
+_hooks_mac = []
+if _sys.platform == 'darwin':
+    _fuera = {'local_cache', '_generated', '_panned'}
+    for _raiz, _dirs, _archivos in _os.walk('resources'):
+        _dirs[:] = [d for d in _dirs if d not in _fuera]
+        for _nombre in _archivos:
+            if _nombre != 'session.json':
+                _datas_mac.append((_os.path.join(_raiz, _nombre), _raiz))
+    # Cambia en cada build: el hook vuelve a copiar resources/ con la versión nueva
+    _marca = _os.path.join(_tempfile.mkdtemp(), 'version_build.txt')
+    with open(_marca, 'w') as _f:
+        _f.write(str(_time.time()))
+    _datas_mac.append((_marca, 'resources'))
+    _hooks_mac = ['installer/hooks/rth_macos.py']
 
 a = Analysis(
     ['src/main.py'],
     pathex=['src'],
     binaries=[],
-    datas=[],
+    datas=_datas_mac,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=['installer/hooks/rth_entorno_qt.py'],
+    runtime_hooks=['installer/hooks/rth_entorno_qt.py'] + _hooks_mac,
     # scipy ya no es dependencia (core/dsp.py), pero si esta instalado en el
     # entorno pyqtgraph lo arrastra: solo lo usa en affineSlice con
     # interpolacion de orden > 1, que la app no llama. Son ~70 MB.
@@ -268,6 +292,27 @@ coll = COLLECT(
     upx_exclude=[],
     name='LabSim',
 )
+
+# macOS: un .app sin firmar (ver .github/workflows/build-macos.yml). La primera
+# vez se abre con clic derecho -> Abrir; se actualiza bajando el zip nuevo.
+if _sys.platform == 'darwin':
+    import re as _re_mac
+    with open(_os.path.join(SPECPATH, 'src', 'main.py'), encoding='utf-8') as _f:
+        _ver_mac = _re_mac.search(r"__VERSION__ = 'v([\d.]+)'", _f.read()).group(1)
+    app = BUNDLE(
+        coll,
+        name='LabSim.app',
+        icon='resources/img/icono_app.png',
+        bundle_identifier='cl.uach.tecmedhub.labsim',
+        info_plist={
+            'CFBundleName': 'LabSim',
+            'CFBundleDisplayName': 'LabSim',
+            'CFBundleShortVersionString': _ver_mac,
+            'CFBundleVersion': _ver_mac,
+            'NSHighResolutionCapable': True,
+            'NSHumanReadableCopyright': COPYRIGHT,
+        },
+    )
 
 import os
 import shutil
