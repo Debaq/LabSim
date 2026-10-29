@@ -11,7 +11,10 @@ S = pathlib.Path(sys.argv[1]); LIBRO = pathlib.Path.home() / 'Escritorio/Proyect
 cat = json.load(open(S / (sys.argv[3] if len(sys.argv) > 3 else 'catalogo_tomo2.json')))
 LABSIM = {'audiosupra', 'logoaudiometria', 'impedancia', 'abr', 'teoae', 'dpoae', 'vemp', 'ecochg', 'cortical'}
 # Examen -> como se nombra en el procedimiento, en este orden
-PROC = [('audiosupra', 'Audiometría'), ('logoaudiometria', 'Audiometría'), ('impedancia', 'Impedanciometría'),
+# (el Tomo I nombra distinto las suyas: audiograma, timpanograma, reflejos, acumetria)
+PROC = [('acumetria', 'Acumetría'), ('audiosupra', 'Audiometría'), ('audiograma', 'Audiometría'),
+        ('logoaudiometria', 'Audiometría'), ('impedancia', 'Impedanciometría'),
+        ('timpanograma', 'Impedanciometría'), ('reflejos', 'Impedanciometría'),
         ('teoae', 'EOA'), ('dpoae', 'EOA'), ('abr', 'PEATC'), ('ecochg', 'ECochG'), ('cortical', 'Corticales'),
         ('vemp', 'VEMP')]
 RUT_NUEVO = {'cap12_esclerosis_multiple': '18087953', 'cap24_gentamicina': '12518779',
@@ -93,7 +96,8 @@ for cap in cat:
         sql.append(
             "INSERT INTO practice_items (folder_id, case_id, procedimiento, show_study_sheet, orden, created_by) VALUES "
             f"((SELECT id FROM practice_folders WHERE nombre = {q(carpeta)} AND active = 1), {q(case_id)}, {q(proc)}, 1, {orden}, {ADMIN}) "
-            "ON CONFLICT(folder_id, case_id) DO UPDATE SET orden = excluded.orden, active = 1;")
+            "ON CONFLICT(folder_id, case_id) DO UPDATE SET orden = excluded.orden, "
+            "procedimiento = excluded.procedimiento, active = 1;")
     (S / archivo).write_text('\n'.join(sql) + '\n', encoding='utf-8')
     resumen.append((cap['cap'], carpeta, [(f"{c}:{cap['cap']}.{n}", k.split('_', 1)[1]) for c, k, _, n in filas]))
 json.dump(ids, open(S / 'ids_libro.json', 'w'), indent=1)

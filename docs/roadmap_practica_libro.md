@@ -88,6 +88,20 @@ Libro: `~/Escritorio/Proyectos/libro-orl`.
   28267995. Los tres de H10 no tenían cara en el libro: hechas y sumadas a
   `rostros/pedidos.json`. Total: 39 carpetas, 142 pacientes, 109 fichas,
   28 madres con cara. Backup previo `labsim_2026-10-29_004607.sqlite`.
+- [x] **Auditoría de las 109 fichas (2026-10-29).** Todas traen todos los
+  exámenes (tonal, logo, supraliminares, acumetría, Z 226/1000, reflejos,
+  EOA, ABR con ECochG, VEMP, sala). Faltaba el bloque `Central` en 89: sin él
+  la latencia media y tardía sale plana, como una ausencia patológica. Se
+  les puso la vía central sana (`CaseBuilder::CENTRAL_DEFAULTS`, lo mismo
+  que escribe el editor al guardar); los cuadros de tronco y neuropatía se
+  modelan en el ABR, no en ese bloque. La 139 (dilema de H4) no tenía
+  relato ni historia, y la 147 y la 102 no tenían historia: los escribió
+  Claude coherentes con el cuadro, con nota en el comentario docente para
+  revisar. Procedimientos del Tomo I corregidos (el mapa no conocía
+  audiograma/timpanograma/acumetria). Backup `labsim_2026-10-29_005817.sqlite`.
+  La app deja hacer cualquier examen a cualquier edad (una audiometría
+  tonal a un recién nacido "responde"): elegir el que corresponde es parte
+  de lo que se evalúa.
 - [ ] **F2. Llenar las carpetas con el libro.** Importar los casos del libro
   al backend (fichas con clave fija) y crear una carpeta por capítulo con
   sus pacientes en el orden del libro, por la consola o un script. Las
