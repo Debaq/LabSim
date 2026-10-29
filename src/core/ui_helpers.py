@@ -245,6 +245,9 @@ class MoveWindow():
 GATED_MODULE_CODES = {
     "A", "W", "Z", "ABR", "AABR", "VEMP", "EOAS", "CVOICE", "AGENDA", "CHAT",
     "AC", "OT", "INBOX", "FICHA", "EVOLUCION", "MIS_PACIENTES",
+    # Nariz y sueño: demo interna (docs/roadmap_nasal.md). No están en
+    # Courses::MODULES, así que solo el admin (modules None) los ve.
+    "RS", "RM", "RA", "OLF", "PRICK", "ESP", "PSG", "CPAP",
 }
 
 # Modulos que NO tienen switch propio en el panel del docente: se habilitan

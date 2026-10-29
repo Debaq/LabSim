@@ -1,0 +1,81 @@
+# Roadmap nasal
+
+Todo lo nasal del libro (H25 a H32, casos de los caps. 35 a 38) entra a
+LabSim como **demo interna**: solo la ve el admin (permission 777), los
+alumnos no. Decidido por él el 2026-10-29 ("todo en labsim, vamos a hacer
+todo pero solo demos internas que no podrán ver los estudiantes por ahora").
+Revierte la decisión del 2026-10-16 de dejar lo nasal fuera de LabSim
+(§ Nariz: todo en LabSim, como demo interna, en `docs/decisiones.md`).
+
+## Reglas
+
+- **Cómo queda oculto:** dos boxes nuevos con `activo = false` y sus
+  módulos en `state = 'development'` (`labsim_backend/src/Layout.php`). El
+  alumno no ve la pestaña ni puede activar el botón; el admin los ve igual
+  que hoy ve el Box Otoneurología (`_apply_admin_overrides_if_any` en
+  `main.py`). Los códigos van en `GATED_MODULE_CODES` pero **no** en
+  `Courses::MODULES`: el docente no los puede prender en un curso hasta que
+  se decida soltarlos.
+- **Sin datos del caso, el módulo no mide** (como el resto: nada de
+  pacientes "normales" de relleno). Cada examen lee su bloque de
+  `cases.data`.
+- **El modelo es el de RinoSim** (`~/Escritorio/Proyectos/rinosim`), portado
+  a Python con los mismos números: el mismo paciente y la misma semilla dan
+  la misma curva que las figuras del libro. RinoSim sigue siendo la fuente de
+  las figuras de H26/H27 y caps. 35/36; si cambia el modelo, cambia en los
+  dos lados (prueba de equivalencia con números de referencia del JS).
+- **Sin scipy** (numpy, `core/dsp.py` si hace falta filtrar).
+- Pantallas de equipo con el estilo actual (`docs/roadmap_estilo.md`);
+  probar a 1366×768.
+
+## Módulos
+
+| Código | Examen | Libro | Box |
+|---|---|---|---|
+| `RS` | Rinoscopía anterior (y endoscopía) | H25 | Box Rinología |
+| `RM` | Rinomanometría anterior | H26 | Box Rinología |
+| `RA` | Rinometría acústica | H27 | Box Rinología |
+| `OLF` | Olfatometría | H28 | Box Rinología |
+| `PRICK` | Prick test | H29 | Box Rinología |
+| `ESP` | Espirometría | H30 | Box Rinología |
+| `PSG` | Polisomnografía y poligrafía | H31 | Laboratorio de sueño |
+| `CPAP` | CPAP y avance mandibular | H32 | Laboratorio de sueño |
+
+Datos del caso: `cases.data['NASAL']` es el paciente de RinoSim tal cual
+(`lados.D/I` con narina, válvula, cornete, desviación, meato, pólipos,
+congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
+`ESPIRO`, `SUENO`) se definen en su fase.
+
+## Fases
+
+- [ ] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
+      iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
+      el botón del admin revienta con KeyError.
+- [ ] **F1. Modelo de RinoSim en Python** (`src/nasal/`): `modelo.py`,
+      `rinomanometria.py`, `rinometria.py`, `azar.py` (mulberry32 + FNV-1a,
+      idéntico al JS). Pruebas: las de RinoSim portadas y la equivalencia
+      contra números generados con node.
+- [ ] **F2. Rinomanometría y rinometría acústica** como equipos: sello,
+      medir FND/FNI, vasoconstrictor, errores de técnica, curva en cuatro
+      cuadrantes, tabla a 75/150 Pa, Broms; calibrar, tres registros, MCA1 y
+      MCA2. Informe con autosave como los demás.
+- [ ] **F3. Caso nasal en el backend:** ficha "Nariz" en `case_create.php`
+      (los parámetros de RinoSim con sus cuadros de ejemplo como punto de
+      partida), validación en `CaseForm`, y los pacientes de los caps. 35 y
+      36 cargados con su bloque `NASAL` (fuera de la práctica libre).
+- [ ] **F4. Rinoscopía:** fotos de bancos con licencia verificada
+      (`libro-orl/trabajo/investigacion/imagenes_nasales.md`), visor como la
+      otoscopía, informe por fosa (tabique, cornetes, meatos, mucosa,
+      secreción). Lo que no tenga foto libre queda sin foto, no con IA.
+- [ ] **F5. Olfatometría y prick test.**
+- [ ] **F6. Espirometría** (maniobra, aceptabilidad y repetibilidad, prueba
+      broncodilatadora, LIN y z-score); caso del cap. 37.
+- [ ] **F7. Sueño:** poligrafía/PSG (registro, puntuación de eventos, IAH)
+      y titulación de CPAP; casos del cap. 38.
+
+## Fuera, por ahora
+
+- Soltarlo a los alumnos (Courses::MODULES, práctica libre, manual).
+- Errores conocidos del modelo de RinoSim (anotados en
+  `libro-orl/ESTADO.md`, "Errores del simulador detectados"): se portan tal
+  cual y se arreglan en los dos lados a la vez.

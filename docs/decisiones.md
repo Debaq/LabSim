@@ -7086,3 +7086,25 @@ Resumen para leer: `docs/audiometria_previa.md`.
 - Pendiente: la ficha de estudio al cerrar (F5, sin redactor IA), y un layout
   de fábrica para un equipo que nunca se conectó (hoy el layout se baja sin
   cuenta y queda en caché).
+
+## Nariz: todo en LabSim, como demo interna (2026-10-29)
+
+Él: "todo en labsim, vamos a hacer todo pero solo demos internas que no
+podrán ver los estudiantes por ahora". Revierte lo del 2026-10-16 (los
+gráficos nasales solo en RinoSim, LabSim sin nariz): ahora los ocho exámenes
+de H25 a H32 entran como equipos de LabSim.
+
+- **Ocultos sin código nuevo:** dos boxes con `activo = false` (Box_4
+  Rinología, Box_5 Laboratorio de sueño) y sus módulos en `'development'`.
+  Es el mismo mecanismo del Box Otoneurología: el admin los ve por
+  `_apply_admin_overrides_if_any`; el alumno no ve la pestaña. Los códigos
+  están en `GATED_MODULE_CODES` y **no** en `Courses::MODULES`, así que
+  tampoco un docente los puede prender en su curso.
+  `tests/test_layout_nasal_oculto.php` falla si alguno se suelta.
+- **Hasta que llegue cada equipo, un cartel** (`ModulePlaceholder`), sin el
+  cual el botón del admin revienta con KeyError.
+- **El modelo es RinoSim portado a Python** con los mismos números (misma
+  semilla, misma curva que las figuras del libro), probado contra números
+  sacados del JS. RinoSim sigue siendo la fuente de las figuras del libro.
+- Fases y módulos en `docs/roadmap_nasal.md` (TODO 73).
+

@@ -82,6 +82,13 @@ _ICONOS = {
     "detener": [("r", 6, 6, 12, 12, 2)],
     "arriba": [("p", (6, 15), (12, 9), (18, 15))],
     "abajo": [("p", (6, 9), (12, 15), (18, 9))],
+    "nariz": [("k", "M11 2.5 C11 7.5 10 11 6.5 15.5 C5.6 16.7 6.3 18.5 8 18.5 L12.5 18.5"),
+              ("k", "M12.5 18.5 C14.5 18.5 15 16.2 13.4 15.2"), ("k", "M8 21.5 L14 21.5")],
+    "pulmon": [("l", 12, 2.5, 12, 10), ("k", "M11 10 C8 10 4.5 13 4.5 18.5 C4.5 20.6 6.5 21.2 8.5 20.3 C10.3 19.5 11 17.5 11 15.5 Z"),
+               ("k", "M13 10 C16 10 19.5 13 19.5 18.5 C19.5 20.6 17.5 21.2 15.5 20.3 C13.7 19.5 13 17.5 13 15.5 Z")],
+    "prick": [("r", 3, 7, 18, 10, 3), ("c", 8, 12, 1.6), ("c", 12, 12, 1.6), ("c", 16, 12, 1.6)],
+    "luna": [("k", "M20 14.5 C18.9 15 17.7 15.3 16.4 15.3 C11.9 15.3 8.7 12.1 8.7 7.6 C8.7 6.3 9 5.1 9.5 4 "
+                   "C6 5.2 3.5 8.5 3.5 12.4 C3.5 17.4 7.6 21.5 12.6 21.5 C16.5 21.5 19.8 19 20 14.5 Z")],
     "impresora": [("k", "M7 9 L7 3.5 L17 3.5 L17 9"), ("r", 3, 9, 18, 8, 2), ("r", 7, 14, 10, 6.5, 1)],
 }
 
@@ -178,8 +185,11 @@ ICONO_MODULO = {
     "EOAS": "coclea", "EOAC": "coclea", "W": "lista", "CVOICE": "microfono",
     "INBOX": "bandeja", "MIS_PACIENTES": "persona", "CHAT": "mensaje", "FICHA": "ficha",
     "EVOLUCION": "evolucion", "VNG": "oido", "VHIT": "oido", "POS": "oido",
+    "RS": "nariz", "RM": "nariz", "RA": "nariz", "OLF": "nariz", "PRICK": "prick",
+    "ESP": "pulmon", "PSG": "luna", "CPAP": "luna",
     # secciones
     "sala_espera": "reloj", "Box_1": "oido", "Box_2": "onda_abr", "Box_3": "oido",
+    "Box_4": "nariz", "Box_5": "luna",
 }
 
 

@@ -49,6 +49,17 @@ final class Layout
         // del libro, ver core/ficha.HojaPrevia en la app). Se abre desde la
         // ficha, no tiene botón ni switch por curso.
         'PREVIO'     => [false, 'Examen que trae el paciente', 22, [false, true], [760, 450], 'pre'],
+        // Nariz y sueño (H25-H32 del libro): demo interna, solo la ve el admin
+        // (docs/roadmap_nasal.md). 'development' + boxes inactivos y fuera de
+        // Courses::MODULES, para que ningún curso los pueda prender todavía.
+        'RS'         => [false, 'Rinoscopía', 23, [false, true], [1000, 580], 'development'],
+        'RM'         => [false, 'Rinomanometría anterior', 24, [false, true], 'max', 'development'],
+        'RA'         => [false, 'Rinometría acústica', 25, [false, true], 'max', 'development'],
+        'OLF'        => [false, 'Olfatometría', 26, [false, true], [1000, 600], 'development'],
+        'PRICK'      => [false, 'Prick test', 27, [false, true], [1000, 600], 'development'],
+        'ESP'        => [false, 'Espirometría', 28, [false, true], 'max', 'development'],
+        'PSG'        => [false, 'Polisomnografía y poligrafía', 29, [false, true], 'max', 'development'],
+        'CPAP'       => [false, 'CPAP y avance mandibular', 30, [false, true], [1000, 600], 'development'],
     ];
 
     public const SECTORS = [
@@ -69,6 +80,8 @@ final class Layout
         'Box_1'       => [true,  ['OT', 'AC', 'A', 'Z'],                              'Box Audiología'],
         'Box_2'       => [true,  ['ABR', 'AABR', 'VEMP', 'EOAS'],                     'Box Electrofisiología'],
         'Box_3'       => [false, ['VNG', 'VHIT', 'POS'],                              'Box Otoneurología'],
+        'Box_4'       => [false, ['RS', 'RM', 'RA', 'OLF', 'PRICK', 'ESP'],           'Box Rinología'],
+        'Box_5'       => [false, ['PSG', 'CPAP'],                                     'Laboratorio de sueño'],
     ];
 
     /** Payload serializable que devuelve GET /api/layout.php. */

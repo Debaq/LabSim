@@ -1205,6 +1205,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 print(f"{attr}: no se pudo cargar el caso:")
                 traceback.print_exc()
 
+    # Los mismos códigos y nombres de Layout::APPS (Box_4 y Box_5).
+    MODULOS_NASALES = {
+        "RS": "Rinoscopía", "RM": "Rinomanometría anterior", "RA": "Rinometría acústica",
+        "OLF": "Olfatometría", "PRICK": "Prick test", "ESP": "Espirometría",
+        "PSG": "Polisomnografía y poligrafía", "CPAP": "CPAP y avance mandibular",
+    }
+
     @tiempos.medir("cargar subventanas")
     def load_sub_windows(self):
         """Carga las subventanas"""
@@ -1248,6 +1255,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "INBOX": FrameSubMdi(inbox.InboxWidget(self), expand=True),
             "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self), expand=True),
         })
+        # Nariz y sueño, demo interna (docs/roadmap_nasal.md): cada código
+        # tiene su cartel hasta que llegue su equipo; sin entrada aquí el
+        # botón del admin revienta con KeyError.
+        for codigo, titulo in self.MODULOS_NASALES.items():
+            if codigo not in self.subw:   # `in` cuenta los diferidos
+                self.subw[codigo] = FrameSubMdi(ModulePlaceholder(titulo), expand=True)
 
         self.subw["CHAT"].obj.entrego.connect(self._al_entregar_informes)
         # Con chat, los informes que trae el paciente se piden (ver

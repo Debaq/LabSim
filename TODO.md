@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 72).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 73).
 
 Revisado contra el código el 2026-09-24.
 
@@ -203,6 +203,12 @@ gap significativo. § Parámetros de audiometría configurables por curso
       paciente no dice nada. Ya están `nino1`/`nina1` con las 124 (Edge TTS):
       faltan sus `none1-3`, elegir la voz por edad y sexo del caso y mejorar
       las que suenan mal. § Audios ordenados por carpeta y voces de niños
+
+### Nariz y sueño
+- [ ] 73. Los ocho equipos de H25 a H32 (rinoscopía, rinomanometría,
+      rinometría, olfatometría, prick, espirometría, PSG, CPAP), como demo
+      interna que solo ve el admin. Fases en `docs/roadmap_nasal.md`.
+      § Nariz: todo en LabSim, como demo interna
 
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
