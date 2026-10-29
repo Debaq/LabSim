@@ -6926,7 +6926,9 @@ VEMP.
   `generados/` y los demo, que son los mismos datos cargados en prod). Así la
   ve el kiosko. Se vuelve a correr si cambia un caso o el dibujo.
 - **Regla en la app** (`core.ficha.audiometria_previa`): práctica libre +
-  procedimiento sin "audiometr" + hay hoja para esa ficha. Por eso sale
+  procedimiento sin "audiometr" ni "otoscop" + hay hoja para esa ficha. Si
+  viene a otoscopía no la trae: la audiometría va después de la otoscopía
+  (H1, Benjamín 35, la mostraba). Por eso sale
   también en las herramientas que no son de audiometría (H7, H9) cuando el
   paciente tiene hoja, y nunca en un lactante sin audiograma en el libro ni
   en una cita del docente: qué trae el paciente en sus prácticos lo decide él.

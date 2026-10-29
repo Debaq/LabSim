@@ -258,6 +258,13 @@ def test_el_docente_ve_en_practica_libre_lo_mismo_que_el_alumno():
     assert 'href="previo:78"' in html
 
 
+def test_sin_otoscopia_hecha_no_trae_audiometria():
+    """La audiometría va después de la otoscopía: si viene a otoscopía, no la trae."""
+    html = _con_previos(lambda: render_ficha_html(
+        _intento_libro("Otoscopía + Acumetría", case_id="35"), {}, {"agenda_1": {}}, "alumno1", False))
+    assert "previo:" not in html
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

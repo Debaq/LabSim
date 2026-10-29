@@ -120,10 +120,14 @@ def audiometria_previa(row, caso):
     audiometría hecha, y no a hacérsela. Si el alumno la repite, queda como
     una atención más en su historial. En una cita del docente no sale nunca:
     el caso puede ser el mismo, pero qué trae el paciente lo decide él.
+
+    Si viene a otoscopía tampoco: la audiometría va después de la otoscopía,
+    así que un paciente al que todavía no le miran el oído no puede traerla.
     """
     if getattr(row, "practice_id", None) is None:
         return None
-    if "audiometr" in (getattr(row, "procedimiento", "") or "").lower():
+    procedimiento = (getattr(row, "procedimiento", "") or "").lower()
+    if "audiometr" in procedimiento or "otoscop" in procedimiento:
         return None
     case_id = getattr(row, "case_id", None) or (caso.get("id") if isinstance(caso, dict) else None)
     ruta = PREVIOS_DIR / f"{case_id}.svg"
