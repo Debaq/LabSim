@@ -31,6 +31,7 @@ from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
 from core import mouse_zurdo, configuracion, hilos, registro, respaldo_informes, tiempos
 from core.module_placeholder import ModulePlaceholder
+from core.subventanas import Subventanas
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           es_docente, entry_estado_por,
@@ -79,6 +80,9 @@ _LAYOUT_FALLBACK_APPS = {
 # insert sqlite local, nunca toca la red -- se sube al backend en batches
 # vía LogUploaderThread (ver MainWindow._data_login).
 LOCAL_LOG_QUEUE = get_log_queue()
+# Entre un módulo y el siguiente al armarlos tras el login: deja pintar y
+# atender clics (ver _armar_modulos_en_fondo).
+PAUSA_ENTRE_MODULOS_MS = 30
 # Logger sin log_queue: stdout (prints de debug regados por todo el código)
 # ya no se sube al backend -- era 87% del volumen y puro ruido interno
 # ("cambio el sender", "True", [agenda_filter]...). Las acciones reales del
@@ -541,7 +545,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self._start_log_uploader()
             self._start_sync_thread()
             self._subir_pendientes_en_fondo()
-            self._retomar_atencion_abierta()
+            # La atención abierta se retoma cuando la agenda termina de
+            # llegar (agenda_cargada): ya no se baja antes de mostrarla.
+            self._armar_modulos_en_fondo()
+
+    def agenda_cargada(self):
+        """La agenda llegó por primera vez en esta sesión (ver Agenda)."""
+        self._retomar_atencion_abierta()
 
     def _retomar_atencion_abierta(self):
         """La app se cerró (o se cortó) con un paciente en atención: al entrar
@@ -866,6 +876,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 self.modules.set(pos_z, None)
 
         login_subw = self.subw.get("LOGIN") if self.subw else None
+        if isinstance(self.subw, Subventanas):
+            self.subw.cancelar()
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
         for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr",
@@ -926,6 +938,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         una)."""
         if self._otra_atencion_abierta(key):
             return
+        self._modulos_listos()
 
         try:
             shedule = Shedule()
@@ -966,7 +979,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._hydrate_modules()
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
-        self.report_autosave.iniciar()
+        self.report_autosave.iniciar(prueba=es_prueba)
         if not es_prueba:
             self._recuperar_informes(key)
 
@@ -1170,26 +1183,30 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         from oae.OaeMainWindow import OaeMainWindow
         from vemp.VempMainWindow import VempMainWindow
 
-        self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current), expand=True)
+        self.subw = Subventanas(self.subw or {})
         self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current), expand=True)
         self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current), expand=True)
-        self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current), expand=True)
-        self.subw_z = FrameSubMdi(Z.ZControl(), expand=True)
-        # expand: sin esto el marco reparte el alto sobrante con un espaciador
-        # y el ABR se queda en su alto natural (las fichas apretadas arriba).
-        self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login), expand=True)
-        self.subw_aabr = FrameSubMdi(AabrMainWindow(data_login=self.data_login), expand=True)
-        self.subw_eoas = FrameSubMdi(OaeMainWindow(data_login=self.data_login), expand=True)
-        self.subw_vemp = FrameSubMdi(VempMainWindow(data_login=self.data_login))
+        # Los pesados se arman después, con la agenda a la vista (ver
+        # core/subventanas.py y _armar_modulos_en_fondo). expand: sin esto el
+        # marco reparte el alto sobrante con un espaciador y el ABR se queda
+        # en su alto natural (las fichas apretadas arriba).
+        self._modulo_diferido("W", "subw_w", lambda: FrameSubMdi(
+            ListWords.ListWords(self.data_current), expand=True))
+        self._modulo_diferido("A", "subw_a", lambda: FrameSubMdi(
+            Audiometer.Audiometer(self.data_current), expand=True))
+        self._modulo_diferido("Z", "subw_z", lambda: FrameSubMdi(Z.ZControl(), expand=True))
+        self._modulo_diferido("ABR", "subw_abr", lambda: FrameSubMdi(
+            AbrMainWindow(data_login=self.data_login), expand=True))
+        self._modulo_diferido("AABR", "subw_aabr", lambda: FrameSubMdi(
+            AabrMainWindow(data_login=self.data_login), expand=True))
+        self._modulo_diferido("EOAS", "subw_eoas", lambda: FrameSubMdi(
+            OaeMainWindow(data_login=self.data_login), expand=True))
+        self._modulo_diferido("VEMP", "subw_vemp", lambda: FrameSubMdi(
+            VempMainWindow(data_login=self.data_login)))
 
         self.subw.update({
-            "A": self.subw_a,
             "AC": self.subw_ac,
             "OT": self.subw_ot,
-            "ABR": self.subw_abr,
-            "AABR": self.subw_aabr,
-            "VEMP": self.subw_vemp,
-            "EOAS": self.subw_eoas,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self), expand=True),
             "CVOICE": FrameSubMdi(ComandosVoz(), expand=True),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")), expand=True),
@@ -1197,18 +1214,64 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget(), expand=True),
             "INBOX": FrameSubMdi(inbox.InboxWidget(self), expand=True),
             "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self), expand=True),
-            "W": self.subw_w,
-            "Z": self.subw_z,
         })
 
         self._hydrate_modules()
-        self.connect_signals()
-        # Al esconder un módulo de examen se sube lo que tenga (ver
-        # core/report_autosave.py).
         for attr in self._ATTRS_EXAMEN:
-            frame = getattr(self, attr)
-            frame.visibility_changed.connect(
-                lambda visible, m=frame.obj: None if visible else self.report_autosave.guardar(m))
+            if getattr(self, attr, None) is not None:
+                self._subir_al_esconder(getattr(self, attr))
+
+    def _subir_al_esconder(self, frame):
+        """Al esconder un módulo de examen se sube lo que tenga (ver
+        core/report_autosave.py)."""
+        frame.visibility_changed.connect(
+            lambda visible, m=frame.obj: None if visible else self.report_autosave.guardar(m))
+
+    def _modulo_diferido(self, nombre, attr, crear):
+        """Deja `nombre` para armarlo después (ver core/subventanas.py), con
+        lo que load_sub_windows le hacía a cada módulo al crearlo."""
+        def armar():
+            with tiempos.medir(f"armar {nombre}"):
+                return crear()
+
+        def despues(frame):
+            setattr(self, attr, frame)
+            try:
+                frame.obj.la_super(self.data_current, self.data_current_key)
+            except Exception:  # noqa: BLE001 -- como en _hydrate_modules
+                print(f"{attr}: no se pudo cargar el caso:")
+                traceback.print_exc()
+            if attr in self._ATTRS_EXAMEN:
+                self._subir_al_esconder(frame)
+            if nombre == "A":
+                self.connect_signals()   # todas cuelgan del audiómetro
+        self.subw.pendiente(nombre, armar, despues)
+
+    def _armar_modulos_en_fondo(self):
+        """Arma los módulos pendientes de a uno, dejando volver al bucle de
+        eventos entre cada uno: la ventana responde mientras tanto."""
+        subw = self.subw
+        if not isinstance(subw, Subventanas):
+            return
+
+        def siguiente():
+            if self.subw is not subw:
+                return   # se cerró la sesión
+            try:
+                quedan = subw.construir_siguiente()
+            except Exception:  # noqa: BLE001 -- uno roto no deja sin los demás
+                traceback.print_exc()
+                quedan = bool(subw.faltan())
+            if quedan:
+                QTimer.singleShot(PAUSA_ENTRE_MODULOS_MS, siguiente)
+
+        QTimer.singleShot(PAUSA_ENTRE_MODULOS_MS, siguiente)
+
+    def _modulos_listos(self):
+        """Antes de cargar un paciente: todos los módulos tienen que existir
+        para recibir el caso y lo guardado de la atención."""
+        if isinstance(self.subw, Subventanas):
+            self.subw.construir_todo()
 
     def activate_listWords(self):
         if self.subw_a.obj.lbl_prueba.text() == "Logoaudiometría":
@@ -1431,6 +1494,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def abrir_abr_consulta(self, data, aviso):
         """"Mis pacientes" -> Ver en el ABR: abre el ABR de una atención ya
         cerrada, solo para mirarlo (ver AbrMainWindow.open_past)."""
+        self._modulos_listos()
         if not self._module_visible("ABR") or getattr(self, "subw_abr", None) is None:
             QMessageBox.information(self, "Ver en el ABR",
                                     "El módulo ABR no está habilitado en tu curso.")

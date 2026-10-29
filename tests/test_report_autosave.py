@@ -131,6 +131,29 @@ def test_iniciar_olvida_la_atencion_anterior():
     auto.detener()
 
 
+def test_la_prueba_del_docente_no_guarda_nada():
+    """Sin atención en el servidor, subir daba 404 y el informe quedaba
+    pendiente en el equipo, reintentándose con cada sync para siempre."""
+    from core import respaldo_informes
+    usuario = respaldo_informes.usuario_de(_Cliente())
+    antes = respaldo_informes.pendientes(usuario)
+    subidas = _con_subidas()
+    m = Modulo()
+    m.data = {"curvas": {"prueba": 1}}
+    auto = ra.ReportAutosave(lambda: [m])
+    auto.iniciar(prueba=True)
+    _tick(auto)
+    _tick(auto, m)            # al esconder el módulo
+    auto.respaldar(con_imagenes=True)
+    auto.reanudar()
+    assert subidas == []
+    assert respaldo_informes.pendientes(usuario) == antes
+    auto.iniciar()            # la atención siguiente, de verdad, sí guarda
+    _tick(auto)
+    assert len(subidas) == 1
+    auto.detener()
+
+
 class ModuloDoble(Modulo):
     """Un módulo que sube dos informes por atención (el ABR: ABR + ECochG)."""
 

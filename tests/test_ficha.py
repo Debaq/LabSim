@@ -69,6 +69,18 @@ def test_las_llaves_de_fecha_se_resuelven_en_la_ficha():
     assert "05-09-2026" in html, html      # 5 días antes
 
 
+def test_sin_cita_las_llaves_se_cuentan_desde_hoy():
+    """Práctica libre abierta por el docente, o un caso sin agendar: la fila
+    no tiene fecha. Salía la llave tal cual y "sin fecha" al lado."""
+    from PySide6.QtCore import QDate
+    row = FilaFalsa()
+    row.fecha = ""
+    html = render_ficha_html(row, {"historia_clinica": "{{-30}} Audiometría de control."},
+                             {"agenda_1": {}}, "alumno1", False)
+    assert "{{-30}}" not in html and "sin fecha" not in html, html
+    assert QDate.currentDate().addDays(-30).toString("dd-MM-yyyy") in html, html
+
+
 def test_la_evolucion_del_alumno_va_despues_de_las_atenciones_previas():
     """Una ficha se lee en orden: primero de dónde viene el paciente."""
     entradas = linea_tiempo(HISTORIA, "10-09-26", [

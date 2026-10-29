@@ -181,6 +181,11 @@ class ReportAutosave(QObject):
         self._respaldadas = {}  # (appointment_id, tipo) -> (huella, quedó en el disco)
         self._hilos = {}        # (appointment_id, tipo) -> _Subida en curso
         self._en_disco = {}     # (appointment_id, tipo) -> huella de los datos en el disco
+        # Atención de prueba del docente: no deja rastro, tampoco informes.
+        # Antes se respaldaban y se subían igual; sin atención en el servidor
+        # contestaba 404 y quedaban pendientes en el equipo, reintentándose
+        # con cada sync para siempre (2026-10-28: 7 informes, cada minuto).
+        self._prueba = False
         self._timer = QTimer(self)
         self._timer.setInterval(INTERVALO_MS)
         self._timer.timeout.connect(self.guardar)
@@ -188,8 +193,10 @@ class ReportAutosave(QObject):
         self._timer_disco.setInterval(INTERVALO_DISCO_MS)
         self._timer_disco.timeout.connect(self.respaldar)
 
-    def iniciar(self):
-        """Arranca con una atención nueva: se olvida lo subido antes."""
+    def iniciar(self, prueba=False):
+        """Arranca con una atención nueva: se olvida lo subido antes. En
+        `prueba` no guarda nada, ni en el equipo ni en el servidor."""
+        self._prueba = prueba
         self._huellas.clear()
         self._respaldadas.clear()
         self._en_disco.clear()
@@ -197,6 +204,9 @@ class ReportAutosave(QObject):
             estado = getattr(m, "estado_informe", None)
             if estado is not None:
                 estado.limpiar()
+        if prueba:
+            self.detener()
+            return
         self._timer.start()
         self._timer_disco.start()
 
@@ -208,6 +218,8 @@ class ReportAutosave(QObject):
     def reanudar(self):
         """Vuelve a correr sin olvidar nada (la subida final falló y la
         atención sigue abierta)."""
+        if self._prueba:
+            return
         self._timer.start()
         self._timer_disco.start()
 
@@ -215,6 +227,8 @@ class ReportAutosave(QObject):
         """Solo al disco, sin red: los datos de lo que cambió (y, con
         `con_imagenes`, también los gráficos). Rápido y nunca lanza: corre
         cada pocos segundos y antes de que el equipo se apague."""
+        if self._prueba:
+            return
         usuario = None
         for m in self._modulos():
             try:
@@ -259,6 +273,8 @@ class ReportAutosave(QObject):
     def guardar(self, modulo=None):
         """Respalda en el disco y sube en segundo plano lo que haya cambiado
         (uno o todos)."""
+        if self._prueba:
+            return
         usuario = None
         for m in ([modulo] if modulo is not None else self._modulos()):
             try:

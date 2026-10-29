@@ -230,7 +230,12 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     # La evolución que escribió el alumno tiene que quedar DESPUÉS de las
     # atenciones previas, que es como se lee una ficha de verdad.
     historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
-    entradas = linea_tiempo(historia_clinica, row.fecha,
+    # Sin cita con fecha (un caso suelto, o la práctica libre abierta por el
+    # docente) al paciente se lo ve hoy: "{{-30}}" es 30 días antes de hoy.
+    # Antes quedaba la llave a la vista, con "sin fecha" al lado.
+    fecha_base = (row.fecha if parse_fecha_agenda(row.fecha).isValid()
+                  else QDate.currentDate().toString("dd-MM-yy"))
+    entradas = linea_tiempo(historia_clinica, fecha_base,
                             historial_atenciones(shedule, row.rut, username, is_admin,
                                                  getattr(row, "practice_id", None) is not None))
 

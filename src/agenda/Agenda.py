@@ -12,7 +12,7 @@ import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView, QAbstractScrollArea,
                                 QButtonGroup, QDateEdit, QFrame, QHBoxLayout, QHeaderView,
-                                QLabel, QLineEdit, QMessageBox, QPushButton,
+                                QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
                                 QStackedWidget, QTextEdit, QVBoxLayout, QCheckBox)
 from PySide6.QtCore import QDate, QSize, QTime, QDateTime, Qt, QTimer
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
@@ -37,7 +37,8 @@ MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
 # cambian de nombre pero no de lugar.
 ENCABEZADOS_AGENDA = ["Estado", "Fecha", "Hora", "RUT", "Nombre", "Apellidos",
                       "Nacimiento", "Procedimiento"]
-ENCABEZADOS_PRACTICA = ["Estado", "Último intento", "Intentos", "RUT", "Nombre", "Apellidos",
+# N° = el lugar del paciente en su carpeta (el orden del libro)
+ENCABEZADOS_PRACTICA = ["Estado", "N°", "Intentos", "RUT", "Nombre", "Apellidos",
                         "Nacimiento", "Procedimiento"]
 
 
@@ -260,12 +261,16 @@ class Agenda(QWidget, Ui_Form):
         self._filtro_texto = ""
         self._prueba_atendiendo_key = None
         self._guardar_base = False
-        # Práctica libre (solo alumno): la tabla muestra la lista de práctica
-        # deliberada del curso en vez de la agenda. Filas con key
-        # "practica:<id>"; los intentos (citas con practice_id) nunca se
-        # muestran como filas de agenda. Ver core/practica.py.
+        # Práctica libre: la tabla muestra los pacientes de una carpeta (una
+        # por capítulo del libro, ver labsim_backend/src/Practica.php) en vez
+        # de la agenda. Filas con key "practica:<id>"; los intentos (citas
+        # con practice_id) nunca se muestran como filas de agenda. El docente
+        # la ve igual y la abre en modo prueba; en su agenda no salen esos
+        # pacientes. Ver core/practica.py.
         self._modo_practica = False
         self._practica = {}
+        self._carpetas = []      # [(clave, nombre, n)] en el orden del backend
+        self._carpeta = None     # la elegida en la lista de la izquierda
 
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -280,8 +285,15 @@ class Agenda(QWidget, Ui_Form):
 
         self.tableWidget.itemSelectionChanged.connect(self._on_selection_changed)
 
-        self.read_shedule()
+        # Arranca vacía y baja la agenda en segundo plano. Antes se bajaba
+        # acá (Shedule() -> el estado completo, ~450 KB) y el login quedaba
+        # con la ventana congelada mientras llegaba. Con la primera carga se
+        # avisa a main (agenda_cargada) para retomar la atención abierta.
+        self.shedule = {}
+        self._cargando = True
+        self._carga_fallo = False
         self.populate_shedule()
+        self.refresh_async()
 
         self.pushButton.setVisible(False)
 
@@ -303,12 +315,7 @@ class Agenda(QWidget, Ui_Form):
         tabla.verticalHeader().setDefaultSectionSize(38)
         tabla.horizontalHeader().setHighlightSections(False)
         tabla.horizontalHeader().setStretchLastSection(False)
-        ancho = QHeaderView.ResizeMode
-        for col, modo in enumerate((ancho.ResizeToContents, ancho.ResizeToContents,
-                                    ancho.ResizeToContents, ancho.ResizeToContents,
-                                    ancho.ResizeToContents, ancho.ResizeToContents,
-                                    ancho.ResizeToContents, ancho.Stretch)):
-            tabla.horizontalHeader().setSectionResizeMode(col, modo)
+        self._poner_anchos()
 
         raiz = self.verticalLayout
         raiz.removeItem(self.horizontalLayout)
@@ -436,7 +443,22 @@ class Agenda(QWidget, Ui_Form):
         col_vacio.addWidget(self.lbl_vacio_ayuda)
         self._pila.addWidget(vacio)
         self._pila.setMinimumHeight(110)
-        raiz.addWidget(self._pila, 1)
+        # Práctica libre: las carpetas a la izquierda de la tabla. Angosta:
+        # en los PC del laboratorio sobra ancho y falta alto.
+        self.lista_carpetas = QListWidget(self)
+        self.lista_carpetas.setObjectName("carpetasPractica")
+        self.lista_carpetas.setFixedWidth(220)
+        self.lista_carpetas.setWordWrap(True)
+        self.lista_carpetas.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # Un nombre de capítulo largo pasa a dos líneas, no se corta con "…"
+        self.lista_carpetas.setTextElideMode(Qt.TextElideMode.ElideNone)
+        self.lista_carpetas.setVisible(False)
+        self.lista_carpetas.currentItemChanged.connect(self._on_carpeta_elegida)
+        fila_tabla = QHBoxLayout()
+        fila_tabla.setSpacing(10)
+        fila_tabla.addWidget(self.lista_carpetas)
+        fila_tabla.addWidget(self._pila, 1)
+        raiz.addLayout(fila_tabla, 1)
 
         # -- Detalle y acciones -----------------------------------------
         self.detalle = PanelDetalle(self)
@@ -473,10 +495,11 @@ class Agenda(QWidget, Ui_Form):
         if self.is_admin:
             # El admin ve todos los pacientes siempre (ver _visible_keys):
             # el filtro por fecha / "ver todas" es solo para el estudiante.
-            # La práctica libre también: el docente prueba los casos desde
-            # sus filas de siempre.
-            for w in (*self._nav_dia, self.chk_ver_todas, self.btn_practica, self.btn_vista_agenda):
+            # La práctica libre sí la tiene, aparte (ver _populate_practica).
+            for w in (*self._nav_dia, self.chk_ver_todas):
                 w.setVisible(False)
+            self.btn_practica.setToolTip("Los pacientes de la práctica libre, en sus carpetas, como los ven "
+                                         "tus alumnos. Se abren en modo prueba: no queda registro.")
             for contador in self._contadores.values():
                 contador.setVisible(False)
 
@@ -514,15 +537,28 @@ class Agenda(QWidget, Ui_Form):
 
     def _on_toggle_practica(self, checked):
         self._modo_practica = checked
-        for w in (*self._nav_dia, self.chk_ver_todas):
-            w.setVisible(not checked)
+        if not self.is_admin:
+            for w in (*self._nav_dia, self.chk_ver_todas):
+                w.setVisible(not checked)
+        else:
+            # Siempre en modo prueba: guardar una atención base pide una cita
+            self.chk_guardar_base.setVisible(not checked)
         self.btn_no_show.setVisible(not checked)
-        self.btn_ficha_estudio.setVisible(checked)
+        # La ficha de estudio del docente está en el panel web (Fichas)
+        self.btn_ficha_estudio.setVisible(checked and not self.is_admin)
         # Sin "No se presentó", "Ver ficha" ocupa todo el ancho.
         self.detalle.acciones.removeWidget(self.btn_ver_ficha)
         self.detalle.acciones.addWidget(self.btn_ver_ficha, 1, 0, 1, 2 if checked else 1)
-        self._mostrar_contadores(vista.CONT_PRACTICA if checked else vista.CONT_AGENDA)
+        if checked:
+            self._mostrar_contadores(vista.CONT_PRACTICA)
+        else:
+            self._mostrar_contadores(() if self.is_admin else vista.CONT_AGENDA)
         self.tableWidget.setHorizontalHeaderLabels(ENCABEZADOS_PRACTICA if checked else ENCABEZADOS_AGENDA)
+        self.lista_carpetas.setVisible(checked and bool(self._carpetas))
+        # Sin columna de orden la tabla queda como la manda el backend (el
+        # orden de la carpeta); si no, se ordenaba sola por Estado, al revés.
+        # Un clic en el encabezado la sigue ordenando.
+        self.tableWidget.horizontalHeader().setSortIndicator(-1 if checked else 0, Qt.DescendingOrder)
         if checked:
             self._pedir_practica()
         self._selected_row_key = None
@@ -535,8 +571,45 @@ class Agenda(QWidget, Ui_Form):
 
     def _on_practica_fetched(self, items):
         self._practica = {f"practica:{it['id']}": it for it in items}
-        if self._modo_practica:
+        self._armar_carpetas()
+        # Al docente también le cambia la agenda: los saca de ahí
+        if self._modo_practica or self.is_admin:
             self.populate_shedule()
+
+    def _armar_carpetas(self):
+        """La lista de carpetas, en el orden en que vienen sus pacientes.
+        Un backend de antes de las carpetas no manda folder_id: queda todo
+        en una sola, sin nombre."""
+        carpetas = {}
+        for it in self._practica.values():
+            clave = it.get("folder_id")
+            if clave not in carpetas:
+                carpetas[clave] = [clave, it.get("carpeta") or "Práctica libre", 0]
+            carpetas[clave][2] += 1
+        self._carpetas = [tuple(c) for c in carpetas.values()]
+        if self._carpeta not in carpetas:
+            self._carpeta = self._carpetas[0][0] if self._carpetas else None
+
+        lista = self.lista_carpetas
+        lista.blockSignals(True)
+        lista.clear()
+        # Sin número adelante: el nombre ya dice el capítulo ("Cap. 7 · ...")
+        for clave, nombre, cuantos in self._carpetas:
+            item = QListWidgetItem(f"{nombre}  ({cuantos})")
+            item.setData(Qt.UserRole, clave)
+            item.setToolTip(f"{nombre}: {_plural(cuantos, 'paciente', 'pacientes')}")
+            lista.addItem(item)
+            if clave == self._carpeta:
+                lista.setCurrentItem(item)
+        lista.blockSignals(False)
+        lista.setVisible(self._modo_practica and bool(self._carpetas))
+
+    def _on_carpeta_elegida(self, actual, _anterior=None):
+        if actual is None:
+            return
+        self._carpeta = actual.data(Qt.UserRole)
+        self._selected_row_key = None
+        self.populate_shedule()
 
     def _on_fecha_seleccionada(self, qdate):
         self._actualizar_tooltip_fecha(qdate)
@@ -633,7 +706,7 @@ class Agenda(QWidget, Ui_Form):
         # Sin QThread por consulta: ver hilos.en_fondo (cierres del
         # 2026-10-09, uno cada 15 s durante toda la jornada).
         self._shedule_fetch = hilos.en_fondo(
-            _traer_agenda, self._modo_practica, dueno=self,
+            _traer_agenda, self._modo_practica or self.is_admin, dueno=self,
             listo=self._on_refresh_async_done, fallo=self._on_refresh_async_fallo,
             nombre="agenda")
 
@@ -665,13 +738,23 @@ class Agenda(QWidget, Ui_Form):
     def _on_refresh_async_done(self, resultado):
         self._shedule_fetch = None
         data, practica = resultado
+        primera = data is not None and self._cargando
         if data is not None:
+            self._cargando = False
             self.shedule = data
+            self.populate_shedule()
+        elif self._cargando:
+            # Se reintenta solo con el sync (aplicar_delta pide completo)
+            self._carga_fallo = True
             self.populate_shedule()
         if practica is not None:
             self._on_practica_fetched(practica)
         if getattr(self, "_refrescar_otra_vez", False):
             self.refresh_async()
+        if primera:
+            aviso = getattr(self.main_window, "agenda_cargada", None)
+            if aviso is not None:
+                aviso()
 
     def _on_refresh_async_fallo(self, exc):
         # Una respuesta rara (no de red) no puede dejar la agenda sin
@@ -687,8 +770,12 @@ class Agenda(QWidget, Ui_Form):
         rows = self.shedule.get(agenda, {})
         if self.is_admin:
             # Única diferencia con la vista de estudiante: el admin ve TODOS
-            # los pacientes/citas (sin filtro por fecha ni por estado).
-            keys = list(rows.keys())
+            # los pacientes/citas (sin filtro por fecha ni por estado), menos
+            # los de práctica, que tienen su lista aparte: los intentos de
+            # los alumnos y la fila "sin cita" de cada paciente de práctica.
+            casos_practica = {str(it.get("case_id")) for it in self._practica.values()}
+            keys = [k for k, v in rows.items()
+                    if v.practice_id is None and not (v.sin_cita and v.case_id in casos_practica)]
         else:
             # Los intentos de práctica no son citas de la agenda: se ven y se
             # retoman desde "Práctica libre".
@@ -745,7 +832,7 @@ class Agenda(QWidget, Ui_Form):
                 item.setBackground(FERIADO_FONDO)
                 item.setForeground(FERIADO_COLOR)
                 item.setToolTip(f"Agendada en feriado: {feriado}")
-        self.tableWidget.setSortingEnabled(True)
+        self._terminar_llenado()
         del sueltos
         self._loading = False
         self._actualizar_resumen(len(keys), conteo)
@@ -783,11 +870,17 @@ class Agenda(QWidget, Ui_Form):
                 and QDateTime(fecha, hora) < QDateTime.currentDateTime())
 
     def _poner_fila(self, row_idx, key, clave, columnas, tooltip=""):
-        """Una fila: la celda de estado (icono + texto de color) y las demás."""
+        """Una fila: la celda de estado (icono + texto de color) y las demás.
+        Un int va como número, para que ordenar por esa columna no ponga el
+        10 antes que el 2."""
         texto, _, color = vista.ESTADOS[clave]
         celdas = [(texto, True)] + [(valor, False) for valor in columnas]
         for col_idx, (valor, es_estado) in enumerate(celdas):
-            item = QTableWidgetItem(valor)
+            if isinstance(valor, int):
+                item = QTableWidgetItem()
+                item.setData(Qt.DisplayRole, valor)
+            else:
+                item = QTableWidgetItem(valor)
             item.setData(Qt.UserRole, key)
             if es_estado:
                 item.setIcon(vista.icono_estado(clave))
@@ -809,11 +902,18 @@ class Agenda(QWidget, Ui_Form):
         self._pila.setCurrentIndex(0 if total else 1)
         if total:
             return
-        if self._filtro_texto:
+        if self._cargando and not self._modo_practica:
+            titulo = "Cargando la agenda…"
+            ayuda = ("El servidor no responde; se vuelve a intentar solo." if self._carga_fallo
+                     else "Trayendo tus citas del servidor.")
+        elif self._filtro_texto:
             titulo, ayuda = "Nada coincide con tu búsqueda", "Prueba con otro nombre, apellido o RUT."
+        elif self._modo_practica and self.is_admin:
+            titulo = "No hay pacientes de práctica"
+            ayuda = "Arma las carpetas en el panel web: Docencia → Práctica libre."
         elif self._modo_practica:
             titulo = "Aún no hay pacientes para practicar"
-            ayuda = "Tu docente todavía no dejó pacientes de práctica libre para este curso."
+            ayuda = "Todavía no hay pacientes en la práctica libre."
         elif self.is_admin:
             titulo, ayuda = "No hay citas ni casos", "Crea un caso o agenda una cita desde el panel web."
         elif self._ver_todas:
@@ -826,6 +926,8 @@ class Agenda(QWidget, Ui_Form):
         self.lbl_vacio_ayuda.setText(ayuda)
 
     def _subtitulo(self, n):
+        if self._modo_practica and self.is_admin:
+            return f"{_plural(n, 'paciente', 'pacientes')} de práctica · vista docente, en modo prueba"
         if self._modo_practica:
             return (f"{_plural(n, 'paciente', 'pacientes')} para practicar · "
                     "sin horario, las veces que quieras")
@@ -858,6 +960,9 @@ class Agenda(QWidget, Ui_Form):
             if it is None:
                 self.detalle.vacio("Elige un paciente para practicar. Puedes repetirlo las veces que quieras.")
                 return
+            if self.is_admin:
+                self._detalle_practica_docente(key, it)
+                return
             intentos = int(it.get("intentos") or 0)
             abierto = self._intento_abierto(key)
             if abierto is not None and self._es_atencion_activa(abierto):
@@ -874,8 +979,9 @@ class Agenda(QWidget, Ui_Form):
                 clave, paso = "practica_nuevo", 1
                 pista = "Presiona «Practicar» para abrir al paciente; después podrás revisar su ficha."
             nombre = f"{it.get('nombre') or ''} {it.get('apellido') or ''}".strip()
-            datos = self._datos_paciente(it.get("rut"), it.get("procedimiento"),
-                                         _plural(intentos, "intento", "intentos"))
+            ultimo = (it.get("ultimo") or "")[:10]
+            extra = _plural(intentos, "intento", "intentos") + (f", el último el {ultimo}" if ultimo else "")
+            datos = self._datos_paciente(it.get("rut"), it.get("procedimiento"), extra)
             self.detalle.mostrar(nombre, datos, clave, pista, paso)
             return
 
@@ -914,11 +1020,65 @@ class Agenda(QWidget, Ui_Form):
         datos = self._datos_paciente(user.rut, user.procedimiento, cuando)
         self.detalle.mostrar(nombre, datos, clave, pista, paso)
 
+    def _detalle_practica_docente(self, key, it):
+        intentos = int(it.get("intentos") or 0)
+        alumnos = int(it.get("alumnos") or 0)
+        if self._prueba_practica_activa(key):
+            clave, paso = "practica_curso", 2
+            pista = "Modo prueba: no queda registro. Presiona «Cerrar/Evolucionar» para terminar."
+        else:
+            clave, paso = ("practica_hecho" if intentos else "practica_nuevo"), 1
+            pista = "Modo prueba: no queda registro. Presiona «Atender (prueba)» para abrirlo como lo ven tus alumnos."
+        if intentos:
+            pista += (f" Lo practicaron {_plural(alumnos, 'alumno', 'alumnos')}; "
+                      f"el último intento cerrado es del {(it.get('ultimo') or '')[:10]}.")
+        nombre = f"{it.get('nombre') or ''} {it.get('apellido') or ''}".strip()
+        datos = self._datos_paciente(it.get("rut"), it.get("procedimiento"),
+                                     " · ".join(p for p in (it.get("carpeta"), _plural(intentos, "intento", "intentos")) if p))
+        self.detalle.mostrar(nombre, datos, clave, pista, paso)
+
+    def _clave_caso_practica(self, it):
+        """Fila de la agenda (oculta en la vista docente) con la que el
+        docente abre en prueba un paciente de práctica: la del caso sin cita
+        o, si ya hay citas del caso, cualquiera de ellas -- en prueba solo se
+        lee el caso, no se escribe nada en la cita."""
+        case_id = str(it.get("case_id") or "")
+        rows = self.shedule.get("agenda_1", {})
+        if f"case:{case_id}" in rows:
+            return f"case:{case_id}"
+        return next((k for k, v in rows.items() if v.case_id == case_id), None)
+
+    def _prueba_practica_activa(self, key):
+        it = self._practica.get(key)
+        clave = self._clave_caso_practica(it) if it else None
+        return clave is not None and self._prueba_atendiendo_key == clave and self._es_atencion_activa(clave)
+
     def _datos_paciente(self, rut, procedimiento, extra=None):
         edad = self._edad(rut) if rut else None
         partes = [f"RUT {rut}" if rut else None, f"{edad} años" if edad else None,
                   procedimiento or None, extra]
         return "  ·  ".join(p for p in partes if p)
+
+    def _poner_anchos(self, llenando=False):
+        """Columnas al ancho de su contenido, la última estirada.
+
+        Mientras se llena la tabla van fijas: con ResizeToContents cada
+        takeItem/setItem recalculaba el ancho mirando todas las filas, y
+        rearmar la agenda era cuadrático (2026-10-28, docente con unas 300
+        filas: 6,9 s de ventana congelada en terreno; 80 s en una prueba con
+        300 filas ya puestas). Al terminar se vuelven a ajustar, una vez."""
+        ancho = QHeaderView.ResizeMode
+        cabecera = self.tableWidget.horizontalHeader()
+        for col in range(cabecera.count()):
+            if llenando:
+                modo = ancho.Interactive
+            else:
+                modo = ancho.Stretch if col == cabecera.count() - 1 else ancho.ResizeToContents
+            cabecera.setSectionResizeMode(col, modo)
+
+    def _terminar_llenado(self):
+        self._poner_anchos()
+        self.tableWidget.setSortingEnabled(True)
 
     def _vaciar_tabla(self, filas):
         """Saca los items de la tabla antes de rearmarla y la deja en
@@ -932,21 +1092,25 @@ class Agenda(QWidget, Ui_Form):
         borra nada. Hay que guardar lo devuelto hasta terminar de llenar."""
         tabla = self.tableWidget
         tabla.setSortingEnabled(False)
+        self._poner_anchos(llenando=True)
         sueltos = [tabla.takeItem(f, c) for f in range(tabla.rowCount())
                    for c in range(tabla.columnCount())]
         tabla.setRowCount(filas)
         return sueltos
 
     def _populate_practica(self):
-        """Llena la tabla con la lista de práctica (ver _on_toggle_practica)."""
+        """Llena la tabla con los pacientes de la carpeta elegida, en su orden
+        (ver _on_toggle_practica). Al buscar, en todas las carpetas."""
         keys = list(self._practica.keys())
         if self._filtro_texto:
             texto = self._filtro_texto
             keys = [
                 k for k in keys
                 if texto in " ".join(str(self._practica[k].get(c) or "") for c in
-                                     ("rut", "nombre", "apellido", "procedimiento", "curso")).lower()
+                                     ("rut", "nombre", "apellido", "procedimiento", "carpeta")).lower()
             ]
+        else:
+            keys = [k for k in keys if self._practica[k].get("folder_id") == self._carpeta]
         prev_key = self._selected_row_key
 
         self._loading = True
@@ -956,12 +1120,16 @@ class Agenda(QWidget, Ui_Form):
             it = self._practica[key]
             intentos = int(it.get("intentos") or 0)
             ultimo = (it.get("ultimo") or "")[:10]
-            clave = "practica_curso" if it.get("abierto") else ("practica_hecho" if intentos else "practica_nuevo")
+            abierto = self._prueba_practica_activa(key) if self.is_admin else bool(it.get("abierto"))
+            clave = "practica_curso" if abierto else ("practica_hecho" if intentos else "practica_nuevo")
             conteo[clave] = conteo.get(clave, 0) + 1
-            columnas = (ultimo or "—", str(intentos), it.get("rut") or "", it.get("nombre") or "",
+            orden = it.get("orden")
+            columnas = (int(orden) if orden else "", str(intentos), it.get("rut") or "", it.get("nombre") or "",
                         it.get("apellido") or "", it.get("fecha_nac") or "", it.get("procedimiento") or "")
-            self._poner_fila(row_idx, key, clave, columnas, f"Curso: {it['curso']}" if it.get("curso") else "")
-        self.tableWidget.setSortingEnabled(True)
+            pista = [f"Carpeta: {it['carpeta']}" if it.get("carpeta") else "",
+                     f"Último intento: {ultimo}" if ultimo else ""]
+            self._poner_fila(row_idx, key, clave, columnas, " · ".join(p for p in pista if p))
+        self._terminar_llenado()
         del sueltos
         self._loading = False
         self._actualizar_resumen(len(keys), conteo)
@@ -990,6 +1158,13 @@ class Agenda(QWidget, Ui_Form):
         it = self._practica[key]
         self._selected_row_key = key
         self._selected_key = None
+        if self.is_admin:
+            clave = self._clave_caso_practica(it)
+            self.btn_atender.setText("Cerrar/Evolucionar" if self._prueba_practica_activa(key) else "Atender (prueba)")
+            self.btn_atender.setEnabled(clave is not None)
+            self.btn_ver_ficha.setEnabled(clave is not None)
+            self.btn_no_show.setEnabled(False)
+            return
         intento = self._intento_abierto(key)
         if intento is not None and self._es_atencion_activa(intento):
             self.btn_atender.setText("Cerrar/Evolucionar")
@@ -1007,6 +1182,9 @@ class Agenda(QWidget, Ui_Form):
         it = self._practica.get(key)
         if it is None or self.main_window is None:
             return
+        if self.is_admin:
+            self._atender_practica_docente(key, it)
+            return
         intento = self._intento_abierto(key)
         if intento is not None and self._es_atencion_activa(intento):
             self._cerrar_practica(intento, it)
@@ -1023,6 +1201,20 @@ class Agenda(QWidget, Ui_Form):
         if hasattr(self.main_window, "atender_paciente"):
             self.main_window.atender_paciente(intento)
         self._on_selection_changed()
+
+    def _atender_practica_docente(self, key, it):
+        """En prueba, como el "Atender" del docente en su agenda (ver
+        atender_paciente): no crea un intento ni deja registro."""
+        if self._prueba_practica_activa(key):
+            self._cerrar_atencion_prueba()
+            return
+        clave = self._clave_caso_practica(it)
+        if clave is None or not hasattr(self.main_window, "atender_paciente_prueba"):
+            return
+        self.main_window.atender_paciente_prueba(clave)
+        self._prueba_atendiendo_key = clave
+        self._on_selection_changed()
+        self.populate_shedule()
 
     def _cerrar_practica(self, intento, it):
         """Como _cerrar_atencion(), para el intento abierto de un paciente
@@ -1042,7 +1234,10 @@ class Agenda(QWidget, Ui_Form):
             abrir_ficha_estudio(self, it["ultimo_cerrado"])
 
     def _reset_atender_button(self):
-        self.btn_atender.setText("Practicar" if self._modo_practica else "Atender")
+        if self._modo_practica:
+            self.btn_atender.setText("Atender (prueba)" if self.is_admin else "Practicar")
+        else:
+            self.btn_atender.setText("Atender")
         self.btn_atender.setEnabled(False)
         self.btn_ver_ficha.setEnabled(False)
         self.btn_no_show.setEnabled(False)
@@ -1226,13 +1421,16 @@ class Agenda(QWidget, Ui_Form):
         if self.main_window is None or not hasattr(self.main_window, "abrir_evolucion"):
             return
 
-        user = self.shedule["agenda_1"][self._selected_row_key]
+        # En práctica libre la fila elegida es "practica:<id>", no la del caso
+        user = self.shedule["agenda_1"][self._prueba_atendiendo_key or self._selected_row_key]
         nombre = f"{user.nombre} {user.apellido}".strip()
 
         def _guardar(nota):
             self._prueba_atendiendo_key = None
             self.main_window.cerrar_atencion_prueba(nota)
             self._on_selection_changed()
+            if self._modo_practica:
+                self.populate_shedule()
             return True
 
         self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
@@ -1297,7 +1495,11 @@ class Agenda(QWidget, Ui_Form):
             return
 
         appointment_key = self._selected_row_key
-        if self._modo_practica:
+        if self._modo_practica and self.is_admin:
+            appointment_key = self._clave_caso_practica(self._practica.get(appointment_key, {}))
+            if appointment_key is None:
+                return
+        elif self._modo_practica:
             appointment_key = self._intento_abierto(self._selected_row_key)
             if appointment_key is None or appointment_key not in self.shedule.get("agenda_1", {}):
                 return
