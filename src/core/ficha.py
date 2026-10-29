@@ -4,6 +4,7 @@
 (core.mis_pacientes) -- ambos parten de la misma fila de agenda + caso, solo
 cambia de dónde sacan `shedule` (en memoria vs. recién pedido al backend)."""
 
+import dataclasses
 import html
 import re
 from pathlib import Path
@@ -127,6 +128,19 @@ def audiometria_previa(row, caso):
     case_id = getattr(row, "case_id", None) or (caso.get("id") if isinstance(caso, dict) else None)
     ruta = PREVIOS_DIR / f"{case_id}.svg"
     return ruta if case_id and ruta.is_file() else None
+
+
+def fila_de_practica(row, item):
+    """La fila del caso como la ve el alumno en la práctica libre.
+
+    El docente abre un paciente de práctica con la fila del caso (sin
+    intento): sin esto su ficha y su chat de prueba llevaban el
+    procedimiento de la ficha del caso y no el de la carpeta, y no salía la
+    audiometría que el alumno sí ve. `item`: el paciente de la carpeta
+    (api/practica.php, con id y procedimiento).
+    """
+    return dataclasses.replace(row, procedimiento=item.get("procedimiento") or row.procedimiento,
+                               practice_id=int(item["id"]))
 
 
 def linea_tiempo(historia_clinica, fecha_cita, historial, previos=()):

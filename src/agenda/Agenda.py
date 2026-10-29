@@ -26,7 +26,8 @@ from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline
                           marcar_entry_no_show,
                           obtener_nota_atencion,
                           CreatePatient)
-from core.ficha import audiometria_previa, parse_fecha_agenda, poner_html, render_ficha_html
+from core.ficha import (audiometria_previa, fila_de_practica, parse_fecha_agenda, poner_html,
+                        render_ficha_html)
 from core.practica import abrir_ficha_estudio
 
 DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
@@ -1239,7 +1240,7 @@ class Agenda(QWidget, Ui_Form):
         clave = self._clave_caso_practica(it)
         if clave is None or not hasattr(self.main_window, "atender_paciente_prueba"):
             return
-        self.main_window.atender_paciente_prueba(clave)
+        self.main_window.atender_paciente_prueba(clave, practica=it)
         self._prueba_atendiendo_key = clave
         self._on_selection_changed()
         self.populate_shedule()
@@ -1532,8 +1533,10 @@ class Agenda(QWidget, Ui_Form):
             return
 
         appointment_key = self._selected_row_key
+        item_practica = None
         if self._modo_practica and self.is_admin:
-            appointment_key = self._clave_caso_practica(self._practica.get(appointment_key, {}))
+            item_practica = self._practica.get(appointment_key, {})
+            appointment_key = self._clave_caso_practica(item_practica)
             if appointment_key is None:
                 return
         elif self._modo_practica:
@@ -1541,6 +1544,8 @@ class Agenda(QWidget, Ui_Form):
             if appointment_key is None or appointment_key not in self.shedule.get("agenda_1", {}):
                 return
         row = self.shedule["agenda_1"][appointment_key]
+        if item_practica:
+            row = fila_de_practica(row, item_practica)
         case_id = row.case_id or None
         if not case_id:
             QMessageBox.information(

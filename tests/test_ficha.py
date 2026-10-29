@@ -244,6 +244,20 @@ def test_las_hojas_previas_las_lee_qtsvg():
         assert QSvgRenderer(str(hoja)).isValid(), hoja.name
 
 
+def test_el_docente_ve_en_practica_libre_lo_mismo_que_el_alumno():
+    """Abre la fila del caso sin cita: sin practice_id ni el procedimiento de
+    la carpeta no le salía la audiometría que trae el paciente."""
+    from backend.shedule_sync import AgendaEntry
+    from core.ficha import fila_de_practica
+    caso_sin_cita = AgendaEntry(fecha="10-09-26", rut="1", procedimiento="Audiometría + PEATC",
+                                case_id="78", sin_cita=True)
+    fila = fila_de_practica(caso_sin_cita, {"id": "42", "procedimiento": "Impedanciometría + PEATC"})
+    assert fila.practice_id == 42 and fila.procedimiento == "Impedanciometría + PEATC"
+    assert caso_sin_cita.practice_id is None, "la fila de la agenda no se toca"
+    html = _con_previos(lambda: render_ficha_html(fila, {}, {"agenda_1": {}}, "admin", True))
+    assert 'href="previo:78"' in html
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

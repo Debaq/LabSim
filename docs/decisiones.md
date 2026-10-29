@@ -6923,6 +6923,11 @@ VEMP.
   en una cita del docente: qué trae el paciente en sus prácticos lo decide él.
 - **No se bloquea nada:** si el alumno repite la audiometría, queda como una
   atención más en su historial.
+- **El docente ve lo mismo** (`core.ficha.fila_de_practica`): en práctica
+  libre abre la fila del caso sin cita, que no tiene `practice_id` y lleva
+  el procedimiento de la ficha del caso. Para la ficha y para su prueba se
+  usa una copia con el id y el procedimiento de la carpeta; la fila de la
+  agenda no se toca. Probado en la app dev contra prod (ficha 78).
 - **El chat sabe de dónde viene** (`LlmConfig::historiaPrevia`): al prompt
   se le suma la historia clínica del caso con las fechas dichas como las
   diría el paciente ("hace 2 meses: profesora jefe…") y, si la app avisa

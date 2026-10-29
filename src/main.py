@@ -46,7 +46,7 @@ from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
 from core import app_layout
-from core.ficha import audiometria_previa
+from core.ficha import audiometria_previa, fila_de_practica
 from core.app_layout import LayoutRetryThread, fetch_layout
 
 # Definir la raíz del proyecto
@@ -909,14 +909,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return  # esta variante es solo para admin/docente
         self._atender_caso(key, es_prueba=False)
 
-    def atender_paciente_prueba(self, key):
+    def atender_paciente_prueba(self, key, practica=None):
         """
         Admin: carga el caso `key` en los módulos (audiómetro, chat con el
         paciente, etc.) para probarlo. A diferencia de atender_paciente(), NO
         marca "atendiendo" ni escribe en attendances/agenda -- no deja rastro
         en la base de datos, es solo para verificar que un caso funciona.
+
+        practica: el paciente de la práctica libre que se prueba (ver
+        core.ficha.fila_de_practica), para que el chat lleve lo mismo que
+        le llega al alumno.
         """
-        self._atender_caso(key, es_prueba=True)
+        self._atender_caso(key, es_prueba=True, practica=practica)
 
     def cerrar_atencion_prueba(self, nota):
         """Admin/profe: descarga el caso de prueba de los módulos, igual que
@@ -932,7 +936,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.statusbar.showMessage(f"[PRUEBA] Atención cerrada (no se guarda): {nota[:80]}")
         self._stop_cronometro()
 
-    def _atender_caso(self, key, *, es_prueba):
+    def _atender_caso(self, key, *, es_prueba, practica=None):
         """Lógica común a atender_paciente() y atender_paciente_prueba() --
         difieren solo en si se marca "atendiendo" en la agenda/backend y en
         el appointment_id que queda asociado al chat (ver docstrings de cada
@@ -949,6 +953,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         entry = agenda.get(key)
         if entry is None:
             return
+        if practica:
+            # Solo para leer: en prueba no se escribe nada en la cita
+            entry = fila_de_practica(entry, practica)
 
         case_id = entry.case_id or None
         if not case_id:
