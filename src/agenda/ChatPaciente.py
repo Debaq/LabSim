@@ -183,6 +183,7 @@ class ChatPacienteWidget(QWidget):
         self._usuario_nombre = usuario_nombre or "Tú"
         self._edad = 0
         self._procedimiento = ""
+        self._trae_audiometria = False
         self._history = []
         self._thread = None
         self._sala_thread = None
@@ -274,13 +275,17 @@ class ChatPacienteWidget(QWidget):
 
         self._actualizar_encabezado()
 
-    def set_paciente(self, case_id, nombre, edad, procedimiento, appointment_id=None):
+    def set_paciente(self, case_id, nombre, edad, procedimiento, appointment_id=None,
+                     trae_audiometria=False):
         """Reapunta el chat a otro caso -- descarta la conversación anterior.
 
         appointment_id: cita real a la que se asocia lo que se guarde del
         chat (ver LlmChat.php) -- None = no se guarda nada (p.ej. "Atender
-        (prueba)" del admin, que no debe dejar rastro)."""
+        (prueba)" del admin, que no debe dejar rastro).
+        trae_audiometria: el paciente llega con la audiometría hecha (la
+        ficha la muestra, ver core.ficha.audiometria_previa) y lo sabe."""
         self._case_id = case_id
+        self._trae_audiometria = bool(trae_audiometria)
         self._appointment_id = appointment_id
         self._nombre = nombre or "el paciente"
         self._edad = edad
@@ -511,7 +516,8 @@ class ChatPacienteWidget(QWidget):
         case_id_solicitado = self._case_id
         self._thread = hilos.en_fondo(
             chat_con_paciente, self._case_id, self._nombre, self._edad, self._procedimiento,
-            list(self._history), mensaje, self._appointment_id, dueno=self, nombre="chat",
+            list(self._history), mensaje, self._appointment_id, self._trae_audiometria,
+            dueno=self, nombre="chat",
             listo=lambda r: self._on_thread_finished(
                 self._on_respuesta, case_id_solicitado, mensaje, r),
             fallo=lambda e: self._on_thread_finished(

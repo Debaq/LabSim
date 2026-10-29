@@ -247,6 +247,7 @@ class BackendClient:
     def llm_chat(
         self, case_id: str, nombre: str, edad: int, procedimiento: str,
         history: list[dict], message: str, appointment_id: int | None = None,
+        trae_audiometria: bool = False,
     ) -> dict:
         """Turno de chat con el paciente y quienes lo acompañan (ver
         Sala.php y llm_chat.php). Devuelve `respuestas`: una entrada por
@@ -275,6 +276,8 @@ class BackendClient:
         }
         if appointment_id is not None:
             body["appointment_id"] = appointment_id
+        if trae_audiometria:
+            body["trae_audiometria"] = True
         return self._post("/api/llm_chat.php", body, timeout=35)
 
     def save_prefs(self, prefs: dict) -> dict:

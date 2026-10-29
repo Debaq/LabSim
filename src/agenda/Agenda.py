@@ -26,7 +26,7 @@ from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline
                           marcar_entry_no_show,
                           obtener_nota_atencion,
                           CreatePatient)
-from core.ficha import parse_fecha_agenda, poner_html, render_ficha_html
+from core.ficha import audiometria_previa, parse_fecha_agenda, poner_html, render_ficha_html
 from core.practica import abrir_ficha_estudio
 
 DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
@@ -1581,5 +1581,6 @@ class Agenda(QWidget, Ui_Form):
             appointment_id = None
 
         if self.main_window is not None and hasattr(self.main_window, "abrir_chat_con"):
-            self.main_window.abrir_chat_con(case_id, nombre or "el paciente", edad, procedimiento, appointment_id)
+            self.main_window.abrir_chat_con(case_id, nombre or "el paciente", edad, procedimiento, appointment_id,
+                                            audiometria_previa(row, {"id": case_id}) is not None)
 

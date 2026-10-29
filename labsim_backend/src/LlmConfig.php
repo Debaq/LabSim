@@ -357,6 +357,73 @@ TXT;
         return self::DISPOSITION_LABELS[$level] ?? self::DISPOSITION_LABELS[0];
     }
 
+    /**
+     * Lo que le pasó al paciente antes de esta cita, para el chat: la
+     * historia clínica del caso con las fechas dichas como las diría él
+     * ("hace 2 meses") y, si llega con ella, la audiometría que trae (la
+     * ficha de la práctica libre la muestra, ver core/ficha.py en la app).
+     *
+     * Va APARTE de la plantilla, como OIRS_TONO: una plantilla propia del
+     * admin no la tendría, y el paciente volvería a no saber de dónde viene
+     * ni qué examen trae. Sin historia ni audiometría devuelve '' y el
+     * prompt queda como antes.
+     *
+     * $historia: cases.data['historia_clinica'], con sus llaves {{N}} (N =
+     * días respecto de la cita, que para el paciente es hoy).
+     */
+    public static function historiaPrevia(string $historia, bool $traeAudiometria, bool $sala = false): string
+    {
+        $lineas = [];
+        foreach (preg_split('/\R/', $historia) ?: [] as $linea) {
+            $linea = trim($linea);
+            if ($linea === '') {
+                continue;
+            }
+            if (preg_match('/^\{\{([+-]?\d+)\}\}\s*(.*)$/s', $linea, $m) === 1) {
+                $linea = self::haceCuanto(-(int) $m[1]) . ': ' . trim($m[2]);
+            }
+            $lineas[] = '- ' . $linea;
+        }
+        if ($traeAudiometria) {
+            $lineas[] = '- ' . self::haceCuanto(14) . ': ' . ($sala
+                ? 'al paciente le hicieron un examen de audición (una audiometría) y traen el informe impreso; nadie sabe interpretarlo.'
+                : 'te hicieron un examen de audición (una audiometría) y traes el informe impreso; no sabes interpretarlo.');
+        }
+        if ($lineas === []) {
+            return '';
+        }
+        $encabezado = $sala
+            ? 'Lo que le pasó al paciente antes de esta cita (lo saben quienes lo acompañaron a esas atenciones). '
+              . 'Si preguntan, se cuenta con palabras de paciente: qué le hicieron, quién lo mandó y cuándo, '
+              . 'sin fechas exactas, sin diagnósticos ni resultados técnicos:'
+            : 'Lo que te pasó antes de esta cita (de ahí viene la derivación). Si te preguntan, cuéntalo con tus '
+              . 'palabras: qué te hicieron, quién te mandó y cuándo, sin fechas exactas, sin diagnósticos ni '
+              . 'resultados técnicos que un paciente no sabría explicar:';
+        return "\n\n" . $encabezado . "\n" . implode("\n", $lineas);
+    }
+
+    /** "Hace 3 semanas": días hacia atrás como los diría el paciente. */
+    private static function haceCuanto(int $dias): string
+    {
+        if ($dias <= 0) {
+            return 'Hoy';
+        }
+        if ($dias === 1) {
+            return 'Ayer';
+        }
+        if ($dias < 14) {
+            return "Hace {$dias} días";
+        }
+        if ($dias < 60) {
+            return 'Hace ' . (int) round($dias / 7) . ' semanas';
+        }
+        if ($dias < 730) {
+            $meses = (int) round($dias / 30);
+            return $meses === 1 ? 'Hace un mes' : "Hace {$meses} meses";
+        }
+        return 'Hace ' . (int) round($dias / 365) . ' años';
+    }
+
     /** Reemplaza cada clave de $vars (ej. "{{nombre}}") por su valor dentro de $template. */
     public static function fillPlaceholders(string $template, array $vars): string
     {

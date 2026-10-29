@@ -46,6 +46,7 @@ from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
 from core import app_layout
+from core.ficha import audiometria_previa
 from core.app_layout import LayoutRetryThread, fetch_layout
 
 # Definir la raíz del proyecto
@@ -1002,6 +1003,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.paciente_actual = {
             "case_id": case_id, "nombre": nombre or "el paciente",
             "edad": edad, "procedimiento": procedimiento, "appointment_id": appointment_id,
+            "trae_audiometria": audiometria_previa(entry, self.data_current) is not None,
         }
 
         if es_prueba:
@@ -1403,11 +1405,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             if btn is not None:
                 btn.setVisible(con_audiometro)
 
-    def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None):
+    def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None,
+                       trae_audiometria=False):
         """Abre (o trae al frente) la subventana MDI de chat con el paciente,
         reapuntada al caso indicado. appointment_id=None = no se guarda el
         chat (ver ChatPacienteWidget.set_paciente)."""
-        self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id)
+        self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id,
+                                           trae_audiometria)
         self.activate_auto("CHAT")
 
     # -----------------------------------------------------------------
@@ -1537,7 +1541,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             QMessageBox.information(self, "Hablar con el paciente", "No estás atendiendo un paciente.")
             return
         p = self.paciente_actual
-        self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"))
+        self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"),
+                            p.get("trae_audiometria", False))
 
     def closeEvent(self, event):
         if not self._salida_permitida():

@@ -6923,5 +6923,11 @@ VEMP.
   en una cita del docente: qué trae el paciente en sus prácticos lo decide él.
 - **No se bloquea nada:** si el alumno repite la audiometría, queda como una
   atención más en su historial.
-- Falta: el chat no sabe que trae la audiometría (el prompt no lee la
-  historia clínica); si el alumno le pregunta, puede contestar que no.
+- **El chat sabe de dónde viene** (`LlmConfig::historiaPrevia`): al prompt
+  se le suma la historia clínica del caso con las fechas dichas como las
+  diría el paciente ("hace 2 meses: profesora jefe…") y, si la app avisa
+  `trae_audiometria`, "hace 2 semanas te hicieron un examen de audición y
+  traes el informe". Va fuera de la plantilla (como `OIRS_TONO`) para que
+  una plantilla propia del admin no lo pierda, y vale para todos los casos,
+  no solo los del libro. El aviso lo manda la app porque es la que sabe si
+  hay hoja; con acompañantes se cuenta en tercera persona.
