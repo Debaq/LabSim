@@ -18,9 +18,11 @@ require_once __DIR__ . '/../bootstrap.php';
  */
 
 $user = Auth::requireUser();
+// Las carpetas solo_admin (demo interna) las ve únicamente permission 777.
+$verSoloAdmin = (int) ($user['permission'] ?? 0) === Auth::PERMISSION_ADMIN;
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $carpetas = Practica::lista((int) $user['id'], $user['role'] === 'admin');
+    $carpetas = Practica::lista((int) $user['id'], $user['role'] === 'admin', $verSoloAdmin);
     $items = [];
     foreach ($carpetas as $c) {
         foreach ($c['items'] as $it) {
@@ -42,7 +44,7 @@ if ($itemId <= 0) {
 }
 
 try {
-    $appointment = Practica::iniciar((int) $user['id'], $itemId);
+    $appointment = Practica::iniciar((int) $user['id'], $itemId, $verSoloAdmin);
 } catch (RuntimeException $e) {
     Response::error($e->getMessage(), 409);
 }

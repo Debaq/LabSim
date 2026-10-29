@@ -316,6 +316,8 @@ CREATE TABLE IF NOT EXISTS practice_folders (
     nombre TEXT NOT NULL,
     orden INTEGER NOT NULL DEFAULT 0,
     active INTEGER NOT NULL DEFAULT 1,
+    -- 1 = solo la ve el admin (permission 777): demo interna, ver Practica::lista.
+    solo_admin INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER REFERENCES users(id),
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP

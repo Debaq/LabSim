@@ -969,6 +969,8 @@ final class Db
             )"
         );
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_practice_items_folder ON practice_items (folder_id, orden)');
+        // Carpetas que solo ve el admin (demo interna, ver Practica::lista).
+        self::addColumnIfMissing($pdo, 'practice_folders', 'solo_admin', 'INTEGER NOT NULL DEFAULT 0');
         self::addColumnIfMissing($pdo, 'appointments', 'practice_item_id', 'INTEGER REFERENCES practice_items(id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_appointments_practice_item ON appointments (practice_item_id)');
     }

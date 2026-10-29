@@ -83,6 +83,32 @@ final class Practica
         return $listas;
     }
 
+    /**
+     * ¿Existe practice_folders.solo_admin? Lo agrega "Aplicar schema"
+     * (Db::migratePracticeFoldersIfNeeded); antes de eso no hay carpetas
+     * solo para el admin y no se filtra nada (la consulta con la columna
+     * fallaría y dejaría sin práctica a todos).
+     */
+    public static function soloAdminListo(): bool
+    {
+        static $listo = null;
+        if ($listo === null) {
+            try {
+                $cols = array_column(Db::get()->query('PRAGMA table_info(practice_folders)')->fetchAll(), 'name');
+                $listo = in_array('solo_admin', $cols, true);
+            } catch (Throwable $e) {
+                $listo = false;
+            }
+        }
+        return $listo;
+    }
+
+    /** Lo que se agrega al JOIN de practice_folders para quien no es admin. */
+    private static function filtroSoloAdmin(bool $verSoloAdmin): string
+    {
+        return !$verSoloAdmin && self::soloAdminListo() ? ' AND f.solo_admin = 0' : '';
+    }
+
     /** Condición SQL "es cita de práctico" (no intento de práctica). */
     public static function sinPractica(string $alias = ''): string
     {
@@ -350,8 +376,14 @@ final class Practica
      *
      * @return array<int, array{id:int, nombre:string, orden:int, items:array}>
      */
-    public static function lista(int $userId, bool $docente): array
+    /**
+     * `$verSoloAdmin`: también las carpetas solo_admin (demo interna, p. ej.
+     * los pacientes nasales: docs/roadmap_nasal.md). Solo permission 777;
+     * un docente (555) tampoco las ve.
+     */
+    public static function lista(int $userId, bool $docente, bool $verSoloAdmin = false): array
     {
+        $soloAdmin = self::filtroSoloAdmin($verSoloAdmin);
         if (!self::carpetasListas()) {
             return [];
         }
@@ -371,7 +403,7 @@ final class Practica
                       WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'{$deQuien}
                       ORDER BY att.updated_at DESC, a.id DESC LIMIT 1) AS ultimo_cerrado
                FROM practice_items pi
-               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1
+               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1{$soloAdmin}
                JOIN cases c ON c.id = pi.case_id AND c.archived_at IS NULL
                LEFT JOIN patients p ON p.id = c.patient_id
               WHERE pi.active = 1
@@ -469,16 +501,17 @@ final class Practica
      * curso activo del alumno, si tiene, para que su docente la vea.
      * Lanza RuntimeException con un texto para el alumno si no corresponde.
      */
-    public static function iniciar(int $userId, int $itemId): array
+    public static function iniciar(int $userId, int $itemId, bool $verSoloAdmin = false): array
     {
         if (!self::carpetasListas()) {
             throw new RuntimeException('La práctica libre todavía no está disponible en el servidor.');
         }
         $pdo = Db::get();
+        $soloAdmin = self::filtroSoloAdmin($verSoloAdmin);
         $stmt = $pdo->prepare(
             "SELECT pi.id, pi.case_id, pi.procedimiento, c.patient_id, c.data
                FROM practice_items pi
-               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1
+               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1{$soloAdmin}
                JOIN cases c ON c.id = pi.case_id AND c.archived_at IS NULL
               WHERE pi.id = ? AND pi.active = 1"
         );
