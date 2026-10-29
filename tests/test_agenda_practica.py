@@ -217,10 +217,18 @@ def test_docente_tiene_practica_libre_y_su_agenda_no_la_mezcla():
     assert _filas(ag) == ["Zoe", "Ana"], _filas(ag)
     assert ag.tableWidget.item(0, 1).text() == "1"
     assert ag.tableWidget.horizontalHeaderItem(1).text() == "N°"
-    assert ag.btn_ficha_estudio.isHidden() and ag.chk_guardar_base.isHidden()
+    assert ag.chk_guardar_base.isHidden()
+    # El docente ve siempre la ficha de estudio del caso, en las dos vistas
+    assert not ag.btn_ficha_estudio.isHidden()
+    ag.tableWidget.selectRow(0)
+    assert ag.btn_ficha_estudio.isEnabled()
+    pedidas = []
+    mod.abrir_ficha_estudio = lambda parent, appointment_id=None, case_id=None: pedidas.append(case_id)
+    ag.btn_ficha_estudio.click()
+    assert pedidas == ["c2"], pedidas
     ag.btn_vista_agenda.setChecked(True)
     assert sorted(_filas(ag)) == ["Cita", "Otro"]
-    assert not ag.chk_guardar_base.isHidden()
+    assert not ag.chk_guardar_base.isHidden() and not ag.btn_ficha_estudio.isHidden()
 
 
 def test_docente_abre_la_practica_en_prueba():
@@ -269,6 +277,13 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     assert _filas(ag) == [f"P{n}" for n in range(1, 12)]
     ag.led_buscar.setText("ana")
     assert _filas(ag) == ["Ana"]
+    # Por examen, aunque el procedimiento no lo nombre: ASSR va con el PEATC
+    items[0]["procedimiento"] = "EOA + PEATC"
+    ag._on_practica_fetched([dict(x) for x in items])
+    ag.led_buscar.setText("ASSR")
+    assert _filas(ag) == ["Zoe"], _filas(ag)
+    ag.led_buscar.setText("audiometria")      # sin tilde también
+    assert len(_filas(ag)) == len(items) - 1
     ag.led_buscar.setText("")
     ag.btn_vista_agenda.setChecked(True)
     assert lista.isHidden()

@@ -7,6 +7,8 @@ Acá no hay lógica de agenda: solo cómo se ve y qué le dice al alumno. Los
 colores salen de core/tema.py y los dibujos de core/iconos.py.
 """
 
+import unicodedata
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton,
                                QVBoxLayout, QWidget)
@@ -280,3 +282,37 @@ QLabel[pill="ok"] {{
     padding: 2px 10px; color: {tema.OK}; font-size: 8pt; font-weight: 600;
 }}
 """
+
+
+# -- Buscador ----------------------------------------------------------------
+# El procedimiento con que se agenda no nombra todo lo que se hace con ese
+# equipo: con el PEATC van ASSR, AABR, ECochG y los corticales. Así "assr"
+# encuentra a los pacientes que se estudian con potenciales.
+_POTENCIALES = ("peatc abr potenciales evocados tronco assr estado estable aabr automatizado "
+                "ecochg electrococleografia corticales mlr latencia media caep p300 mmn")
+EXAMENES_POR_PROCEDIMIENTO = {
+    "peatc": _POTENCIALES,
+    "abr": _POTENCIALES,
+    "ecochg": "ecochg electrococleografia",
+    "eoa": "eoa emisiones otoacusticas teoae dpoae soae",
+    "audiometr": ("audiometria tonal enmascaramiento logoaudiometria logo umd srt sdt supraliminares "
+                  "sisi fowler stenger carhart rosemberg ldl acufeno tinnitus"),
+    "impedanciometr": "impedanciometria timpanometria timpanograma reflejos estapediales decay etf trompa",
+    "vemp": "vemp vestibular miogenicos",
+    "otoscop": "otoscopia",
+    "acumetr": "acumetria rinne weber diapason",
+}
+
+
+def sin_tildes(texto):
+    """Minúsculas y sin tildes: "Audiometría" y "audiometria" son lo mismo."""
+    return unicodedata.normalize("NFKD", texto or "").encode("ascii", "ignore").decode().lower()
+
+
+def texto_busqueda(*campos, procedimiento=""):
+    """Todo lo que el buscador mira de una fila: los campos, el
+    procedimiento y los exámenes que ese procedimiento incluye."""
+    proc = sin_tildes(procedimiento)
+    examenes = " ".join(v for clave, v in EXAMENES_POR_PROCEDIMIENTO.items() if clave in proc)
+    return " ".join([sin_tildes(" ".join(str(c or "") for c in campos)), proc, examenes])
+

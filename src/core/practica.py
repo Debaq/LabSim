@@ -15,17 +15,22 @@ from PySide6.QtWidgets import QMessageBox
 from core.helpers import ficha_estudio_pdf
 
 
-def abrir_ficha_estudio(parent, appointment_id):
-    """Baja la ficha de estudio (PDF) de un intento cerrado y la abre con el
-    visor del sistema. Avisa si no se pudo, sin lanzar."""
+def abrir_ficha_estudio(parent, appointment_id=None, case_id=None):
+    """Baja la ficha de estudio (PDF) de un intento cerrado --o, el docente,
+    la de un caso (`case_id`)-- y la abre con el visor del sistema. Avisa si
+    no se pudo, sin lanzar."""
     try:
-        contenido = ficha_estudio_pdf(int(appointment_id))
+        if case_id is not None:
+            contenido = ficha_estudio_pdf(case_id=str(case_id))
+        else:
+            contenido = ficha_estudio_pdf(int(appointment_id))
     except requests.RequestException as exc:
         QMessageBox.warning(parent, "Ficha de estudio",
                             f"No se pudo traer la ficha de estudio.\n\n{exc}")
         return
     carpeta = Path(tempfile.mkdtemp(prefix="labsim_ficha_"))
-    ruta = carpeta / f"ficha_estudio_{int(appointment_id)}.pdf"
+    sufijo = f"caso_{case_id}" if case_id is not None else str(int(appointment_id))
+    ruta = carpeta / f"ficha_estudio_{sufijo}.pdf"
     ruta.write_bytes(contenido)
     if not QDesktopServices.openUrl(QUrl.fromLocalFile(str(ruta))):
         QMessageBox.information(parent, "Ficha de estudio",

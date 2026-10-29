@@ -347,11 +347,13 @@ class BackendClient:
         paciente, o una nueva)."""
         return self._post("/api/practica.php", {"action": "iniciar", "id": practice_id})["appointment"]
 
-    def get_ficha_estudio(self, appointment_id: int) -> bytes | None:
-        """PDF de la ficha de estudio de un intento de práctica cerrado,
-        si el docente la dejó disponible (ver api/practica_ficha.php)."""
+    def get_ficha_estudio(self, appointment_id: int | None = None, case_id: str | None = None) -> bytes | None:
+        """PDF de la ficha de estudio: la de un intento de práctica cerrado,
+        si el paciente la tiene disponible, o (`case_id`, solo docente) la
+        de cualquier caso (ver api/practica_ficha.php)."""
+        params = {"case_id": case_id} if case_id is not None else {"appointment_id": appointment_id}
         resp = self._http.get(
-            f"{self._base_url}/api/practica_ficha.php", params={"appointment_id": appointment_id},
+            f"{self._base_url}/api/practica_ficha.php", params=params,
             headers=self._headers(), timeout=60,
         )
         self._raise_for_status_with_detail(resp)

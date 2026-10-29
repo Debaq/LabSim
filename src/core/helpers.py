@@ -172,9 +172,10 @@ def iniciar_practica(practice_id: int) -> dict:
     return _get_backend_client().iniciar_practica(practice_id)
 
 
-def ficha_estudio_pdf(appointment_id: int) -> bytes:
-    """PDF de la ficha de estudio de un intento cerrado. Lanza si falla."""
-    return _get_backend_client().get_ficha_estudio(appointment_id)
+def ficha_estudio_pdf(appointment_id: int | None = None, case_id: str | None = None) -> bytes:
+    """PDF de la ficha de estudio de un intento cerrado o, para el docente,
+    de un caso (`case_id`). Lanza si falla."""
+    return _get_backend_client().get_ficha_estudio(appointment_id, case_id)
 
 
 def mi_conversacion(appointment_id: int) -> list:

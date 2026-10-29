@@ -6821,3 +6821,24 @@ web (`HistoriaClinica.php`) siempre parte de una cita.
   (`scripts/libro/caras_acompanantes.py`) y se subieron por la consola.
   Los oídos sin otoscopía en el libro quedan sin foto en LabSim (decisión
   del autor, por ahora).
+
+## Buscador por examen, ficha de estudio del docente y casos de ASSR (2026-10-29)
+
+- **Buscador:** encuentra también por examen (`vista.texto_busqueda`). El
+  procedimiento no nombra todo lo que se hace con el equipo: con el PEATC van
+  ASSR, AABR, ECochG y los corticales; con la audiometría, logo y
+  supraliminares; con la impedanciometría, timpanograma, reflejos, decay. Sin
+  importar tildes ni mayúsculas, en la agenda y en la práctica libre.
+- **Ficha de estudio:** el docente la ve siempre, en la agenda y en la
+  práctica libre, de cualquier caso y aunque el paciente no la tenga
+  liberada para el alumno (`api/practica_ficha.php?case_id=`, solo rol admin).
+- **Casos de ASSR:** el libro no tenía ninguno (H13 sin pacientes). Se
+  sumaron al libro y a la práctica H13.1 (lactante GJB2 severa, umbrales
+  por frecuencia para audífonos), H13.2 (niño con TEA que no tolera los
+  fonos, CMV congénito OD) y 28.5 (84 años con demencia, respuestas
+  conductuales no confiables; vía central con deterioro cognitivo y la hija
+  en la sala). Generados con el editor real (`armar_casos.sh`); en este
+  equipo podman necesita almacenamiento vfs y `--network host` (envoltorio
+  en la sesión). En la práctica dicen "+ ASSR" (`CON_ASSR` en
+  `scripts/libro/sql_practica.py`). El texto de esos casos en el libro
+  falta: lo escribe el autor.

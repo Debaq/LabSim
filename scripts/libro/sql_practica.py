@@ -23,7 +23,17 @@ RUT_NUEVO = {'cap12_esclerosis_multiple': '18087953', 'cap24_gentamicina': '1251
 ADMIN = 1
 q = lambda s: "'" + str(s).replace("'", "''") + "'"
 
-def procedimiento(figs):
+# El libro no tiene figura de ASSR: los casos hechos para practicarlo lo dicen acá
+CON_ASSR = {'h13_lactante', 'h13_nino_tea', 'cap28_no_colabora'}
+
+
+def procedimiento(figs, clave=''):
+    if clave in CON_ASSR:
+        return procedimiento(figs) + ' + ASSR'
+    return _procedimiento(figs)
+
+
+def _procedimiento(figs):
     vistos = []
     for f, nombre in PROC:
         if f in figs and nombre not in vistos:
@@ -76,7 +86,7 @@ for cap in cat:
             snap = dict(data['paciente_snapshot'])
             if p['clave'] in RUT_NUEVO:
                 snap['rut'] = RUT_NUEVO[p['clave']]
-            snap['procedimiento'] = procedimiento(p['figuras'])
+            snap['procedimiento'] = procedimiento(p['figuras'], p['clave'])
             data['paciente_snapshot'] = snap
             data['id'] = int(case_id)
             sql.append(
@@ -89,7 +99,7 @@ for cap in cat:
                 f"({q(case_id)}, {q(json.dumps(data, ensure_ascii=False))}, CURRENT_TIMESTAMP, "
                 f"(SELECT id FROM patients WHERE rut = {q(snap['rut'])}), CURRENT_TIMESTAMP, {ADMIN}, {ADMIN}, "
                 "(SELECT id FROM case_folders WHERE name = 'Libro' COLLATE NOCASE));")
-        filas.append((case_id, p['clave'], procedimiento(p['figuras']), p['n']))
+        filas.append((case_id, p['clave'], procedimiento(p['figuras'], p['clave']), p['n']))
     sql.append(f"INSERT INTO practice_folders (nombre, orden, created_by) SELECT {q(carpeta)}, {orden_carpeta}, {ADMIN} "
                f"WHERE NOT EXISTS (SELECT 1 FROM practice_folders WHERE nombre = {q(carpeta)} AND active = 1);")
     for case_id, clave, proc, orden in filas:

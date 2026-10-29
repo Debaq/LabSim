@@ -373,7 +373,7 @@ class Agenda(QWidget, Ui_Form):
         fila_filtros.setSpacing(8)
         self.led_buscar = QLineEdit(self)
         self.led_buscar.setObjectName("buscarAgenda")
-        self.led_buscar.setPlaceholderText("Buscar por RUT, nombre o apellido")
+        self.led_buscar.setPlaceholderText("Buscar por RUT, nombre, apellido o examen (ASSR, EOA, VEMP...)")
         self.led_buscar.setClearButtonEnabled(True)
         self.led_buscar.addAction(iconos.icono("buscar", tema.TEXTO_TENUE, 18),
                                   QLineEdit.ActionPosition.LeadingPosition)
@@ -500,6 +500,11 @@ class Agenda(QWidget, Ui_Form):
                 w.setVisible(False)
             self.btn_practica.setToolTip("Los pacientes de la práctica libre, en sus carpetas, como los ven "
                                          "tus alumnos. Se abren en modo prueba: no queda registro.")
+            # El docente ve siempre la ficha de estudio del caso elegido, en la
+            # agenda y en la práctica libre (la del alumno depende de su intento).
+            self.btn_ficha_estudio.setVisible(True)
+            self.btn_ficha_estudio.setToolTip("La ficha de estudio del caso: la que ve el alumno al cerrar "
+                                              "un intento de práctica")
             for contador in self._contadores.values():
                 contador.setVisible(False)
 
@@ -544,8 +549,7 @@ class Agenda(QWidget, Ui_Form):
             # Siempre en modo prueba: guardar una atención base pide una cita
             self.chk_guardar_base.setVisible(not checked)
         self.btn_no_show.setVisible(not checked)
-        # La ficha de estudio del docente está en el panel web (Fichas)
-        self.btn_ficha_estudio.setVisible(checked and not self.is_admin)
+        self.btn_ficha_estudio.setVisible(checked or self.is_admin)
         # Sin "No se presentó", "Ver ficha" ocupa todo el ancho.
         self.detalle.acciones.removeWidget(self.btn_ver_ficha)
         self.detalle.acciones.addWidget(self.btn_ver_ficha, 1, 0, 1, 2 if checked else 1)
@@ -679,7 +683,7 @@ class Agenda(QWidget, Ui_Form):
         self.date_selector.setToolTip(f"Feriado: {descripcion}" if descripcion else "")
 
     def _on_filtro_changed(self, texto):
-        self._filtro_texto = texto.strip().lower()
+        self._filtro_texto = vista.sin_tildes(texto.strip())
         self.populate_shedule()
 
     def read_shedule(self):
@@ -788,8 +792,8 @@ class Agenda(QWidget, Ui_Form):
             texto = self._filtro_texto
             keys = [
                 k for k in keys
-                if texto in " ".join((rows[k].rut, rows[k].nombre, rows[k].apellido,
-                                       rows[k].fecha_nac, rows[k].procedimiento)).lower()
+                if texto in vista.texto_busqueda(rows[k].rut, rows[k].nombre, rows[k].apellido,
+                                                 rows[k].fecha_nac, procedimiento=rows[k].procedimiento)
             ]
         return keys
 
@@ -1106,8 +1110,9 @@ class Agenda(QWidget, Ui_Form):
             texto = self._filtro_texto
             keys = [
                 k for k in keys
-                if texto in " ".join(str(self._practica[k].get(c) or "") for c in
-                                     ("rut", "nombre", "apellido", "procedimiento", "carpeta")).lower()
+                if texto in vista.texto_busqueda(
+                    *(self._practica[k].get(c) for c in ("rut", "nombre", "apellido", "carpeta")),
+                    procedimiento=self._practica[k].get("procedimiento") or "")
             ]
         else:
             keys = [k for k in keys if self._practica[k].get("folder_id") == self._carpeta]
@@ -1163,6 +1168,7 @@ class Agenda(QWidget, Ui_Form):
             self.btn_atender.setText("Cerrar/Evolucionar" if self._prueba_practica_activa(key) else "Atender (prueba)")
             self.btn_atender.setEnabled(clave is not None)
             self.btn_ver_ficha.setEnabled(clave is not None)
+            self.btn_ficha_estudio.setEnabled(bool(it.get("case_id")))
             self.btn_no_show.setEnabled(False)
             return
         intento = self._intento_abierto(key)
@@ -1229,7 +1235,14 @@ class Agenda(QWidget, Ui_Form):
         self.main_window.abrir_evolucion(nombre or "el paciente", _guardar, intento)
 
     def _ver_ficha_estudio(self):
-        it = self._practica.get(self._selected_row_key or "")
+        key = self._selected_row_key or ""
+        if self.is_admin:
+            fila = self.shedule.get("agenda_1", {}).get(key)
+            case_id = (self._practica.get(key) or {}).get("case_id") or (fila.case_id if fila else None)
+            if case_id:
+                abrir_ficha_estudio(self, case_id=case_id)
+            return
+        it = self._practica.get(key)
         if it and it.get("ultimo_cerrado"):
             abrir_ficha_estudio(self, it["ultimo_cerrado"])
 
@@ -1344,6 +1357,8 @@ class Agenda(QWidget, Ui_Form):
             self.btn_atender.setEnabled(tiene_caso and not pendiente)
 
         self.btn_ver_ficha.setEnabled(tiene_caso)
+        if self.is_admin:
+            self.btn_ficha_estudio.setEnabled(tiene_caso)
 
         fecha_agendada = parse_fecha_agenda(user.fecha)
         hora_agendada = QTime.fromString(user.hora, "HH:mm")
