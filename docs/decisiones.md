@@ -6970,3 +6970,20 @@ VEMP.
 - **"Practicar" con otra atención abierta** avisa antes de crear el intento:
   antes el intento se creaba en el servidor y quedaba abierto aunque la app
   no dejara atenderlo.
+
+## Agenda: Ver/Cerrar ficha y la fila marcada al cambiar de carpeta (2026-10-29)
+
+- **"Cerrar ficha"** mientras la ficha está abierta (`Agenda.pintar_boton_ficha`,
+  repintado por `visibility_changed` de la subventana, también al cerrarla con
+  su ✕). La ficha ya sigue sola a la fila elegida; un "Ver ficha" a la vista
+  invitaba a apretarlo a cada rato. Cerrarla cierra también la hoja del
+  examen que trae el paciente.
+- **Fila marcada sin elegir:** al rearmar la tabla sin una fila que recuperar
+  (cambio de carpeta), Qt dejaba la primera pintada como elegida y la agenda
+  no la tomaba: el clic no hacía nada y, en una carpeta de un solo paciente,
+  no había cómo ver su ficha. Ahora se limpia (`_sin_seleccion`).
+- **Fecha de la audiometría previa:** 14 días antes de la cita, salvo que la
+  historia tenga algo más reciente (el otorrino que la pide): entonces va al
+  día siguiente de eso, nunca el día de la cita. Mismo cálculo en la ficha
+  (`dias_audiometria_previa`) y en el chat (`LlmConfig::diasAudiometriaPrevia`).
+  H11, Patricia: el 17-10 el otorrino la pedía y la ficha la mostraba hecha el 15-10.

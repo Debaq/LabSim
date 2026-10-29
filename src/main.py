@@ -1240,6 +1240,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self), expand=True),
         })
 
+        # El botón Ver/Cerrar ficha de la agenda sigue a la ficha, también
+        # cuando se cierra con su ✕.
+        self.subw["FICHA"].visibility_changed.connect(
+            lambda _visible: self.subw["AGENDA"].obj.pintar_boton_ficha())
         self._hydrate_modules()
         for attr in self._ATTRS_EXAMEN:
             if getattr(self, attr, None) is not None:
@@ -1572,6 +1576,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def ficha_abierta(self):
         return self._subventana_visible("FICHA")
+
+    def cerrar_ficha(self):
+        """Cierra la ficha y la hoja del examen que trae el paciente, que
+        cuelga de ella."""
+        self.close_sub_window("FICHA")
+        self.close_sub_window("PREVIO")
 
     def abrir_previo(self, ruta):
         """El examen que trae el paciente (ver core.ficha.HojaPrevia)."""

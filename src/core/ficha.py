@@ -108,8 +108,17 @@ _ORDEN_ULTIMO = QDateTime(QDate(9999, 12, 31), QTime(23, 59))
 # para que el kiosko la vea igual que todo lo demás de la ficha.
 PREVIOS_DIR = Path("resources/libro/previos")
 # Días antes de la cita en que se hizo: lo bastante cerca para que la deriven
-# con ella, y antes que la cita a la que viene.
+# con ella, y antes que la cita a la que viene. Si la historia trae algo más
+# reciente (el otorrino que la pide), va después de eso: hacerla antes de que
+# la pidan no tiene sentido. Mismo cálculo en LlmConfig::diasAudiometriaPrevia.
 PREVIA_DIAS = 14
+
+
+def dias_audiometria_previa(historia_clinica):
+    """Días respecto de la cita (negativo) en que se hizo la audiometría."""
+    pasados = [int(n) for n in HISTORIA_CLINICA_FECHA_RE.findall(historia_clinica or "") if int(n) < 0]
+    ultima = max(pasados, default=-PREVIA_DIAS - 1)
+    return min(max(-PREVIA_DIAS, ultima + 1), -1)
 
 
 def audiometria_previa(row, caso):
@@ -366,7 +375,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     fecha_base = (row.fecha if parse_fecha_agenda(row.fecha).isValid()
                   else QDate.currentDate().toString("dd-MM-yy"))
     previa = audiometria_previa(row, caso)
-    previos = [(-PREVIA_DIAS, "Audiometría. Trae el informe.",
+    previos = [(dias_audiometria_previa(historia_clinica), "Audiometría. Trae el informe.",
                 f"previo:{previa.stem}")] if previa else []
     entradas = linea_tiempo(historia_clinica, fecha_base,
                             historial_atenciones(shedule, row.rut, username, is_admin,

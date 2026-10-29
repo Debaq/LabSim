@@ -385,7 +385,7 @@ TXT;
             $lineas[] = '- ' . $linea;
         }
         if ($traeAudiometria) {
-            $lineas[] = '- ' . self::haceCuanto(14) . ': ' . ($sala
+            $lineas[] = '- ' . self::haceCuanto(self::diasAudiometriaPrevia($historia)) . ': ' . ($sala
                 ? 'al paciente le hicieron un examen de audición (una audiometría) y traen el informe impreso; nadie sabe interpretarlo.'
                 : 'te hicieron un examen de audición (una audiometría) y traes el informe impreso; no sabes interpretarlo.');
         }
@@ -400,6 +400,23 @@ TXT;
               . 'palabras: qué te hicieron, quién te mandó y cuándo, sin fechas exactas, sin diagnósticos ni '
               . 'resultados técnicos que un paciente no sabría explicar:';
         return "\n\n" . $encabezado . "\n" . implode("\n", $lineas);
+    }
+
+    /**
+     * Hace cuántos días se hizo la audiometría que trae: 14, o después de lo
+     * último de la historia si es más reciente (el otorrino que la pidió).
+     * Mismo cálculo que dias_audiometria_previa en core/ficha.py de la app.
+     */
+    public static function diasAudiometriaPrevia(string $historia): int
+    {
+        preg_match_all('/\{\{([+-]?\d+)\}\}/', $historia, $m);
+        $hace = 15;
+        foreach ($m[1] as $n) {
+            if ((int) $n < 0) {
+                $hace = min($hace, -(int) $n);
+            }
+        }
+        return max(min(14, $hace - 1), 1);
     }
 
     /** "Hace 3 semanas": días hacia atrás como los diría el paciente. */

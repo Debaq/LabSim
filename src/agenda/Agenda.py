@@ -500,10 +500,12 @@ class Agenda(QWidget, Ui_Form):
         self.btn_atender.clicked.connect(self.atender_paciente)
 
         self.btn_ver_ficha = BotonAccion("Ver ficha", "ficha", parent=self)
-        self.btn_ver_ficha.setToolTip("Antecedentes y motivo de consulta del paciente. "
-                                      "Revísala antes de atender.")
-        self.btn_ver_ficha.setEnabled(False)
-        self.btn_ver_ficha.clicked.connect(self._ver_ficha_paciente)
+        # Con la ficha abierta pasa a "Cerrar ficha": la ficha ya sigue sola
+        # al paciente elegido, y un "Ver ficha" a la vista invitaba a
+        # apretarlo a cada rato sin notar que ya se había actualizado.
+        self._ficha_disponible = False
+        self.btn_ver_ficha.clicked.connect(self._on_boton_ficha)
+        self.pintar_boton_ficha()
 
         self.btn_no_show = BotonAccion("No se presentó", "x", parent=self)
         self.btn_no_show.setToolTip("Disponible cuando la hora de la cita ya pasó y no atendiste al paciente")
@@ -908,6 +910,7 @@ class Agenda(QWidget, Ui_Form):
             self.tableWidget.blockSignals(False)
             self._on_selection_changed()
         else:
+            self._sin_seleccion()
             self._reset_atender_button()
             self._selected_key = None
             self._selected_row_key = None
@@ -1219,10 +1222,22 @@ class Agenda(QWidget, Ui_Form):
             self.tableWidget.blockSignals(False)
             self._on_selection_changed()
         else:
+            self._sin_seleccion()
             self._reset_atender_button()
             self._selected_key = None
             self._selected_row_key = None
             self._actualizar_detalle()
+
+    def _sin_seleccion(self):
+        """Tabla rearmada sin una fila que recuperar: se limpia también lo que
+        Qt deja marcado. Si no, la primera fila quedaba pintada como elegida
+        sin que la agenda la tomara, y hacer clic en ella no hacía nada (en
+        una carpeta de un solo paciente, no había cómo ver su ficha)."""
+        tabla = self.tableWidget
+        tabla.blockSignals(True)
+        tabla.clearSelection()
+        tabla.setCurrentItem(None)
+        tabla.blockSignals(False)
 
     def _intento_abierto(self, key):
         """Key de agenda del intento que el alumno dejó abierto en este
@@ -1238,7 +1253,7 @@ class Agenda(QWidget, Ui_Form):
             clave = self._clave_caso_practica(it)
             self.btn_atender.setText("Cerrar/Evolucionar" if self._prueba_practica_activa(key) else "Atender (prueba)")
             self.btn_atender.setEnabled(clave is not None)
-            self.btn_ver_ficha.setEnabled(clave is not None)
+            self._ficha_para(clave is not None)
             self.btn_ficha_estudio.setEnabled(bool(it.get("case_id")))
             self.btn_no_show.setEnabled(False)
             return
@@ -1251,7 +1266,7 @@ class Agenda(QWidget, Ui_Form):
             self.btn_atender.setText("Practicar")
         self.btn_atender.setEnabled(True)
         # La ficha clínica cuelga de la cita: recién existe con el intento.
-        self.btn_ver_ficha.setEnabled(intento is not None)
+        self._ficha_para(intento is not None)
         self.btn_ficha_estudio.setEnabled(bool(it.get("show_study_sheet") and it.get("ultimo_cerrado")))
         self.btn_no_show.setEnabled(False)
 
@@ -1328,7 +1343,7 @@ class Agenda(QWidget, Ui_Form):
         else:
             self.btn_atender.setText("Atender")
         self.btn_atender.setEnabled(False)
-        self.btn_ver_ficha.setEnabled(False)
+        self._ficha_para(False)
         self.btn_no_show.setEnabled(False)
         self.btn_ficha_estudio.setEnabled(False)
         if self.is_admin:
@@ -1433,7 +1448,7 @@ class Agenda(QWidget, Ui_Form):
             self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(tiene_caso and not pendiente)
 
-        self.btn_ver_ficha.setEnabled(tiene_caso)
+        self._ficha_para(tiene_caso)
         if self.is_admin:
             self.btn_ficha_estudio.setEnabled(tiene_caso)
 
@@ -1582,6 +1597,35 @@ class Agenda(QWidget, Ui_Form):
             QMessageBox.warning(self, "Marcar inasistencia",
                                 f"No hay conexión con el servidor. Inténtalo de nuevo.\n\n{exc}")
         self.actualizar()
+
+    def _ficha_para(self, disponible):
+        """Si lo elegido tiene ficha que ver (el botón en modo "Ver ficha")."""
+        self._ficha_disponible = bool(disponible)
+        self.pintar_boton_ficha()
+
+    def _ficha_abierta(self):
+        mw = getattr(self, "main_window", None)     # todavía no, al armar el botón
+        return mw is not None and hasattr(mw, "ficha_abierta") and mw.ficha_abierta()
+
+    def pintar_boton_ficha(self):
+        """"Cerrar ficha" mientras está abierta; si no, "Ver ficha". main lo
+        llama también cuando la ficha se abre o se cierra con su ✕."""
+        if self._ficha_abierta():
+            self.btn_ver_ficha.setText("Cerrar ficha")
+            self.btn_ver_ficha.setToolTip("La ficha sigue sola al paciente que elijas en la lista.")
+            self.btn_ver_ficha.setEnabled(True)
+        else:
+            self.btn_ver_ficha.setText("Ver ficha")
+            self.btn_ver_ficha.setToolTip("Antecedentes y motivo de consulta del paciente. "
+                                          "Revísala antes de atender.")
+            self.btn_ver_ficha.setEnabled(self._ficha_disponible)
+
+    def _on_boton_ficha(self):
+        if self._ficha_abierta():
+            self.main_window.cerrar_ficha()
+        else:
+            self._ver_ficha_paciente()
+        self.pintar_boton_ficha()
 
     def _fila_para_ficha(self):
         """(fila, cita) de la ficha de lo elegido, o None si no tiene: un

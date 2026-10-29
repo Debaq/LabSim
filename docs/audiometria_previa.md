@@ -18,11 +18,13 @@ capítulo de PEATC o de VEMP decía que venía a la audiometría.
 |---|---|---|
 | Procedimiento (caps. 9, 11, 12, 14, 18, 20, 30 y H12) | "Audiometría + Impedanciometría + PEATC" | "Impedanciometría + PEATC" (27 pacientes en prod) |
 | Procedimiento de H21 (ficha 36) | "Otoscopía + Acumetría" (el valor por defecto) | "Prueba de audífonos" |
-| Ficha clínica | Sin rastro de la audiometría | Entrada en el historial, 14 días antes de la cita: "Audiometría. Trae el informe. **Ver informe**" |
+| Ficha clínica | Sin rastro de la audiometría | Entrada en el historial, 14 días antes de la cita (o justo después de quien la pidió, si eso fue más cerca): "Audiometría. Trae el informe. **Ver informe**" |
 | "Ver informe" | — | Subventana del MDI, "Examen que trae el paciente", con la hoja auditiva del libro |
 | Chat del paciente | Solo sabía el motivo; no conocía la historia clínica | Conoce la historia clínica ("hace 2 meses el otorrino me mandó…") y que trae la audiometría ("hace un par de semanas me hicieron una prueba de audición y traigo el papel") |
 | Docente en práctica libre | Veía el procedimiento de la ficha del caso, sin la audiometría, y su chat de prueba decía "audiometría" | Ve lo mismo que el alumno |
 | Ficha abierta y otro paciente elegido en la agenda | Quedaba la ficha del anterior | La ficha cambia sola; la hoja del paciente anterior se cierra |
+| Botón de la ficha en la agenda | Siempre "Ver ficha" | "Cerrar ficha" mientras está abierta |
+| Carpeta nueva en práctica libre | La primera fila quedaba marcada sin estar elegida; con un solo paciente no se podía ver su ficha | Sin fila marcada; un clic la elige |
 | Alumno que repite la audiometría | — | Puede hacerlo; queda como una atención más en su historial |
 
 ## Por qué se decidió así

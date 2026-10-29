@@ -265,6 +265,19 @@ def test_sin_otoscopia_hecha_no_trae_audiometria():
     assert "previo:" not in html
 
 
+def test_la_audiometria_previa_va_despues_de_quien_la_pidio():
+    """El otorrino la pide 12 días antes de la cita: no puede estar hecha 14 días antes."""
+    from core.ficha import dias_audiometria_previa
+    assert dias_audiometria_previa("{{-90}} Urgencia.\n{{-12}} ORL deriva a evaluación auditiva.") == -11
+    assert dias_audiometria_previa("{{-60}} Profesora jefe deriva.") == -14
+    assert dias_audiometria_previa("{{-1}} ORL deriva ayer.") == -1
+    assert dias_audiometria_previa("") == -14
+    caso = {"historia_clinica": "{{-12}} ORL deriva a evaluación auditiva."}
+    html = _con_previos(lambda: render_ficha_html(
+        _intento_libro("Impedanciometría + PEATC"), caso, {"agenda_1": {}}, "alumno1", False))
+    assert html.index("29-08-2026") < html.index("30-08-2026") < html.index("previo:78"), html
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

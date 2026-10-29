@@ -32,3 +32,11 @@ t_true(strpos(LlmConfig::historiaPrevia('{{-30}} Control.', false), '- Hace 4 se
     '30 días = hace 4 semanas');
 t_true(strpos(LlmConfig::historiaPrevia('{{-365}} Control.', false), '- Hace 12 meses: Control.') !== false,
     '365 días = hace 12 meses');
+
+t_eq(LlmConfig::diasAudiometriaPrevia("{{-90}} Urgencia.\n{{-12}} ORL deriva."), 11,
+    'La audiometría va después del otorrino que la pidió (mismo cálculo que la ficha)');
+t_eq(LlmConfig::diasAudiometriaPrevia('{{-60}} Profesora jefe deriva.'), 14, 'Sin nada reciente: 14 días');
+t_eq(LlmConfig::diasAudiometriaPrevia('{{-1}} ORL deriva ayer.'), 1, 'Nunca el mismo día de la cita');
+t_eq(LlmConfig::diasAudiometriaPrevia(''), 14, 'Sin historia: 14 días');
+t_true(strpos(LlmConfig::historiaPrevia('{{-12}} ORL deriva.', true), '- Hace 11 días: te hicieron un examen de audición') !== false,
+    'El chat dice la misma fecha que la ficha');

@@ -381,6 +381,41 @@ def test_la_ficha_abierta_sigue_al_paciente_elegido():
     assert main.fichas[-1][0] in ("Cita Normal", "Otro Caso"), main.fichas[-1][0]
 
 
+def test_al_cambiar_de_carpeta_no_queda_una_fila_marcada_que_no_se_puede_elegir():
+    """La primera fila quedaba pintada como elegida sin que la agenda la
+    tomara: un clic en ella no hacía nada, y en una carpeta de un solo
+    paciente no había cómo ver su ficha."""
+    ag, _ = _armar(lambda pid: {})
+    items = [_item(1, "Cap. 6", 60, 1, "Zoe"), _item(2, "Cap. 6", 60, 2, "Ana"), _item(3, "Cap. 3", 30, 1, "Solo")]
+    mod.lista_practica = lambda: [dict(it) for it in items]
+    ag.btn_practica.setChecked(True)
+    ag.tableWidget.selectRow(0)
+    assert ag._selected_row_key == "practica:1"
+    ag.lista_carpetas.setCurrentRow(1)                  # carpeta de un solo paciente
+    assert ag.tableWidget.selectionModel().selectedRows() == []
+    ag.tableWidget.selectRow(0)
+    assert ag._selected_row_key == "practica:3", ag._selected_row_key
+
+
+def test_con_la_ficha_abierta_el_boton_dice_cerrar_ficha():
+    ag, _ = _armar_docente()
+    main = _MainConFicha()
+    abierta = {"si": False}
+    main.ficha_abierta = lambda: abierta["si"]
+    main.cerrar_ficha = lambda: abierta.update(si=False)
+    main.abrir_ficha_con = lambda *a: abierta.update(si=True)
+    ag.main_window = main
+    mod.CasesOffline.en_memoria = staticmethod(lambda case_id: {})
+    mod.CasesOffline.get_cases = lambda self: {}
+    ag.btn_practica.setChecked(True)
+    ag.tableWidget.selectRow(1)
+    assert ag.btn_ver_ficha.text() == "Ver ficha" and ag.btn_ver_ficha.isEnabled()
+    ag.btn_ver_ficha.click()
+    assert abierta["si"] and ag.btn_ver_ficha.text() == "Cerrar ficha"
+    ag.btn_ver_ficha.click()
+    assert not abierta["si"] and ag.btn_ver_ficha.text() == "Ver ficha"
+
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):
