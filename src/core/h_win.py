@@ -58,6 +58,10 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         #super(FrameSubMdi, self).__init__()
         super().__init__()
         self.setupUi(self)
+        # Un píxel libre a los lados y abajo para el borde del QSS
+        # (FrameSubMdi en dark.qss): sin él el contenido lo tapaba y la
+        # subventana quedaba sin línea inferior, fundida con el lienzo.
+        self.verticalLayout_2.setContentsMargins(1, 0, 1, 1)
         if expand:
             # El spacer de abajo del .ui es Expanding y se reparte el alto
             # sobrante con el contenido: con stretch 1 el contenido se lo
