@@ -6928,7 +6928,10 @@ VEMP.
 - **Regla en la app** (`core.ficha.audiometria_previa`): práctica libre +
   procedimiento sin "audiometr" ni "otoscop" + hay hoja para esa ficha. Si
   viene a otoscopía no la trae: la audiometría va después de la otoscopía
-  (H1, Benjamín 35, la mostraba). Por eso sale
+  (H1, Benjamín 35, la mostraba). H21 (ficha 36) tiene procedimiento propio,
+  "Prueba de audífonos" (`PROC_PROPIO` en sql_practica.py): salía con el
+  "Otoscopía + Acumetría" por defecto y perdía la audiometría que trae.
+  Resumen para leer: `docs/audiometria_previa.md`. Por eso sale
   también en las herramientas que no son de audiometría (H7, H9) cuando el
   paciente tiene hoja, y nunca en un lactante sin audiograma en el libro ni
   en una cita del docente: qué trae el paciente en sus prácticos lo decide él.

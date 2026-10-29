@@ -35,7 +35,16 @@ AUDIOMETRIA_PREVIA = {9, 11, 12, 14, 18, 20, 30, 'H12'}
 AUDIOMETRIA = {'audiosupra', 'audiograma', 'logoaudiometria'}
 
 
+# Pacientes cuyo procedimiento no sale de las figuras: el de H21 viene a probarse
+# audífonos (su figura es campo_libre, que no está en PROC) y salía con el
+# "Otoscopía + Acumetría" por defecto, que además le quitaba la audiometría
+# que trae (core.ficha.audiometria_previa).
+PROC_PROPIO = {'h21_p36': 'Prueba de audífonos'}
+
+
 def procedimiento(figs, clave='', cap=None):
+    if clave in PROC_PROPIO:
+        return PROC_PROPIO[clave]
     if cap in AUDIOMETRIA_PREVIA:
         figs = [f for f in figs if f not in AUDIOMETRIA]
     if clave in CON_ASSR:
