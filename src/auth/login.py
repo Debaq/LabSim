@@ -103,8 +103,22 @@ class MainLogin(QWidget):
         ayuda = QLabel("Lo muestra la actividad LabSim de tu curso.")
         ayuda.setObjectName("login_ayuda")
         col.addWidget(ayuda)
-        col.addWidget(self._link("Ingresar con usuario y contraseña", self.PAGINA_USUARIO))
+        enlaces = QHBoxLayout()
+        enlaces.addWidget(self._link("Ingresar con usuario y contraseña", self.PAGINA_USUARIO))
+        enlaces.addStretch(1)
+        # Sin cuenta: los pacientes del libro, sin red ni API (core/invitado.py)
+        sin_cuenta = QLabel('<a href="#" style="color:#5D1049;">Practicar sin cuenta</a>')
+        sin_cuenta.setObjectName("login_sin_cuenta")
+        sin_cuenta.setToolTip("Los pacientes del libro, sin chat y sin guardar nada")
+        sin_cuenta.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
+        sin_cuenta.linkActivated.connect(lambda _href: self.entrar_sin_cuenta())
+        enlaces.addWidget(sin_cuenta)
+        col.addLayout(enlaces)
         return pagina
+
+    def entrar_sin_cuenta(self):
+        from core import invitado
+        self.data_login_signal.emit(invitado.datos_login())
 
     def _pagina_usuario(self):
         pagina = QWidget()

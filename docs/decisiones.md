@@ -7062,3 +7062,27 @@ Resumen para leer: `docs/audiometria_previa.md`.
 - Sin actualización automática: `check_for_update` no busca nada en macOS
   (si no, bajaría el paquete de Linux).
 - No se probó en un Mac: solo lo que corra el runner.
+
+## Entrar sin cuenta (2026-10-29)
+
+- "Practicar sin cuenta" en la ventana de ingreso entra como invitado
+  (`core/invitado.py`): los pacientes del libro del catálogo de la app
+  (`resources/libro/catalogo.json.gz`), sin red ni API.
+- **Nada de API ni de la sesión del equipo:** `backend.client.sin_api` corta
+  todo `get`/`post` de cualquier `BackendClient` (también los que crea cada
+  módulo) y no lee `session.json`, que puede tener el token del último alumno
+  (nunca se borra al cerrar sesión). Probado en la app: cero pedidos a la API.
+- **Sin registro:** la cola de acciones no encola (sus eventos quedarían sin
+  dueño y el próximo alumno los subiría a su nombre), no hay sync, informes ni
+  intentos. La config del curso anterior se descarta (`app_config_store.reset`).
+- **Atiende como la prueba del docente** (`Agenda._en_prueba`): "Practicar"
+  abre el caso sin crear intento, "Cerrar/Evolucionar" cierra sin escribir.
+  Entra directo a la práctica libre, sin "Mi agenda", sin avance (sería cero),
+  sin ficha de estudio, sin chat ni bandeja ni "Mis pacientes".
+- **La ficha cuenta lo que diría el paciente** (relato, medicamentos,
+  cirugías) y muestra los informes que trae desde el principio.
+- **Otoscopías empaquetadas** (`resources/libro/otoscopias`, 600 px, 7 MB):
+  sin ellas el módulo quedaba vacío.
+- Pendiente: la ficha de estudio al cerrar (F5, sin redactor IA), y un layout
+  de fábrica para un equipo que nunca se conectó (hoy el layout se baja sin
+  cuenta y queda en caché).

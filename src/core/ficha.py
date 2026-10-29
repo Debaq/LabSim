@@ -15,7 +15,7 @@ from PySide6.QtGui import QPainter, QPixmap, QTextDocument
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QTextBrowser, QVBoxLayout, QWidget
 
-from core import iconos, tema
+from core import iconos, invitado, tema
 
 from core.helpers import obtener_hora_real_atencion
 
@@ -439,6 +439,21 @@ def _seccion(icono, titulo, cuerpo):
         f'{cuerpo}</td></tr></table><p style="margin:0;">&nbsp;</p>')
 
 
+def _lo_que_cuenta(caso):
+    """Sin cuenta no hay chat (core/invitado.py): lo que el paciente contaría
+    si le preguntaran va escrito en la ficha, como en la ficha de estudio."""
+    anamnesis = (caso.get("Anamnesis") or {}) if isinstance(caso, dict) else {}
+    filas = []
+    for titulo, clave in (("Lo que cuenta", "otros"), ("Medicamentos", "medicamentos"),
+                          ("Cirugías", "cirugias")):
+        texto = str(anamnesis.get(clave) or "").strip()
+        if texto:
+            filas.append(f'{_etiqueta(titulo)}<br><span style="color:{tema.TEXTO};">{html.escape(texto)}</span>')
+    cuerpo = ("<br><br>".join(filas) if filas else
+              f'<span style="color:{tema.TEXTO_SUAVE};">Sin relato registrado.</span>')
+    return _seccion("persona", "Lo que cuenta el paciente", cuerpo)
+
+
 def _enlaces(enlaces):
     """"Ver audiometría · Ver impedanciometría" al final de una entrada del
     historial que trae informes."""
@@ -497,6 +512,9 @@ def render_ficha_html(row, caso, shedule, username, is_admin, todos=False):
             f'<td width="30%">{_dato("Inicio real", hora_real)}</td>'
             f'<td>{resumen}</td></tr></table>')
         partes.append(_seccion("reloj", "Puntualidad", puntualidad))
+
+    if invitado.activo:
+        partes.append(_lo_que_cuenta(caso))
 
     # Una sola línea de tiempo: lo que le hicieron al paciente antes de
     # llegar (historia clínica del caso) y las atenciones cerradas, en orden.

@@ -20,7 +20,7 @@ from agenda.UI.Ui_agenda import Ui_Form
 from agenda import vista
 from agenda.vista import BotonAccion, Contador, PanelDetalle
 from core import feriados as feriados_cl
-from core import hilos, iconos, respaldo_informes, tema
+from core import hilos, iconos, invitado, respaldo_informes, tema
 from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline, debug_print,
                           es_docente, lista_practica, iniciar_practica,
                           marcar_entry_no_show,
@@ -301,6 +301,10 @@ class Agenda(QWidget, Ui_Form):
         self.shedule = {}
         self._cargando = True
         self._carga_fallo = False
+        if invitado.activo:
+            # Sin cuenta no hay agenda: solo los pacientes del libro
+            self.btn_vista_agenda.hide()
+            self.btn_practica.setChecked(True)
         self.populate_shedule()
         self.refresh_async()
 
@@ -642,7 +646,7 @@ class Agenda(QWidget, Ui_Form):
         lista.clear()
         # Sin número adelante: el nombre ya dice el capítulo ("Cap. 7 · ...")
         for clave, nombre, cuantos, hechos in self._carpetas:
-            if self.is_admin:
+            if self._en_prueba():
                 item = QListWidgetItem(f"{nombre}  ({cuantos})")
                 item.setToolTip(f"{nombre}: {_plural(cuantos, 'paciente', 'pacientes')}")
             else:
@@ -665,7 +669,9 @@ class Agenda(QWidget, Ui_Form):
         el curso, y el avance de cada alumno es el de él."""
         total = sum(c[2] for c in self._carpetas)
         hechos = sum(c[3] for c in self._carpetas)
-        self.avance_libro.setVisible(not self.is_admin and total > 0)
+        # Ni el docente (sus números son de todo el curso) ni el invitado (no
+        # se guarda nada: siempre sería cero)
+        self.avance_libro.setVisible(not self._en_prueba() and total > 0)
         self.lbl_avance.setText(f"{hechos} de {_plural(total, 'caso', 'casos')}")
         self.barra_avance.setRange(0, max(total, 1))
         self.barra_avance.setValue(hechos)
@@ -1003,6 +1009,8 @@ class Agenda(QWidget, Ui_Form):
     def _subtitulo(self, n):
         if self._modo_practica and self.is_admin:
             return f"{_plural(n, 'paciente', 'pacientes')} de práctica · vista docente, en modo prueba"
+        if self._modo_practica and invitado.activo:
+            return f"{_plural(n, 'paciente', 'pacientes')} del libro · sin cuenta: no se guarda nada"
         if self._modo_practica:
             return (f"{_plural(n, 'paciente', 'pacientes')} para practicar · "
                     "sin horario, las veces que quieras")
@@ -1035,7 +1043,7 @@ class Agenda(QWidget, Ui_Form):
             if it is None:
                 self.detalle.vacio("Elige un paciente para practicar. Puedes repetirlo las veces que quieras.")
                 return
-            if self.is_admin:
+            if self._en_prueba():
                 self._detalle_practica_docente(key, it)
                 return
             intentos = int(it.get("intentos") or 0)
@@ -1096,6 +1104,17 @@ class Agenda(QWidget, Ui_Form):
         self.detalle.mostrar(nombre, datos, clave, pista, paso)
 
     def _detalle_practica_docente(self, key, it):
+        if invitado.activo:
+            nombre = f"{it.get('nombre') or ''} {it.get('apellido') or ''}".strip()
+            datos = self._datos_paciente(it.get("rut"), it.get("procedimiento"), it.get("carpeta"))
+            if self._prueba_practica_activa(key):
+                self.detalle.mostrar(nombre, datos, "practica_curso", "Cuando termines, presiona "
+                                     "«Cerrar/Evolucionar». Sin cuenta no se guarda nada.", 2)
+            else:
+                self.detalle.mostrar(nombre, datos, "practica_nuevo", "Revisa su ficha y presiona «Practicar». "
+                                     "Sin cuenta no hay chat ni se guarda nada: lo que contaría el "
+                                     "paciente está en su ficha.", 1)
+            return
         intentos = int(it.get("intentos") or 0)
         alumnos = int(it.get("alumnos") or 0)
         if self._prueba_practica_activa(key):
@@ -1111,6 +1130,11 @@ class Agenda(QWidget, Ui_Form):
         datos = self._datos_paciente(it.get("rut"), it.get("procedimiento"),
                                      " · ".join(p for p in (it.get("carpeta"), _plural(intentos, "intento", "intentos")) if p))
         self.detalle.mostrar(nombre, datos, clave, pista, paso)
+
+    def _en_prueba(self):
+        """Atiende la práctica en prueba, sin intento en el servidor: el
+        docente, y el invitado, que no tiene cuenta (core/invitado.py)."""
+        return self.is_admin or invitado.activo
 
     def _clave_caso_practica(self, it):
         """Fila de la agenda (oculta en la vista docente) con la que el
@@ -1206,7 +1230,7 @@ class Agenda(QWidget, Ui_Form):
             it = self._practica[key]
             intentos = int(it.get("intentos") or 0)
             ultimo = (it.get("ultimo") or "")[:10]
-            abierto = self._prueba_practica_activa(key) if self.is_admin else bool(it.get("abierto"))
+            abierto = self._prueba_practica_activa(key) if self._en_prueba() else bool(it.get("abierto"))
             clave = "practica_curso" if abierto else ("practica_hecho" if intentos else "practica_nuevo")
             conteo[clave] = conteo.get(clave, 0) + 1
             orden = it.get("orden")
@@ -1256,12 +1280,13 @@ class Agenda(QWidget, Ui_Form):
         it = self._practica[key]
         self._selected_row_key = key
         self._selected_key = None
-        if self.is_admin:
+        if self._en_prueba():
             clave = self._clave_caso_practica(it)
-            self.btn_atender.setText("Cerrar/Evolucionar" if self._prueba_practica_activa(key) else "Atender (prueba)")
+            abrir = "Atender (prueba)" if self.is_admin else "Practicar"
+            self.btn_atender.setText("Cerrar/Evolucionar" if self._prueba_practica_activa(key) else abrir)
             self.btn_atender.setEnabled(clave is not None)
             self._ficha_para(clave is not None)
-            self.btn_ficha_estudio.setEnabled(bool(it.get("case_id")))
+            self.btn_ficha_estudio.setEnabled(self.is_admin and bool(it.get("case_id")))
             self.btn_no_show.setEnabled(False)
             return
         intento = self._intento_abierto(key)
@@ -1281,7 +1306,7 @@ class Agenda(QWidget, Ui_Form):
         it = self._practica.get(key)
         if it is None or self.main_window is None:
             return
-        if self.is_admin:
+        if self._en_prueba():
             self._atender_practica_docente(key, it)
             return
         intento = self._intento_abierto(key)
@@ -1641,7 +1666,7 @@ class Agenda(QWidget, Ui_Form):
             return None
         appointment_key = self._selected_row_key
         item_practica = None
-        if self._modo_practica and self.is_admin:
+        if self._modo_practica and self._en_prueba():
             item_practica = self._practica.get(appointment_key, {})
             appointment_key = self._clave_caso_practica(item_practica)
             if appointment_key is None:
@@ -1688,7 +1713,10 @@ class Agenda(QWidget, Ui_Form):
         html = render_ficha_html(row, caso, self.shedule, self._current_username(), self.is_admin)
         cuando = f"{row.fecha} {row.hora}".strip() if row.fecha and row.hora else None
         case_id = row.case_id
-        args = (html, lambda: self._abrir_chat_paciente(row, case_id, appointment_key),
+        # Sin chat (el invitado, o un curso sin el módulo) la ficha no ofrece
+        # "Hablar con el paciente"
+        con_chat = not invitado.activo and getattr(self.main_window, "_module_visible", lambda _m: True)("CHAT")
+        args = (html, (lambda: self._abrir_chat_paciente(row, case_id, appointment_key)) if con_chat else None,
                 (f"{row.nombre} {row.apellido}".strip(), self._datos_paciente(row.rut, row.procedimiento, cuando)))
         getattr(self.main_window, metodo)(*args)
 

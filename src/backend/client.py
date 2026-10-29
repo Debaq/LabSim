@@ -28,6 +28,33 @@ CLOCK_SKEW_TOLERANCE_S = 120
 # instancias de BackendClient (cada módulo crea la suya).
 al_perder_sesion = None
 
+# Modo invitado (core/invitado.py): sin cuenta no hay API. Lo fija main al
+# entrar como invitado y lo apaga al salir. Vale para todas las instancias,
+# también las que cada módulo crea por su cuenta: ninguna lee session.json
+# (que puede tener el token del último que entró) ni hace un pedido.
+sin_api = False
+
+
+class _SesionHttp:
+    """requests.Session que, en modo invitado, corta todo pedido antes de
+    salir: un error de conexión, que quien llama ya sabe manejar."""
+
+    def __init__(self):
+        self._real = requests.Session()
+        self.hooks = self._real.hooks
+
+    def _revisar(self):
+        if sin_api:
+            raise requests.ConnectionError("modo invitado: sin acceso a la API")
+
+    def get(self, *args, **kwargs):
+        self._revisar()
+        return self._real.get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self._revisar()
+        return self._real.post(*args, **kwargs)
+
 
 def _revisar_sesion(resp, *args, **kwargs):
     """Hook de requests: mira cada respuesta a una petición con token."""
@@ -60,14 +87,14 @@ class BackendClient:
         # Session en vez de requests.get/post sueltos: reusa la conexión TCP/TLS
         # entre llamadas -- sin esto, SyncThread (polling cada 15s, ver
         # sync_thread.py) repetía el handshake completo en cada ciclo.
-        self._http = requests.Session()
+        self._http = _SesionHttp()
         self._http.hooks["response"].append(_revisar_sesion)
         self._load_session()
 
     # -- sesión local -----------------------------------------------------
 
     def _load_session(self) -> None:
-        if not self._session_file.exists():
+        if sin_api or not self._session_file.exists():
             return
         try:
             data = json.loads(self._session_file.read_text("utf-8"))
@@ -94,7 +121,7 @@ class BackendClient:
     # -- requests -----------------------------------------------------------
 
     def _headers(self) -> dict:
-        if not self.token:
+        if not self.token or sin_api:
             return {}
         return {"Authorization": f"Bearer {self.token}"}
 

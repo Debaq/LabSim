@@ -28,7 +28,7 @@ import os
 import sys
 
 from backend.client import BackendClient
-from core import app_config_store
+from core import app_config_store, invitado
 from backend.cases_sync import backend_state_to_cases, diff_and_push_cases
 from backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
 
@@ -66,6 +66,8 @@ def sesion_es_docente() -> bool:
     el criterio seguro es no imprimir.
     """
     global _sesion_docente
+    if invitado.activo:
+        return False        # session.json puede ser de otro (ver core/invitado.py)
     if _sesion_docente is None:
         try:
             with open(context.get_resource('json/session.json'), encoding='utf-8') as archivo:
@@ -169,6 +171,8 @@ def lista_practica() -> list:
     """Pacientes de práctica deliberada del alumno (ver api/practica.php).
     Lanza requests.RequestException si falla la red: quien llama distingue
     "sin conexión" de "no hay pacientes"."""
+    if invitado.activo:
+        return invitado.items_practica()
     return _get_backend_client().get_practica()
 
 
@@ -225,6 +229,8 @@ def foto_otoscopia(case_id, side, fase=0):
     no tiene imagen subida o no hay conexión al backend -- mismo criterio
     que foto_paciente: una falla de red acá no bloquea la ventana, solo
     deja el aviso de "sin imagen"."""
+    if invitado.activo:
+        return invitado.foto_otoscopia(case_id, side, fase)
     try:
         return _get_backend_client().get_otoscopia_photo(case_id, side, fase)
     except requests.RequestException:
@@ -269,6 +275,10 @@ class CasesOffline():
     def get_cases(self) -> dict:
         """Recupera la base de casos compartida desde el backend."""
         global _cases_snapshot
+        if invitado.activo:
+            data = invitado.casos()
+            _cases_snapshot = deepcopy(data)
+            return data
         client = _get_backend_client()
         data = backend_state_to_cases(client.get_full_state())
         # deepcopy: quien llama muta el dict que le devolvemos (agrega
@@ -289,6 +299,8 @@ class CasesOffline():
     def set_cases(self, cases:dict) -> None:
         """Guarda la base de casos compartida en el backend."""
         global _cases_snapshot
+        if invitado.activo:
+            return
         client = _get_backend_client()
         diff_and_push_cases(client, cases, _cases_snapshot)
         _cases_snapshot = deepcopy(cases)
@@ -296,6 +308,11 @@ class CasesOffline():
 class Shedule:
     def __init__(self):
         global _shedule_snapshot
+        if invitado.activo:
+            # Sin cuenta: los pacientes del libro, del catálogo de la app
+            self.data = invitado.agenda()
+            _shedule_snapshot = deepcopy(self.data)
+            return
         client = _get_backend_client()
         own_id = (client.user or {}).get("id")
         own_username = (client.user or {}).get("username", "")
@@ -319,6 +336,8 @@ class Shedule:
         """guarda la agenda en el backend"""
         global _shedule_snapshot
         self.data = data
+        if invitado.activo:
+            return          # el invitado no deja registro
         client = _get_backend_client()
         own_username = (client.user or {}).get("username", "")
         diff_and_push_shedule(client, data, _shedule_snapshot, own_username)

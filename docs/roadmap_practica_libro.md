@@ -46,7 +46,10 @@ Libro: `~/Escritorio/Proyectos/libro-orl`.
   archivados y toda la lista vieja por curso apagada: la práctica arranca
   vacía.
 
-- [ ] **F1. Catálogo del libro en la app.** `scripts/catalogo_libro.py` lee
+- [x] **F1. Catálogo del libro en la app (2026-10-29).** `scripts/libro/catalogo_app.py` →
+  `resources/libro/catalogo.json.gz` (97 KB): las 40 carpetas y 145 pacientes de prod, con el
+  caso completo y el mismo procedimiento (`procedimientos.py`). Lo que sigue es el plan original:
+   `scripts/catalogo_libro.py` lee
   el libro y escribe `resources/libro/catalogo.json`:
   `[{carpeta, titulo, orden, pacientes: [{clave, nombre, edad, sexo, procedimiento, modulos, data}]}]`
   en el orden del libro, dejando fuera los pacientes que necesitan un módulo
@@ -113,11 +116,15 @@ Libro: `~/Escritorio/Proyectos/libro-orl`.
   al backend (fichas con clave fija) y crear una carpeta por capítulo con
   sus pacientes en el orden del libro, por la consola o un script. Las
   fotos, con `consola.py otoscopia/rostro`.
-- [ ] **F3. Modo sin cuenta.** Botón en el login. Sesión de invitado sin
+- [x] **F3. Modo sin cuenta (2026-10-29).** "Practicar sin cuenta" en el ingreso
+  (`core/invitado.py`). Ver decisiones.md, "Entrar sin cuenta". Plan original:
+   Botón en el login. Sesión de invitado sin
   backend: los casos salen del catálogo, sin sync, logs, informes ni chat;
   autoguardado en modo prueba. Revisar cada módulo por llamadas al backend
   (normativa del curso → la de fábrica, fotos, avisos de la secretaria).
-- [ ] **F4. Imágenes sin red.** Otoscopías y rostros de los pacientes del
+- [x] **F4. Otoscopías sin red (2026-10-29)**, 188 fotos a 600 px (7 MB,
+  `scripts/libro/otoscopias_app.py`). Faltan los rostros (solo adornan el chat, que el invitado
+  no tiene). Plan original: Otoscopías y rostros de los pacientes del
   libro empaquetados con la app (ver tamaño; `labsim_build_sin_datos_privados`).
 - [ ] **F5. Ficha de estudio** al cerrar el intento: la del libro, ya
   generada, sin redactor IA en el modo sin cuenta.

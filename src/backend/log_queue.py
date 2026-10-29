@@ -68,7 +68,14 @@ class LocalLogQueue:
                 conn.execute("ALTER TABLE pending_logs ADD COLUMN user_id TEXT")
 
     def push(self, action: str, payload: dict | None = None) -> None:
-        """Encola un evento. Escritura local, no bloquea por red."""
+        """Encola un evento. Escritura local, no bloquea por red.
+
+        El invitado no encola nada: sus eventos quedarían sin dueño y el
+        próximo alumno que entre los subiría a su nombre (pop_batch incluye
+        los de user_id NULL)."""
+        from core import invitado
+        if invitado.activo:
+            return
         # con milisegundos: la duración de un estímulo (1 a 2 s) no se mide
         # con segundos enteros
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]

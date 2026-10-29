@@ -45,7 +45,7 @@ from backend import client as backend_client
 from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
-from core import app_layout
+from core import app_layout, invitado
 from core import ficha as ficha_clinica
 from core.ficha import HojaPrevia, examenes_que_trae, fila_de_practica
 from core.app_layout import LayoutRetryThread, fetch_layout
@@ -500,6 +500,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if not user:
             self.logout()
         else:
+            if data.get("invitado"):
+                # Sin cuenta: nada de API ni de la sesión que haya en el equipo
+                invitado.activar()
             reset_backend_session()
             show_hide(self.modules, 0)
             self.lbl_name.setText(f"{user}")
@@ -704,7 +707,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Informes que quedaron en este equipo sin subir, de cualquier
         atención del usuario (ver report_autosave.subir_pendientes). Al
         iniciar sesión y con cada sync, que es cuando hay red."""
-        if self._subida_pendientes is not None:
+        if self._subida_pendientes is not None or invitado.activo:
             return
         # Con cada sync: sin QThread, ver hilos.en_fondo.
         self._subida_pendientes = hilos.en_fondo(
@@ -833,6 +836,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
+        if invitado.activo:
+            invitado.desactivar()
         preferencias().limpiar()
         self._aplicar_kiosko()
         if self._update_pendiente:
@@ -941,8 +946,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Admin/profe: descarga el caso de prueba de los módulos, igual que
         cerrar_atencion(), pero sin marcar "atendido" ni escribir en
         attendances/agenda -- no deja rastro en la base de datos."""
-        if not es_docente(self.data_login["permission"]):
-            return  # solo admin/profe usan el ciclo de prueba
+        if not es_docente(self.data_login["permission"]) and not invitado.activo:
+            return  # solo admin/profe (y el invitado, que siempre atiende en prueba)
         self.report_autosave.detener()
         self.data_current_key = None
         self.data_current = None
