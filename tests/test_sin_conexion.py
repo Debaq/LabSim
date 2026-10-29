@@ -468,6 +468,35 @@ def test_un_cierre_inesperado_se_ofrece_una_vez_aunque_se_actualice_en_el_medio(
     registro.cierre_atendido()                          # se respondió
     registro.marcar_salida()
     assert registro.marcar_inicio(log) is None
+    registro.marcar_salida()
+
+
+def test_otro_labsim_abierto_no_es_un_cierre_inesperado():
+    """Dos abiertos a la vez (la app y un script en desarrollo): la marca del
+    que sigue corriendo no es una caída, y el que sale no borra la ajena."""
+    import subprocess
+    from pathlib import Path
+    log = Path(tempfile.mkdtemp()) / "labsim.log"
+    marca = Path(str(log) + ".en_curso")
+    otro = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    # Recién lanzado, /proc/<pid>/cmdline puede estar vacío un instante
+    cmdline = Path(f"/proc/{otro.pid}/cmdline")
+    for _ in range(100):
+        if not cmdline.exists() or cmdline.read_bytes():
+            break
+        time.sleep(0.02)
+    try:
+        marca.write_text(f"2026-10-29 11:02:29\n{otro.pid}", "utf-8")
+        assert registro.marcar_inicio(log) is None, "el otro sigue abierto"
+        marca.write_text(f"2026-10-29 11:02:29\n{otro.pid}", "utf-8")   # el otro reescribe la suya
+        registro.marcar_salida()
+        assert marca.exists(), "no se borra la marca del otro"
+    finally:
+        otro.kill()
+        otro.wait()
+    assert registro.marcar_inicio(log) == "2026-10-29 11:02:29", "muerto sin salir: eso sí es una caída"
+    registro.cierre_atendido()
+    registro.marcar_salida()
 
 
 class _ClienteTicket:

@@ -165,18 +165,56 @@ def marcar_inicio(ruta_log: Path):
     _pendiente = Path(str(ruta_log) + ".cierre_pendiente")
     try:
         if _marca.exists() and not _pendiente.exists():
-            hora = _marca.read_text("utf-8").strip() or "?"
-            _pendiente.write_text(hora, "utf-8")
+            hora, pid = _leer_marca()
+            if not _sigue_abierto(pid):
+                _pendiente.write_text(hora, "utf-8")
     except OSError:
         pass
     try:
-        _marca.write_text(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "utf-8")
+        # La hora y quién la dejó: con dos LabSim abiertos a la vez (en
+        # desarrollo: la app y un script) el segundo leía la marca del
+        # primero como una caída.
+        _marca.write_text(f"{datetime.now():%Y-%m-%d %H:%M:%S}\n{os.getpid()}", "utf-8")
     except OSError:
         pass
     try:
         return _pendiente.read_text("utf-8").strip() or "?" if _pendiente.exists() else None
     except OSError:
         return None
+
+
+def _leer_marca():
+    """(hora, pid) de la marca; pid None en las de antes, que no lo traían."""
+    lineas = _marca.read_text("utf-8").splitlines()
+    hora = (lineas[0].strip() if lineas else "") or "?"
+    try:
+        pid = int(lineas[1])
+    except (IndexError, ValueError):
+        pid = None
+    return hora, pid
+
+
+def _sigue_abierto(pid) -> bool:
+    """El proceso que dejó la marca sigue corriendo y es un LabSim: entonces
+    no se cayó, hay dos abiertos. En Windows no se mira: ahí el mutex
+    LabSimAppMutex no deja abrir un segundo."""
+    if pid is None or pid == os.getpid() or sys.platform == "win32":
+        return False
+    cmdline = Path(f"/proc/{pid}/cmdline")
+    if cmdline.parent.exists():
+        try:
+            datos = cmdline.read_bytes()
+        except OSError:
+            return False
+        # Un pid reciclado por otro programa no cuenta como LabSim abierto
+        return b"python" in datos or b"LabSim" in datos
+    try:
+        os.kill(pid, 0)       # macOS: sin /proc, basta con que exista
+    except ProcessLookupError:
+        return False
+    except OSError:
+        return True
+    return True
 
 
 def cierre_atendido() -> None:
@@ -194,6 +232,9 @@ def marcar_salida() -> None:
     if _marca is None:
         return
     try:
+        # Solo la propia: si después abrió otro LabSim, la marca es suya
+        if _marca.exists() and _leer_marca()[1] not in (None, os.getpid()):
+            return
         _marca.unlink(missing_ok=True)
     except OSError:
         pass

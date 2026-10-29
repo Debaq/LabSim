@@ -112,9 +112,10 @@ tiempos.instalar(_T0_ARRANQUE)
 tiempos.hito("registro listo")
 # Si la vez anterior no terminó bien, al abrir se ofrece mandar el registro
 # (ver core/soporte.ofrecer_envio_por_cierre).
-CIERRE_PREVIO = registro.marcar_inicio(LOG_FILE)
-if CIERRE_PREVIO:
-    print(f"la vez anterior (abierta {CIERRE_PREVIO}) no terminó bien")
+# La marca se pone en __main__, no al importar: los tests, las capturas del
+# manual y los scripts importan main y no pasan por marcar_salida, y el
+# próximo LabSim avisaba de un cierre que no existió.
+CIERRE_PREVIO = None
 
 
 def _log_excepcion(tipo, valor, tb):
@@ -1809,6 +1810,11 @@ def _antes_de_buscar_update():
 
 
 if __name__ == '__main__':
+    # Antes que la actualización: en el kiosko puede reiniciar sin mostrar
+    # nada, y el aviso de una caída tiene que sobrevivir a eso.
+    CIERRE_PREVIO = registro.marcar_inicio(LOG_FILE)
+    if CIERRE_PREVIO:
+        print(f"la vez anterior (abierta {CIERRE_PREVIO}) no terminó bien")
     if getattr(sys, 'frozen', False):
         try:
             buscar_update = _antes_de_buscar_update()
