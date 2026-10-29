@@ -1,6 +1,6 @@
 """Comandos de voz: cada frase emite su clave de siempre.
 
-La clave es el nombre del audio (resources/audio/<clave>.mp3) y lo que lee
+La clave es el nombre del audio (resources/audio/comandos/<clave>.mp3) y lo que lee
 ResponseAudiometry.history_command para decidir la respuesta del paciente.
 Si un rótulo nuevo cambia la clave, el paciente deja de responder a esa
 instrucción sin que nada avise.
@@ -38,7 +38,7 @@ def test_estan_todas_las_del_motor():
 def test_cada_clave_tiene_su_audio():
     for clave in set(_claves()) - SIN_AUDIO:
         plano = unicodedata.normalize('NFKD', clave).encode('ascii', 'ignore').decode()
-        ruta = os.path.join(RAIZ, "resources", "audio", f"{plano}.mp3")
+        ruta = os.path.join(RAIZ, "resources", "audio", "comandos", f"{plano}.mp3")
         assert os.path.exists(ruta), ruta
 
 

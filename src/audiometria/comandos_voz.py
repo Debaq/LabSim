@@ -4,7 +4,7 @@ paciente por el talkback.
 
 Se elige la frase acá y se dice con Talkback en el audiómetro. Cada frase
 emite su clave (`btn_checked`), que es a la vez el nombre del audio
-(resources/audio/<clave>.mp3) y lo que lee ResponseAudiometry.history_command
+(resources/audio/comandos/<clave>.mp3) y lo que lee ResponseAudiometry.history_command
 para decidir cómo responde el paciente: las claves no se cambian aunque
 cambie el rótulo.
 """

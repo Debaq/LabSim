@@ -246,8 +246,8 @@ class ListWords(QWidget):
         """Conecta cada palabra y desactiva las que no tienen audio.
 
         Una palabra necesita dos grabaciones: la que oye el paciente
-        (LP_palacios_1_<palabra>) y la que dice al repetirla
-        (LP_palacios_r_feme1_<palabra>). Sin la primera no suena nada; sin la
+        (logo/estimulos/<palabra>) y la que dice al repetirla
+        (logo/respuestas/feme1/<palabra>). Sin la primera no suena nada; sin la
         segunda el paciente se queda callado aunque haya entendido. En los
         dos casos el botón queda desactivado, con el motivo en el tooltip,
         hasta que se graben.
@@ -268,8 +268,8 @@ class ListWords(QWidget):
     def _audio_faltante(texto):
         """Qué grabación le falta a la palabra, o '' si están las dos."""
         palabra = texto.strip().lower()
-        estimulo = context.get_resource(normalize(f"audio/LP_palacios_1_{palabra}.mp3"))
-        respuesta = context.get_resource(normalize(f"audio/LP_palacios_r_feme1_{palabra}.mp3"))
+        estimulo = context.get_resource(normalize(f"audio/logo/estimulos/{palabra}.mp3"))
+        respuesta = context.get_resource(normalize(f"audio/logo/respuestas/feme1/{palabra}.mp3"))
         if not os.path.exists(estimulo):
             return "la palabra"
         if not os.path.exists(respuesta):
@@ -281,8 +281,8 @@ class ListWords(QWidget):
             return
         self._limpiar_usadas()
         self.is_response = data['sector'] == "Camara_sono"
-        # TODO: solo existen audios de respuesta grabados como feme1/feme2
-        # (resources/audio/LP_palacios_r_feme{1,2}_*.mp3). No hay voces "male"
+        # TODO: hay respuestas grabadas como feme1/feme2 y, generadas con TTS,
+        # nino1/nina1 (resources/audio/logo/respuestas/<voz>/). No hay voces "male"
         # grabadas y ningun otro id de ficha tiene voz asociada, asi que
         # create_word_response fallaba silenciosamente (ffmpeg "No existe el
         # fichero o el directorio") y parecia que el paciente no respondia.
@@ -313,8 +313,7 @@ class ListWords(QWidget):
         self.sender_btn = btn
         self.num = int(self._BOTON_PALABRA.match(btn.objectName()).group(1))
         self.text = (btn.text()).lower()
-        file = f"LP_palacios_1_{self.text}"
-        word = create_word(file, self.playable[2])
+        word = create_word(self.text, self.playable[2])
         self.soundPlay(word)
    
 

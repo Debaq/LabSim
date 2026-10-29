@@ -16,7 +16,7 @@ from audiometria.audio_player import Player
 from audiometria.masking_params import es_ruido
 #from lib.API_connector import API, PostData
 from audiometria.h_audio import (calibrate, create_frecuency, create_intency,
-                         create_sound, create_word, data_basic)
+                         create_command, create_sound, data_basic)
 from core.helpers import Preferences
 from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QFont, QKeySequence
@@ -495,7 +495,7 @@ class Audiometer(QWidget, Ui_Audiometer):
     def supra(self, state):
         if state != "silencio":
             command = f"{state}"
-            comandvoice = create_word(command)
+            comandvoice = create_command(command)
             self.state_supra = [comandvoice, state]
         else:
             self.state_supra = [None, None]

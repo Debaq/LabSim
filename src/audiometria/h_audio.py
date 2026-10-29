@@ -84,8 +84,16 @@ def create_sound(stim, f, ch):
     file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
+# Árbol de resources/audio (los nombres van sin tildes ni ñ, ver normalize):
+#   comandos/<clave>.mp3                 lo que dice el examinador por talkback
+#   paciente/<voz>/<frase>.mp3           frases sueltas del paciente (sí, no...)
+#   logo/estimulos/<palabra>.mp3         palabra de la lista, dicha por el examinador
+#   logo/respuestas/<voz>/<palabra>.mp3  el paciente la repite; none1-3 = no la entendió
+#   _generated/, _panned/                caches que se rehacen solos
+# <voz> = género + número: feme1, feme2, male, nino1, nina1.
+
 def create_voice(name, gender, idx):
-    file = f"audio/{name}_{gender}{idx}.mp3"
+    file = f"audio/paciente/{gender}{idx}/{name}.mp3"
     file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
@@ -102,7 +110,7 @@ def _panned_word_file(rel_path, side):
     panneada solo al oído indicado, para que no suene por ambos fonos."""
     suffix = "OD" if side == 0 else "OI"
     src = Path(context.get_resource(rel_path))
-    dst = src.parent / "_panned" / f"{src.stem}_{suffix}{src.suffix}"
+    dst = Path(context.get_resource("audio")) / "_panned" / f"{src.stem}_{suffix}{src.suffix}"
     if not dst.exists():
         # En Windows sin esto cada palabra abria una consola de ffmpeg
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
@@ -124,15 +132,19 @@ def _panned_word_file(rel_path, side):
     return str(dst)
 
 
-def create_word(name, side=None):
-    file = f"audio/{name}.mp3"
-    file = normalize(file)
+def create_command(clave):
+    file = normalize(f"audio/comandos/{clave}.mp3")
+    return QUrl.fromLocalFile(context.get_resource(file))
+
+
+def create_word(palabra, side=None):
+    file = normalize(f"audio/logo/estimulos/{palabra}.mp3")
     if side is None:
         return QUrl.fromLocalFile(context.get_resource(file))
     return QUrl.fromLocalFile(_panned_word_file(file, side))
 
 def create_word_response(name, sex, number):
-    file = f"audio/LP_palacios_r_{sex}{number}_{name}.mp3"
+    file = f"audio/logo/respuestas/{sex}{number}/{name}.mp3"
     file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 

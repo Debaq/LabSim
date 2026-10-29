@@ -193,14 +193,16 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 72. Sitios del cuerpo (ECM, esternón, clavícula, nuca) para el VEMP:
       fotografiar la persona de pie de labyrinthus3d.
 
-### Voces sintéticas (Google)
-§ Voces sintéticas con Google: plan
+### Voces sintéticas
+§ Voces sintéticas con Google: plan. Avance en `docs/roadmap_voces.md`
 - [ ] 69. Instrucciones del talkback que faltan (`ruido_blanco_contralateral`,
       `rosemberg_bilateral`) o las 23 con una misma voz, para que no se note el
       cambio entre grabada y sintética. Volumen igualado al de las actuales.
 - [ ] 70. Voces del paciente al repetir las listas de palabras: hoy una sola
       voz fija (`feme1`) que tiene 50 de las 124 palabras; en las otras 74 el
-      paciente no dice nada.
+      paciente no dice nada. Ya están `nino1`/`nina1` con las 124 (Edge TTS):
+      faltan sus `none1-3`, elegir la voz por edad y sexo del caso y mejorar
+      las que suenan mal. § Audios ordenados por carpeta y voces de niños
 
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
