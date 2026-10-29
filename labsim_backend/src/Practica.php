@@ -405,6 +405,45 @@ final class Practica
     }
 
     /**
+     * Avance del alumno en el libro: por carpeta, cuántos casos tiene y en
+     * cuántos cerró al menos un intento. Lo mismo que cuenta la app arriba de
+     * las carpetas (Agenda._mostrar_avance), para el portal del alumno. Un
+     * paciente en dos carpetas son dos casos: en cada una se practica otro
+     * examen.
+     *
+     * @return array{casos:int, hechos:int, carpetas:list<array{nombre:string, casos:int, hechos:int}>}
+     */
+    public static function avance(int $userId): array
+    {
+        $vacio = ['casos' => 0, 'hechos' => 0, 'carpetas' => []];
+        if (!self::carpetasListas()) {
+            return $vacio;
+        }
+        $stmt = Db::get()->prepare(
+            "SELECT f.nombre, COUNT(*) AS casos,
+                    SUM(EXISTS (SELECT 1 FROM attendances att JOIN appointments a ON a.id = att.appointment_id
+                                 WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'
+                                   AND att.student_id = :me)) AS hechos
+               FROM practice_items pi
+               JOIN practice_folders f ON f.id = pi.folder_id AND f.active = 1
+               JOIN cases c ON c.id = pi.case_id AND c.archived_at IS NULL
+              WHERE pi.active = 1
+              GROUP BY f.id
+              ORDER BY f.orden, f.id"
+        );
+        $stmt->bindValue(':me', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $avance = $vacio;
+        foreach ($stmt->fetchAll() as $f) {
+            $carpeta = ['nombre' => (string) $f['nombre'], 'casos' => (int) $f['casos'], 'hechos' => (int) $f['hechos']];
+            $avance['carpetas'][] = $carpeta;
+            $avance['casos'] += $carpeta['casos'];
+            $avance['hechos'] += $carpeta['hechos'];
+        }
+        return $avance;
+    }
+
+    /**
      * Cita del intento que el alumno dejó a medias en este paciente, o null.
      * Cuenta también la cita creada sin atención todavía (la app se cayó
      * entre "Practicar" y marcar "atendiendo"): sin esto quedaría huérfana y

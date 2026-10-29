@@ -215,6 +215,9 @@ if ($isPortalUser) {
         return isset($citasPractica[(int) ($log['appointment_id'] ?? 0)]);
     };
     $myPracticas = Metrics::countAttentions(array_filter($myLogs, $esPractica));
+    // Cuántos casos del libro lleva (lo mismo que ve arriba de las carpetas
+    // en la práctica libre de la app).
+    $avanceLibro = Practica::avance((int) $userId);
     $myAttentions = Metrics::countAttentions(array_filter($myLogs, static function (array $l) use ($esPractica): bool {
         return !$esPractica($l);
     }));
@@ -296,6 +299,15 @@ header('Content-Type: text/html; charset=utf-8');
     .tecnica-anillo { width: 96px; height: 96px; flex-shrink: 0; }
     .tecnica-evolucion { width: 260px; max-width: 100%; height: auto; border-radius: 4px; }
     .tecnica-pasos { display: block; max-width: 100%; height: 34px; margin: 0.8rem auto 0; }
+    .avance-libro { margin-top: 1.8rem; }
+    .avance-libro h3 { font-size: 1rem; margin-bottom: 0.4rem; text-align: center; }
+    .avance-barra { height: 8px; border-radius: 4px; background: #ece6ec; overflow: hidden; margin: 0.4rem 0 0.6rem; }
+    .avance-barra span { display: block; height: 100%; background: #5d1049; }
+    .avance-libro details { font-size: 0.9rem; }
+    .avance-libro summary { cursor: pointer; text-align: center; color: #555; }
+    .avance-carpetas { list-style: none; padding: 0; margin: 0.6rem 0 0; }
+    .avance-carpetas li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.25rem 0; border-bottom: 1px solid #eee; }
+    .avance-carpetas .listo { color: #2e7d4f; font-weight: bold; }
 
     @media (max-width: 30rem) {
         body { margin-top: 2rem; }
@@ -379,6 +391,33 @@ header('Content-Type: text/html; charset=utf-8');
                 <?php endif; ?>
             </div>
             <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if (!$isPortalUser && $avanceLibro['casos'] > 0):
+            $terminadas = count(array_filter($avanceLibro['carpetas'], static function (array $c): bool {
+                return $c['hechos'] === $c['casos'];
+            }));
+            $pct = (int) round(100 * $avanceLibro['hechos'] / $avanceLibro['casos']); ?>
+        <div class="avance-libro">
+            <h3>Tu avance en el libro</h3>
+            <p class="stats-summary">
+                <?= $avanceLibro['hechos'] ?> de <?= $avanceLibro['casos'] ?> casos practicados
+                · <?= $terminadas ?> de <?= count($avanceLibro['carpetas']) ?> capítulos completos
+            </p>
+            <div class="avance-barra" role="progressbar" aria-valuemin="0" aria-valuemax="<?= $avanceLibro['casos'] ?>"
+                 aria-valuenow="<?= $avanceLibro['hechos'] ?>"><span style="width: <?= $pct ?>%"></span></div>
+            <details>
+                <summary>Ver por capítulo</summary>
+                <ul class="avance-carpetas">
+                    <?php foreach ($avanceLibro['carpetas'] as $c): ?>
+                    <li>
+                        <span><?= htmlspecialchars($c['nombre']) ?></span>
+                        <span class="<?= $c['hechos'] === $c['casos'] ? 'listo' : '' ?>"><?= $c['hechos'] ?>/<?= $c['casos'] ?><?= $c['hechos'] === $c['casos'] ? ' ✓' : '' ?></span>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </details>
+        </div>
         <?php endif; ?>
     </div>
 

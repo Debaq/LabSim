@@ -271,8 +271,8 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     mod.lista_practica = lambda: [dict(it) for it in items]
     ag.btn_practica.setChecked(True)
     lista = ag.lista_carpetas
-    assert not lista.isHidden()
-    assert [lista.item(i).text() for i in range(lista.count())] == ["Cap. 6  (2)", "Cap. 3  (11)"]
+    assert not ag.columna_carpetas.isHidden()
+    assert [lista.item(i).text() for i in range(lista.count())] == ["Cap. 6  (0/2)", "Cap. 3  (0/11)"]
     assert _filas(ag) == ["Zoe", "Ana"]
     lista.setCurrentRow(1)
     assert _filas(ag) == [f"P{n}" for n in range(1, 12)]
@@ -290,7 +290,33 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     assert len(_filas(ag)) == len(items) - 1
     ag.led_buscar.setText("")
     ag.btn_vista_agenda.setChecked(True)
-    assert lista.isHidden() and not ag.tableWidget.isColumnHidden(mod.COL_N_PRACTICA)
+    assert ag.columna_carpetas.isHidden() and not ag.tableWidget.isColumnHidden(mod.COL_N_PRACTICA)
+
+
+def test_el_alumno_ve_su_avance_en_el_libro():
+    """Practicado = al menos un intento cerrado. Un capítulo entero lleva ✓."""
+    ag, _ = _armar(lambda pid: {})
+    items = [_item(1, "Cap. 6", 60, 1, "Zoe"), _item(2, "Cap. 6", 60, 2, "Ana"),
+             _item(3, "Cap. 3", 30, 1, "Luis"), _item(4, "Cap. 3", 30, 2, "Rosa"), _item(5, "Cap. 3", 30, 3, "Eva")]
+    items[0]["intentos"] = 2
+    items[1]["intentos"] = 1
+    items[2]["intentos"] = 1
+    mod.lista_practica = lambda: [dict(it) for it in items]
+    ag.btn_practica.setChecked(True)
+    lista = ag.lista_carpetas
+    assert [lista.item(i).text() for i in range(lista.count())] == ["Cap. 6  (2/2)  ✓", "Cap. 3  (1/3)"]
+    assert not ag.avance_libro.isHidden()
+    assert ag.lbl_avance.text() == "3 de 5 casos"
+    assert (ag.barra_avance.value(), ag.barra_avance.maximum()) == (3, 5)
+    assert "terminaste 1 de 2 carpetas" in ag.avance_libro.toolTip()
+
+
+def test_el_docente_no_ve_avance_propio():
+    """Sus números son de todo el curso: la carpeta sigue con el total."""
+    ag, _ = _armar_docente()
+    ag.btn_practica.setChecked(True)
+    assert ag.avance_libro.isHidden()
+    assert ag.lista_carpetas.item(0).text() == "Cap. 3  (2)"
 
 
 def test_la_agenda_no_se_baja_en_el_hilo_de_la_ventana():

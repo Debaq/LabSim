@@ -106,6 +106,9 @@ Libro: `~/Escritorio/Proyectos/libro-orl`.
   20, 30 y H12 el paciente llega con la audiometría hecha: el procedimiento
   no la nombra y la ficha la muestra con "Ver informe" (hoja del libro en
   `resources/libro/previos`, `scripts/libro/previos.py`). Ver decisiones.md.
+- [x] **Avance del alumno (2026-10-29).** "N de M casos" y avance por
+  carpeta en la práctica libre de la app y en el portal (launch.php). Sin
+  ranking. Ver decisiones.md.
 - [ ] **F2. Llenar las carpetas con el libro.** Importar los casos del libro
   al backend (fichas con clave fija) y crear una carpeta por capítulo con
   sus pacientes en el orden del libro, por la consola o un script. Las

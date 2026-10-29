@@ -6950,3 +6950,23 @@ VEMP.
   una plantilla propia del admin no lo pierda, y vale para todos los casos,
   no solo los del libro. El aviso lo manda la app porque es la que sabe si
   hay hoja; con acompañantes se cuenta en tercera persona.
+
+## Avance del alumno en el libro, y aviso al cambiar de paciente en prueba (2026-10-29)
+
+- **Avance, no ranking.** Arriba de las carpetas de la práctica libre, el
+  alumno ve "N de M casos" con una barra, y cada carpeta dice "(hechos/total)"
+  con ✓ si está completa. Practicado = al menos un intento cerrado. Un
+  paciente que sale en dos carpetas son dos casos (en cada una se practica
+  otro examen). Sale de lo que ya manda `api/practica.php` (sus intentos por
+  paciente), sin pedir nada nuevo. El docente no lo ve ahí: sus números son
+  de todo el curso. Lo mismo en el portal del alumno (`lti/launch.php`, "Tu
+  avance en el libro", con el detalle por capítulo plegado), con
+  `Practica::avance()`. El ranking entre alumnos sigue descartado (ver el
+  comentario en launch.php).
+- **Atender a otro con una prueba abierta** pregunta antes de cambiar ("¿Lo
+  cierras y atiendes a este paciente?"); antes cambiaba sin decir nada porque
+  la prueba no guarda. Con "No" sigue con el que tenía y la agenda no lo
+  marca. Con una atención real se sigue pidiendo cerrarla primero.
+- **"Practicar" con otra atención abierta** avisa antes de crear el intento:
+  antes el intento se creaba en el servidor y quedaba abierto aunque la app
+  no dejara atenderlo.

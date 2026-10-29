@@ -928,6 +928,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         le llega al alumno.
         """
         self._atender_caso(key, es_prueba=True, practica=practica)
+        # False si no se abrió (siguió con el que tenía): la agenda no lo marca
+        return self.data_current_key == key
+
+    def otra_atencion_abierta(self):
+        """Para quien va a abrir una atención nueva antes de tener su cita (el
+        intento de práctica): avisa y devuelve True si hay otra abierta."""
+        return self._otra_atencion_abierta(None)
 
     def cerrar_atencion_prueba(self, nota):
         """Admin/profe: descarga el caso de prueba de los módulos, igual que
@@ -1485,9 +1492,20 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         actual = self.data_current_key
         if actual is None or actual == key:
             return False
-        if (self.paciente_actual or {}).get("appointment_id") is None:
-            return False  # "prueba" del docente: no hay nada que perder
         nombre = (self.paciente_actual or {}).get("nombre") or "otro paciente"
+        if (self.paciente_actual or {}).get("appointment_id") is None:
+            # Prueba del docente: no hay nada que guardar, pero cambiar de
+            # paciente sin avisar dejaba al primero cerrado sin que lo supiera.
+            dlg = QMessageBox(QMessageBox.Icon.Question, "Atención de prueba abierta",
+                              f"Tienes a {nombre} abierto en prueba. ¿Lo cierras y "
+                              "atiendes a este paciente? La prueba no se guarda.",
+                              QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, self)
+            dlg.setDefaultButton(QMessageBox.StandardButton.No)
+            style_dialog(dlg)
+            if dlg.exec() != QMessageBox.StandardButton.Yes:
+                return True
+            self.cerrar_atencion_prueba("se atiende a otro paciente")
+            return False
         dlg = QMessageBox(QMessageBox.Icon.Warning, "Atención abierta",
                           f"Tienes a {nombre} en atención. Ciérrala primero "
                           "(Cerrar/Evolucionar en la agenda) para que sus exámenes "

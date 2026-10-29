@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView, QAbstractScrollArea,
                                 QButtonGroup, QDateEdit, QFrame, QHBoxLayout, QHeaderView,
                                 QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
-                                QStackedWidget, QTextBrowser, QTextEdit, QVBoxLayout, QCheckBox)
+                                QProgressBar, QStackedWidget, QTextBrowser, QTextEdit, QVBoxLayout, QCheckBox)
 from PySide6.QtCore import QDate, QSize, QTime, QDateTime, Qt, QTimer
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
@@ -278,7 +278,7 @@ class Agenda(QWidget, Ui_Form):
         # pacientes. Ver core/practica.py.
         self._modo_practica = False
         self._practica = {}
-        self._carpetas = []      # [(clave, nombre, n)] en el orden del backend
+        self._carpetas = []      # [(clave, nombre, n, hechos)] en el orden del backend
         self._carpeta = None     # la elegida en la lista de la izquierda
 
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -461,11 +461,34 @@ class Agenda(QWidget, Ui_Form):
         self.lista_carpetas.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         # Un nombre de capítulo largo pasa a dos líneas, no se corta con "…"
         self.lista_carpetas.setTextElideMode(Qt.TextElideMode.ElideNone)
-        self.lista_carpetas.setVisible(False)
         self.lista_carpetas.currentItemChanged.connect(self._on_carpeta_elegida)
+        # Arriba de las carpetas, el avance del alumno en el libro: cuántos de
+        # sus casos ya practicó (con al menos un intento cerrado).
+        self.avance_libro = QFrame(self)
+        self.avance_libro.setObjectName("avanceLibro")
+        self.avance_libro.setFixedWidth(220)
+        col_avance = QVBoxLayout(self.avance_libro)
+        col_avance.setContentsMargins(12, 10, 12, 12)
+        col_avance.setSpacing(4)
+        titulo_avance = QLabel("Tu avance en el libro")
+        titulo_avance.setProperty("role", "hint")
+        self.lbl_avance = QLabel("")
+        self.lbl_avance.setObjectName("lblAvance")
+        self.barra_avance = QProgressBar(self.avance_libro)
+        self.barra_avance.setObjectName("barraAvance")
+        self.barra_avance.setTextVisible(False)
+        for w in (titulo_avance, self.lbl_avance, self.barra_avance):
+            col_avance.addWidget(w)
+        self.columna_carpetas = QWidget(self)
+        col_carpetas = QVBoxLayout(self.columna_carpetas)
+        col_carpetas.setContentsMargins(0, 0, 0, 0)
+        col_carpetas.setSpacing(8)
+        col_carpetas.addWidget(self.avance_libro)
+        col_carpetas.addWidget(self.lista_carpetas, 1)
+        self.columna_carpetas.setVisible(False)
         fila_tabla = QHBoxLayout()
         fila_tabla.setSpacing(10)
-        fila_tabla.addWidget(self.lista_carpetas)
+        fila_tabla.addWidget(self.columna_carpetas)
         fila_tabla.addWidget(self._pila, 1)
         raiz.addLayout(fila_tabla, 1)
 
@@ -567,7 +590,7 @@ class Agenda(QWidget, Ui_Form):
         else:
             self._mostrar_contadores(() if self.is_admin else vista.CONT_AGENDA)
         self.tableWidget.setHorizontalHeaderLabels(ENCABEZADOS_PRACTICA if checked else ENCABEZADOS_AGENDA)
-        self.lista_carpetas.setVisible(checked and bool(self._carpetas))
+        self.columna_carpetas.setVisible(checked and bool(self._carpetas))
         # Sin columna de orden la tabla queda como la manda el backend (el
         # orden de la carpeta); si no, se ordenaba sola por Estado, al revés.
         # Un clic en el encabezado la sigue ordenando.
@@ -597,8 +620,10 @@ class Agenda(QWidget, Ui_Form):
         for it in self._practica.values():
             clave = it.get("folder_id")
             if clave not in carpetas:
-                carpetas[clave] = [clave, it.get("carpeta") or "Práctica libre", 0]
+                carpetas[clave] = [clave, it.get("carpeta") or "Práctica libre", 0, 0]
             carpetas[clave][2] += 1
+            # Al alumno le llegan sus intentos cerrados; al docente, los de todos
+            carpetas[clave][3] += int(bool(it.get("intentos")))
         self._carpetas = [tuple(c) for c in carpetas.values()]
         if self._carpeta not in carpetas:
             self._carpeta = self._carpetas[0][0] if self._carpetas else None
@@ -607,15 +632,38 @@ class Agenda(QWidget, Ui_Form):
         lista.blockSignals(True)
         lista.clear()
         # Sin número adelante: el nombre ya dice el capítulo ("Cap. 7 · ...")
-        for clave, nombre, cuantos in self._carpetas:
-            item = QListWidgetItem(f"{nombre}  ({cuantos})")
+        for clave, nombre, cuantos, hechos in self._carpetas:
+            if self.is_admin:
+                item = QListWidgetItem(f"{nombre}  ({cuantos})")
+                item.setToolTip(f"{nombre}: {_plural(cuantos, 'paciente', 'pacientes')}")
+            else:
+                listo = "  ✓" if hechos == cuantos else ""
+                item = QListWidgetItem(f"{nombre}  ({hechos}/{cuantos}){listo}")
+                item.setToolTip(f"{nombre}: practicaste {hechos} de "
+                                f"{_plural(cuantos, 'paciente', 'pacientes')}")
             item.setData(Qt.UserRole, clave)
-            item.setToolTip(f"{nombre}: {_plural(cuantos, 'paciente', 'pacientes')}")
             lista.addItem(item)
             if clave == self._carpeta:
                 lista.setCurrentItem(item)
         lista.blockSignals(False)
-        lista.setVisible(self._modo_practica and bool(self._carpetas))
+        self._mostrar_avance()
+        self.columna_carpetas.setVisible(self._modo_practica and bool(self._carpetas))
+
+    def _mostrar_avance(self):
+        """Cuántos casos del libro practicó el alumno. Un paciente que sale en
+        dos carpetas (Tomás en H3 y en H9) son dos casos: en cada una se
+        practica otro examen. El docente no lo ve: sus números son de todo
+        el curso, y el avance de cada alumno es el de él."""
+        total = sum(c[2] for c in self._carpetas)
+        hechos = sum(c[3] for c in self._carpetas)
+        self.avance_libro.setVisible(not self.is_admin and total > 0)
+        self.lbl_avance.setText(f"{hechos} de {_plural(total, 'caso', 'casos')}")
+        self.barra_avance.setRange(0, max(total, 1))
+        self.barra_avance.setValue(hechos)
+        capitulos = sum(1 for c in self._carpetas if c[2] and c[3] == c[2])
+        self.avance_libro.setToolTip(
+            f"Practicaste {hechos} de {total} casos del libro (al menos un intento cerrado) "
+            f"y terminaste {capitulos} de {_plural(len(self._carpetas), 'carpeta', 'carpetas')}.")
 
     def _on_carpeta_elegida(self, actual, _anterior=None):
         if actual is None:
@@ -1219,6 +1267,10 @@ class Agenda(QWidget, Ui_Form):
             self._cerrar_practica(intento, it)
             return
         if intento is None:
+            # Antes de crear el intento en el servidor: si después main no
+            # deja abrirlo, quedaba un intento abierto que nadie empezó.
+            if hasattr(self.main_window, "otra_atencion_abierta") and self.main_window.otra_atencion_abierta():
+                return
             try:
                 cita = iniciar_practica(int(it["id"]))
             except requests.RequestException as exc:
@@ -1240,7 +1292,8 @@ class Agenda(QWidget, Ui_Form):
         clave = self._clave_caso_practica(it)
         if clave is None or not hasattr(self.main_window, "atender_paciente_prueba"):
             return
-        self.main_window.atender_paciente_prueba(clave, practica=it)
+        if self.main_window.atender_paciente_prueba(clave, practica=it) is False:
+            return
         self._prueba_atendiendo_key = clave
         self._on_selection_changed()
         self.populate_shedule()
@@ -1424,7 +1477,8 @@ class Agenda(QWidget, Ui_Form):
                 QMessageBox.warning(self, "Atender", "Este registro no tiene un caso clínico asociado.")
                 return
             if self.main_window is not None and hasattr(self.main_window, "atender_paciente_prueba"):
-                self.main_window.atender_paciente_prueba(self._selected_row_key)
+                if self.main_window.atender_paciente_prueba(self._selected_row_key) is False:
+                    return      # siguió con el paciente que tenía abierto
                 self._prueba_atendiendo_key = self._selected_row_key
                 self._on_selection_changed()
             return
