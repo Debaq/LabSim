@@ -7,6 +7,13 @@ name: Build Windows (Python)
 # pyinstaller-v*, pasandole el commit exacto y el build_id, para que el .exe
 # de Windows y el .tar.gz de Linux salgan del mismo codigo. A mano:
 #   gh workflow run build-windows.yml -f sha=$(git rev-parse HEAD) -f build_id=0.9.8-rXXXXXXX
+#
+# Ademas del instalador completo arma el delta contra la release anterior
+# (LabSim-windows-x86_64-update-setup.exe, el eslabon de la cadena de
+# updates de core/updater.py) y el manifest-windows.json contra el que se
+# calculara el delta de la proxima. Antes de subir nada prueba los dos en
+# este Windows: instala la release publicada y la actualiza con el mismo
+# aplicar.cmd que usa la app (scripts/probar_update_windows.py).
 
 on:
   workflow_dispatch:
@@ -20,9 +27,14 @@ on:
         required: false
         default: ''
 
+permissions:
+  contents: read
+
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,6 +75,11 @@ jobs:
           "num_version=$ver" >> $env:GITHUB_OUTPUT
           Write-Host "BUILD_VERSION=$buildId (VersionInfo $ver)"
 
+      # Despues de BUILD_VERSION (update_diff.py lo excluye igual) y antes
+      # del ISCC: es el hash de cada archivo tal cual lo copia el instalador.
+      - name: Manifest de Windows
+        run: python scripts/update_diff.py manifest dist/LabSim dist/manifest-windows.json
+
       - name: Instalar Inno Setup si falta
         shell: pwsh
         run: |
@@ -80,17 +97,76 @@ jobs:
                         /DNumVersion="${{ steps.version.outputs.num_version }}" `
                         installer\labsim.iss
 
+      # Release anterior = la pyinstaller-v* mas reciente que no sea esta,
+      # por fecha de publicacion: el mismo criterio con el que el cliente
+      # arma la cadena. Sin su manifest-windows.json (release previa a esto,
+      # o su build de Windows fallo) no hay delta y el cliente baja el
+      # instalador completo.
+      - name: Instalador delta contra la release anterior
+        id: delta
+        shell: pwsh
+        run: |
+          # Un gh que falla (release sin manifest) es un caso esperado, no un
+          # error del paso: se mira $LASTEXITCODE a mano.
+          $PSNativeCommandUseErrorActionPreference = $false
+          $tag = "pyinstaller-v${{ steps.version.outputs.build_id }}"
+          $prev = gh release list --limit 100 --json tagName,createdAt | ConvertFrom-Json |
+              Where-Object { $_.tagName -like 'pyinstaller-v*' -and $_.tagName -ne $tag } |
+              Sort-Object createdAt | Select-Object -Last 1
+          if (-not $prev) { Write-Host "Sin release anterior: no hay delta"; exit 0 }
+          $prevTag = $prev.tagName
+          $prevId = $prevTag.Substring('pyinstaller-v'.Length)
+          "prev_tag=$prevTag" >> $env:GITHUB_OUTPUT
+          "prev_id=$prevId" >> $env:GITHUB_OUTPUT
+          New-Item -ItemType Directory -Force dist/prev | Out-Null
+          gh release download $prevTag -p manifest-windows.json -D dist/prev --clobber
+          if ($LASTEXITCODE -ne 0) { Write-Host "$prevTag no tiene manifest-windows.json: no hay delta"; exit 0 }
+          python scripts/update_diff.py diff dist/LabSim dist/prev/manifest-windows.json dist/update_pkg_win
+          if ($LASTEXITCODE -ne 0) { throw "update_diff diff fallo" }
+          # El delta deja la instalacion en ESTA version: BUILD_VERSION va
+          # siempre (el manifest lo excluye a proposito).
+          Copy-Item dist/LabSim/BUILD_VERSION dist/update_pkg_win/BUILD_VERSION
+          python scripts/update_diff.py inno-delete dist/update_pkg_win/__removed__.txt dist/delta_removed.iss
+          if ($LASTEXITCODE -ne 0) { throw "update_diff inno-delete fallo" }
+          & "$env:ISCC" /DDelta=1 /DBaseBuildId="$prevId" /DSourceDir="..\dist\update_pkg_win" `
+                        /DMyAppVersion="${{ steps.version.outputs.build_id }}" `
+                        /DNumVersion="${{ steps.version.outputs.num_version }}" `
+                        installer\labsim.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC del delta fallo" }
+          "delta=1" >> $env:GITHUB_OUTPUT
+
+      # Instala la release anterior tal cual se publico y la actualiza con
+      # lo recien compilado, por el mismo camino que la app. Si el delta no
+      # pasa se borra (el cliente cae al completo); si el completo no pasa,
+      # el build falla: mejor ninguna version nueva que una que no instala.
+      - name: Probar la actualizacion en este Windows
+        if: steps.delta.outputs.prev_tag != ''
+        shell: pwsh
+        run: |
+          python scripts/probar_update_windows.py `
+              --anterior "${{ steps.delta.outputs.prev_tag }}" `
+              --build-id "${{ steps.version.outputs.build_id }}" `
+              --manifest dist/manifest-windows.json `
+              --completo dist/LabSim-windows-x86_64-setup.exe `
+              --delta dist/LabSim-windows-x86_64-update-setup.exe
+          if ($LASTEXITCODE -ne 0) { throw "la prueba de actualizacion fallo" }
+
       # Portable: mismo dist sin instalar, para labs donde no se puede
       # ejecutar un instalador. No se adjunta a la release (peso), queda
       # como artifact del run.
       - name: Empaquetar zip portable
         run: Compress-Archive -Path dist/LabSim/* -DestinationPath dist/LabSim-windows-x86_64.zip
 
+      # Todo lo que va a la release, en un solo artifact (el script de
+      # release sube lo que encuentre). El delta puede faltar.
       - name: Subir instalador
         uses: actions/upload-artifact@v4
         with:
           name: labsim-windows-setup
-          path: dist/LabSim-windows-x86_64-setup.exe
+          path: |
+            dist/LabSim-windows-x86_64-setup.exe
+            dist/LabSim-windows-x86_64-update-setup.exe
+            dist/manifest-windows.json
           if-no-files-found: error
 
       - name: Subir portable

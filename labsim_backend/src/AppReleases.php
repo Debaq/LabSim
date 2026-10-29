@@ -36,6 +36,7 @@ final class AppReleases
         'Windows' => 'LabSim-windows-x86_64-setup.exe',
         'Linux' => 'LabSim-linux-x86_64.tar.gz',
         'Actualización Linux' => 'LabSim-linux-x86_64-update.tar.gz',
+        'Actualización Windows' => 'LabSim-windows-x86_64-update-setup.exe',
         'Manifiesto' => 'manifest.json',
     ];
 
@@ -140,10 +141,19 @@ final class AppReleases
             $assets = [];
             foreach ((array) ($r['assets'] ?? []) as $a) {
                 if (is_array($a) && isset($a['name'], $a['browser_download_url'])) {
-                    $assets[] = [
+                    $asset = [
                         'name' => (string) $a['name'],
                         'browser_download_url' => (string) $a['browser_download_url'],
                     ];
+                    // Con qué comparar lo descargado (_con_verificacion en
+                    // core/updater.py): un archivo cortado no llega al instalador.
+                    if (isset($a['size']) && is_int($a['size'])) {
+                        $asset['size'] = $a['size'];
+                    }
+                    if (isset($a['digest']) && is_string($a['digest'])) {
+                        $asset['digest'] = $a['digest'];
+                    }
+                    $assets[] = $asset;
                 }
             }
             $salida[] = [

@@ -1723,13 +1723,59 @@ def _check_and_apply_update():
     _download_and_apply(update)
 
 
+def _antes_de_buscar_update():
+    """Lo que deja la actualización anterior, antes de buscar otra: barre
+    sus descargas del temporal, toma el mutex que espera el instalador y
+    avisa si la versión que se fue a instalar no llegó (antes se abría la
+    vieja sin decir nada). Devuelve False si ahora no conviene ofrecer una
+    actualización: un instalador sigue trabajando, u hay otra ventana de
+    LabSim abierta que dejaría sus archivos tomados."""
+    from core import updater
+    try:
+        updater.limpiar_temporales()
+    except Exception:  # noqa: BLE001
+        traceback.print_exc()
+    otra_abierta = updater.tomar_mutex_instancia()
+    estado = updater.revisar_update_anterior(__VERSION__)
+    if estado and estado.get("en_curso"):
+        print("actualización: el instalador anterior sigue trabajando, no se ofrece otra")
+        return False
+    if estado:
+        print(f"actualización: no llegó la {estado['esperado']}, sigue la {estado['actual']}")
+        print(estado["log"])
+        if not es_kiosko() and not _auto_update_forzado():
+            aviso = QMessageBox()
+            aviso.setIcon(QMessageBox.Warning)
+            aviso.setWindowTitle("La actualización no se completó")
+            aviso.setText(
+                f"No se pudo instalar la versión {estado['esperado']}: sigues con la "
+                f"{estado['actual']}.\nSe volverá a ofrecer ahora. Si vuelve a fallar, "
+                "envía un reporte desde Configuración → Reportar un problema "
+                "(lleva este detalle)."
+            )
+            if estado["log"]:
+                aviso.setDetailedText(estado["log"])
+            aviso.setStandardButtons(QMessageBox.Ok)
+            style_dialog(aviso)
+            aviso.exec()
+    if otra_abierta:
+        print("actualización: hay otra ventana de LabSim abierta, no se ofrece")
+        return False
+    return True
+
+
 if __name__ == '__main__':
     if getattr(sys, 'frozen', False):
+        try:
+            buscar_update = _antes_de_buscar_update()
+        except Exception:  # noqa: BLE001
+            traceback.print_exc()
+            buscar_update = True
         if es_kiosko():
             # No se abre con una versión vieja: espera a estar al día.
             from core.actualizacion_kiosko import actualizar_o_bloquear
             actualizar_o_bloquear(__VERSION__, BACKEND_URL)
-        else:
+        elif buscar_update:
             try:
                 _check_and_apply_update()
             except Exception:  # noqa: BLE001

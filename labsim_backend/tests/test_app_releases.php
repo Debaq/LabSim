@@ -20,7 +20,8 @@ $github = function () use (&$llamadas) {
     return [
         ['tag_name' => 'pyinstaller-v0.9.8-raaa', 'created_at' => '2026-09-25T03:00:00Z',
          'body' => 'notas', 'draft' => false, 'author' => ['login' => 'x'],
-         'assets' => [['name' => 'manifest.json', 'size' => 10,
+         'assets' => [['name' => 'manifest.json', 'size' => 10, 'digest' => 'sha256:ab12',
+                       'download_count' => 3,
                        'browser_download_url' => 'https://github.com/d/manifest.json']]],
         ['tag_name' => 'v3.1.0', 'created_at' => '2026-09-20T00:00:00Z', 'assets' => []],
     ];
@@ -36,8 +37,9 @@ t_eq(count($l['releases']), 1, 'Solo las versiones de esta app, no las del rewri
 t_eq(array_keys($l['releases'][0]), ['tag_name', 'created_at', 'body', 'assets'],
      'Solo los campos que usa el updater');
 t_eq($l['releases'][0]['assets'][0],
-     ['name' => 'manifest.json', 'browser_download_url' => 'https://github.com/d/manifest.json'],
-     'Assets con nombre y URL de descarga');
+     ['name' => 'manifest.json', 'browser_download_url' => 'https://github.com/d/manifest.json',
+      'size' => 10, 'digest' => 'sha256:ab12'],
+     'Assets con nombre, URL de descarga, y tamaño y sha256 para verificar lo bajado');
 
 AppReleases::lista($github, $cache, $t0 + AppReleases::TTL - 1);
 t_eq($llamadas, 1, 'Dentro del TTL no se vuelve a consultar a GitHub');
@@ -61,7 +63,8 @@ $l = AppReleases::lista($caido, $cache, $t0 + 30, true);
 t_eq($l['consultado'], $t0 + 20, 'Forzar con GitHub caído: sigue la guardada');
 
 t_eq(AppReleases::archivos($l['releases'][0]),
-     ['Windows' => false, 'Linux' => false, 'Actualización Linux' => false, 'Manifiesto' => true],
+     ['Windows' => false, 'Linux' => false, 'Actualización Linux' => false,
+      'Actualización Windows' => false, 'Manifiesto' => true],
      'Archivos presentes por versión');
 
 t_eq(AppReleases::guardada($cache)['consultado'], $t0 + 20,

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Genera el manifest de hashes de dist/LabSim y arma el paquete de update
-(diff) contra el manifest de la release anterior. Usado solo desde
-scripts/release_pyinstaller.sh -- no se importa desde la app ni desde
-core/updater.py.
+(diff) contra el manifest de la release anterior. Usado desde
+scripts/release_pyinstaller.sh (Linux) y .github/workflows/build-windows.yml
+(Windows, con manifest-windows.json y el instalador delta) -- no se importa
+desde la app ni desde core/updater.py.
 
 BUILD_VERSION y la data dinamica del usuario (resources/local_cache/,
 resources/json/session.json) quedan afuera del manifest a proposito:
@@ -81,12 +82,29 @@ def cmd_diff(dist_dir: str, old_manifest_path: str, update_dir_out: str) -> None
     sys.exit(0 if had_previous else 2)
 
 
+def cmd_inno_delete(removed_path: str, out_path: str) -> None:
+    """__removed__.txt -> seccion [InstallDelete] del instalador delta de
+    Windows (installer/labsim.iss la incluye con /DDelta=1). Las llaves se
+    duplican: en Inno "{" abre una constante como {app}."""
+    lineas = ["[InstallDelete]"]
+    for rel in Path(removed_path).read_text(encoding="utf-8").splitlines():
+        rel = rel.strip()
+        if not rel or rel.startswith(EXCLUDE_PREFIXES):
+            continue
+        ruta = rel.replace("/", "\\").replace("{", "{{")
+        lineas.append(f'Type: files; Name: "{{app}}\\{ruta}"')
+    Path(out_path).write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    print(f"inno-delete: {len(lineas) - 1} archivos a borrar")
+
+
 if __name__ == "__main__":
     action = sys.argv[1]
     if action == "manifest":
         cmd_manifest(sys.argv[2], sys.argv[3])
     elif action == "diff":
         cmd_diff(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif action == "inno-delete":
+        cmd_inno_delete(sys.argv[2], sys.argv[3])
     else:
         print(f"accion desconocida: {action}", file=sys.stderr)
         sys.exit(1)

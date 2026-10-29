@@ -19,11 +19,13 @@
 # (creandolo si hace falta).
 #
 # En paralelo dispara el workflow build-windows.yml (GitHub Actions) sobre
-# el MISMO commit, espera a que termine y adjunta a la release el instalador
-# Inno que produce -- LabSim-windows-x86_64-setup.exe. En Windows el updater
-# no usa la cadena de diffs: baja ese instalador y lo corre en silencio, asi
-# que solo la release mas nueva necesita tenerlo. SKIP_WINDOWS=1 lo saltea
-# (release solo Linux, mas rapida para probar).
+# el MISMO commit, espera a que termine y adjunta a la release lo que
+# produce: el instalador Inno completo (LabSim-windows-x86_64-setup.exe), el
+# delta contra la release anterior (LabSim-windows-x86_64-update-setup.exe,
+# puede faltar) y manifest-windows.json, la base del delta de la proxima.
+# Los deltas son la cadena de Windows, igual que los update.tar.gz la de
+# Linux: se conservan en las releases viejas; el completo solo en la ultima.
+# SKIP_WINDOWS=1 lo saltea (release solo Linux, mas rapida para probar).
 #
 # Ademas arma un paquete de update (diff) contra el manifest de la release
 # anterior (scripts/update_diff.py) -- LabSim-linux-x86_64-update.tar.gz,
@@ -171,6 +173,8 @@ UPDATE_ASSET_NAME="LabSim-linux-x86_64-update.tar.gz"
 echo "Build: ${BUILD_ID} -> tag ${TAG}"
 
 SETUP_ASSET_NAME="LabSim-windows-x86_64-setup.exe"
+WIN_UPDATE_ASSET_NAME="LabSim-windows-x86_64-update-setup.exe"
+WIN_MANIFEST_NAME="manifest-windows.json"
 WIN_WORKFLOW="build-windows.yml"
 SHA=$(git rev-parse HEAD)
 WIN_RUN_ID=""
@@ -278,9 +282,18 @@ if [ -n "$WIN_RUN_ID" ]; then
         rm -rf dist/win
         if run_with_spinner "Bajando ${SETUP_ASSET_NAME}..." \
                 gh run download "$WIN_RUN_ID" -n labsim-windows-setup -D dist/win; then
-            echo "Instalador: dist/win/${SETUP_ASSET_NAME} ($(du -h "dist/win/${SETUP_ASSET_NAME}" | cut -f1))"
-            run_with_spinner "Subiendo ${SETUP_ASSET_NAME} al release..." \
-                gh release upload "$TAG" "dist/win/${SETUP_ASSET_NAME}" --clobber
+            WIN_ASSETS=()
+            for f in "$SETUP_ASSET_NAME" "$WIN_UPDATE_ASSET_NAME" "$WIN_MANIFEST_NAME"; do
+                if [ -f "dist/win/$f" ]; then
+                    echo "Windows: dist/win/$f ($(du -h "dist/win/$f" | cut -f1))"
+                    WIN_ASSETS+=("dist/win/$f")
+                fi
+            done
+            if [ ! -f "dist/win/$WIN_UPDATE_ASSET_NAME" ]; then
+                echo "Sin delta de Windows (release anterior sin manifest, o no pasó la prueba): esos clientes bajan el completo"
+            fi
+            run_with_spinner "Subiendo los archivos de Windows al release..." \
+                gh release upload "$TAG" "${WIN_ASSETS[@]}" --clobber
             WIN_OK=1
         fi
     else
@@ -299,8 +312,9 @@ if [ -n "$OLD_TAGS" ]; then
     echo "Podando asset full de releases pyinstaller-v* viejas (se mantiene el tag y el paquete update):"
     while IFS= read -r old_tag; do
         run_with_spinner "  Borrando ${ASSET_NAME} de ${old_tag}..." delete_asset_if_present "$old_tag" "$ASSET_NAME" || true
-        # El instalador de Windows es siempre completo y el updater solo mira
-        # la release mas nueva: los viejos no le sirven a nadie. Solo se podan
+        # El instalador completo de Windows: el updater toma el de la mas
+        # nueva que lo tenga, los viejos no le sirven a nadie (el delta y el
+        # manifest-windows.json si se quedan: son la cadena). Solo se podan
         # si el de esta release ya subio, para no dejar cero instaladores.
         if [ "$WIN_OK" = "1" ]; then
             run_with_spinner "  Borrando ${SETUP_ASSET_NAME} de ${old_tag}..." delete_asset_if_present "$old_tag" "$SETUP_ASSET_NAME" || true

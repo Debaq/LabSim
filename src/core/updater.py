@@ -5,10 +5,20 @@ Auto-update de la build PyInstaller (onedir) contra GitHub Releases.
 Dos estrategias segun plataforma:
 - Linux: swap in-place de los archivos del dist (paquetes tar.gz, con
   cadena de diffs; todo lo que sigue de este docstring).
-- Windows: baja el instalador Inno de la release mas nueva QUE TENGA
-  instalador y lo corre en silencio. No hay diffs ni swap manual -- los DLL
-  de _internal/ estan tomados por el proceso que corre y solo el instalador
-  (Restart Manager) puede reemplazarlos. Ver installer/labsim.iss.
+- Windows: todo pasa por instaladores Inno (installer/labsim.iss), nunca
+  por un swap manual -- los DLL de _internal/ estan tomados por el proceso
+  que corre y el instalador es el que sabe esperarlo, reemplazarlos y
+  deshacer si algo falla. Igual que en Linux hay cadena: cada release trae
+  un instalador delta (LabSim-windows-x86_64-update-setup.exe, solo lo que
+  cambio respecto a la anterior) y se corren en fila, uno por release; si
+  falta un eslabon se corre el instalador completo de la mas nueva que lo
+  tenga. Los lanza aplicar.cmd (ver _script_windows), que si uno falla
+  vuelve a abrir el LabSim que habia.
+
+En las dos plataformas, antes de cerrarse para actualizar se deja una marca
+(PENDIENTE) con la version esperada: al abrir de nuevo, revisar_update_anterior()
+dice si llego o no, con el log del instalador/script, en vez de seguir como
+si nada con la version vieja.
 
 Los releases de este repo se comparten con el rewrite Tauri (tags v3.x,
 assets .deb/.rpm/.AppImage/.exe/.msi). Para no mezclarse con esos, esta
@@ -52,9 +62,10 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 from pathlib import Path
 from http.client import HTTPException
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
@@ -67,7 +78,29 @@ UPDATE_ASSET_NAME = "LabSim-linux-x86_64-update.tar.gz"
 # mantiene este asset en las ultimas releases; el cliente busca hacia atras si
 # a la mas nueva le falta (build de Windows caida, o SKIP_WINDOWS=1).
 SETUP_ASSET_NAME = "LabSim-windows-x86_64-setup.exe"
+# Instalador delta: solo los archivos que cambiaron respecto a la release
+# inmediatamente anterior (build-windows.yml, contra su manifest-windows.json).
+# Se niega a correr si lo instalado no es esa release (ver labsim.iss).
+WIN_UPDATE_ASSET_NAME = "LabSim-windows-x86_64-update-setup.exe"
 IS_WINDOWS = sys.platform.startswith("win")
+# Mutex con nombre que crea la app abierta y que el instalador espera a que
+# se suelte antes de copiar (InitializeSetup en installer/labsim.iss). Mismo
+# texto en los dos lados.
+MUTEX_NAME = "LabSimAppMutex"
+_mutex = None
+# Carpetas de descarga en el temporal del sistema (tempfile.mkdtemp). En
+# Windows no se pueden borrar al lanzar el instalador -- corre desde ahi --,
+# asi que las barre limpiar_temporales() en un arranque posterior.
+TMP_PREFIX = "labsim_update_"
+# "Me cerre para actualizar a X": la deja apply_update_and_restart y la lee
+# revisar_update_anterior() al abrir de nuevo. Con la data del usuario: el
+# instalador y los paquetes no la tocan.
+PENDIENTE = "resources/local_cache/update_pendiente.json"
+# Un instalador sigue corriendo un rato despues de que la app se cerro: si el
+# alumno abre LabSim a mano en ese lapso, la version aun no cambio y no es
+# una falla. Pasado este tiempo sin la marca FALLO, si lo es.
+PENDIENTE_GRACIA_S = 15 * 60
+DESCARGA_INTENTOS = 4
 # per_page=100: la API devuelve 30 por defecto y las releases viejas se
 # mantienen a proposito (son la cadena de updates). Pasadas las 30, una
 # maquina atrasada no encontraba la suya en la lista y bajaba el full.
@@ -361,66 +394,107 @@ def check_for_update(current_version: str, estricto: bool = False,
         # dice BUILD_VERSION sea de verdad lo que esta instalado.
         if local_index is None:
             return None
-        return _check_install_integrity(candidates, candidates[local_index])
+        return _con_verificacion(_check_install_integrity(candidates, candidates[local_index]), candidates)
+
+    if IS_WINDOWS:
+        return _con_verificacion(_update_windows(newer, chain_ok), candidates)
 
     latest = newer[-1]
     latest_tag = latest["tag_name"]
     latest_build_id = latest_tag[len(TAG_PREFIX):]
 
-    if IS_WINDOWS:
-        # El swap in-place que hace la cadena/full de Linux no es posible en
-        # Windows: los DLL de _internal/ estan tomados por el proceso que
-        # corre. El instalador resuelve las dos cosas -- cierra la instancia
-        # via Restart Manager y reemplaza los archivos -- asi que en Windows
-        # el update ES el setup completo, sin diffs.
-        #
-        # Se busca hacia atras la release mas nueva que TENGA instalador: el
-        # .exe lo compila un runner aparte (build-windows.yml) y puede faltar
-        # -- el workflow fallo, o la release se publico con SKIP_WINDOWS=1.
-        # Mirando solo la ultima, esas releases dejaban a Windows sin
-        # actualizacion y sin aviso, cuando la anterior si servia para
-        # ponerlos al dia.
-        for r in reversed(newer):
-            setup_url = _asset_url(r, SETUP_ASSET_NAME)
-            if setup_url is None:
-                continue
-            return {
-                "tag": r["tag_name"],
-                "build_id": r["tag_name"][len(TAG_PREFIX):],
-                "mode": "setup",
-                "url": setup_url,
-                "notes": _extract_notes(r),
-            }
-        return None
-
-    hops = [] if chain_ok else None
-    if hops is not None:
-        for r in newer:
-            update_url = _asset_url(r, UPDATE_ASSET_NAME)
-            if update_url is None:
-                hops = None
-                break
-            hops.append((r["tag_name"], update_url))
-
+    hops = _cadena(newer, UPDATE_ASSET_NAME) if chain_ok else None
     if hops is not None and len(hops) <= MAX_CHAIN_HOPS:
-        return {
+        return _con_verificacion({
             "tag": latest_tag,
             "build_id": latest_build_id,
             "mode": "chain",
             "hops": hops,
             "notes": _extract_notes(latest),
-        }
+        }, candidates)
 
     full_url = _asset_url(latest, FULL_ASSET_NAME)
     if full_url is None:
         return None
-    return {
+    return _con_verificacion({
         "tag": latest_tag,
         "build_id": latest_build_id,
         "mode": "full",
         "url": full_url,
         "notes": _extract_notes(latest),
-    }
+    }, candidates)
+
+
+def _cadena(releases: list, asset: str):
+    """[(tag, url), ...] del paquete `asset` de cada release, en orden, o
+    None si a alguna le falta: un eslabon roto invalida la cadena entera
+    (cada paquete es un diff contra la release inmediatamente anterior)."""
+    hops = []
+    for r in releases:
+        url = _asset_url(r, asset)
+        if url is None:
+            return None
+        hops.append((r["tag_name"], url))
+    return hops
+
+
+def _update_windows(newer: list, chain_ok: bool):
+    """El update de Windows: siempre instaladores Inno (ver docstring).
+
+    El destino es la release mas nueva que TENGA instalador completo: el .exe
+    lo compila un runner aparte (build-windows.yml) y puede faltar -- el
+    workflow fallo, o la release se publico con SKIP_WINDOWS=1. Mirando solo
+    la ultima, esas releases dejaban a Windows sin actualizacion y sin aviso,
+    cuando la anterior si servia para ponerlos al dia.
+
+    Hasta ese destino se va por la cadena de instaladores delta si esta
+    entera (unos MB cada uno contra los ~55 del completo); si no, el
+    completo. Las dos formas devuelven "instalador": True, que es lo que
+    apply_update_and_restart mira para no correr el script de bash."""
+    for idx in range(len(newer) - 1, -1, -1):
+        r = newer[idx]
+        setup_url = _asset_url(r, SETUP_ASSET_NAME)
+        if setup_url is None:
+            continue
+        info = {
+            "tag": r["tag_name"],
+            "build_id": _build_id_of(r),
+            "notes": _extract_notes(r),
+            "instalador": True,
+        }
+        hops = _cadena(newer[:idx + 1], WIN_UPDATE_ASSET_NAME) if chain_ok else None
+        if hops is not None and len(hops) <= MAX_CHAIN_HOPS:
+            info.update(mode="chain", hops=hops)
+        else:
+            info.update(mode="setup", url=setup_url)
+        return info
+    return None
+
+
+def _con_verificacion(info, releases: list):
+    """Le agrega a `info` el tamaño y sha256 que GitHub informa de cada
+    asset (campos size y digest de la API; el backend los reenvia), para que
+    _download descarte un archivo cortado o corrupto en vez de dejarselo al
+    tar o al instalador. Lo que no venga, no se verifica."""
+    if info is None:
+        return None
+    verificar = {}
+    for r in releases:
+        for a in r.get("assets", []):
+            url = a.get("browser_download_url")
+            if not url:
+                continue
+            meta = {}
+            size = a.get("size")
+            if isinstance(size, int) and size > 0:
+                meta["size"] = size
+            digest = a.get("digest")
+            if isinstance(digest, str) and digest.startswith("sha256:"):
+                meta["sha256"] = digest[len("sha256:"):].lower()
+            if meta:
+                verificar[url] = meta
+    info["verificar"] = verificar
+    return info
 
 
 def _extract_notes(release: dict) -> str:
@@ -600,18 +674,269 @@ nohup ./run.sh >/dev/null 2>&1 &
 """
 
 
-def _download(url: str, dest: Path, on_chunk) -> None:
-    req = Request(url)
-    with urlopen(req, timeout=60) as resp, open(dest, "wb") as f:
-        total = int(resp.headers.get("Content-Length") or 0)
-        downloaded = 0
-        while True:
-            chunk = resp.read(65536)
-            if not chunk:
-                break
-            f.write(chunk)
-            downloaded += len(chunk)
-            on_chunk(downloaded, total)
+def _download(url: str, dest: Path, on_chunk, esperado: dict | None = None) -> None:
+    """Baja `url` a `dest` aguantando la red del laboratorio: hasta
+    DESCARGA_INTENTOS intentos, y cada reintento sigue desde donde se corto
+    (Range) en vez de empezar de cero. Si `esperado` trae size/sha256 (ver
+    _con_verificacion), el archivo se compara antes de darlo por bueno: uno
+    cortado o corrupto se descarta y se baja de nuevo. Lo que se baja va a
+    <dest>.part y recien al final pasa a llamarse `dest`."""
+    esperado = esperado or {}
+    parcial = dest.with_name(dest.name + ".part")
+    error = None
+    for intento in range(DESCARGA_INTENTOS):
+        if intento:
+            time.sleep(min(2 ** intento, 10))
+        try:
+            _bajar_desde(url, parcial, on_chunk)
+        except (URLError, OSError, TimeoutError, HTTPException) as exc:
+            error = exc
+            continue
+        problema = _problema_descarga(parcial, esperado)
+        if problema is None:
+            os.replace(parcial, dest)
+            return
+        error = ValueError(f"descarga de {dest.name} no coincide con la publicada: {problema}")
+        parcial.unlink(missing_ok=True)
+    raise error
+
+
+def _bajar_desde(url: str, parcial: Path, on_chunk) -> None:
+    ya = parcial.stat().st_size if parcial.exists() else 0
+    headers = {"Range": f"bytes={ya}-"} if ya else {}
+    try:
+        resp = urlopen(Request(url, headers=headers), timeout=60)
+    except HTTPError as exc:
+        if exc.code == 416 and ya:
+            # 416 a un Range que empieza en el final: ya estaba completo.
+            return
+        raise
+    with resp:
+        if ya and resp.status != 206:
+            # El servidor no reanuda: manda el archivo entero desde el byte 0.
+            ya = 0
+        largo = int(resp.headers.get("Content-Length") or 0)
+        total = ya + largo if largo else 0
+        bajado = ya
+        with open(parcial, "ab" if ya else "wb") as f:
+            while True:
+                chunk = resp.read(65536)
+                if not chunk:
+                    break
+                f.write(chunk)
+                bajado += len(chunk)
+                on_chunk(bajado, total)
+    if largo and bajado - ya < largo:
+        raise OSError(f"conexion cortada: {bajado} de {total} bytes")
+
+
+def _problema_descarga(path: Path, esperado: dict):
+    size = esperado.get("size")
+    if size and path.stat().st_size != size:
+        return f"{path.stat().st_size} bytes en vez de {size}"
+    sha = esperado.get("sha256")
+    if sha and _sha256(path) != sha:
+        return "sha256 distinto"
+    return None
+
+
+def _entorno_limpio() -> dict:
+    """Entorno para lo que se lanza al actualizar. El bootloader de
+    PyInstaller deja variables _PYI_* (y _MEI* en builds viejas) que hereda
+    todo hijo: el LabSim nuevo que relanza el instalador las recibiria del
+    viejo y podria creerse un subproceso suyo. PYINSTALLER_RESET_ENVIRONMENT
+    es la forma documentada de que arranque como una app independiente."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("_PYI_", "_MEI"))}
+    env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
+    return env
+
+
+def _script_windows(n: int) -> str:
+    """aplicar.cmd: corre paso1.exe..pasoN.exe (instaladores Inno, en la
+    misma carpeta) en fila, cada uno con su log, y solo el ultimo relanza
+    LabSim (/LAUNCH=1, ver installer/labsim.iss). Si uno sale con error
+    corta ahi, deja la marca FALLO y abre el LabSim que habia (%1) -- antes
+    el alumno se quedaba sin programa y sin saber por que.
+
+    Rutas solo relativas a %~dp0 (la carpeta del script) y el ejecutable por
+    argumento: cmd lee el .cmd en la pagina de codigos OEM, y una ruta con
+    tildes escrita adentro (C:\\Users\\José\\...) se romperia. Los
+    argumentos y %~dp0 no pasan por esa conversion."""
+    lineas = [
+        "@echo off",
+        "rem Generado por core/updater.py -- ver _script_windows.",
+        "setlocal",
+    ]
+    for i in range(1, n + 1):
+        relanzar = " /LAUNCH=1" if i == n else ""
+        lineas += [
+            f'echo paso {i} de {n} >> "%~dp0aplicar.log"',
+            f'start "" /wait "%~dp0paso{i}.exe" /SILENT /SUPPRESSMSGBOXES /NORESTART '
+            f'/CLOSEAPPLICATIONS{relanzar} /LOG="%~dp0paso{i}.log"',
+            "if errorlevel 1 goto fallo",
+        ]
+    lineas += [
+        'echo OK >> "%~dp0aplicar.log"',
+        "exit /b 0",
+        ":fallo",
+        'echo FALLO %errorlevel% >> "%~dp0aplicar.log"',
+        'echo %errorlevel% > "%~dp0FALLO"',
+        'start "" "%~1"',
+        "exit /b 1",
+    ]
+    return "\r\n".join(lineas) + "\r\n"
+
+
+def preparar_windows(carpeta: Path, setups: list) -> Path:
+    """Deja en `carpeta` los instaladores como paso1.exe.. y aplicar.cmd.
+    `setups` son rutas ya descargadas (en `carpeta` o no). Lo usa tambien
+    scripts/probar_update_windows.py en CI, para probar exactamente esto."""
+    for i, src in enumerate(setups, start=1):
+        dest = carpeta / f"paso{i}.exe"
+        if Path(src) != dest:
+            shutil.copyfile(src, dest)
+    script = carpeta / "aplicar.cmd"
+    script.write_bytes(_script_windows(len(setups)).encode("ascii"))
+    return script
+
+
+def lanzar_windows(script: Path, exe: Path) -> subprocess.Popen:
+    """Corre aplicar.cmd sin ventana de consola, en su propio grupo, para
+    que sobreviva a este proceso, que se cierra acto seguido. /s y las
+    comillas dobles de afuera son la forma en que cmd /c respeta las
+    comillas de una ruta con espacios."""
+    if IS_WINDOWS:
+        # El bootloader fija el directorio de DLL de _internal/ para este
+        # proceso; que no lo vea el instalador.
+        try:
+            import ctypes
+            ctypes.windll.kernel32.SetDllDirectoryW(None)
+        except Exception:  # noqa: BLE001
+            pass
+    comspec = os.environ.get("COMSPEC") or "cmd.exe"
+    flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    return subprocess.Popen(
+        f'"{comspec}" /d /s /c ""{script}" "{exe}""',
+        creationflags=flags,
+        close_fds=True,
+        env=_entorno_limpio(),
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def _marcar_pendiente(update_info: dict, carpeta: Path) -> None:
+    ruta = _dist_dir() / PENDIENTE
+    datos = {
+        "esperado": update_info["build_id"],
+        "desde": local_build_id(""),
+        "carpeta": str(carpeta),
+        "cuando": time.time(),
+        "instalador": bool(update_info.get("instalador") or update_info["mode"] == "setup"),
+    }
+    try:
+        ruta.parent.mkdir(parents=True, exist_ok=True)
+        ruta.write_text(json.dumps(datos), encoding="utf-8")
+    except OSError:
+        pass
+
+
+def _cola(path: Path, lineas: int) -> str:
+    try:
+        texto = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    return "\n".join(texto.splitlines()[-lineas:])
+
+
+def revisar_update_anterior(current_version: str):
+    """¿Llego la actualizacion que se aplico al cerrar la vez anterior?
+
+    None: no habia ninguna pendiente, o llego bien (se borran la marca y la
+    carpeta de descarga). {"en_curso": True}: el instalador probablemente
+    sigue trabajando (ver PENDIENTE_GRACIA_S) -- no conviene ofrecer otra
+    actualizacion encima. Si fallo: {"esperado", "actual", "log"}, con la
+    cola de los logs del instalador o del script, y la marca se borra (se
+    avisa una vez; la proxima busqueda de updates la vuelve a ofrecer)."""
+    ruta = _dist_dir() / PENDIENTE
+    try:
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(datos, dict):
+        datos = {}
+    actual = local_build_id(current_version).lstrip("v")
+    esperado = str(datos.get("esperado") or "")
+    carpeta = Path(datos["carpeta"]) if datos.get("carpeta") else None
+
+    if actual == esperado:
+        ruta.unlink(missing_ok=True)
+        if carpeta is not None:
+            shutil.rmtree(carpeta, ignore_errors=True)
+        return None
+
+    joven = time.time() - float(datos.get("cuando") or 0) < PENDIENTE_GRACIA_S
+    fallo_marcado = carpeta is not None and (carpeta / "FALLO").exists()
+    if datos.get("instalador") and joven and not fallo_marcado:
+        return {"en_curso": True}
+
+    partes = []
+    if carpeta is not None:
+        aplicar = _cola(carpeta / "aplicar.log", 20)
+        if aplicar:
+            partes.append(aplicar)
+        for log in sorted(carpeta.glob("paso*.log")):
+            partes.append(f"--- {log.name}\n{_cola(log, 40)}")
+    linux = _cola(_dist_dir() / "resources/local_cache/update.log", 30)
+    if linux and not datos.get("instalador"):
+        partes.append(linux)
+    ruta.unlink(missing_ok=True)
+    return {"esperado": esperado, "actual": actual, "log": "\n".join(partes)}
+
+
+def limpiar_temporales(edad_min_s: int = 3600) -> None:
+    """Borra las carpetas de descarga de actualizaciones viejas en el
+    temporal del sistema (~55 MB cada una en Windows, donde no se pueden
+    borrar al lanzar el instalador). Se salta las recientes -- un instalador
+    puede seguir corriendo desde ahi -- y la de una actualizacion pendiente,
+    que guarda los logs para revisar_update_anterior()."""
+    protegida = None
+    try:
+        datos = json.loads((_dist_dir() / PENDIENTE).read_text(encoding="utf-8"))
+        protegida = Path(datos["carpeta"]).resolve()
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    ahora = time.time()
+    for carpeta in Path(tempfile.gettempdir()).glob(TMP_PREFIX + "*"):
+        try:
+            if not carpeta.is_dir() or carpeta.resolve() == protegida:
+                continue
+            if ahora - carpeta.stat().st_mtime < edad_min_s:
+                continue
+        except OSError:
+            continue
+        shutil.rmtree(carpeta, ignore_errors=True)
+
+
+def tomar_mutex_instancia() -> bool:
+    """Windows: crea el mutex MUTEX_NAME, que el instalador espera a que se
+    suelte antes de copiar (sin el, Inno solo tiene el Restart Manager, que
+    no siempre logra cerrar una instancia colgada). Devuelve True si otra
+    instancia de LabSim ya lo tenia: con dos abiertas, actualizar desde una
+    dejaria los DLL tomados por la otra. En Linux no hace nada."""
+    global _mutex
+    if not IS_WINDOWS:
+        return False
+    try:
+        import ctypes
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.CreateMutexW.restype = ctypes.c_void_p
+        k32.CreateMutexW.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_wchar_p]
+        _mutex = k32.CreateMutexW(None, False, MUTEX_NAME)
+        return ctypes.get_last_error() == 183  # ERROR_ALREADY_EXISTS
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _salida_limpia():
@@ -639,40 +964,39 @@ def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
             on_progress(stage, current, total, hop, hops)
 
     dist_dir = Path(sys.executable).resolve().parent
-    tmp_dir = Path(tempfile.mkdtemp(prefix="labsim_update_"))
+    tmp_dir = Path(tempfile.mkdtemp(prefix=TMP_PREFIX))
+    verificar = update_info.get("verificar") or {}
     steps = []
 
-    if update_info["mode"] == "setup":
-        # Windows: el instalador hace todo el trabajo. Se lanza desacoplado
-        # (DETACHED_PROCESS) porque acto seguido este proceso se muere, y con
-        # /LAUNCH=1, que en installer/labsim.iss relanza LabSim al terminar.
-        # tmp_dir NO se borra: el .exe que esta corriendo vive ahi.
-        setup_path = tmp_dir / SETUP_ASSET_NAME
-        report("download", 0, 0, 1, 1)
-        _download(update_info["url"], setup_path, lambda cur, tot: report("download", cur, tot, 1, 1))
+    if update_info.get("instalador") or update_info["mode"] == "setup":
+        # Windows: los instaladores hacen todo el trabajo; aplicar.cmd los
+        # corre en fila cuando este proceso ya se cerro. tmp_dir NO se borra:
+        # los .exe corren desde ahi y guarda sus logs (limpiar_temporales).
+        if update_info["mode"] == "setup":
+            urls = [update_info["url"]]
+        else:
+            urls = [url for _tag, url in update_info["hops"]]
+        n = len(urls)
+        setups = []
+        for i, url in enumerate(urls, start=1):
+            setup_path = tmp_dir / f"paso{i}.exe"
+            report("download", 0, 0, i, n)
+            _download(url, setup_path, lambda cur, tot, i=i: report("download", cur, tot, i, n),
+                      verificar.get(url))
+            setups.append(setup_path)
+        script = preparar_windows(tmp_dir, setups)
 
-        report("restart", 0, 0, 1, 1)
-        flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(
-            subprocess, "CREATE_NEW_PROCESS_GROUP", 0
-        )
+        report("restart", 0, 0, n, n)
+        _marcar_pendiente(update_info, tmp_dir)
         _salida_limpia()
-        subprocess.Popen(
-            [
-                str(setup_path),
-                "/SILENT",
-                "/CLOSEAPPLICATIONS",
-                "/NORESTART",
-                "/LAUNCH=1",
-            ],
-            creationflags=flags,
-            close_fds=True,
-        )
+        lanzar_windows(script, Path(sys.executable).resolve())
         os._exit(0)
 
     if update_info["mode"] == "full":
         archive_path = tmp_dir / "full.tar.gz"
         report("download", 0, 0, 1, 1)
-        _download(update_info["url"], archive_path, lambda cur, tot: report("download", cur, tot, 1, 1))
+        _download(update_info["url"], archive_path, lambda cur, tot: report("download", cur, tot, 1, 1),
+                  verificar.get(update_info["url"]))
 
         report("extract", 0, 0, 1, 1)
         extract_dir = tmp_dir / "full_extracted"
@@ -692,7 +1016,8 @@ def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
         for i, (_tag, update_url) in enumerate(hops, start=1):
             archive_path = tmp_dir / f"update_{i}.tar.gz"
             report("download", 0, 0, i, n)
-            _download(update_url, archive_path, lambda cur, tot, i=i, n=n: report("download", cur, tot, i, n))
+            _download(update_url, archive_path, lambda cur, tot, i=i, n=n: report("download", cur, tot, i, n),
+                      verificar.get(update_url))
 
             report("extract", 0, 0, i, n)
             extract_dir = tmp_dir / f"update_{i}_extracted"
@@ -712,6 +1037,7 @@ def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
     script_path.chmod(0o755)
 
     report("restart", 0, 0, len(steps), len(steps))
+    _marcar_pendiente(update_info, tmp_dir)
     _salida_limpia()
     subprocess.Popen(
         [str(script_path), str(os.getpid()), str(dist_dir), str(steps_file), update_info["build_id"]],

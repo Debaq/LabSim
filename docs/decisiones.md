@@ -6842,3 +6842,55 @@ web (`HistoriaClinica.php`) siempre parte de una cita.
   en la sesión). En la práctica dicen "+ ASSR" (`CON_ASSR` en
   `scripts/libro/sql_practica.py`). El texto de esos casos en el libro
   falta: lo escribe el autor.
+
+## Update de Windows: cadena de instaladores delta y avisos (2026-10-29)
+
+Los alumnos contaban que en Windows actualizar era ir a GitHub, bajar el
+instalador y correrlo. El cartel "Actualización disponible" sí aparece; lo
+que fallaba no se veía: la app lanzaba el setup y se cerraba sin esperar, y
+si el setup no terminaba (archivo tomado, antivirus, descarga cortada) no
+quedaba rastro, así que lo más rápido era instalar a mano.
+
+- **Cadena delta, como en Linux.** `build-windows.yml` arma además
+  `LabSim-windows-x86_64-update-setup.exe`: un Inno con solo lo que cambió
+  respecto a la release anterior (contra su `manifest-windows.json`) y un
+  `[InstallDelete]` con lo borrado. Se niega a correr si el `BUILD_VERSION`
+  instalado no es su base. El cliente los corre en fila hasta la más nueva
+  con instalador completo; si falta un eslabón, corre el completo. Los
+  deltas y el manifest se conservan en las releases viejas; el completo,
+  solo en la última.
+- **Instaladores con Inno, no swap a mano.** En Windows hacer un swap con
+  un script propio era posible después de cerrar la app, pero Inno ya sabe
+  esperar archivos tomados, deshacer si falla y llevar el registro de
+  desinstalación. Por eso el delta también es un instalador.
+- **`aplicar.cmd`** (`_script_windows`) los corre con `/SILENT
+  /SUPPRESSMSGBOXES /LOG`. Si uno falla deja `FALLO` y vuelve a abrir el
+  LabSim que había. Adentro no lleva rutas absolutas (cmd lee el archivo en
+  OEM y una carpeta de usuario con tilde se rompía); van por `%~dp0` y por
+  argumento.
+- **Marca de update pendiente.** Antes de cerrarse para actualizar (las dos
+  plataformas) queda `local_cache/update_pendiente.json` con la versión
+  esperada. Al abrir: si llegó, se borra junto con la descarga; si no, cartel
+  con la cola del log y la sugerencia de mandarlo por "Reportar un
+  problema". Se avisa una vez. En Windows, 15 min de gracia sin `FALLO` se
+  toman como "el instalador sigue trabajando".
+- **Descarga** con 4 intentos, reanudando con `Range`, y comparada con
+  `size`/`digest` de la API de GitHub (el backend los reenvía); una distinta
+  se descarta.
+- **Temporal:** `limpiar_temporales()` barre al abrir las carpetas
+  `labsim_update_*` de más de una hora (en Windows no se pueden borrar al
+  lanzar el setup, que corre desde ahí).
+- **Mutex `LabSimAppMutex`:** cada LabSim abierto lo toma. El setup en
+  silencio espera hasta 30 s a que se suelte, y si se corre a mano pide
+  cerrar LabSim. Con otra ventana de LabSim abierta, la app no ofrece
+  actualizar.
+- **Entorno limpio** para lo que se lanza: sin `_PYI_*` y con
+  `PYINSTALLER_RESET_ENVIRONMENT=1`, para que el LabSim que relanza el setup
+  no herede el entorno del bootloader viejo.
+- **Prueba en CI** (`scripts/probar_update_windows.py`): antes de subir
+  nada, el runner instala la release publicada y la actualiza con el mismo
+  `aplicar.cmd`. Verifica archivo por archivo contra el manifest, que el
+  delta se niegue sobre otra base y que el completo espere al mutex. Si el
+  delta no pasa, no se publica; si el completo no pasa, el build falla. La
+  primera release con esto no tiene delta (la anterior no tiene
+  manifest-windows): la cadena empieza en la siguiente.

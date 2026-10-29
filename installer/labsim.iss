@@ -11,6 +11,12 @@
 ; archivos al lado del ejecutable. En "Program Files" eso falla por permisos.
 ;
 ; Archivo en UTF-8 con BOM (Inno Setup 6 lo lee así): lleva tildes.
+;
+; Con /DDelta=1 /DBaseBuildId=<build anterior> /DSourceDir=<carpeta del diff>
+; sale el instalador delta de la cadena de updates (core/updater.py): solo
+; trae lo que cambió respecto a BaseBuildId, borra lo que ya no existe
+; (dist\delta_removed.iss, lo arma scripts/update_diff.py inno-delete) y se
+; niega a correr si lo instalado no es BaseBuildId.
 
 #define MyAppName "LabSim"
 #define MyAppExeName "LabSim.exe"
@@ -27,6 +33,14 @@
 #endif
 #ifndef SourceDir
   #define SourceDir "..\dist\LabSim"
+#endif
+#ifdef Delta
+  #ifndef BaseBuildId
+    #error El instalador delta necesita /DBaseBuildId
+  #endif
+  #define OutputName "LabSim-windows-x86_64-update-setup"
+#else
+  #define OutputName "LabSim-windows-x86_64-setup"
 #endif
 
 [Setup]
@@ -55,7 +69,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir=..\dist
-OutputBaseFilename=LabSim-windows-x86_64-setup
+OutputBaseFilename={#OutputName}
 SetupIconFile=..\icons\Icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName} {#MyAppVersion}
@@ -82,8 +96,13 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 ; local_cache/ (logs.db, cola de acciones offline, layout) y json/session.json
 ; son data del usuario: no vienen en el build y no se tocan al actualizar.
+; En el delta, __removed__.txt es la lista que se convierte en [InstallDelete].
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion; \
-    Excludes: "resources\local_cache\*,resources\json\session.json"
+    Excludes: "resources\local_cache\*,resources\json\session.json,__removed__.txt"
+
+#ifdef Delta
+#include "..\dist\delta_removed.iss"
+#endif
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -103,7 +122,83 @@ Filename: "{app}\{#MyAppExeName}"; Flags: nowait; Check: RelanzarTrasUpdate
 Type: filesandordirs; Name: "{app}"
 
 [Code]
+const
+  { El mismo nombre que MUTEX_NAME en src/core/updater.py: lo crea cada
+    LabSim abierto. }
+  MutexApp = 'LabSimAppMutex';
+  { Clave de desinstalación del AppId de arriba (instalación por usuario). }
+  ClaveUninstall = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{9EBD5A50-4B31-4855-B38A-E8CFBA118B6F}_is1';
+
 function RelanzarTrasUpdate: Boolean;
 begin
   Result := WizardSilent and (ExpandConstant('{param:LAUNCH|0}') = '1');
+end;
+
+{ El LabSim que lanzó la actualización se cierra recién después de lanzar
+  este instalador: en silencio se le dan hasta 30 s para soltar sus
+  archivos. A mano, se le pide al usuario que lo cierre. Si en silencio
+  sigue abierto (otra ventana colgada), queda el Restart Manager
+  (CloseApplications). }
+function EsperarLabSimCerrado: Boolean;
+var
+  Vueltas: Integer;
+begin
+  Result := True;
+  if WizardSilent then
+  begin
+    Vueltas := 0;
+    while CheckForMutexes(MutexApp) and (Vueltas < 60) do
+    begin
+      Sleep(500);
+      Vueltas := Vueltas + 1;
+    end;
+    if CheckForMutexes(MutexApp) then
+      Log('LabSim sigue abierto tras 30 s: queda el Restart Manager');
+  end
+  else
+    while CheckForMutexes(MutexApp) do
+      if MsgBox('LabSim está abierto. Ciérralo y pulsa Aceptar para continuar.',
+                mbError, MB_OKCANCEL) = IDCANCEL then
+      begin
+        Result := False;
+        Exit;
+      end;
+end;
+
+#ifdef Delta
+{ Lo que dice BUILD_VERSION en la carpeta instalada, o '' si no hay
+  LabSim instalado. }
+function VersionInstalada: String;
+var
+  Carpeta: String;
+  Contenido: AnsiString;
+begin
+  Result := '';
+  if RegQueryStringValue(HKCU, ClaveUninstall, 'InstallLocation', Carpeta) then
+    if LoadStringFromFile(AddBackslash(Carpeta) + 'BUILD_VERSION', Contenido) then
+      Result := Trim(String(Contenido));
+end;
+#endif
+
+function InitializeSetup: Boolean;
+#ifdef Delta
+var
+  Instalada: String;
+#endif
+begin
+#ifdef Delta
+  { Un delta sobre otra versión dejaría una mezcla de archivos: se corta
+    antes de tocar nada. El updater cae al instalador completo. }
+  Instalada := VersionInstalada;
+  if Instalada <> '{#BaseBuildId}' then
+  begin
+    Log('Delta para {#BaseBuildId}, instalada: "' + Instalada + '"');
+    if not WizardSilent then
+      MsgBox('Este instalador solo actualiza LabSim {#BaseBuildId} y la versión instalada es "' +
+             Instalada + '". Descarga LabSim-windows-x86_64-setup.exe.', mbError, MB_OK);
+    Result := False;
+    Exit;
+  end;
+#endif
+  Result := EsperarLabSimCerrado;
 end;
