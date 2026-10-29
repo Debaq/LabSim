@@ -100,5 +100,11 @@
  "h10_anciano": "147",
  "h13_lactante": "148",
  "h13_nino_tea": "149",
- "cap28_no_colabora": "150"
+ "cap28_no_colabora": "150",
+ "cap35_desviacion": "151",
+ "cap35_valvula": "152",
+ "cap35_discordancia": "153",
+ "cap36_alergica": "154",
+ "cap36_medicamentosa": "155",
+ "cap36_mixta": "156"
 }
