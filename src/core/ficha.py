@@ -6,6 +6,7 @@ cambia de dónde sacan `shedule` (en memoria vs. recién pedido al backend)."""
 
 import dataclasses
 import html
+import json
 import re
 from pathlib import Path
 
@@ -103,44 +104,126 @@ _ORDEN_PRIMERO = QDateTime(QDate(1, 1, 1), QTime(0, 0))
 _ORDEN_ULTIMO = QDateTime(QDate(9999, 12, 31), QTime(23, 59))
 
 
-# Audiometría que el paciente del libro trae hecha: la hoja auditiva del libro,
-# una por ficha (scripts/libro/previos.py). Va con la app y no con el backend
-# para que el kiosko la vea igual que todo lo demás de la ficha.
+# Exámenes de los pacientes del libro, con la hoja del libro de cada uno
+# (scripts/libro/previos.py). Van con la app y no con el backend para que el
+# kiosko los vea igual que todo lo demás de la ficha. indice.json dice qué
+# hojas tiene cada ficha: "trae" (los que el paciente llega con hechos, si su
+# procedimiento no los nombra) e "historia" (la hoja de un examen que cuenta
+# una línea de su historia clínica, por los días de esa línea).
 PREVIOS_DIR = Path("resources/libro/previos")
-# Días antes de la cita en que se hizo: lo bastante cerca para que la deriven
-# con ella, y antes que la cita a la que viene. Si la historia trae algo más
-# reciente (el otorrino que la pide), va después de eso: hacerla antes de que
-# la pidan no tiene sentido. Mismo cálculo en LlmConfig::diasAudiometriaPrevia.
+# Días antes de la cita en que se hizo lo que trae: lo bastante cerca para que
+# lo deriven con eso, y antes que la cita a la que viene. Si la historia trae
+# algo más reciente (el otorrino que lo pide), va después de eso: hacerlo
+# antes de que lo pidan no tiene sentido. Mismo cálculo en
+# LlmConfig::diasAudiometriaPrevia.
 PREVIA_DIAS = 14
+# Cómo aparece cada examen en el procedimiento, para saber si el paciente
+# viene a hacérselo; en este orden se nombran en la ficha.
+EN_PROCEDIMIENTO = {"Audiometría": "audiometr", "Impedanciometría": "impedanciometr", "EOA": "eoa",
+                    "AABR": "aabr", "PEATC": "peatc", "ECochG": "ecochg", "VEMP": "vemp",
+                    "Corticales": "cortical"}
+_indice = None
+
+
+def indice_previos():
+    """indice.json, leído una vez. Vacío si no está (un build sin libro)."""
+    global _indice
+    if _indice is None:
+        try:
+            _indice = json.loads((PREVIOS_DIR / "indice.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            _indice = {}
+    return _indice
 
 
 def dias_audiometria_previa(historia_clinica):
-    """Días respecto de la cita (negativo) en que se hizo la audiometría."""
+    """Días respecto de la cita (negativo) en que se hizo lo que trae."""
     pasados = [int(n) for n in HISTORIA_CLINICA_FECHA_RE.findall(historia_clinica or "") if int(n) < 0]
     ultima = max(pasados, default=-PREVIA_DIAS - 1)
     return min(max(-PREVIA_DIAS, ultima + 1), -1)
 
 
-def audiometria_previa(row, caso):
-    """La audiometría que trae el paciente (ruta del SVG), o None.
+def _ficha_de(row, caso):
+    case_id = getattr(row, "case_id", None) or (caso.get("id") if isinstance(caso, dict) else None)
+    return str(case_id) if case_id else None
 
-    Solo en la práctica libre y cuando el procedimiento no la nombra: el
-    paciente viene derivado a otro examen (un PEATC, un VEMP) con la
-    audiometría hecha, y no a hacérsela. Si el alumno la repite, queda como
-    una atención más en su historial. En una cita del docente no sale nunca:
-    el caso puede ser el mismo, pero qué trae el paciente lo decide él.
 
-    Si viene a otoscopía tampoco: la audiometría va después de la otoscopía,
-    así que un paciente al que todavía no le miran el oído no puede traerla.
+def examenes_que_trae(row, caso):
+    """[(examen, ruta)] de lo que el paciente llega con hecho, en orden.
+
+    Solo en la práctica libre, y solo lo que su procedimiento no nombra: el
+    procedimiento dice lo que enseña el capítulo (FOCO en sql_practica.py) y
+    el resto de los exámenes que el libro muestra de ese paciente ya los trae.
+    Si el alumno los repite, quedan como una atención más en su historial. En
+    una cita del docente no sale nada: qué trae el paciente lo decide él.
+
+    Si viene a otoscopía no trae nada: todo lo demás va después de mirarle
+    el oído.
     """
     if getattr(row, "practice_id", None) is None:
-        return None
+        return []
     procedimiento = (getattr(row, "procedimiento", "") or "").lower()
-    if "audiometr" in procedimiento or "otoscop" in procedimiento:
+    if "otoscop" in procedimiento:
+        return []
+    hojas = indice_previos().get(_ficha_de(row, caso) or "", {})
+    trae = hojas.get("trae", {})
+    # Lo que muestra la ficha del libro en el capítulo de esa carpeta (el
+    # procedimiento la distingue); sin ella (un intento de antes del cambio),
+    # todo lo que hay del paciente.
+    candidatos = hojas.get("por_procedimiento", {}).get(getattr(row, "procedimiento", "") or "")
+    if candidatos is not None:
+        trae = {e: trae[e] for e in candidatos if e in trae}
+    # Lo que ya cuenta su historia (el PEAT que le hicieron hace tres meses)
+    # tiene su hoja en esa línea: no se repite como algo que trae.
+    en_la_historia = {h["examen"] for h in hojas.get("historia", [])}
+    return [(examen, PREVIOS_DIR / trae[examen]) for examen, clave in EN_PROCEDIMIENTO.items()
+            if examen in trae and examen not in en_la_historia and clave not in procedimiento
+            and (PREVIOS_DIR / trae[examen]).is_file()]
+
+
+def audiometria_previa(row, caso):
+    """La audiometría que trae el paciente (ruta del SVG), o None."""
+    return dict(examenes_que_trae(row, caso)).get("Audiometría")
+
+
+def _nombre(examen):
+    """Como se escribe dentro de una frase: "audiometría", pero "EOA"."""
+    return examen.lower() if examen.istitle() and examen[1:].islower() else examen
+
+
+def _y(nombres):
+    """"a, b y c" ("e" antes de "i": "audiometría e impedanciometría")."""
+    if len(nombres) == 1:
+        return nombres[0]
+    union = " e " if nombres[-1].lower().startswith(("i", "hi")) else " y "
+    return ", ".join(nombres[:-1]) + union + nombres[-1]
+
+
+def _enlace_a(examen, ruta):
+    return (f"Ver {_nombre(examen)}", f"previo:{ruta.relative_to(PREVIOS_DIR).as_posix()}")
+
+
+def entrada_lo_que_trae(row, caso, historia_clinica):
+    """(días, texto, enlaces) de la entrada "Audiometría e impedanciometría.
+    Trae los informes.", o None si no trae nada."""
+    trae = examenes_que_trae(row, caso)
+    if not trae:
         return None
-    case_id = getattr(row, "case_id", None) or (caso.get("id") if isinstance(caso, dict) else None)
-    ruta = PREVIOS_DIR / f"{case_id}.svg"
-    return ruta if case_id and ruta.is_file() else None
+    nombres = _y([_nombre(e) for e, _ in trae])
+    texto = (nombres[0].upper() + nombres[1:] + ". "
+             + ("Trae el informe." if len(trae) == 1 else "Trae los informes."))
+    return dias_audiometria_previa(historia_clinica), texto, [_enlace_a(e, r) for e, r in trae]
+
+
+def enlaces_de_la_historia(row, caso):
+    """{días: [(texto, href)]}: las líneas de la historia que cuentan un
+    examen hecho llevan su hoja (ver indice.json, "historia")."""
+    enlaces = {}
+    for h in indice_previos().get(_ficha_de(row, caso) or "", {}).get("historia", []):
+        ruta = PREVIOS_DIR / h["svg"]
+        if ruta.is_file():
+            enlaces.setdefault(int(h["dias"]), []).append(_enlace_a(h["examen"], ruta))
+    return enlaces
 
 
 def fila_de_practica(row, item):
@@ -156,20 +239,23 @@ def fila_de_practica(row, item):
                                practice_id=int(item["id"]))
 
 
-def linea_tiempo(historia_clinica, fecha_cita, historial, previos=()):
+def linea_tiempo(historia_clinica, fecha_cita, historial, previos=(), enlaces_historia=None):
     """Atenciones previas del caso + atenciones cerradas, en un solo orden.
 
-    Devuelve dicts {fecha, hora, alumno, texto, enlace}: `alumno` vacío en
+    Devuelve dicts {fecha, hora, alumno, texto, enlaces}: `alumno` vacío en
     las entradas que vienen de la historia clínica del caso, que no son de
-    nadie en particular. `previos`: (días respecto a la cita, texto, enlace)
-    de los exámenes que el paciente trae hechos; `enlace` es el href que
-    abre el informe desde la ficha.
+    nadie en particular. `previos`: (días respecto a la cita, texto, enlaces)
+    de los exámenes que el paciente trae hechos. `enlaces_historia`: {días:
+    enlaces} para las líneas de la historia que cuentan un examen. Cada
+    enlace es (texto, href) y abre el informe desde la ficha.
     """
     entradas = []
     fecha_cita_q = parse_fecha_agenda(fecha_cita)
+    enlaces_historia = enlaces_historia or {}
 
-    for linea in resolver_fechas_historia_clinica(historia_clinica or "", fecha_cita).splitlines():
-        linea = linea.strip()
+    for cruda in (historia_clinica or "").splitlines():
+        dias = re.match(r"\s*\{\{([+-]?\d+)\}\}", cruda)
+        linea = resolver_fechas_historia_clinica(cruda, fecha_cita).strip()
         if not linea:
             continue
         match = HISTORIA_LINEA_RE.match(linea)
@@ -177,13 +263,14 @@ def linea_tiempo(historia_clinica, fecha_cita, historial, previos=()):
         texto = match.group(2).strip() if match else linea
         orden = QDateTime(QDate.fromString(fecha, "dd-MM-yyyy"), QTime(0, 0)) if fecha else None
         entradas.append((orden if orden and orden.isValid() else _ORDEN_PRIMERO,
-                         {"fecha": fecha, "hora": "", "alumno": "", "texto": texto, "enlace": ""}))
+                         {"fecha": fecha, "hora": "", "alumno": "", "texto": texto,
+                          "enlaces": enlaces_historia.get(int(dias.group(1)), []) if dias else []}))
 
-    for dias, texto, enlace in previos:
+    for dias, texto, enlaces in previos:
         fecha_q = fecha_cita_q.addDays(dias) if fecha_cita_q.isValid() else QDate()
         entradas.append((QDateTime(fecha_q, QTime(0, 0)) if fecha_q.isValid() else _ORDEN_PRIMERO,
                          {"fecha": fecha_q.toString("dd-MM-yyyy") if fecha_q.isValid() else "",
-                          "hora": "", "alumno": "", "texto": texto, "enlace": enlace}))
+                          "hora": "", "alumno": "", "texto": texto, "enlaces": enlaces}))
 
     for fecha, hora_real, alumno, nota in historial:
         fecha_q = parse_fecha_agenda(fecha)
@@ -197,7 +284,7 @@ def linea_tiempo(historia_clinica, fecha_cita, historial, previos=()):
         fecha_txt = fecha_q.toString("dd-MM-yyyy") if fecha_q.isValid() else fecha
         entradas.append((orden if fecha_q.isValid() else _ORDEN_ULTIMO,
                          {"fecha": fecha_txt, "hora": hora_real, "alumno": alumno, "texto": nota,
-                          "enlace": ""}))
+                          "enlaces": []}))
 
     # sorted es estable: a igual fecha, la historia del caso queda antes que
     # las atenciones, que es el orden en que se cargaron.
@@ -226,15 +313,22 @@ def poner_html(editor, html_ficha):
     editor.setHtml(html_ficha)
 
 
+# Archivo de cada hoja -> el examen, para el título de su subventana
+_EXAMEN_DE_ARCHIVO = {"audiometria": "Audiometría", "impedanciometria": "Impedanciometría", "eoa": "EOA",
+                      "aabr": "AABR", "peatc": "PEATC", "ecochg": "ECochG", "vemp": "VEMP",
+                      "corticales": "Corticales"}
+
+
 def abrir_enlace(url, editor):
-    """Un enlace de la ficha: "previo:<ficha>" abre la audiometría que trae,
-    en su subventana del MDI (main.abrir_previo)."""
+    """Un enlace de la ficha: "previo:<ficha>/<hoja>.svg" abre esa hoja en su
+    subventana del MDI (main.abrir_previo)."""
     if url.scheme() != "previo":
         return
-    ruta = PREVIOS_DIR / f"{url.path()}.svg"
+    ruta = PREVIOS_DIR / url.path()
     ventana = editor.window()
     if ruta.is_file() and hasattr(ventana, "abrir_previo"):
-        ventana.abrir_previo(ruta)
+        examen = _EXAMEN_DE_ARCHIVO.get(ruta.stem.split("_")[-1], "Examen")
+        ventana.abrir_previo(ruta, examen)
 
 
 class HojaPrevia(QWidget):
@@ -262,7 +356,7 @@ class HojaPrevia(QWidget):
 
     def ficha(self):
         """Número de ficha de la hoja que se ve, o None."""
-        return self.ruta.stem if self.ruta else None
+        return self.ruta.parent.name if self.ruta else None
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -307,12 +401,14 @@ def _seccion(icono, titulo, cuerpo):
         f'{cuerpo}</td></tr></table><p style="margin:0;">&nbsp;</p>')
 
 
-def _enlace(href):
-    """"Ver informe" al final de una entrada del historial que lo tiene."""
-    if not href:
+def _enlaces(enlaces):
+    """"Ver audiometría · Ver impedanciometría" al final de una entrada del
+    historial que trae informes."""
+    if not enlaces:
         return ""
-    return (f' <a href="{html.escape(href)}" style="color:{tema.ACENTO}; font-weight:700;">'
-            'Ver informe</a>')
+    return " " + " · ".join(
+        f'<a href="{html.escape(href)}" style="color:{tema.ACENTO}; font-weight:700;">{html.escape(texto)}</a>'
+        for texto, href in enlaces)
 
 
 def _pastilla(texto, color):
@@ -374,13 +470,12 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     # Antes quedaba la llave a la vista, con "sin fecha" al lado.
     fecha_base = (row.fecha if parse_fecha_agenda(row.fecha).isValid()
                   else QDate.currentDate().toString("dd-MM-yy"))
-    previa = audiometria_previa(row, caso)
-    previos = [(dias_audiometria_previa(historia_clinica), "Audiometría. Trae el informe.",
-                f"previo:{previa.stem}")] if previa else []
+    trae = entrada_lo_que_trae(row, caso, historia_clinica)
+    previos = [trae] if trae else []
     entradas = linea_tiempo(historia_clinica, fecha_base,
                             historial_atenciones(shedule, row.rut, username, is_admin,
                                                  getattr(row, "practice_id", None) is not None),
-                            previos)
+                            previos, enlaces_de_la_historia(row, caso))
 
     if entradas:
         # Escapado: son textos libres (historia del caso, nota del alumno) y
@@ -405,7 +500,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
                 f'<span style="font-weight:700; color:{tema.ACENTO};">'
                 f'{html.escape(e["fecha"] or "sin fecha")}</span>{hora}</td>'
                 f'<td valign="top" bgcolor="{fondo}" style="border-top:1px solid {tema.GRILLA};">'
-                f'{quien}{html.escape(e["texto"] or "sin comentario")}{_enlace(e["enlace"])}</td></tr>')
+                f'{quien}{html.escape(e["texto"] or "sin comentario")}{_enlaces(e["enlaces"])}</td></tr>')
         cuerpo = ('<table width="100%" cellspacing="0" cellpadding="8">' + "".join(filas) + "</table>")
     else:
         cuerpo = (f'<span style="color:{tema.TEXTO_SUAVE};">'

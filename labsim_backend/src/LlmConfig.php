@@ -371,7 +371,7 @@ TXT;
      * $historia: cases.data['historia_clinica'], con sus llaves {{N}} (N =
      * días respecto de la cita, que para el paciente es hoy).
      */
-    public static function historiaPrevia(string $historia, bool $traeAudiometria, bool $sala = false): string
+    public static function historiaPrevia(string $historia, array $trae, bool $sala = false): string
     {
         $lineas = [];
         foreach (preg_split('/\R/', $historia) ?: [] as $linea) {
@@ -384,10 +384,18 @@ TXT;
             }
             $lineas[] = '- ' . $linea;
         }
-        if ($traeAudiometria) {
+        $examenes = array_values(array_filter(array_map(static function ($e): string {
+            return self::EXAMEN_PREVIO[(string) $e] ?? '';
+        }, $trae)));
+        if ($examenes !== []) {
+            $uno = count($examenes) === 1;
+            $lista = $uno ? $examenes[0]
+                : implode(', ', array_slice($examenes, 0, -1)) . ' y ' . $examenes[count($examenes) - 1];
             $lineas[] = '- ' . self::haceCuanto(self::diasAudiometriaPrevia($historia)) . ': ' . ($sala
-                ? 'al paciente le hicieron un examen de audición (una audiometría) y traen el informe impreso; nadie sabe interpretarlo.'
-                : 'te hicieron un examen de audición (una audiometría) y traes el informe impreso; no sabes interpretarlo.');
+                ? "al paciente le hicieron {$lista}, y traen " . ($uno ? 'el informe impreso; nadie sabe interpretarlo.'
+                                                                         : 'los informes impresos; nadie sabe interpretarlos.')
+                : "te hicieron {$lista}, y traes " . ($uno ? 'el informe impreso; no sabes interpretarlo.'
+                                                          : 'los informes impresos; no sabes interpretarlos.'));
         }
         if ($lineas === []) {
             return '';
@@ -403,7 +411,22 @@ TXT;
     }
 
     /**
-     * Hace cuántos días se hizo la audiometría que trae: 14, o después de lo
+     * Los exámenes que trae el paciente (los nombres que manda la app, ver
+     * core.ficha.EN_PROCEDIMIENTO), dichos como los diría él.
+     */
+    public const EXAMEN_PREVIO = [
+        'Audiometría' => 'un examen de audición en cabina (audiometría)',
+        'Impedanciometría' => 'un examen del oído con una sonda que mete aire (impedanciometría)',
+        'EOA' => 'un examen de las emisiones del oído (otoemisiones)',
+        'AABR' => 'un tamizaje auditivo automático',
+        'PEATC' => 'unos potenciales auditivos con electrodos en la cabeza (PEATC)',
+        'ECochG' => 'una electrococleografía',
+        'VEMP' => 'unos potenciales vestibulares con electrodos en el cuello (VEMP)',
+        'Corticales' => 'unos potenciales auditivos de la corteza',
+    ];
+
+    /**
+     * Hace cuántos días se hizo lo que trae (los mismos días para todo): 14, o después de lo
      * último de la historia si es más reciente (el otorrino que la pidió).
      * Mismo cálculo que dias_audiometria_previa en core/ficha.py de la app.
      */

@@ -6987,3 +6987,26 @@ VEMP.
   día siguiente de eso, nunca el día de la cita. Mismo cálculo en la ficha
   (`dias_audiometria_previa`) y en el chat (`LlmConfig::diasAudiometriaPrevia`).
   H11, Patricia: el 17-10 el otorrino la pedía y la ficha la mostraba hecha el 15-10.
+
+## Exámenes previos: foco por capítulo y hojas de la historia (2026-10-29)
+
+Resumen para leer: `docs/audiometria_previa.md`.
+
+- **Foco por capítulo** (`FOCO` en `scripts/libro/procedimientos.py`, que usan
+  `sql_practica.py` y `previos.py`): en los capítulos que enseñan un examen el
+  procedimiento nombra solo ese examen; los demás exámenes de la ficha del
+  libro en ese capítulo, más la audiometría, llegan hechos. 30 procedimientos
+  en prod (respaldo `labsim_2026-10-29_133700.sqlite`).
+- **Todas las hojas, no solo la audiometría:** `resources/libro/previos/<ficha>/<examen>.svg`
+  (289 hojas, ~9 MB) e `indice.json` con `trae`, `por_procedimiento` (lo que
+  trae en cada carpeta: el mismo demo sale en varias) e `historia`.
+- **Hojas de la historia** (`historia_examenes.json`, tabla curada a partir de
+  un catálogo de las 62 líneas que cuentan un examen): tarjeta de tamizaje
+  (pasa/refiere por oído), hoja actual, o estado anterior (caso aparte en el
+  libro, provisorio: podman no corre en este kernel y se usó otro caso con el
+  mismo cuadro; aviso en `pendientes_urgentes.md` del libro). Lo que ya está en
+  la historia no se repite como algo que trae. Salen siempre, no solo en la
+  práctica: son la historia del caso.
+- **Chat:** la app manda `trae` (lista) en vez de `trae_audiometria`; el
+  backend acepta los dos. `LlmConfig::EXAMEN_PREVIO` dice cada examen en
+  palabras de paciente.

@@ -102,14 +102,14 @@ if ($acompanado) {
     );
 }
 
-// De dónde viene el paciente: la historia del caso y, si la trae, la
-// audiometría. trae_audiometria viene de la app, que es la que sabe si la
-// ficha la muestra (ver core.ficha.audiometria_previa).
-$systemPrompt .= LlmConfig::historiaPrevia(
-    (string) ($caseData['historia_clinica'] ?? ''),
-    !empty($body['trae_audiometria']),
-    $acompanado
-);
+// De dónde viene el paciente: la historia del caso y los exámenes que trae.
+// `trae` viene de la app, que es la que sabe qué muestra la ficha (ver
+// core.ficha.examenes_que_trae); la app de antes mandaba trae_audiometria.
+$trae = is_array($body['trae'] ?? null) ? $body['trae'] : [];
+if ($trae === [] && !empty($body['trae_audiometria'])) {
+    $trae = ['Audiometría'];
+}
+$systemPrompt .= LlmConfig::historiaPrevia((string) ($caseData['historia_clinica'] ?? ''), $trae, $acompanado);
 
 // El historial va rotulado con quién dijo cada cosa: con más de una persona
 // en la consulta, un "assistant" pelado no le dice al modelo si eso lo dijo

@@ -1,0 +1,383 @@
+[
+ {
+  "ficha": "51",
+  "dias": -2900,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje auditivo neonatal",
+  "OD": "no evaluable",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "60",
+  "dias": -60,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje auditivo escolar",
+  "OD": "no pasa",
+  "OI": "no pasa"
+ },
+ {
+  "ficha": "70",
+  "dias": -1095,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Audiometría de tamizaje (medicina del trabajo)",
+  "OD": "normal",
+  "OI": "normal"
+ },
+ {
+  "ficha": "73",
+  "dias": -1125,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "74",
+  "dias": -240,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "74",
+  "dias": -210,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Repetición del tamizaje con emisiones",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "75",
+  "dias": -2165,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "pasa",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "89",
+  "dias": -5470,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "pasa",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "96",
+  "dias": -28,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal automatizado (AABR)",
+  "OD": "refiere",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "105",
+  "dias": -18,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "refiere",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "106",
+  "dias": -82,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal automatizado (AABR)",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "106",
+  "dias": -54,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Retamizaje a los 30 días",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "107",
+  "dias": -82,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal automatizado (AABR)",
+  "OD": "pasa",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "108",
+  "dias": -75,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal automatizado (AABR)",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "109",
+  "dias": -70,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal automatizado (AABR)",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "117",
+  "dias": -25,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje auditivo escolar",
+  "OD": "no pasa",
+  "OI": "no pasa"
+ },
+ {
+  "ficha": "142",
+  "dias": -58,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje auditivo neonatal",
+  "OD": "refiere",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "142",
+  "dias": -38,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Retamizaje",
+  "OD": "refiere",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "143",
+  "dias": -1460,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "pasa",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "145",
+  "dias": -84,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "pasa",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "148",
+  "dias": -120,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "refiere",
+  "OI": "refiere"
+ },
+ {
+  "ficha": "35",
+  "dias": -1600,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje auditivo neonatal",
+  "OD": "pasa",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "40",
+  "dias": -5480,
+  "examen": "Tamizaje",
+  "hoja": "tamizaje",
+  "prueba": "Tamizaje neonatal con emisiones otoacústicas",
+  "OD": "pasa",
+  "OI": "pasa"
+ },
+ {
+  "ficha": "73",
+  "dias": -1065,
+  "examen": "Impedanciometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "75",
+  "dias": -1080,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "75",
+  "dias": -1080,
+  "examen": "Impedanciometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "77",
+  "dias": -4380,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "77",
+  "dias": -2190,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "83",
+  "dias": -90,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "110",
+  "dias": -14,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "111",
+  "dias": -60,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "130",
+  "dias": -90,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "132",
+  "dias": -30,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "133",
+  "dias": -1095,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "133",
+  "dias": -365,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "134",
+  "dias": -1,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "136",
+  "dias": -30,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "137",
+  "dias": -2920,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "146",
+  "dias": -30,
+  "examen": "Audiometría",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "148",
+  "dias": -100,
+  "examen": "PEATC",
+  "hoja": "actual"
+ },
+ {
+  "ficha": "69",
+  "dias": -138,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap08_ototoxica_138",
+  "revisar": true
+ },
+ {
+  "ficha": "69",
+  "dias": -138,
+  "examen": "EOA",
+  "hoja": "anterior",
+  "caso": "previo_cap08_ototoxica_138",
+  "revisar": true
+ },
+ {
+  "ficha": "69",
+  "dias": -116,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap08_ototoxica_138",
+  "revisar": true
+ },
+ {
+  "ficha": "116",
+  "dias": -2200,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap19_sobre_real_2200",
+  "revisar": true
+ },
+ {
+  "ficha": "132",
+  "dias": -2920,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap33_control_2920",
+  "revisar": true
+ },
+ {
+  "ficha": "132",
+  "dias": -2555,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap33_control_2920",
+  "revisar": true
+ },
+ {
+  "ficha": "133",
+  "dias": -14,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap33_reposo_14",
+  "revisar": true
+ },
+ {
+  "ficha": "136",
+  "dias": -1100,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_cap34_hidrops_1100",
+  "revisar": true
+ },
+ {
+  "ficha": "37",
+  "dias": -2900,
+  "examen": "Audiometría",
+  "hoja": "anterior",
+  "caso": "previo_demo37_2900",
+  "revisar": true
+ }
+]

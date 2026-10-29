@@ -114,7 +114,7 @@ def sala_del_caso(case_id, nombre="", edad=0):
 
 
 def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None,
-                      trae_audiometria=False):
+                      trae=()):
     """Un turno de chat con el paciente y quienes lo acompañan (vive en el
     servidor, ver Sala.php). Devuelve el dict del backend: `respuestas` (una
     por cada persona que habló en el turno) y `sala` (quiénes están).
@@ -127,12 +127,12 @@ def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, ap
     LlmChat.php) -- None cuando no corresponde dejar rastro (ej. "Atender
     (prueba)" del admin).
 
-    trae_audiometria: el paciente llega con la audiometría hecha (ver
-    core.ficha.audiometria_previa); el backend se lo cuenta al modelo.
+    trae: exámenes con que el paciente llega hechos (ver
+    core.ficha.examenes_que_trae); el backend se lo cuenta al modelo.
     """
     client = _get_backend_client()
     return client.llm_chat(case_id, nombre, edad, procedimiento, history, message, appointment_id,
-                           trae_audiometria)
+                           trae)
 
 
 def inbox_list() -> list:

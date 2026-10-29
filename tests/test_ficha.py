@@ -190,10 +190,12 @@ def _con_previos(fn):
     from core import ficha
     antes = ficha.PREVIOS_DIR
     ficha.PREVIOS_DIR = pathlib.Path(__file__).resolve().parents[1] / "resources/libro/previos"
+    ficha._indice = None
     try:
         return fn()
     finally:
         ficha.PREVIOS_DIR = antes
+        ficha._indice = None
 
 
 def _intento_libro(procedimiento, case_id="78"):
@@ -208,14 +210,16 @@ def test_el_paciente_del_libro_trae_la_audiometria_si_no_viene_a_eso():
     """Cap. 11: viene al PEATC con la audiometría hecha, y se abre desde el historial."""
     html = _con_previos(lambda: render_ficha_html(
         _intento_libro("Impedanciometría + PEATC"), {}, {"agenda_1": {}}, "alumno1", False))
-    assert 'href="previo:78"' in html, html
+    assert 'href="previo:78/audiometria.svg"' in html, html
+    # Viene al PEATC: el VEMP del libro también lo trae; el PEATC no
+    assert 'href="previo:78/vemp.svg"' in html and "previo:78/peatc.svg" not in html
     assert "27-08-2026" in html, "14 días antes de la cita del 10-09-26"
 
 
 def test_no_trae_audiometria_si_viene_a_hacersela():
     html = _con_previos(lambda: render_ficha_html(
         _intento_libro("Audiometría + Impedanciometría + PEATC"), {}, {"agenda_1": {}}, "alumno1", False))
-    assert "previo:" not in html
+    assert "previo:78/audiometria.svg" not in html and "previo:78/vemp.svg" in html
 
 
 def test_en_una_cita_del_docente_no_aparece_la_audiometria_del_libro():
@@ -238,7 +242,7 @@ def test_las_hojas_previas_las_lee_qtsvg():
     from PySide6.QtWidgets import QApplication
     QApplication.instance() or QApplication([])
     carpeta = pathlib.Path(__file__).resolve().parents[1] / "resources/libro/previos"
-    hojas = sorted(carpeta.glob("*.svg"))
+    hojas = sorted(carpeta.glob("*/*.svg"))
     assert hojas
     for hoja in hojas:
         assert QSvgRenderer(str(hoja)).isValid(), hoja.name
@@ -255,7 +259,7 @@ def test_el_docente_ve_en_practica_libre_lo_mismo_que_el_alumno():
     assert fila.practice_id == 42 and fila.procedimiento == "Impedanciometría + PEATC"
     assert caso_sin_cita.practice_id is None, "la fila de la agenda no se toca"
     html = _con_previos(lambda: render_ficha_html(fila, {}, {"agenda_1": {}}, "admin", True))
-    assert 'href="previo:78"' in html
+    assert 'href="previo:78/audiometria.svg"' in html
 
 
 def test_sin_otoscopia_hecha_no_trae_audiometria():
@@ -275,7 +279,30 @@ def test_la_audiometria_previa_va_despues_de_quien_la_pidio():
     caso = {"historia_clinica": "{{-12}} ORL deriva a evaluación auditiva."}
     html = _con_previos(lambda: render_ficha_html(
         _intento_libro("Impedanciometría + PEATC"), caso, {"agenda_1": {}}, "alumno1", False))
-    assert html.index("29-08-2026") < html.index("30-08-2026") < html.index("previo:78"), html
+    assert html.index("29-08-2026") < html.index("30-08-2026") < html.index("previo:78/"), html
+
+
+def test_la_historia_lleva_la_hoja_del_examen_que_cuenta():
+    """Cap. 8: la audiometría de base y su control cuelgan de su línea."""
+    caso = {"historia_clinica": "{{-140}} Oncólogo: pide evaluación de base.\n"
+                                "{{-138}} Audiometría de base: normal. DPOAE presentes.\n"
+                                "{{-116}} Control sin cambio.\n{{-8}} ORL: solicita audiometría."}
+    row = _intento_libro("Audiometría + EOA", case_id="69")
+    html = _con_previos(lambda: render_ficha_html(row, caso, {"agenda_1": {}}, "alumno1", False))
+    base = html.index("Audiometría de base")
+    assert base < html.index("previo:69/historia_138_audiometria.svg") < html.index("Control sin cambio")
+    assert "previo:69/historia_138_eoa.svg" in html and "previo:69/historia_116_audiometria.svg" in html
+    assert "Trae" not in html, "viene a la audiometría y las EOA: no trae nada"
+
+
+def test_lo_que_ya_cuenta_la_historia_no_se_repite_como_algo_que_trae():
+    """H13: el PEAT de hace tres meses está en su línea; trae la impedanciometría y las EOA."""
+    row = _intento_libro("ASSR", case_id="148")
+    caso = {"historia_clinica": "{{-120}} Tamizaje refiere.\n{{-100}} ORL: PEAT con click.\n{{-7}} ORL: pide ASSR."}
+    html = _con_previos(lambda: render_ficha_html(row, caso, {"agenda_1": {}}, "alumno1", False))
+    assert "previo:148/historia_120_tamizaje.svg" in html and "previo:148/peatc.svg" in html
+    assert html.count("previo:148/peatc.svg") == 1
+    assert "Impedanciometría y EOA. Trae los informes." in html
 
 
 if __name__ == "__main__":

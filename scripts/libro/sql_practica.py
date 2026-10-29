@@ -6,58 +6,17 @@ CARPETA tiene catalogo_tomo2.json; deja ahí libro_capNN.sql e ids_libro.json, q
 cargan con consola.py script. Se puede volver a correr: no duplica nada.
 """
 import json, pathlib, sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from procedimientos import procedimiento  # noqa: E402
 S = pathlib.Path(sys.argv[1]); LIBRO = pathlib.Path.home() / 'Escritorio/Proyectos/libro-orl'
 # Tomo II por defecto; el Tomo I (H, B) con su catálogo como tercer argumento
 cat = json.load(open(S / (sys.argv[3] if len(sys.argv) > 3 else 'catalogo_tomo2.json')))
 LABSIM = {'audiosupra', 'logoaudiometria', 'impedancia', 'abr', 'teoae', 'dpoae', 'vemp', 'ecochg', 'cortical'}
-# Examen -> como se nombra en el procedimiento, en este orden
-# (el Tomo I nombra distinto las suyas: audiograma, timpanograma, reflejos, acumetria)
-PROC = [('acumetria', 'Acumetría'), ('audiosupra', 'Audiometría'), ('audiograma', 'Audiometría'),
-        ('logoaudiometria', 'Audiometría'), ('impedancia', 'Impedanciometría'),
-        ('timpanograma', 'Impedanciometría'), ('reflejos', 'Impedanciometría'),
-        ('teoae', 'EOA'), ('dpoae', 'EOA'), ('abr', 'PEATC'), ('ecochg', 'ECochG'), ('cortical', 'Corticales'),
-        ('vemp', 'VEMP')]
 RUT_NUEVO = {'cap12_esclerosis_multiple': '18087953', 'cap24_gentamicina': '12518779',
              'cap17_rubeola_congenita': '28268815', 'cap17_asfixia_perinatal': '28268816',
              'h10_lactante': '28267995'}
 ADMIN = 1
 q = lambda s: "'" + str(s).replace("'", "''") + "'"
-
-# El libro no tiene figura de ASSR: los casos hechos para practicarlo lo dicen acá
-CON_ASSR = {'h13_lactante', 'h13_nino_tea', 'cap28_no_colabora'}
-
-
-# Capítulos en los que el paciente llega con la audiometría hecha: viene
-# derivado a otro examen y la trae en la ficha (resources/libro/previos, ver
-# scripts/libro/previos.py). El procedimiento no la nombra, para que el
-# paciente no crea que viene a eso; hacerla igual queda como repetición.
-AUDIOMETRIA_PREVIA = {9, 11, 12, 14, 18, 20, 30, 'H12'}
-AUDIOMETRIA = {'audiosupra', 'audiograma', 'logoaudiometria'}
-
-
-# Pacientes cuyo procedimiento no sale de las figuras: el de H21 viene a probarse
-# audífonos (su figura es campo_libre, que no está en PROC) y salía con el
-# "Otoscopía + Acumetría" por defecto, que además le quitaba la audiometría
-# que trae (core.ficha.audiometria_previa).
-PROC_PROPIO = {'h21_p36': 'Prueba de audífonos'}
-
-
-def procedimiento(figs, clave='', cap=None):
-    if clave in PROC_PROPIO:
-        return PROC_PROPIO[clave]
-    if cap in AUDIOMETRIA_PREVIA:
-        figs = [f for f in figs if f not in AUDIOMETRIA]
-    if clave in CON_ASSR:
-        return _procedimiento(figs) + ' + ASSR'
-    return _procedimiento(figs)
-
-
-def _procedimiento(figs):
-    vistos = []
-    for f, nombre in PROC:
-        if f in figs and nombre not in vistos:
-            vistos.append(nombre)
-    return ' + '.join(vistos) or 'Otoscopía + Acumetría'
 
 def comentario(clave, cap, pedido):
     lados = [f"{o} {pedido['cuadro'][o]}" + (f" {pedido.get('grado', {}).get(o)}" if pedido.get('grado', {}).get(o) else '')

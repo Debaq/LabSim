@@ -46,7 +46,7 @@ from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
 from core import app_layout
-from core.ficha import HojaPrevia, audiometria_previa, fila_de_practica
+from core.ficha import HojaPrevia, examenes_que_trae, fila_de_practica
 from core.app_layout import LayoutRetryThread, fetch_layout
 
 # Definir la raíz del proyecto
@@ -1024,7 +1024,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.paciente_actual = {
             "case_id": case_id, "nombre": nombre or "el paciente",
             "edad": edad, "procedimiento": procedimiento, "appointment_id": appointment_id,
-            "trae_audiometria": audiometria_previa(entry, self.data_current) is not None,
+            "trae": [examen for examen, _ in examenes_que_trae(entry, self.data_current)],
         }
 
         if es_prueba:
@@ -1432,12 +1432,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 btn.setVisible(con_audiometro)
 
     def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None,
-                       trae_audiometria=False):
+                       trae=()):
         """Abre (o trae al frente) la subventana MDI de chat con el paciente,
         reapuntada al caso indicado. appointment_id=None = no se guarda el
         chat (ver ChatPacienteWidget.set_paciente)."""
         self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id,
-                                           trae_audiometria)
+                                           trae)
         self.activate_auto("CHAT")
 
     # -----------------------------------------------------------------
@@ -1566,7 +1566,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["FICHA"].obj.set_ficha(html, on_chat, cabecera)
         previo = self.subw.get("PREVIO")
         ficha = previo.obj.ficha() if previo is not None else None
-        if ficha and f"previo:{ficha}\"" not in html:
+        if ficha and f"previo:{ficha}/" not in html:
             self.close_sub_window("PREVIO")
 
     def _subventana_visible(self, nombre):
@@ -1583,12 +1583,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.close_sub_window("FICHA")
         self.close_sub_window("PREVIO")
 
-    def abrir_previo(self, ruta):
-        """El examen que trae el paciente (ver core.ficha.HojaPrevia)."""
+    def abrir_previo(self, ruta, examen="Examen"):
+        """La hoja de un examen previo del paciente (ver core.ficha.HojaPrevia)."""
         if "PREVIO" not in self.apps:
             return
         self.subw["PREVIO"].obj.set_hoja(ruta)
         self.activate_auto("PREVIO")
+        self.subw["PREVIO"].lbl_title.setText(f"{examen} del paciente")
 
     def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None):
         """Abre (o trae al frente) la subventana MDI de evolución, reapuntada
@@ -1610,7 +1611,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return
         p = self.paciente_actual
         self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"),
-                            p.get("trae_audiometria", False))
+                            p.get("trae", ()))
 
     def closeEvent(self, event):
         if not self._salida_permitida():
