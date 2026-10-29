@@ -16,10 +16,10 @@ from core import atajos, iconos, invitado, keyboard_monitor, soporte, tema
 from core.kiosko import es_kiosko
 from core.preferencias import preferencias
 
-# Lo propio de esta ventana; lo demás es el estilo común (tema.QSS): tarjetas,
-# roles de texto, botones. La lista de secciones es la de las carpetas de la
-# práctica libre (agenda/vista.py).
-QSS_CONFIG = f"""
+# Lo propio de esta ventana; lo demás es el estilo común (tema.QSS y
+# tema.QSS_FORM): tarjetas, roles de texto, campos, botones. La lista de
+# secciones es la de las carpetas de la práctica libre (agenda/vista.py).
+QSS_CONFIG = tema.QSS_FORM + f"""
 QFrame#cabeceraConfig {{ background: {tema.TARJETA}; border: 1px solid {tema.BORDE}; border-radius: 10px; }}
 QListWidget#navConfig {{
     background: {tema.TARJETA}; border: 1px solid {tema.BORDE}; border-radius: 10px;
@@ -28,31 +28,7 @@ QListWidget#navConfig {{
 QListWidget#navConfig::item {{ padding: 8px 6px; border-radius: 6px; color: {tema.TEXTO}; }}
 QListWidget#navConfig::item:selected {{ background: {tema.ACENTO}; color: white; }}
 QListWidget#navConfig::item:hover:!selected {{ background: {tema.TARJETA_ALT}; }}
-QLineEdit, QPlainTextEdit {{
-    background: {tema.TARJETA}; border: 1px solid {tema.BORDE_FUERTE}; border-radius: 6px;
-    padding: 3px 8px; selection-background-color: {tema.ACENTO_SUAVE}; selection-color: {tema.TEXTO};
-}}
-QLineEdit {{ min-height: 20px; }}
-QLineEdit:focus, QPlainTextEdit:focus {{ border-color: {tema.ACENTO}; }}
-QGroupBox {{
-    background: {tema.TARJETA_ALT}; border: 1px solid {tema.BORDE}; border-radius: 8px;
-    margin-top: 16px; padding: 12px 8px 6px; font-size: 8.5pt; font-weight: 700; color: {tema.TEXTO_SUAVE};
-}}
-QGroupBox::title {{ subcontrol-origin: margin; left: 10px; padding: 0 4px; }}
-QGroupBox QLabel {{ font-weight: 400; color: {tema.TEXTO}; }}
-QCheckBox {{ spacing: 8px; color: {tema.TEXTO}; }}
-QCheckBox::indicator {{
-    width: 15px; height: 15px; border: 1px solid {tema.BORDE_FUERTE}; border-radius: 4px; background: {tema.TARJETA};
-}}
-QCheckBox::indicator:checked {{ background: {tema.ACENTO}; border-color: {tema.ACENTO}; }}
-QCheckBox::indicator:hover {{ border-color: {tema.ACENTO}; }}
 QLabel#errorConfig {{ color: {tema.ALERTA}; font-size: 8.5pt; }}
-QPushButton[accion="principal"] {{
-    background: {tema.ACENTO}; border: 1px solid {tema.ACENTO}; color: #FFFFFF;
-    font-weight: 700; padding: 6px 20px; border-radius: 8px;
-}}
-QPushButton[accion="principal"]:hover {{ background: {tema.ACENTO_CLARO}; border-color: {tema.ACENTO_CLARO}; color: #FFFFFF; }}
-QPushButton[accion="principal"]:disabled {{ background: {tema.TARJETA_ALT}; border-color: {tema.BORDE}; color: {tema.TEXTO_TENUE}; }}
 """
 
 

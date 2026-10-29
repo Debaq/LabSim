@@ -325,6 +325,64 @@ QComboBox::down-arrow:disabled {{ image: url({r["abajo_off"]}); }}
     return _flechas_qss
 
 
+# Formularios: campos de texto, cajas de grupo, casillas y el botón principal.
+# Lo usan Configuración y los diálogos (ui_helpers.style_dialog).
+QSS_FORM = f"""
+QLineEdit, QPlainTextEdit {{
+    background: {TARJETA}; border: 1px solid {BORDE_FUERTE}; border-radius: 6px;
+    padding: 3px 8px; selection-background-color: {ACENTO_SUAVE}; selection-color: {TEXTO};
+}}
+QLineEdit {{ min-height: 20px; }}
+QLineEdit:focus, QPlainTextEdit:focus {{ border-color: {ACENTO}; }}
+QGroupBox {{
+    background: {TARJETA_ALT}; border: 1px solid {BORDE}; border-radius: 8px;
+    margin-top: 16px; padding: 12px 8px 6px; font-size: 8.5pt; font-weight: 700; color: {TEXTO_SUAVE};
+}}
+QGroupBox::title {{ subcontrol-origin: margin; left: 10px; padding: 0 4px; }}
+QGroupBox QLabel {{ font-weight: 400; color: {TEXTO}; }}
+QCheckBox {{ spacing: 8px; color: {TEXTO}; }}
+QCheckBox::indicator {{
+    width: 15px; height: 15px; border: 1px solid {BORDE_FUERTE}; border-radius: 4px; background: {TARJETA};
+}}
+QCheckBox::indicator:checked {{ background: {ACENTO}; border-color: {ACENTO}; }}
+QCheckBox::indicator:hover {{ border-color: {ACENTO}; }}
+QPushButton[accion="principal"] {{
+    background: {ACENTO}; border: 1px solid {ACENTO}; color: #FFFFFF;
+    font-weight: 700; padding: 6px 20px; border-radius: 8px;
+}}
+QPushButton[accion="principal"]:hover {{ background: {ACENTO_CLARO}; border-color: {ACENTO_CLARO}; color: #FFFFFF; }}
+QPushButton[accion="principal"]:disabled {{ background: {TARJETA_ALT}; border-color: {BORDE}; color: {TEXTO_TENUE}; }}
+QFrame#cabeceraDialogo {{ background: {TARJETA}; border: 1px solid {BORDE}; border-radius: 10px; }}
+"""
+
+# Los avisos (QMessageBox, QProgressDialog, QDialog): el estilo común sobre el
+# lienzo, el botón por defecto como principal y la barra de progreso del color
+# de la app.
+QSS_DIALOGO = f"""
+QDialog, QMessageBox, QProgressDialog {{
+    background: {FONDO}; color: {TEXTO};
+    font-family: "Noto Sans", "DejaVu Sans", sans-serif; font-size: 9pt;
+}}
+QMessageBox QLabel {{ color: {TEXTO}; font-size: 9.5pt; }}
+QDialogButtonBox QPushButton, QMessageBox QPushButton {{ min-width: 84px; padding: 6px 14px; }}
+QMessageBox QPushButton:default, QDialogButtonBox QPushButton:default {{
+    background: {ACENTO}; border: 1px solid {ACENTO}; color: #FFFFFF; font-weight: 700;
+}}
+QMessageBox QPushButton:default:hover, QDialogButtonBox QPushButton:default:hover {{
+    background: {ACENTO_CLARO}; border-color: {ACENTO_CLARO}; color: #FFFFFF;
+}}
+QProgressBar {{
+    border: 1px solid {BORDE}; border-radius: 6px; background: {TARJETA};
+    min-height: 16px; text-align: center; color: {TEXTO}; font-size: 8pt;
+}}
+QProgressBar::chunk {{ background: {ACENTO}; border-radius: 5px; }}
+"""
+
+
+def qss_dialogo():
+    return QSS + QSS_FORM + QSS_DIALOGO + qss_flechas()
+
+
 def aplicar_estilo(widget, extra=""):
     """Aplica el QSS común a `widget` y a todo lo que cuelgue de él. `extra`:
     reglas propias del módulo, que se suman al final."""

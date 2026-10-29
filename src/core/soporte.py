@@ -9,8 +9,8 @@ ticket es para que el equipo de LabSim abra un issue.
 import gzip
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QCheckBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox,
-                               QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QCheckBox, QDialog, QFormLayout, QFrame, QGroupBox, QHBoxLayout,
+                               QLabel, QPlainTextEdit, QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from core import equipo, hilos, registro
 from core.base import context
@@ -57,35 +57,78 @@ def _enviar_cierre(client, args):
     return client.send_ticket(*args, cierre_inesperado=True, anonimo=True)
 
 
+def _ruta_partible(ruta):
+    """La ruta con puntos de corte invisibles después de cada carpeta: sin
+    espacios no se parte y obliga a la ventana a su ancho."""
+    return str(ruta).replace("/", "/\u200b").replace("\\", "\\\u200b")
+
+
+def cabecera_dialogo(parent, icono, titulo, texto):
+    """Encabezado de los diálogos (cierre inesperado, registro): el ícono, el
+    título y una línea de explicación, en una tarjeta (tema.QSS_FORM)."""
+    from core import iconos, tema
+    marco = QFrame(parent)
+    marco.setObjectName("cabeceraDialogo")
+    fila = QHBoxLayout(marco)
+    fila.setContentsMargins(14, 10, 14, 10)
+    fila.setSpacing(12)
+    marca = QLabel(marco)
+    marca.setPixmap(iconos.pixmap(icono, tema.ACENTO, 30))
+    textos = QVBoxLayout()
+    textos.setSpacing(2)
+    rotulo = QLabel(titulo, marco)
+    rotulo.setProperty("role", "titulo")
+    rotulo.setWordWrap(True)
+    explicacion = QLabel(texto, marco)
+    explicacion.setProperty("role", "hint")
+    explicacion.setWordWrap(True)
+    textos.addWidget(rotulo)
+    textos.addWidget(explicacion)
+    fila.addWidget(marca, 0, Qt.AlignmentFlag.AlignTop)
+    fila.addLayout(textos, 1)
+    return marco
+
+
 def ofrecer_envio_por_cierre(parent, hora_arranque):
     """La vez anterior LabSim se cerró sin terminar bien (ver
     registro.marcar_inicio): se ofrece mandar el registro, mostrando qué
     sale del equipo. Mandarlo es tocar "Enviar"; no se insiste."""
+    from agenda.vista import BotonAccion
     info_equipo = equipo.identidad()
     detalle = registro.detalle_sistema()
     dlg = QDialog(parent)
     dlg.setWindowTitle("LabSim se cerró de forma inesperada")
+    dlg.resize(600, 560)
     caja = QVBoxLayout(dlg)
-    texto = QLabel(
-        "La última vez que se usó LabSim en este equipo"
-        + (f" (abierto a las {hora_arranque[11:16]})" if len(hora_arranque) >= 16 else "")
-        + " se cerró de forma inesperada.\n\n¿Enviar el registro al equipo de LabSim? "
-        "Sirve para encontrar la causa. No se envía nada de lo que hiciste en los exámenes.",
-        dlg)
-    texto.setWordWrap(True)
-    caja.addWidget(texto)
+    caja.setContentsMargins(14, 14, 14, 12)
+    caja.setSpacing(10)
+    cuando = f" (abierto a las {hora_arranque[11:16]})" if len(hora_arranque) >= 16 else ""
+    caja.addWidget(cabecera_dialogo(
+        dlg, "alerta", "LabSim se cerró de forma inesperada",
+        f"La última vez que se usó en este equipo{cuando} no terminó bien. ¿Enviar el registro al "
+        "equipo de LabSim? Sirve para encontrar la causa. No se envía nada de lo que hiciste en los "
+        "exámenes."))
     descripcion = QPlainTextEdit(dlg)
     descripcion.setPlaceholderText("¿Qué estabas haciendo? (opcional)")
     descripcion.setMaximumHeight(70)
     caja.addWidget(descripcion)
-    caja.addWidget(_caja_que_se_envia(dlg, info_equipo, detalle))
-    botones = QDialogButtonBox(dlg)
-    btn_enviar = botones.addButton("Enviar registro", QDialogButtonBox.ButtonRole.AcceptRole)
-    botones.addButton("No enviar", QDialogButtonBox.ButtonRole.RejectRole)
-    botones.accepted.connect(dlg.accept)
-    botones.rejected.connect(dlg.reject)
+    # Lo que se envía es largo: con scroll, para que quepa en 768 px de alto
+    scroll = QScrollArea(dlg)
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.Shape.NoFrame)
+    scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    scroll.setWidget(_caja_que_se_envia(None, info_equipo, detalle, dlg))
+    caja.addWidget(scroll, 1)
+    pie = QHBoxLayout()
+    pie.addStretch(1)
+    btn_no = BotonAccion("No enviar", "x", parent=dlg)
+    btn_no.clicked.connect(dlg.reject)
+    btn_enviar = BotonAccion("Enviar registro", "enviar", principal=True, parent=dlg)
+    btn_enviar.clicked.connect(dlg.accept)
     btn_enviar.setDefault(True)
-    caja.addWidget(botones)
+    pie.addWidget(btn_no)
+    pie.addWidget(btn_enviar)
+    caja.addLayout(pie)
     style_dialog(dlg)
     respuesta = dlg.exec()
     registro.cierre_atendido()
@@ -97,7 +140,9 @@ def ofrecer_envio_por_cierre(parent, hora_arranque):
                           cierre_inesperado=True, nombre="soporte")
 
 
-def _caja_que_se_envia(parent, info_equipo, detalle):
+def _caja_que_se_envia(parent, info_equipo, detalle, ventana=None):
+    """`ventana`: de quién cuelga el visor del registro, si `parent` todavía
+    no tiene dueño (la caja va a un scroll)."""
     box = QGroupBox("Qué se envía", parent)
     form = QFormLayout(box)
     e = info_equipo or {}
@@ -111,32 +156,39 @@ def _caja_que_se_envia(parent, info_equipo, detalle):
         form.addRow(f"{_ROTULOS.get(clave, clave)}:", etiqueta)
     kb = len(registro.cola()) // 1024
     btn_ver = QPushButton(f"Ver el registro ({kb} KB)", box)
-    btn_ver.clicked.connect(lambda: _ver_registro(parent))
+    btn_ver.clicked.connect(lambda: _ver_registro(ventana or parent))
     form.addRow("Registro de la app:", btn_ver)
-    # La ruta no tiene espacios: sin puntos de corte (\u200b después de cada
-    # carpeta) no se partía y obligaba a la ventana a su ancho.
-    ruta = str(registro.archivo()).replace("/", "/\u200b").replace("\\", "\\\u200b")
-    donde = QLabel(f"Se guarda en: {ruta}", box)
+    donde = QLabel(f"Se guarda en: {_ruta_partible(registro.archivo())}", box)
     donde.setWordWrap(True)
     form.addRow("", donde)
     return box
 
 
 def _ver_registro(parent):
+    from agenda.vista import BotonAccion
     dlg = QDialog(parent)
     dlg.setWindowTitle("Registro de LabSim")
-    dlg.resize(760, 520)
+    dlg.resize(760, 540)
     caja = QVBoxLayout(dlg)
+    caja.setContentsMargins(14, 14, 14, 12)
+    caja.setSpacing(10)
+    caja.addWidget(cabecera_dialogo(
+        dlg, "lista", "Registro de LabSim",
+        f"Lo último que anotó la app en este equipo. Se guarda en {_ruta_partible(registro.archivo())}."))
     texto = QPlainTextEdit(dlg)
     texto.setReadOnly(True)
     texto.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+    texto.setStyleSheet('QPlainTextEdit { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; }')
     texto.setPlainText(registro.cola().decode("utf-8", errors="replace")
                        or "(el registro está vacío)")
     texto.moveCursor(texto.textCursor().MoveOperation.End)
-    caja.addWidget(texto)
-    botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, dlg)
-    botones.rejected.connect(dlg.reject)
-    caja.addWidget(botones)
+    caja.addWidget(texto, 1)
+    pie = QHBoxLayout()
+    pie.addStretch(1)
+    cerrar = BotonAccion("Cerrar", "x", parent=dlg)
+    cerrar.clicked.connect(dlg.reject)
+    pie.addWidget(cerrar)
+    caja.addLayout(pie)
     style_dialog(dlg)
     dlg.exec()
 

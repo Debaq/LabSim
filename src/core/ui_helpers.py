@@ -18,7 +18,6 @@ from core.h_win import FrameSubMdi, MdiArea
 from core import iconos, inbox, tema
 from core import mis_pacientes
 from core.base import context
-from core.helpers import Preferences
 
 
 def style_dialog(dlg, with_logo: bool = True) -> None:
@@ -28,27 +27,17 @@ def style_dialog(dlg, with_logo: bool = True) -> None:
     se vean parte de la app y no genéricos del SO.
 
     - Logo: LogoBN.png vía context.get_resource("img/LogoBN.png")
-    - Stylesheet: el .qss del style activo (mismo path que Preferences.get_style)
-      Si el .qss falta (OSError), no rompe: el diálogo queda con estilo nativo.
-
-    Lazy: lee Preferences solo al primer uso para no penalizar el import de
-    ui_helpers (que lo importan muchos módulos al cargar la app).
+    - Stylesheet: tema.qss_dialogo(), el estilo común de la app.
     """
     if with_logo:
         dlg.setWindowIcon(
             QIcon(QPixmap(context.get_resource("img/LogoBN.png")))
         )
-    try:
-        styles = Preferences().data.get("styles", {})
-        style_pred = styles[0]
-        qss_name = styles[1][style_pred]
-        qss_path = context.get_resource(f"styles/{qss_name}.qss")
-        with open(qss_path, "r", encoding="utf-8") as f:
-            dlg.setStyleSheet(f.read())
-    except (OSError, KeyError, IndexError, TypeError):
-        # Sin stylesheet no rompemos: el diálogo sigue funcional con el
-        # estilo del sistema. Mejor que crashear el update dialog.
-        pass
+    # El estilo común de la app (core/tema.py: tarjetas, botones, campos), no
+    # el dark.qss de la ventana principal, que no tiene nada para diálogos y
+    # los dejaba con los controles genéricos.
+    from core import tema
+    dlg.setStyleSheet(tema.qss_dialogo())
 
 
 def titlebar_icon(kind: str, size: int = 14, color: str = "#ffffff") -> QIcon:

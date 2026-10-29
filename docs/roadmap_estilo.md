@@ -239,3 +239,10 @@ Actualizado 2026-10-27.
 - [x] "Reportar un problema" cabe a lo ancho: la casilla de aceptación tenía
   el texto en el QCheckBox (no se parte) y la ruta del registro no tenía
   puntos de corte.
+- [x] Ventanas anexas (2026-10-29): el aviso de cierre inesperado y el visor
+  del registro con encabezado en tarjeta (`soporte.cabecera_dialogo`), "Qué se
+  envía" con scroll (cabe en 768 px) y "Enviar registro" como botón principal.
+  `style_dialog` aplica el estilo común (`tema.qss_dialogo`: `QSS` + `QSS_FORM`
+  + `QSS_DIALOGO`) a todos los avisos de la app en vez del dark.qss de la
+  ventana principal: botón por defecto de los avisos en color, barra de
+  progreso de las actualizaciones del color de la app.
