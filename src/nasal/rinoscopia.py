@@ -17,6 +17,8 @@ rayos con numpy (sin módulos de Qt nuevos en el build):
 - El examinador mira desde ~25 cm por la abertura del espéculo: los rayos
   entran por la narina casi paralelos y, al extender la cabeza del
   paciente, suben dentro de la fosa (pivotan en la narina).
+- El espéculo no está en la imagen: el visor muestra el campo en penumbra
+  y lo ilumina solo donde está el mouse (como el otoscopio).
 - Lo del paciente que cambia la imagen: la desviación (y el espolón, si es
   angosta), el cornete inferior según su hueso y su mucosa congestionada
   (el vasoconstrictor lo achica, como en la RM), los pólipos, la
@@ -36,7 +38,7 @@ from nasal import modelo
 
 # Cambiar esto invalida las imágenes guardadas en el equipo (ver la caché de
 # nasal/RinoscopiaWindow.py).
-VERSION = 2
+VERSION = 5
 
 MUCOSAS = {   # clave -> (texto, tinte sobre el rosado normal)
     'rosada': ('Rosada', (1.0, 1.0, 1.0)),
@@ -57,14 +59,6 @@ COLORES = {   # piso, techo, tabique, pared lateral, cornete inf., cornete medio
     3: (0.84, 0.48, 0.47), 4: (0.86, 0.40, 0.40), 5: (0.85, 0.46, 0.45), 6: (0.78, 0.74, 0.62),
 }
 FONDO = np.array([0.05, 0.012, 0.012])  # lo de atrás, sin luz: casi negro rojizo
-
-# Umbrales con que el docente lee "lo que hay" (hallazgos()): criterio del
-# simulador, en las mismas unidades del modelo.
-DESVIACION_MINIMA = 0.15     # cm² de área que quita el tabique
-ESPOLON_ANCHO = 0.5          # cm: una desviación más angosta es un espolón
-CORNETE_GRANDE = 1.15        # volumen (hueso + mucosa congestionada) sobre el normal (~0,8)
-CONTACTO = 0.12              # cm entre cornete y tabique
-
 
 def aspecto(nasal, lado):
     """Cómo se ve la mucosa de esa fosa: `nasal['rinoscopia'][lado]`, con lo
@@ -206,17 +200,25 @@ def _textura(P):
     return manchas, vasos
 
 
-def render(fosa, grados, tam=280, espejo=False):
-    """La imagen por el espéculo con la cabeza a `grados` de extensión, como
-    arreglo (tam, tam, 3) uint8. `espejo`: la fosa izquierda."""
-    a = math.radians(2 + 0.85 * grados)
+def render(fosa, grados, tam=280, espejo=False, campo=1.0):
+    """Lo que se ve desde la narina con la cabeza a `grados` de extensión,
+    como arreglo (tam, tam, 3) uint8: el campo entero, cuadrado; el espéculo
+    (lo que alcanza a iluminar y mostrar) lo pone el visor donde está el
+    mouse. `campo` agranda la ventana alrededor de la narina. `espejo`: la
+    fosa izquierda."""
+    # La mirada no sube lo mismo que la cabeza: parte apuntando algo hacia
+    # arriba por el vestíbulo y el examinador la acomoda. Con 0,6 por grado,
+    # a 30° llega al cornete y meato medios y a 60° al techo y la parte alta
+    # del tabique, más atrás (H25).
+    a = math.radians(2 + 0.6 * grados)
     # Algo hacia medial: el tabique se ve de lado, no de canto.
     adelante = np.array([-0.055, math.sin(a), math.cos(a)])
     adelante /= np.linalg.norm(adelante)
-    xc, yc, hx, hy = 0.62, 0.95, 0.62, 0.95     # abertura del espéculo, cm
+    xc, yc = 0.62, 0.95                          # centro de la narina, cm
+    hx = hy = 0.95 * campo
     u = np.linspace(-1, 1, tam)
     U, V = np.meshgrid(u, -u)
-    abierto = (U ** 2 + V ** 2 <= 1).reshape(-1)
+    abierto = np.ones(tam * tam, bool)
     # Tabique a la derecha del examinador (x chico a la derecha).
     W = np.stack([xc - U * hx, yc + V * hy, np.zeros_like(U)], -1).reshape(-1, 3)
     ojo = np.array([xc, yc, 0.0]) - adelante * 25
@@ -240,6 +242,15 @@ def render(fosa, grados, tam=280, espejo=False):
         t[idx[~choca]] += np.maximum(d[~choca] * 0.7, 0.004)
         sale = (Q[:, 2] > 8.2) | (Q[:, 0] < -1.5) | (t[idx] > 14)
         vivo[idx[sale & ~choca]] = False
+    # Los rayos que se quedaron rozando una esquina (donde se juntan dos
+    # superficies el paso se achica y no alcanzan a llegar) chocaron igual:
+    # sin esto quedan puntos oscuros a lo largo de las uniones.
+    resto = np.nonzero(vivo)[0]
+    if len(resto):
+        d, ti = fosa.campo(org[resto] + dirs[resto] * t[resto, None])
+        roza = d < 0.05
+        golpe[resto[roza]] = True
+        tipo[resto[roza]] = ti[roza]
     img = np.zeros((len(dirs), 3))
     img[abierto & ~golpe] = FONDO
     k = np.nonzero(golpe)[0]
@@ -279,8 +290,6 @@ def render(fosa, grados, tam=280, espejo=False):
         esp = esp + donde * lam ** 20 * 0.3   # brilla: está mojada
     difusa = 0.38 + 0.62 * lam
     img[k] = (base * difusa[:, None] + esp[:, None]) * caida[:, None] + FONDO * (1 - caida)[:, None]
-    # Fuera de la abertura no hay nada: el aro del espéculo lo dibuja el
-    # visor (suavizado, a cualquier tamaño).
     img = (np.clip(img, 0, 1) ** (1 / 2.2)).reshape(tam, tam, 3)
     if espejo:
         img = img[:, ::-1]
@@ -289,25 +298,3 @@ def render(fosa, grados, tam=280, espejo=False):
 
 def fosa_del_paciente(p, nasal, lado, estado):
     return Fosa(p, lado, estado, aspecto(nasal, lado))
-
-
-def hallazgos(p, nasal, lado, estado):
-    """Lo que hay en la fosa, leído del paciente con los umbrales de arriba:
-    lo que el docente compara contra el informe del alumno."""
-    f = fosa_del_paciente(p, nasal, lado, estado)
-    d = f.dev
-    if d['area'] < DESVIACION_MINIMA:
-        tabique = 'centrado'
-    else:
-        tabique = 'espolon' if d['ancho'] < ESPOLON_ANCHO else 'desviado'
-    medial = f.x_cornete() - (f.r_ci + 0.15)
-    contacta = medial - d['B'] * math.exp(-0.5 * ((f.z_ci - d['z']) / d['w']) ** 2) < CONTACTO
-    cornete = 'contacta' if contacta else ('hipertrofico' if f.vol_ci > CORNETE_GRANDE else 'normal')
-    return {
-        'tabique': tabique,
-        'perforacion': f.perf is not None,
-        'cornete_inferior': cornete,
-        'polipos': f.polipos > 0,
-        'mucosa': f.aspecto['mucosa'],
-        'secrecion': f.aspecto['secrecion'],
-    }

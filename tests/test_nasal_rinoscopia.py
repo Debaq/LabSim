@@ -2,12 +2,14 @@
 
 1. El dibujo: imagen del tamaño pedido, la misma cada vez, y la fosa
    izquierda es la derecha en espejo cuando las dos fosas son iguales.
-2. Lo que hay sale de la nariz del caso: desviación, espolón, cornete
-   congestionado que el vasoconstrictor achica, pólipos, perforación, y el
-   aspecto de la mucosa del bloque `rinoscopia`.
-3. El módulo: sin NASAL no mira; con NASAL dibuja (fuera de la ventana),
-   anota en qué orden y posiciones miró el alumno, y el informe lleva lo
-   marcado y la técnica. Retomar devuelve lo informado.
+2. La fosa sale de la nariz del caso: desviación (y la concavidad del otro
+   lado), cornete congestionado que el vasoconstrictor achica, pólipos,
+   perforación, y el aspecto de la mucosa del bloque `rinoscopia`.
+3. El módulo: sin NASAL no mira; con NASAL dibuja (fuera de la ventana);
+   "reclinar" mueve la cabeza de a 2° entre 0° y 60° y el interior usa el
+   cálculo más cercano; una posición cuenta como mirada cuando el espéculo
+   (el mouse) pasa por la narina; el mouse sobre cada narina elige su fosa;
+   el informe lleva lo marcado y la técnica. Retomar devuelve lo informado.
 """
 
 import os
@@ -21,6 +23,7 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 import numpy as np  # noqa: E402
+from PySide6.QtCore import QPointF  # noqa: E402
 
 from core.base import context  # noqa: E402
 from nasal import RinoscopiaWindow as RW  # noqa: E402
@@ -57,23 +60,18 @@ def test_dibujo():
     assert not np.array_equal(a, rinoscopia.render(f, 60, 64))   # la cabeza cambia la vista
 
 
-def test_hallazgos_del_caso():
-    def h(cuadro, lado='D', estado=None, nasal=None):
-        p = modelo.paciente(cuadro)
-        return rinoscopia.hallazgos(p, nasal, lado, estado or {'minuto': 0})
-    assert h('normal')['tabique'] == 'centrado'
-    assert h('desviacion_derecha')['tabique'] == 'desviado'
-    assert h('desviacion_derecha', 'I')['tabique'] == 'centrado'
+def test_la_fosa_sale_del_caso():
     p = modelo.paciente('desviacion_derecha')
-    p['lados']['D']['desviacion']['ancho'] = 0.3
-    assert rinoscopia.hallazgos(p, None, 'D', {})['tabique'] == 'espolon'
-    assert h('cornetes')['cornete_inferior'] in ('hipertrofico', 'contacta')
-    assert h('cornetes', estado={'vc': True})['cornete_inferior'] == 'normal'
-    assert h('polipos')['polipos'] and not h('normal')['polipos']
-    assert h('perforacion')['perforacion']
+    d = rinoscopia.Fosa(p, 'D', {})
+    i = rinoscopia.Fosa(p, 'I', {})
+    assert d.dev['B'] > 0 and i.dev['B'] == 0          # el tabique se va a la derecha
+    assert i.concavo['B'] > 0                           # y del otro lado queda cóncavo
+    assert rinoscopia.Fosa(modelo.paciente('polipos'), 'D', {}).pol
+    assert rinoscopia.Fosa(modelo.paciente('perforacion'), 'D', {}).perf is not None
     nasal = {'rinoscopia': {'D': {'mucosa': 'palida', 'secrecion': 'acuosa'}, 'I': {'mucosa': 'verde'}}}
-    assert h('normal', nasal=nasal)['mucosa'] == 'palida'
-    assert h('normal', 'I', nasal=nasal)['mucosa'] == 'rosada'
+    assert rinoscopia.aspecto(nasal, 'D') == {'mucosa': 'palida', 'secrecion': 'acuosa'}
+    assert rinoscopia.aspecto(nasal, 'I')['mucosa'] == 'rosada'
+    assert rinoscopia.aspecto(None, 'D') == rinoscopia.ASPECTO_NORMAL
 
 
 def test_vasoconstrictor_achica_el_cornete():
@@ -91,7 +89,7 @@ def test_modulo_sin_nariz():
     sesion._actual = None
     w = RW.RinoscopiaWindow(data_login=ADMIN)
     w.la_super({'edad': 30}, '1')
-    assert not w.btn_lado['D'].isEnabled()
+    assert not w.btn_atras.isEnabled() and not w.cara.activa
     assert w.report_job() is None
 
 
@@ -101,14 +99,25 @@ def test_modulo_mira_e_informa():
     w = RW.RinoscopiaWindow(data_login=ADMIN)
     w.la_super(data, '42')
     esperar(w)
-    assert ('D', 0, False) in w.imagenes and ('I', 60, False) in w.imagenes
+    assert ('D', 0, False) in w.imagenes and ('I', 60, False) in w.imagenes and ('D', 10, False) in w.imagenes
     assert w.report_job() is None          # todavía no miró nada
-    w._elegir(grados=30)
-    w._elegir(grados=60)
-    w._elegir(lado='I', grados=0)
+    for _ in range(15):          # mantener apretado "reclinar": de a 2°
+        w._reclinar(+2)
+    assert w.grados == 30 and w.cara.grados == 30 and w.angulo() == 30
+    w._miro('D')
+    for _ in range(20):
+        w._reclinar(+2)
+    assert w.grados == 60            # no pasa de 60
+    w._miro('D')
+    w._reclinar(-2)
+    assert w.angulo() == 60          # 58° muestra el cálculo de 60°
+    for _ in range(40):
+        w._reclinar(-2)
+    assert w.grados == 0
+    w._miro('I')
     esperar(w)
+    assert w.cara.interior['D'] is not None
     w.paneles['D'].combos['tabique'].setCurrentIndex(w.paneles['D'].combos['tabique'].findData('desviado'))
-    w.paneles['D'].chk_perforacion.setChecked(False)
     w.txt_conclusion.setPlainText('Desviación septal derecha.')
     job = w.report_job()
     assert job['tipo'] == 'RINOSCOPIA' and job['appointment_id'] == 42
@@ -116,11 +125,10 @@ def test_modulo_mira_e_informa():
     assert d['D']['tabique'] == 'desviado'
     t = d['tecnica']
     assert t['primera_fosa'] == 'D'
-    assert t['posiciones'] == {'D': [30, 60], 'I': [0]}   # la recta de entrada no la eligió él
+    assert t['posiciones'] == {'D': [30, 60], 'I': [0]}
     assert not t['tres_posiciones']['D']
-    w._elegir(lado='D', grados=0)
+    w._miro('D')
     assert w.tecnica()['tres_posiciones']['D']
-    assert 'Desviado' in w.lbl_verdad.text()
 
     sesion._actual = None
     otra = RW.RinoscopiaWindow(data_login=ADMIN)
@@ -132,13 +140,30 @@ def test_modulo_mira_e_informa():
     esperar(otra)
 
 
+def test_narinas_eligen_la_fosa():
+    sesion._actual = None
+    w = RW.RinoscopiaWindow(data_login=ADMIN)
+    w.resize(900, 700)
+    w.la_super(caso('normal'), '3')
+    for grados in (0, 30, 60):
+        w.grados = grados
+        w.cara.set_grados(grados)
+        narinas, k = w.cara._narinas()
+        assert w.cara.fosa_bajo(narinas['D']) == 'D'
+        assert w.cara.fosa_bajo(narinas['I']) == 'I'
+        assert narinas['D'].x() < narinas['I'].x()      # la derecha del paciente, a mi izquierda
+        lejos = narinas['D'] + QPointF(0, 60 * k)
+        assert w.cara.fosa_bajo(lejos) is None
+    esperar(w)
+
+
 def test_cache_en_el_equipo():
     sesion._actual = None
     w = RW.RinoscopiaWindow(data_login=ADMIN)
     w.la_super(caso('mixta'), '7')
     esperar(w)
     antes = len(os.listdir(_cache))
-    assert antes >= 6
+    assert antes >= 14
     sesion._actual = None
     w2 = RW.RinoscopiaWindow(data_login=ADMIN)
     w2.la_super(caso('mixta'), '7')

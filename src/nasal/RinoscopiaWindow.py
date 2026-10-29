@@ -1,18 +1,32 @@
-"""La rinoscopía anterior en LabSim (H25): el visor por el espéculo y el
+"""La rinoscopía anterior en LabSim (H25): el paciente, el espéculo y el
 informe por fosa, como la otoscopía.
+
+El paciente de frente, como lo ve el examinador (la cabeza de
+labyrinthus3d fotografiada reclinándose de 0° a 60° cada 2°:
+scripts/nasal/cara_rinoscopia.py). Al lado derecho, "Reclinar": las
+flechas, mantenidas apretadas, echan la cabeza hacia atrás o la devuelven,
+suave.
+
+El espéculo es el mouse: sobre una narina aparece, y encima de la cara se
+abre lo que se ve por él en esa fosa y con la cabeza en esa posición.
+Moviéndolo un poco dentro de la narina se recorre la fosa (se inclina el
+espéculo). La fosa la elige la narina: la derecha del paciente queda a la
+izquierda del examinador.
 
 Lo que se ve lo dibuja nasal/rinoscopia.py desde la nariz del caso (la
 misma de la rinomanometría y la rinometría, nasal/sesion.py): si el alumno
 puso vasoconstrictor en la RM, el cornete se ve retraído también aquí.
+Se calcula cada 10° (recta, 10°, ..., 60°): la cabeza se reclina de a 2° y
+el interior muestra el cálculo más cercano.
 
-El alumno elige la fosa y la posición de la cabeza (recta, 30°, 60°). El
-módulo anota solo en qué orden miró las fosas y en qué posiciones, que es
-lo que H25 pide ("primero la fosa derecha", "cabeza recta, 30° y 60°"): va
+El módulo anota solo en qué orden miró las fosas y en qué posiciones de la
+cabeza (una posición cuenta cuando pasó el espéculo por la narina), que es
+lo que pide H25: "primero la fosa derecha", "cabeza recta, 30° y 60°". Va
 en el informe para el docente, sin avisarle nada al alumno.
 
 Cada imagen tarda un par de segundos: se calculan fuera de la ventana,
-primero la que se pide y después las tres posiciones de cada fosa, y quedan
-guardadas en el equipo (local_cache/nasal/rinoscopia) para la próxima vez.
+primero la que se pide y después las demás, y quedan guardadas en el equipo
+(local_cache/nasal/rinoscopia) para la próxima vez.
 
 Demo interna (docs/roadmap_nasal.md): solo el admin abre el módulo.
 Sin `cases.data['NASAL']` no hay nariz que mirar.
@@ -22,11 +36,10 @@ import hashlib
 import json
 import os
 
-from PySide6.QtCore import QRectF, Qt
-from PySide6.QtGui import QColor, QImage, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QHBoxLayout, QLabel,
-                               QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy, QSlider,
-                               QTabWidget, QVBoxLayout, QWidget)
+from PySide6.QtCore import QPointF, QRectF, Qt, Signal
+from PySide6.QtGui import QColor, QImage, QPainter, QPainterPath, QPen, QPixmap, QRadialGradient
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QHBoxLayout, QPlainTextEdit, QPushButton,
+                               QScrollArea, QSizePolicy, QTabWidget, QVBoxLayout, QWidget)
 
 from core import hilos, iconos, tema
 from core.base import context
@@ -36,11 +49,18 @@ from vemp.widgets.kit import Campos, Tarjeta, etiqueta
 
 LADOS = (('D', 'Fosa derecha', 'FND'), ('I', 'Fosa izquierda', 'FNI'))
 POSICIONES = (0, 30, 60)
-ANGULOS = tuple(range(0, 61, 10))     # lo que se calcula (el control va de 10 en 10)
-TAM = 260
-PERMISOS_DOCENTE = (555, 777)
+ANGULOS = tuple(range(0, 61, 10))     # el interior se calcula cada 10°
+TAM = 320
+CAMPO = 1.15                          # cuánto más que la narina abarca el campo
 NEGRO_VISOR = QColor('#0E0A0D')
 METAL = '#8E9098'
+
+PASO_RECLINAR = 2                     # grados por paso de las flechas
+REPETIR_MS = 70                       # cada cuánto avanza con la flecha apretada
+RADIO_NARINA = 13.0                   # px de la foto de 600: dónde "entra" el espéculo
+LUPA = 0.27                           # radio del círculo, en fracción del lado de la cara
+RECORTE = 0.62                        # qué parte del campo calculado entra en el círculo
+BATA = '#A9C4C8'
 
 # Lo que el alumno informa por fosa: (clave, rótulo, opciones (clave, texto)).
 CAMPOS_INFORME = [
@@ -55,7 +75,6 @@ CAMPOS_INFORME = [
     ('mucosa', 'Mucosa', [('', '—')] + [(k, v[0]) for k, v in rinoscopia.MUCOSAS.items()]),
     ('secrecion', 'Secreción', [('', '—')] + [(k, v[0]) for k, v in rinoscopia.SECRECIONES.items()]),
 ]
-TEXTO_OPCION = {campo: dict(opciones) for campo, _r, opciones in CAMPOS_INFORME}
 
 
 def _carpeta_cache():
@@ -66,8 +85,8 @@ def _carpeta_cache():
 
 def _clave(fosa, lado, grados):
     """Identifica una imagen: la misma fosa en la misma posición sale igual."""
-    crudo = json.dumps([rinoscopia.VERSION, TAM, lado, grados, round(fosa.vol_ci, 3), fosa.dev,
-                        fosa.polipos, fosa.perf, fosa.aspecto, round(fosa.r_cm, 3)],
+    crudo = json.dumps([rinoscopia.VERSION, TAM, CAMPO, lado, grados, round(fosa.vol_ci, 3), fosa.dev,
+                        fosa.concavo, fosa.polipos, fosa.perf, fosa.aspecto, round(fosa.r_cm, 3)],
                        sort_keys=True, default=str)
     return hashlib.blake2b(crudo.encode(), digest_size=12).hexdigest()
 
@@ -79,7 +98,7 @@ def _calcular(fosa, lado, grados, ruta):
         img = QImage(ruta)
         if not img.isNull():
             return img
-    arr = rinoscopia.render(fosa, grados, TAM, espejo=(lado == 'I'))
+    arr = rinoscopia.render(fosa, grados, TAM, espejo=(lado == 'I'), campo=CAMPO)
     img = QImage(arr.data, TAM, TAM, 3 * TAM, QImage.Format.Format_RGB888).copy()
     try:
         img.save(ruta, 'PNG')
@@ -88,53 +107,175 @@ def _calcular(fosa, lado, grados, ruta):
     return img
 
 
-class Visor(QWidget):
-    """Lo que se ve por el espéculo: la imagen centrada sobre negro."""
+_cara = None
+
+
+def cara():
+    """resources/rinoscopia: los cuadros de la cara y dónde caen las narinas."""
+    global _cara
+    if _cara is None:
+        with open(context.get_resource('rinoscopia/cara.json'), encoding='utf-8') as f:
+            info = json.load(f)
+        with open(context.get_resource('rinoscopia/cara.bin'), 'rb') as f:
+            info['bin'] = f.read()
+        _cara = info
+    return _cara
+
+
+class Cara(QWidget):
+    """El paciente de frente. Con el mouse sobre una narina aparece el
+    espéculo y, encima de la cara, lo que se ve por él."""
+
+    miro = Signal(str)          # la fosa ('D' o 'I') por la que pasó el espéculo
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._pixmap = None
-        self._texto = 'Sin atención abierta'
-        self.setMinimumSize(280, 280)
+        self.grados = 0
+        self.interior = {}      # lado -> QPixmap de lo que se ve, o None si se está calculando
+        self.activa = False     # hay paciente con nariz
+        self._fotos = {}
+        self._mouse = None
+        self._fosa = None       # la narina bajo el mouse
+        self.setMinimumSize(320, 320)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setMouseTracking(True)
 
-    def mostrar(self, pixmap):
-        self._pixmap, self._texto = pixmap, None
+    def set_grados(self, grados):
+        self.grados = grados
         self.update()
 
-    def aviso(self, texto):
-        self._pixmap, self._texto = None, texto
+    def set_interior(self, lado, pixmap):
+        self.interior[lado] = pixmap
         self.update()
+
+    def _foto(self):
+        g = str(self.grados)
+        if g not in self._fotos:
+            d = cara()
+            ini, largo = d['indice'][g]
+            self._fotos[g] = QPixmap.fromImage(QImage.fromData(d['bin'][ini:ini + largo], 'WEBP'))
+        return self._fotos[g]
+
+    def _marco(self):
+        lado = min(self.width(), self.height())
+        return QRectF((self.width() - lado) / 2, (self.height() - lado) / 2, lado, lado), lado / cara()['tam']
+
+    def _narinas(self):
+        """Dónde cae cada narina en pantalla, en este cuadro."""
+        marco, k = self._marco()
+        fila = cara()['cuadros'][str(self.grados)]
+        return {l: QPointF(marco.x() + fila[l][0] * k, marco.y() + fila[l][1] * k) for l in ('D', 'I')}, k
+
+    def fosa_bajo(self, pos):
+        narinas, k = self._narinas()
+        lado = min(narinas, key=lambda l: (narinas[l] - pos).manhattanLength())
+        d = narinas[lado] - pos
+        return lado if (d.x() ** 2 + d.y() ** 2) ** 0.5 <= RADIO_NARINA * k else None
+
+    def mouseMoveEvent(self, evento):
+        self._mouse = evento.position()
+        self._fosa = self.fosa_bajo(self._mouse) if self.activa else None
+        self.setCursor(Qt.CursorShape.BlankCursor if self._fosa else Qt.CursorShape.ArrowCursor)
+        if self._fosa:
+            self.miro.emit(self._fosa)
+        self.update()
+        super().mouseMoveEvent(evento)
+
+    def leaveEvent(self, evento):
+        self._mouse = self._fosa = None
+        self.update()
+        super().leaveEvent(evento)
 
     def paintEvent(self, _evento):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
-        borde = QPainterPath()
-        borde.addRoundedRect(QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), 8, 8)
-        p.setClipPath(borde)
-        p.fillRect(self.rect(), NEGRO_VISOR)
-        if self._pixmap is not None:
-            lado = min(self.width(), self.height()) - 24
-            destino = QRectF((self.width() - lado) / 2, (self.height() - lado) / 2, lado, lado)
-            # Solo la abertura del espéculo, y su aro de metal encima.
-            circulo = QPainterPath()
-            circulo.addEllipse(destino)
-            p.save()
-            p.setClipPath(circulo)
-            p.drawPixmap(destino, self._pixmap, QRectF(self._pixmap.rect()))
-            p.restore()
-            aro = max(6.0, lado * 0.025)
-            p.setPen(QPen(QColor(METAL), aro))
-            p.drawEllipse(destino.adjusted(aro / 2, aro / 2, -aro / 2, -aro / 2))
-        else:
-            p.setPen(QColor(tema.TEXTO_TENUE))
-            p.drawText(self.rect().adjusted(16, 0, -16, 0),
-                       Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap, self._texto or '')
-        p.setClipping(False)
-        p.setPen(QPen(QColor(tema.BORDE), 1))
-        p.drawPath(borde)
+        marco, k = self._marco()
+        p.drawPixmap(marco, self._foto(), QRectF(0, 0, cara()['tam'], cara()['tam']))
+        self._pintar_bata(p, marco, k)
+        if self._fosa and self._mouse is not None:
+            self._pintar_especulo(p, marco, k)
         p.end()
+
+    def _pintar_bata(self, p, marco, k):
+        """El modelo termina en el cuello: al reclinar asoma el corte. Los
+        hombros con la bata lo tapan, hasta justo debajo del borde."""
+        x0, x1, y = cara()['cuadros'][str(self.grados)]['cuello']
+        arriba = marco.y() + (y - 8) * k
+        if arriba > marco.bottom():
+            return
+        # Centrada en la cara (el borde del modelo no es simétrico).
+        mitad = max(cara()['tam'] / 2 - x0, x1 - cara()['tam'] / 2) + 6
+        medio = marco.center().x()
+        izq, der = medio - mitad * k, medio + mitad * k
+        hombro = arriba + 90 * k
+        ancho = self.width()
+        bata = QPainterPath()
+        bata.moveTo(-2, self.height() + 2)
+        bata.lineTo(-2, hombro + 60 * k)
+        bata.cubicTo(medio - 300 * k, hombro, izq - 50 * k, hombro, izq, arriba)
+        bata.lineTo(der, arriba)
+        bata.cubicTo(der + 50 * k, hombro, medio + 300 * k, hombro, ancho + 2, hombro + 60 * k)
+        bata.lineTo(ancho + 2, self.height() + 2)
+        bata.closeSubpath()
+        p.setPen(QPen(QColor('#8FAFB4'), 1.2))
+        p.setBrush(QColor(BATA))
+        p.drawPath(bata)
+        # El escote, una línea un poco más oscura.
+        p.setPen(QPen(QColor('#8FAFB4'), 2))
+        p.drawLine(QPointF(izq, arriba + 2), QPointF(der, arriba + 2))
+
+    def _pintar_especulo(self, p, marco, k):
+        lado = self._fosa
+        narinas, _ = self._narinas()
+        centro = narinas[lado]
+        # El espéculo en la narina (pequeño, plateado) ...
+        p.setPen(QPen(QColor(METAL), 2.4))
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawEllipse(centro, 9 * k, 11 * k)
+        # ... y lo que se ve por él, en grande al costado de esa fosa (la
+        # derecha del paciente hacia mi izquierda), sin tapar la narina.
+        r = marco.width() * LUPA
+        hacia = -1 if lado == 'D' else 1
+        c = QPointF(centro.x() + hacia * (r + 40 * k), centro.y() - r * 0.15)
+        c.setX(max(r + 6, min(self.width() - r - 6, c.x())))
+        c.setY(max(r + 6, min(self.height() - r - 6, c.y())))
+        p.setPen(QPen(QColor(METAL), 1.6, Qt.PenStyle.DashLine))
+        p.drawLine(centro, c + (centro - c) * (r / max(1.0, ((centro - c).x() ** 2 + (centro - c).y() ** 2) ** 0.5)))
+        circulo = QPainterPath()
+        circulo.addEllipse(c, r, r)
+        p.save()
+        p.setClipPath(circulo)
+        p.fillRect(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), NEGRO_VISOR)
+        img = self.interior.get(lado)
+        if img is None:
+            p.setPen(QColor(tema.TEXTO_TENUE))
+            p.drawText(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), Qt.AlignmentFlag.AlignCenter,
+                       'Acomodando el espéculo…')
+        else:
+            # Mover el mouse dentro de la narina inclina el espéculo: se
+            # recorre el campo calculado.
+            d = self._mouse - centro
+            dx = max(-1.0, min(1.0, d.x() / (RADIO_NARINA * k)))
+            dy = max(-1.0, min(1.0, d.y() / (RADIO_NARINA * k)))
+            w = img.width() * RECORTE
+            libre = (img.width() - w) / 2
+            fuente = QRectF(libre + dx * libre, libre + dy * libre, w, w)
+            p.drawPixmap(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), img, fuente)
+            luz = QRadialGradient(c, r)
+            luz.setColorAt(0.0, QColor(255, 220, 150, 35))
+            luz.setColorAt(0.7, QColor(0, 0, 0, 0))
+            luz.setColorAt(1.0, QColor(NEGRO_VISOR.red(), NEGRO_VISOR.green(), NEGRO_VISOR.blue(), 230))
+            p.fillRect(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), luz)
+        p.restore()
+        aro = max(5.0, r * 0.05)
+        p.setPen(QPen(QColor(METAL), aro))
+        p.drawEllipse(c, r + aro / 2, r + aro / 2)
+        p.setPen(QPen(QColor(255, 255, 255, 110), aro * 0.35))
+        p.drawArc(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), 40 * 16, 70 * 16)
+        p.setPen(QColor(tema.TARJETA))
+        p.drawText(QRectF(c.x() - r, c.y() + r * 0.72, 2 * r, r * 0.2), Qt.AlignmentFlag.AlignCenter,
+                   'Fosa derecha' if lado == 'D' else 'Fosa izquierda')
 
 
 class PanelFosa(Tarjeta):
@@ -187,11 +328,9 @@ class RinoscopiaWindow(QWidget):
     def __init__(self, data_login=None, parent=None):
         super().__init__(parent)
         self.data_login = data_login or {}
-        self.es_docente = self.data_login.get('permission') in PERMISOS_DOCENTE
         self.sesion = None
         self.nasal = None
         self.appointment_id = None
-        self.lado = 'D'
         self.grados = 0
         self.imagenes = {}      # (lado, grados, vc) -> QPixmap
         self.cola = []          # (lado, grados) por calcular, la primera es la que se pide
@@ -204,16 +343,6 @@ class RinoscopiaWindow(QWidget):
         self.tabs = QTabWidget()
         self.tabs.addTab(self._pestana_visor(), iconos.icono('nariz', tema.TEXTO_TENUE, 16), 'Rinoscopio')
         self.tabs.addTab(self._pestana_informe(), iconos.icono('evolucion', tema.TEXTO_TENUE, 16), 'Informe')
-        self.lbl_verdad = None
-        if self.es_docente:
-            self.lbl_verdad = etiqueta('', rol='hint')
-            self.lbl_verdad.setTextFormat(Qt.TextFormat.RichText)
-            self.lbl_verdad.setWordWrap(True)
-            self.lbl_verdad.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-            caja = QScrollArea()
-            caja.setWidgetResizable(True)
-            caja.setWidget(self.lbl_verdad)
-            self.tabs.addTab(caja, 'Lo que hay')
         raiz.addWidget(self.tabs)
         self.la_super(None)
 
@@ -221,45 +350,37 @@ class RinoscopiaWindow(QWidget):
 
     def _pestana_visor(self):
         tab = QWidget()
-        col = QVBoxLayout(tab)
-        col.setContentsMargins(0, 10, 0, 0)
-        col.setSpacing(8)
-        fila = QHBoxLayout()
-        self.grupo_lado = QButtonGroup(self)
-        self.btn_lado = {}
-        for lado, texto, sigla in LADOS:
-            b = QPushButton(texto)
-            b.setCheckable(True)
-            b.clicked.connect(lambda _c=False, l=lado: self._elegir(lado=l))
-            self.grupo_lado.addButton(b)
-            self.btn_lado[lado] = b
-            fila.addWidget(b)
-        fila.addSpacing(16)
-        fila.addWidget(etiqueta('CABEZA', rol='seccion'))
-        self.grupo_pos = QButtonGroup(self)
-        self.btn_pos = {}
-        for g in POSICIONES:
-            b = QPushButton('Recta' if g == 0 else f'{g}°')
-            b.setCheckable(True)
-            b.clicked.connect(lambda _c=False, gg=g: self._elegir(grados=gg))
-            self.grupo_pos.addButton(b)
-            self.btn_pos[g] = b
-            fila.addWidget(b)
-        self.slider = QSlider(Qt.Orientation.Horizontal)
-        self.slider.setRange(0, len(ANGULOS) - 1)
-        self.slider.setPageStep(1)
-        self.slider.setFixedWidth(160)
-        self.slider.valueChanged.connect(lambda i: self._elegir(grados=ANGULOS[i]))
-        fila.addWidget(self.slider)
-        self.lbl_grados = etiqueta('0°', rol='hint')
-        fila.addWidget(self.lbl_grados)
-        fila.addStretch(1)
-        col.addLayout(fila)
-        self.visor = Visor()
-        col.addWidget(self.visor, 1)
-        self.lbl_pista = etiqueta('', rol='hint')
-        self.lbl_pista.setWordWrap(True)
-        col.addWidget(self.lbl_pista)
+        fila = QHBoxLayout(tab)
+        fila.setContentsMargins(0, 10, 0, 0)
+        fila.setSpacing(10)
+        self.cara = Cara()
+        self.cara.miro.connect(self._miro)
+        fila.addWidget(self.cara, 1)
+
+        # Reclinar: mantener apretada una flecha mueve la cabeza de a poco.
+        lado = QVBoxLayout()
+        lado.setSpacing(6)
+        lado.addStretch(1)
+        self.btn_atras = QPushButton('▲')
+        self.btn_adelante = QPushButton('▼')
+        for b, paso, ayuda in ((self.btn_atras, PASO_RECLINAR, 'Echar la cabeza hacia atrás'),
+                               (self.btn_adelante, -PASO_RECLINAR, 'Volver la cabeza')):
+            b.setToolTip(ayuda)
+            b.setFixedSize(54, 54)
+            b.setAutoRepeat(True)
+            b.setAutoRepeatDelay(250)
+            b.setAutoRepeatInterval(REPETIR_MS)
+            b.clicked.connect(lambda _c=False, d=paso: self._reclinar(d))
+        lado.addWidget(self.btn_atras, 0, Qt.AlignmentFlag.AlignHCenter)
+        rotulo = etiqueta('RECLINAR', rol='seccion')
+        rotulo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        lado.addWidget(rotulo)
+        self.lbl_grados = etiqueta('', rol='hint')
+        self.lbl_grados.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        lado.addWidget(self.lbl_grados)
+        lado.addWidget(self.btn_adelante, 0, Qt.AlignmentFlag.AlignHCenter)
+        lado.addStretch(1)
+        fila.addLayout(lado)
         return tab
 
     def _pestana_informe(self):
@@ -301,54 +422,58 @@ class RinoscopiaWindow(QWidget):
         self.txt_conclusion.clear()
         self.estado_informe.limpiar()
         hay = self.sesion is not None and self.sesion.hay_paciente
-        for b in (*self.btn_lado.values(), *self.btn_pos.values(), self.slider):
+        for b in (self.btn_atras, self.btn_adelante):
             b.setEnabled(hay)
+        self.cara.activa = hay
+        self.cara.interior.clear()
+        self.grados = 0
+        self.cara.set_grados(0)
+        self.lbl_grados.setText('recta' if hay else '')
         if not hay:
-            self.visor.aviso('Este paciente no tiene la nariz cargada en el caso.' if data is not None
-                             else 'Sin atención abierta')
-            self.lbl_pista.setText('')
-            self._dibujar_verdad()
             return
-        self.lado, self.grados = 'D', 0
-        self.lbl_pista.setText('Elige la fosa y la posición de la cabeza del paciente.')
-        self._elegir(lado='D', grados=0, mirar=False)
-        # Las tres posiciones de las dos fosas, de a poco y fuera de la
-        # ventana; los ángulos intermedios, recién cuando se piden.
-        for lado in ('D', 'I'):
-            for g in POSICIONES:
+        self._mostrar()
+        # Las tres posiciones de las dos fosas primero; después los ángulos
+        # intermedios, todo de a poco y fuera de la ventana.
+        for g in POSICIONES + tuple(a for a in ANGULOS if a not in POSICIONES):
+            for lado in ('D', 'I'):
                 self._pedir(lado, g, al_final=True)
-        self._dibujar_verdad()
 
     def showEvent(self, evento):
         # El vasoconstrictor pudo ponerse en la RM o la RA: otra imagen.
         if self.sesion is not None and self.sesion.hay_paciente:
-            self._elegir(mirar=False)
+            self._mostrar()
         super().showEvent(evento)
 
     # --- Visor -----------------------------------------------------------
 
-    def _elegir(self, lado=None, grados=None, mirar=True):
+    def angulo(self):
+        """El cálculo del interior más cercano a cómo está la cabeza."""
+        return min(ANGULOS, key=lambda a: abs(a - self.grados))
+
+    def _reclinar(self, paso):
         if self.sesion is None or not self.sesion.hay_paciente:
             return
-        self.lado = lado or self.lado
-        self.grados = self.grados if grados is None else grados
-        for l, b in self.btn_lado.items():
-            b.setChecked(l == self.lado)
-        for g, b in self.btn_pos.items():
-            b.setChecked(g == self.grados)
-        self.slider.blockSignals(True)
-        self.slider.setValue(ANGULOS.index(self.grados))
-        self.slider.blockSignals(False)
-        self.lbl_grados.setText(f'{self.grados}°')
-        if mirar and (self.lado, self.grados) not in self.vistas:
-            self.vistas.append((self.lado, self.grados))
-        img = self.imagenes.get((self.lado, self.grados, self.sesion.vc))
-        if img is not None:
-            self.visor.mostrar(img)
-        else:
-            self.visor.aviso('Acomodando el espéculo…')
-            self._pedir(self.lado, self.grados)
-        self._dibujar_verdad()
+        self.grados = max(0, min(ANGULOS[-1], self.grados + paso))
+        self.cara.set_grados(self.grados)
+        self.lbl_grados.setText('recta' if self.grados == 0 else f'{self.grados}°')
+        self._mostrar()
+
+    def _mostrar(self):
+        """Pone en la cara el interior de las dos fosas para esta posición
+        (o lo pide, si no está)."""
+        g = self.angulo()
+        for lado in ('D', 'I'):
+            img = self.imagenes.get((lado, g, self.sesion.vc))
+            self.cara.set_interior(lado, img)
+            if img is None:
+                self._pedir(lado, g)
+
+    def _miro(self, lado):
+        """Pasó el espéculo por la narina: cuenta como mirada de esa fosa en
+        esta posición (la del cálculo, de 10 en 10)."""
+        vista = (lado, self.angulo())
+        if vista not in self.vistas:
+            self.vistas.append(vista)
 
     def _pedir(self, lado, grados, al_final=False):
         clave = (lado, grados)
@@ -379,8 +504,8 @@ class RinoscopiaWindow(QWidget):
             if self.sesion is not sesion_actual:
                 return self._siguiente()
             self.imagenes[(lado, grados, vc)] = QPixmap.fromImage(img)
-            if (lado, grados, vc) == (self.lado, self.grados, self.sesion.vc):
-                self.visor.mostrar(self.imagenes[(lado, grados, vc)])
+            if (grados, vc) == (self.angulo(), self.sesion.vc):
+                self.cara.set_interior(lado, self.imagenes[(lado, grados, vc)])
             self._siguiente()
 
         def fallo(exc):
@@ -427,34 +552,4 @@ class RinoscopiaWindow(QWidget):
                        if isinstance(v, (list, tuple)) and len(v) == 2]
         if data.get('vasoconstrictor'):
             self.sesion.aplicar_vasoconstrictor()
-        self._dibujar_verdad()
         return True
-
-    # --- Lo que hay (docente) ----------------------------------------------
-
-    def _dibujar_verdad(self):
-        if self.lbl_verdad is None:
-            return
-        if self.sesion is None or not self.sesion.hay_paciente:
-            self.lbl_verdad.setText('')
-            return
-        estado = self.sesion.estado()
-        filas = []
-        for clave, rotulo in (('tabique', 'Tabique'), ('cornete_inferior', 'Cornete inferior'),
-                              ('mucosa', 'Mucosa'), ('secrecion', 'Secreción')):
-            celdas = [TEXTO_OPCION[clave].get(rinoscopia.hallazgos(self.sesion.paciente, self.nasal, l, estado)[clave], '—')
-                      for l in ('D', 'I')]
-            filas.append(f'<tr><td>{rotulo}</td><td>{celdas[0]}</td><td>{celdas[1]}</td></tr>')
-        for clave, rotulo in (('perforacion', 'Perforación septal'), ('polipos', 'Pólipos en el meato medio')):
-            celdas = ['sí' if rinoscopia.hallazgos(self.sesion.paciente, self.nasal, l, estado)[clave] else 'no'
-                      for l in ('D', 'I')]
-            filas.append(f'<tr><td>{rotulo}</td><td>{celdas[0]}</td><td>{celdas[1]}</td></tr>')
-        t = self.tecnica()
-        primera = {'D': 'la derecha', 'I': 'la izquierda', None: '—'}[t['primera_fosa']]
-        pos = '; '.join(f"{s}: {', '.join(f'{g}°' for g in t['posiciones'][l]) or 'ninguna'}"
-                        for l, _t, s in LADOS)
-        self.lbl_verdad.setText(
-            '<p>Leído de la nariz del caso, con los umbrales del simulador '
-            f'({"con" if self.sesion.vc else "sin"} vasoconstrictor).</p>'
-            '<table cellpadding="4"><tr><th></th><th>FND</th><th>FNI</th></tr>' + ''.join(filas) + '</table>'
-            f'<p><b>Cómo miró el alumno.</b> Primero {primera}. Posiciones: {pos}.</p>')
