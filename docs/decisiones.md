@@ -7497,3 +7497,12 @@ vestibular) sin tocar el panel. El catálogo del modo invitado lleva el
 mismo grupo. En el servidor: desplegar, "Aplicar schema" y correr
 `scripts/libro/grupo_libro.sql`; antes de eso la API no manda grupo y la app
 muestra las carpetas sueltas como siempre.
+
+En el backend, lo mismo (`Practica::agrupar`): el panel de práctica libre
+muestra cada libro como un bloque plegable con sus carpetas adentro (queda
+abierto o cerrado como lo dejó el docente) y cada carpeta tiene su campo
+"Libro" (vacío: suelta), también al crearla. En la agenda, "Nueva cita" suma
+un filtro "Carpeta" con los libros y sus capítulos (más "fuera de la
+práctica libre"): en un capítulo, los pacientes salen en el orden del libro.
+Agendar uno de esos pacientes es una cita común: no cuenta como intento de
+práctica.

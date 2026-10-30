@@ -532,6 +532,20 @@ if ($isNewFlow) {
             'label' => $label,
         ];
     }
+    // La práctica libre: en qué carpetas está cada ficha, para filtrar el
+    // selector por libro y capítulo (Practica::agrupar, como el panel).
+    $carpetasPractica = Practica::carpetasListas() ? Practica::carpetas() : [];
+    $bloquesPractica = Practica::agrupar($carpetasPractica);
+    $carpetasDeFicha = [];
+    foreach ($carpetasPractica as $cp) {
+        foreach ($cp['items'] as $it) {
+            $carpetasDeFicha[(string) $it['case_id']][] = (int) $cp['id'] . ':' . (int) $it['orden'];
+        }
+    }
+    foreach ($caseOptions as &$opcion) {
+        $opcion['carpetas'] = $carpetasDeFicha[(string) $opcion['id']] ?? [];
+    }
+    unset($opcion);
 }
 
 admin_add_css('agenda.css');
@@ -751,11 +765,27 @@ admin_header('Agendas', $me);
     <label>Buscar paciente por nombre
         <input type="text" id="new-case-search" placeholder="Escribe un nombre..." autocomplete="off" oninput="filterCaseOptions()">
     </label>
+    <?php if ($carpetasPractica): ?>
+    <label>Carpeta
+        <select id="new-case-carpeta" onchange="filterCaseOptions()">
+            <option value="">Todas las fichas</option>
+            <option value="ninguna">Fichas fuera de la práctica libre</option>
+            <?php foreach ($bloquesPractica as $bloque): ?>
+            <?php if ($bloque['grupo'] !== null): ?><optgroup label="<?= htmlspecialchars($bloque['grupo']) ?>"><?php endif; ?>
+            <?php foreach ($bloque['carpetas'] as $cp): ?>
+            <option value="<?= (int) $cp['id'] ?>"><?= htmlspecialchars($cp['nombre']) ?> (<?= count($cp['items']) ?>)</option>
+            <?php endforeach; ?>
+            <?php if ($bloque['grupo'] !== null): ?></optgroup><?php endif; ?>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <?php endif; ?>
     <label>Caso / paciente
         <select id="new-case-picker" size="8" onchange="if (this.value) { location.href = this.options[this.selectedIndex].dataset.href; }">
             <?php foreach ($caseOptions as $co): ?>
             <option value="<?= htmlspecialchars($co['id']) ?>"
                     data-search="<?= htmlspecialchars(mb_strtolower($co['label'])) ?>"
+                    data-carpetas="<?= htmlspecialchars(implode(',', $co['carpetas'] ?? [])) ?>"
                     data-href="<?= htmlspecialchars(agenda_url(['schedule' => $co['id'], 'new' => null, 'force_round' => 1])) ?>">
                 <?= htmlspecialchars($co['label']) ?>
             </option>
@@ -773,12 +803,34 @@ admin_header('Agendas', $me);
         var q = document.getElementById('new-case-search').value.toLowerCase().trim();
         var opts = document.querySelectorAll('#new-case-picker option');
         var anyVisible = false;
+        var filtro = document.getElementById('new-case-carpeta');
+        var carpeta = filtro ? filtro.value : '';
         opts.forEach(function (o) {
-            var match = q === '' || (o.dataset.search || '').indexOf(q) !== -1;
+            // data-carpetas: "carpeta:número del caso", una por carpeta.
+            var suyas = {};
+            (o.dataset.carpetas || '').split(',').forEach(function (par) {
+                if (par) { var p = par.split(':'); suyas[p[0]] = parseInt(p[1], 10) || 0; }
+            });
+            var enCarpeta = carpeta === '' || (carpeta === 'ninguna' ? Object.keys(suyas).length === 0 : carpeta in suyas);
+            o.dataset.orden = carpeta in suyas ? suyas[carpeta] : '';
+            var match = enCarpeta && (q === '' || (o.dataset.search || '').indexOf(q) !== -1);
             o.hidden = !match;
             if (match) { anyVisible = true; }
         });
         document.getElementById('new-case-empty').style.display = anyVisible ? 'none' : 'block';
+        // En un capítulo, los pacientes en el orden del libro; si no, como
+        // vienen (los últimos editados primero).
+        var lista = document.getElementById('new-case-picker');
+        var todas = Array.prototype.slice.call(opts);
+        if (!lista.dataset.original) {
+            todas.forEach(function (o, i) { o.dataset.pos = i; });
+            lista.dataset.original = '1';
+        }
+        var conOrden = /^[0-9]+$/.test(carpeta);
+        todas.sort(function (a, b) {
+            return conOrden ? (+a.dataset.orden || 0) - (+b.dataset.orden || 0) || a.dataset.pos - b.dataset.pos
+                            : a.dataset.pos - b.dataset.pos;
+        }).forEach(function (o) { lista.appendChild(o); });
     }
     document.getElementById('new-case-search').focus();
 </script>

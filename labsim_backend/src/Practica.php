@@ -178,8 +178,9 @@ final class Practica
             return [];
         }
         $pdo = Db::get();
+        $grupo = self::grupoListo() ? 'grupo' : 'NULL AS grupo';
         $carpetas = $pdo->query(
-            'SELECT id, nombre, orden FROM practice_folders WHERE active = 1 ORDER BY orden, id'
+            "SELECT id, nombre, orden, {$grupo} FROM practice_folders WHERE active = 1 ORDER BY orden, id"
         )->fetchAll();
         $stmt = $pdo->query(
             "SELECT pi.id, pi.folder_id, pi.case_id, pi.procedimiento, pi.show_study_sheet, pi.orden,
@@ -200,28 +201,91 @@ final class Practica
         }
         foreach ($carpetas as &$c) {
             $c['id'] = (int) $c['id'];
+            $c['grupo'] = $c['grupo'] !== null && $c['grupo'] !== '' ? (string) $c['grupo'] : null;
             $c['items'] = $porCarpeta[$c['id']] ?? [];
         }
         unset($c);
         return $carpetas;
     }
 
-    public static function crearCarpeta(string $nombre, int $userId): ?string
+    public static function crearCarpeta(string $nombre, int $userId, string $grupo = ''): ?string
     {
         $nombre = trim($nombre);
+        $grupo = trim($grupo);
         if ($nombre === '') {
             return 'Falta el nombre de la carpeta.';
         }
         if (!self::carpetasListas()) {
             return 'La base todavía no tiene las carpetas: aplica el schema en Base de datos.';
         }
-        Db::reintentar(static function () use ($nombre, $userId): void {
+        $conGrupo = $grupo !== '' && self::grupoListo();
+        Db::reintentar(static function () use ($nombre, $userId, $grupo, $conGrupo): void {
             $pdo = Db::get();
             $orden = (int) $pdo->query('SELECT COALESCE(MAX(orden), 0) + 1 FROM practice_folders WHERE active = 1')->fetchColumn();
-            $pdo->prepare('INSERT INTO practice_folders (nombre, orden, created_by) VALUES (?, ?, ?)')
-                ->execute([$nombre, $orden, $userId]);
+            if ($conGrupo) {
+                $pdo->prepare('INSERT INTO practice_folders (nombre, orden, created_by, grupo) VALUES (?, ?, ?, ?)')
+                    ->execute([$nombre, $orden, $userId, $grupo]);
+            } else {
+                $pdo->prepare('INSERT INTO practice_folders (nombre, orden, created_by) VALUES (?, ?, ?)')
+                    ->execute([$nombre, $orden, $userId]);
+            }
         });
         return null;
+    }
+
+    /**
+     * El libro (o la carpeta que la contiene) de una carpeta; vacío = suelta.
+     * Ver practice_folders.grupo.
+     */
+    public static function cambiarGrupo(int $folderId, string $grupo): ?string
+    {
+        if (!self::grupoListo()) {
+            return 'La base todavía no tiene la columna del libro: aplica el schema en Base de datos.';
+        }
+        $grupo = trim($grupo);
+        Db::reintentar(static function () use ($folderId, $grupo): void {
+            Db::get()->prepare('UPDATE practice_folders SET grupo = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([$grupo === '' ? null : $grupo, $folderId]);
+        });
+        return null;
+    }
+
+    /** Los libros que ya existen, para proponerlos al crear o mover una carpeta. */
+    public static function grupos(): array
+    {
+        if (!self::grupoListo()) {
+            return [];
+        }
+        $filas = Db::get()->query(
+            "SELECT DISTINCT grupo FROM practice_folders WHERE active = 1 AND grupo IS NOT NULL AND grupo <> '' ORDER BY grupo"
+        )->fetchAll();
+        return array_map('strval', array_column($filas, 'grupo'));
+    }
+
+    /**
+     * Las carpetas agrupadas por libro, en el orden de la primera carpeta de
+     * cada uno; las sueltas, cada una en su propio bloque sin libro. Lo que
+     * ve el panel y lo mismo que arma la app (Agenda._armar_carpetas).
+     *
+     * @return list<array{grupo:?string, carpetas:list<array>}>
+     */
+    public static function agrupar(array $carpetas): array
+    {
+        $bloques = [];
+        $indice = [];
+        foreach ($carpetas as $c) {
+            $g = $c['grupo'] ?? null;
+            if ($g === null) {
+                $bloques[] = ['grupo' => null, 'carpetas' => [$c]];
+                continue;
+            }
+            if (!isset($indice[$g])) {
+                $indice[$g] = count($bloques);
+                $bloques[] = ['grupo' => $g, 'carpetas' => []];
+            }
+            $bloques[$indice[$g]]['carpetas'][] = $c;
+        }
+        return $bloques;
     }
 
     public static function renombrarCarpeta(int $folderId, string $nombre): ?string
