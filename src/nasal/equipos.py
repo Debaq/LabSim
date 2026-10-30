@@ -126,6 +126,7 @@ class EquipoNasal(QMainWindow):
 
     TITULO = ''
     EQUIPO = ''      # prefijo de la semilla de cada medición
+    PILL_VC = True   # el estado del vasoconstrictor junto a los mensajes
 
     def __init__(self, data_login=None, parent=None):
         super().__init__(parent)
@@ -221,21 +222,19 @@ class EquipoNasal(QMainWindow):
         return contenedor
 
     def _encabezado(self):
-        caja = Tarjeta()
-        caja.cuerpo.setContentsMargins(14, 10, 14, 10)
-        fila = QHBoxLayout()
+        """Una línea: lo que va pasando y, si hay, el vasoconstrictor. El
+        paciente ya está en la atención; el minuto del ciclo nasal, en "Lo
+        que el equipo no sabe"."""
+        caja = QWidget()
+        fila = QHBoxLayout(caja)
+        fila.setContentsMargins(4, 0, 4, 0)
         fila.setSpacing(8)
-        self.lbl_paciente = etiqueta('Sin atención abierta', rol='titulo')
-        fila.addWidget(self.lbl_paciente)
-        self.pill_estado = Pastilla('reposo', 'neutro')
-        fila.addWidget(self.pill_estado)
-        self.pill_minuto = Pastilla('', 'neutro')
-        fila.addWidget(self.pill_minuto)
-        fila.addStretch(1)
-        caja.agregar_layout(fila)
         self.lbl_mensaje = etiqueta('', rol='hint')
         self.lbl_mensaje.setWordWrap(True)
-        caja.agregar(self.lbl_mensaje)
+        fila.addWidget(self.lbl_mensaje, 1)
+        self.pill_estado = Pastilla('', 'neutro')
+        self.pill_estado.setVisible(False)
+        fila.addWidget(self.pill_estado)
         return caja
 
     def _boton(self, texto, accion, principal=False):
@@ -293,7 +292,6 @@ class EquipoNasal(QMainWindow):
             return
         for panel in self._paneles():
             panel.setEnabled(True)
-        self.lbl_paciente.setText(descripcion_paciente(data))
         self._al_entrar()
         self._mensaje(self.INDICACION)
         self.dibujar()
@@ -301,8 +299,6 @@ class EquipoNasal(QMainWindow):
     def _sin_caso(self, con_paciente=False):
         for panel in self._paneles():
             panel.setEnabled(False)
-        self.lbl_paciente.setText('Sin atención abierta')
-        self.pill_minuto.set('')
         if con_paciente:
             self._mensaje('Este paciente no tiene la nariz cargada en el caso: el equipo no '
                           'mide. Hace falta el bloque NASAL del caso.', 'alerta')
@@ -406,11 +402,11 @@ class EquipoNasal(QMainWindow):
 
     def _refrescar_encabezado(self):
         if self.sesion is None or not self.sesion.hay_paciente:
-            self.pill_estado.set('—', 'neutro')
+            self.pill_estado.setVisible(False)
             return
         texto = texto_vc(self.sesion)
-        self.pill_estado.set(texto or 'reposo', 'acento' if texto else 'neutro')
-        self.pill_minuto.set(f'minuto {self.sesion.minuto()} del ciclo' if self.es_docente else '')
+        self.pill_estado.set(texto, 'acento')
+        self.pill_estado.setVisible(bool(texto) and self.PILL_VC)
         self.btn_vc.setEnabled(not all(l in self.sesion.vc_puesto for l in LADOS) and not self.midiendo)
 
     def _cada_segundo(self):
@@ -510,6 +506,7 @@ class RinomanometriaWindow(EquipoNasal):
 
     TITULO = 'Rinomanometría anterior'
     EQUIPO = 'rm'
+    PILL_VC = False            # ya lo cuenta el paciente
     TIPO = 'RINOMANOMETRIA'
     FUNCION = staticmethod(RM.mide_registro)
     INDICACION = ('Pon el adaptador con el tubo de presión en una narina (clic en la narina del '
@@ -1236,13 +1233,6 @@ def texto_vc(sesion):
         cuando = 'en acción' if falta == 0 else f'faltan {int(falta // 60)}:{int(falta % 60):02d}'
         partes.append(f'VC {SIGLA[lado]}: {cuando}')
     return ' · '.join(partes)
-
-
-def descripcion_paciente(data):
-    snap = data.get('paciente_snapshot') if isinstance(data.get('paciente_snapshot'), dict) else {}
-    nombre = ' '.join(x for x in (snap.get('nombre'), snap.get('apellido')) if x) or 'Paciente'
-    edad = data.get('edad')
-    return f'{nombre} · {edad} años' if isinstance(edad, (int, float)) else nombre
 
 
 def series_con_datos(res):

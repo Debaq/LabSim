@@ -270,12 +270,12 @@ def test_rm_vasoconstrictor_espera_su_tiempo():
     w.cmb_farmaco.setCurrentIndex(1)
     w._vasoconstrictor()
     assert w.sesion.fase('D') == 'vc' and w.sesion.fase('I') == 'reposo'
-    assert not w.sesion.vc_activo('D') and 'faltan 15:00' in w.pill_estado.text()
+    assert not w.sesion.vc_activo('D') and 'faltan 15:00' in w.lbl_vc.text()
     registrar(w, 'D')                       # antes de tiempo: rotulado con VC, sin efecto
     assert w.res['vc']['D'] and not w.res['vc']['D']['estado']['vc']
     t[0] += 15 * 60
     w._cada_segundo()
-    assert w.sesion.vc_activo('D') and 'en acción' in w.pill_estado.text()
+    assert w.sesion.vc_activo('D') and 'en acción' in w.lbl_vc.text()
     correr(w, 4)                            # el paciente en vivo pasa a tener VC
     esperar_vivo(w)
     assert w.mon.estado['vc']
