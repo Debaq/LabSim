@@ -74,6 +74,7 @@ COLUMNAS = 5
 ANCHO_PALABRA = 72
 # En una pantalla alta las palabras no se estiran más que esto.
 ALTO_MAXIMO_PALABRA = 52
+MARGEN_TARJETAS = 6
 
 EXTRA_QSS = f"""
 QPushButton[palabra="true"] {{ padding: 5px 2px; }}
@@ -131,8 +132,10 @@ class ListWords(QWidget):
         self.columnas = COLUMNAS
         self._grillas = []   # (grilla, botones) de cada lista
         raiz = QVBoxLayout(self)
-        raiz.setContentsMargins(12, 10, 12, 12)
-        raiz.setSpacing(8)
+        # Márgenes chicos: en un lateral de 1280 tienen que caber tres
+        # palabras por fila.
+        raiz.setContentsMargins(0, 0, 0, 0)
+        raiz.setSpacing(MARGEN_TARJETAS)
 
         # Estado del dictado + última palabra
         # Uno debajo del otro: al lado del audiómetro el panel es angosto y

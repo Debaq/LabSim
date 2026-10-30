@@ -115,7 +115,7 @@ class ComandosVoz(QWidget):
         super().__init__()
         tema.aplicar_estilo(self, EXTRA_QSS)
         raiz = QVBoxLayout(self)
-        raiz.setContentsMargins(6, 8, 6, 8)
+        raiz.setContentsMargins(0, 0, 0, 0)
         raiz.setSpacing(6)
 
         raiz.addWidget(self._elegida())

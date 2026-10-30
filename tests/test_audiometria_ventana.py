@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(RAIZ, "src"))
 os.chdir(RAIZ)  # context.get_resource() usa rutas relativas a la raíz
 
 from core.base import context  # noqa: E402,F401  (crea el QApplication)
+from PySide6.QtCore import QPoint, QRect  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from audiometria.ventana import LOGO, AudiometriaWindow  # noqa: E402
@@ -23,6 +24,12 @@ def _ventana(ancho, alto=650, **kw):
     return v
 
 
+def _rect(v, w):
+    """El rectángulo de `w` en coordenadas de la ventana: los paneles van
+    dentro de su columna."""
+    return QRect(w.mapTo(v, QPoint(0, 0)), w.size())
+
+
 def _logo(v, activa=True):
     v.audiometro.prueba_cambio.emit(LOGO if activa else "Umbrales")
     QApplication.processEvents()
@@ -34,10 +41,10 @@ def test_ancha_tres_columnas_y_listas_solo_con_logo():
     assert v.comandos.isVisible() and v.aviso_listas.isVisible()
     assert not v.listas.isVisible()
     # comandos a la izquierda del audiómetro, listas a la derecha
-    assert v.comandos.geometry().right() < v.escalado.geometry().left()
+    assert _rect(v, v.comandos).right() < _rect(v, v.audiometro).left()
     _logo(v)
     assert v.listas.isVisible() and not v.aviso_listas.isVisible()
-    assert v.listas.geometry().left() > v.escalado.geometry().right()
+    assert _rect(v, v.listas).left() > _rect(v, v.audiometro).right()
     _logo(v, False)
     assert not v.listas.isVisible() and v.aviso_listas.isVisible()
 
@@ -50,25 +57,25 @@ def test_angosta_comparten_la_columna_derecha_sin_esconderse():
     v = _ventana(1024)
     assert v._modo == "columna"
     assert v.comandos.isVisible()
-    assert v.comandos.geometry().left() > v.escalado.geometry().right()
+    assert _rect(v, v.comandos).left() > _rect(v, v.audiometro).right()
     _logo(v)
     assert v.listas.isVisible() and v.comandos.isVisible()
-    assert v.listas.geometry().top() > v.comandos.geometry().bottom()
+    assert _rect(v, v.listas).top() > _rect(v, v.comandos).bottom()
     # nada se sale de la ventana
     for w in (v.comandos, v.listas, v.audiometro):
-        assert w.geometry().right() <= v.width()
+        assert _rect(v, w).right() <= v.width()
 
 
-def test_el_audiometro_se_escala_y_va_centrado():
-    v = _ventana(1920, 970)
-    assert v.escalado.escala > 1.3          # pantalla grande: más grande
-    alto = v.audiometro.height() * v.escalado.escala
-    arriba = v.escalado.mapFromScene(0, 0).y()
-    assert abs(arriba - (v.escalado.height() - alto) / 2) <= 2   # centrado en vertical
-    v = _ventana(1366, 660)
-    assert 0.95 <= v.escalado.escala <= 1.05
-    v = _ventana(900, 600)                   # más chica que el audiómetro: se achica
-    assert v.escalado.escala < 1
+def test_el_audiometro_va_al_centro_y_los_laterales_iguales():
+    for ancho, alto in ((1920, 970), (1366, 660), (1280, 610)):
+        v = _ventana(ancho, alto)
+        a = _rect(v, v.audiometro)
+        assert a.width() == v.audiometro.minimumSizeHint().width()   # ancho fijo
+        assert abs(a.center().x() - ancho / 2) <= 2
+        assert abs(a.center().y() - alto / 2) <= 2
+        assert abs(v.col_izq.width() - v.col_der.width()) <= 1
+    v = _ventana(1366, 660, listas=False)    # aunque un lateral quede vacío
+    assert abs(_rect(v, v.audiometro).center().x() - 1366 / 2) <= 2
 
 
 def test_sin_permiso_no_aparece_su_panel():
@@ -87,7 +94,7 @@ def test_las_columnas_siguen_al_ancho():
     v = _ventana(1920)
     _logo(v)
     assert v.comandos.columnas >= 2
-    assert v.listas.columnas == 3   # lo que sobra agranda el audiómetro
+    assert v.listas.columnas >= 4
 
 
 def test_la_frase_elegida_llega_al_audiometro():

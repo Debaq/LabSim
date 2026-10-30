@@ -354,18 +354,9 @@ class Audiometer(QWidget, Ui_Audiometer):
             k("a_transductor_ch2"): lambda: self.cycle_trans(1),
         }
         self._stim_keys = {k("a_estimulo_ch1"): 0, k("a_estimulo_ch2"): 1}
-        # Frecuencia, pasos de 5 y rango extendido también por el filtro y no
-        # con el atajo del botón: el audiómetro va dentro de una escena con
-        # zoom (audiometria/ventana.py) y ahí solo se comprobó el filtro.
-        self._switch_keys.update({
-            k("a_freq_menos"): self.btn_freq_minus.click,
-            k("a_freq_mas"): self.btn_freq_plus.click,
-            Qt.Key_5: self.btn_step_5.click,
-            Qt.Key_E: self.btn_ext_range.click,
-        })
-        for btn in (self.btn_freq_minus, self.btn_freq_plus, self.btn_step_5,
-                    self.btn_ext_range):
-            btn.setShortcut(QKeySequence())
+        # Frecuencia: atajo propio del botón (no pasa por el filtro).
+        self.btn_freq_minus.setShortcut(QKeySequence(teclas["a_freq_menos"]))
+        self.btn_freq_plus.setShortcut(QKeySequence(teclas["a_freq_mas"]))
 
     def eventFilter(self, obj, event):
         # El filtro esta instalado en QApplication: recibe TODOS los eventos

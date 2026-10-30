@@ -64,16 +64,14 @@ def test_audiometro_cambia_al_enchufar():
     from audiometria.Audiometer import Audiometer
     from PySide6.QtWidgets import QPushButton
     a = types.SimpleNamespace(kb_monitor=_Monitor(False), btn_freq_minus=QPushButton(),
-                              btn_freq_plus=QPushButton(), btn_step_5=QPushButton(),
-                              btn_ext_range=QPushButton(), cycle_output=lambda c: None,
+                              btn_freq_plus=QPushButton(), cycle_output=lambda c: None,
                               cycle_stim=lambda c: None, cycle_trans=lambda c: None)
     preferencias().cargar({})
     Audiometer._aplicar_atajos(a)
     assert a._dial_keys[Qt.Key_W] == (0, True) and a._dial_keys[Qt.Key_S] == (0, False)
     assert a._dial_keys[Qt.Key_I] == (1, True) and a._dial_keys[Qt.Key_K] == (1, False)
     assert a._stim_keys == {Qt.Key_V: 0, Qt.Key_B: 1}
-    assert a._switch_keys[Qt.Key_A] == a.btn_freq_minus.click
-    assert a.btn_freq_minus.shortcut().isEmpty()
+    assert a.btn_freq_minus.shortcut() == QKeySequence("A")
     a.kb_monitor.conectado = True
     Audiometer._aplicar_atajos(a)
     assert a._dial_keys[Qt.Key_S] == (0, True) and a._dial_keys[Qt.Key_W] == (0, False)
