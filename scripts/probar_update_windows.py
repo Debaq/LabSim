@@ -114,7 +114,7 @@ def correr(setup: Path, logs: Path, nombre: str, mutex_s: float = 0):
     rc = proc.wait(timeout=1200)
     for log in sorted(carpeta.glob("*.log")):
         print(f"--- {nombre}/{log.name}")
-        print("\n".join(log.read_text(encoding="utf-8", errors="replace").splitlines()[-25:]))
+        print("\n".join(log.read_text(encoding="utf-8-sig", errors="replace").splitlines()[-25:]))
     return rc, carpeta, durante
 
 
@@ -172,6 +172,10 @@ def probar_completo(args, anterior_setup, manifest, anterior_manifest, logs) -> 
 
 
 def main():
+    # La consola del runner es cp1252: un log del instalador con BOM o con un
+    # carácter fuera de cp1252 tumbaba la prueba al imprimirlo (2026-10-30).
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--anterior", required=True, help="tag de la release anterior")
     ap.add_argument("--build-id", required=True)
