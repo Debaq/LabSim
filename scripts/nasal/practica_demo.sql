@@ -1,6 +1,7 @@
 -- Carpeta de práctica "Nariz (demo interna)" con los pacientes nasales del
--- libro (fichas 151-158, ver scripts/nasal/sql_pacientes.py): nariz,
--- olfatometría (153), prick (154, 157) y espirometría (157, 158). Solo la ve el
+-- libro (fichas 151-162, ver scripts/nasal/sql_pacientes.py): nariz,
+-- olfatometría (153), prick (154, 157), espirometría (157, 158) y sueño
+-- (159-162, cap. 38). Solo la ve el
 -- admin (practice_folders.solo_admin = 1, ver Practica::lista).
 --
 -- Cargar DESPUÉS de desplegar Practica.php y api/practica.php y de correr
@@ -18,7 +19,11 @@ SELECT (SELECT id FROM practice_folders WHERE nombre = 'Nariz (demo interna)' AN
                  WHEN 154 THEN 'Rinoscopía, rinomanometría anterior, rinometría acústica y prick test'
                  WHEN 157 THEN 'Espirometría con prueba broncodilatadora y prick test'
                  WHEN 158 THEN 'Espirometría con prueba broncodilatadora'
+                 WHEN 159 THEN 'Poligrafía respiratoria'
+                 WHEN 160 THEN 'Poligrafía respiratoria'
+                 WHEN 161 THEN 'Polisomnografía'
+                 WHEN 162 THEN 'Polisomnografía (la poligrafía previa no alcanzó)'
                  ELSE 'Rinoscopía, rinomanometría anterior y rinometría acústica' END,
        0, CAST(c.id AS INTEGER) - 150, 1
-  FROM cases c WHERE CAST(c.id AS INTEGER) BETWEEN 151 AND 158
+  FROM cases c WHERE CAST(c.id AS INTEGER) BETWEEN 151 AND 162
 ON CONFLICT(folder_id, case_id) DO UPDATE SET active = 1, procedimiento = excluded.procedimiento;

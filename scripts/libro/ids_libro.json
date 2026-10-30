@@ -108,5 +108,9 @@
  "cap36_medicamentosa": "155",
  "cap36_mixta": "156",
  "cap37_asma": "157",
- "cap37_estenosis": "158"
+ "cap37_estenosis": "158",
+ "cap38_roncador": "159",
+ "cap38_moderado": "160",
+ "cap38_grave": "161",
+ "cap38_dudosa": "162"
 }

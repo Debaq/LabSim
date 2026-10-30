@@ -11,6 +11,9 @@ del paciente es la del libro. Los del cap. 37 llevan en cambio su bloque
 ESPIRO: la FVC, el FEV1 y el PEF de sus informes en el libro
 (libro-orl/material/ilustraciones/hacer_cap37.py, ASMA y ESTEN).
 
+Los del cap. 38 llevan su bloque SUENO: el perfil del libro, la misma noche
+simulada de libro-orl/material/ilustraciones/hacer_cap38.py (F7).
+
 Tres llevan además olfatometría o prick (F5), con lo que cuenta su historia:
 Rocío (olfato disminuido tras un cuadro viral) trae los puntajes del informe
 de ejemplo de H28; Sofía y Óscar (pruebas cutáneas "según relata") traen la
@@ -28,7 +31,7 @@ import sys
 
 RAIZ = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ / 'src'))
-from nasal import espirometria, modelo, olfatometria, prick  # noqa: E402
+from nasal import espirometria, modelo, olfatometria, prick, sueno  # noqa: E402
 
 LIBRO = pathlib.Path.home() / 'Escritorio/Proyectos/libro-orl'
 IDS = RAIZ / 'scripts/libro/ids_libro.json'
@@ -74,6 +77,13 @@ PIELES = {
                    'alergenos': {'dpte': 7, 'dfar': 6, 'gato': 5},
                    'farmaco': {'clave': 'cetirizina', 'horas': 200}},
 }
+# clave del caso -> bloque SUENO (cap. 38) y su procedimiento.
+SUENOS = {
+    'cap38_roncador': ({'perfil': 'roncador'}, 'Poligrafía respiratoria'),
+    'cap38_moderado': ({'perfil': 'moderado'}, 'Poligrafía respiratoria'),
+    'cap38_grave': ({'perfil': 'grave'}, 'Polisomnografía'),
+    'cap38_dudosa': ({'perfil': 'dudosa'}, 'Polisomnografía (la poligrafía previa no alcanzó)'),
+}
 OTROS = {'cap35_discordancia': ('OLFATO', 'olfatometría'), 'cap36_alergica': ('PRICK', 'prick test'),
          'cap37_asma': ('PRICK', 'prick test')}
 
@@ -87,7 +97,7 @@ def main(salida):
     siguiente = max(map(int, ids.values())) + 1
     sql = [f"INSERT INTO case_folders (name, created_by) SELECT {q(CARPETA)}, {ADMIN} "
            f"WHERE NOT EXISTS (SELECT 1 FROM case_folders WHERE name = {q(CARPETA)} COLLATE NOCASE);"]
-    for clave in list(NARICES) + list(PULMONES):
+    for clave in list(NARICES) + list(PULMONES) + list(SUENOS):
         if clave not in ids:
             ids[clave] = str(siguiente)
             siguiente += 1
@@ -102,6 +112,11 @@ def main(salida):
                              if k in p}
             snap['procedimiento'] = PROCEDIMIENTO
             que = f"nariz de RinoSim {cuadro}{'' if semilla is None else f' (semilla {semilla})'}"
+        elif clave in SUENOS:
+            bloque, proc = SUENOS[clave]
+            data['SUENO'] = sueno.normaliza(bloque)
+            snap['procedimiento'] = proc
+            que = f"noche del libro, perfil {bloque['perfil']}"
         else:
             data['ESPIRO'] = espirometria.normaliza(PULMONES[clave])
             snap['procedimiento'] = PROCEDIMIENTO_ESPIRO
