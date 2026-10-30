@@ -259,6 +259,17 @@ def reset_backend_session() -> None:
     _estado_agenda = None
 
 
+def estado_completo():
+    """El pull completo del backend (get_full_state), o None sin cuenta. Para
+    quien necesita agenda y casos a la vez: se baja una vez y se pasa a
+    Shedule(estado) y CasesOffline().get_cases(estado). Con el admin son
+    ~1,4 MB; dos seguidos en el hilo de la ventana la congelaban 12 s al
+    atender (tiempos del 2026-10-29)."""
+    if invitado.activo:
+        return None
+    return _get_backend_client().get_full_state()
+
+
 class CasesOffline():
     """
     Los casos (definición del paciente/audiometría) son una única base
@@ -272,15 +283,20 @@ class CasesOffline():
     def __init__(self) -> None:
         pass
 
-    def get_cases(self) -> dict:
-        """Recupera la base de casos compartida desde el backend."""
+    def get_cases(self, estado=None) -> dict:
+        """Recupera la base de casos compartida desde el backend (o de
+        `estado`, si ya se bajó con estado_completo())."""
         global _cases_snapshot
         if invitado.activo:
             data = invitado.casos()
             _cases_snapshot = deepcopy(data)
             return data
-        client = _get_backend_client()
-        data = backend_state_to_cases(client.get_full_state())
+        if estado is None:
+            data = backend_state_to_cases(_get_backend_client().get_full_state())
+        else:
+            # El estado es compartido (Shedule lo indexa en _estado_agenda):
+            # quien abre el caso lo muta, y eso no puede llegar a la agenda.
+            data = deepcopy(backend_state_to_cases(estado))
         # deepcopy: quien llama muta el dict que le devolvemos (agrega
         # casos, edita anidados) -- si _cases_snapshot compartiera
         # referencia, esa mutación también "cambiaría" el snapshot y
@@ -306,7 +322,7 @@ class CasesOffline():
         _cases_snapshot = deepcopy(cases)
 
 class Shedule:
-    def __init__(self):
+    def __init__(self, estado=None):
         global _shedule_snapshot
         if invitado.activo:
             # Sin cuenta: los pacientes del libro, del catálogo de la app
@@ -316,7 +332,7 @@ class Shedule:
         client = _get_backend_client()
         own_id = (client.user or {}).get("id")
         own_username = (client.user or {}).get("username", "")
-        state = client.get_full_state()
+        state = client.get_full_state() if estado is None else estado
         app_config_store.update_from_sync(state.get("config"))
         global _estado_agenda
         _estado_agenda = _indexar(state)

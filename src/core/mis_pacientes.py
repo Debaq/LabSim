@@ -35,7 +35,8 @@ from PySide6.QtWidgets import (QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEd
 from agenda.ChatPaciente import QSS_CHAT, _burbuja, _ListaMensajes
 from core import hilos, iconos, tema
 from core.ficha import poner_html, render_ficha_html
-from core.helpers import CasesOffline, Shedule, mi_conversacion, mis_atenciones, mis_informes
+from core.helpers import (CasesOffline, Shedule, estado_completo, mi_conversacion, mis_atenciones,
+                          mis_informes)
 from core.inbox import fecha_corta, fecha_larga, _Elidida
 from core.practica import abrir_ficha_estudio
 
@@ -447,11 +448,15 @@ class MisPacientesWidget(QWidget):
     def _leer_todo():
         items = mis_atenciones()
         try:
-            shedule = Shedule().get()
+            estado = estado_completo()
+        except Exception:
+            return items, {}, {}
+        try:
+            shedule = Shedule(estado).get()
         except Exception:
             shedule = {}
         try:
-            cases = CasesOffline().get_cases()
+            cases = CasesOffline().get_cases(estado)
         except Exception:
             cases = {}
         return items, shedule, cases

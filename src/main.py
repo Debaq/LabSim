@@ -34,7 +34,7 @@ from core.module_placeholder import ModulePlaceholder
 from core.subventanas import Subventanas
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
-                          es_docente, entry_estado_por,
+                          es_docente, entry_estado_por, estado_completo,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, raise_window
@@ -966,7 +966,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._modulos_listos()
 
         try:
-            shedule = Shedule()
+            # Una sola bajada para la agenda y los casos (ver estado_completo)
+            estado = estado_completo()
+            shedule = Shedule(estado)
         except requests.RequestException as exc:
             return self._atender_sin_conexion(exc)
         agenda = shedule.data.setdefault("agenda_1", {})
@@ -984,7 +986,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if not case_id:
             return
         try:
-            cases = CasesOffline().get_cases()
+            cases = CasesOffline().get_cases(estado)
         except requests.RequestException as exc:
             return self._atender_sin_conexion(exc)
         if case_id not in cases:
