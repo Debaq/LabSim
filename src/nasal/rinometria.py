@@ -233,6 +233,41 @@ def medidas(x, A):
 
 CAMPOS = ['dist1', 'mca1', 'dist2', 'mca2', 'vol1', 'vol05', 'vol25']
 
+# Lo que informa el equipo de LabSim: las de RinoSim más Vol 0-2 (el
+# vestíbulo y la válvula) y Vol 0-7 (la fosa entera, ya en la zona poco
+# fiable; el volumen de la cavidad se informa a 0-6 o 0-7 cm).
+PARAMETROS = ['dist1', 'mca1', 'dist2', 'mca2', 'vol1', 'vol02', 'vol05', 'vol25', 'vol07']
+
+
+def area_en(x, A, d):
+    """El área de la curva a d cm (interpolada)."""
+    if d <= x[0]:
+        return A[0]
+    for i in range(1, len(x)):
+        if x[i] >= d:
+            t = (d - x[i - 1]) / (x[i] - x[i - 1])
+            return A[i - 1] + (A[i] - A[i - 1]) * t
+    return A[-1]
+
+
+def parametros(x, A, d1=None, d2=None):
+    """Todo lo que informa el equipo de una curva. MCA1 y MCA2 son el área
+    donde el evaluador puso cada cursor (d1, d2 en cm): el equipo lee ahí,
+    no busca el valle. Sin cursor, el valle que encuentra medidas()."""
+    if d1 is None or d2 is None:
+        m = medidas(x, A)
+        d1 = m['dist1'] if d1 is None else d1
+        d2 = m['dist2'] if d2 is None else d2
+    return {
+        'dist1': d1, 'mca1': area_en(x, A, d1),
+        'dist2': d2, 'mca2': area_en(x, A, d2),
+        'vol1': volumen(x, A, 0, d2),
+        'vol02': volumen(x, A, 0, 2),
+        'vol05': volumen(x, A, 0, 5),
+        'vol25': volumen(x, A, 2, 5),
+        'vol07': volumen(x, A, 0, 7),
+    }
+
 
 def mide_fosa(p, lado, estado=None, opciones=None):
     """El examen de una fosa: tres registros (o los que se pidan), sus
@@ -254,15 +289,31 @@ def mide_fosa(p, lado, estado=None, opciones=None):
 REGISTROS_PROTOCOLO = 3
 
 
-def fosa(p, lado, estado, registros, pedidos=None):
+def fosa(p, lado, estado, registros, pedidos=None, marcas=None):
     """Lo que se anota de una fosa con los registros ya tomados (de
     registro(), con sus medidas): el promedio, si cumplen el criterio de
     repetición y los avisos. Con `pedidos`, si faltan registros no se da por
-    repetible."""
+    repetible.
+
+    Con `marcas` ({d1, d2}: dónde puso el evaluador los cursores de MCA1 y
+    MCA2), cada registro se lee con parametros() en esas distancias: las
+    medidas son las del evaluador, con todos los PARAMETROS y el coeficiente
+    de variación entre registros (`cv`, %). Lo que habría marcado el equipo
+    solo (el valle de cada registro) queda en `auto`."""
     estado = estado or {}
     n = len(registros)
+    auto = None
+    campos = CAMPOS
+    if marcas:
+        # El valle de cada registro (medidas()) queda en 'valle': se puede
+        # volver a leer con otras marcas sin perderlo.
+        registros = [{**r, 'valle': r.get('valle', r['medidas']),
+                      'medidas': parametros(r['x'], r['A'], marcas['d1'], marcas['d2'])}
+                     for r in registros]
+        auto = {c: sum(r['valle'][c] for r in registros) / n for c in CAMPOS}
+        campos = PARAMETROS
     promedio = {}
-    for c in CAMPOS:
+    for c in campos:
         tot = 0
         for r in registros:
             tot += r['medidas'][c]
@@ -282,12 +333,22 @@ def fosa(p, lado, estado, registros, pedidos=None):
         avisos.append(f"Registros que no se parecen (MCA1 ±{a_fijo(rango('mca1'), 2)}, MCA2 ±{a_fijo(rango('mca2'), 2)} cm²): revisar sello, posición y apnea.")
     if promedio['mca1'] < AREA_CRITICA:
         avisos.append('Primer mínimo muy cerrado: lo que está detrás no se puede evaluar.')
-    if not all(r['medidas']['segundo_claro'] for r in registros):
+    if not marcas and not all(r['medidas']['segundo_claro'] for r in registros):
         avisos.append('Sin segundo mínimo claro: MCA2 se marca en el hombro de la zona del cornete.')
     # La verdad, para el docente: el perfil sin errores, medido igual.
     verdadero = perfil(p, lado, estado)[:I_CURVA + 1]
     xv = REJILLA[:I_CURVA + 1]
+    extra = {}
+    if marcas:
+        def cv(c):
+            vs = [r['medidas'][c] for r in registros]
+            if len(vs) < 2:
+                return None
+            m = sum(vs) / len(vs)
+            return 100 * math.sqrt(sum((v - m) ** 2 for v in vs) / (len(vs) - 1)) / m
+        extra = {'auto': auto, 'marcas': dict(marcas), 'cv': {'mca1': cv('mca1'), 'mca2': cv('mca2')}}
     return {
+        **extra,
         'lado': lado, 'estado': dict(estado), 'registros': registros, 'promedio': promedio,
         'repetible': repetible,
         'rango': {'mca1': rango('mca1'), 'mca2': rango('mca2')},
@@ -407,7 +468,8 @@ def registro_de_toma(p, lado, semilla, recetas, bases=None):
 
 def rehace_fosa(p, lado, estado=None, opciones=None):
     """La fosa de una medición guardada: cada registro desde su toma
-    (opciones['registros']: [{semilla, pulsos}]). Las mediciones de antes de
+    (opciones['registros']: [{semilla, pulsos}]) y leída donde el evaluador
+    dejó los cursores (opciones['marcas']). Las mediciones de antes de
     la toma en vivo (tres registros de una vez) se rehacen con mide_fosa."""
     opciones = opciones or {}
     tomas = [t for t in opciones.get('registros') or [] if t.get('pulsos')]
@@ -416,7 +478,7 @@ def rehace_fosa(p, lado, estado=None, opciones=None):
     bases = {}
     registros = [registro_de_toma(p, lado, t['semilla'], t['pulsos'], bases) for t in tomas]
     ultimo = tomas[-1]['pulsos'][-1].get('estado') or estado
-    return fosa(p, lado, ultimo, registros, REGISTROS_PROTOCOLO)
+    return fosa(p, lado, ultimo, registros, REGISTROS_PROTOCOLO, opciones.get('marcas'))
 
 
 def examen(p, estado=None, opciones=None):

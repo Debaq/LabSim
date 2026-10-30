@@ -38,8 +38,9 @@ from core.estado_informe import EstadoInforme
 from nasal import modelo, sesion
 from nasal import rinomanometria as RM
 from nasal import rinometria as RA
+from nasal.azar import generador
 from nasal.graficos import (GraficoResistencia, GraficoRinometria, GraficoRinomanometria,
-                            GraficoTiempo)
+                            GraficoTiempo, curva_media)
 from nasal.paciente_rm import PacienteRM
 from nasal.referencias import (COREY_1997, HILBERG_1989, PROTOCOLO_REPETICION,
                                REFERENCIA_UNILATERAL_150, REN_2018, RINOMETRIA_SIN_NORMA,
@@ -73,6 +74,10 @@ def num(v, d=2):
     if v is None or v != v or v in (float('inf'), float('-inf')):
         return '—'
     return f'{v:.{d}f}'.replace('.', ',')
+
+
+def pct_o_raya(v):
+    return '—' if v is None else f'{num(v, 1)} %'
 
 
 def pct(v):
@@ -1398,6 +1403,7 @@ class RinometriaWindow(EquipoNasal):
 
     def __init__(self, data_login=None, parent=None):
         self.vivo = None
+        self.marcas = {}
         super().__init__(data_login, parent)
         self.timer = QTimer(self)
         self.timer.setInterval(self.TIC_MS)
@@ -1420,13 +1426,18 @@ class RinometriaWindow(EquipoNasal):
 
     def _restaurar_extra(self, data):
         self.calibrado = bool(data.get('calibrado')) or bool(data.get('mediciones'))
+        for m in data.get('mediciones') or []:
+            marcas = (m.get('opciones') or {}).get('marcas') if isinstance(m, dict) else None
+            if marcas and m.get('lado') in LADOS and m.get('fase') in ('reposo', 'vc'):
+                self.marcas[(m['fase'], m['lado'])] = dict(marcas)
+                self.marcando = (m['fase'], m['lado'])
+
     INDICACION = ('Calibra con el tubo calibrador y mide cada fosa, primero la derecha: Iniciar, '
                   'el paciente en apnea, y Detener cuando la banda quede angosta. Tres registros '
                   'por fosa.')
 
-    CAMPOS = ['dist1', 'mca1', 'dist2', 'mca2', 'vol1', 'vol05', 'vol25']
-
     calibrado = False
+    marcando = None            # (fase, lado) de la curva que lleva los cursores
 
     def _botones(self, caja):
         self.btn_calibrar = caja.agregar(self._boton('Calibrar', self._calibrar))
@@ -1442,6 +1453,13 @@ class RinometriaWindow(EquipoNasal):
             self._log_error_simulado(self.chk_err[clave], clave)
 
     def _opciones(self, caja):
+        caja.agregar(etiqueta('Cursores MCA1 y MCA2 en', rol='campo'))
+        self.cmb_marcar = caja.agregar(QComboBox())
+        self.cmb_marcar.activated.connect(self._elegir_marcar)
+        ayuda = etiqueta('Arrastra cada cursor hasta su valle: el equipo lee el área donde lo '
+                         'dejes.', rol='hint')
+        ayuda.setWordWrap(True)
+        caja.agregar(ayuda)
         self.chk_log = caja.agregar(self._check('Área en escala logarítmica', self.dibujar, True))
         self.chk_registros = caja.agregar(self._check('Ver los tres registros', self.dibujar, True))
         self.chk_verdad = None
@@ -1484,10 +1502,14 @@ class RinometriaWindow(EquipoNasal):
 
     def la_super(self, data, appointment_id=None):
         self._parar()
+        self.marcas = {}
+        self.marcando = None
         super().la_super(data, appointment_id)
 
     def _sin_caso(self, con_paciente=False):
         self._parar()
+        self.marcas = {}
+        self.marcando = None
         super()._sin_caso(con_paciente)
 
     def _al_entrar(self):
@@ -1595,14 +1617,72 @@ class RinometriaWindow(EquipoNasal):
         toma = {'semilla': v['semilla'], 'pulsos': [rc for _, rc in v['pulsos']]}
         tomados = (tomados + [(v['banda'], toma)])[-RA.REGISTROS_PROTOCOLO:]
         estado = toma['pulsos'][-1]['estado']
-        r = RA.fosa(self.sesion.paciente, lado, estado, [c for c, _ in tomados], RA.REGISTROS_PROTOCOLO)
+        marcas = self.marcas.setdefault((fase, lado), self._cursores_iniciales(v['semilla']))
+        self.marcando = (fase, lado)
+        r = RA.fosa(self.sesion.paciente, lado, estado, [c for c, _ in tomados], RA.REGISTROS_PROTOCOLO,
+                    marcas)
         receta = {'lado': lado, 'fase': fase, 'estado': dict(estado),
-                  'opciones': {'registros': [t for _, t in tomados]}}
+                  'opciones': {'registros': [t for _, t in tomados], 'marcas': dict(marcas)}}
         self.res[fase][lado] = r
         self.mediciones = [m for m in self.mediciones if (m['lado'], m['fase']) != (lado, fase)] + [receta]
         self._registrar_medicion(lado, fase, r, receta, pulsos=v['k'],
                                  calidad=RA.calidad(v['banda'], v['banda']['medidas']))
         self._al_medir(lado, r)
+        self.dibujar()
+
+    @staticmethod
+    def _cursores_iniciales(semilla):
+        """Dónde aparecen los cursores la primera vez: al azar (con la semilla
+        de la toma), no en los valles; ponerlos es del evaluador."""
+        r = generador(f'ra-cursores/{semilla}')
+        d1 = r.entre(0.5, 2.5)
+        d2 = min(5.5, d1 + r.entre(0.8, 2.5))
+        return {'d1': round(round(d1 / modelo.DX) * modelo.DX, 4), 'd2': round(round(d2 / modelo.DX) * modelo.DX, 4)}
+
+    def _elegir_marcar(self, _i=None):
+        # El dato va como texto "fase:lado": findData no reconoce tuplas.
+        dato = self.cmb_marcar.currentData()
+        self.marcando = tuple(dato.split(':')) if dato else None
+        self.dibujar()
+
+    def _poblar_marcar(self):
+        self.cmb_marcar.blockSignals(True)
+        self.cmb_marcar.clear()
+        for fase, nombre in (('reposo', 'reposo'), ('vc', 'con VC')):
+            for lado in LADOS:
+                if self.res[fase][lado] and (fase, lado) in self.marcas:
+                    self.cmb_marcar.addItem(f'{SIGLA[lado]} {nombre}', f'{fase}:{lado}')
+        i = self.cmb_marcar.findData(':'.join(self.marcando)) if self.marcando else -1
+        if i < 0 and self.cmb_marcar.count():
+            i = self.cmb_marcar.count() - 1
+            self.marcando = tuple(self.cmb_marcar.itemData(i).split(':'))
+        self.cmb_marcar.setCurrentIndex(i)
+        self.cmb_marcar.setEnabled(self.cmb_marcar.count() > 0)
+        self.cmb_marcar.blockSignals(False)
+
+    def _soltar_cursor(self, cual, d):
+        # Fuera de la señal del cursor: dibujar() borra el gráfico, cursor incluido.
+        QTimer.singleShot(0, lambda: self._mover_cursor(cual, d))
+
+    def _mover_cursor(self, cual, d):
+        """El evaluador soltó un cursor: la fosa se vuelve a leer ahí."""
+        if self.marcando is None or self.sesion is None or not self.sesion.hay_paciente:
+            return
+        fase, lado = self.marcando
+        f = self.res[fase][lado]
+        if not f:
+            return
+        marcas = self.marcas[(fase, lado)]
+        marcas['d1' if cual == 'mca1' else 'd2'] = d
+        r = RA.fosa(self.sesion.paciente, lado, f['estado'], f['registros'], RA.REGISTROS_PROTOCOLO, marcas)
+        self.res[fase][lado] = r
+        for m in self.mediciones:
+            if (m['lado'], m['fase']) == (lado, fase):
+                m['opciones']['marcas'] = dict(marcas)
+        verdad = r['verdad']['medidas']
+        self._log('marcar', lado=lado, fase=fase, cursor=cual, dist=d, area=r['promedio'][cual],
+                  valle_dist=r['auto']['dist1' if cual == 'mca1' else 'dist2'], valle_area=r['auto'][cual],
+                  verdad_dist=verdad['dist1' if cual == 'mca1' else 'dist2'], verdad_area=verdad[cual])
         self.dibujar()
 
     def _parar(self):
@@ -1634,13 +1714,22 @@ class RinometriaWindow(EquipoNasal):
         elif r['repetible']:
             self._mensaje(f'{SIGLA[lado]}{vc}: tres registros en apnea. Se parecen entre sí.', 'ok')
         else:
-            self._mensaje(f'{SIGLA[lado]}{vc}: tres registros en apnea. No se parecen: revisa y repite '
-                          '(quedan los tres últimos).', 'alerta')
+            self._mensaje(f'{SIGLA[lado]}{vc}: tres registros en apnea. No se parecen donde están los '
+                          'cursores: revisa los cursores y, si siguen sin parecerse, repite (quedan los '
+                          'tres últimos).', 'alerta')
 
     def _dibujar_equipo(self):
+        self._poblar_marcar()
+        f = self.res[self.marcando[0]][self.marcando[1]] if self.marcando else None
+        marca = f is not None and self.vivo is None and self.marcando in self.marcas
         self.g_curva.dibujar(self._series(), log=self.chk_log.isChecked(),
                              registros=self.chk_registros.isChecked(),
-                             verdad=bool(self.chk_verdad and self.chk_verdad.isChecked()))
+                             verdad=bool(self.chk_verdad and self.chk_verdad.isChecked()),
+                             sin_rotulo=(self.marcando[1], self.marcando[0] == 'vc') if marca else None)
+        if marca:
+            media = curva_media(f)
+            self.g_curva.cursores({'x': [x for x, _ in media], 'A': [a for _, a in media]},
+                                  self.marcas[self.marcando], self.marcando[1], self._soltar_cursor)
         self._tabla()
         avisos = self._lista_avisos()
         if self.sesion and self.sesion.hay_paciente and not self.calibrado:
@@ -1654,13 +1743,14 @@ class RinometriaWindow(EquipoNasal):
                   errores=errores, semilla=toma['semilla'], pulsos=pulsos,
                   promediados=len(toma['pulsos']), calidad=calidad,
                   registros=len(r['registros']),
-                  registro={c: r['registros'][-1]['medidas'][c] for c in self.CAMPOS},
-                  medido={c: r['promedio'][c] for c in self.CAMPOS},
-                  verdad={c: r['verdad']['medidas'][c] for c in self.CAMPOS},
+                  registro={c: r['registros'][-1]['medidas'][c] for c in RA.PARAMETROS},
+                  medido={c: r['promedio'][c] for c in RA.PARAMETROS},
+                  valle=r.get('auto'), marcas=r.get('marcas'), cv=r.get('cv'),
+                  verdad=RA.parametros(r['verdad']['x'], r['verdad']['A']),
                   repetible=r['repetible'], avisos=r['avisos'])
 
     def _celdas(self, m):
-        return [num(m[c]) for c in self.CAMPOS]
+        return [num(m.get(c)) for c in RA.PARAMETROS]
 
     def _tabla(self):
         if not series_con_datos(self.res):
@@ -1669,41 +1759,57 @@ class RinometriaWindow(EquipoNasal):
             self.tabla_vc.setVisible(False)
             self.pie.setText('')
             return
-        cab = ['', 'Dist 1 (cm)', 'MCA1 (cm²)', 'Dist 2 (cm)', 'MCA2 (cm²)', 'Vol 1 (cm³)',
-               'Vol 0-5 (cm³)', 'Vol 2-5 (cm³)', f'≤ {num(PROTOCOLO_REPETICION["valor"])}']
+        # Cabeceras cortas: el PDF reparte el ancho por igual entre columnas.
+        cab = ['', 'D1', 'MCA1', 'D2', 'MCA2', 'V1', 'V0-2', 'V0-5', 'V2-5', 'V0-7', 'CV MCA1', 'CV MCA2',
+               f'≤ {num(PROTOCOLO_REPETICION["valor"])}']
+        col_criterio = len(cab) - 1
         filas = []
-        for lado in LADOS:
-            for nombre, fase in (('reposo', 'reposo'), ('con VC', 'vc')):
+        for nombre, fase in (('reposo', 'reposo'), ('con VC', 'vc')):
+            for lado in LADOS:
                 f = self.res[fase][lado]
                 if not f:
                     continue
                 for k, r in enumerate(f['registros'] if self.chk_registros.isChecked() else []):
-                    filas.append(([f'{SIGLA[lado]} {nombre} · registro {k + 1}'] + self._celdas(r['medidas']) + [''],
-                                  lado, {}))
+                    filas.append(([f'{SIGLA[lado]} {nombre} · registro {k + 1}'] + self._celdas(r['medidas'])
+                                  + ['', '', ''], lado, {}))
                 n = len(f['registros'])
                 if n < RA.REGISTROS_PROTOCOLO:
                     criterio, marca = f'{n} de {RA.REGISTROS_PROTOCOLO}', {}
                 else:
                     criterio = 'sí' if f['repetible'] else 'no'
-                    marca = {8: 'ok' if f['repetible'] else 'fuera'}
+                    marca = {col_criterio: 'ok' if f['repetible'] else 'fuera'}
+                cv = f.get('cv') or {}
                 filas.append(([f'{SIGLA[lado]} {nombre} · promedio'] + self._celdas(f['promedio'])
-                              + [criterio], lado, marca))
-        filas.append((['Normal del modelo (no es norma)'] + self._celdas(normal_modelo()) + [''], None, {}))
+                              + [pct_o_raya(cv.get('mca1')), pct_o_raya(cv.get('mca2')), criterio],
+                              lado, marca))
+            d, i = self.res[fase]['D'], self.res[fase]['I']
+            if d and i:
+                # La nariz entera: la suma de las dos fosas (las distancias no se suman).
+                total = {c: None if c.startswith('dist') else
+                         (d['promedio'].get(c) or 0) + (i['promedio'].get(c) or 0) for c in RA.PARAMETROS}
+                filas.append(([f'Nariz {nombre} (D + I)'] + self._celdas(total) + ['', '', ''], None, {}))
+        filas.append((['Normal del modelo (no es norma)'] + self._celdas(normal_modelo()) + ['', '', ''],
+                      None, {}))
         self.tabla.poblar(cab, filas)
-        self.pie.setText('Vol 1: de la narina al segundo mínimo; Vol 0-5: el «Vol 2» del libro; '
-                         'Vol 2-5: el de los cambios de la mucosa. Última columna: '
-                         f'{PROTOCOLO_REPETICION["texto"]} {RINOMETRIA_SIN_NORMA} {HILBERG_1989["texto"]}')
+        self.pie.setText('D1, D2: distancia de la narina a cada cursor (cm). MCA1, MCA2: área donde '
+                         'está cada cursor (cm²). Volúmenes en cm³: V1 de la narina a MCA2; V0-2 el '
+                         'vestíbulo y la válvula; V0-5 el «Vol 2» del libro; V2-5 el de los cambios de '
+                         'la mucosa; V0-7 la fosa entera, pasada la zona confiable. CV: coeficiente de '
+                         'variación entre los registros (%). Nariz: suma de las dos fosas. Última '
+                         f'columna: {PROTOCOLO_REPETICION["texto"]} {RINOMETRIA_SIN_NORMA} '
+                         f'{HILBERG_1989["texto"]}')
 
         cambios = []
         for lado in LADOS:
             a, b = self.res['reposo'][lado], self.res['vc'][lado]
             if a and b:
                 pa, pb = a['promedio'], b['promedio']
-                cambios.append(([SIGLA[lado]] + [pct((pb[k] - pa[k]) / pa[k]) for k in ('mca1', 'mca2', 'vol05', 'vol25')],
+                cambios.append(([SIGLA[lado]] + [pct((pb[k] - pa[k]) / pa[k]) if pa.get(k) and pb.get(k) is not None
+                                                 else '—' for k in ('mca1', 'mca2', 'vol05', 'vol25', 'vol07')],
                                 lado, {}))
         self.tabla_vc.setVisible(bool(cambios))
         if cambios:
-            self.tabla_vc.poblar(['Cambio con vasoconstrictor', 'MCA1', 'MCA2', 'Vol 0-5', 'Vol 2-5'], cambios)
+            self.tabla_vc.poblar(['Cambio con vasoconstrictor', 'MCA1', 'MCA2', 'V0-5', 'V2-5', 'V0-7'], cambios)
             self.pie.setText(self.pie.text() + ' ' + COREY_1997['texto'])
 
     def _texto_verdad(self):
@@ -1713,16 +1819,21 @@ class RinometriaWindow(EquipoNasal):
                 f = self.res[fase][lado]
                 if not f:
                     continue
-                v, m = f['verdad']['medidas'], f['promedio']
+                v, m, auto = f['verdad']['medidas'], f['promedio'], f.get('auto') or f['promedio']
+
+                def celda(c, dist):
+                    return (f'{num(v[c])} a {num(v[dist])} cm · valle {num(auto[c])} a {num(auto[dist])} '
+                            f'· marcada {num(m[c])} a {num(m[dist])}')
                 filas.append(f'<tr><td>{SIGLA[lado]}</td><td>{nombre}</td>'
-                             f'<td>{num(v["mca1"])} (medida {num(m["mca1"])})</td>'
-                             f'<td>{num(v["mca2"])} (medida {num(m["mca2"])})</td>'
+                             f'<td>{celda("mca1", "dist1")}</td><td>{celda("mca2", "dist2")}</td>'
                              f'<td>{num(v["vol05"])} (medida {num(m["vol05"])})</td></tr>')
         return ('<p>En el gráfico, "Área verdadera" dibuja en puntos el área de cada fosa. La curva '
                 'del equipo se aparta de ella detrás de un estrechamiento marcado, pasados ~5 cm '
                 '(senos y rinofaringe), con perforación y con los errores de técnica.</p>'
-                '<table cellpadding="4"><tr><th>Fosa</th><th>Estado</th><th>MCA1 verdadera</th>'
-                '<th>MCA2 verdadera</th><th>Vol 0-5 verdadero</th></tr>'
+                '<p>MCA1 y MCA2: la verdadera (cm², cm), el valle de la curva del equipo y dónde '
+                'dejó los cursores el evaluador.</p>'
+                '<table cellpadding="4"><tr><th>Fosa</th><th>Estado</th><th>MCA1</th>'
+                '<th>MCA2</th><th>Vol 0-5 verdadero</th></tr>'
                 + (''.join(filas) or '<tr><td colspan="5">Sin mediciones.</td></tr>') + '</table>'
                 f'<p>Minuto {self.sesion.minuto()} del ciclo nasal.</p>')
 
@@ -1736,5 +1847,5 @@ def normal_modelo():
     if _normal is None:
         n = RA.I_CURVA + 1
         p = modelo.paciente('normal')
-        _normal = RA.medidas(modelo.REJILLA[:n], modelo.perfil(p, 'D', {})[:n])
+        _normal = RA.parametros(modelo.REJILLA[:n], modelo.perfil(p, 'D', {})[:n])
     return _normal

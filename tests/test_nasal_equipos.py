@@ -33,6 +33,7 @@ if SRC not in sys.path:
 
 from core.base import context  # noqa: E402,F401  (crea la QApplication)
 from nasal import modelo, sesion  # noqa: E402
+from nasal import rinometria as RA  # noqa: E402
 from nasal.equipos import RinometriaWindow, RinomanometriaWindow  # noqa: E402
 
 ADMIN = {'permission': 777}
@@ -253,6 +254,85 @@ def test_rinometria_en_vivo():
     w.la_super(caso(), 'otra')
     assert w.vivo is None and not w.timer.isActive() and w.res['reposo']['I'] is None
     assert w.baremos['mca1'].valor is None
+
+
+def test_rinometria_cursores_del_evaluador():
+    """MCA1 y MCA2 son donde el evaluador deja los cursores: aparecen al azar,
+    se arrastran y el equipo lee ahí; el valle queda para el docente."""
+    LOGS.eventos.clear()
+    data = caso('mixta')
+    w = RinometriaWindow(data_login=ADMIN)
+    w.la_super(data, '88')
+    w._calibrar()
+    medir(w, 'D')
+    f = w.res['reposo']['D']
+    marcas = w.marcas[('reposo', 'D')]
+    assert w.marcando == ('reposo', 'D') and w.cmb_marcar.currentText() == 'FND reposo'
+    assert f['promedio']['dist1'] == marcas['d1'] and f['promedio']['dist2'] == marcas['d2']
+    valle = f['auto']
+    assert abs(marcas['d1'] - valle['dist1']) > 1e-9    # no aparecen en el valle
+    assert w.g_curva.marcador is not None
+    # Arrastrar al valle: el equipo lee el valle.
+    w.g_curva.marcador.arrastrar('mca1', valle['dist1'])
+    context.app.processEvents()
+    f = w.res['reposo']['D']
+    assert abs(f['promedio']['dist1'] - valle['dist1']) < 1e-9
+    assert abs(f['promedio']['mca1'] - valle['mca1']) < 0.02
+    assert f['auto'] == valle                          # el valle no se pierde al volver a leer
+    assert set(RA.PARAMETROS) <= set(f['promedio']) and f['cv']['mca1'] is not None
+    log = LOGS.de('ra_marcar')[-1]
+    assert log['cursor'] == 'mca1' and log['dist'] == f['promedio']['dist1'] and 'verdad_area' in log
+    # La tabla trae todo, y la nariz entera con las dos fosas.
+    medir(w, 'I')
+    assert w.marcando == ('reposo', 'I')                # la última medida
+    w.cmb_marcar.setCurrentIndex(w.cmb_marcar.findText('FND reposo'))
+    w._elegir_marcar()
+    assert w.marcando == ('reposo', 'D') and w.cmb_marcar.currentText() == 'FND reposo'
+    textos = [w.tabla.item(i, 0).text() for i in range(w.tabla.rowCount())]
+    assert 'Nariz reposo (D + I)' in textos and w.tabla.columnCount() == 13
+    # Al retomar la atención, los cursores siguen donde quedaron.
+    d = w.report_job()['data']
+    sesion._actual = None
+    otra = RinometriaWindow(data_login=ADMIN)
+    otra.la_super(data, '88')
+    otra.restore_report(d)
+    esperar(otra)
+    assert otra.marcas[('reposo', 'D')] == w.marcas[('reposo', 'D')]
+    assert otra.res['reposo']['D']['promedio'] == w.res['reposo']['D']['promedio']
+
+
+def test_rinometria_cursor_con_el_mouse():
+    """El cursor se agarra y se suelta con el mouse, como en clase (ver
+    test_ecochg_panel._arrastre: hover antes del press y qWait entre
+    movimientos por el límite de pyqtgraph)."""
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtTest import QTest
+    w = RinometriaWindow(data_login=ADMIN)
+    w.resize(1366, 768)
+    w.show()
+    w.la_super(caso('mixta'), 'mouse')
+    w._calibrar()
+    medir(w, 'D')
+    QTest.qWait(100)
+    plot = w.g_curva.widget
+    vb = plot.getPlotItem().vb
+    linea = w.g_curva.marcador.lineas['mca1']
+    pixel = lambda d: plot.mapFromScene(vb.mapViewToScene(QPointF(d, 0.0)))
+    ini, fin = pixel(linea.value()), pixel(1.3)
+    vp = plot.viewport()
+    QTest.mouseMove(vp, ini)
+    QTest.qWait(30)
+    QTest.mousePress(vp, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, ini)
+    for k in range(1, 9):
+        QTest.qWait(30)
+        QTest.mouseMove(vp, QPoint(ini.x() + (fin.x() - ini.x()) * k // 8, ini.y() + k % 2))
+    QTest.qWait(30)
+    QTest.mouseRelease(vp, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, fin)
+    QTest.qWait(60)
+    d1 = w.marcas[('reposo', 'D')]['d1']
+    assert abs(d1 - 1.3) < 0.03, d1
+    assert w.res['reposo']['D']['promedio']['dist1'] == d1
+    w.close()
 
 
 def test_rm_en_vivo_con_adaptador_o_mascara():

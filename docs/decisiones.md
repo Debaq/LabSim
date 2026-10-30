@@ -7222,3 +7222,39 @@ modelo, no medidos.
   se rehacen con `mide_fosa`. `ra_registro` lleva los baremos (`calidad`).
 - Cambiar de atención con la toma en vivo la corta sin guardar
   (`ra_cancelar`).
+
+## Rinometría acústica: MCA1 y MCA2 con cursores, y todos los parámetros (2026-10-29)
+
+Pedido de él: "los MCA 1 y 2 no se mueven ni marcan por el evaluador como en
+un equipo normal; además faltan un montón de parámetros". No hay manual de
+los equipos a mano (Eccovision, RhinoScan, GM A1): el conjunto sale de lo
+que repite la literatura (MCA1 válvula, MCA2 cabeza del cornete inferior;
+V0-5 y V2-5; el volumen de la cavidad a 0-6 o 0-7 cm; la suma de las dos
+fosas).
+
+- **MCA1 y MCA2 son cursores** (líneas verticales que se arrastran con el
+  mouse, con el área y la distancia en el rótulo mientras se mueven). El
+  equipo **lee el área donde queda el cursor**; no busca el valle. Un
+  cursor en la pendiente da un MCA más grande y registros que se parecen
+  menos: es el error del evaluador y se ve.
+- **Aparecen al azar** (semilla de la toma), no en el valle: ponerlos es
+  del evaluador (como los controles que el alumno aprende a ajustar, sin un
+  valor "correcto" de partida).
+- **Una curva a la vez lleva los cursores**: el combo "Cursores MCA1 y
+  MCA2 en" de Pantalla (FND/FNI, reposo/con VC). Las demás muestran sus
+  marcas como puntos. Las marcas son por fosa y estado, valen para sus tres
+  registros y siguen ahí al tomar uno nuevo; van en la receta
+  (`opciones.marcas`) y vuelven al retomar la atención.
+- **El valle que habría marcado el equipo solo** (`medidas()`, el de
+  RinoSim) se guarda como `auto`: lo ve el docente en "Lo que el equipo no
+  sabe" junto a la verdad y a lo marcado, y va en `ra_marcar`.
+- **Parámetros** (`rinometria.PARAMETROS`): D1, MCA1, D2, MCA2, V1 (narina
+  a MCA2, el del libro), V0-2 (vestíbulo y válvula), V0-5 («Vol 2» del
+  libro), V2-5 (cambios de la mucosa), V0-7 (la fosa entera, ya en la zona
+  poco fiable); en el promedio, el CV de MCA1 y MCA2 entre registros y el
+  criterio de 0,03 cm²; una fila **Nariz (D + I)** con la suma de las dos
+  fosas por estado; el cambio con VC suma V0-7. Cabeceras cortas porque el
+  PDF reparte el ancho por igual; las unidades van en el pie.
+- No se agregó MCA3 (cornete medio, ~5-6 cm, ya en la zona poco fiable) ni
+  áreas a distancias fijas: se suman si él los echa de menos.
+

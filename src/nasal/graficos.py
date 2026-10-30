@@ -16,7 +16,8 @@ from PySide6.QtCore import Qt
 from core import tema
 from nasal.referencias import REFERENCIA_UNILATERAL_150
 from nasal.rinomanometria import PRESIONES, RADIO_BROMS
-from nasal.rinometria import X_CONFIABLE, X_CURVA
+from nasal.modelo import DX
+from nasal.rinometria import X_CONFIABLE, X_CURVA, area_en
 
 COLOR = {'D': tema.OD, 'I': tema.OI}
 ZONA_POCO_FIABLE = (244, 236, 230, 160)
@@ -299,11 +300,14 @@ class GraficoRinometria:
     def exportar(self, ruta):
         exportar(self.widget, ruta)
 
-    def dibujar(self, series, log=True, registros=True, verdad=False):
-        """series: [(fosas {D, I} de rinometria.mide_fosa o None, vc bool)]."""
+    def dibujar(self, series, log=True, registros=True, verdad=False, sin_rotulo=None):
+        """series: [(fosas {D, I} de rinometria.mide_fosa o None, vc bool)].
+        MCA1 y MCA2 van marcados en cada promedio; sin_rotulo = (lado, vc) de
+        la que lleva los cursores (cursores()), que ya dicen cuál es cuál."""
         plot = self.widget
         plot.clear()
         self._vivas = None
+        self.marcador = None
         amax = 10 if log else 4
         y = (lambda a: math.log10(max(self.AMIN, min(amax, a)))) if log else \
             (lambda a: max(0.0, min(amax, a)))
@@ -343,12 +347,14 @@ class GraficoRinometria:
                         plot.plot(r['x'], [y(a) for a in r['A']], pen=pg.mkPen(color, width=0.9, style=estilo))
                 media = curva_media(f)
                 plot.plot([x for x, _ in media], [y(a) for _, a in media], pen=_pluma(lado, vc))
-                if not vc:
-                    p = f['promedio']
-                    for d, a, nombre in ((p['dist1'], p['mca1'], 'MCA1'), (p['dist2'], p['mca2'], 'MCA2')):
-                        plot.addItem(pg.ScatterPlotItem([d], [y(a)], size=8,
-                                                        pen=pg.mkPen('#ffffff', width=1.2),
-                                                        brush=pg.mkBrush(COLOR[lado])))
+                if (lado, vc) == sin_rotulo:
+                    continue
+                p = f['promedio']
+                for d, a, nombre in ((p['dist1'], p['mca1'], 'MCA1'), (p['dist2'], p['mca2'], 'MCA2')):
+                    plot.addItem(pg.ScatterPlotItem([d], [y(a)], size=8,
+                                                    pen=pg.mkPen('#ffffff', width=1.2),
+                                                    brush=pg.mkBrush(COLOR[lado])))
+                    if not vc:
                         _texto(plot, d, y(a), nombre, COLOR[lado], ancla=(0.5, -0.4), negrita=True)
 
     def en_vivo(self, barrido, banda, lado):
@@ -384,6 +390,61 @@ class GraficoRinometria:
             return
         for k, clave in (('sup', 'sup'), ('inf', 'inf'), ('media', 'A')):
             v[k].setData(banda['x'], [y(a) for a in banda[clave]])
+
+    def cursores(self, curva, marcas, lado, al_soltar):
+        """Los cursores de MCA1 y MCA2 sobre `curva` ({x, A}: el promedio de
+        la fosa que se marca), como en el equipo: líneas que el evaluador
+        arrastra hasta cada valle; el rótulo dice el área y la distancia
+        donde están. Al soltar, al_soltar('mca1'|'mca2', d en cm, en la
+        rejilla)."""
+        self.marcador = _Cursores(self, curva, marcas, lado, al_soltar)
+        return self.marcador
+
+
+class _Cursores:
+    """Los cursores de MCA1 y MCA2 de una curva (GraficoRinometria.cursores)."""
+
+    def __init__(self, grafico, curva, marcas, lado, al_soltar):
+        self.grafico, self.curva, self.al_soltar = grafico, curva, al_soltar
+        plot = grafico.widget
+        color = pg.mkColor(COLOR[lado])
+        self.lineas = {}
+        self.puntos = {}
+        for cual, d in (('mca1', marcas['d1']), ('mca2', marcas['d2'])):
+            linea = pg.InfiniteLine(pos=d, angle=90, movable=True, bounds=(DX, X_CURVA),
+                                    pen=pg.mkPen(color, width=1.4, style=Qt.PenStyle.DashDotLine),
+                                    hoverPen=pg.mkPen(color, width=3))
+            linea.setZValue(30)
+            linea.etiqueta = pg.InfLineLabel(linea, '', position=0.93 if cual == 'mca1' else 0.80,
+                                             color=COLOR[lado], fill=pg.mkBrush(255, 255, 255, 220),
+                                             anchors=[(0, 0.5), (0, 0.5)])
+            linea.setCursor(Qt.CursorShape.SizeHorCursor)
+            punto = pg.ScatterPlotItem(size=10, pen=pg.mkPen('#ffffff', width=1.5), brush=pg.mkBrush(color))
+            punto.setZValue(31)
+            plot.addItem(linea)
+            plot.addItem(punto)
+            linea.sigPositionChanged.connect(lambda _l, c=cual: self._leer(c))
+            linea.sigPositionChangeFinished.connect(lambda _l, c=cual: self._soltar(c))
+            self.lineas[cual] = linea
+            self.puntos[cual] = punto
+            self._leer(cual)
+
+    def _leer(self, cual):
+        """Lo que lee el equipo donde está el cursor, mientras se mueve."""
+        d = self.lineas[cual].value()
+        a = area_en(self.curva['x'], self.curva['A'], d)
+        nombre = 'MCA1' if cual == 'mca1' else 'MCA2'
+        self.lineas[cual].etiqueta.setText(f' {nombre} {a:.2f} cm² · {d:.2f} cm '.replace('.', ','))
+        self.puntos[cual].setData([d], [self.grafico._y(a)])
+
+    def _soltar(self, cual):
+        d = round(round(self.lineas[cual].value() / DX) * DX, 4)
+        self.al_soltar(cual, d)
+
+    def arrastrar(self, cual, d):
+        """Como si el evaluador lo soltara en d (para las pruebas)."""
+        self.lineas[cual].setValue(d)
+        self._soltar(cual)
 
 
 def curva_media(f):

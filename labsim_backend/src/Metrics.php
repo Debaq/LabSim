@@ -70,6 +70,7 @@ final class Metrics
         'ra_iniciar' => 'Inicia la toma de una fosa',
         'ra_detener' => 'Detiene sin ningún pulso',
         'ra_registro' => 'Registro de una fosa',
+        'ra_marcar' => 'Mueve un cursor (MCA1 o MCA2)',
         'ra_cancelar' => 'Toma cortada al cambiar de atención',
         'ra_vasoconstrictor' => 'Vasoconstrictor',
         'ra_error_simulado' => 'Error de técnica simulado (docente)',
