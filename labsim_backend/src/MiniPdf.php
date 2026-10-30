@@ -74,6 +74,12 @@ final class MiniPdf
      */
     private static function toWinAnsi(string $utf8): string
     {
+        // Lo que WinAnsi no tiene y mbstring cambiaría por "?": desigualdades
+        // y subíndices (SpO₂, cmH₂O) de los informes nasales y de sueño.
+        $utf8 = strtr($utf8, [
+            '≥' => '>=', '≤' => '<=', '₀' => '0', '₁' => '1', '₂' => '2', '₃' => '3', '₄' => '4',
+            '₅' => '5', '₆' => '6', '₇' => '7', '₈' => '8', '₉' => '9',
+        ]);
         if (function_exists('mb_convert_encoding')) {
             $out = @mb_convert_encoding($utf8, 'Windows-1252', 'UTF-8');
             if ($out !== false && $out !== '') {

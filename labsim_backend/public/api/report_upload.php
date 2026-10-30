@@ -53,6 +53,8 @@ const REPORT_IMAGE_SUFFIXES = [
     'esp_fv', 'esp_vt',
     // Olfatometría: la escalera del umbral. Prick: el antebrazo con las pápulas.
     'olf_umbral', 'prick_brazo',
+    // Polisomnografía: el resumen gráfico de la noche.
+    'psg_noche',
 ];
 
 $user = Auth::requireUser();

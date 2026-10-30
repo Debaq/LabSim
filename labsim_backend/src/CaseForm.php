@@ -429,6 +429,8 @@ final class CaseForm
         $olfato = self::parseOlfato($v['olfato_json'] ?? '', $olfatoError);
         $prickError = null;
         $prick = self::parsePrick($v['prick_json'] ?? '', $prickError);
+        $suenoError = null;
+        $sueno = self::parseSueno($v['sueno_json'] ?? '', $suenoError);
 
         // Edad 0 es válida SI viene la edad exacta: es un recién nacido o un
         // lactante, no un campo sin llenar. Sin esa excepción no se podía
@@ -478,6 +480,8 @@ final class CaseForm
             $error = $olfatoError;
         } elseif ($prickError !== null) {
             $error = $prickError;
+        } elseif ($suenoError !== null) {
+            $error = $suenoError;
         } elseif (($neuralError = CaseBuilder::neuralParamsError($abrOd['neural'], 'OD')
                 ?? CaseBuilder::neuralParamsError($abrOi['neural'], 'OI')) !== null) {
             $error = $neuralError;
@@ -623,6 +627,7 @@ final class CaseForm
                 'espiro' => $espiro,
                 'olfato' => $olfato,
                 'prick' => $prick,
+                'sueno' => $sueno,
                 // La pasada final del docente por el Resumen: qué fichas
                 // dio por buenas. Va adentro del caso, no al lado -- ver
                 // más abajo, es lo último que bloquea el guardado.
@@ -1353,6 +1358,128 @@ final class CaseForm
                 return null;
             }
             $out['farmaco'] = ['clave' => $f['clave'], 'horas' => $h];
+        }
+        return $out;
+    }
+
+    /** Perfiles del libro del bloque SUENO (nasal/sueno.PERFILES_LIBRO) y el personalizado. Mantener iguales. */
+    public const SUENO_PERFILES = [
+        'roncador' => 'Roncador simple (cap. 38.1)',
+        'moderado' => 'SAOS moderado con obstrucción nasal (cap. 38.2)',
+        'grave' => 'SAOS grave (cap. 38.3)',
+        'dudosa' => 'Poligrafía que no alcanza: hipopneas con despertar (cap. 38.4)',
+        'personalizado' => 'Personalizado',
+    ];
+    /** Parámetros del perfil personalizado (nasal/sueno.PARAMETROS): clave => [mínimo, máximo, por defecto]. */
+    public const SUENO_PARAMETROS = [
+        'tasa' => [0, 120, 15.0],
+        'rem' => [0.5, 5, 2.0],
+        'supino' => [0.5, 4, 1.6],
+        'obstructivas' => [0, 1, 0.30],
+        'mixtas' => [0, 1, 0.05],
+        'centrales' => [0, 1, 0.02],
+        'hipopneas' => [0, 1, 0.63],
+        'rera' => [0, 1, 0.0],
+        'caida_apnea' => [1, 20, 6.0],
+        'caida_hipopnea' => [3, 12, 4.5],
+        'hip_sin_desaturar' => [0, 1, 0.2],
+        'spo2_basal' => [85, 99, 95.5],
+        'tib' => [300, 600, 470],
+        'semilla' => [1, 99999, 1],
+    ];
+    /** Sensores del montaje (nasal/sueno.SENSORES): clave => [nombre, ¿lo lleva la poligrafía?]. */
+    public const SUENO_SENSORES = [
+        'eeg' => ['EEG (F4, C4, O2 con M1)', false],
+        'eog' => ['EOG (E1, E2)', false],
+        'emg' => ['EMG mentoniano', false],
+        'termico' => ['Sensor térmico oronasal', false],
+        'canula' => ['Cánula de presión nasal', true],
+        'torax' => ['Banda de tórax', true],
+        'abd' => ['Banda de abdomen', true],
+        'spo2' => ['Oxímetro de pulso', true],
+        'ron' => ['Micrófono de ronquido', true],
+        'pos' => ['Sensor de posición', true],
+    ];
+    /** Reglas de hipopnea (nasal/sueno.REGLAS). */
+    public const SUENO_REGLAS = [
+        '3' => 'Recomendada: caída ≥ 30 % con desaturación ≥ 3 % o despertar',
+        '4' => 'Aceptable: caída ≥ 30 % con desaturación ≥ 4 %',
+    ];
+
+    /**
+     * El estudio de sueño desde el hidden `sueno_json` -> cases.data['SUENO']
+     * (demo interna). Vacío es "sin estudio" y da null sin error. Mismas
+     * reglas que nasal/sueno.normaliza: perfil del libro o personalizado
+     * (con sus parámetros en rango y la mezcla de tipos que no suma 0) y la
+     * cánula suelta opcional (minutos desde que apaga la luz).
+     *
+     * @param mixed       $raw   El texto del hidden.
+     * @param string|null $error Mensaje para el docente; null si está bien.
+     */
+    public static function parseSueno($raw, ?string &$error = null): ?array
+    {
+        $error = null;
+        $raw = is_string($raw) ? trim($raw) : '';
+        if ($raw === '') {
+            return null;
+        }
+        $json = json_decode($raw, true);
+        if (!is_array($json)) {
+            $error = 'Sueño: los datos del estudio de sueño no se pudieron leer (JSON inválido).';
+            return null;
+        }
+        $perfil = $json['perfil'] ?? null;
+        if (!is_string($perfil) || !isset(self::SUENO_PERFILES[$perfil])) {
+            $error = 'Sueño: el perfil de la noche no es uno de los conocidos.';
+            return null;
+        }
+        $num = static function ($x, string $nombre, $lo, $hi) use (&$error) {
+            if (!(is_int($x) || is_float($x)) || !is_finite((float) $x)) {
+                $error = "Sueño: \"{$nombre}\" tiene que ser un número.";
+                return null;
+            }
+            if ($x < $lo || $x > $hi) {
+                $error = "Sueño: \"{$nombre}\" va entre {$lo} y {$hi} (vale {$x}).";
+                return null;
+            }
+            return $x + 0;
+        };
+        $out = ['perfil' => $perfil, 'params' => null, 'canula_suelta' => null];
+        if ($perfil === 'personalizado') {
+            $p = $json['params'] ?? [];
+            if ($p === null) {
+                $p = [];
+            }
+            if (!is_array($p)) {
+                $error = 'Sueño: los parámetros del perfil personalizado no se pudieron leer.';
+                return null;
+            }
+            $params = [];
+            foreach (self::SUENO_PARAMETROS as $k => $r) {
+                $x = array_key_exists($k, $p) && $p[$k] !== '' ? $p[$k] : $r[2];
+                $params[$k] = $num($x, $k, $r[0], $r[1]);
+                if ($error !== null) {
+                    return null;
+                }
+            }
+            $mezcla = $params['obstructivas'] + $params['mixtas'] + $params['centrales'] + $params['hipopneas'] + $params['rera'];
+            if ($mezcla <= 0) {
+                $error = 'Sueño: la mezcla de tipos de evento (obstructivas, mixtas, centrales, hipopneas, RERA) suma cero.';
+                return null;
+            }
+            $out['params'] = $params;
+        }
+        $c = $json['canula_suelta'] ?? null;
+        if (is_array($c) && ($c['desde'] ?? null) !== null) {
+            $desde = $num($c['desde'], 'canula_suelta.desde', 0, 600);
+            if ($error !== null) {
+                return null;
+            }
+            $hasta = $num($c['hasta'] ?? null, 'canula_suelta.hasta', $desde + 1, 601);
+            if ($error !== null) {
+                return null;
+            }
+            $out['canula_suelta'] = ['desde' => $desde, 'hasta' => $hasta];
         }
         return $out;
     }

@@ -1562,6 +1562,9 @@ final class CaseBuilder
         if (!empty($form['prick']) && is_array($form['prick'])) {
             $data['PRICK'] = $form['prick'];
         }
+        if (!empty($form['sueno']) && is_array($form['sueno'])) {
+            $data['SUENO'] = $form['sueno'];
+        }
         return $data;
     }
 
@@ -2017,6 +2020,9 @@ final class CaseBuilder
         }
         if (is_array($data['PRICK'] ?? null)) {
             $v['prick_json'] = (string) json_encode($data['PRICK'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        }
+        if (is_array($data['SUENO'] ?? null)) {
+            $v['sueno_json'] = (string) json_encode($data['SUENO'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         }
 
         // Las tildes del Resumen, para que reeditar un caso ya revisado no

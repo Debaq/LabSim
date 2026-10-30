@@ -51,11 +51,11 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 
 ## Fases
 
-**Para retomar (2026-10-30):** F0-F6 hechas; la rinomanometría (F2b), la
-rinometría acústica (F2c), la espirometría (F6), la olfatometría y el
-prick (F5) falta verlos en la app real, y las tarjetas Olfato y Prick en el
-navegador. Lo que sigue es **F7 (sueño)**. La rinoscopía (F4) está en pausa
-por el aspecto.
+**Para retomar (2026-10-30):** F0-F6 y F7a hechas. Falta verlos en la app
+real: la rinomanometría (F2b), la rinometría acústica (F2c), la
+espirometría (F6), la olfatometría y el prick (F5) y la polisomnografía
+(F7a); y en el navegador, las tarjetas Olfato, Prick y Sueño. Lo que sigue
+es **F7b (CPAP)**. La rinoscopía (F4) está en pausa por el aspecto.
 
 - [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
@@ -254,7 +254,34 @@ por el aspecto.
       - De paso: los equipos nasales no tenían `submit_report` y cada cierre
         de atención los contaba como informe no subido.
 - [ ] **F7. Sueño:** poligrafía/PSG (registro, puntuación de eventos, IAH)
-      y titulación de CPAP; casos del cap. 38.
+      y titulación de CPAP; casos del cap. 38. En dos partes:
+  - [x] **F7a. Poligrafía y polisomnografía** (2026-10-30, a pedido de él;
+        tests y capturas a 1366, **sin ver en la app real ni la tarjeta en
+        el navegador**; fichas 159-162 del cap. 38 generadas, sin cargar).
+        Decisión en `docs/decisiones.md` (§ Polisomnografía: el alumno
+        corrige la puntuación automática). Código `PSG`, tipo
+        `POLISOMNOGRAFIA`. Modelo `nasal/sueno.py`: la noche simulada de
+        libro-orl `hacer_cap38.py` portada tal cual (mismos pacientes y
+        semillas: los índices del cap. 38 salen idénticos), más el termistor
+        y el EOG. Bloque `SUENO` del caso: perfil del libro (roncador,
+        moderado, grave, dudosa + su poligrafía previa) o personalizado
+        (tasa, REM, supino, mezcla de tipos, caídas, SpO2 basal, semilla), y
+        si la cánula se suelta en casa. Ventana: elegir estudio y montaje
+        (sensores), registrar la noche, revisar en ventanas de 30 s a 5 min
+        con la vista de la noche entera (hipnograma, posición, eventos,
+        SpO2); la puntuación automática propone y el alumno corrige (tipo,
+        borrar, agregar arrastrando, excluir artefactos); los índices salen
+        de SU puntuación (IAH/REI, por posición y etapa, IDO, T90,
+        arquitectura en PSG) con la regla 3 % o despertar / 4 %; la gravedad
+        la elige él. **Pendiente:** biocalibraciones; la estadificación
+        del sueño la trae hecha el equipo (el alumno no la corrige).
+  - [ ] **F7b. Titulación de CPAP** (código `CPAP`): noche en el laboratorio
+        a velocidad acelerada, presión que sube el alumno con las reglas de
+        Kushida 2008 (≥ 2 apneas, ≥ 3 hipopneas, ≥ 5 RERA, ronquido; 1 cmH2O
+        cada 5 min o más), presión eficaz del caso por posición y REM,
+        interfaz y fuga; grado de la titulación (óptima, buena, adecuada,
+        inaceptable). Después: la descarga de 30 noches (uso, IAH residual,
+        fuga).
 
 ## Fuera, por ahora
 

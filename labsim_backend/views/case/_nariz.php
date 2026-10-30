@@ -15,7 +15,8 @@
  * La tarjeta Pulmón es la espirometría (cases.data['ESPIRO']): su estado
  * vive en el hidden #espiro-json y lo mantiene public/js/case/pulmon.js.
  * Olfato (cases.data['OLFATO'], hidden #olfato-json, olfato.js) y Prick
- * (cases.data['PRICK'], hidden #prick-json, prick.js) siguen el mismo patrón.
+ * (cases.data['PRICK'], hidden #prick-json, prick.js) y Sueño (cases.data['SUENO'],
+ * hidden #sueno-json, sueno.js) siguen el mismo patrón.
  */
 ?>
 <div class="tab-panel" data-tab="nariz">
@@ -165,6 +166,30 @@
     </div>
     <p class="help">Pápula de cada alérgeno (mm, 0-25).</p>
     <div id="prick-alergenos" class="two-col"></div>
+    </div>
+</div>
+<div class="card">
+    <strong>Sueño (poligrafía y polisomnografía)</strong>
+    <p class="help">Demo interna, como la nariz. Sin la casilla, el caso se guarda sin estudio de sueño y el equipo no registra. Los perfiles del libro son las noches del cap. 38 con sus índices. En el personalizado, "tasa" es más o menos el IAH que sale hasta cerca de 40; sobre eso satura (70 da cerca de 50, 100 da cerca de 60). Los demás parámetros ajustan la noche: cuánto más en REM y en supino, la mezcla de tipos de evento (se normaliza, no puede sumar cero), las caídas de saturación y los minutos en cama. La cánula suelta solo pasa en la poligrafía de la casa, entre esos minutos desde que apaga la luz. Nada se bloquea acá: el servidor valida al guardar.</p>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="sueno-presente">
+        El caso trae estudio de sueño
+    </label>
+    <div id="sueno-campos">
+    <label>Perfil de la noche
+        <select id="sueno-perfil"></select>
+    </label>
+    <div id="sueno-personalizado">
+        <div id="sueno-params" class="two-col"></div>
+    </div>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="sueno-canula">
+        La cánula se suelta en la poligrafía de la casa
+    </label>
+    <div id="sueno-canula-campos" class="two-col">
+        <label>Desde (min desde que apaga la luz, 0-600) <input type="number" id="sueno-desde" step="1" min="0" max="600"></label>
+        <label>Hasta (min, mayor que desde, hasta 601) <input type="number" id="sueno-hasta" step="1" min="1" max="601"></label>
+    </div>
     </div>
 </div>
 </div>

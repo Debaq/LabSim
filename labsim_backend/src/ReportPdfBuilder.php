@@ -98,6 +98,12 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'POLISOMNOGRAFIA') {
+            $y = self::polisomnografiaBody($pdf, $reportId, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'PRICK') {
             $y = self::prickBody($pdf, $reportId, $data, $y, $contentW);
             self::textSections($pdf, $data, $y, $contentW);
@@ -738,7 +744,8 @@ final class ReportPdfBuilder
             // La primera columna lleva el nombre de la fila (fosa, registro):
             // más ancha que las de números.
             $n = count($cabeceras);
-            $primera = min(150.0, $contentW * 0.3);
+            // Con dos columnas (Parámetro/Valor) el rótulo es una frase larga.
+            $primera = $n === 2 ? $contentW * 0.55 : min(150.0, $contentW * 0.3);
             $resto = $n > 1 ? ($contentW - $primera) / ($n - 1) : 0.0;
             $fila = function (array $celdas, bool $negrita) use ($pdf, $primera, $resto, &$y, $n) {
                 $x = self::MARGIN;
@@ -960,6 +967,66 @@ final class ReportPdfBuilder
             $y += 16;
         }
         return $y;
+    }
+
+    /** Gravedad por el índice, en palabras (nasal/PolisomnografiaWindow.py). */
+    private const PSG_GRAVEDADES = ['normal' => 'normal', 'leve' => 'leve', 'moderada' => 'moderada', 'grave' => 'grave'];
+
+    /**
+     * Cuerpo del informe de polisomnografía / poligrafía: el estudio, la
+     * regla de hipopnea, el montaje (con lo que faltó para ese estudio), el
+     * resumen gráfico de la noche, la tabla de índices que armó la app, los
+     * avisos y la gravedad que eligió el alumno (nasal/PolisomnografiaWindow.py).
+     */
+    private static function polisomnografiaBody(MiniPdf $pdf, int $reportId, array $data, float $y, float $contentW): float
+    {
+        require_once __DIR__ . '/CaseForm.php';
+        $psg = ($data['estudio'] ?? 'psg') !== 'pg';
+        $y = self::ensureSpace($pdf, $y, 24.0);
+        $pdf->text(self::MARGIN, $y, $psg ? 'Polisomnografía de noche completa' : 'Poligrafía respiratoria domiciliaria', 12, true);
+        $y += 20;
+
+        $lineas = [];
+        $regla = (string) ($data['regla'] ?? '');
+        if (isset(CaseForm::SUENO_REGLAS[$regla])) {
+            $lineas[] = 'Regla de hipopnea: ' . self::frase(CaseForm::SUENO_REGLAS[$regla]);
+        }
+        $montados = [];
+        foreach (is_array($data['montaje'] ?? null) ? $data['montaje'] : [] as $k) {
+            if (is_string($k) && isset(CaseForm::SUENO_SENSORES[$k])) {
+                $montados[$k] = CaseForm::SUENO_SENSORES[$k][0];
+            }
+        }
+        $lineas[] = 'Sensores montados: ' . ($montados !== [] ? implode(', ', $montados) : 'ninguno') . '.';
+        $faltan = [];
+        foreach (CaseForm::SUENO_SENSORES as $k => $def) {
+            if (($psg || $def[1]) && !isset($montados[$k])) {
+                $faltan[] = $def[0];
+            }
+        }
+        if ($faltan !== []) {
+            $lineas[] = 'Sensores que faltan para este estudio: ' . implode(', ', $faltan) . '.';
+        }
+        foreach ($lineas as $linea) {
+            $y = self::ensureSpace($pdf, $y, 14.0);
+            $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);
+            $y += 2;
+        }
+        $y += 6;
+
+        $antes = $y;
+        $y = self::imagenInforme($pdf, $reportId, 'psg_noche', $y, $contentW, 340.0);
+        if ($y > $antes) {
+            $pdf->text(self::MARGIN, $y, 'Resumen gráfico de la noche.', 8);
+            $y += 16;
+        }
+
+        $y = self::tablaYAvisos($pdf, $data, $y, $contentW);
+
+        $g = (string) ($data['gravedad'] ?? '');
+        $y = self::ensureSpace($pdf, $y, 16.0);
+        $y = $pdf->textBlock(self::MARGIN, $y, 'Gravedad por el índice: ' . (self::PSG_GRAVEDADES[$g] ?? 'sin elegir'), $contentW, 10);
+        return $y + 10;
     }
 
     /** Resultado de cada sitio del prick en palabras. */

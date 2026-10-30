@@ -25,7 +25,7 @@ foreach ($nasales as $t) {
     t_true(isset(ReportFile::LABELS[$t]), "ReportFile::LABELS rotula {$t}");
     t_true(isset(ReportFile::SHORT_LABELS[$t]), "ReportFile::SHORT_LABELS rotula {$t}");
 }
-foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt', 'olf_umbral', 'prick_brazo'] as $suf) {
+foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt', 'olf_umbral', 'prick_brazo', 'psg_noche'] as $suf) {
     t_true(strpos($upload, "'{$suf}'") !== false, "report_upload acepta la imagen {$suf}");
 }
 foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
@@ -134,3 +134,33 @@ t_true(strpos($prick, "3,5 \xD7 3 mm") !== false, 'La pápula conserva el medio 
 t_true(strpos($prick, 'ninguno.') !== false && strpos($prick, 'ninguno..') === false, 'Fármacos con un solo punto final');
 t_true(strpos($prick, "sin p\xE1pula") !== false && strpos($prick, "Sin reacci\xF3n \\(v\xE1lido\\)") !== false, 'Dice cuando no hay pápula');
 t_true(strpos($prick, 'Positivo') !== false && strpos($prick, "minutos de la punci\xF3n") !== false, 'Trae el resultado y el minuto de lectura');
+
+// Polisomnografía: título, regla, montaje con lo que falta, tabla y gravedad.
+$datosPsg = [
+    'estudio' => 'psg', 'montaje' => ['eeg', 'canula', 'spo2'], 'regla' => '4',
+    'eventos' => [['t' => 1200, 'dur' => 20, 'tipo' => 'ao', 'auto' => true]], 'excluidos' => [],
+    'indices' => ['IAH' => 32.4], 'avisos' => ['Falta el EMG mentoniano.'], 'gravedad' => 'moderada',
+    'tabla' => ['cabeceras' => ['Parámetro', 'Valor'], 'filas' => [['IAH', '32,4 /h'], ['SpO2 mínima', '81 %']]],
+    'hallazgos' => 'Apneas obstructivas en supino.', 'conclusion' => 'SAOS moderado.',
+];
+$psg = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', $datosPsg, $paciente, 'Alumno X', '29-10-2026');
+t_true(strpos($psg, '%PDF-1.4') === 0, 'El informe de polisomnografía sale como PDF');
+t_true(strpos($psg, 'Polisomnograf') !== false && strpos($psg, 'noche completa') !== false, 'Trae el título de la polisomnografía');
+t_true(strpos($psg, '32,4 /h') !== false && strpos($psg, 'SpO2 m') !== false, 'Trae la tabla que mandó la app');
+t_true(strpos($psg, 'Gravedad por el') !== false && strpos($psg, 'moderada') !== false, 'Trae la gravedad que eligió el alumno');
+t_true(strpos($psg, 'Aceptable') !== false, 'Dice la regla de hipopnea en palabras');
+t_true(strpos($psg, 'EMG mentoniano') !== false && strpos($psg, 'faltan') !== false, 'Dice los sensores que faltan');
+t_true(strpos($psg, 'Falta el EMG mentoniano') !== false, 'Trae los avisos');
+$pg = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', ['estudio' => 'pg', 'montaje' => ['canula', 'torax', 'abd', 'spo2', 'ron', 'pos'], 'regla' => '3', 'gravedad' => ''] + $datosPsg, $paciente, 'Alumno X', '29-10-2026');
+t_true(strpos($pg, 'Poligraf') !== false && strpos($pg, 'domiciliaria') !== false, 'La poligrafía lleva su título');
+t_true(strpos($pg, 'faltan') === false, 'Con el montaje completo de la poligrafía no falta nada');
+t_true(strpos($pg, 'sin elegir') !== false, 'Sin gravedad elegida lo dice');
+
+// Lo que WinAnsi no tiene no sale como "?": ≥ y los subíndices.
+$sp = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', [
+    'estudio' => 'psg', 'montaje' => [], 'regla' => '3', 'eventos' => [], 'excluidos' => [],
+    'tabla' => ['cabeceras' => ['Parámetro', 'Valor'], 'filas' => [['SpO₂ media / mínima', '94 %'], ['IDO ≥ 3 %', '20']]],
+    'avisos' => [], 'gravedad' => '', 'hallazgos' => '', 'conclusion' => '',
+], $paciente, 'Alumno X', '30-10-2026');
+t_true(strpos($sp, 'SpO2 media') !== false && strpos($sp, 'IDO >= 3') !== false, 'Subíndices y desigualdades legibles en el PDF');
+

@@ -457,6 +457,7 @@ if ($esAdminCompleto) {
     admin_add_js('case/pulmon.js');
     admin_add_js('case/olfato.js');
     admin_add_js('case/prick.js');
+    admin_add_js('case/sueno.js');
 }
 admin_add_js('case/patient-photo.js');
 admin_add_js('case/sala.js');
@@ -537,6 +538,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php // La olfatometría (cases.data['OLFATO']) y el prick test (cases.data['PRICK']), por lo mismo. ?>
 <input type="hidden" id="olfato-json" name="olfato_json" value="<?= htmlspecialchars((string) ($v['olfato_json'] ?? '')) ?>">
 <input type="hidden" id="prick-json" name="prick_json" value="<?= htmlspecialchars((string) ($v['prick_json'] ?? '')) ?>">
+<?php // El estudio de sueño (cases.data['SUENO']), por lo mismo. ?>
+<input type="hidden" id="sueno-json" name="sueno_json" value="<?= htmlspecialchars((string) ($v['sueno_json'] ?? '')) ?>">
 <?php
 // La barra sale de CaseReview::TABS (misma fuente que usa el Resumen para
 // listar las fichas): escrita a mano acá, el Resumen podía listar una ficha
@@ -688,6 +691,8 @@ window.CASE_CONST = <?= json_encode([
     // Tarjetas Olfato y Prick de la misma ficha: rangos, listas y normas (las de la app).
     'olfato' => $esAdminCompleto ? ['rangos' => CaseForm::OLFATO_RANGOS, 'normas' => CaseBuilder::olfatoNormas()] : null,
     'prick' => $esAdminCompleto ? ['rangos' => CaseForm::PRICK_RANGOS, 'alergenos' => CaseForm::PRICK_ALERGENOS, 'farmacos' => CaseForm::PRICK_FARMACOS] : null,
+    // Tarjeta Sueño de la misma ficha: perfiles del libro y parámetros del personalizado (los de la app).
+    'sueno' => $esAdminCompleto ? ['perfiles' => CaseForm::SUENO_PERFILES, 'parametros' => CaseForm::SUENO_PARAMETROS] : null,
     'vempBaselineOverride' => $vempBaselineOverride,
     'escenarios' => CaseProfile::SCENARIOS,
     // Qué se le puede ofrecer a esta edad y qué va primero en el turno del

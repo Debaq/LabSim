@@ -7412,3 +7412,33 @@ fármaco con las horas desde la dosis. Todo lo demás sale de cómo se hizo:
   alérgenos: positivo/negativo con 3 mm y 3 sobre el negativo). La verdad
   de cada sitio va a "Lo que el equipo no sabe" y al log.
 - **Queda fuera por ahora** la reacción sistémica y la vasovagal de H29.
+
+## Polisomnografía: el alumno corrige la puntuación automática (2026-10-30)
+
+La poligrafía y la polisomnografía de la demo usan la noche simulada del
+libro (libro-orl, `hacer_cap38.py`), portada sin cambios a
+`nasal/sueno.py`: con el perfil de un paciente del cap. 38 la noche, los
+eventos y los índices son los del capítulo (un test lo compara con el
+script). Lo que el alumno hace es lo que hace un técnico con el programa del
+equipo:
+
+- **Elige el estudio y monta los sensores.** La poligrafía no tiene EEG: no
+  ve despertares, así que las hipopneas que solo dan despertar no existen
+  para ella (el caso 38.4). Lo que no se monta no se registra y se avisa en
+  el informe.
+- **El programa propone y el alumno corrige.** La puntuación automática se
+  equivoca como un programa: sin EEG no puntúa esas hipopneas, se le
+  escapa alguna (6 %), confunde alguna obstructiva con central si el
+  esfuerzo es débil, no puntúa RERA y, donde la cánula se soltó en la casa,
+  ve apneas que no existen. El alumno cambia el tipo, borra, agrega con la
+  selección y excluye los tramos sin señal. La estadificación del sueño
+  viene hecha: corregirla es otra destreza y queda fuera por ahora.
+- **Los índices salen de su puntuación**, con la regla de hipopnea que elija
+  (3 % o despertar, o 4 %): IAH por hora de sueño en la polisomnografía, REI
+  por hora de registro válido en la poligrafía (con aviso si quedan menos de
+  4 h), por posición y por etapa, IDO, SpO2 y arquitectura. La gravedad la
+  elige él. "Lo que el equipo no sabe" compara su índice con el de la noche
+  de verdad y con el de la puntuación automática sin tocar.
+- **Perfil personalizado** para el docente: tasa de eventos (≈ el IAH hasta
+  40; sobre eso satura), cuánto pesan el REM y el supino, la mezcla de tipos,
+  las caídas de SpO2 y la semilla, sobre una arquitectura normal.
