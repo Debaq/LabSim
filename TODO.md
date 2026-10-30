@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 73).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 74).
 
 Revisado contra el código el 2026-09-24.
 
@@ -209,6 +209,11 @@ gap significativo. § Parámetros de audiometría configurables por curso
       rinometría, olfatometría, prick, espirometría, PSG, CPAP), como demo
       interna que solo ve el admin. Fases en `docs/roadmap_nasal.md`.
       § Nariz: todo en LabSim, como demo interna
+- [ ] 74. Indicadores de técnica de los equipos nasales sobre lo que ya
+      registran (`rm_`, `ra_`, `rs_` en action_logs), como el T01 del
+      audiómetro; qué medir lo decide él. Con eso, ver si se saca la pestaña
+      "Lo que el equipo no sabe" de la app.
+      § Equipos nasales: cada acción y todas las variables a action_logs
 
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
