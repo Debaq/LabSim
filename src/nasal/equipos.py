@@ -335,6 +335,9 @@ class EquipoNasal(QMainWindow):
         return {'appointment_id': appointment_id, 'tipo': self.TIPO, 'data': data,
                 'images': self._exportar_imagenes}
 
+    def submit_report(self):
+        return sesion.subir_al_cerrar(self)
+
     def _avisos_informe(self):
         return []
 

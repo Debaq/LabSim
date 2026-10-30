@@ -556,6 +556,9 @@ class RinoscopiaWindow(QWidget):
                      'vistas': [list(v) for v in self.vistas], 'vasoconstrictor': self.sesion.vc_informe()})
         return {'appointment_id': appointment_id, 'tipo': self.TIPO, 'data': data, 'images': None}
 
+    def submit_report(self):
+        return sesion.subir_al_cerrar(self)
+
     def restore_report(self, data):
         """Retomar la atención: vuelve lo informado y lo que ya había mirado,
         si en esta vuelta todavía no se hizo nada."""

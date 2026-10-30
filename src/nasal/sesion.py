@@ -206,3 +206,17 @@ def registrar(accion, data, appointment_id, **payload):
         cola().push(accion, payload)
     except Exception as exc:  # noqa: BLE001 -- sin log el examen sigue
         print(f'nasal: no se pudo registrar {accion}: {exc}')
+
+
+def subir_al_cerrar(modulo):
+    """submit_report de los equipos nasales: main.py lo llama al cerrar la
+    atención (como en la otoscopía). Sin esto cada cierre los contaba como
+    "no se pudo subir el informe". True si no había nada o subió."""
+    job = modulo.report_job()
+    if job is None:
+        return True
+    from core.report_autosave import subir_ahora
+    ok, detalle = subir_ahora(job)
+    if not ok:
+        print(f'{job["tipo"]}: no se pudo subir el informe: {detalle}')
+    return ok
