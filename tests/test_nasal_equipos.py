@@ -4,11 +4,13 @@
    apagados y el mensaje lo dice (no hay nariz normal de relleno).
 2. La rinomanometría mide las dos fosas, la tabla trae la fila total y
    con vasoconstrictor suma las columnas del cambio.
-3. La rinometría no mide sin calibrar; calibrada, tres registros por fosa.
+3. La rinometría no mide sin calibrar; calibrada, se inicia, el equipo
+   manda pulsos (cada uno una curva en vivo) y al detener la última queda
+   como registro. Tres registros por fosa; con más, quedan los tres últimos.
 4. Los dos equipos comparten la nariz: el vasoconstrictor puesto en uno vale
    para el otro en la misma atención, y una atención nueva empieza en reposo.
 5. La medición corre fuera de la ventana y deja los botones apagados
-   mientras tanto.
+   mientras tanto (en la rinometría, en vivo solo queda el de detener).
 10. La rinomanometría se registra como en el equipo: adaptador en una
     narina, máscara, presión y flujo en el tiempo; las indicaciones al
     paciente cambian los ciclos siguientes y la receta los rehace iguales.
@@ -54,17 +56,26 @@ sesion._cola = LOGS
 
 
 def medir(w, lado):
-    """La medición corre en otro hilo (hilos.en_fondo): se espera el aviso.
-    En la rinomanometría es un registro de seis ciclos."""
+    """En la rinomanometría, una grabación de 20 s; en la rinometría, tres
+    registros (iniciar, unos pulsos, detener)."""
     if isinstance(w, RinomanometriaWindow):
         registrar(w, lado)
         return
+    for _ in range(3):
+        tomar(w, lado)
+
+
+def tomar(w, lado, pulsos=4):
+    """Un registro de rinometría: el timer no corre en la prueba, los pulsos
+    se dan a mano."""
     w._medir(lado)
-    while w.midiendo:
-        context.app.processEvents()
-        if w.tarea is not None:
-            w.tarea.esperar(20)
-    context.app.processEvents()
+    if w.vivo is None:
+        return
+    for _ in range(pulsos - 1):
+        w._tic()
+    w._medir(lado)
+
+
 ALUMNO = {'permission': 1}
 
 
@@ -186,16 +197,40 @@ def test_vasoconstrictor_compartido():
     assert not ra.sesion.vc
 
 
-def test_mide_en_segundo_plano():
+def test_rinometria_en_vivo():
+    LOGS.eventos.clear()
     w = RinometriaWindow(data_login=ADMIN)
-    w.la_super(caso(), 'fondo')
+    w.la_super(caso(), 'vivo-ra')
     w._calibrar()
     w._medir('D')
-    assert w.midiendo and not w.btn_d.isEnabled() and not w.btn_vc.isEnabled()
-    while w.midiendo:
-        context.app.processEvents()
-        w.tarea.esperar(20)
-    assert w.res['reposo']['D'] is not None and w.btn_d.isEnabled()
+    assert w.vivo and w.timer.isActive() and w.btn_d.text() == 'Detener' and w.btn_d.isEnabled()
+    assert not w.btn_i.isEnabled() and not w.btn_vc.isEnabled() and not w.btn_calibrar.isEnabled()
+    w._medir('I')                           # la otra fosa espera
+    assert w.vivo['lado'] == 'D'
+    w._tic()
+    w._tic()
+    curvas = w.vivo['curvas']
+    assert len(curvas) == 3 and curvas[0]['A'] != curvas[-1]['A']   # cada pulso, una curva
+    assert 'MCA1' in w.lbl_mensaje.text()
+    ultima = curvas[-1]['A']
+    w._medir('D')                           # detener
+    assert w.vivo is None and not w.timer.isActive() and w.btn_d.text() == 'Iniciar FND'
+    f = w.res['reposo']['D']
+    assert len(f['registros']) == 1 and f['registros'][0]['A'] == ultima
+    assert not f['repetible'] and any('Faltan registros' in a for a in f['avisos'])
+    tomar(w, 'D')
+    tomar(w, 'D')
+    tomar(w, 'D')                           # un cuarto: quedan los tres últimos
+    f = w.res['reposo']['D']
+    assert len(f['registros']) == 3 and f['registros'][0]['A'] != ultima
+    assert len(w.mediciones[0]['opciones']['registros']) == 3
+    reg = LOGS.de('ra_registro')
+    assert len(LOGS.de('ra_iniciar')) == 4 and len(reg) == 4
+    assert reg[0]['pulsos'] == 3 and reg[-1]['registros'] == 3 and 'mca1' in reg[-1]['verdad']
+    # Cambiar de atención en vivo: no se guarda nada.
+    w._medir('I')
+    w.la_super(caso(), 'otra')
+    assert w.vivo is None and not w.timer.isActive() and w.res['reposo']['I'] is None
 
 
 def test_rm_en_vivo_con_adaptador_o_mascara():

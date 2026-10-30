@@ -71,7 +71,8 @@ aspecto.
       (`nasal/equipos.py`, `nasal/graficos.py`, `nasal/sesion.py`): sello,
       medir FND/FNI, vasoconstrictor, errores de técnica "simulados" a mano,
       curva en cuatro cuadrantes, resistencia según la presión, tabla a
-      75/150 Pa, Broms; calibrar, tres registros, MCA1 y MCA2, cambio con VC.
+      75/150 Pa, Broms; calibrar, toma en vivo (Iniciar/Detener, un
+      registro por toma, tres por fosa), MCA1 y MCA2, cambio con VC.
       Las dos ventanas comparten la nariz de la atención (el VC de una vale
       para la otra) y el ciclo nasal corre con el reloj. "Lo que el equipo no
       sabe" solo para docente/admin. La medición corre en `hilos.en_fondo`

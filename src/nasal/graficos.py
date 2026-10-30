@@ -303,9 +303,11 @@ class GraficoRinometria:
         """series: [(fosas {D, I} de rinometria.mide_fosa o None, vc bool)]."""
         plot = self.widget
         plot.clear()
+        self._vivas = []
         amax = 10 if log else 4
         y = (lambda a: math.log10(max(self.AMIN, min(amax, a)))) if log else \
             (lambda a: max(0.0, min(amax, a)))
+        self._y = y
         plot.setXRange(0, X_CURVA, padding=0)
         # La escala log se hace a mano (log10 del área + marcas rotuladas en
         # cm²): setLogMode de pyqtgraph no deja acotar el área a [0,1; 10].
@@ -348,6 +350,26 @@ class GraficoRinometria:
                                                         pen=pg.mkPen('#ffffff', width=1.2),
                                                         brush=pg.mkBrush(COLOR[lado])))
                         _texto(plot, d, y(a), nombre, COLOR[lado], ancla=(0.5, -0.4), negrita=True)
+
+    def en_vivo(self, curvas, lado):
+        """Los últimos pulsos mientras el equipo mide, sobre lo que dejó
+        dibujar(): el más nuevo entero, los de antes cada vez más tenues."""
+        plot = self.widget
+        while len(self._vivas) < len(curvas):
+            item = plot.plot([], [])
+            item.setZValue(10)
+            self._vivas.append(item)
+        n = len(curvas)
+        for i, item in enumerate(self._vivas):
+            if i >= n:
+                item.setData([], [])
+                continue
+            r = curvas[i]
+            color = pg.mkColor(COLOR[lado])
+            nuevo = i == n - 1
+            color.setAlphaF(1.0 if nuevo else 0.15 + 0.35 * (i + 1) / n)
+            item.setPen(pg.mkPen(color, width=2.2 if nuevo else 1.0))
+            item.setData(r['x'], [self._y(a) for a in r['A']])
 
 
 def curva_media(f):

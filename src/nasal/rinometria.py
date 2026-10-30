@@ -247,6 +247,20 @@ def mide_fosa(p, lado, estado=None, opciones=None):
         curva = registro(p, lado, estado, {**opciones, 'base': base}, k)
         curva['medidas'] = medidas(curva['x'], curva['A'])
         registros.append(curva)
+    return fosa(p, lado, estado, registros)
+
+
+# Registros por fosa del protocolo del libro (H27).
+REGISTROS_PROTOCOLO = 3
+
+
+def fosa(p, lado, estado, registros, pedidos=None):
+    """Lo que se anota de una fosa con los registros ya tomados (de
+    registro(), con sus medidas): el promedio, si cumplen el criterio de
+    repetición y los avisos. Con `pedidos`, si faltan registros no se da por
+    repetible."""
+    estado = estado or {}
+    n = len(registros)
     promedio = {}
     for c in CAMPOS:
         tot = 0
@@ -258,9 +272,13 @@ def mide_fosa(p, lado, estado=None, opciones=None):
         vs = [r['medidas'][c] for r in registros]
         return max(vs) - min(vs)
 
-    repetible = rango('mca1') <= CRITERIO_REPETICION and rango('mca2') <= CRITERIO_REPETICION
+    parecidos = rango('mca1') <= CRITERIO_REPETICION and rango('mca2') <= CRITERIO_REPETICION
+    faltan = bool(pedidos) and n < pedidos
+    repetible = parecidos and not faltan
     avisos = []
-    if not repetible:
+    if faltan:
+        avisos.append(f'Faltan registros: {n} de {pedidos}.')
+    if not parecidos:
         avisos.append(f"Registros que no se parecen (MCA1 ±{a_fijo(rango('mca1'), 2)}, MCA2 ±{a_fijo(rango('mca2'), 2)} cm²): revisar sello, posición y apnea.")
     if promedio['mca1'] < AREA_CRITICA:
         avisos.append('Primer mínimo muy cerrado: lo que está detrás no se puede evaluar.')
@@ -277,6 +295,29 @@ def mide_fosa(p, lado, estado=None, opciones=None):
         'verdad': {'x': xv, 'A': verdadero, 'medidas': medidas(xv, verdadero)},
         'congestion': congestion(p, lado, estado),
     }
+
+
+def pulso(p, lado, estado, receta, base=None):
+    """Un pulso del equipo en vivo: el registro `k` de la semilla de esa
+    toma, con el estado de la nariz y los errores de ese momento (receta:
+    {estado, semilla, errores, k}). Con la receta sale siempre igual."""
+    curva = registro(p, lado, receta.get('estado') or estado,
+                     {'semilla': receta.get('semilla', 1), 'errores': receta.get('errores') or {},
+                      'base': base}, receta.get('k', 0))
+    curva['medidas'] = medidas(curva['x'], curva['A'])
+    return curva
+
+
+def rehace_fosa(p, lado, estado=None, opciones=None):
+    """La fosa de una medición guardada: cada registro desde su receta
+    (opciones['registros']). Las mediciones de antes de la toma en vivo
+    (tres registros de una vez) se rehacen con mide_fosa."""
+    opciones = opciones or {}
+    recetas = opciones.get('registros')
+    if not recetas:
+        return mide_fosa(p, lado, estado, opciones)
+    registros = [pulso(p, lado, estado, r) for r in recetas]
+    return fosa(p, lado, recetas[-1].get('estado') or estado, registros, REGISTROS_PROTOCOLO)
 
 
 def examen(p, estado=None, opciones=None):

@@ -7170,7 +7170,8 @@ equipo en `AlumnoIndicadores::EQUIPOS`).
   existe en la app. `rm_grabacion` lleva la resistencia medida y la
   verdadera a 75 y 150 Pa, el error, la congestión, el minuto del ciclo, si
   el vasoconstrictor ya actuaba, los ciclos con cada error, el ambiente y la
-  lectura de H26; `ra_medicion` las medidas y las verdaderas.
+  lectura de H26; `ra_registro` las medidas del registro, el promedio y
+  las verdaderas.
 - **Lo que mide la técnica**: `rm_indicacion` dice si hacía falta (lo que
   hacía el paciente cuando se la dieron), `rm_grabar` cuánto lo miró en vivo
   y cómo respiraba al apretar Grabar, los rechazos (cambiar adaptador con la
@@ -7180,3 +7181,27 @@ equipo en `AlumnoIndicadores::EQUIPOS`).
 - El alumno no ve los payloads: `my_attendances` solo resume nombres y
   tiempos. Los indicadores con estos datos quedan para cuando se decida qué
   medir.
+
+## Rinometría acústica: en vivo, Iniciar y Detener (2026-10-29)
+
+Pedido de él: en el rinómetro las curvas aparecen como pulsos ("ticks") al
+apretar Iniciar, y es el operador quien aprieta Detener. Antes "Medir FND"
+sacaba los tres registros de golpe.
+
+- **Un pulso cada 150 ms**, cada uno una curva nueva del modelo
+  (`rinometria.pulso`) con el estado de la nariz y los errores marcados en
+  ese momento: con "Respira o traga" la curva baila y se ve. En pantalla,
+  los últimos 5 pulsos, el nuevo entero y los anteriores tenues, y arriba
+  MCA1/MCA2 del pulso actual.
+- **Detener guarda el último pulso como un registro**, no un promedio de
+  los pulsos: lo que el alumno ve al detener es lo que queda. Tres registros
+  por fosa (H27); con menos, la tabla dice "n de 3" y no se da por
+  repetible. **Con un cuarto quedan los tres últimos**: repetir no pide
+  borrar nada.
+- **La receta es por registro** (estado, semilla de la toma, errores y
+  número de pulso): `rinometria.rehace_fosa` los rehace iguales al retomar
+  la atención. Las mediciones guardadas antes (tres registros de una vez)
+  se rehacen con `mide_fosa`.
+- Cambiar de atención con la toma en vivo la corta sin guardar
+  (`ra_cancelar`).
+
