@@ -303,7 +303,7 @@ class GraficoRinometria:
         """series: [(fosas {D, I} de rinometria.mide_fosa o None, vc bool)]."""
         plot = self.widget
         plot.clear()
-        self._vivas = []
+        self._vivas = None
         amax = 10 if log else 4
         y = (lambda a: math.log10(max(self.AMIN, min(amax, a)))) if log else \
             (lambda a: max(0.0, min(amax, a)))
@@ -351,25 +351,39 @@ class GraficoRinometria:
                                                         brush=pg.mkBrush(COLOR[lado])))
                         _texto(plot, d, y(a), nombre, COLOR[lado], ancla=(0.5, -0.4), negrita=True)
 
-    def en_vivo(self, curvas, lado):
-        """Los últimos pulsos mientras el equipo mide, sobre lo que dejó
-        dibujar(): el más nuevo entero, los de antes cada vez más tenues."""
+    def en_vivo(self, barrido, banda, lado):
+        """Lo que se ve mientras el equipo mide, sobre lo que dejó dibujar():
+        el pulso en curso hasta donde llegó (barrido: {x, A}) y, si ya hay
+        pulsos completos, el promedio con sus límites y la banda entre
+        ellos (rinometria.banda)."""
         plot = self.widget
-        while len(self._vivas) < len(curvas):
-            item = plot.plot([], [])
-            item.setZValue(10)
-            self._vivas.append(item)
-        n = len(curvas)
-        for i, item in enumerate(self._vivas):
-            if i >= n:
-                item.setData([], [])
-                continue
-            r = curvas[i]
-            color = pg.mkColor(COLOR[lado])
-            nuevo = i == n - 1
-            color.setAlphaF(1.0 if nuevo else 0.15 + 0.35 * (i + 1) / n)
-            item.setPen(pg.mkPen(color, width=2.2 if nuevo else 1.0))
-            item.setData(r['x'], [self._y(a) for a in r['A']])
+        color = pg.mkColor(COLOR[lado])
+        if self._vivas is None:
+            tenue = pg.mkColor(COLOR[lado])
+            tenue.setAlphaF(0.55)
+            limite = pg.mkPen(color, width=1.3, style=Qt.PenStyle.DashLine)
+            self._vivas = {
+                'barrido': plot.plot([], [], pen=pg.mkPen(tenue, width=1.0)),
+                'sup': plot.plot([], [], pen=limite),
+                'inf': plot.plot([], [], pen=limite),
+                'media': plot.plot([], [], pen=pg.mkPen(color, width=2.4)),
+            }
+            relleno = pg.mkColor(COLOR[lado])
+            relleno.setAlphaF(0.12)
+            entre = pg.FillBetweenItem(self._vivas['sup'], self._vivas['inf'], brush=pg.mkBrush(relleno))
+            plot.addItem(entre)
+            self._vivas['entre'] = entre
+            for z, k in enumerate(('entre', 'barrido', 'sup', 'inf', 'media')):
+                self._vivas[k].setZValue(10 + z)
+        y = self._y
+        v = self._vivas
+        v['barrido'].setData(barrido['x'], [y(a) for a in barrido['A']])
+        if banda is None:
+            for k in ('sup', 'inf', 'media'):
+                v[k].setData([], [])
+            return
+        for k, clave in (('sup', 'sup'), ('inf', 'inf'), ('media', 'A')):
+            v[k].setData(banda['x'], [y(a) for a in banda[clave]])
 
 
 def curva_media(f):

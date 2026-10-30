@@ -7184,24 +7184,41 @@ equipo en `AlumnoIndicadores::EQUIPOS`).
 
 ## Rinometría acústica: en vivo, Iniciar y Detener (2026-10-29)
 
-Pedido de él: en el rinómetro las curvas aparecen como pulsos ("ticks") al
-apretar Iniciar, y es el operador quien aprieta Detener. Antes "Medir FND"
-sacaba los tres registros de golpe.
+Pedido de él: en el rinómetro las curvas aparecen pulso a pulso al apretar
+Iniciar y es el operador quien aprieta Detener. Y cómo se ve el equipo: "es
+una onda lenta, se construye de izquierda a derecha y se va moviendo
+principalmente, y mucho, a la derecha, donde es menos sensible; las líneas
+suelen caer más al principio, centradas; se dibujan tres curvas: el
+promedio, el límite superior y el inferior; los límites se mueven en base
+al registro; hay indicadores y baremos para ver si las desviaciones son
+correctas". Son equipos viejos con poco publicado: los tamaños son del
+modelo, no medidos.
 
-- **Un pulso cada 150 ms**, cada uno una curva nueva del modelo
-  (`rinometria.pulso`) con el estado de la nariz y los errores marcados en
-  ese momento: con "Respira o traga" la curva baila y se ve. En pantalla,
-  los últimos 5 pulsos, el nuevo entero y los anteriores tenues, y arriba
-  MCA1/MCA2 del pulso actual.
-- **Detener guarda el último pulso como un registro**, no un promedio de
-  los pulsos: lo que el alumno ve al detener es lo que queda. Tres registros
-  por fosa (H27); con menos, la tabla dice "n de 3" y no se da por
-  repetible. **Con un cuarto quedan los tres últimos**: repetir no pide
-  borrar nada.
-- **La receta es por registro** (estado, semilla de la toma, errores y
-  número de pulso): `rinometria.rehace_fosa` los rehace iguales al retomar
-  la atención. Las mediciones guardadas antes (tres registros de una vez)
-  se rehacen con `mide_fosa`.
+- **Cada pulso cruza la pantalla en 0,8 s** (20 tics de 40 ms) y después
+  sale el siguiente, con el estado de la nariz y los errores marcados en
+  ese momento.
+- **La variación entre pulsos crece con la distancia**
+  (`rinometria.dispersion`): DE relativa ~0,3 % adelante, ~4 % a 5 cm,
+  ~20 % al fondo. Es multiplicativa (en exponente): nunca da áreas
+  negativas. Fuga la duplica; respirar o tragar la triplica y además mueve
+  lo de atrás de un pulso a otro (el paladar).
+- **Tres curvas sobre los últimos 8 pulsos**: el promedio y los límites
+  promedio · e^(±2 DE) con la DE del log del área (la variación es
+  proporcional y la escala es log: con promedio ± 2 DE lineal el límite
+  inferior se iba a cero). La banda entre ellos va sombreada.
+- **Baremos verde/ámbar/rojo** del semiancho de la banda, en % del
+  promedio: en MCA1, en MCA2 y el medio de 0 a 5 cm. Verde hasta 4 % (con
+  2 DE, un CV del 2 %: Hilberg y cols., 1989), ámbar hasta 8 %. En % y no
+  en cm²: el 0,03 cm² del libro es entre registros, y en cm² una fosa ancha
+  salía siempre fuera.
+- **Detener guarda el promedio de la ventana como registro** (el pulso a
+  medio cruzar no cuenta). Tres registros por fosa (H27); con menos, la
+  tabla dice "n de 3" y no se da por repetible. **Con un cuarto quedan los
+  tres últimos.** La variación entre registros es la de RinoSim (posición
+  y sello de cada toma): promediar pulsos no la borra.
+- **La receta es por registro**: semilla de la toma y, por pulso, número,
+  estado y errores. `rinometria.rehace_fosa` los rehace iguales al retomar
+  la atención; las mediciones guardadas antes (tres registros de una vez)
+  se rehacen con `mide_fosa`. `ra_registro` lleva los baremos (`calidad`).
 - Cambiar de atención con la toma en vivo la corta sin guardar
   (`ra_cancelar`).
-

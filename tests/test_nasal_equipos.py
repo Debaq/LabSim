@@ -65,15 +65,19 @@ def medir(w, lado):
         tomar(w, lado)
 
 
-def tomar(w, lado, pulsos=4):
-    """Un registro de rinometría: el timer no corre en la prueba, los pulsos
-    se dan a mano."""
+def tomar(w, lado, pulsos=3):
+    """Un registro de rinometría: el timer no corre en la prueba, los tics
+    se dan a mano (cada pulso cruza la pantalla en PASOS_PULSO tics)."""
     w._medir(lado)
     if w.vivo is None:
         return
-    for _ in range(pulsos - 1):
-        w._tic()
+    tics(w, pulsos * w.PASOS_PULSO - 1)
     w._medir(lado)
+
+
+def tics(w, n):
+    for _ in range(n):
+        w._tic()
 
 
 ALUMNO = {'permission': 1}
@@ -207,30 +211,48 @@ def test_rinometria_en_vivo():
     assert not w.btn_i.isEnabled() and not w.btn_vc.isEnabled() and not w.btn_calibrar.isEnabled()
     w._medir('I')                           # la otra fosa espera
     assert w.vivo['lado'] == 'D'
-    w._tic()
-    w._tic()
-    curvas = w.vivo['curvas']
-    assert len(curvas) == 3 and curvas[0]['A'] != curvas[-1]['A']   # cada pulso, una curva
-    assert 'MCA1' in w.lbl_mensaje.text()
-    ultima = curvas[-1]['A']
+    # El pulso cruza de izquierda a derecha: a la mitad, va a la mitad.
+    tics(w, w.PASOS_PULSO // 2 - 1)
+    barrido = w.g_curva._vivas['barrido'].getData()[0]
+    assert 4.5 < barrido[-1] < 5.5 and w.vivo['banda'] is None and w.baremos['mca1'].valor is None
+    tics(w, w.PASOS_PULSO // 2)
+    assert w.vivo['banda']['n'] == 1 and '1 de 8' in w.lbl_pulsos.text()
+    tics(w, 9 * w.PASOS_PULSO)            # la ventana se llena y corre
+    b = w.vivo['banda']
+    assert b['n'] == 8 and 'MCA1' in w.lbl_mensaje.text()
+    # Adelante los pulsos caen casi encima; atrás se abren.
+    ancho = [s_ - i_ for s_, i_ in zip(b['sup'], b['inf'])]
+    rel = lambda x: ancho[b['x'].index(x)] / b['A'][b['x'].index(x)]
+    x1, x9 = min(b['x'], key=lambda x: abs(x - 1)), min(b['x'], key=lambda x: abs(x - 9))
+    assert rel(x9) > 5 * rel(x1)
+    assert all(z.zona() == 'ok' for z in w.baremos.values())
+    media = list(b['A'])
+    tics(w, 3)                             # a medio pulso: no cuenta
     w._medir('D')                           # detener
     assert w.vivo is None and not w.timer.isActive() and w.btn_d.text() == 'Iniciar FND'
     f = w.res['reposo']['D']
-    assert len(f['registros']) == 1 and f['registros'][0]['A'] == ultima
+    assert len(f['registros']) == 1 and f['registros'][0]['A'] == media   # el promedio
     assert not f['repetible'] and any('Faltan registros' in a for a in f['avisos'])
+    assert len(w.mediciones[0]['opciones']['registros'][0]['pulsos']) == 8
     tomar(w, 'D')
     tomar(w, 'D')
     tomar(w, 'D')                           # un cuarto: quedan los tres últimos
     f = w.res['reposo']['D']
-    assert len(f['registros']) == 3 and f['registros'][0]['A'] != ultima
+    assert len(f['registros']) == 3 and f['registros'][0]['A'] != media
     assert len(w.mediciones[0]['opciones']['registros']) == 3
     reg = LOGS.de('ra_registro')
     assert len(LOGS.de('ra_iniciar')) == 4 and len(reg) == 4
-    assert reg[0]['pulsos'] == 3 and reg[-1]['registros'] == 3 and 'mca1' in reg[-1]['verdad']
-    # Cambiar de atención en vivo: no se guarda nada.
+    assert reg[0]['promediados'] == 8 and reg[-1]['registros'] == 3 and 'mca1' in reg[-1]['verdad']
+    assert set(reg[0]['calidad']) == {'mca1', 'mca2', 'banda05'}
+    # Respirando, la banda se abre atrás y el baremo lo marca.
     w._medir('I')
+    w.chk_err['respira'].setChecked(True)
+    tics(w, 8 * w.PASOS_PULSO)
+    assert w.baremos['banda05'].zona() == 'fuera'
+    # Cambiar de atención en vivo: no se guarda nada.
     w.la_super(caso(), 'otra')
     assert w.vivo is None and not w.timer.isActive() and w.res['reposo']['I'] is None
+    assert w.baremos['mca1'].valor is None
 
 
 def test_rm_en_vivo_con_adaptador_o_mascara():

@@ -21,7 +21,7 @@ Sin `cases.data['NASAL']` el equipo no mide.
 """
 
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFrame, QHBoxLayout,
                                QHeaderView, QMainWindow, QPlainTextEdit, QPushButton, QScrollArea,
                                QSpinBox,
@@ -1325,25 +1325,76 @@ def series_con_datos(res):
     return any(res[f][l] for f in ('reposo', 'vc') for l in LADOS)
 
 
+class Baremo(QWidget):
+    """Una barra con tres zonas (verde, ámbar, roja) y una marca en el valor:
+    de un vistazo, si la variación entre pulsos está dentro de lo esperable."""
+
+    def __init__(self, titulo, verde, ambar, tope, ayuda):
+        super().__init__()
+        self.titulo, self.verde, self.ambar, self.tope = titulo, verde, ambar, tope
+        self.valor = None
+        self.setToolTip(ayuda)
+        self.setMinimumSize(150, 40)
+
+    def poner(self, valor):
+        self.valor = valor
+        self.update()
+
+    def zona(self):
+        if self.valor is None:
+            return None
+        return 'ok' if self.valor <= self.verde else 'aviso' if self.valor <= self.ambar else 'fuera'
+
+    def paintEvent(self, _evento):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        w = self.width()
+        texto = '—' if self.valor is None else f'± {num(self.valor, 1)} %'
+        color = {'ok': tema.OK, 'aviso': tema.AVISO, 'fuera': tema.ALERTA}.get(self.zona(), tema.TEXTO_SUAVE)
+        p.setPen(QColor(tema.TEXTO_SUAVE))
+        p.drawText(0, 0, w, 18, int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter), self.titulo)
+        p.setPen(QColor(color))
+        p.drawText(0, 0, w, 18, int(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter), texto)
+        y, h = 24, 8
+        x = 0
+        for hasta, c in ((self.verde, tema.OK), (self.ambar, tema.AVISO), (self.tope, tema.ALERTA)):
+            fin = w * hasta / self.tope
+            relleno = QColor(c)
+            relleno.setAlphaF(0.35)
+            p.fillRect(int(x), y, int(fin - x), h, relleno)
+            x = fin
+        if self.valor is not None:
+            mx = int(min(w - 2, w * self.valor / self.tope))
+            p.fillRect(mx - 1, y - 4, 3, h + 8, QColor(tema.TEXTO))
+        p.end()
+
+
 class RinometriaWindow(EquipoNasal):
-    """La rinometría acústica como se hace: Iniciar y el equipo manda un
-    pulso tras otro; cada eco es una curva nueva en la pantalla, con las de
-    antes desvaneciéndose. El alumno mira hasta que la curva quede quieta
-    (paciente en apnea, adaptador sellado) y la detiene: la última curva
-    queda como un registro. Tres registros por fosa; si se toman más,
-    quedan los tres últimos.
+    """La rinometría acústica como se ve en el equipo: Iniciar y manda un
+    pulso tras otro. Cada pulso se dibuja lento, de izquierda a derecha;
+    adelante los pulsos caen casi encima, atrás se mueven mucho. Sobre ellos,
+    tres curvas: el promedio de los últimos pulsos y sus límites (promedio ±
+    2 DE), que se mueven con lo que va midiendo, y abajo los baremos del
+    ancho de la banda. El alumno detiene cuando la banda queda angosta
+    (paciente en apnea, adaptador sellado): el promedio queda como un
+    registro. Tres registros por fosa; si se toman más, quedan los tres
+    últimos.
 
     Cada pulso sale del modelo con el estado de la nariz y los errores de
     ese momento (rinometria.pulso). Lo que se ve en vivo no se guarda: solo
-    la receta de cada registro detenido, que basta para rehacerlo al
+    la receta de los pulsos de cada registro, que basta para rehacerlo al
     retomar la atención."""
 
     TITULO = 'Rinometría acústica'
     EQUIPO = 'ra'
     TIPO = 'RINOMETRIA'
     FUNCION = staticmethod(RA.rehace_fosa)
-    TIC_MS = 150
-    RECIENTES = 5              # pulsos en pantalla mientras mide
+    TIC_MS = 40
+    PASOS_PULSO = 20           # tics que tarda un pulso en cruzar la pantalla (0,8 s)
+    # Los baremos, en % del promedio (semiancho de la banda): verde, ámbar, tope.
+    BAREMOS = (('mca1', 'Banda en MCA1', 4, 8, 16),
+               ('mca2', 'Banda en MCA2', 4, 8, 16),
+               ('banda05', 'Banda 0-5 cm', 4, 8, 16))
 
     def __init__(self, data_login=None, parent=None):
         self.vivo = None
@@ -1370,7 +1421,7 @@ class RinometriaWindow(EquipoNasal):
     def _restaurar_extra(self, data):
         self.calibrado = bool(data.get('calibrado')) or bool(data.get('mediciones'))
     INDICACION = ('Calibra con el tubo calibrador y mide cada fosa, primero la derecha: Iniciar, '
-                  'el paciente en apnea, y Detener cuando la curva quede quieta. Tres registros '
+                  'el paciente en apnea, y Detener cuando la banda quede angosta. Tres registros '
                   'por fosa.')
 
     CAMPOS = ['dist1', 'mca1', 'dist2', 'mca2', 'vol1', 'vol05', 'vol25']
@@ -1404,6 +1455,21 @@ class RinometriaWindow(EquipoNasal):
         self.g_curva = GraficoRinometria()
         caja_curva = Tarjeta('Área-distancia')
         caja_curva.agregar(self.g_curva.widget, 1)
+        fila = QHBoxLayout()
+        fila.setSpacing(16)
+        ayuda = (f'Semiancho de la banda (promedio ± {RA.DE_LIMITES} DE de los últimos '
+                 f'{RA.VENTANA_PULSOS} pulsos), en % del promedio. Verde hasta 4 %: un coeficiente '
+                 'de variación del 2 % (Hilberg y cols., 1989); ámbar hasta 8 %.')
+        self.baremos = {}
+        for clave, titulo, verde, ambar, tope in self.BAREMOS:
+            self.baremos[clave] = Baremo(titulo, verde, ambar, tope, ayuda)
+            fila.addWidget(self.baremos[clave], 1)
+        self.lbl_pulsos = etiqueta('', rol='hint')
+        self.lbl_pulsos.setMinimumWidth(110)
+        fila.addWidget(self.lbl_pulsos)
+        contenedor_baremos = QWidget()
+        contenedor_baremos.setLayout(fila)
+        caja_curva.agregar(contenedor_baremos)
         caja, self.tabla, self.pie, self.avisos = self._bloque_tabla('Resultados')
         self.tabla_vc = Tabla()
         self.resultados.insertWidget(1, self.tabla_vc)
@@ -1428,6 +1494,7 @@ class RinometriaWindow(EquipoNasal):
         self.calibrado = False
         for chk in self.chk_err.values():
             chk.setChecked(False)
+        self._poner_baremos(None)
 
     def _calibrar(self):
         self._log('calibrar')
@@ -1451,10 +1518,12 @@ class RinometriaWindow(EquipoNasal):
             return
         self.vivo = {'lado': lado, 'fase': self.sesion.fase(lado),
                      'semilla': self.sesion.semilla_medicion(self.EQUIPO),
-                     'k': 0, 'curvas': [], 'receta': None, 'clave_base': None, 'base': None}
+                     'k': 0, 'paso': 0, 'actual': None, 'pulsos': [], 'banda': None,
+                     'bases': {}}
         self._log('iniciar', lado=lado, fase=self.vivo['fase'], semilla=self.vivo['semilla'],
                   registro=self._n_registros(lado, self.vivo['fase']) + 1, errores=self._errores_puestos())
         self._midiendo(True)
+        self._poner_baremos(None)
         self._tic()
         self.timer.start()
 
@@ -1466,50 +1535,73 @@ class RinometriaWindow(EquipoNasal):
         return len(r['registros']) if r else 0
 
     def _tic(self):
-        """Un pulso: la curva de este momento (estado de la nariz y errores
-        puestos ahora)."""
+        """El pulso en curso avanza de izquierda a derecha; al llegar al
+        final entra al promedio y sale el siguiente, con el estado de la
+        nariz y los errores de ese momento."""
         v = self.vivo
         if v is None:
             return
-        estado, errores = self.sesion.estado(v['lado']), self._errores_puestos()
-        clave = (repr(sorted(estado.items())), tuple(sorted(errores)))
-        if clave != v['clave_base']:
-            v['clave_base'] = clave
-            v['base'] = RA.curva_del_equipo(self.sesion.paciente, v['lado'], estado, errores)
-        receta = {'estado': dict(estado), 'semilla': v['semilla'], 'errores': errores, 'k': v['k']}
-        curva = RA.pulso(self.sesion.paciente, v['lado'], estado, receta, v['base'])
-        v['k'] += 1
-        v['receta'] = receta
-        v['curvas'] = (v['curvas'] + [curva])[-self.RECIENTES:]
-        self.g_curva.en_vivo(v['curvas'], v['lado'])
-        m = curva['medidas']
+        if v['paso'] == 0:
+            estado, errores = self.sesion.estado(v['lado']), self._errores_puestos()
+            receta = {'k': v['k'], 'estado': dict(estado), 'errores': errores}
+            clave = (repr(sorted(estado.items())), tuple(sorted(errores)))
+            if clave not in v['bases']:
+                v['bases'] = {clave: RA.curva_del_equipo(self.sesion.paciente, v['lado'], estado, errores)}
+            v['actual'] = (RA.pulso(self.sesion.paciente, v['lado'], v['semilla'], receta, v['bases'][clave]),
+                           receta)
+            v['k'] += 1
+        v['paso'] += 1
+        curva = v['actual'][0]
+        hasta = max(2, round(len(curva['x']) * v['paso'] / self.PASOS_PULSO))
+        self.g_curva.en_vivo({'x': curva['x'][:hasta], 'A': curva['A'][:hasta]}, v['banda'], v['lado'])
+        if v['paso'] < self.PASOS_PULSO:
+            return
+        v['paso'] = 0
+        v['pulsos'] = (v['pulsos'] + [v['actual']])[-RA.VENTANA_PULSOS:]
+        b = RA.banda([c for c, _ in v['pulsos']])
+        b['medidas'] = RA.medidas(b['x'], b['A'])
+        v['banda'] = b
+        self._poner_baremos(b)
+        m = b['medidas']
         n = self._n_registros(v['lado'], v['fase']) + 1
         self._mensaje(f'{SIGLA[v["lado"]]} en vivo · registro {min(n, RA.REGISTROS_PROTOCOLO)} de '
                       f'{RA.REGISTROS_PROTOCOLO} · MCA1 {num(m["mca1"])} cm² · MCA2 {num(m["mca2"])} cm². '
-                      'Detén cuando la curva quede quieta.')
+                      'Detén cuando la banda quede angosta.')
+
+    def _poner_baremos(self, b):
+        q = RA.calidad(b, b['medidas']) if b is not None else {}
+        for clave, baremo in self.baremos.items():
+            baremo.poner(q.get(clave))
+        self.lbl_pulsos.setText('' if b is None else
+                                f'{b["n"]} de {RA.VENTANA_PULSOS} pulsos')
+        return q
 
     def _detener(self):
-        """La última curva queda como registro; de la fosa quedan los tres últimos."""
+        """El promedio de los pulsos de la ventana queda como registro (el que
+        va por la mitad no cuenta); de la fosa quedan los tres últimos."""
         v, self.vivo = self.vivo, None
         self.timer.stop()
         self._midiendo(False)
         lado, fase = v['lado'], v['fase']
-        if not v['curvas']:
+        if v['banda'] is None:
             self._log('detener', lado=lado, fase=fase, pulsos=0)
+            self._mensaje('Detenido antes de terminar el primer pulso: no queda registro.', 'alerta')
             self.dibujar()
             return
         previa = next((m for m in self.mediciones if (m['lado'], m['fase']) == (lado, fase)), None)
         antes = self.res[fase][lado]
         tomados = list(zip(antes['registros'], previa['opciones'].get('registros') or [])) \
             if antes and previa else []
-        tomados = (tomados + [(v['curvas'][-1], v['receta'])])[-RA.REGISTROS_PROTOCOLO:]
-        estado = v['receta']['estado']
+        toma = {'semilla': v['semilla'], 'pulsos': [rc for _, rc in v['pulsos']]}
+        tomados = (tomados + [(v['banda'], toma)])[-RA.REGISTROS_PROTOCOLO:]
+        estado = toma['pulsos'][-1]['estado']
         r = RA.fosa(self.sesion.paciente, lado, estado, [c for c, _ in tomados], RA.REGISTROS_PROTOCOLO)
         receta = {'lado': lado, 'fase': fase, 'estado': dict(estado),
-                  'opciones': {'registros': [rc for _, rc in tomados]}}
+                  'opciones': {'registros': [t for _, t in tomados]}}
         self.res[fase][lado] = r
         self.mediciones = [m for m in self.mediciones if (m['lado'], m['fase']) != (lado, fase)] + [receta]
-        self._registrar_medicion(lado, fase, r, receta, pulsos=v['k'])
+        self._registrar_medicion(lado, fase, r, receta, pulsos=v['k'],
+                                 calidad=RA.calidad(v['banda'], v['banda']['medidas']))
         self._al_medir(lado, r)
         self.dibujar()
 
@@ -1555,10 +1647,12 @@ class RinometriaWindow(EquipoNasal):
             avisos = '• Equipo sin calibrar.' + ('\n' + avisos if avisos else '')
         self.avisos.setText(avisos)
 
-    def _registrar_medicion(self, lado, fase, r, receta, pulsos=None):
-        ultimo = receta['opciones']['registros'][-1]
+    def _registrar_medicion(self, lado, fase, r, receta, pulsos=None, calidad=None):
+        toma = receta['opciones']['registros'][-1]
+        errores = sorted({e for rc in toma['pulsos'] for e in rc['errores']})
         self._log('registro', lado=lado, fase=fase, vc_activo=bool(receta['estado'].get('vc')),
-                  errores=ultimo['errores'], semilla=ultimo['semilla'], pulso=ultimo['k'], pulsos=pulsos,
+                  errores=errores, semilla=toma['semilla'], pulsos=pulsos,
+                  promediados=len(toma['pulsos']), calidad=calidad,
                   registros=len(r['registros']),
                   registro={c: r['registros'][-1]['medidas'][c] for c in self.CAMPOS},
                   medido={c: r['promedio'][c] for c in self.CAMPOS},

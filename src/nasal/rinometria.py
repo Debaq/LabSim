@@ -297,27 +297,126 @@ def fosa(p, lado, estado, registros, pedidos=None):
     }
 
 
-def pulso(p, lado, estado, receta, base=None):
-    """Un pulso del equipo en vivo: el registro `k` de la semilla de esa
-    toma, con el estado de la nariz y los errores de ese momento (receta:
-    {estado, semilla, errores, k}). Con la receta sale siempre igual."""
-    curva = registro(p, lado, receta.get('estado') or estado,
-                     {'semilla': receta.get('semilla', 1), 'errores': receta.get('errores') or {},
-                      'base': base}, receta.get('k', 0))
-    curva['medidas'] = medidas(curva['x'], curva['A'])
-    return curva
+# --- La toma en vivo (el equipo de LabSim; RinoSim no la tiene) ---------
+#
+# El equipo manda un pulso tras otro. Cada pulso es la curva de la toma (el
+# registro de su semilla: posición del adaptador, sello) con su propia
+# variación, chica cerca de la narina y grande hacia atrás, donde el eco
+# llega débil y mezclado (senos, rinofaringe). La pantalla muestra el
+# promedio de los últimos pulsos y sus límites; al detener, el promedio es
+# el registro. Tamaños elegidos por el modelo, como los errores de arriba.
+
+# Pulsos que entran al promedio y a los límites.
+VENTANA_PULSOS = 8
+# Los límites: el promedio ± tantas desviaciones estándar entre pulsos (del log del área).
+DE_LIMITES = 2
+
+
+def dispersion(x):
+    """Desviación estándar relativa entre pulsos a x cm de la narina: ~0,3 %
+    adelante, ~4 % a 5 cm y ~20 % al fondo."""
+    return 0.003 + 0.20 * _sigmoide(x, 6.5, 1.0)
+
+
+def pulso(p, lado, semilla, receta, base=None):
+    """Un pulso de la toma `semilla`. receta: {k, estado, errores}, lo que
+    había al mandarlo; con ella sale siempre igual. `base` (opcional) es
+    curva_del_equipo con ese estado y esos errores."""
+    estado = receta.get('estado') or {}
+    errores = receta.get('errores') or {}
+    toma = registro(p, lado, estado, {'semilla': semilla, 'errores': errores, 'base': base}, 0)
+    r = generador(f"ra-pulso/{a_texto(semilla)}/{lado}/{a_texto(receta.get('k', 0))}")
+    escala = 3 if errores.get('respira') else 2 if errores.get('fuga') else 1
+    # Tres ondas lentas a lo largo de la fosa, de varianza total 1.
+    ondas = [(r.normal(0, 0.8165), r.entre(0.15, 0.6), r.entre(0, 6.3)) for _ in range(3)]
+    # Al respirar o tragar se mueve el paladar: lo de atrás salta de un pulso a otro.
+    paladar = r.normal(0, 0.3) if errores.get('respira') else 0
+    A = []
+    for xi, a in zip(toma['x'], toma['A']):
+        campo = 0
+        for amp, f, fase in ondas:
+            campo += amp * math.sin(2 * math.pi * f * xi + fase)
+        # En exponente: proporcional al área y nunca negativa, aunque atrás se mueva mucho.
+        A.append(max(0.01, a * math.exp(escala * dispersion(xi) * campo + paladar * _sigmoide(xi, 4.5, 0.4))))
+    return {'x': toma['x'], 'A': A}
+
+
+def banda(curvas):
+    """Promedio punto a punto de los pulsos y sus límites. La variación es
+    proporcional al área: la desviación estándar se toma sobre el log del
+    área y los límites son promedio · e^(±DE_LIMITES·DE), siempre positivos
+    (con un pulso, los límites son él)."""
+    n = len(curvas)
+    x = curvas[0]['x']
+    media, sup, inf = [], [], []
+    for i in range(len(x)):
+        tot = 0
+        tot_log = 0
+        for c in curvas:
+            tot += c['A'][i]
+            tot_log += math.log(c['A'][i])
+        m = tot / n
+        de = 0
+        if n > 1:
+            m_log = tot_log / n
+            s2 = 0
+            for c in curvas:
+                s2 += (math.log(c['A'][i]) - m_log) ** 2
+            de = math.sqrt(s2 / (n - 1))
+        media.append(m)
+        sup.append(m * math.exp(DE_LIMITES * de))
+        inf.append(m * math.exp(-DE_LIMITES * de))
+    return {'x': x, 'A': media, 'sup': sup, 'inf': inf, 'n': n}
+
+
+def calidad(b, m):
+    """Lo que muestran los baremos, en % del promedio: el semiancho de la
+    banda en MCA1, en MCA2 y el medio de 0 a 5 cm. Con DE_LIMITES = 2, un
+    semiancho del 4 % es un coeficiente de variación del 2 %."""
+    x = b['x']
+
+    def rel(i):
+        return 100 * (b['sup'][i] - b['inf'][i]) / 2 / b['A'][i]
+
+    tot = 0
+    n = 0
+    for i, xi in enumerate(x):
+        if 0.3 <= xi <= X_CONFIABLE:
+            tot += rel(i)
+            n += 1
+    return {'mca1': rel(x.index(m['dist1'])), 'mca2': rel(x.index(m['dist2'])), 'banda05': tot / n}
+
+
+def registro_de_toma(p, lado, semilla, recetas, bases=None):
+    """El registro que deja una toma: el promedio de sus pulsos (las
+    recetas de la ventana), con sus límites y sus medidas. `bases` guarda
+    curva_del_equipo por estado y errores entre llamadas."""
+    bases = {} if bases is None else bases
+    curvas = []
+    for rc in recetas:
+        estado = rc.get('estado') or {}
+        errores = rc.get('errores') or {}
+        clave = (repr(sorted(estado.items())), tuple(sorted(k for k, v in errores.items() if v)))
+        if clave not in bases:
+            bases[clave] = curva_del_equipo(p, lado, estado, errores)
+        curvas.append(pulso(p, lado, semilla, rc, bases[clave]))
+    b = banda(curvas)
+    b['medidas'] = medidas(b['x'], b['A'])
+    return b
 
 
 def rehace_fosa(p, lado, estado=None, opciones=None):
-    """La fosa de una medición guardada: cada registro desde su receta
-    (opciones['registros']). Las mediciones de antes de la toma en vivo
-    (tres registros de una vez) se rehacen con mide_fosa."""
+    """La fosa de una medición guardada: cada registro desde su toma
+    (opciones['registros']: [{semilla, pulsos}]). Las mediciones de antes de
+    la toma en vivo (tres registros de una vez) se rehacen con mide_fosa."""
     opciones = opciones or {}
-    recetas = opciones.get('registros')
-    if not recetas:
+    tomas = [t for t in opciones.get('registros') or [] if t.get('pulsos')]
+    if not tomas:
         return mide_fosa(p, lado, estado, opciones)
-    registros = [pulso(p, lado, estado, r) for r in recetas]
-    return fosa(p, lado, recetas[-1].get('estado') or estado, registros, REGISTROS_PROTOCOLO)
+    bases = {}
+    registros = [registro_de_toma(p, lado, t['semilla'], t['pulsos'], bases) for t in tomas]
+    ultimo = tomas[-1]['pulsos'][-1].get('estado') or estado
+    return fosa(p, lado, ultimo, registros, REGISTROS_PROTOCOLO)
 
 
 def examen(p, estado=None, opciones=None):
