@@ -424,6 +424,7 @@ class RinoscopiaWindow(QWidget):
     def la_super(self, data, appointment_id=None):
         """Entra (o sale) el paciente en atención."""
         self.sesion = sesion.para(data, appointment_id)
+        self.data_caso = data
         self.nasal = (data or {}).get('NASAL') if isinstance(data, dict) else None
         self.appointment_id = appointment_id
         self.imagenes.clear()
@@ -486,6 +487,10 @@ class RinoscopiaWindow(QWidget):
         vista = (lado, self.angulo())
         if vista not in self.vistas:
             self.vistas.append(vista)
+            if self.sesion is not None and self.sesion.hay_paciente:
+                sesion.registrar('rs_mirada', self.data_caso, self.appointment_id, lado=lado,
+                                 grados=vista[1], orden=len(self.vistas),
+                                 vc_activo=self.sesion.vc_activo(lado))
 
     def _pedir(self, lado, grados, al_final=False):
         clave = (lado, grados)

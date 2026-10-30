@@ -36,6 +36,23 @@ from nasal.equipos import RinometriaWindow, RinomanometriaWindow  # noqa: E402
 ADMIN = {'permission': 777}
 
 
+class ColaFalsa:
+    """En vez de la cola de action_logs: lo registrado queda aquí."""
+
+    def __init__(self):
+        self.eventos = []
+
+    def push(self, accion, payload=None):
+        self.eventos.append((accion, payload or {}))
+
+    def de(self, accion):
+        return [p for a, p in self.eventos if a == accion]
+
+
+LOGS = ColaFalsa()
+sesion._cola = LOGS
+
+
 def medir(w, lado):
     """La medición corre en otro hilo (hilos.en_fondo): se espera el aviso.
     En la rinomanometría es un registro de seis ciclos."""
@@ -373,6 +390,39 @@ def test_informe_rinometria():
     esperar(otra)
     assert otra.calibrado
     assert otra.res['vc']['D']['promedio'] == w.res['vc']['D']['promedio']
+
+
+def test_rm_registra_cada_accion_con_las_variables():
+    """Como el audiómetro: cada acción a action_logs, y la grabación con lo
+    que el equipo no sabe (el backend no tiene el modelo para calcularlo)."""
+    LOGS.eventos.clear()
+    data = dict(caso('cornetes'), id=151)
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super(data, '321')
+    w.chk_err['boca'].setChecked(True)
+    preparar(w, 'D')
+    w._indicar('boca')
+    w._indicar('parejo')                    # no hacía falta
+    correr(w, 7)
+    w._sello()
+    w._registro()
+    correr(w, 20.2)
+    nombres = [a for a, _ in LOGS.eventos]
+    for accion in ('rm_adaptador', 'rm_mascara', 'rm_indicacion', 'rm_sello', 'rm_grabar', 'rm_grabacion'):
+        assert accion in nombres, accion
+    assert all(p['appointment_id'] == '321' and p['case_id'] == 151 for _, p in LOGS.eventos)
+    ind = LOGS.de('rm_indicacion')
+    assert [(i['indicacion'], i['necesaria']) for i in ind] == [('boca', True), ('parejo', False)]
+    g = LOGS.de('rm_grabar')[0]
+    assert g['lado'] == 'D' and g['segundos'] == 20 and g['en_vivo_s'] >= 7 and g['errores'] == {}
+    gr = LOGS.de('rm_grabacion')[0]
+    assert gr['guardada'] and gr['ciclos'] == 6 and gr['ciclos_con']['boca'] == 0
+    assert set(gr['verdad']) == {'75', '150'} and gr['error_150'] is not None
+    assert 'temperatura' in gr['ambiente'] and 0 <= gr['congestion'] <= 1
+    w.chk_err['irregular'].click()          # marcado a mano: simulado
+    assert LOGS.de('rm_error_simulado')[-1] == dict(LOGS.de('rm_error_simulado')[-1], error='irregular', activo=True)
+    import json
+    json.dumps(LOGS.eventos)                # todo serializable
 
 
 if __name__ == '__main__':

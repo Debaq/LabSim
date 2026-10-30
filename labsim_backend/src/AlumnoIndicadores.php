@@ -110,7 +110,8 @@ final class AlumnoIndicadores
     }
 
     /** Equipo de cada prefijo de action_logs (lo único que la app registra acción por acción). */
-    public const EQUIPOS = ['audio_' => 'Audiómetro', 'z_' => 'Impedanciómetro'];
+    public const EQUIPOS = ['audio_' => 'Audiómetro', 'z_' => 'Impedanciómetro',
+        'rm_' => 'Rinomanómetro', 'ra_' => 'Rinómetro acústico', 'rs_' => 'Rinoscopía'];
 
     /**
      * Cuánto usó cada equipo en una atención, en palabras: suma los

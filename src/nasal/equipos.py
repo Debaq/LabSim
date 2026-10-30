@@ -282,6 +282,7 @@ class EquipoNasal(QMainWindow):
         """Entra (o sale) el paciente en atención."""
         self.sesion = sesion.para(data, appointment_id)
         self.appointment_id = appointment_id
+        self.data_caso = data
         self.res = _vacio()
         self.mediciones = []
         self.txt_hallazgos.clear()
@@ -374,6 +375,9 @@ class EquipoNasal(QMainWindow):
     def _restaurar_extra(self, data):
         pass
 
+    def _registrar_medicion(self, lado, fase, r, receta):
+        pass
+
     def _exportar_imagenes(self):
         temp = context.get_resource('local_cache/nasal/temp')
         os.makedirs(temp, exist_ok=True)
@@ -395,6 +399,21 @@ class EquipoNasal(QMainWindow):
 
     # --- Común ---------------------------------------------------------
 
+    data_caso = None
+
+    def _log(self, accion, **payload):
+        """Una acción del alumno a action_logs, con el prefijo del equipo
+        (rm_, ra_): ver sesion.registrar."""
+        if self.sesion is None or not self.sesion.hay_paciente:
+            return
+        payload.setdefault('minuto_ciclo', self.sesion.minuto())
+        sesion.registrar(f'{self.EQUIPO}_{accion}', self.data_caso, self.appointment_id, **payload)
+
+    def _log_error_simulado(self, chk, clave):
+        """Solo lo que se marca a mano (clicked): lo que corrige una
+        indicación o una acción no es "simular"."""
+        chk.clicked.connect(lambda activo, k=clave: self._log('error_simulado', error=k, activo=activo))
+
     def _mensaje(self, texto, estado=None):
         self.lbl_mensaje.setText(texto)
         color = {'alerta': tema.ALERTA, 'ok': tema.OK}.get(estado, tema.TEXTO_SUAVE)
@@ -415,6 +434,7 @@ class EquipoNasal(QMainWindow):
 
     def _vasoconstrictor(self):
         self.sesion.aplicar_vasoconstrictor()
+        self._log('vasoconstrictor', lados=list(LADOS), farmaco='oximetazolina', puff=2)
         self._mensaje('Vasoconstrictor puesto en las dos fosas (oximetazolina, 2 puff). Hace efecto '
                       'a los 15 minutos: lo que midas desde ahora es "con VC", pero antes de ese '
                       'tiempo la mucosa sigue igual. Retira la mucosa y apaga el ciclo; no toca lo '
@@ -444,6 +464,7 @@ class EquipoNasal(QMainWindow):
             self.res[fase][lado] = r
             self.mediciones = [m for m in self.mediciones
                                if (m['lado'], m['fase']) != (lado, fase)] + [receta]
+            self._registrar_medicion(lado, fase, r, receta)
             self._al_medir(lado, r)
             self.dibujar()
 
@@ -615,6 +636,7 @@ class RinomanometriaWindow(EquipoNasal):
         for clave, texto in (('mascara', 'Fuga en la máscara'), ('adaptador', 'Adaptador sin sellar'),
                              ('boca', 'Respira por la boca'), ('irregular', 'Respiración irregular')):
             self.chk_err[clave] = caja.agregar(self._check(texto, self._sync_paciente))
+            self._log_error_simulado(self.chk_err[clave], clave)
 
     def _opciones(self, caja):
         self.chk_ciclos = caja.agregar(self._check('Ver los ciclos', self.dibujar, True))
@@ -703,11 +725,14 @@ class RinomanometriaWindow(EquipoNasal):
 
     def _poner_sonda(self, lado):
         if self.rec is not None:
+            self._log('adaptador', narina=lado, rechazado='grabando')
             self._mensaje('Termina o cancela la grabación antes de cambiar el adaptador.', 'alerta')
             return
         if self.mascara:
+            self._log('adaptador', narina=lado, rechazado='con_mascara')
             self._mensaje('Saca la máscara para cambiar el adaptador de narina.', 'alerta')
             return
+        self._log('adaptador', narina=None if self.sonda == lado else lado)
         if self.sonda == lado:
             self.sonda = None
             self._mensaje('Adaptador fuera.')
@@ -721,9 +746,11 @@ class RinomanometriaWindow(EquipoNasal):
 
     def _mascara(self):
         if self.rec is not None:
+            self._log('mascara', puesta=False, rechazado='grabando')
             self._mensaje('Termina o cancela la grabación antes de sacar la máscara.', 'alerta')
             return
         self.mascara = not self.mascara
+        self._log('mascara', puesta=self.mascara, con_adaptador=self.sonda)
         self.chk_err['mascara'].setChecked(False)
         if self.mascara and not self.sonda:
             self._mensaje('Máscara puesta: se ve el flujo, pero sin adaptador no hay presión y '
@@ -734,6 +761,8 @@ class RinomanometriaWindow(EquipoNasal):
         self._sync_monitor()
 
     def _acomodar(self):
+        self._log('acomodar_mascara', tenia_fuga=self.chk_err['mascara'].isChecked(),
+                  grabando=self.rec is not None)
         self.chk_err['mascara'].setChecked(False)
         self._mensaje('Acomodas la máscara y la apoyas pareja contra la cara.')
         self._sync_paciente()
@@ -742,6 +771,12 @@ class RinomanometriaWindow(EquipoNasal):
         """La indicación se nota en la primera o la segunda respiración que
         sigue: hay que esperar a que se regule."""
         texto = dict(self.INDICACIONES)[clave]
+        # ¿Hacía falta? Lo que el paciente hacía cuando se lo dijeron.
+        necesaria = {'boca': self.chk_err['boca'].isChecked(),
+                     'parejo': self.chk_err['irregular'].isChecked(),
+                     'tranquila': self.forzada, 'fuerte': not self.forzada}[clave]
+        self._log('indicacion', indicacion=clave, necesaria=necesaria, en_vivo=self.timer.isActive(),
+                  grabando=self.rec is not None)
         if self.timer.isActive():
             self._pendientes.append([self._azar.choice((1, 2)), clave])
             cuando = ' Espera a que se regule.'
@@ -768,15 +803,20 @@ class RinomanometriaWindow(EquipoNasal):
         self.caja_vc.setVisible(not self.caja_vc.isVisible())
 
     def _vasoconstrictor(self):
+        lados = self.cmb_fosa_vc.currentData()
         if self.sonda or self.mascara:
+            self._log('vasoconstrictor', lados=list(lados), rechazado='con_mascara_o_adaptador')
             self._mensaje('Saca la máscara y el adaptador para poner el vasoconstrictor.', 'alerta')
             return
-        lados = self.cmb_fosa_vc.currentData()
         ya = [l for l in lados if l in self.sesion.vc_puesto]
         if len(ya) == len(lados):
+            self._log('vasoconstrictor', lados=list(lados), rechazado='ya_tenia')
             self._mensaje('Esa fosa ya tiene vasoconstrictor.', 'alerta')
             return
         puff = self.spin_puff.value()
+        self._log('vasoconstrictor', lados=[l for l in lados if l not in ya],
+                  farmaco=self.cmb_farmaco.currentData(), puff=puff,
+                  resistencia_reposo_150={l: r150(self.res['reposo'][l]) for l in LADOS})
         self.sesion.aplicar_vasoconstrictor(lados, self.cmb_farmaco.currentData(), puff)
         self.caja_vc.setVisible(False)
         fosas = ' y '.join(SIGLA[l] for l in lados if l not in ya)
@@ -787,6 +827,8 @@ class RinomanometriaWindow(EquipoNasal):
         self.dibujar()
 
     def _saltar_espera(self):
+        self._log('saltar_espera', faltaba={l: self.sesion.falta_vc(l) for l in LADOS
+                                            if self.sesion.falta_vc(l) is not None})
         self.sesion.saltar_espera()
         self._mensaje('Se da por pasado el tiempo de acción del vasoconstrictor.')
         self._cada_segundo()
@@ -876,6 +918,7 @@ class RinomanometriaWindow(EquipoNasal):
                 return
             self._mon_nuevo = None
             self.mon = nuevo
+            self._vivo_desde = self._reloj()      # cuánto lo miró así antes de grabar
             if not self.timer.isActive():
                 self._t0 = self._reloj()
                 self._t, self._P, self._V = [], [], []
@@ -997,6 +1040,8 @@ class RinomanometriaWindow(EquipoNasal):
     # --- La grabación ---------------------------------------------------
 
     def _sello(self):
+        self._log('sello', con_adaptador=self.sonda,
+                  sella=bool(self.sonda) and not self.chk_err['adaptador'].isChecked())
         if not self.sonda:
             self._mensaje('Primero pon el adaptador en una narina.', 'alerta')
         elif self.chk_err['adaptador'].isChecked():
@@ -1023,6 +1068,11 @@ class RinomanometriaWindow(EquipoNasal):
             self._mensaje('Espera a ver respirar al paciente.', 'alerta')
             return
         mon = self.mon
+        errores, forzada = self._condicion()
+        self._log('grabar', lado=mon.lado, segundos=self.cmb_tiempo.currentData(),
+                  en_vivo_s=self._reloj() - self._vivo_desde, errores=errores, forzada=forzada,
+                  pendientes=[c for _n, c in self._pendientes], vc_puesto=mon.lado in self.sesion.vc_puesto,
+                  vc_activo=bool(mon.estado.get('vc')), falta_vc=self.sesion.falta_vc(mon.lado))
         self.rec = RM.Registro(self.sesion.paciente, mon.lado, mon.estado,
                                self.sesion.semilla_medicion(self.EQUIPO))
         self.rec.redes = dict(mon.redes)
@@ -1042,6 +1092,8 @@ class RinomanometriaWindow(EquipoNasal):
         self.dibujar()
 
     def _cancelar(self):
+        self._log('cancelar', lado=self.rec.lado, segundos=self._grab_fin,
+                  transcurrido=self._reloj() - self._t0, ciclos=len(self._rec_completos))
         self.rec = None
         self._fin_grabacion()
         self._mensaje('Grabación cancelada: no se guardó. El paciente sigue en vivo.')
@@ -1060,6 +1112,7 @@ class RinomanometriaWindow(EquipoNasal):
         self._fin_grabacion()
         while len(rec.ciclos) > len(completos):
             rec.descartar_ultimo()
+        self._registrar_grabacion(rec, completos)
         if len(completos) < self.MIN_CICLOS:
             self._mensaje(f'En {self._grab_fin:.0f} s entraron {len(completos)} ciclos completos: hacen '
                           f'falta al menos {self.MIN_CICLOS} para promediar. No se guardó; graba más '
@@ -1086,6 +1139,34 @@ class RinomanometriaWindow(EquipoNasal):
             self.g_tiempo.limpiar()
             self.vista_paciente.empanado = 0.0
             self.dibujar()
+
+    def _registrar_grabacion(self, rec, completos):
+        """Todo lo de la grabación, también lo que el equipo no sabe."""
+        lado, fase = rec.lado, self.rec_fase
+        temp, hr = self.sesion.ambiente()
+        conds = rec.condiciones
+        datos = {'lado': lado, 'fase': fase, 'segundos': self._grab_fin, 'ciclos': len(completos),
+                 'guardada': len(completos) >= self.MIN_CICLOS, 'semilla': rec.semilla,
+                 'minuto_ciclo': rec.estado.get('minuto'), 'vc_activo': bool(rec.estado.get('vc')),
+                 'ciclos_con': {k: sum(1 for c in conds if c['errores'].get(k))
+                                for k in ('boca', 'irregular', 'mascara', 'adaptador')},
+                 'ciclos_forzados': sum(1 for c in conds if c['forzada']),
+                 'ambiente': {'temperatura': temp, 'humedad': hr}}
+        if completos and len(completos) >= self.MIN_CICLOS:
+            r = rec.resultado(len(completos))
+            l150 = r['lecturas'][150]['insp']
+            datos.update({
+                'medido': {str(P): (r['lecturas'][P]['insp'] or {}).get('R') for P in RM.PRESIONES},
+                'verdad': {str(P): r['verdad'][P] for P in RM.PRESIONES},
+                'error_150': (l150['R'] - r['verdad'][150]) / r['verdad'][150] if l150 else None,
+                'pico_insp': r['pico']['insp'], 'congestion': r['congestion'],
+                'cv_entre_ciclos': r['cv_entre_ciclos'], 'avisos': r['avisos'],
+            })
+            if fase == 'vc':
+                lec = RM.lectura_vasoconstrictor(r150(self.res['reposo'][lado]), l150['R'] if l150 else None)
+                if lec:
+                    datos['lectura_h26'] = {'tipo': lec['tipo'], 'cambio': lec['cambio']}
+        self._log('grabacion', **datos)
 
     def _midiendo(self, si):
         """Al retomar la atención se recalcula lo guardado fuera de la ventana."""
@@ -1235,6 +1316,11 @@ def texto_vc(sesion):
     return ' · '.join(partes)
 
 
+def r150(f):
+    """Resistencia inspiratoria a 150 Pa de una fosa medida, o None."""
+    return ((f or {}).get('lecturas', {}).get(150, {}).get('insp') or {}).get('R')
+
+
 def series_con_datos(res):
     return any(res[f][l] for f in ('reposo', 'vc') for l in LADOS)
 
@@ -1280,6 +1366,7 @@ class RinometriaWindow(EquipoNasal):
         for clave, texto in (('fuga', 'Fuga en el adaptador'), ('aprieta', 'Adaptador que aprieta la narina'),
                              ('respira', 'Respira o traga en el registro')):
             self.chk_err[clave] = caja.agregar(QCheckBox(texto))
+            self._log_error_simulado(self.chk_err[clave], clave)
 
     def _opciones(self, caja):
         self.chk_log = caja.agregar(self._check('Área en escala logarítmica', self.dibujar, True))
@@ -1313,12 +1400,14 @@ class RinometriaWindow(EquipoNasal):
             chk.setChecked(False)
 
     def _calibrar(self):
+        self._log('calibrar')
         self.calibrado = True
         self._mensaje('Equipo calibrado con el tubo calibrador.', 'ok')
         self.dibujar()
 
     def _pedido(self, lado):
         if not self.calibrado:
+            self._log('medir', lado=lado, rechazado='sin_calibrar')
             self._mensaje('Primero calibra el equipo con el tubo calibrador (H27).', 'alerta')
             return None
         return RA.mide_fosa, (self.sesion.paciente, lado, self.sesion.estado(lado), {
@@ -1343,6 +1432,13 @@ class RinometriaWindow(EquipoNasal):
         if self.sesion and self.sesion.hay_paciente and not self.calibrado:
             avisos = '• Equipo sin calibrar.' + ('\n' + avisos if avisos else '')
         self.avisos.setText(avisos)
+
+    def _registrar_medicion(self, lado, fase, r, receta):
+        self._log('medicion', lado=lado, fase=fase, vc_activo=bool(receta['estado'].get('vc')),
+                  errores=receta['opciones'].get('errores'), semilla=receta['opciones'].get('semilla'),
+                  medido={c: r['promedio'][c] for c in self.CAMPOS},
+                  verdad={c: r['verdad']['medidas'][c] for c in self.CAMPOS},
+                  repetible=r['repetible'], avisos=r['avisos'])
 
     def _celdas(self, m):
         return [num(m[c]) for c in self.CAMPOS]

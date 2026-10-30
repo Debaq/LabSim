@@ -164,3 +164,45 @@ def para(data, appointment_id):
             or _actual.paciente != desde_caso(data)):
         _actual = SesionNasal(data, appointment_id)
     return _actual
+
+
+# ── Lo que hace el alumno, acción por acción ──────────────────────────────
+# Como el audiómetro y el impedanciómetro: cada acción va a action_logs
+# (backend/log_queue.py, escritura local que sube en lotes) con la atención y
+# el caso. Las mediciones llevan además lo que el equipo no sabe (la
+# resistencia verdadera, la congestión, si el vasoconstrictor ya actuaba):
+# el modelo solo existe en la app, así que el backend no podría calcularlo
+# después. El alumno no ve los payloads (my_attendances solo resume).
+
+_cola = None
+
+
+def cola():
+    global _cola
+    if _cola is None:
+        from backend.log_queue import get_log_queue
+        _cola = get_log_queue()
+    return _cola
+
+
+def redondear(v, d=4):
+    """Para el log: floats cortos, dentro de listas y diccionarios también."""
+    if isinstance(v, float):
+        return round(v, d) if math.isfinite(v) else None
+    if isinstance(v, dict):
+        return {str(k): redondear(x, d) for k, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [redondear(x, d) for x in v]
+    return v
+
+
+def registrar(accion, data, appointment_id, **payload):
+    case_id = data.get('id') if isinstance(data, dict) else None
+    payload = redondear(payload)
+    payload.setdefault('case_id', case_id)
+    payload.setdefault('appointment_id', appointment_id)
+    payload.setdefault('con_paciente', case_id is not None)
+    try:
+        cola().push(accion, payload)
+    except Exception as exc:  # noqa: BLE001 -- sin log el examen sigue
+        print(f'nasal: no se pudo registrar {accion}: {exc}')

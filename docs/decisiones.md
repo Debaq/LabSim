@@ -7156,3 +7156,27 @@ indicaciones hasta que respire parejo y recién ahí se graba, por tiempo.
 - **Temperatura y humedad**: una sala de consulta sorteada por atención
   (20-24 °C, 35-60 %) con deriva lenta. Se muestran y se anotan; no mueven
   el modelo.
+
+## Equipos nasales: cada acción y todas las variables a action_logs (2026-10-29)
+
+Pedido de él: "como en cualquier aplicación que tenemos, así podemos hacer
+medidas, saber cómo avanzan los estudiantes, tener todas las variables".
+Como el audiómetro (`audio_`) y el impedanciómetro (`z_`), los equipos de la
+nariz registran acción por acción con prefijo `rm_`, `ra_` y `rs_`
+(`nasal/sesion.registrar`, rótulos en `Metrics::ACTION_LABELS`, uso de
+equipo en `AlumnoIndicadores::EQUIPOS`).
+
+- **La verdad viaja en el log**, no se recalcula: el modelo de RinoSim solo
+  existe en la app. `rm_grabacion` lleva la resistencia medida y la
+  verdadera a 75 y 150 Pa, el error, la congestión, el minuto del ciclo, si
+  el vasoconstrictor ya actuaba, los ciclos con cada error, el ambiente y la
+  lectura de H26; `ra_medicion` las medidas y las verdaderas.
+- **Lo que mide la técnica**: `rm_indicacion` dice si hacía falta (lo que
+  hacía el paciente cuando se la dieron), `rm_grabar` cuánto lo miró en vivo
+  y cómo respiraba al apretar Grabar, los rechazos (cambiar adaptador con la
+  máscara puesta, VC con la máscara) van con `rechazado`. Los errores
+  marcados a mano son `*_error_simulado` (solo `clicked`: lo que corrige una
+  indicación no cuenta como simular).
+- El alumno no ve los payloads: `my_attendances` solo resume nombres y
+  tiempos. Los indicadores con estos datos quedan para cuando se decida qué
+  medir.
