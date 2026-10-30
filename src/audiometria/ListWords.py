@@ -183,6 +183,7 @@ class ListWords(QWidget):
         scroll.viewport().setAutoFillBackground(False)
         self.paginas.setObjectName("paginas")
         scroll.setWidget(self.paginas)
+        scroll.installEventFilter(self)
         col.addWidget(scroll, 1)
         raiz.addWidget(grilla, 1)
 
@@ -225,16 +226,21 @@ class ListWords(QWidget):
         audiómetro se lo llevan primero los comandos de voz (ver
         audiometria/ventana.py), que con más ancho ganan columnas."""
         alto = super().sizeHint().height()
-        barra = self._scroll.verticalScrollBar().sizeHint().width()
-        return QtCore.QSize(48 + barra + 3 * ANCHO_PALABRA + 2 * 6, alto)
+        # márgenes de la raíz y de la tarjeta (12 + 12 por lado)
+        return QtCore.QSize(48 + 3 * ANCHO_PALABRA + 2 * 6, alto)
 
-    def resizeEvent(self, event):
+    def eventFilter(self, obj, event):
+        if obj is self._scroll and event.type() == QtCore.QEvent.Type.Resize:
+            self._ajustar_columnas()
+        return False
+
+    def _ajustar_columnas(self):
         """Las palabras se reparten en las columnas que caben: al lado del
-        audiómetro, en una pantalla chica, el panel es angosto."""
-        super().resizeEvent(event)
-        # márgenes de la raíz y de la tarjeta (12 + 12 por lado) y la barra
-        # del scroll, por si aparece
-        util = self.width() - 48 - self._scroll.verticalScrollBar().sizeHint().width()
+        audiómetro, en una pantalla chica, el panel es angosto. Se mide el
+        scroll entero, con barra o sin ella: si se midiera sin la barra, al
+        aparecer quedaría trabado en menos columnas. Si hace falta, las
+        palabras se angostan (mínimo 40) para dejarle lugar."""
+        util = self._scroll.width()
         columnas = max(2, min(COLUMNAS, (util + 6) // (ANCHO_PALABRA + 6)))
         if columnas == self.columnas:
             return

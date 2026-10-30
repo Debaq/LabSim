@@ -25,7 +25,7 @@ LOGO = test_list[1]
 # Lo mínimo que necesita cada panel al lado del audiómetro: una frase por
 # fila, tres palabras por fila.
 ANCHO_COMANDOS = 220
-ANCHO_LISTAS = 300
+ANCHO_LISTAS = 280
 # Mínimo fijo de los paneles, menor que los de arriba: si la ventana no
 # pudiera achicarse bajo el ancho de los tres lado a lado, nunca pasaría a
 # la columna compartida (el MDI no la deja más chica que su mínimo).

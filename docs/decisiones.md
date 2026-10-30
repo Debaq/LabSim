@@ -7539,3 +7539,9 @@ curso: sin el permiso, su panel no aparece.
   oído?* dicen Fowler.
 - `Layout.php` manda `A` como `max`; el cliente lo fuerza igual
   (`APPS["A"]`) para el layout guardado sin red y un backend sin desplegar.
+- **Alto aprovechado** (a pedido, mismo día): la prueba va en la misma línea
+  que la frase, a la derecha (se parte en dos solo si no cabe), márgenes y
+  pistas más cortos y *Silencio* chico al lado de la búsqueda. Las columnas
+  de frases salen del botón más ancho y no de un ancho fijo; la barra del
+  scroll se descuenta solo si hace falta (medirla siempre las dejaba
+  trabadas en menos columnas). A 1366×660 entran todas las frases sin scroll.
