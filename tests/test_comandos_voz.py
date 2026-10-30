@@ -22,8 +22,6 @@ CLAVES_DEL_MOTOR = {
     'ruido_blanco_contralateral', 'rosemberg_bilateral', 'pitos_fuertes', 'dos_pitos',
     'cambie_de_volumen', 'aerea_+_ruido', 'vibrador_+_ruido', 'escuche_mi_voz', 'pa_pa_pa',
 }
-# Todavía sin grabación: el talkback no dice nada, pero la prueba corre.
-SIN_AUDIO = {'ruido_blanco_contralateral', 'rosemberg_bilateral'}
 
 
 def _claves():
@@ -36,7 +34,7 @@ def test_estan_todas_las_del_motor():
 
 
 def test_cada_clave_tiene_su_audio():
-    for clave in set(_claves()) - SIN_AUDIO:
+    for clave in set(_claves()):
         plano = unicodedata.normalize('NFKD', clave).encode('ascii', 'ignore').decode()
         ruta = os.path.join(RAIZ, "resources", "audio", "comandos", f"{plano}.mp3")
         assert os.path.exists(ruta), ruta

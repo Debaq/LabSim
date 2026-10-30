@@ -30,6 +30,10 @@ de niños). TODO 69 y 70.
   listas: `es-CL-LorenzoNeural` +45 Hz y `es-CL-CatalinaNeural` +40 Hz, las dos
   a -45 % (a -15 % y -30 % el autor las encontró rápidas). Silencio de los
   bordes recortado, mp3 96 kbit/s. Quedan mejor que Gemini, pero algunas suenan mal.
+- [x] **Talkback** (2026-10-30): las 23 instrucciones con una misma voz,
+  `es-CL-CatalinaNeural` a -8 % (la grabada era femenina, ~240 Hz), con
+  `scripts/voces_comandos.py`. Textos transcritos de las grabaciones (Whisper)
+  y corregidos; STAT y Rosemberg escritos nuevos. -21 LUFS, como las grabadas.
 - [x] `resources/audio` ordenado por carpeta (antes 291 archivos sueltos con
   prefijo `LP_palacios_`), rutas ajustadas en `h_audio`, `ListWords`,
   `Audiometer` y `test_comandos_voz`.
@@ -49,9 +53,6 @@ de niños). TODO 69 y 70.
 - [ ] **Voces adultas completas.** `feme1` tiene 50 de 124 palabras y `feme2` 75;
   no hay `male`. Con edge-tts (`es-CL-*` sin subir el tono) se completan, pero
   se nota la diferencia con las grabadas: ¿completar o rehacer la voz entera?
-- [ ] **Talkback** (TODO 69): faltan `ruido_blanco_contralateral` y
-  `rosemberg_bilateral`; o regenerar las 23 con una misma voz. Volumen igualado
-  al de las actuales (vúmetro y nivel del talkback).
 - [ ] **Mejor calidad.** Azure Speech (oficial, plan gratis ~500 mil caracteres al
   mes, pide cuenta): revisar si tiene alguna voz infantil en español.
   edge-tts no es oficial y Microsoft lo puede cortar; los mp3 ya generados no se pierden.

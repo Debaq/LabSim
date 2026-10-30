@@ -7561,3 +7561,25 @@ curso: sin el permiso, su panel no aparece.
   dentro de la escena se comprobó el filtro y el atajo del botón no.
   "Sin dictado" quedó como píldora corta con la pista debajo, y el stack de
   listas sin mínimo propio (pedía el ancho de la lista oculta más ancha).
+
+## Talkback: las 23 instrucciones con una misma voz de edge-tts (2026-10-30)
+
+A pedido de él (cierra el TODO 69). Faltaban *Ruido blanco contralateral* y
+*Rosemberg bilateral*, y generar solo esas dos dejaba una voz distinta. Se
+pensó en Azure Speech, pero no hay cuenta: van con edge-tts, como las voces
+de las listas. `scripts/voces_comandos.py` tiene los 23 textos y rehace los
+mp3; para cambiar una frase se edita ahí y se corre con su clave.
+
+- **Textos:** las 21 grabaciones se transcribieron con Whisper (`small`) y se
+  corrigió lo que el reconocimiento oyó mal ("por estos fonos va a
+  escuchar", "igual que al comienzo del examen", las preguntas con signos).
+  La de *Mano levantada en ruido* no se entendía de qué lado iba el ruido:
+  quedó "por la otra orejita", como dice el manual (Carhart con ruido en el
+  otro oído). STAT y Rosemberg se escribieron nuevos con la misma forma que
+  *Mano levantada*; Rosemberg además pide volver a levantar la mano al
+  escucharlo de nuevo (el tiempo se acumula). Para revisarlos, él.
+- **Voz:** `es-CL-CatalinaNeural` a -8 %: la grabada era femenina (~240 Hz).
+- **Volumen:** loudnorm a -21 LUFS y -1.5 dBTP (las grabadas iban de -16 a
+  -22,5, mediana -21), mono 48 kHz 64 kbit/s como antes: el vúmetro y el
+  nivel del talkback no cambian. Silencio de los bordes recortado.
+

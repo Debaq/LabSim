@@ -195,9 +195,6 @@ gap significativo. § Parámetros de audiometría configurables por curso
 
 ### Voces sintéticas
 § Voces sintéticas con Google: plan. Avance en `docs/roadmap_voces.md`
-- [ ] 69. Instrucciones del talkback que faltan (`ruido_blanco_contralateral`,
-      `rosemberg_bilateral`) o las 23 con una misma voz, para que no se note el
-      cambio entre grabada y sintética. Volumen igualado al de las actuales.
 - [ ] 70. Voces del paciente al repetir las listas de palabras: hoy una sola
       voz fija (`feme1`) que tiene 50 de las 124 palabras; en las otras 74 el
       paciente no dice nada. Ya están `nino1`/`nina1` con las 124 (Edge TTS):
