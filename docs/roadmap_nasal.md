@@ -83,6 +83,17 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       `mide_fosa` partido en `Red` + `ciclo` + `resumen` sin cambiar números
       (la equivalencia con el JS pasa); `Registro` genera ciclo a ciclo con la
       condición de ese momento y `mide_registro` lo rehace desde la receta.
+      Segunda vuelta (mismo día, a pedido de él): **en vivo** apenas hay
+      adaptador o máscara (adaptador solo: presión sin flujo; máscara sola:
+      flujo por las dos fosas, la otra narina abierta en la red, sin
+      presión); las indicaciones tardan 1-2 respiraciones; **Grabar** descarta
+      lo anterior y graba 10/15/20/30/60 s, promedia los ciclos completos
+      (~3,2 s cada uno; con menos de 3 no guarda). **Vasoconstrictor en el
+      paciente** (fármaco, fosa, puff; sin máscara ni adaptador) que hace
+      efecto a los 15 min de reloj (H26), con cuenta regresiva y "saltar la
+      espera" para el docente; vale por fosa también en la rinometría y la
+      rinoscopía. **Temperatura y humedad de la sala** en la barra del equipo
+      y en el PDF (no mueven el modelo).
 - [x] **F3. Caso nasal e informe** (hecho 2026-10-29, sin ver en navegador):
       - Ficha **Nariz** en `case_create.php`, solo para el admin
         (`CaseReview::TABS['nariz']`: `solo_admin`, no revisable, no

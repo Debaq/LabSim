@@ -635,6 +635,29 @@ final class ReportPdfBuilder
      * backend no recalcula resistencias ni áreas, que salen del modelo de
      * RinoSim y solo existe en la app.
      */
+    /**
+     * El vasoconstrictor del informe nasal: true en los informes de antes,
+     * o {lados, farmaco: {lado: nombre}, puff: {lado: n}} desde que se
+     * elige en la app (nasal/sesion.py, vc_informe).
+     */
+    private static function nasalVasoconstrictor($vc): string
+    {
+        if (!is_array($vc)) {
+            return $vc ? 'Con prueba de vasoconstrictor.' : '';
+        }
+        $siglas = ['D' => 'FND', 'I' => 'FNI'];
+        $partes = [];
+        foreach (is_array($vc['lados'] ?? null) ? $vc['lados'] : [] as $lado) {
+            if (!isset($siglas[$lado])) {
+                continue;
+            }
+            $farmaco = (string) ($vc['farmaco'][$lado] ?? 'vasoconstrictor');
+            $puff = (int) ($vc['puff'][$lado] ?? 0);
+            $partes[] = $farmaco . ($puff > 0 ? ', ' . $puff . ' puff' : '') . ' en ' . $siglas[$lado];
+        }
+        return $partes === [] ? '' : 'Vasoconstrictor: ' . implode('; ', $partes) . '.';
+    }
+
     private static function nasalBody(MiniPdf $pdf, int $reportId, string $tipo, array $data, float $y, float $contentW): float
     {
         if ($tipo === 'RINOMANOMETRIA') {
@@ -662,9 +685,21 @@ final class ReportPdfBuilder
             }
         }
 
-        if (!empty($data['vasoconstrictor'])) {
-            $pdf->text(self::MARGIN, $y, 'Con prueba de vasoconstrictor.', 10);
-            $y += 16;
+        $vc = self::nasalVasoconstrictor($data['vasoconstrictor'] ?? null);
+        if ($vc !== '') {
+            $y = $pdf->textBlock(self::MARGIN, $y, $vc, $contentW, 10);
+            $y += 4;
+        }
+        // La sala como la midió el equipo (rinomanometría).
+        $amb = is_array($data['ambiente'] ?? null) ? $data['ambiente'] : null;
+        if ($amb !== null && isset($amb['temperatura'], $amb['humedad'])) {
+            $linea = 'Sala: ' . str_replace('.', ',', sprintf('%.1f', (float) $amb['temperatura'])) . ' °C, humedad relativa '
+                . (int) $amb['humedad'] . ' %';
+            if (!empty($data['segundos'])) {
+                $linea .= '; grabación de ' . (int) $data['segundos'] . ' s por fosa';
+            }
+            $pdf->text(self::MARGIN, $y, $linea . '.', 9);
+            $y += 14;
         }
         $tabla = is_array($data['tabla'] ?? null) ? $data['tabla'] : [];
         $cabeceras = is_array($tabla['cabeceras'] ?? null) ? array_map('strval', $tabla['cabeceras']) : [];

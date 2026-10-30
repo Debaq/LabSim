@@ -7125,3 +7125,34 @@ generativa y sin módulos de Qt nuevos. Prototipo mirado y aprobado por él
 antes de armar el módulo. Las formas son órdenes de magnitud para que se
 lea como una rinoscopía, no una anatomía medida.
 
+
+## Rinomanometría: en vivo, grabación por tiempo y vasoconstrictor con espera (2026-10-29)
+
+Pedido de él: los equipos muestran primero presión y flujo en el tiempo; al
+poner el adaptador o la máscara se ve respirar al paciente, se le dan
+indicaciones hasta que respire parejo y recién ahí se graba, por tiempo.
+
+- **Lo que se ve sin grabar no se guarda.** Grabar descarta lo anterior y
+  usa un `Registro` nuevo con su semilla: la receta del informe solo trae
+  los ciclos grabados, aunque el alumno haya mirado diez minutos antes.
+- **Se promedian todos los ciclos completos del tiempo elegido**, no los
+  últimos N: lo que se elige es el tiempo (10-60 s). Con menos de 3 ciclos
+  no se guarda (Vogt y cols., 2016, piden 3-5); 10 s alcanza justo para 3 a
+  ~19 respiraciones por minuto (3,2 s por ciclo, del simulador).
+- **Sin adaptador, la red deja la otra narina abierta** (área grande,
+  `AREA_NARINA_LIBRE`): con la máscara sola se ve el flujo de las dos fosas,
+  como pasaría. La presión sin adaptador y el flujo sin máscara son el
+  ruido del transductor.
+- **Las indicaciones tardan 1 o 2 respiraciones**: se ve al paciente
+  regularse. Mientras se calcula la red de lo nuevo, solo lo que cambia la
+  red (boca, adaptador) espera; la fuga y la respiración irregular cambian
+  en el ciclo.
+- **Vasoconstrictor por fosa y con 15 minutos de reloj** (H26: "tras 15
+  minutos"), compartido por los tres equipos. Lo medido antes del tiempo se
+  rotula "con VC" pero la mucosa no cambió: es el error de no esperar. El
+  modelo de RinoSim es todo o nada (no hay efecto parcial ni diferencia
+  entre fármacos); la fosa ocluida usa el mismo estado que la medida (solo
+  pesa con perforación). El docente puede saltar la espera.
+- **Temperatura y humedad**: una sala de consulta sorteada por atención
+  (20-24 °C, 35-60 %) con deriva lenta. Se muestran y se anotan; no mueven
+  el modelo.

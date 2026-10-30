@@ -475,7 +475,7 @@ class RinoscopiaWindow(QWidget):
         (o lo pide, si no está)."""
         g = self.angulo()
         for lado in ('D', 'I'):
-            img = self.imagenes.get((lado, g, self.sesion.vc))
+            img = self.imagenes.get((lado, g, self.sesion.vc_activo(lado)))
             self.cara.set_interior(lado, img)
             if img is None:
                 self._pedir(lado, g)
@@ -489,7 +489,7 @@ class RinoscopiaWindow(QWidget):
 
     def _pedir(self, lado, grados, al_final=False):
         clave = (lado, grados)
-        if (lado, grados, self.sesion.vc) in self.imagenes or clave == self.calculando:
+        if (lado, grados, self.sesion.vc_activo(lado)) in self.imagenes or clave == self.calculando:
             return
         if clave in self.cola:
             self.cola.remove(clave)
@@ -503,10 +503,10 @@ class RinoscopiaWindow(QWidget):
         if self.calculando is not None or not self.cola or self.sesion is None:
             return
         lado, grados = self.cola.pop(0)
-        vc = self.sesion.vc
+        vc = self.sesion.vc_activo(lado)
         if (lado, grados, vc) in self.imagenes:
             return self._siguiente()
-        fosa = rinoscopia.fosa_del_paciente(self.sesion.paciente, self.nasal, lado, self.sesion.estado())
+        fosa = rinoscopia.fosa_del_paciente(self.sesion.paciente, self.nasal, lado, self.sesion.estado(lado))
         ruta = os.path.join(_carpeta_cache(), _clave(fosa, lado, grados) + '.png')
         self.calculando = (lado, grados)
         sesion_actual = self.sesion
@@ -516,7 +516,7 @@ class RinoscopiaWindow(QWidget):
             if self.sesion is not sesion_actual:
                 return self._siguiente()
             self.imagenes[(lado, grados, vc)] = QPixmap.fromImage(img)
-            if (grados, vc) == (self.angulo(), self.sesion.vc):
+            if (grados, vc) == (self.angulo(), self.sesion.vc_activo(lado)):
                 self.cara.set_interior(lado, self.imagenes[(lado, grados, vc)])
             self._siguiente()
 
@@ -548,7 +548,7 @@ class RinoscopiaWindow(QWidget):
             return None
         data = {lado: self.paneles[lado].to_dict() for lado in ('D', 'I')}
         data.update({'conclusion': self.txt_conclusion.toPlainText(), 'tecnica': self.tecnica(),
-                     'vistas': [list(v) for v in self.vistas], 'vasoconstrictor': self.sesion.vc})
+                     'vistas': [list(v) for v in self.vistas], 'vasoconstrictor': self.sesion.vc_informe()})
         return {'appointment_id': appointment_id, 'tipo': self.TIPO, 'data': data, 'images': None}
 
     def restore_report(self, data):
@@ -562,6 +562,5 @@ class RinoscopiaWindow(QWidget):
         self.txt_conclusion.setPlainText(data.get('conclusion') or '')
         self.vistas = [tuple(v) for v in (data.get('vistas') or [])
                        if isinstance(v, (list, tuple)) and len(v) == 2]
-        if data.get('vasoconstrictor'):
-            self.sesion.aplicar_vasoconstrictor()
+        self.sesion.restaurar_vc(data.get('vasoconstrictor'))
         return True

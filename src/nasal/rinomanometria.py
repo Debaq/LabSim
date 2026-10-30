@@ -62,6 +62,9 @@ X_COANA = 8
 AREA_BOCA = 1.6
 # Área de la fuga alrededor de un adaptador que no sella, cm². Modelo.
 AREA_FUGA_ADAPTADOR = 0.12
+# Sin adaptador (LabSim, en vivo): la otra narina queda abierta al aire de la
+# máscara; se respira por las dos fosas. Un área grande, del modelo.
+AREA_NARINA_LIBRE = 3.0
 # Fracción del flujo que se escapa por una máscara que no sella. Modelo.
 FRACCION_FUGA_MASCARA = 0.3
 
@@ -215,6 +218,8 @@ def resuelve_red(fm, fo, P, perforacion, errores=None):
     perf = ({'k1': 0.002, 'k2': (RHO_MEDIO * 1.5) / perforacion['area'] ** 2}
             if perforacion and perforacion['area'] > 0 else None)
     fuga = {'k1': 0, 'k2': RHO_MEDIO / AREA_FUGA_ADAPTADOR ** 2} if errores.get('adaptador') else None
+    if errores.get('abierta'):
+        fuga = {'k1': 0, 'k2': RHO_MEDIO / AREA_NARINA_LIBRE ** 2}
     boca = {'k1': 0.004, 'k2': RHO_MEDIO / AREA_BOCA ** 2} if errores.get('boca') else None
 
     def F(e, a, b):  # de a hacia b
@@ -312,10 +317,15 @@ class Red:
         return pmax
 
 
+# Los errores que cambian la red (los demás actúan sobre cada ciclo).
+ERRORES_DE_RED = ('adaptador', 'boca', 'abierta')
+
+
 def clave_red(errores, forzada):
     """Lo que distingue una Red de otra para la misma nariz y el mismo estado."""
     errores = errores or {}
-    return (bool(errores.get('adaptador')), bool(errores.get('boca')), bool(forzada))
+    return (bool(errores.get('adaptador')), bool(errores.get('boca')), bool(forzada),
+            bool(errores.get('abierta')))
 
 
 # Muestras por ciclo respiratorio (N + 1 puntos, de 0 a 2π).

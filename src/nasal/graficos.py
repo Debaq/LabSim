@@ -20,6 +20,7 @@ from nasal.rinometria import X_CONFIABLE, X_CURVA
 
 COLOR = {'D': tema.OD, 'I': tema.OI}
 ZONA_POCO_FIABLE = (244, 236, 230, 160)
+ZONA_GRABADA = (233, 222, 236, 150)
 MARCAS_LOG = [0.1, 0.2, 0.5, 1, 2, 5, 10]
 
 # Topes "redondos" de los ejes, los mismos de RinoSim.
@@ -186,6 +187,15 @@ class GraficoTiempo:
         self.presion.getAxis('bottom').setStyle(showValues=False)
         self.curva_p = self.presion.plot([], [])
         self.curva_v = self.flujo.plot([], [])
+        # La ventana que se está grabando (o la última grabada).
+        self.zonas = []
+        for plot in (self.presion, self.flujo):
+            zona = pg.LinearRegionItem(values=(0, 0), movable=False, brush=pg.mkBrush(*ZONA_GRABADA),
+                                       pen=pg.mkPen(None))
+            zona.setZValue(-10)
+            zona.setVisible(False)
+            plot.addItem(zona)
+            self.zonas.append(zona)
         self.limpiar()
 
     def _fila(self, fila, texto):
@@ -205,14 +215,21 @@ class GraficoTiempo:
         return plot
 
     def limpiar(self):
+        for zona in self.zonas:
+            zona.setVisible(False)
         self.curva_p.setData([], [])
         self.curva_v.setData([], [])
         self.presion.setXRange(0, self.VENTANA, padding=0)
         self.presion.setYRange(-300, 300, padding=0)
         self.flujo.setYRange(-600, 600, padding=0)
 
-    def poner(self, t, P, V, lado):
-        """t, P, V: lo registrado hasta ahora; se ven los últimos segundos."""
+    def poner(self, t, P, V, lado, grabado=None):
+        """t, P, V: lo registrado hasta ahora; se ven los últimos segundos.
+        grabado: (desde, hasta) en segundos, la zona de la grabación."""
+        for zona in self.zonas:
+            zona.setVisible(grabado is not None)
+            if grabado is not None:
+                zona.setRegion(grabado)
         pluma = pg.mkPen(COLOR[lado], width=1.8)
         self.curva_p.setData(t, P, pen=pluma)
         self.curva_v.setData(t, V, pen=pluma)

@@ -51,44 +51,65 @@ def medir(w, lado):
 ALUMNO = {'permission': 1}
 
 
-def preparar(w, lado):
-    """Adaptador en la narina contraria y máscara puesta."""
-    if w.mascara:
-        w._mascara()
-    w._poner_sonda('I' if lado == 'D' else 'D')
-    w._mascara()
+def reloj(w):
+    """Un reloj de mentira para la ventana (las curvas corren con él)."""
+    if not hasattr(w, '_t_falso'):
+        w._t_falso = [0.0]
+        w._reloj = lambda: w._t_falso[0]
+    return w._t_falso
 
 
-def arrancar(w):
-    """Iniciar el registro con un reloj de mentira; espera la red."""
-    t = [0.0]
-    w._reloj = lambda: t[0]
-    w._registro()
-    while w.preparando:
+def esperar_vivo(w):
+    while w.mon is None or w._mon_nuevo is not None:
         context.app.processEvents()
         if w.tarea is not None:
             w.tarea.esperar(20)
     context.app.processEvents()
-    return t
 
 
-def correr(w, t, segundos):
+def preparar(w, lado):
+    """Adaptador en la narina contraria y máscara puesta: en vivo."""
+    reloj(w)
+    if w.mascara:
+        w._mascara()
+    if w.sonda != ('I' if lado == 'D' else 'D'):
+        w._poner_sonda('I' if lado == 'D' else 'D')
+    w._mascara()
+    esperar_vivo(w)
+
+
+def correr(w, segundos):
     """El tiempo pasa de a 0,1 s."""
-    for _ in range(int(segundos * 10)):
+    t = reloj(w)
+    for _ in range(int(round(segundos * 10))):
         t[0] += 0.1
         w._tic()
+        # Lo que se calcula en el fondo tarda menos que una respiración.
+        if w.tarea is not None:
+            w.tarea.esperar(3000)
+        context.app.processEvents()
 
 
-def registrar(w, lado, ciclos=6):
+def registrar(w, lado, segundos=20):
     if not (w.sesion and w.sesion.hay_paciente):
         w._registro()
         return
     preparar(w, lado)
-    t = arrancar(w)
-    if w.reg is None:
-        return
-    correr(w, t, ciclos * w.DURACION[w.forzada] + 0.5)
+    w.cmb_tiempo.setCurrentIndex(w.TIEMPOS.index(segundos))
     w._registro()
+    correr(w, segundos + 0.2)
+    assert w.rec is None
+
+
+def poner_vc(w, lados='Las dos'):
+    """Fuera máscara y adaptador, vasoconstrictor y sin esperar los 15 min."""
+    if w.mascara:
+        w._mascara()
+    if w.sonda:
+        w._poner_sonda(w.sonda)
+    w.cmb_fosa_vc.setCurrentText(lados)
+    w._vasoconstrictor()
+    w.sesion.saltar_espera()
 
 
 def caso(cuadro='mixta'):
@@ -115,11 +136,11 @@ def test_rinomanometria_mide_y_tabula():
     assert w.res['reposo']['D'] and w.res['reposo']['I']
     assert w.tabla.rowCount() == 3 and w.tabla.item(2, 0).text() == 'Total'
     columnas = w.tabla.columnCount()
-    w._vasoconstrictor()
+    poner_vc(w)
     medir(w, 'D')
     assert w.res['vc']['D'] and w.res['vc']['D']['estado']['vc']
     assert w.tabla.columnCount() == columnas + 2
-    assert not w.btn_vc.isEnabled()
+    assert not w.btn_vc.isEnabled()      # las dos fosas ya tienen
 
 
 def test_rinometria_pide_calibrar():
@@ -140,7 +161,7 @@ def test_vasoconstrictor_compartido():
     rm.la_super(data, 'compartida')
     ra.la_super(data, 'compartida')
     assert rm.sesion is ra.sesion
-    rm._vasoconstrictor()
+    poner_vc(rm, 'Derecha')
     ra._calibrar()
     medir(ra, 'D')
     assert ra.res['vc']['D'] is not None and ra.res['reposo']['D'] is None
@@ -160,48 +181,72 @@ def test_mide_en_segundo_plano():
     assert w.res['reposo']['D'] is not None and w.btn_d.isEnabled()
 
 
-def test_rm_pide_adaptador_y_mascara():
+def test_rm_en_vivo_con_adaptador_o_mascara():
     w = RinomanometriaWindow(data_login=ADMIN)
-    w.la_super(caso(), 'pasos')
+    w.la_super(caso(), 'vivo')
+    reloj(w)
     w._registro()
-    assert w.reg is None and 'adaptador' in w.lbl_mensaje.text()
-    w._poner_sonda('I')
-    assert w.vista_paciente.sonda == 'I' and 'FND' in w.lbl_sonda.text()
+    assert w.rec is None and 'adaptador' in w.lbl_mensaje.text()
+    w._poner_sonda('I')                     # solo adaptador: presión, sin flujo
+    esperar_vivo(w)
+    assert w.mon.lado == 'D' and w.timer.isActive()
+    correr(w, 4)
+    assert max(map(abs, w._P)) > 30 and max(map(abs, w._V)) < 30
     w._registro()
-    assert w.reg is None and 'máscara' in w.lbl_mensaje.text()
-    w._mascara()
+    assert w.rec is None and 'máscara' in w.lbl_mensaje.text()
+    w._poner_sonda('I')                     # fuera el adaptador
+    assert w.mon is None and not w.timer.isActive()
+    w._mascara()                            # solo máscara: flujo por las dos fosas, sin presión
+    esperar_vivo(w)
+    assert w.mon.abierta
+    correr(w, 4)
+    assert max(map(abs, w._V)) > 100 and max(map(abs, w._P[-60:])) < 30
     w._poner_sonda('D')                     # con la máscara puesta no se cambia
-    assert w.sonda == 'I' and 'Saca la máscara' in w.lbl_mensaje.text()
-    t = arrancar(w)
-    assert w.reg is not None and w.reg.lado == 'D' and not w.btn_vc.isEnabled()
-    w._mascara()                            # ni se saca registrando
+    assert w.sonda is None and 'Saca la máscara' in w.lbl_mensaje.text()
+
+
+def test_rm_graba_por_tiempo_y_descarta_lo_anterior():
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super(caso(), 'tiempo')
+    preparar(w, 'D')
+    correr(w, 9)
+    assert w._t[-1] > 8
+    w.cmb_tiempo.setCurrentIndex(w.TIEMPOS.index(10))
+    w._registro()
+    assert w.rec is not None and w._t == [] and not w.btn_vc.isEnabled()
+    w._mascara()                            # no se saca grabando
     assert w.mascara
-    correr(w, t, 2 * w.DURACION[False] + 0.5)
-    assert len(w._completos) == 2 and len(w._t) > 100
-    w._registro()                           # dos ciclos no alcanzan
-    assert w.res['reposo']['D'] is None and 'al menos 3' in w.lbl_mensaje.text()
+    correr(w, 10.2)
+    # 10 s a 3,2 s por ciclo: tres completos.
+    assert w.rec is None and len(w.res['reposo']['D']['ciclos']) == 3
+    assert w.mediciones[-1]['opciones']['desde'] == 0 and w.timer.isActive()   # sigue en vivo
+    w._registro()
+    correr(w, 2)
+    w._registro()                           # cancelar
+    assert w.rec is None and 'cancelada' in w.lbl_mensaje.text()
 
 
-def test_rm_indicaciones_cambian_los_ciclos():
+def test_rm_indicaciones_tardan_y_se_rehacen():
     data = caso('cornetes')
     w = RinomanometriaWindow(data_login=ADMIN)
     w.la_super(data, '55')
-    preparar(w, 'D')
     w.chk_err['boca'].setChecked(True)
+    preparar(w, 'D')
     assert w.vista_paciente.boca
-    t = arrancar(w)
-    correr(w, t, 2 * w.DURACION[False] + 0.2)
     w._indicar('boca')
+    assert w.chk_err['boca'].isChecked()    # todavía no: espera a que se regule
+    correr(w, 2 * w.DURACION[False] + 0.2)
     assert not w.chk_err['boca'].isChecked() and not w.vista_paciente.boca
+    w.chk_err['irregular'].setChecked(True)
+    w._registro()
+    correr(w, 4)
+    w._indicar('parejo')
     while w.tarea is not None and not w.tarea.esperar(20):
         context.app.processEvents()
     context.app.processEvents()
-    correr(w, t, 4 * w.DURACION[False] + 0.2)
-    w._registro()
+    correr(w, 16.2)
     conds = w.mediciones[-1]['opciones']['registro']
-    assert conds[0]['errores'] == {'boca': True} and conds[-1]['errores'] == {}
-    # Los cuatro últimos ya son con la boca cerrada: los que promedia.
-    assert w.mediciones[-1]['opciones']['desde'] == len(conds) - 4
+    assert conds[0]['errores'] == {'irregular': True} and conds[-1]['errores'] == {}
 
     sesion._actual = None
     otra = RinomanometriaWindow(data_login=ADMIN)
@@ -209,6 +254,33 @@ def test_rm_indicaciones_cambian_los_ciclos():
     assert otra.restore_report(w.report_job()['data'])
     esperar(otra)
     assert otra.res['reposo']['D']['lecturas'] == w.res['reposo']['D']['lecturas']
+
+
+def test_rm_vasoconstrictor_espera_su_tiempo():
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super(caso('cornetes'), 'vc')
+    t = reloj(w)
+    w.sesion._reloj = w._reloj
+    preparar(w, 'D')
+    w._vasoconstrictor()                    # con máscara y adaptador no
+    assert not w.sesion.vc and 'Saca la máscara' in w.lbl_mensaje.text()
+    w._mascara()
+    w._poner_sonda('I')
+    w.cmb_fosa_vc.setCurrentText('Derecha')
+    w.cmb_farmaco.setCurrentIndex(1)
+    w._vasoconstrictor()
+    assert w.sesion.fase('D') == 'vc' and w.sesion.fase('I') == 'reposo'
+    assert not w.sesion.vc_activo('D') and 'faltan 15:00' in w.pill_estado.text()
+    registrar(w, 'D')                       # antes de tiempo: rotulado con VC, sin efecto
+    assert w.res['vc']['D'] and not w.res['vc']['D']['estado']['vc']
+    t[0] += 15 * 60
+    w._cada_segundo()
+    assert w.sesion.vc_activo('D') and 'en acción' in w.pill_estado.text()
+    correr(w, 4)                            # el paciente en vivo pasa a tener VC
+    esperar_vivo(w)
+    assert w.mon.estado['vc']
+    assert w.sesion.vc_informe()['farmaco']['D'].startswith('Xilometazolina')
+    assert 'HR' in w.pill_ambiente.text()
 
 
 def test_misma_atencion_misma_medicion():
@@ -252,13 +324,14 @@ def test_informe_y_retomar():
     assert w.report_job() is None
     medir(w, 'D')
     medir(w, 'I')
-    w._vasoconstrictor()
+    poner_vc(w, 'Derecha')
     medir(w, 'D')
     w.txt_conclusion.setPlainText('Obstrucción derecha que mejora con VC.')
     job = w.report_job()
     assert job['tipo'] == 'RINOMANOMETRIA' and job['appointment_id'] == 123
     d = job['data']
-    assert d['vasoconstrictor'] and len(d['mediciones']) == 3
+    assert d['vasoconstrictor']['lados'] == ['D'] and len(d['mediciones']) == 3
+    assert d['ambiente']['temperatura'] > 15 and d['segundos'] == 20
     assert d['tabla']['filas'][-1][0] == 'Total'
     imagenes = job['images']()
     assert set(imagenes) == {'rm_curva', 'rm_resistencia'}

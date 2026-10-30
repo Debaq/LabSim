@@ -10,10 +10,19 @@ los 40 no ven la misma congestión (H26: una sola medición es una foto). El
 minuto en que entra el paciente sale de la atención, siempre el mismo para
 esa atención (stable_seed, no hash(): ver core/rng.py).
 
+El vasoconstrictor se pone en una fosa o en las dos, y hace efecto
+pasados 15 minutos de reloj (H26: "tras 15 minutos"): lo que se mida antes
+cuenta como "con vasoconstrictor" pero la mucosa sigue igual, como en la
+consulta. El modelo de RinoSim lo trata como todo o nada.
+
+El ambiente de la sala (temperatura y humedad) es el que muestra el equipo:
+fijo por atención, con una deriva lenta. No mueve el modelo; se anota.
+
 Sin `cases.data['NASAL']` no hay paciente: el equipo no mide (no se rellena
 con una nariz normal).
 """
 
+import math
 import time
 
 from core.rng import stable_seed
@@ -36,6 +45,13 @@ def desde_caso(data):
         return None
 
 
+# Tiempo de acción del vasoconstrictor, segundos (H26).
+ESPERA_VC_S = 15 * 60
+# Los que se pueden elegir: (clave, nombre en pantalla e informe).
+VASOCONSTRICTORES = (('oximetazolina', 'Oximetazolina 0,05 %'),
+                     ('xilometazolina', 'Xilometazolina 0,1 %'))
+
+
 class SesionNasal:
     def __init__(self, data, appointment_id, reloj=time.monotonic):
         self.paciente = desde_caso(data)
@@ -45,7 +61,7 @@ class SesionNasal:
         # En qué punto del ciclo llega: 0-149 min, fijo por atención.
         periodo = (self.paciente or {}).get('ciclo', {}).get('periodo', 150) or 150
         self.minuto_llegada = stable_seed('nasal', appointment_id) % int(periodo)
-        self.vc = False
+        self.vc_puesto = {}       # lado -> {'t', 'farmaco', 'puff'}
         self._mediciones = 0
 
     @property
@@ -55,15 +71,76 @@ class SesionNasal:
     def minuto(self):
         return self.minuto_llegada + int((self._reloj() - self._inicio) // 60)
 
-    def estado(self):
-        """El `estado` que piden modelo, rinomanometria y rinometria."""
-        return {'minuto': self.minuto(), 'vc': self.vc}
+    def estado(self, lado=None):
+        """El `estado` que piden modelo, rinomanometria y rinometria para
+        medir `lado` (sin lado: con vasoconstrictor si alguna fosa lo tiene
+        en acción)."""
+        vc = self.vc_activo(lado) if lado else any(self.vc_activo(l) for l in modelo.LADOS)
+        return {'minuto': self.minuto(), 'vc': vc}
 
-    def fase(self):
-        return 'vc' if self.vc else 'reposo'
+    def fase(self, lado=None):
+        """Cómo se rotula lo que se mida: "con VC" desde que se puso."""
+        puesto = lado in self.vc_puesto if lado else bool(self.vc_puesto)
+        return 'vc' if puesto else 'reposo'
 
-    def aplicar_vasoconstrictor(self):
-        self.vc = True
+    @property
+    def vc(self):
+        """Se puso vasoconstrictor en alguna fosa."""
+        return bool(self.vc_puesto)
+
+    def aplicar_vasoconstrictor(self, lados=modelo.LADOS, farmaco='oximetazolina', puff=2, ya=False):
+        """`ya`: sin esperar el tiempo de acción (al retomar la atención)."""
+        t = self._reloj() - (ESPERA_VC_S if ya else 0)
+        for lado in lados:
+            if lado not in self.vc_puesto:
+                self.vc_puesto[lado] = {'t': t, 'farmaco': farmaco, 'puff': int(puff)}
+
+    def falta_vc(self, lado):
+        """Segundos que faltan para que haga efecto en esa fosa (0 si ya), o None sin VC."""
+        v = self.vc_puesto.get(lado)
+        if v is None:
+            return None
+        return max(0.0, ESPERA_VC_S - (self._reloj() - v['t']))
+
+    def vc_activo(self, lado):
+        return self.falta_vc(lado) == 0
+
+    def saltar_espera(self):
+        """Para el docente: da por pasado el tiempo de acción."""
+        for v in self.vc_puesto.values():
+            v['t'] = min(v['t'], self._reloj() - ESPERA_VC_S)
+
+    def vc_informe(self):
+        """Lo que va al informe: dónde, qué y cuánto (o None)."""
+        if not self.vc_puesto:
+            return None
+        nombres = dict(VASOCONSTRICTORES)
+        return {'lados': sorted(self.vc_puesto),
+                'farmaco': {l: nombres.get(v['farmaco'], v['farmaco']) for l, v in self.vc_puesto.items()},
+                'puff': {l: v['puff'] for l, v in self.vc_puesto.items()}}
+
+    def restaurar_vc(self, guardado):
+        """Del informe guardado: un bool (informes de antes) o vc_informe()."""
+        if isinstance(guardado, dict):
+            claves = {n: k for k, n in VASOCONSTRICTORES}
+            for lado in guardado.get('lados') or []:
+                if lado in modelo.LADOS:
+                    nombre = (guardado.get('farmaco') or {}).get(lado)
+                    self.aplicar_vasoconstrictor([lado], claves.get(nombre, 'oximetazolina'),
+                                                 (guardado.get('puff') or {}).get(lado, 2), ya=True)
+        elif guardado:
+            self.aplicar_vasoconstrictor(ya=True)
+
+    def ambiente(self):
+        """Temperatura (°C) y humedad relativa (%) de la sala, como las
+        muestra el equipo. Del simulador: una sala de consulta (20-24 °C,
+        35-60 %), fija por atención, que se mueve poco con las horas."""
+        base = stable_seed('nasal-ambiente', self.appointment_id)
+        t0 = 20.0 + (base % 400) / 100
+        h0 = 35 + (base // 400) % 26
+        horas = (self._reloj() - self._inicio) / 3600
+        return (round(t0 + 0.4 * math.sin(horas * 2.1 + base % 7), 1),
+                int(round(h0 + 2 * math.sin(horas * 1.3 + base % 5))))
 
     def semilla_medicion(self, equipo):
         """Cada medición con su propia variabilidad, reproducible por
