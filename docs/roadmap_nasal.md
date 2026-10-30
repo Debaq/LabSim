@@ -56,6 +56,8 @@ real: la rinomanometría (F2b), la rinometría acústica (F2c), la
 espirometría (F6), la olfatometría y el prick (F5) y la polisomnografía
 (F7a); y en el navegador, las tarjetas Olfato, Prick y Sueño. Lo que sigue
 es **F7b (CPAP)**. La rinoscopía (F4) está en pausa por el aspecto.
+Las fichas 151-162 están en la práctica libre de todos, una carpeta por
+capítulo (35 a 38); los equipos siguen solo para el admin.
 
 - [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto

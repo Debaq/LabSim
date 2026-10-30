@@ -7442,3 +7442,14 @@ equipo:
 - **Perfil personalizado** para el docente: tasa de eventos (≈ el IAH hasta
   40; sobre eso satura), cuánto pesan el REM y el supino, la mezcla de tipos,
   las caídas de SpO2 y la semilla, sobre una arquitectura normal.
+
+## Los pacientes nasales y de sueño, en la práctica libre de todos (2026-10-30)
+
+A pedido de él, las fichas 151-162 (caps. 35 a 38) salen de la carpeta
+"Nariz (demo interna)", que solo veía el admin, y pasan a una carpeta por
+capítulo como el resto del libro ("Cap. 35 · Nariz tapada" … "Cap. 38 · El
+que ronca"), visibles para todos (`scripts/nasal/practica_capitulos.sql`).
+La carpeta de demo queda apagada. Los equipos (RS, RM, RA, OLF, PRICK, ESP,
+PSG) siguen en 'development': el alumno ve al paciente, su historia y su
+ficha de estudio, pero los equipos solo los abre el admin hasta que se
+suelten.
