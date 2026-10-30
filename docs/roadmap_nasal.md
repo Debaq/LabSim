@@ -27,6 +27,9 @@ Revierte la decisión del 2026-10-16 de dejar lo nasal fuera de LabSim
 - **Sin scipy** (numpy, `core/dsp.py` si hace falta filtrar).
 - Pantallas de equipo con el estilo actual (`docs/roadmap_estilo.md`);
   probar a 1366×768.
+- **Cada equipo registra cada acción y todas sus variables** en
+  action_logs con su prefijo (como `audio_`, `z_`; aquí `rm_`, `ra_`,
+  `rs_`), incluido lo que el equipo no sabe. Vale para F5-F7.
 
 ## Módulos
 
@@ -47,6 +50,11 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 `ESPIRO`, `SUENO`) se definen en su fase.
 
 ## Fases
+
+**Para retomar (2026-10-29):** F0-F4 hechas; la rinomanometría (F2b) es la
+más trabajada y falta verla en la app real. Lo que sigue es **F5
+(olfatometría y prick test)**. La rinoscopía (F4) está en pausa por el
+aspecto.
 
 - [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
@@ -70,30 +78,43 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       (una fosa de RM tarda ~0,7 s). Probado a 1366 y 1024 de ancho
       (`tests/test_nasal_equipos.py`). **Sin informe todavía:** sumar los
       tipos a `reports.tipo` es una migración (CHECK en la tabla); va en F3.
-- [x] **F2b. Rinomanometría como se hace** (2026-10-29, a pedido de él: "los
-      equipos usan primero las de presión y flujo"; sin ver en la app real).
-      Ventanita del paciente (`nasal/paciente_rm.py`: la cara de la
-      rinoscopía con la máscara oronasal y el adaptador con su tubo; clic en
-      la narina pone el adaptador, solo sin máscara). Registrar: presión y
-      flujo corren en el tiempo, cada ciclo completo se suma al lazo P-V, y
-      al detener se promedian los últimos 3-5 (con menos de 3 no se guarda).
-      Indicaciones al paciente (boca, parejo, tranquilo, fuerte) que se notan
-      desde la respiración siguiente; los errores se ven sin carteles (boca
-      abierta por la máscara, máscara chueca, oliva asomando). El modelo:
-      `mide_fosa` partido en `Red` + `ciclo` + `resumen` sin cambiar números
-      (la equivalencia con el JS pasa); `Registro` genera ciclo a ciclo con la
-      condición de ese momento y `mide_registro` lo rehace desde la receta.
-      Segunda vuelta (mismo día, a pedido de él): **en vivo** apenas hay
-      adaptador o máscara (adaptador solo: presión sin flujo; máscara sola:
-      flujo por las dos fosas, la otra narina abierta en la red, sin
-      presión); las indicaciones tardan 1-2 respiraciones; **Grabar** descarta
-      lo anterior y graba 10/15/20/30/60 s, promedia los ciclos completos
-      (~3,2 s cada uno; con menos de 3 no guarda). **Vasoconstrictor en el
-      paciente** (fármaco, fosa, puff; sin máscara ni adaptador) que hace
-      efecto a los 15 min de reloj (H26), con cuenta regresiva y "saltar la
-      espera" para el docente; vale por fosa también en la rinometría y la
-      rinoscopía. **Temperatura y humedad de la sala** en la barra del equipo
-      y en el PDF (no mueven el modelo).
+- [x] **F2b. Rinomanometría como se hace** (2026-10-29, a pedido de él;
+      tests y capturas a 1366 y 1024, **sin ver en la app real**). Cómo
+      queda hoy:
+      - **Paciente** (`nasal/paciente_rm.py`): la cara de la rinoscopía con
+        la máscara oronasal y el adaptador con su tubo. Clic en una narina
+        pone o saca el adaptador (solo sin máscara). Los errores se ven sin
+        carteles: boca abierta por la máscara, máscara chueca, oliva
+        asomando; la máscara se empaña al espirar.
+      - **En vivo** apenas hay adaptador o máscara: adaptador solo = presión
+        sin flujo; máscara sola = flujo por las dos fosas (la otra narina
+        abierta en la red, `AREA_NARINA_LIBRE`), sin presión. Indicaciones
+        al paciente (tranquilo, cerrar la boca, parejo, fuerte) que tardan
+        1-2 respiraciones.
+      - **Grabar** descarta lo anterior, graba 10/15/20/30/60 s (zona
+        sombreada, cuenta de segundos y ciclos) y promedia todos los ciclos
+        completos (~3,2 s cada uno; con menos de 3 no guarda). Cancelar no
+        guarda. Después sigue en vivo.
+      - **Vasoconstrictor en el paciente** (fármaco, fosa, puff; sin máscara
+        ni adaptador), efecto a los 15 min de reloj con cuenta regresiva y
+        "saltar la espera" para el docente. Por fosa en la sesión
+        (`sesion.vc_puesto`): vale también en la rinometría y la rinoscopía.
+        Lo medido antes de tiempo se rotula "con VC" sin efecto.
+      - **Temperatura y humedad de la sala** en la barra del equipo y en el
+        PDF (no mueven el modelo). Fuera el encabezado con nombre y edad:
+        queda una línea de mensajes.
+      - **Modelo:** `mide_fosa` partido en `Red` + `ciclo` + `resumen` sin
+        cambiar números (la equivalencia con el JS pasa); `Registro` genera
+        ciclo a ciclo con la condición de ese momento y `mide_registro` lo
+        rehace desde la receta del informe.
+      - **Registro de acciones** (`sesion.registrar`): `rm_`, `ra_`, `rs_` a
+        action_logs, como el audiómetro, con la verdad del modelo en el
+        payload (el backend no la puede calcular). Rótulos en
+        `Metrics::ACTION_LABELS`. Indicadores con esos datos: TODO 74, para
+        más adelante.
+      - Decisiones en `docs/decisiones.md`: § Rinomanometría: en vivo,
+        grabación por tiempo y vasoconstrictor con espera; § Equipos
+        nasales: cada acción y todas las variables a action_logs.
 - [x] **F3. Caso nasal e informe** (hecho 2026-10-29, sin ver en navegador):
       - Ficha **Nariz** en `case_create.php`, solo para el admin
         (`CaseReview::TABS['nariz']`: `solo_admin`, no revisable, no
