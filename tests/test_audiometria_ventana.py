@@ -34,10 +34,10 @@ def test_ancha_tres_columnas_y_listas_solo_con_logo():
     assert v.comandos.isVisible() and v.aviso_listas.isVisible()
     assert not v.listas.isVisible()
     # comandos a la izquierda del audiómetro, listas a la derecha
-    assert v.comandos.geometry().right() < v.audiometro.geometry().left()
+    assert v.comandos.geometry().right() < v.escalado.geometry().left()
     _logo(v)
     assert v.listas.isVisible() and not v.aviso_listas.isVisible()
-    assert v.listas.geometry().left() > v.audiometro.geometry().right()
+    assert v.listas.geometry().left() > v.escalado.geometry().right()
     _logo(v, False)
     assert not v.listas.isVisible() and v.aviso_listas.isVisible()
 
@@ -50,13 +50,25 @@ def test_angosta_comparten_la_columna_derecha_sin_esconderse():
     v = _ventana(1024)
     assert v._modo == "columna"
     assert v.comandos.isVisible()
-    assert v.comandos.geometry().left() > v.audiometro.geometry().right()
+    assert v.comandos.geometry().left() > v.escalado.geometry().right()
     _logo(v)
     assert v.listas.isVisible() and v.comandos.isVisible()
     assert v.listas.geometry().top() > v.comandos.geometry().bottom()
     # nada se sale de la ventana
     for w in (v.comandos, v.listas, v.audiometro):
         assert w.geometry().right() <= v.width()
+
+
+def test_el_audiometro_se_escala_y_va_centrado():
+    v = _ventana(1920, 970)
+    assert v.escalado.escala > 1.3          # pantalla grande: más grande
+    alto = v.audiometro.height() * v.escalado.escala
+    arriba = v.escalado.mapFromScene(0, 0).y()
+    assert abs(arriba - (v.escalado.height() - alto) / 2) <= 2   # centrado en vertical
+    v = _ventana(1366, 660)
+    assert 0.95 <= v.escalado.escala <= 1.05
+    v = _ventana(900, 600)                   # más chica que el audiómetro: se achica
+    assert v.escalado.escala < 1
 
 
 def test_sin_permiso_no_aparece_su_panel():
@@ -75,7 +87,7 @@ def test_las_columnas_siguen_al_ancho():
     v = _ventana(1920)
     _logo(v)
     assert v.comandos.columnas >= 2
-    assert v.listas.columnas >= 4
+    assert v.listas.columnas == 3   # lo que sobra agranda el audiómetro
 
 
 def test_la_frase_elegida_llega_al_audiometro():

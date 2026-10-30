@@ -7545,3 +7545,14 @@ curso: sin el permiso, su panel no aparece.
   de frases salen del botón más ancho y no de un ancho fijo; la barra del
   scroll se descuenta solo si hace falta (medirla siempre las dejaba
   trabadas en menos columnas). A 1366×660 entran todas las frases sin scroll.
+- **El audiómetro se escala y va centrado** (a pedido, mismo día): estirar
+  sus layouts solo abría huecos entre los controles, así que va dentro de un
+  `QGraphicsView` (`ventana._Escalado`) con zoom uniforme al espacio que le
+  dejan los paneles (×0.6 a ×1.8; ×1.5 a 1920, ×1.0 a 1366), centrado en las
+  dos direcciones. Los paneles llevan ancho fijo calculado en `_disponer`; el
+  audiómetro no tiene mínimo, y por eso la ventana siempre puede pasar a la
+  columna compartida. La vista lo muestra y lo esconde con ella
+  (`Audiometer.hideEvent` corta el sonido y suelta las teclas). Las teclas
+  A/D (frecuencia), 5 y E pasaron del atajo del botón (`setShortcut`) al
+  filtro de teclas, como W/S/V/B: dentro de la escena se comprobó el
+  filtro; el atajo del botón no se pudo comprobar sin pantalla.

@@ -221,14 +221,6 @@ class ListWords(QWidget):
         self._grillas.append((grid, botones))
         return pagina
 
-    def sizeHint(self):
-        """Ancho preferido: el de tres columnas. Lo que sobre al lado del
-        audiómetro se lo llevan primero los comandos de voz (ver
-        audiometria/ventana.py), que con más ancho ganan columnas."""
-        alto = super().sizeHint().height()
-        # márgenes de la raíz y de la tarjeta (12 + 12 por lado)
-        return QtCore.QSize(48 + 3 * ANCHO_PALABRA + 2 * 6, alto)
-
     def eventFilter(self, obj, event):
         if obj is self._scroll and event.type() == QtCore.QEvent.Type.Resize:
             self._ajustar_columnas()

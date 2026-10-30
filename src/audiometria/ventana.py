@@ -9,11 +9,17 @@ Nada se pliega ni se esconde. Si no caben los tres lado a lado (pantallas
 de menos de ~1280 de ancho), los dos paneles comparten la columna de la
 derecha: arriba los comandos y, con la logo, las listas debajo.
 
+El audiómetro se escala entero (texto, perillas y botones) al espacio que
+le queda y va centrado: estirar sus layouts solo abría huecos entre los
+controles. Va dentro de un QGraphicsView (ver _Escalado).
+
 Cada panel sigue siendo un módulo del curso (CVOICE y W en Layout.php):
 sin el permiso, su panel no aparece.
 """
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtGui import QPainter, QTransform
+from PySide6.QtWidgets import (QFrame, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel,
+                               QSizePolicy, QVBoxLayout, QWidget)
 
 from audiometria.Audiometer import Audiometer, test_list
 from audiometria.ListWords import ListWords
@@ -26,17 +32,16 @@ LOGO = test_list[1]
 # fila, tres palabras por fila.
 ANCHO_COMANDOS = 220
 ANCHO_LISTAS = 280
-# Mínimo fijo de los paneles, menor que los de arriba: si la ventana no
-# pudiera achicarse bajo el ancho de los tres lado a lado, nunca pasaría a
-# la columna compartida (el MDI no la deja más chica que su mínimo).
-ANCHO_MINIMO_PANEL = 120
 # En la columna compartida con las listas, los comandos no pasan de esta
 # fracción del alto: las palabras tienen que verse enteras y las frases se
 # encuentran también con la búsqueda.
 FRACCION_COMANDOS_COLUMNA = 0.36
 # Con los comandos más anchos que esto no caben más columnas de frases: lo
-# que sobra va a las listas.
+# que sobra va al audiómetro.
 ANCHO_MAXIMO_COMANDOS = 520
+# Zoom del audiómetro: más chico se lee mal, más grande no aporta.
+ESCALA_MINIMA = 0.6
+ESCALA_MAXIMA = 1.8
 MARGEN = 6
 
 
@@ -48,27 +53,22 @@ class AudiometriaWindow(QWidget):
         self.audiometro = Audiometer(data)
         self.comandos = ComandosVoz()
         self.listas = ListWords(data)
-        self.aviso_listas = _AvisoListas(self.listas)
+        self.aviso_listas = _aviso_listas()
         self._con_comandos = comandos
         self._con_listas = listas
         self._logo = self.audiometro.lbl_prueba.text() == LOGO
         self._modo = None
-        for panel in (self.comandos, self.listas, self.aviso_listas):
-            panel.setMinimumWidth(ANCHO_MINIMO_PANEL)
+        self.escalado = _Escalado(self.audiometro)
 
         raiz = QHBoxLayout(self)
         raiz.setContentsMargins(MARGEN, MARGEN, MARGEN, MARGEN)
         raiz.setSpacing(MARGEN)
         self.izq = QVBoxLayout()
-        centro = QVBoxLayout()
-        centro.addWidget(self.audiometro)
-        centro.addStretch(1)
         self.der = QVBoxLayout()
         self.der.setSpacing(MARGEN)
-        # El audiómetro en su ancho natural; los comandos crecen hasta su
-        # tope y el resto queda para las listas (ver _disponer).
-        raiz.addLayout(self.izq, 1)
-        raiz.addLayout(centro, 0)
+        # Los paneles con ancho fijo (ver _disponer); el audiómetro, el resto.
+        raiz.addLayout(self.izq, 0)
+        raiz.addWidget(self.escalado, 1)
         raiz.addLayout(self.der, 0)
 
         # Lo que antes conectaba main.connect_signals entre las tres ventanas.
@@ -88,20 +88,22 @@ class AudiometriaWindow(QWidget):
         self._logo = prueba == LOGO
         self._visibles()
 
-    def _ancho_lado_a_lado(self):
-        ancho = self.audiometro.minimumSizeHint().width() + 2 * MARGEN
-        if self._con_comandos:
-            ancho += ANCHO_COMANDOS + MARGEN
-        if self._con_listas:
-            ancho += ANCHO_LISTAS + MARGEN
-        return ancho
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._disponer()
 
     def _disponer(self):
-        modo = "lado" if self.width() >= self._ancho_lado_a_lado() else "columna"
+        """Reparte el ancho. Los paneles van con ancho fijo y el audiómetro
+        se escala al resto; como el audiómetro no tiene mínimo, la ventana
+        siempre puede achicarse (el MDI no la deja bajo su mínimo, y con un
+        mínimo grande nunca llegaría a la columna compartida)."""
+        base = self.escalado.base.width()
+        n_paneles = self._con_comandos + self._con_listas
+        disponible = self.width() - 2 * MARGEN - n_paneles * MARGEN
+        listas = ANCHO_LISTAS if self._con_listas else 0
+        cabe = disponible >= base + listas + (ANCHO_COMANDOS if self._con_comandos else 0)
+        modo = "lado" if cabe else "columna"
         if modo != self._modo:
             self._modo = modo
             for w in (self.comandos, self.listas, self.aviso_listas):
@@ -115,17 +117,19 @@ class AudiometriaWindow(QWidget):
                 self.der.addWidget(self.comandos, 1)
                 self.der.addWidget(self.listas, 2)
                 self.der.addWidget(self.aviso_listas)
-        # Lado a lado, los comandos se quedan con todo lo que no necesitan
-        # las listas (en 1366 les alcanza para dos columnas de frases). Es
-        # un máximo y no un mínimo de las listas: un mínimo no dejaría
-        # achicar la ventana bajo el ancho de los tres, y nunca pasaría a
-        # la columna compartida.
-        tope = QWIDGETSIZE_MAX
-        if modo == "lado" and self._con_listas:
-            libre = (self.width() - self.audiometro.minimumSizeHint().width()
-                     - 4 * MARGEN)
-            tope = max(ANCHO_COMANDOS, min(ANCHO_MAXIMO_COMANDOS, libre - ANCHO_LISTAS))
-        self.comandos.setMaximumWidth(tope)
+        if modo == "lado":
+            # Las listas en su ancho de tres columnas; los comandos, lo que
+            # deje el audiómetro en tamaño 1 (en 1366, dos columnas de
+            # frases), con su tope; lo demás agranda el audiómetro.
+            comandos = min(ANCHO_MAXIMO_COMANDOS,
+                           max(ANCHO_COMANDOS, disponible - listas - base))
+            self.comandos.setFixedWidth(comandos)
+            for panel in (self.listas, self.aviso_listas):
+                panel.setFixedWidth(ANCHO_LISTAS)
+        else:
+            columna = max(ANCHO_LISTAS, self.width() - 3 * MARGEN - base)
+            for panel in (self.comandos, self.listas, self.aviso_listas):
+                panel.setFixedWidth(columna)
         self._visibles()
 
     def _alto_comandos(self):
@@ -144,22 +148,61 @@ class AudiometriaWindow(QWidget):
                                      and self._modo == "lado")
 
 
-class _AvisoListas(QFrame):
-    """El lado derecho sin logoaudiometría: dice qué va ahí y cuándo. Pide
-    el mismo ancho que las listas: si no, al entrar a la logo el audiómetro
-    se corría."""
+class _Escalado(QGraphicsView):
+    """Muestra un widget escalado entero al espacio que tiene, centrado y
+    sin deformarlo. El widget sigue siendo el mismo (clics, perillas y
+    teclas andan igual); solo se dibuja con zoom."""
 
-    def __init__(self, listas):
+    def __init__(self, widget):
         super().__init__()
-        self._listas = listas
-        self.setProperty("card", "true")
-        _armar_aviso(self)
+        self._widget = widget
+        self.base = widget.minimumSizeHint()
+        widget.resize(self.base)
+        escena = QGraphicsScene(self)
+        self._proxy = escena.addWidget(widget)
+        self.setScene(escena)
+        self.setSceneRect(self._proxy.boundingRect())
+        self.setObjectName("escalado")
+        self.setStyleSheet("QGraphicsView#escalado { background: transparent; border: none; }")
+        self.viewport().setAutoFillBackground(False)
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setRenderHints(QPainter.RenderHint.Antialiasing
+                            | QPainter.RenderHint.TextAntialiasing
+                            | QPainter.RenderHint.SmoothPixmapTransform)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.escala = 1.0
 
     def sizeHint(self):
-        return QSize(self._listas.sizeHint().width(), super().sizeHint().height())
+        return self.base
+
+    def minimumSizeHint(self):
+        return QSize(0, 0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        escala = min(self.width() / self.base.width(), self.height() / self.base.height())
+        self.escala = max(ESCALA_MINIMA, min(ESCALA_MAXIMA, escala))
+        self.setTransform(QTransform.fromScale(self.escala, self.escala))
+
+    # El audiómetro se muestra y se esconde con la ventana: al esconderse
+    # corta el sonido y suelta sus teclas (Audiometer.hideEvent). Dentro de
+    # la escena no se enteraría solo.
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._widget.show()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self._widget.hide()
 
 
-def _armar_aviso(caja):
+def _aviso_listas():
+    """El lado derecho sin logoaudiometría: dice qué va ahí y cuándo."""
+    caja = QFrame()
+    caja.setProperty("card", "true")
     col = QVBoxLayout(caja)
     col.setContentsMargins(18, 18, 18, 18)
     col.setSpacing(8)
@@ -178,3 +221,4 @@ def _armar_aviso(caja):
     for w in (icono, titulo, pista):
         col.addWidget(w)
     col.addStretch(2)
+    return caja
