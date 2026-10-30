@@ -891,14 +891,15 @@ class DebugMkgDialog(QDialog):
 
     def _reporte(self):
         subw = getattr(self.main_window, 'subw', None) or {}
-        aud = subw.get("A")
-        if aud is None:
+        frame = subw.get("A")
+        if frame is None:
             return SIN_CASO
-        listas = subw.get("W")
-        logo = getattr(listas.obj, 'prev', None) if listas is not None else None
-        estado = getattr(listas.obj, 'playable', ()) if listas is not None else ()
+        # audiómetro y listas viven en la misma ventana (audiometria/ventana.py)
+        listas = frame.obj.listas
+        logo = getattr(listas, 'prev', None)
+        estado = getattr(listas, 'playable', ())
         try:
-            return build_report(aud.obj.response, logo, estado,
+            return build_report(frame.obj.audiometro.response, logo, estado,
                                 self.main_window.data_current)
         except Exception as exc:  # panel de depuración: nunca voltear la app
             return f"No se pudo armar el reporte: {exc!r}"

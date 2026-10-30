@@ -517,22 +517,18 @@ def audiometro():
     ir_a_box(w, "Box Audiología")
     recortar(w, "barra-audiologia", (0, 0, w.width(), BARRA))
     fa = abrir(w, "A")
-    a = fa.obj
+    a = fa.obj.audiometro
     a.lbl_int_ch0.setText("40 dB HL")
     a.lbl_int_ch1.setText("60 dB HL")
     a.lbl_output_ch1.setText("Izquierda")
     a.lbl_stimOn_ch0.setStyleSheet("background-color: rgb(170,170,255);")
     a.response.upHand()
-    fc = abrir(w, "CVOICE")
-    for b in fc.obj.findChildren(QPushButton):
-        if b.text() == "Colocar fonos":
-            b.setChecked(True)
-    mover(fa, 8, 8)
-    mover(fc, 8 + fa.width() + 24, 8)
-    x, y, ancho, alto = rect_de(w, fa, 10)
-    recortar(w, "audiometro-con-comandos", (0, 0, w.width(), y + alto))
-    guardar(fa, "audiometro")
-    guardar(fc, "comandos-de-voz")
+    # Elegida sin click: el click la dice por el talkback.
+    comandos = fa.obj.comandos
+    comandos.botones["colocar_fonos"].setChecked(True)
+    comandos._pintar(comandos.botones["colocar_fonos"])
+    guardar(fa, "audiometro-con-comandos")
+    guardar(a, "audiometro")
     w.close()
 
 
@@ -541,10 +537,9 @@ def listas_de_palabras():
     w, frame, ag = atendiendo("38")
     frame.hide()
     ir_a_box(w, "Box Audiología")
-    fl = w.subw["W"]
-    w.activate_auto("W")
-    procesar()
-    guardar(fl, "listas-de-palabras")
+    fa = abrir(w, "A")
+    fa.obj.audiometro.speech()   # Habla en un canal: Logoaudiometría
+    guardar(fa, "listas-de-palabras")
     w.close()
 
 

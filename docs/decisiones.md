@@ -7506,3 +7506,36 @@ un filtro "Carpeta" con los libros y sus capítulos (más "fuera de la
 práctica libre"): en un capítulo, los pacientes salen en el orden del libro.
 Agendar uno de esos pacientes es una cita común: no cuenta como intento de
 práctica.
+
+## Audiómetro en una sola ventana, con la prueba en cada instrucción (2026-10-30)
+
+A pedido de él: los alumnos se perdían abriendo *Comandos de voz* y *Listas de
+Palabras* con botones fuera del equipo, y no sabían qué instrucción iba con qué
+prueba. El audiómetro (`A`) pasa a pantalla completa, como el ABR, y adentro
+(`audiometria/ventana.py`, `AudiometriaWindow`) van los tres: comandos de voz a
+la izquierda, el equipo al centro y, a la derecha, las listas de palabras, que
+aparecen solas al poner *Habla* (señal nueva `Audiometer.prueba_cambio`); sin
+logo ese lado dice qué va ahí. Se quitaron los botones de la barra, las
+subventanas `W` y `CVOICE` y el cableado de `main.connect_signals`, que ahora
+vive en la ventana. `W` y `CVOICE` siguen en `Layout.php` como módulos del
+curso: sin el permiso, su panel no aparece.
+
+- **Nada se pliega.** Él pidió que no se escondan: plegables es esconderlos.
+  Con menos ancho que los tres lado a lado (~1270 px), los dos paneles
+  comparten la columna derecha (comandos arriba, listas abajo con la logo;
+  los comandos se topan al 36 % del alto para que las palabras se vean). Las
+  frases pasan de 3 a 1 columna y las palabras de 5 a 2 según el ancho.
+  Revisado a 1920×970, 1366×660, 1280×610 y 1024×660 (alto útil del MDI).
+  A 1024 con logo es justo: palabras y frases con scroll, y la búsqueda.
+- **Por qué los paneles no llevan un mínimo de ancho grande:** el MDI no deja
+  la ventana más chica que su mínimo, y entonces nunca llegaba a la columna
+  compartida. El reparto se hace con un tope a los comandos
+  (`ANCHO_MAXIMO_COMANDOS`) y el ancho preferido de las listas (tres columnas).
+- **La prueba en cada instrucción** (`comandos_voz.PRUEBA`): la misma tabla de
+  la sección 16 del manual del estudiante. La búsqueda encuentra también por
+  la prueba ("sisi" → *Cambie de volumen*). Sin rótulo quedan *Solo si
+  molesta* (no está en el manual ni en el motor) y las preguntas que no son de
+  una sola prueba (*¿Escucha?*, *¿Molesta?*...); *¿Sonidos iguales?* y *¿En qué
+  oído?* dicen Fowler.
+- `Layout.php` manda `A` como `max`; el cliente lo fuerza igual
+  (`APPS["A"]`) para el layout guardado sin red y un backend sin desplegar.

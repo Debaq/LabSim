@@ -15,7 +15,7 @@ from PySide6 import QtCore
 from PySide6.QtMultimedia import QAudioBufferOutput, QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import (
     QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton,
-    QSizePolicy, QStackedWidget, QVBoxLayout, QWidget,
+    QScrollArea, QSizePolicy, QStackedWidget, QVBoxLayout, QWidget,
 )
 
 from audiometria.audio_player import audio_buffer_level
@@ -69,16 +69,21 @@ GRUPOS = (
     ("DISÍLABOS (PALACIOS)", (("l", ""), ("f", ""), ("f", "_2"))),
     ("TÉRMINOS CONOCIDOS", (("g", ""), ("h", ""))),
 )
+# Columnas como máximo; en un panel angosto bajan hasta 2 (ver resizeEvent).
 COLUMNAS = 5
+ANCHO_PALABRA = 72
+# En una pantalla alta las palabras no se estiran más que esto.
+ALTO_MAXIMO_PALABRA = 52
 
 EXTRA_QSS = f"""
-QPushButton[palabra="true"] {{ padding: 7px 2px; }}
+QPushButton[palabra="true"] {{ padding: 5px 2px; }}
 QPushButton[palabra="true"][usada="true"] {{
     background: {tema.TARJETA_ALT};
     color: {tema.TEXTO_TENUE};
     border-color: {tema.BORDE};
 }}
 QPushButton[lista="true"] {{ padding: 5px 4px; }}
+QStackedWidget#paginas, QStackedWidget#paginas > QWidget {{ background: transparent; }}
 """
 
 
@@ -123,20 +128,22 @@ class ListWords(QWidget):
         se elige la lista arriba y las 25 palabras quedan en una grilla.
         Las ya dictadas se atenúan para no perder el hilo."""
         tema.aplicar_estilo(self, EXTRA_QSS)
+        self.columnas = COLUMNAS
+        self._grillas = []   # (grilla, botones) de cada lista
         raiz = QVBoxLayout(self)
         raiz.setContentsMargins(12, 10, 12, 12)
         raiz.setSpacing(8)
 
         # Estado del dictado + última palabra
+        # Uno debajo del otro: al lado del audiómetro el panel es angosto y
+        # la píldora se cortaba.
         estado, col = self._tarjeta()
-        fila = QHBoxLayout()
         self.lbl_dictado = QLabel()
         self.lbl_dictado.setProperty("pill", "neutro")
         self.lbl_ultima = QLabel("Última: —")
         self.lbl_ultima.setProperty("role", "titulo")
-        fila.addWidget(self.lbl_ultima, 1)
-        fila.addWidget(self.lbl_dictado)
-        col.addLayout(fila)
+        col.addWidget(self.lbl_ultima)
+        col.addWidget(self.lbl_dictado, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         raiz.addWidget(estado)
         self._mostrar_dictado()
 
@@ -166,8 +173,17 @@ class ListWords(QWidget):
         raiz.addWidget(selector)
 
         # Palabras
+        # Con scroll solo por si no cabe: sin él, en una pantalla baja la
+        # grilla empujaba la ventana más allá del borde.
         grilla, col = self._tarjeta()
-        col.addWidget(self.paginas, 1)
+        self._scroll = scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.viewport().setAutoFillBackground(False)
+        self.paginas.setObjectName("paginas")
+        scroll.setWidget(self.paginas)
+        col.addWidget(scroll, 1)
         raiz.addWidget(grilla, 1)
 
     @staticmethod
@@ -181,17 +197,55 @@ class ListWords(QWidget):
 
     def _pagina(self, clave):
         pagina = QWidget()
-        grid = QGridLayout(pagina)
+        col = QVBoxLayout(pagina)
+        col.setContentsMargins(0, 0, 0, 0)
+        grid = QGridLayout()
+        col.addLayout(grid)
+        col.addStretch(1)
         grid.setContentsMargins(0, 0, 0, 0)
         grid.setSpacing(6)
         letra, sufijo = clave
+        botones = []
         for i, palabra in enumerate(PALABRAS[clave]):
             btn = QPushButton(palabra)
             btn.setObjectName(f"btn_{letra}{i + 1}{sufijo}")
             btn.setProperty("palabra", "true")
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-            grid.addWidget(btn, i // COLUMNAS, i % COLUMNAS)
+            btn.setMaximumHeight(ALTO_MAXIMO_PALABRA)
+            # El ancho lo decide resizeEvent; sin esto "Televisión" o
+            # "Automóvil" ensanchaban la grilla más allá del panel.
+            btn.setMinimumWidth(40)
+            grid.addWidget(btn, i // self.columnas, i % self.columnas)
+            botones.append(btn)
+        self._grillas.append((grid, botones))
         return pagina
+
+    def sizeHint(self):
+        """Ancho preferido: el de tres columnas. Lo que sobre al lado del
+        audiómetro se lo llevan primero los comandos de voz (ver
+        audiometria/ventana.py), que con más ancho ganan columnas."""
+        alto = super().sizeHint().height()
+        barra = self._scroll.verticalScrollBar().sizeHint().width()
+        return QtCore.QSize(48 + barra + 3 * ANCHO_PALABRA + 2 * 6, alto)
+
+    def resizeEvent(self, event):
+        """Las palabras se reparten en las columnas que caben: al lado del
+        audiómetro, en una pantalla chica, el panel es angosto."""
+        super().resizeEvent(event)
+        # márgenes de la raíz y de la tarjeta (12 + 12 por lado) y la barra
+        # del scroll, por si aparece
+        util = self.width() - 48 - self._scroll.verticalScrollBar().sizeHint().width()
+        columnas = max(2, min(COLUMNAS, (util + 6) // (ANCHO_PALABRA + 6)))
+        if columnas == self.columnas:
+            return
+        self.columnas = columnas
+        for grid, botones in self._grillas:
+            for btn in botones:
+                grid.removeWidget(btn)
+            for i, btn in enumerate(botones):
+                grid.addWidget(btn, i // columnas, i % columnas)
+            for c in range(COLUMNAS):
+                grid.setColumnStretch(c, 1 if c < columnas else 0)
 
     def _limpiar_usadas(self):
         """Nuevo caso: las palabras vuelven a estar sin dictar."""

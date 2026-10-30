@@ -21,7 +21,11 @@ final class Layout
 {
     public const APPS = [
         'LOGIN'      => [true, 'Ingreso', 0, [true, true], [410, 140], 'pre'],
-        'A'          => [false, 'Audiómetro', 1, [true, true], [740, 560], 'pre'],
+        // A pantalla completa con los comandos de voz y las listas de
+        // palabras adentro (src/audiometria/ventana.py del cliente). W y
+        // CVOICE ya no se abren como ventana: quedan como módulos del curso
+        // que muestran u ocultan su panel.
+        'A'          => [false, 'Audiómetro', 1, [false, true], 'max', 'pre'],
         'W'          => [false, 'Lista de Palabras', 2, [true, true], [440, 420], 'pre'],
         'Z'          => [false, 'Impedanciómetro', 3, [true, true], [740, 560], 'pre'],
         'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], 'max', 'pre'],

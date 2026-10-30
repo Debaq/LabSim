@@ -47,6 +47,9 @@ alternate_time = class_pref.get("alternate_time")
 
 class Audiometer(QWidget, Ui_Audiometer):
     signal_speech = Signal(list)
+    # Umbrales / Logoaudiometría: con la logo se muestran las listas de
+    # palabras (ver audiometria/ventana.py).
+    prueba_cambio = Signal(str)
     def __init__(self, thr):
         # Inicialización de la ventana y propiedades
         #super(Audiometer, self).__init__()
@@ -827,9 +830,12 @@ class Audiometer(QWidget, Ui_Audiometer):
     def _extracted_from_threshold_2(self, arg0, arg1):
         self.lbl_freq.setFont(QFont('Noto Sans', 20))
         self.lbl_freq.setText(arg0)
-        if self.lbl_prueba.text() != test_list[arg1]:
+        cambio = self.lbl_prueba.text() != test_list[arg1]
+        if cambio:
             self._log("audio_prueba_change", prueba=test_list[arg1])
         self.lbl_prueba.setText(test_list[arg1])
+        if cambio:
+            self.prueba_cambio.emit(test_list[arg1])
             #data = {'frecuency': 1000,
             #        'stim_type_ch0': stim_list[0], 'stim_type_ch1': stim_list[3]}
             #online = self.btn_online.isChecked()

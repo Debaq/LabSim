@@ -38,7 +38,6 @@ from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Sto
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, raise_window
-from audiometria.comandos_voz import ComandosVoz
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
 from backend import client as backend_client
@@ -153,6 +152,11 @@ _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
 # leía como "la configuración cambió".
 if LAYOUT_AVAILABLE:
     APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [760, 450], "pre"])
+    # El audiómetro va a pantalla completa con sus paneles (ver
+    # audiometria/ventana.py). Layout.php ya lo manda así; acá por el
+    # layout guardado sin red y por un backend que todavía no se actualiza.
+    if "A" in APPS:
+        APPS["A"][3:5] = [[False, True], "max"]
 
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
@@ -665,8 +669,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         btns_actions los vuelven a armar en el próximo login)."""
         for layout in (*self.layouts, self.layoutAction):
             self._clear_layout(layout)
-        for attr in ("btn_chat_paciente", "btn_cmd_voice", "btn_list_words",
-                     "btn_cerrar_ventanas", "btn_configuracion",
+        for attr in ("btn_chat_paciente", "btn_cerrar_ventanas", "btn_configuracion",
                      "btn_debug_mkg", "btn_bandeja_oirs"):
             setattr(self, attr, None)
 
@@ -894,7 +897,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.subw.cancelar()
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
-        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr",
+        for attr in ("subw_a", "subw_z", "subw_ac", "subw_ot", "subw_abr",
                      "subw_aabr", "subw_eoas", "subw_vemp"):
             if hasattr(self, attr):
                 delattr(self, attr)
@@ -1194,7 +1197,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga self.data_current en los módulos ya construidos, o los
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
-        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr",
+        for attr in ("subw_a", "subw_z", "subw_ac", "subw_ot", "subw_abr",
                      "subw_aabr", "subw_eoas", "subw_vemp", "subw_rm", "subw_ra", "subw_rs",
                      "subw_esp", "subw_olf", "subw_prick", "subw_psg", "subw_cpap"):
             frame = getattr(self, attr, None)
@@ -1220,7 +1223,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga las subventanas"""
         from abr.AabrMainWindow import AabrMainWindow
         from abr.AbrMainWindow import AbrMainWindow
-        from audiometria import Audiometer, ListWords
+        from audiometria.ventana import AudiometriaWindow
         from impedanciometria import Z
         from nasal.equipos import RinomanometriaWindow, RinometriaWindow
         from nasal.CpapWindow import CpapWindow
@@ -1239,10 +1242,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # core/subventanas.py y _armar_modulos_en_fondo). expand: sin esto el
         # marco reparte el alto sobrante con un espaciador y el ABR se queda
         # en su alto natural (las fichas apretadas arriba).
-        self._modulo_diferido("W", "subw_w", lambda: FrameSubMdi(
-            ListWords.ListWords(self.data_current), expand=True))
+        # Comandos de voz y listas de palabras van dentro del audiómetro
+        # (ver audiometria/ventana.py); sus códigos solo dicen si el curso
+        # los tiene.
         self._modulo_diferido("A", "subw_a", lambda: FrameSubMdi(
-            Audiometer.Audiometer(self.data_current), expand=True))
+            AudiometriaWindow(self.data_current,
+                              comandos=self._module_visible("CVOICE"),
+                              listas=self._module_visible("W")), expand=True))
         self._modulo_diferido("Z", "subw_z", lambda: FrameSubMdi(Z.ZControl(), expand=True))
         self._modulo_diferido("ABR", "subw_abr", lambda: FrameSubMdi(
             AbrMainWindow(data_login=self.data_login), expand=True))
@@ -1282,7 +1288,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "AC": self.subw_ac,
             "OT": self.subw_ot,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self), expand=True),
-            "CVOICE": FrameSubMdi(ComandosVoz(), expand=True),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")), expand=True),
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),
             "PREVIO": FrameSubMdi(HojaPrevia(), expand=True),
@@ -1332,8 +1337,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 traceback.print_exc()
             if attr in self._ATTRS_EXAMEN:
                 self._subir_al_esconder(frame)
-            if nombre == "A":
-                self.connect_signals()   # todas cuelgan del audiómetro
         self.subw.pendiente(nombre, armar, despues)
 
     def _armar_modulos_en_fondo(self):
@@ -1362,20 +1365,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if isinstance(self.subw, Subventanas):
             self.subw.construir_todo()
 
-    def activate_listWords(self):
-        if self.subw_a.obj.lbl_prueba.text() == "Logoaudiometría":
-            self.activate_auto("W")
-
-    def speechlist_mode(self, state):
-        self.subw["W"].obj.update_state(state)
-
-    def connect_signals(self):
-        self.subw["A"].visibility_changed.connect(self._on_audiometro_visibility)
-        self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
-        self.subw["A"].obj.signal_speech.connect(self.speechlist_mode)
-        self.subw["W"].obj.level_changed.connect(
-            lambda level: self.subw["A"].obj._on_player_level(self.subw["W"].obj.channel, level))
-
     def refresh_data(self):
         self.load_sub_windows()
         self.btns_seccion()
@@ -1398,9 +1387,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             if widget is not None:
                 widget.deleteLater()
         # los botones se recrean abajo: las refs viejas quedan apuntando a
-        # widgets ya destruidos (_update_action_buttons las usa)
-        self.btn_cmd_voice = None
-        self.btn_list_words = None
+        # widgets ya destruidos
         self.btn_debug_mkg = None
         if self._module_visible("CHAT"):
             self.btn_chat_paciente = QPushButton("Hablar con el paciente")
@@ -1408,18 +1395,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_chat_paciente.setObjectName("btn_chat_paciente")
             self.btn_chat_paciente.clicked.connect(self.abrir_chat_paciente)
             self.layoutAction.addWidget(self.btn_chat_paciente)
-        if self._module_visible("CVOICE"):
-            self.btn_cmd_voice = QPushButton("Comandos de voz")
-            self._icono_accion(self.btn_cmd_voice, "microfono")
-            self.btn_cmd_voice.setObjectName("btn_CVOICE")
-            self.btn_cmd_voice.clicked.connect(self.activate_soft)
-            self.layoutAction.addWidget(self.btn_cmd_voice)
-        if self._module_visible("W"):
-            self.btn_list_words = QPushButton("Listas de Palabras")
-            self._icono_accion(self.btn_list_words, "lista")
-            self.btn_list_words.setObjectName("btn_W")
-            self.btn_list_words.clicked.connect(self.activate_listWords)
-            self.layoutAction.addWidget(self.btn_list_words)
         # Rescate: una subventana tapada o corrida se cierra desde acá sin
         # tener que encontrarle la ✕.
         self.btn_cerrar_ventanas = QPushButton("Cerrar ventanas")
@@ -1442,7 +1417,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_debug_mkg.setObjectName("btn_debug_mkg")
             self.btn_debug_mkg.clicked.connect(self.abrir_debug_mkg)
             self.layoutAction.addWidget(self.btn_debug_mkg)
-        self._update_action_buttons()
         self._compactar_acciones()
 
     def cerrar_ventanas(self):
@@ -1470,27 +1444,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.debug_mkg_dialog.raise_()
         self.debug_mkg_dialog.activateWindow()
         self.debug_mkg_dialog.refresh()
-
-    def _on_audiometro_visibility(self, visible):
-        """Al esconder el audiómetro se van con él sus accesorios: listas de
-        palabras y comandos de voz operan sobre sus canales, solos no sirven."""
-        self._update_action_buttons()
-        if visible:
-            return
-        for name in ("W", "CVOICE"):
-            if name in self.apps and name in self.subw:
-                self.close_sub_window(name)
-
-    def _update_action_buttons(self):
-        """Comandos de voz y Listas de palabras son controles del audiómetro
-        (dictan/reproducen por sus canales): sin el audiómetro abierto no
-        tienen sentido, así que se muestran solo con él a la vista."""
-        subw_a = self.subw.get("A") if self.subw else None
-        con_audiometro = subw_a is not None and subw_a.isVisible()
-        for btn in (getattr(self, "btn_cmd_voice", None),
-                    getattr(self, "btn_list_words", None)):
-            if btn is not None:
-                btn.setVisible(con_audiometro)
 
     def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None,
                        trae=()):
@@ -1803,8 +1756,7 @@ def _precargar_modulos():
     try:
         import abr.AabrMainWindow  # noqa: F401
         import abr.AbrMainWindow  # noqa: F401
-        import audiometria.Audiometer  # noqa: F401
-        import audiometria.ListWords  # noqa: F401
+        import audiometria.ventana  # noqa: F401
         import impedanciometria.Z  # noqa: F401
         import oae.OaeMainWindow  # noqa: F401
         import vemp.VempMainWindow  # noqa: F401

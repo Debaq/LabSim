@@ -468,7 +468,7 @@ El audiómetro tiene **dos canales**: el **canal 1** a la izquierda y el **canal
 | **Ext. Rango** | Extiende el máximo de la vía aérea de 100 a 120 dB HL |
 | **Alta frec.** | Suma las frecuencias de 9 a 16 kHz |
 | **Alternado** | Pone los dos canales en modo alternado (un oído y el otro) |
-| **Talkback** | Le dice al paciente la instrucción elegida en *Comandos de voz* (sección 16) |
+| **Talkback** | Le dice al paciente la instrucción elegida en los comandos de voz (sección 16) |
 | **Monitor ch1 / ch2** | El volumen de cada canal en tus fonos |
 | **Iniciar · Detener · Borrar** | El cronómetro de la pantalla |
 | **+1 · -1 · Limpiar** | Los aciertos de la logoaudiometría (sección 18) |
@@ -477,13 +477,15 @@ Los límites de intensidad son los del equipo: la vía aérea va de -15 a 100 dB
 
 ## 16. Las instrucciones al paciente
 
-El paciente responde según la **última instrucción** que le diste. Las instrucciones se eligen en la ventana **Comandos de voz** y se le dicen con **Talkback**.
+El paciente responde según la **última instrucción** que le diste. Las instrucciones están a la **izquierda del audiómetro**, en la misma ventana, y se le dicen con **Talkback**.
 
-![El audiómetro con los comandos de voz al lado](img/estudiante/audiometro-con-comandos.png)
+![El audiómetro con los comandos de voz a la izquierda](img/estudiante/audiometro-con-comandos.png)
 
-1. Con el audiómetro abierto, botón **Comandos de voz** (arriba a la derecha).
-2. Elige la instrucción. Dejando el mouse encima ves el texto completo que escucha el paciente.
-3. Presiona **Talkback** en el audiómetro. Recién ahí el paciente recibe la instrucción.
+1. Elige la instrucción. Debajo de cada una dice en qué prueba se usa (*Carhart*, *SISI*, *LDL*...). También puedes buscarla por la prueba: escribe *sisi* en **Buscar frase** y aparece *Cambie de volumen*.
+2. Presiona **Talkback** en el audiómetro. Recién ahí el paciente recibe la instrucción.
+3. **Silencio** suelta la instrucción elegida.
+
+En una pantalla angosta los comandos van a la derecha del audiómetro, en la misma columna que las listas de palabras.
 
 | Instrucción | Para | Qué hace el paciente |
 |---|---|---|
@@ -516,7 +518,7 @@ Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pant
 
 ![Las listas de palabras](img/estudiante/listas-de-palabras.png)
 
-1. Con *Habla* en un canal, botón **Listas de Palabras**.
+1. Con *Habla* en un canal, las listas aparecen a la **derecha del audiómetro** (antes ese espacio dice dónde van a aparecer).
 2. Elige la lista: **Disilabos (Palacios)** o **Terminos Conocidos**. Las palabras desactivadas todavía no tienen su grabación: dejando el mouse encima dice cuál falta.
 3. Haz clic en una palabra: suena por la salida del canal. El paciente la repite (o dice otra cosa, si no la entendió).
 4. Anota con **+1** o **-1** en el audiómetro. **<** y **>** cambian el total de palabras; **Limpiar** vuelve los aciertos a cero.
@@ -802,7 +804,7 @@ Si LabSim se cerró solo, se colgó o algo no funcionó, avísalo desde **Config
 | No aparece un equipo | Tu curso no lo tiene habilitado; consulta a tu docente |
 | *Atención abierta* al querer atender | Cierra primero la atención que tienes (*Cerrar/Evolucionar*) |
 | El paciente no levanta la mano | Revisa que le diste la instrucción con **Talkback** y que el canal suena (indicador lila) |
-| *Listas de Palabras* no abre | Primero elige **Habla** en un canal del audiómetro |
+| No aparecen las listas de palabras | Primero elige **Habla** en un canal del audiómetro |
 | Una palabra de la lista está desactivada | Todavía no tiene su grabación; usa otra |
 | Una ventana quedó tapada o fuera de la pantalla | **Cerrar ventanas** y vuelve a abrir el equipo |
 | *sin conexión* bajo un equipo | Sigue trabajando: se guarda en el computador y se sube cuando vuelva internet |

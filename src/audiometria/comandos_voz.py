@@ -10,7 +10,8 @@ cambie el rótulo.
 """
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QLineEdit, QPushButton, QScrollArea, QVBoxLayout, QWidget)
+                               QLineEdit, QPushButton, QScrollArea, QSizePolicy, QVBoxLayout,
+                               QWidget)
 
 from core import iconos, tema
 
@@ -49,16 +50,45 @@ GRUPOS = (
         ("¿Muy fuerte?", "muy_fuerte"),
     )),
 )
+# La prueba en que se usa cada frase, a la vista en su botón: los alumnos
+# no sabían qué instrucción iba con qué prueba. Lo mismo que la tabla de la
+# sección 16 del manual del estudiante. Las preguntas que no son de una sola
+# prueba (¿Escucha?, ¿Molesta?...) van sin rótulo.
+PRUEBA = {
+    "colocar_fonos": "Vía aérea",
+    "colocar_vibrador": "Vía ósea",
+    "aerea_+_ruido": "Aérea enmascarada",
+    "vibrador_+_ruido": "Ósea enmascarada",
+    "mano_levantada": "Carhart",
+    "mano_levantada_en_ruido": "Carhart con ruido",
+    "escuche_mi_voz": "Detección de la voz",
+    "dictar_palabras": "Logoaudiometría",
+    "pitos_fuertes": "LDL",
+    "dos_pitos": "Fowler",
+    "cambie_de_volumen": "SISI",
+    "ruido_blanco_contralateral": "STAT",
+    "rosemberg_bilateral": "Rosemberg",
+    "pa_pa_pa": "Detección de la voz",
+    "sonidos_iguales": "Fowler",
+    "en_qué_oído": "Fowler",
+}
+# Columnas como máximo; con menos ancho se reacomodan (ver resizeEvent).
 COLUMNAS = 3
+ANCHO_FRASE = 155
 
 EXTRA_QSS = f"""
 QPushButton[frase="true"] {{ text-align: left; padding: 5px 9px; }}
 QPushButton[frase="true"]:checked {{
     background: {tema.ACENTO};
     border-color: {tema.ACENTO};
-    color: white;
-    font-weight: 600;
 }}
+QLabel#rotulo {{ color: {tema.TEXTO}; background: transparent; }}
+QLabel#prueba {{
+    color: {tema.ACENTO}; background: transparent;
+    font-size: 8pt; font-weight: 600;
+}}
+QLabel#rotulo[activa="true"], QLabel#prueba[activa="true"] {{ color: white; }}
+QLabel#rotulo[activa="true"] {{ font-weight: 600; }}
 QFrame#elegida {{
     background: {tema.ACENTO_SUAVE};
     border: 1px solid {tema.BORDE};
@@ -98,7 +128,13 @@ class ComandosVoz(QWidget):
         self.buscar.textChanged.connect(self._filtrar)
         # Enter elige la primera que coincide: escribir "mano" + Enter.
         self.buscar.returnPressed.connect(self._elegir_primera)
-        raiz.addWidget(self.buscar)
+        # Silencio al lado de la búsqueda y no en la caja de la frase: en la
+        # columna angosta junto al audiómetro ahí no cabía.
+        fila = QHBoxLayout()
+        fila.setSpacing(6)
+        fila.addWidget(self.buscar, 1)
+        fila.addWidget(self.btn_silencio)
+        raiz.addLayout(fila)
 
         self.grupo = QButtonGroup(self)
         self.grupo.setExclusive(False)   # Silencio = ninguna marcada
@@ -118,18 +154,11 @@ class ComandosVoz(QWidget):
             col.addWidget(rotulo)
             grilla = QGridLayout()
             grilla.setSpacing(5)
-            for c in range(COLUMNAS):
-                grilla.setColumnStretch(c, 1)
             botones = []
-            for i, (texto, clave) in enumerate(frases):
-                btn = QPushButton(texto)
-                btn.setCheckable(True)
-                btn.setProperty("frase", "true")
-                btn.setProperty("clave", clave)
-                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            for texto, clave in frases:
+                btn = _boton_frase(texto, clave)
                 self.grupo.addButton(btn)
                 self.botones[clave] = btn
-                grilla.addWidget(btn, i // COLUMNAS, i % COLUMNAS)
                 botones.append(btn)
             col.addLayout(grilla)
             self.secciones.append((rotulo, grilla, botones))
@@ -147,10 +176,35 @@ class ComandosVoz(QWidget):
         scroll.setWidget(lista)
         raiz.addWidget(scroll, 1)
 
+        self.columnas = COLUMNAS
+        self.filtradas = set()   # las que esconde la búsqueda
+        self._reacomodar()
         self._pintar(None)
 
+    def resizeEvent(self, event):
+        """En una columna angosta (pantallas chicas) las frases van de a una
+        o dos por fila, sin cortarse."""
+        super().resizeEvent(event)
+        columnas = max(1, min(COLUMNAS, self.width() // ANCHO_FRASE))
+        if columnas != self.columnas:
+            self.columnas = columnas
+            self._reacomodar()
+
+    def _reacomodar(self):
+        """Pone en la grilla las frases que no esconde la búsqueda, sin
+        dejar huecos. Se mira `filtradas` y no isHidden(): antes de mostrarse
+        la ventana todas cuentan como escondidas."""
+        for _rotulo, grilla, botones in self.secciones:
+            for b in botones:
+                grilla.removeWidget(b)
+            for i, b in enumerate(b for b in botones if b not in self.filtradas):
+                grilla.addWidget(b, i // self.columnas, i % self.columnas)
+            for c in range(COLUMNAS):
+                grilla.setColumnStretch(c, 1 if c < self.columnas else 0)
+
     def _elegida(self):
-        """La frase que se va a decir, y Silencio para no decir nada."""
+        """La frase que se va a decir. Silencio (no decir nada) se arma acá
+        y va junto a la búsqueda."""
         caja = QFrame()
         caja.setObjectName("elegida")
         fila = QHBoxLayout(caja)
@@ -165,13 +219,16 @@ class ComandosVoz(QWidget):
         self.lbl_frase.setObjectName("frase")
         self.lbl_pista = QLabel()
         self.lbl_pista.setProperty("role", "hint")
+        # En la columna angosta junto al audiómetro el texto se parte en líneas.
+        self.lbl_frase.setWordWrap(True)
+        self.lbl_pista.setWordWrap(True)
         textos.addWidget(self.lbl_frase)
         textos.addWidget(self.lbl_pista)
         fila.addLayout(textos, 1)
         self.btn_silencio = QPushButton(" Silencio")
         self.btn_silencio.setIcon(iconos.icono_boton("x", tema.TEXTO_SUAVE, tam=14))
         self.btn_silencio.clicked.connect(self.silencio)
-        fila.addWidget(self.btn_silencio)
+        self.btn_silencio.setMinimumWidth(self.btn_silencio.sizeHint().width())
         self.caja_elegida = caja
         return caja
 
@@ -205,28 +262,88 @@ class ComandosVoz(QWidget):
             self.lbl_frase.setText("Silencio")
             self.lbl_pista.setText("Elige una frase para decírsela al paciente.")
         else:
-            self.lbl_frase.setText(btn.text())
-            self.lbl_pista.setText("Presiona Talkback en el audiómetro para decirla.")
+            self.lbl_frase.setText(btn.property("rotulo"))
+            prueba = PRUEBA.get(btn.property("clave"))
+            pista = "Presiona Talkback en el audiómetro para decirla."
+            self.lbl_pista.setText(f"{prueba} · {pista}" if prueba else pista)
         self.btn_silencio.setEnabled(btn is not None)
         self.caja_elegida.setProperty("vacia", "true" if btn is None else "false")
         tema.repintar(self.caja_elegida)
         tema.repintar(self.lbl_frase)
 
     def _filtrar(self, texto):
-        """Muestra las frases que contienen lo escrito (sin tildes ni signos)."""
+        """Muestra las frases que contienen lo escrito (sin tildes ni
+        signos), en el rótulo o en la prueba: "sisi" encuentra Cambie de
+        volumen."""
         buscado = _plano(texto)
         alguna = False
-        for rotulo, grilla, botones in self.secciones:
-            visibles = [b for b in botones if buscado in _plano(b.text())]
-            # Se reacomodan para no dejar huecos en la grilla.
+        for rotulo, _grilla, botones in self.secciones:
+            visibles = [b for b in botones if buscado in _plano(_buscable(b))]
             for b in botones:
-                grilla.removeWidget(b)
                 b.setVisible(b in visibles)
-            for i, b in enumerate(visibles):
-                grilla.addWidget(b, i // COLUMNAS, i % COLUMNAS)
+                if b in visibles:
+                    self.filtradas.discard(b)
+                else:
+                    self.filtradas.add(b)
             rotulo.setVisible(bool(visibles))
             alguna = alguna or bool(visibles)
+        self._reacomodar()
         self.sin_resultados.setVisible(not alguna)
+
+
+class _BotonFrase(QPushButton):
+    """QPushButton mide su alto por su texto, no por su layout: con las dos
+    etiquetas adentro, las líneas se encimaban."""
+
+    def sizeHint(self):
+        return self.layout().sizeHint()
+
+    def minimumSizeHint(self):
+        return self.layout().minimumSize()
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, ancho):
+        return self.layout().totalHeightForWidth(ancho)
+
+
+def _boton_frase(texto, clave):
+    """Botón de una frase: el rótulo y, debajo, la prueba en que se usa.
+    Sin texto propio (lo pintan las etiquetas); el rótulo queda en la
+    propiedad `rotulo`."""
+    btn = _BotonFrase()
+    btn.setCheckable(True)
+    btn.setProperty("frase", "true")
+    btn.setProperty("clave", clave)
+    btn.setProperty("rotulo", texto)
+    btn.setAccessibleName(texto)
+    btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    col = QVBoxLayout(btn)
+    col.setContentsMargins(9, 4, 9, 4)
+    col.setSpacing(0)
+    etiquetas = [QLabel(texto)]
+    etiquetas[0].setObjectName("rotulo")
+    etiquetas[0].setWordWrap(True)
+    prueba = PRUEBA.get(clave)
+    if prueba:
+        etiquetas.append(QLabel(prueba))
+        etiquetas[1].setObjectName("prueba")
+    for lbl in etiquetas:
+        lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        col.addWidget(lbl)
+    btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+    def marcar(activa):
+        for lbl in etiquetas:
+            lbl.setProperty("activa", "true" if activa else "false")
+            tema.repintar(lbl)
+    btn.toggled.connect(marcar)
+    return btn
+
+
+def _buscable(btn):
+    return f"{btn.property('rotulo')} {PRUEBA.get(btn.property('clave'), '')}"
 
 
 def _plano(texto):
