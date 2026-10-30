@@ -1,5 +1,6 @@
-"""El audiómetro en una sola ventana (audiometria/ventana.py): comandos de
-voz y listas de palabras a la vista, sin plegarse, en cualquier ancho."""
+"""El audiómetro en una sola ventana (audiometria/ventana.py): reparto
+1:3:1 con el audiómetro al centro, y comandos de voz y listas de palabras a
+la vista, sin plegarse, en cualquier ancho."""
 import os
 import sys
 
@@ -35,47 +36,44 @@ def _logo(v, activa=True):
     QApplication.processEvents()
 
 
-def test_ancha_tres_columnas_y_listas_solo_con_logo():
-    v = _ventana(1366)
-    assert v._modo == "lado"
+def _dibujado(v):
+    """Lo que ocupa el audiómetro en pantalla, ya con su zoom."""
+    e = v.escalado
+    arriba_izq = e.mapTo(v, e.mapFromScene(0, 0))
+    lado = e.base * e.escala
+    return QRect(arriba_izq, lado)
+
+
+def test_comandos_a_la_izquierda_y_listas_solo_con_logo():
+    v = _ventana(1366, 660)
     assert v.comandos.isVisible() and v.aviso_listas.isVisible()
     assert not v.listas.isVisible()
-    # comandos a la izquierda del audiómetro, listas a la derecha
-    assert _rect(v, v.comandos).right() < _rect(v, v.audiometro).left()
+    assert _rect(v, v.comandos).right() < _dibujado(v).left()
     _logo(v)
     assert v.listas.isVisible() and not v.aviso_listas.isVisible()
-    assert _rect(v, v.listas).left() > _rect(v, v.audiometro).right()
+    assert _rect(v, v.listas).left() > _dibujado(v).right()
     _logo(v, False)
     assert not v.listas.isVisible() and v.aviso_listas.isVisible()
 
 
-def test_1280_todavia_cabe_lado_a_lado():
-    assert _ventana(1280)._modo == "lado"
-
-
-def test_angosta_comparten_la_columna_derecha_sin_esconderse():
-    v = _ventana(1024)
-    assert v._modo == "columna"
-    assert v.comandos.isVisible()
-    assert _rect(v, v.comandos).left() > _rect(v, v.audiometro).right()
-    _logo(v)
-    assert v.listas.isVisible() and v.comandos.isVisible()
-    assert _rect(v, v.listas).top() > _rect(v, v.comandos).bottom()
-    # nada se sale de la ventana
-    for w in (v.comandos, v.listas, v.audiometro):
-        assert _rect(v, w).right() <= v.width()
-
-
-def test_el_audiometro_va_al_centro_y_los_laterales_iguales():
-    for ancho, alto in ((1920, 970), (1366, 660), (1280, 610)):
+def test_reparto_1_3_1_con_el_audiometro_al_centro():
+    for ancho, alto in ((1920, 970), (1366, 660), (1280, 610), (1024, 660)):
         v = _ventana(ancho, alto)
-        a = _rect(v, v.audiometro)
-        assert a.width() == v.audiometro.minimumSizeHint().width()   # ancho fijo
-        assert abs(a.center().x() - ancho / 2) <= 2
-        assert abs(a.center().y() - alto / 2) <= 2
-        assert abs(v.col_izq.width() - v.col_der.width()) <= 1
-    v = _ventana(1366, 660, listas=False)    # aunque un lateral quede vacío
-    assert abs(_rect(v, v.audiometro).center().x() - 1366 / 2) <= 2
+        _logo(v)
+        quinto = (ancho - 4 * 6) / 5
+        assert abs(v.col_izq.width() - quinto) <= 2, ancho
+        assert abs(v.col_der.width() - quinto) <= 2, ancho
+        assert abs(v.escalado.width() - 3 * quinto) <= 3, ancho
+        a = _dibujado(v)
+        # llena su parte (a lo ancho o a lo alto, sin deformarse) y al medio
+        assert a.width() >= v.escalado.width() - 3 or a.height() >= v.escalado.height() - 3
+        assert abs(a.center().x() - ancho / 2) <= 3, ancho
+        assert abs(a.center().y() - alto / 2) <= 3, ancho
+        for w in (v.comandos, v.listas):
+            assert _rect(v, w).right() <= ancho
+    assert _ventana(1920, 970).escalado.escala > 1.4       # lo más grande
+    v = _ventana(1366, 660, listas=False)                  # aunque un lateral quede vacío
+    assert abs(_dibujado(v).center().x() - 1366 / 2) <= 3
 
 
 def test_sin_permiso_no_aparece_su_panel():
@@ -87,11 +85,11 @@ def test_sin_permiso_no_aparece_su_panel():
 
 
 def test_las_columnas_siguen_al_ancho():
-    v = _ventana(1024)
+    v = _ventana(1024, 660)
     _logo(v)
     assert v.comandos.columnas == 1
-    assert v.listas.columnas in (2, 3)
-    v = _ventana(1920)
+    assert v.listas.columnas == 2
+    v = _ventana(1920, 970)
     _logo(v)
     assert v.comandos.columnas >= 2
     assert v.listas.columnas >= 4

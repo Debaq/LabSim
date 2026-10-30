@@ -7545,12 +7545,19 @@ curso: sin el permiso, su panel no aparece.
   de frases salen del botón más ancho y no de un ancho fijo; la barra del
   scroll se descuenta solo si hace falta (medirla siempre las dejaba
   trabadas en menos columnas). A 1366×660 entran todas las frases sin scroll.
-- **El audiómetro, de ancho fijo y siempre al centro** (a pedido, mismo
-  día): los dos laterales se reparten por igual el ancho que sobra, cada uno
-  a lo más la mitad, aunque uno esté vacío; el audiómetro va además al
-  medio en vertical. Se probó antes un zoom (QGraphicsView) que lo agrandaba
-  al espacio libre y no gustó. Los laterales llevan tope y no ancho fijo: un
-  mínimo grande no dejaría achicar la ventana y nunca llegaría a la columna
-  compartida, que entra con laterales de menos de 250 px (~1250 de ancho);
-  ahí el audiómetro deja de ir centrado. Comandos y listas sin márgenes
-  propios para que quepan tres palabras por fila a 1280.
+- **Reparto 1:3:1, el audiómetro lo más grande** (a pedido, mismo día; se
+  probaron antes un zoom que le daba al audiómetro lo que dejaban los
+  paneles y un audiómetro de ancho fijo con laterales a medias, y no
+  gustaron): cada lateral un quinto del ancho y el audiómetro tres quintos,
+  en toda pantalla. El audiómetro se escala entero dentro de un
+  `QGraphicsView` (`ventana._Escalado`, ×0.6 a ×2.2) hasta llenar su parte,
+  centrado en las dos direcciones: ×1.57 a 1920, ×1.11 a 1366, ×1.04 a
+  1280, ×0.83 a 1024. Ya no hay columna compartida: los laterales
+  reacomodan sus columnas (a 1024, frases de a una y palabras de a dos). Los
+  laterales llevan tope (su quinto) y no ancho fijo, para que el MDI deje
+  achicar la ventana. La vista muestra y esconde el audiómetro con ella
+  (`Audiometer.hideEvent` corta el sonido y suelta las teclas). Las teclas
+  A/D, 5 y E pasaron del atajo del botón al filtro de teclas, como W/S/V/B:
+  dentro de la escena se comprobó el filtro y el atajo del botón no.
+  "Sin dictado" quedó como píldora corta con la pista debajo, y el stack de
+  listas sin mínimo propio (pedía el ancho de la lista oculta más ancha).

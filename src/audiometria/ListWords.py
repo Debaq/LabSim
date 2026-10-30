@@ -71,7 +71,7 @@ GRUPOS = (
 )
 # Columnas como máximo; en un panel angosto bajan hasta 2 (ver resizeEvent).
 COLUMNAS = 5
-ANCHO_PALABRA = 72
+ANCHO_PALABRA = 70
 # En una pantalla alta las palabras no se estiran más que esto.
 ALTO_MAXIMO_PALABRA = 52
 MARGEN_TARJETAS = 6
@@ -143,10 +143,15 @@ class ListWords(QWidget):
         estado, col = self._tarjeta()
         self.lbl_dictado = QLabel()
         self.lbl_dictado.setProperty("pill", "neutro")
+        # Aparte de la píldora: en un lateral angosto no cabía en una línea.
+        self.lbl_dictado_pista = QLabel("Actívalo en el audiómetro.")
+        self.lbl_dictado_pista.setProperty("role", "hint")
+        self.lbl_dictado_pista.setWordWrap(True)
         self.lbl_ultima = QLabel("Última: —")
         self.lbl_ultima.setProperty("role", "titulo")
         col.addWidget(self.lbl_ultima)
         col.addWidget(self.lbl_dictado, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        col.addWidget(self.lbl_dictado_pista)
         raiz.addWidget(estado)
         self._mostrar_dictado()
 
@@ -185,6 +190,9 @@ class ListWords(QWidget):
         scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.viewport().setAutoFillBackground(False)
         self.paginas.setObjectName("paginas")
+        # Sin esto el stack pide el ancho de la lista más ancha, aunque esté
+        # oculta y ya reacomodada: la grilla se salía del panel.
+        self.paginas.setMinimumWidth(1)
         scroll.setWidget(self.paginas)
         scroll.installEventFilter(self)
         col.addWidget(scroll, 1)
@@ -266,8 +274,9 @@ class ListWords(QWidget):
             texto = "Dictado activo" if intensidad is None else f"Dictado activo · {intensidad} dB"
             self.lbl_dictado.setProperty("pill", "acento")
         else:
-            texto = "Sin dictado: actívalo en el audiómetro"
+            texto = "Sin dictado"
             self.lbl_dictado.setProperty("pill", "neutro")
+        self.lbl_dictado_pista.setVisible(not activo)
         self.lbl_dictado.setText(texto)
         tema.repintar(self.lbl_dictado)
 

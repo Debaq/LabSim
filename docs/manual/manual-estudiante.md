@@ -485,8 +485,6 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 2. Presiona **Talkback** en el audiómetro. Recién ahí el paciente recibe la instrucción.
 3. **Silencio** suelta la instrucción elegida.
 
-En una pantalla angosta los comandos van a la derecha del audiómetro, en la misma columna que las listas de palabras.
-
 | Instrucción | Para | Qué hace el paciente |
 |---|---|---|
 | **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar (y Stenger) | Levanta la mano mientras suena un tono que oye |
