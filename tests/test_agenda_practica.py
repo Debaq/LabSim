@@ -272,9 +272,9 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     ag.btn_practica.setChecked(True)
     lista = ag.lista_carpetas
     assert not ag.columna_carpetas.isHidden()
-    assert [lista.item(i).text() for i in range(lista.count())] == ["Cap. 6  (0/2)", "Cap. 3  (0/11)"]
+    assert [it.text(0) for it in ag.carpetas_visibles()] == ["Cap. 6  (0/2)", "Cap. 3  (0/11)"]
     assert _filas(ag) == ["Zoe", "Ana"]
-    lista.setCurrentRow(1)
+    lista.setCurrentItem(ag.carpetas_visibles()[1])
     assert _filas(ag) == [f"P{n}" for n in range(1, 12)]
     # N° es número: ordenar por esa columna no pone el 10 antes que el 2
     ag.tableWidget.sortItems(mod.COL_N_PRACTICA, Qt.AscendingOrder)
@@ -293,6 +293,33 @@ def test_carpetas_en_su_orden_y_buscar_en_todas():
     assert ag.columna_carpetas.isHidden() and not ag.tableWidget.isColumnHidden(mod.COL_N_PRACTICA)
 
 
+def test_el_libro_es_la_carpeta_y_los_capitulos_las_subcarpetas():
+    """Con grupo, el libro va arriba (con el avance de todo el libro) y sus
+    capítulos adentro; un clic en el libro lo abre o lo cierra, no elige."""
+    ag, _ = _armar(lambda pid: {})
+    libro = "Evaluación y rehabilitación en otorrinolaringología"
+    items = [dict(_item(1, "H3 · Audiometría", 3, 1, "Ana"), grupo=libro),
+             dict(_item(2, "Cap. 6 · Ruido", 60, 1, "Zoe"), grupo=libro, intentos=1),
+             dict(_item(3, "Cap. 6 · Ruido", 60, 2, "Eva"), grupo=libro),
+             _item(4, "Del curso", 99, 1, "Luis")]
+    mod.lista_practica = lambda: [dict(it) for it in items]
+    ag.btn_practica.setChecked(True)
+    lista = ag.lista_carpetas
+    assert lista.topLevelItemCount() == 2
+    nodo = lista.topLevelItem(0)
+    assert nodo.text(0) == f"▾ {libro}  (1/3)" and nodo.childCount() == 2 and nodo.isExpanded()
+    assert lista.topLevelItem(1).text(0) == "Del curso  (0/1)"
+    assert [it.text(0) for it in ag.carpetas_visibles()] == [
+        "H3 · Audiometría  (0/1)", "Cap. 6 · Ruido  (1/2)", "Del curso  (0/1)"]
+    assert _filas(ag) == ["Ana"]
+    lista.setCurrentItem(nodo.child(1))
+    assert _filas(ag) == ["Zoe", "Eva"]
+    ag._on_carpeta_clic(nodo)
+    assert not nodo.isExpanded() and nodo.text(0).startswith("▸ ") and _filas(ag) == ["Zoe", "Eva"]
+    lista.setCurrentItem(nodo)          # el libro no se elige: sigue el capítulo
+    assert _filas(ag) == ["Zoe", "Eva"]
+
+
 def test_el_alumno_ve_su_avance_en_el_libro():
     """Practicado = al menos un intento cerrado. Un capítulo entero lleva ✓."""
     ag, _ = _armar(lambda pid: {})
@@ -303,8 +330,7 @@ def test_el_alumno_ve_su_avance_en_el_libro():
     items[2]["intentos"] = 1
     mod.lista_practica = lambda: [dict(it) for it in items]
     ag.btn_practica.setChecked(True)
-    lista = ag.lista_carpetas
-    assert [lista.item(i).text() for i in range(lista.count())] == ["Cap. 6  (2/2)  ✓", "Cap. 3  (1/3)"]
+    assert [it.text(0) for it in ag.carpetas_visibles()] == ["Cap. 6  (2/2)  ✓", "Cap. 3  (1/3)"]
     assert not ag.avance_libro.isHidden()
     assert ag.lbl_avance.text() == "3 de 5 casos"
     assert (ag.barra_avance.value(), ag.barra_avance.maximum()) == (3, 5)
@@ -316,7 +342,7 @@ def test_el_docente_no_ve_avance_propio():
     ag, _ = _armar_docente()
     ag.btn_practica.setChecked(True)
     assert ag.avance_libro.isHidden()
-    assert ag.lista_carpetas.item(0).text() == "Cap. 3  (2)"
+    assert ag.carpetas_visibles()[0].text(0) == "Cap. 3  (2)"
 
 
 def test_la_agenda_no_se_baja_en_el_hilo_de_la_ventana():
@@ -391,7 +417,7 @@ def test_al_cambiar_de_carpeta_no_queda_una_fila_marcada_que_no_se_puede_elegir(
     ag.btn_practica.setChecked(True)
     ag.tableWidget.selectRow(0)
     assert ag._selected_row_key == "practica:1"
-    ag.lista_carpetas.setCurrentRow(1)                  # carpeta de un solo paciente
+    ag.lista_carpetas.setCurrentItem(ag.carpetas_visibles()[1])   # carpeta de un solo paciente
     assert ag.tableWidget.selectionModel().selectedRows() == []
     ag.tableWidget.selectRow(0)
     assert ag._selected_row_key == "practica:3", ag._selected_row_key

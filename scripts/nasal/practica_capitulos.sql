@@ -7,8 +7,8 @@
 -- pero los equipos solo los abre el admin hasta que se suelten.
 -- Se puede volver a correr:
 --     python3 scripts/consola.py script scripts/nasal/practica_capitulos.sql
-INSERT INTO practice_folders (nombre, orden, created_by)
-SELECT n, o, 1 FROM (SELECT 'Cap. 35 · Nariz tapada' n, 35 o UNION ALL SELECT 'Cap. 36 · Rinitis y vasoconstrictor', 36
+INSERT INTO practice_folders (nombre, orden, created_by, grupo)
+SELECT n, o, 1, 'Evaluación y rehabilitación en otorrinolaringología' FROM (SELECT 'Cap. 35 · Nariz tapada' n, 35 o UNION ALL SELECT 'Cap. 36 · Rinitis y vasoconstrictor', 36
                      UNION ALL SELECT 'Cap. 37 · Nariz y pulmón', 37 UNION ALL SELECT 'Cap. 38 · El que ronca', 38)
 WHERE NOT EXISTS (SELECT 1 FROM practice_folders f WHERE f.nombre = n AND f.active = 1);
 INSERT INTO practice_items (folder_id, case_id, procedimiento, show_study_sheet, orden, created_by)
@@ -37,3 +37,5 @@ SELECT (SELECT id FROM practice_folders WHERE active = 1 AND nombre = CASE
 ON CONFLICT(folder_id, case_id) DO UPDATE SET orden = excluded.orden,
     procedimiento = excluded.procedimiento, active = 1;
 UPDATE practice_folders SET active = 0 WHERE nombre = 'Nariz (demo interna)';
+UPDATE practice_folders SET grupo = 'Evaluación y rehabilitación en otorrinolaringología'
+ WHERE active = 1 AND nombre LIKE 'Cap. 3_ · %' AND CAST(substr(nombre, 6, 2) AS INTEGER) BETWEEN 35 AND 38;

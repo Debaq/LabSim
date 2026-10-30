@@ -7483,3 +7483,17 @@ abierta, grave 13, dudosa 8 cmH2O). `nasal/cpap.py`:
 - **Una misma secuencia de cambios rehace la misma noche** (un solo
   generador por segundo): así se retoma la atención, y si se cerró a mitad
   de la noche queda en pausa para seguir.
+
+## Práctica libre: el libro es la carpeta y los capítulos, sus subcarpetas (2026-10-30)
+
+A pedido de él. Cada carpeta de práctica tiene un `grupo` (la carpeta que la
+contiene: el libro, "Evaluación y rehabilitación en otorrinolaringología");
+la agenda de la app las muestra en árbol: el libro arriba, con el avance de
+todo el libro y una flecha que lo abre o lo cierra (un clic en el libro no
+elige nada), y adentro sus capítulos. Una carpeta sin grupo queda suelta
+arriba (las que cree el docente en el panel). Es una columna y no carpetas
+anidadas porque basta con un nivel y deja lugar a otro libro (el
+vestibular) sin tocar el panel. El catálogo del modo invitado lleva el
+mismo grupo. En el servidor: desplegar, "Aplicar schema" y correr
+`scripts/libro/grupo_libro.sql`; antes de eso la API no manda grupo y la app
+muestra las carpetas sueltas como siempre.

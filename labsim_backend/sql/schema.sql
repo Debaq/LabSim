@@ -318,6 +318,9 @@ CREATE TABLE IF NOT EXISTS practice_folders (
     active INTEGER NOT NULL DEFAULT 1,
     -- 1 = solo la ve el admin (permission 777): demo interna, ver Practica::lista.
     solo_admin INTEGER NOT NULL DEFAULT 0,
+    -- La carpeta que la contiene en la app (el libro): sus carpetas son los
+    -- capítulos. NULL = suelta, arriba. Ver Practica::lista.
+    grupo TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER REFERENCES users(id),
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP

@@ -16,6 +16,8 @@ RUT_NUEVO = {'cap12_esclerosis_multiple': '18087953', 'cap24_gentamicina': '1251
              'cap17_rubeola_congenita': '28268815', 'cap17_asfixia_perinatal': '28268816',
              'h10_lactante': '28267995'}
 ADMIN = 1
+# La carpeta que contiene a los capítulos en la app (practice_folders.grupo).
+GRUPO = 'Evaluación y rehabilitación en otorrinolaringología'
 q = lambda s: "'" + str(s).replace("'", "''") + "'"
 
 def comentario(clave, cap, pedido):
@@ -78,8 +80,9 @@ for cap in cat:
                 f"(SELECT id FROM patients WHERE rut = {q(snap['rut'])}), CURRENT_TIMESTAMP, {ADMIN}, {ADMIN}, "
                 "(SELECT id FROM case_folders WHERE name = 'Libro' COLLATE NOCASE));")
         filas.append((case_id, p['clave'], procedimiento(p['figuras'], p['clave'], cap['cap']), p['n']))
-    sql.append(f"INSERT INTO practice_folders (nombre, orden, created_by) SELECT {q(carpeta)}, {orden_carpeta}, {ADMIN} "
+    sql.append(f"INSERT INTO practice_folders (nombre, orden, created_by, grupo) SELECT {q(carpeta)}, {orden_carpeta}, {ADMIN}, {q(GRUPO)} "
                f"WHERE NOT EXISTS (SELECT 1 FROM practice_folders WHERE nombre = {q(carpeta)} AND active = 1);")
+    sql.append(f"UPDATE practice_folders SET grupo = {q(GRUPO)} WHERE nombre = {q(carpeta)} AND active = 1;")
     for case_id, clave, proc, orden in filas:
         sql.append(
             "INSERT INTO practice_items (folder_id, case_id, procedimiento, show_study_sheet, orden, created_by) VALUES "

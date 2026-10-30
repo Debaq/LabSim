@@ -7,8 +7,8 @@ la práctica libre del backend (sql_practica.py), con el caso completo de cada
 uno, para que el modo invitado funcione sin red ni API (ver
 core/invitado.py y docs/roadmap_practica_libro.md, F1 y F3).
 
-    {"carpetas": [{"id", "nombre", "orden"}],
-     "items": [{"id", "folder_id", "carpeta", "case_id", "orden", "procedimiento",
+    {"carpetas": [{"id", "nombre", "grupo", "orden"}],
+     "items": [{"id", "folder_id", "carpeta", "grupo", "case_id", "orden", "procedimiento",
                 "nombre", "apellido", "rut", "fecha_nac"}],
      "casos": {"<ficha>": <cases.data>}}
 
@@ -28,6 +28,8 @@ LABSIM = AQUI.parents[1]
 LIBRO = pathlib.Path.home() / 'Escritorio/Proyectos/libro-orl'
 CASOS = LIBRO / 'material/casos'
 sys.path.insert(0, str(AQUI))
+# La carpeta que contiene a los capítulos en la app (practice_folders.grupo).
+GRUPO = 'Evaluación y rehabilitación en otorrinolaringología'
 from procedimientos import procedimiento  # noqa: E402
 
 # Los mismos que sql_practica.py: capítulos fuera y RUT cambiados al cargar
@@ -63,7 +65,7 @@ def main():
         # El Tomo I va antes que el II, como en el libro
         orden = -100 + int(cap['cap'][1:]) if tomo1 else cap['cap']
         folder_id = len(carpetas) + 1
-        carpetas.append({'id': folder_id, 'nombre': nombre, 'orden': orden})
+        carpetas.append({'id': folder_id, 'nombre': nombre, 'grupo': GRUPO, 'orden': orden})
         for p in pacientes:
             if p['origen'].startswith('demo:'):
                 ficha = p['origen'].split(':')[1]
@@ -81,7 +83,7 @@ def main():
             data['id'] = int(ficha)
             casos[ficha] = data
             items.append({
-                'id': len(items) + 1, 'folder_id': folder_id, 'carpeta': nombre, 'case_id': ficha,
+                'id': len(items) + 1, 'folder_id': folder_id, 'carpeta': nombre, 'grupo': GRUPO, 'case_id': ficha,
                 'orden': p['n'], 'procedimiento': procedimiento(p['figuras'], p['clave'], cap['cap']),
                 'nombre': snap.get('nombre', ''), 'apellido': snap.get('apellido', ''),
                 'rut': snap.get('rut', ''), 'fecha_nac': snap.get('fecha_nac', ''),

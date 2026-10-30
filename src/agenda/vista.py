@@ -247,13 +247,14 @@ QTableWidget::item:selected {{ background: {tema.ACENTO_SUAVE}; color: {tema.TEX
 QTableWidget::item:hover {{ background: {tema.TARJETA_ALT}; }}
 QHeaderView::section {{ padding: 7px 8px; }}
 
-QListWidget#carpetasPractica {{
+QTreeWidget#carpetasPractica {{
     background: {tema.TARJETA}; border: 1px solid {tema.BORDE}; border-radius: 10px;
-    outline: none; font-size: 9pt; padding: 4px;
+    outline: none; font-size: 9pt; padding: 4px; show-decoration-selected: 0;
 }}
-QListWidget#carpetasPractica::item {{ padding: 7px 2px; border-radius: 6px; color: {tema.TEXTO}; }}
-QListWidget#carpetasPractica::item:selected {{ background: {tema.ACENTO}; color: white; }}
-QListWidget#carpetasPractica::item:hover:!selected {{ background: {tema.TARJETA_ALT}; }}
+QTreeWidget#carpetasPractica::item {{ padding: 7px 2px; border-radius: 6px; color: {tema.TEXTO}; }}
+QTreeWidget#carpetasPractica::item:selected {{ background: {tema.ACENTO}; color: white; }}
+QTreeWidget#carpetasPractica::item:hover:!selected {{ background: {tema.TARJETA_ALT}; }}
+QTreeWidget#carpetasPractica::branch {{ background: transparent; border: none; }}
 QFrame#avanceLibro {{ background: {tema.TARJETA}; border: 1px solid {tema.BORDE}; border-radius: 10px; }}
 QLabel#lblAvance {{ color: {tema.TEXTO}; font-size: 11pt; font-weight: 700; }}
 QProgressBar#barraAvance {{

@@ -12,10 +12,11 @@ import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView, QAbstractScrollArea,
                                 QButtonGroup, QDateEdit, QFrame, QHBoxLayout, QHeaderView,
-                                QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
+                                QLabel, QLineEdit, QMessageBox, QPushButton, QTreeWidget, QTreeWidgetItem,
                                 QProgressBar, QStackedWidget, QTextBrowser, QTextEdit, QVBoxLayout, QCheckBox)
-from PySide6.QtCore import QDate, QSize, QTime, QDateTime, Qt, QTimer
-from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
+from PySide6.QtCore import QDate, QRect, QSize, QTime, QDateTime, Qt, QTimer
+from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QTextCharFormat
+from PySide6.QtWidgets import QStyledItemDelegate
 from agenda.UI.Ui_agenda import Ui_Form
 from agenda import vista
 from agenda.vista import BotonAccion, Contador, PanelDetalle
@@ -47,6 +48,23 @@ COL_N_PRACTICA = 7
 ANCHO_ESTADO = 40
 ANCHO_PROCEDIMIENTO = 210
 ANCHO_INTENTOS = 72
+
+
+class _DelegadoCarpeta(QStyledItemDelegate):
+    """El árbol de carpetas no calcula solo el alto de una fila con el
+    nombre partido en dos líneas: lo calcula aquí con el ancho que le queda
+    (la columna menos la sangría del capítulo)."""
+
+    RELLENO = 14        # el padding de ::item (7 + 7 px) en vista.py
+
+    def sizeHint(self, option, index):
+        arbol = self.parent()
+        sangria = arbol.indentation() if index.parent().isValid() else 0
+        ancho = max(60, arbol.viewport().width() - sangria - 12)
+        texto = index.data(Qt.ItemDataRole.DisplayRole) or ''
+        alto = QFontMetrics(option.font).boundingRect(
+            QRect(0, 0, ancho, 10000), int(Qt.TextFlag.TextWordWrap), texto).height()
+        return QSize(ancho, alto + self.RELLENO)
 
 
 def _plural(n, uno, varios):
@@ -278,7 +296,7 @@ class Agenda(QWidget, Ui_Form):
         # pacientes. Ver core/practica.py.
         self._modo_practica = False
         self._practica = {}
-        self._carpetas = []      # [(clave, nombre, n, hechos)] en el orden del backend
+        self._carpetas = []      # [(clave, nombre, n, hechos, grupo)] en el orden del backend
         self._carpeta = None     # la elegida en la lista de la izquierda
 
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -464,11 +482,25 @@ class Agenda(QWidget, Ui_Form):
         self._pila.addWidget(vacio)
         self._pila.setMinimumHeight(110)
         # Práctica libre: las carpetas a la izquierda de la tabla. Angosta:
-        # en los PC del laboratorio sobra ancho y falta alto.
-        self.lista_carpetas = QListWidget(self)
+        # en los PC del laboratorio sobra ancho y falta alto. Un árbol: el
+        # libro es la carpeta y sus capítulos, las subcarpetas (grupo).
+        self.lista_carpetas = QTreeWidget(self)
         self.lista_carpetas.setObjectName("carpetasPractica")
         self.lista_carpetas.setFixedWidth(220)
+        self.lista_carpetas.setHeaderHidden(True)
+        self.lista_carpetas.setIndentation(12)
+        self.lista_carpetas.setUniformRowHeights(False)
         self.lista_carpetas.setWordWrap(True)
+        # Con la columna estirada al ancho, un nombre largo pasa a dos líneas
+        # (el alto lo da el delegado). Sin el adorno de rama de Qt: la flecha
+        # del libro va en su rótulo (▸ / ▾).
+        self.lista_carpetas.header().setStretchLastSection(True)
+        self.lista_carpetas.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.lista_carpetas.setRootIsDecorated(False)
+        self.lista_carpetas.setItemDelegate(_DelegadoCarpeta(self.lista_carpetas))
+        self.lista_carpetas.itemClicked.connect(self._on_carpeta_clic)
+        self.lista_carpetas.itemExpanded.connect(self._rotular_libro)
+        self.lista_carpetas.itemCollapsed.connect(self._rotular_libro)
         self.lista_carpetas.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         # Un nombre de capítulo largo pasa a dos líneas, no se corta con "…"
         self.lista_carpetas.setTextElideMode(Qt.TextElideMode.ElideNone)
@@ -633,7 +665,7 @@ class Agenda(QWidget, Ui_Form):
         for it in self._practica.values():
             clave = it.get("folder_id")
             if clave not in carpetas:
-                carpetas[clave] = [clave, it.get("carpeta") or "Práctica libre", 0, 0]
+                carpetas[clave] = [clave, it.get("carpeta") or "Práctica libre", 0, 0, it.get("grupo") or None]
             carpetas[clave][2] += 1
             # Al alumno le llegan sus intentos cerrados; al docente, los de todos
             carpetas[clave][3] += int(bool(it.get("intentos")))
@@ -644,20 +676,39 @@ class Agenda(QWidget, Ui_Form):
         lista = self.lista_carpetas
         lista.blockSignals(True)
         lista.clear()
+        grupos = {}          # grupo -> su nodo (el libro), en el orden en que aparece
+        elegido = None
         # Sin número adelante: el nombre ya dice el capítulo ("Cap. 7 · ...")
-        for clave, nombre, cuantos, hechos in self._carpetas:
-            if self._en_prueba():
-                item = QListWidgetItem(f"{nombre}  ({cuantos})")
-                item.setToolTip(f"{nombre}: {_plural(cuantos, 'paciente', 'pacientes')}")
+        for clave, nombre, cuantos, hechos, grupo in self._carpetas:
+            item = QTreeWidgetItem([self._rotulo_carpeta(nombre, cuantos, hechos)])
+            item.setToolTip(0, self._ayuda_carpeta(nombre, cuantos, hechos))
+            item.setData(0, Qt.UserRole, clave)
+            if grupo is None:
+                lista.addTopLevelItem(item)
             else:
-                listo = "  ✓" if hechos == cuantos else ""
-                item = QListWidgetItem(f"{nombre}  ({hechos}/{cuantos}){listo}")
-                item.setToolTip(f"{nombre}: practicaste {hechos} de "
-                                f"{_plural(cuantos, 'paciente', 'pacientes')}")
-            item.setData(Qt.UserRole, clave)
-            lista.addItem(item)
+                if grupo not in grupos:
+                    nodo = QTreeWidgetItem([grupo])
+                    # El libro no se elige: un clic lo abre o lo cierra.
+                    nodo.setFlags(Qt.ItemFlag.ItemIsEnabled)
+                    nodo.setData(0, Qt.UserRole, None)
+                    fuente = nodo.font(0)
+                    fuente.setBold(True)
+                    nodo.setFont(0, fuente)
+                    lista.addTopLevelItem(nodo)
+                    grupos[grupo] = nodo
+                grupos[grupo].addChild(item)
             if clave == self._carpeta:
-                lista.setCurrentItem(item)
+                elegido = item
+        for grupo, nodo in grupos.items():
+            cuantos = sum(c[2] for c in self._carpetas if c[4] == grupo)
+            hechos = sum(c[3] for c in self._carpetas if c[4] == grupo)
+            nodo.setData(0, Qt.UserRole + 1, self._rotulo_carpeta(grupo, cuantos, hechos))
+            nodo.setToolTip(0, self._ayuda_carpeta(grupo, cuantos, hechos))
+            # Abierto el libro de la carpeta elegida; los demás, cerrados.
+            nodo.setExpanded(elegido is not None and elegido.parent() is nodo)
+            self._rotular_libro(nodo)
+        if elegido is not None:
+            lista.setCurrentItem(elegido)
         lista.blockSignals(False)
         self._mostrar_avance()
         self.columna_carpetas.setVisible(self._modo_practica and bool(self._carpetas))
@@ -680,10 +731,41 @@ class Agenda(QWidget, Ui_Form):
             f"Practicaste {hechos} de {total} casos del libro (al menos un intento cerrado) "
             f"y terminaste {capitulos} de {_plural(len(self._carpetas), 'carpeta', 'carpetas')}.")
 
+    def _rotulo_carpeta(self, nombre, cuantos, hechos):
+        if self._en_prueba():
+            return f"{nombre}  ({cuantos})"
+        return f"{nombre}  ({hechos}/{cuantos})" + ("  ✓" if hechos == cuantos else "")
+
+    def _ayuda_carpeta(self, nombre, cuantos, hechos):
+        if self._en_prueba():
+            return f"{nombre}: {_plural(cuantos, 'paciente', 'pacientes')}"
+        return f"{nombre}: practicaste {hechos} de {_plural(cuantos, 'paciente', 'pacientes')}"
+
+    def carpetas_visibles(self):
+        """Los nodos de carpeta (no los libros), en orden."""
+        out = []
+        lista = self.lista_carpetas
+        for i in range(lista.topLevelItemCount()):
+            nodo = lista.topLevelItem(i)
+            if nodo.data(0, Qt.UserRole) is None and nodo.childCount():
+                out += [nodo.child(k) for k in range(nodo.childCount())]
+            else:
+                out.append(nodo)
+        return out
+
+    def _rotular_libro(self, nodo):
+        rotulo = nodo.data(0, Qt.UserRole + 1)
+        if rotulo:
+            nodo.setText(0, ("▾ " if nodo.isExpanded() else "▸ ") + rotulo)
+
+    def _on_carpeta_clic(self, item, _columna=0):
+        if item.data(0, Qt.UserRole) is None and item.childCount():
+            item.setExpanded(not item.isExpanded())
+
     def _on_carpeta_elegida(self, actual, _anterior=None):
-        if actual is None:
+        if actual is None or actual.data(0, Qt.UserRole) is None and actual.childCount():
             return
-        self._carpeta = actual.data(Qt.UserRole)
+        self._carpeta = actual.data(0, Qt.UserRole)
         self._selected_row_key = None
         self.populate_shedule()
 

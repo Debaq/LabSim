@@ -103,6 +103,24 @@ final class Practica
         return $listo;
     }
 
+    /**
+     * ¿Existe practice_folders.grupo (el libro que agrupa sus capítulos)? Lo
+     * agrega "Aplicar schema"; antes, las carpetas van sueltas.
+     */
+    public static function grupoListo(): bool
+    {
+        static $listo = null;
+        if ($listo === null) {
+            try {
+                $cols = array_column(Db::get()->query('PRAGMA table_info(practice_folders)')->fetchAll(), 'name');
+                $listo = in_array('grupo', $cols, true);
+            } catch (Throwable $e) {
+                $listo = false;
+            }
+        }
+        return $listo;
+    }
+
     /** Lo que se agrega al JOIN de practice_folders para quien no es admin. */
     private static function filtroSoloAdmin(bool $verSoloAdmin): string
     {
@@ -387,11 +405,12 @@ final class Practica
         if (!self::carpetasListas()) {
             return [];
         }
+        $grupo = self::grupoListo() ? 'f.grupo' : 'NULL';
         $pdo = Db::get();
         $deQuien = $docente ? '' : ' AND att.student_id = :me';
         $stmt = $pdo->prepare(
             "SELECT pi.id, pi.folder_id, pi.case_id, pi.procedimiento, pi.show_study_sheet, pi.orden,
-                    f.nombre AS carpeta,
+                    f.nombre AS carpeta, {$grupo} AS grupo,
                     p.nombre, p.apellido, p.rut, p.fecha_nac,
                     (SELECT COUNT(*) FROM attendances att JOIN appointments a ON a.id = att.appointment_id
                       WHERE a.practice_item_id = pi.id AND att.estado = 'atendido'{$deQuien}) AS intentos,
@@ -419,8 +438,10 @@ final class Practica
             $fid = (int) $it['folder_id'];
             if (!isset($carpetas[$fid])) {
                 $carpetas[$fid] = ['id' => $fid, 'nombre' => (string) $it['carpeta'],
+                                   'grupo' => $it['grupo'] !== null && $it['grupo'] !== '' ? (string) $it['grupo'] : null,
                                    'orden' => count($carpetas) + 1, 'items' => []];
             }
+            $it['grupo'] = $carpetas[$fid]['grupo'];
             $it['id'] = (int) $it['id'];
             $it['folder_id'] = $fid;
             // El número del caso en su capítulo (caso 1.4 -> 4), aunque falten
