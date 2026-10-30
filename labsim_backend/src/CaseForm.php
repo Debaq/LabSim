@@ -423,6 +423,8 @@ final class CaseForm
         // todos, también para el docente que no ve la ficha: ver parseNasal.
         $nasalError = null;
         $nasal = self::parseNasal($v['nasal_json'] ?? '', $nasalError);
+        $espiroError = null;
+        $espiro = self::parseEspiro($v['espiro_json'] ?? '', $espiroError);
 
         // Edad 0 es válida SI viene la edad exacta: es un recién nacido o un
         // lactante, no un campo sin llenar. Sin esa excepción no se podía
@@ -466,6 +468,8 @@ final class CaseForm
             $error = 'Patología VEMP inválida.';
         } elseif ($nasalError !== null) {
             $error = $nasalError;
+        } elseif ($espiroError !== null) {
+            $error = $espiroError;
         } elseif (($neuralError = CaseBuilder::neuralParamsError($abrOd['neural'], 'OD')
                 ?? CaseBuilder::neuralParamsError($abrOi['neural'], 'OI')) !== null) {
             $error = $neuralError;
@@ -608,6 +612,7 @@ final class CaseForm
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
                 'central' => self::parseCentral($v),
                 'nasal' => $nasal,
+                'espiro' => $espiro,
                 // La pasada final del docente por el Resumen: qué fichas
                 // dio por buenas. Va adentro del caso, no al lado -- ver
                 // más abajo, es lo último que bloquea el guardado.
@@ -1106,6 +1111,93 @@ final class CaseForm
      * @param mixed       $raw   El texto del hidden.
      * @param string|null $error Mensaje para el docente; null si está bien.
      */
+    /**
+     * Rangos del bloque ESPIRO: los mismos de nasal/espirometria.normaliza
+     * en la app (si no cierran allá, el espirómetro dice que no hay pulmón
+     * cargado). Los lee también la ficha (window.CASE_CONST.espiro).
+     */
+    public const ESPIRO_RANGOS = [
+        'talla' => [90, 220], 'peso' => [12, 250],
+        'fvc' => [0.5, 8], 'fev1' => [0.3, 7], 'pef' => [1, 16], 'tope' => [0.3, 12],
+    ];
+    public const ESPIRO_COLABORACION = ['buena', 'regular', 'mala'];
+
+    /**
+     * El pulmón de la espirometría desde el hidden `espiro_json` ->
+     * cases.data['ESPIRO'] (demo interna). Vacío es "sin espirometría" y da
+     * null sin error. Si trae algo: talla y peso, la maniobra perfecta antes
+     * del broncodilatador (pre: fvc, fev1, pef) y, opcional, con su efecto
+     * pleno (bd), los topes de flujo de una obstrucción de la vía aérea
+     * superior (null si no hay) y la colaboración. FEV1 menor que FVC.
+     *
+     * @param mixed       $raw   El texto del hidden.
+     * @param string|null $error Mensaje para el docente; null si está bien.
+     */
+    public static function parseEspiro($raw, ?string &$error = null): ?array
+    {
+        $error = null;
+        $raw = is_string($raw) ? trim($raw) : '';
+        if ($raw === '') {
+            return null;
+        }
+        $json = json_decode($raw, true);
+        if (!is_array($json)) {
+            $error = 'Pulmón: los datos de la espirometría no se pudieron leer (JSON inválido).';
+            return null;
+        }
+        $r = self::ESPIRO_RANGOS;
+        $num = static function ($x, string $nombre, array $rango) use (&$error) {
+            if (!(is_int($x) || is_float($x)) || !is_finite((float) $x)) {
+                $error = "Pulmón: \"{$nombre}\" tiene que ser un número.";
+                return null;
+            }
+            if ($x < $rango[0] || $x > $rango[1]) {
+                $error = "Pulmón: \"{$nombre}\" va entre {$rango[0]} y {$rango[1]} (vale {$x}).";
+                return null;
+            }
+            return $x + 0;
+        };
+        $out = [];
+        foreach (['talla' => 'Talla', 'peso' => 'Peso'] as $k => $nombre) {
+            $out[$k] = $num($json[$k] ?? null, $nombre, $r[$k]);
+            if ($error !== null) {
+                return null;
+            }
+        }
+        foreach (['pre' => 'antes del broncodilatador', 'bd' => 'con broncodilatador'] as $fase => $rotulo) {
+            $d = $json[$fase] ?? null;
+            if ($fase === 'bd' && ($d === null || $d === [])) {
+                continue;
+            }
+            if (!is_array($d)) {
+                $error = "Pulmón: faltan los valores {$rotulo}.";
+                return null;
+            }
+            $f = [];
+            foreach (['fvc' => 'FVC', 'fev1' => 'FEV1', 'pef' => 'PEF'] as $k => $nombre) {
+                $f[$k] = $num($d[$k] ?? null, "{$nombre} {$rotulo}", $r[$k]);
+                if ($error !== null) {
+                    return null;
+                }
+            }
+            if ($f['fev1'] >= $f['fvc']) {
+                $error = "Pulmón: el FEV1 {$rotulo} tiene que ser menor que la FVC.";
+                return null;
+            }
+            $out[$fase] = $f;
+        }
+        foreach (['tope_e' => 'Tope de flujo espiratorio', 'tope_i' => 'Tope de flujo inspiratorio'] as $k => $nombre) {
+            $x = $json[$k] ?? null;
+            $out[$k] = ($x === null || $x === '' || $x === 0 || $x === 0.0) ? null : $num($x, $nombre, $r['tope']);
+            if ($error !== null) {
+                return null;
+            }
+        }
+        $c = $json['colaboracion'] ?? 'buena';
+        $out['colaboracion'] = in_array($c, self::ESPIRO_COLABORACION, true) ? $c : 'buena';
+        return $out;
+    }
+
     /** Claves de nasal/rinoscopia.py (MUCOSAS, SECRECIONES): mantener iguales. */
     public const NASAL_MUCOSAS = ['rosada', 'palida', 'violacea', 'roja'];
     public const NASAL_SECRECIONES = ['no', 'acuosa', 'mucosa', 'purulenta'];

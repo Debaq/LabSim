@@ -582,6 +582,15 @@ final class CaseBuilder
      * CaseForm::parseNasal (los rangos que validan) y la ficha, vía
      * window.CASE_CONST.nasalCuadros. Mismo mecanismo que vempNormative().
      */
+    public static function gli2012(): array
+    {
+        // Coeficientes GLI-2012 (los mismos de la app, resources/nasal/
+        // gli2012.json): la ficha muestra los previstos del paciente.
+        $path = __DIR__ . '/../resources/nasal/gli2012.json';
+        $datos = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        return is_array($datos) ? $datos : [];
+    }
+
     public static function nasalCuadros(): array
     {
         $path = __DIR__ . '/../resources/nasal/cuadros.json';
@@ -1525,6 +1534,10 @@ final class CaseBuilder
         if (!empty($form['nasal']) && is_array($form['nasal'])) {
             $data['NASAL'] = $form['nasal'];
         }
+        // El pulmón de la espirometría (ver CaseForm::parseEspiro), igual.
+        if (!empty($form['espiro']) && is_array($form['espiro'])) {
+            $data['ESPIRO'] = $form['espiro'];
+        }
         return $data;
     }
 
@@ -1971,6 +1984,9 @@ final class CaseBuilder
         // con nariz la devuelve en el POST y no la pierde.
         if (is_array($data['NASAL'] ?? null)) {
             $v['nasal_json'] = (string) json_encode($data['NASAL'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        }
+        if (is_array($data['ESPIRO'] ?? null)) {
+            $v['espiro_json'] = (string) json_encode($data['ESPIRO'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         }
 
         // Las tildes del Resumen, para que reeditar un caso ya revisado no

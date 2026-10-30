@@ -62,8 +62,9 @@ $sql = (string) $otra->query("SELECT sql FROM sqlite_master WHERE name = 'report
 t_true(strpos($sql, "'MMN'") !== false && strpos($sql, "'PEALM'") !== false, 'El CHECK acepta los tipos corticales');
 t_true(strpos($sql, "'ASSR'") !== false, 'El CHECK acepta el ASSR');
 t_true(strpos($sql, "'RINOMANOMETRIA'") !== false && strpos($sql, "'RINOMETRIA'") !== false
-       && strpos($sql, "'RINOSCOPIA'") !== false,
-       'El CHECK acepta los informes nasales');
+       && strpos($sql, "'RINOSCOPIA'") !== false && strpos($sql, "'ESPIROMETRIA'") !== false
+       && strpos($sql, "'CPAP'") !== false,
+       'El CHECK acepta los informes nasales y de sueño');
 t_eq($otra->query('SELECT group_concat(id || ":" || version) FROM (SELECT * FROM reports ORDER BY id)')->fetchColumn(),
      '7:3,9:1', 'Conserva ids y versiones');
 $rv = (string) $otra->query("SELECT sql FROM sqlite_master WHERE name = 'report_versions'")->fetchColumn();
@@ -78,6 +79,7 @@ t_eq((int) $otra->query("SELECT count(*) FROM sqlite_master WHERE name = 'report
 $otra->exec("INSERT INTO reports (attendance_id, tipo, data) VALUES (1, 'MMN', '{}')");
 $otra->exec("INSERT INTO reports (attendance_id, tipo, data) VALUES (1, 'ASSR', '{}')");
 $otra->exec("INSERT INTO reports (attendance_id, tipo, data) VALUES (1, 'RINOMETRIA', '{}')");
+$otra->exec("INSERT INTO reports (attendance_id, tipo, data) VALUES (1, 'ESPIROMETRIA', '{}')");
 $rechazada = false;
 try {
     $otra->exec("INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (999, 1, 'c', 'z')");

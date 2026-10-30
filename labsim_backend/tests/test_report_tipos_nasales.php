@@ -13,7 +13,7 @@ require_once __DIR__ . '/../src/ReportPdfBuilder.php';
  * un CHECK viejo, sin ellos.
  */
 
-$nasales = ['RINOMANOMETRIA', 'RINOMETRIA', 'RINOSCOPIA'];
+$nasales = ['RINOMANOMETRIA', 'RINOMETRIA', 'RINOSCOPIA', 'ESPIROMETRIA', 'OLFATOMETRIA', 'PRICK', 'POLISOMNOGRAFIA', 'CPAP'];
 $leer = function (string $ruta): string {
     return (string) file_get_contents(__DIR__ . '/../' . $ruta);
 };
@@ -25,7 +25,7 @@ foreach ($nasales as $t) {
     t_true(isset(ReportFile::LABELS[$t]), "ReportFile::LABELS rotula {$t}");
     t_true(isset(ReportFile::SHORT_LABELS[$t]), "ReportFile::SHORT_LABELS rotula {$t}");
 }
-foreach (['rm_curva', 'rm_resistencia', 'ra_curva'] as $suf) {
+foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt'] as $suf) {
     t_true(strpos($upload, "'{$suf}'") !== false, "report_upload acepta la imagen {$suf}");
 }
 foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
@@ -35,7 +35,7 @@ foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
         t_true(strpos($c[1], "'{$t}'") !== false, "El CHECK de {$archivo} acepta {$t}");
     }
 }
-t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'RINOSCOPIA'\")") !== false,
+t_true(strpos($leer('src/Db.php'), "strpos(\$sql, \"'CPAP'\")") !== false,
        'La migración detecta un CHECK sin los tipos nasales');
 
 $paciente = ['nombre' => 'Ana', 'apellido' => 'Pérez', 'rut' => '11.111.111-1', 'fecha_nac' => '1986-01-01'];
@@ -72,3 +72,28 @@ t_true(strpos($rs, 'Desviado hacia esta fosa') !== false && strpos($rs, 'Contact
        'Trae lo que el alumno marcó en cada fosa');
 t_true(strpos($rs, 'Primero la fosa derecha') !== false, 'Dice qué fosa miró primero');
 t_true(strpos($rs, 'FNI: cabeza en 0') !== false, 'Dice en qué posiciones miró cada fosa');
+
+// Espirometría: los datos del examen y la tabla del manual SER 2024.
+$esp = ReportPdfBuilder::build(999, 'ESPIROMETRIA', [
+    'paciente' => ['sexo' => 'M', 'edad' => 27, 'talla' => 176, 'peso' => 74, 'etnia' => 'caucasico'],
+    'ecuacion' => 'GLI-2012, grupo caucásico',
+    'broncodilatador' => ['clave' => 'salbutamol', 'nombre' => 'Salbutamol 400 µg con aerocámara',
+                          'espera_min' => 15, 'minutos_primera' => 16],
+    'verificacion' => ['ok' => true, 'descargas' => []],
+    'ambiente' => ['temperatura' => 21.8, 'humedad' => 44, 'presion' => 1019],
+    'calidad' => ['pre' => 'VEF1 A, CVF A', 'post' => 'VEF1 A, CVF B'],
+    'bd_previo' => 'salbutamol hace más de 24 horas',
+    'tabla' => [
+        'cabeceras' => ['', 'Teór.', 'Pre', '% Teór.', 'LIN', 'z', 'Post', '% Teór.', 'z', 'Cambio (L)', 'Cambio (% teór.)'],
+        'filas' => [['CVF (L)', '5,37', '4,86', '91', '4,34', '-0,81', '5,06', '94', '-0,50', '+0,19', '+3,6'],
+                    ['VEF1 (L)', '4,47', '3,20', '72', '3,59', '-2,35', '3,78', '84', '-1,30', '+0,58', '+12,9']],
+    ],
+    'avisos' => ['Pre: 2 maniobras aceptables (se buscan 3).'],
+    'conclusion' => 'Patrón obstructivo con respuesta significativa al broncodilatador.',
+], $paciente, 'Alumno X', '29-10-2026');
+t_true(strpos($esp, '%PDF-1.4') === 0, 'El informe de espirometría sale como PDF');
+t_true(strpos($esp, 'GLI-2012') !== false, 'Dice qué valores teóricos usó');
+t_true(strpos($esp, 'a los 16 minutos') !== false, 'Dice cuándo fue la primera maniobra post');
+t_true(strpos($esp, 'VEF1 A, CVF B') !== false, 'Trae la calidad pre y post');
+t_true(strpos($esp, '+12,9') !== false, 'Trae la tabla que mandó la app');
+t_true(strpos($esp, 'verificado con la jeringa') !== false, 'Dice que el equipo se verificó');

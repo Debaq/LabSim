@@ -86,6 +86,12 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'ESPIROMETRIA') {
+            $y = self::espirometriaBody($pdf, $reportId, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'RINOMANOMETRIA' || $tipo === 'RINOMETRIA') {
             $y = self::nasalBody($pdf, $reportId, $tipo, $data, $y, $contentW);
             self::textSections($pdf, $data, $y, $contentW);
@@ -701,6 +707,15 @@ final class ReportPdfBuilder
             $pdf->text(self::MARGIN, $y, $linea . '.', 9);
             $y += 14;
         }
+        return self::tablaYAvisos($pdf, $data, $y, $contentW);
+    }
+
+    /**
+     * La tabla tal como se vio en el equipo ({cabeceras, filas}) y los
+     * avisos: lo común de los informes nasales y de la espirometría.
+     */
+    private static function tablaYAvisos(MiniPdf $pdf, array $data, float $y, float $contentW): float
+    {
         $tabla = is_array($data['tabla'] ?? null) ? $data['tabla'] : [];
         $cabeceras = is_array($tabla['cabeceras'] ?? null) ? array_map('strval', $tabla['cabeceras']) : [];
         $filas = is_array($tabla['filas'] ?? null) ? $tabla['filas'] : [];
@@ -735,6 +750,85 @@ final class ReportPdfBuilder
             $y += 2;
         }
         return $y + 10;
+    }
+
+    /** Número con coma decimal, como en la app. */
+    private static function decimal(float $v, int $d = 1): string
+    {
+        return str_replace('.', ',', sprintf('%.' . $d . 'f', $v));
+    }
+
+    /**
+     * Cuerpo del informe de espirometría (formato del manual SER 2024): las
+     * curvas pre y post sobrepuestas, los datos del examen y la tabla con
+     * previsto, LIN, z-score y cambio sobre el teórico, como la armó el
+     * equipo (nasal/EspirometriaWindow.py).
+     */
+    private static function espirometriaBody(MiniPdf $pdf, int $reportId, array $data, float $y, float $contentW): float
+    {
+        $imgW = ($contentW - 20) / 2;
+        $imgH = $imgW * 0.8;
+        $dibujo = false;
+        foreach ([['esp_fv', 'Flujo-volumen', 0.0], ['esp_vt', 'Volumen-tiempo', $imgW + 20]] as [$suf, $titulo, $dx]) {
+            $ruta = ReportFile::imagePath($reportId, $suf);
+            if (is_file($ruta)) {
+                $pdf->text(self::MARGIN + $dx, $y, $titulo, 9, true);
+                $pdf->image($ruta, self::MARGIN + $dx, $y + 4, $imgW, $imgH);
+                $dibujo = true;
+            }
+        }
+        if ($dibujo) {
+            $pdf->text(self::MARGIN, $y + $imgH + 16, 'Pre broncodilatador en azul, post en rojo (guiones).', 8);
+            $y += $imgH + 30;
+        }
+        $lineas = [];
+        $p = is_array($data['paciente'] ?? null) ? $data['paciente'] : [];
+        if (isset($p['talla'], $p['edad'])) {
+            $sexo = ($p['sexo'] ?? '') === 'F' ? 'femenino' : 'masculino';
+            $lineas[] = 'Sexo de nacimiento ' . $sexo . ', ' . (int) round((float) $p['edad']) . ' años, '
+                . (int) round((float) $p['talla']) . ' cm, ' . (int) round((float) ($p['peso'] ?? 0)) . ' kg.';
+        }
+        if (!empty($data['ecuacion'])) {
+            $lineas[] = 'Valores teóricos: ' . (string) $data['ecuacion'] . '.';
+        }
+        $bd = is_array($data['broncodilatador'] ?? null) ? $data['broncodilatador'] : null;
+        if ($bd !== null && !empty($bd['nombre'])) {
+            $linea = 'Broncodilatador: ' . (string) $bd['nombre'];
+            if (isset($bd['minutos_primera'])) {
+                $linea .= '; primera maniobra posterior a los ' . (int) $bd['minutos_primera'] . ' minutos';
+            }
+            $lineas[] = $linea . '.';
+        }
+        if (trim((string) ($data['bd_previo'] ?? '')) !== '') {
+            $lineas[] = 'Última dosis de broncodilatador: ' . trim((string) $data['bd_previo']) . '.';
+        }
+        $ver = is_array($data['verificacion'] ?? null) ? $data['verificacion'] : null;
+        $lineas[] = $ver === null ? 'Equipo sin verificar con la jeringa de 3 L en esta atención.'
+            : (!empty($ver['ok']) ? 'Equipo verificado con la jeringa de 3 L (±3 %) el día del examen.'
+                : 'La verificación con la jeringa de 3 L quedó fuera de ±3 %.');
+        $amb = is_array($data['ambiente'] ?? null) ? $data['ambiente'] : null;
+        if ($amb !== null && isset($amb['temperatura'], $amb['humedad'])) {
+            $lineas[] = 'Sala: ' . self::decimal((float) $amb['temperatura']) . ' °C, humedad relativa '
+                . (int) $amb['humedad'] . ' %' . (isset($amb['presion']) ? ', ' . (int) $amb['presion'] . ' hPa' : '')
+                . ' (resultados en BTPS).';
+        }
+        $cal = is_array($data['calidad'] ?? null) ? $data['calidad'] : [];
+        $partes = [];
+        foreach (['pre' => 'pre', 'post' => 'post'] as $k => $nombre) {
+            if (!empty($cal[$k])) {
+                $partes[] = $nombre . ' ' . (string) $cal[$k];
+            }
+        }
+        if ($partes !== []) {
+            $lineas[] = 'Calidad de la prueba: ' . implode('; ', $partes) . '.';
+        }
+        foreach ($lineas as $linea) {
+            $y = self::ensureSpace($pdf, $y, 14.0);
+            $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);
+            $y += 2;
+        }
+        $y += 6;
+        return self::tablaYAvisos($pdf, $data, $y, $contentW);
     }
 
     /** Qué dice cada valor del informe de rinoscopía (nasal/RinoscopiaWindow.py). */
@@ -1308,6 +1402,11 @@ final class ReportPdfBuilder
             'RINOMANOMETRIA' => 'Rinomanometría anterior',
             'RINOMETRIA' => 'Rinometría acústica',
             'RINOSCOPIA' => 'Rinoscopía anterior',
+            'ESPIROMETRIA' => 'Espirometría',
+            'OLFATOMETRIA' => 'Olfatometría',
+            'PRICK' => 'Prick test',
+            'POLISOMNOGRAFIA' => 'Polisomnografía y poligrafía',
+            'CPAP' => 'Titulación de CPAP',
         ];
         return $etiquetas[$tipo] ?? $tipo;
     }

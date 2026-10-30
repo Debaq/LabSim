@@ -32,6 +32,11 @@ final class ReportFile
         'RINOMANOMETRIA' => 'Rinomanometría anterior',
         'RINOMETRIA' => 'Rinometría acústica',
         'RINOSCOPIA' => 'Rinoscopía anterior',
+        'ESPIROMETRIA' => 'Espirometría',
+        'OLFATOMETRIA' => 'Olfatometría',
+        'PRICK' => 'Prick test',
+        'POLISOMNOGRAFIA' => 'Polisomnografía y poligrafía',
+        'CPAP' => 'Titulación de CPAP',
     ];
 
     /** Rótulo corto, para una celda de tabla. */
@@ -50,6 +55,11 @@ final class ReportFile
         'RINOMANOMETRIA' => 'Rinomanometría',
         'RINOMETRIA' => 'Rinometría',
         'RINOSCOPIA' => 'Rinoscopía',
+        'ESPIROMETRIA' => 'Espirometría',
+        'OLFATOMETRIA' => 'Olfatometría',
+        'PRICK' => 'Prick',
+        'POLISOMNOGRAFIA' => 'PSG',
+        'CPAP' => 'CPAP',
     ];
 
     public static function dir(): string

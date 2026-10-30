@@ -7258,3 +7258,86 @@ fosas).
 - No se agregó MCA3 (cornete medio, ~5-6 cm, ya en la zona poco fiable) ni
   áreas a distancias fijas: se suman si él los echa de menos.
 
+
+## Espirometría: en vivo, conducida por el alumno, con los criterios del manual SER 2024 (2026-10-29)
+
+El espirómetro de la demo nasal (Box Rinología, código `ESP`, H30 del libro)
+se hace como en la sala, no como un botón "medir":
+
+- **El paciente sale del modelo de H30** (el de las figuras del libro,
+  `hacer_h30.py`: el flujo máximo depende solo del volumen ya espirado),
+  con la p que da el FEV1 del caso. **El bloque `ESPIRO` del caso trae lo
+  que mide una maniobra bien hecha** (FVC, FEV1, PEF antes y con el
+  broncodilatador pleno), no la capacidad vital del modelo: con
+  obstrucción la cola de la curva no termina, el paciente deja de soplar
+  cuando en un segundo sale menos de 20 mL, y la capacidad vital del pulmón
+  se ajusta para que lo medido sea lo del caso (`espirometria.ajustar`). Así
+  el docente escribe números de informe y los casos del cap. 37 miden lo de
+  sus figuras.
+- **El esfuerzo es un factor que se apaga con el volumen**, no un tope: el
+  tope aplanaba el pico y la curva normal parecía una obstrucción fija. Lo
+  que depende del esfuerzo es el pico; el final es el mismo (H30). El inicio
+  lento sí es un tope en el tiempo (agranda el BEV).
+- **El alumno conduce cada maniobra** con cinco indicaciones (teclas 1 a 5):
+  respire tranquilo, tome todo el aire, ¡sople!, ¡siga, siga!, ¡tome aire
+  rápido! El paciente reacciona con 0,15-0,5 s de demora. **Sin «siga» deja
+  de soplar antes** (según su colaboración, 2-8 s): sin meseta, la FVC queda
+  utilizable salvo que repita otra. Sin «tome aire rápido» inspira solo y
+  despacio: no hay CVIF. «¡Sople!» antes de llegar a TLC: la CVIF supera a la
+  FVC. Una pausa de más de 2 s en TLC baja el pico y algo el FEV1; aguanta
+  5-8 s y suelta.
+- **El equipo solo ve el flujo en la boquilla** (`analizar`): tiempo cero por
+  retroextrapolación en la pendiente máxima de 80 ms, BEV, FEV1, FVC, PEF,
+  TEF, meseta (< 25 mL en 1 s), CVIF, PIF, FEF50, FIF50, respiraciones
+  tranquilas previas y deriva de la línea de base. **Lo que el equipo no ve
+  lo marca el alumno** en la tabla ("Lo que viste": tos en el primer
+  segundo, cierre de glotis, fuga, boquilla obstruida, descartar) y se
+  aplica la tabla de H30 "Qué aprovecha cada hallazgo". La tos no se
+  detecta sola a propósito: verla en la curva es lo que se enseña.
+- **Grados A-F por separado para FEV1 y FVC, pre y post**; se informa la
+  mayor FVC y el mayor FEV1 de las aceptables aunque vengan de maniobras
+  distintas; la curva que se dibuja e informa es la de mayor FEV1 + FVC.
+  Hasta 8 maniobras por fase. El criterio de fin "FVC repetida" compara con
+  las demás maniobras de la fase, no solo con las anteriores.
+- **Valores teóricos GLI-2012** (los coeficientes del libro, validados con
+  los dos ejemplos del manual), grupo caucásico por defecto y "otros" a
+  elección; LIN en z = −1,645; cambio post-pre en litros y en % del teórico.
+  **El equipo usa la talla que escribe el alumno**: "Medir talla y peso" la
+  trae del caso, pero si escribe otra, el teórico se mueve (el error de H30).
+- **Broncodilatador desde el paciente**, con el protocolo nacional
+  (salbutamol 400 µg, 15 min; ipratropio 80 µg, 30 min), solo después de la
+  basal. El efecto crece como 1 − e^(−3t/espera): 95 % al cumplir la espera;
+  lo medido antes es "post" con efecto parcial y el informe avisa a qué
+  minuto fue la primera maniobra. "Saltar la espera" solo para el docente.
+- **Jeringa de 3 L y calibración**: tres descargas a 0,5, 1,5 y 6 L/s, cada
+  una dentro de ±3 %. "Equipo descalibrado" (simulado) mueve todo un 6 %;
+  "Corriente de aire al poner el cero" corre el flujo 30-60 mL/s: la base de
+  las respiraciones tranquilas se va y no hay meseta. Calibrar y "Cero de
+  flujo" los corrigen.
+- **Sin interpretación automática**: la tabla trae números, LIN y z (en rojo
+  bajo el LIN) y el cambio; el patrón y la gravedad los escribe el alumno
+  (H30: el informe dice el patrón funcional, no un diagnóstico).
+- **Una receta por maniobra** (semilla, efecto del broncodilatador,
+  errores, pinza, cero, calibración e indicaciones con su muestra): al
+  retomar la atención se rehace idéntica. Acciones con prefijo `esp_`.
+
+## Los tipos de informe de nariz y sueño, todos de una vez (2026-10-29)
+
+Con `ESPIROMETRIA` entraron también al CHECK de `reports.tipo`
+`OLFATOMETRIA`, `PRICK`, `POLISOMNOGRAFIA` y `CPAP`, aunque esos equipos
+todavía no existen. Cada tipo nuevo obliga a reconstruir la tabla `reports`
+en producción (SQLite no cambia un CHECK con ALTER TABLE), y esa migración
+ya tumbó informes una vez; mejor una sola vez para todo lo que falta del
+roadmap nasal. Si un equipo termina necesitando otro nombre, se usa el que
+ya está. La migración mira `'CPAP'`.
+
+## Espirometría en el caso: tarjeta Pulmón en la ficha Nariz (2026-10-29)
+
+El bloque `ESPIRO` se edita en la ficha Nariz (solo admin), en una tarjeta
+aparte, y viaja en el hidden `espiro_json` para todos (un docente que edita
+un caso con espirometría no la pierde), igual que `NASAL`. Los cuadros de
+partida son fracciones de los previstos GLI-2012 del sexo y la edad de la
+ficha Paciente y de la talla de la tarjeta; el PEF, que GLI no trae, es el
+doble del FEV1 previsto (orden de magnitud del modelo, editable). Los
+rangos son los mismos que valida la app (`CaseForm::ESPIRO_RANGOS` =
+`espirometria.normaliza`).

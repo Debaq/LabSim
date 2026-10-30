@@ -51,10 +51,10 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 
 ## Fases
 
-**Para retomar (2026-10-29):** F0-F4 hechas; la rinomanometría (F2b) y la
-rinometría acústica (F2c) son las más trabajadas y falta verlas en la app
-real. Lo que sigue es **F5 (olfatometría y prick test)**. La rinoscopía (F4)
-está en pausa por el aspecto.
+**Para retomar (2026-10-29):** F0-F4 y F6 hechas; la rinomanometría (F2b),
+la rinometría acústica (F2c) y la espirometría (F6) falta verlas en la app
+real. Lo que sigue es **F5 (olfatometría y prick test)** o F7 (sueño). La
+rinoscopía (F4) está en pausa por el aspecto.
 
 - [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
@@ -193,8 +193,35 @@ está en pausa por el aspecto.
       licencia (hoy ruido procedural), bordes dentados al agrandar, y el
       interior que cambia cada 10° aunque la cabeza vaya de a 2°.
 - [ ] **F5. Olfatometría y prick test.**
-- [ ] **F6. Espirometría** (maniobra, aceptabilidad y repetibilidad, prueba
-      broncodilatadora, LIN y z-score); caso del cap. 37.
+- [x] **F6. Espirometría** (2026-10-29, a pedido de él; tests y capturas
+      a 1366, **sin ver en la app real ni la tarjeta en el navegador**).
+      Decisiones en `docs/decisiones.md` (§ Espirometría: en vivo,
+      conducida por el alumno; § Los tipos de informe de nariz y sueño;
+      § Espirometría en el caso).
+      - **Modelo** (`nasal/espirometria.py`): el de H30 calibrado para que una
+        maniobra bien hecha mida la FVC, el FEV1 y el PEF del caso; GLI-2012
+        (`resources/nasal/gli2012.json`, el del libro); análisis del equipo
+        solo con la señal; tabla de aceptabilidad de H30, grados A-F,
+        respuesta sobre el teórico; jeringa de 3 L.
+      - **Equipo** (`nasal/EspirometriaWindow.py`): pinza y boquilla en la
+        cara del paciente, talla y peso, verificar y calibrar, cero de flujo,
+        Iniciar y cinco indicaciones (teclas 1-5), curvas en vivo, tabla de
+        maniobras con "Lo que viste", broncodilatador con espera, informe
+        en el formato SER 2024 con los indicadores de OVAS (FIF50,
+        FEF50/FIF50, FEV1/PEF). Errores simulados: tos, inicio lento, no
+        inspira al máximo, cierre de glotis, fuga, boquilla tapada, cero
+        corrido, descalibrado. Acciones `esp_`.
+      - **Backend**: tipo `ESPIROMETRIA` (y de una vez `OLFATOMETRIA`,
+        `PRICK`, `POLISOMNOGRAFIA`, `CPAP`: una sola reconstrucción de
+        `reports`, centinela `'CPAP'`), PDF con curvas, datos del examen y
+        tabla; tarjeta Pulmón en la ficha Nariz (`public/js/case/pulmon.js`,
+        `CaseForm::parseEspiro`).
+      - **Pacientes del cap. 37**: fichas 157 (asma) y 158 (estenosis
+        traqueal), `scripts/nasal/sql_pacientes.py` con su bloque `ESPIRO`
+        (los números de los informes del libro). SQL listo, sin cargar en
+        producción.
+      - De paso: los equipos nasales no tenían `submit_report` y cada cierre
+        de atención los contaba como informe no subido.
 - [ ] **F7. Sueño:** poligrafía/PSG (registro, puntuación de eventos, IAH)
       y titulación de CPAP; casos del cap. 38.
 
