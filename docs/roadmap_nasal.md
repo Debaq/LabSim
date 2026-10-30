@@ -51,10 +51,11 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 
 ## Fases
 
-**Para retomar (2026-10-29):** F0-F4 y F6 hechas; la rinomanometría (F2b),
-la rinometría acústica (F2c) y la espirometría (F6) falta verlas en la app
-real. Lo que sigue es **F5 (olfatometría y prick test)** o F7 (sueño). La
-rinoscopía (F4) está en pausa por el aspecto.
+**Para retomar (2026-10-30):** F0-F6 hechas; la rinomanometría (F2b), la
+rinometría acústica (F2c), la espirometría (F6), la olfatometría y el
+prick (F5) falta verlos en la app real, y las tarjetas Olfato y Prick en el
+navegador. Lo que sigue es **F7 (sueño)**. La rinoscopía (F4) está en pausa
+por el aspecto.
 
 - [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
@@ -192,7 +193,37 @@ rinoscopía (F4) está en pausa por el aspecto.
       (la bata celeste, el interior), textura de mucosa de fotos reales con
       licencia (hoy ruido procedural), bordes dentados al agrandar, y el
       interior que cambia cada 10° aunque la cabeza vaya de a 2°.
-- [ ] **F5. Olfatometría y prick test.**
+- [x] **F5. Olfatometría y prick test** (2026-10-30, a pedido de él; tests
+      y capturas a 1366, **sin ver en la app real ni las tarjetas en el
+      navegador**). Decisiones en `docs/decisiones.md` (§ Olfatometría: la
+      batería completa con un paciente de elección forzada; § Prick test:
+      la piel reacciona a lo que hace el alumno).
+      - **Olfatometría** (`nasal/olfatometria.py`,
+        `nasal/OlfatometriaWindow.py`): la batería completa de H28 (umbral
+        en escalera, discriminación, identificación), por narina o con las
+        dos. El alumno elige el paso de cada trío; el paciente responde en
+        elección forzada con la logística de las figuras de H28, y cambia
+        si no tiene venda, si se presenta antes de 20 s o si fumó, comió o
+        se perfumó (pregunta + espera de 1 h). «No huelo nada» pide
+        «elija igual». La hoja se llena sola; el T lo escribe el alumno y
+        la categoría la elige él; P10 por edad de Oleszkiewicz 2019.
+        Conductas del caso: colabora, se distrae, exagera (bajo el azar).
+        Lista de identificación propia del simulador (16 olores).
+      - **Prick** (`nasal/prick.py`, `nasal/PrickWindow.py`): antebrazo
+        volar en mm; marcar y gota, puncionar (lanceta nueva o reusada),
+        secar (o arrastrando), cronómetro; pápulas con eritema y
+        seudópodos que crecen con el reloj (histamina ~10 min, alérgenos
+        ~17, a la hora nada); antihistamínico según horas desde la última
+        dosis; dermografismo; reflejo axónico a menos de 2 cm. Lupa con
+        regla al medio milímetro; el alumno anota mayor × perpendicular y
+        decide el resultado. Sin reacción sistémica ni vasovagal todavía.
+      - **Backend**: bloques `OLFATO` y `PRICK` (CaseForm/CaseBuilder,
+        tarjetas Olfato y Prick test en la ficha Nariz, solo admin, con
+        cuadros de partida), PDFs `olfatometriaBody`/`prickBody`, imágenes
+        `olf_umbral` y `prick_brazo`, rótulos `olf_*` y `prick_*`.
+      - **Sin pacientes del libro todavía**: los caps. 35-36 no traen
+        resultados de olfatometría ni de prick; se cargan cuando él diga
+        qué paciente lleva cada uno.
 - [x] **F6. Espirometría** (2026-10-29, a pedido de él; tests y capturas
       a 1366, **sin ver en la app real ni la tarjeta en el navegador**).
       Decisiones en `docs/decisiones.md` (§ Espirometría: en vivo,

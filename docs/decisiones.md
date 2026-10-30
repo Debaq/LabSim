@@ -7351,3 +7351,64 @@ B escrito en modo invitado y, a diseñar con calma, un práctico sin servidor
 (casos bajados antes, llave del docente, todo sube al volver). Se descarta
 por ahora un servidor espejo en el laboratorio: reconciliar dos SQLite es
 más riesgo que la caída. Detalle en `docs/roadmap_sin_servidor.md`.
+
+## Olfatometría: la batería completa con un paciente de elección forzada (2026-10-30)
+
+La olfatometría de la demo nasal es la batería completa de bolígrafos de
+H28 (umbral, discriminación, identificación), porque es la que cuantifica y
+la que enseña el libro. Lo que se aprende es la técnica, así que el equipo
+no la hace por el alumno:
+
+- **El alumno elige el paso de cada trío del umbral.** La hoja anota y
+  dibuja la escalera, pero no dice qué paso sigue ni cuenta inversiones; el
+  T lo calcula él y lo escribe. "Lo que el equipo no sabe" muestra el T que
+  da la regla con sus mismos tríos y cuántos se salieron de ella. D e I sí
+  se cuentan solos (es sumar aciertos) y solo valen con los 16.
+- **El paciente responde como una persona en elección forzada**: detecta
+  con la logística de las figuras de H28 y, si no detecta, adivina (un
+  anósmico saca ~5 en D y 4 en I). El T del caso es el centro de la
+  logística corrido −0,3 pasos, calibrado simulando la regla: una escalera
+  bien hecha da el T del caso ±0,6 entre 6 y 15; bajo 5 da más (3-4 en un
+  anósmico), como en la sala.
+- **Los errores de H28 cambian la respuesta, no se marcan a mano**: sin
+  venda en T o D ve el bolígrafo (90 %); con menos de 20 s desde el trío
+  anterior se adapta (hasta 2 pasos o 40 %); si fumó, comió o se perfumó
+  huele menos hasta que pase una hora (se pregunta y se espera; el docente
+  puede saltar la espera). Si dice «no huelo nada», el alumno le pide que
+  elija igual o lo anota como error (y el puntaje baja).
+- **Conductas del caso**: colabora, se distrae (15 % al azar) o exagera
+  (elige mal adrede lo que huele: queda bajo el azar, el "Ojo clínico" de
+  H28).
+- **La categoría la elige el alumno**; la pantalla da los cortes del TDI y
+  el percentil 10 de su grupo de edad (Oleszkiewicz y cols., 2019), como H28
+  pide informar las dos cosas.
+- **La lista de identificación es del simulador** (16 olores comunes con
+  tres distractores), no la de un producto: H28 dice que una lista debe
+  adaptarse y validarse en cada lugar.
+
+## Prick test: la piel reacciona a lo que hace el alumno (2026-10-30)
+
+No hay equipo: el prick de la demo es el antebrazo del paciente y una
+regla. El caso dice qué pápula daría cada alérgeno a los 15-20 minutos con
+una punción bien hecha (mm), la histamina, el dermografismo y el último
+fármaco con las horas desde la dosis. Todo lo demás sale de cómo se hizo:
+
+- **El tiempo es el del reloj**: la histamina llega a su máximo hacia los
+  10 minutos y los alérgenos a los 17; a la hora casi no queda nada. Leer
+  antes o después cambia lo medido. El docente puede saltar a los 15 min.
+- **Los fármacos** achican todo según la tabla de H29 (el borde largo de
+  los plazos de Heinzerling y Bernstein); un antihistamínico de ayer deja la
+  histamina bajo 3 mm: prueba no válida. Los que no hace falta suspender no
+  hacen nada.
+- **Los errores de H29**: punciones a menos de 2 cm suman una pápula por
+  reflejo axónico; la lanceta reusada lleva el alérgeno anterior; secar
+  arrastrando (único error "simulado" a mano) contamina a los vecinos; el
+  dermografismo da pápula en todos los sitios, también en el negativo. El
+  orden (negativo primero, histamina al final) y los sitios cerca de un
+  pliegue solo se registran.
+- **El alumno mide y decide**: con la lupa arrastra la regla (se lee al
+  medio milímetro) sobre la pápula, no el eritema, anota mayor y
+  perpendicular, y elige el resultado (controles: válido/no válido;
+  alérgenos: positivo/negativo con 3 mm y 3 sobre el negativo). La verdad
+  de cada sitio va a "Lo que el equipo no sabe" y al log.
+- **Queda fuera por ahora** la reacción sistémica y la vasovagal de H29.

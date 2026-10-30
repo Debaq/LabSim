@@ -25,7 +25,7 @@ foreach ($nasales as $t) {
     t_true(isset(ReportFile::LABELS[$t]), "ReportFile::LABELS rotula {$t}");
     t_true(isset(ReportFile::SHORT_LABELS[$t]), "ReportFile::SHORT_LABELS rotula {$t}");
 }
-foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt'] as $suf) {
+foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt', 'olf_umbral', 'prick_brazo'] as $suf) {
     t_true(strpos($upload, "'{$suf}'") !== false, "report_upload acepta la imagen {$suf}");
 }
 foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
@@ -97,3 +97,40 @@ t_true(strpos($esp, 'a los 16 minutos') !== false, 'Dice cuándo fue la primera 
 t_true(strpos($esp, 'VEF1 A, CVF B') !== false, 'Trae la calidad pre y post');
 t_true(strpos($esp, '+12,9') !== false, 'Trae la tabla que mandó la app');
 t_true(strpos($esp, 'verificado con la jeringa') !== false, 'Dice que el equipo se verificó');
+
+// Olfatometría: puntajes por narina, categoría del alumno y P10.
+$olf = ReportPdfBuilder::build(999, 'OLFATOMETRIA', [
+    'paciente' => ['edad' => 35, 'sexo' => 'F'],
+    'preparacion' => ['pregunto' => true, 'respuesta' => 'no fumó ni comió', 'espero' => false],
+    'ensayos' => [],
+    'puntajes' => [
+        'ambas' => ['T' => 7.5, 'D' => 11, 'I' => 12, 'TDI' => 30.5],
+        'D' => ['T' => 7.0, 'D' => 10, 'I' => 12, 'TDI' => 29.0],
+        'I' => ['T' => null, 'D' => null, 'I' => null, 'TDI' => null],
+    ],
+    'p10' => 30.5, 'grupo_edad' => '31–40', 'categoria' => 'hiposmia',
+    'hallazgos' => 'Hiposmia bilateral.', 'conclusion' => 'Control en 3 meses.',
+], $paciente, 'Alumno X', '29-10-2026');
+t_true(strpos($olf, '%PDF-1.4') === 0, 'El informe de olfatometría sale como PDF');
+t_true(strpos($olf, 'Hiposmia') !== false && strpos($olf, '30,5') !== false, 'Trae la categoría y el P10 con coma');
+t_true(strpos($olf, 'Narina derecha') !== false && strpos($olf, '29,0') !== false, 'Trae el TDI de la narina derecha');
+
+// Prick: la hoja de registro, por orden de punción.
+$prick = ReportPdfBuilder::build(999, 'PRICK', [
+    'paciente' => ['edad' => 27, 'sexo' => 'M'], 'pregunto_farmacos' => true, 'farmacos' => 'ninguno.',
+    'sitios' => [
+        ['extracto' => 'dpte', 'nombre' => 'D. pteronyssinus', 'x' => 0, 'y' => 60, 'orden' => 2,
+         'lectura' => ['mayor' => 8.0, 'perpendicular' => 6.0, 'min' => 17.0], 'resultado' => 'positivo'],
+        ['extracto' => 'gato', 'nombre' => 'Gato (epitelio)', 'x' => 20, 'y' => 60, 'orden' => 3,
+         'lectura' => ['mayor' => 3.5, 'perpendicular' => 3.0, 'min' => 17.0], 'resultado' => 'positivo'],
+        ['extracto' => 'neg', 'nombre' => 'Control negativo', 'x' => 0, 'y' => 30, 'orden' => 1,
+         'lectura' => ['mayor' => null, 'perpendicular' => null, 'min' => 17.0], 'resultado' => 'valido'],
+    ],
+    'lectura_min' => 17.0, 'hallazgos' => 'Sensibilización a ácaros.', 'conclusion' => 'Rinitis alérgica.',
+], $paciente, 'Alumno X', '29-10-2026');
+t_true(strpos($prick, '%PDF-1.4') === 0, 'El informe de prick sale como PDF');
+t_true(strpos($prick, "8 \xD7 6 mm") !== false, 'Trae la pápula mayor × perpendicular');
+t_true(strpos($prick, "3,5 \xD7 3 mm") !== false, 'La pápula conserva el medio milímetro de la regla');
+t_true(strpos($prick, 'ninguno.') !== false && strpos($prick, 'ninguno..') === false, 'Fármacos con un solo punto final');
+t_true(strpos($prick, "sin p\xE1pula") !== false && strpos($prick, "Sin reacci\xF3n \\(v\xE1lido\\)") !== false, 'Dice cuando no hay pápula');
+t_true(strpos($prick, 'Positivo') !== false && strpos($prick, "minutos de la punci\xF3n") !== false, 'Trae el resultado y el minuto de lectura');

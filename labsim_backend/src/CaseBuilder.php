@@ -591,6 +591,23 @@ final class CaseBuilder
         return is_array($datos) ? $datos : [];
     }
 
+    /**
+     * Normas de la olfatometría para la tarjeta Olfato: las de
+     * nasal/olfatometria.py (NORMAS: Oleszkiewicz y cols., 2019, ambos
+     * sexos, [edad desde, edad hasta, media TDI, percentil 10]; CORTES del
+     * TDI: [tope, clave, nombre]). Mantener iguales.
+     */
+    public static function olfatoNormas(): array
+    {
+        return [
+            'grupos' => [[5, 10, 25.21, 19.4], [11, 20, 34.00, 28.5], [21, 30, 35.99, 30.75],
+                [31, 40, 35.55, 30.5], [41, 50, 34.06, 28.15], [51, 60, 32.85, 27.25],
+                [61, 70, 31.26, 24.88], [71, 80, 27.93, 19.2], [81, 120, 23.30, 13.0]],
+            'cortes' => [[16.0, 'anosmia', 'Anosmia funcional'], [30.5, 'hiposmia', 'Hiposmia'],
+                [41.25, 'normosmia', 'Normosmia'], [48.0, 'superior', 'Olfato superior']],
+        ];
+    }
+
     public static function nasalCuadros(): array
     {
         $path = __DIR__ . '/../resources/nasal/cuadros.json';
@@ -1538,6 +1555,13 @@ final class CaseBuilder
         if (!empty($form['espiro']) && is_array($form['espiro'])) {
             $data['ESPIRO'] = $form['espiro'];
         }
+        // Olfatometría y prick test (ver CaseForm::parseOlfato / parsePrick), igual.
+        if (!empty($form['olfato']) && is_array($form['olfato'])) {
+            $data['OLFATO'] = $form['olfato'];
+        }
+        if (!empty($form['prick']) && is_array($form['prick'])) {
+            $data['PRICK'] = $form['prick'];
+        }
         return $data;
     }
 
@@ -1987,6 +2011,12 @@ final class CaseBuilder
         }
         if (is_array($data['ESPIRO'] ?? null)) {
             $v['espiro_json'] = (string) json_encode($data['ESPIRO'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        }
+        if (is_array($data['OLFATO'] ?? null)) {
+            $v['olfato_json'] = (string) json_encode($data['OLFATO'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        }
+        if (is_array($data['PRICK'] ?? null)) {
+            $v['prick_json'] = (string) json_encode($data['PRICK'], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
         }
 
         // Las tildes del Resumen, para que reeditar un caso ya revisado no

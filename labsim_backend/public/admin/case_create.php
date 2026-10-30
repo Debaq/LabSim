@@ -455,6 +455,8 @@ admin_add_js('case/vemp.js');
 if ($esAdminCompleto) {
     admin_add_js('case/nariz.js');
     admin_add_js('case/pulmon.js');
+    admin_add_js('case/olfato.js');
+    admin_add_js('case/prick.js');
 }
 admin_add_js('case/patient-photo.js');
 admin_add_js('case/sala.js');
@@ -532,6 +534,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <input type="hidden" id="nasal-json" name="nasal_json" value="<?= htmlspecialchars((string) ($v['nasal_json'] ?? '')) ?>">
 <?php // El pulmón de la espirometría (cases.data['ESPIRO']), por lo mismo. ?>
 <input type="hidden" id="espiro-json" name="espiro_json" value="<?= htmlspecialchars((string) ($v['espiro_json'] ?? '')) ?>">
+<?php // La olfatometría (cases.data['OLFATO']) y el prick test (cases.data['PRICK']), por lo mismo. ?>
+<input type="hidden" id="olfato-json" name="olfato_json" value="<?= htmlspecialchars((string) ($v['olfato_json'] ?? '')) ?>">
+<input type="hidden" id="prick-json" name="prick_json" value="<?= htmlspecialchars((string) ($v['prick_json'] ?? '')) ?>">
 <?php
 // La barra sale de CaseReview::TABS (misma fuente que usa el Resumen para
 // listar las fichas): escrita a mano acá, el Resumen podía listar una ficha
@@ -680,6 +685,9 @@ window.CASE_CONST = <?= json_encode([
     'nasalCuadros' => $esAdminCompleto ? CaseBuilder::nasalCuadros() : null,
     // La tarjeta Pulmón de la misma ficha: rangos y GLI-2012 para los previstos.
     'espiro' => $esAdminCompleto ? ['rangos' => CaseForm::ESPIRO_RANGOS, 'gli' => CaseBuilder::gli2012()] : null,
+    // Tarjetas Olfato y Prick de la misma ficha: rangos, listas y normas (las de la app).
+    'olfato' => $esAdminCompleto ? ['rangos' => CaseForm::OLFATO_RANGOS, 'normas' => CaseBuilder::olfatoNormas()] : null,
+    'prick' => $esAdminCompleto ? ['rangos' => CaseForm::PRICK_RANGOS, 'alergenos' => CaseForm::PRICK_ALERGENOS, 'farmacos' => CaseForm::PRICK_FARMACOS] : null,
     'vempBaselineOverride' => $vempBaselineOverride,
     'escenarios' => CaseProfile::SCENARIOS,
     // Qué se le puede ofrecer a esta edad y qué va primero en el turno del

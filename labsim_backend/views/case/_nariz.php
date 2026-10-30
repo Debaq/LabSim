@@ -14,6 +14,8 @@
  *
  * La tarjeta Pulmón es la espirometría (cases.data['ESPIRO']): su estado
  * vive en el hidden #espiro-json y lo mantiene public/js/case/pulmon.js.
+ * Olfato (cases.data['OLFATO'], hidden #olfato-json, olfato.js) y Prick
+ * (cases.data['PRICK'], hidden #prick-json, prick.js) siguen el mismo patrón.
  */
 ?>
 <div class="tab-panel" data-tab="nariz">
@@ -85,6 +87,84 @@
         </select>
     </label>
     <p class="help" id="pulmon-previstos"></p>
+    </div>
+</div>
+<div class="card">
+    <strong>Olfato (olfatometría)</strong>
+    <p class="help">Demo interna, como la nariz. Sin la casilla, el caso se guarda sin olfato y el equipo no mide. Con ella, el paciente responde a cada trío o ítem según estos puntajes por narina. T es el puntaje de umbral que daría una escalera bien hecha (1 a 16); D e I son los aciertos esperados de 16. Con las dos narinas huele el mejor lado de cada puntaje. Nada se bloquea acá: el servidor valida al guardar.</p>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="olfato-presente">
+        El paciente trae olfatometría
+    </label>
+    <div id="olfato-campos">
+    <div class="two-col">
+        <label>Cuadro de partida
+            <select id="olfato-cuadro"></select>
+        </label>
+        <div><button type="button" id="olfato-cargar" class="secondary">Cargar el cuadro</button></div>
+    </div>
+    <table class="pulmon-tabla">
+        <tr><th></th><th>T (1-16)</th><th>D (0-16)</th><th>I (0-16)</th></tr>
+        <tr><td class="side-label">Narina derecha</td>
+            <td><input type="number" id="olfato-D-T" step="0.5" min="1" max="16"></td>
+            <td><input type="number" id="olfato-D-D" step="1" min="0" max="16"></td>
+            <td><input type="number" id="olfato-D-I" step="1" min="0" max="16"></td></tr>
+        <tr><td class="side-label">Narina izquierda</td>
+            <td><input type="number" id="olfato-I-T" step="0.5" min="1" max="16"></td>
+            <td><input type="number" id="olfato-I-D" step="1" min="0" max="16"></td>
+            <td><input type="number" id="olfato-I-I" step="1" min="0" max="16"></td></tr>
+    </table>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="olfato-igual">
+        Igual en las dos narinas (copia la derecha a la izquierda)
+    </label>
+    <div class="two-col">
+        <label>Conducta
+            <select id="olfato-conducta">
+                <option value="buena">Colabora</option>
+                <option value="distraida">Se distrae (contesta al azar a veces)</option>
+                <option value="exagera">Exagera la pérdida (elige mal adrede)</option>
+            </select>
+        </label>
+        <label>Preparación
+            <select id="olfato-preparacion">
+                <option value="ok">Viene preparado</option>
+                <option value="fumo">Fumó hace un rato</option>
+                <option value="comio">Comió hace un rato</option>
+                <option value="perfume">Viene perfumado</option>
+            </select>
+        </label>
+    </div>
+    <p class="help">Lo que sigue se calcula con los puntajes de arriba: el TDI de cada narina y de las dos juntas (T + D + I, con el mejor lado por puntaje), la categoría por los cortes del TDI y el percentil 10 del grupo de edad de la ficha Paciente. En la sala el azar da cerca de 5 en D y 4 en I a quien no huele nada, y una escalera de umbral da 3 o 4 aunque el caso diga 1; el TDI medido sale un poco sobre el de acá.</p>
+    <p class="help" id="olfato-resumen"></p>
+    </div>
+</div>
+<div class="card">
+    <strong>Prick test</strong>
+    <p class="help">Demo interna, como la nariz. Sin la casilla, el caso se guarda sin prick y la prueba no se hace. Con ella, cada alérgeno da la pápula (diámetro mayor, en mm) que daría una punción bien hecha leída a su pico; 0 es sin sensibilización. El fármaco la achica según las horas desde la última dosis, y el dermografismo hace pápula también en el control negativo. Nada se bloquea acá: el servidor valida al guardar.</p>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="prick-presente">
+        El paciente trae prick test
+    </label>
+    <div id="prick-campos">
+    <div class="two-col">
+        <label>Cuadro de partida
+            <select id="prick-cuadro"></select>
+        </label>
+        <div><button type="button" id="prick-cargar" class="secondary">Cargar el cuadro</button></div>
+    </div>
+    <div class="two-col">
+        <label>Histamina (mm, 0-15) <input type="number" id="prick-histamina" step="0.5" min="0" max="15"></label>
+        <label>Dermografismo (mm, 0-8) <input type="number" id="prick-dermografismo" step="0.5" min="0" max="8"></label>
+    </div>
+    <div class="two-col">
+        <label>Fármaco
+            <select id="prick-farmaco"></select>
+        </label>
+        <label>Horas desde la última dosis (0-1440) <input type="number" id="prick-horas" step="1" min="0" max="1440"></label>
+    </div>
+    <p class="help">Pápula de cada alérgeno (mm, 0-25).</p>
+    <div id="prick-alergenos" class="two-col"></div>
     </div>
 </div>
 </div>

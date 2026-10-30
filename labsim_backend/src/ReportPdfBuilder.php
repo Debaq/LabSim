@@ -92,6 +92,18 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'OLFATOMETRIA') {
+            $y = self::olfatometriaBody($pdf, $reportId, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
+        if ($tipo === 'PRICK') {
+            $y = self::prickBody($pdf, $reportId, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'RINOMANOMETRIA' || $tipo === 'RINOMETRIA') {
             $y = self::nasalBody($pdf, $reportId, $tipo, $data, $y, $contentW);
             self::textSections($pdf, $data, $y, $contentW);
@@ -758,6 +770,19 @@ final class ReportPdfBuilder
         return str_replace('.', ',', sprintf('%.' . $d . 'f', $v));
     }
 
+    /** Una pápula medida con la regla (al medio milímetro): 8 o 8,5. */
+    private static function mm(float $v): string
+    {
+        return abs($v - round($v)) < 0.05 ? (string) (int) round($v) : self::decimal($v, 1);
+    }
+
+    /** El texto con su punto final, sin duplicarlo si ya lo trae (o cierra con »). */
+    private static function frase(string $t): string
+    {
+        $t = rtrim($t);
+        return preg_match('/[.!?»]$/u', $t) ? $t : $t . '.';
+    }
+
     /**
      * Cuerpo del informe de espirometría (formato del manual SER 2024): las
      * curvas pre y post sobrepuestas, los datos del examen y la tabla con
@@ -829,6 +854,199 @@ final class ReportPdfBuilder
         }
         $y += 6;
         return self::tablaYAvisos($pdf, $data, $y, $contentW);
+    }
+
+    /**
+     * Dibuja la imagen del informe (si el equipo la mandó) con su proporción,
+     * hasta $maxW de ancho y $maxH de alto; devuelve la nueva $y.
+     */
+    private static function imagenInforme(MiniPdf $pdf, int $reportId, string $sufijo, float $y, float $maxW, float $maxH): float
+    {
+        $ruta = ReportFile::imagePath($reportId, $sufijo);
+        if (!is_file($ruta)) {
+            return $y;
+        }
+        $info = @getimagesize($ruta);
+        $razon = ($info !== false && $info[0] > 0) ? $info[1] / $info[0] : 0.6;
+        $w = $maxW;
+        $h = $w * $razon;
+        if ($h > $maxH) {
+            $h = $maxH;
+            $w = $h / $razon;
+        }
+        $y = self::ensureSpace($pdf, $y, $h + 8);
+        $pdf->image($ruta, self::MARGIN, $y, $w, $h);
+        return $y + $h + 12;
+    }
+
+    /**
+     * Cuerpo del informe de olfatometría: cómo vino el paciente (la
+     * pregunta por la preparación), el T, D, I y TDI de cada narina medida,
+     * la categoría que eligió el alumno con el percentil 10 del grupo de
+     * edad, y la escalera del umbral (nasal/OlfatometriaWindow.py).
+     */
+    private static function olfatometriaBody(MiniPdf $pdf, int $reportId, array $data, float $y, float $contentW): float
+    {
+        $lineas = [];
+        $p = is_array($data['paciente'] ?? null) ? $data['paciente'] : [];
+        if (isset($p['edad'])) {
+            $sexo = ($p['sexo'] ?? '') === 'F' ? 'femenino' : 'masculino';
+            $lineas[] = 'Sexo de nacimiento ' . $sexo . ', ' . (int) round((float) $p['edad']) . ' años.';
+        }
+        $prep = is_array($data['preparacion'] ?? null) ? $data['preparacion'] : [];
+        if (empty($prep['pregunto'])) {
+            $lineas[] = 'No se preguntó cómo venía preparado el paciente (comida, tabaco, perfume en la última hora).';
+        } else {
+            $resp = trim((string) ($prep['respuesta'] ?? ''));
+            $lineas[] = 'Preparación: ' . self::frase($resp !== '' ? $resp : 'se le preguntó')
+                . (!empty($prep['espero']) ? ' Se esperó antes de medir.' : '');
+        }
+        foreach ($lineas as $linea) {
+            $y = self::ensureSpace($pdf, $y, 14.0);
+            $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);
+            $y += 2;
+        }
+        $y += 6;
+
+        $puntajes = is_array($data['puntajes'] ?? null) ? $data['puntajes'] : [];
+        $nombres = ['ambas' => 'Ambas narinas', 'D' => 'Narina derecha', 'I' => 'Narina izquierda'];
+        $filas = [];
+        foreach ($nombres as $clave => $nombre) {
+            $f = is_array($puntajes[$clave] ?? null) ? $puntajes[$clave] : null;
+            if ($f === null) {
+                continue;
+            }
+            $celda = static function ($v, int $d) {
+                return $v === null || !is_numeric($v) ? '—' : self::decimal((float) $v, $d);
+            };
+            $filas[] = [$nombre, $celda($f['T'] ?? null, 1), $celda($f['D'] ?? null, 0),
+                $celda($f['I'] ?? null, 0), $celda($f['TDI'] ?? null, 1)];
+        }
+        if ($filas !== []) {
+            $y = self::ensureSpace($pdf, $y, 20.0 + 13 * count($filas));
+            $pdf->text(self::MARGIN, $y, 'Puntajes', 12, true);
+            $y += 18;
+            $cols = [150.0, 70.0, 70.0, 70.0, 70.0];
+            foreach (array_merge([['', 'T (umbral)', 'D (discrim.)', 'I (identif.)', 'TDI']], $filas) as $n => $celdas) {
+                $x = self::MARGIN;
+                foreach ($celdas as $i => $texto) {
+                    $pdf->text($x, $y, (string) $texto, 9, $n === 0 || $i === 0);
+                    $x += $cols[$i];
+                }
+                $y += 13;
+            }
+            $y += 6;
+        }
+        $nombresCat = ['anosmia' => 'Anosmia funcional', 'hiposmia' => 'Hiposmia',
+            'normosmia' => 'Normosmia', 'superior' => 'Olfato superior'];
+        $cat = (string) ($data['categoria'] ?? '');
+        $lineasCat = [];
+        $lineasCat[] = 'Categoría elegida por el alumno: ' . ($nombresCat[$cat] ?? 'sin elegir') . '.';
+        if (isset($data['p10']) && is_numeric($data['p10'])) {
+            $lineasCat[] = 'Percentil 10 del TDI de su grupo de edad'
+                . (!empty($data['grupo_edad']) ? ' (' . (string) $data['grupo_edad'] . ' años)' : '')
+                . ': ' . self::decimal((float) $data['p10'], 2) . '.';
+        }
+        foreach ($lineasCat as $linea) {
+            $y = self::ensureSpace($pdf, $y, 14.0);
+            $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);
+            $y += 2;
+        }
+        $y += 6;
+        $antes = $y;
+        $y = self::imagenInforme($pdf, $reportId, 'olf_umbral', $y, $contentW * 0.8, 300.0);
+        if ($y > $antes) {
+            $pdf->text(self::MARGIN, $y, 'Escalera del umbral.', 8);
+            $y += 16;
+        }
+        return $y;
+    }
+
+    /** Resultado de cada sitio del prick en palabras. */
+    private const PRICK_RESULTADOS = [
+        'positivo' => 'Positivo', 'negativo' => 'Negativo',
+        'no_valido' => 'No válido',
+    ];
+
+    /**
+     * Cuerpo del informe de prick test: la hoja de registro (n.°, alérgeno o
+     * control, pápula y resultado, por orden de punción), fármacos y minuto
+     * de lectura, y el antebrazo con las pápulas (nasal/PrickWindow.py).
+     */
+    private static function prickBody(MiniPdf $pdf, int $reportId, array $data, float $y, float $contentW): float
+    {
+        $lineas = [];
+        $p = is_array($data['paciente'] ?? null) ? $data['paciente'] : [];
+        if (isset($p['edad'])) {
+            $sexo = ($p['sexo'] ?? '') === 'F' ? 'femenino' : 'masculino';
+            $lineas[] = 'Sexo de nacimiento ' . $sexo . ', ' . (int) round((float) $p['edad']) . ' años.';
+        }
+        if (empty($data['pregunto_farmacos'])) {
+            $lineas[] = 'No se preguntó por los fármacos que toma el paciente.';
+        } else {
+            $f = trim((string) ($data['farmacos'] ?? ''));
+            $lineas[] = 'Fármacos: ' . self::frase($f !== '' ? $f : 'se le preguntó');
+        }
+        if (isset($data['lectura_min']) && is_numeric($data['lectura_min'])) {
+            $lineas[] = 'Lectura a los ' . self::decimal((float) $data['lectura_min'], 0) . ' minutos de la punción.';
+        }
+        foreach ($lineas as $linea) {
+            $y = self::ensureSpace($pdf, $y, 14.0);
+            $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);
+            $y += 2;
+        }
+        $y += 6;
+
+        $sitios = is_array($data['sitios'] ?? null) ? array_values(array_filter($data['sitios'], 'is_array')) : [];
+        usort($sitios, static function ($a, $b) {
+            return (int) ($a['orden'] ?? 0) <=> (int) ($b['orden'] ?? 0);
+        });
+        if ($sitios !== []) {
+            $y = self::ensureSpace($pdf, $y, 50.0);
+            $pdf->text(self::MARGIN, $y, 'Hoja de registro', 12, true);
+            $y += 18;
+            $cols = [30.0, 190.0, 130.0, $contentW - 350.0];
+            $fila = function (array $celdas, bool $negrita) use ($pdf, $cols, &$y) {
+                $x = self::MARGIN;
+                foreach ($celdas as $i => $texto) {
+                    $pdf->text($x, $y, (string) $texto, 9, $negrita);
+                    $x += $cols[$i];
+                }
+                $y += 13;
+            };
+            $fila(['N.°', 'Alérgeno o control', 'Pápula', 'Resultado'], true);
+            foreach ($sitios as $i => $s) {
+                $y = self::ensureSpace($pdf, $y, 14.0);
+                $clave = (string) ($s['extracto'] ?? '');
+                $nombre = trim((string) ($s['nombre'] ?? ''));
+                if ($nombre === '') {
+                    $nombre = $clave;
+                }
+                $l = is_array($s['lectura'] ?? null) ? $s['lectura'] : [];
+                $mayor = $l['mayor'] ?? null;
+                $perp = $l['perpendicular'] ?? null;
+                if (!is_numeric($mayor) || (float) $mayor <= 0) {
+                    $papula = 'sin pápula';
+                } else {
+                    $papula = self::mm((float) $mayor) . (is_numeric($perp) ? ' × ' . self::mm((float) $perp) : '') . ' mm';
+                }
+                $res = (string) ($s['resultado'] ?? '');
+                if ($res === 'valido') {
+                    $texto = $clave === 'neg' ? 'Sin reacción (válido)' : ($clave === 'his' ? 'Reaccionó (válido)' : 'Válido');
+                } else {
+                    $texto = self::PRICK_RESULTADOS[$res] ?? '—';
+                }
+                $fila([$i + 1, $nombre, $papula, $texto], false);
+            }
+            $y += 8;
+        }
+        $antes = $y;
+        $y = self::imagenInforme($pdf, $reportId, 'prick_brazo', $y, $contentW * 0.5, 320.0);
+        if ($y > $antes) {
+            $pdf->text(self::MARGIN, $y, 'Antebrazo con las pápulas a la lectura.', 8);
+            $y += 16;
+        }
+        return $y;
     }
 
     /** Qué dice cada valor del informe de rinoscopía (nasal/RinoscopiaWindow.py). */

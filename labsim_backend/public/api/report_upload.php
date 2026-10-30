@@ -51,6 +51,8 @@ const REPORT_IMAGE_SUFFIXES = [
     'rm_curva', 'rm_resistencia', 'ra_curva',
     // Espirometría: flujo-volumen y volumen-tiempo, pre y post sobrepuestas.
     'esp_fv', 'esp_vt',
+    // Olfatometría: la escalera del umbral. Prick: el antebrazo con las pápulas.
+    'olf_umbral', 'prick_brazo',
 ];
 
 $user = Auth::requireUser();

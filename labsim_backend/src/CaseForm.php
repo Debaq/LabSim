@@ -425,6 +425,10 @@ final class CaseForm
         $nasal = self::parseNasal($v['nasal_json'] ?? '', $nasalError);
         $espiroError = null;
         $espiro = self::parseEspiro($v['espiro_json'] ?? '', $espiroError);
+        $olfatoError = null;
+        $olfato = self::parseOlfato($v['olfato_json'] ?? '', $olfatoError);
+        $prickError = null;
+        $prick = self::parsePrick($v['prick_json'] ?? '', $prickError);
 
         // Edad 0 es válida SI viene la edad exacta: es un recién nacido o un
         // lactante, no un campo sin llenar. Sin esa excepción no se podía
@@ -470,6 +474,10 @@ final class CaseForm
             $error = $nasalError;
         } elseif ($espiroError !== null) {
             $error = $espiroError;
+        } elseif ($olfatoError !== null) {
+            $error = $olfatoError;
+        } elseif ($prickError !== null) {
+            $error = $prickError;
         } elseif (($neuralError = CaseBuilder::neuralParamsError($abrOd['neural'], 'OD')
                 ?? CaseBuilder::neuralParamsError($abrOi['neural'], 'OI')) !== null) {
             $error = $neuralError;
@@ -613,6 +621,8 @@ final class CaseForm
                 'central' => self::parseCentral($v),
                 'nasal' => $nasal,
                 'espiro' => $espiro,
+                'olfato' => $olfato,
+                'prick' => $prick,
                 // La pasada final del docente por el Resumen: qué fichas
                 // dio por buenas. Va adentro del caso, no al lado -- ver
                 // más abajo, es lo último que bloquea el guardado.
@@ -1195,6 +1205,155 @@ final class CaseForm
         }
         $c = $json['colaboracion'] ?? 'buena';
         $out['colaboracion'] = in_array($c, self::ESPIRO_COLABORACION, true) ? $c : 'buena';
+        return $out;
+    }
+
+    /**
+     * Rangos del bloque OLFATO: los mismos de nasal/olfatometria.normaliza
+     * en la app (T de 1 a 16; D e I de 0 a 16). Los lee también la ficha
+     * (window.CASE_CONST.olfato).
+     */
+    public const OLFATO_RANGOS = ['T' => [1, 16], 'D' => [0, 16], 'I' => [0, 16]];
+    public const OLFATO_CONDUCTAS = ['buena', 'distraida', 'exagera'];
+    public const OLFATO_PREPARACIONES = ['ok', 'fumo', 'comio', 'perfume'];
+
+    /**
+     * La olfatometría desde el hidden `olfato_json` -> cases.data['OLFATO']
+     * (demo interna). Vacío es "sin olfatometría" y da null sin error. Si
+     * trae algo: T, D e I de cada narina (lados D e I), la conducta y la
+     * preparación (una clave desconocida cae en buena / ok, como en la app).
+     *
+     * @param mixed       $raw   El texto del hidden.
+     * @param string|null $error Mensaje para el docente; null si está bien.
+     */
+    public static function parseOlfato($raw, ?string &$error = null): ?array
+    {
+        $error = null;
+        $raw = is_string($raw) ? trim($raw) : '';
+        if ($raw === '') {
+            return null;
+        }
+        $json = json_decode($raw, true);
+        if (!is_array($json)) {
+            $error = 'Olfato: los datos de la olfatometría no se pudieron leer (JSON inválido).';
+            return null;
+        }
+        $lados = [];
+        foreach (['D' => 'derecha', 'I' => 'izquierda'] as $lado => $rotulo) {
+            $d = $json['lados'][$lado] ?? null;
+            if (!is_array($d)) {
+                $error = "Olfato: faltan los valores de la narina {$rotulo}.";
+                return null;
+            }
+            $f = [];
+            foreach (self::OLFATO_RANGOS as $k => $rango) {
+                $x = $d[$k] ?? null;
+                if (!(is_int($x) || is_float($x)) || !is_finite((float) $x)) {
+                    $error = "Olfato: \"{$k}\" de la narina {$rotulo} tiene que ser un número.";
+                    return null;
+                }
+                if ($x < $rango[0] || $x > $rango[1]) {
+                    $error = "Olfato: \"{$k}\" de la narina {$rotulo} va entre {$rango[0]} y {$rango[1]} (vale {$x}).";
+                    return null;
+                }
+                $f[$k] = $x + 0;
+            }
+            $lados[$lado] = $f;
+        }
+        $c = $json['conducta'] ?? 'buena';
+        $p = $json['preparacion'] ?? 'ok';
+        return [
+            'lados' => $lados,
+            'conducta' => in_array($c, self::OLFATO_CONDUCTAS, true) ? $c : 'buena',
+            'preparacion' => in_array($p, self::OLFATO_PREPARACIONES, true) ? $p : 'ok',
+        ];
+    }
+
+    /** Alérgenos del prick (nasal/prick.ALERGENOS): clave => nombre. Mantener iguales. */
+    public const PRICK_ALERGENOS = [
+        'dpte' => 'D. pteronyssinus', 'dfar' => 'D. farinae', 'gato' => 'Gato (epitelio)',
+        'perro' => 'Perro (epitelio)', 'cucaracha' => 'Cucaracha', 'pastos' => 'Mezcla de pastos',
+        'olivo' => 'Olivo', 'platano' => 'Plátano oriental', 'cipres' => 'Ciprés', 'abedul' => 'Abedul',
+        'avellano' => 'Avellano', 'aliso' => 'Aliso', 'artemisa' => 'Artemisa', 'ambrosia' => 'Ambrosía',
+        'parietaria' => 'Parietaria', 'alternaria' => 'Alternaria alternata',
+        'cladosporium' => 'Cladosporium herbarum', 'aspergillus' => 'Aspergillus fumigatus',
+    ];
+    /** Fármacos del prick (nasal/prick.FARMACOS): clave => nombre. */
+    public const PRICK_FARMACOS = [
+        'hidroxizina' => 'Hidroxizina', 'clorfenamina' => 'Clorfenamina', 'cetirizina' => 'Cetirizina',
+        'loratadina' => 'Loratadina', 'ketotifeno' => 'Ketotifeno', 'doxepina' => 'Doxepina',
+        'famotidina' => 'Famotidina (anti-H2)', 'corticoide_topico' => 'Corticoide tópico en el antebrazo',
+        'omalizumab' => 'Omalizumab', 'prednisona' => 'Prednisona en curso corto',
+        'budesonida' => 'Budesonida nasal', 'montelukast' => 'Montelukast', 'salbutamol' => 'Salbutamol inhalado',
+    ];
+    /** Rangos del bloque PRICK, en mm (y horas del fármaco): los de nasal/prick.normaliza. */
+    public const PRICK_RANGOS = ['histamina' => [0, 15], 'dermografismo' => [0, 8], 'alergeno' => [0, 25], 'horas' => [0, 1440]];
+
+    /**
+     * El prick desde el hidden `prick_json` -> cases.data['PRICK'] (demo
+     * interna). Vacío es "sin prick" y da null sin error. Si trae algo:
+     * histamina (obligatoria), dermografismo, la pápula de cada alérgeno
+     * (los que faltan valen 0; las claves desconocidas se ignoran) y el
+     * fármaco (null, o {clave, horas}).
+     *
+     * @param mixed       $raw   El texto del hidden.
+     * @param string|null $error Mensaje para el docente; null si está bien.
+     */
+    public static function parsePrick($raw, ?string &$error = null): ?array
+    {
+        $error = null;
+        $raw = is_string($raw) ? trim($raw) : '';
+        if ($raw === '') {
+            return null;
+        }
+        $json = json_decode($raw, true);
+        if (!is_array($json)) {
+            $error = 'Prick: los datos del prick test no se pudieron leer (JSON inválido).';
+            return null;
+        }
+        $r = self::PRICK_RANGOS;
+        $num = static function ($x, string $nombre, array $rango) use (&$error) {
+            if (!(is_int($x) || is_float($x)) || !is_finite((float) $x)) {
+                $error = "Prick: \"{$nombre}\" tiene que ser un número.";
+                return null;
+            }
+            if ($x < $rango[0] || $x > $rango[1]) {
+                $error = "Prick: \"{$nombre}\" va entre {$rango[0]} y {$rango[1]} (vale {$x}).";
+                return null;
+            }
+            return $x + 0;
+        };
+        $out = ['histamina' => $num($json['histamina'] ?? null, 'Histamina', $r['histamina'])];
+        if ($error !== null) {
+            return null;
+        }
+        $d = $json['dermografismo'] ?? 0;
+        $out['dermografismo'] = $num($d === null || $d === '' ? 0 : $d, 'Dermografismo', $r['dermografismo']);
+        if ($error !== null) {
+            return null;
+        }
+        $alerg = $json['alergenos'] ?? [];
+        if (!is_array($alerg)) {
+            $error = 'Prick: los alérgenos no se pudieron leer.';
+            return null;
+        }
+        $out['alergenos'] = [];
+        foreach (self::PRICK_ALERGENOS as $k => $nombre) {
+            $x = $alerg[$k] ?? 0;
+            $out['alergenos'][$k] = $num($x === null || $x === '' ? 0 : $x, $nombre, $r['alergeno']);
+            if ($error !== null) {
+                return null;
+            }
+        }
+        $f = $json['farmaco'] ?? null;
+        $out['farmaco'] = null;
+        if (is_array($f) && isset($f['clave']) && is_string($f['clave']) && isset(self::PRICK_FARMACOS[$f['clave']])) {
+            $h = $num($f['horas'] ?? null, 'Horas desde la última dosis de ' . self::PRICK_FARMACOS[$f['clave']], $r['horas']);
+            if ($error !== null) {
+                return null;
+            }
+            $out['farmaco'] = ['clave' => $f['clave'], 'horas' => $h];
+        }
         return $out;
     }
 
