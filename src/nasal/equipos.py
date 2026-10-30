@@ -20,7 +20,7 @@ guardar miles de puntos de cada curva.
 Sin `cases.data['NASAL']` el equipo no mide.
 """
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QFrame, QHBoxLayout, QHeaderView,
                                QMainWindow, QPlainTextEdit, QPushButton, QScrollArea, QSpinBox,
@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QFrame, QHBoxLayout
                                QVBoxLayout, QWidget)
 
 import os
+import time
 
 from core import hilos, tema
 from core.base import context
@@ -35,7 +36,9 @@ from core.estado_informe import EstadoInforme
 from nasal import modelo, sesion
 from nasal import rinomanometria as RM
 from nasal import rinometria as RA
-from nasal.graficos import GraficoResistencia, GraficoRinometria, GraficoRinomanometria
+from nasal.graficos import (GraficoResistencia, GraficoRinometria, GraficoRinomanometria,
+                            GraficoTiempo)
+from nasal.paciente_rm import PacienteRM
 from nasal.referencias import (COREY_1997, HILBERG_1989, PROTOCOLO_REPETICION,
                                REFERENCIA_UNILATERAL_150, REN_2018, RINOMETRIA_SIN_NORMA,
                                VOGT_2016)
@@ -43,6 +46,7 @@ from vemp.widgets.kit import Campos, Pastilla, Tarjeta, etiqueta
 
 SIGLA = modelo.SIGLA_LADO
 LADOS = modelo.LADOS
+NARINA = {'D': 'derecha', 'I': 'izquierda'}
 PERMISOS_DOCENTE = (555, 777)
 
 QSS_NASAL = f"""
@@ -146,15 +150,7 @@ class EquipoNasal(QMainWindow):
         izq = QVBoxLayout(izquierda)
         izq.setContentsMargins(0, 0, 0, 0)
         izq.setSpacing(10)
-        self.panel_examen = Tarjeta('Examen')
-        izq.addWidget(self.panel_examen)
-        self._botones(self.panel_examen)
-        self.panel_errores = Tarjeta('Simular error de técnica')
-        izq.addWidget(self.panel_errores)
-        self._errores(self.panel_errores)
-        self.panel_vista = Tarjeta('Pantalla')
-        izq.addWidget(self.panel_vista)
-        self._opciones(self.panel_vista)
+        self._paneles_izquierda(izq)
         izq.addStretch(1)
         desplazable = QScrollArea()
         desplazable.setWidget(izquierda)
@@ -178,6 +174,24 @@ class EquipoNasal(QMainWindow):
         else:
             self.verdad = None
         cuerpo.addWidget(self.tabs, 1)
+
+    def _paneles_izquierda(self, izq):
+        self.panel_examen = Tarjeta('Examen')
+        izq.addWidget(self.panel_examen)
+        self._botones(self.panel_examen)
+        self._paneles_comunes(izq)
+
+    def _paneles_comunes(self, izq):
+        self.panel_errores = Tarjeta('Simular error de técnica')
+        izq.addWidget(self.panel_errores)
+        self._errores(self.panel_errores)
+        self.panel_vista = Tarjeta('Pantalla')
+        izq.addWidget(self.panel_vista)
+        self._opciones(self.panel_vista)
+
+    def _paneles(self):
+        """Lo que se apaga sin paciente con nariz."""
+        return [self.panel_examen, self.panel_errores, self.panel_vista]
 
     def _pestana_informe(self):
         caja = Tarjeta('Informe')
@@ -266,7 +280,7 @@ class EquipoNasal(QMainWindow):
         if self.sesion is None or not self.sesion.hay_paciente:
             self._sin_caso(con_paciente=data is not None)
             return
-        for panel in (self.panel_examen, self.panel_errores, self.panel_vista):
+        for panel in self._paneles():
             panel.setEnabled(True)
         self.lbl_paciente.setText(descripcion_paciente(data))
         self._al_entrar()
@@ -274,7 +288,7 @@ class EquipoNasal(QMainWindow):
         self.dibujar()
 
     def _sin_caso(self, con_paciente=False):
-        for panel in (self.panel_examen, self.panel_errores, self.panel_vista):
+        for panel in self._paneles():
             panel.setEnabled(False)
         self.lbl_paciente.setText('Sin atención abierta')
         self.pill_minuto.set('')
@@ -462,98 +476,448 @@ class EquipoNasal(QMainWindow):
 
 
 class RinomanometriaWindow(EquipoNasal):
+    """La rinomanometría como se hace: el alumno pone el adaptador con el
+    tubo de presión en una narina y la máscara (en la ventanita del
+    paciente), registra, y en la pantalla corren la presión y el flujo
+    mientras el paciente respira; cada ciclo completo se suma al lazo
+    presión-flujo. Mientras registra le da indicaciones al paciente (que
+    cierre la boca, que respire parejo, que tome aire fuerte), que se notan
+    desde la respiración siguiente. Al detener, el equipo promedia los
+    últimos ciclos completos.
+
+    Cada ciclo sale del modelo con lo que hacía el paciente en ese momento
+    (rinomanometria.Registro): un registro sin cambios es mide_fosa, y la
+    receta (la condición de cada ciclo y la semilla) basta para rehacerlo
+    al retomar la atención."""
+
     TITULO = 'Rinomanometría anterior'
     EQUIPO = 'rm'
     TIPO = 'RINOMANOMETRIA'
-    FUNCION = staticmethod(RM.mide_fosa)
+    FUNCION = staticmethod(RM.mide_registro)
+    INDICACION = ('Pon el adaptador con el tubo de presión en una narina (clic en la narina del '
+                  'paciente) y después la máscara, y registra: se mide la fosa contraria. Primero '
+                  'la derecha, con el adaptador en la izquierda.')
+
+    # Segundos por ciclo respiratorio, tranquila y forzada. Del simulador.
+    DURACION = {False: 4.0, True: 3.2}
+    MIN_CICLOS = 3
+    MAX_CICLOS = 20            # el registro se detiene solo
+    TIC_MS = 40
+    GUARDA_S = 20              # lo que se guarda de los trazos en el tiempo
+
+    INDICACIONES = (
+        ('tranquila', 'Respire tranquilo por la nariz'),
+        ('boca', 'Cierre bien la boca'),
+        ('parejo', 'Respire parejo, sin tragar ni hablar'),
+        ('fuerte', 'Tome aire fuerte por la nariz'),
+    )
+
+    reg = None                 # el registro en curso (rinomanometria.Registro)
+    preparando = False
+    sonda = None               # narina con el adaptador
+    mascara = False
+    forzada = False
+
+    def __init__(self, data_login=None, parent=None):
+        self._reloj = time.monotonic
+        self._redes_pedidas = set()
+        super().__init__(data_login, parent)
+        self.timer = QTimer(self)
+        self.timer.setInterval(self.TIC_MS)
+        self.timer.timeout.connect(self._tic)
 
     def _graficos_informe(self):
         return [('rm_curva', self.g_curva), ('rm_resistencia', self.g_resistencia)]
-    INDICACION = ('Comprueba el sello y mide cada fosa: primero la derecha (adaptador en la '
-                  'izquierda), después la izquierda.')
 
-    def _botones(self, caja):
-        self.btn_sello = caja.agregar(self._boton('Comprobar sello', self._sello))
-        self.btn_d = caja.agregar(self._boton('Medir FND', lambda: self._medir('D'), True))
-        self.btn_i = caja.agregar(self._boton('Medir FNI', lambda: self._medir('I'), True))
-        self.btn_vc = caja.agregar(self._boton('Aplicar vasoconstrictor', self._vasoconstrictor))
-        campos = Campos()
-        self.spin_ciclos = QSpinBox()
-        self.spin_ciclos.setRange(3, 5)
-        self.spin_ciclos.setValue(4)
-        campos.agregar('Ciclos', self.spin_ciclos)
-        caja.agregar(campos)
-        self.chk_forzada = caja.agregar(QCheckBox('Inspiración forzada'))
+    # --- UI -------------------------------------------------------------
+
+    def _paneles_izquierda(self, izq):
+        self.panel_paciente = Tarjeta('Paciente')
+        self.vista_paciente = PacienteRM()
+        self.vista_paciente.setFixedHeight(250)
+        self.vista_paciente.narina.connect(self._poner_sonda)
+        self.panel_paciente.agregar(self.vista_paciente)
+        self.lbl_sonda = etiqueta('', rol='hint')
+        self.lbl_sonda.setWordWrap(True)
+        self.panel_paciente.agregar(self.lbl_sonda)
+        fila = QHBoxLayout()
+        fila.setSpacing(6)
+        self.btn_mascara = self._boton('Poner la máscara', self._mascara)
+        self.btn_acomodar = self._boton('Acomodarla', self._acomodar)
+        fila.addWidget(self.btn_mascara, 1)
+        fila.addWidget(self.btn_acomodar)
+        self.panel_paciente.agregar_layout(fila)
+        izq.addWidget(self.panel_paciente)
+
+        self.panel_indicaciones = Tarjeta('Indicaciones al paciente')
+        for clave, texto in self.INDICACIONES:
+            b = self._boton(f'«{texto}»', lambda _c=False, k=clave: self._indicar(k))
+            b.setStyleSheet('text-align: left;')
+            self.panel_indicaciones.agregar(b)
+        izq.addWidget(self.panel_indicaciones)
+        self._paneles_comunes(izq)
+
+    def _paneles(self):
+        return [self.panel_paciente, self.panel_indicaciones, self.panel_examen,
+                self.panel_errores, self.panel_vista]
 
     def _errores(self, caja):
         self.chk_err = {}
         for clave, texto in (('mascara', 'Fuga en la máscara'), ('adaptador', 'Adaptador sin sellar'),
                              ('boca', 'Respira por la boca'), ('irregular', 'Respiración irregular')):
-            self.chk_err[clave] = caja.agregar(QCheckBox(texto))
+            self.chk_err[clave] = caja.agregar(self._check(texto, self._sync_paciente))
 
     def _opciones(self, caja):
         self.chk_ciclos = caja.agregar(self._check('Ver los ciclos', self.dibujar, True))
         self.chk_referencia = caja.agregar(self._check('Recta de referencia (0,4)', self.dibujar, True))
         self.chk_broms = caja.agregar(self._check('Lectura de Broms (radio 200)', self.dibujar))
 
+    def _barra_examen(self):
+        self.panel_examen = Tarjeta()
+        self.panel_examen.cuerpo.setContentsMargins(10, 8, 10, 8)
+        fila = QHBoxLayout()
+        fila.setSpacing(8)
+        self.btn_sello = self._boton('Comprobar sello', self._sello)
+        self.btn_registro = self._boton('Iniciar registro', self._registro, True)
+        self.btn_registro.setMinimumWidth(130)
+        self.btn_vc = self._boton('Vasoconstrictor', self._vasoconstrictor)
+        self.btn_vc.setToolTip('Aplicar vasoconstrictor en las dos fosas')
+        campos = Campos()
+        self.spin_ciclos = QSpinBox()
+        self.spin_ciclos.setRange(3, 5)
+        self.spin_ciclos.setValue(4)
+        self.spin_ciclos.setToolTip('Cuántos ciclos completos promedia al detener')
+        campos.agregar('Ciclos', self.spin_ciclos)
+        self.pill_registro = Pastilla('', 'neutro')
+        for w in (self.btn_sello, self.btn_registro, campos, self.btn_vc):
+            fila.addWidget(w)
+        fila.addStretch(1)
+        fila.addWidget(self.pill_registro)
+        self.panel_examen.agregar_layout(fila)
+        return self.panel_examen
+
     def _pantalla(self):
         contenedor = QWidget()
         layout = QVBoxLayout(contenedor)
         layout.setContentsMargins(10, 10, 10, 10)
-        arriba = QSplitter(Qt.Orientation.Horizontal)
+        layout.setSpacing(8)
+        layout.addWidget(self._barra_examen())
+        self.g_tiempo = GraficoTiempo()
         self.g_curva = GraficoRinomanometria()
         self.g_resistencia = GraficoResistencia()
-        caja_curva = Tarjeta('Presión-flujo')
-        caja_curva.agregar(self.g_curva.widget, 1)
-        caja_r = Tarjeta('Resistencia según la presión')
-        caja_r.agregar(self.g_resistencia.widget, 1)
-        arriba.setMinimumHeight(300)
-        arriba.addWidget(caja_curva)
-        arriba.addWidget(caja_r)
-        arriba.setStretchFactor(0, 3)
-        arriba.setStretchFactor(1, 2)
+        caja_tiempo = Tarjeta('Presión y flujo')
+        caja_tiempo.agregar(self.g_tiempo.widget, 1)
+        # La curva y la resistencia, una a la vez: la tabla necesita el ancho.
+        curvas = QTabWidget()
+        curvas.addTab(self.g_curva.widget, 'Presión-flujo')
+        curvas.addTab(self.g_resistencia.widget, 'Resistencia según la presión')
+        self.tabs_curvas = curvas
+        arriba = QSplitter(Qt.Orientation.Horizontal)
+        arriba.addWidget(caja_tiempo)
+        arriba.addWidget(curvas)
+        arriba.setStretchFactor(0, 1)
+        arriba.setStretchFactor(1, 1)
+        arriba.setMinimumHeight(280)
         caja, self.tabla, self.pie, self.avisos = self._bloque_tabla('Resultados')
         vertical = QSplitter(Qt.Orientation.Vertical)
         vertical.addWidget(arriba)
         vertical.addWidget(caja)
         vertical.setStretchFactor(0, 3)
-        vertical.setStretchFactor(1, 1)
-        layout.addWidget(vertical)
+        vertical.setStretchFactor(1, 2)
+        layout.addWidget(vertical, 1)
         return contenedor
 
+    # --- El paciente ----------------------------------------------------
+
+    def la_super(self, data, appointment_id=None):
+        self._cortar()
+        super().la_super(data, appointment_id)
+        self._sync_paciente()
+
+    def _sin_caso(self, con_paciente=False):
+        self._cortar()
+        super()._sin_caso(con_paciente)
+        if hasattr(self, 'vista_paciente'):
+            self._sync_paciente()
+
     def _al_entrar(self):
+        self.sonda = None
+        self.mascara = False
+        self.forzada = False
         for chk in self.chk_err.values():
             chk.setChecked(False)
-        self.chk_forzada.setChecked(False)
 
-    def _errores_puestos(self):
-        return {k: True for k, c in self.chk_err.items() if c.isChecked()}
+    def _registrando(self):
+        return self.reg is not None
+
+    def _poner_sonda(self, lado):
+        if self._registrando():
+            self._mensaje('Detén el registro antes de cambiar el adaptador.', 'alerta')
+            return
+        if self.mascara:
+            self._mensaje('Saca la máscara para cambiar el adaptador de narina.', 'alerta')
+            return
+        self.sonda = lado
+        self.chk_err['adaptador'].setChecked(False)
+        otro = 'I' if lado == 'D' else 'D'
+        self._mensaje(f'Adaptador con el tubo de presión en la narina {NARINA[lado]}: se mide la '
+                      f'{SIGLA[otro]}. Comprueba que selle y pon la máscara.')
+        self._sync_paciente()
+
+    def _mascara(self):
+        if self._registrando():
+            self._mensaje('Detén el registro antes de sacar la máscara.', 'alerta')
+            return
+        self.mascara = not self.mascara
+        self.chk_err['mascara'].setChecked(False)
+        if self.mascara and not self.sonda:
+            self._mensaje('Máscara puesta, pero sin adaptador en ninguna narina: no hay de dónde '
+                          'leer la presión.', 'alerta')
+        else:
+            self._mensaje('Máscara puesta, apoyada en toda la cara.' if self.mascara else 'Máscara fuera.')
+        self._sync_paciente()
+
+    def _acomodar(self):
+        self.chk_err['mascara'].setChecked(False)
+        self._mensaje('Acomodas la máscara y la apoyas pareja contra la cara.')
+        self._sync_paciente()
+
+    def _indicar(self, clave):
+        texto = dict(self.INDICACIONES)[clave]
+        if clave == 'tranquila':
+            self.forzada = False
+        elif clave == 'boca':
+            self.chk_err['boca'].setChecked(False)
+        elif clave == 'parejo':
+            self.chk_err['irregular'].setChecked(False)
+        elif clave == 'fuerte':
+            self.forzada = True
+        cuando = ' Se nota desde la respiración siguiente.' if self._registrando() else ''
+        self._mensaje(f'Le dices al paciente: «{texto}».{cuando}')
+        self._sync_paciente()
+        if self._registrando():
+            self._pedir_red(*self._condicion())
+
+    def _sync_paciente(self):
+        v = self.vista_paciente
+        hay = bool(self.sesion and self.sesion.hay_paciente)
+        v.activo = hay
+        v.sonda, v.mascara = self.sonda, self.mascara
+        v.boca = self.chk_err['boca'].isChecked()
+        v.fuga = self.mascara and self.chk_err['mascara'].isChecked()
+        v.suelto = bool(self.sonda) and self.chk_err['adaptador'].isChecked()
+        if not self.mascara:
+            v.empanado = 0.0
+        v.update()
+        self.btn_mascara.setText('Sacar la máscara' if self.mascara else 'Poner la máscara')
+        self.btn_acomodar.setEnabled(self.mascara)
+        if not hay:
+            self.lbl_sonda.setText('')
+        elif self.sonda:
+            otro = 'I' if self.sonda == 'D' else 'D'
+            self.lbl_sonda.setText(f'Adaptador en la narina {NARINA[self.sonda]} · se mide la '
+                                   f'{SIGLA[otro]}. Respira {"fuerte" if self.forzada else "tranquilo"}.')
+        else:
+            self.lbl_sonda.setText('Sin adaptador: clic en una narina para ponerlo.')
+
+    def _condicion(self):
+        """Lo que hace el paciente ahora (y cómo está puesto el equipo)."""
+        errores = {k: True for k, c in self.chk_err.items() if c.isChecked()}
+        return errores, self.forzada
+
+    # --- El registro ----------------------------------------------------
 
     def _sello(self):
-        if self.chk_err['adaptador'].isChecked():
+        if not self.sonda:
+            self._mensaje('Primero pon el adaptador en una narina.', 'alerta')
+        elif self.chk_err['adaptador'].isChecked():
             self._mensaje('Pasa aire por el adaptador: no sella. El tubo no va a leer la '
-                          'rinofaringe. Corrígelo antes de medir.', 'alerta')
+                          'rinofaringe. Sácalo y vuelve a ponerlo antes de medir.', 'alerta')
         else:
             self._mensaje('No pasa aire por el adaptador: sella bien.', 'ok')
 
-    def _pedido(self, lado):
-        return RM.mide_fosa, (self.sesion.paciente, lado, self.sesion.estado(), {
-            'ciclos': self.spin_ciclos.value(),
-            'semilla': self.sesion.semilla_medicion(self.EQUIPO),
-            'errores': self._errores_puestos(),
-            'forzada': self.chk_forzada.isChecked(),
-        })
+    def _vasoconstrictor(self):
+        if self._registrando() or self.preparando:
+            self._mensaje('Detén el registro antes de poner el vasoconstrictor.', 'alerta')
+            return
+        super()._vasoconstrictor()
+
+    def _registro(self):
+        if self._registrando() or self.preparando:
+            self._detener()
+            return
+        if self.sesion is None or not self.sesion.hay_paciente or self.midiendo:
+            return
+        if not self.sonda:
+            self._mensaje('Pon el adaptador con el tubo de presión en una narina (clic en la narina).',
+                          'alerta')
+            return
+        if not self.mascara:
+            self._mensaje('Pon la máscara antes de registrar.', 'alerta')
+            return
+        lado = 'I' if self.sonda == 'D' else 'D'
+        self.reg = RM.Registro(self.sesion.paciente, lado, self.sesion.estado(),
+                               self.sesion.semilla_medicion(self.EQUIPO))
+        self.reg_fase = self.sesion.fase()
+        self._redes_pedidas = set()
+        self._completos = []
+        self._t, self._P, self._V = [], [], []
+        self.g_tiempo.limpiar()
+        self.preparando = True
+        self.btn_registro.setText('Detener')
+        self.btn_vc.setEnabled(False)
+        self.pill_registro.set(f'{SIGLA[lado]} · preparando', 'acento')
+        self._mensaje(f'Registrando la {SIGLA[lado]}: el paciente respira con la máscara puesta.')
+        self._pedir_red(*self._condicion(), luego=self._arrancar)
+        self.dibujar()
+
+    def _pedir_red(self, errores, forzada, luego=None):
+        """La red de esa condición, calculada fuera de la ventana (~1 s)."""
+        reg = self.reg
+        if reg is None:
+            return
+        if reg.red(errores, forzada) is not None:
+            if luego:
+                luego()
+            return
+        clave = RM.clave_red(errores, forzada)
+        if clave in self._redes_pedidas and luego is None:
+            return
+        self._redes_pedidas.add(clave)
+
+        def listo(red):
+            if self.reg is not reg:
+                return
+            reg.poner_red(errores, forzada, red)
+            if luego:
+                luego()
+
+        def fallo(exc):
+            self._mensaje(f'No se pudo registrar: {exc}', 'alerta')
+            self._cortar()
+
+        self.tarea = hilos.en_fondo(reg.calcular_red, errores, forzada, listo=listo, fallo=fallo,
+                                    dueno=self, nombre='red rm')
+
+    def _arrancar(self):
+        self.preparando = False
+        self._t0 = self._reloj()
+        self._ciclo_nuevo(0.0)
+        self.timer.start()
+        self.pill_registro.set(f'{SIGLA[self.reg.lado]} · 0 ciclos', 'acento')
+
+    def _ciclo_nuevo(self, inicio):
+        """El ciclo que empieza ahora, con lo que el paciente hace ahora. Si
+        lo que cambió todavía no está calculado, respira una vez más como
+        venía (y se calcula mientras)."""
+        errores, forzada = self._condicion()
+        if self.reg.red(errores, forzada) is None:
+            self._pedir_red(errores, forzada)
+            errores, forzada = self._ultima
+        self._ultima = (errores, forzada)
+        c = self.reg.siguiente(errores, forzada)
+        self._actual = {'c': c, 'ini': inicio, 'dur': self.DURACION[bool(forzada)], 'hechos': 0}
+
+    def _tic(self):
+        if self.reg is None or self.preparando:
+            return
+        ahora = self._reloj() - self._t0
+        N = RM.N_CICLO
+        while True:
+            a = self._actual
+            frac = (ahora - a['ini']) / a['dur']
+            hasta = max(a['hechos'], min(N, int(frac * N)))
+            c = a['c']
+            for k in range(a['hechos'], hasta):
+                self._t.append(a['ini'] + k * a['dur'] / N)
+                self._P.append(c['P'][k])
+                self._V.append(c['V'][k])
+            a['hechos'] = hasta
+            if frac < 1:
+                break
+            self._completos.append(c)
+            lado = self.reg.lado
+            self.pill_registro.set(f'{SIGLA[lado]} · {len(self._completos)} ciclos', 'acento')
+            if len(self._completos) >= self.MAX_CICLOS:
+                self._detener()
+                return
+            self._ciclo_nuevo(a['ini'] + a['dur'])
+            self.dibujar()
+        if self._t and self._t[0] < self._t[-1] - self.GUARDA_S:
+            corte = next(i for i, t in enumerate(self._t) if t >= self._t[-1] - self.GUARDA_S)
+            del self._t[:corte], self._P[:corte], self._V[:corte]
+        self.g_tiempo.poner(self._t, self._P, self._V, self.reg.lado)
+        a = self._actual
+        self.g_curva.actual(a['c']['P'][:a['hechos']], a['c']['V'][:a['hechos']])
+        # El vaho en la máscara: aparece al espirar y se va al inspirar.
+        v = self.vista_paciente
+        flujo = self._V[-1] if self._V else 0
+        v.empanado = min(1.0, max(v.empanado * 0.9, -flujo / 450))
+        v.update()
+
+    def _detener(self):
+        reg, completos = self.reg, list(getattr(self, '_completos', []))
+        preparando = self.preparando
+        self._cortar(trazos=False)
+        if reg is None or preparando:
+            self._mensaje('Registro cancelado.')
+            self.dibujar()
+            return
+        if len(completos) < self.MIN_CICLOS:
+            self._mensaje(f'Registro detenido con {len(completos)} ciclos completos: hacen falta al '
+                          f'menos {self.MIN_CICLOS} para promediar. No se guardó.', 'alerta')
+            self.dibujar()
+            return
+        if len(reg.ciclos) > len(completos):
+            reg.descartar_ultimo()
+        n = min(self.spin_ciclos.value(), len(completos))
+        r = reg.resultado(n)
+        lado, fase = reg.lado, self.reg_fase
+        self.res[fase][lado] = r
+        receta = {'lado': lado, 'fase': fase, 'estado': dict(reg.estado), 'opciones': reg.receta(n)}
+        self.mediciones = [m for m in self.mediciones if (m['lado'], m['fase']) != (lado, fase)] + [receta]
+        self._al_medir(lado, r)
+        self.dibujar()
+
+    def _cortar(self, trazos=True):
+        """Corta el registro en curso sin guardar nada."""
+        if getattr(self, 'timer', None) is not None:
+            self.timer.stop()
+        self.reg = None
+        self.preparando = False
+        if hasattr(self, 'btn_registro'):
+            self.btn_registro.setText('Iniciar registro')
+            self.pill_registro.set('')
+            if trazos:
+                self.g_tiempo.limpiar()
+            self._refrescar_encabezado()
+
+    def _midiendo(self, si):
+        """Al retomar la atención se recalcula lo guardado fuera de la ventana."""
+        self.midiendo = si
+        for b in (self.btn_registro, self.btn_vc):
+            b.setEnabled(not si)
+        if not si:
+            self._refrescar_encabezado()
+
+    def _refrescar_encabezado(self):
+        super()._refrescar_encabezado()
+        if self.sesion is not None and self.sesion.hay_paciente:
+            self.btn_vc.setEnabled(not self.sesion.vc and not self.midiendo
+                                   and not self._registrando() and not self.preparando)
 
     def _al_medir(self, lado, r):
-        siguiente = ' Cambia el adaptador a la derecha y mide la FNI.' if lado == 'D' else ''
-        self._mensaje(f'{SIGLA[lado]} medida {"con vasoconstrictor" if self.sesion.vc else "en reposo"}: '
-                      f'{len(r["ciclos"])} ciclos promediados.{siguiente}')
+        siguiente = (' Saca la máscara, cambia el adaptador a la narina derecha y registra la FNI.'
+                     if lado == 'D' else '')
+        self._mensaje(f'{SIGLA[lado]} {"con vasoconstrictor" if self.sesion.vc else "en reposo"}: '
+                      f'promedio de los últimos {len(r["ciclos"])} ciclos.{siguiente}')
 
     def _dibujar_equipo(self):
         series = self._series()
         broms = self.chk_broms.isChecked()
+        vivo = (self.reg.lado, self._completos) if self.reg is not None else None
         self.g_curva.dibujar(series, ciclos=self.chk_ciclos.isChecked(),
-                             referencia=self.chk_referencia.isChecked(), broms=broms)
+                             referencia=self.chk_referencia.isChecked(), broms=broms, vivo=vivo)
         self.g_resistencia.dibujar(series)
         self._tabla()
         self.avisos.setText(self._lista_avisos())

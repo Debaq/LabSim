@@ -70,6 +70,19 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
       (una fosa de RM tarda ~0,7 s). Probado a 1366 y 1024 de ancho
       (`tests/test_nasal_equipos.py`). **Sin informe todavía:** sumar los
       tipos a `reports.tipo` es una migración (CHECK en la tabla); va en F3.
+- [x] **F2b. Rinomanometría como se hace** (2026-10-29, a pedido de él: "los
+      equipos usan primero las de presión y flujo"; sin ver en la app real).
+      Ventanita del paciente (`nasal/paciente_rm.py`: la cara de la
+      rinoscopía con la máscara oronasal y el adaptador con su tubo; clic en
+      la narina pone el adaptador, solo sin máscara). Registrar: presión y
+      flujo corren en el tiempo, cada ciclo completo se suma al lazo P-V, y
+      al detener se promedian los últimos 3-5 (con menos de 3 no se guarda).
+      Indicaciones al paciente (boca, parejo, tranquilo, fuerte) que se notan
+      desde la respiración siguiente; los errores se ven sin carteles (boca
+      abierta por la máscara, máscara chueca, oliva asomando). El modelo:
+      `mide_fosa` partido en `Red` + `ciclo` + `resumen` sin cambiar números
+      (la equivalencia con el JS pasa); `Registro` genera ciclo a ciclo con la
+      condición de ese momento y `mide_registro` lo rehace desde la receta.
 - [x] **F3. Caso nasal e informe** (hecho 2026-10-29, sin ver en navegador):
       - Ficha **Nariz** en `case_create.php`, solo para el admin
         (`CaseReview::TABS['nariz']`: `solo_admin`, no revisable, no

@@ -9,6 +9,9 @@
    para el otro en la misma atención, y una atención nueva empieza en reposo.
 5. La medición corre fuera de la ventana y deja los botones apagados
    mientras tanto.
+10. La rinomanometría se registra como en el equipo: adaptador en una
+    narina, máscara, presión y flujo en el tiempo; las indicaciones al
+    paciente cambian los ciclos siguientes y la receta los rehace iguales.
 6. La misma atención y los mismos pasos dan la misma medición (semillas
    estables, no hash()).
 7. La pestaña "Lo que el equipo no sabe" es solo para docente/admin.
@@ -34,7 +37,11 @@ ADMIN = {'permission': 777}
 
 
 def medir(w, lado):
-    """La medición corre en otro hilo (hilos.en_fondo): se espera el aviso."""
+    """La medición corre en otro hilo (hilos.en_fondo): se espera el aviso.
+    En la rinomanometría es un registro de seis ciclos."""
+    if isinstance(w, RinomanometriaWindow):
+        registrar(w, lado)
+        return
     w._medir(lado)
     while w.midiendo:
         context.app.processEvents()
@@ -42,6 +49,46 @@ def medir(w, lado):
             w.tarea.esperar(20)
     context.app.processEvents()
 ALUMNO = {'permission': 1}
+
+
+def preparar(w, lado):
+    """Adaptador en la narina contraria y máscara puesta."""
+    if w.mascara:
+        w._mascara()
+    w._poner_sonda('I' if lado == 'D' else 'D')
+    w._mascara()
+
+
+def arrancar(w):
+    """Iniciar el registro con un reloj de mentira; espera la red."""
+    t = [0.0]
+    w._reloj = lambda: t[0]
+    w._registro()
+    while w.preparando:
+        context.app.processEvents()
+        if w.tarea is not None:
+            w.tarea.esperar(20)
+    context.app.processEvents()
+    return t
+
+
+def correr(w, t, segundos):
+    """El tiempo pasa de a 0,1 s."""
+    for _ in range(int(segundos * 10)):
+        t[0] += 0.1
+        w._tic()
+
+
+def registrar(w, lado, ciclos=6):
+    if not (w.sesion and w.sesion.hay_paciente):
+        w._registro()
+        return
+    preparar(w, lado)
+    t = arrancar(w)
+    if w.reg is None:
+        return
+    correr(w, t, ciclos * w.DURACION[w.forzada] + 0.5)
+    w._registro()
 
 
 def caso(cuadro='mixta'):
@@ -102,14 +149,66 @@ def test_vasoconstrictor_compartido():
 
 
 def test_mide_en_segundo_plano():
-    w = RinomanometriaWindow(data_login=ADMIN)
+    w = RinometriaWindow(data_login=ADMIN)
     w.la_super(caso(), 'fondo')
+    w._calibrar()
     w._medir('D')
     assert w.midiendo and not w.btn_d.isEnabled() and not w.btn_vc.isEnabled()
     while w.midiendo:
         context.app.processEvents()
         w.tarea.esperar(20)
     assert w.res['reposo']['D'] is not None and w.btn_d.isEnabled()
+
+
+def test_rm_pide_adaptador_y_mascara():
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super(caso(), 'pasos')
+    w._registro()
+    assert w.reg is None and 'adaptador' in w.lbl_mensaje.text()
+    w._poner_sonda('I')
+    assert w.vista_paciente.sonda == 'I' and 'FND' in w.lbl_sonda.text()
+    w._registro()
+    assert w.reg is None and 'máscara' in w.lbl_mensaje.text()
+    w._mascara()
+    w._poner_sonda('D')                     # con la máscara puesta no se cambia
+    assert w.sonda == 'I' and 'Saca la máscara' in w.lbl_mensaje.text()
+    t = arrancar(w)
+    assert w.reg is not None and w.reg.lado == 'D' and not w.btn_vc.isEnabled()
+    w._mascara()                            # ni se saca registrando
+    assert w.mascara
+    correr(w, t, 2 * w.DURACION[False] + 0.5)
+    assert len(w._completos) == 2 and len(w._t) > 100
+    w._registro()                           # dos ciclos no alcanzan
+    assert w.res['reposo']['D'] is None and 'al menos 3' in w.lbl_mensaje.text()
+
+
+def test_rm_indicaciones_cambian_los_ciclos():
+    data = caso('cornetes')
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super(data, '55')
+    preparar(w, 'D')
+    w.chk_err['boca'].setChecked(True)
+    assert w.vista_paciente.boca
+    t = arrancar(w)
+    correr(w, t, 2 * w.DURACION[False] + 0.2)
+    w._indicar('boca')
+    assert not w.chk_err['boca'].isChecked() and not w.vista_paciente.boca
+    while w.tarea is not None and not w.tarea.esperar(20):
+        context.app.processEvents()
+    context.app.processEvents()
+    correr(w, t, 4 * w.DURACION[False] + 0.2)
+    w._registro()
+    conds = w.mediciones[-1]['opciones']['registro']
+    assert conds[0]['errores'] == {'boca': True} and conds[-1]['errores'] == {}
+    # Los cuatro últimos ya son con la boca cerrada: los que promedia.
+    assert w.mediciones[-1]['opciones']['desde'] == len(conds) - 4
+
+    sesion._actual = None
+    otra = RinomanometriaWindow(data_login=ADMIN)
+    otra.la_super(data, '55')
+    assert otra.restore_report(w.report_job()['data'])
+    esperar(otra)
+    assert otra.res['reposo']['D']['lecturas'] == w.res['reposo']['D']['lecturas']
 
 
 def test_misma_atencion_misma_medicion():

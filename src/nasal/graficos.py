@@ -87,16 +87,23 @@ class GraficoRinomanometria:
     def exportar(self, ruta):
         exportar(self.widget, ruta)
 
-    def dibujar(self, series, ciclos=True, referencia=True, broms=False):
-        """series: [(fosas {D, I} de mide_fosa o None, vc bool)]."""
+    def dibujar(self, series, ciclos=True, referencia=True, broms=False, vivo=None):
+        """series: [(fosas {D, I} de mide_fosa o None, vc bool)].
+        vivo: (lado, [ciclos ya completos]) del registro en curso, o None."""
         plot = self.widget
         plot.clear()
+        self._actual = None
         pmax = vmax = 0.0
+        en_curso = vivo[1] if vivo else []
         for fosas, _vc in series:
             for f in filter(None, fosas.values()):
-                for c in f['ciclos']:
-                    pmax = max(pmax, max(abs(p) for p in c['P']))
-                    vmax = max(vmax, max(abs(v) for v in c['V']))
+                en_curso = en_curso + f['ciclos']
+        for c in en_curso:
+            pmax = max(pmax, max(abs(p) for p in c['P']))
+            vmax = max(vmax, max(abs(v) for v in c['V']))
+        if vivo:
+            # Al empezar todavía no hay ciclos: un rango que no salte.
+            pmax, vmax = max(pmax, 280), max(vmax, 480)
         P = _tope(pmax * 1.02, TOPES_P)
         V = _tope(vmax * 1.05, TOPES_V)
         plot.setXRange(-P, P, padding=0)
@@ -146,6 +153,81 @@ class GraficoRinomanometria:
                     plot.addItem(pg.ScatterPlotItem([signo * b['P']], [b['V']], size=8,
                                                     pen=pg.mkPen('#ffffff', width=1.2),
                                                     brush=pg.mkBrush(COLOR[lado])))
+
+        if vivo:
+            lado, completos = vivo
+            self._signo = 1 if lado == 'D' else -1
+            color = pg.mkColor(COLOR[lado])
+            color.setAlphaF(0.45)
+            for c in completos:
+                plot.plot([self._signo * p for p in c['P']], c['V'], pen=pg.mkPen(color, width=1))
+            self._actual = plot.plot([], [], pen=pg.mkPen(COLOR[lado], width=2.4))
+
+    def actual(self, P, V):
+        """El ciclo que se está registrando, punto a punto (sin redibujar todo)."""
+        if self._actual is not None:
+            self._actual.setData(self._signo * np.asarray(P, dtype=float), np.asarray(V, dtype=float))
+
+
+class GraficoTiempo:
+    """Presión y flujo contra el tiempo, como corren en la pantalla del equipo
+    mientras el paciente respira con la máscara puesta. Inspiración hacia
+    arriba en los dos."""
+
+    VENTANA = 12.0   # segundos a la vista
+
+    def __init__(self):
+        self.widget = pg.GraphicsLayoutWidget()
+        self.widget.setBackground(tema.TARJETA)
+        self.presion = self._fila(0, 'presión (Pa)')
+        self.flujo = self._fila(1, 'flujo (cm³/s)')
+        self.flujo.setXLink(self.presion)
+        self.flujo.getAxis('bottom').setLabel('tiempo (s)', color=tema.TEXTO_TENUE)
+        self.presion.getAxis('bottom').setStyle(showValues=False)
+        self.curva_p = self.presion.plot([], [])
+        self.curva_v = self.flujo.plot([], [])
+        self.limpiar()
+
+    def _fila(self, fila, texto):
+        plot = self.widget.addPlot(row=fila, col=0)
+        plot.setMenuEnabled(False)
+        plot.hideButtons()
+        plot.getViewBox().setMouseEnabled(x=False, y=False)
+        plot.showGrid(x=True, y=True, alpha=0.25)
+        for nombre in ('bottom', 'left'):
+            eje = plot.getAxis(nombre)
+            eje.setPen(pg.mkPen(tema.BORDE_FUERTE))
+            eje.setTextPen(pg.mkPen(tema.TEXTO_TENUE))
+        plot.getAxis('left').setLabel(texto, color=tema.TEXTO_TENUE)
+        plot.getAxis('left').setWidth(58)
+        plot.addItem(pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen(tema.BORDE_FUERTE, width=1)))
+        _texto(plot, 0, 0, 'insp ↑', ancla=(0, 0)).setParentItem(plot.getViewBox())
+        return plot
+
+    def limpiar(self):
+        self.curva_p.setData([], [])
+        self.curva_v.setData([], [])
+        self.presion.setXRange(0, self.VENTANA, padding=0)
+        self.presion.setYRange(-300, 300, padding=0)
+        self.flujo.setYRange(-600, 600, padding=0)
+
+    def poner(self, t, P, V, lado):
+        """t, P, V: lo registrado hasta ahora; se ven los últimos segundos."""
+        pluma = pg.mkPen(COLOR[lado], width=1.8)
+        self.curva_p.setData(t, P, pen=pluma)
+        self.curva_v.setData(t, V, pen=pluma)
+        fin = max(self.VENTANA, t[-1] if len(t) else 0)
+        self.presion.setXRange(fin - self.VENTANA, fin, padding=0)
+        vista = np.asarray(t) >= fin - self.VENTANA
+        for plot, datos, minimo, topes in ((self.presion, P, 300, TOPES_P), (self.flujo, V, 600, TOPES_V)):
+            m = float(np.max(np.abs(np.asarray(datos)[vista]))) if vista.any() else 0
+            tope = _tope(max(minimo, m * 1.1), [minimo] + topes)
+            plot.setYRange(-tope, tope, padding=0)
+
+    def exportar(self, ruta):
+        exportador = pg.exporters.ImageExporter(self.widget.scene())
+        exportador.parameters()['width'] = max(800, int(self.widget.width() * 2))
+        exportador.export(ruta)
 
 
 class GraficoResistencia:

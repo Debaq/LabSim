@@ -268,6 +268,105 @@ ESFUERZO = {
 }
 
 
+class Red:
+    """La curva estática de la red de una medición (resuelve_red en una
+    rejilla de presiones de rinofaringe, cada 2 Pa) y lo que hace el paciente
+    con ella: la presión pico con la que llega a su flujo. Es lo caro de la
+    medición (~0,8 s; ~1,6 s con inspiración forzada) y depende solo de la
+    nariz, del estado y de lo que cambia la red: el adaptador sin sellar, la
+    boca abierta y la maniobra (clave_red). La fuga de la máscara y la
+    respiración irregular actúan sobre cada ciclo, no sobre la red."""
+
+    def __init__(self, p, lado, estado=None, errores=None, forzada=False):
+        estado = estado or {}
+        errores = errores or {}
+        otro = 'I' if lado == 'D' else 'D'
+        self.fm = fosa(p, lado, estado)
+        fo = fosa(p, otro, estado)
+        esfuerzo = ESFUERZO['forzada' if forzada else 'normal']
+        self.paso = 2
+        self.tope = esfuerzo['pmax'] * 1.25
+        self.tabla = []
+        P = -self.tope
+        while P <= self.tope + 1e-9:
+            t = resuelve_red(self.fm, fo, P, p['perforacion'], errores)
+            t['P'] = P
+            self.tabla.append(t)
+            P += self.paso
+        self.pico_insp = self._presion_pico(1, esfuerzo['flujo'], esfuerzo['pmax'])
+        self.pico_esp = self._presion_pico(-1, 0.9 * esfuerzo['flujo'], 0.9 * esfuerzo['pmax'])
+
+    def en(self, P, campo):
+        tabla = self.tabla
+        t = max(0, min(len(tabla) - 1.000001, (P + self.tope) / self.paso))
+        i = math.floor(t)
+        return tabla[i][campo] + (tabla[i + 1][campo] - tabla[i][campo]) * (t - i)
+
+    def _presion_pico(self, signo, objetivo, pmax):
+        """El paciente: la menor presión con la que llega a su flujo, o su máximo."""
+        P = 2
+        while P <= pmax:
+            if abs(self.en(signo * P, 'pulmon')) >= objetivo:
+                return P
+            P += 1
+        return pmax
+
+
+def clave_red(errores, forzada):
+    """Lo que distingue una Red de otra para la misma nariz y el mismo estado."""
+    errores = errores or {}
+    return (bool(errores.get('adaptador')), bool(errores.get('boca')), bool(forzada))
+
+
+# Muestras por ciclo respiratorio (N + 1 puntos, de 0 a 2π).
+N_CICLO = 160
+
+
+def ciclo(r, red, errores=None):
+    """Un ciclo respiratorio: la presión va y viene como un seno; el flujo la
+    sigue con un pequeño retraso (la inercia del aire), que abre la curva en
+    un lazo. `r` es el generador de la medición: los ciclos salen en orden."""
+    errores = errores or {}
+    tope, en_tabla = red.tope, red.en
+    irregular = bool(errores.get('irregular'))
+    cv = 0.3 if irregular else 0.05
+    retraso = 0.08 if irregular else 0.015
+    N = N_CICLO
+    a = max(0.35, r.normal(1, cv))
+    pi = min(tope, red.pico_insp * a)
+    pe = min(tope, red.pico_esp * max(0.35, r.normal(1, cv)))
+    # Una pausa (traga, aguanta) en algún ciclo de la respiración irregular.
+    pausa = r.entre(0.3, 5.5) if irregular and r.uniforme() < 0.6 else None
+    # Y respira cada ciclo distinto, y la máscara se mueve: cada ciclo con
+    # su propio retraso y su propia ganancia del flujo.
+    atraso = max(0, r.normal(retraso, 0.06)) if irregular else retraso
+    ganancia = r.normal(1, 0.12) if irregular else 1
+    Ps = []
+    Vs = []
+    fase = []
+    for k in range(N + 1):
+        th = (2 * math.pi * k) / N
+
+        def pnp(t):
+            return (pi if t < math.pi else pe) * math.sin(t)
+
+        thr = max(0, th - atraso)
+        v = ganancia * en_tabla(pnp(thr), 'mascara')
+        if pausa is not None and th > pausa and th < pausa + 0.6:
+            v *= 0.05
+        if errores.get('mascara'):
+            v *= 1 - FRACCION_FUGA_MASCARA
+        Ps.append(en_tabla(pnp(th), 'sensor') + r.normal(0, 1.2))
+        Vs.append(v + r.normal(0, 12 if irregular else 4))
+        fase.append('insp' if th < math.pi else 'esp')
+    return {'P': Ps, 'V': Vs, 'fase': fase, 'pico': {'insp': pi, 'esp': pe}}
+
+
+def generador_medicion(lado, estado, semilla):
+    minuto = estado.get('minuto')
+    return generador(f"rm/{a_texto(semilla)}/{lado}/{'vc' if estado.get('vc') else 'reposo'}/{a_texto(0 if minuto is None else minuto)}")
+
+
 def mide_fosa(p, lado, estado=None, opciones=None):
     """Mide una fosa como el equipo: varios ciclos respiratorios, la curva
     promedio y la resistencia a 75 y 150 Pa (y en el radio de Broms).
@@ -280,82 +379,16 @@ def mide_fosa(p, lado, estado=None, opciones=None):
     """
     estado = estado or {}
     opciones = opciones or {}
-    ciclos = opciones.get('ciclos', 4)
-    semilla = opciones.get('semilla', 1)
     errores = opciones.get('errores') or {}
-    forzada = opciones.get('forzada', False)
-    otro = 'I' if lado == 'D' else 'D'
-    fm = fosa(p, lado, estado)
-    fo = fosa(p, otro, estado)
-    esfuerzo = ESFUERZO['forzada' if forzada else 'normal']
-    minuto = estado.get('minuto')
-    r = generador(f"rm/{a_texto(semilla)}/{lado}/{'vc' if estado.get('vc') else 'reposo'}/{a_texto(0 if minuto is None else minuto)}")
+    red = Red(p, lado, estado, errores, opciones.get('forzada', False))
+    r = generador_medicion(lado, estado, opciones.get('semilla', 1))
+    lista = [ciclo(r, red, errores) for _c in range(opciones.get('ciclos', 4))]
+    return resumen(lado, estado, lista, red.fm)
 
-    # La curva estática de la red, en una rejilla de presiones de rinofaringe.
-    paso = 2
-    tope = esfuerzo['pmax'] * 1.25
-    tabla = []
-    P = -tope
-    while P <= tope + 1e-9:
-        t = resuelve_red(fm, fo, P, p['perforacion'], errores)
-        t['P'] = P
-        tabla.append(t)
-        P += paso
 
-    def en_tabla(P, campo):
-        t = max(0, min(len(tabla) - 1.000001, (P + tope) / paso))
-        i = math.floor(t)
-        return tabla[i][campo] + (tabla[i + 1][campo] - tabla[i][campo]) * (t - i)
-
-    # El paciente: la menor presión con la que llega a su flujo, o su máximo.
-    def presion_pico(signo, objetivo, pmax):
-        P = 2
-        while P <= pmax:
-            if abs(en_tabla(signo * P, 'pulmon')) >= objetivo:
-                return P
-            P += 1
-        return pmax
-
-    pico_insp = presion_pico(1, esfuerzo['flujo'], esfuerzo['pmax'])
-    pico_esp = presion_pico(-1, 0.9 * esfuerzo['flujo'], 0.9 * esfuerzo['pmax'])
-
-    # Los ciclos: la presión va y viene como un seno; el flujo la sigue con un
-    # pequeño retraso (la inercia del aire), que abre la curva en un lazo.
-    irregular = bool(errores.get('irregular'))
-    cv = 0.3 if irregular else 0.05
-    retraso = 0.08 if irregular else 0.015
-    N = 160
-    lista = []
-    for _c in range(ciclos):
-        a = max(0.35, r.normal(1, cv))
-        pi = min(tope, pico_insp * a)
-        pe = min(tope, pico_esp * max(0.35, r.normal(1, cv)))
-        # Una pausa (traga, aguanta) en algún ciclo de la respiración irregular.
-        pausa = r.entre(0.3, 5.5) if irregular and r.uniforme() < 0.6 else None
-        # Y respira cada ciclo distinto, y la máscara se mueve: cada ciclo con
-        # su propio retraso y su propia ganancia del flujo.
-        atraso = max(0, r.normal(retraso, 0.06)) if irregular else retraso
-        ganancia = r.normal(1, 0.12) if irregular else 1
-        Ps = []
-        Vs = []
-        fase = []
-        for k in range(N + 1):
-            th = (2 * math.pi * k) / N
-
-            def pnp(t):
-                return (pi if t < math.pi else pe) * math.sin(t)
-
-            thr = max(0, th - atraso)
-            v = ganancia * en_tabla(pnp(thr), 'mascara')
-            if pausa is not None and th > pausa and th < pausa + 0.6:
-                v *= 0.05
-            if errores.get('mascara'):
-                v *= 1 - FRACCION_FUGA_MASCARA
-            Ps.append(en_tabla(pnp(th), 'sensor') + r.normal(0, 1.2))
-            Vs.append(v + r.normal(0, 12 if irregular else 4))
-            fase.append('insp' if th < math.pi else 'esp')
-        lista.append({'P': Ps, 'V': Vs, 'fase': fase, 'pico': {'insp': pi, 'esp': pe}})
-
+def resumen(lado, estado, lista, fm):
+    """De los ciclos registrados a lo que muestra el equipo: la curva
+    promedio, las lecturas, los avisos; y la verdad de la fosa `fm`."""
     media = {'insp': _promedio(lista, 'insp'), 'esp': _promedio(lista, 'esp')}
 
     def lectura(rama, Pref):
@@ -554,3 +587,81 @@ def lectura_vasoconstrictor(rReposo, rVc, referencia=REFERENCIA_UNILATERAL_150['
     if rVc <= referencia:
         return {'cambio': cambio, 'tipo': 'vasomotora', 'texto': 'Baja hasta la referencia: vasomotora (mucosa)'}
     return {'cambio': cambio, 'tipo': 'mixta', 'texto': 'Baja sin llegar a la referencia: mixta'}
+
+
+# ── El registro en vivo ─────────────────────────────────────────────────────
+# Lo que no está en RinoSim: el equipo de LabSim muestra presión y flujo en el
+# tiempo mientras el paciente respira, y el alumno le va dando indicaciones
+# (que cierre la boca, que respire parejo) o le acomoda la máscara a mitad del
+# registro. Cada ciclo sale con lo que el paciente hacía en ese momento, del
+# mismo generador que mide_fosa: un registro sin cambios es mide_fosa.
+
+class Registro:
+    """Una fosa registrada ciclo a ciclo. `condiciones` guarda con qué
+    errores y maniobra salió cada ciclo, en orden: con eso y la semilla,
+    mide_registro lo vuelve a armar idéntico (al retomar la atención)."""
+
+    def __init__(self, p, lado, estado=None, semilla=1):
+        self.p = p
+        self.lado = lado
+        self.estado = dict(estado or {})
+        self.semilla = semilla
+        self.r = generador_medicion(lado, self.estado, semilla)
+        self.redes = {}
+        self.ciclos = []
+        self.condiciones = []
+
+    def red(self, errores, forzada):
+        """La red de esa condición, si ya está calculada (o None)."""
+        return self.redes.get(clave_red(errores, forzada))
+
+    def calcular_red(self, errores, forzada):
+        """Calcula la red (lento: fuera de la ventana) sin guardarla."""
+        return Red(self.p, self.lado, self.estado, errores, forzada)
+
+    def poner_red(self, errores, forzada, red):
+        self.redes[clave_red(errores, forzada)] = red
+
+    def siguiente(self, errores=None, forzada=False):
+        """El próximo ciclo con lo que hace el paciente ahora. La red de esa
+        condición tiene que estar (se calcula si falta)."""
+        errores = {k: True for k, v in (errores or {}).items() if v}
+        red = self.red(errores, forzada)
+        if red is None:
+            red = self.calcular_red(errores, forzada)
+            self.poner_red(errores, forzada, red)
+        c = ciclo(self.r, red, errores)
+        self.ciclos.append(c)
+        self.condiciones.append({'errores': errores, 'forzada': bool(forzada)})
+        return c
+
+    def descartar_ultimo(self):
+        """El ciclo a medias cuando se detiene el registro: no cuenta. Es el
+        último, así que la receta de lo que queda sigue dando lo mismo."""
+        self.ciclos.pop()
+        self.condiciones.pop()
+
+    def resultado(self, n):
+        """Lo que guarda el equipo al detener: los últimos n ciclos."""
+        desde = max(0, len(self.ciclos) - n)
+        return resumen(self.lado, self.estado, self.ciclos[desde:], fosa(self.p, self.lado, self.estado))
+
+    def receta(self, n):
+        """Las opciones de mide_registro que dan este mismo resultado."""
+        return {'semilla': self.semilla, 'registro': list(self.condiciones),
+                'desde': max(0, len(self.ciclos) - n), 'ciclos': n}
+
+
+def mide_registro(p, lado, estado=None, opciones=None):
+    """Vuelve a armar un registro en vivo desde su receta (Registro.receta).
+    Sin `registro` en las opciones es una medición de una vez (mide_fosa)."""
+    opciones = opciones or {}
+    condiciones = opciones.get('registro')
+    if not condiciones:
+        return mide_fosa(p, lado, estado, opciones)
+    n = int(opciones.get('ciclos', 4))
+    hasta = int(opciones.get('desde', 0)) + n
+    reg = Registro(p, lado, estado, opciones.get('semilla', 1))
+    for c in condiciones[:hasta]:
+        reg.siguiente(c.get('errores'), c.get('forzada'))
+    return reg.resultado(n)
