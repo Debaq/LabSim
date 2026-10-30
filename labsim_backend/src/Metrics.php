@@ -120,6 +120,13 @@ final class Metrics
         'psg_volver_auto' => 'Vuelve a la puntuación automática',
         'psg_regla' => 'Cambia la regla de hipopnea',
         'psg_gravedad' => 'Elige la gravedad por el índice',
+        'cpap_interfaz' => 'Elige la mascarilla y su talla (CPAP)',
+        'cpap_empezar' => 'Empieza la titulación de CPAP',
+        'cpap_presion' => 'Cambia la presión del CPAP',
+        'cpap_velocidad' => 'Cambia la velocidad de la noche (CPAP)',
+        'cpap_pausa' => 'Pausa o reanuda la noche (CPAP)',
+        'cpap_terminar' => 'Termina la noche de CPAP',
+        'cpap_indicar' => 'Indica la presión y el grado de la titulación',
         // Sistema
         'session_login' => 'Inicio de sesión',
         'session_logout' => 'Cierre de sesión',

@@ -25,7 +25,7 @@ foreach ($nasales as $t) {
     t_true(isset(ReportFile::LABELS[$t]), "ReportFile::LABELS rotula {$t}");
     t_true(isset(ReportFile::SHORT_LABELS[$t]), "ReportFile::SHORT_LABELS rotula {$t}");
 }
-foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt', 'olf_umbral', 'prick_brazo', 'psg_noche'] as $suf) {
+foreach (['rm_curva', 'rm_resistencia', 'ra_curva', 'esp_fv', 'esp_vt', 'olf_umbral', 'prick_brazo', 'psg_noche', 'cpap_noche'] as $suf) {
     t_true(strpos($upload, "'{$suf}'") !== false, "report_upload acepta la imagen {$suf}");
 }
 foreach (['sql/schema.sql', 'src/Db.php'] as $archivo) {
@@ -163,4 +163,34 @@ $sp = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', [
     'avisos' => [], 'gravedad' => '', 'hallazgos' => '', 'conclusion' => '',
 ], $paciente, 'Alumno X', '30-10-2026');
 t_true(strpos($sp, 'SpO2 media') !== false && strpos($sp, 'IDO >= 3') !== false, 'Subíndices y desigualdades legibles en el PDF');
+
+
+// CPAP: interfaz, presiones, duración, tabla de 11 columnas, presión indicada y grado.
+$datosCpap = [
+    'interfaz' => 'oronasal', 'talla' => 'L', 'cambios' => [[0, 4], [900, 6], [2400, 10]], 't_fin' => 22260, 'terminada' => true,
+    'tabla' => ['cabeceras' => ['cmH₂O', 'Minutos', 'Sueño (min)', 'REM supino (min)', 'Apneas O/M/C', 'Hipopneas', 'RERA', 'IDR', 'SpO₂ mín.', 'Ronquido (min)', 'Fuga (L/min)'],
+                'filas' => [['4', '15', '12', '0', '3/0/0', '4', '1', '40,0', '84', '9', '6'], ['10', '120', '100', '8', '0/0/0', '0', '0', '1,2', '93', '0', '9']]],
+    'idr_basal' => 38.5, 'presion_indicada' => 10, 'grado' => 'optima',
+    'hallazgos' => 'Los eventos cedieron a 10.', 'conclusion' => 'CPAP a 10.',
+];
+$cpap = ReportPdfBuilder::build(999, 'CPAP', $datosCpap, $paciente, 'Alumno X', '30-10-2026');
+t_true(strpos($cpap, '%PDF-1.4') === 0, 'El informe de CPAP sale como PDF');
+t_true(strpos($cpap, 'Titulaci') !== false && strpos($cpap, 'manual de CPAP') !== false, 'Trae el título de la titulación');
+t_true(strpos($cpap, 'Mascarilla oronasal') !== false && strpos($cpap, 'talla L') !== false, 'Dice la interfaz y la talla');
+t_true(strpos($cpap, '6 h 11 min') !== false && strpos($cpap, 'Se termin') !== false, 'Dice la duración y que se terminó');
+t_true(strpos($cpap, 'Fuga \\(L/min\\)') !== false && strpos($cpap, '3/0/0') !== false, 'Trae la tabla de 11 columnas');
+t_true(strpos($cpap, 'indicada: 10') !== false, 'Trae la presión indicada');
+t_true(strpos($cpap, 'ptima') !== false, 'Trae el grado en palabras');
+$cpap0 = ReportPdfBuilder::build(999, 'CPAP', ['interfaz' => 'nasal', 'talla' => 'M', 'presion_indicada' => null, 'grado' => ''] + $datosCpap, $paciente, 'Alumno X', '30-10-2026');
+t_true(strpos($cpap0, 'sin indicar') !== false && strpos($cpap0, 'sin elegir') !== false, 'Sin presión ni grado lo dice');
+
+// En producción el PDF se arma sin el resto de la app cargada: cada cuerpo
+// tiene que traer lo que usa (cpapBody usaba CaseForm sin cargarlo).
+foreach (['POLISOMNOGRAFIA', 'CPAP', 'OLFATOMETRIA', 'PRICK', 'ESPIROMETRIA'] as $t) {
+    $codigo = 'require "' . __DIR__ . '/../src/ReportFile.php"; require "' . __DIR__ . '/../src/ReportPdfBuilder.php";'
+        . ' echo substr(ReportPdfBuilder::build(999, "' . $t . '", ["estudio" => "psg", "cambios" => [[0, 4]],'
+        . ' "interfaz" => "nasal", "talla" => "M", "regla" => "3"], ["nombre" => "A", "apellido" => "B"], "X", "30-10-2026"), 0, 8);';
+    $salida = (string) shell_exec(escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($codigo) . ' 2>&1');
+    t_true(strpos($salida, '%PDF-1.4') === 0, "El PDF de {$t} se arma solo con ReportFile y ReportPdfBuilder: " . substr($salida, 0, 120));
+}
 

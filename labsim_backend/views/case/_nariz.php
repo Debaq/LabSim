@@ -190,6 +190,18 @@
         <label>Desde (min desde que apaga la luz, 0-600) <input type="number" id="sueno-desde" step="1" min="0" max="600"></label>
         <label>Hasta (min, mayor que desde, hasta 601) <input type="number" id="sueno-hasta" step="1" min="1" max="601"></label>
     </div>
+    <strong>Titulación de CPAP</strong>
+    <p class="help">La presión eficaz es la que abre la vía en decúbito lateral y en NREM; en supino y en REM se suma lo indicado. Con la presión real bajo la eficaz siguen los eventos: las apneas se van 2 cmH₂O antes, las hipopneas 1 antes y el ronquido en la eficaz. Respirar por la boca con mascarilla nasal o almohadillas, o una talla que no le calza, sube la fuga y baja la presión real. Lo que se deja vacío sale del perfil de la noche.</p>
+    <div class="two-col">
+        <label>Presión eficaz (cmH₂O, 4 a 20) <input type="number" id="sueno-cpap-p_eficaz" step="0.5" min="4" max="20"></label>
+        <label>Más en supino (cmH₂O, 0 a 6) <input type="number" id="sueno-cpap-supino" step="0.5" min="0" max="6" placeholder="2"></label>
+        <label>Más en REM (cmH₂O, 0 a 6) <input type="number" id="sueno-cpap-rem" step="0.5" min="0" max="6" placeholder="1,5"></label>
+        <label>Talla de mascarilla que le calza <select id="sueno-cpap-talla"><option value="">Del perfil (M)</option></select></label>
+    </div>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="sueno-cpap-boca">
+        Respira por la boca
+    </label>
     </div>
 </div>
 </div>

@@ -104,6 +104,12 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'CPAP') {
+            $y = self::cpapBody($pdf, $reportId, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'PRICK') {
             $y = self::prickBody($pdf, $reportId, $data, $y, $contentW);
             self::textSections($pdf, $data, $y, $contentW);
@@ -1026,6 +1032,104 @@ final class ReportPdfBuilder
         $g = (string) ($data['gravedad'] ?? '');
         $y = self::ensureSpace($pdf, $y, 16.0);
         $y = $pdf->textBlock(self::MARGIN, $y, 'Gravedad por el índice: ' . (self::PSG_GRAVEDADES[$g] ?? 'sin elegir'), $contentW, 10);
+        return $y + 10;
+    }
+
+    /** Interfaces y grados de la titulación de CPAP en palabras (nasal/cpap.py). */
+    private const CPAP_INTERFACES = [
+        'nasal' => 'Mascarilla nasal', 'almohadillas' => 'Almohadillas nasales', 'oronasal' => 'Mascarilla oronasal',
+    ];
+    private const CPAP_GRADOS = [
+        'optima' => 'Óptima', 'buena' => 'Buena', 'adecuada' => 'Adecuada', 'inaceptable' => 'Inaceptable',
+    ];
+
+    /**
+     * Cuerpo del informe de titulación de CPAP: la interfaz y la talla, la
+     * presión de partida y la final, cuánto duró la noche, el IDR basal, el
+     * resumen gráfico, la tabla por presión (11 columnas, letra chica), la
+     * presión indicada y su grado (nasal/cpap.py).
+     */
+    private static function cpapBody(MiniPdf $pdf, int $reportId, array $data, float $y, float $contentW): float
+    {
+        require_once __DIR__ . '/CaseForm.php';
+        $y = self::ensureSpace($pdf, $y, 24.0);
+        $pdf->text(self::MARGIN, $y, 'Titulación manual de CPAP en polisomnografía', 12, true);
+        $y += 20;
+
+        $lineas = [];
+        $interfaz = (string) ($data['interfaz'] ?? '');
+        $talla = (string) ($data['talla'] ?? '');
+        $lineas[] = 'Interfaz: ' . (self::CPAP_INTERFACES[$interfaz] ?? 'sin dato')
+            . (in_array($talla, CaseForm::SUENO_TALLAS, true) ? ', talla ' . $talla : '') . '.';
+        $cambios = [];
+        foreach (is_array($data['cambios'] ?? null) ? $data['cambios'] : [] as $c) {
+            if (is_array($c) && isset($c[1]) && is_numeric($c[1])) {
+                $cambios[] = (float) $c[1];
+            }
+        }
+        if ($cambios !== []) {
+            $lineas[] = 'Presión inicial: ' . self::decimal($cambios[0]) . ' cmH₂O. Presión final: '
+                . self::decimal($cambios[count($cambios) - 1]) . ' cmH₂O (' . count($cambios) . ' ajustes incluido el inicial).';
+        }
+        $tFin = isset($data['t_fin']) && is_numeric($data['t_fin']) ? max(0, (int) round((float) $data['t_fin'])) : null;
+        if ($tFin !== null) {
+            $lineas[] = 'Duración: ' . intdiv($tFin, 3600) . ' h ' . intdiv($tFin % 3600, 60) . ' min. '
+                . (!empty($data['terminada']) ? 'Se terminó la noche.' : 'La noche no se terminó.');
+        }
+        if (isset($data['idr_basal']) && is_numeric($data['idr_basal'])) {
+            $lineas[] = 'IDR basal: ' . self::decimal((float) $data['idr_basal']) . ' /h.';
+        }
+        foreach ($lineas as $linea) {
+            $y = self::ensureSpace($pdf, $y, 14.0);
+            $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);
+            $y += 2;
+        }
+        $y += 6;
+
+        $antes = $y;
+        $y = self::imagenInforme($pdf, $reportId, 'cpap_noche', $y, $contentW, 340.0);
+        if ($y > $antes) {
+            $pdf->text(self::MARGIN, $y, 'Resumen gráfico de la noche.', 8);
+            $y += 16;
+        }
+
+        $tabla = is_array($data['tabla'] ?? null) ? $data['tabla'] : [];
+        $cabeceras = is_array($tabla['cabeceras'] ?? null) ? array_values(array_map('strval', $tabla['cabeceras'])) : [];
+        $filas = is_array($tabla['filas'] ?? null) ? $tabla['filas'] : [];
+        if ($cabeceras !== [] && $filas !== []) {
+            $y = self::ensureSpace($pdf, $y, 40.0);
+            $pdf->text(self::MARGIN, $y, 'Resultados por presión', 12, true);
+            $y += 18;
+            $n = count($cabeceras);
+            $ancho = $contentW / $n;
+            $fila = function (array $celdas, bool $negrita) use ($pdf, $ancho, &$y, $n) {
+                $x = self::MARGIN;
+                for ($i = 0; $i < $n; $i++) {
+                    $pdf->text($x, $y, (string) ($celdas[$i] ?? ''), 7, $negrita);
+                    $x += $ancho;
+                }
+                $y += 12;
+            };
+            $fila($cabeceras, true);
+            foreach ($filas as $celdas) {
+                if (is_array($celdas)) {
+                    $y = self::ensureSpace($pdf, $y, 14.0);
+                    $fila(array_values($celdas), false);
+                }
+            }
+            $y += 8;
+        }
+        $nota = trim((string) ($data['nota'] ?? ''));
+        if ($nota !== '') {
+            $y = $pdf->textBlock(self::MARGIN, $y, $nota, $contentW, 8) + 6;
+        }
+
+        $y = self::ensureSpace($pdf, $y, 32.0);
+        $p = $data['presion_indicada'] ?? null;
+        $y = $pdf->textBlock(self::MARGIN, $y, 'Presión indicada: '
+            . (is_numeric($p) ? self::decimal((float) $p, 0) . ' cmH₂O' : 'sin indicar'), $contentW, 10);
+        $g = (string) ($data['grado'] ?? '');
+        $y = $pdf->textBlock(self::MARGIN, $y + 2, 'Grado de la titulación: ' . (self::CPAP_GRADOS[$g] ?? 'sin elegir'), $contentW, 10);
         return $y + 10;
     }
 

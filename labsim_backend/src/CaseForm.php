@@ -1400,6 +1400,16 @@ final class CaseForm
         'ron' => ['Micrófono de ronquido', true],
         'pos' => ['Sensor de posición', true],
     ];
+    /** Rangos de la titulación de CPAP (nasal/sueno.normaliza, parte cpap): clave => [mínimo, máximo]. */
+    public const SUENO_CPAP_RANGOS = [
+        'p_eficaz' => [4, 20],
+        'supino' => [0, 6],
+        'rem' => [0, 6],
+    ];
+    /** Presión eficaz que sale del perfil si no se indica (nasal/cpap.PRESION_PERFIL, cmH2O). */
+    public const SUENO_CPAP_PERFIL = ['roncador' => 7, 'moderado' => 10, 'grave' => 13, 'dudosa' => 8];
+    /** Tallas de mascarilla (nasal/cpap.TALLAS). */
+    public const SUENO_TALLAS = ['S', 'M', 'L'];
     /** Reglas de hipopnea (nasal/sueno.REGLAS). */
     public const SUENO_REGLAS = [
         '3' => 'Recomendada: caída ≥ 30 % con desaturación ≥ 3 % o despertar',
@@ -1444,7 +1454,7 @@ final class CaseForm
             }
             return $x + 0;
         };
-        $out = ['perfil' => $perfil, 'params' => null, 'canula_suelta' => null];
+        $out = ['perfil' => $perfil, 'params' => null, 'canula_suelta' => null, 'cpap' => null];
         if ($perfil === 'personalizado') {
             $p = $json['params'] ?? [];
             if ($p === null) {
@@ -1480,6 +1490,26 @@ final class CaseForm
                 return null;
             }
             $out['canula_suelta'] = ['desde' => $desde, 'hasta' => $hasta];
+        }
+        // Titulación de CPAP (opcional): lo que falta sale del perfil en la app.
+        $cp = $json['cpap'] ?? null;
+        if (is_array($cp) && $cp !== []) {
+            $cpap = [];
+            foreach (self::SUENO_CPAP_RANGOS as $k => $r) {
+                if (($cp[$k] ?? null) !== null && $cp[$k] !== '') {
+                    $cpap[$k] = $num($cp[$k], 'cpap.' . $k, $r[0], $r[1]);
+                    if ($error !== null) {
+                        return null;
+                    }
+                }
+            }
+            if (array_key_exists('boca', $cp)) {
+                $cpap['boca'] = (bool) $cp['boca'];
+            }
+            if (isset($cp['talla']) && in_array($cp['talla'], self::SUENO_TALLAS, true)) {
+                $cpap['talla'] = $cp['talla'];
+            }
+            $out['cpap'] = $cpap !== [] ? $cpap : null;
         }
         return $out;
     }

@@ -51,11 +51,12 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 
 ## Fases
 
-**Para retomar (2026-10-30):** F0-F6 y F7a hechas. Falta verlos en la app
+**Para retomar (2026-10-30):** F0-F7 hechas. Falta verlos en la app
 real: la rinomanometría (F2b), la rinometría acústica (F2c), la
-espirometría (F6), la olfatometría y el prick (F5) y la polisomnografía
-(F7a); y en el navegador, las tarjetas Olfato, Prick y Sueño. Lo que sigue
-es **F7b (CPAP)**. La rinoscopía (F4) está en pausa por el aspecto.
+espirometría (F6), la olfatometría y el prick (F5), la polisomnografía
+(F7a) y el CPAP (F7b); y en el navegador, las tarjetas Olfato, Prick y
+Sueño. Lo que queda son los pendientes de cada fase y soltar los equipos a
+los alumnos. La rinoscopía (F4) está en pausa por el aspecto.
 Las fichas 151-162 están en la práctica libre de todos, una carpeta por
 capítulo (35 a 38); los equipos siguen solo para el admin.
 
@@ -277,13 +278,15 @@ capítulo (35 a 38); los equipos siguen solo para el admin.
         arquitectura en PSG) con la regla 3 % o despertar / 4 %; la gravedad
         la elige él. **Pendiente:** biocalibraciones; la estadificación
         del sueño la trae hecha el equipo (el alumno no la corrige).
-  - [ ] **F7b. Titulación de CPAP** (código `CPAP`): noche en el laboratorio
+  - [x] **F7b. Titulación de CPAP** (2026-10-30, a pedido de él; tests y
+        capturas a 1366, **sin ver en la app real**; decisión en
+        `docs/decisiones.md`, § Titulación de CPAP). Código `CPAP`: noche en el laboratorio
         a velocidad acelerada, presión que sube el alumno con las reglas de
         Kushida 2008 (≥ 2 apneas, ≥ 3 hipopneas, ≥ 5 RERA, ronquido; 1 cmH2O
         cada 5 min o más), presión eficaz del caso por posición y REM,
         interfaz y fuga; grado de la titulación (óptima, buena, adecuada,
-        inaceptable). Después: la descarga de 30 noches (uso, IAH residual,
-        fuga).
+        inaceptable). **Pendiente:** la descarga de 30 noches (uso, IAH
+        residual, fuga), BiPAP y el avance mandibular.
 
 ## Fuera, por ahora
 

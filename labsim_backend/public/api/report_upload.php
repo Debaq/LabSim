@@ -55,6 +55,8 @@ const REPORT_IMAGE_SUFFIXES = [
     'olf_umbral', 'prick_brazo',
     // Polisomnografía: el resumen gráfico de la noche.
     'psg_noche',
+    // CPAP: la noche de titulación.
+    'cpap_noche',
 ];
 
 $user = Auth::requireUser();

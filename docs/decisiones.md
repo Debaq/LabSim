@@ -7453,3 +7453,33 @@ La carpeta de demo queda apagada. Los equipos (RS, RM, RA, OLF, PRICK, ESP,
 PSG) siguen en 'development': el alumno ve al paciente, su historia y su
 ficha de estudio, pero los equipos solo los abre el admin hasta que se
 suelten.
+
+## Titulación de CPAP: la noche en el laboratorio, con la presión del alumno (2026-10-30)
+
+La titulación de la demo es la manual en polisomnografía de H32, con las
+reglas de Kushida y cols. (2008). El paciente es el de su estudio de sueño
+(la misma arquitectura, posición y eventos, `nasal/sueno.py`); el caso suma
+la **presión eficaz** (la que abre la vía en lateral y NREM; más en supino y
+en REM), si respira por la boca y la talla de mascarilla que le calza (lo
+que falta sale del perfil del libro: roncador 7, moderado 10 y con la boca
+abierta, grave 13, dudosa 8 cmH2O). `nasal/cpap.py`:
+
+- **Cada tipo de evento tiene su umbral**, como el ejemplo de H32: las
+  apneas se van 2 cmH2O antes de la eficaz, las hipopneas 1 antes, los RERA
+  medio antes y el ronquido en la eficaz. Muy por encima aparecen centrales.
+- **La fuga baja la presión real**: crece con la presión; una talla que no
+  calza o la boca abierta con mascarilla nasal o almohadillas la disparan y
+  la vía recibe menos de lo que marca el equipo (cap. 38: "la boca como
+  salida"). La oronasal lo resuelve.
+- **El alumno decide todo**: la interfaz, la talla, la presión inicial y
+  cada cambio de 1 cmH2O, mirando el período desde el último cambio. La
+  noche corre acelerada (×30 a ×300, con pausa). El equipo no le dice
+  cuándo subir; "Lo que el equipo no sabe" marca los cambios a menos de 5
+  minutos o sin criterio.
+- **El informe**: la tabla por presión (minutos, sueño, REM en supino,
+  eventos, IDR, SpO2 mínima, ronquido, fuga); la presión indicada y el grado
+  (óptima, buena, adecuada, inaceptable) los elige él, y la app calcula el
+  que corresponde para compararlo.
+- **Una misma secuencia de cambios rehace la misma noche** (un solo
+  generador por segundo): así se retoma la atención, y si se cerró a mitad
+  de la noche queda en pausa para seguir.

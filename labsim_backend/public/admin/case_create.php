@@ -692,7 +692,7 @@ window.CASE_CONST = <?= json_encode([
     'olfato' => $esAdminCompleto ? ['rangos' => CaseForm::OLFATO_RANGOS, 'normas' => CaseBuilder::olfatoNormas()] : null,
     'prick' => $esAdminCompleto ? ['rangos' => CaseForm::PRICK_RANGOS, 'alergenos' => CaseForm::PRICK_ALERGENOS, 'farmacos' => CaseForm::PRICK_FARMACOS] : null,
     // Tarjeta Sueño de la misma ficha: perfiles del libro y parámetros del personalizado (los de la app).
-    'sueno' => $esAdminCompleto ? ['perfiles' => CaseForm::SUENO_PERFILES, 'parametros' => CaseForm::SUENO_PARAMETROS] : null,
+    'sueno' => $esAdminCompleto ? ['perfiles' => CaseForm::SUENO_PERFILES, 'parametros' => CaseForm::SUENO_PARAMETROS, 'cpap' => ['rangos' => CaseForm::SUENO_CPAP_RANGOS, 'perfil' => CaseForm::SUENO_CPAP_PERFIL, 'tallas' => CaseForm::SUENO_TALLAS]] : null,
     'vempBaselineOverride' => $vempBaselineOverride,
     'escenarios' => CaseProfile::SCENARIOS,
     // Qué se le puede ofrecer a esta edad y qué va primero en el turno del
