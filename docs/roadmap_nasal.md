@@ -51,10 +51,10 @@ congestión; `ciclo`; `perforacion`). Los demás bloques (`OLFATO`, `PRICK`,
 
 ## Fases
 
-**Para retomar (2026-10-29):** F0-F4 hechas; la rinomanometría (F2b) es la
-más trabajada y falta verla en la app real. Lo que sigue es **F5
-(olfatometría y prick test)**. La rinoscopía (F4) está en pausa por el
-aspecto.
+**Para retomar (2026-10-29):** F0-F4 hechas; la rinomanometría (F2b) y la
+rinometría acústica (F2c) son las más trabajadas y falta verlas en la app
+real. Lo que sigue es **F5 (olfatometría y prick test)**. La rinoscopía (F4)
+está en pausa por el aspecto.
 
 - [x] **F0. Base.** Boxes y códigos en `Layout.php`, `GATED_MODULE_CODES`,
       iconos, `ModulePlaceholder` para cada código en `main.py`. Sin esto
@@ -71,9 +71,8 @@ aspecto.
       (`nasal/equipos.py`, `nasal/graficos.py`, `nasal/sesion.py`): sello,
       medir FND/FNI, vasoconstrictor, errores de técnica "simulados" a mano,
       curva en cuatro cuadrantes, resistencia según la presión, tabla a
-      75/150 Pa, Broms; calibrar, toma en vivo (Iniciar/Detener, barrido,
-      promedio con límites y baremos; tres registros por fosa), MCA1 y
-      MCA2, cambio con VC.
+      75/150 Pa, Broms; calibrar, tres registros, MCA1 y MCA2, cambio con
+      VC (la rinometría como equipo de verdad: F2c).
       Las dos ventanas comparten la nariz de la atención (el VC de una vale
       para la otra) y el ciclo nasal corre con el reloj. "Lo que el equipo no
       sabe" solo para docente/admin. La medición corre en `hilos.en_fondo`
@@ -117,6 +116,34 @@ aspecto.
       - Decisiones en `docs/decisiones.md`: § Rinomanometría: en vivo,
         grabación por tiempo y vasoconstrictor con espera; § Equipos
         nasales: cada acción y todas las variables a action_logs.
+- [x] **F2c. Rinometría acústica como se hace** (2026-10-29, a pedido de
+      él; tests, capturas a 1366 y arrastre con mouse simulado, **sin ver en
+      la app real**). Es del equipo de LabSim: RinoSim no tiene toma en vivo
+      ni cursores, y las figuras del libro siguen saliendo de `mide_fosa`.
+      - **Iniciar/Detener por fosa.** Cada pulso cruza la pantalla de
+        izquierda a derecha en 0,8 s; la variación entre pulsos es chica
+        adelante y grande atrás (`rinometria.dispersion`, multiplicativa),
+        el doble con fuga y el triple respirando (y lo de atrás salta).
+      - **Tres curvas** sobre los últimos 8 pulsos: promedio y límites
+        (± 2 DE del log del área) con la banda sombreada. **Baremos**
+        verde/ámbar/rojo del semiancho de la banda en MCA1, MCA2 y 0-5 cm
+        (verde ≤ 4 %, ámbar ≤ 8 %).
+      - **Detener guarda el promedio** como registro; tres por fosa, con un
+        cuarto quedan los tres últimos. Receta por pulso (semilla, número,
+        estado, errores): `rehace_fosa` lo rehace igual al retomar.
+      - **MCA1 y MCA2 con cursores** que se arrastran; el equipo lee el
+        área donde quedan (no busca el valle). Aparecen al azar; el combo
+        "Cursores MCA1 y MCA2 en" elige la curva. El valle automático y la
+        verdad, para el docente.
+      - **Parámetros** (`rinometria.PARAMETROS`): D1, MCA1, D2, MCA2, V1,
+        V0-2, V0-5, V2-5, V0-7, CV de MCA1/MCA2, criterio 0,03 y la nariz
+        entera (D + I). Sin MCA3 ni áreas a distancias fijas: si él los
+        echa de menos.
+      - Acciones: `ra_iniciar`, `ra_registro` (con baremos y valle),
+        `ra_marcar`, `ra_detener`, `ra_cancelar`.
+      - Decisiones en `docs/decisiones.md`: § Rinometría acústica: en vivo,
+        Iniciar y Detener; § MCA1 y MCA2 con cursores, y todos los
+        parámetros.
 - [x] **F3. Caso nasal e informe** (hecho 2026-10-29, sin ver en navegador):
       - Ficha **Nariz** en `case_create.php`, solo para el admin
         (`CaseReview::TABS['nariz']`: `solo_admin`, no revisable, no
