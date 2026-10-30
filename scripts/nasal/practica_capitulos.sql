@@ -23,8 +23,8 @@ SELECT (SELECT id FROM practice_folders WHERE active = 1 AND nombre = CASE
                  WHEN 157 THEN 'Espirometría con prueba broncodilatadora y prick test'
                  WHEN 158 THEN 'Espirometría con prueba broncodilatadora'
                  WHEN 159 THEN 'Poligrafía respiratoria'
-                 WHEN 160 THEN 'Poligrafía respiratoria'
-                 WHEN 161 THEN 'Polisomnografía'
+                 WHEN 160 THEN 'Poligrafía respiratoria y titulación de CPAP'
+                 WHEN 161 THEN 'Polisomnografía y titulación de CPAP'
                  WHEN 162 THEN 'Polisomnografía (la poligrafía previa no alcanzó)'
                  ELSE 'Rinoscopía, rinomanometría anterior y rinometría acústica' END,
        1,

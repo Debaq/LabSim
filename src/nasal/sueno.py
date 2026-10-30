@@ -400,7 +400,9 @@ def normaliza(bloque):
     """Valida el bloque SUENO del caso (ValueError si no sirve). Forma:
     {'perfil': clave del libro | 'personalizado', 'params': {...} (solo
     personalizado), 'canula_suelta': None | {'desde', 'hasta'} (minutos desde
-    que apaga la luz, solo en la poligrafía de la casa)}."""
+    que apaga la luz, solo en la poligrafía de la casa), 'cpap': None |
+    {'p_eficaz', 'supino', 'rem', 'boca', 'talla'} (la titulación, nasal/cpap.py;
+    lo que falta sale del perfil)}."""
     if not isinstance(bloque, dict):
         raise ValueError('SUENO no es un objeto')
     perfil = bloque.get('perfil')
@@ -419,6 +421,18 @@ def normaliza(bloque):
         desde = _rango(c.get('desde'), 0, 600, 'canula_suelta.desde')
         hasta = _rango(c.get('hasta'), desde + 1, 601, 'canula_suelta.hasta')
         out['canula_suelta'] = {'desde': desde, 'hasta': hasta}
+    c = bloque.get('cpap')
+    out['cpap'] = None
+    if isinstance(c, dict) and c:
+        cp = {}
+        for k, lo, hi in (('p_eficaz', 4, 20), ('supino', 0, 6), ('rem', 0, 6)):
+            if c.get(k) is not None:
+                cp[k] = _rango(c[k], lo, hi, f'cpap.{k}')
+        if 'boca' in c:
+            cp['boca'] = bool(c['boca'])
+        if c.get('talla') in ('S', 'M', 'L'):
+            cp['talla'] = c['talla']
+        out['cpap'] = cp or None
     return out
 
 

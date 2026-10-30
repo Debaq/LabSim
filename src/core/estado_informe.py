@@ -16,7 +16,7 @@ ROTULOS = {"ABR": "ABR", "ELECTROCOCLEO": "ECochG", "AABR": "AABR",
            "EOA": "EOA", "VEMP": "VEMP", "OTOSCOPIA": "Otoscopia",
            "PEALM": "PEALM", "CAEP": "CAEP", "P300": "P300", "MMN": "MMN", "ASSR": "ASSR",
            "RINOMANOMETRIA": "Rinomanometría", "RINOMETRIA": "Rinometría", "ESPIROMETRIA": "Espirometría",
-           "OLFATOMETRIA": "Olfatometría", "PRICK": "Prick test", "POLISOMNOGRAFIA": "Polisomnografía",
+           "OLFATOMETRIA": "Olfatometría", "PRICK": "Prick test", "POLISOMNOGRAFIA": "Polisomnografía", "CPAP": "CPAP",
            "RINOSCOPIA": "Rinoscopía"}
 
 

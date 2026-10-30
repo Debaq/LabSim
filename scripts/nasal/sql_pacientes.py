@@ -80,8 +80,8 @@ PIELES = {
 # clave del caso -> bloque SUENO (cap. 38) y su procedimiento.
 SUENOS = {
     'cap38_roncador': ({'perfil': 'roncador'}, 'Poligrafía respiratoria'),
-    'cap38_moderado': ({'perfil': 'moderado'}, 'Poligrafía respiratoria'),
-    'cap38_grave': ({'perfil': 'grave'}, 'Polisomnografía'),
+    'cap38_moderado': ({'perfil': 'moderado'}, 'Poligrafía respiratoria y titulación de CPAP'),
+    'cap38_grave': ({'perfil': 'grave'}, 'Polisomnografía y titulación de CPAP'),
     'cap38_dudosa': ({'perfil': 'dudosa'}, 'Polisomnografía (la poligrafía previa no alcanzó)'),
 }
 OTROS = {'cap35_discordancia': ('OLFATO', 'olfatometría'), 'cap36_alergica': ('PRICK', 'prick test'),

@@ -1196,7 +1196,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         bajo el caso/paciente ya cerrado."""
         for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr",
                      "subw_aabr", "subw_eoas", "subw_vemp", "subw_rm", "subw_ra", "subw_rs",
-                     "subw_esp", "subw_olf", "subw_prick", "subw_psg"):
+                     "subw_esp", "subw_olf", "subw_prick", "subw_psg", "subw_cpap"):
             frame = getattr(self, attr, None)
             if frame is None:
                 continue
@@ -1223,6 +1223,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         from audiometria import Audiometer, ListWords
         from impedanciometria import Z
         from nasal.equipos import RinomanometriaWindow, RinometriaWindow
+        from nasal.CpapWindow import CpapWindow
         from nasal.EspirometriaWindow import EspirometriaWindow
         from nasal.OlfatometriaWindow import OlfatometriaWindow
         from nasal.PolisomnografiaWindow import PolisomnografiaWindow
@@ -1273,6 +1274,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self._module_visible("PSG"):
             self._modulo_diferido("PSG", "subw_psg", lambda: FrameSubMdi(
                 PolisomnografiaWindow(data_login=self.data_login), expand=True))
+        if self._module_visible("CPAP"):
+            self._modulo_diferido("CPAP", "subw_cpap", lambda: FrameSubMdi(
+                CpapWindow(data_login=self.data_login), expand=True))
 
         self.subw.update({
             "AC": self.subw_ac,
@@ -1502,7 +1506,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     # -----------------------------------------------------------------
 
     _ATTRS_EXAMEN = ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas", "subw_ot",
-                     "subw_rm", "subw_ra", "subw_rs", "subw_esp", "subw_olf", "subw_prick", "subw_psg")
+                     "subw_rm", "subw_ra", "subw_rs", "subw_esp", "subw_olf", "subw_prick", "subw_psg", "subw_cpap")
 
     def _modulos_examen(self):
         return [getattr(self, a).obj for a in self._ATTRS_EXAMEN
@@ -1536,7 +1540,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                         "subw_rm": "RINOMANOMETRIA", "subw_ra": "RINOMETRIA",
                         "subw_rs": "RINOSCOPIA", "subw_esp": "ESPIROMETRIA",
                         "subw_olf": "OLFATOMETRIA", "subw_prick": "PRICK",
-                        "subw_psg": "POLISOMNOGRAFIA"}
+                        "subw_psg": "POLISOMNOGRAFIA", "subw_cpap": "CPAP"}
 
     def _recuperar_informes(self, key):
         """Retomar una atención: vuelve lo que ya se había guardado solo."""
