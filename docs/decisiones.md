@@ -7341,3 +7341,13 @@ ficha Paciente y de la talla de la tarjeta; el PEF, que GLI no trae, es el
 doble del FEV1 previsto (orden de magnitud del modelo, editable). Los
 rangos son los mismos que valida la app (`CaseForm::ESPIRO_RANGOS` =
 `espirometria.normaliza`).
+
+## El práctico cuando el hosting se cae (2026-10-30)
+
+HostArmada cayó entero el 2026-10-30 (servidores de nombres y panel): sin
+backend no hay login, agenda, atención ni chat, así que no hay práctico.
+Queda como plan futuro, sin implementar: sacar el DNS del proveedor, un plan
+B escrito en modo invitado y, a diseñar con calma, un práctico sin servidor
+(casos bajados antes, llave del docente, todo sube al volver). Se descarta
+por ahora un servidor espejo en el laboratorio: reconciliar dos SQLite es
+más riesgo que la caída. Detalle en `docs/roadmap_sin_servidor.md`.

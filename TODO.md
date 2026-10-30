@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 74).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 75).
 
 Revisado contra el código el 2026-09-24.
 
@@ -214,6 +214,12 @@ gap significativo. § Parámetros de audiometría configurables por curso
       audiómetro; qué medir lo decide él. Con eso, ver si se saca la pestaña
       "Lo que el equipo no sabe" de la app.
       § Equipos nasales: cada acción y todas las variables a action_logs
+
+### Sin servidor
+- [ ] 75. El práctico cuando el hosting se cae: DNS fuera de HostArmada,
+      plan B en modo invitado y, a diseñar, práctico sin servidor (casos
+      bajados antes, llave del docente, todo sube al volver). Opciones en
+      `docs/roadmap_sin_servidor.md`. § El práctico cuando el hosting se cae
 
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
