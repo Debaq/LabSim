@@ -218,8 +218,8 @@ rinoscopía (F4) está en pausa por el aspecto.
         `CaseForm::parseEspiro`).
       - **Pacientes del cap. 37**: fichas 157 (asma) y 158 (estenosis
         traqueal), `scripts/nasal/sql_pacientes.py` con su bloque `ESPIRO`
-        (los números de los informes del libro). SQL listo, sin cargar en
-        producción.
+        (los números de los informes del libro). Cargados en producción
+        el 2026-10-30, en la carpeta "Libro · nariz (demo)".
       - De paso: los equipos nasales no tenían `submit_report` y cada cierre
         de atención los contaba como informe no subido.
 - [ ] **F7. Sueño:** poligrafía/PSG (registro, puntuación de eventos, IAH)
