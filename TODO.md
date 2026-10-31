@@ -12,11 +12,6 @@ Revisado contra el código el 2026-09-24.
 
 ## Bugs conocidos
 
-- [ ] 1. `response.py:response_sdt_w_mkg` (mano levantada del SDT) exige el
-      stim 5 (Speech Noise): con cualquier otro ruido baja la mano siempre.
-      Además usa el modelo viejo de rango + curva sombra, distinto del "mejor
-      de las dos vías" de `CalculateLogo`: dos modelos para el mismo
-      fenómeno. § El update mentía la versión
 - [ ] 2. `Audiometer._mkg_on` exige `"Invertido"` en el canal del ruido: en
       Normal el ruido suena pero no llega al motor y no enmascara. Lo que se
       oye y lo que se simula no coinciden. § El update mentía la versión
@@ -28,10 +23,6 @@ Revisado contra el código el 2026-09-24.
       guardan 130. Hace falta una marca por frecuencia (casilla o valor
       reservado) antes de poder cargar un caso con frecuencias sin probar.
       § "Sin respuesta" (130) ya no es un umbral de 130 dB
-- [ ] 5. Voces de logoaudiometría: `ListWords.la_super` fuerza `feme1` porque
-      no hay voces `male` grabadas. Falta grabar `male1`/`male2` (palabras +
-      `none1/2/3`), decidir qué representa el número de voz y sacar el
-      forzado. § Voces de respuesta logoaudiometria (ListWords.py)
 - [ ] 6. El PDF del caso siempre dibuja ABR/VEMP con la normativa por defecto:
       no consulta la del curso (`AppConfig`, `normative_data.abr`).
       § Los trazos del PDF no son el generador

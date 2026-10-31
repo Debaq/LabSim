@@ -13,6 +13,10 @@ Con los pacientes de práctica 33-42 (docs/manual/capturas/casos_demo.json):
     que bajar el SDT no los mueve;
   - la curva sombra del SDT (sub-enmascarado) también baja esos 5 dB.
 
+Desde el 2026-10-30 la mano la decide CalculateLogo.detecta_sdt, el modelo
+de las dos vías de las palabras (TODO 1): cualquier ruido enmascara, con su
+CE, y el ruido de más sobreenmascara de a poco en vez de apagar la mano.
+
 core.base crea un QApplication al importarse -> QT_QPA_PLATFORM=offscreen.
 """
 
@@ -28,6 +32,7 @@ sys.path.insert(0, os.path.join(RAIZ, "src"))
 
 from audiometria.logo_curva import cfg_oido, pct_logo, rollover_de_caso  # noqa: E402
 from audiometria.logoaudiometry import CalculateLogo  # noqa: E402
+from audiometria.masking_params import STIM_NBN, STIM_SN, STIM_WN  # noqa: E402
 from audiometria.response import ResponseAudiometry  # noqa: E402
 
 with open(os.path.join(RAIZ, "docs", "manual", "capturas", "casos_demo.json"),
@@ -63,6 +68,11 @@ def respuesta(caso):
     return r
 
 
+def umbral(r, side, mkg=0, stim=STIM_SN):
+    """Desde qué nivel (grilla de 5) levanta la mano; 130 si nunca."""
+    return next((i for i in range(-10, 121, 5) if r._detecta_sdt(side, i, mkg, stim)), 130)
+
+
 class SdtAutoDemoTest(unittest.TestCase):
     def test_sdt_5_bajo_el_fletcher(self):
         for clave, caso in DEMO.items():
@@ -84,9 +94,11 @@ class SdtAutoDemoTest(unittest.TestCase):
                 det = caso["SRT"][1 - side] - caso["SDT"][1 - side]
                 mkg = max(5, rango["mkg_min"] + det)
                 self.assertLessEqual(mkg, rango["mkg_max"], f"paciente {clave}/{side}")
-                umbral = r._resolve_sdt_threshold(side, 1 - side, caso["SDT"][side], mkg)
-                self.assertEqual(umbral, caso["SDT"][side], f"paciente {clave}/{side}")
-                self.assertLess(umbral, caso["SRT"][side], f"paciente {clave}/{side}")
+                sdt = caso["SDT"][side]
+                self.assertTrue(r._detecta_sdt(side, sdt, mkg, STIM_SN), f"paciente {clave}/{side}")
+                self.assertFalse(r._detecta_sdt(side, sdt - 5, mkg, STIM_SN),
+                                 f"paciente {clave}/{side}")
+                self.assertLess(sdt, caso["SRT"][side], f"paciente {clave}/{side}")
 
     def test_sombra_de_la_cofosis_baja_con_el_sdt_del_sano(self):
         # 42: OD cofótico, OI sano (SRT 0, SDT -5, óseo 0). Sin enmascarar,
@@ -94,13 +106,36 @@ class SdtAutoDemoTest(unittest.TestCase):
         # OI detecta bajo su umbral de habla: 45 + 0 - 5 = 40 dB.
         caso = DEMO["42"]
         r = respuesta(caso)
-        self.assertEqual(r._resolve_sdt_threshold(0, 1, 40, 0), 40)
+        self.assertEqual(umbral(r, 0), 40)
         # el sano (OI) solo: responde en su SDT, no en su SRT
-        self.assertEqual(r._resolve_sdt_threshold(1, 0, -5, 0), -5)
-        # con el ruido justo en el mínimo (40 - 45 - 0 + 0 + 5 = 0 -> 5 a
-        # 45 dB) el OD cofótico ya no responde
-        self.assertEqual(r._resolve_sdt_threshold(0, 1, 45, 5), 130)
-        self.assertEqual(r._resolve_sdt_threshold(0, 1, 45, 4), 40)
+        self.assertEqual(umbral(r, 1), -5)
+        # con el ruido justo en el mínimo (45 - 45 - 0 + 0 + 5 = 5 a 45 dB)
+        # el OD cofótico ya no responde; con menos, la sombra sí
+        self.assertFalse(r._detecta_sdt(0, 45, 5, STIM_SN))
+        self.assertTrue(r._detecta_sdt(0, 45, 4, STIM_SN))
+
+    def test_cualquier_ruido_enmascara_con_su_ce(self):
+        # Antes solo el Speech Noise: con otro ruido la mano bajaba siempre.
+        caso = DEMO["42"]
+        r = respuesta(caso)
+        self.assertTrue(r._detecta_sdt(1, -5, 20, STIM_WN))     # el sano, enmascarado
+        # el NBN rinde 20 dB menos que el SN (CE_LOGO): 5 no alcanza a tapar
+        # la sombra del cofótico a 45, hacen falta 25
+        self.assertTrue(r._detecta_sdt(0, 45, 5, STIM_NBN))
+        self.assertFalse(r._detecta_sdt(0, 45, 25, STIM_NBN))
+
+    def test_el_ruido_de_mas_sobreenmascara_de_a_poco(self):
+        # 33: SDT -5 y óseo 0 en los dos. El ruido cruza al oído estudiado
+        # sobre 45 + 0: el SDT sube con él, no deja de responder de golpe.
+        r = respuesta(DEMO["33"])
+        self.assertEqual(umbral(r, 0, 45), -5)
+        self.assertEqual(umbral(r, 0, 50), 5)
+        self.assertEqual(umbral(r, 0, 70), 25)
+
+    def test_sin_sdt_en_la_ficha_no_responde(self):
+        caso = copy.deepcopy(DEMO["33"])
+        del caso["SDT"]
+        self.assertEqual(umbral(respuesta(caso), 0), 130)
 
     def test_la_curva_no_depende_del_sdt_auto(self):
         for clave, caso in DEMO.items():

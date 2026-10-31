@@ -20,8 +20,9 @@ class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
         self.logo_attenuation = 45
-        # Sin SDT acá: la mano del SDT es response.py con el SDT de la ficha,
-        # y el gap/enmascaramiento usan el SRT (_srt_aereo).
+        # El SDT solo decide la mano levantada (detecta_sdt); el gap y el
+        # enmascaramiento usan el SRT (_srt_aereo).
+        self.sdt = thr.get('SDT')
         datos = dict(thr)
         datos['UMD'] = umd
         self.ri = rollover_de_caso(datos)
@@ -80,6 +81,42 @@ class CalculateLogo():
 
         return max(propio, cruce)
 
+    def detecta_sdt(self, side, intensity, int_mkg=0, stim_mkg=None):
+        """¿Levanta la mano el paciente con la voz a `intensity` en el oído
+        `side` (SDT)? Las mismas dos vías que get(): la detecta el oído
+        estudiado, corrido si el ruido del otro lado cruza y lo
+        sobreenmascara, o el otro oído, al que la voz llega por vía ósea 45 dB
+        más abajo y donde el ruido la tapa. Cualquier ruido enmascara, con
+        su CE (masking_params.ce_logo).
+
+        El umbral de cada oído es el SDT de la ficha. Con el mínimo de ruido
+        justo el ruido gana (ver _oye): así el mínimo es el de
+        _masking_range más lo que el otro oído detecta bajo su SRT.
+        """
+        try:
+            sdt = [float(self.sdt[0]), float(self.sdt[1])]
+        except (TypeError, ValueError, IndexError, KeyError):
+            # caso sin SDT cargado: no se inventa un umbral, no responde
+            return False
+        other = 1 - side
+        at = self.logo_attenuation
+        bone = self._bone_sdt()
+        gap = self._air_bone_gap()
+        ruido = int_mkg - ce_logo(stim_mkg) if int_mkg else 0
+        propio = self._oye(intensity, sdt[side], max(0, (ruido - at) - bone[side]))
+        cruce = self._oye(intensity - at + gap[other], sdt[other],
+                          max(0, (ruido - gap[other]) - bone[other]))
+        return propio or cruce
+
+    @staticmethod
+    def _oye(nivel, umbral, corrimiento):
+        """Detecta `nivel` un oído con `umbral`, corrido `corrimiento` dB
+        por el ruido. Sin ruido, desde su umbral; con ruido, al nivel justo
+        gana el ruido: el mínimo de enmascaramiento ya enmascara."""
+        if corrimiento <= 0:
+            return nivel >= umbral
+        return nivel - corrimiento > umbral
+
     def _curve(self, side, intensity):
         """% de un oído a un nivel, en la grilla de 5 dB del audiómetro.
 
@@ -122,8 +159,7 @@ class CalculateLogo():
         return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi}
 
     def _bone_sdt(self):
-        # Promedio de Fletcher (mejores 2 de 500/1000/2000Hz) sobre Osea_mkg,
-        # igual criterio que response.py:calc_sdt.
+        # Promedio de Fletcher (mejores 2 de 500/1000/2000Hz) sobre Osea_mkg.
         sublista = self.thr['Osea_mkg'][2:5]
         minimos_a = sorted(item[0] for item in sublista)[:2]
         minimos_b = sorted(item[1] for item in sublista)[:2]

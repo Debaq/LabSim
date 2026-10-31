@@ -9,7 +9,8 @@ from audiometria.h_audio import voz_del_paciente
 from audiometria.Fowler import FOWLER_PATTERNS
 from audiometria.masking_params import (  # re-export: los usan
     CE_TONAL, RUIDOS_ENMASCARANTES, STIM_HABLA, STIM_NBN,      # noqa: F401
-    STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal)            # el panel y los tests
+    STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal, es_ruido)  # el panel y los tests
+from audiometria.logoaudiometry import CalculateLogo
 class_pref = Preferences()
 
 c_voice = class_pref.get('command_voice')
@@ -113,6 +114,7 @@ class ResponseAudiometry():
 
     def set_case(self,dbdata):
         self.dbdata = dbdata
+        self._logo = None   # el del SDT, se arma al primer uso (_detecta_sdt)
         self.other_response.voz = voz_del_paciente(dbdata)
         self.aerea = [[dbdata['Aerea'][i][0] for i in range(len(dbdata['Aerea']))], 
                       [dbdata['Aerea'][i][1] for i in range(len(dbdata['Aerea']))]]
@@ -229,141 +231,38 @@ class ResponseAudiometry():
 
 
     def response_sdt(self):
-        """
-        sdt responde la mejor aerea con atenuación 45
-        lo verifico contra los umbrales aereos del contra y su osea
-        minr = int_est - at (45) - uone + uaone
-        max = at(45) + uoe
-        si sobrepaso el maximo no hay respuesta
-        """
-   
-        if self.data['audio']['test'] == 'Logoaudiometría':
-            count = self.data['audio']['stimOn'].count(True)
-            if count == 1:
-                stim_on = self.data['audio']['stimOn'].index(True)
-                #verifica si es habla o ruido
-                if self.data['audio']['stim'][stim_on] == 2: #si es habla el oido que se estimula
-                    output = self.data['audio']['output'][stim_on] #derecho o izquierdo
-                    o_n = int(not output)
-                    int_ = self.data['audio']['int'][stim_on]
-                    # sin canal de mkg -> ruido en 0 (curva sombra si hacia falta enmascarar)
-                    threshold = self._resolve_sdt_threshold(output, o_n, int_, 0)
-                    verify = int_ >= threshold
-                    if verify:
-                        self.upHand()
-                    else:
-                        self.downHand()
-                else: #si no es habla
-                    debug_print("ese es el mkg")
-                    self.downHand()
-            elif count == 2:
-                self.response_sdt_w_mkg()
-
-    def response_sdt_w_mkg(self):
-        """
-        Logoaudiometría con enmascaramiento: ruido de habla (Speech Noise) en el oido no estudiado.
-        at fijo en 45, no depende de frecuencia (a diferencia de la via tonal).
-        minimo: int_est - at - uone + uane + (SRT - SDT del no estudiado)
-        maximo: at + uoe
-        uae: SDT guardado en el perfil del oido estudiado (donde levanta la mano)
-        uane: SRT del no estudiado (su aereo de habla, para el gap; sin SRT, su SDT)
-        uoe/uone: umbral oseo (predicho por Fletcher, no hay SDT oseo) del oido estudiado/no estudiado
-        """
-        stim = self.data['audio']['stim']
-        output = self.data['audio']['output']
-        if 2 not in stim or 5 not in stim:
+        """Mano levantada del SDT: la voz en un canal y, si hay, un ruido en
+        el otro, al otro oído. Lo decide CalculateLogo.detecta_sdt, el mismo
+        modelo de las dos vías que las palabras (antes había uno propio acá:
+        solo aceptaba Speech Noise y con ruido de más dejaba de responder de
+        golpe)."""
+        if self.data['audio']['test'] != 'Logoaudiometría':
+            return
+        audio = self.data['audio']
+        encendidos = [ch for ch in (0, 1) if audio['stimOn'][ch]]
+        habla = [ch for ch in encendidos if audio['stim'][ch] == STIM_HABLA]
+        if len(habla) != 1:
             self.downHand()
             return
-        ch_habla = stim.index(2)
-        ch_mkg = stim.index(5)
-        if ch_habla == ch_mkg or output[ch_habla] == output[ch_mkg]:
-            self.downHand()
-            return
-
-        o_e = output[ch_habla] #oido estudiado
-        o_n = output[ch_mkg]   #oido enmascarado
-
-        int_ = self.data['audio']['int'][ch_habla]
-        int_mkg = self.data['audio']['int'][ch_mkg]
-
-        threshold = self._resolve_sdt_threshold(o_e, o_n, int_, int_mkg)
-
-        if threshold <= int_:
+        ch = habla[0]
+        int_mkg, stim_mkg = 0, None
+        otro = [c for c in encendidos if c != ch]
+        if otro:
+            c = otro[0]
+            if not es_ruido(audio['stim'][c]) or audio['output'][c] == audio['output'][ch]:
+                # un tono, o el ruido en el mismo oído: no es un SDT
+                self.downHand()
+                return
+            int_mkg, stim_mkg = audio['int'][c], audio['stim'][c]
+        if self._detecta_sdt(audio['output'][ch], audio['int'][ch], int_mkg, stim_mkg):
             self.upHand()
         else:
             self.downHand()
 
-    def _resolve_sdt_threshold(self, o_e, o_n, int_, int_mkg):
-        """
-        Igual que _resolve_masked_threshold pero para logoaudiometria: el
-        rango de mkg depende de la intensidad del estimulo (int_), no solo
-        del oido/frecuencia, por eso no usa _masking_calc.
-        """
-        sdt = self.dbdata.get('SDT') #umbral guardado en el perfil del paciente
-        try:
-            uae = sdt[o_e]
-            sdt_ne = sdt[o_n]
-        except (TypeError, IndexError, KeyError):
-            # caso sin SDT cargado: no se inventa un umbral, el paciente
-            # no responde
-            return 130
-        # El gap del no estudiado se mide con su SRT (aéreo de habla en la
-        # métrica del óseo de Fletcher), no con su SDT: el SDT auto va
-        # 5 dB bajo el Fletcher (CaseBuilder::SDT_BAJO_SRT_DB) y el gap
-        # salía corto. Sin SRT en la ficha, el SDT (lo de antes).
-        srt = self.dbdata.get('SRT')
-        try:
-            uane = srt[o_n]
-        except (TypeError, IndexError, KeyError):
-            uane = sdt_ne
-        # Lo que el no estudiado detecta antes de reconocer (SRT - SDT):
-        # la voz que cruza la nota ese tanto bajo su umbral de habla.
-        det_ne = max(0, uane - sdt_ne)
-        sdt_osea = self.calc_sdt(self.dbdata['Osea_mkg'])
-
-        at = 45
-        uoe = sdt_osea[o_e]
-        uone = sdt_osea[o_n]
-        # la voz que cruza al otro oído (curva sombra) la detecta a su óseo
-        # + 45, menos lo que ese oído detecta bajo su umbral de habla
-        cruce = at + uone - det_ne
-        if int_mkg <= 0:
-            # sin ruido el cruce está tal cual: antes un ruido en 0 contaba
-            # como "en la meseta" cuando el mínimo daba 0 o menos, y la
-            # sombra salía un escalón tarde
-            return min(uae, cruce)
-
-        # el ruido tiene que tapar también esos det_ne dB que el otro oído
-        # detecta bajo su SRT
-        mkg_min = int_ - at - uone + uane + det_ne
-        mkg_max = at + uoe
-        mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
-
-        if mkg_lo <= int_mkg <= mkg_hi:
-            return uae
-        elif int_mkg > mkg_hi:
-            return 130
-        else:
-            # sub-enmascarado: responde la sombra
-            return min(uae, cruce)
-
-    def calc_sdt(self, lista):
-        # Promedio de Fletcher: mejores 2 de 500/1000/2000 Hz (indices 2,3,4)
-        sublista = lista[2:5]
-        # Calcular el promedio para a y b
-        minimos_a = sorted(item[0] for item in sublista)[:2]
-        minimos_b = sorted(item[1] for item in sublista)[:2]
-
-        # Calcular el promedio de los dos números más bajos
-        promedio_minimos_a = sum(minimos_a) / len(minimos_a)
-        promedio_minimos_b = sum(minimos_b) / len(minimos_b)
-
-        # Redondear hacia abajo al múltiplo de 5 más cercano
-        promedio_minimos_a_redondeado = (promedio_minimos_a // 5) * 5
-        promedio_minimos_b_redondeado = (promedio_minimos_b // 5) * 5
-
-        return [promedio_minimos_a_redondeado, promedio_minimos_b_redondeado]
-
+    def _detecta_sdt(self, side, int_, int_mkg=0, stim_mkg=None):
+        if self._logo is None:
+            self._logo = CalculateLogo(self.dbdata, self.dbdata.get('UMD'))
+        return self._logo.detecta_sdt(side, int_, int_mkg, stim_mkg)
 
     def ldl(self):
         if self.data['audio']['test'] == 'Umbrales':

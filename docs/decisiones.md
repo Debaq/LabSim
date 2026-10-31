@@ -7609,3 +7609,28 @@ del Fowler, "molesta" de la LDL, "el derecho / el izquierdo") eran siempre de
   cuáles. Las preguntas del talkback que no tienen respuesta en el motor
   (*¿Me escucha?*, *¿Molesta?*...) siguen sin contestar.
 
+## SDT: la mano con el modelo de las dos vías de la logo (2026-10-30)
+
+Cierra el TODO 1 (y el 5, que ya cerraron las voces completas). La mano
+levantada del SDT tenía su propio modelo en `response.py` (rango de
+enmascaramiento + curva sombra), distinto del "mejor de las dos vías" de
+`CalculateLogo` que usan las palabras, y exigía Speech Noise: con cualquier
+otro ruido la mano bajaba siempre. Ahora la decide
+`CalculateLogo.detecta_sdt`: el oído estudiado la detecta desde su SDT,
+corrido si el ruido del otro lado cruza (sobreenmascaramiento), o el otro
+oído, al que la voz llega 45 dB más abajo y donde el ruido la tapa. Cualquier
+ruido enmascara, con su CE de logo (`masking_params.CE_LOGO`).
+
+- **No cambia ningún umbral.** Con el empate a favor del ruido (al mínimo
+  justo, enmascara; `CalculateLogo._oye`) el mínimo sale idéntico al de
+  antes: `int - 45 - óseo_ne + SRT_ne + (SRT_ne - SDT_ne)`. Comparado en los
+  diez pacientes de práctica, de -10 a 100 dB y ruido de 0 a 100: iguales en
+  todo salvo el sobreenmascaramiento.
+- **Sobreenmascaramiento de a poco:** antes, con el ruido sobre 45 + óseo del
+  estudiado, el paciente dejaba de responder del todo; ahora su SDT sube con
+  el ruido (paciente 33: ruido 50 → responde desde 5 dB; 70 → desde 25), como
+  sobreenmascaran las palabras.
+- La voz con un tono en el otro canal, o con el ruido en el mismo oído, no es
+  un SDT: la mano baja (como antes).
+- El backend no simula el SDT (`AudiometriaPaciente` es tonal): nada que espejar.
+
