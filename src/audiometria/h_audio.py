@@ -100,9 +100,12 @@ EDAD_VOZ_INFANTIL = 12
 
 def voz_del_paciente(caso):
     """(género, número) de la voz con que contesta el paciente del caso, por
-    su sexo (gender 0 = mujer, como en el audiómetro) y su edad. Sin edad,
-    voz adulta."""
-    mujer = int(caso.get("gender") or 0) == 0
+    su sexo y su edad. Sin edad, voz adulta.
+
+    gender: 0 = hombre, 1 = mujer, como en el formulario del caso
+    (views/case/_paciente.php) y el resto de los módulos. Antes se leía al
+    revés y las mujeres contestaban con voz de hombre."""
+    mujer = int(caso.get("gender") or 0) == 1
     try:
         edad = int(caso.get("edad"))
     except (TypeError, ValueError):

@@ -494,7 +494,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             return
         thr = data if data["sector"] == "Camara_sono" else data_basic()
         gender = thr['gender']
-        self.gender = "feme" if gender == 0 else "male"
+        self.gender = "feme" if gender == 1 else "male"
         self.id = thr['id']
         self.curve_z = [thr['Z_OD'], thr['Z_OI']]
         result = [thr['Aerea'], thr['Osea'], thr['LDL']]

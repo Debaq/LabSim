@@ -12,8 +12,10 @@ from core import iconos, tema
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QButtonGroup, QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy,
-    QTabWidget, QTextEdit, QVBoxLayout, QWidget,
+    QStackedLayout, QTabWidget, QTextEdit, QVBoxLayout, QWidget,
 )
+
+from audiometria import no_realizable
 
 # Reglas propias de la ventana (el resto sale de core/tema.py): pestañas con
 # subrayado, y los botones de oído con el color de su lado cuando están
@@ -63,12 +65,18 @@ class Acumetria(QWidget):
         self._rinne_probado = {'mastoides': False, 'pabellon': False}
 
         tema.aplicar_estilo(self, EXTRA_QSS)
-        layout = QVBoxLayout(self)
+        self.equipo = QWidget()
+        layout = QVBoxLayout(self.equipo)
         layout.setContentsMargins(12, 8, 12, 12)
-        tabs = QTabWidget(self)
+        tabs = QTabWidget(self.equipo)
         layout.addWidget(tabs)
         tabs.addTab(self._build_rinne_tab(), "Rinne")
         tabs.addTab(self._build_weber_tab(), "Weber")
+        # Con un bebé, en lugar de los diapasones va el aviso
+        self.aviso_bebe = no_realizable.AvisoNoRealizable("Acumetría no realizable")
+        self.pila = QStackedLayout(self)
+        self.pila.addWidget(self.equipo)
+        self.pila.addWidget(self.aviso_bebe)
 
         self.la_super(thr)
 
@@ -78,6 +86,10 @@ class Acumetria(QWidget):
         por MainWindow._hydrate_modules() cada vez que cambia el caso activo."""
         self.data = data
         self.appointment_id = appointment_id
+        motivo = no_realizable.motivo(data, "acumetría")
+        if motivo:
+            self.aviso_bebe.texto.setText(motivo)
+        self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
 
     # ------------------------------------------------------ piezas comunes ----
 

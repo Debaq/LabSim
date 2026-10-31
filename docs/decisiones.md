@@ -7729,3 +7729,27 @@ calculaba por el tono y decía "lo está oyendo".
   enmascarante (antes solo Speech Noise) y viaja el tipo de ruido.
 - `tests/test_masking_tonal.py` tenía `unittest.main()` a mitad de archivo:
   dos clases nunca corrían como script. Va al final.
+
+## Un bebé no hace audiometría ni acumetría (2026-10-31)
+
+Pedido del docente: los bebés no hablan; si el alumno los pasa a
+audiometría hay que avisar de lo absurdo y no permitirlo.
+
+- **Corte en 3 años** (`no_realizable.EDAD_MINIMA`): la audiometría del
+  simulador pide levantar la mano o repetir palabras, y la acumetría decir
+  dónde suena el diapasón. Antes de los 3 años la audición conductual se
+  mide con otras técnicas que LabSim no simula. Sin edad en el caso no se
+  bloquea nada.
+- **El aviso va en lugar del equipo**, en el audiómetro (con sus comandos y
+  listas) y en la acumetría: "El paciente tiene 8 meses. Un bebé no levanta
+  la mano ni repite palabras ni dice dónde escucha un sonido: la audiometría
+  no se puede realizar." La edad se dice como se dice de un bebé (horas de
+  vida, días, meses), con `edad_horas` del caso. El audiómetro escondido
+  suelta las teclas y no suena.
+- **El intento queda registrado** (`audio_no_realizable`, una vez por caso al
+  abrir el audiómetro): el docente ve que se intentó. No cuenta como falta en
+  los indicadores.
+- **Voces del paciente por sexo:** `voz_del_paciente` leía `gender` 0 como
+  mujer; en el caso 0 es hombre y 1 mujer (formulario y demás módulos). Las
+  mujeres contestaban con voz de hombre desde que las voces se eligen por
+  sexo.

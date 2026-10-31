@@ -20,11 +20,12 @@ import shiboken6
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPainter, QTransform
 from PySide6.QtWidgets import (QFrame, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel,
-                               QSizePolicy, QVBoxLayout, QWidget)
+                               QSizePolicy, QStackedLayout, QVBoxLayout, QWidget)
 
 from audiometria.Audiometer import Audiometer, test_list
 from audiometria.ListWords import ListWords
 from audiometria.comandos_voz import ComandosVoz
+from audiometria import no_realizable
 from core import iconos, tema
 
 LOGO = test_list[1]
@@ -50,8 +51,12 @@ class AudiometriaWindow(QWidget):
         self._con_listas = listas
         self._logo = self.audiometro.lbl_prueba.text() == LOGO
         self.escalado = _Escalado(self.audiometro)
+        # Con un bebé, en lugar del equipo va el aviso (ver no_realizable)
+        self.aviso_bebe = no_realizable.AvisoNoRealizable("Audiometría no realizable")
+        self._bebe_registrado = None   # caso cuyo intento ya quedó en el registro
 
-        raiz = QHBoxLayout(self)
+        self.equipo = QWidget()
+        raiz = QHBoxLayout(self.equipo)
         raiz.setContentsMargins(MARGEN, MARGEN, MARGEN, MARGEN)
         raiz.setSpacing(MARGEN)
         self.col_izq, izq = _columna()
@@ -62,6 +67,9 @@ class AudiometriaWindow(QWidget):
         raiz.addWidget(self.col_izq, PARTES[0])
         raiz.addWidget(self.escalado, PARTES[1])
         raiz.addWidget(self.col_der, PARTES[2])
+        self.pila = QStackedLayout(self)
+        self.pila.addWidget(self.equipo)
+        self.pila.addWidget(self.aviso_bebe)
 
         # Lo que antes conectaba main.connect_signals entre las tres ventanas.
         self.comandos.btn_checked.connect(self.audiometro.supra)
@@ -71,10 +79,43 @@ class AudiometriaWindow(QWidget):
         self.audiometro.prueba_cambio.connect(self._al_cambiar_prueba)
 
         self._visibles()
+        self._data = None
+        self._revisar_edad(data)
 
     def la_super(self, data, appointment_id=None):
         self.audiometro.la_super(data, appointment_id)
         self.listas.la_super(data, appointment_id)
+        self._revisar_edad(data)
+
+    def _revisar_edad(self, data):
+        self._data = data
+        motivo = no_realizable.motivo(data, "audiometría")
+        if motivo:
+            self.aviso_bebe.texto.setText(motivo)
+        self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
+        if motivo:
+            # dentro de la escena el audiómetro no se entera de que su página
+            # se tapó: escondido suelta las teclas y corta el sonido
+            # (Audiometer.hideEvent); _Escalado lo vuelve a mostrar
+            self.audiometro.hide()
+        elif self.escalado.isVisible():
+            self.audiometro.show()
+        if self.isVisible():
+            self._registrar_bebe()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._registrar_bebe()
+
+    def _registrar_bebe(self):
+        """Abrir el audiómetro con un bebé queda en el registro, una vez por
+        caso: el docente ve que se intentó."""
+        data = self._data
+        if not no_realizable.es_bebe(data) or self._bebe_registrado is data:
+            return
+        self._bebe_registrado = data
+        self.audiometro._log("audio_no_realizable", motivo="bebe",
+                             edad=data.get("edad"), edad_horas=data.get("edad_horas"))
 
     def _al_cambiar_prueba(self, prueba):
         self._logo = prueba == LOGO
