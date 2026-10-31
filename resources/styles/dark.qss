@@ -10,7 +10,7 @@ QWidget#barra{
 
 }
 
-QWidget#barra QPushButton#btn_login{
+QWidget#barra QPushButton#btn_login, QWidget#barra QPushButton#btn_configuracion{
   font: 600 7.5pt "Noto Sans";
   padding: 2px 10px;
   border-radius: 9px;
@@ -19,7 +19,7 @@ QWidget#barra QPushButton#btn_login{
   background: rgba(255, 255, 255, 25);
 }
 
-QWidget#barra QPushButton#btn_login:hover{
+QWidget#barra QPushButton#btn_login:hover, QWidget#barra QPushButton#btn_configuracion:hover{
   border-color: #fff;
   background: rgba(255, 255, 255, 60);
 }
@@ -123,6 +123,24 @@ QFrame#tool QPushButton:disabled{
 
 QFrame#tool QLabel{
   color: #5D1049;
+}
+
+/* La ventana activa y su cierre, como la barra de menú del Mac (los
+   exámenes a pantalla completa no tienen barra propia). */
+QFrame#tool QLabel#lbl_ventana_activa{
+  font: 600 9pt "Noto Sans";
+}
+
+QFrame#tool QPushButton#btn_cerrar_activa{
+  background: #C0392B;
+  border: none;
+  border-radius: 9px;
+  padding: 0;
+  min-height: 0;
+}
+
+QFrame#tool QPushButton#btn_cerrar_activa:hover{
+  background: #a32529;
 }
 
 /* ---- Ingreso ---------------------------------------------------------- */

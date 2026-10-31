@@ -351,6 +351,10 @@ class SubWindow():
             widg.lbl_title.setText(name)
             self.mdi_area.addSubWindow(sub)
             if size == "max":
+                # Sin barra propia: no se mueve, y su nombre y su ✕ van en
+                # la barra de la ventana principal (ver main.py,
+                # _pintar_ventana_activa).
+                widg.barra.hide()
                 _flags(sub)
                 sub.setProperty(FULL_WINDOW_PROP, True)
                 sub.show()

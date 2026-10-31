@@ -7788,3 +7788,19 @@ Se suman a `'max'` en `Layout.php` el AABR y los que estaban en desarrollo
 fuerza igual para el layout guardado sin red. Acumetría y otoscopía siguen
 como ventana: se usan encima de otro equipo. Las ventanas full son
 excluyentes entre sí (abrir una esconde la otra), igual que antes.
+
+## Ventana activa en la barra, como en el Mac (2026-10-31)
+
+Pedido: con casi todo a pantalla completa, la barra propia de cada examen
+(nombre y ✕) sobraba, y "Cerrar ventanas" también.
+
+- **Los exámenes full no tienen barra propia** (`ui_helpers.create_sub_window`
+  la esconde): no se mueven, así que solo ocupaba alto.
+- **Nombre de la ventana activa y su ✕** en la barra de módulos, donde
+  estaba "Cerrar ventanas" (que se quita). Sigue al foco: si hay una ventana
+  normal encima de un examen (acumetría, agenda, chat), manda esa; al
+  cerrarla vuelve el examen. `MdiArea.ventanas_cambiaron` avisa de cada
+  show/hide/foco. El ingreso no cuenta.
+- **Configuración sube a la barra morada**, entre el nombre del usuario y
+  Cerrar sesión, con el mismo estilo. Aparece con la sesión, como antes.
+- Las ventanas normales conservan su barra: se arrastran desde ahí.

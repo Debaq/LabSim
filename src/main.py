@@ -10,7 +10,8 @@ import traceback
 import requests
 from PySide6.QtCore import QEvent, Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
+from PySide6.QtWidgets import (QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog,
+                               QLabel, QMdiArea)
 
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
@@ -375,6 +376,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_max.clicked.connect(self._toggle_max_min)
         self.btn_login.clicked.connect(self.toggle_login)
 
+        # Atajos de teclado y mouse para zurdos, guardados en el perfil. Va
+        # junto al nombre del usuario y aparece con la sesión (btns_actions).
+        self.btn_configuracion = QPushButton("Configuración", self.barra)
+        self.btn_configuracion.setObjectName("btn_configuracion")
+        self.btn_configuracion.setIcon(iconos.icono_boton("engranaje", "#ffffff", tam=14))
+        self.btn_configuracion.setIconSize(QSize(14, 14))
+        self.btn_configuracion.setProperty("texto_completo", "Configuración")
+        self.btn_configuracion.setToolTip("Configuración")
+        self.btn_configuracion.clicked.connect(lambda: configuracion.abrir(self))
+        self.btn_configuracion.hide()
+        self.horizontalLayout_6.insertWidget(
+            self.horizontalLayout_6.indexOf(self.btn_login), self.btn_configuracion)
+
     # -----------------------------------------------------------------
     # Modo laboratorio (ver core/kiosko.py)
     # -----------------------------------------------------------------
@@ -417,8 +431,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         no caben con texto en los PC de poca resolución: se dejan solo con su
         icono y el nombre pasa al tooltip."""
         compacto = self.width() < self.ANCHO_ACCIONES_COMPACTO
-        for i in range(self.layoutAction.count()):
-            boton = self.layoutAction.itemAt(i).widget()
+        botones = [self.layoutAction.itemAt(i).widget()
+                   for i in range(self.layoutAction.count())]
+        for boton in (*botones, getattr(self, "btn_configuracion", None)):
             texto = boton.property("texto_completo") if boton is not None else None
             if texto:
                 boton.setText("" if compacto else texto)
@@ -451,6 +466,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Crea el objeto mdi_area"""
         self.mdi_area = MdiArea()
         self.horizontalLayout.addWidget(self.mdi_area)
+        self.mdi_area.ventanas_cambiaron.connect(self._pintar_ventana_activa)
         # Karime: avisos de la secretaria durante la atención (ver
         # core/secretaria.py), se programan junto con el cronómetro.
         self.secretaria = Secretaria(self.mdi_area)
@@ -673,9 +689,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         btns_actions los vuelven a armar en el próximo login)."""
         for layout in (*self.layouts, self.layoutAction):
             self._clear_layout(layout)
-        for attr in ("btn_chat_paciente", "btn_cerrar_ventanas", "btn_configuracion",
+        for attr in ("btn_chat_paciente", "lbl_ventana_activa", "btn_cerrar_activa",
                      "btn_debug_mkg", "btn_bandeja_oirs"):
             setattr(self, attr, None)
+        self.btn_configuracion.hide()
 
     def _logged_in_client(self):
         """Cliente del backend con la sesión que dejó el login, o None si ese
@@ -1395,25 +1412,27 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # los botones se recrean abajo: las refs viejas quedan apuntando a
         # widgets ya destruidos
         self.btn_debug_mkg = None
+        self.btn_configuracion.show()
         if self._module_visible("CHAT"):
             self.btn_chat_paciente = QPushButton("Hablar con el paciente")
             self._icono_accion(self.btn_chat_paciente, "mensaje")
             self.btn_chat_paciente.setObjectName("btn_chat_paciente")
             self.btn_chat_paciente.clicked.connect(self.abrir_chat_paciente)
             self.layoutAction.addWidget(self.btn_chat_paciente)
-        # Rescate: una subventana tapada o corrida se cierra desde acá sin
-        # tener que encontrarle la ✕.
-        self.btn_cerrar_ventanas = QPushButton("Cerrar ventanas")
-        self._icono_accion(self.btn_cerrar_ventanas, "cerrar")
-        self.btn_cerrar_ventanas.setObjectName("btn_cerrar_ventanas")
-        self.btn_cerrar_ventanas.clicked.connect(self.cerrar_ventanas)
-        self.layoutAction.addWidget(self.btn_cerrar_ventanas)
-        # Atajos de teclado y mouse para zurdos, guardados en el perfil.
-        self.btn_configuracion = QPushButton("Configuración")
-        self._icono_accion(self.btn_configuracion, "engranaje")
-        self.btn_configuracion.setObjectName("btn_configuracion")
-        self.btn_configuracion.clicked.connect(lambda: configuracion.abrir(self))
-        self.layoutAction.addWidget(self.btn_configuracion)
+        # La ventana activa y su ✕, como la barra de menú del Mac: los
+        # exámenes van a pantalla completa sin barra propia (ver
+        # ui_helpers.create_sub_window), así que se cierran desde acá.
+        self.btn_cerrar_activa = QPushButton()
+        self.btn_cerrar_activa.setObjectName("btn_cerrar_activa")
+        self.btn_cerrar_activa.setIcon(iconos.icono_boton("cerrar", "#ffffff", tam=10))
+        self.btn_cerrar_activa.setIconSize(QSize(10, 10))
+        self.btn_cerrar_activa.setFixedSize(18, 18)
+        self.btn_cerrar_activa.clicked.connect(self.cerrar_ventana_activa)
+        self.layoutAction.addWidget(self.btn_cerrar_activa)
+        self.lbl_ventana_activa = QLabel()
+        self.lbl_ventana_activa.setObjectName("lbl_ventana_activa")
+        self.layoutAction.addWidget(self.lbl_ventana_activa)
+        self._pintar_ventana_activa()
         if es_docente((self.data_login or {}).get("permission")):
             # Panel de depuración: umbrales *_mkg cargados y rangos de
             # enmascaramiento en vivo. Solo admin/docente -- al alumno le
@@ -1425,17 +1444,41 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.layoutAction.addWidget(self.btn_debug_mkg)
         self._compactar_acciones()
 
-    def cerrar_ventanas(self):
-        """Oculta todas las subventanas, igual que su ✕: el contenido se
-        conserva y cada una vuelve con su botón. También las de pantalla
-        completa (ABR, VEMP, EOAS): si quedaban, en el box de
-        Electrofisiología el botón parecía no hacer nada. Al esconder un
-        examen se sube su informe (ver load_sub_windows)."""
-        login_pos_z = self.apps["LOGIN"][2]
-        login = self.modules.get(login_pos_z)
-        for sub in self.mdi_area.subWindowList():
-            if sub is login or sub.isHidden():
-                continue
+    # Ancho máximo del nombre de la ventana activa; el resto va con "…".
+    ANCHO_NOMBRE_ACTIVA = 260
+
+    def _ventana_activa(self):
+        """La subventana con foco o, si Qt no tiene ninguna (se acaba de
+        esconder la activa), la que quedó más arriba. El ingreso no
+        cuenta: se cierra con la sesión."""
+        login = self.modules.get(self.apps["LOGIN"][2]) if self.apps else None
+        visibles = [s for s in self.mdi_area.subWindowList(QMdiArea.WindowOrder.StackingOrder)
+                    if not s.isHidden() and s is not login]
+        activa = self.mdi_area.activeSubWindow()
+        if activa in visibles:
+            return activa
+        return visibles[-1] if visibles else None
+
+    def _pintar_ventana_activa(self):
+        if getattr(self, "lbl_ventana_activa", None) is None:
+            return
+        sub = self._ventana_activa()
+        titulo = getattr(sub.widget(), "lbl_title", None) if sub is not None else None
+        nombre = titulo.text() if titulo is not None else ""
+        metricas = self.lbl_ventana_activa.fontMetrics()
+        self.lbl_ventana_activa.setText(metricas.elidedText(
+            nombre, Qt.TextElideMode.ElideRight, self.ANCHO_NOMBRE_ACTIVA))
+        self.lbl_ventana_activa.setToolTip(nombre)
+        self.btn_cerrar_activa.setToolTip(f"Cerrar {nombre}")
+        self.lbl_ventana_activa.setVisible(bool(nombre))
+        self.btn_cerrar_activa.setVisible(bool(nombre))
+
+    def cerrar_ventana_activa(self):
+        """Oculta la ventana activa, igual que su ✕: el contenido se
+        conserva y vuelve con su botón. Al esconder un examen se sube su
+        informe (ver _subir_al_esconder)."""
+        sub = self._ventana_activa()
+        if sub is not None:
             sub.hide()
 
     def abrir_debug_mkg(self):

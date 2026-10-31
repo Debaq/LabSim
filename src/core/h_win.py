@@ -98,8 +98,13 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
 
 
 class MdiArea(QMdiArea):
+    # Se abrió, cerró o cambió de foco alguna subventana. La usa main.py
+    # para el nombre de la ventana activa y su ✕ en la barra de arriba.
+    ventanas_cambiaron = Signal()
+
     def __init__(self):
         super().__init__()
+        self._aviso_pendiente = False
         self.setDocumentMode(True)
         self.setBackground(QColor(tema.LIENZO_APP))
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -107,6 +112,30 @@ class MdiArea(QMdiArea):
         # Al clickear un modulo full Qt lo trae al frente y taparia a los
         # modulos normales abiertos encima: se los vuelve a subir.
         self.subWindowActivated.connect(self._keep_full_below)
+        self.subWindowActivated.connect(self._avisar_cambio)
+
+    def addSubWindow(self, sub, *args):
+        # Esconder una que no es la activa no pasa por subWindowActivated:
+        # se mira el show/hide de cada una.
+        sub.installEventFilter(self)
+        return super().addSubWindow(sub, *args)
+
+    def eventFilter(self, obj, event):
+        if event.type() in (QEvent.Type.Show, QEvent.Type.Hide):
+            self._avisar_cambio()
+        return super().eventFilter(obj, event)
+
+    def _avisar_cambio(self, *_):
+        """Un solo aviso por vuelta del loop: abrir un módulo full esconde
+        al otro y activa el nuevo, todo de una."""
+        if self._aviso_pendiente:
+            return
+        self._aviso_pendiente = True
+
+        def avisar():
+            self._aviso_pendiente = False
+            self.ventanas_cambiaron.emit()
+        QTimer.singleShot(0, avisar)
 
     def _keep_full_below(self, sub):
         if sub is None:
