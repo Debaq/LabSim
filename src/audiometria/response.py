@@ -99,9 +99,14 @@ class ResponseAudiometry():
     UMBRAL = ('colocar_fonos', 'colocar_vibrador', 'aerea_+_ruido', 'vibrador_+_ruido')
     # Instrucciones cuya respuesta se recalcula al mover una perilla con el
     # estimulo sonando (con el tono en continuo, subir el ruido tiene que
-    # bajar la mano sin soltar el tono). El LDL hablado no: diria "molesta" a
-    # cada paso.
-    RECALCULA = UMBRAL + ('escuche_mi_voz', 'solo_si_molesta')
+    # bajar la mano sin soltar el tono; subir el tono sostenido hasta el LDL
+    # tiene que hacerlo hablar).
+    RECALCULA = UMBRAL + ('escuche_mi_voz', 'solo_si_molesta', 'pitos_fuertes')
+    # "Molesta" se dice una vez por nivel: el pulsado prende y apaga el tono
+    # cada medio segundo y lo hacia repetir (cortandose) en cada pulso. Lo
+    # vuelve a decir con otro nivel, oido o frecuencia, o si el tono estuvo
+    # este rato sin molestarle.
+    LDL_REPITE_S = 3
     # Talkback: el dial no esta calibrado; cada marca se toma como 5 dB HL
     # de voz en los fonos (ver docs/decisiones.md).
     TALKBACK_DB_POR_MARCA = 5
@@ -122,6 +127,7 @@ class ResponseAudiometry():
         # como estaba el equipo al apagar el ultimo estimulo: las preguntas en
         # pasado ("¿en qué oído lo escuchó?") se contestan sobre eso
         self._ultima = None
+        self._ldl_dicho = (None, 0.0)   # (que le molesto, cuando)
 
         self.history_command= []
         self._pregunta = None   # pregunta del Fowler esperando que termine el talkback
@@ -294,14 +300,21 @@ class ResponseAudiometry():
         dice; con "solo si molesta" levanta la mano (y la baja si no)."""
         if self.data['audio']['test'] != 'Umbrales':
             return
-        tonos = self._tonos_encendidos()
-        molesta = any(self._le_molesta(ch) for ch in tonos)
+        a = self.data['audio']
+        molestos = [ch for ch in self._tonos_encendidos() if self._le_molesta(ch)]
         if con_la_mano:
-            if molesta:
+            if molestos:
                 self.upHand()
             else:
                 self.downHand()
-        elif molesta:
+            return
+        if not molestos:
+            return
+        clave = tuple((a['freq'], a['int'][ch], tuple(self._oidos(ch))) for ch in molestos)
+        ahora = time.monotonic()
+        anterior, cuando = self._ldl_dicho
+        self._ldl_dicho = (clave, ahora)
+        if clave != anterior or ahora - cuando > self.LDL_REPITE_S:
             self.other_response.create_voice_('molesta')
 
     def _le_molesta(self, ch, a=None):

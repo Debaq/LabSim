@@ -244,6 +244,46 @@ class RespuestasTest(Base):
         self.assertEqual(llamadas, [1, 2])
 
 
+class LdlHabladoTest(Base):
+    """Pitos fuertes: el paciente dice "molesta" al llegar a su LDL (100)."""
+
+    def setUp(self):
+        super().setUp()
+        self.dichas = []
+        self.r.other_response.create_voice_ = self.dichas.append
+        self.r.history_command = ['pitos_fuertes']
+        self.r.data['audio'].update({'test': 'Umbrales', 'freq': F1000, 'trans': [0, 0],
+                                     'stim': [STIM_TONO, STIM_NBN], 'output': [0, 1],
+                                     'int': [90, 0]})
+
+    def nivel(self, db):
+        self.r.set_config(FakeSender('lbl_int_ch0', f'{db} dB HL'))
+
+    def prender(self, on=True):
+        self.r.set_config(FakeSender('lbl_stimOn_ch0', ESTIMULO_ENCENDIDO if on else ''))
+
+    def test_presentado_al_ldl_lo_dice(self):
+        self.prender()
+        self.assertEqual(self.dichas, [])
+        self.prender(False)
+        self.nivel(100)
+        self.prender()
+        self.assertEqual(self.dichas, ['molesta'])
+
+    def test_subiendo_con_el_tono_sostenido_lo_dice(self):
+        self.prender()
+        for db in (95, 100, 105):
+            self.nivel(db)
+        self.assertEqual(self.dichas, ['molesta', 'molesta'])
+
+    def test_el_pulsado_no_lo_repite_en_cada_pulso(self):
+        self.nivel(100)
+        for _ in range(6):
+            self.prender()
+            self.prender(False)
+        self.assertEqual(self.dichas, ['molesta'])
+
+
 class RecalculaTest(Base):
     def test_subir_el_ruido_con_el_tono_sonando_baja_la_mano(self):
         self.assertTrue(self.presentar(

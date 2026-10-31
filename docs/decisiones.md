@@ -7716,6 +7716,11 @@ calculaba por el tono y decía "lo está oyendo".
   instrucciones se siguen igual.
 - **"Solo si molesta"** levanta la mano al llegar al LDL (antes no hacía
   nada); "Pitos fuertes" lo sigue diciendo.
+- **LDL hablado:** subir el tono sostenido hasta el LDL ahora lo hace decir
+  "molesta" (antes solo al presionar). Lo dice una vez por nivel
+  (`LDL_REPITE_S`): en pulsado lo repetía en cada pulso y el audio se cortaba
+  solo; lo vuelve a decir con otro nivel, oído o frecuencia, o tras 3 s sin
+  que el tono le moleste.
 - **El talkback ya no corta los canales** (`players.stop(2)` en vez de
   `stop_all`): apagaba el ruido sin que el equipo ni el motor se enteraran.
 - **Mover una perilla con el estímulo sonando recalcula** la mano en las
