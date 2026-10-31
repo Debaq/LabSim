@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
 )
 
 from audiometria.audio_player import audio_buffer_level
-from audiometria.h_audio import create_word, create_word_response, normalize
+from audiometria.h_audio import (VOCES_PACIENTE, create_word, create_word_response, normalize,
+                                  voz_del_paciente)
 from core.base import context
 from audiometria.logoaudiometry import CalculateLogo
 from core import tema
@@ -330,14 +331,17 @@ class ListWords(QWidget):
 
     @staticmethod
     def _audio_faltante(texto):
-        """Qué grabación le falta a la palabra, o '' si están las dos."""
+        """Qué grabación le falta a la palabra, o '' si están todas: la
+        palabra y la respuesta en cada voz del paciente (la del caso se
+        elige después, al cargarlo)."""
         palabra = texto.strip().lower()
         estimulo = context.get_resource(normalize(f"audio/logo/estimulos/{palabra}.mp3"))
-        respuesta = context.get_resource(normalize(f"audio/logo/respuestas/feme1/{palabra}.mp3"))
         if not os.path.exists(estimulo):
             return "la palabra"
-        if not os.path.exists(respuesta):
-            return "la respuesta del paciente"
+        for voz in VOCES_PACIENTE:
+            respuesta = context.get_resource(normalize(f"audio/logo/respuestas/{voz}/{palabra}.mp3"))
+            if not os.path.exists(respuesta):
+                return f"la respuesta del paciente, voz {voz}"
         return ""
 
     def la_super(self, data, appointment_id=None):
@@ -345,15 +349,9 @@ class ListWords(QWidget):
             return
         self._limpiar_usadas()
         self.is_response = data['sector'] == "Camara_sono"
-        # TODO: hay respuestas grabadas como feme1/feme2 y, generadas con TTS,
-        # nino1/nina1 (resources/audio/logo/respuestas/<voz>/). No hay voces "male"
-        # grabadas y ningun otro id de ficha tiene voz asociada, asi que
-        # create_word_response fallaba silenciosamente (ffmpeg "No existe el
-        # fichero o el directorio") y parecia que el paciente no respondia.
-        # Mientras no se graben mas voces, forzamos siempre la voz feme1 sin
-        # importar el genero/id real del paciente.
-        self.gender = "feme"
-        self.id = 1
+        # La voz del paciente sale de su edad y sexo; todas tienen las 124
+        # palabras (scripts/voces_edge.py).
+        self.gender, self.id = voz_del_paciente(data)
         UMD = data["UMD"]
         self.is_mkg = self.ifMkg(data)
         self.prev = CalculateLogo(data, UMD)

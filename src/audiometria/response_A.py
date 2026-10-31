@@ -22,6 +22,9 @@ class Response(QWidget):
         self.channel_0.mediaStatusChanged.connect(self.media_change)
         self.channel_0.setAudioOutput(self.output_ch)
         self.fowler_engine = None
+        # (género, número) de la voz del paciente; la pone
+        # ResponseAudiometry.set_case según el caso (h_audio.voz_del_paciente).
+        self.voz = ("feme", 1)
 
     def set_fowler_data(self, thr_od, thr_oi, cuts, diplacusia=False):
         """Configura el motor de Fowler/ABLB (audiometria.Fowler.Fowler) con los
@@ -62,6 +65,6 @@ class Response(QWidget):
             self.sender().setPosition(0)
 
     def create_voice_(self, response_text):
-        voice_ldl = create_voice(response_text, 'feme', 2)
+        voice_ldl = create_voice(response_text, *self.voz)
         self.channel_0.setSource(voice_ldl)
         self.channel_0.play()

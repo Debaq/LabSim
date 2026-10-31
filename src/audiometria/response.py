@@ -5,6 +5,7 @@ from core.helpers import CasesOffline, debug_print
 from core.helpers import Preferences
 from PySide6.QtCore import QTimer
 from audiometria.response_A import Response
+from audiometria.h_audio import voz_del_paciente
 from audiometria.Fowler import FOWLER_PATTERNS
 from audiometria.masking_params import (  # re-export: los usan
     CE_TONAL, RUIDOS_ENMASCARANTES, STIM_HABLA, STIM_NBN,      # noqa: F401
@@ -112,6 +113,7 @@ class ResponseAudiometry():
 
     def set_case(self,dbdata):
         self.dbdata = dbdata
+        self.other_response.voz = voz_del_paciente(dbdata)
         self.aerea = [[dbdata['Aerea'][i][0] for i in range(len(dbdata['Aerea']))], 
                       [dbdata['Aerea'][i][1] for i in range(len(dbdata['Aerea']))]]
         self.oseo = [[dbdata['Osea'][i][0] for i in range(len(dbdata['Osea']))], 

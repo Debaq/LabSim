@@ -90,7 +90,27 @@ def create_sound(stim, f, ch):
 #   logo/estimulos/<palabra>.mp3         palabra de la lista, dicha por el examinador
 #   logo/respuestas/<voz>/<palabra>.mp3  el paciente la repite; none1-3 = no la entendió
 #   _generated/, _panned/                caches que se rehacen solos
-# <voz> = género + número: feme1, feme2, male, nino1, nina1.
+# <voz> = género + número: feme1, male1, nino1, nina1 (VOCES_PACIENTE), todas
+# completas, generadas con scripts/voces_edge.py.
+
+VOCES_PACIENTE = ("feme1", "male1", "nino1", "nina1")
+# Hasta esta edad el paciente contesta con voz de niño o niña.
+EDAD_VOZ_INFANTIL = 12
+
+
+def voz_del_paciente(caso):
+    """(género, número) de la voz con que contesta el paciente del caso, por
+    su sexo (gender 0 = mujer, como en el audiómetro) y su edad. Sin edad,
+    voz adulta."""
+    mujer = int(caso.get("gender") or 0) == 0
+    try:
+        edad = int(caso.get("edad"))
+    except (TypeError, ValueError):
+        edad = None
+    if edad is not None and edad <= EDAD_VOZ_INFANTIL:
+        return ("nina" if mujer else "nino"), 1
+    return ("feme" if mujer else "male"), 1
+
 
 def create_voice(name, gender, idx):
     file = f"audio/paciente/{gender}{idx}/{name}.mp3"

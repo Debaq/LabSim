@@ -7583,3 +7583,29 @@ mp3; para cambiar una frase se edita ahí y se corre con su clave.
   -22,5, mediana -21), mono 48 kHz 64 kbit/s como antes: el vúmetro y el
   nivel del talkback no cambian. Silencio de los bordes recortado.
 
+## Voces del paciente completas, por edad y sexo (2026-10-30)
+
+A pedido de él, después del talkback. El paciente contestaba la
+logoaudiometría siempre con `feme1`, que tenía 50 de las 124 palabras: en las
+otras no decía nada. Y las respuestas de las otras pruebas (sí/no del SISI y
+del Fowler, "molesta" de la LDL, "el derecho / el izquierdo") eran siempre de
+`feme2`, también fija.
+
+- **Cuatro voces completas con edge-tts** (`scripts/voces_edge.py`): `feme1`
+  (es-PE-CamilaNeural: Catalina es la del examinador y no se distinguirían),
+  `male1` (es-CL-LorenzoNeural), y `nino1`/`nina1` como estaban. Cada una con
+  las 124 palabras, `none1-3` (los textos de las grabadas: "No entendí", "¿Qué
+  dijo?", "No sé") y las 12 frases de `paciente/<voz>/` (las de `feme2`,
+  transcritas, incluidas las de cansancio que el motor todavía no usa). Las
+  grabadas (`feme1`, `feme2`, `male`) se sacaron: completar una voz grabada
+  con sintética dejaba el cambio a la vista. Todas a -17 LUFS, como las de niño.
+- **La voz la elige el caso** (`h_audio.voz_del_paciente`): hasta los 12 años
+  niño o niña, después adulto, por `gender` (0 = mujer, como el audiómetro);
+  sin edad, adulto. La usan `ListWords` (palabras y "no entendí") y
+  `response_A` (las demás respuestas), que la recibe en
+  `ResponseAudiometry.set_case`.
+- `_audio_faltante` mira la palabra en las cuatro voces.
+- Pendiente (TODO 70): rehacer las palabras que suenen mal, cuando él diga
+  cuáles. Las preguntas del talkback que no tienen respuesta en el motor
+  (*¿Me escucha?*, *¿Molesta?*...) siguen sin contestar.
+
