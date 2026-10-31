@@ -152,11 +152,13 @@ _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
 # leía como "la configuración cambió".
 if LAYOUT_AVAILABLE:
     APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [760, 450], "pre"])
-    # El audiómetro y el impedanciómetro van a pantalla completa con sus
-    # paneles (ver audiometria/ventana.py e impedanciometria/ventana.py).
-    # Layout.php ya los manda así; acá por el layout guardado sin red y por
-    # un backend que todavía no se actualiza.
-    for codigo in ("A", "Z"):
+    # Todos los exámenes van a pantalla completa menos acumetría y
+    # otoscopía, que se usan junto a otros. Layout.php ya los manda así;
+    # acá por el layout guardado sin red y por un backend que todavía no se
+    # actualiza.
+    for codigo in ("A", "Z", "ABR", "AABR", "VEMP", "EOAS", "EOAC", "VNG",
+                   "VHIT", "POS", "RS", "RM", "RA", "OLF", "PRICK", "ESP",
+                   "PSG", "CPAP"):
         if codigo in APPS:
             APPS[codigo][3:5] = [[False, True], "max"]
 

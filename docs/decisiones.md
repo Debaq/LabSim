@@ -7779,3 +7779,12 @@ paciente para ponerle la sonda).
   cambia la curva: no instruir no mete artefactos.
 - **Imprimir** guarda la pantalla que está a la vista con `grab()`: el
   `grabWindow(winId())` de antes sacaba el equipo de la escena escalada.
+
+## Exámenes a pantalla completa, salvo acumetría y otoscopía (2026-10-31)
+
+Pedido: todos los exámenes a pantalla completa menos acumetría y otoscopía.
+Se suman a `'max'` en `Layout.php` el AABR y los que estaban en desarrollo
+(EOAC, VNG, VHIT, POS, rinoscopía, olfatometría, prick, CPAP); el cliente los
+fuerza igual para el layout guardado sin red. Acumetría y otoscopía siguen
+como ventana: se usan encima de otro equipo. Las ventanas full son
+excluyentes entre sí (abrir una esconde la otra), igual que antes.

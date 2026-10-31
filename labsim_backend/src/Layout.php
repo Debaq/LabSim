@@ -35,13 +35,13 @@ final class Layout
         // tiene módulo propio en Courses::MODULES a propósito -- se habilita
         // con ABR (ver SubWindow::_module_visible en el cliente), porque
         // ofrecer el tamizaje sin el diagnóstico no tiene sentido.
-        'AABR'       => [false, 'Tamizaje auditivo automatizado (AABR)', 21, [false, true], [980, 620], 'pre'],
+        'AABR'       => [false, 'Tamizaje auditivo automatizado (AABR)', 21, [false, true], 'max', 'pre'],
         'VEMP'       => [false, 'Potenciales evocados vestibulares miogénicos', 5, [false, true], 'max', 'pre'],
         'EOAS'       => [false, 'Emisor Otoacústico', 6, [false, true], 'max', 'pre'],
-        'EOAC'       => [false, 'Emisor Otoacústico Clínico', 7, [false, true], [1000, 600], 'development'],
-        'VNG'        => [false, 'Videonistagmografía', 8, [false, true], [1000, 600], 'development'],
-        'VHIT'       => [false, 'Video Head Impulse Test', 9, [false, true], [1000, 600], 'development'],
-        'POS'        => [false, 'Posturografía', 10, [false, true], [1000, 600], 'development'],
+        'EOAC'       => [false, 'Emisor Otoacústico Clínico', 7, [false, true], 'max', 'development'],
+        'VNG'        => [false, 'Videonistagmografía', 8, [false, true], 'max', 'development'],
+        'VHIT'       => [false, 'Video Head Impulse Test', 9, [false, true], 'max', 'development'],
+        'POS'        => [false, 'Posturografía', 10, [false, true], 'max', 'development'],
         'CVOICE'     => [false, 'Comandos de Voz', 11, [true, true], [600, 530], 'pre'],
         'AGENDA'     => [false, 'Agenda', 13, [true, true], [940, 580], 'pre'],
         'CHAT'       => [false, 'Hablar con el paciente', 14, [true, true], [440, 500], 'pre'],
@@ -58,14 +58,14 @@ final class Layout
         // Nariz y sueño (H25-H32 del libro): demo interna, solo la ve el admin
         // (docs/roadmap_nasal.md). 'development' + boxes inactivos y fuera de
         // Courses::MODULES, para que ningún curso los pueda prender todavía.
-        'RS'         => [false, 'Rinoscopía', 23, [false, true], [1000, 580], 'development'],
+        'RS'         => [false, 'Rinoscopía', 23, [false, true], 'max', 'development'],
         'RM'         => [false, 'Rinomanometría anterior', 24, [false, true], 'max', 'development'],
         'RA'         => [false, 'Rinometría acústica', 25, [false, true], 'max', 'development'],
-        'OLF'        => [false, 'Olfatometría', 26, [false, true], [1000, 600], 'development'],
-        'PRICK'      => [false, 'Prick test', 27, [false, true], [1000, 600], 'development'],
+        'OLF'        => [false, 'Olfatometría', 26, [false, true], 'max', 'development'],
+        'PRICK'      => [false, 'Prick test', 27, [false, true], 'max', 'development'],
         'ESP'        => [false, 'Espirometría', 28, [false, true], 'max', 'development'],
         'PSG'        => [false, 'Polisomnografía y poligrafía', 29, [false, true], 'max', 'development'],
-        'CPAP'       => [false, 'CPAP y avance mandibular', 30, [false, true], [1000, 600], 'development'],
+        'CPAP'       => [false, 'CPAP y avance mandibular', 30, [false, true], 'max', 'development'],
     ];
 
     public const SECTORS = [
