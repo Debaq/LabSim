@@ -7668,3 +7668,14 @@ armarlas "por ahora".
 - El H5 del libro dice "dos palabras familiares": quedó como pendiente del
   tomo I en `libro-orl/pendientes_urgentes.md` (manda el protocolo).
 
+## Fowler: el paciente contesta después de la pregunta (2026-10-30)
+
+Avisaron que en el Fowler, al preguntar *¿Los escuchó iguales?*, el "sí"
+salía al mismo tiempo que la pregunta. `Audiometer.talkback` reproduce la
+pregunta y llama `rol_player`, que contestaba ahí mismo (`fowler_q`). Ahora
+`rol_player` deja la pregunta pendiente y `Player.termino` (nuevo: el audio
+de un canal terminó sin bucle, o no se pudo abrir) avisa cuándo terminó el
+talkback (canal 2); `ResponseAudiometry.talkback_termino` contesta tras una
+pausa de 0,4 a 0,9 s, con los niveles que estén sonando en ese momento. Una
+instrucción nueva antes de que termine reemplaza la pregunta pendiente.
+

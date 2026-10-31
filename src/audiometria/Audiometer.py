@@ -197,6 +197,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         # Audios channels
         self.players = Player(3)
         self.players.level_changed.connect(self._on_player_level)
+        # El canal 2 es el talkback: el paciente contesta cuando termina la
+        # pregunta, no encima de ella.
+        self.players.termino.connect(
+            lambda ch: self.response.talkback_termino() if ch == 2 else None)
         self.channel_on = [False, False]
         self.monitor(0)
         self.monitor(1)

@@ -53,6 +53,9 @@ def audio_buffer_level(buffer) -> float:
 class Player(QObject):
     # canal (int), nivel normalizado 0.0-1.0 de la señal que realmente está sonando
     level_changed = Signal(int, float)
+    # canal (int): terminó lo que sonaba (sin bucle), o no se pudo abrir.
+    # Para que el paciente conteste después de la pregunta del talkback.
+    termino = Signal(int)
 
     def __init__(self, channels: int) -> None:
         super().__init__()
@@ -87,6 +90,11 @@ class Player(QObject):
         self.level_changed.emit(ch, audio_buffer_level(buffer))
 
     def check_end_of_media(self, player, status: int):
+        if status == QMediaPlayer.MediaStatus.InvalidMedia:
+            ch = self._player_to_ch.get(player)
+            if ch is not None:
+                self.termino.emit(ch)
+            return
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
             current_media = self.current_medias.get(player, None)
             if current_media and self.loop_media.get(current_media, False):
@@ -100,6 +108,7 @@ class Player(QObject):
             ch = self._player_to_ch.get(player)
             if ch is not None:
                 self.level_changed.emit(ch, 0.0)
+                self.termino.emit(ch)
 
     def stop(self, ch: int) -> None:
         self.players[ch].stop()

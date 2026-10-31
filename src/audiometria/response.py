@@ -98,6 +98,7 @@ class ResponseAudiometry():
                             'stim': [0, 3], 'test':'Umbrales', 'contin':['Continuo', 'Continuo']}
 
         self.history_command= []
+        self._pregunta = None   # pregunta del Fowler esperando que termine el talkback
         self.obj_audio = obj_audio
         self.mano = False
         self.frecuency =         [125,250, 500,1000,2000,3000,4000,6000,8000]
@@ -860,10 +861,22 @@ class ResponseAudiometry():
         if rol == 'dictar_palabras':
             pass
             #self.obj_audio()
-        if rol == 'sonidos_iguales':
-            self.other_response.fowler_q(1, self.data)
-        if rol == "en_qué_oído":
-            self.other_response.fowler_q(2, self.data)
+        # Las preguntas del Fowler se contestan cuando el talkback termina de
+        # decirlas (talkback_termino): antes el "sí" salía encima de la
+        # pregunta.
+        self._pregunta = {'sonidos_iguales': 1, 'en_qué_oído': 2}.get(rol)
+
+    # Pausa del paciente entre el fin de la pregunta y su respuesta, en ms.
+    PAUSA_RESPUESTA_MS = (400, 900)
+
+    def talkback_termino(self):
+        """Terminó lo que decía el talkback: si era una pregunta, contesta
+        tras una pausa, con lo que esté sonando entonces."""
+        pregunta, self._pregunta = self._pregunta, None
+        if pregunta is None:
+            return
+        QTimer.singleShot(random.randint(*self.PAUSA_RESPUESTA_MS),
+                          lambda: self.other_response.fowler_q(pregunta, self.data))
 
  
                 
