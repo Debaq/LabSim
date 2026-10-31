@@ -50,6 +50,10 @@ GRUPOS = (
         ("¿Muy fuerte?", "muy_fuerte"),
     )),
 )
+# Las preguntas se contestan pero no reemplazan la instrucción vigente: tras
+# "¿Me escucha?" el paciente sigue respondiendo como se le instruyó.
+PREGUNTAS = frozenset(clave for titulo, frases in GRUPOS if titulo == "PREGUNTAS"
+                      for _, clave in frases)
 # La prueba en que se usa cada frase, a la vista en su botón: los alumnos
 # no sabían qué instrucción iba con qué prueba. Lo mismo que la tabla de la
 # sección 16 del manual del estudiante. Las preguntas que no son de una sola

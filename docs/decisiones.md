@@ -7679,3 +7679,48 @@ talkback (canal 2); `ResponseAudiometry.talkback_termino` contesta tras una
 pausa de 0,4 a 0,9 s, con los niveles que estén sonando en ese momento. Una
 instrucción nueva antes de que termine reemplaza la pregunta pendiente.
 
+
+## Enmascaramiento con cualquier canal y preguntas que se contestan (2026-10-30)
+
+Avisaron del laboratorio que con el ruido en el canal 0 y el tono en el
+canal 1 el paciente no respondía. `response_aerea_w_msk` y
+`response_osea_w_msk` sacaban el oído estudiado de `output[0]` (el canal 0
+se suponía el del tono): con el ruido ahí buscaban el ruido en el oído del
+tono, no lo encontraban y salían sin decidir. El panel de depuración sí lo
+calculaba por el tono y decía "lo está oyendo".
+
+- **Un solo motor de umbrales** (`response_umbral`) para las cuatro
+  instrucciones de umbral: el tono es el canal con Tono o FM, el ruido el que
+  llega al otro oído, la vía la del transductor del tono. El paciente
+  responde a lo que suena, no a la instrucción que el alumno pensaba dar:
+  "Colocar fonos" con ruido puesto también enmascara.
+- **Ruido en el mismo oído del tono:** no enmascara el otro (la sombra
+  sigue) y tapa el tono ahí mismo hasta su nivel efectivo (dial − CE). Antes
+  la mano no se movía.
+- **Simultáneo y campo libre:** el tono llega a los dos oídos y contesta el
+  mejor; no hay oído estudiado. Simultáneo se guarda en `audio['sim']` (el
+  `output` sigue siendo 0/1 para el resto del código). Deterioro tonal y SISI
+  no se administran así: no dan resultado.
+- **Las preguntas no reemplazan la instrucción** (`_instruccion` las salta;
+  la lista sale de `comandos_voz.PREGUNTAS`). Antes, tras "¿Me escucha?" el
+  paciente dejaba de responder a los tonos. Ahora se contestan al terminar el
+  talkback, con lo que suena o con lo último que sonó:
+  ¿Me escucha? (sí, o calla si no oye el talkback), ¿Le molesta / está muy
+  fuerte mi voz? (contra el LDL de 500-2000 Hz del oído más sensible; "muy
+  fuerte" desde 10 dB antes), ¿Lo dejó de escuchar?, ¿En qué oído? (por el
+  camino con más nivel de sensación: sin enmascarar delata la sombra),
+  ¿Le molestó o solo fuerte? (LDL a esa frecuencia) y ¿Escucha pero no
+  entiende? (detecta pero está bajo el SRT).
+- **Talkback en dB:** el dial no está calibrado; cada marca se toma como
+  5 dB HL (`TALKBACK_DB_POR_MARCA`). Solo decide si oye las preguntas: las
+  instrucciones se siguen igual.
+- **"Solo si molesta"** levanta la mano al llegar al LDL (antes no hacía
+  nada); "Pitos fuertes" lo sigue diciendo.
+- **El talkback ya no corta los canales** (`players.stop(2)` en vez de
+  `stop_all`): apagaba el ruido sin que el equipo ni el motor se enteraran.
+- **Mover una perilla con el estímulo sonando recalcula** la mano en las
+  instrucciones de umbral, SDT y "solo si molesta".
+- **Logo:** al presionar el estímulo de habla los cuatro ruidos cuentan como
+  enmascarante (antes solo Speech Noise) y viaja el tipo de ruido.
+- `tests/test_masking_tonal.py` tenía `unittest.main()` a mitad de archivo:
+  dos clases nunca corrían como script. Va al final.

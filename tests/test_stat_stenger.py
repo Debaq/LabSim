@@ -211,7 +211,8 @@ class StengerTest(Base):
         self.assertFalse(self.hand_up())
 
     def test_tono_y_ruido_no_es_stenger(self):
-        # con colocar_fonos, tono + ruido no cambia la mano (como antes)
+        # tono + ruido no es Stenger: se responde como umbral enmascarado
+        # (OD sano a 15 dB: lo oye)
         self.nuevo(self.no_organico_oi())
         self.r.mano = True
         self.r.data["audio"].update({

@@ -1,3 +1,4 @@
+import copy
 import random
 import time
 
@@ -8,9 +9,10 @@ from audiometria.response_A import Response
 from audiometria.h_audio import voz_del_paciente
 from audiometria.Fowler import FOWLER_PATTERNS
 from audiometria.masking_params import (  # re-export: los usan
-    CE_TONAL, RUIDOS_ENMASCARANTES, STIM_HABLA, STIM_NBN,      # noqa: F401
+    CE_TONAL, RUIDOS_ENMASCARANTES, STIM_FM, STIM_HABLA, STIM_NBN,  # noqa: F401
     STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal, es_ruido)  # el panel y los tests
 from audiometria.logoaudiometry import CalculateLogo
+from audiometria.comandos_voz import PREGUNTAS
 class_pref = Preferences()
 
 c_voice = class_pref.get('command_voice')
@@ -29,6 +31,8 @@ pulsatile_time = class_pref.get("pulsatile_time")
 # forma en que este motor se entera de que se prendio o apago un estimulo.
 ESTIMULO_ENCENDIDO = "estimulo_encendido"
 alternate_time = class_pref.get("alternate_time")
+# Estimulos que el paciente reconoce como "el pitito": tono puro y FM (warble)
+STIMS_TONO = (STIM_TONO, STIM_FM)
 
 '''_summary_
 tipo->condición -> respuesta
@@ -89,13 +93,35 @@ class ResponseAudiometry():
     # en casi todo oido retrococlear: a 100 dB HL sobran 70-85 dB.
     STAT_POSITIVO_DB = 30
 
+    # Instrucciones de umbral: "cada pito que escuche, levante la mano". Las
+    # cuatro se responden igual -- el paciente no sabe si el alumno pensaba
+    # enmascarar --; lo que cambia la respuesta es lo que suena y por donde.
+    UMBRAL = ('colocar_fonos', 'colocar_vibrador', 'aerea_+_ruido', 'vibrador_+_ruido')
+    # Instrucciones cuya respuesta se recalcula al mover una perilla con el
+    # estimulo sonando (con el tono en continuo, subir el ruido tiene que
+    # bajar la mano sin soltar el tono). El LDL hablado no: diria "molesta" a
+    # cada paso.
+    RECALCULA = UMBRAL + ('escuche_mi_voz', 'solo_si_molesta')
+    # Talkback: el dial no esta calibrado; cada marca se toma como 5 dB HL
+    # de voz en los fonos (ver docs/decisiones.md).
+    TALKBACK_DB_POR_MARCA = 5
+    # "¿Está muy fuerte mi voz?": dice que si desde 10 dB bajo su LDL.
+    MUY_FUERTE_BAJO_LDL = 10
+
     def __init__(self,obj_audio):
         super().__init__()
         self.data = {}
         self.other_response = Response()
+        # 'output' es el oido (0 OD, 1 OI); 'sim' marca el canal en
+        # Simultaneo, que llega a los dos (su 'output' queda en OI para el
+        # codigo que solo entiende un oido).
         self.data['audio']={'stimOn': [False, False], 'freq': 3, 'step': 5,
                             'int': [20, 20], 'output': [0, 1],'trans': [0, 0],
-                            'stim': [0, 3], 'test':'Umbrales', 'contin':['Continuo', 'Continuo']}
+                            'stim': [0, 3], 'test':'Umbrales', 'contin':['Continuo', 'Continuo'],
+                            'sim': [False, False]}
+        # como estaba el equipo al apagar el ultimo estimulo: las preguntas en
+        # pasado ("¿en qué oído lo escuchó?") se contestan sobre eso
+        self._ultima = None
 
         self.history_command= []
         self._pregunta = None   # pregunta del Fowler esperando que termine el talkback
@@ -128,51 +154,41 @@ class ResponseAudiometry():
         uphand = any(elem in self.data['audio']['stim'] for elem in list_)
         debug_print(uphand)
         #['dictar_palabras', 'vibrador_+_ruido', 'molesto_o', 'dictar_palabras']
-        if uphand:        
-            if self.history_command:
-                if self.history_command[0] in ['colocar_fonos', 'colocar_vibrador']:
-                    self.response_aerea_wout_msk()
-                elif self.history_command[0] == 'mano_levantada':
-                    self.response_tone_decay('mano_levantada')
-                elif self.history_command[0] == 'mano_levantada_en_ruido':
-                    self.response_tone_decay('mano_levantada_en_ruido')
-                elif self.history_command[0] == 'ruido_blanco_contralateral':
-                    self.response_tone_decay('ruido_blanco_contralateral')
-                elif self.history_command[0] == 'rosemberg_bilateral':
-                    self.response_tone_decay('rosemberg_bilateral')
-                elif self.history_command[0] =='pitos_fuertes':
-                    self.ldl()
-                elif self.history_command[0] =='dos_pitos':
-                    self.fowler()
-                elif self.history_command[0] == 'cambie_de_volumen':
-                    # prender el tono portador no es un incremento: el
-                    # paciente responde recien cuando se sube la intensidad
-                    pass
-                elif self.history_command[0] =='aerea_+_ruido':
-                    if self.data['audio']['stimOn'].count(True) == 2:
-                        self.response_aerea_w_msk()
-                    else:
-                        # instruccion dada pero el ruido nunca se encendio: el
-                        # paciente no deja de responder, responde sin
-                        # enmascarar -> curva sombra
-                        self.response_aerea_wout_msk()
-                elif self.history_command[0] =='vibrador_+_ruido':
-                    if self.data['audio']['stimOn'].count(True) == 2:
-                        self.response_osea_w_msk()
-                    else:
-                        self.response_aerea_wout_msk()
-                elif self.history_command[0] == 'escuche_mi_voz':
-
-                    self.response_sdt()
-            else:
+        if uphand:
+            instruccion = self._instruccion()
+            if instruccion in self.UMBRAL:
+                # con o sin ruido, en cualquier canal: ver response_umbral
+                self.response_umbral()
+            elif instruccion in self.DECAY_TESTS:
+                self.response_tone_decay(instruccion)
+            elif instruccion == 'pitos_fuertes':
+                self.ldl()
+            elif instruccion == 'solo_si_molesta':
+                self.ldl(con_la_mano=True)
+            elif instruccion == 'dos_pitos':
+                self.fowler()
+            elif instruccion == 'cambie_de_volumen':
+                # prender el tono portador no es un incremento: el
+                # paciente responde recien cuando se sube la intensidad
+                pass
+            elif instruccion == 'escuche_mi_voz':
+                self.response_sdt()
+            elif instruccion is None:
                 debug_print("no has dado comando alguno")
         else:
             pass
         if not any(self.data["audio"]['stimOn']):
             self.downHand()
 
+    def _instruccion(self):
+        """La ultima instruccion dada, saltando las preguntas: antes la
+        pregunta pasaba a ser el comando vigente y tras "¿Me escucha?" el
+        paciente dejaba de responder a los tonos."""
+        for rol in self.history_command:
+            if rol not in PREGUNTAS:
+                return rol
+        return None
 
-        
     def set_config(self, data):
         debug_print("cambio el sender")
         name = data.objectName()
@@ -182,12 +198,12 @@ class ResponseAudiometry():
         if 'ch0' in name or 'ch1' in name:
             channel = 0 if name[-1] == 'ch0' else 1
 
+        instruccion = self._instruccion()
         if 'int' in name:
             value = str_.split(' ')
             old_int = self.data['audio']['int'][channel]
             self.data['audio']['int'][channel] = int(value[0])
-            if (self.history_command
-                    and self.history_command[0] == 'cambie_de_volumen'):
+            if instruccion == 'cambie_de_volumen':
                 self.response_sisi(channel, int(value[0]) - old_int)
         elif 'trans' in name:
             value = trans_list.index(str_)
@@ -195,11 +211,15 @@ class ResponseAudiometry():
         elif 'output' in name:
             value = 0 if str_ == 'Derecha' else 1
             self.data['audio']['output'][channel] = value
+            self.data['audio'].setdefault('sim', [False, False])[channel] = (
+                str_ == output_list[2])
         elif 'stim' in name:
             value = stim_list.index(str_)
             self.data['audio']['stim'][channel] = value
         elif 'stimOn' in name:
             value = str_ == ESTIMULO_ENCENDIDO
+            if not value and self.data['audio']['stimOn'][channel]:
+                self._ultima = copy.deepcopy(self.data['audio'])
             self.data['audio']['stimOn'][channel] = value
             self.response_()
         elif 'freq' in name:
@@ -217,13 +237,17 @@ class ResponseAudiometry():
         elif 'contin' in name:
             self.data['audio']['contin'][channel] = str_
 
-        if ('stimOn' not in name and self.history_command
-                and self.history_command[0] in self.DECAY_TESTS):
+        if 'stimOn' not in name and instruccion in self.DECAY_TESTS:
             # cualquier cambio del equipo mientras corre un deterioro tonal lo
             # recalcula: subir el tono, mover el ruido contralateral, cambiar
             # de oído o de frecuencia. ('stimOn' no entra porque ya pasó por
             # response_(), que rutea a la prueba que corresponda.)
-            self.response_tone_decay(self.history_command[0])
+            self.response_tone_decay(instruccion)
+        elif (instruccion in self.RECALCULA and any(self.data['audio']['stimOn'])
+              and any(k in name for k in ('int', 'output', 'trans', 'freq'))):
+            # mover una perilla con el estimulo sonando: el paciente responde
+            # a lo que suena ahora, no a lo que sonaba al encenderlo
+            self.response_()
 
         #print(self.data['audio'])
 
@@ -265,18 +289,26 @@ class ResponseAudiometry():
             self._logo = CalculateLogo(self.dbdata, self.dbdata.get('UMD'))
         return self._logo.detecta_sdt(side, int_, int_mkg, stim_mkg)
 
-    def ldl(self):
-        if self.data['audio']['test'] == 'Umbrales':
-            if self.data['audio']['stimOn'].count(True) == 1:
-                stim_on = self.data['audio']['stimOn'].index(True)
-                output = self.data['audio']['output'][stim_on] #derecho o izquierdo
-                frecuency = self.data['audio']['freq'] #indice
-                int_ = self.data['audio']['int'][stim_on]
-                value = self.dbdata['LDL'][frecuency][output]
-                verify = True if int_ >= value else False
+    def ldl(self, con_la_mano=False):
+        """LDL: el tono llega a su nivel de molestia. Con "pitos fuertes" lo
+        dice; con "solo si molesta" levanta la mano (y la baja si no)."""
+        if self.data['audio']['test'] != 'Umbrales':
+            return
+        tonos = self._tonos_encendidos()
+        molesta = any(self._le_molesta(ch) for ch in tonos)
+        if con_la_mano:
+            if molesta:
+                self.upHand()
+            else:
+                self.downHand()
+        elif molesta:
+            self.other_response.create_voice_('molesta')
 
-                if verify:
-                    self.other_response.create_voice_('molesta')
+    def _le_molesta(self, ch, a=None):
+        """El canal `ch` suena a su LDL o mas en algun oido al que llega."""
+        a = a or self.data['audio']
+        return any(a['int'][ch] >= self.dbdata['LDL'][a['freq']][o]
+                   for o in self._oidos(ch, a))
 
     def fowler(self):
         if self.data['audio']['test'] == 'Umbrales':
@@ -380,7 +412,7 @@ class ResponseAudiometry():
 
         continuo = self.data['audio']['contin'][stim_on] == 'Continuo'
         via_aerea = self.data['audio']['trans'][stim_on] == 0
-        if not (continuo and via_aerea):
+        if not (continuo and via_aerea) or self._binaural(stim_on):
             self._decay_abort()
             return
 
@@ -397,8 +429,8 @@ class ResponseAudiometry():
 
         if cfg['contra'] == 'white_noise':
             noise_on = (self.data['audio']['stimOn'][other]
-                        and self.data['audio']['output'][other] == o_n
-                        and self.data['audio']['stim'][other] == 4)  # 4 = Ruido blanco
+                        and self._llega_a(other, o_n)
+                        and self.data['audio']['stim'][other] == STIM_WN)
             noise_lvl = self.data['audio']['int'][other] if noise_on else 0
             if not noise_on or noise_lvl < self.STAT_NOISE_MIN_DB:
                 # a 100 dB HL el tono cruza al otro oído: sin ruido blanco que
@@ -589,7 +621,7 @@ class ResponseAudiometry():
         bajo el umbral no deja oir ningun incremento."""
         if delta <= 0 or self.data['audio']['test'] != 'Umbrales':
             return
-        if self._tone_channel() != channel:
+        if self._tone_channel() != channel or self._binaural(channel):
             return
         output = self.data['audio']['output'][channel]
         freq = self.data['audio']['freq']
@@ -666,11 +698,36 @@ class ResponseAudiometry():
         """
         audio = self.data['audio']
         for ch in (0, 1):
-            if (audio['stimOn'][ch] and audio['output'][ch] == o_n
+            if (audio['stimOn'][ch] and self._llega_a(ch, o_n)
                     and audio['stim'][ch] in RUIDOS_ENMASCARANTES):
                 stim = audio['stim'][ch]
                 return ch, stim, ce_tonal(stim)
         return None
+
+    def _binaural(self, ch, a=None):
+        """El canal suena en los dos oidos: Simultaneo o campo libre."""
+        a = a or self.data['audio']
+        return a.get('sim', [False, False])[ch] or a['trans'][ch] == 2
+
+    def _llega_a(self, ch, oido, a=None):
+        """El estimulo del canal `ch` llega al oido `oido`: por su fono, o a
+        los dos si va en Simultaneo, por campo libre o por vibrador (en via
+        osea la atenuacion interaural es ~0)."""
+        a = a or self.data['audio']
+        return (a['output'][ch] == oido or self._binaural(ch, a)
+                or a['trans'][ch] == 1)
+
+    def _oidos(self, ch, a=None):
+        return [o for o in (0, 1) if self._llega_a(ch, o, a)]
+
+    def _ruido_en(self, oido, a=None, excluir=None):
+        """(nivel, CE) del ruido encendido que llega a `oido`, o (0, 0)."""
+        a = a or self.data['audio']
+        for ch in (0, 1):
+            if (ch != excluir and a['stimOn'][ch] and self._llega_a(ch, oido, a)
+                    and a['stim'][ch] in RUIDOS_ENMASCARANTES):
+                return a['int'][ch], ce_tonal(a['stim'][ch])
+        return 0, 0
 
     def _resolve_masked_threshold(self, via, frecuency, o_e, o_n, int_mkg,
                                   ce=0):
@@ -689,6 +746,11 @@ class ResponseAudiometry():
         130) y el plateau se veía como un salto. Con el mínimo sobre el máximo
         no hay ruido que dé el umbral real: el dilema, sin programarlo aparte.
         """
+        return min(130, *self._caminos(via, frecuency, o_e, o_n, int_mkg, ce))
+
+    def _caminos(self, via, frecuency, o_e, o_n, int_mkg, ce=0):
+        """(por_cruce, por_estudiado): el umbral por cada camino que puede
+        tomar el tono (ver _resolve_masked_threshold)."""
         calc = self._masking_calc(via, frecuency, o_e, o_n, ce)
         real, cruce = calc['real'], calc['cruce']
         # El ruido empieza a tapar el oído no estudiado en `inicio`: el mínimo
@@ -696,90 +758,88 @@ class ResponseAudiometry():
         inicio = calc['minimo'] - (real - cruce)
         por_cruce = cruce + max(0, int_mkg - inicio)
         por_estudiado = real + max(0, int_mkg - calc['maximo'])
-        return min(130, por_cruce, por_estudiado)
+        return por_cruce, por_estudiado
 
-    def response_aerea_w_msk(self):
+    def _percepcion(self, ch, a=None):
+        """Por que oido oye el tono del canal `ch`: [(nivel de sensacion,
+        oido)] de cada camino que lo deja oir, vacio si no lo oye.
+
+        El oido estudiado y el que no se estudia salen del canal del TONO, no
+        del numero de canal: antes se suponia el tono en el canal 0 y con el
+        ruido en el 0 y el tono en el 1 el paciente no respondia nunca.
+
+        - Monoaural: el tono llega por su oido (umbral real) o cruza al otro
+          (curva sombra); el ruido que llega al otro oido corre la sombra y,
+          pasado el maximo, tambien el real (_caminos). Un ruido en el MISMO
+          oido no enmascara al otro: tapa el tono ahi mismo, hasta su nivel
+          efectivo (el del dial menos su CE).
+        - Binaural (Simultaneo, campo libre): cada oido con su umbral real,
+          tapado por el ruido que le llegue.
         """
-        minimo: UAE - AT - UONE + UANE + CE
+        a = a or self.data['audio']
+        f = a['freq']
+        int_ = a['int'][ch]
+        via = 'osea' if a['trans'][ch] == 1 else 'aerea'
+        if self._binaural(ch, a):
+            tabla = self.dbdata['Osea_mkg' if via == 'osea' else 'Aerea_mkg'][f]
+            caminos = []
+            for o in (0, 1):
+                nivel, ce = self._ruido_en(o, a, excluir=ch)
+                caminos.append((int_ - max(tabla[o], nivel - ce), o))
+            return [c for c in caminos if c[0] >= 0]
+        o_e = a['output'][ch]
+        o_n = 1 - o_e
+        nivel_n, ce_n = self._ruido_en(o_n, a, excluir=ch)
+        por_cruce, por_estudiado = self._caminos(via, f, o_e, o_n, nivel_n, ce_n)
+        nivel_e, ce_e = self._ruido_en(o_e, a, excluir=ch)
+        if nivel_e:
+            por_estudiado = max(por_estudiado, nivel_e - ce_e)
+        caminos = [(int_ - min(130, por_estudiado), o_e), (int_ - min(130, por_cruce), o_n)]
+        return [c for c in caminos if c[0] >= 0]
+
+    def _oye_tono(self, ch, a=None):
+        return bool(self._percepcion(ch, a))
+
+    def _tonos_encendidos(self, a=None):
+        a = a or self.data['audio']
+        return [ch for ch in (0, 1) if a['stimOn'][ch] and a['stim'][ch] in STIMS_TONO]
+
+    def response_umbral(self):
+        """Umbrales por via aerea u osea, con o sin ruido: el paciente levanta
+        la mano si oye el tono, por el camino que sea (ver _percepcion).
+
+        minimo: UAE - AT - UONE + UANE + CE      (aerea)
+                (UOE - UONE) + UANE + CE + EO    (osea)
         maximo: UOE + AT
 
-        donde:
-        UAE: umbral aereo estudiado
-        AT: Atenuación interaural
-        UONE: umbral oseo no estudiado
-        UOE: umbral oseo estudiado
-        UANE: umbral aereo no estudiado
-        CE: coeficiente de enmascaramiento
-        uae:40 - 40 - 15 + 15 + 0
+        UAE/UOE: umbral aereo/oseo estudiado; UANE/UONE: aereo/oseo no
+        estudiado; AT: atenuacion interaural; CE: coeficiente de
+        enmascaramiento; EO: efecto de oclusion.
         """
-        if self.data['audio']['test'] == 'Umbrales':
-            if self.data['audio']['stimOn'].count(True) == 2:
-                #{'audio': {'stimOn': [True, True], 'freq': 3, 'step': 5, 'int': [25, 20], 'output': [0, 1], 'trans': [0, 0], 'stim': [0, 3], 'test': 'Tono', 'contin': ['Continuo', 'Continuo']}}
-                #No existe una logica de cuando le pongan mkg pero en realidad no lo necesite
-                if any(s in self.data['audio']['stim']
-                       for s in RUIDOS_ENMASCARANTES):
-                    if self.data['audio']['output'][0] != self.data['audio']['output'][1]:
-                        if self.data['audio']['trans'] == [0,0]:
-                            o_e = 0 if self.data['audio']['output'][0] == 0 else 1
-                            o_n = int(not o_e)
-                            ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1
-                            ruido = self._canal_ruido(o_n)
-                            if ruido is None:
-                                return
-                            ch_mkg, _stim, ce = ruido
-                            frecuency = self.data['audio']['freq'] #indice
-                            int_ = self.data['audio']['int'][ch_tone]
-                            int_mkg = self.data['audio']['int'][ch_mkg]
-                            threshold = self._resolve_masked_threshold(
-                                'aerea', frecuency, o_e, o_n, int_mkg, ce)
+        a = self.data['audio']
+        if a['test'] != 'Umbrales' or not any(a['stimOn']):
+            return
+        tonos = self._tonos_encendidos()
+        if not tonos:
+            # lo unico encendido es el ruido: lo oye, pero no es el pitito
+            # por el que se le pidio levantar la mano
+            self.downHand()
+            return
+        if len(tonos) == 2 and self._es_stenger():
+            # el Stenger se instruye como los umbrales: lo que lo distingue
+            # es el mismo tono en los dos oidos a la vez
+            self.response_stenger()
+            return
+        if any(self._oye_tono(ch) for ch in tonos):
+            self.upHand()
+        else:
+            self.downHand()
 
-                            if threshold <= int_:
-                                self.upHand()
-                            else:
-                                self.downHand()
-
-
-                #print(self.data)
-
-
-    def response_osea_w_msk(self):
-        """
-        minimo:
-        (UOE - UONE) + UANOE + CE + EO
-        (45 - 10)
-        max:
-        AT+UOE
-
-        UOE : umbral oseo oido estudiado
-        UONE: umbral oseo no estudiado
-        UANOE: umbral aereo no estudiado
-        CE: coeficiente de enmascaramiento
-        EO: efecto de oclusión
-        At: atenuación interaural (~0 en via osea)
-        """
-        if self.data['audio']['test'] == 'Umbrales':
-            if self.data['audio']['stimOn'].count(True) == 2:
-                debug_print(self.data)
-                if (any(s in self.data['audio']['stim']
-                        for s in RUIDOS_ENMASCARANTES)
-                        and 1 in self.data['audio']['trans']):
-                    o_e = 0 if self.data['audio']['output'][0] == 0 else 1 #solución parche ya que supone que el oido estudiado es el ch 0
-                    o_n = int(not o_e)
-                    ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   #aca se generaria un problema de inmediato con o_e
-                    ruido = self._canal_ruido(o_n)
-                    if ruido is None:
-                        return
-                    ch_mkg, _stim, ce = ruido
-                    frecuency = self.data['audio']['freq'] #indice
-                    int_ = self.data['audio']['int'][ch_tone]
-                    int_mkg = self.data['audio']['int'][ch_mkg]
-                    threshold = self._resolve_masked_threshold(
-                        'osea', frecuency, o_e, o_n, int_mkg, ce)
-                    if threshold <= int_:
-                        self.upHand()
-                    else:
-                        self.downHand()
-
+    # Nombres viejos: las cuatro instrucciones de umbral pasan por el mismo
+    # motor (antes cada una suponia el tono en un canal fijo).
+    response_aerea_w_msk = response_umbral
+    response_osea_w_msk = response_umbral
+    response_aerea_wout_msk = response_umbral
 
     def oclusive_efect(self, f:int, o:int)->int:
         """Efecto oclusivo del oido `o`: cuanto mejora su audicion por via
@@ -807,41 +867,6 @@ class ResponseAudiometry():
         return 0 if gap > 5 else value_oclusive
 
 
-    def response_aerea_wout_msk(self):
-        #aca se debe manejar la situación que esl estudiante no puso el fono en su lugar, ni el vibrador, eso no lo maneja
-        if self.data['audio']['test'] == 'Umbrales':
-            if self.data['audio']['stimOn'].count(True) == 1:
-                stim_on = self.data['audio']['stimOn'].index(True)
-                if self.data['audio']['stim'][stim_on] in RUIDOS_ENMASCARANTES:
-                    # lo unico encendido es el ruido: lo oye, pero no es el
-                    # pitito por el que se le pidio levantar la mano
-                    self.downHand()
-                    return
-                trans = self.data['audio']['trans'][stim_on]
-                via = 'aerea' if trans == 0 else 'osea'
-                output = self.data['audio']['output'][stim_on] #derecho o izquierdo
-                o_n = int(not output)
-                frecuency = self.data['audio']['freq'] #indice
-                debug_print(frecuency)
-                int_ = self.data['audio']['int'][stim_on]
-                # sin canal de mkg encendido = ruido de enmascaramiento en 0
-                # (submascarado en cuanto haga falta enmascarar -> curva sombra)
-                value = self._resolve_masked_threshold(via, frecuency, output, o_n, 0)
-                verify = True if int_ >= value else False
-
-                #print(f"la intensidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
-                if verify:
-                    self.upHand()
-                else:
-                    self.downHand()
-
-            elif self.data['audio']['stimOn'].count(True) == 2:
-                # el Stenger se instruye como los umbrales ("cada pito que
-                # escuche, levante la mano"): lo que lo distingue es el
-                # estimulo, el mismo tono en los dos oidos a la vez
-                if self._es_stenger():
-                    self.response_stenger()
-
     def Action(self, action):
         t,p,m = action.split('_')
         if t in ['THR', 'S', 'L']:
@@ -851,7 +876,9 @@ class ResponseAudiometry():
         
     def rol_player(self, rol):
         if rol != 'pa_pa_pa':
-            max_list = 4
+            # largo de sobra: las preguntas quedan en la historia pero no
+            # pueden empujar afuera la instruccion vigente (_instruccion)
+            max_list = 12
             self.history_command.insert(0, rol)
             while len(self.history_command) > max_list:
                 self.history_command.pop()
@@ -861,10 +888,10 @@ class ResponseAudiometry():
         if rol == 'dictar_palabras':
             pass
             #self.obj_audio()
-        # Las preguntas del Fowler se contestan cuando el talkback termina de
-        # decirlas (talkback_termino): antes el "sí" salía encima de la
-        # pregunta.
-        self._pregunta = {'sonidos_iguales': 1, 'en_qué_oído': 2}.get(rol)
+        # Las preguntas se contestan cuando el talkback termina de decirlas
+        # (talkback_termino): antes el "sí" del Fowler salía encima de la
+        # pregunta, y las demás no se contestaban.
+        self._pregunta = rol if rol in PREGUNTAS else None
 
     # Pausa del paciente entre el fin de la pregunta y su respuesta, en ms.
     PAUSA_RESPUESTA_MS = (400, 900)
@@ -876,7 +903,87 @@ class ResponseAudiometry():
         if pregunta is None:
             return
         QTimer.singleShot(random.randint(*self.PAUSA_RESPUESTA_MS),
-                          lambda: self.other_response.fowler_q(pregunta, self.data))
+                          lambda: self.contestar(pregunta))
+
+    def contestar(self, pregunta):
+        """Contesta una pregunta del talkback con lo que este sonando (o con
+        lo ultimo que sono, si ya no suena nada)."""
+        fowler = pregunta == 'sonidos_iguales' or (
+            pregunta == 'en_qué_oído' and self._instruccion() == 'dos_pitos')
+        if fowler:
+            self.other_response.fowler_q(1 if pregunta == 'sonidos_iguales' else 2,
+                                         self.data)
+            return
+        respuesta = self.respuesta_a(pregunta)
+        debug_print(f"[pregunta] {pregunta} -> {respuesta}")
+        if respuesta is not None:
+            self.other_response.create_voice_(respuesta)
+
+    def respuesta_a(self, pregunta):
+        """Lo que dice el paciente ('si', 'no', 'molesta', 'elderecho',
+        'elizquierdo') o None si calla. Los textos estan en
+        scripts/voces_comandos.py."""
+        actual = self.data['audio']
+        pasado = actual if any(actual['stimOn']) else (self._ultima or actual)
+        if pregunta == 'escucha':                       # ¿Me escucha?
+            return 'si' if self._oye_talkback() else None
+        if pregunta in ('molesta', 'muy_fuerte'):       # ... mi voz
+            if not self._oye_talkback():
+                return None
+            margen = self.MUY_FUERTE_BAJO_LDL if pregunta == 'muy_fuerte' else 0
+            return 'si' if self._talkback_db() >= self._ldl_voz() - margen else 'no'
+        if pregunta == 'dejo_de_escuchar':              # ¿Lo dejó de escuchar?
+            tonos = self._tonos_encendidos()
+            if not tonos:
+                return 'si'
+            if self._instruccion() in self.DECAY_TESTS:
+                # en el deterioro tonal la mano es lo que percibe
+                return 'no' if self.mano else 'si'
+            return 'no' if any(self._oye_tono(ch) for ch in tonos) else 'si'
+        if pregunta == 'en_qué_oído':                   # ¿En qué oído...?
+            caminos = [c for ch in self._tonos_encendidos(pasado)
+                       for c in self._percepcion(ch, pasado)]
+            if not caminos:
+                return 'no'
+            return ('elderecho', 'elizquierdo')[max(caminos)[1]]
+        if pregunta == 'molesto_o':                     # ¿Le molestó, o fuerte?
+            encendidos = [ch for ch in (0, 1) if pasado['stimOn'][ch]]
+            return ('molesta' if any(self._le_molesta(ch, pasado) for ch in encendidos)
+                    else 'no')
+        if pregunta == 'no_entiende':                   # ¿Escucha, pero no entiende?
+            return self._no_entiende(pasado)
+        return None
+
+    def _talkback_db(self):
+        dial = getattr(self.obj_audio, 'dial_talkback', None)
+        if dial is None:
+            return None
+        return dial.value() * self.TALKBACK_DB_POR_MARCA
+
+    def _oye_talkback(self):
+        """Oye la voz del evaluador por los fonos: con el mejor oido."""
+        nivel = self._talkback_db()
+        if nivel is None:
+            return True
+        return nivel >= min(self.dbdata.get('SDT', [0, 0]))
+
+    def _ldl_voz(self):
+        """LDL para la voz: el promedio de 500-2000 Hz del oido mas
+        sensible (la voz llega a los dos fonos)."""
+        ldl = self.dbdata['LDL']
+        return min(sum(ldl[f][o] for f in (2, 3, 4)) / 3 for o in (0, 1))
+
+    def _no_entiende(self, a):
+        """Con palabras sonando: 'si' si las detecta pero estan bajo su SRT,
+        'no' si las entiende o si ni las oye. Sin palabras, por el talkback."""
+        habla = [ch for ch in (0, 1) if a['stimOn'][ch] and a['stim'][ch] == STIM_HABLA]
+        if not habla:
+            return 'no' if self._oye_talkback() else None
+        ch = habla[0]
+        side, int_ = a['output'][ch], a['int'][ch]
+        if not self._detecta_sdt(side, int_):
+            return 'no'
+        return 'si' if int_ < self.dbdata['SRT'][side] else 'no'
 
  
                 

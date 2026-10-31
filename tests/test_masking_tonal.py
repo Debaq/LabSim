@@ -210,9 +210,6 @@ class CurvaDeEnmascaramientoTest(unittest.TestCase):
             sum(self.umbral(n) == self.calc['real'] for n in range(0, 121, 5)), 3)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class TablaOclusivaTest(unittest.TestCase):
     """El efecto oclusivo crece hacia los graves y desaparece sobre 2000 Hz:
@@ -309,3 +306,7 @@ class TipoDeRuidoMotorTest(unittest.TestCase):
         a.update({'stimOn': [True, True], 'output': [0, 0],
                   'stim': [0, 4], 'int': [70, 80]})
         self.assertIsNone(self.r._canal_ruido(1))
+
+
+if __name__ == "__main__":
+    unittest.main()

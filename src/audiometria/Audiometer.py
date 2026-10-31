@@ -530,7 +530,9 @@ class Audiometer(QWidget, Ui_Audiometer):
         self._log("audio_talkback_press", command=self.state_supra[1] if self.state_supra else None)
         if self.state_supra is not None:
             if self.state_supra[1] != 'pa_pa_pa':
-                self.players.stop_all()
+                # solo lo que decia el talkback: cortar los canales apagaba el
+                # ruido de enmascaramiento sin que el equipo se enterara
+                self.players.stop(2)
                 source=self.state_supra[0]
                 self.players.play(2, source)
                 self.response.rol_player(self.state_supra[1])
@@ -769,13 +771,14 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.datasignal_speech[2] = int_der
             self.datasignal_speech[3] = side
             self.datasignal_speech[5] = ch
-
-            self.signal_speech.emit(self.datasignal_speech)
+            # los cuatro ruidos enmascaran, como en update_logo (antes aca
+            # solo contaba el Speech Noise y el tipo de ruido quedaba viejo)
+            self.datasignal_speech[4] = self._mkg_on(contra)
+            self.datasignal_speech[6] = self._mkg_intensity(ch)
+            self.datasignal_speech[7] = self._mkg_stim(ch)
             self.lbl_warnings[ch].setStyleSheet(
                 "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
             self.lbl_warnings[ch].setText(ESTIMULO_ENCENDIDO)
-            self.datasignal_speech[4] = self.lbl_revers[contra].text() == "Invertido" and self.lbl_stim[contra].text() == "Speech Noise"
-            self.datasignal_speech[6] = self._mkg_intensity(ch)
 
             self.signal_speech.emit(self.datasignal_speech)
 

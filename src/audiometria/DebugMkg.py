@@ -243,7 +243,7 @@ def _veredicto_tonal(response, audio):
     stim = audio['stim']
     freq_idx = audio['freq']
     encendidos = [ch for ch in (0, 1) if audio['stimOn'][ch]]
-    tonos = [ch for ch in encendidos if stim[ch] == 0]
+    tonos = response._tonos_encendidos(audio)
     if not tonos:
         return ["No hay tono presentándose (nada que evaluar)."]
 
@@ -255,7 +255,10 @@ def _veredicto_tonal(response, audio):
         int_ = audio['int'][ch_tone]
         ruidos = [ch for ch in encendidos
                   if ch != ch_tone and stim[ch] in RUIDOS
-                  and audio['output'][ch] == o_n]
+                  and response._llega_a(ch, o_n, audio)]
+        ipsi = [ch for ch in encendidos
+                if ch != ch_tone and stim[ch] in RUIDOS
+                and response._llega_a(ch, o_e, audio)]
         ch_ruido = ruidos[0] if ruidos else None
         int_mkg = audio['int'][ch_ruido] if ruidos else 0
         ce = CE_TONAL.get(stim[ch_ruido], 0) if ruidos else 0
@@ -263,11 +266,13 @@ def _veredicto_tonal(response, audio):
             calc = response._masking_calc(via, freq_idx, o_e, o_n, ce)
             umbral = response._resolve_masked_threshold(via, freq_idx, o_e, o_n,
                                                         int_mkg, ce)
+            # lo que hace el paciente lo decide el motor, con todo lo que
+            # suena (ruido en el mismo oído, Simultáneo, campo libre)
+            responde = response._oye_tono(ch_tone, audio)
         except (IndexError, KeyError, TypeError) as exc:
             lineas.append(f"Tono {via} en {_oi(o_e)}: no se pudo calcular ({exc})")
             continue
 
-        responde = umbral <= int_
         nombre = (stim_list[stim[ch_ruido]] if ruidos and stim[ch_ruido] < len(stim_list)
                   else "ruido")
         lineas.append(
@@ -282,6 +287,13 @@ def _veredicto_tonal(response, audio):
                 f"el mínimo efectivo sube a {calc['mkg_min']:g} dB "
                 "(la energía fuera de la banda crítica del tono no tapa nada)")
         lineas.append(f"     {_zona(calc, int_mkg)}")
+        if ipsi:
+            lineas.append(
+                f"     ATENCIÓN: hay ruido en el {_oi(o_e)}, el mismo oído del "
+                "tono: lo tapa ahí mismo, no enmascara el otro oído")
+        if response._binaural(ch_tone, audio):
+            lineas.append("     el tono va a los dos oídos (Simultáneo o campo "
+                          "libre): contesta el mejor, no hay oído estudiado")
         if calc['shadow'] < calc['real'] and int_mkg < calc['mkg_min']:
             lineas.append(
                 f"     el umbral aparente {calc['shadow']:g} dB NO es del "
