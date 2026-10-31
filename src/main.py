@@ -11,7 +11,7 @@ import requests
 from PySide6.QtCore import QEvent, Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog,
-                               QLabel, QMdiArea)
+                               QFrame, QHBoxLayout, QLabel, QMdiArea)
 
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
@@ -378,11 +378,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         # Atajos de teclado y mouse para zurdos, guardados en el perfil. Va
         # junto al nombre del usuario y aparece con la sesión (btns_actions).
-        self.btn_configuracion = QPushButton("Configuración", self.barra)
+        self.btn_configuracion = QPushButton(self.barra)
         self.btn_configuracion.setObjectName("btn_configuracion")
-        self.btn_configuracion.setIcon(iconos.icono_boton("engranaje", "#ffffff", tam=14))
-        self.btn_configuracion.setIconSize(QSize(14, 14))
-        self.btn_configuracion.setProperty("texto_completo", "Configuración")
+        self.btn_configuracion.setIcon(iconos.icono_boton("engranaje", "#ffffff", tam=16))
+        self.btn_configuracion.setIconSize(QSize(16, 16))
+        self.btn_configuracion.setFixedSize(26, 22)
         self.btn_configuracion.setToolTip("Configuración")
         self.btn_configuracion.clicked.connect(lambda: configuracion.abrir(self))
         self.btn_configuracion.hide()
@@ -431,9 +431,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         no caben con texto en los PC de poca resolución: se dejan solo con su
         icono y el nombre pasa al tooltip."""
         compacto = self.width() < self.ANCHO_ACCIONES_COMPACTO
-        botones = [self.layoutAction.itemAt(i).widget()
-                   for i in range(self.layoutAction.count())]
-        for boton in (*botones, getattr(self, "btn_configuracion", None)):
+        for i in range(self.layoutAction.count()):
+            boton = self.layoutAction.itemAt(i).widget()
             texto = boton.property("texto_completo") if boton is not None else None
             if texto:
                 boton.setText("" if compacto else texto)
@@ -689,7 +688,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         btns_actions los vuelven a armar en el próximo login)."""
         for layout in (*self.layouts, self.layoutAction):
             self._clear_layout(layout)
-        for attr in ("btn_chat_paciente", "lbl_ventana_activa", "btn_cerrar_activa",
+        for attr in ("btn_chat_paciente", "marco_ventana_activa", "lbl_ventana_activa",
+                     "btn_cerrar_activa",
                      "btn_debug_mkg", "btn_bandeja_oirs"):
             setattr(self, attr, None)
         self.btn_configuracion.hide()
@@ -1421,17 +1421,25 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.layoutAction.addWidget(self.btn_chat_paciente)
         # La ventana activa y su ✕, como la barra de menú del Mac: los
         # exámenes van a pantalla completa sin barra propia (ver
-        # ui_helpers.create_sub_window), así que se cierran desde acá.
-        self.btn_cerrar_activa = QPushButton()
-        self.btn_cerrar_activa.setObjectName("btn_cerrar_activa")
-        self.btn_cerrar_activa.setIcon(iconos.icono_boton("cerrar", "#ffffff", tam=10))
-        self.btn_cerrar_activa.setIconSize(QSize(10, 10))
-        self.btn_cerrar_activa.setFixedSize(18, 18)
-        self.btn_cerrar_activa.clicked.connect(self.cerrar_ventana_activa)
-        self.layoutAction.addWidget(self.btn_cerrar_activa)
+        # ui_helpers.create_sub_window), así que se cierran desde acá. Una
+        # sola pieza con la forma de los botones de la barra.
+        self.marco_ventana_activa = QFrame()
+        self.marco_ventana_activa.setObjectName("marco_ventana_activa")
+        fila = QHBoxLayout(self.marco_ventana_activa)
+        fila.setContentsMargins(10, 0, 3, 0)
+        fila.setSpacing(4)
         self.lbl_ventana_activa = QLabel()
         self.lbl_ventana_activa.setObjectName("lbl_ventana_activa")
-        self.layoutAction.addWidget(self.lbl_ventana_activa)
+        fila.addWidget(self.lbl_ventana_activa)
+        self.btn_cerrar_activa = QPushButton()
+        self.btn_cerrar_activa.setObjectName("btn_cerrar_activa")
+        self.btn_cerrar_activa.setIcon(
+            iconos.icono_boton("cerrar", tema.TEXTO_SUAVE, tam=12))
+        self.btn_cerrar_activa.setIconSize(QSize(12, 12))
+        self.btn_cerrar_activa.setFixedSize(20, 20)
+        self.btn_cerrar_activa.clicked.connect(self.cerrar_ventana_activa)
+        fila.addWidget(self.btn_cerrar_activa)
+        self.layoutAction.addWidget(self.marco_ventana_activa)
         self._pintar_ventana_activa()
         if es_docente((self.data_login or {}).get("permission")):
             # Panel de depuración: umbrales *_mkg cargados y rangos de
@@ -1470,8 +1478,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             nombre, Qt.TextElideMode.ElideRight, self.ANCHO_NOMBRE_ACTIVA))
         self.lbl_ventana_activa.setToolTip(nombre)
         self.btn_cerrar_activa.setToolTip(f"Cerrar {nombre}")
-        self.lbl_ventana_activa.setVisible(bool(nombre))
-        self.btn_cerrar_activa.setVisible(bool(nombre))
+        self.marco_ventana_activa.setVisible(bool(nombre))
 
     def cerrar_ventana_activa(self):
         """Oculta la ventana activa, igual que su ✕: el contenido se

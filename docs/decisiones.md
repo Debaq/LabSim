@@ -7797,10 +7797,12 @@ Pedido: con casi todo a pantalla completa, la barra propia de cada examen
 - **Los exámenes full no tienen barra propia** (`ui_helpers.create_sub_window`
   la esconde): no se mueven, así que solo ocupaba alto.
 - **Nombre de la ventana activa y su ✕** en la barra de módulos, donde
-  estaba "Cerrar ventanas" (que se quita). Sigue al foco: si hay una ventana
+  estaba "Cerrar ventanas" (que se quita): una pieza con la forma de los
+  botones de la barra, la ✕ gris adentro a la derecha. Un círculo rojo
+  aparte se probó y no iba con el diseño. Sigue al foco: si hay una ventana
   normal encima de un examen (acumetría, agenda, chat), manda esa; al
   cerrarla vuelve el examen. `MdiArea.ventanas_cambiaron` avisa de cada
   show/hide/foco. El ingreso no cuenta.
 - **Configuración sube a la barra morada**, entre el nombre del usuario y
-  Cerrar sesión, con el mismo estilo. Aparece con la sesión, como antes.
+  Cerrar sesión: solo el engranaje, sin borde (como min/max/cerrar). Aparece con la sesión, como antes.
 - Las ventanas normales conservan su barra: se arrastran desde ahí.
