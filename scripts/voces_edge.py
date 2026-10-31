@@ -2,8 +2,9 @@
 
 Por cada voz deja:
   - resources/audio/logo/respuestas/<voz>/<palabra>.mp3: el paciente repite
-    cada palabra de las listas (PALABRAS de src/audiometria/ListWords.py), y
-    none1-3.mp3 cuando no la entendió.
+    cada palabra de las listas (PALABRAS de src/audiometria/ListWords.py),
+    cada mitad de las compuestas del SRT (MITADES), y none1-3.mp3 cuando no
+    la entendió.
   - resources/audio/paciente/<voz>/<frase>.mp3: lo que contesta en las otras
     pruebas (FRASES: sí/no del SISI y del Fowler, "molesta" de la LDL...).
 
@@ -65,13 +66,20 @@ FILTRO = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
           "loudnorm=I=-17:TP=-1.5:LRA=11")
 
 
-def palabras_de_las_listas():
+def _de_listwords(nombre):
     arbol = ast.parse(open(os.path.join(RAIZ, "src", "audiometria", "ListWords.py")).read())
     for nodo in arbol.body:
-        if isinstance(nodo, ast.Assign) and getattr(nodo.targets[0], "id", "") == "PALABRAS":
-            listas = ast.literal_eval(nodo.value)
-            return sorted({p for lista in listas.values() for p in lista})
-    sys.exit("No se encontró PALABRAS en ListWords.py")
+        if isinstance(nodo, ast.Assign) and getattr(nodo.targets[0], "id", "") == nombre:
+            return ast.literal_eval(nodo.value)
+    sys.exit(f"No se encontró {nombre} en ListWords.py")
+
+
+def palabras_de_las_listas():
+    """Las palabras de las listas y las mitades de las compuestas (las
+    repetidas, como "sol", se generan una vez)."""
+    palabras = {p for lista in _de_listwords("PALABRAS").values() for p in lista}
+    palabras |= {m for par in _de_listwords("MITADES").values() for m in par}
+    return sorted(palabras, key=str.lower)
 
 
 def normalize(s):

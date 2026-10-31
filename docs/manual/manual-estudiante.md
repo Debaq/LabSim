@@ -517,9 +517,11 @@ Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pant
 ![Las listas de palabras](img/estudiante/listas-de-palabras.png)
 
 1. Con *Habla* en un canal, las listas aparecen a la **derecha del audiómetro** (antes ese espacio dice dónde van a aparecer).
-2. Elige la lista: **Disilabos (Palacios)** o **Terminos Conocidos**. Las palabras desactivadas todavía no tienen su grabación: dejando el mouse encima dice cuál falta.
+2. Elige la lista: **Disílabos (Palacios)** o **Términos conocidos** para la discriminación, o **Compuestas (SRT)** para el umbral de reconocimiento. Las palabras desactivadas todavía no tienen su grabación: dejando el mouse encima dice cuál falta.
 3. Haz clic en una palabra: suena por la salida del canal. El paciente la repite (o dice otra cosa, si no la entendió).
 4. Anota con **+1** o **-1** en el audiómetro. **<** y **>** cambian el total de palabras; **Limpiar** vuelve los aciertos a cero.
+
+Para el **SRT** usa la lista **Compuestas (SRT)**: desde el SDT, sube de 5 en 5 dB y dicta dos palabras en cada nivel. El paciente repite la palabra entera, solo una mitad (*«puntas»* de *sacapuntas*) o nada. El SRT es el primer nivel en que percibe la mitad del mensaje.
 
 Para volver a los umbrales, elige **Tono** o **FM**.
 

@@ -9,11 +9,17 @@ las claves a rehacer.
     python -m venv /tmp/venv_edge && /tmp/venv_edge/bin/pip install edge-tts
     /tmp/venv_edge/bin/python scripts/voces_comandos.py                  # todas
     /tmp/venv_edge/bin/python scripts/voces_comandos.py dos_pitos escucha
+    /tmp/venv_edge/bin/python scripts/voces_comandos.py --estimulos      # palabras sin audio
+
+--estimulos hace, con la misma voz, las palabras de las listas
+(ListWords.PALABRAS) que todavía no tienen su logo/estimulos/<palabra>.mp3;
+no toca las que ya existen (las grabadas).
 
 Los textos salen de las grabaciones anteriores (transcritas, con la redacción
 del autor); ruido_blanco_contralateral y rosemberg_bilateral no tenían
 grabación. Necesita ffmpeg. Ver docs/roadmap_voces.md.
 """
+import ast
 import asyncio
 import os
 import subprocess
@@ -108,12 +114,46 @@ async def generar(clave):
     print(f"  {os.path.relpath(archivo(clave), RAIZ)}")
 
 
+# Las palabras de las listas, al nivel de las grabadas (-18 LUFS, mono
+# 44,1 kHz): el vúmetro está calibrado con ellas.
+FILTRO_ESTIMULO = FILTRO.replace("loudnorm=I=-21:TP=-1.5", "loudnorm=I=-18:TP=-1")
+ESTIMULOS = os.path.join(RAIZ, "resources", "audio", "logo", "estimulos")
+
+
+def palabras_de_las_listas():
+    arbol = ast.parse(open(os.path.join(RAIZ, "src", "audiometria", "ListWords.py")).read())
+    for nodo in arbol.body:
+        if isinstance(nodo, ast.Assign) and getattr(nodo.targets[0], "id", "") == "PALABRAS":
+            return sorted({p for lista in ast.literal_eval(nodo.value).values() for p in lista})
+    sys.exit("No se encontró PALABRAS en ListWords.py")
+
+
+async def estimulos():
+    for palabra in palabras_de_las_listas():
+        plano = unicodedata.normalize("NFKD", palabra.lower()).encode("ascii", "ignore").decode()
+        final = os.path.join(ESTIMULOS, f"{plano}.mp3")
+        if os.path.exists(final):
+            continue
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+            crudo = tmp.name
+        try:
+            await edge_tts.Communicate(f"{palabra}.", VOZ, pitch=TONO, rate=VELOCIDAD).save(crudo)
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", crudo, "-af", FILTRO_ESTIMULO,
+                            "-ac", "1", "-ar", "44100", "-b:a", "64k", final], check=True)
+        finally:
+            os.unlink(crudo)
+        print(f"  {os.path.relpath(final, RAIZ)}")
+
+
 async def main(claves):
     for clave in claves:
         await generar(clave)
 
 
 if __name__ == "__main__":
+    if sys.argv[1:] == ["--estimulos"]:
+        asyncio.run(estimulos())
+        sys.exit()
     pedidas = sys.argv[1:] or list(COMANDOS)
     desconocidas = [c for c in pedidas if c not in COMANDOS]
     if desconocidas:

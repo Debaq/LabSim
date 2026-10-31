@@ -2,6 +2,13 @@
 from audiometria.logo_curva import cfg_oido, pct_logo, rollover_de_caso
 from audiometria.masking_params import ce_logo
 
+# Palabras compuestas del SRT: la curva es mucho más empinada que la de los
+# bisílabos (las dos raíces se reconocen juntas) y pasa por el 50 % en el
+# SRT de la ficha: 0 % a SRT - 5 y 100 % a SRT + 5 (10 %/dB). Con dos
+# palabras por nivel, como pide el protocolo, el alumno lo encuentra en el
+# SRT o, con mala suerte, 5 dB arriba.
+SRT_PENDIENTE_PCT_DB = 10.0
+
 class CalculateLogo():
     """Lo que discrimina el paciente simulado en las listas de palabras.
 
@@ -56,6 +63,14 @@ class CalculateLogo():
         `stim_mkg` es el indice de stim_list del ruido puesto (ver
         masking_params): sin dato se asume el que corresponde a la prueba.
         """
+        return self._dos_vias(side, mkg, intensity, int_mkg, stim_mkg, self._curve)
+
+    def get_srt(self, side, mkg, intensity, int_mkg=None, stim_mkg=None):
+        """% de palabras compuestas (SRT) que repite: las mismas dos vías
+        que get(), con la curva de las compuestas (_curva_srt)."""
+        return self._dos_vias(side, mkg, intensity, int_mkg, stim_mkg, self._curva_srt)
+
+    def _dos_vias(self, side, mkg, intensity, int_mkg, stim_mkg, curva):
         other = 1 - side
         int_mkg = int_mkg if (mkg and int_mkg is not None) else 0
         at = self.logo_attenuation
@@ -71,15 +86,24 @@ class CalculateLogo():
         # el ruido del contralateral cruza con la misma atenuacion interaural
         # y enmascara al oido estudiado por encima de su umbral oseo
         shift_e = max(0, (ruido - at) - bone[side])
-        propio = self._curve(side, intensity - shift_e)
+        propio = curva(side, intensity - shift_e)
 
         # el habla cruzada llega a la coclea contralateral a (intensity - at);
         # la curva del contralateral esta en dB HL aereos, de ahi el + gap.
         # El ruido, aereo, llega a esa misma coclea atenuado por su gap.
         shift_ne = max(0, (ruido - gap[other]) - bone[other])
-        cruce = self._curve(other, intensity - at + gap[other] - shift_ne)
+        cruce = curva(other, intensity - at + gap[other] - shift_ne)
 
         return max(propio, cruce)
+
+    def _curva_srt(self, side, intensity):
+        """% de compuestas de un oído a un nivel (ver SRT_PENDIENTE_PCT_DB).
+        Un oído sin SRT (130) no repite ninguna."""
+        srt = self.cfg[side]['srt']
+        if srt >= 130:
+            return 0.0
+        pct = 50.0 + (intensity - srt) * SRT_PENDIENTE_PCT_DB
+        return round(max(0.0, min(100.0, pct)), 1)
 
     def detecta_sdt(self, side, intensity, int_mkg=0, stim_mkg=None):
         """¿Levanta la mano el paciente con la voz a `intensity` en el oído

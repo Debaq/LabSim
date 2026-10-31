@@ -65,14 +65,49 @@ PALABRAS = {
             'Compañero', 'Delantal', 'Cama', 'Pan', 'Árbol',
             'Bandera', 'Colegio', 'Mantel', 'Televisión', 'Camión',
         ),
+    # Palabras compuestas para el SRT: dos por nivel, desde el SDT y de 5 en
+    # 5 dB, hasta que perciba la mitad del mensaje (protocolo ORL). Con 25
+    # alcanza: un examen usa unas cuatro por oído. Provisorias, armadas para
+    # LabSim: el protocolo no trae la lista (a validar por el autor).
+    ('s', ''): (
+            'Sacapuntas', 'Paraguas', 'Cumpleaños', 'Mediodía', 'Lavaplatos',
+            'Abrelatas', 'Girasol', 'Salvavidas', 'Telaraña', 'Parabrisas',
+            'Pasatiempo', 'Sobremesa', 'Puntapié', 'Quitasol', 'Guardapolvo',
+            'Cortaúñas', 'Matamoscas', 'Bienvenida', 'Sacacorchos', 'Saltamontes',
+            'Altavoz', 'Lavamanos', 'Rascacielos', 'Tocadiscos', 'Medianoche',
+        ),
 }
 GRUPOS = (
     ("DISÍLABOS (PALACIOS)", (("l", ""), ("f", ""), ("f", "_2"))),
     ("TÉRMINOS CONOCIDOS", (("g", ""), ("h", ""))),
+    ("COMPUESTAS (SRT)", (("s", ""),)),
 )
+# Lista del SRT: el paciente la repite según su propia curva
+# (CalculateLogo.get_srt), no la de los bisílabos, y por mitades.
+LETRA_SRT = "s"
+# Las dos mitades de cada compuesta: el paciente puede repetir la palabra
+# entera, solo una mitad o nada (ver response). El SRT es el nivel en que
+# percibe la mitad del mensaje.
+MITADES = {
+    'Sacapuntas': ('saca', 'puntas'), 'Paraguas': ('para', 'aguas'),
+    'Cumpleaños': ('cumple', 'años'), 'Mediodía': ('medio', 'día'),
+    'Lavaplatos': ('lava', 'platos'), 'Abrelatas': ('abre', 'latas'),
+    'Girasol': ('gira', 'sol'), 'Salvavidas': ('salva', 'vidas'),
+    'Telaraña': ('tela', 'araña'), 'Parabrisas': ('para', 'brisas'),
+    'Pasatiempo': ('pasa', 'tiempo'), 'Sobremesa': ('sobre', 'mesa'),
+    'Puntapié': ('punta', 'pie'), 'Quitasol': ('quita', 'sol'),
+    'Guardapolvo': ('guarda', 'polvo'), 'Cortaúñas': ('corta', 'uñas'),
+    'Matamoscas': ('mata', 'moscas'), 'Bienvenida': ('bien', 'venida'),
+    'Sacacorchos': ('saca', 'corchos'), 'Saltamontes': ('salta', 'montes'),
+    'Altavoz': ('alta', 'voz'), 'Lavamanos': ('lava', 'manos'),
+    'Rascacielos': ('rasca', 'cielos'), 'Tocadiscos': ('toca', 'discos'),
+    'Medianoche': ('media', 'noche'),
+}
 # Columnas como máximo; en un panel angosto bajan hasta 2 (ver resizeEvent).
 COLUMNAS = 5
 ANCHO_PALABRA = 70
+# Las compuestas son largas ("Rascacielos"): van en menos columnas.
+ANCHO_COMPUESTA = 92
 # En una pantalla alta las palabras no se estiran más que esto.
 ALTO_MAXIMO_PALABRA = 52
 MARGEN_TARJETAS = 6
@@ -112,11 +147,9 @@ class ListWords(QWidget):
         self._is_stimulus_playing = False
         self.wait_count = [10, 0]
         self.continue_response = True
-        self.list_response = [
-                            0,0,0,0,0,0,0,0,0,0,
-                            0,0,0,0,0,0,0,0,0,0,
-                            0,0,0,0,0
-                            ]
+        self.list_response = [0] * 25
+        self.pct_srt = 0.0     # % de mitades de compuesta que reconoce (SRT)
+        self.es_srt = False    # la última palabra era compuesta
         self.list_intencity = [i*5 for i in range(21)]
         self.create_actions_btn()
         self.create_channels()
@@ -230,7 +263,8 @@ class ListWords(QWidget):
             btn.setMinimumWidth(40)
             grid.addWidget(btn, i // self.columnas, i % self.columnas)
             botones.append(btn)
-        self._grillas.append((grid, botones))
+        ancho = ANCHO_COMPUESTA if letra == LETRA_SRT else ANCHO_PALABRA
+        self._grillas.append((grid, botones, ancho))
         return pagina
 
     def eventFilter(self, obj, event):
@@ -245,17 +279,22 @@ class ListWords(QWidget):
         aparecer quedaría trabado en menos columnas. Si hace falta, las
         palabras se angostan (mínimo 40) para dejarle lugar."""
         util = self._scroll.width()
-        columnas = max(2, min(COLUMNAS, (util + 6) // (ANCHO_PALABRA + 6)))
-        if columnas == self.columnas:
-            return
-        self.columnas = columnas
-        for grid, botones in self._grillas:
+        self.columnas = self._columnas_para(util, ANCHO_PALABRA)
+        for grid, botones, ancho in self._grillas:
+            columnas = self._columnas_para(util, ancho)
+            if grid.property("columnas") == columnas:
+                continue
+            grid.setProperty("columnas", columnas)
             for btn in botones:
                 grid.removeWidget(btn)
             for i, btn in enumerate(botones):
                 grid.addWidget(btn, i // columnas, i % columnas)
             for c in range(COLUMNAS):
                 grid.setColumnStretch(c, 1 if c < columnas else 0)
+
+    @staticmethod
+    def _columnas_para(util, ancho):
+        return max(2, min(COLUMNAS, (util + 6) // (ancho + 6)))
 
     def _limpiar_usadas(self):
         """Nuevo caso: las palabras vuelven a estar sin dictar."""
@@ -374,6 +413,7 @@ class ListWords(QWidget):
         btn = self.sender()
         self.sender_btn = btn
         self.num = int(self._BOTON_PALABRA.match(btn.objectName()).group(1))
+        self.es_srt = btn.objectName().startswith(f"btn_{LETRA_SRT}")
         self.text = (btn.text()).lower()
         word = create_word(self.text, self.playable[2])
         self.soundPlay(word)
@@ -432,6 +472,11 @@ class ListWords(QWidget):
         self.time_2.stop()
 
     def response(self):
+        if self.es_srt:
+            media = create_word_response(self.respuesta_srt(), self.gender, self.id)
+            self.channel_0.setSource(media)
+            self.channel_0.play()
+            return
         num = self.num - 1
         if self.list_response[num] == 1:
             media = create_word_response(self.text, self.gender, self.id)
@@ -456,11 +501,23 @@ class ListWords(QWidget):
             intencity = max(intencity, 0)
             percentage = self.prev.get(side, with_mkg, intencity, int_mkg,
                                        stim_mkg)
-            number_success = int(percentage / 4)
-            self.list_response = self.list_success(number_success)
+            self.list_response = self.list_success(int(percentage / 4))
+            self.pct_srt = self.prev.get_srt(side, with_mkg, intencity, int_mkg, stim_mkg)
         
 
         
+    def respuesta_srt(self, azar=random.random):
+        """Lo que repite de la compuesta: cada mitad la reconoce con el % de
+        la curva del SRT, por separado. Las dos, la palabra; una, esa mitad;
+        ninguna, "no entendí" (none1-3)."""
+        mitades = MITADES[self.sender_btn.text()]
+        oidas = [m for m in mitades if azar() * 100 < self.pct_srt]
+        if len(oidas) == 2:
+            return self.text
+        if oidas:
+            return oidas[0]
+        return f"none{random.randint(1, 3)}"
+
     def list_success(self, number_success):
         range_error = 25 - number_success
         result = [1 for _ in range(number_success)] + [0 for _ in range(range_error)]

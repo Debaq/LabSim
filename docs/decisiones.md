@@ -7634,3 +7634,37 @@ ruido enmascara, con su CE de logo (`masking_params.CE_LOGO`).
   un SDT: la mano baja (como antes).
 - El backend no simula el SDT (`AudiometriaPaciente` es tonal): nada que espejar.
 
+## SRT con palabras compuestas (2026-10-30)
+
+A pedido de él ("el SRT está totalmente pendiente"). El protocolo ORL manda,
+para el SRT, partir del SDT y subir de 5 en 5 dB dictando **dos palabras
+compuestas** por nivel, hasta que repita la mitad (una de dos). LabSim no
+tenía palabras compuestas: el alumno solo tenía las listas de la UMD. El
+protocolo no trae la lista y no estaba en ninguna parte, así que él pidió
+armarlas "por ahora".
+
+- **Una lista provisoria de 25** (`ListWords.PALABRAS`, letra `s`, grupo
+  "Compuestas (SRT)"): compuestas de uso común en Chile, de 7 a 11 letras
+  (*sacapuntas, cumpleaños, girasol, medianoche...*), sin repetir las de las
+  otras listas. Se armaron dos y él dijo que con 25 basta: un examen usa unas
+  cuatro por oído. A validar por él. Van en menos columnas (`ANCHO_COMPUESTA`).
+- **El paciente repite por mitades** (pedido de él): cada compuesta tiene sus
+  dos mitades (`ListWords.MITADES`, *saca / puntas*) y cada una la reconoce
+  con el % de la curva, por separado (`ListWords.respuesta_srt`): las dos, la
+  palabra entera; una, esa mitad; ninguna, "no entendí". Así "la mitad del
+  mensaje" del protocolo se oye: dos palabras por nivel son cuatro mitades.
+- **Curva propia** (`CalculateLogo.get_srt`): 50 % en el SRT de la ficha, 0 %
+  a SRT − 5 y 100 % a SRT + 5 (10 %/dB, las compuestas se reconocen de golpe),
+  con las mismas dos vías y el mismo enmascaramiento que los bisílabos
+  (`_dos_vias`). Con el método del protocolo (2 de las 4 mitades) el alumno
+  mide el SRT o, con mala suerte, 5 dB arriba (simulado en los diez pacientes de práctica,
+  `tests/test_logo_srt.py`). La UMD baja no toca el SRT: una discriminación
+  mala con SRT concordante es justo lo que enseña el H5.
+- **Audios:** la palabra con la voz del examinador (Catalina, como el
+  talkback) al nivel de los estímulos grabados (-18 LUFS, el vúmetro está
+  calibrado con ellos), con `scripts/voces_comandos.py --estimulos` (solo
+  las que faltan); la respuesta, entera y cada mitad, en las cuatro voces del
+  paciente con `scripts/voces_edge.py`.
+- El H5 del libro dice "dos palabras familiares": quedó como pendiente del
+  tomo I en `libro-orl/pendientes_urgentes.md` (manda el protocolo).
+

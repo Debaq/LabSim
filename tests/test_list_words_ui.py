@@ -16,14 +16,16 @@ def _botones(w):
     return [b for b in w.findChildren(QPushButton) if LW.ListWords._BOTON_PALABRA.match(b.objectName())]
 
 
-def test_cinco_listas_de_25_con_el_nombre_que_espera_pushaudio():
+def test_seis_listas_de_25_con_el_nombre_que_espera_pushaudio():
+    # 5 de bisílabos y términos conocidos + 1 de compuestas (SRT)
     w = LW.ListWords(None)
     botones = _botones(w)
-    assert len(botones) == 125
-    assert len({b.objectName() for b in botones}) == 125
+    assert len(botones) == 150
+    assert len({b.objectName() for b in botones}) == 150
     # el número del nombre es la posición en la lista (indexa list_response)
     assert w.findChild(QPushButton, "btn_f25_2").text() == "Liso"
     assert w.findChild(QPushButton, "btn_g1").text() == "Barco"
+    assert w.findChild(QPushButton, "btn_s19").text() == "Sacacorchos"
 
 
 def test_elegir_lista_cambia_la_grilla():

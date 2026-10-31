@@ -8,7 +8,7 @@ RAIZ = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(RAIZ, "src"))
 
 from audiometria.h_audio import VOCES_PACIENTE, normalize, voz_del_paciente  # noqa: E402
-from audiometria.ListWords import PALABRAS  # noqa: E402
+from audiometria.ListWords import MITADES, PALABRAS  # noqa: E402
 
 AUDIO = os.path.join(RAIZ, "resources", "audio")
 # Lo que piden response.py y response_A.py con create_voice.
@@ -26,7 +26,10 @@ def test_la_voz_sale_de_la_edad_y_el_sexo():
 
 
 def test_cada_voz_tiene_las_palabras_el_no_entendi_y_las_frases():
+    """Las palabras de las listas, las mitades de las compuestas del SRT,
+    "no entendí" y las frases de las otras pruebas."""
     palabras = {p for lista in PALABRAS.values() for p in lista}
+    palabras |= {m for par in MITADES.values() for m in par}   # media compuesta
     for voz in VOCES_PACIENTE:
         logo = os.path.join(AUDIO, "logo", "respuestas", voz)
         for p in palabras:
