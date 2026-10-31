@@ -7753,3 +7753,29 @@ audiometría hay que avisar de lo absurdo y no permitirlo.
   mujer; en el caso 0 es hombre y 1 mujer (formulario y demás módulos). Las
   mujeres contestaban con voz de hombre desde que las voces se eligen por
   sexo.
+
+## Impedanciómetro en una sola ventana, con instrucciones al paciente (2026-10-31)
+
+Pedido: el impedanciómetro no tenía instrucciones; pegarlas a la izquierda
+como en el audiómetro y dejar la derecha libre (ahí irá la cabeza del
+paciente para ponerle la sonda).
+
+- **Mismo reparto 1:3:1** que el audiómetro, ahora en `core/reparto.py`
+  (Reparto + Escalado), que usan los dos. `Layout.php` manda el Z a `'max'`
+  y el cliente lo fuerza para el layout guardado. La columna derecha queda
+  vacía a propósito.
+- **Mismo panel que los comandos de voz** (`ComandosVoz` con sus frases,
+  `impedanciometria/instrucciones.py`): preparar (explicar el examen,
+  colocar sonda, fono contralateral), instrucciones (no hablar ni tragar,
+  sonidos fuertes, sonido largo, trague tres veces / una vez) y preguntas.
+  Cada una con la prueba en que se usa, incluidas las dos de la ETF
+  (perforada e íntegra).
+- **Sin talkback:** en la impedanciometría se le habla al paciente en el
+  box, así que tocar la frase la dice (voz de edge-tts igual a la del
+  talkback, `scripts/voces_comandos.py --z` → `resources/audio/comandos_z/`).
+  Tocarla de nuevo la repite; Silencio corta.
+- **Queda en el registro** (`z_instruccion`, con la clave y el oído): el
+  docente ve si el alumno preparó al paciente antes de medir. Por ahora no
+  cambia la curva: no instruir no mete artefactos.
+- **Imprimir** guarda la pantalla que está a la vista con `grab()`: el
+  `grabWindow(winId())` de antes sacaba el equipo de la escena escalada.

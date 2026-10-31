@@ -2,8 +2,9 @@
 Comandos de voz del audiómetro: la frase que el evaluador le dice al
 paciente por el talkback.
 
-Se elige la frase acá y se dice con Talkback en el audiómetro. Cada frase
-emite su clave (`btn_checked`), que es a la vez el nombre del audio
+Se elige la frase acá y se dice con Talkback en el audiómetro. El
+impedanciómetro usa el mismo panel con sus propias frases (ver
+impedanciometria/instrucciones.py). Cada frase emite su clave (`btn_checked`), que es a la vez el nombre del audio
 (resources/audio/comandos/<clave>.mp3) y lo que lee ResponseAudiometry.history_command
 para decidir cómo responde el paciente: las claves no se cambian aunque
 cambie el rótulo.
@@ -114,9 +115,12 @@ QWidget#lista {{ background: transparent; }}
 
 class ComandosVoz(QWidget):
     btn_checked = Signal(str)
+    # Lo que dice la caja de arriba bajo la frase elegida.
+    PISTA = "Dila con Talkback."
 
-    def __init__(self):
+    def __init__(self, grupos=GRUPOS, prueba=PRUEBA):
         super().__init__()
+        self._prueba = prueba
         tema.aplicar_estilo(self, EXTRA_QSS)
         raiz = QVBoxLayout(self)
         raiz.setContentsMargins(0, 0, 0, 0)
@@ -151,7 +155,7 @@ class ComandosVoz(QWidget):
         col = QVBoxLayout(lista)
         col.setContentsMargins(0, 0, 4, 0)
         col.setSpacing(3)
-        for titulo, frases in GRUPOS:
+        for titulo, frases in grupos:
             rotulo = QLabel(titulo)
             rotulo.setProperty("role", "seccion")
             col.addSpacing(2)
@@ -160,7 +164,7 @@ class ComandosVoz(QWidget):
             grilla.setSpacing(4)
             botones = []
             for texto, clave in frases:
-                btn = _boton_frase(texto, clave)
+                btn = _boton_frase(texto, clave, prueba.get(clave))
                 self.grupo.addButton(btn)
                 self.botones[clave] = btn
                 botones.append(btn)
@@ -288,8 +292,8 @@ class ComandosVoz(QWidget):
             self.lbl_pista.setText("Elige una frase.")
         else:
             self.lbl_frase.setText(btn.property("rotulo"))
-            prueba = PRUEBA.get(btn.property("clave"))
-            pista = "Dila con Talkback."
+            prueba = btn.property("prueba")
+            pista = self.PISTA
             self.lbl_pista.setText(f"{prueba} · {pista}" if prueba else pista)
         self.btn_silencio.setEnabled(btn is not None)
         self.caja_elegida.setProperty("vacia", "true" if btn is None else "false")
@@ -333,8 +337,8 @@ class _BotonFrase(QPushButton):
         return self.layout().totalHeightForWidth(ancho)
 
 
-def _boton_frase(texto, clave):
-    """Botón de una frase: el rótulo y, debajo, la prueba en que se usa.
+def _boton_frase(texto, clave, prueba=None):
+    """Botón de una frase: el rótulo y, al lado, la prueba en que se usa.
     Sin texto propio (lo pintan las etiquetas); el rótulo queda en la
     propiedad `rotulo`."""
     btn = _BotonFrase()
@@ -342,6 +346,7 @@ def _boton_frase(texto, clave):
     btn.setProperty("frase", "true")
     btn.setProperty("clave", clave)
     btn.setProperty("rotulo", texto)
+    btn.setProperty("prueba", prueba)
     btn.setAccessibleName(texto)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
     # La prueba en la misma línea, a la derecha: en dos líneas cabían la
@@ -352,7 +357,6 @@ def _boton_frase(texto, clave):
     etiquetas = [QLabel(texto)]
     etiquetas[0].setObjectName("rotulo")
     etiquetas[0].setWordWrap(True)
-    prueba = PRUEBA.get(clave)
     if prueba:
         etiquetas.append(QLabel(prueba))
         etiquetas[1].setObjectName("prueba")
@@ -374,7 +378,7 @@ def _boton_frase(texto, clave):
 
 
 def _buscable(btn):
-    return f"{btn.property('rotulo')} {PRUEBA.get(btn.property('clave'), '')}"
+    return f"{btn.property('rotulo')} {btn.property('prueba') or ''}"
 
 
 def _plano(texto):

@@ -27,7 +27,9 @@ final class Layout
         // que muestran u ocultan su panel.
         'A'          => [false, 'Audiómetro', 1, [false, true], 'max', 'pre'],
         'W'          => [false, 'Lista de Palabras', 2, [true, true], [440, 420], 'pre'],
-        'Z'          => [false, 'Impedanciómetro', 3, [true, true], [740, 560], 'pre'],
+        // También a pantalla completa, con las instrucciones al paciente
+        // a la izquierda (src/impedanciometria/ventana.py del cliente).
+        'Z'          => [false, 'Impedanciómetro', 3, [false, true], 'max', 'pre'],
         'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], 'max', 'pre'],
         // Tamizaje automatizado: mismo equipo por dentro, otra prueba. No
         // tiene módulo propio en Courses::MODULES a propósito -- se habilita

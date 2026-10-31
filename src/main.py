@@ -152,11 +152,13 @@ _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
 # leía como "la configuración cambió".
 if LAYOUT_AVAILABLE:
     APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [760, 450], "pre"])
-    # El audiómetro va a pantalla completa con sus paneles (ver
-    # audiometria/ventana.py). Layout.php ya lo manda así; acá por el
-    # layout guardado sin red y por un backend que todavía no se actualiza.
-    if "A" in APPS:
-        APPS["A"][3:5] = [[False, True], "max"]
+    # El audiómetro y el impedanciómetro van a pantalla completa con sus
+    # paneles (ver audiometria/ventana.py e impedanciometria/ventana.py).
+    # Layout.php ya los manda así; acá por el layout guardado sin red y por
+    # un backend que todavía no se actualiza.
+    for codigo in ("A", "Z"):
+        if codigo in APPS:
+            APPS[codigo][3:5] = [[False, True], "max"]
 
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
@@ -1224,7 +1226,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         from abr.AabrMainWindow import AabrMainWindow
         from abr.AbrMainWindow import AbrMainWindow
         from audiometria.ventana import AudiometriaWindow
-        from impedanciometria import Z
+        from impedanciometria.ventana import ImpedanciometriaWindow
         from nasal.equipos import RinomanometriaWindow, RinometriaWindow
         from nasal.CpapWindow import CpapWindow
         from nasal.EspirometriaWindow import EspirometriaWindow
@@ -1249,7 +1251,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             AudiometriaWindow(self.data_current,
                               comandos=self._module_visible("CVOICE"),
                               listas=self._module_visible("W")), expand=True))
-        self._modulo_diferido("Z", "subw_z", lambda: FrameSubMdi(Z.ZControl(), expand=True))
+        # Las instrucciones al paciente van dentro del impedanciómetro.
+        self._modulo_diferido("Z", "subw_z", lambda: FrameSubMdi(
+            ImpedanciometriaWindow(), expand=True))
         self._modulo_diferido("ABR", "subw_abr", lambda: FrameSubMdi(
             AbrMainWindow(data_login=self.data_login), expand=True))
         self._modulo_diferido("AABR", "subw_aabr", lambda: FrameSubMdi(
@@ -1757,7 +1761,7 @@ def _precargar_modulos():
         import abr.AabrMainWindow  # noqa: F401
         import abr.AbrMainWindow  # noqa: F401
         import audiometria.ventana  # noqa: F401
-        import impedanciometria.Z  # noqa: F401
+        import impedanciometria.ventana  # noqa: F401
         import oae.OaeMainWindow  # noqa: F401
         import vemp.VempMainWindow  # noqa: F401
     except Exception:

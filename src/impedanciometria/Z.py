@@ -69,7 +69,7 @@ class ZControl(QWidget, UiControlZ):
         self.btn_1.clicked.connect(self.btn1_click)
         self.btn_2.clicked.connect(self.btn2_click)
         self.btn_stimulus.clicked.connect(self.stimulus_click)
-        self.btn_print.clicked.connect(lambda: printer(self,  self.Z.winId()))
+        self.btn_print.clicked.connect(lambda: printer(self, self.current_screen))
 
         self.btn_toneDecay.setEnabled(True)
         self.btn_tymp.clicked.connect(lambda: self.show_screen(self.Z))

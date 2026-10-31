@@ -1,12 +1,13 @@
-from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QFileDialog
 from datetime import datetime
 
 from core.helpers import debug_print
 
 
 def printer(self, widget):
-    screen = QApplication.primaryScreen()
-    screenshot = screen.grabWindow(widget)
+    # grab() y no grabWindow(winId()): el equipo va dentro de una escena
+    # escalada (core/reparto.py) y pedirle winId lo saca de ella.
+    screenshot = widget.grab()
     now = datetime.now()
     current_time = now.strftime("%d-%m-%y_%H_%M_%S")        
     file = str(QFileDialog.getExistingDirectory(self, "Seleccionar destino"))

@@ -11,6 +11,12 @@ las claves a rehacer.
     /tmp/venv_edge/bin/python scripts/voces_comandos.py dos_pitos escucha
     /tmp/venv_edge/bin/python scripts/voces_comandos.py --estimulos      # palabras sin audio
 
+--z hace las instrucciones del impedanciómetro (COMANDOS_Z, las claves de
+src/impedanciometria/instrucciones.py) en resources/audio/comandos_z/:
+
+    /tmp/venv_edge/bin/python scripts/voces_comandos.py --z              # todas
+    /tmp/venv_edge/bin/python scripts/voces_comandos.py --z trague_una_vez
+
 --estimulos hace, con la misma voz, las palabras de las listas
 (ListWords.PALABRAS) que todavía no tienen su logo/estimulos/<palabra>.mp3;
 no toca las que ya existen (las grabadas).
@@ -31,6 +37,7 @@ import edge_tts
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SALIDA = os.path.join(RAIZ, "resources", "audio", "comandos")
+SALIDA_Z = os.path.join(RAIZ, "resources", "audio", "comandos_z")
 
 # La de las grabaciones era femenina (~240 Hz): Catalina, un poco más lenta
 # para un paciente que oye mal.
@@ -94,24 +101,50 @@ COMANDOS = {
     "muy_fuerte": "¿Está muy fuerte mi voz?",
 }
 
+# Impedanciómetro: se le habla al paciente en el box, sin talkback.
+COMANDOS_Z = {
+    # PREPARAR
+    "explicar_examen": "Le voy a hacer un examen para ver cómo está su oído por dentro. No "
+                       "duele. Va a sentir un poco de presión en el oído, y va a escuchar "
+                       "algunos sonidos. Usted no tiene que hacer nada.",
+    "colocar_sonda": "Le voy a poner esta gomita en la entrada del oído. Puede que sienta un "
+                     "poco de presión. Si le molesta, me avisa levantando la mano.",
+    "colocar_fono_contra": "En la otra oreja le voy a poner este fono. Por ahí va a escuchar "
+                           "unos sonidos fuertes.",
+    # INSTRUCCIONES
+    "no_hablar_ni_tragar": "Ahora necesito que no se mueva, que no hable y que no trague "
+                           "saliva, hasta que yo le avise. Respire normal.",
+    "sonidos_fuertes": "Ahora va a escuchar unos sonidos fuertes. No tiene que hacer nada: "
+                       "solo no se mueva, no hable y no trague.",
+    "sonido_largo": "Ahora va a escuchar un sonido fuerte y largo. No se mueva, no hable y "
+                    "no trague hasta que se termine.",
+    "trague_tres_veces": "Ahora trague saliva tres veces seguidas, sin apurarse.",
+    "trague_una_vez": "Ahora trague saliva una vez.",
+    # PREGUNTAS
+    "le_molesta_presion": "¿Le molesta la presión?",
+    "trago": "¿Tragó saliva recién?",
+    "esta_bien": "¿Está bien? ¿Puedo seguir?",
+}
 
-def archivo(clave):
+
+def archivo(clave, salida=SALIDA):
     """Como h_audio.normalize: sin tildes (en_qué_oído -> en_que_oido)."""
     plano = unicodedata.normalize("NFKD", clave).encode("ascii", "ignore").decode()
-    return os.path.join(SALIDA, f"{plano}.mp3")
+    return os.path.join(salida, f"{plano}.mp3")
 
 
-async def generar(clave):
-    texto = COMANDOS[clave]
+async def generar(clave, textos=COMANDOS, salida=SALIDA):
+    texto = textos[clave]
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
         crudo = tmp.name
     try:
         await edge_tts.Communicate(texto, VOZ, pitch=TONO, rate=VELOCIDAD).save(crudo)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", crudo, "-af", FILTRO,
-                        "-ac", "1", "-ar", "48000", "-b:a", "64k", archivo(clave)], check=True)
+                        "-ac", "1", "-ar", "48000", "-b:a", "64k", archivo(clave, salida)],
+                       check=True)
     finally:
         os.unlink(crudo)
-    print(f"  {os.path.relpath(archivo(clave), RAIZ)}")
+    print(f"  {os.path.relpath(archivo(clave, salida), RAIZ)}")
 
 
 # Las palabras de las listas, al nivel de las grabadas (-18 LUFS, mono
@@ -145,17 +178,22 @@ async def estimulos():
         print(f"  {os.path.relpath(final, RAIZ)}")
 
 
-async def main(claves):
+async def main(claves, textos=COMANDOS, salida=SALIDA):
+    os.makedirs(salida, exist_ok=True)
     for clave in claves:
-        await generar(clave)
+        await generar(clave, textos, salida)
 
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["--estimulos"]:
         asyncio.run(estimulos())
         sys.exit()
-    pedidas = sys.argv[1:] or list(COMANDOS)
-    desconocidas = [c for c in pedidas if c not in COMANDOS]
+    args = sys.argv[1:]
+    textos, salida = COMANDOS, SALIDA
+    if args[:1] == ["--z"]:
+        args, textos, salida = args[1:], COMANDOS_Z, SALIDA_Z
+    pedidas = args or list(textos)
+    desconocidas = [c for c in pedidas if c not in textos]
     if desconocidas:
         sys.exit(f"Claves desconocidas: {', '.join(desconocidas)}")
-    asyncio.run(main(pedidas))
+    asyncio.run(main(pedidas, textos, salida))
