@@ -22,17 +22,24 @@ trae los tres armados justamente para que pueda elegir mal).
 
 import random
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QObject, Qt, Signal
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QButtonGroup, QComboBox, QDoubleSpinBox,
-                               QHBoxLayout, QPushButton, QSpinBox, QVBoxLayout,
+                               QHBoxLayout, QLabel, QPushButton, QSpinBox,
                                QWidget)
 
+from core import iconos
 from vemp import protocol, theme
 from vemp.engine import Ajustes
-from vemp.widgets.kit import Campos, Pastilla, Tarjeta, etiqueta
+from vemp.widgets.kit import Campos, ComboRecortado, Tarjeta
 
 
-class PanelControl(QWidget):
+class PanelControl(QObject):
+    """Los mandos del equipo y su estado. No es un widget: arma tres
+    tarjetas (`caja_prueba`, `caja_estimulo`, `caja_registro`) y los botones
+    Registrar/Detener, y la ventana los acomoda (en una o dos columnas según
+    el alto, ver VempMainWindow._acomodar_mandos)."""
+
     sig_registrar = Signal()
     sig_pausar = Signal()
     sig_detener = Signal()
@@ -45,15 +52,20 @@ class PanelControl(QWidget):
         super().__init__(parent)
         self.registrando = False
 
-        raiz = QVBoxLayout(self)
-        raiz.setContentsMargins(0, 0, 0, 0)
-        raiz.setSpacing(10)
-
-        raiz.addWidget(self._caja_prueba())
-        raiz.addWidget(self._caja_estimulo())
-        raiz.addWidget(self._caja_registro())
-        raiz.addWidget(self._caja_botones())
-        raiz.addStretch(1)
+        self.caja_prueba = self._caja_prueba()
+        self.caja_estimulo = self._caja_estimulo()
+        self.caja_registro = self._caja_registro()
+        # Los spinbox salían 3 px más altos que los combos: filas disparejas
+        # y alto que en 768 px no sobra.
+        alto = self.cb_freq.sizeHint().height()
+        for spin in (self.sb_int, self.sb_tasa, self.sb_promedios, self.sb_rechazo,
+                     self.sb_filtro_alto, self.sb_filtro_bajo):
+            spin.setFixedHeight(alto)
+        self.cajas = (self.caja_prueba, self.caja_estimulo, self.caja_registro)
+        # Registrar y Detener son del panel (sus señales salen de acá) pero
+        # van en la cabecera de la ventana, junto al avance del registro:
+        # abajo de todo empujaban el alto mínimo del módulo.
+        self._botones()
 
         self._randomizar()
         self._aplicar_subtipo(self.subtipo())
@@ -68,7 +80,7 @@ class PanelControl(QWidget):
         caja = Tarjeta('Prueba')
         campos = Campos()
 
-        self.cb_subtipo = QComboBox()
+        self.cb_subtipo = ComboRecortado()
         for subtipo in protocol.SUBTIPOS:
             self.cb_subtipo.addItem(protocol.SUBTIPO_LABEL[subtipo], subtipo)
         campos.agregar('VEMP', self.cb_subtipo)
@@ -77,31 +89,28 @@ class PanelControl(QWidget):
         lay = QHBoxLayout(fila)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(6)
-        self.grupo_lado = QButtonGroup(self)
+        self.grupo_lado = QButtonGroup(fila)
         self.btn_od = QPushButton('OD')
         self.btn_oi = QPushButton('OI')
         for i, btn in enumerate((self.btn_od, self.btn_oi)):
             btn.setCheckable(True)
+            btn.setProperty('lado', 'od' if i == 0 else 'oi')
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             self.grupo_lado.addButton(btn, i)
             lay.addWidget(btn)
         self.btn_od.setChecked(True)
-        campos.agregar('Oído estimulado', fila)
+        campos.agregar('Oído', fila)
 
-        self.cb_maniobra = QComboBox()
+        self.cb_maniobra = ComboRecortado()
         campos.agregar('Maniobra', self.cb_maniobra)
         caja.agregar(campos)
-
-        self.lbl_montaje = etiqueta('', rol='hint')
-        self.lbl_montaje.setWordWrap(True)
-        caja.agregar(self.lbl_montaje)
         return caja
 
     def _caja_estimulo(self):
         caja = Tarjeta('Estímulo')
         campos = Campos()
 
-        self.cb_transductor = QComboBox()
+        self.cb_transductor = ComboRecortado()
         self.cb_transductor.addItems(protocol.TRANSDUCTORES)
         campos.agregar('Transductor', self.cb_transductor)
 
@@ -121,12 +130,11 @@ class PanelControl(QWidget):
         self.sb_tasa = QDoubleSpinBox()
         self.sb_tasa.setRange(*protocol.TASA_HZ)
         self.sb_tasa.setSingleStep(0.5)
+        self.sb_tasa.setDecimals(1)
         self.sb_tasa.setSuffix(' /s')
         campos.agregar('Tasa', self.sb_tasa)
 
         caja.agregar(campos)
-        self.lbl_unidad_int = etiqueta('', rol='hint')
-        caja.agregar(self.lbl_unidad_int)
         return caja
 
     def _caja_registro(self):
@@ -142,49 +150,65 @@ class PanelControl(QWidget):
         self.sb_rechazo.setRange(*protocol.RECHAZO)
         self.sb_rechazo.setSingleStep(0.5)
         self.sb_rechazo.setDecimals(1)
-        campos.agregar('Rechazo artefactos', self.sb_rechazo)
+        self.sb_rechazo.setToolTip('Rechazo de artefactos: múltiplo del EMG '
+                                   'tónico esperado')
+        campos.agregar('Rechazo', self.sb_rechazo)
 
+        # El filtro es una banda: pasa-alto y pasa-bajo en la misma fila,
+        # como se lee (1–2000 Hz). En dos filas sumaban alto que no hay.
         self.sb_filtro_alto = QDoubleSpinBox()
         self.sb_filtro_alto.setRange(*protocol.FILTRO_PASA_ALTO)
         self.sb_filtro_alto.setSingleStep(1.0)
+        self.sb_filtro_alto.setDecimals(0)
         self.sb_filtro_alto.setSuffix(' Hz')
-        campos.agregar('Pasa-alto', self.sb_filtro_alto)
+        self.sb_filtro_alto.setToolTip('Pasa-alto')
+        self.sb_filtro_alto.setMinimumWidth(64)
 
         self.sb_filtro_bajo = QDoubleSpinBox()
         self.sb_filtro_bajo.setRange(*protocol.FILTRO_PASA_BAJO)
         self.sb_filtro_bajo.setSingleStep(50.0)
+        self.sb_filtro_bajo.setDecimals(0)
         self.sb_filtro_bajo.setSuffix(' Hz')
-        campos.agregar('Pasa-bajo', self.sb_filtro_bajo)
+        self.sb_filtro_bajo.setToolTip('Pasa-bajo')
+        self.sb_filtro_bajo.setMinimumWidth(72)
+
+        banda = QWidget()
+        fila = QHBoxLayout(banda)
+        fila.setContentsMargins(0, 0, 0, 0)
+        fila.setSpacing(4)
+        fila.addWidget(self.sb_filtro_alto, 1)
+        guion = QLabel('–')
+        guion.setProperty('role', 'campo')
+        fila.addWidget(guion)
+        fila.addWidget(self.sb_filtro_bajo, 1)
+        campos.agregar('Filtro', banda)
 
         caja.agregar(campos)
-        self.lbl_duracion = etiqueta('', rol='hint')
-        caja.agregar(self.lbl_duracion)
         return caja
 
-    def _caja_botones(self):
-        caja = Tarjeta(plano=True)
-        caja.cuerpo.setContentsMargins(10, 10, 10, 10)
-        fila = QHBoxLayout()
-        fila.setSpacing(8)
+    def _botones(self):
         self.btn_registrar = QPushButton('Registrar')
         self.btn_registrar.setObjectName('btnRegistrar')
         self.btn_registrar.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._icono_registrar = iconos.icono_boton('atender', '#FFFFFF', tam=14)
+        self.btn_registrar.setIcon(self._icono_registrar)
         self.btn_detener = QPushButton('Detener')
         self.btn_detener.setObjectName('btnDetener')
+        self.btn_detener.setIcon(iconos.icono_boton('detener', theme.TEXTO_SUAVE, tam=14))
+        self.btn_detener.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_detener.setEnabled(False)
-        fila.addWidget(self.btn_registrar, 2)
-        fila.addWidget(self.btn_detener, 1)
-        caja.agregar_layout(fila)
-        return caja
 
     def _conectar(self):
         self.cb_subtipo.currentIndexChanged.connect(self._on_subtipo)
         self.grupo_lado.idClicked.connect(self._on_lado)
         self.cb_maniobra.currentTextChanged.connect(self.sig_maniobra.emit)
         self.cb_transductor.currentTextChanged.connect(self._on_transductor)
-        self.cb_freq.currentTextChanged.connect(lambda *_: self.sig_condicion.emit())
-        self.sb_promedios.valueChanged.connect(lambda *_: self._refrescar_duracion())
-        self.sb_tasa.valueChanged.connect(lambda *_: self._refrescar_duracion())
+        # Todo lo que cambia la curva que saldría refresca la cabecera (la
+        # condición y "Listo para registrar ...", con la duración).
+        for senal in (self.cb_freq.currentTextChanged, self.cb_pol.currentTextChanged,
+                      self.sb_int.valueChanged, self.sb_tasa.valueChanged,
+                      self.sb_promedios.valueChanged):
+            senal.connect(lambda *_: self.sig_condicion.emit())
         self.btn_registrar.clicked.connect(self._on_registrar)
         self.btn_detener.clicked.connect(self._on_detener)
 
@@ -215,7 +239,7 @@ class PanelControl(QWidget):
         if actual in opciones:
             self.cb_maniobra.setCurrentText(actual)
         self.cb_maniobra.blockSignals(False)
-        self._refrescar_montaje()
+        self.cb_maniobra.setToolTip(self.cb_maniobra.currentText())
         self.sig_maniobra.emit(self.cb_maniobra.currentText())
 
     def _aplicar_transductor(self):
@@ -231,19 +255,9 @@ class PanelControl(QWidget):
         self.sb_int.setValue(hi - 2 * protocol.PASO_INTENSIDAD)
         self.sb_int.blockSignals(False)
         unidad = 'dB SPL' if transductor == protocol.AEREO else 'dB FL'
-        self.lbl_unidad_int.setText(f'{lo}–{hi} {unidad}')
-        self._refrescar_duracion()
-
-    def _refrescar_montaje(self):
-        subtipo = self.subtipo()
-        self.lbl_montaje.setText(
-            'Registro: ' + protocol.descripcion_montaje(subtipo, self.lado()))
-
-    def _refrescar_duracion(self):
-        segundos = self.sb_promedios.value() / max(self.sb_tasa.value(), 0.1)
-        self.lbl_duracion.setText(
-            f'{self.sb_promedios.value()} barridos a {self.sb_tasa.value():.1f}/s '
-            f'≈ {int(segundos // 60):d}:{int(segundos % 60):02d} de contracción')
+        # La unidad va en el campo: es la escala del transductor elegido.
+        self.sb_int.setSuffix(f' {unidad}')
+        self.sb_int.setToolTip(f'{lo}–{hi} {unidad}')
 
     # ------------------------------------------------------------------
     # Señales
@@ -256,7 +270,6 @@ class PanelControl(QWidget):
         self.sig_condicion.emit()
 
     def _on_lado(self, *_):
-        self._refrescar_montaje()
         self.sig_lado.emit(self.lado())
         self.sig_condicion.emit()
 
@@ -302,6 +315,14 @@ class PanelControl(QWidget):
             maniobra=self.maniobra(),
         )
 
+    def habilitar(self, activo):
+        """Sin caso no se toca nada: ni los mandos ni Registrar."""
+        for caja in self.cajas:
+            caja.setEnabled(activo)
+        self.btn_registrar.setEnabled(activo)
+        if not activo:
+            self.btn_detener.setEnabled(False)
+
     def set_registrando(self, registrando, pausado=False):
         """Congela lo que define la curva mientras se promedia.
 
@@ -321,5 +342,7 @@ class PanelControl(QWidget):
             self.btn_registrar.setText('Continuar')
         else:
             self.btn_registrar.setText('Registrar')
+        # El triángulo es "arrancar": en Pausar no va.
+        self.btn_registrar.setIcon(QIcon() if registrando else self._icono_registrar)
         self.btn_registrar.setProperty('registrando', 'true' if registrando else 'false')
         theme.repintar(self.btn_registrar)

@@ -1281,7 +1281,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._modulo_diferido("EOAS", "subw_eoas", lambda: FrameSubMdi(
             OaeMainWindow(data_login=self.data_login), expand=True))
         self._modulo_diferido("VEMP", "subw_vemp", lambda: FrameSubMdi(
-            VempMainWindow(data_login=self.data_login)))
+            VempMainWindow(data_login=self.data_login), expand=True))
         # Nariz: demo interna, solo se arma para quien la puede abrir (admin).
         if self._module_visible("RM"):
             self._modulo_diferido("RM", "subw_rm", lambda: FrameSubMdi(

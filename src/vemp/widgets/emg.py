@@ -13,7 +13,8 @@ igual. Este medidor muestra, en vivo:
   la que la amplitud que se informa es la corregida.
 
 Pintado a mano y no con pyqtgraph: es un instrumento, no un gráfico de
-datos, y con QPainter entra en 110 px sin ejes ni leyenda.
+datos, y con QPainter entra en 92 px sin ejes ni leyenda. El rótulo lo pone
+la tarjeta que lo contiene; acá arriba va la lectura en una sola línea.
 """
 
 from collections import deque
@@ -25,6 +26,7 @@ from PySide6.QtWidgets import QSizePolicy, QWidget
 from vemp import protocol, theme
 
 N_HISTORIA = 90
+ALTO = 92
 
 
 class MedidorEmg(QWidget):
@@ -34,7 +36,7 @@ class MedidorEmg(QWidget):
         self.nivel = 0.0
         self.activo = False
         self.historia = deque([0.0] * N_HISTORIA, maxlen=N_HISTORIA)
-        self.setMinimumHeight(118)
+        self.setMinimumHeight(ALTO)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
     # ------------------------------------------------------------------
@@ -73,40 +75,37 @@ class MedidorEmg(QWidget):
 
         ancho = self.width()
         alto = self.height()
-        margen = 10
+        margen = 0
         util = ancho - 2 * margen
 
-        # --- Rótulo y lectura -----------------------------------------
-        p.setPen(QColor(theme.TEXTO_TENUE))
-        fuente = QFont(self.font())
-        fuente.setPointSizeF(7.5)
-        fuente.setBold(True)
-        p.setFont(fuente)
-        p.drawText(margen, 14, 'EMG RECTIFICADO')
-
+        # --- Lectura: valor, banda y estado en una línea ----------------
         color = self._color_estado()
+        fuente = QFont(self.font())
+        fuente.setBold(True)
         fuente.setPointSizeF(13.0)
         p.setFont(fuente)
         p.setPen(QColor(color))
         texto = '--' if not self.activo else f'{self.nivel:.0f}'
-        p.drawText(QRectF(margen, 18, util, 22),
-                   Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, texto)
+        caja_valor = QRectF(margen, 0, util, 22)
+        p.drawText(caja_valor, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, texto)
+        ancho_valor = p.fontMetrics().horizontalAdvance(texto) + 6
 
         fuente.setPointSizeF(7.5)
         fuente.setBold(False)
         p.setFont(fuente)
         p.setPen(QColor(theme.TEXTO_SUAVE))
-        p.drawText(QRectF(margen + 34, 18, util - 34, 22),
+        p.drawText(QRectF(margen + ancho_valor, 0, util - ancho_valor, 22),
                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
-                   f'µV   ·   banda {lo:.0f}–{hi:.0f}')
+                   f'µV · banda {lo:.0f}–{hi:.0f}')
+        fuente.setBold(True)
+        p.setFont(fuente)
         p.setPen(QColor(color))
-        p.drawText(QRectF(margen, 18, util, 22),
-                   Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+        p.drawText(caja_valor, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
                    self._texto_estado())
 
         # --- Barra con la banda objetivo -------------------------------
-        y_barra = 46
-        h_barra = 16
+        y_barra = 27
+        h_barra = 14
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QBrush(QColor(theme.TARJETA_ALT)))
         p.drawRoundedRect(QRectF(margen, y_barra, util, h_barra), 4, 4)
@@ -126,8 +125,8 @@ class MedidorEmg(QWidget):
             p.drawRoundedRect(QRectF(margen, y_barra + 3, ancho_nivel, h_barra - 6), 3, 3)
 
         # --- Historia --------------------------------------------------
-        y_top = y_barra + h_barra + 8
-        h_hist = max(alto - y_top - 6, 12)
+        y_top = y_barra + h_barra + 6
+        h_hist = max(alto - y_top - 1, 12)
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QBrush(QColor(theme.TARJETA_ALT)))
         p.drawRoundedRect(QRectF(margen, y_top, util, h_hist), 4, 4)
@@ -160,5 +159,5 @@ class MedidorEmg(QWidget):
         if not self.activo or self.nivel <= 0:
             return 'sin paciente'
         return {'ok': 'en banda',
-                'insuficiente': 'contracción insuficiente',
-                'excesivo': 'contracción excesiva'}[self.estado]
+                'insuficiente': 'insuficiente',
+                'excesivo': 'excesiva'}[self.estado]

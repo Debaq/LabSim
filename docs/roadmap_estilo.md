@@ -195,8 +195,23 @@ Actualizado 2026-10-27.
 - [x] `_ListaMensajes.vaciar` (chat) esconde antes de borrar: lo viejo quedaba dibujado encima.
 - [ ] Probar en la app real con atenciones de verdad.
 
-### Otros
-- [x] VEMP: referencia, sin cambios de diseño.
+### VEMP
+- [x] Revisado a 1366×660, 1280×610 y 1024×660 (2026-11-02). Alto mínimo bajó de ~990 a ~460 px:
+  los mandos en una columna angosta a todo el alto (262 px) y la cabecera (paciente, Registrar/Detener,
+  avance) arriba de las pestañas, no a todo el ancho. Si en una columna no caben a lo alto y hay ancho
+  (≥1180), pasan a dos: Prueba + EMG | Estímulo + Registro (1280×720). El EMG nunca queda bajo el scroll.
+- [x] Fuera lo repetido: montaje y duración ya estaban en la cabecera; la unidad de intensidad va en el
+  campo (dB SPL / dB FL, rango en el tooltip); pasa-alto y pasa-bajo en una fila "Filtro"; sin píldora
+  de estado (lo dice Registrar: Pausar en rojo, Continuar). Medidor EMG compacto (lectura en una línea).
+- [x] Detalles: OD/OI de Prueba en rojo/azul como el AABR, rótulos a un mismo ancho en todas las
+  tarjetas, combos largos (maniobra, transductor) con "…" y lista al ancho del texto, decimales
+  ("6,20 /s", "500,00 Hz"), pestañas con icono, zona pre-estímulo sin el gris azulado viejo, aire arriba
+  para el rótulo de P13. La cabecera ahora sigue a intensidad, tasa y barridos (quedaba vieja).
+- [x] Tabla de medidas sin columna Oído (la curva va en su color) y rótulos cortos con tooltip; columnas
+  estiradas solo si entran. Informe: lo medido y el umbral lado a lado, hallazgos | conclusión en dos
+  columnas a todo el alto (el umbral flotaba a la derecha).
+- [x] `expand=True` en el marco MDI. Tests en `tests/test_vemp_ventana.py`.
+- [ ] Probar en la app real (solo renders offscreen).
 
 ## Falta
 

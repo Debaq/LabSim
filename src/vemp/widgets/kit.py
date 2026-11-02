@@ -11,8 +11,10 @@ propiedad y el layout.
 """
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QComboBox, QFrame, QGridLayout, QHBoxLayout,
+                               QLabel, QSizePolicy, QStyle,
+                               QStyleOptionComboBox, QStylePainter,
+                               QVBoxLayout, QWidget)
 
 from vemp import theme
 
@@ -113,22 +115,97 @@ class Dato(QWidget):
         self.lbl_unidad.setText(unidad)
 
 
+class EtiquetaRecortada(QLabel):
+    """QLabel de una línea que se achica con puntos suspensivos en vez de
+    empujar el layout: en la barra de cada traza, a 1024 px, el texto de la
+    curva se metía debajo de los botones de pico."""
+
+    def __init__(self, texto='', rol=None, parent=None):
+        super().__init__(parent)
+        if rol:
+            self.setProperty('role', rol)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        self.setMinimumWidth(20)
+        self._completo = ''
+        self.setText(texto)
+
+    def setText(self, texto):
+        self._completo = texto or ''
+        self.setToolTip(self._completo)
+        self._recortar()
+
+    def text(self):
+        return self._completo
+
+    def resizeEvent(self, evento):
+        super().resizeEvent(evento)
+        self._recortar()
+
+    def _recortar(self):
+        recortado = self.fontMetrics().elidedText(
+            self._completo, Qt.TextElideMode.ElideRight, max(self.width(), 0))
+        super().setText(recortado)
+
+
+class ComboRecortado(QComboBox):
+    """Combo que muestra la opción con puntos suspensivos si no cabe, con la
+    lista desplegada al ancho del texto entero.
+
+    Las maniobras y los transductores son textos largos ('Presión contra la
+    mano del examinador') y también son la clave con la que el motor y el
+    informe los leen: no se pueden acortar. Un QComboBox común los cortaba
+    a la mitad de una letra.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.setMinimumContentsLength(8)
+        self.currentTextChanged.connect(self.setToolTip)
+
+    def showPopup(self):
+        ancho = max((self.fontMetrics().horizontalAdvance(self.itemText(i))
+                     for i in range(self.count())), default=0)
+        self.view().setMinimumWidth(max(ancho + 32, self.width()))
+        super().showPopup()
+
+    def paintEvent(self, _evento):
+        pintor = QStylePainter(self)
+        opcion = QStyleOptionComboBox()
+        self.initStyleOption(opcion)
+        pintor.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opcion)
+        texto = self.style().subControlRect(
+            QStyle.ComplexControl.CC_ComboBox, opcion,
+            QStyle.SubControl.SC_ComboBoxEditField, self)
+        opcion.currentText = self.fontMetrics().elidedText(
+            opcion.currentText, Qt.TextElideMode.ElideRight, texto.width())
+        pintor.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opcion)
+
+
 class Campos(QWidget):
     """Rejilla rótulo/control, más compacta que un QFormLayout y con los
-    rótulos en el mismo gris que el resto del módulo."""
+    rótulos en el mismo gris que el resto del módulo.
+
+    La columna de rótulos tiene el mismo ancho en todas las tarjetas: cada
+    rejilla mide la suya y los campos de Prueba, Estímulo y Registro
+    quedaban cada uno empezando en otra x."""
+
+    ANCHO_ROTULO = 74
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.grid = QGridLayout(self)
         self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setHorizontalSpacing(8)
-        self.grid.setVerticalSpacing(6)
+        self.grid.setVerticalSpacing(5)
+        self.grid.setColumnMinimumWidth(0, self.ANCHO_ROTULO)
         self.grid.setColumnStretch(1, 1)
         self._fila = 0
 
     def agregar(self, rotulo, widget):
         lbl = etiqueta(rotulo, rol='campo')
-        lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.grid.addWidget(lbl, self._fila, 0)
         self.grid.addWidget(widget, self._fila, 1)
         self._fila += 1

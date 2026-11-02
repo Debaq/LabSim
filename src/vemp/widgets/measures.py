@@ -23,8 +23,16 @@ from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView,
 from vemp import protocol, theme
 from vemp.widgets.kit import Dato, Tarjeta, etiqueta
 
-COLUMNAS = ['Curva', 'Oído', 'dB', 'Tone burst', 'Lat 1', 'Lat 2',
-            'p-p µV', 'EMG µV', 'p-p corr.', 'Barridos']
+# Sin columna Oído: el nombre de la curva ya lo dice (C-OD-2) y va en el
+# color del oído. Rótulos cortos: a 1024 px la tabla tiene ~400 px y con
+# 'Tone burst' o 'Barridos' de cabecera se cortaban todas las columnas.
+COLUMNAS = ['Curva', 'dB', 'Hz', 'Lat 1', 'Lat 2',
+            'p-p', 'EMG', 'Corr.', 'n']
+TOOLTIPS = ['', 'Intensidad', 'Tone burst', '', '', 'Amplitud pico-pico cruda (µV)',
+            'EMG rectificado medio del registro (µV)',
+            'Amplitud pico-pico corregida por EMG', 'Barridos aceptados']
+COL_LAT = (3, 4)
+COL_EMG = 6
 
 
 class TablaMedidas(QWidget):
@@ -47,19 +55,45 @@ class TablaMedidas(QWidget):
         self.tabla.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tabla.setShowGrid(False)
         self.tabla.setAlternatingRowColors(False)
-        cabecera = self.tabla.horizontalHeader()
-        cabecera.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        cabecera.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        for col, ayuda in enumerate(TOOLTIPS):
+            if ayuda:
+                self.tabla.horizontalHeaderItem(col).setToolTip(ayuda)
+        # Columnas a lo ancho si entran y, si no, cada una a su contenido (ver
+        # _ajustar_columnas).
+        self.tabla.horizontalHeader().setMinimumSectionSize(30)
+        self.tabla.verticalHeader().setDefaultSectionSize(24)
+        self.tabla.setStyleSheet('QTableWidget::item { padding: 0px 3px; }')
         self.tabla.itemSelectionChanged.connect(self._on_seleccion)
         raiz.addWidget(self.tabla)
+
+    def _ajustar_columnas(self):
+        """Estiradas por igual, a 1024 px se cortaban '115 SPL' y las
+        latencias mientras 'Hz' sobraba; a su contenido, en 1920 la tabla
+        quedaba amontonada a la izquierda. Se estiran solo si entran todas."""
+        cabecera = self.tabla.horizontalHeader()
+        necesario = sum(max(self.tabla.sizeHintForColumn(c), cabecera.sectionSizeHint(c))
+                        for c in range(self.tabla.columnCount()))
+        modo = (QHeaderView.ResizeMode.Stretch
+                if self.tabla.viewport().width() >= necesario
+                else QHeaderView.ResizeMode.ResizeToContents)
+        cabecera.setSectionResizeMode(modo)
+
+    def resizeEvent(self, evento):
+        super().resizeEvent(evento)
+        self._ajustar_columnas()
 
     def set_subtipo(self, subtipo):
         self.subtipo = subtipo
         picos = protocol.PEAKS[subtipo]
         cabeceras = list(COLUMNAS)
-        cabeceras[4] = f'{picos[0].upper()} ms'
-        cabeceras[5] = f'{picos[1].upper()} ms'
+        cabeceras[COL_LAT[0]] = picos[0].upper()
+        cabeceras[COL_LAT[1]] = picos[1].upper()
         self.tabla.setHorizontalHeaderLabels(cabeceras)
+        for col, pico in zip(COL_LAT, picos):
+            self.tabla.horizontalHeaderItem(col).setToolTip(f'Latencia de {pico.upper()} (ms)')
+        for col, ayuda in enumerate(TOOLTIPS):
+            if ayuda:
+                self.tabla.horizontalHeaderItem(col).setToolTip(ayuda)
 
     def poblar(self, registros, activa=None):
         """registros: lista de Registro, en el orden en que se tomaron."""
@@ -71,6 +105,7 @@ class TablaMedidas(QWidget):
         if activa in self._nombres:
             self.tabla.selectRow(self._nombres.index(activa))
         self.tabla.blockSignals(False)
+        self._ajustar_columnas()
 
     def _fila(self, fila, registro):
         picos = registro.picos_esperados
@@ -82,29 +117,30 @@ class TablaMedidas(QWidget):
 
         valores = [
             registro.nombre,
-            registro.lado,
             f'{registro.intensidad} {unidad}',
-            registro.ajustes.freq,
+            registro.ajustes.freq.replace(' Hz', ''),
             self._num(marcas.get(picos[0], [None])[0], 2),
             self._num(marcas.get(picos[1], [None])[0], 2),
             self._num(p2p, 1),
             self._num(emg, 0),
             self._num(corregida, 2),
-            f'{registro.aceptados}' + (f' (−{registro.rechazados})'
-                                       if registro.rechazados else ''),
+            f'{registro.aceptados}',
         ]
         color = QColor(theme.color_lado(registro.lado))
         for col, valor in enumerate(valores):
             item = QTableWidgetItem(str(valor))
-            if col in (4, 5, 6, 7, 8, 9):
+            if col >= COL_LAT[0]:
                 item.setTextAlignment(Qt.AlignmentFlag.AlignRight |
                                       Qt.AlignmentFlag.AlignVCenter)
-            if col == 1:
+            if col == 0:
                 item.setForeground(QBrush(color))
                 fuente = QFont()
                 fuente.setBold(True)
                 item.setFont(fuente)
-            if col == 7 and emg and not protocol.emg_en_banda(registro.subtipo, emg):
+            if col == len(valores) - 1:
+                item.setToolTip(f'{registro.aceptados} aceptados, '
+                                f'{registro.rechazados} rechazados')
+            if col == COL_EMG and emg and not protocol.emg_en_banda(registro.subtipo, emg):
                 item.setForeground(QBrush(QColor(theme.ALERTA)))
             self.tabla.setItem(fila, col, item)
 
@@ -135,7 +171,7 @@ class BarraAsimetria(QWidget):
         super().__init__(parent)
         self.od = None
         self.oi = None
-        self.setMinimumHeight(46)
+        self.setMinimumHeight(38)
 
     def set_valores(self, od, oi):
         self.od = od
@@ -186,11 +222,13 @@ class PanelAsimetria(Tarjeta):
     """Resumen del subtipo activo: las dos amplitudes y su asimetría."""
 
     def __init__(self, parent=None):
-        super().__init__('Comparación entre oídos', parent=parent)
+        super().__init__('Amplitud corregida', parent=parent)
         fila = QHBoxLayout()
         fila.setSpacing(16)
-        self.dato_od = Dato('OD corregida')
-        self.dato_oi = Dato('OI corregida')
+        # El título ya dice "corregida": los rótulos quedan cortos para que
+        # los tres datos entren en ~260 px (pantallas de 1024).
+        self.dato_od = Dato('OD')
+        self.dato_oi = Dato('OI')
         self.dato_ar = Dato('Asimetría', unidad='%')
         for dato in (self.dato_od, self.dato_oi, self.dato_ar):
             fila.addWidget(dato)
@@ -200,6 +238,9 @@ class PanelAsimetria(Tarjeta):
         self.barra = BarraAsimetria()
         self.agregar(self.barra)
 
+        # Solo la cuenta: las crudas y el EMG de cada oído están en la tabla
+        # de al lado (y en el tooltip); con todo junto eran tres líneas que
+        # en 768 px no entraban.
         self.lbl_cuenta = etiqueta('', rol='hint')
         self.lbl_cuenta.setWordWrap(True)
         self.agregar(self.lbl_cuenta)
@@ -208,13 +249,14 @@ class PanelAsimetria(Tarjeta):
         """od/oi: Registro elegido de cada oído (o None)."""
         corr_od = od.p2p_corregida() if od else None
         corr_oi = oi.p2p_corregida() if oi else None
-        self.set_titulo(f'Comparación entre oídos · {protocol.SUBTIPO_CORTO[subtipo]}')
+        self.set_titulo(f'Amplitud corregida · {protocol.SUBTIPO_CORTO[subtipo]}')
         self.dato_od.set_valor('—' if corr_od is None else f'{corr_od:.2f}')
         self.dato_oi.set_valor('—' if corr_oi is None else f'{corr_oi:.2f}')
         self.dato_ar.set_valor('—' if ratio is None else f'{ratio:.0f}')
         self.barra.set_valores(corr_od, corr_oi)
 
         if ratio is None:
+            self.lbl_cuenta.setToolTip('')
             faltan = []
             if corr_od is None:
                 faltan.append('OD')
@@ -222,9 +264,10 @@ class PanelAsimetria(Tarjeta):
                 faltan.append('OI')
             self.lbl_cuenta.setText(
                 'Falta una amplitud pico-pico marcada en ' + ' y '.join(faltan or ['los dos oídos'])
-                + '. La asimetría necesita los dos oídos medidos en la misma condición.')
+                + ': la asimetría necesita los dos oídos en la misma condición.')
             return
         self.lbl_cuenta.setText(
-            f'|{corr_od:.2f} − {corr_oi:.2f}| / ({corr_od:.2f} + {corr_oi:.2f}) × 100  '
-            f'·  crudas: OD {od.p2p():.1f} µV con EMG {od.emg_medio:.0f} µV, '
+            f'|{corr_od:.2f} − {corr_oi:.2f}| / ({corr_od:.2f} + {corr_oi:.2f}) × 100')
+        self.lbl_cuenta.setToolTip(
+            f'Crudas: OD {od.p2p():.1f} µV con EMG {od.emg_medio:.0f} µV, '
             f'OI {oi.p2p():.1f} µV con EMG {oi.emg_medio:.0f} µV')

@@ -25,10 +25,12 @@ cargado, el módulo lo dice y no deja registrar: no hay respuesta sintética
 import os
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (QHBoxLayout, QMainWindow, QProgressBar,
-                               QSplitter, QTabWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QMainWindow, QProgressBar,
+                               QScrollArea, QSplitter, QTabWidget, QVBoxLayout,
+                               QWidget)
 
 from backend.client import BackendClient
+from core import iconos
 from core.base import context
 from core.helpers import Preferences
 from core.report_autosave import subir_ahora
@@ -42,6 +44,13 @@ from vemp.widgets.kit import Pastilla, Tarjeta, etiqueta
 from vemp.widgets.measures import PanelAsimetria, TablaMedidas
 from vemp.widgets.report import PanelInforme
 from vemp.widgets.traces import PanelTrazas
+
+# Columna de mandos: ancho de cada una, separación, y desde qué ancho de
+# ventana se pasa a dos cuando en una no caben a lo alto (en una de 1024 las
+# trazas quedarían demasiado angostas: ahí, scroll).
+COLUMNA_ANCHO = 262
+COLUMNA_SEP = 10
+ANCHO_DOS_COLUMNAS = 1180
 
 # Ritmo del reloj de promediación (ms). No es tiempo del paciente: el
 # tiempo del paciente lo marca la tasa de estímulo y se muestra aparte.
@@ -97,46 +106,115 @@ class VempMainWindow(QMainWindow):
     # =====================================================================
 
     def _construir(self):
+        """Los mandos en una columna angosta a todo el alto y, al lado, la
+        cabecera (paciente, Registrar, avance) sobre las pestañas.
+
+        El alto es lo que falta en los PC del laboratorio (1280x720 deja
+        ~610 px de área): la cabecera a todo el ancho y Registrar abajo de
+        los mandos llevaban el mínimo del módulo a ~990 px.
+        """
         central = QWidget()
         theme.aplicar_estilo(central)
         self.setCentralWidget(central)
 
-        raiz = QVBoxLayout(central)
-        raiz.setContentsMargins(12, 10, 12, 12)
+        raiz = QHBoxLayout(central)
+        self._raiz = raiz
+        raiz.setContentsMargins(10, 8, 10, 10)
         raiz.setSpacing(10)
-        raiz.addWidget(self._encabezado())
 
-        cuerpo = QHBoxLayout()
-        cuerpo.setSpacing(12)
-        raiz.addLayout(cuerpo, 1)
-
-        izquierda = QWidget()
-        izq_layout = QVBoxLayout(izquierda)
-        izq_layout.setContentsMargins(0, 0, 0, 0)
-        izq_layout.setSpacing(10)
-        self.control = PanelControl()
-        izq_layout.addWidget(self.control)
-        caja_emg = Tarjeta('Paciente')
+        self.control = PanelControl(self)
         self.medidor = MedidorEmg()
-        caja_emg.agregar(self.medidor)
-        self.lbl_maniobra = etiqueta('', rol='hint')
-        self.lbl_maniobra.setWordWrap(True)
-        caja_emg.agregar(self.lbl_maniobra)
-        izq_layout.addWidget(caja_emg)
-        izq_layout.addStretch(1)
-        izquierda.setFixedWidth(310)
-        cuerpo.addWidget(izquierda)
+        self.caja_emg = Tarjeta('Contracción · EMG rectificado')
+        self.caja_emg.cuerpo.setSpacing(6)
+        self.caja_emg.agregar(self.medidor)
+
+        # Dos columnas de tarjetas; la segunda solo se usa si en una no
+        # caben a lo alto (ver _acomodar_mandos).
+        mandos = QWidget()
+        fila = QHBoxLayout(mandos)
+        fila.setContentsMargins(0, 0, 0, 0)
+        fila.setSpacing(COLUMNA_SEP)
+        self.col_mandos = []
+        for _ in range(2):
+            col = QVBoxLayout()
+            col.setContentsMargins(0, 0, 0, 0)
+            col.setSpacing(8)
+            fila.addLayout(col, 1)
+            self.col_mandos.append(col)
+        self.dos_columnas = None
+        # Con scroll solo por si ni en dos columnas cabe: los mandos no
+        # pueden quedar cortados abajo.
+        self.izquierda = QScrollArea()
+        self.izquierda.setFrameShape(QFrame.Shape.NoFrame)
+        self.izquierda.setWidgetResizable(True)
+        self.izquierda.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.izquierda.setWidget(mandos)
+        self.izquierda.viewport().setAutoFillBackground(False)
+        mandos.setAutoFillBackground(False)
+        for tarjeta in self._tarjetas_mandos():
+            tarjeta.cuerpo.setContentsMargins(12, 8, 12, 10)
+        self._acomodar_mandos(False)
+        raiz.addWidget(self.izquierda)
+
+        derecha = QVBoxLayout()
+        derecha.setSpacing(8)
+        derecha.addWidget(self._encabezado())
 
         self.tabs = QTabWidget()
-        self.tabs.addTab(self._pestana_registro(), 'Registro')
+        self.tabs.addTab(self._pestana_registro(),
+                         iconos.icono('onda_abr', theme.TEXTO_TENUE, 16), 'Registro')
         self.analisis = PanelAnalisis()
-        self.tabs.addTab(self._envolver(self.analisis), 'Análisis')
+        self.tabs.addTab(self._envolver(self.analisis),
+                         iconos.icono('barras', theme.TEXTO_TENUE, 16), 'Análisis')
         self.informe = PanelInforme()
         self.estado_informe = self.informe.estado
         if self.data_login.get('name'):
             self.informe.set_evaluador(self.data_login['name'])
-        self.tabs.addTab(self._envolver(self.informe), 'Informe')
-        cuerpo.addWidget(self.tabs, 1)
+        self.tabs.addTab(self._envolver(self.informe),
+                         iconos.icono('evolucion', theme.TEXTO_TENUE, 16), 'Informe')
+        derecha.addWidget(self.tabs, 1)
+        raiz.addLayout(derecha, 1)
+
+    def _tarjetas_mandos(self):
+        c = self.control
+        return (c.caja_prueba, self.caja_emg, c.caja_estimulo, c.caja_registro)
+
+    def _alto_una_columna(self):
+        tarjetas = self._tarjetas_mandos()
+        return (sum(t.sizeHint().height() for t in tarjetas)
+                + self.col_mandos[0].spacing() * (len(tarjetas) - 1))
+
+    def _acomodar_mandos(self, dos):
+        """Una columna angosta si los mandos caben a lo alto; si no, dos
+        (Prueba y EMG | Estímulo y Registro). En los PC del laboratorio sobra
+        ancho y falta alto: a 1280x720 la columna sola quedaba con scroll y
+        el EMG --lo que hay que mirar mientras se registra-- fuera de vista."""
+        if dos == self.dos_columnas:
+            return
+        self.dos_columnas = dos
+        prueba, emg, estimulo, registro = self._tarjetas_mandos()
+        for col in self.col_mandos:
+            while col.count():
+                col.takeAt(0)
+        izq, der = self.col_mandos
+        orden = ((izq, (prueba, emg)), (der, (estimulo, registro))) if dos else \
+            ((izq, (prueba, estimulo, registro, emg)),)
+        for col, tarjetas in orden:
+            for tarjeta in tarjetas:
+                col.addWidget(tarjeta)
+            col.addStretch(1)
+        ancho = COLUMNA_ANCHO * (2 if dos else 1) + (COLUMNA_SEP if dos else 0)
+        self.izquierda.setFixedWidth(ancho)
+
+    def resizeEvent(self, evento):
+        super().resizeEvent(evento)
+        # El alto disponible no depende de cuántas columnas haya: no oscila.
+        # Se mide de la ventana y no del scroll, que en el primer resize
+        # todavía no tiene su alto.
+        margenes = self._raiz.contentsMargins()
+        alto = self.height() - margenes.top() - margenes.bottom()
+        self._acomodar_mandos(self._alto_una_columna() > alto
+                              and self.width() >= ANCHO_DOS_COLUMNAS)
 
     @staticmethod
     def _envolver(widget):
@@ -148,9 +226,14 @@ class VempMainWindow(QMainWindow):
         return contenedor
 
     def _encabezado(self):
+        """Paciente y condición a la izquierda, Registrar/Detener a la
+        derecha; debajo el avance y qué está pasando.
+
+        Sin píldora de estado: Registrar ya lo dice (Pausar en rojo mientras
+        promedia, Continuar en pausa)."""
         caja = Tarjeta()
-        caja.cuerpo.setContentsMargins(14, 10, 14, 10)
-        caja.cuerpo.setSpacing(6)
+        caja.cuerpo.setContentsMargins(14, 8, 10, 8)
+        caja.cuerpo.setSpacing(5)
 
         fila = QHBoxLayout()
         fila.setSpacing(8)
@@ -160,28 +243,28 @@ class VempMainWindow(QMainWindow):
         fila.addWidget(self.pill_subtipo)
         self.pill_lado = Pastilla('OD', 'od')
         fila.addWidget(self.pill_lado)
-        self.pill_condicion = Pastilla('', 'neutro')
-        fila.addWidget(self.pill_condicion)
         fila.addStretch(1)
-        self.pill_estado = Pastilla('detenido', 'neutro')
-        fila.addWidget(self.pill_estado)
+        fila.addWidget(self.control.btn_registrar)
+        fila.addWidget(self.control.btn_detener)
         caja.agregar_layout(fila)
 
         self.barra = QProgressBar()
+        self.barra.setObjectName('barraRegistro')
         self.barra.setTextVisible(False)
-        self.barra.setFixedHeight(6)
         self.barra.setRange(0, 100)
         self.barra.setValue(0)
-        self.barra.setStyleSheet(
-            f'QProgressBar {{ background: {theme.TARJETA_ALT}; border: none;'
-            f' border-radius: 3px; }}'
-            f'QProgressBar::chunk {{ background: {theme.ACENTO};'
-            f' border-radius: 3px; }}')
         caja.agregar(self.barra)
 
+        # La condición va con el mensaje y no en la fila del título: ahí,
+        # con Registrar y Detener, el encabezado no cabía en 1024 px.
+        fila = QHBoxLayout()
+        fila.setSpacing(8)
+        self.pill_condicion = Pastilla('', 'neutro')
+        fila.addWidget(self.pill_condicion, 0, Qt.AlignmentFlag.AlignTop)
         self.lbl_estado = etiqueta('', rol='hint')
         self.lbl_estado.setWordWrap(True)
-        caja.agregar(self.lbl_estado)
+        fila.addWidget(self.lbl_estado, 1)
+        caja.agregar_layout(fila)
         return caja
 
     def _pestana_registro(self):
@@ -208,17 +291,20 @@ class VempMainWindow(QMainWindow):
         abajo.addWidget(caja_tabla)
         self.asimetria = PanelAsimetria()
         abajo.addWidget(self.asimetria)
-        abajo.setStretchFactor(0, 3)
-        abajo.setStretchFactor(1, 2)
-        abajo.setMinimumHeight(190)
+        # La tabla se lleva el ancho; la comparación no lo necesita.
+        self.asimetria.setMaximumWidth(300)
+        abajo.setStretchFactor(0, 1)
+        abajo.setStretchFactor(1, 0)
+        abajo.setMinimumHeight(150)
 
         arriba = QWidget()
         arriba.setLayout(trazas)
         vertical = QSplitter(Qt.Orientation.Vertical)
         vertical.addWidget(arriba)
         vertical.addWidget(abajo)
-        vertical.setStretchFactor(0, 3)
+        vertical.setStretchFactor(0, 4)
         vertical.setStretchFactor(1, 1)
+        vertical.setChildrenCollapsible(False)
         layout.addWidget(vertical)
         return contenedor
 
@@ -258,7 +344,7 @@ class VempMainWindow(QMainWindow):
             self._sin_caso(con_paciente=data is not None)
             return
 
-        self.control.setEnabled(True)
+        self.control.habilitar(True)
         if self.isVisible():
             self.timer_emg.start(TICK_EMG_MS)
         else:
@@ -272,12 +358,11 @@ class VempMainWindow(QMainWindow):
         self._mensaje('')
 
     def _sin_caso(self, con_paciente=False):
-        self.control.setEnabled(False)
+        self.control.habilitar(False)
         self.timer_emg.stop()
         self.medidor.set_activo(False)
         self.lbl_paciente.setText('Sin atención abierta')
         self.informe.set_paciente('')
-        self.pill_estado.set('detenido', 'neutro')
         if con_paciente:
             self._mensaje('Este paciente no tiene VEMP cargado en el caso: '
                           'el equipo no registra. Cargalo en la ficha VEMP del '
@@ -451,8 +536,6 @@ class VempMainWindow(QMainWindow):
             self.segundos_sostenido = 0.0
             self.maniobra_previa = maniobra
         subtipo = self.control.subtipo()
-        musculo, _via = protocol.MUSCULO[subtipo]
-        self.lbl_maniobra.setText(f'{maniobra} · {musculo}')
         if self.motor is not None:
             self.medidor.push(self.motor.emg_instantaneo(subtipo, maniobra,
                                                          self.segundos_sostenido))
@@ -571,12 +654,6 @@ class VempMainWindow(QMainWindow):
         self.pill_condicion.set(f'{ajustes.intensidad} dB {unidad} · '
                                 f'{ajustes.freq} · {via}')
 
-        estados = {'detenido': ('detenido', 'neutro'),
-                   'registrando': ('registrando', 'od'),
-                   'pausado': ('en pausa', 'acento')}
-        texto, tipo = estados[self.estado]
-        self.pill_estado.set(texto, tipo)
-
         registro = self.registro_actual
         if registro is None:
             self.barra.setValue(0)
@@ -593,6 +670,8 @@ class VempMainWindow(QMainWindow):
                   f'{registro.rechazados} rechazados',
                   f'{int(segundos // 60)}:{int(segundos % 60):02d} de registro',
                   f'EMG {registro.emg_medio:.0f} µV']
+        if self.estado == 'pausado':
+            partes.insert(0, 'En pausa')
         estado_emg = protocol.estado_emg(registro.subtipo, self.medidor.nivel)
         nivel = 'alerta' if estado_emg != 'ok' else None
         if estado_emg != 'ok':

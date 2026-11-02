@@ -23,12 +23,12 @@ import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters  # noqa: F401  (registra ImageExporter)
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import (QButtonGroup, QHBoxLayout, QMenu, QPushButton,
                                QVBoxLayout, QWidget)
 
 from vemp import protocol, theme
-from vemp.widgets.kit import Pastilla, etiqueta
+from vemp.widgets.kit import EtiquetaRecortada, Pastilla
 from core.borrado import borrar_luego
 
 
@@ -70,9 +70,9 @@ class PanelTrazas(QWidget):
         self.pastilla = Pastilla(self.lado, 'od' if self.lado == 'OD' else 'oi')
         fila.addWidget(self.pastilla)
 
-        self.lbl_curva = etiqueta('sin registros', rol='hint')
-        fila.addWidget(self.lbl_curva)
-        fila.addStretch(1)
+        # Se achica con '…': a 1024 px el texto se metía bajo los botones.
+        self.lbl_curva = EtiquetaRecortada('sin registros', rol='hint')
+        fila.addWidget(self.lbl_curva, 1)
 
         # Los botones de pico viven en su propio contenedor: cambian con el
         # subtipo y así se rehacen sin tocar el resto de la barra.
@@ -109,7 +109,7 @@ class PanelTrazas(QWidget):
         for pico in protocol.PEAKS[self.subtipo]:
             btn = QPushButton(pico.upper())
             btn.setCheckable(True)
-            btn.setFixedWidth(48)
+            btn.setFixedWidth(46)
             btn.setToolTip(f'Marcar {pico.upper()}: clic sobre la curva')
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.toggled.connect(lambda activo, p=pico: self._on_pico(p, activo))
@@ -142,7 +142,7 @@ class PanelTrazas(QWidget):
         plot.addItem(self.linea_estimulo)
         inicio, _fin = protocol.VENTANA[self.subtipo]
         self.zona_pre = pg.LinearRegionItem(values=(inicio, 0), movable=False,
-                                            brush=pg.mkBrush(220, 226, 234, 70))
+                                            brush=pg.mkBrush(_tenue(theme.GRILLA)))
         _sin_bordes(self.zona_pre)
         self.zona_pre.setZValue(-10)
         plot.addItem(self.zona_pre)
@@ -242,7 +242,9 @@ class PanelTrazas(QWidget):
         self.plot.setXRange(inicio - self._canaleta(), fin, padding=0.005)
         visibles = self._visibles()
         piso = -self.escala * (0.6 * max(len(visibles) - 1, 0) + 1.0)
-        self.plot.setYRange(piso, self.escala, padding=0.02)
+        # Aire arriba: el rótulo de un P13 en la curva de más arriba quedaba
+        # cortado por el borde.
+        self.plot.setYRange(piso, self.escala * 1.15, padding=0.02)
         self._dibujar_barra_escala(fin, piso)
 
     def _dibujar_barra_escala(self, fin, piso):
@@ -520,6 +522,14 @@ class PanelTrazas(QWidget):
     def exportar(self, path):
         exportador = pg.exporters.ImageExporter(self.plot.plotItem)
         exportador.export(path)
+
+
+def _tenue(color, alfa=170):
+    """Un color de la paleta con transparencia: la zona pre-estímulo es fondo
+    y la grilla tiene que seguir viéndose a través."""
+    c = QColor(color)
+    c.setAlpha(alfa)
+    return c
 
 
 def _sin_bordes(region):

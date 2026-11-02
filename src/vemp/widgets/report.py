@@ -39,32 +39,43 @@ class PanelInforme(QWidget):
         self.cuerpo.setSpacing(10)
         scroll.setWidget(contenido)
 
+        # Alto antes que ancho: lo medido y el umbral lado a lado, y hallazgos
+        # y conclusión en dos columnas que se llevan el alto que sobra. Uno
+        # bajo el otro, a 1366x768 la conclusión quedaba fuera de vista.
         self.cuerpo.addWidget(self._caja_encabezado())
-        self.cuerpo.addWidget(self._caja_medidas())
-        self.cuerpo.addWidget(self._caja_umbrales())
-        self.cuerpo.addWidget(self._caja_texto())
-        self.cuerpo.addStretch(1)
+        fila = QHBoxLayout()
+        fila.setSpacing(10)
+        fila.addWidget(self._caja_medidas(), 1)
+        fila.addWidget(self._caja_umbrales())
+        self.cuerpo.addLayout(fila)
+        self.cuerpo.addWidget(self._caja_texto(), 1)
 
     # ------------------------------------------------------------------
     # Construcción
     # ------------------------------------------------------------------
 
     def _caja_encabezado(self):
-        caja = Tarjeta('Informe')
+        caja = Tarjeta()
+        caja.cuerpo.setContentsMargins(14, 8, 14, 8)
+        fila = QHBoxLayout()
+        fila.setSpacing(10)
+        fila.addWidget(etiqueta_seccion('Informe'))
         self.lbl_paciente = etiqueta('Sin atención abierta', rol='titulo')
-        caja.agregar(self.lbl_paciente)
+        fila.addWidget(self.lbl_paciente)
+        fila.addStretch(1)
         self.lbl_datos = etiqueta('', rol='hint')
-        caja.agregar(self.lbl_datos)
+        fila.addWidget(self.lbl_datos)
+        caja.agregar_layout(fila)
         return caja
 
     def _caja_medidas(self):
-        caja = Tarjeta('Lo que midió el examen')
+        caja = Tarjeta('Lo que midió el examen · amplitud corregida')
         fila = QHBoxLayout()
         fila.setSpacing(16)
-        self.dato_od = Dato('OD corregida')
-        self.dato_oi = Dato('OI corregida')
+        self.dato_od = Dato('OD')
+        self.dato_oi = Dato('OI')
         self.dato_ar = Dato('Asimetría', unidad='%')
-        self.dato_barridos = Dato('Curvas medidas')
+        self.dato_barridos = Dato('Curvas')
         for dato in (self.dato_od, self.dato_oi, self.dato_ar, self.dato_barridos):
             fila.addWidget(dato)
         fila.addStretch(1)
@@ -88,29 +99,37 @@ class PanelInforme(QWidget):
             # que agregar una casilla al lado de cada spin.
             spin.setSpecialValueText('no informado')
             spin.setValue(0)
-            spin.setMaximumWidth(150)
+            spin.setMinimumWidth(120)
             campos.agregar(f'Umbral {lado}', spin)
             self.spins_umbral[lado] = spin
         caja.agregar(campos)
-        caja.agregar(etiqueta(
+        ayuda = etiqueta(
             'La serie muestra hasta qué intensidad hubo respuesta marcada; el '
-            'umbral que se informa lo decide quien informa.', rol='hint'))
+            'umbral que se informa lo decide quien informa.', rol='hint')
+        ayuda.setWordWrap(True)
+        caja.agregar(ayuda)
+        caja.cuerpo.addStretch(1)
+        caja.setFixedWidth(240)
         return caja
 
     def _caja_texto(self):
-        caja = Tarjeta('Redacción')
-        caja.agregar(etiqueta_seccion('Hallazgos'))
+        caja = Tarjeta()
+        columnas = QHBoxLayout()
+        columnas.setSpacing(12)
         self.txt_hallazgos = QTextEdit()
         self.txt_hallazgos.setPlaceholderText(
             'Morfología, latencias, amplitudes, condiciones del registro...')
-        self.txt_hallazgos.setMinimumHeight(110)
-        caja.agregar(self.txt_hallazgos)
-
-        caja.agregar(etiqueta_seccion('Conclusión'))
         self.txt_conclusion = QTextEdit()
         self.txt_conclusion.setPlaceholderText('Interpretación del examen...')
-        self.txt_conclusion.setMinimumHeight(90)
-        caja.agregar(self.txt_conclusion)
+        for titulo, texto in (('Hallazgos', self.txt_hallazgos),
+                              ('Conclusión', self.txt_conclusion)):
+            texto.setMinimumHeight(110)
+            columna = QVBoxLayout()
+            columna.setSpacing(6)
+            columna.addWidget(etiqueta_seccion(titulo))
+            columna.addWidget(texto, 1)
+            columnas.addLayout(columna, 1)
+        caja.cuerpo.addLayout(columnas, 1)
         # Se guarda solo (core/report_autosave.py); acá se ve si quedó.
         self.estado = EstadoInforme()
         caja.agregar(self.estado)
