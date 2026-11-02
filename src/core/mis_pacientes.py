@@ -39,6 +39,7 @@ from core.helpers import (CasesOffline, Shedule, estado_completo, mi_conversacio
                           mis_informes)
 from core.inbox import fecha_corta, fecha_larga, _Elidida
 from core.practica import abrir_ficha_estudio
+from core.borrado import borrar_luego
 
 BTN_OBJECT_NAME = "btn_mis_pacientes"
 
@@ -204,16 +205,19 @@ def _nota_docente(comentario):
     return marco
 
 
-def _vaciar(layout):
+def _vaciar(layout, _juntar=None):
+    viejos = [] if _juntar is None else _juntar
     while layout.count():
         item = layout.takeAt(0)
         if item.widget() is not None:
             # Escondido ya: deleteLater lo borra después y mientras tanto
             # quedaba dibujado encima de lo nuevo.
             item.widget().hide()
-            item.widget().deleteLater()
+            viejos.append(item.widget())
         elif item.layout() is not None:
-            _vaciar(item.layout())
+            _vaciar(item.layout(), viejos)
+    if _juntar is None:
+        borrar_luego(viejos, "mis pacientes")
 
 
 class _Fila(QFrame):
@@ -480,7 +484,7 @@ class MisPacientesWidget(QWidget):
     def _armar_filas(self):
         for f in self._filas:
             f.setParent(None)
-            f.deleteLater()
+        borrar_luego(self._filas, "mis pacientes: filas")
         self._filas = []
         self._actual = None
         for it in self._items:

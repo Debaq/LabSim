@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel,
 
 from abr import cortical
 from core import tema
+from core.borrado import borrar_luego
 
 tr = QCoreApplication.translate
 
@@ -97,7 +98,7 @@ class CorticalTable(QWidget):
         self.test = test
         for btn in self.botones:
             self.cabecera.removeWidget(btn)
-            btn.deleteLater()
+        borrar_luego(self.botones, "ABR corticales: botones")
         self.botones = []
         for marca in cortical.MARKS[test]:
             btn = QToolButton(self)

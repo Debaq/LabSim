@@ -49,6 +49,7 @@ from core import app_layout, invitado
 from core import ficha as ficha_clinica
 from core.ficha import HojaPrevia, examenes_que_trae, fila_de_practica
 from core.app_layout import LayoutRetryThread, fetch_layout
+from core.borrado import borrar_luego
 
 # Definir la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
@@ -910,7 +911,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 # chat, otoscopia) corre con hilos.en_fondo: termina solo y
                 # su resultado ya no le llega a nadie.
                 self.mdi_area.removeSubWindow(sub)
-                sub.deleteLater()
+                borrar_luego([sub], "cerrar subventanas")
                 self.modules.set(pos_z, None)
 
         login_subw = self.subw.get("LOGIN") if self.subw else None
@@ -1405,10 +1406,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             boton.setToolTip(boton.text())
 
     def btns_actions(self):
-        for i in reversed(range(self.layoutAction.count())):
-            widget = self.layoutAction.itemAt(i).widget()
-            if widget is not None:
-                widget.deleteLater()
+        borrar_luego([self.layoutAction.itemAt(i).widget()
+                      for i in reversed(range(self.layoutAction.count()))], "barra de acciones")
         # los botones se recrean abajo: las refs viejas quedan apuntando a
         # widgets ya destruidos
         self.btn_debug_mkg = None

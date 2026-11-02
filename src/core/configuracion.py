@@ -15,6 +15,7 @@ from agenda.vista import BotonAccion
 from core import atajos, iconos, invitado, keyboard_monitor, soporte, tema
 from core.kiosko import es_kiosko
 from core.preferencias import preferencias
+from core.borrado import borrar_luego
 
 # Lo propio de esta ventana; lo demás es el estilo común (tema.QSS y
 # tema.QSS_FORM): tarjetas, roles de texto, campos, botones. La lista de
@@ -281,4 +282,4 @@ def abrir(parent=None):
     dialogo = ConfiguracionDialog(parent)
     dialogo.exec()
     # Con padre quedaba vivo uno por cada vez que se abría.
-    dialogo.deleteLater()
+    borrar_luego([dialogo], "configuración")

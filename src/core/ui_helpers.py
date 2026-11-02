@@ -18,6 +18,7 @@ from core.h_win import FrameSubMdi, MdiArea
 from core import iconos, inbox, tema
 from core import mis_pacientes
 from core.base import context
+from core.borrado import borrar_luego
 
 
 def style_dialog(dlg, with_logo: bool = True) -> None:
@@ -428,10 +429,8 @@ class ToolBar(SubWindow):
      ## Funciones para el toolbar
     def _clear_layout(self, layout):
         """Elimina todos los widgets contenidos en un layout"""
-        for i in reversed(range(layout.count())):
-            widget = layout.itemAt(i).widget()
-            if widget is not None:
-                widget.deleteLater()
+        borrar_luego([layout.itemAt(i).widget() for i in reversed(range(layout.count()))],
+                     "botones de sección")
 
     def btns_seccion(self):
         self._clear_layout(self.layouts[0])
@@ -458,8 +457,8 @@ class ToolBar(SubWindow):
         #self.parent.btns_actions()
 
     def changeArea(self):
-        for i in reversed(range( self.layouts[1].count())):
-            self.layouts[1].itemAt(i).widget().deleteLater()
+        borrar_luego([self.layouts[1].itemAt(i).widget()
+                      for i in reversed(range(self.layouts[1].count()))], "cambio de área")
         # el botón de bandeja se destruye arriba junto al resto de la
         # sección y solo se recrea si la nueva sección tiene "AGENDA" (ver
         # chargeBtnsArea) -- invalidar la ref ahora evita que

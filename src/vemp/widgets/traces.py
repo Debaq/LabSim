@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (QButtonGroup, QHBoxLayout, QMenu, QPushButton,
 
 from vemp import protocol, theme
 from vemp.widgets.kit import Pastilla, etiqueta
+from core.borrado import borrar_luego
 
 
 class PanelTrazas(QWidget):
@@ -102,7 +103,7 @@ class PanelTrazas(QWidget):
         for btn in self.botones_pico.values():
             self.grupo_picos.removeButton(btn)
             self.fila_picos.removeWidget(btn)
-            btn.deleteLater()
+        borrar_luego(list(self.botones_pico.values()), "VEMP: botones de pico")
         self.botones_pico = {}
         self.pico_activo = None
         for pico in protocol.PEAKS[self.subtipo]:

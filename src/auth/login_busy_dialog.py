@@ -17,6 +17,7 @@ Implementación segura:
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QDialog, QFrame, QLabel, QVBoxLayout
+from core.borrado import borrar_luego
 
 
 _SPINNER_FRAMES = ("⏳", "◐", "◓", "◑", "◒", "◓", "◑", "◒")
@@ -90,4 +91,4 @@ class LoginBusyDialog(QDialog):
         """Para el timer, cierra el diálogo y libera. NO usar close() directo."""
         self._timer.stop()
         self.close()
-        self.deleteLater()
+        borrar_luego([self], "login: espera")

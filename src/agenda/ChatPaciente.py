@@ -17,6 +17,7 @@ from agenda.vista import BotonAccion
 from core.helpers import chat_con_paciente, foto_paciente, sala_del_caso
 from core import ficha, hilos, iconos, tema
 from core.avatar import avatar_iniciales, avatar_circular_desde_bytes, color_por_nombre
+from core.borrado import borrar_luego
 
 
 # Las tres consultas corren con hilos.en_fondo (sin QThread: ver los
@@ -95,12 +96,14 @@ class _ListaMensajes(QScrollArea):
     def vaciar(self):
         self._burbujas = []
         # El aviso de "conversación vacía" se queda: solo se esconde y se muestra.
+        viejos = []
         for i in reversed(range(self.fila.count())):
             w = self.fila.itemAt(i).widget()
             if w is not None and w.objectName() != "vacioChat":
                 self.fila.takeAt(i)
                 w.hide()
-                w.deleteLater()
+                viejos.append(w)
+        borrar_luego(viejos, "chat del paciente")
 
     def _al_cambiar_rango(self, _minimo, maximo):
         if self._pegado:

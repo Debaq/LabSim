@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout,
 from core.avatar import avatar_circular_desde_bytes, avatar_iniciales
 from core.base import context
 from core import app_config_store
+from core.borrado import borrar_luego
 
 NOMBRE = "Karime"
 # Su foto de perfil, la misma de la versión Tauri (tauri-app/public/
@@ -228,7 +229,7 @@ class AvisoSecretaria(QFrame):
     def _terminar(self):
         self.hide()
         self._al_cerrar(self)
-        self.deleteLater()
+        borrar_luego([self], "aviso de la secretaria")
 
 
 class Secretaria(QObject):

@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QHBoxLayout, QLabel, QPushB
 
 from core import hilos, iconos, tema
 from core.helpers import inbox_list, inbox_marcar_leido
+from core.borrado import borrar_luego
 
 BTN_OBJECT_NAME = "btn_bandeja_oirs"
 MESES = ("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
@@ -325,7 +326,7 @@ class InboxWidget(QWidget):
     def _armar_filas(self):
         for f in self._filas:
             f.setParent(None)
-            f.deleteLater()
+        borrar_luego(self._filas, "bandeja: filas")
         self._filas = []
         self._actual = None
         for it in self._items:
