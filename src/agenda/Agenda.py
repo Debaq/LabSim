@@ -675,7 +675,7 @@ class Agenda(QWidget, Ui_Form):
 
         lista = self.lista_carpetas
         lista.blockSignals(True)
-        lista.clear()
+        sueltos = self._vaciar_carpetas()
         grupos = {}          # grupo -> su nodo (el libro), en el orden en que aparece
         elegido = None
         # Sin número adelante: el nombre ya dice el capítulo ("Cap. 7 · ...")
@@ -710,8 +710,25 @@ class Agenda(QWidget, Ui_Form):
         if elegido is not None:
             lista.setCurrentItem(elegido)
         lista.blockSignals(False)
+        del sueltos
         self._mostrar_avance()
         self.columna_carpetas.setVisible(self._modo_practica and bool(self._carpetas))
+
+    def _vaciar_carpetas(self):
+        """Saca los items del árbol de carpetas antes de rearmarlo.
+
+        Como en _vaciar_tabla: clear() hace que Qt borre items que creó
+        Python, y el 2026-10-30 (labsim3, tickets 31 y 32) eso reventó en
+        shiboken (segfault en unregisterWrapper) al llegar la práctica. Se
+        sacan los hijos de cada libro y el libro, sueltos, para que cada uno
+        lo libere Python sin padre. Hay que guardarlos hasta terminar."""
+        lista = self.lista_carpetas
+        sueltos = []
+        while lista.topLevelItemCount():
+            nodo = lista.takeTopLevelItem(0)
+            sueltos.extend(nodo.takeChildren())
+            sueltos.append(nodo)
+        return sueltos
 
     def _mostrar_avance(self):
         """Cuántos casos del libro practicó el alumno. Un paciente que sale en

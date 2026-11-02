@@ -806,6 +806,11 @@ class OlfatometriaWindow(QMainWindow):
 
     def _pintar_tabla(self):
         cab = ['N.°', 'Prueba', 'Narina', 'Paso / ítem', 'Correcto', 'Eligió', '', 'Observación']
+        # Sacar los items antes de clear(): si Qt borra items creados en
+        # Python, shiboken puede reventar (ver Agenda._vaciar_tabla). Se
+        # liberan de este lado al salir de la función.
+        sueltos = [self.tabla.takeItem(f, c) for f in range(self.tabla.rowCount())  # noqa: F841
+                   for c in range(self.tabla.columnCount())]
         self.tabla.clear()
         self.tabla.setColumnCount(len(cab))
         self.tabla.setHorizontalHeaderLabels(cab)

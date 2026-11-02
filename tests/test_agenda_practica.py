@@ -320,6 +320,26 @@ def test_el_libro_es_la_carpeta_y_los_capitulos_las_subcarpetas():
     assert _filas(ag) == ["Zoe", "Eva"]
 
 
+def test_rearmar_las_carpetas_muchas_veces_no_deja_items_colgados():
+    """Cada vez que llega la práctica se rearma el árbol de carpetas. El
+    2026-10-30 (labsim3, tickets 31 y 32) se cerró la app en clear(): Qt
+    borraba items creados en Python. Ahora se sacan con take* antes."""
+    import gc
+    ag, _ = _armar(lambda pid: {})
+    libro = "Libro"
+    ag.btn_practica.setChecked(True)
+    for vuelta in range(60):
+        n = 1 + (vuelta * 5) % 7
+        items = [dict(_item(i, f"Cap. {i % 3}", 10 + i % 3, i, f"P{i}"),
+                      grupo=libro if i % 2 else None) for i in range(1, n + 1)]
+        if vuelta % 4 == 0 and ag.lista_carpetas.topLevelItemCount():
+            ag.lista_carpetas.setCurrentItem(ag.lista_carpetas.topLevelItem(0))
+        ag._on_practica_fetched(items)
+        gc.collect()
+        APP.processEvents()
+        assert sum(c[2] for c in ag._carpetas) == n
+
+
 def test_el_alumno_ve_su_avance_en_el_libro():
     """Practicado = al menos un intento cerrado. Un capítulo entero lleva ✓."""
     ag, _ = _armar(lambda pid: {})

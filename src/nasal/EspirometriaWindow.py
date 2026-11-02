@@ -1035,6 +1035,11 @@ class EspirometriaWindow(QMainWindow):
     def _pintar_tabla(self):
         cab = ['Fase', 'N°', 'FVC', 'FEV1', 'FEV1/FVC', 'PEF', 'TEF', 'BEV', 'CVIF', 'FEV1', 'FVC', 'Lo que viste']
         self.tabla.blockSignals(True)
+        # Sacar los items antes de clear(): si Qt borra items creados en
+        # Python, shiboken puede reventar (ver Agenda._vaciar_tabla). Se
+        # liberan de este lado al salir de la función.
+        sueltos = [self.tabla.takeItem(f, c) for f in range(self.tabla.rowCount())  # noqa: F841
+                   for c in range(self.tabla.columnCount())]
         self.tabla.clear()
         self.tabla.setColumnCount(len(cab))
         self.tabla.setHorizontalHeaderLabels(cab)
