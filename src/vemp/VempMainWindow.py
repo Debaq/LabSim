@@ -226,24 +226,28 @@ class VempMainWindow(QMainWindow):
         return contenedor
 
     def _encabezado(self):
-        """Paciente y condición a la izquierda, Registrar/Detener a la
-        derecha; debajo el avance y qué está pasando.
+        """Una fila: qué se va a registrar (subtipo y oído), qué está
+        pasando y Registrar/Detener; debajo, el avance.
 
-        Sin píldora de estado: Registrar ya lo dice (Pausar en rojo mientras
-        promedia, Continuar en pausa)."""
+        Sin el nombre del paciente (el alumno sabe a quién atiende, igual
+        que en el ABR), sin la condición (la columna de mandos la muestra) y
+        sin píldora de estado (Registrar lo dice: Pausar en rojo mientras
+        promedia, Continuar en pausa). Cada fila de más era alto que las
+        trazas no tenían."""
         caja = Tarjeta()
-        caja.cuerpo.setContentsMargins(14, 8, 10, 8)
-        caja.cuerpo.setSpacing(5)
+        caja.cuerpo.setContentsMargins(10, 7, 8, 7)
+        caja.cuerpo.setSpacing(6)
 
         fila = QHBoxLayout()
         fila.setSpacing(8)
-        self.lbl_paciente = etiqueta('Sin atención abierta', rol='titulo')
-        fila.addWidget(self.lbl_paciente)
         self.pill_subtipo = Pastilla('cVEMP', 'acento')
         fila.addWidget(self.pill_subtipo)
         self.pill_lado = Pastilla('OD', 'od')
         fila.addWidget(self.pill_lado)
-        fila.addStretch(1)
+        fila.addSpacing(4)
+        self.lbl_estado = etiqueta('', rol='hint')
+        self.lbl_estado.setWordWrap(True)
+        fila.addWidget(self.lbl_estado, 1)
         fila.addWidget(self.control.btn_registrar)
         fila.addWidget(self.control.btn_detener)
         caja.agregar_layout(fila)
@@ -254,17 +258,6 @@ class VempMainWindow(QMainWindow):
         self.barra.setRange(0, 100)
         self.barra.setValue(0)
         caja.agregar(self.barra)
-
-        # La condición va con el mensaje y no en la fila del título: ahí,
-        # con Registrar y Detener, el encabezado no cabía en 1024 px.
-        fila = QHBoxLayout()
-        fila.setSpacing(8)
-        self.pill_condicion = Pastilla('', 'neutro')
-        fila.addWidget(self.pill_condicion, 0, Qt.AlignmentFlag.AlignTop)
-        self.lbl_estado = etiqueta('', rol='hint')
-        self.lbl_estado.setWordWrap(True)
-        fila.addWidget(self.lbl_estado, 1)
-        caja.agregar_layout(fila)
         return caja
 
     def _pestana_registro(self):
@@ -350,9 +343,6 @@ class VempMainWindow(QMainWindow):
         else:
             self._emg_pausado = True  # arranca al mostrarse (showEvent)
         self.medidor.set_activo(True)
-        descripcion = f'Paciente · {self.caso.descripcion}'
-        self.lbl_paciente.setText(descripcion)
-        self.informe.set_paciente(descripcion)
         self._cambiar_subtipo(self.control.subtipo())
         self._cambiar_maniobra(self.control.maniobra())
         self._mensaje('')
@@ -361,8 +351,6 @@ class VempMainWindow(QMainWindow):
         self.control.habilitar(False)
         self.timer_emg.stop()
         self.medidor.set_activo(False)
-        self.lbl_paciente.setText('Sin atención abierta')
-        self.informe.set_paciente('')
         if con_paciente:
             self._mensaje('Este paciente no tiene VEMP cargado en el caso: '
                           'el equipo no registra. Cargalo en la ficha VEMP del '
@@ -649,10 +637,6 @@ class VempMainWindow(QMainWindow):
         ajustes = self.control.ajustes()
         self.pill_subtipo.set(protocol.SUBTIPO_CORTO[ajustes.subtipo], 'acento')
         self.pill_lado.set(ajustes.lado, 'od' if ajustes.lado == 'OD' else 'oi')
-        unidad = 'SPL' if ajustes.transductor == protocol.AEREO else 'FL'
-        via = 'aéreo' if ajustes.transductor == protocol.AEREO else 'óseo'
-        self.pill_condicion.set(f'{ajustes.intensidad} dB {unidad} · '
-                                f'{ajustes.freq} · {via}')
 
         registro = self.registro_actual
         if registro is None:
@@ -681,8 +665,8 @@ class VempMainWindow(QMainWindow):
     def _mensaje_listo(self, ajustes):
         """Qué va a pasar si aprieta Registrar ahora."""
         segundos = engine.duracion_segundos(ajustes.promedios, ajustes.tasa)
-        return (f'Listo para registrar {protocol.SUBTIPO_CORTO[ajustes.subtipo]} '
-                f'{ajustes.lado}: {ajustes.promedios} barridos a {ajustes.tasa:.1f}/s '
+        # Subtipo y oído ya están en las píldoras de al lado.
+        return (f'Listo para registrar: {ajustes.promedios} barridos a {ajustes.tasa:.1f}/s '
                 f'({int(segundos // 60)}:{int(segundos % 60):02d}) · '
                 f'{protocol.descripcion_montaje(ajustes.subtipo, ajustes.lado)}')
 

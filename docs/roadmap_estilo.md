@@ -200,6 +200,10 @@ Actualizado 2026-10-27.
   los mandos en una columna angosta a todo el alto (262 px) y la cabecera (paciente, Registrar/Detener,
   avance) arriba de las pestañas, no a todo el ancho. Si en una columna no caben a lo alto y hay ancho
   (≥1180), pasan a dos: Prueba + EMG | Estímulo + Registro (1280×720). El EMG nunca queda bajo el scroll.
+- [x] Cabecera de una sola fila (2026-11-02): píldoras subtipo/oído, el mensaje (avisos de EMG,
+  rechazos, sin VEMP en el caso) y Registrar/Detener, con el avance debajo. Sin "Paciente · mujer,
+  34 años" (el alumno sabe a quién atiende, como en el ABR) ni en el informe, que queda con fecha y
+  evaluador en una línea; sin píldora de condición (la columna de mandos ya la muestra).
 - [x] Fuera lo repetido: montaje y duración ya estaban en la cabecera; la unidad de intensidad va en el
   campo (dB SPL / dB FL, rango en el tooltip); pasa-alto y pasa-bajo en una fila "Filtro"; sin píldora
   de estado (lo dice Registrar: Pausar en rojo, Continuar). Medidor EMG compacto (lectura en una línea).

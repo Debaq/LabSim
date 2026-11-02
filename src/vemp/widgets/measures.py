@@ -55,28 +55,51 @@ class TablaMedidas(QWidget):
         self.tabla.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tabla.setShowGrid(False)
         self.tabla.setAlternatingRowColors(False)
-        for col, ayuda in enumerate(TOOLTIPS):
-            if ayuda:
-                self.tabla.horizontalHeaderItem(col).setToolTip(ayuda)
-        # Columnas a lo ancho si entran y, si no, cada una a su contenido (ver
+        self._alinear_cabecera()
+        # Cada columna a su contenido más una parte de lo que sobre (ver
         # _ajustar_columnas).
         self.tabla.horizontalHeader().setMinimumSectionSize(30)
+        self.tabla.horizontalHeader().setSectionsClickable(False)
         self.tabla.verticalHeader().setDefaultSectionSize(24)
         self.tabla.setStyleSheet('QTableWidget::item { padding: 0px 3px; }')
         self.tabla.itemSelectionChanged.connect(self._on_seleccion)
         raiz.addWidget(self.tabla)
 
+    def _alinear_cabecera(self):
+        """Cada rótulo alineado como sus valores (números a la derecha) y con
+        su ayuda. setHorizontalHeaderLabels rehace los items: va después."""
+        for col in range(self.tabla.columnCount()):
+            item = self.tabla.horizontalHeaderItem(col)
+            lado = (Qt.AlignmentFlag.AlignRight if col >= COL_LAT[0]
+                    else Qt.AlignmentFlag.AlignLeft)
+            item.setTextAlignment(lado | Qt.AlignmentFlag.AlignVCenter)
+            if TOOLTIPS[col]:
+                item.setToolTip(TOOLTIPS[col])
+
     def _ajustar_columnas(self):
         """Estiradas por igual, a 1024 px se cortaban '115 SPL' y las
         latencias mientras 'Hz' sobraba; a su contenido, en 1920 la tabla
-        quedaba amontonada a la izquierda. Se estiran solo si entran todas."""
+        quedaba amontonada a la izquierda. Cada una a su contenido y, si
+        sobra ancho, repartido entre todas."""
         cabecera = self.tabla.horizontalHeader()
-        necesario = sum(max(self.tabla.sizeHintForColumn(c), cabecera.sectionSizeHint(c))
-                        for c in range(self.tabla.columnCount()))
-        modo = (QHeaderView.ResizeMode.Stretch
-                if self.tabla.viewport().width() >= necesario
-                else QHeaderView.ResizeMode.ResizeToContents)
-        cabecera.setSectionResizeMode(modo)
+        # Se mide con las columnas ya a su contenido: sizeHintForColumn no
+        # cuenta la negrita de la curva ni el padding del QSS.
+        cabecera.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        columnas = self.tabla.columnCount()
+        # Contando siempre la barra vertical: aparece después, con más filas
+        # que alto, y entonces la tabla se salía de lado por unos píxeles.
+        barra = self.tabla.verticalScrollBar().sizeHint().width()
+        disponible = self.tabla.width() - 2 * self.tabla.frameWidth() - barra
+        sobra = disponible - cabecera.length()
+        if sobra <= 0:
+            return
+        # Lo que sobra, repartido encima del ancho de cada una (Stretch las
+        # deja todas iguales y vuelve a cortar la curva y la intensidad).
+        anchos = [cabecera.sectionSize(c) for c in range(columnas)]
+        cabecera.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        extra = sobra // columnas
+        for c, ancho in enumerate(anchos):
+            cabecera.resizeSection(c, ancho + extra)
 
     def resizeEvent(self, evento):
         super().resizeEvent(evento)
@@ -91,9 +114,7 @@ class TablaMedidas(QWidget):
         self.tabla.setHorizontalHeaderLabels(cabeceras)
         for col, pico in zip(COL_LAT, picos):
             self.tabla.horizontalHeaderItem(col).setToolTip(f'Latencia de {pico.upper()} (ms)')
-        for col, ayuda in enumerate(TOOLTIPS):
-            if ayuda:
-                self.tabla.horizontalHeaderItem(col).setToolTip(ayuda)
+        self._alinear_cabecera()
 
     def poblar(self, registros, activa=None):
         """registros: lista de Registro, en el orden en que se tomaron."""

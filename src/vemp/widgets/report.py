@@ -38,6 +38,9 @@ class PanelInforme(QWidget):
         self.cuerpo.setContentsMargins(4, 4, 4, 4)
         self.cuerpo.setSpacing(10)
         scroll.setWidget(contenido)
+        # Sin esto el scroll pinta el gris del sistema detrás de las tarjetas.
+        scroll.viewport().setAutoFillBackground(False)
+        contenido.setAutoFillBackground(False)
 
         # Alto antes que ancho: lo medido y el umbral lado a lado, y hallazgos
         # y conclusión en dos columnas que se llevan el alto que sobra. Uno
@@ -55,17 +58,17 @@ class PanelInforme(QWidget):
     # ------------------------------------------------------------------
 
     def _caja_encabezado(self):
-        caja = Tarjeta()
-        caja.cuerpo.setContentsMargins(14, 8, 14, 8)
-        fila = QHBoxLayout()
+        """Fecha y evaluador en una línea, sin tarjeta ni nombre del
+        paciente: el alumno sabe a quién atiende y el alto es para escribir."""
+        caja = QWidget()
+        fila = QHBoxLayout(caja)
+        fila.setContentsMargins(4, 0, 4, 0)
         fila.setSpacing(10)
-        fila.addWidget(etiqueta_seccion('Informe'))
-        self.lbl_paciente = etiqueta('Sin atención abierta', rol='titulo')
-        fila.addWidget(self.lbl_paciente)
+        fila.addWidget(etiqueta_seccion('Informe VEMP'))
         fila.addStretch(1)
         self.lbl_datos = etiqueta('', rol='hint')
         fila.addWidget(self.lbl_datos)
-        caja.agregar_layout(fila)
+        self._refrescar_encabezado()
         return caja
 
     def _caja_medidas(self):
@@ -141,10 +144,6 @@ class PanelInforme(QWidget):
 
     def set_evaluador(self, nombre):
         self.evaluador = nombre or ''
-        self._refrescar_encabezado()
-
-    def set_paciente(self, descripcion):
-        self.lbl_paciente.setText(descripcion or 'Sin atención abierta')
         self._refrescar_encabezado()
 
     def _refrescar_encabezado(self):

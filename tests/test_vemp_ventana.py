@@ -79,8 +79,8 @@ def test_la_cabecera_sigue_a_los_mandos():
     v = _ventana(1366, 660)
     v.control.sb_promedios.setValue(500)
     assert '500 barridos' in v.lbl_estado.text()
-    v.control.sb_int.setValue(v.control.sb_int.minimum())
-    assert v.pill_condicion.text().startswith(f'{v.control.sb_int.minimum()} dB')
+    v.control.sb_tasa.setValue(5.0)
+    assert '500 barridos a 5.0/s (1:40)' in v.lbl_estado.text()
     v.close()
 
 
