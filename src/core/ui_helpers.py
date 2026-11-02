@@ -341,7 +341,16 @@ class SubWindow():
             position(tuple): posicion de la subventana
         """
         if self.modules.is_full(pos_z):
-            show_hide(self.modules, pos_z)
+            sub = self.modules.get(pos_z)
+            tapada = (not sub.isHidden() and not is_full_window(sub)
+                      and self.mdi_area.activeSubWindow() is not sub)
+            if tapada:
+                # Abierta detrás de otra: el botón la trae al frente; se
+                # esconde recién con el clic siguiente. (Las de pantalla
+                # completa van siempre al fondo: ahí el botón alterna.)
+                raise_window(sub)
+            else:
+                show_hide(self.modules, pos_z)
         else:
             # Las subventanas a pantalla completa no cuentan: si contaran,
             # nunca habria hueco libre y todo se abriria en cascada.
@@ -439,8 +448,8 @@ class ToolBar(SubWindow):
     def btns_seccion(self):
         self._clear_layout(self.layouts[0])
         self._clear_layout(self.layouts[1])
-        active = str()
-        for iter_btn, i in enumerate(self.boxs):
+        active = None
+        for i in self.boxs:
             if self.boxs[i][0]:
                 btn = QPushButton()
                 btn.setObjectName(i)
@@ -453,11 +462,13 @@ class ToolBar(SubWindow):
                 btn.setCheckable(True)
                 btn.setAutoExclusive(True)
                 self.layouts[0].addWidget(btn)
-                if iter_btn == 0:
+                # La primera sección visible, no la primera del layout: esa
+                # puede venir apagada y no tener botón.
+                if active is None:
                     active = i
-        btn_selec = self.frame.findChild(QPushButton,active)
-        btn_selec.setChecked(True)
-        self.chargeBtnsArea(active)
+                    btn.setChecked(True)
+        if active is not None:
+            self.chargeBtnsArea(active)
         #self.parent.btns_actions()
 
     def changeArea(self):

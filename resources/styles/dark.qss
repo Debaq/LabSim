@@ -58,12 +58,6 @@ QWidget#barra QPushButton#btn_close:hover{
   background-color: #a32529;
 }
 
-QGroupBox#frame_Box_1 QPushButton{
-  color : white;
-  background-color: rgb(255, 0, 0);
-
-}
-
 QFrame#frame_sec QPushButton{
   min-height: 26px;
   padding: 0 16px;
