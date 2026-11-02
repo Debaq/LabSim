@@ -2,7 +2,7 @@ from core.base import context
 from core import tema, tiempos
 from PySide6.QtCore import Qt, QEvent, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPixmap
-from PySide6.QtWidgets import QMdiArea, QWidget
+from PySide6.QtWidgets import QApplication, QMdiArea, QWidget
 from core.UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
 
 
@@ -105,6 +105,7 @@ class MdiArea(QMdiArea):
     def __init__(self):
         super().__init__()
         self._aviso_pendiente = False
+        self._cerrando = False
         self.setDocumentMode(True)
         self.setBackground(QColor(tema.LIENZO_APP))
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -113,6 +114,15 @@ class MdiArea(QMdiArea):
         # modulos normales abiertos encima: se los vuelve a subir.
         self.subWindowActivated.connect(self._keep_full_below)
         self.subWindowActivated.connect(self._avisar_cambio)
+        # Al salir, PySide destruye las subventanas (atexit) y cada Hide
+        # pasaría por eventFilter con medio árbol ya borrado: cascada de
+        # "Internal C++ object already deleted" en la consola.
+        QApplication.instance().aboutToQuit.connect(self._soltar_filtros)
+
+    def _soltar_filtros(self):
+        self._cerrando = True
+        for sub in self.subWindowList():
+            sub.removeEventFilter(self)
 
     def addSubWindow(self, sub, *args):
         # Esconder una que no es la activa no pasa por subWindowActivated:
@@ -121,6 +131,8 @@ class MdiArea(QMdiArea):
         return super().addSubWindow(sub, *args)
 
     def eventFilter(self, obj, event):
+        if self._cerrando:
+            return False
         if event.type() in (QEvent.Type.Show, QEvent.Type.Hide):
             self._avisar_cambio()
         return super().eventFilter(obj, event)
