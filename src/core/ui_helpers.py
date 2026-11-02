@@ -425,6 +425,10 @@ class ToolBar(SubWindow):
         self.apps = apps
         self.size = size
         self.subw = subw
+        # La marca (color oscuro) de los botones de módulo la decide qué
+        # ventanas están abiertas, no el clic: si no, cada clic alternaba
+        # el color y quedaba el último.
+        self.mdi_area.ventanas_cambiaron.connect(self.pintar_botones_modulos)
 
      ## Funciones para el toolbar
     def _clear_layout(self, layout):
@@ -500,6 +504,30 @@ class ToolBar(SubWindow):
             # (y más completa, con todos los alumnos) en el portal web.
             if self.data_login.get("permission") != 777 and self._module_visible("MIS_PACIENTES"):
                 mis_pacientes.crear_boton(self, self.layouts[1])
+        self.pintar_botones_modulos()
+
+    def _modulo_abierto(self, code: str) -> bool:
+        app = self.apps.get(code)
+        if app is None:
+            return False
+        sub = self.modules.get(app[2])
+        if sub is None:
+            return False
+        try:
+            return not sub.isHidden()
+        except RuntimeError:  # subventana ya destruida
+            return False
+
+    def pintar_botones_modulos(self) -> None:
+        """Marca solo los botones de los módulos con ventana abierta."""
+        layout = self.layouts[1]
+        for i in range(layout.count()):
+            btn = layout.itemAt(i).widget()
+            if not isinstance(btn, QPushButton) or not btn.isCheckable():
+                continue
+            code = btn.objectName().removeprefix("btn_").upper()
+            if code in self.apps:
+                btn.setChecked(self._modulo_abierto(code))
 
     def activate_soft(self) -> None:
         """activa la ventana con el mismo nombre del boton que envia la señal"""
@@ -508,6 +536,8 @@ class ToolBar(SubWindow):
         _, obj_name = btn_name.split("_")
         obj_name = obj_name.upper()
         self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
+        # El clic ya alternó la marca; manda la ventana (por si no se abrió).
+        self.pintar_botones_modulos()
     
     def activate_soft_(self, name) -> None:
         """activa la ventana con el mismo nombre del boton que envia la señal"""
