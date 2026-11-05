@@ -8064,3 +8064,11 @@ quién lo hizo y qué concluyó.
 - Bug de `previos.py` corregido: la corrida completa cortaba después de la
   primera ficha (`if indice and not solo: break`, pensado para
   `--solo-historia`), y el índice quedaba con 5 hojas.
+- **Velocidad (`previos.py`):** el PEATC tardaba ~17 s por hoja porque el
+  motor promedia "en vivo" (86 pasos por registro, 688 por hoja) y solo
+  usa la curva final. Las semillas del ruido son por captura: con un paso
+  (`fake_averages` = 1) la curva sale idéntica (y, réplica, A/B y ondas,
+  comparado en la ficha 34) en 0,8 s. Además es incremental: cada hoja
+  guarda en `previos_huellas.json` la huella del caso, la figura y el
+  código del que depende su examen (tocar `src/abr` rehace solo los
+  potenciales); `--todo` fuerza todo.

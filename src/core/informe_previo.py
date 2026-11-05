@@ -275,14 +275,44 @@ def conclusion_vemp(resumen, nombre="cVEMP"):
     return lineas
 
 
+def _tipo_tamizaje(prueba):
+    p = prueba.lower()
+    if any(k in p for k in ("emisi", "eoa", "oae", "otoemis")):
+        return "eoa"
+    if any(k in p for k in ("peat", "aabr", "automatiz", "potencial", "abr")):
+        return "aabr"
+    return None
+
+
+def _dice(tipo, resultado, nivel):
+    """Lo que significa el resultado de un oído en ese examen."""
+    r = resultado.strip().lower()
+    if tipo == "eoa" and r == "pasa":
+        return "emisiones otoacústicas presentes (pasa)"
+    if tipo == "eoa" and r == "refiere":
+        return "emisiones otoacústicas ausentes (refiere)"
+    if tipo == "aabr" and r == "pasa":
+        return f"respuesta presente{nivel} (pasa)"
+    if tipo == "aabr" and r == "refiere":
+        return f"sin respuesta{nivel} (refiere)"
+    if r == "no evaluable":
+        return "no evaluable"
+    return resultado.strip() or "—"
+
+
 def conclusion_tamizaje(prueba, od, oi):
-    """Las tarjetas del docente: el resultado de cada oído, dicho en una línea."""
-    def bien(r):
-        return r.strip().lower() in ("pasa", "normal")
-    od, oi = (od or "—").strip(), (oi or "—").strip()
-    if bien(od) and bien(oi) and od.lower() == oi.lower():
-        return [f"{od.capitalize()} en ambos oídos."]
-    return [f"OD: {od.capitalize()}.", f"OI: {oi.capitalize()}."]
+    """Las tarjetas del docente: qué significa el resultado de cada oído,
+    según el examen que nombra la hoja (EOA o PEAT automatizado). El mismo
+    resultado en los dos oídos va en una línea."""
+    tipo = _tipo_tamizaje(prueba)
+    m = re.search(r"(\d+)\s*dB\s*nHL", prueba, re.I)
+    nivel = f" a {m.group(1)} dB nHL" if m and tipo == "aabr" else ""
+    od, oi = (od or "").strip(), (oi or "").strip()
+    if od.lower() == oi.lower():
+        texto = _dice(tipo, od, nivel)
+        return [f"{texto[0].upper()}{texto[1:]} en ambos oídos."]
+    return [f"OD: {_dice(tipo, od, nivel)[0].upper()}{_dice(tipo, od, nivel)[1:]}.",
+            f"OI: {_dice(tipo, oi, nivel)[0].upper()}{_dice(tipo, oi, nivel)[1:]}."]
 
 
 # ── La hoja ───────────────────────────────────────────────────────────────
@@ -390,18 +420,30 @@ def formato_rut(rut):
     return f"{int(rut):,}".replace(",", ".") + f"-{dv}"
 
 
-def paciente_del_caso(caso):
-    """Nombre, edad y RUT del caso (paciente_snapshot), lo que haya."""
+def edad_texto(anios):
+    if anios is None:
+        return None
+    if anios < 1:
+        dias = anios * 365.25
+        if dias < 28:
+            return "recién nacido"
+        meses = int(dias // 30.44)
+        return f"{meses} mes{'es' if meses != 1 else ''}"
+    return f"{int(anios)} año{'s' if int(anios) != 1 else ''}"
+
+
+def paciente_del_caso(caso, dias=0):
+    """Nombre, edad y RUT del caso (paciente_snapshot), lo que haya. `dias`
+    (negativo): la edad que tenía ese día, no la de la cita."""
     snap = caso.get("paciente_snapshot") if isinstance(caso, dict) else None
     snap = snap if isinstance(snap, dict) else {}
     nombre = " ".join(p for p in (snap.get("nombre"), snap.get("apellido")) if p).strip()
     edad = _num(caso.get("edad")) if isinstance(caso, dict) else None
-    if edad is None:
-        texto_edad = None
-    elif edad < 1:
-        meses = int(round(edad * 12))
-        texto_edad = f"{meses} mes{'es' if meses != 1 else ''}" if meses else "recién nacido"
-    else:
-        texto_edad = f"{int(edad)} años"
+    horas = _num(caso.get("edad_horas")) if isinstance(caso, dict) else None
+    if horas and (edad is None or edad < 1):
+        edad = horas / 24 / 365.25          # el lactante: la edad fina va en horas
+    if edad is not None:
+        edad = edad + dias / 365.25
+    texto_edad = edad_texto(edad) if edad is None or edad >= 0 else None
     rut = str(snap.get("rut") or "").strip()
     return {"nombre": nombre or None, "edad": texto_edad, "rut": rut or None}

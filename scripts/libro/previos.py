@@ -3,6 +3,12 @@
     QT_QPA_PLATFORM=offscreen ~/.local/share/labsim/libro-venv/bin/python -I scripts/libro/previos.py
     ... previos.py --solo-historia     (rehace solo las hojas de la historia)
     ... previos.py --examen EOA        (rehace solo las hojas de ese examen)
+    ... previos.py --todo              (rehace todas, aunque estén al día)
+
+Es incremental: cada hoja guarda en previos_huellas.json la huella del caso,
+la figura y el código del que depende su examen, y solo se rehace lo que
+cambió. Todo de cero toma ~3 min (el PEATC se registra en un paso: ver
+fake_averages más abajo).
 
 (el PEATC necesita PySide6 y pyqtgraph: el python del libro, ver
 libro.python_figuras.)
@@ -37,6 +43,7 @@ propios/: sql_practica.py carga los generados) y de los demo 33-42. Se
 vuelve a correr cuando cambia un caso o el dibujo del libro.
 """
 import gzip
+import hashlib
 import json
 import pathlib
 import re
@@ -78,6 +85,56 @@ def _con_montaje(ventana):
 from motor import abr as _abr, cortical as _cortical  # noqa: E402
 _abr._ventana = _con_montaje(_abr._ventana)
 _cortical._ventana = _con_montaje(_cortical._ventana)
+
+# El equipo promedia "en vivo": 86 pasos por registro para 2000 barridos, y
+# la hoja solo usa la curva final. Esa curva no depende de los pasos
+# intermedios (las semillas del ruido son por captura): con un solo paso sale
+# idéntica (y, réplica, subpromedios A/B y ondas; verificado el 2026-11-05) en
+# 0,8 s en vez de 15 s por hoja de PEATC.
+from abr.AbrMainWindow import AbrMainWindow as _Abr  # noqa: E402
+_Abr.fake_averages = lambda self, *a, **k: 1
+
+# Regeneración incremental: cada hoja guarda la huella de lo que la produce
+# (el caso, la figura y el código del que depende ese examen) y, si no
+# cambió, no se vuelve a dibujar. Tocar el ABR rehace solo los potenciales.
+# --todo las rehace todas.
+HUELLAS = pathlib.Path(__file__).with_name('previos_huellas.json')
+_COMUN = ['scripts/libro/previos.py', 'src/core/informe_previo.py', 'src/core/dsp.py', 'src/core/rng.py']
+_CODIGO_EXAMEN = {
+    'Audiometría': [],
+    'Impedanciometría': ['src/impedanciometria'],
+    'EOA': ['src/oae', 'resources/oae'],
+    'PEATC': ['src/abr', 'resources/abr', 'src/core/cabeza_electrodos.py'],
+    'ECochG': ['src/abr', 'resources/abr'],
+    'Corticales': ['src/abr', 'resources/abr', 'src/core/cabeza_electrodos.py'],
+    'VEMP': ['src/vemp', 'resources/vemp'],
+}
+_codigo = {}
+
+
+def _hash_codigo(examen):
+    if examen not in _codigo:
+        h = hashlib.blake2b(digest_size=12)
+        rutas = [LABSIM / r for r in _COMUN + _CODIGO_EXAMEN.get(examen, [])]
+        rutas += [LIBRO / 'material/figuras/hacer_figuras.py', LIBRO / 'material/figuras/motor']
+        for r in rutas:
+            for f in sorted([r] if r.is_file() else r.rglob('*') if r.is_dir() else []):
+                if f.is_file() and f.suffix in ('.py', '.json', '.csv') and '__pycache__' not in f.parts:
+                    h.update(str(f.relative_to(f.anchor)).encode())
+                    h.update(f.read_bytes())
+        _codigo[examen] = h.hexdigest()
+    return _codigo[examen]
+
+
+def _huella(examen, *datos):
+    h = hashlib.blake2b(digest_size=12)
+    h.update(_hash_codigo(examen).encode())
+    h.update(json.dumps(datos, sort_keys=True, ensure_ascii=False, default=str).encode())
+    return h.hexdigest()
+
+
+def _al_dia(huellas, ruta, huella):
+    return '--todo' not in sys.argv and huellas.get(ruta) == huella and (salida / ruta).is_file()
 
 # Los mismos capítulos que sql_practica.py deja fuera (vestibulares y nasales)
 FUERA = {21, 22, 23, 24, 25, 26, 27, 31, 32, 35, 36, 37, 38}
@@ -277,6 +334,8 @@ def main():
             if examen and examen not in de_la_ficha:
                 de_la_ficha[examen] = (clave, origen, [g for g in figuras if EXAMEN.get(g['tipo']) == examen])
     indice = {}
+    huellas = json.loads(HUELLAS.read_text(encoding='utf-8')) if HUELLAS.is_file() else {}
+    rehechas = 0
     solo = sys.argv[sys.argv.index('--examen') + 1] if '--examen' in sys.argv else None
     if '--solo-historia' in sys.argv or solo:
         # Las hojas de lo que traen ya están (dibujarlas tarda: el PEATC)
@@ -294,8 +353,13 @@ def main():
                 continue
             ruta = f'{ficha}/{ARCHIVO[examen]}.svgz'
             caso = cargar_caso(origen)
-            _guardar(ruta, _informe(caso, IP.paciente_del_caso(caso), ficha, examen, figuras))
             indice.setdefault(ficha, {}).setdefault('trae', {})[examen] = ruta
+            huella = _huella(examen, ficha, caso, figuras)
+            if _al_dia(huellas, ruta, huella):
+                continue
+            _guardar(ruta, _informe(caso, IP.paciente_del_caso(caso), ficha, examen, figuras))
+            huellas[ruta] = huella
+            rehechas += 1
             print(f'  {ruta:30} {clave}')
     # Qué trae en cada carpeta: lo que muestra la ficha del libro en ese
     # capítulo, más la audiometría, que va antes de todo lo demás. Un demo sale
@@ -319,6 +383,19 @@ def main():
         # El paciente es el de hoy aunque la hoja sea de un estado anterior
         paciente = IP.paciente_del_caso(cargar_caso(origenes[ficha])) if ficha in origenes else {}
         firma = f"historia {h['dias']} {examen}"
+        entrada = {'dias': h['dias'], 'examen': examen, 'svg': ruta}
+        if h.get('revisar'):
+            entrada['revisar'] = True
+        if h['hoja'] == 'actual' and examen in trae:
+            entrada['svg'] = trae[examen]
+            indice.setdefault(ficha, {}).setdefault('historia', []).append(entrada)
+            continue
+        origen = (origenes.get(ficha) if h['hoja'] == 'actual'
+                  else f"archivo:{CASOS / 'generados' / (h['caso'] + '.json')}")
+        huella = _huella(examen, h, paciente, cargar_caso(origen) if origen and h['hoja'] != 'tamizaje' else None)
+        indice.setdefault(ficha, {}).setdefault('historia', []).append(entrada)
+        if _al_dia(huellas, ruta, huella):
+            continue
         if h['hoja'] == 'tamizaje':
             # Sin la franja del título: el informe ya lo lleva arriba
             # (recortar el viewBox no basta: lo que queda fuera igual se dibuja)
@@ -329,22 +406,17 @@ def main():
             svg = IP.informe(tarjeta, examen, paciente,
                              IP.conclusion_tamizaje(h['prueba'], h['OD'], h['OI']),
                              IP.firmante(ficha, firma), prueba=h['prueba'])
-        elif h['hoja'] == 'actual' and examen in trae:
-            ruta, svg = trae[examen], None
         else:
-            origen = (origenes[ficha] if h['hoja'] == 'actual'
-                      else f"archivo:{CASOS / 'generados' / (h['caso'] + '.json')}")
             figuras = hojas.get(ficha, {}).get(examen, (None, None, POR_DEFECTO.get(examen, [])))[2]
             svg = _informe(cargar_caso(origen), paciente, ficha, examen, figuras, firma)
-        if svg is not None:
-            (salida / ficha).mkdir(parents=True, exist_ok=True)
-            _guardar(ruta, svg)
-        entrada = {'dias': h['dias'], 'examen': examen, 'svg': ruta}
-        if h.get('revisar'):
-            entrada['revisar'] = True
-        indice.setdefault(ficha, {}).setdefault('historia', []).append(entrada)
+        (salida / ficha).mkdir(parents=True, exist_ok=True)
+        _guardar(ruta, svg)
+        huellas[ruta] = huella
+        rehechas += 1
         print(f"  {ruta:34} {h['hoja']}")
     (salida / 'indice.json').write_text(json.dumps(indice, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+    HUELLAS.write_text(json.dumps(huellas, ensure_ascii=False, indent=0, sort_keys=True) + '\n', encoding='utf-8')
+    print(rehechas, 'hojas rehechas (las demás estaban al día)')
     print(len(indice), 'fichas,', sum(len(v.get('trae', {})) for v in indice.values()), 'hojas que traen,',
           len(tabla), 'de la historia')
 

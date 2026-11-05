@@ -166,7 +166,7 @@ def informe_del_docente(caso, row, previo, indice):
     """El examen que marcó el docente como un informe: la tarjeta con el
     resultado de cada oído, la conclusión (la que escribió el docente o,
     si no, el resultado dicho en una línea) y la firma (core/informe_previo)."""
-    paciente = informe_previo.paciente_del_caso(caso)
+    paciente = informe_previo.paciente_del_caso(caso, int(previo["dias"]))
     nombre = " ".join(p for p in (getattr(row, "nombre", ""), getattr(row, "apellido", "")) if p).strip()
     if nombre:
         paciente["nombre"] = nombre

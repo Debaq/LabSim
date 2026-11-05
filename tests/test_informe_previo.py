@@ -66,8 +66,20 @@ def test_eoa_peatc_tamizaje():
                                  [80, 60, 40], {"OD": 25, "OI": None})
     assert lineas[0].startswith("OD: Onda V identificable hasta 40 dB nHL (menor nivel explorado)")
     assert lineas[1].startswith("OI: Sin respuesta identificable a 80 dB nHL")
-    assert IP.conclusion_tamizaje("EOA", "Pasa", "pasa") == ["Pasa en ambos oídos."]
-    assert IP.conclusion_tamizaje("EOA", "Pasa", "Refiere") == ["OD: Pasa.", "OI: Refiere."]
+    assert IP.conclusion_tamizaje("EOA", "Pasa", "pasa") == [
+        "Emisiones otoacústicas presentes (pasa) en ambos oídos."]
+    assert IP.conclusion_tamizaje("Emisiones otoacústicas (tamizaje)", "Pasa", "Refiere") == [
+        "OD: Emisiones otoacústicas presentes (pasa).", "OI: Emisiones otoacústicas ausentes (refiere)."]
+    assert IP.conclusion_tamizaje("PEAT automatizado 35 dB nHL", "Refiere", "Refiere") == [
+        "Sin respuesta a 35 dB nHL (refiere) en ambos oídos."]
+    assert IP.conclusion_tamizaje("Otro examen", "Normal", "Alterado") == ["OD: Normal.", "OI: Alterado."]
+
+
+def test_edad_el_dia_del_examen():
+    # 180 días hoy; el examen fue hace 122: tenía 58 días
+    assert IP.paciente_del_caso({"edad": 0, "edad_horas": 4320}, -122)["edad"] == "1 mes"
+    assert IP.paciente_del_caso({"edad": 0, "edad_horas": 4320}, -170)["edad"] == "recién nacido"
+    assert IP.paciente_del_caso({"edad": 34})["edad"] == "34 años"
 
 
 def test_firma_fija_e_inventada():
@@ -102,6 +114,8 @@ def test_tarjeta_del_docente_con_su_conclusion():
     assert "Refiere OI: se deriva a PEATC." in svg and "Luis Soto" in svg and "06-10-2026" in svg
     previo["conclusion"] = ""
     assert "OD: Pasa." in ficha.informe_del_docente({"id": 7}, Fila(), previo, 0)
+    previo["prueba"] = "Retamizaje EOA"
+    assert "OI: Emisiones otoacústicas ausentes (refiere)." in ficha.informe_del_docente({"id": 7}, Fila(), previo, 0)
 
 
 if __name__ == "__main__":
