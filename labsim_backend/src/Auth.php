@@ -452,6 +452,15 @@ final class Auth
         // "todos menos el último" porque un mismo user entra desde varios
         // dispositivos a la vez.
         Tokens::purgarVencidas($pdo);
+        // Ídem con los intentos de práctica de pacientes que ya no salen en
+        // ninguna lista: abiertos, no dejaban atender a nadie más (ver
+        // Practica::cerrarIntentosSinSalida). Si falla, el login sigue.
+        try {
+            require_once __DIR__ . '/Practica.php';
+            Practica::cerrarIntentosSinSalida($userId);
+        } catch (Throwable $e) {
+            error_log('[login] no se pudieron cerrar intentos sin salida: ' . $e->getMessage());
+        }
         $courseId = $ltiPlatformId !== null
             ? Lti::courseForLaunch($ltiPlatformId, $contextId)
             : null;

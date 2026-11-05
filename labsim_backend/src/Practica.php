@@ -451,18 +451,20 @@ final class Practica
      * una atención que no podía evolucionar y que no lo dejaba atender a
      * nadie más (2026-11-05: Laura Pérez y otros tres, TODO 76).
      *
-     * Se llama al quitar un paciente y al archivar fichas (CaseLibrary). No
-     * desde un endpoint de lectura: una escritura escondida en un GET es lo
-     * que tumbó informes en prod (ver docs/decisiones.md, auditoría).
-     * Devuelve cuántos cerró.
+     * Corre sola en producción: al iniciar sesión, solo para ese alumno
+     * (Auth::issueTokenFor, que ya escribe el token), y para todos al quitar
+     * un paciente o archivar fichas (CaseLibrary). No desde un endpoint de
+     * lectura: una escritura escondida en un GET es lo que tumbó informes en
+     * prod (ver docs/decisiones.md, auditoría). Devuelve cuántos cerró.
      */
-    public static function cerrarIntentosSinSalida(): int
+    public static function cerrarIntentosSinSalida(?int $studentId = null): int
     {
-        return (int) Db::reintentar(static function (): int {
+        return (int) Db::reintentar(static function () use ($studentId): int {
+            $soloAlumno = $studentId !== null ? ' AND student_id = ?' : '';
             $stmt = Db::get()->prepare(
                 "UPDATE attendances
                     SET estado = 'atendido', nota = ?, updated_at = CURRENT_TIMESTAMP
-                  WHERE estado = 'atendiendo' AND appointment_id IN (
+                  WHERE estado = 'atendiendo'{$soloAlumno} AND appointment_id IN (
                         SELECT a.id FROM appointments a
                           LEFT JOIN practice_items pi ON pi.id = a.practice_item_id
                           LEFT JOIN practice_folders f ON f.id = pi.folder_id
@@ -472,7 +474,7 @@ final class Practica
                                 AND (pi.id IS NULL OR pi.active = 0 OR f.id IS NULL OR f.active = 0
                                      OR c.archived_at IS NOT NULL)))"
             );
-            $stmt->execute([self::NOTA_SIN_SALIDA]);
+            $stmt->execute($studentId !== null ? [self::NOTA_SIN_SALIDA, $studentId] : [self::NOTA_SIN_SALIDA]);
             return $stmt->rowCount();
         });
     }

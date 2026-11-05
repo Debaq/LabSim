@@ -7838,13 +7838,16 @@ Arreglo:
 - **Backend:** `Practica::cerrarIntentosSinSalida()` cierra los intentos
   'atendiendo' de pacientes que ya no salen en ninguna lista (quitados, en
   carpeta borrada, ficha archivada, o de la práctica vieja `practice_cases`,
-  que ya no se lista) con la nota "Cerrada sola: …". Corre al quitar un
-  paciente y al archivar fichas; no desde un endpoint de lectura.
+  que ya no se lista) con la nota "Cerrada sola: …". Corre sola, sin que
+  nadie lance una limpieza: al iniciar sesión, solo para ese alumno
+  (`Auth::issueTokenFor`, junto a la purga de tokens vencidos; si falla, el
+  login sigue), y para todos al quitar un paciente o archivar fichas. No desde
+  un endpoint de lectura.
 - **App:** el aviso "Tienes a X en atención" trae el botón Cerrar/Evolucionar,
   que abre la evolución de esa atención aunque su fila no esté en ninguna
   lista.
 - Quedaban tres más abiertos en prod (atenciones 231, 286, 288, de la práctica
-  vieja): se cierran a mano con el mismo UPDATE.
+  vieja): se cierran solos cuando esos alumnos vuelvan a entrar.
 
 ## Las citas del curso no entregan los exámenes previos (2026-11-05)
 
