@@ -118,6 +118,8 @@ $trae = array_values(array_unique(array_merge(array_map('strval', $trae), Examen
 $systemPrompt .= LlmConfig::historiaPrevia((string) ($caseData['historia_clinica'] ?? ''), $trae, $acompanado, $previos);
 // Llega despierto: para los potenciales hay que pedir que lo duerman (ver LlmConfig::sueno)
 $systemPrompt .= LlmConfig::sueno($edadPaciente, $acompanado);
+// Lo que el tecnólogo no contesta y cómo se calma un paciente difícil
+$systemPrompt .= LlmConfig::rolDelEstudiante($acompanado);
 
 // El historial va rotulado con quién dijo cada cosa: con más de una persona
 // en la consulta, un "assistant" pelado no le dice al modelo si eso lo dijo

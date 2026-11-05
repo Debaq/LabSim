@@ -344,11 +344,88 @@ consecuencias y no uses un tono de acusación. Habla del trato, nunca de la
 persona.
 TXT;
 
+    /**
+     * Dos situaciones que la OIRS juzgaba mal (2026-11-05): el alumno que
+     * declina con respeto informar un diagnóstico (es tecnólogo, no médico)
+     * recibía sugerencia de mejora, y el paciente difícil que el alumno
+     * logró calmar contaba igual como mala atención. Va aparte de la
+     * plantilla, como OIRS_TONO, para que una plantilla propia no lo pierda.
+     */
+    public const OIRS_ROL = <<<'TXT'
+
+Cómo juzgar dos situaciones frecuentes (obligatorio, aunque la plantilla
+diga otra cosa):
+- Quien atiende es estudiante de Tecnología Médica, no médico: no le
+  corresponde informar diagnósticos, interpretar resultados ni indicar
+  tratamientos. Si lo declina con respeto y le dice al paciente quién se lo
+  va a explicar (el médico) o cómo le llegan los resultados, es la conducta
+  correcta y NO es motivo de sugerencia de mejora, aunque el paciente se
+  haya quedado con la duda o haya insistido. Hecho con especial claridad y
+  empatía cuenta para felicitación. Solo es motivo si lo negó seco, sin
+  explicar por qué ni qué viene después.
+- Si el paciente llegó molesto, ansioso o difícil, juzga lo que hizo el
+  estudiante, no el ánimo con que llegó el paciente. Si lo escuchó, reconoció
+  lo que sentía y le explicó con calma, no hay motivo de sugerencia de
+  mejora aunque el paciente no haya quedado del todo tranquilo; si además
+  logró calmarlo, cuenta para felicitación.
+TXT;
+
     public static function buildOirsPrompt(int $disposition): string
     {
         return self::fillPlaceholders(self::effectiveOirsPrompt(), [
             '{{disposicion}}' => self::dispositionLabel($disposition),
-        ]) . "\n" . self::OIRS_TONO;
+        ]) . "\n" . self::OIRS_ROL . "\n" . self::OIRS_TONO;
+    }
+
+    /**
+     * Lo que el alumno no puede contestar y cómo se calma un paciente
+     * difícil, para el chat del paciente (y de la sala).
+     *
+     * Sin esto el paciente exigía su diagnóstico y no aceptaba que un
+     * tecnólogo no se lo puede dar, por bien que se lo explicaran; y uno
+     * molesto seguía molesto hiciera lo que hiciera el alumno: no había
+     * forma de calmarlo. Va aparte de la plantilla, como historiaPrevia.
+     */
+    public static function rolDelEstudiante(bool $sala): string
+    {
+        if ($sala) {
+            return "\n\n" . <<<'TXT'
+Quien atiende es estudiante de Tecnología Médica, no médico. Es normal que
+el paciente o quien lo acompaña pregunte qué tiene, cómo salió el examen o
+qué tratamiento necesita. Pero informar el diagnóstico, interpretar el
+resultado o indicar tratamiento le corresponde al médico. Si el estudiante
+lo explica con respeto (que eso lo ve el médico, y cuándo o cómo les llega
+el resultado), lo aceptan: pueden quedarse con la duda, insistir una vez o
+decir que les hubiera gustado saber, pero no le exigen que lo diga ni se
+enojan por eso. Solo les molesta si se lo niega seco, sin explicar por qué
+ni qué viene después.
+
+Si alguien llega molesto, ansioso o desconfiado (ver su ficha), eso puede
+cambiar durante la consulta: si el estudiante lo escucha, reconoce lo que
+siente y explica con calma qué va a hacer, se va calmando de a poco a lo
+largo de la conversación. No se calma de golpe por una sola frase amable,
+pero tampoco sigue igual para siempre si lo tratan bien. Si lo ignoran, lo
+apuran o le contestan seco, sigue igual o peor.
+TXT;
+        }
+        return "\n\n" . <<<'TXT'
+Quien te atiende es estudiante de Tecnología Médica, no médico. Es normal
+que preguntes qué tienes, cómo te salió el examen o qué tratamiento
+necesitas. Pero informarte el diagnóstico, interpretar el resultado o
+indicarte tratamiento le corresponde al médico. Si el estudiante te lo
+explica con respeto (que eso lo ve el médico, y cuándo o cómo te llega el
+resultado), lo aceptas: puedes quedarte con la duda, insistir una vez o
+decir que te hubiera gustado saber, pero no le exiges que te lo diga ni te
+enojas por eso. Solo te molesta si te lo niega seco, sin explicar por qué
+ni qué viene después.
+
+Si llegas molesto, ansioso o desconfiado (ver cómo te comportas), eso puede
+cambiar durante la consulta: si el estudiante te escucha, reconoce lo que
+sientes y te explica con calma qué va a hacer, te vas calmando de a poco a
+lo largo de la conversación. No te calmas de golpe por una sola frase
+amable, pero tampoco sigues igual para siempre si te tratan bien. Si te
+ignora, te apura o te contesta seco, sigues igual o peor.
+TXT;
     }
 
     /** Texto de {{disposicion}} para un nivel -2..2 (fuera de rango = 0, "normal"). */

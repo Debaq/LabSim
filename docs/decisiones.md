@@ -7982,3 +7982,24 @@ ponen y se sacan; en las fotos quedarían fijos.
 - Queda fuera por ahora: el ASSR no mira los fonos (estimula los dos oídos
   a la vez y su registro arma los canales por su cuenta); la profundidad no
   cambia la atenuación interaural.
+
+## Paciente del chat: lo que no le toca al tecnólogo y calmar al difícil (2026-11-05)
+
+El paciente simulado exigía su diagnóstico y no aceptaba que el alumno, por
+ser tecnólogo y no médico, no se lo puede dar, por bien que se lo
+explicara. Uno molesto seguía molesto hiciera lo que hiciera el alumno, y la
+OIRS dejaba sugerencia de mejora en los dos casos.
+
+- `LlmConfig::rolDelEstudiante()` (paciente solo y sala) se agrega en
+  `llm_chat.php` después del bloque del sueño. Si el alumno explica con
+  respeto que el diagnóstico, la interpretación o el tratamiento los da el
+  médico y qué viene después, el paciente lo acepta: puede insistir una vez
+  o quedarse con la duda, pero no se enoja. Molesta solo si se lo niegan
+  seco. Un paciente molesto o ansioso se calma de a poco si lo escuchan y le
+  explican, y sigue igual o peor si lo apuran.
+- `LlmConfig::OIRS_ROL` se agrega al prompt de la OIRS. Declinar con respeto
+  y derivar al médico es la conducta correcta y no es motivo; bien hecho
+  cuenta para felicitación. Con un paciente difícil se juzga lo que hizo el
+  estudiante, no el ánimo con que llegó.
+- Los dos van fuera de la plantilla, como `OIRS_TONO` e `historiaPrevia`:
+  las plantillas propias de los cursos también los llevan.
