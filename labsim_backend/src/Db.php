@@ -373,6 +373,18 @@ final class Db
                 last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )"
         );
+        // Historial de ingresos por equipo (ver Equipos::ingresos). Mismo SQL que schema.sql.
+        self::get()->exec("CREATE TABLE IF NOT EXISTS app_equipos_ingresos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                equipo_id TEXT NOT NULL,
+                -- copia del nombre: app_equipos olvida el equipo a los 180 días
+                nombre TEXT NOT NULL DEFAULT '',
+                user_id INTEGER,
+                ip TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )");
+        self::get()->exec('CREATE INDEX IF NOT EXISTS idx_equipos_ingresos_fecha ON app_equipos_ingresos (created_at)');
+        self::get()->exec('CREATE INDEX IF NOT EXISTS idx_equipos_ingresos_equipo ON app_equipos_ingresos (equipo_id, created_at)');
     }
 
     public static function migrateLlmUsageIfNeeded(): void

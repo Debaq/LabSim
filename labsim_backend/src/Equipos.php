@@ -18,6 +18,8 @@ final class Equipos
 {
     /** Un equipo que no entra hace este tiempo se deja de mostrar. */
     private const OLVIDAR_DIAS = 180;
+    /** El historial de ingresos (quién usó qué equipo) se guarda un año. */
+    public const GUARDAR_DIAS = 365;
 
     /**
      * El bloque tal como lo manda la app, validado; null si no sirve (app
@@ -67,9 +69,43 @@ final class Equipos
             $pdo->exec(
                 "DELETE FROM app_equipos WHERE last_seen_at < datetime('now', '-" . self::OLVIDAR_DIAS . " days')"
             );
+            // El historial: quién entró desde este equipo y cuándo.
+            $pdo->prepare('INSERT INTO app_equipos_ingresos (equipo_id, nombre, user_id, ip) VALUES (?, ?, ?, ?)')
+                ->execute([$equipo['id'], $equipo['nombre'], $userId,
+                           substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45)]);
+            $pdo->exec(
+                "DELETE FROM app_equipos_ingresos WHERE created_at < datetime('now', '-" . self::GUARDAR_DIAS . " days')"
+            );
         } catch (Throwable $e) {
             error_log('Equipos::registrar: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Ingresos de un día (fecha local 'YYYY-MM-DD'), del más antiguo al más
+     * reciente, con el equipo y el usuario. Cada ingreso dura hasta el
+     * siguiente del mismo equipo: eso lo arma la vista.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function ingresos(string $fechaLocal): array
+    {
+        Db::migrateAppEquiposIfNeeded();
+        $zona = new DateTimeZone(Clock::ZONA);
+        $desde = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaLocal, $zona);
+        if ($desde === false) {
+            return [];
+        }
+        $utc = new DateTimeZone('UTC');
+        $stmt = Db::get()->prepare(
+            'SELECT i.equipo_id, i.nombre, i.ip, i.created_at, u.username, u.display_name
+             FROM app_equipos_ingresos i LEFT JOIN users u ON u.id = i.user_id
+             WHERE i.created_at >= ? AND i.created_at < ?
+             ORDER BY i.created_at, i.id'
+        );
+        $stmt->execute([$desde->setTimezone($utc)->format('Y-m-d H:i:s'),
+                        $desde->modify('+1 day')->setTimezone($utc)->format('Y-m-d H:i:s')]);
+        return $stmt->fetchAll();
     }
 
     /** @return array<int, array<string, mixed>> el más reciente primero */

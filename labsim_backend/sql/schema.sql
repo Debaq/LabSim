@@ -780,6 +780,21 @@ CREATE TABLE IF NOT EXISTS app_equipos (
     last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Historial: una fila por cada inicio de sesión en la app, con el equipo
+-- (app_equipos guarda solo el último usuario). Para saber quién usó qué
+-- equipo y cuándo (pedido 2026-11-05). Se guarda un año (Equipos::GUARDAR_DIAS).
+CREATE TABLE IF NOT EXISTS app_equipos_ingresos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    equipo_id TEXT NOT NULL,
+    -- copia del nombre: app_equipos olvida el equipo a los 180 días
+    nombre TEXT NOT NULL DEFAULT '',
+    user_id INTEGER,
+    ip TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_equipos_ingresos_fecha ON app_equipos_ingresos (created_at);
+CREATE INDEX IF NOT EXISTS idx_equipos_ingresos_equipo ON app_equipos_ingresos (equipo_id, created_at);
+
 -- Problemas reportados desde la app (Configuración → Reportar un problema;
 -- ver Tickets.php). El registro de la app va en data/tickets/, no acá. Se
 -- crea sola también (Tickets::migrar): la escribe la app. Mismo SQL.

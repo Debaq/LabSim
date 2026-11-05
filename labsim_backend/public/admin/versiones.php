@@ -39,6 +39,22 @@ $guardada = AppReleases::guardada();
 $releases = $guardada['releases'] ?? [];
 $prefijo = AppReleases::PREFIJO;
 $equipos = Equipos::listar();
+// Historial de un día: quién entró desde cada equipo (ver Equipos::ingresos).
+$fechaIngresos = (string) ($_GET['fecha'] ?? '');
+if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaIngresos) !== 1) {
+    $fechaIngresos = Clock::now()->format('Y-m-d');
+}
+$ingresos = Equipos::ingresos($fechaIngresos);
+// Cada ingreso dura hasta el siguiente del mismo equipo ese día.
+$siguiente = [];
+for ($i = count($ingresos) - 1; $i >= 0; $i--) {
+    $eq = (string) $ingresos[$i]['equipo_id'];
+    $ingresos[$i]['hasta'] = $siguiente[$eq] ?? null;
+    $siguiente[$eq] = (string) $ingresos[$i]['created_at'];
+}
+usort($ingresos, static function (array $a, array $b): int {
+    return [(string) $a['nombre'], (string) $a['created_at']] <=> [(string) $b['nombre'], (string) $b['created_at']];
+});
 $claseEstado = [
     'al_dia' => 'tag--success',
     'atrasado' => 'tag--warn',
@@ -100,6 +116,41 @@ admin_header('Versiones de la app', $me);
         <?php endforeach; ?>
         <?php if (!$equipos): ?>
         <tr><td colspan="6" class="muted">Ningún equipo registrado todavía.</td></tr>
+        <?php endif; ?>
+    </table>
+    </div>
+</div>
+
+<div class="card" id="ingresos">
+    <h2>Quién usó cada equipo</h2>
+    <p class="muted">
+        Cada vez que alguien inicia sesión en la app queda el equipo, la persona y la hora. Se guarda
+        <?= (int) (Equipos::GUARDAR_DIAS / 365) ?> año. "Hasta" es el siguiente ingreso en ese mismo equipo ese día;
+        sin él, la persona pudo seguir hasta cerrar la app. Empezó a guardarse el 2026-11-05: antes solo
+        quedaba el último usuario de cada equipo.
+    </p>
+    <form method="get" class="inline">
+        <label>Día <input type="date" name="fecha" value="<?= htmlspecialchars($fechaIngresos) ?>"></label>
+        <button type="submit">Ver</button>
+    </form>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Equipo</th><th>Desde</th><th>Hasta</th><th>Usuario</th><th>IP</th></tr>
+        <?php foreach ($ingresos as $g): ?>
+        <tr>
+            <td><?= htmlspecialchars((string) $g['nombre']) ?></td>
+            <td><?= htmlspecialchars(Clock::fromUtc((string) $g['created_at'])->format('H:i')) ?></td>
+            <td><?= $g['hasta'] !== null ? htmlspecialchars(Clock::fromUtc((string) $g['hasta'])->format('H:i')) : '<span class="muted">—</span>' ?></td>
+            <td>
+                <?php if ($g['username'] !== null): ?>
+                    <?= htmlspecialchars((string) $g['display_name']) ?> <span class="muted">(<?= htmlspecialchars((string) $g['username']) ?>)</span>
+                <?php endif; ?>
+            </td>
+            <td class="mono"><?= htmlspecialchars((string) $g['ip']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (!$ingresos): ?>
+        <tr><td colspan="5" class="muted">Nadie inició sesión en la app ese día.</td></tr>
         <?php endif; ?>
     </table>
     </div>

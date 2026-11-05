@@ -7926,3 +7926,21 @@ números.
   fisiológico y ahora se alcanza (antes el registro no llegaba).
 - **Audiograma con valores**: el número eHL al lado de cada símbolo, "NR" con
   el nivel donde no respondió, y una tabla OD/OI × frecuencia debajo.
+
+## Historial de quién usó cada equipo (2026-11-05)
+
+Pedido tras un robo en el laboratorio: no había forma de saber quién usó qué
+PC. `app_equipos` guarda solo el último usuario de cada equipo (INSERT OR
+REPLACE) y los registros de acciones dicen quién estuvo y a qué hora, pero no
+en qué equipo.
+
+- **`app_equipos_ingresos`**: una fila por cada inicio de sesión en la app,
+  con el id del equipo, su nombre (copia: `app_equipos` lo olvida a los 180
+  días), el usuario, la IP y la hora. La escribe `Equipos::registrar` en el
+  mismo login que ya anotaba el equipo; se crea sola igual que `app_equipos`.
+  Se guarda un año (`Equipos::GUARDAR_DIAS`).
+- **Panel**: Versiones de la app → "Quién usó cada equipo", por día. "Hasta"
+  es el siguiente ingreso en el mismo equipo; sin él, la persona pudo seguir
+  hasta cerrar la app (no hay registro del cierre por equipo).
+- Sin cambio en la app: ya manda el equipo al iniciar sesión. Empieza a
+  contar cuando se sube el backend; lo de antes no se puede reconstruir.
