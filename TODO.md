@@ -186,15 +186,6 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 76. Fonos de inserción en el ASSR (hoy no los mira) y la profundidad
       de inserción en la atenuación interaural. § Fonos de inserción en la
       cabeza de electrodos
-- [ ] 77. Regenerar las hojas del libro con el `previos.py` nuevo (atajo de
-      promediación + incremental; ~3 min de cero, segundos si no cambió
-      nada): la primera corrida las rehace todas y crea
-      `scripts/libro/previos_huellas.json`. Corrige 31 de 52 PEATC que
-      todavía dicen "intervalos interpico normales". Revisar con git qué
-      hojas cambiaron: solo deberían ser esos PEATC (y quizá los 6
-      corticales, cuyo atajo no se comparó). Commitear las hojas y
-      `previos_huellas.json`. § Los exámenes que trae el paciente son
-      informes firmados
 
 ### Voces sintéticas
 § Voces sintéticas con Google: plan. Avance en `docs/roadmap_voces.md`

@@ -390,7 +390,7 @@ def main():
             entrada['svg'] = trae[examen]
             indice.setdefault(ficha, {}).setdefault('historia', []).append(entrada)
             continue
-        origen = (origenes.get(ficha) if h['hoja'] == 'actual'
+        origen = (None if h['hoja'] == 'tamizaje' else origenes.get(ficha) if h['hoja'] == 'actual'
                   else f"archivo:{CASOS / 'generados' / (h['caso'] + '.json')}")
         huella = _huella(examen, h, paciente, cargar_caso(origen) if origen and h['hoja'] != 'tamizaje' else None)
         indice.setdefault(ficha, {}).setdefault('historia', []).append(entrada)
