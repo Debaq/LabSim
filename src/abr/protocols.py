@@ -126,6 +126,15 @@ DEFAULT_TEST = 'ABR'
 # equipo es lo que tiene que aprender (ver AbrControl.randomize_initial_values).
 # 'control' son los mandos del panel; 'technical' lo de Parámetros avanzados.
 STANDARD_SETUP = {
+    # Los mandos del protocolo ABR de arriba (banda, tasa, promediaciones):
+    # sin esto el docente encontraba el ABR con la banda 3,3-1000 Hz del
+    # alumno y el rechazo descartaba el 70 % de los barridos.
+    'ABR': {
+        'control': {'stim': CLICK, 'pol': 'Alternada', 'int': 80,
+                    'rate': 21.1, 'filter_passhigh': '100',
+                    'filter_down': '3000', 'average': 2000},
+        'technical': {'montage': 'vertex_mastoid', 'window_ms': 12.0},
+    },
     'ECochG': {
         'control': {'stim': CLICK, 'pol': 'Alternada', 'int': 90,
                     'rate': 11.1, 'filter_passhigh': '5',

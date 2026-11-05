@@ -252,6 +252,30 @@ def test_el_informe_lleva_los_fonos():
     assert w.session_payload()['fonos']['OD'] == {'oido': 'OD', 'profunda': True, 'oliva': 'adulto'}
 
 
+
+def test_al_admin_no_le_toca_preparar_la_cabeza():
+    """El docente/admin encuentra el montaje hecho y el equipo en el
+    estándar: puede tomar el ASSR o el ECochG sin limpiar la piel."""
+    w = AbrMainWindow({'name': 'Admin', 'user': 'adm', 'permission': 777})
+    w.la_super(_caso(), 42)
+    assert w.tabWidget.currentWidget() is w.abr
+    assert w.technical['electrodes']['vertex'] == 'Cz'
+    assert {c: v['oido'] for c, v in w.technical['fonos'].items()} == {'OD': 'OD', 'OI': 'OI'}
+    assert w.control.get_data()['filter_passhigh'] == '100'
+    w.control.cb_test.setCurrentText('ASSR')
+    w.capture_state('record')
+    for _ in range(3):
+        w.capture()
+    assert w.assr_panel.rec.n > 0
+    w.capture_state('stopped')
+    w.control.cb_test.setCurrentText('ECochG')
+    assert w.montaje.montaje()['activo']['sitio'] == 'cae_der'
+    # El alumno sigue empezando de cero.
+    a = AbrMainWindow({'name': 'Alumno', 'user': 'al', 'permission': 444})
+    a.la_super(_caso(), 42)
+    assert a.tabWidget.currentWidget() is a.montaje and a.montaje.colocados == {}
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

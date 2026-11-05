@@ -8003,3 +8003,24 @@ OIRS dejaba sugerencia de mejora en los dos casos.
   estudiante, no el ánimo con que llegó.
 - Los dos van fuera de la plantilla, como `OIRS_TONO` e `historiaPrevia`:
   las plantillas propias de los cursos también los llevan.
+
+## El docente no prepara la cabeza; estándar del ABR (2026-11-05)
+
+El ASSR "no hacía nada" con el admin: sin electrodos puestos no entra
+ninguna época. Preparar la piel, poner electrodos y fonos es lo que se
+evalúa al alumno, no al docente que prueba un caso.
+
+- Docente/admin (`es_docente`, 777/555): paciente nuevo abre en el equipo
+  (no en Electrodos) con el montaje de rutina hecho
+  (`AbrMainWindow.montaje_docente`: piel preparada, Cz-mastoides-Fpz y los
+  fonos enrollados cada uno en su oído; activo en el conducto para el
+  ECochG). Se rehace al cambiar de prueba. El alumno sigue igual.
+- `STANDARD_SETUP['ABR']` no existía: el docente encontraba el ABR con la
+  banda 3,3-1000 Hz del alumno y el rechazo descartaba el 70 %. Ahora toma
+  los valores del protocolo ABR (click alternado 80 dB, 21,1/s,
+  100-3000 Hz, 2000 promediaciones) y se aplica también al abrir el
+  paciente, no solo al cambiar de prueba.
+- Bebé despierto (sin pedir que lo duerman): registra igual, con más ruido
+  (ABR ~200 nV y la mitad de los barridos rechazados, la respuesta no
+  asoma). Dormido baja a ~40 nV y aparece. Ya lo hacía `abr/vigilia.py`;
+  lo que lo tapaba era la banda.

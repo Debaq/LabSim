@@ -517,9 +517,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 self.control.apply_protocol('ABR')
                 self.set_test_silently('ABR')
             self.otras_pruebas = {}
+            if data is not None and not self.montaje_retomado:
+                # Al docente: equipo en la configuracion estandar del ABR y
+                # el montaje hecho (antes solo al cambiar de prueba).
+                self.apply_standard_setup('ABR')
             self._con_montaje()
             if data is not None:
-                self.tabWidget.setCurrentWidget(self.montaje)
+                # El docente no prepara la cabeza: va directo al equipo.
+                self.tabWidget.setCurrentWidget(
+                    self.abr if self._montaje_solo() else self.montaje)
         self.clear_sessions()
         # Las pruebas que quedaron aparte eran del paciente anterior.
         self.otras_pruebas = {}
@@ -2127,6 +2133,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.otras_pruebas[self.test_actual] = {
             'data': self.session_payload(), 'images': imagenes, 'pendiente': True}
 
+    def _montaje_solo(self):
+        """El docente/admin no tiene que limpiar la piel ni poner electrodos
+        y fonos para probar una prueba: eso es lo que se evalua al alumno."""
+        return self.docente and not getattr(self, 'view_only', False)
+
+    def montaje_docente(self, test):
+        """Al docente le deja el montaje de rutina de la prueba bien hecho
+        (piel preparada, electrodos y fonos): el activo en el conducto para
+        el ECochG, en Cz para lo demas."""
+        if not self._montaje_solo():
+            return
+        if test == 'ECochG':
+            self.montaje.de_libro(1, activo='cae_der')
+        else:
+            self.montaje.de_libro(2)
+
     def apply_standard_setup(self, test):
         """Deja el equipo en la configuracion estandar, SOLO al docente.
 
@@ -2136,6 +2158,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         if not self.docente or getattr(self, 'view_only', False):
             return
+        self.montaje_docente(test)
         setup = standard_setup(test)
         if setup is None:
             return
