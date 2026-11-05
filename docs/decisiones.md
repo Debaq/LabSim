@@ -8137,3 +8137,30 @@ LabSim (última línea ~11:05-12:56, siguiente arranque 14:04, sin traza).
   completo cada 5 min.
 - El ticket 34 (abort en `malloc` en `AbrDetailAllCurves`) es heap ya
   corrupto: mismo origen probable, sin arreglo propio.
+
+## MDI sin ningún filtro de eventos en Python (2026-11-05)
+
+Auditoría de `core/h_win.py` tras los tickets 33-43. El `_VigiaSubventanas`
+de ab6c94dc seguía siendo un eventFilter en Python: todo evento de cada
+subventana pasaba por Python, y solo se soltaba si la subventana moría por
+`deleteLater` (al salir o al borrarse el MDI quedaba puesto durante la
+destrucción; las sacadas en el logout lo conservaban hasta su
+`DeferredDelete`). Ahora el MDI escucha `FrameSubMdi.visibility_changed`
+(su showEvent/hideEvent, que ya existía) y `removeSubWindow` avisa solo.
+Sin filtro no hace falta `_soltar_filtros` ni `aboutToQuit`.
+
+De la misma pasada:
+- `MoveWin` guarda la ventana con weakref: barra → MoveWin → FrameSubMdi →
+  barra era un ciclo que dejaba vivo el módulo entero hasta el GC.
+- El arrastre mira el botón izquierdo de verdad (antes se comparaba con la
+  constante `Qt.MouseButton.LeftButton`, siempre verdadera).
+- `QTimer.singleShot` con el MDI de contexto: si muere antes, Qt no llama.
+- `keep_inside` nunca deja la barra fuera (`max(…, 0)`) y devuelve tamaño y
+  mínimo cuando el MDI vuelve a crecer, salvo que el usuario la haya
+  redimensionado entretanto.
+- La marca de agua se carga y escala una vez, no en cada pintado.
+
+Pendiente aparte: el ASSR (`AssrPanel`) borra y crea todos sus ítems de
+pyqtgraph en cada tick (`PlotItem.clear()`); ahí cayeron 35 y 43. Si
+vuelve a caer con esto instalado, pasar a crear los ítems una vez y
+actualizarlos.

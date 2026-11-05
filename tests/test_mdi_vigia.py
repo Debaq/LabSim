@@ -1,18 +1,21 @@
 """core/h_win.MdiArea: el aviso de show/hide de subventanas no pasa por
-QMdiArea.eventFilter y se suelta antes de que Qt destruya la subventana
-(tickets 35, 36, 43 del 2026-11-05). Y core/recolector: el GC corre solo
-desde el hilo de la ventana (ticket 33)."""
+ningún eventFilter en Python (tickets 35, 36, 43 del 2026-11-05), sino por
+la señal visibility_changed del FrameSubMdi. Y core/recolector: el GC corre
+solo desde el hilo de la ventana (ticket 33)."""
 import gc
 import os
 import sys
+import weakref
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from PySide6.QtCore import QCoreApplication, QEvent  # noqa: E402
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QPointF, Qt  # noqa: E402
+from PySide6.QtGui import QMouseEvent  # noqa: E402
 from PySide6.QtWidgets import QApplication, QMdiArea, QMdiSubWindow, QWidget  # noqa: E402
 
-from core.h_win import MdiArea, _VigiaSubventanas  # noqa: E402  (crea la QApplication)
+from core import h_win  # noqa: E402  (core.base crea la QApplication)
+from core.h_win import FrameSubMdi, MdiArea  # noqa: E402
 
 APP = QApplication.instance()
 
@@ -22,47 +25,130 @@ def _vueltas():
         QCoreApplication.processEvents()
 
 
-def test_no_sobrescribe_eventfilter_de_qmdiarea():
-    assert MdiArea.eventFilter is QMdiArea.eventFilter
-
-
-class _Espia(_VigiaSubventanas):
-    def __init__(self, avisar, parent):
-        super().__init__(avisar, parent)
-        self.vistos = []
-
-    def eventFilter(self, obj, event):
-        self.vistos.append(event.type())
-        return super().eventFilter(obj, event)
-
-
-def test_avisa_al_esconder_y_se_suelta_al_borrar():
+def _mdi():
     mdi = MdiArea()
-    mdi._vigia = espia = _Espia(mdi._avisar_cambio, mdi)
     mdi.resize(600, 400)
     mdi.show()
-    avisos = []
-    mdi.ventanas_cambiaron.connect(lambda: avisos.append(1))
+    _vueltas()
+    return mdi
+
+
+def _sub(mdi, w=200, h=150):
     sub = QMdiSubWindow()
-    sub.setWidget(QWidget())
+    sub.setWidget(FrameSubMdi(QWidget()))
     mdi.addSubWindow(sub)
+    sub.resize(w, h)
     sub.show()
     _vueltas()
+    return sub
+
+
+def _borrar(*objs):
+    for o in objs:
+        o.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
+def test_ningun_eventfilter_en_python():
+    assert MdiArea.eventFilter is QMdiArea.eventFilter
+    assert not hasattr(h_win, "_VigiaSubventanas")
+
+
+def test_avisa_al_esconder_mostrar_y_sacar():
+    mdi = _mdi()
+    avisos = []
+    mdi.ventanas_cambiaron.connect(lambda: avisos.append(1))
+    sub = _sub(mdi)
+    otra = _sub(mdi)   # la activa es `otra`: esconder `sub` no la activa
     avisos.clear()
     sub.hide()
     _vueltas()
     assert avisos, "esconder una subventana no avisó"
-
-    espia.vistos.clear()
-    sub.deleteLater()
-    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    avisos.clear()
+    sub.show()
     _vueltas()
-    # Lo último que vio el filtro fue el DeferredDelete: nada de la
-    # destrucción (ChildRemoved, Leave, Destroy) pasó por Python.
-    assert espia.vistos == [QEvent.Type.DeferredDelete], espia.vistos
-    assert mdi.subWindowList() == []
-    mdi.deleteLater()
-    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    assert avisos, "mostrar una subventana no avisó"
+    avisos.clear()
+    mdi.removeSubWindow(otra)
+    _vueltas()
+    assert avisos, "sacar una subventana no avisó"
+    _borrar(otra, sub, mdi)
+
+
+def test_conecta_una_sola_vez():
+    mdi = _mdi()
+    sub = _sub(mdi)
+    mdi.removeSubWindow(sub)
+    mdi.addSubWindow(sub)
+    assert sub.widget()._avisa_al_mdi
+    _borrar(sub, mdi)
+
+
+def test_frame_sin_ciclo_con_su_barra():
+    estaba = gc.isenabled()
+    gc.disable()
+    try:
+        frame = FrameSubMdi(QWidget())
+        ref = weakref.ref(frame)
+        del frame
+        assert ref() is None, "FrameSubMdi quedó vivo: hay un ciclo de referencias"
+    finally:
+        if estaba:
+            gc.enable()
+
+
+def _mouse(tipo, x, y, botones):
+    boton = (Qt.MouseButton.NoButton if tipo == QEvent.Type.MouseMove
+             else Qt.MouseButton.LeftButton)
+    p = QPointF(x, y)
+    return QMouseEvent(tipo, p, p, p, boton, botones, Qt.KeyboardModifier.NoModifier)
+
+
+def test_arrastre_solo_con_boton_izquierdo():
+    mdi = _mdi()
+    sub = _sub(mdi)
+    sub.move(10, 10)
+    barra = sub.widget().barra
+    izq, nada = Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton
+    barra.mousePressEvent(_mouse(QEvent.Type.MouseButtonPress, 100, 100, izq))
+    barra.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, 150, 130, izq))
+    assert sub.pos() == QPoint(60, 40), sub.pos()
+    # Se perdió el release: moverse sin el botón izquierdo no arrastra.
+    barra.mouseMoveEvent(_mouse(QEvent.Type.MouseMove, 200, 200, Qt.MouseButton.RightButton))
+    assert sub.pos() == QPoint(60, 40), sub.pos()
+    barra.mouseReleaseEvent(_mouse(QEvent.Type.MouseButtonRelease, 200, 200, nada))
+    _borrar(sub, mdi)
+
+
+def test_keep_inside_achica_y_devuelve_el_tamano():
+    mdi = _mdi()
+    sub = _sub(mdi, 400, 300)
+    sub.setMinimumSize(400, 300)
+    sub.move(150, 80)
+    mdi.resize(300, 200)
+    _vueltas()
+    vp = mdi.viewport().size()
+    assert sub.width() <= vp.width() and sub.height() <= vp.height()
+    assert sub.x() >= 0 and sub.y() >= 0
+    mdi.resize(800, 600)
+    _vueltas()
+    assert (sub.width(), sub.height()) == (400, 300)
+    assert (sub.minimumWidth(), sub.minimumHeight()) == (400, 300)
+    _borrar(sub, mdi)
+
+
+def test_keep_inside_nunca_deja_la_barra_afuera():
+    mdi = _mdi()
+    sub = _sub(mdi)
+    # Más grande que el viewport y sin poder achicarse (mínimo forzado
+    # después): la esquina con la barra queda a la vista.
+    sub.resize(900, 700)
+    sub.setMinimumSize(900, 700)
+    sub.move(-50, -50)
+    sub.setMinimumSize(900, 700)
+    mdi.keep_inside(sub)
+    assert sub.x() >= 0 and sub.y() >= 0, sub.pos()
+    _borrar(sub, mdi)
 
 
 def test_recolector_apaga_el_automatico_y_recolecta():
