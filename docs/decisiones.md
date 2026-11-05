@@ -7833,8 +7833,18 @@ Laura Pérez quedó trabada: tenía abierto un intento de Benjamín Alonso
 El intento seguía 'atendiendo', ya no salía en ninguna lista y no había cómo
 evolucionarlo. Se cerró a mano por la consola (atenciones 287 y 97, con nota
 "Cerrada por el docente"). Al cerrar así no corre la evaluación OIRS.
-Pendiente: que quitar un paciente de la práctica no deje intentos sin salida
-(TODO 76).
+Arreglo:
+
+- **Backend:** `Practica::cerrarIntentosSinSalida()` cierra los intentos
+  'atendiendo' de pacientes que ya no salen en ninguna lista (quitados, en
+  carpeta borrada, ficha archivada, o de la práctica vieja `practice_cases`,
+  que ya no se lista) con la nota "Cerrada sola: …". Corre al quitar un
+  paciente y al archivar fichas; no desde un endpoint de lectura.
+- **App:** el aviso "Tienes a X en atención" trae el botón Cerrar/Evolucionar,
+  que abre la evolución de esa atención aunque su fila no esté en ninguna
+  lista.
+- Quedaban tres más abiertos en prod (atenciones 231, 286, 288, de la práctica
+  vieja): se cierran a mano con el mismo UPDATE.
 
 ## Las citas del curso no entregan los exámenes previos (2026-11-05)
 

@@ -1593,11 +1593,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return False
         dlg = QMessageBox(QMessageBox.Icon.Warning, "Atención abierta",
                           f"Tienes a {nombre} en atención. Ciérrala primero "
-                          "(Cerrar/Evolucionar en la agenda) para que sus exámenes "
-                          "queden guardados.",
+                          "para que sus exámenes queden guardados.",
                           QMessageBox.StandardButton.Ok, self)
+        # Cerrarla desde acá: si el paciente ya no sale en ninguna lista (se
+        # quitó de la práctica), el botón de la agenda no existe y el alumno
+        # quedaba sin poder atender a nadie (TODO 76, 2026-11-05).
+        cerrar = dlg.addButton("Cerrar/Evolucionar", QMessageBox.ButtonRole.AcceptRole)
         style_dialog(dlg)
         dlg.exec()
+        if dlg.clickedButton() is cerrar:
+            cierre = (self.cerrar_atencion_base if es_docente(self.data_login.get("permission"))
+                      else self.cerrar_atencion)
+            self.abrir_evolucion(nombre, lambda nota, k=actual: cierre(k, nota), actual)
         return True
 
     def _guardar_informes_al_salir(self):

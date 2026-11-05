@@ -438,6 +438,43 @@ final class Practica
             Db::get()->prepare('UPDATE practice_items SET active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
                 ->execute([$itemId]);
         });
+        self::cerrarIntentosSinSalida();
+    }
+
+    public const NOTA_SIN_SALIDA = 'Cerrada sola: el paciente se quitó de la práctica antes de que se evolucionara.';
+
+    /**
+     * Cierra los intentos abiertos ('atendiendo') de pacientes que ya no
+     * salen en ninguna lista: quitados de la práctica, en una carpeta
+     * borrada, con la ficha archivada, o de la práctica deliberada vieja
+     * (practice_cases, que ya no se lista). Sin esto el alumno quedaba con
+     * una atención que no podía evolucionar y que no lo dejaba atender a
+     * nadie más (2026-11-05: Laura Pérez y otros tres, TODO 76).
+     *
+     * Se llama al quitar un paciente y al archivar fichas (CaseLibrary). No
+     * desde un endpoint de lectura: una escritura escondida en un GET es lo
+     * que tumbó informes en prod (ver docs/decisiones.md, auditoría).
+     * Devuelve cuántos cerró.
+     */
+    public static function cerrarIntentosSinSalida(): int
+    {
+        return (int) Db::reintentar(static function (): int {
+            $stmt = Db::get()->prepare(
+                "UPDATE attendances
+                    SET estado = 'atendido', nota = ?, updated_at = CURRENT_TIMESTAMP
+                  WHERE estado = 'atendiendo' AND appointment_id IN (
+                        SELECT a.id FROM appointments a
+                          LEFT JOIN practice_items pi ON pi.id = a.practice_item_id
+                          LEFT JOIN practice_folders f ON f.id = pi.folder_id
+                          LEFT JOIN cases c ON c.id = a.case_id
+                         WHERE (a.practice_id IS NOT NULL AND a.practice_item_id IS NULL)
+                            OR (a.practice_item_id IS NOT NULL
+                                AND (pi.id IS NULL OR pi.active = 0 OR f.id IS NULL OR f.active = 0
+                                     OR c.archived_at IS NOT NULL)))"
+            );
+            $stmt->execute([self::NOTA_SIN_SALIDA]);
+            return $stmt->rowCount();
+        });
     }
 
     public static function setMostrarFicha(int $itemId, bool $mostrar): void

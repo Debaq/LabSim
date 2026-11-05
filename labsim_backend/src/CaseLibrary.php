@@ -159,7 +159,12 @@ final class CaseLibrary
     /** Archiva fichas (idempotente: no le pisa la fecha a una ya archivada). */
     public static function archive(array $caseIds): int
     {
-        return self::updateCases($caseIds, 'archived_at = CURRENT_TIMESTAMP', [], 'archived_at IS NULL');
+        $n = self::updateCases($caseIds, 'archived_at = CURRENT_TIMESTAMP', [], 'archived_at IS NULL');
+        // Una ficha archivada sale de la práctica: sus intentos abiertos
+        // quedarían sin cómo evolucionarse.
+        require_once __DIR__ . '/Practica.php';
+        Practica::cerrarIntentosSinSalida();
+        return $n;
     }
 
     public static function unarchive(array $caseIds): int

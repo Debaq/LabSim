@@ -36,11 +36,6 @@ Revisado contra el código el 2026-09-24.
 - [ ] 9. El informe de otoscopia no se guarda local: sin conexión, al cerrar la
       atención se pierde (el autosave de 30 s lo mitiga, pero solo sube).
       § Otoscopia: cono del espéculo e informe por cuadrantes
-- [ ] 76. Quitar un paciente de la práctica (`practice_cases.active = 0`) deja
-      colgados los intentos abiertos: la atención sigue 'atendiendo', el
-      paciente ya no sale en la lista y el alumno no puede cerrarla ni atender
-      a otro. Pasó con Laura Pérez (atención 287, se cerró a mano por la
-      consola). § Intentos de práctica huérfanos al quitar el paciente
 
 ## Decisiones pendientes
 
