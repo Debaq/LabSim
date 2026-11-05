@@ -8112,3 +8112,28 @@ naranja no concluyente, borde en el umbral) y el audiograma por oído con el
 umbral del ASSR (dB nHL, cuadrado vacío) y el estimado (dB eHL, lleno y con
 línea). **Sin la audiometría del caso**: es lo que el alumno estima. Sale
 del registro del panel, vivo o guardado, y se actualiza mientras registra.
+
+## Caídas del 2026-11-05: filtro del MDI y GC fuera del hilo de Qt (2026-11-05)
+
+Tickets 33-43 del primer práctico con r92e21323/r8a9866e2. Cinco caídas
+reales (33, 34, 35, 36, 43); 37-42 son equipos que se apagaron sin cerrar
+LabSim (última línea ~11:05-12:56, siguiente arranque 14:04, sin traza).
+
+- **`MdiArea.eventFilter` en Python (b7aabcaf) era la causa principal.**
+  QMdiArea se instala como filtro de sus subventanas: al sobrescribirlo,
+  todo evento de cada subventana pasaba por Python, también mientras Qt la
+  destruía (ChildRemoved, Leave, Destroy). PySide armaba envolturas para
+  objetos a medio borrar: el registro mostraba
+  `eventFilter(QWidgetItem, QChildEvent)` y minutos después la app caía en
+  `BindingManager::unregisterWrapper` desde cualquier otro lado (ASSR
+  `PlotItem.clear`, que borra y crea ítems en cada tick, es donde más se
+  nota). Ahora no se sobrescribe: un `_VigiaSubventanas` aparte mira
+  Show/Hide y se suelta al llegar el `DeferredDelete`, que Qt entrega
+  antes de destruir.
+- **GC solo en el hilo de la ventana (`core/recolector.py`).** Python
+  recolecta en el hilo que esté pidiendo memoria; el ticket 33 cayó con el
+  GC corriendo en el hilo `tiempos` borrando objetos de PySide. Se apaga el
+  automático y un QTimer recolecta cada 500 ms si pasó el umbral, y
+  completo cada 5 min.
+- El ticket 34 (abort en `malloc` en `AbrDetailAllCurves`) es heap ya
+  corrupto: mismo origen probable, sin arreglo propio.

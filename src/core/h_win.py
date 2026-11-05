@@ -1,6 +1,6 @@
 from core.base import context
 from core import tema, tiempos
-from PySide6.QtCore import Qt, QEvent, QTimer, Signal
+from PySide6.QtCore import Qt, QEvent, QObject, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import QApplication, QMdiArea, QWidget
 from core.UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
@@ -97,6 +97,26 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
 
 
 
+class _VigiaSubventanas(QObject):
+    """Avisa cuando una subventana se muestra o se esconde. Se suelta de la
+    subventana al llegarle el DeferredDelete (deleteLater, WA_DeleteOnClose),
+    antes de que Qt empiece a destruirla: ningún evento de un objeto a medio
+    borrar pasa por Python."""
+
+    def __init__(self, avisar, parent):
+        super().__init__(parent)
+        self._avisar = avisar
+
+    def eventFilter(self, obj, event):
+        tipo = event.type()
+        if tipo == QEvent.Type.DeferredDelete:
+            obj.removeEventFilter(self)
+            self._avisar()
+        elif tipo in (QEvent.Type.Show, QEvent.Type.Hide):
+            self._avisar()
+        return False
+
+
 class MdiArea(QMdiArea):
     # Se abrió, cerró o cambió de foco alguna subventana. La usa main.py
     # para el nombre de la ventana activa y su ✕ en la barra de arriba.
@@ -119,23 +139,25 @@ class MdiArea(QMdiArea):
         # "Internal C++ object already deleted" en la consola.
         QApplication.instance().aboutToQuit.connect(self._soltar_filtros)
 
+        # Esconder una que no es la activa no pasa por subWindowActivated:
+        # se mira el show/hide de cada una con un filtro aparte. NO se
+        # sobrescribe QMdiArea.eventFilter: Qt lo llama para todo lo de las
+        # subventanas, también mientras las destruye, y PySide armaba
+        # envolturas Python para objetos a medio borrar ("eventFilter
+        # (QWidgetItem, QChildEvent)" en el registro) que después tumbaban
+        # la app en cualquier otro lado (tickets 35, 36, 43 del 2026-11-05).
+        self._vigia = _VigiaSubventanas(self._avisar_cambio, self)
+
     def _soltar_filtros(self):
         self._cerrando = True
         for sub in self.subWindowList():
-            sub.removeEventFilter(self)
+            sub.removeEventFilter(self._vigia)
 
     def addSubWindow(self, sub, *args):
-        # Esconder una que no es la activa no pasa por subWindowActivated:
-        # se mira el show/hide de cada una.
-        sub.installEventFilter(self)
-        return super().addSubWindow(sub, *args)
-
-    def eventFilter(self, obj, event):
-        if self._cerrando:
-            return False
-        if event.type() in (QEvent.Type.Show, QEvent.Type.Hide):
-            self._avisar_cambio()
-        return super().eventFilter(obj, event)
+        sub = super().addSubWindow(sub, *args)
+        if sub is not None and not self._cerrando:
+            sub.installEventFilter(self._vigia)
+        return sub
 
     def _avisar_cambio(self, *_):
         """Un solo aviso por vuelta del loop: abrir un módulo full esconde

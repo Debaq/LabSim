@@ -1995,6 +1995,8 @@ if __name__ == '__main__':
     # y queda el genérico. Ver scripts/generar_icono.py.
     context.app.setWindowIcon(QIcon(context.get_resource("img/icono_app.png")))
     tiempos.iniciar_ui()
+    from core import recolector
+    recolector.iniciar()
     tiempos.hito("antes de MainWindow")
     with tiempos.medir("arranque: MainWindow()"):
         window = MainWindow()
