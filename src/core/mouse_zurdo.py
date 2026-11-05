@@ -1,25 +1,38 @@
-"""Mouse para zurdos dentro de LabSim.
+"""Mouse para zurdos en LabSim.
 
-Intercambia los botones izquierdo y derecho solo en esta app. Lo normal es
-hacerlo en el sistema operativo, pero en los computadores del laboratorio
-la cuenta es compartida y el siguiente alumno lo encontraría al revés. Por
-eso es una preferencia del alumno (viaja con su perfil, ver
-core/preferencias.py) y se aplica SOLO en modo laboratorio
-(LABSIM_KIOSKO=1, ver core/kiosko.py): en su propio computador lo tiene en
-el sistema, y si LabSim lo invirtiera otra vez quedaría al derecho.
+Intercambia los botones izquierdo y derecho. Lo normal es hacerlo en el
+sistema operativo, pero en los computadores del laboratorio la cuenta es
+compartida y el siguiente alumno lo encontraría al revés. Por eso es una
+preferencia del alumno (viaja con su perfil, ver core/preferencias.py) y se
+aplica SOLO en modo laboratorio (LABSIM_KIOSKO=1, ver core/kiosko.py): en
+su propio computador lo tiene en el sistema, y si LabSim lo invirtiera otra
+vez quedaría al derecho.
 
-Cómo: un filtro en cada ventana NATIVA (QWindow) de la app recibe el evento
-de mouse del sistema antes de que Qt lo reparta a los widgets, lo descarta
-y le manda a la misma ventana uno igual con los botones intercambiados. Qt
-lo reparte como si fuera el original, menú contextual incluido (lo genera
-del botón derecho ya invertido).
+Dos maneras, en este orden:
 
-No va en QApplication (2026-11-05): ahí cada evento de cada objeto de la
-app pasaba por Python, también los de objetos a medio destruir, el mismo
-mal que tumbaba el MDI (tickets 35, 36, 43). Las ventanas nativas son pocas
-y duran; a las que aparecen después (diálogos, menús, la lista de un
-combo) se les pone el filtro al aparecer (ver _cubrir).
+1. **En el servidor X** (los kioskos: X11 + Openbox, ver el repo
+   archcraft-postinstall). Con Xlib (`XSetPointerMapping`, por ctypes) se
+   intercambian los botones 1 y 3 del puntero: LabSim no toca ningún
+   evento, el sistema ya los entrega invertidos. Se pone al entrar un
+   alumno zurdo y se saca al cerrar su sesión y al salir de LabSim. Si
+   LabSim se cae con el mapeo puesto, al volver a abrir lo corrige (en el
+   kiosko, sin zurdo, los botones 1 y 3 invertidos solo pueden ser
+   nuestros), y al reiniciar el equipo X arranca de nuevo.
+2. **Sin X11** (Wayland, Windows, las pruebas): un filtro en cada ventana
+   nativa (QWindow) recibe el evento de mouse antes de que Qt lo reparta,
+   lo descarta y le manda a la misma ventana uno igual con los botones
+   intercambiados. No va en QApplication (2026-11-05): ahí cada evento de
+   cada objeto pasaba por Python, también los de objetos a medio destruir,
+   el mismo mal que tumbaba el MDI (tickets 35, 36, 43).
+
+libX11 se carga del dist (va empaquetada, ver LabSim.spec) o por su nombre,
+que con Qt en xcb ya está cargada: nunca con ctypes.util.find_library, que
+devolvería la del sistema y mezclaría dos versiones (build encapsulado).
 """
+
+import ctypes
+import os
+import sys
 
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QTimer, Qt
 from PySide6.QtGui import QGuiApplication, QMouseEvent
@@ -37,7 +50,136 @@ _MARCA = "labsim_mouse_zurdo"
 # Respaldo para ventanas que aparecen sin clic ni foco (un aviso que se
 # abre solo): cada cuánto se revisan.
 _REVISAR_MS = 500
+# XSetPointerMapping responde "ocupado" si hay un botón apretado: se
+# reintenta cada tanto, un rato.
+_REINTENTO_MS = 200
+_REINTENTOS = 25
 
+
+# --- 1. En el servidor X -----------------------------------------------------
+
+class MapeoX11:
+    """Los botones del puntero en el servidor X (Xlib por ctypes)."""
+
+    EXITO, OCUPADO = 0, 1   # MappingSuccess, MappingBusy
+
+    def __init__(self, lib):
+        self.lib = lib
+
+    @classmethod
+    def abrir(cls):
+        """El mapeo del servidor X, o None si la app no corre en X11."""
+        if not sys.platform.startswith("linux"):
+            return None
+        app = QGuiApplication.instance()
+        if app is None or QGuiApplication.platformName() != "xcb":
+            return None
+        lib = _cargar_libx11()
+        if lib is None:
+            return None
+        mapeo = cls(lib)
+        return mapeo if mapeo.leer() else None
+
+    def _con_display(self, hacer):
+        dpy = self.lib.XOpenDisplay(None)
+        if not dpy:
+            return None
+        try:
+            return hacer(dpy)
+        finally:
+            self.lib.XCloseDisplay(dpy)
+
+    def leer(self):
+        """[botón lógico de cada botón físico], o [] si no se pudo."""
+        def hacer(dpy):
+            buf = (ctypes.c_ubyte * 256)()
+            n = self.lib.XGetPointerMapping(dpy, buf, 256)
+            return list(buf[:n])
+        return self._con_display(hacer) or []
+
+    def invertido(self):
+        m = self.leer()
+        return len(m) >= 3 and m[0] == 3 and m[2] == 1
+
+    def poner(self, invertir):
+        """'ok', 'ocupado' (un botón apretado: reintentar) o 'error'."""
+        def hacer(dpy):
+            buf = (ctypes.c_ubyte * 256)()
+            n = self.lib.XGetPointerMapping(dpy, buf, 256)
+            if n < 3:
+                return 'error'
+            buf[0], buf[2] = (3, 1) if invertir else (1, 3)
+            r = self.lib.XSetPointerMapping(dpy, buf, n)
+            return {self.EXITO: 'ok', self.OCUPADO: 'ocupado'}.get(r, 'error')
+        return self._con_display(hacer) or 'error'
+
+
+def _cargar_libx11():
+    candidatos = []
+    base = getattr(sys, "_MEIPASS", None)
+    if base:
+        candidatos.append(os.path.join(base, "libX11.so.6"))
+    candidatos.append("libX11.so.6")
+    for nombre in candidatos:
+        if os.sep in nombre and not os.path.exists(nombre):
+            continue
+        try:
+            lib = ctypes.CDLL(nombre)
+        except OSError:
+            continue
+        lib.XOpenDisplay.argtypes = [ctypes.c_char_p]
+        lib.XOpenDisplay.restype = ctypes.c_void_p
+        lib.XCloseDisplay.argtypes = [ctypes.c_void_p]
+        lib.XCloseDisplay.restype = ctypes.c_int
+        for f in (lib.XGetPointerMapping, lib.XSetPointerMapping):
+            f.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_ubyte), ctypes.c_int]
+            f.restype = ctypes.c_int
+        return lib
+    return None
+
+
+# None: sin mirar todavía; False: no hay X11; si no, el MapeoX11.
+_x11 = None
+# Lo último que se pidió poner en X (para activo() y los reintentos).
+_x11_invertido = False
+
+
+def _mapeo_x11():
+    global _x11
+    if _x11 is None:
+        _x11 = MapeoX11.abrir() or False
+    return _x11 or None
+
+
+def _poner_en_x11(intento=0):
+    """Deja el servidor X como pide la preferencia del alumno logueado."""
+    global _x11_invertido
+    x11 = _mapeo_x11()
+    if x11 is None:
+        return
+    deseado = es_kiosko() and preferencias().mouse_zurdo()
+    if x11.invertido() == deseado:
+        _x11_invertido = deseado
+        return
+    r = x11.poner(deseado)
+    if r == 'ok':
+        _x11_invertido = deseado
+        print(f"mouse zurdo: botones {'invertidos' if deseado else 'normales'} en X")
+    elif r == 'ocupado' and intento < _REINTENTOS:
+        QTimer.singleShot(_REINTENTO_MS, QCoreApplication.instance(),
+                          lambda: _poner_en_x11(intento + 1))
+    else:
+        print(f"mouse zurdo: X no aceptó el cambio ({r})")
+
+
+def _al_salir():
+    """Al cerrar LabSim el mouse vuelve a lo normal para lo que siga."""
+    x11 = _mapeo_x11() if es_kiosko() else None
+    if x11 is not None and x11.invertido():
+        x11.poner(False)
+
+
+# --- 2. Sin X11: filtro en cada ventana nativa -------------------------------
 
 def _invertir(boton):
     if boton == _IZQ:
@@ -129,26 +271,42 @@ class InvertirBotones(QObject):
 _filtro = None
 
 
-def aplicar():
-    """Instala o saca el filtro según el modo laboratorio y la preferencia
-    del alumno logueado."""
+def _sacar_filtro():
     global _filtro
-    app = QApplication.instance()
-    activo = es_kiosko() and preferencias().mouse_zurdo()
-    if activo and _filtro is None:
-        _filtro = InvertirBotones(app)
-        _filtro.empezar()
-    elif not activo and _filtro is not None:
+    if _filtro is not None:
         _filtro.terminar()
         _filtro.deleteLater()
         _filtro = None
 
 
+# --- Lo que usa el resto de la app -------------------------------------------
+
+def aplicar():
+    """Pone o saca la inversión según el modo laboratorio y la preferencia
+    del alumno logueado."""
+    global _filtro
+    # Fuera del kiosko no se toca el servidor X: el mouse del computador
+    # personal lo maneja su dueño (un zurdo ya lo tendría invertido ahí).
+    if es_kiosko() and _mapeo_x11() is not None:
+        _sacar_filtro()
+        _poner_en_x11()
+        return
+    activo_ = es_kiosko() and preferencias().mouse_zurdo()
+    if activo_ and _filtro is None:
+        _filtro = InvertirBotones(QApplication.instance())
+        _filtro.empezar()
+    elif not activo_:
+        _sacar_filtro()
+
+
 def activo():
-    return _filtro is not None
+    return _filtro is not None or (_x11 not in (None, False) and _x11_invertido)
 
 
 def conectar():
     """Se llama una vez al arrancar: sigue a la preferencia del alumno."""
     preferencias().cambiaron.connect(aplicar)
+    app = QApplication.instance()
+    if app is not None:
+        app.aboutToQuit.connect(_al_salir)
     aplicar()

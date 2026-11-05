@@ -8257,3 +8257,27 @@ todavía está dentro de un bucle anidado (`QThread.loopLevel() > 1`),
 reintenta a los 100 ms; varios 401 seguidos dejan un solo reintento. El
 aviso y el logout corren siempre desde el bucle principal, con el código
 del módulo ya terminado. Tests: tests/test_sesion_perdida_bucle.py.
+
+## Mouse de zurdos en el servidor X del kiosko (2026-11-05)
+
+Los kioskos corren X11 + Openbox (repo archcraft-postinstall), así que la
+inversión se hace donde corresponde: en el servidor X, con Xlib
+(`XSetPointerMapping` por ctypes) intercambiando los botones 1 y 3. LabSim
+ya no toca ningún evento del mouse en el kiosko.
+
+- Se pone al entrar un alumno zurdo y se saca al cerrar su sesión
+  (preferencias().limpiar() → aplicar) y al salir de LabSim (aboutToQuit).
+- Si LabSim se cae con el mapeo puesto, al volver a abrir lo corrige: en el
+  kiosko, sin zurdo logueado, 1 y 3 invertidos solo pueden ser nuestros. Y
+  al reiniciar el equipo X arranca de nuevo.
+- Fuera del kiosko no se toca el servidor X (un zurdo ya lo tiene en su
+  sistema). Sin X11 (Wayland, Windows, pruebas) queda el filtro en cada
+  ventana nativa.
+- Si hay un botón apretado X responde "ocupado": se reintenta cada 200 ms.
+- libX11 se carga del dist (va empaquetada) o por su nombre, ya cargada por
+  Qt en xcb; nunca con find_library, que traería la del sistema (build
+  encapsulado). No hace falta ningún paquete nuevo en el kiosko.
+
+Probado de punta a punta en un Xvfb propio con clics "físicos" de XTest: el
+izquierdo físico no aprieta el botón, el derecho sí, y al cerrar la sesión
+el mapeo vuelve a 1 2 3 (tests/test_mouse_zurdo_x11.py).
