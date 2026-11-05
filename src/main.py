@@ -8,10 +8,10 @@ import os
 import sys
 import traceback
 import requests
-from PySide6.QtCore import QEvent, Qt, QSize, QTimer, Signal, Slot
+from PySide6.QtCore import QEvent, Qt, QSize, QThread, QTimer, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog,
-                               QFrame, QHBoxLayout, QLabel, QMdiArea)
+from PySide6.QtWidgets import (QApplication, QDialog, QMainWindow, QWidget, QPushButton, QMessageBox,
+                               QProgressDialog, QFrame, QHBoxLayout, QLabel, QMdiArea)
 
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
@@ -179,6 +179,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # (ver backend/client.py: _revisar_sesion): se atiende en la ventana.
         hilos.preparar()
         self._avisando_sesion = False
+        self._sesion_pendiente = None   # motivo, mientras espera el bucle principal
         backend_client.al_perder_sesion = (
             lambda motivo: hilos.avisar(self._sesion_perdida, motivo, dueno=self))
         # Mouse para zurdos: sigue a la preferencia del alumno logueado, solo
@@ -785,6 +786,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         report_autosave.subir_pendientes)."""
         if not self.data_login or self._avisando_sesion:
             return
+        if self._esperar_bucle_principal(motivo):
+            return
         self._avisando_sesion = True
         try:
             print(f"sesión perdida ({motivo}): se vuelve al login")
@@ -812,6 +815,37 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 self.toggle_login()   # sin sesión: abre el login
         finally:
             self._avisando_sesion = False
+
+    def _esperar_bucle_principal(self, motivo) -> bool:
+        """True si el aviso de sesión perdida tiene que esperar.
+
+        hilos.avisar reparte en cualquier bucle de eventos, también dentro
+        del diálogo modal o el menú de un módulo (su exec()). El logout de
+        ahí destruía el módulo con su código todavía esperando que ese
+        diálogo cerrara (comprobado: exec() vuelve con 0 y lo siguiente da
+        "already deleted"). Se cierran los diálogos y menús abiertos y el
+        aviso se repite cuando el bucle vuelve a ser el principal."""
+        cerrados = 0
+        while cerrados < 20:
+            abierto = QApplication.activePopupWidget() or QApplication.activeModalWidget()
+            if abierto is None or abierto is self:
+                break
+            if isinstance(abierto, QDialog):
+                abierto.reject()
+            else:
+                abierto.close()
+            cerrados += 1
+        if QThread.currentThread().loopLevel() <= 1:
+            return False
+        if self._sesion_pendiente is None:
+            self._sesion_pendiente = motivo
+            QTimer.singleShot(100, self, self._sesion_perdida_diferida)
+        return True
+
+    def _sesion_perdida_diferida(self):
+        motivo, self._sesion_pendiente = self._sesion_pendiente, None
+        if motivo is not None:
+            self._sesion_perdida(motivo)
 
     def sync_ahora(self) -> bool:
         """Que el sync pregunte ya (tras atender, cerrar, una inasistencia).

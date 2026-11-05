@@ -8242,3 +8242,18 @@ salieron dos bugs que ya estaban:
 
 Las imágenes salen idénticas píxel a píxel a las de antes (CPAP a 0,5, 4 y
 7,9 h y vacío; rinomanometría vacía, medida, con Broms y en vivo).
+
+## Sesión perdida: el logout espera al bucle principal (2026-11-05)
+
+El aviso de sesión vencida o cuenta bloqueada (401) llega por
+`hilos.avisar`, que reparte en cualquier bucle de eventos, también dentro
+del exec() de un diálogo o menú de un módulo. El logout de ahí destruía el
+módulo mientras su código seguía esperando ese diálogo: exec() volvía con
+0 y la línea siguiente daba "already deleted" (reproducido en una prueba;
+con código de Qt o pyqtgraph debajo puede ser segfault).
+
+Ahora `_sesion_perdida` primero cierra los menús y diálogos abiertos y, si
+todavía está dentro de un bucle anidado (`QThread.loopLevel() > 1`),
+reintenta a los 100 ms; varios 401 seguidos dejan un solo reintento. El
+aviso y el logout corren siempre desde el bucle principal, con el código
+del módulo ya terminado. Tests: tests/test_sesion_perdida_bucle.py.
