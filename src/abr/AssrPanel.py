@@ -55,6 +55,94 @@ def _circulo(radio, n=120):
     return radio * np.cos(a), radio * np.sin(a)
 
 
+class _Capas:
+    """Los ítems de un gráfico, creados una sola vez y reutilizados.
+
+    El panel se redibuja en cada tick del registro. Antes hacía
+    `PlotItem.clear()` y volvía a crear textos, líneas y puntos: cada tick
+    destruía y armaba objetos de Qt con envoltura de PySide, y los tickets
+    35 y 43 (2026-11-05) cayeron justo ahí, en
+    `BindingManager::unregisterWrapper` al borrar un QGraphicsItem. Ahora
+    cada redibujo pide los ítems por su papel (`tomar`), se les cambian los
+    datos y el estilo, y lo que no se usó en esa pasada queda escondido.
+    Ningún ítem se borra mientras viva el panel.
+
+    Uso: `empezar()`, `tomar(...)` las veces que haga falta, `terminar()`.
+    """
+
+    def __init__(self, plot):
+        self.plot = plot
+        self._items = {}    # papel -> [ítems, en orden de creación]
+        self._usados = {}   # papel -> cuántos se usaron en esta pasada
+        self._orden = 0
+
+    def empezar(self):
+        self._usados = {}
+        self._orden = 0
+
+    def tomar(self, papel, crear):
+        lista = self._items.setdefault(papel, [])
+        i = self._usados.get(papel, 0)
+        if i == len(lista):
+            item = crear()
+            self.plot.addItem(item)
+            lista.append(item)
+        item = lista[i]
+        self._usados[papel] = i + 1
+        # Lo tomado después queda encima, como cuando se creaba todo en
+        # cada pasada: sin esto mandaba el orden de creación (el OD tapaba
+        # al OI si su línea había nacido después).
+        self._orden += 1
+        item.setZValue(self._orden)
+        item.setVisible(True)
+        return item
+
+    def terminar(self):
+        for papel, lista in self._items.items():
+            for item in lista[self._usados.get(papel, 0):]:
+                item.setVisible(False)
+
+    def vaciar(self):
+        self.empezar()
+        self.terminar()
+
+    # --- atajos por tipo de ítem ---------------------------------------
+    def curva(self, papel, x, y, **estilo):
+        """PlotDataItem con datos y estilo nuevos. Lo que no se pasa vuelve
+        a su valor por defecto (relleno y símbolo apagados)."""
+        item = self.tomar(papel, pg.PlotDataItem)
+        opciones = dict(fillLevel=None, brush=None, symbol=None)
+        opciones.update(estilo)
+        item.setData(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
+                     **opciones)
+        return item
+
+    def puntos(self, papel, x, y, **estilo):
+        item = self.tomar(papel, pg.ScatterPlotItem)
+        item.setData(x=list(x), y=list(y), **estilo)
+        return item
+
+    def linea(self, papel, pos, angle, pen):
+        item = self.tomar(papel, lambda: pg.InfiniteLine(angle=angle, movable=False))
+        item.setAngle(angle)
+        item.setPos(pos)
+        item.setPen(pen)
+        return item
+
+    def texto(self, papel, texto, pos, color, anchor, font):
+        """TextItem: el ancla y la letra (None = la de pyqtgraph) se fijan
+        al crearlo, así que cada papel debe usar siempre las mismas."""
+        def crear():
+            item = pg.TextItem("", anchor=anchor)
+            if font is not None:
+                item.setFont(font)
+            return item
+        item = self.tomar(papel, crear)
+        item.setText(texto, color=color)
+        item.setPos(*pos)
+        return item
+
+
 class AssrPanel(QWidget):
     """Registro, análisis y audiograma del ASSR."""
 
@@ -180,6 +268,9 @@ class AssrPanel(QWidget):
         self.p_polar.hideAxis('left')
         self._formato_audiograma(self.p_audio)
         self.p_fft.scene().sigMouseClicked.connect(self._clic_fft)
+        # Los ítems de cada gráfico se reutilizan entre ticks (ver _Capas).
+        self._capas = {p: _Capas(p) for p in
+                       (self.p_rastro, self.p_fft, self.p_polar, self.p_audio)}
         self.limpiar()
 
     def _plot(self, titulo, etiqueta_x, etiqueta_y):
@@ -249,8 +340,8 @@ class AssrPanel(QWidget):
     def limpiar(self):
         self.tabla.clearContents()
         self.tabla_umbral.clearContents()
-        for p in (self.p_rastro, self.p_fft, self.p_polar, self.p_audio):
-            p.clear()
+        for capas in self._capas.values():
+            capas.vaciar()
         self.lbl_polar.setText("")
 
     def _armar_tabla(self):
@@ -505,69 +596,90 @@ class AssrPanel(QWidget):
         self.dibujar_polar()
         self.dibujar_audiograma()
 
+    def _capas_de(self, plot):
+        """Las capas del panel, o unas de un solo uso para un gráfico que
+        se arma aparte al exportar."""
+        return self._capas[plot] if plot in self._capas else _Capas(plot)
+
+    @staticmethod
+    def _region_vecinos():
+        region = pg.LinearRegionItem(movable=False,
+                                     brush=pg.mkBrush(255, 235, 59, 40))
+        for linea in region.lines:
+            linea.setPen(pg.mkPen(None))
+        return region
+
     def dibujar_rastro(self):
-        p, rec = self.p_rastro, self.rec
-        p.clear()
-        if rec.n == 0:
-            return
-        if self.cb_rastro.currentIndex() == 1 and rec.last_epoch is not None:
-            t, y = rec.trace(rec.last_epoch, window=VENTANA_RASTRO_S)
-            p.plot(t * 1000.0, y, pen=pg.mkPen('#777', width=1))
-            return
-        medio, _n = rec.mean_spectrum(self.canal)
-        t, y = rec.trace(medio, window=VENTANA_RASTRO_S)
-        p.plot(t * 1000.0, y, pen=pg.mkPen('#222', width=1.5))
-        k = assr.FM_BIN[self.canal[0]][assr.CARRIERS.index(self.canal[1])]
-        t, c = rec.trace(medio, only_bin=k, window=VENTANA_RASTRO_S)
-        p.plot(t * 1000.0, c, pen=pg.mkPen(COLOR[self.canal[0]], width=2.5))
+        rec = self.rec
+        capas = self._capas[self.p_rastro]
+        capas.empezar()
+        try:
+            if rec.n == 0:
+                return
+            if self.cb_rastro.currentIndex() == 1 and rec.last_epoch is not None:
+                t, y = rec.trace(rec.last_epoch, window=VENTANA_RASTRO_S)
+                capas.curva('crudo', t * 1000.0, y, pen=pg.mkPen('#777', width=1))
+                return
+            medio, _n = rec.mean_spectrum(self.canal)
+            t, y = rec.trace(medio, window=VENTANA_RASTRO_S)
+            capas.curva('promedio', t * 1000.0, y, pen=pg.mkPen('#222', width=1.5))
+            k = assr.FM_BIN[self.canal[0]][assr.CARRIERS.index(self.canal[1])]
+            t, c = rec.trace(medio, only_bin=k, window=VENTANA_RASTRO_S)
+            capas.curva('componente', t * 1000.0, c,
+                        pen=pg.mkPen(COLOR[self.canal[0]], width=2.5))
+        finally:
+            capas.terminar()
 
     def dibujar_fft(self):
         p, rec = self.p_fft, self.rec
-        p.clear()
-        medio, n = rec.mean_spectrum(self.canal)
-        if n == 0:
-            return
-        sel = (rec.freqs <= F_MAX_VISTA)
-        f, amp = rec.freqs[sel], np.abs(medio[sel]) * 1000.0
-        p.plot(f, amp, pen=pg.mkPen('#555', width=1),
-               fillLevel=0, brush=pg.mkBrush(150, 150, 150, 70))
-        st = rec.stats(self.canal)
-        k = assr.FM_BIN[self.canal[0]][assr.CARRIERS.index(self.canal[1])]
-        vec = rec.neighbor_bins(self.canal)
-        if len(vec):
-            region = pg.LinearRegionItem(
-                (vec.min() * assr.DF, vec.max() * assr.DF), movable=False,
-                brush=pg.mkBrush(255, 235, 59, 40))
-            region.setZValue(-10)
-            for linea in region.lines:
-                linea.setPen(pg.mkPen(None))
-            p.addItem(region)
-        p.addItem(pg.InfiniteLine(
-            pos=st['noise_nv'], angle=0,
-            pen=pg.mkPen(tema.AVISO, width=1.2, style=Qt.DashLine)))
-        for canal in assr.channels():
-            if not rec.active(canal):
-                continue
-            kc = assr.FM_BIN[canal[0]][assr.CARRIERS.index(canal[1])]
-            sel_c = canal == self.canal
-            p.addItem(pg.InfiniteLine(
-                pos=kc * assr.DF, angle=90,
-                pen=pg.mkPen(COLOR[canal[0]], width=2.5 if sel_c else 0.8,
-                             style=Qt.SolidLine if sel_c else Qt.DotLine)))
-            # El OD arriba y el OI abajo: las modulaciones de los dos oídos
-            # están a 2 bins y los rótulos se pisaban.
-            txt = pg.TextItem(f"{canal[1] / 1000:g}", color=COLOR[canal[0]],
-                              anchor=(0.5, 1.0))
-            txt.setFont(pg.QtGui.QFont('', 7))
+        capas = self._capas[p]
+        capas.empezar()
+        try:
+            medio, n = rec.mean_spectrum(self.canal)
+            if n == 0:
+                return
+            sel = (rec.freqs <= F_MAX_VISTA)
+            f, amp = rec.freqs[sel], np.abs(medio[sel]) * 1000.0
+            capas.curva('espectro', f, amp, pen=pg.mkPen('#555', width=1),
+                        fillLevel=0, brush=pg.mkBrush(150, 150, 150, 70))
+            st = rec.stats(self.canal)
+            vec = rec.neighbor_bins(self.canal)
+            if len(vec):
+                region = capas.tomar('vecinos', self._region_vecinos)
+                region.setRegion((vec.min() * assr.DF, vec.max() * assr.DF))
+                region.setZValue(-10)   # por debajo del espectro
+            capas.linea('ruido', st['noise_nv'], 0,
+                        pg.mkPen(tema.AVISO, width=1.2, style=Qt.DashLine))
             alto = max(float(amp.max()) * 1.25, 60.0)
-            txt.setPos(kc * assr.DF, alto * (0.99 if canal[0] == 'OD' else 0.91))
-            p.addItem(txt)
-        p.setXRange(40, 130)
-        p.setYRange(0, max(float(amp.max()) * 1.25, 60.0))
+            letra = pg.QtGui.QFont('', 7)
+            for canal in assr.channels():
+                if not rec.active(canal):
+                    continue
+                kc = assr.FM_BIN[canal[0]][assr.CARRIERS.index(canal[1])]
+                sel_c = canal == self.canal
+                capas.linea('modulacion', kc * assr.DF, 90, pg.mkPen(
+                    COLOR[canal[0]], width=2.5 if sel_c else 0.8,
+                    style=Qt.SolidLine if sel_c else Qt.DotLine))
+                # El OD arriba y el OI abajo: las modulaciones de los dos
+                # oídos están a 2 bins y los rótulos se pisaban.
+                capas.texto('rotulo', f"{canal[1] / 1000:g}",
+                            (kc * assr.DF, alto * (0.99 if canal[0] == 'OD' else 0.91)),
+                            COLOR[canal[0]], (0.5, 1.0), letra)
+            p.setXRange(40, 130)
+            p.setYRange(0, alto)
+        finally:
+            capas.terminar()
 
     def dibujar_polar(self, plot=None):
         p, rec = plot or self.p_polar, self.rec
-        p.clear()
+        capas = self._capas_de(p)
+        capas.empezar()
+        try:
+            self._dibujar_polar(p, rec, capas, plot)
+        finally:
+            capas.terminar()
+
+    def _dibujar_polar(self, p, rec, capas, plot):
         st = rec.stats(self.canal)
         if st['n'] < 2:
             if plot is None:
@@ -589,32 +701,29 @@ class AssrPanel(QWidget):
         r = paso
         while r <= lim * 1.05:
             x, y = _circulo(r)
-            p.plot(x, y, pen=pg.mkPen('#ddd', width=1))
-            tx = pg.TextItem(f"{r:g} nV", color='#999', anchor=(0, 1))
-            tx.setPos(r * 0.71, r * 0.71)
-            p.addItem(tx)
+            capas.curva('anillo', x, y, pen=pg.mkPen('#ddd', width=1))
+            capas.texto('anillo_txt', f"{r:g} nV", (r * 0.71, r * 0.71),
+                        '#999', (0, 1), None)
             r += paso
-        p.addItem(pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen('#ccc')))
-        p.addItem(pg.InfiniteLine(pos=0, angle=90, pen=pg.mkPen('#ccc')))
+        capas.linea('eje_h', 0, 0, pg.mkPen('#ccc'))
+        capas.linea('eje_v', 0, 90, pg.mkPen('#ccc'))
         # Círculo de ruido (95 %).
         x, y = _circulo(radio_ruido)
         color = tema.OK if st['detected'] else tema.AVISO
-        p.plot(x, y, pen=pg.mkPen(color, width=1.5, style=Qt.DashLine))
+        capas.curva('ruido', x, y, pen=pg.mkPen(color, width=1.5, style=Qt.DashLine))
         # Camino de la punta del vector medio. Los primeros puntos (pocas
         # épocas) caen lejos y emborronan la escala: solo se dibuja lo que
         # cabe en la vista.
         camino = [v for v in camino if abs(v) <= 2.0 * lim]
         if len(camino) > 1:
-            p.plot([v.real for v in camino], [v.imag for v in camino],
-                   pen=pg.mkPen(COLOR[self.canal[0]] + '66', width=1.2))
-        p.addItem(pg.ScatterPlotItem(
-            [b.real for b in bloques], [b.imag for b in bloques], size=6,
-            brush=pg.mkBrush(120, 120, 120, 140), pen=pg.mkPen(None)))
-        p.plot([0, medio.real], [0, medio.imag],
-               pen=pg.mkPen(COLOR[self.canal[0]], width=3))
-        p.addItem(pg.ScatterPlotItem(
-            [medio.real], [medio.imag], size=11, symbol='o',
-            brush=pg.mkBrush(COLOR[self.canal[0]]), pen=pg.mkPen('w')))
+            capas.curva('camino', [v.real for v in camino], [v.imag for v in camino],
+                        pen=pg.mkPen(COLOR[self.canal[0]] + '66', width=1.2))
+        capas.puntos('bloques', [b.real for b in bloques], [b.imag for b in bloques],
+                     size=6, brush=pg.mkBrush(120, 120, 120, 140), pen=pg.mkPen(None))
+        capas.curva('vector', [0, medio.real], [0, medio.imag],
+                    pen=pg.mkPen(COLOR[self.canal[0]], width=3))
+        capas.puntos('punta', [medio.real], [medio.imag], size=11, symbol='o',
+                     brush=pg.mkBrush(COLOR[self.canal[0]]), pen=pg.mkPen('w'))
         p.setXRange(-lim, lim)
         p.setYRange(-lim, lim)
         texto = tr(
@@ -636,11 +745,19 @@ class AssrPanel(QWidget):
         p, rec = plot or self.p_audio, self.rec
         if rec is None:
             return
-        p.clear()
+        capas = self._capas_de(p)
+        capas.empezar()
+        try:
+            self._dibujar_audiograma(p, rec, capas, plot)
+        finally:
+            capas.terminar()
+
+    def _dibujar_audiograma(self, p, rec, capas, plot):
         if plot is None:
             self.tabla_umbral.clearContents()
-        p.addItem(pg.InfiniteLine(pos=20, angle=0,
-                                  pen=pg.mkPen('#bbb', style=Qt.DashLine)))
+        capas.linea('ref20', 20, 0, pg.mkPen('#bbb', style=Qt.DashLine))
+        letra_valor = pg.QtGui.QFont('', 8, pg.QtGui.QFont.Bold)
+        letra_nr = pg.QtGui.QFont('', 7)
         for side, simbolo in (('OD', 'o'), ('OI', 'x')):
             if not rec.has_ear(side):
                 continue
@@ -663,20 +780,16 @@ class AssrPanel(QWidget):
                     if mayor:
                         sin_resp.append((i, max(mayor)))
             if len(xs) > 1:
-                p.plot(xs, ehl, pen=pg.mkPen(color, width=1.5))
+                capas.curva(('linea', side), xs, ehl, pen=pg.mkPen(color, width=1.5))
             # El valor al lado del símbolo: OD a la izquierda, OI a la derecha
             # para que no se pisen cuando coinciden.
             desp, ancla = (-0.12, (1.0, 0.5)) if side == 'OD' else (0.12, (0.0, 0.5))
             for x, v in zip(xs, ehl):
-                txt = pg.TextItem(f"{v:.0f}", color=color, anchor=ancla)
-                txt.setFont(pg.QtGui.QFont('', 8, pg.QtGui.QFont.Bold))
-                txt.setPos(x + desp, v)
-                p.addItem(txt)
+                capas.texto(('valor', side), f"{v:.0f}", (x + desp, v),
+                            color, ancla, letra_valor)
             for x, v in sin_resp:
-                txt = pg.TextItem(f"NR {v:.0f}", color=color, anchor=ancla)
-                txt.setFont(pg.QtGui.QFont('', 7))
-                txt.setPos(x + desp, v)
-                p.addItem(txt)
+                capas.texto(('nr', side), f"NR {v:.0f}", (x + desp, v),
+                            color, ancla, letra_nr)
             if plot is None:
                 fila = 0 if side == 'OD' else 1
                 for i, f in enumerate(assr.CARRIERS):
@@ -690,29 +803,27 @@ class AssrPanel(QWidget):
                     it.setTextAlignment(Qt.AlignCenter)
                     it.setForeground(QColor(color))
                     self.tabla_umbral.setItem(fila, i, it)
-            p.addItem(pg.ScatterPlotItem(
-                xs, bruto, size=6, symbol='d', brush=pg.mkBrush(None),
-                pen=pg.mkPen(color + '99', width=1)))
-            p.addItem(pg.ScatterPlotItem(
-                xs, ehl, size=13, symbol=simbolo,
-                brush=pg.mkBrush(None), pen=pg.mkPen(color, width=2)))
+            capas.puntos(('bruto', side), xs, bruto, size=6, symbol='d',
+                         brush=pg.mkBrush(None), pen=pg.mkPen(color + '99', width=1))
+            capas.puntos(('ehl', side), xs, ehl, size=13, symbol=simbolo,
+                         brush=pg.mkBrush(None), pen=pg.mkPen(color, width=2))
             if sin_resp:
-                p.addItem(pg.ScatterPlotItem(
-                    [x for x, _ in sin_resp], [y for _, y in sin_resp],
-                    size=11, symbol='t1', brush=pg.mkBrush(color),
-                    pen=pg.mkPen(color)))
+                capas.puntos(('nr_simbolo', side), [x for x, _ in sin_resp],
+                             [y for _, y in sin_resp], size=11, symbol='t1',
+                             brush=pg.mkBrush(color), pen=pg.mkPen(color))
             if self.docente:
                 # Lo que el caso realmente tiene: solo lo ve el docente.
                 real = [(i, rec.hl[(side, f)])
                         for i, f in enumerate(assr.CARRIERS)
                         if rec.hl[(side, f)] is not None]
                 if real:
-                    p.plot([x for x, _ in real], [y for _, y in real],
-                           pen=pg.mkPen(color + '55', width=1,
-                                        style=Qt.DashLine),
-                           symbol='s', symbolSize=6,
-                           symbolBrush=pg.mkBrush(color + '55'),
-                           symbolPen=pg.mkPen(None))
+                    capas.curva(('real', side), [x for x, _ in real],
+                                [y for _, y in real],
+                                pen=pg.mkPen(color + '55', width=1,
+                                             style=Qt.DashLine),
+                                symbol='s', symbolSize=6,
+                                symbolBrush=pg.mkBrush(color + '55'),
+                                symbolPen=pg.mkPen(None))
         p.setXRange(-0.5, 3.5)
         p.setYRange(-10, 120)
         p.getAxis('left').setTickSpacing(20, 10)

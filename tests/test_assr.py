@@ -273,6 +273,33 @@ def test_panel_replaces_the_graphs_and_runs_with_the_capture_tick():
     assert w.graph_r.isVisibleTo(w) and not w.assr_panel.isVisibleTo(w)
 
 
+def test_panel_reuses_its_plot_items_between_ticks():
+    """Tickets 35 y 43 (2026-11-05): borrar y crear ítems de pyqtgraph en
+    cada tick terminaba en segfault. Después de armarse, los ticks no
+    crean ni borran ítems: solo cambian datos y visibilidad."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    panel = w.assr_panel
+    plots = (panel.p_rastro, panel.p_fft, panel.p_polar, panel.p_audio)
+    w.control.start_capture()
+    for _ in range(40):
+        w.capture()
+    antes = [set(map(id, p.getPlotItem().items)) for p in plots]
+    for _ in range(20):
+        w.capture()
+    panel.cb_rastro.setCurrentIndex(1)
+    panel.cb_rastro.setCurrentIndex(0)
+    panel.tabla.selectRow(3)
+    w.control.stop_capture()
+    despues = [set(map(id, p.getPlotItem().items)) for p in plots]
+    for p, a, d in zip(plots, antes, despues):
+        assert a <= d, f"{p.getPlotItem().titleLabel.text}: se borraron ítems"
+    # Época cruda vs promedio: lo de la otra vista queda escondido.
+    visibles = [i for i in panel.p_rastro.getPlotItem().items if i.isVisible()]
+    assert len(visibles) == 2, visibles
+
+
 def test_panel_students_do_not_see_the_real_audiogram():
     if not HAS_UI:
         return

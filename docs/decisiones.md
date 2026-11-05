@@ -8160,7 +8160,22 @@ De la misma pasada:
   redimensionado entretanto.
 - La marca de agua se carga y escala una vez, no en cada pintado.
 
-Pendiente aparte: el ASSR (`AssrPanel`) borra y crea todos sus ítems de
-pyqtgraph en cada tick (`PlotItem.clear()`); ahí cayeron 35 y 43. Si
-vuelve a caer con esto instalado, pasar a crear los ítems una vez y
-actualizarlos.
+El ASSR (`AssrPanel`), donde terminaron 35 y 43, se arregló aparte: ver
+la sección que sigue.
+
+## ASSR: los gráficos se reutilizan, no se borran en cada tick (2026-11-05)
+
+`AssrPanel` hacía `PlotItem.clear()` en sus cuatro gráficos y volvía a
+crear textos, líneas, regiones y puntos en cada tick del registro. Las
+caídas de los tickets 35 y 43 terminaron ahí (`unregisterWrapper` al
+destruir un QGraphicsItem). No se sabe si el ASSR caía solo o era donde se
+notaba el daño del eventFilter del MDI; se arregló preventivo igual.
+
+Ahora cada gráfico tiene una `_Capas`: los ítems se piden por su papel
+(`'espectro'`, `('valor', 'OD')`…), se crean la primera vez y después solo
+se les cambian datos y estilo; lo que no se usó en la pasada queda
+escondido. Ningún ítem se borra mientras viva el panel. El orden de dibujo
+se fija con el Z (lo tomado después, encima), para que se vea igual que
+antes: las cinco imágenes (panel y los cuatro JPEG del informe) salen
+idénticas píxel a píxel a las del código anterior. Los gráficos que se
+arman aparte al exportar usan unas `_Capas` de un solo uso.
