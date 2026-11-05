@@ -56,6 +56,11 @@ final class ExamenesPrevios
                 'OD' => $campo('prev_od'),
                 'OI' => $campo('prev_oi'),
             ];
+            // Lo que concluyó quien lo hizo; vacío, la app lo arma con el resultado.
+            $conclusion = trim(mb_substr((string) (((array) ($v['prev_conclusion'] ?? []))[$i] ?? ''), 0, 300));
+            if ($conclusion !== '') {
+                $lista[count($lista) - 1]['conclusion'] = $conclusion;
+            }
             if (count($lista) >= self::MAX) {
                 break;
             }
@@ -83,7 +88,7 @@ final class ExamenesPrevios
                 'prueba' => trim((string) $e['prueba']),
                 'OD' => trim((string) ($e['OD'] ?? '')),
                 'OI' => trim((string) ($e['OI'] ?? '')),
-            ];
+            ] + (trim((string) ($e['conclusion'] ?? '')) !== '' ? ['conclusion' => trim((string) $e['conclusion'])] : []);
         }
         return $lista;
     }

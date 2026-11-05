@@ -8024,3 +8024,43 @@ evalúa al alumno, no al docente que prueba un caso.
   (ABR ~200 nV y la mitad de los barridos rechazados, la respuesta no
   asoma). Dormido baja a ~40 nV y aparece. Ya lo hacía `abr/vigilia.py`;
   lo que lo tapaba era la banda.
+
+## Los exámenes que trae el paciente son informes firmados (2026-11-05)
+
+Las hojas que entrega el paciente eran solo el gráfico (las del libro) o
+"Pasa/Refiere" por oído (las que marca el docente). Un informe real trae
+quién lo hizo y qué concluyó.
+
+- `core/informe_previo.py` arma el informe: título del examen, servicio,
+  paciente (nombre, edad, RUT con dígito verificador y, en las del docente,
+  la fecha del examen), el gráfico, la conclusión y la firma.
+- **Firma:** un tecnólogo médico inventado de una lista de 12, fijo por
+  paciente y examen (`stable_seed`).
+- **Conclusión:** describe hallazgos, no recomienda conductas. Sale de lo
+  mismo que dibuja la hoja:
+  - audiometría: grado BIAP del backend (normal hasta 20, leve 21-40,
+    moderada 41-70, severa 71-90, profunda 91+) en 500-1k-2k-4k; tipo por el
+    gap (15 dB o más: de conducción con óseo hasta 20, si no mixta); descenso
+    en agudos si el promedio es normal y algo sobre 25 dB desde 3 kHz;
+    discriminación máxima (UMD);
+  - impedanciometría: la curva que dibuja la hoja (con la sonda usada) y los
+    reflejos ipsi y contra por sonda, 500-4000 Hz; NR si no se puede;
+  - EOA: el `overall_pass` del generador de TEOAE y DPOAE;
+  - PEATC: hasta qué nivel registrado se ve la onda V (el umbral del caso
+    contra los niveles de la hoja) e intervalos según el patrón neural;
+  - ECochG: razón PS/PA contra el límite timpánico (0,40);
+  - VEMP: presencia, amplitud P-N y razón de asimetría, sin juicio (no hay
+    límite en el módulo: lo decide quien informa);
+  - corticales: los componentes que la hoja rotula, en el canal de lectura.
+- Las tarjetas del docente aceptan una **conclusión escrita** por él
+  (campo opcional en el formulario del caso, `examenes_previos[].conclusion`);
+  vacía, se dice el resultado de cada oído.
+- `scripts/libro/previos.py` regenera las hojas del libro con el marco.
+  **Hallazgo:** las hojas de PEATC y corticales del libro salían planas desde
+  el 28-10 (el motor del libro abre el ABR sin electrodos). `previos.py`
+  pone el montaje de rutina envolviendo `_ventana` del motor; al libro se le
+  dejó el aviso en `pendientes_urgentes.md` (punto 9).
+- Las hojas del libro no llevan fecha: se dibujan una vez, sin la cita.
+- Bug de `previos.py` corregido: la corrida completa cortaba después de la
+  primera ficha (`if indice and not solo: break`, pensado para
+  `--solo-historia`), y el índice quedaba con 5 hojas.

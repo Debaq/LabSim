@@ -81,6 +81,12 @@ t_eq($previos[0]['dias'], -122, 'Días antes = {{-N}}');
 $dup = ExamenesPrevios::fromForm(['prev_dias' => ['10', '5'], 'prev_prueba' => ['EOA', 'eoa'],
                                   'prev_od' => ['', ''], 'prev_oi' => ['', '']]);
 t_eq(array_column($dup, 'prueba'), ['EOA', 'eoa (2)'], 'Dos con el mismo nombre se distinguen');
+$conConclusion = ExamenesPrevios::fromForm(['prev_dias' => ['10', '5'], 'prev_prueba' => ['EOA', 'PEATC'],
+    'prev_od' => ['Pasa', ''], 'prev_oi' => ['Refiere', ''], 'prev_conclusion' => ['', ' Onda V hasta 30 dB nHL. ']]);
+t_true(!isset($conConclusion[0]['conclusion']), 'Sin conclusión escrita no se guarda la clave');
+t_eq($conConclusion[1]['conclusion'], 'Onda V hasta 30 dB nHL.', 'La conclusión del docente se guarda tal cual');
+t_eq(ExamenesPrevios::delCaso(['examenes_previos' => $conConclusion])[1]['conclusion'], 'Onda V hasta 30 dB nHL.',
+     'Y vuelve con el caso');
 $caso = ['examenes_previos' => $previos];
 $nombres = ExamenesPrevios::nombres($caso);
 $conDocente = LlmConfig::historiaPrevia('{{-150}} Nace.', $nombres, true, ExamenesPrevios::delCaso($caso));

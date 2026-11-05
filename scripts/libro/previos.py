@@ -56,6 +56,29 @@ from motor.svg import Svg  # noqa: E402
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from procedimientos import capitulo, procedimiento  # noqa: E402
 
+sys.path.insert(0, str(LABSIM / 'src'))
+from core import informe_previo as IP  # noqa: E402
+
+
+def _con_montaje(ventana):
+    """El ABR registra con lo que está puesto en la pestaña Electrodos
+    (electrodos desde 2026-10-28, fonos de inserción desde 2026-11-05): sin
+    eso las curvas salen planas. El motor del libro abre la ventana sin
+    ponerlos, así que acá se pone el montaje de rutina (piel preparada,
+    Cz-mastoides-Fpz y los fonos) antes de registrar. El aviso para el motor
+    del libro quedó en libro-orl/pendientes_urgentes.md."""
+    def envuelta(*a, **k):
+        w = ventana(*a, **k)
+        w.montaje.de_libro(2)
+        w._con_montaje()
+        return w
+    return envuelta
+
+
+from motor import abr as _abr, cortical as _cortical  # noqa: E402
+_abr._ventana = _con_montaje(_abr._ventana)
+_cortical._ventana = _con_montaje(_cortical._ventana)
+
 # Los mismos capítulos que sql_practica.py deja fuera (vestibulares y nasales)
 FUERA = {21, 22, 23, 24, 25, 26, 27, 31, 32, 35, 36, 37, 38}
 # Figura del libro -> examen (como lo nombra el procedimiento) y archivo.
@@ -140,6 +163,96 @@ def _hoja(caso, examen, figuras):
     return hacer_figuras.figura(caso, {**f, 'tomo2': True})
 
 
+def _conclusion(caso, examen, figuras):
+    """Lo que concluyó quien hizo el examen: lo mismo que muestra la hoja,
+    con los mismos generadores y parámetros (core/informe_previo.py)."""
+    if examen == 'Audiometría':
+        return IP.conclusion_audiometria(caso)
+    if examen == 'Impedanciometría':
+        from motor.impedancia import NO_REALIZABLE, _curva
+        f = next((f for f in figuras if f['tipo'] in ('impedancia', 'timpanograma')), {})
+        letras = {}
+        for lado in ('OD', 'OI'):
+            if caso.get(f'Z_{lado}') == NO_REALIZABLE:
+                letras[lado] = 'NR'
+                continue
+            d = _curva(caso, lado, f.get('sonda', 226))
+            if d:
+                letras[lado] = d['letra']
+        return IP.conclusion_impedancia(caso, letras)
+    if examen == 'EOA':
+        from motor import oae
+        res = {lado: (bool(oae.teoae(caso, lado)['overall_pass']), bool(oae.dpoae(caso, lado)['overall_pass']))
+               for lado in ('OD', 'OI') if (caso.get('EOAS') or {}).get(lado)}
+        return IP.conclusion_eoa(res)
+    if examen == 'PEATC':
+        from motor import abr
+        f = next(f for f in figuras if f['tipo'] == 'abr')
+        oidos = f.get('oidos', ['OD', 'OI'])
+        umbrales = abr._umbrales(caso, f.get('estimulo'), f.get('transductor', 'insercion'))
+        umbrales = {lado: umbrales.get(lado) for lado in oidos if lado in umbrales}
+        estimulo = (f.get('estimulo') or 'click').lower()
+        return IP.conclusion_peatc(caso, f.get('niveles', [80, 60, 40]), umbrales, estimulo)
+    if examen == 'ECochG':
+        from motor import ecochg
+        from abr.ecochg import SP_AP_LIMIT
+        f = next(f for f in figuras if f['tipo'] == 'ecochg')
+        medidas = {}
+        for lado in ('OD', 'OI'):
+            r = ecochg.registrar(caso, lado, nivel=f.get('nivel', 90))
+            if r is not None:
+                m = r['medida'] or {}
+                medidas[lado] = m.get('sp_ap') if ecochg._hay_complejo(m) else None
+        return IP.conclusion_ecochg(medidas, SP_AP_LIMIT['tympanic'])
+    if examen == 'VEMP':
+        from motor import vemp
+        f = next(f for f in figuras if f['tipo'] == 'vemp')
+        subtipos = ('cvemp', 'ovemp') if f.get('subtipo') == 'ambos' else (f.get('subtipo', 'cvemp'),)
+        lineas = []
+        for sub in subtipos:
+            r = vemp.registrar(caso, sub, intensidad=f.get('intensidad', 100), promedios=f.get('promedios', 200))
+            lineas += IP.conclusion_vemp(r['resumen'], 'oVEMP' if sub == 'ovemp' else 'cVEMP')
+        return lineas
+    if examen == 'Corticales':
+        return _conclusion_cortical(caso, next(f for f in figuras if f['tipo'] == 'cortical'))
+    return []
+
+
+def _conclusion_cortical(caso, f):
+    """Los componentes que la hoja rotula (los que están en las dos réplicas),
+    en el canal de lectura y al nivel más alto registrado."""
+    from motor import cortical
+    from abr import cortical as C
+    prueba = f.get('prueba', 'MLR')
+    curvas = cortical.capturar(caso, f.get('oidos', ['OD', 'OI']), f.get('niveles', [70]), prueba=prueba,
+                               estimulo=f.get('estimulo'), promediaciones=f.get('promediaciones'),
+                               ventana_ms=f.get('ms_max'))
+    canales = cortical.CANALES[prueba]
+    canal = 'Cz' if 'Cz' in canales else canales[0]
+    signos = {n: sg for n, _, _, sg in cortical.VENTANAS[prueba]}
+    lineas = []
+    for lado in ('OD', 'OI'):
+        if not curvas.get(lado):
+            continue
+        c = max(curvas[lado], key=lambda c: c['db'])
+        y1, y2 = c['canales'][canal]
+        prom = [(a + b) / 2 for a, b in zip(y1, y2)]
+        marcas = cortical._marcas(prueba, c['x'], prom, c.get('edad'))
+        rel = {n: cortical._relacion(c['x'], y1, y2, t, signos[n], C.SNAP_MS[prueba]) for n, (t, _) in marcas.items()}
+        if not c.get('sobre_umbral', True) or not cortical._hay_respuesta(prueba, rel, c.get('edad')):
+            marcas = {}
+        vistos = [f"{n} {t:.0f} ms" for n, (t, _) in marcas.items() if rel[n] >= 1.0]
+        texto = ', '.join(vistos) if vistos else 'sin componentes identificables'
+        lineas.append(f"{lado}: {texto[0].upper()}{texto[1:]} ({canal}, {c['db']:g} dB).")
+    return lineas
+
+
+def _informe(caso, paciente, ficha, examen, figuras, firma_clave=None):
+    """La hoja del libro como informe: encabezado, gráfico, conclusión y firma."""
+    return IP.informe(_hoja(caso, examen, figuras), examen, paciente, _conclusion(caso, examen, figuras),
+                      IP.firmante(ficha, firma_clave or examen))
+
+
 def tarjeta_tamizaje(prueba, od, oi):
     """Un tamizaje como lo entrega el equipo: el resultado de cada oído y nada
     más (no hay curva que mirar). Con los colores de oído del libro."""
@@ -170,14 +283,18 @@ def main():
         viejo = json.loads((salida / 'indice.json').read_text(encoding='utf-8'))
         indice = {f: {'trae': v['trae']} for f, v in viejo.items() if v.get('trae')}
     for ficha, examenes in sorted(hojas.items(), key=lambda x: int(x[0])):
-        if indice and not solo:
+        # Con --solo-historia las hojas de lo que traen no se rehacen. Antes
+        # esto miraba si el índice tenía algo, y en la corrida completa
+        # cortaba después de la primera ficha.
+        if '--solo-historia' in sys.argv:
             break
         (salida / ficha).mkdir(parents=True, exist_ok=True)
         for examen, (clave, origen, figuras) in examenes.items():
             if solo and examen != solo:
                 continue
             ruta = f'{ficha}/{ARCHIVO[examen]}.svgz'
-            _guardar(ruta, _hoja(cargar_caso(origen), examen, figuras))
+            caso = cargar_caso(origen)
+            _guardar(ruta, _informe(caso, IP.paciente_del_caso(caso), ficha, examen, figuras))
             indice.setdefault(ficha, {}).setdefault('trae', {})[examen] = ruta
             print(f'  {ruta:30} {clave}')
     # Qué trae en cada carpeta: lo que muestra la ficha del libro en ese
@@ -199,15 +316,23 @@ def main():
         ficha, examen = h['ficha'], h['examen']
         trae = indice.get(ficha, {}).get('trae', {})
         ruta = f"{ficha}/historia_{-h['dias']}_{ARCHIVO[examen]}.svgz"
+        # El paciente es el de hoy aunque la hoja sea de un estado anterior
+        paciente = IP.paciente_del_caso(cargar_caso(origenes[ficha])) if ficha in origenes else {}
+        firma = f"historia {h['dias']} {examen}"
         if h['hoja'] == 'tamizaje':
-            svg = tarjeta_tamizaje(h['prueba'], h['OD'], h['OI'])
+            # Sin la franja del título: el informe ya lo lleva arriba
+            tarjeta = tarjeta_tamizaje(h['prueba'], h['OD'], h['OI']).replace(
+                'viewBox="0 0 360 128" width="360" height="128"', 'viewBox="0 38 360 72" width="360" height="72"', 1)
+            svg = IP.informe(tarjeta, examen, paciente,
+                             IP.conclusion_tamizaje(h['prueba'], h['OD'], h['OI']),
+                             IP.firmante(ficha, firma), prueba=h['prueba'])
         elif h['hoja'] == 'actual' and examen in trae:
             ruta, svg = trae[examen], None
         else:
             origen = (origenes[ficha] if h['hoja'] == 'actual'
                       else f"archivo:{CASOS / 'generados' / (h['caso'] + '.json')}")
             figuras = hojas.get(ficha, {}).get(examen, (None, None, POR_DEFECTO.get(examen, [])))[2]
-            svg = _hoja(cargar_caso(origen), examen, figuras)
+            svg = _informe(cargar_caso(origen), paciente, ficha, examen, figuras, firma)
         if svg is not None:
             (salida / ficha).mkdir(parents=True, exist_ok=True)
             _guardar(ruta, svg)

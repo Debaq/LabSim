@@ -136,6 +136,9 @@
                 <input type="text" name="prev_oi[]" maxlength="80" list="previo-resultados" value="<?= htmlspecialchars((string) ($e['OI'] ?? '')) ?>">
             </label>
             <button type="button" class="secondary previo-remove">Quitar</button>
+            <label class="previo-conclusion">Conclusión del informe (opcional)
+                <input type="text" name="prev_conclusion[]" maxlength="300" value="<?= htmlspecialchars((string) ($e['conclusion'] ?? '')) ?>" placeholder="Vacío: se arma con el resultado de cada oído">
+            </label>
         </div>
         <?php
         return (string) ob_get_clean();
@@ -153,7 +156,7 @@
         </div>
         <template id="previo-row-tpl"><?= $previoRowHtml([]) ?></template>
         <button type="button" class="secondary" id="previo-add">Agregar examen</button>
-        <p class="help">"Días antes" es lo mismo que la <code>{{-N}}</code> de la historia: la ficha lo pone en la fecha real de la cita. El resultado de cada oído es texto libre; las sugerencias son solo atajos.</p>
+        <p class="help">"Días antes" es lo mismo que la <code>{{-N}}</code> de la historia: la ficha lo pone en la fecha real de la cita. El resultado de cada oído es texto libre; las sugerencias son solo atajos. La hoja sale como un informe firmado por un tecnólogo médico (inventado, fijo por paciente); la conclusión que escribas va tal cual.</p>
     </div>
 
     <label>Comentario del docente <span style="font-weight:400; color:var(--color-danger);">(privado -- el alumno nunca lo ve)</span>

@@ -15,7 +15,7 @@ from PySide6.QtGui import QPainter, QPixmap, QTextDocument
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QTextBrowser, QVBoxLayout, QWidget
 
-from core import iconos, invitado, rutas, tema
+from core import iconos, informe_previo, invitado, rutas, tema
 
 from core.helpers import obtener_hora_real_atencion
 
@@ -156,13 +156,38 @@ def previos_del_docente(caso):
         except (TypeError, ValueError):
             dias = -1
         previos.append({"dias": dias, "prueba": str(e["prueba"]).strip(),
-                        "OD": str(e.get("OD") or "").strip(), "OI": str(e.get("OI") or "").strip()})
+                        "OD": str(e.get("OD") or "").strip(), "OI": str(e.get("OI") or "").strip(),
+                        # Lo que concluyó quien lo hizo, si el docente lo escribió
+                        "conclusion": str(e.get("conclusion") or "").strip()})
     return previos
 
 
-def tarjeta_previo(prueba, od, oi):
-    """La hoja de un examen que trae: el resultado de cada oído y nada más,
-    como la tarjeta de tamizaje del libro (scripts/libro/previos.py)."""
+def informe_del_docente(caso, row, previo, indice):
+    """El examen que marcó el docente como un informe: la tarjeta con el
+    resultado de cada oído, la conclusión (la que escribió el docente o,
+    si no, el resultado dicho en una línea) y la firma (core/informe_previo)."""
+    paciente = informe_previo.paciente_del_caso(caso)
+    nombre = " ".join(p for p in (getattr(row, "nombre", ""), getattr(row, "apellido", "")) if p).strip()
+    if nombre:
+        paciente["nombre"] = nombre
+    if getattr(row, "rut", ""):
+        paciente["rut"] = row.rut
+    cita = parse_fecha_agenda(getattr(row, "fecha", "") or "")
+    if cita.isValid():
+        paciente["fecha"] = cita.addDays(int(previo["dias"])).toString("dd-MM-yyyy")
+    conclusion = ([previo["conclusion"]] if previo.get("conclusion")
+                  else informe_previo.conclusion_tamizaje(previo["prueba"], previo["OD"], previo["OI"]))
+    return informe_previo.informe(
+        tarjeta_previo(previo["prueba"], previo["OD"], previo["OI"], titulo=False),
+        previo["prueba"], paciente, conclusion,
+        informe_previo.firmante(_ficha_de(row, caso), f"{indice}:{previo['prueba']}"),
+        prueba=previo["prueba"])
+
+
+def tarjeta_previo(prueba, od, oi, titulo=True):
+    """El resultado de cada oído, como la tarjeta de tamizaje del libro
+    (scripts/libro/previos.py). Sin `titulo` es el cuerpo de un informe
+    (informe_del_docente), que ya lo lleva arriba."""
     def caja(x, lado, nombre, resultado):
         color = tema.color_lado(lado)
         bien = resultado.lower() in ("pasa", "normal")
@@ -171,6 +196,10 @@ def tarjeta_previo(prueba, od, oi):
                 f'{html.escape(nombre)}</text>'
                 f'<text x="{x + 14}" y="94" font-size="13" font-weight="700" '
                 f'fill="{"#1F2933" if bien else color}">{html.escape(resultado[:1].upper() + resultado[1:] or "—")}</text>')
+    if not titulo:
+        return ('<svg xmlns="http://www.w3.org/2000/svg" width="360" height="72" viewBox="0 38 360 72" '
+                'font-family="sans-serif">'
+                + caja(20, "OD", "Oído derecho", od) + caja(190, "OI", "Oído izquierdo", oi) + "</svg>")
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="360" height="128" viewBox="0 0 360 128" '
             'font-family="sans-serif">'
             '<rect width="360" height="128" fill="white"/>'
@@ -188,7 +217,7 @@ def _del_docente(row, caso):
     lista = []
     for i, e in enumerate(previos):
         ruta = carpeta / f"{i}.svg"
-        svg = tarjeta_previo(e["prueba"], e["OD"], e["OI"])
+        svg = informe_del_docente(caso, row, e, i)
         try:
             if not ruta.is_file() or ruta.read_text(encoding="utf-8") != svg:
                 carpeta.mkdir(parents=True, exist_ok=True)
