@@ -154,6 +154,91 @@ def test_artifact_epochs_are_rejected_with_a_tight_window():
     assert flojo.rejected == 0
 
 
+def _neural(umbrales, **params):
+    oido = _oido(umbrales)
+    oido['type'] = 'neural'
+    oido['neural'] = params
+    return oido
+
+
+ANSD = {'bloqueo': 'total', 'microfonica': 'amplificada', 'desincronia': 'alta'}
+
+
+def _ansd_casos(n=40):
+    """Oídos ANSD distintos (cambia el audiograma) para mirar el sorteo."""
+    return [_neural([10 + (i % 8) * 5] * 4, **ANSD) for i in range(n)]
+
+
+def test_ansd_assr_does_not_follow_the_audiogram():
+    # Audición casi normal: el ASSR igual falta o sale solo arriba de 80.
+    for oido in _ansd_casos():
+        rec = assr.Recording({'OD': oido, 'OI': None})
+        for f in assr.CARRIERS:
+            phys = rec.phys[('OD', f)]
+            assert phys is None or phys >= 80, (oido, f, phys)
+        assert rec.hl[('OD', 1000)] <= 50   # el docente ve la audición real
+
+
+def test_ansd_sometimes_absent_sometimes_high():
+    resultados = [assr.Recording({'OD': o, 'OI': None}).phys[('OD', 1000)]
+                  for o in _ansd_casos()]
+    assert any(p is None for p in resultados)
+    assert any(p is not None for p in resultados)
+
+
+def test_ansd_with_normal_hearing_gives_no_line_at_60():
+    oido = next(o for o in _ansd_casos()
+                if assr.Recording({'OD': o, 'OI': None}).phys[('OD', 1000)] is None)
+    rec = _registro(od=oido, oi=None, nivel=60, n=400)
+    assert not rec.stats(('OD', 1000))['detected']
+
+
+def test_ansd_threshold_never_below_a_dead_cochlea():
+    rec = assr.Recording({'OD': _neural([None] * 4, **ANSD), 'OI': None})
+    assert all(rec.phys[('OD', f)] is None for f in assr.CARRIERS)
+    profundo = _neural([110] * 4, **ANSD)
+    rec = assr.Recording({'OD': profundo, 'OI': None})
+    for f in assr.CARRIERS:
+        p = rec.phys[('OD', f)]
+        assert p is None or p >= 110 - assr.BURST_NHL_CORRECTION[f], p
+
+
+def test_proximal_block_has_no_assr():
+    rec = assr.Recording({'OD': _neural([25] * 4, bloqueo='post_i'), 'OI': None})
+    assert all(rec.phys[('OD', f)] is None for f in assr.CARRIERS)
+
+
+def test_partial_desync_raises_the_threshold():
+    for i in range(30):
+        oido = _neural([20 + i % 3 * 5] * 4, desincronia='alta')
+        rec = assr.Recording({'OD': oido, 'OI': None})
+        for f in assr.CARRIERS:
+            p = rec.phys[('OD', f)]
+            assert p is None or p >= 70, p
+
+
+def test_retrocochlear_without_desync_keeps_the_audiogram():
+    # Un schwannoma (desincronía leve, sin bloqueo) no apaga el 80 Hz.
+    oido = _neural([25, 25, 20, 20], i_iii_ms=0.45, desincronia='leve')
+    rec = assr.Recording({'OD': oido, 'OI': None})
+    hl = rec.hl[('OD', 1000)]
+    assert rec.phys[('OD', 1000)] == assr.physiological_threshold(hl, 1000)
+
+
+def test_neural_params_on_a_cochlear_ear_are_ignored():
+    oido = _oido([25, 25, 20, 20])
+    oido['type'] = 'coclear'
+    oido['neural'] = dict(ANSD)
+    assert assr.neural_pattern(oido) == 'normal'
+
+
+def test_ansd_same_patient_same_assr():
+    oido = _neural([30] * 4, **ANSD)
+    a = assr.Recording({'OD': oido, 'OI': None})
+    b = assr.Recording({'OD': oido, 'OI': None})
+    assert a.phys == b.phys
+
+
 def _caso():
     return {'edad': 30, 'gender': 0,
             'ABR': {'OD': dict(NORMAL), 'OI': dict(NORMAL)}}

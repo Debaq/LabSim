@@ -7806,3 +7806,22 @@ Pedido: con casi todo a pantalla completa, la barra propia de cada examen
 - **Configuración sube a la barra morada**, entre el nombre del usuario y
   Cerrar sesión: solo el engranaje, sin borde (como min/max/cerrar). Aparece con la sesión, como antes.
 - Las ventanas normales conservan su barra: se arrastran desde ahí.
+
+## ASSR en la neuropatía auditiva: no sigue al audiograma (2026-11-05)
+
+Pedido al armar un caso de ANSD en un prematuro con hiperbilirrubinemia: el
+ASSR sacaba su umbral del audiograma también en la neuropatía, así que
+"predecía" la audición, que es lo contrario de lo que hay que enseñar.
+
+- **El patrón lo decide el bloque `neural` del ABR del oído** (`assr.neural_pattern`),
+  solo si `type == 'neural'`, igual que el generador del ABR. Sin campo nuevo en
+  el caso: el docente arma la ANSD una vez y el ABR y el ASSR quedan coherentes.
+- **Bloqueo total (ANSD):** el ASSR falta (35 %) o aparece a 80-105 dB HL,
+  sorteado por oído y portadora con semilla del caso, sin relación con el
+  audiograma (Rance 1999, 2005). Línea a la mitad de amplitud.
+- **Desincronía alta con ondas:** falta (15 %) o 70-100 dB HL, línea al 70 %.
+- **Bloqueo proximal (solo onda I):** sin ASSR: el 80 Hz es del tronco.
+- **Retrococleares sin desincronía alta** (schwannoma, etc.): sin cambio.
+- Nunca por debajo de lo que la cóclea oye: un oído muerto no da ASSR.
+- El docente sigue viendo el audiograma real en el panel: el contraste entre
+  ese audiograma y el ASSR es la lección.

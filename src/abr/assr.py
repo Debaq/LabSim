@@ -30,10 +30,19 @@ restando una corrección por frecuencia al umbral hallado: eso es el dB eHL
 ("estimated hearing level"). La corrección es calibrable (ver
 DEFAULT_EHL_CORRECTION): es un criterio de trabajo, no una cifra de un
 fabricante.
+
+Excepción: la neuropatía auditiva / desincronía. El ASSR de 80 Hz es una
+respuesta con fase fija del tronco, y la desincronía es justamente la
+pérdida de esa fase. En la ANSD el ASSR falta o aparece solo a niveles
+altos (80-100+ dB HL) y su umbral NO se correlaciona con el conductual:
+oídos con audición casi normal y oídos profundos dan el mismo ASSR (Rance
+1999, 2005). Ver neural_pattern(): el patrón retrococlear del caso (el
+mismo bloque 'neural' que dibuja el ABR) decide si el umbral del ASSR sale
+del audiograma o se sortea por su cuenta.
 """
 import numpy as np
 
-from abr.ABR_generator import INTERAURAL_ATTENUATION
+from abr.ABR_generator import INTERAURAL_ATTENUATION, ABRGenerator
 from core.rng import case_fingerprint, stable_seed
 
 FS = 2000.0
@@ -78,6 +87,17 @@ OFFSET_SHRINK_HL = 70.0
 # Corrección que aplica el equipo para informar en eHL. Arranca igual al
 # offset de un oído normal; el docente la calibra.
 DEFAULT_EHL_CORRECTION = {500: 15.0, 1000: 12.0, 2000: 10.0, 4000: 10.0}
+
+# Neuropatía / desincronía (ver neural_pattern). Rangos del umbral del ASSR
+# en dB HL, sorteados por oído y portadora sin mirar el audiograma: ANSD con
+# bloqueo total (ninguna onda en el ABR) y desincronía alta con ondas
+# todavía presentes. Rance 1999/2005: respuestas solo a 80-100+ dB HL, o
+# ninguna; el parcial queda algo más abajo porque el tronco aún sincroniza.
+DESYNC_RANGE_DB = {'total': (80.0, 105.0), 'parcial': (70.0, 100.0)}
+# Probabilidad de que el oído no dé ASSR a ningún nivel.
+DESYNC_ABSENT_P = {'total': 0.35, 'parcial': 0.15}
+# La línea que queda es chica: la respuesta pierde fase de época en época.
+DESYNC_AMP_FACTOR = {'total': 0.5, 'parcial': 0.7}
 
 # Amplitud máxima de la respuesta (µV) y qué tan rápido se alcanza con el
 # nivel de sensación (dB).
@@ -140,6 +160,52 @@ def physiological_threshold(hl, carrier):
         return None
     reduccion = 1.0 - OFFSET_SHRINK * min(max(hl / OFFSET_SHRINK_HL, 0.0), 1.0)
     return hl + PHYS_OFFSET_DB[carrier] * reduccion
+
+
+def neural_pattern(case):
+    """Cuánto le quita al ASSR el patrón retrococlear del oído.
+
+    'normal'     umbral desde el audiograma (también las retrococleares sin
+                 desincronía: un schwannoma no apaga el 80 Hz).
+    'sin_tronco' bloqueo proximal (solo onda I): el generador del 80 Hz es
+                 del tronco, así que no hay ASSR a ningún nivel.
+    'total'      ANSD con bloqueo total.
+    'parcial'    desincronía alta con ondas todavía presentes.
+
+    Lee el mismo bloque 'neural' que dibuja el ABR, y solo si el oído es
+    neural: un caso coclear con parámetros neurales cargados de más no se
+    toca (igual que en el generador del ABR).
+    """
+    if not isinstance(case, dict) or case.get('type') != 'neural':
+        return 'normal'
+    params = ABRGenerator.neural_params(case.get('neural'))
+    if params['bloqueo'] == 'post_i':
+        return 'sin_tronco'
+    if params['bloqueo'] == 'total':
+        return 'total'
+    if params['desincronia'] == 'alta':
+        return 'parcial'
+    return 'normal'
+
+
+def desync_threshold(case, side, carrier, hl, pattern):
+    """Umbral del ASSR (dB HL) de un oído desincronizado, o None.
+
+    Sorteado con semilla del caso y del oído: el mismo paciente da siempre
+    el mismo ASSR. Nunca por debajo de lo que la cóclea oye (un oído
+    muerto sigue muerto), pero tampoco atado al audiograma.
+    """
+    if hl is None or pattern == 'sin_tronco':
+        return None
+    rng_oido = np.random.default_rng(stable_seed(
+        'assr_desync', case_fingerprint(case), side))
+    if rng_oido.random() < DESYNC_ABSENT_P[pattern]:
+        return None
+    rng = np.random.default_rng(stable_seed(
+        'assr_desync', case_fingerprint(case), side, carrier))
+    lo, hi = DESYNC_RANGE_DB[pattern]
+    thr = round(rng.uniform(lo, hi) / LEVEL_STEP) * LEVEL_STEP
+    return float(max(thr, hl + PHYS_OFFSET_DB[carrier]))
 
 
 def response_amplitude_uv(level, phys, carrier):
@@ -214,13 +280,22 @@ class Recording:
         self.freqs = np.arange(N_BINS) * DF
         self.hl = {}
         self.phys = {}
+        self.amp_factor = {}
         for s in SIDES:
+            patron = neural_pattern(self.cases[s])
             for f in CARRIERS:
+                self.amp_factor[(s, f)] = DESYNC_AMP_FACTOR.get(patron, 1.0)
                 try:
-                    self.hl[(s, f)] = behavioural_threshold(self.cases[s], f)
-                    self.phys[(s, f)] = physiological_threshold(self.hl[(s, f)], f)
+                    hl = behavioural_threshold(self.cases[s], f)
                 except ValueError:
                     self.hl[(s, f)] = self.phys[(s, f)] = False
+                    continue
+                self.hl[(s, f)] = hl
+                if patron == 'normal':
+                    self.phys[(s, f)] = physiological_threshold(hl, f)
+                else:
+                    self.phys[(s, f)] = desync_threshold(
+                        self.cases[s], s, f, hl, patron)
         self.reset()
 
     # ------------------------------------------------------------------
@@ -280,14 +355,16 @@ class Recording:
                 continue
             lado_opuesto = 'OI' if side == 'OD' else 'OD'
             sl_nivel = self.levels[(side, f)]
-            amp = response_amplitude_uv(sl_nivel, self.phys[(side, f)], f)
+            amp = (response_amplitude_uv(sl_nivel, self.phys[(side, f)], f)
+                   * self.amp_factor[(side, f)])
             # Cruce de sonido al otro oído: la línea tiene la modulación del
             # oído estimulado aunque la responda la cóclea contraria.
             if self.has_ear(lado_opuesto):
                 cruzado = sl_nivel - INTERAURAL_ATTENUATION.get(
                     self.transducer, 65.0)
                 amp = max(amp, response_amplitude_uv(
-                    cruzado, self.phys[(lado_opuesto, f)], f))
+                    cruzado, self.phys[(lado_opuesto, f)], f)
+                    * self.amp_factor[(lado_opuesto, f)])
             k = FM_BIN[side][CARRIERS.index(f)]
             fase = -2.0 * np.pi * (k * DF) * GROUP_DELAY_S[f]
             sig[k] += amp * np.exp(1j * fase)
