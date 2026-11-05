@@ -28,6 +28,7 @@ from test_abr_panel import _banda, _capturar, _caso  # noqa: E402  (crea el QApp
 import numpy as np  # noqa: E402
 from abr.ABR_generator import ABRGenerator  # noqa: E402
 from abr.AbrMainWindow import AbrMainWindow  # noqa: E402
+from core import cabeza_electrodos as ce  # noqa: E402
 
 
 def _ventana(montar):
@@ -196,6 +197,59 @@ def test_paciente_nuevo_piel_nueva():
     w.montaje.de_libro(1)
     w.la_super(_caso(), 43)
     assert w.montaje.colocados
+
+
+
+def test_sin_fonos_no_llega_el_estimulo():
+    def sin_fonos(m):
+        m.de_libro(1)
+        for canal in ('OD', 'OI'):
+            m._sacar_fono(canal)
+    w = _ventana(sin_fonos)
+    assert w.technical['fonos']['OD']['oido'] is None
+    assert w.last_metadata['fsp'] < _ventana(_de_libro).last_metadata['fsp'] / 2
+
+
+def test_fonos_cruzados_registran_el_otro_oido():
+    caso = _caso()
+    caso['ABR']['OI']['umbral'] = 100          # oído izquierdo sin respuesta
+    def cruzados(m):
+        m.de_libro(1)
+        for canal, oido in (('OD', 'OI'), ('OI', 'OD')):
+            m.fonos.apretar(canal, ahora=0.0)
+            m.fonos.soltar(canal, ahora=2.0)
+            m.fonos.poner(canal, oido, ahora=2.0)
+        m._pintar()
+    w = AbrMainWindow({'name': 'Docente', 'user': 'doc', 'permission': 'admin'})
+    w.la_super(caso, 42)
+    w.control.sb_prom.setValue(2000)
+    w.control.sb_rate.setValue(21.1)
+    _banda(w, '100', '3000')
+    cruzados(w.montaje)
+    w.tabWidget.setCurrentWidget(w.abr)
+    _capturar(w, 80, 'OD')
+    assert w.last_metadata['fsp'] < _ventana(_de_libro).last_metadata['fsp'] / 2
+    assert ('fono_cruzado', 'OD') in w.montaje.errores
+
+
+def test_el_ruido_sale_por_el_otro_fono():
+    w = _ventana(_de_libro)
+    setting = dict(w.current_setting, mkg=60)
+    real, s, _t = w._por_los_fonos('OD', setting)
+    assert real == 'OD' and s['mkg'] == 60
+    w.montaje._sacar_fono('OI')
+    _real, s, t = w._por_los_fonos('OD', setting)
+    assert s['mkg'] == 0 and t['masking_offset_db'] == 0.0
+    # A medio meter el estímulo llega con menos nivel.
+    w.montaje.fonos.poner('OI', 'OI', ahora=0.0)     # sin enrollar
+    w.montaje._pintar()
+    _real, s, _t = w._por_los_fonos('OI', dict(setting, int=80))
+    assert s['int'] == 80 - ce.PERDIDA_SUPERFICIAL_DB
+
+
+def test_el_informe_lleva_los_fonos():
+    w = _ventana(_de_libro)
+    assert w.session_payload()['fonos']['OD'] == {'oido': 'OD', 'profunda': True, 'oliva': 'adulto'}
 
 
 if __name__ == "__main__":

@@ -7944,3 +7944,41 @@ en qué equipo.
   hasta cerrar la app (no hay registro del cierre por equipo).
 - Sin cambio en la app: ya manda el equipo al iniciar sesión. Empieza a
   contar cuando se sube el backend; lo de antes no se puede reconstruir.
+
+## Fonos de inserción en la cabeza de electrodos (2026-11-05)
+
+El alumno pone los fonos de inserción en la pestaña Electrodos, sobre la
+misma cabeza giratoria (`core/cabeza_electrodos.py`). No se volvió a
+fotografiar la cabeza en labyrinthus3d: los fonos se dibujan encima, con
+puntos 3D proyectados en cada cuadro como los electrodos (espuma en el
+conducto, tubo detrás del lóbulo, caja del transductor colgando). Así se
+ponen y se sacan; en las fotos quedarían fijos.
+
+- **Canal = color, oído = donde quedó.** El rojo es el canal OD del equipo
+  y el azul el OI. Lo que sale por un canal llega al oído donde quedó ese
+  fono: cruzados, la curva rotulada "OD" es la del oído izquierdo (con la
+  referencia ipsi de ese lado). Sin fono en el canal no llega sonido: se
+  trata como el tubo pinzado (queda el artefacto, no la respuesta).
+- **Espuma.** Se mantiene apretado *Comprimir* (2 s para enrollarla) y se
+  hace clic en el conducto antes de que se expanda (10 s suelta). Enrollada
+  al menos 70 % entra al fondo; si no, queda a medio meter, se dibuja
+  asomando y pierde 10 dB. Cifras de trabajo, no de una norma
+  (`COMPRIMIR_S`, `EXPANDE_S`, `PROFUNDA_MIN`, `PERDIDA_*`).
+- **Olivas.** Adulto o infantil. Infantil en un conducto de adulto (13 años
+  o más) no sella: −10 dB. **Oliva de adulto a un bebé** (menos de 3 años,
+  `vigilia.es_bebe`): no entra, sale el aviso "¡El bebé está llorando!"
+  (no modal) y el bebé se despierta (`vigilia.despertar`): hay que volver a
+  pedir que lo duerman.
+- **Enmascaramiento.** Sale por el otro canal: sin ese fono puesto no llega
+  (también anula el offset relativo de Parámetros avanzados). Con vibrador o
+  supraaural el estímulo no pasa por los fonos, pero el ruido sí.
+- Se aplica en `AbrMainWindow._por_los_fonos` a ABR, ECochG y corticales; el
+  setting de la ventana no se toca, así que la curva se rotula con lo que el
+  alumno pidió. Viaja en `montaje_estado` (retomar) y en el informe
+  (`fonos`); los errores van a `preparacion_errores`.
+- Registro: `abr_fono_comprimir/poner/sacar/oliva/llanto` en action_logs,
+  con rótulos en `Metrics::ACTION_LABELS` y el prefijo `abr_` en
+  `AlumnoIndicadores::EQUIPOS`.
+- Queda fuera por ahora: el ASSR no mira los fonos (estimula los dos oídos
+  a la vez y su registro arma los canales por su cuenta); la profundidad no
+  cambia la atenuación interaural.

@@ -265,6 +265,113 @@ def test_colores_de_los_cables():
     assert ce.COLOR_ROL["activo"].upper() == "#FFFFFF"
 
 
+
+# --- Fonos de inserción ------------------------------------------------
+
+def test_espuma_se_enrolla_apretando_y_se_expande_sola():
+    f = ce.FonosInsercion()
+    f.apretar("OD", ahora=0.0)
+    assert abs(f.fonos["OD"].compresion(1.0) - 0.5) < 1e-9
+    f.soltar("OD", ahora=ce.COMPRIMIR_S)
+    assert f.fonos["OD"].compresion(ce.COMPRIMIR_S) == 1.0
+    # Suelta, vuelve sola a su tamaño.
+    assert f.fonos["OD"].compresion(ce.COMPRIMIR_S + ce.EXPANDE_S) == 0.0
+
+
+def test_enrollada_entra_al_fondo_y_expandida_queda_a_medio_meter():
+    f = ce.FonosInsercion()
+    f.apretar("OD", ahora=0.0)
+    f.soltar("OD", ahora=2.0)
+    f.poner("OD", "OD", ahora=3.0)
+    assert f.fonos["OD"].profunda and f.entrega("OD") == ("OD", 0.0)
+    # El azul se mete sin enrollar: superficial, se fuga sonido.
+    f.poner("OI", "OI", ahora=3.0)
+    oido, perdida = f.entrega("OI")
+    assert oido == "OI" and perdida == ce.PERDIDA_SUPERFICIAL_DB
+    assert ("espuma_sin_comprimir", "OI") in f.errores
+    # Enrollada pero tarde: ya se expandió.
+    g = ce.FonosInsercion()
+    g.apretar("OD", ahora=0.0)
+    g.soltar("OD", ahora=2.0)
+    g.poner("OD", "OD", ahora=2.0 + ce.EXPANDE_S * 0.5)
+    assert not g.fonos["OD"].profunda
+
+
+def test_fonos_cruzados_y_uno_por_oido():
+    f = ce.FonosInsercion()
+    f.poner("OD", "OI", ahora=0.0)
+    assert f.entrega("OD")[0] == "OI" and ("fono_cruzado", "OD") in f.errores
+    f.poner("OI", "OI", ahora=0.0)          # el azul saca al rojo de ese oído
+    assert f.fonos["OD"].oido is None and f.entrega("OD") == (None, 0.0)
+
+
+def test_oliva_infantil_no_sella_en_adulto():
+    f = ce.FonosInsercion()
+    f.cambiar_oliva("OD", "infantil")
+    f.apretar("OD", ahora=0.0)
+    f.soltar("OD", ahora=2.0)
+    f.poner("OD", "OD", ahora=2.0)
+    assert f.entrega("OD", adulto=True)[1] == ce.PERDIDA_OLIVA_CHICA_DB
+    assert f.entrega("OD", adulto=False)[1] == 0.0
+
+
+def test_el_clic_tiene_que_caer_en_el_conducto():
+    assert ce.FonosInsercion.oido_en(_sitio("cae_der")[0]) == "OD"
+    assert ce.FonosInsercion.oido_en(_sitio("cae_izq")[0]) == "OI"
+    assert ce.FonosInsercion.oido_en(_sitio("M2")[0]) is None
+
+
+def _clic_en_conducto(m, sitio, giro):
+    QTest.qWaitForWindowExposed(m)
+    m.cabeza.mirar(giro, 0)
+    QTest.qWait(30)
+    pt = _en_pantalla(m, sitio)
+    QTest.mouseMove(m.cabeza, pt)
+    QTest.qWait(30)
+    QTest.mouseClick(m.cabeza, Qt.MouseButton.LeftButton, pos=pt)
+
+
+def test_poner_el_fono_con_el_mouse():
+    m = _montaje()
+    acciones = []
+    m.accion.connect(lambda a, d: acciones.append((a, d)))
+    QTest.mousePress(m.botones_comprimir["OD"], Qt.MouseButton.LeftButton)
+    QTest.qWait(int(ce.COMPRIMIR_S * 1000) + 100)
+    QTest.mouseRelease(m.botones_comprimir["OD"], Qt.MouseButton.LeftButton)
+    assert m.cabeza.herramienta == "fono" and m.barra_espuma["OD"].value() > 90
+    _clic_en_conducto(m, "cae_der", 90)
+    assert m.fonos.fonos["OD"].oido == "OD" and m.fonos.fonos["OD"].profunda
+    assert m.botones_comprimir["OD"].text() == "Puesto" and m.fono_actual == "OI"
+    assert [a for a, _ in acciones] == ["abr_fono_comprimir", "abr_fono_poner"]
+    assert m.equipo()["fonos"]["OD"] == {"oido": "OD", "perdida_db": 0.0}
+    # Se dibuja sin romper, de frente y de lado.
+    for giro in (0, 90, 180):
+        m.cabeza.mirar(giro, 0)
+        m.cabeza.grab()
+    # Y vuelve igual al retomar la atención.
+    otro = _montaje()
+    assert otro.restaurar(m.estado())
+    assert otro.fonos.estado() == m.fonos.estado()
+
+
+def test_oliva_de_adulto_a_un_bebe_llora():
+    m = _montaje()
+    m.paciente = {"id": 7, "edad": 0.5}
+    acciones = []
+    m.accion.connect(lambda a, d: acciones.append(a))
+    m._elegir_fono("OD")
+    _clic_en_conducto(m, "cae_der", 90)
+    assert m.fonos.fonos["OD"].oido is None
+    assert m.aviso_llanto is not None and m.aviso_llanto.isVisible()
+    assert "llorando" in m.aviso_llanto.text()
+    assert ("oliva_adulto_bebe", "OD") in m.errores and acciones == ["abr_fono_llanto"]
+    m.aviso_llanto.close()
+    # Con la infantil entra.
+    m.combo_oliva["OD"].setCurrentIndex(m.combo_oliva["OD"].findData("infantil"))
+    _clic_en_conducto(m, "cae_der", 90)
+    assert m.fonos.fonos["OD"].oido == "OD"
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

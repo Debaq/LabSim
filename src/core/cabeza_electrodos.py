@@ -35,8 +35,9 @@ from collections import OrderedDict
 import numpy as np
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QImage, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QProgressBar, QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QButtonGroup, QComboBox, QFrame, QGridLayout, QHBoxLayout,
+                               QLabel, QMessageBox, QProgressBar, QPushButton, QSizePolicy,
+                               QVBoxLayout, QWidget)
 
 from core import iconos, tema
 from core.base import context
@@ -199,8 +200,10 @@ class Geometria:
         ry = np.array([[math.cos(b), 0, math.sin(b)], [0, 1, 0], [-math.sin(b), 0, math.cos(b)]])
         return rx @ ry
 
-    def proyectar(self, puntos, normales, inclinacion, giro):
-        """Puntos de la piel (marco de la cabeza) -> (px de la foto, a la vista)."""
+    def proyectar(self, puntos, normales, inclinacion, giro, umbral=0.0):
+        """Puntos de la piel (marco de la cabeza) -> (px de la foto, a la vista).
+        Con `umbral` negativo se ve también algo de lo que queda de canto (lo
+        que asoma de la cabeza, como un fono)."""
         r = self.rotacion(inclinacion, giro)
         mundo = np.atleast_2d(puntos) @ r.T
         nm = np.atleast_2d(normales) @ r.T
@@ -209,7 +212,9 @@ class Geometria:
         y = self.foco * cam[:, 1] / -cam[:, 2]
         px = np.stack([(x + 1) / 2 * self.tam, (1 - y) / 2 * self.tam], axis=1)
         # De frente a la cámara: la normal apunta hacia ella.
-        visible = np.einsum("ij,ij->i", nm, self.ojo - mundo) > 0
+        hacia = self.ojo - mundo
+        hacia /= np.maximum(np.linalg.norm(hacia, axis=1, keepdims=True), 1e-12)
+        visible = np.einsum("ij,ij->i", nm, hacia) > umbral
         return px, visible
 
     def rayo(self, x, y, inclinacion, giro):
@@ -524,11 +529,149 @@ def ganancia_montaje(activo, referencias):
 
     return GANANCIA_ACTIVO[za] * float(np.mean([ref(r) for r in referencias]))
 
+
+# --- Fonos de inserción ------------------------------------------------
+# El rojo es el canal OD del equipo y el azul el OI: lo que sale por cada uno
+# llega al oído donde quedó metido, no al que dice el color. La espuma hay
+# que enrollarla (apretarla) antes de meterla; fuera del conducto vuelve
+# sola a su tamaño y, si se expandió antes de entrar, queda a medio meter.
+# Son criterio de trabajo para que el ejercicio funcione, no cifras de una
+# norma: ajustarlas acá.
+FONOS = (("OD", "Rojo (OD)", tema.OD), ("OI", "Azul (OI)", tema.OI))
+OLIVAS = (("adulto", "Adulto"), ("infantil", "Infantil"))
+COMPRIMIR_S = 2.0               # apretando entre los dedos: de libre a enrollada
+EXPANDE_S = 10.0                # suelta, de enrollada a libre
+PROFUNDA_MIN = 0.7              # enrollada al menos esto al meterla: entra hasta el fondo
+EN_CONDUCTO_M = 0.015           # el clic cae a menos de 1,5 cm del conducto
+PERDIDA_SUPERFICIAL_DB = 10.0   # a medio meter: el sonido se fuga
+PERDIDA_OLIVA_CHICA_DB = 10.0   # infantil en un conducto de adulto: no sella
+OIDO_DE_SITIO = {"cae_der": "OD", "cae_izq": "OI"}
+
+
+class Fono:
+    def __init__(self, oliva="adulto"):
+        self.oliva = oliva
+        self.oido = None          # 'OD'/'OI' donde quedó metido, None en la mesa
+        self.profunda = False
+        self._compresion = 0.0    # al momento _desde
+        self._desde = 0.0
+        self._apretando = False
+
+    def compresion(self, ahora=None):
+        """0 libre, 1 enrollada. Mientras se aprieta sube; suelta, baja."""
+        if self.oido is not None:
+            return 0.0            # adentro se expandió y sella
+        ahora = time.monotonic() if ahora is None else ahora
+        dt = max(0.0, ahora - self._desde)
+        if self._apretando:
+            return min(1.0, self._compresion + dt / COMPRIMIR_S)
+        return max(0.0, self._compresion - dt / EXPANDE_S)
+
+    def _fijar(self, ahora, apretando):
+        self._compresion = self.compresion(ahora)
+        self._desde = ahora
+        self._apretando = apretando
+
+
+class FonosInsercion:
+    """Los dos fonos: enrollar la espuma, meterla en un conducto, sacarla, y
+    lo que entonces le llega a cada oído."""
+
+    def __init__(self):
+        self.fonos = {canal: Fono() for canal, _, _ in FONOS}
+        self.errores = []         # (qué, canal): para la evaluación, no se muestra
+
+    def apretar(self, canal, ahora=None):
+        f = self.fonos[canal]
+        if f.oido is None:
+            f._fijar(time.monotonic() if ahora is None else ahora, True)
+
+    def soltar(self, canal, ahora=None):
+        f = self.fonos[canal]
+        if f.oido is None:
+            f._fijar(time.monotonic() if ahora is None else ahora, False)
+
+    def cambiar_oliva(self, canal, oliva):
+        f = self.fonos[canal]
+        if f.oido is None:
+            f.oliva = oliva
+
+    @staticmethod
+    def oido_en(punto):
+        """El conducto bajo un punto de la piel ('OD'/'OI'), o None."""
+        d = datos()
+        mejor = None
+        for sitio, oido in OIDO_DE_SITIO.items():
+            dist = float(np.linalg.norm(d["pos"][d["por_id"][sitio]] - punto))
+            if dist <= EN_CONDUCTO_M and (mejor is None or dist < mejor[1]):
+                mejor = (oido, dist)
+        return mejor[0] if mejor else None
+
+    def poner(self, canal, oido, ahora=None):
+        """Mete el fono en ese conducto (el que había ahí vuelve a la mesa).
+        Entra hasta el fondo solo si la espuma iba enrollada."""
+        f = self.fonos[canal]
+        ahora = time.monotonic() if ahora is None else ahora
+        comp = f.compresion(ahora)
+        for otro in self.fonos.values():
+            if otro is not f and otro.oido == oido:
+                self._a_la_mesa(otro, ahora)
+        f.oido = oido
+        f.profunda = comp >= PROFUNDA_MIN
+        f._apretando = False
+        if not f.profunda:
+            self.errores.append(("espuma_sin_comprimir", canal))
+        if canal != oido:
+            self.errores.append(("fono_cruzado", canal))
+        return comp
+
+    def sacar(self, canal, ahora=None):
+        self._a_la_mesa(self.fonos[canal], time.monotonic() if ahora is None else ahora)
+
+    @staticmethod
+    def _a_la_mesa(f, ahora):
+        f.oido = None
+        f.profunda = False
+        f._compresion, f._desde, f._apretando = 0.0, ahora, False
+
+    def expandiendo(self, ahora=None):
+        """Si alguna espuma está cambiando de tamaño (para animar la barra)."""
+        return any(f.oido is None and (f._apretando or f.compresion(ahora) > 0)
+                   for f in self.fonos.values())
+
+    def entrega(self, canal, adulto=True):
+        """Lo que sale por ese canal del equipo: (oído al que llega o None,
+        dB que se pierden en el camino)."""
+        f = self.fonos[canal]
+        if f.oido is None:
+            return None, 0.0
+        perdida = 0.0 if f.profunda else PERDIDA_SUPERFICIAL_DB
+        if adulto and f.oliva == "infantil":
+            perdida += PERDIDA_OLIVA_CHICA_DB
+        return f.oido, perdida
+
+    def equipo(self, adulto=True):
+        return {canal: dict(zip(("oido", "perdida_db"), self.entrega(canal, adulto)))
+                for canal in self.fonos}
+
+    def estado(self):
+        return {canal: {"oido": f.oido, "profunda": f.profunda, "oliva": f.oliva}
+                for canal, f in self.fonos.items()}
+
+    def restaurar(self, d):
+        for canal, f in self.fonos.items():
+            e = (d or {}).get(canal) or {}
+            f.oliva = e.get("oliva") if e.get("oliva") in dict(OLIVAS) else "adulto"
+            f.oido = e.get("oido") if e.get("oido") in ("OD", "OI") else None
+            f.profunda = bool(e.get("profunda")) and f.oido is not None
+
+
 HERRAMIENTAS = (
     ("girar", "Girar"),
     ("alcohol", "Alcohol"),
     ("gel", "Gel exfoliante"),
     ("electrodo", "Electrodo"),
+    ("fono", "Fono"),
 )
 
 
@@ -553,6 +696,7 @@ class CabezaElectrodos(QWidget):
         self.piel = None          # Piel, para dibujar lo limpiado
         self.colocados = {}       # rol -> Electrodo
         self.estados = {}         # rol -> 'ok'/'aviso'/'alerta' de la impedancia medida
+        self.fonos = None         # FonosInsercion, para dibujarlos
         self._apretado = None
         self._arrastrando = False
         self._trazo = None        # la pasada en curso
@@ -663,6 +807,7 @@ class CabezaElectrodos(QWidget):
         if self.ver_puntos:
             self._dibujar_sitios(p)
         self._dibujar_electrodos(p)
+        self._dibujar_fonos(p, escala)
         if self._trazo is not None and self._trazo["pantalla"]:
             # El algodón bajo el dedo.
             p.setPen(QPen(QColor("#C9C2C8"), 1))
@@ -739,6 +884,53 @@ class CabezaElectrodos(QWidget):
             p.setBrush(QColor(COLOR_ROL[rol]))
             p.drawEllipse(pt, 7.5, 7.5)
 
+    def _dibujar_fonos(self, p, escala):
+        """Cada fono metido: el tubo que baja por detrás de la oreja, la caja
+        del transductor colgando y la espuma en el conducto (asomando si
+        quedó a medio meter). Se ven mientras su lado no mire al otro lado."""
+        if self.fonos is None:
+            return
+        d = datos()
+        inc, giro = self._angulos()
+        px_por_m = self.geo.foco * self.geo.tam / 2 / self.geo.ojo[2] * escala
+        for canal, _nombre, color in FONOS:
+            f = self.fonos.fonos[canal]
+            if f.oido is None:
+                continue
+            sitio = next(s for s, o in OIDO_DE_SITIO.items() if o == f.oido)
+            c = d["pos"][d["por_id"][sitio]]
+            lat = np.array([1.0 if c[0] > 0 else -1.0, 0.0, 0.0])
+            afuera = 0.003 if f.profunda else 0.010
+            puntos = np.array([
+                c + lat * afuera,                                     # espuma
+                c + lat * (afuera + 0.006),                           # sale el tubo
+                [c[0] + lat[0] * 0.018, c[1] - 0.030, c[2] - 0.012],  # detrás del lóbulo
+                [c[0] + lat[0] * 0.014, -0.100, c[2] - 0.010],
+                [c[0] * 0.85, -0.150, c[2] + 0.010],                  # caja del transductor
+            ])
+            px, vis = self.geo.proyectar(puntos, [lat] * len(puntos), inc, giro, umbral=-0.3)
+            if not vis[0]:
+                continue
+            pant = [self._a_pantalla(xy) for xy in px]
+            tubo = QPainterPath(pant[1])
+            tubo.cubicTo(pant[2], pant[3], pant[4])
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.setPen(QPen(QColor(120, 125, 135, 220), max(2.0, 0.0025 * px_por_m)))
+            p.drawPath(tubo)
+            caja = QRectF(0, 0, 0.018 * px_por_m, 0.026 * px_por_m)
+            caja.moveCenter(pant[4])
+            p.setPen(QPen(QColor(color), 2))
+            p.setBrush(QColor("#3B3F46"))
+            p.drawRoundedRect(caja, 3, 3)
+            # Al fondo se ve solo la cara de atrás de la espuma; a medio
+            # meter asoma entera en la concha, más grande.
+            radio = (0.0042 if f.oliva == "adulto" else 0.0030) * px_por_m
+            if not f.profunda:
+                radio *= 1.7
+            p.setPen(QPen(QColor(color), 2.5))
+            p.setBrush(QColor("#E8C46A"))
+            p.drawEllipse(pant[0], radio, radio)
+
     # ------------------------------------------------------------ mouse
     def mousePressEvent(self, ev):
         if ev.button() != Qt.MouseButton.LeftButton:
@@ -798,7 +990,7 @@ class CabezaElectrodos(QWidget):
         self._apretado = None
         self._arrastrando = False
         self.setCursor(Qt.CursorShape.OpenHandCursor)
-        if not arrastro and self.herramienta == "electrodo":
+        if not arrastro and self.herramienta in ("electrodo", "fono"):
             tocado = self.tocar(ev.position())
             if tocado is not None:
                 self.punto_elegido.emit(tocado[0], tocado[1])
@@ -875,17 +1067,22 @@ class MontajeElectrodos(QWidget):
     """Prototipo: la cabeza y un panel para preparar la piel, poner activo,
     referencia(s) y tierra donde el alumno quiera y medir sus impedancias."""
     montaje_cambio = Signal(dict)
+    accion = Signal(str, dict)    # lo que hace el alumno, para action_logs (abr_...)
 
     PISTAS = {
         "girar": "Arrastra para girar la cabeza.",
         "alcohol": "Pasa el algodón con alcohol: arrastra sobre la piel.",
         "gel": "Pasa el algodón con gel exfoliante: arrastra sobre la piel.",
         "electrodo": "Clic en la piel pone el electrodo elegido.",
+        "fono": "Mantén apretado Comprimir y haz clic en el conducto antes de que la espuma se expanda.",
     }
 
     def __init__(self, parent=None, rng=None):
         super().__init__(parent)
         self.impedancias = Impedancias(rng)
+        self.fonos = FonosInsercion()
+        self.paciente = None      # el caso en atención: edad para las olivas
+        self.aviso_llanto = None
         tema.aplicar_estilo(self, EXTRA_QSS)
         raiz = QHBoxLayout(self)
         raiz.setContentsMargins(12, 10, 12, 12)
@@ -897,6 +1094,7 @@ class MontajeElectrodos(QWidget):
         col.setContentsMargins(8, 8, 8, 8)
         self.cabeza = CabezaElectrodos()
         self.cabeza.piel = self.impedancias.piel
+        self.cabeza.fonos = self.fonos
         self.cabeza.punto_elegido.connect(self._poner_en)
         self.cabeza.pasada.connect(self._pasada)
         col.addWidget(self.cabeza, 1)
@@ -995,6 +1193,9 @@ class MontajeElectrodos(QWidget):
         pcol.addLayout(grilla)
 
         pcol.addSpacing(4)
+        pcol.addLayout(self._seccion_fonos())
+
+        pcol.addSpacing(4)
         pcol.addWidget(self._seccion("NORMA"))
         fila = QHBoxLayout()
         fila.setSpacing(4)
@@ -1036,6 +1237,62 @@ class MontajeElectrodos(QWidget):
         lbl = QLabel(texto)
         lbl.setProperty("role", "seccion")
         return lbl
+
+    def _seccion_fonos(self):
+        """Un fono por fila: elegirlo (y pasar a la herramienta Fono), la
+        oliva, sacarlo; abajo Comprimir (se mantiene apretado) y cuánto va
+        enrollada la espuma."""
+        col = QVBoxLayout()
+        col.setSpacing(4)
+        col.addWidget(self._seccion("FONOS DE INSERCIÓN"))
+        self.grupo_fono = QButtonGroup(self)
+        self.botones_fono, self.combo_oliva, self.barra_espuma = {}, {}, {}
+        self.botones_comprimir = {}
+        grilla = QGridLayout()
+        grilla.setHorizontalSpacing(4)
+        grilla.setVerticalSpacing(3)
+        grilla.setColumnStretch(0, 1)
+        for i, (canal, nombre, color) in enumerate(FONOS):
+            b = QPushButton(" " + nombre)
+            b.setIcon(_punto(color))
+            b.setCheckable(True)
+            b.setProperty("rol", canal)
+            b.clicked.connect(lambda _=False, c=canal: self._elegir_fono(c))
+            self.grupo_fono.addButton(b)
+            combo = QComboBox()
+            for clave, texto in OLIVAS:
+                combo.addItem(texto, clave)
+            combo.setToolTip("Oliva de espuma")
+            combo.currentIndexChanged.connect(lambda _i, c=canal: self._cambiar_oliva(c))
+            quitar = QPushButton()
+            quitar.setIcon(iconos.icono_boton("cerrar", tema.TEXTO_TENUE, tam=12))
+            quitar.setToolTip("Sacar este fono")
+            quitar.setFixedSize(24, 22)
+            quitar.clicked.connect(lambda _=False, c=canal: self._sacar_fono(c))
+            comprimir = QPushButton("Comprimir")
+            comprimir.setProperty("chico", "true")
+            comprimir.setToolTip("Mantén apretado para enrollar la espuma")
+            comprimir.pressed.connect(lambda c=canal: self._apretar(c))
+            comprimir.released.connect(lambda c=canal: self._soltar(c))
+            barra = QProgressBar()
+            barra.setRange(0, 100)
+            barra.setTextVisible(False)
+            barra.setToolTip("Cuánto va enrollada la espuma")
+            grilla.addWidget(b, i * 2, 0)
+            grilla.addWidget(combo, i * 2, 1)
+            grilla.addWidget(quitar, i * 2, 2)
+            grilla.addWidget(comprimir, i * 2 + 1, 0)
+            grilla.addWidget(barra, i * 2 + 1, 1, 1, 2)
+            self.botones_fono[canal] = b
+            self.combo_oliva[canal] = combo
+            self.botones_comprimir[canal] = comprimir
+            self.barra_espuma[canal] = barra
+        col.addLayout(grilla)
+        self.fono_actual = "OD"
+        self._espuma = QTimer(self)
+        self._espuma.setInterval(50)
+        self._espuma.timeout.connect(self._pintar_fonos)
+        return col
 
     def _seccion_impedancias(self):
         col = QVBoxLayout()
@@ -1093,6 +1350,103 @@ class MontajeElectrodos(QWidget):
         self.pista.setText(self.PISTAS[clave] + " Fuera de la cabeza, arrastrar la gira."
                            if clave != "girar" else self.PISTAS[clave])
 
+    # ------------------------------------------------------------ fonos
+    def _edad(self):
+        try:
+            return max(float((self.paciente or {}).get("edad") or 0), 0.0)
+        except (TypeError, ValueError, AttributeError):
+            return 0.0
+
+    def _es_bebe(self):
+        from abr import vigilia
+        return self.paciente is not None and vigilia.es_bebe(self.paciente)
+
+    def _es_adulto(self):
+        """Conducto de adulto: la oliva infantil no sella."""
+        return self.paciente is None or self._edad() >= 13
+
+    def _elegir_fono(self, canal):
+        self.fono_actual = canal
+        self.botones_fono[canal].setChecked(True)
+        self.elegir_herramienta("fono")
+
+    def _cambiar_oliva(self, canal):
+        oliva = self.combo_oliva[canal].currentData()
+        if self.fonos.fonos[canal].oliva != oliva:
+            self.fonos.cambiar_oliva(canal, oliva)
+            self.accion.emit("abr_fono_oliva", {"canal": canal, "oliva": oliva})
+            self._pintar()
+
+    def _apretar(self, canal):
+        self._elegir_fono(canal)
+        self.fonos.apretar(canal)
+        self._espuma.start()
+
+    def _soltar(self, canal):
+        self.fonos.soltar(canal)
+        self.accion.emit("abr_fono_comprimir", {
+            "canal": canal, "compresion": round(self.fonos.fonos[canal].compresion(), 2)})
+        self._espuma.start()
+
+    def _poner_fono(self, punto):
+        canal = self.fono_actual
+        f = self.fonos.fonos[canal]
+        oido = FonosInsercion.oido_en(punto)
+        if oido is None:
+            self.pista.setText("El fono va en el conducto auditivo.")
+            return
+        if f.oliva == "adulto" and self._es_bebe():
+            # No entra: el bebé se despierta llorando y el fono sigue en la mano.
+            self.fonos.errores.append(("oliva_adulto_bebe", canal))
+            self.accion.emit("abr_fono_llanto", {"canal": canal, "oido": oido, "oliva": f.oliva})
+            from abr import vigilia
+            case_id = (self.paciente or {}).get("id")
+            if case_id not in (None, ""):
+                vigilia.despertar(case_id)
+            self._llorar()
+            return
+        comp = self.fonos.poner(canal, oido)
+        self.accion.emit("abr_fono_poner", {
+            "canal": canal, "oido": oido, "oliva": f.oliva, "compresion": round(comp, 2),
+            "profunda": f.profunda, "cruzado": canal != oido})
+        # Pasa solo al que falta, como con los electrodos.
+        falta = next((c for c, _, _ in FONOS if self.fonos.fonos[c].oido is None), None)
+        if falta:
+            self.fono_actual = falta
+            self.botones_fono[falta].setChecked(True)
+        self._pintar()
+
+    def _llorar(self):
+        if self.aviso_llanto is not None:
+            self.aviso_llanto.close()
+        caja = QMessageBox(QMessageBox.Icon.Warning, "El bebé está llorando",
+                           "¡El bebé está llorando!", QMessageBox.StandardButton.Ok, self)
+        caja.setWindowModality(Qt.WindowModality.NonModal)
+        caja.show()
+        self.aviso_llanto = caja
+
+    def _sacar_fono(self, canal):
+        if self.fonos.fonos[canal].oido is not None:
+            self.fonos.sacar(canal)
+            self.accion.emit("abr_fono_sacar", {"canal": canal})
+        self._pintar()
+
+    def _pintar_fonos(self):
+        for canal, f in self.fonos.fonos.items():
+            self.barra_espuma[canal].setValue(int(round(f.compresion() * 100)))
+            puesto = f.oido is not None
+            combo = self.combo_oliva[canal]
+            combo.blockSignals(True)
+            combo.setCurrentIndex(max(0, combo.findData(f.oliva)))
+            combo.blockSignals(False)
+            # La oliva se cambia con el fono en la mano, no metido.
+            combo.setEnabled(not puesto)
+            self.botones_comprimir[canal].setEnabled(not puesto)
+            self.botones_comprimir[canal].setText("Puesto" if puesto else "Comprimir")
+        if not self.fonos.expandiendo():
+            self._espuma.stop()
+        self.cabeza.update()
+
     def _ver_puntos(self, ver):
         self.cabeza.poner_ver_puntos(ver)
         self._pintar()
@@ -1144,6 +1498,9 @@ class MontajeElectrodos(QWidget):
         self._pintar()
 
     def _poner_en(self, punto, normal):
+        if self.cabeza.herramienta == "fono":
+            self._poner_fono(punto)
+            return
         e = Electrodo(punto, normal)
         # Dos electrodos en la misma piel no caben: el nuevo saca al otro.
         for rol, otro in list(self.colocados.items()):
@@ -1176,6 +1533,8 @@ class MontajeElectrodos(QWidget):
         self.colocados = {}
         self.impedancias.z.clear()
         self.impedancias.medido.clear()
+        for canal, _, _ in FONOS:
+            self.fonos.sacar(canal)
         self._elegir_rol("activo")
         self._pintar()
 
@@ -1185,13 +1544,16 @@ class MontajeElectrodos(QWidget):
 
     @property
     def errores(self):
-        """Lo mal hecho en la preparación, para la evaluación (no se muestra)."""
-        return list(self.impedancias.errores)
+        """Lo mal hecho en la preparación y con los fonos, para la evaluación
+        (no se muestra)."""
+        return list(self.impedancias.errores) + list(self.fonos.errores)
 
     def reiniciar(self, rng=None):
         """Paciente nuevo: piel sin preparar y sin electrodos."""
         self.impedancias = Impedancias(rng or self.impedancias.piel.rng)
         self.cabeza.piel = self.impedancias.piel
+        self.fonos = FonosInsercion()
+        self.cabeza.fonos = self.fonos
         self.colocados = {}
         self._elegir_rol("activo")
         self.elegir_herramienta("girar")
@@ -1205,7 +1567,8 @@ class MontajeElectrodos(QWidget):
                 "colocados": {rol: {"punto": np.round(e.punto, 5).tolist(),
                                     "normal": np.round(e.normal, 5).tolist()}
                               for rol, e in self.colocados.items()},
-                "z": dict(self.impedancias.z), "medido": dict(self.impedancias.medido)}
+                "z": dict(self.impedancias.z), "medido": dict(self.impedancias.medido),
+                "fonos": self.fonos.estado()}
 
     def restaurar(self, estado):
         """Vuelve un montaje guardado con estado(). False si no se pudo."""
@@ -1220,6 +1583,7 @@ class MontajeElectrodos(QWidget):
                                   if k in self.colocados}
             self.impedancias.medido = {k: float(v) for k, v in (estado.get("medido") or {}).items()
                                        if k in self.colocados}
+            self.fonos.restaurar(estado.get("fonos"))
         except (KeyError, TypeError, ValueError) as exc:
             print(f"montaje: no se pudo restaurar: {exc!r}")
             return False
@@ -1249,7 +1613,9 @@ class MontajeElectrodos(QWidget):
             impedance[clave] = float(self.impedancias.z[rol_de[id(e)]]) if e is not None else 2.0
         referencias = [r for r in (der, izq) if r is not None]
         return {"electrodes": electrodes, "impedance": impedance, "channels": self.canales,
-                "electrode_gain": ganancia_montaje(c.get("activo"), referencias)}
+                "electrode_gain": ganancia_montaje(c.get("activo"), referencias),
+                # Por dónde sale cada canal del equipo (ver AbrMainWindow._por_los_fonos).
+                "fonos": self.fonos.equipo(adulto=self._es_adulto())}
 
     def de_libro(self, canales=2, activo="Cz"):
         """Montaje de rutina bien hecho: activo (Cz; "cae_der" para el
@@ -1270,6 +1636,13 @@ class MontajeElectrodos(QWidget):
                     self.impedancias.piel.pasada(herramienta, linea, [normal] * 10)
         for sitio in sitios:
             self.poner_en_sitio(sitio)
+        # Y los fonos, enrollados y cada uno en su oído, con la oliva que va.
+        oliva = "infantil" if self._es_bebe() else "adulto"
+        for canal, _, _ in FONOS:
+            self.fonos.cambiar_oliva(canal, oliva)
+            self.fonos.apretar(canal, ahora=0.0)
+            self.fonos.soltar(canal, ahora=COMPRIMIR_S)
+            self.fonos.poner(canal, canal, ahora=COMPRIMIR_S)
         self.medir()
 
     def montaje(self):
@@ -1302,6 +1675,7 @@ class MontajeElectrodos(QWidget):
         estados = {rol: self.impedancias.estado(rol) for rol in self.colocados
                    if self.impedancias.estado(rol)}
         self.cabeza.poner(self.colocados, estados)
+        self._pintar_fonos()
         self._pintar_impedancias()
         self.montaje_cambio.emit(self.montaje())
 

@@ -38,6 +38,12 @@ final class Metrics
         'audio_prueba_change' => 'Cambio de prueba (umbrales/logoaudiometría)',
         'audio_respuesta' => 'Respuesta del paciente (mano)',
         'audio_caso_cargado' => 'Paciente cargado en el audiómetro',
+        // Potenciales evocados: fonos de inserción (pestaña Electrodos)
+        'abr_fono_comprimir' => 'Fono de inserción: comprimir la espuma',
+        'abr_fono_poner' => 'Fono de inserción: poner en el conducto',
+        'abr_fono_sacar' => 'Fono de inserción: sacar',
+        'abr_fono_oliva' => 'Fono de inserción: cambio de oliva',
+        'abr_fono_llanto' => 'Fono de inserción: oliva de adulto a un bebé (llora)',
         // Impedanciómetro (Z)
         'z_dial_change' => 'Movimiento de dial',
         'z_direction_change' => 'Cambio de dirección de barrido',

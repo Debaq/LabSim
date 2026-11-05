@@ -183,6 +183,9 @@ gap significativo. § Parámetros de audiometría configurables por curso
       pestaña Electrodos.
 - [ ] 72. Sitios del cuerpo (ECM, esternón, clavícula, nuca) para el VEMP:
       fotografiar la persona de pie de labyrinthus3d.
+- [ ] 76. Fonos de inserción en el ASSR (hoy no los mira) y la profundidad
+      de inserción en la atenuación interaural. § Fonos de inserción en la
+      cabeza de electrodos
 
 ### Voces sintéticas
 § Voces sintéticas con Google: plan. Avance en `docs/roadmap_voces.md`

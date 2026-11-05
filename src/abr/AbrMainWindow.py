@@ -402,6 +402,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.technical = default_settings(self.test_actual)
         self._con_montaje()
         self.montaje.montaje_cambio.connect(lambda _m: self._con_montaje())
+        self.montaje.accion.connect(self._registrar)
         # Cada cambio del montaje se guarda en el equipo (un poco después:
         # frotar emite muchos cambios seguidos).
         self._timer_montaje = QTimer(self)
@@ -442,6 +443,20 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
         self.aplicar_monitor()
 
+    def _registrar(self, accion, payload):
+        """Lo que hace el alumno en el montaje, a action_logs (prefijo abr_),
+        con la atencion y el caso, como los demas equipos."""
+        if self.data_current is None:
+            return
+        payload = dict(payload, case_id=self.data_current.get('id'),
+                       appointment_id=self.appointment_id,
+                       edad=self.data_current.get('edad'))
+        try:
+            from backend.log_queue import get_log_queue
+            get_log_queue().push(accion, payload)
+        except Exception as exc:  # noqa: BLE001 -- sin log el examen sigue
+            print(f"ABR: no se pudo registrar {accion}: {exc}")
+
     def _usuario(self):
         return (self.data_login or {}).get('user') or ''
 
@@ -480,6 +495,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.control.stop_capture()
         self.capture_timer.stop()
         self.data_current = data
+        self.montaje.paciente = data
         if appointment_id != self.montaje_cita:
             # Paciente (o atención) nuevo: piel sin preparar, sin electrodos.
             # stable_seed: la misma piel en cualquier proceso (core.rng).
@@ -898,6 +914,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # cuántos mm, impedancia) y lo mal hecho al preparar la piel:
             # el procedimiento, para el docente.
             'electrodos': self.montaje.montaje(),
+            # Donde quedo cada fono (canal -> oido), si entro hasta el fondo y la oliva.
+            'fonos': self.montaje.fonos.estado(),
             'preparacion_errores': [list(e) for e in self.montaje.errores],
             # Todo el montaje, para retomar la atención en otro equipo.
             'montaje_estado': self.montaje.estado(),
@@ -1538,11 +1556,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         prom = [min(self.count_averages / max(self.total_averages, 1), 1.0),
                 self.current_setting['average']]
-        case = self.abr_od if side == "OD" else self.abr_oi
+        real, setting, technical = self._por_los_fonos(side, self.current_setting)
+        case = (self.abr_od if real == "OD" else self.abr_oi) or \
+            (self.abr_od if side == "OD" else self.abr_oi)
         t, trazos, metadata = Cortical_Curve(
-            self.test_actual, intencity, self.current_setting, case,
+            self.test_actual, setting['int'], setting, case,
             self.central, prom, done=self.done, patient=self.data_current,
-            capture_id=self.current_capture_curve, technical=self.technical)
+            capture_id=self.current_capture_curve, technical=technical)
         self.last_metadata = metadata
         grupo = self.current_capture_curve
         data_line = {}
@@ -2224,6 +2244,44 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.memory[name_curve]['fsp_track'] = self.fsp_tracks.get(name_curve, {})
         self.detail_all.process_and_fill_data(self.memory)
 
+    def _por_los_fonos(self, side, setting):
+        """Lo que de verdad le llega al paciente segun los fonos de insercion
+        que puso el alumno (pestana Electrodos): el canal OD sale por el fono
+        rojo y llega al oido donde quedo metido. Devuelve (oido real, setting
+        y technical para el generador); los de la ventana no se tocan, asi
+        que la curva se rotula con lo que el alumno pidio.
+
+        - sin fono en ese canal no llega sonido: como el tubo pinzado (queda
+          el artefacto, no la respuesta);
+        - a medio meter o con oliva chica, se pierden dB en el camino;
+        - el enmascaramiento sale por el otro canal: sin su fono no llega.
+        Con supraaural o vibrador el estimulo no pasa por los fonos, pero el
+        ruido si (ABR_generator: masking_transducer)."""
+        fonos = self.technical.get('fonos')
+        if not fonos:
+            return side, setting, self.technical
+        setting, technical = dict(setting), dict(self.technical)
+        real = side
+        if (technical.get('transducer') or 'insert_earphone') == 'insert_earphone':
+            oido = fonos.get(side, {}).get('oido')
+            if oido is None:
+                setting['clamp'] = True
+            else:
+                real = oido
+                setting['int'] = float(setting['int']) - float(fonos[side].get('perdida_db') or 0.0)
+        ruido_por_inserto = (technical.get('masking_transducer') or 'insert_earphone') == 'insert_earphone'
+        if ruido_por_inserto:
+            otro = 'OI' if side == 'OD' else 'OD'
+            o2 = fonos.get(otro, {}).get('oido')
+            if o2 is None or o2 == real:
+                setting['mkg'] = 0
+                technical['masking_offset_db'] = 0.0
+            elif setting.get('mkg'):
+                setting['mkg'] = max(0.0, float(setting['mkg']) - float(fonos[otro].get('perdida_db') or 0.0))
+        # Decide cual referencia es la ipsi: la del oido estimulado de verdad.
+        setting['side'] = real
+        return real, setting, technical
+
     def test_test(self, side):
 
         """
@@ -2246,11 +2304,18 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
 
         side_idx = 0 if side == "OD" else 1
-        case = self.abr_od if side_idx == 0 else self.abr_oi
+        # El estimulo llega al oido donde quedo el fono de ese canal: con
+        # los fonos cruzados la curva de "OD" es la del oido izquierdo.
+        real, setting, technical = self._por_los_fonos(side, self.current_setting)
+        case = self.abr_od if real == "OD" else self.abr_oi
         # Oido no evaluado: el generador lo necesita para la curva sombra
         # (estimulo que cruza el craneo por sobre la atenuacion interaural
         # y hace responder a la otra coclea si no esta enmascarada).
-        contra = self.abr_oi if side_idx == 0 else self.abr_od
+        contra = self.abr_oi if real == "OD" else self.abr_od
+        if case is None:
+            # Ese oido no trae ABR: al menos que no salga respuesta.
+            case = self.abr_od if side_idx == 0 else self.abr_oi
+            setting = dict(setting, clamp=True)
 
         if case.get("repro", True) == False:
             side_letter = 'r' if side_idx == 0 else 'l'
@@ -2276,14 +2341,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # devuelve canal contralateral ni jitter de reproducibilidad:
             # el ECochG no los tiene.
             x, y, metadata = ECochG_Curve(
-                self.current_setting["int"], self.current_setting, case, prom,
+                setting["int"], setting, case, prom,
                 done=self.done, patient=self.data_current,
                 capture_id=self.current_capture_curve,
-                technical=self.technical)
+                technical=technical)
             return (x, y), None, 0, metadata
 
         x, y, dx, dy, repro, metadata = ABR_Curve(
-            self.current_setting["int"], self.current_setting, case, repro_prev,
+            setting["int"], setting, case, repro_prev,
             prom,
             done=self.done,
             # data_current trae 'edad' y 'gender' del paciente (ver
@@ -2292,7 +2357,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             patient=self.data_current,
             contra=contra,
             capture_id=self.current_capture_curve,
-            technical=self.technical,
+            technical=technical,
         )
 
         contra = (dx, dy) if dy is not None else None
