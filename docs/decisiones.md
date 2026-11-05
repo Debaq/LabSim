@@ -8207,3 +8207,24 @@ Búsqueda de puntos débiles del mismo tipo que las caídas del MDI.
 Queda para conversar: el mouse de zurdos (core/mouse_zurdo.py) también es
 un filtro sobre toda la app. Solo se usa en kiosko; la idea es invertir los
 botones en el sistema operativo del kiosko y no simularlo dentro de LabSim.
+
+## Mouse de zurdos: filtro en cada ventana nativa, no en la app (2026-11-05)
+
+`core/mouse_zurdo.py` era un filtro sobre QApplication (todo evento de la
+app por Python, como el del audiómetro). Ahora va en cada QWindow: invierte
+el evento del sistema antes de que Qt lo reparta y se lo devuelve a la
+misma ventana. A las ventanas que aparecen después (diálogos, menús, la
+lista de un combo) se les pone al clic, al cambiar el foco y, de respaldo,
+cada 500 ms. Por ahora queda así; invertir los botones en el sistema
+operativo del kiosko quedó para más adelante (mucho trabajo).
+
+Al probarlo con clics que entran por la ventana nativa (como los reales)
+salieron dos bugs que ya estaban:
+- **El menú contextual nunca salía con el izquierdo físico.** El filtro
+  descartaba el menú que Qt genera (ya del botón invertido) y el propio no
+  se armaba, porque el evento le llegaba a la ventana nativa y no a un
+  widget. Los tests de antes mandaban el clic directo al widget y no lo
+  veían. Ahora el menú lo genera Qt solo, del botón ya invertido.
+- **Dentro de un diálogo abierto con un clic no se invertía nada**: la
+  bandera de "estoy reenviando" quedaba puesta mientras el exec() del
+  diálogo corría. Ahora el evento propio se reconoce por identidad.

@@ -8,16 +8,22 @@ core/preferencias.py) y se aplica SOLO en modo laboratorio
 (LABSIM_KIOSKO=1, ver core/kiosko.py): en su propio computador lo tiene en
 el sistema, y si LabSim lo invirtiera otra vez quedaría al derecho.
 
-Cómo: un filtro en la QApplication recibe cada evento de mouse antes que
-nadie, lo descarta y manda en su lugar uno igual con los botones
-intercambiados. El menú contextual necesita un paso más: Qt lo genera a
-partir del botón FÍSICO derecho, así que el que corresponde a ese botón se
-descarta y se genera uno propio cuando el botón que "llega" es el derecho.
+Cómo: un filtro en cada ventana NATIVA (QWindow) de la app recibe el evento
+de mouse del sistema antes de que Qt lo reparta a los widgets, lo descarta
+y le manda a la misma ventana uno igual con los botones intercambiados. Qt
+lo reparte como si fuera el original, menú contextual incluido (lo genera
+del botón derecho ya invertido).
+
+No va en QApplication (2026-11-05): ahí cada evento de cada objeto de la
+app pasaba por Python, también los de objetos a medio destruir, el mismo
+mal que tumbaba el MDI (tickets 35, 36, 43). Las ventanas nativas son pocas
+y duran; a las que aparecen después (diálogos, menús, la lista de un
+combo) se les pone el filtro al aparecer (ver _cubrir).
 """
 
-from PySide6.QtCore import QCoreApplication, QEvent, QObject, Qt
-from PySide6.QtGui import QContextMenuEvent, QGuiApplication, QMouseEvent
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, QTimer, Qt
+from PySide6.QtGui import QGuiApplication, QMouseEvent
+from PySide6.QtWidgets import QApplication
 
 from core.kiosko import es_kiosko
 from core.preferencias import preferencias
@@ -26,6 +32,11 @@ _IZQ = Qt.MouseButton.LeftButton
 _DER = Qt.MouseButton.RightButton
 _TIPOS = (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
           QEvent.Type.MouseButtonDblClick, QEvent.Type.MouseMove)
+# Propiedad dinámica que marca las ventanas que ya tienen el filtro.
+_MARCA = "labsim_mouse_zurdo"
+# Respaldo para ventanas que aparecen sin clic ni foco (un aviso que se
+# abre solo): cada cuánto se revisan.
+_REVISAR_MS = 500
 
 
 def _invertir(boton):
@@ -47,34 +58,48 @@ def _invertir_varios(botones):
     return resto
 
 
-def _tipo_que_abre_menu():
-    """En Windows el menú contextual sale al SOLTAR el botón; en el resto,
-    al apretarlo (igual que decide Qt)."""
-    hints = QGuiApplication.styleHints()
-    if hasattr(hints, "contextMenuTrigger"):
-        if hints.contextMenuTrigger() == Qt.ContextMenuTrigger.Release:
-            return QEvent.Type.MouseButtonRelease
-        return QEvent.Type.MouseButtonPress
-    import sys
-    return QEvent.Type.MouseButtonRelease if sys.platform.startswith("win") \
-        else QEvent.Type.MouseButtonPress
-
-
 class InvertirBotones(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._enviando = False
-        self._menu_propio = False
+        # Los eventos que mandó este filtro y siguen en camino. Se
+        # reconocen por identidad, no con una bandera: si el clic abre un
+        # diálogo modal (exec()), el reenvío no vuelve hasta cerrarlo, y con
+        # una bandera puesta todos los clics del diálogo pasaban sin
+        # invertir.
+        self._en_camino = []
+        self._revisar = QTimer(self)
+        self._revisar.setInterval(_REVISAR_MS)
+        self._revisar.timeout.connect(self.cubrir)
+
+    def empezar(self):
+        self.cubrir()
+        QGuiApplication.instance().focusWindowChanged.connect(self.cubrir)
+        self._revisar.start()
+
+    def terminar(self):
+        self._revisar.stop()
+        try:
+            QGuiApplication.instance().focusWindowChanged.disconnect(self.cubrir)
+        except (RuntimeError, TypeError):
+            pass
+        for ventana in QGuiApplication.topLevelWindows():
+            if ventana.property(_MARCA):
+                ventana.removeEventFilter(self)
+                ventana.setProperty(_MARCA, False)
+
+    def cubrir(self, *_):
+        """Pone el filtro en las ventanas nativas que todavía no lo tienen."""
+        for ventana in QGuiApplication.topLevelWindows():
+            if not ventana.property(_MARCA):
+                ventana.installEventFilter(self)
+                ventana.setProperty(_MARCA, True)
 
     def eventFilter(self, obj, ev):
         tipo = ev.type()
-        if tipo == QEvent.Type.ContextMenu:
-            # El que genera Qt viene del botón físico derecho, que ahora es
-            # el izquierdo: se descarta. El propio (abajo) pasa.
-            return (not self._menu_propio
-                    and ev.reason() == QContextMenuEvent.Reason.Mouse)
-        if tipo not in _TIPOS or self._enviando:
+        if tipo not in _TIPOS:
+            return False
+        if any(ev is propio for propio in self._en_camino):
             return False
 
         boton, botones = ev.button(), ev.buttons()
@@ -82,25 +107,22 @@ class InvertirBotones(QObject):
         if nuevo_boton == boton and nuevos_botones == botones:
             return False  # rueda, botones laterales, movimiento sin apretar
 
+        if tipo == QEvent.Type.MouseButtonPress:
+            # Un clic puede abrir un menú o la lista de un combo (ventanas
+            # nativas nuevas): se cubren apenas el bucle de eventos gira,
+            # también si el menú se abre con exec() dentro del reenvío.
+            QTimer.singleShot(0, self, self.cubrir)
+
         nuevo = QMouseEvent(tipo, ev.position(), ev.scenePosition(), ev.globalPosition(),
                             nuevo_boton, nuevos_botones, ev.modifiers(), ev.pointingDevice())
-        self._enviando = True
+        self._en_camino.append(nuevo)
         try:
             QCoreApplication.sendEvent(obj, nuevo)
         finally:
-            self._enviando = False
+            self._en_camino = [e for e in self._en_camino if e is not nuevo]
         ev.setAccepted(nuevo.isAccepted())
-
-        if (nuevo_boton == _DER and tipo == _tipo_que_abre_menu()
-                and isinstance(obj, QWidget)):
-            menu = QContextMenuEvent(QContextMenuEvent.Reason.Mouse,
-                                     ev.position().toPoint(), ev.globalPosition().toPoint(),
-                                     ev.modifiers())
-            self._menu_propio = True
-            try:
-                QCoreApplication.sendEvent(obj, menu)
-            finally:
-                self._menu_propio = False
+        if tipo == QEvent.Type.MouseButtonPress:
+            self.cubrir()
         return True
 
 
@@ -115,9 +137,9 @@ def aplicar():
     activo = es_kiosko() and preferencias().mouse_zurdo()
     if activo and _filtro is None:
         _filtro = InvertirBotones(app)
-        app.installEventFilter(_filtro)
+        _filtro.empezar()
     elif not activo and _filtro is not None:
-        app.removeEventFilter(_filtro)
+        _filtro.terminar()
         _filtro.deleteLater()
         _filtro = None
 
