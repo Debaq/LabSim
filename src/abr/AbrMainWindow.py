@@ -588,7 +588,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 self._eeg_pausado = True  # arranca al mostrarse (showEvent)
             # Despues de pintar: es una consulta al backend y la atencion
             # no tiene por que esperarla.
-            QTimer.singleShot(0, self.fetch_sessions)
+            QTimer.singleShot(0, self, self.fetch_sessions)
 
     def recording_conditions(self):
         """Como se esta registrando: equipo + lo que el equipo midio.

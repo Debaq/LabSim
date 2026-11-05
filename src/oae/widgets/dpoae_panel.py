@@ -377,7 +377,7 @@ class DpoaePanel(QWidget):
         # El probe check corre con su propio QTimer: si generamos la captura
         # en esta misma vuelta del event loop, la animación de la sonda no
         # alcanza a pintar ni un frame (mismo patrón que TEOAE).
-        QTimer.singleShot(self.PROBE_CHECK_MS, self._run_capture)
+        QTimer.singleShot(self.PROBE_CHECK_MS, self, self._run_capture)
 
     def _run_capture(self):
         if self._pending is None:

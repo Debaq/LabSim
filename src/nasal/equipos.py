@@ -1665,7 +1665,7 @@ class RinometriaWindow(EquipoNasal):
 
     def _soltar_cursor(self, cual, d):
         # Fuera de la señal del cursor: dibujar() borra el gráfico, cursor incluido.
-        QTimer.singleShot(0, lambda: self._mover_cursor(cual, d))
+        QTimer.singleShot(0, self, lambda: self._mover_cursor(cual, d))
 
     def _mover_cursor(self, cual, d):
         """El evaluador soltó un cursor: la fosa se vuelve a leer ahí."""

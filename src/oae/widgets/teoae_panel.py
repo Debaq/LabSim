@@ -346,7 +346,7 @@ class TeoaePanel(QWidget):
         # la captura -- generate() es síncrono y bloquea el loop de eventos,
         # así que si se llama en la misma vuelta el timer del probe nunca
         # pinta un frame (la animación no se ve).
-        QTimer.singleShot(self.PROBE_CHECK_MS, self._run_capture)
+        QTimer.singleShot(self.PROBE_CHECK_MS, self, self._run_capture)
 
     def _run_capture(self):
         if self._pending is None:

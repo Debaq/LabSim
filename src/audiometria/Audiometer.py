@@ -264,21 +264,24 @@ class Audiometer(QWidget, Ui_Audiometer):
         # importar cuanto se mantenga la tecla apretada en el firmware
         # (MODO_MANTENER), asi que siempre se comportaba como click rapido.
         # Con eventFilter se captura el press/release real de la tecla.
-        # Guardia de reentrada: el filtro vive en QApplication, asi que si
-        # algo de adentro (emitir pressed, mover el dial) despacha otro
-        # evento, este mismo metodo se vuelve a llamar ANIDADO. Sin la
-        # guardia esa anidacion se apila hasta reventar el limite de
-        # recursion, y PySide lo reporta como la cadena interminable de
-        # "Error calling Python override of QWidget::eventFilter()".
+        # El filtro va en la ventana NATIVA principal (su QWindow), no en
+        # QApplication: ahí llega cada tecla antes de repartirse al widget
+        # con foco, pero no los miles de eventos de pintado, layout y
+        # destrucción de cada widget. En QApplication todo evento de la app
+        # pasaba por Python mientras el audiómetro estaba abierto, también
+        # los de objetos a medio destruir (el mismo mal que tumbaba el MDI,
+        # tickets 35, 36, 43 del 2026-11-05).
+        # Guardia de reentrada: si algo de adentro (emitir pressed, mover el
+        # dial) despacha otra tecla, el filtro se llamaría ANIDADO.
         self._filter_busy = False
         self._filter_error_logged = False
         self._filter_installed = False
+        self._filtro_en = None   # el QWindow donde está puesto
+        self._reintentos_filtro = 0
         # El filtro se instala y se saca con showEvent/hideEvent: con el
-        # audiometro cerrado no tiene nada que capturar, y cada evento de
-        # la aplicacion (los miles que despacha pyqtgraph en el ABR) deja
-        # de pagar un frame de Python.
+        # audiometro cerrado no tiene nada que capturar.
         if self.isVisible():
-            self.install_key_filter(True)
+            self._poner_filtro_luego()
 
         # Las teclas marcan lo que está puesto en cada canal.
         for lbl in (*self.lbl_output, *self.lbl_stim, *self.lbl_trans,
@@ -301,20 +304,72 @@ class Audiometer(QWidget, Ui_Audiometer):
     def _marcar_teclas(self, *_):
         panel_ui.marcar(self, output_list, stim_list, trans_list, tone_list, reverse_list)
 
+    def _ventana_nativa(self):
+        """El QWindow de la ventana principal. El audiómetro va dentro de
+        una escena con zoom (core/reparto.py): ahí `window()` es el widget
+        incrustado, así que se sube por la vista de la escena hasta la
+        ventana de verdad."""
+        w = self
+        for _ in range(10):
+            top = w.window()
+            proxy = top.graphicsProxyWidget()
+            if proxy is None:
+                return top.windowHandle()
+            escena = proxy.scene()
+            if escena is None or not escena.views():
+                # Recién incrustado (Escalado hace addWidget antes de
+                # setScene): todavía no hay vista. NO tocar el windowHandle
+                # del widget incrustado: Qt lo está desarmando y ponerle el
+                # filtro ahí tumbaba la app en QWidgetPrivate::show_sys.
+                return None
+            w = escena.views()[0]
+        return None
+
     def install_key_filter(self, activo: bool) -> None:
-        """Pone o saca el filtro global de teclas del audiometro."""
-        app = QApplication.instance()
-        if app is None or activo == self._filter_installed:
+        """Pone o saca el filtro de teclas del audiometro (en la ventana
+        nativa principal, ver __init__)."""
+        if activo == self._filter_installed:
             return
         if activo:
-            app.installEventFilter(self)
-        else:
-            app.removeEventFilter(self)
+            destino = self._ventana_nativa()
+            if destino is None:
+                # Todavía sin ventana nativa (la escena aún no tiene vista):
+                # se reintenta en un rato, unas pocas veces.
+                if self._reintentos_filtro < 20:
+                    self._reintentos_filtro += 1
+                    QTimer.singleShot(100, self, self._reintentar_filtro)
+                return
+            self._reintentos_filtro = 0
+            destino.installEventFilter(self)
+            destino.destroyed.connect(self._destino_destruido)
+            self._filtro_en = destino
+        elif self._filtro_en is not None:
+            destino, self._filtro_en = self._filtro_en, None
+            try:
+                destino.destroyed.disconnect(self._destino_destruido)
+                destino.removeEventFilter(self)
+            except (RuntimeError, TypeError):
+                pass   # la ventana ya no está
         self._filter_installed = activo
+
+    def _poner_filtro_luego(self):
+        """En la vuelta siguiente del bucle, no dentro del showEvent: el
+        primer show llega en medio de QGraphicsScene.addWidget (ver
+        core/reparto.py) y preguntarle ahí la escena al proxy tumbaba la
+        app."""
+        QTimer.singleShot(0, self, self._reintentar_filtro)
+
+    def _reintentar_filtro(self):
+        if self.isVisible():
+            self.install_key_filter(True)
+
+    def _destino_destruido(self, *_):
+        self._filtro_en = None
+        self._filter_installed = False
 
     def showEvent(self, event):
         super().showEvent(event)
-        self.install_key_filter(True)
+        self._poner_filtro_luego()
         # Rearma los timers del modo de tono que quedo elegido (hideEvent
         # los paro)
         for ch in (0, 1):
@@ -372,14 +427,9 @@ class Audiometer(QWidget, Ui_Audiometer):
             btn.setShortcut(QKeySequence())
 
     def eventFilter(self, obj, event):
-        # El filtro esta instalado en QApplication: recibe TODOS los eventos
-        # de TODOS los objetos. Por eso lo primero es el chequeo mas barato
-        # posible (el tipo de evento) y se sale con return False: si aca se
-        # hace cualquier llamada a Qt (isVisible(), focusWidget(), ...) se
-        # agrega un frame de Python por cada evento anidado que Qt despacha
-        # durante layout/pintado (ej. la cadena de sizeHint/boundingRect de
-        # pyqtgraph), y eso revienta el limite de recursion con
-        # "Error calling Python override of QWidget::eventFilter()".
+        # Instalado en el QWindow principal: le llegan las teclas, el mouse
+        # y los avisos de la ventana. Lo primero es el chequeo más barato
+        # (el tipo de evento) y se sale con return False.
         event_type = event.type()
         if event_type not in (QEvent.KeyPress, QEvent.KeyRelease):
             return False

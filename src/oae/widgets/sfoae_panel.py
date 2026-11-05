@@ -231,7 +231,7 @@ class SfoaePanel(QWidget):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
         self.probe.start(self.spn_level.value(), oae_probe_fit(case))
-        QTimer.singleShot(self.PROBE_CHECK_MS, self._run_capture)
+        QTimer.singleShot(self.PROBE_CHECK_MS, self, self._run_capture)
 
     def _run_capture(self):
         if self._pending is None:

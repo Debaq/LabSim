@@ -4,7 +4,7 @@ import time
 
 from core.helpers import CasesOffline, debug_print
 from core.helpers import Preferences
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QObject, QTimer
 from audiometria.response_A import Response
 from audiometria.h_audio import voz_del_paciente
 from audiometria.Fowler import FOWLER_PATTERNS
@@ -915,7 +915,11 @@ class ResponseAudiometry():
         pregunta, self._pregunta = self._pregunta, None
         if pregunta is None:
             return
-        QTimer.singleShot(random.randint(*self.PAUSA_RESPUESTA_MS),
+        # Con el audiómetro de contexto: si se cerró la sesión mientras el
+        # paciente "pensaba", Qt no llama (PySide no lo cancela solo). Los
+        # tests le pasan un audiómetro de mentira, sin Qt.
+        contexto = (self.obj_audio,) if isinstance(self.obj_audio, QObject) else ()
+        QTimer.singleShot(random.randint(*self.PAUSA_RESPUESTA_MS), *contexto,
                           lambda: self.contestar(pregunta))
 
     def contestar(self, pregunta):

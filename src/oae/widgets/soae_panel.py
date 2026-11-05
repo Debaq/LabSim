@@ -289,7 +289,7 @@ class SoaePanel(QWidget):
         # El nivel que se le pasa al probe check es solo el del click de
         # chequeo de sello: el registro SOAE en sí es en silencio.
         self.probe.start(60.0, oae_probe_fit(case))
-        QTimer.singleShot(self.PROBE_CHECK_MS, self._run_capture)
+        QTimer.singleShot(self.PROBE_CHECK_MS, self, self._run_capture)
 
     def _run_capture(self):
         if self._pending is None:

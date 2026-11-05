@@ -674,7 +674,7 @@ class OlfatometriaWindow(QMainWindow):
         self._log('presentar', **{k: v for k, v in ensayo.items() if k not in ('opciones', 'verdad')},
                   **ensayo['verdad'], paso_regla=regla)
         self.vista.boligrafo = narina
-        QTimer.singleShot(1200, self._bajar_boligrafo)
+        QTimer.singleShot(1200, self, self._bajar_boligrafo)
         if resp['dice_nada']:
             self.pendiente = ensayo
             self.lbl_respuesta.setText('<b>Paciente:</b> «No huelo nada en ninguno.»'

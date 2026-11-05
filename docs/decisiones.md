@@ -8179,3 +8179,31 @@ se fija con el Z (lo tomado después, encima), para que se vea igual que
 antes: las cinco imágenes (panel y los cuatro JPEG del informe) salen
 idénticas píxel a píxel a las del código anterior. Los gráficos que se
 arman aparte al exportar usan unas `_Capas` de un solo uso.
+
+## Teclas del audiómetro en la ventana nativa, y timers con contexto (2026-11-05)
+
+Búsqueda de puntos débiles del mismo tipo que las caídas del MDI.
+
+- **El filtro de teclas del audiómetro estaba en QApplication**: mientras
+  el audiómetro estaba abierto (casi todo el práctico), cada evento de cada
+  objeto de la app pasaba por Python, también los de objetos a medio
+  destruir. Ahora va en el QWindow de la ventana principal: ahí llega cada
+  tecla antes de repartirse al widget con foco (así el audiómetro sigue
+  teniendo prioridad aunque otra subventana tenga el foco), pero no el
+  pintado, el layout ni la destrucción de cada widget. Como va dentro de la
+  escena con zoom (core/reparto.py), se sube por la vista hasta la ventana.
+  Se instala en la vuelta siguiente del bucle, no dentro del showEvent: el
+  primer show llega en medio de `QGraphicsScene.addWidget` y preguntarle la
+  escena al proxy ahí tumbaba la app. Efecto aparte, deseado: una tecla en
+  un diálogo u otra ventana ya no mueve el audiómetro.
+- **`QTimer.singleShot(ms, self.metodo)` no se cancela si el objeto
+  muere** (comprobado con PySide 6.12: lo llama igual y da "already
+  deleted"). Los timers de módulos que se destruyen al cerrar sesión llevan
+  ahora el objeto de contexto (`singleShot(ms, self, ...)`): paneles OAE
+  (chequeo de sonda), respuesta del paciente al talkback (contexto: el
+  audiómetro), sesiones del ABR, olfatometría y rinometría. Los de main.py
+  quedan sin contexto: la ventana principal vive toda la sesión.
+
+Queda para conversar: el mouse de zurdos (core/mouse_zurdo.py) también es
+un filtro sobre toda la app. Solo se usa en kiosko; la idea es invertir los
+botones en el sistema operativo del kiosko y no simularlo dentro de LabSim.
