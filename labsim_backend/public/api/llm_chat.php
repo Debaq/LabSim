@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/LlmConfig.php';
 require_once __DIR__ . '/../../src/LlmChat.php';
 require_once __DIR__ . '/../../src/Sala.php';
+require_once __DIR__ . '/../../src/ExamenesPrevios.php';
 
 /**
  * Chat real de la app (Ficha del paciente -> "Conversar con paciente"): el
@@ -109,7 +110,12 @@ $trae = is_array($body['trae'] ?? null) ? $body['trae'] : [];
 if ($trae === [] && !empty($body['trae_audiometria'])) {
     $trae = ['Audiometría'];
 }
-$systemPrompt .= LlmConfig::historiaPrevia((string) ($caseData['historia_clinica'] ?? ''), $trae, $acompanado);
+// Más lo que el docente marcó en el caso (ExamenesPrevios), en toda cita:
+// el backend lo suma aunque la app no lo mande, y es lo único que el
+// paciente puede entregar fuera de las hojas del libro.
+$previos = ExamenesPrevios::delCaso($caseData);
+$trae = array_values(array_unique(array_merge(array_map('strval', $trae), ExamenesPrevios::nombres($caseData))));
+$systemPrompt .= LlmConfig::historiaPrevia((string) ($caseData['historia_clinica'] ?? ''), $trae, $acompanado, $previos);
 
 // El historial va rotulado con quién dijo cada cosa: con más de una persona
 // en la consulta, un "assistant" pelado no le dice al modelo si eso lo dijo

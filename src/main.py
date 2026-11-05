@@ -1640,7 +1640,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["FICHA"].obj.set_ficha(html, on_chat, cabecera)
         previo = self.subw.get("PREVIO")
         ficha = previo.obj.ficha() if previo is not None else None
-        if ficha and f"previo:{ficha}/" not in html:
+        if ficha and f"previo:{ficha}/" not in html and f"previodoc:{ficha}/" not in html:
             self.close_sub_window("PREVIO")
 
     def _subventana_visible(self, nombre):

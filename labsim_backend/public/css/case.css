@@ -251,6 +251,11 @@ main:has(.form-actions-sticky) { padding-bottom: 6rem; }
   .two-col,
   .three-col { grid-template-columns: 1fr; }
 }
+/* Exámenes que trae (views/case/_paciente.php): días | examen | OD | OI | quitar */
+.previo-row { display: grid; grid-template-columns: 7rem 1fr 9rem 9rem auto; gap: var(--space-3); align-items: end; margin-bottom: var(--space-3); }
+@media (max-width: 40rem) {
+  .previo-row { grid-template-columns: 1fr 1fr; }
+}
 .audiogram-legend {
   display: flex;
   flex-wrap: wrap;

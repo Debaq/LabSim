@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../src/PatientPhoto.php';
 require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
 require_once __DIR__ . '/../../src/Patients.php';
 require_once __DIR__ . '/../../src/Sala.php';
+require_once __DIR__ . '/../../src/ExamenesPrevios.php';
 
 /**
  * Crea un caso clínico completo desde el navegador -- equivalente web de
@@ -208,6 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['fecha_nac'] = $editFechaNacDisplay;
     $v['historia_clinica'] = $editPatient['historia_clinica'] ?? '';
     $v['comentario_docente'] = $editPatient['comentario_docente'] ?? '';
+    $v['examenes_previos'] = ExamenesPrevios::delCaso(is_array($existingData) ? $existingData : []);
 } else {
     // Caso nuevo: la tolerancia del paciente nace sorteada, no en un valor
     // fijo (ver CaseProfile::LDL_TOLERANCIA_PESOS).
@@ -233,6 +235,18 @@ if (isset($v['otoscopia']['fases']) && is_array($v['otoscopia']['fases'])) {
     $otoscopiaTextoAt = static function (int $n) use ($v): string {
         return (string) fv($v, ['otoscopia', 'texto', (string) $n], '');
     };
+}
+
+// Exámenes que trae (ver ExamenesPrevios.php): al editar llegan guardados;
+// en un submit fallido, como los arrays paralelos del POST.
+if (isset($v['examenes_previos']) && is_array($v['examenes_previos'])) {
+    $previosRows = array_map(static function (array $e): array {
+        return ['dias' => (string) abs((int) $e['dias']), 'prueba' => $e['prueba'], 'OD' => $e['OD'], 'OI' => $e['OI']];
+    }, $v['examenes_previos']);
+} else {
+    $previosRows = array_map(static function (array $e): array {
+        return ['dias' => (string) abs((int) $e['dias']), 'prueba' => $e['prueba'], 'OD' => $e['OD'], 'OI' => $e['OI']];
+    }, ExamenesPrevios::fromForm($v));
 }
 
 // Sala: quién viene con el paciente (ver Sala.php). Mismo problema de
@@ -316,6 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // respecto a la fecha de la cita, ej. {{-5}}) que Agenda.py
                 // resuelve a una fecha concreta al armar la ficha del alumno.
                 $data['historia_clinica'] = $editHistoriaClinica;
+                $data['examenes_previos'] = ExamenesPrevios::fromForm($v);
 
                 // paciente_snapshot: se mantiene sincronizado con patients --
                 // agenda.php lo sigue leyendo para precargar el formulario de
@@ -376,6 +391,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Patients::updateComentarioDocente($pdo, $newPatientId, trim((string) ($v['comentario_docente'] ?? '')));
             // Ídem rama de edición más arriba: también en cases.data para sync.php.
             $data['historia_clinica'] = $newHistoriaClinica;
+            $data['examenes_previos'] = ExamenesPrevios::fromForm($v);
 
             // created_by/created_at solo en el INSERT: si el id ya existía
             // (mismo caso guardado dos veces) se respeta quién lo creó y
@@ -461,6 +477,7 @@ if ($esAdminCompleto) {
 }
 admin_add_js('case/patient-photo.js');
 admin_add_js('case/sala.js');
+admin_add_js('case/examenes-previos.js');
 admin_add_js('case/otoscopia.js');
 admin_add_js('case/sex-mirror.js');
 admin_add_js('case/newborn.js');

@@ -8,7 +8,7 @@
  * correría sin la sesión de admin que valida case_create.php.
  *
  * Incluido por admin/case_create.php, que comparte su scope: este archivo
- * NO declara lo que usa. Espera del padre $v, $isEdit, $photoCaseId, $editDisplayName.
+ * NO declara lo que usa. Espera del padre $v, $isEdit, $photoCaseId, $editDisplayName, $previosRows.
  */
 ?>
 <div class="tab-panel<?= $isEdit ? ' active' : '' ?>" data-tab="paciente">
@@ -115,6 +115,46 @@
     </label>
     <p class="help">Las <strong>atenciones previas</strong> del paciente: qué le hicieron antes de llegar acá y qué se encontró, una por línea y de la más antigua a la más reciente. Es del <strong>paciente</strong>, no del caso. No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
     <p class="help">Las fechas no se escriben a mano: poné <code>{{-N}}</code> al principio de la línea, donde N son los <strong>días antes</strong> de la cita que va a atender el alumno, y la app lo reemplaza por la fecha real. Así el mismo caso sirve en cualquier fecha. Ejemplos: <code>{{-5}}</code> hace cinco días, <code>{{-30}}</code> hace un mes, <code>{{-730}}</code> hace dos años. En un recién nacido, el nacimiento es la primera línea: <code>{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.</code></p>
+
+    <?php
+    // Una sola definición de fila para las guardadas y la plantilla que
+    // clona examenes-previos.js.
+    $previoRowHtml = static function (array $e): string {
+        ob_start();
+        ?>
+        <div class="previo-row">
+            <label>Días antes
+                <input type="number" name="prev_dias[]" min="1" max="36500" value="<?= htmlspecialchars((string) ($e['dias'] ?? '')) ?>">
+            </label>
+            <label>Examen (como lo dice la hoja)
+                <input type="text" name="prev_prueba[]" maxlength="80" value="<?= htmlspecialchars((string) ($e['prueba'] ?? '')) ?>" placeholder="Tamizaje auditivo al alta">
+            </label>
+            <label>OD
+                <input type="text" name="prev_od[]" maxlength="80" list="previo-resultados" value="<?= htmlspecialchars((string) ($e['OD'] ?? '')) ?>">
+            </label>
+            <label>OI
+                <input type="text" name="prev_oi[]" maxlength="80" list="previo-resultados" value="<?= htmlspecialchars((string) ($e['OI'] ?? '')) ?>">
+            </label>
+            <button type="button" class="secondary previo-remove">Quitar</button>
+        </div>
+        <?php
+        return (string) ob_get_clean();
+    };
+    ?>
+    <div class="section-sep" style="border-top:1px dashed var(--color-border);">
+        <strong>Exámenes que trae</strong>
+        <p class="help">Los informes impresos que el paciente (o quien lo acompaña) tiene en la mano. En el chat los entrega solo si el alumno se los pide, y recién ahí aparecen en su ficha, como una hoja con el resultado de cada oído. Vale para todas las citas del caso, también las de práctica.</p>
+        <p class="help">Lo que la historia clínica cuenta y no está en esta lista, el paciente sabe que se lo hicieron, pero no trajo el informe: si se lo piden, dice que no lo trajo. Una lista vacía es un paciente que no trae ningún papel.</p>
+        <datalist id="previo-resultados">
+            <?php foreach (ExamenesPrevios::RESULTADOS as $r): ?><option value="<?= htmlspecialchars($r) ?>"><?php endforeach; ?>
+        </datalist>
+        <div id="previo-rows">
+            <?php foreach ($previosRows as $e) { echo $previoRowHtml($e); } ?>
+        </div>
+        <template id="previo-row-tpl"><?= $previoRowHtml([]) ?></template>
+        <button type="button" class="secondary" id="previo-add">Agregar examen</button>
+        <p class="help">"Días antes" es lo mismo que la <code>{{-N}}</code> de la historia: la ficha lo pone en la fecha real de la cita. El resultado de cada oído es texto libre; las sugerencias son solo atajos.</p>
+    </div>
 
     <label>Comentario del docente <span style="font-weight:400; color:var(--color-danger);">(privado -- el alumno nunca lo ve)</span>
         <textarea name="comentario_docente" rows="3" class="input" placeholder="Ej: hipoacusia sensorioneural bilateral leve, caso pensado para practicar enmascaramiento..."><?= htmlspecialchars((string) ($v['comentario_docente'] ?? '')) ?></textarea>

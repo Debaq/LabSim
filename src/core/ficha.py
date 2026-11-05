@@ -15,7 +15,7 @@ from PySide6.QtGui import QPainter, QPixmap, QTextDocument
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QTextBrowser, QVBoxLayout, QWidget
 
-from core import iconos, invitado, tema
+from core import iconos, invitado, rutas, tema
 
 from core.helpers import obtener_hora_real_atencion
 
@@ -132,6 +132,74 @@ entrega_por_chat = False
 _entregados = {}        # ficha -> {examen}, mientras dura la atención
 
 
+# Exámenes que el docente marcó como traídos (cases.data["examenes_previos"],
+# ver ExamenesPrevios.php en el backend). Valen en toda cita, del curso o de
+# práctica, y el paciente solo entrega eso (y en la práctica libre, las hojas
+# del libro). La hoja se dibuja acá con el resultado de cada oído y se guarda
+# en local_cache para que la abran la ficha y el chat como las del libro.
+_hojas_docente = {}     # ficha -> {prueba: ruta}
+
+
+def _carpeta_docente():
+    return rutas.recursos() / "local_cache" / "previos"
+
+
+def previos_del_docente(caso):
+    """[{dias, prueba, OD, OI}] del caso, sin las filas que no sirven."""
+    lista = (caso or {}).get("examenes_previos") if isinstance(caso, dict) else None
+    previos = []
+    for e in lista or []:
+        if not isinstance(e, dict) or not str(e.get("prueba") or "").strip():
+            continue
+        try:
+            dias = int(e.get("dias", -1))
+        except (TypeError, ValueError):
+            dias = -1
+        previos.append({"dias": dias, "prueba": str(e["prueba"]).strip(),
+                        "OD": str(e.get("OD") or "").strip(), "OI": str(e.get("OI") or "").strip()})
+    return previos
+
+
+def tarjeta_previo(prueba, od, oi):
+    """La hoja de un examen que trae: el resultado de cada oído y nada más,
+    como la tarjeta de tamizaje del libro (scripts/libro/previos.py)."""
+    def caja(x, lado, nombre, resultado):
+        color = tema.color_lado(lado)
+        bien = resultado.lower() in ("pasa", "normal")
+        return (f'<rect x="{x}" y="46" width="150" height="62" rx="8" fill="#F3F5F8"/>'
+                f'<text x="{x + 14}" y="68" font-size="11" font-weight="700" fill="{color}">'
+                f'{html.escape(nombre)}</text>'
+                f'<text x="{x + 14}" y="94" font-size="13" font-weight="700" '
+                f'fill="{"#1F2933" if bien else color}">{html.escape(resultado[:1].upper() + resultado[1:] or "—")}</text>')
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="360" height="128" viewBox="0 0 360 128" '
+            'font-family="sans-serif">'
+            '<rect width="360" height="128" fill="white"/>'
+            f'<text x="20" y="28" font-size="14" font-weight="700" fill="#1F2933">{html.escape(prueba)}</text>'
+            + caja(20, "OD", "Oído derecho", od) + caja(190, "OI", "Oído izquierdo", oi) + "</svg>")
+
+
+def _del_docente(row, caso):
+    """[(prueba, ruta)] de lo que el docente marcó, con la hoja ya en disco."""
+    ficha_id = _ficha_de(row, caso)
+    previos = previos_del_docente(caso)
+    if not ficha_id or not previos:
+        return []
+    carpeta = _carpeta_docente() / ficha_id
+    lista = []
+    for i, e in enumerate(previos):
+        ruta = carpeta / f"{i}.svg"
+        svg = tarjeta_previo(e["prueba"], e["OD"], e["OI"])
+        try:
+            if not ruta.is_file() or ruta.read_text(encoding="utf-8") != svg:
+                carpeta.mkdir(parents=True, exist_ok=True)
+                ruta.write_text(svg, encoding="utf-8")
+        except OSError:
+            continue
+        lista.append((e["prueba"], ruta))
+    _hojas_docente[ficha_id] = dict(lista)
+    return lista
+
+
 def registrar_entrega(case_id, examenes):
     _entregados.setdefault(str(case_id), set()).update(examenes)
 
@@ -142,6 +210,9 @@ def olvidar_entregas(case_id):
 
 
 def ruta_de_lo_que_trae(case_id, examen):
+    del_docente = _hojas_docente.get(str(case_id), {}).get(examen)
+    if del_docente is not None:
+        return del_docente
     ruta = indice_previos().get(str(case_id), {}).get("trae", {}).get(examen)
     return PREVIOS_DIR / ruta if ruta else None
 
@@ -170,7 +241,25 @@ def _ficha_de(row, caso):
 
 
 def examenes_que_trae(row, caso, todos=False):
-    """[(examen, ruta)] de lo que el paciente llega con hecho, en orden.
+    """[(examen, ruta)] de lo que el paciente llega con hecho, en orden: las
+    hojas del libro (solo práctica libre, ver _del_libro) y lo que marcó el
+    docente en el caso (toda cita, ver _del_docente).
+
+    Con chat, solo lo que ya entregó (`todos`: lo que trae, se lo haya
+    entregado o no: lo que sabe el paciente, o una atención ya cerrada).
+    """
+    return _entregado(row, caso, _del_libro(row, caso) + _del_docente(row, caso), todos)
+
+
+def _entregado(row, caso, lista, todos):
+    if entrega_por_chat and not todos:
+        dados = _entregados.get(_ficha_de(row, caso) or "", set())
+        lista = [(e, r) for e, r in lista if e in dados]
+    return lista
+
+
+def _del_libro(row, caso):
+    """[(examen, ruta)] de las hojas del libro que trae el paciente.
 
     Solo en la práctica libre, y solo lo que su procedimiento no nombra: el
     procedimiento dice lo que enseña el capítulo (FOCO en sql_practica.py) y
@@ -180,9 +269,6 @@ def examenes_que_trae(row, caso, todos=False):
 
     Si viene a otoscopía no trae nada: todo lo demás va después de mirarle
     el oído.
-
-    Con chat, solo lo que ya entregó (`todos`: lo que trae, se lo haya
-    entregado o no: lo que sabe el paciente, o una atención ya cerrada).
     """
     if getattr(row, "practice_id", None) is None:
         return []
@@ -203,15 +289,12 @@ def examenes_que_trae(row, caso, todos=False):
     lista = [(examen, PREVIOS_DIR / trae[examen]) for examen, clave in EN_PROCEDIMIENTO.items()
              if examen in trae and examen not in en_la_historia and clave not in procedimiento
              and (PREVIOS_DIR / trae[examen]).is_file()]
-    if entrega_por_chat and not todos:
-        dados = _entregados.get(_ficha_de(row, caso) or "", set())
-        lista = [(e, r) for e, r in lista if e in dados]
     return lista
 
 
 def audiometria_previa(row, caso):
     """La audiometría que trae el paciente (ruta del SVG), o None."""
-    return dict(examenes_que_trae(row, caso)).get("Audiometría")
+    return dict(_entregado(row, caso, _del_libro(row, caso), False)).get("Audiometría")
 
 
 def _nombre(examen):
@@ -240,10 +323,10 @@ def entrada_lo_que_trae(row, caso, historia_clinica, todos=False):
     "Impedanciometría y EOA. Informes no adjuntos." Entregados: "… Trae los
     informes." con un enlace a cada uno.
     """
-    trae = examenes_que_trae(row, caso, todos=True)
+    trae = _del_libro(row, caso)
     if not trae:
         return None
-    entregados = trae if todos else examenes_que_trae(row, caso)
+    entregados = _entregado(row, caso, trae, todos)
     nombres = _y([_nombre(e) for e, _ in trae])
     if entregados:
         cierre = "Trae el informe." if len(trae) == 1 else "Trae los informes."
@@ -251,6 +334,24 @@ def entrada_lo_que_trae(row, caso, historia_clinica, todos=False):
         cierre = "Informe no adjunto." if len(trae) == 1 else "Informes no adjuntos."
     texto = nombres[0].upper() + nombres[1:] + ". " + cierre
     return dias_audiometria_previa(historia_clinica), texto, [_enlace_a(e, r) for e, r in entregados]
+
+
+def entradas_del_docente(row, caso, todos=False):
+    """[(días, texto, enlaces)]: una entrada por examen que marcó el docente,
+    en su día. Como lo del libro: la ficha dice que se lo hizo, y el enlace a
+    la hoja aparece recién cuando lo entrega."""
+    hojas = _del_docente(row, caso)
+    dados = {e for e, _ in _entregado(row, caso, hojas, todos)}
+    rutas_de = dict(hojas)
+    entradas = []
+    for e in previos_del_docente(caso):
+        prueba, ruta = e["prueba"], rutas_de.get(e["prueba"])
+        if ruta is not None and prueba in dados:
+            entradas.append((e["dias"], f"{prueba}. Trae el informe.",
+                             [("Ver informe", f"previodoc:{ruta.parent.name}/{ruta.stem}")]))
+        else:
+            entradas.append((e["dias"], f"{prueba}. Informe no adjunto.", []))
+    return entradas
 
 
 def enlaces_de_la_historia(row, caso):
@@ -359,11 +460,18 @@ _EXAMEN_DE_ARCHIVO = {"audiometria": "Audiometría", "impedanciometria": "Impeda
 
 def abrir_enlace(url, editor):
     """Un enlace de la ficha: "previo:<ficha>/<hoja>.svgz" abre esa hoja en su
-    subventana del MDI (main.abrir_previo)."""
+    subventana del MDI (main.abrir_previo); "previodoc:<ficha>/<n>", la de un
+    examen que marcó el docente."""
+    ventana = editor.window()
+    if url.scheme() == "previodoc":
+        ficha_id, _, n = url.path().partition("/")
+        for prueba, ruta in _hojas_docente.get(ficha_id, {}).items():
+            if ruta.stem == n and ruta.is_file() and hasattr(ventana, "abrir_previo"):
+                ventana.abrir_previo(ruta, prueba)
+        return
     if url.scheme() != "previo":
         return
     ruta = PREVIOS_DIR / url.path()
-    ventana = editor.window()
     if ruta.is_file() and hasattr(ventana, "abrir_previo"):
         examen = _EXAMEN_DE_ARCHIVO.get(ruta.stem.split("_")[-1], "Examen")
         ventana.abrir_previo(ruta, examen)
@@ -527,7 +635,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin, todos=False):
     fecha_base = (row.fecha if parse_fecha_agenda(row.fecha).isValid()
                   else QDate.currentDate().toString("dd-MM-yy"))
     trae = entrada_lo_que_trae(row, caso, historia_clinica, todos)
-    previos = [trae] if trae else []
+    previos = ([trae] if trae else []) + entradas_del_docente(row, caso, todos)
     entradas = linea_tiempo(historia_clinica, fecha_base,
                             historial_atenciones(shedule, row.rut, username, is_admin,
                                                  getattr(row, "practice_id", None) is not None),

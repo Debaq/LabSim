@@ -58,3 +58,39 @@ t_eq($e, ['Audiometría'], 'No entrega lo que no trae');
 t_eq($e, ['Audiometría', 'EOA'], '"todos" entrega todo lo que trae');
 [$t, $e] = LlmConfig::separarEntrega('Me hicieron una audiometría hace poco.', ['Audiometría']);
 t_eq([$t, $e], ['Me hicieron una audiometría hace poco.', []], 'Contarlo no es entregarlo');
+
+// Sin nada que entregar, el paciente dice que no los trajo (2026-11-05: la
+// mamá de un lactante "entregaba" con palabras el tamizaje que contaba la
+// historia y en la ficha no aparecía nada).
+t_true(strpos(LlmConfig::historiaPrevia('{{-122}} Tamizaje al alta: refiere.', []), 'di que no los trajiste') !== false,
+       'Con historia y nada que traer: dice que no los trajo');
+t_true(strpos(LlmConfig::historiaPrevia('{{-122}} Tamizaje al alta: refiere.', [], true), 'no los trajeron') !== false,
+       'Con acompañantes también');
+
+// Exámenes que marcó el docente (ExamenesPrevios): en toda cita, cada uno en su día
+require_once __DIR__ . '/../src/ExamenesPrevios.php';
+$previos = ExamenesPrevios::fromForm([
+    'prev_dias' => ['122', '', '30'],
+    'prev_prueba' => ['Tamizaje auditivo al alta', '', 'Retamizaje, EOA [hospital]'],
+    'prev_od' => ['Refiere', '', 'Pasa'],
+    'prev_oi' => ['Refiere', '', 'Refiere'],
+]);
+t_eq(array_column($previos, 'prueba'), ['Tamizaje auditivo al alta', 'Retamizaje EOA hospital'],
+     'Fila vacía fuera; sin comas ni corchetes (rompen la marca); del más antiguo al más reciente');
+t_eq($previos[0]['dias'], -122, 'Días antes = {{-N}}');
+$dup = ExamenesPrevios::fromForm(['prev_dias' => ['10', '5'], 'prev_prueba' => ['EOA', 'eoa'],
+                                  'prev_od' => ['', ''], 'prev_oi' => ['', '']]);
+t_eq(array_column($dup, 'prueba'), ['EOA', 'eoa (2)'], 'Dos con el mismo nombre se distinguen');
+$caso = ['examenes_previos' => $previos];
+$nombres = ExamenesPrevios::nombres($caso);
+$conDocente = LlmConfig::historiaPrevia('{{-150}} Nace.', $nombres, true, ExamenesPrevios::delCaso($caso));
+t_true(strpos($conDocente, '[ENTREGA: Tamizaje auditivo al alta, Retamizaje EOA hospital]') !== false,
+       'Lo marcado por el docente se entrega con su nombre');
+t_true(strpos($conDocente, 'Hace 4 meses: al paciente le hicieron «Tamizaje auditivo al alta»') !== false,
+       'Cada uno en su día');
+t_true(strpos($conDocente, 'no lo trajeron') !== false, 'Lo demás que sabe: no lo trajo');
+[, $e] = LlmConfig::separarEntrega('Tome. [ENTREGA: tamizaje auditivo al alta]', $nombres);
+t_eq($e, ['Tamizaje auditivo al alta'], 'separarEntrega acepta los nombres del docente');
+$mismo = LlmConfig::historiaPrevia('', ['Audiometría'], false, [['dias' => -20, 'prueba' => 'Audiometría', 'OD' => '', 'OI' => '']]);
+t_true(substr_count($mismo, '«Audiometría»') === 1 && strpos($mismo, 'examen de audición') === false,
+       'Un nombre del docente igual a uno del libro no se cuenta dos veces');

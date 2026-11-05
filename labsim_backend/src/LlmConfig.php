@@ -370,9 +370,20 @@ TXT;
      *
      * $historia: cases.data['historia_clinica'], con sus llaves {{N}} (N =
      * días respecto de la cita, que para el paciente es hoy).
+     * $previos: los exámenes que el docente marcó como traídos
+     * (ExamenesPrevios::delCaso), cada uno en su día. Sus nombres también
+     * tienen que venir en $trae para que separarEntrega los acepte.
+     *
+     * Lo que la historia cuenta y no está entre lo que trae, el paciente lo
+     * sabe pero no tiene el papel: si se lo piden, dice que no lo trajo. Sin
+     * esa regla el modelo "entregaba" con palabras exámenes que no existen.
      */
-    public static function historiaPrevia(string $historia, array $trae, bool $sala = false): string
+    public static function historiaPrevia(string $historia, array $trae, bool $sala = false, array $previos = []): string
     {
+        $delDocente = [];
+        foreach ($previos as $p) {
+            $delDocente[(string) $p['prueba']] = true;
+        }
         $lineas = [];
         foreach (preg_split('/\R/', $historia) ?: [] as $linea) {
             $linea = trim($linea);
@@ -384,8 +395,8 @@ TXT;
             }
             $lineas[] = '- ' . $linea;
         }
-        $examenes = array_values(array_filter(array_map(static function ($e): string {
-            return self::EXAMEN_PREVIO[(string) $e] ?? '';
+        $examenes = array_values(array_filter(array_map(static function ($e) use ($delDocente): string {
+            return isset($delDocente[(string) $e]) ? '' : (self::EXAMEN_PREVIO[(string) $e] ?? '');
         }, $trae)));
         if ($examenes !== []) {
             $uno = count($examenes) === 1;
@@ -397,13 +408,18 @@ TXT;
                 : "te hicieron {$lista}, y traes " . ($uno ? 'el informe impreso; no sabes interpretarlo.'
                                                           : 'los informes impresos; no sabes interpretarlos.'));
         }
+        foreach ($previos as $p) {
+            $lineas[] = '- ' . self::haceCuanto(-(int) $p['dias']) . ': ' . ($sala
+                ? "al paciente le hicieron «{$p['prueba']}», y traen el informe impreso; nadie sabe interpretarlo."
+                : "te hicieron «{$p['prueba']}», y traes el informe impreso; no sabes interpretarlo.");
+        }
         if ($lineas === []) {
             return '';
         }
         $entrega = '';
-        $nombres = array_values(array_filter(array_map('strval', $trae), static function (string $e): bool {
-            return isset(self::EXAMEN_PREVIO[$e]);
-        }));
+        $nombres = array_values(array_unique(array_filter(array_map('strval', $trae), static function (string $e) use ($delDocente): bool {
+            return isset(self::EXAMEN_PREVIO[$e]) || isset($delDocente[$e]);
+        })));
         if ($nombres !== []) {
             // La app muestra los informes en la ficha solo cuando el paciente
             // los entrega (core.ficha.examenes_que_trae): la marca es cómo se
@@ -412,7 +428,16 @@ TXT;
                 . 'Si el estudiante pide los exámenes o informes que traes, o quiere verlos, entrégaselos: '
                 . 'termina ' . ($sala ? 'el texto de quien los entrega' : 'tu respuesta')
                 . ' con la marca [ENTREGA: ' . implode(', ', $nombres) . '] (solo los que entregas, escritos así). '
-                . 'Sin que te los pidan no pongas la marca: cuéntalo con palabras si viene al caso.';
+                . 'Sin que te los pidan no pongas la marca: cuéntalo con palabras si viene al caso. '
+                . ($sala
+                    ? 'De cualquier otro examen que le hayan hecho no traen el informe: si lo piden, quien conteste dice que no lo trajeron.'
+                    : 'De cualquier otro examen que te hayan hecho no traes el informe: si te lo piden, di que no lo trajiste.')
+                . ' No inventes papeles.';
+        } else {
+            $entrega = "\n\n" . ($sala
+                ? 'No traen ningún informe ni papel de exámenes anteriores: si el estudiante los pide, quien conteste dice que no los trajeron.'
+                : 'No traes ningún informe ni papel de exámenes anteriores: si el estudiante los pide, di que no los trajiste.')
+                . ' No hagas como que entregas nada.';
         }
         $encabezado = $sala
             ? 'Lo que le pasó al paciente antes de esta cita (lo saben quienes lo acompañaron a esas atenciones). '

@@ -330,6 +330,49 @@ def test_con_chat_los_informes_salen_cuando_el_paciente_los_entrega():
     assert "Audiometría e impedanciometría. Trae los informes." in ver()
 
 
+def test_en_toda_cita_entrega_lo_que_marco_el_docente():
+    """Cita del curso (sin practice_id): antes no traía nada y el paciente
+    "entregaba" con palabras. Ahora trae lo marcado en el caso, en su día,
+    y la hoja sale recién cuando lo entrega."""
+    import tempfile
+    from core import ficha
+    from PySide6.QtSvg import QSvgRenderer
+    from PySide6.QtWidgets import QApplication
+    QApplication.instance() or QApplication([])
+    row = FilaFalsa()
+    row.case_id = "163"
+    row.practice_id = None
+    caso = {"historia_clinica": "{{-180}} Nace a las 29 semanas.",
+            "examenes_previos": [{"dias": -122, "prueba": "Tamizaje auditivo al alta",
+                                  "OD": "Refiere", "OI": "Refiere"}]}
+    viejo = os.environ.get("LABSIM_RECURSOS")
+    with tempfile.TemporaryDirectory() as tmp:
+        os.environ["LABSIM_RECURSOS"] = tmp
+        ficha.entrega_por_chat = True
+        try:
+            ficha.olvidar_entregas("163")
+            assert [e for e, _ in ficha.examenes_que_trae(row, caso, todos=True)] == ["Tamizaje auditivo al alta"]
+            antes = render_ficha_html(row, caso, {"agenda_1": {}}, "alumno1", False)
+            assert "Tamizaje auditivo al alta. Informe no adjunto." in antes
+            assert "previodoc:" not in antes
+            assert "11-05-2026" in antes, "en su día: 122 días antes del 10-09-26"
+            ficha.registrar_entrega("163", ["Tamizaje auditivo al alta"])
+            html = render_ficha_html(row, caso, {"agenda_1": {}}, "alumno1", False)
+            assert "Trae el informe." in html and "previodoc:163/0" in html
+            ruta = ficha.ruta_de_lo_que_trae("163", "Tamizaje auditivo al alta")
+            assert ruta is not None and QSvgRenderer(str(ruta)).isValid()
+            assert "Refiere" in ruta.read_text(encoding="utf-8")
+            sin = render_ficha_html(row, {"historia_clinica": "{{-5}} ORL."}, {"agenda_1": {}}, "alumno1", False)
+            assert "Informe no adjunto" not in sin, "sin marcar, no trae nada"
+        finally:
+            ficha.entrega_por_chat = False
+            ficha.olvidar_entregas("163")
+            if viejo is None:
+                os.environ.pop("LABSIM_RECURSOS", None)
+            else:
+                os.environ["LABSIM_RECURSOS"] = viejo
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

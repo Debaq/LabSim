@@ -7825,3 +7825,39 @@ ASSR sacaba su umbral del audiograma también en la neuropatía, así que
 - Nunca por debajo de lo que la cóclea oye: un oído muerto no da ASSR.
 - El docente sigue viendo el audiograma real en el panel: el contraste entre
   ese audiograma y el ASSR es la lección.
+
+## Intentos de práctica huérfanos al quitar el paciente (2026-11-05)
+
+Laura Pérez quedó trabada: tenía abierto un intento de Benjamín Alonso
+(caso 35, `practice_cases` 6) y ese paciente se había quitado de la práctica.
+El intento seguía 'atendiendo', ya no salía en ninguna lista y no había cómo
+evolucionarlo. Se cerró a mano por la consola (atenciones 287 y 97, con nota
+"Cerrada por el docente"). Al cerrar así no corre la evaluación OIRS.
+Pendiente: que quitar un paciente de la práctica no deje intentos sin salida
+(TODO 76).
+
+## Las citas del curso no entregan los exámenes previos (2026-11-05)
+
+Práctico de lactantes (casos 163/164): los alumnos le pidieron los exámenes
+a la mamá, ella dijo "sí, tome" y en la ficha no apareció nada. La entrega por
+chat (`[ENTREGA: …]`, `LlmConfig::historiaPrevia`, `ficha.examenes_que_trae`)
+estaba hecha solo para la práctica libre: en una cita del curso `trae` va
+vacío y las hojas solo existen para los casos del libro. El modelo igual lo
+"entrega" con palabras porque la historia clínica cuenta el tamizaje. La
+entrega es para todas las citas, también las del curso.
+
+- **Solo entrega lo que marca el docente** (case_create, pestaña Paciente,
+  "Exámenes que trae": días antes, nombre del examen, resultado OD/OI). Se
+  guarda en `cases.data['examenes_previos']` (`ExamenesPrevios.php`). Nada se
+  deriva de la historia: si no, un lactante "entregaría" la audiometría que
+  viene a hacerse.
+- **Lo que el paciente sabe y no está marcado, no lo trajo**: el prompt
+  (`LlmConfig::historiaPrevia`) le dice que conteste eso, y sin nada marcado,
+  que no trae ningún papel. Esto vale apenas se sube el backend, aunque la app
+  sea la anterior.
+- **La hoja** la dibuja la app (`ficha.tarjeta_previo`): el nombre y el
+  resultado de cada oído, como la tarjeta de tamizaje del libro. Se escribe en
+  `resources/local_cache/previos/<caso>/<n>.svg` y se abre con un enlace
+  `previodoc:`. Sale en la ficha en su día, "Informe no adjunto" hasta que lo
+  entrega. El backend suma los nombres a `trae` aunque la app no los mande.
+- En la práctica libre siguen además las hojas del libro.
