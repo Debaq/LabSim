@@ -42,6 +42,7 @@ del audiograma o se sortea por su cuenta.
 """
 import numpy as np
 
+from abr import vigilia
 from abr.ABR_generator import INTERAURAL_ATTENUATION, ABRGenerator
 from core.rng import case_fingerprint, stable_seed
 
@@ -267,6 +268,7 @@ class Recording:
         # cases: {'OD': dict|None, 'OI': dict|None}. Un oído sin datos no se
         # registra: no hay fallback sintético.
         self.cases = {s: (cases or {}).get(s) for s in SIDES}
+        self.patient = patient
         self.quality = float(quality)
         self.inquietud = float(inquietud or 0.0)
         self.reject_uv = float(reject_uv)
@@ -342,9 +344,13 @@ class Recording:
     # ------------------------------------------------------------------
     # generación
     # ------------------------------------------------------------------
+    def _calidad(self):
+        """El ruido del caso, por lo que agrega estar despierto (abr/vigilia.py)."""
+        return self.quality * vigilia.ruido(self.patient)
+
     def _noise_sigma(self):
         f = self.freqs
-        sigma = NOISE_UV * self.quality * (90.0 / np.maximum(f, 5.0)) ** NOISE_SLOPE
+        sigma = NOISE_UV * self._calidad() * (90.0 / np.maximum(f, 5.0)) ** NOISE_SLOPE
         return sigma * _filter_gain(f)
 
     def _signal(self):
@@ -375,7 +381,9 @@ class Recording:
         aceptadas = 0
         sigma = self._noise_sigma()
         senial = self._signal()
-        linea = 0.04 * max(self.impedance_kohm - 1.0, 0.0) * self.quality
+        calidad = self._calidad()
+        inquietud = vigilia.inquietud(self.patient, self.inquietud)
+        linea = 0.04 * max(self.impedance_kohm - 1.0, 0.0) * calidad
         k_linea = (int(round(LINE_HZ / DF)), int(round(2 * LINE_HZ / DF)))
         for _ in range(count):
             if self.n >= MAX_EPOCHS:
@@ -385,10 +393,10 @@ class Recording:
             g = rng.standard_normal((N_BINS, 2))
             ruido = (g[:, 0] + 1j * g[:, 1]) * (sigma / np.sqrt(2.0))
             escala = 1.0
-            if rng.random() < ART_P_BASE + ART_P_INQUIETUD * min(self.inquietud, 1.0):
+            if rng.random() < ART_P_BASE + ART_P_INQUIETUD * min(inquietud, 1.0):
                 escala = rng.uniform(*ART_SCALE)
                 ruido = ruido * escala
-            pico = EPOCH_PEAK_UV * self.quality * escala
+            pico = EPOCH_PEAK_UV * calidad * escala
             if pico > self.reject_uv:
                 self.rejected += 1
                 continue

@@ -20,6 +20,7 @@ from abr.ABR_generator import (DISCONNECTED, ABR_Curve, ABRGenerator, agitation_
                                level_label, sl_reference,
                                case_quality, latency_intensity_band,
                                normative_limits, raw_eeg)
+from abr import vigilia
 from abr.estilo import QSS_ABR, TARJETAS
 from core import tema
 from core.cabeza_electrodos import MontajeElectrodos, zona_de
@@ -632,7 +633,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # el monitor tiene que mostrar la MISMA banda que se promedia,
             # o el alumno mueve los filtros y no ve nada cambiar.
             datos = raw_eeg(self.technical,
-                            quality=self.quality * self.agitation_now(),
+                            quality=(self.quality * vigilia.ruido(self.data_current)
+                                     * self.agitation_now()),
                             seed=semilla,
                             tick=self.eeg_tick, duration_ms=TIEMPO_EEG,
                             test=self.control.cb_test.currentText(),
@@ -656,13 +658,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         encontrar.
         """
         case = self.abr_od or self.abr_oi or {}
-        if not float(case.get('inquietud') or 0):
+        # Despierto se mueve mas que lo que dice el caso (ver abr/vigilia.py)
+        inquietud = vigilia.inquietud(self.data_current, case.get('inquietud'))
+        if not inquietud:
             return 1.0
         if self.state_capture == 'record' and self.last_metadata:
             bloque = int(self.last_metadata.get('noise_blocks') or 0)
         else:
             bloque = self.eeg_tick
-        return agitation_factor(case, bloque)
+        return agitation_factor(case, bloque, inquietud)
 
     def update_capture_info(self, metadata):
         """Estado de la captura en curso, como lo muestra un equipo real.

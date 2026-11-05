@@ -450,6 +450,41 @@ TXT;
     }
 
     /**
+     * El paciente llega despierto, y despierto los potenciales salen
+     * llenos de ruido (app: abr/vigilia.py). El alumno tiene que pedir que
+     * lo hagan dormir (un bebé: a la mamá o a quien lo tiene) o que se
+     * relaje y trate de dormir (niño o adulto). Cuando lo hacen, la
+     * respuesta termina con [DUERME] y la app baja el ruido. Bebé = menos
+     * de 3 años, como en vigilia.DESPIERTO.
+     */
+    public static function sueno(int $edad, bool $sala): string
+    {
+        $marca = ' con la marca [DUERME]. Sin que te lo pidan no lo hagas ni pongas la marca; si ya lo hiciste, no la repitas.';
+        if ($edad < 3) {
+            return "\n\n" . 'El bebé llega despierto. Si el estudiante pide que lo hagan dormir para el examen '
+                . '(darle pecho o mamadera, acunarlo, apagar la luz), '
+                . ($sala ? 'quien lo tiene a cargo lo hace y lo cuenta: el bebé se queda dormido. Termina el texto de esa persona'
+                         : 'lo haces y lo cuentas: el bebé se queda dormido. Termina tu respuesta')
+                . $marca;
+        }
+        return "\n\n" . ($sala ? 'El paciente llega despierto. Si el estudiante le pide al paciente ' : 'Llegas despierto. Si el estudiante te pide ')
+            . 'que se relaje, cierre los ojos o intente dormir durante el examen, '
+            . ($sala ? 'el paciente lo hace y lo dice. Termina el texto del paciente' : 'lo haces y lo dices. Termina tu respuesta')
+            . $marca;
+    }
+
+    /**
+     * Saca la marca [DUERME] (ver sueno) y dice si estaba.
+     *
+     * @return array{0:string, 1:bool}
+     */
+    public static function separarSueno(string $texto): array
+    {
+        $limpio = (string) preg_replace('/\[\s*DUERME\s*\]/iu', '', $texto, -1, $n);
+        return [trim((string) preg_replace('/[ \t]+\n/', "\n", $limpio)), $n > 0];
+    }
+
+    /**
      * Saca de un texto del modelo la marca [ENTREGA: …] (ver historiaPrevia)
      * y devuelve [texto sin la marca, exámenes entregados]. Solo cuenta lo
      * que el paciente trae (`$trae`, lo que mandó la app): el modelo no puede

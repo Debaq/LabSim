@@ -48,6 +48,7 @@ from backend.sync_thread import SyncThread
 from core import app_layout, invitado
 from core import ficha as ficha_clinica
 from core.ficha import HojaPrevia, examenes_que_trae, fila_de_practica
+from abr import vigilia
 from core.app_layout import LayoutRetryThread, fetch_layout
 from core.borrado import borrar_luego
 
@@ -1006,6 +1007,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # Atención nueva (o retomada, con el chat de cero): los informes que
         # trae vuelven a estar en su mano hasta que se los pidan.
         ficha_clinica.olvidar_entregas(entry.case_id)
+        # Y llega despierto: para los potenciales hay que pedir que lo duerman
+        vigilia.despertar(entry.case_id)
 
         case_id = entry.case_id or None
         if not case_id:
@@ -1327,9 +1330,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 self.subw[codigo] = FrameSubMdi(ModulePlaceholder(titulo), expand=True)
 
         self.subw["CHAT"].obj.entrego.connect(self._al_entregar_informes)
+        self.subw["CHAT"].obj.durmio.connect(self._al_dormir_paciente)
         # Con chat, los informes que trae el paciente se piden (ver
         # core.ficha.entrega_por_chat); sin el módulo, salen en la ficha.
         ficha_clinica.entrega_por_chat = self._module_visible("CHAT")
+        # Ídem para dormir al paciente antes de los potenciales: sin chat no
+        # hay a quién pedírselo y llega dormido (ver abr/vigilia.py).
+        vigilia.por_chat = self._module_visible("CHAT")
         # El botón Ver/Cerrar ficha de la agenda sigue a la ficha, también
         # cuando se cierra con su ✕.
         self.subw["FICHA"].visibility_changed.connect(
@@ -1656,6 +1663,15 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         cuelga de ella."""
         self.close_sub_window("FICHA")
         self.close_sub_window("PREVIO")
+
+    def _al_dormir_paciente(self, case_id):
+        """Lo hicieron dormir (o se relajó) en el chat: los potenciales
+        bajan el ruido (abr/vigilia.py) y queda en el registro."""
+        vigilia.dormir(case_id)
+        LOCAL_LOG_QUEUE.push("paciente_duerme", {
+            "case_id": case_id,
+            "appointment_id": (self.paciente_actual or {}).get("appointment_id"),
+        })
 
     def _al_entregar_informes(self, case_id, examenes):
         """El paciente entregó informes en el chat: entran a su ficha."""

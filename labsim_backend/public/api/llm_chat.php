@@ -116,6 +116,8 @@ if ($trae === [] && !empty($body['trae_audiometria'])) {
 $previos = ExamenesPrevios::delCaso($caseData);
 $trae = array_values(array_unique(array_merge(array_map('strval', $trae), ExamenesPrevios::nombres($caseData))));
 $systemPrompt .= LlmConfig::historiaPrevia((string) ($caseData['historia_clinica'] ?? ''), $trae, $acompanado, $previos);
+// Llega despierto: para los potenciales hay que pedir que lo duerman (ver LlmConfig::sueno)
+$systemPrompt .= LlmConfig::sueno($edadPaciente, $acompanado);
 
 // El historial va rotulado con quién dijo cada cosa: con más de una persona
 // en la consulta, un "assistant" pelado no le dice al modelo si eso lo dijo
@@ -192,8 +194,11 @@ $respuestas = $acompanado
 // LlmConfig::separarEntrega): la marca no llega a la burbuja; la app los
 // pone en la ficha y en el chat.
 $entrega = [];
+$duerme = false;
 foreach ($respuestas as $i => $r) {
-    [$texto, $dados] = LlmConfig::separarEntrega($r['texto'], $trae);
+    [$texto, $durmio] = LlmConfig::separarSueno($r['texto']);
+    $duerme = $duerme || $durmio;
+    [$texto, $dados] = LlmConfig::separarEntrega($texto, $trae);
     $respuestas[$i]['texto'] = $texto;
     $entrega = array_values(array_unique(array_merge($entrega, $dados)));
 }
@@ -233,4 +238,6 @@ Response::json([
     'respuestas' => $respuestas,
     'sala' => Sala::paraCliente($sala),
     'entrega' => $entrega,
+    // El paciente se durmió en este turno (ver LlmConfig::sueno)
+    'duerme' => $duerme,
 ]);

@@ -94,3 +94,12 @@ t_eq($e, ['Tamizaje auditivo al alta'], 'separarEntrega acepta los nombres del d
 $mismo = LlmConfig::historiaPrevia('', ['Audiometría'], false, [['dias' => -20, 'prueba' => 'Audiometría', 'OD' => '', 'OI' => '']]);
 t_true(substr_count($mismo, '«Audiometría»') === 1 && strpos($mismo, 'examen de audición') === false,
        'Un nombre del docente igual a uno del libro no se cuenta dos veces');
+
+// Llega despierto: hay que pedir que lo duerman para los potenciales
+t_true(strpos(LlmConfig::sueno(0, true), 'quien lo tiene a cargo lo hace') !== false
+       && strpos(LlmConfig::sueno(0, true), '[DUERME]') !== false, 'Bebé con acompañante: lo duerme quien lo tiene');
+t_true(strpos(LlmConfig::sueno(45, false), 'Llegas despierto') !== false, 'Adulto solo: se relaja él');
+t_true(strpos(LlmConfig::sueno(8, true), 'Termina el texto del paciente') !== false, 'Niño acompañado: lo hace el niño');
+t_eq(LlmConfig::separarSueno("Ya, le doy pecho y se queda dormidito. [DUERME]"),
+     ['Ya, le doy pecho y se queda dormidito.', true], 'La marca no llega a la burbuja y avisa');
+t_eq(LlmConfig::separarSueno('Está despierto todavía.'), ['Está despierto todavía.', false], 'Sin marca no se duerme');

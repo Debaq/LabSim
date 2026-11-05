@@ -181,6 +181,9 @@ class ChatPacienteWidget(QWidget):
     # El paciente entregó informes en este turno: (case_id, [examen]). main
     # los pone en la ficha (ver core.ficha.registrar_entrega).
     entrego = Signal(str, list)
+    # Lo hicieron dormir (o se relajó) porque el alumno lo pidió: case_id.
+    # main baja el ruido de los potenciales (ver abr/vigilia.py).
+    durmio = Signal(str)
 
     REINTENTOS_AUTOMATICOS = 1  # 1 reintento silencioso antes de pedirle al alumno que reintente a mano
     AVATAR_SIZE = 32
@@ -563,6 +566,8 @@ class ChatPacienteWidget(QWidget):
         if entrega:
             self._papeles(entrega)
             self.entrego.emit(str(self._case_id), entrega)
+        if resultado.get("duerme"):
+            self.durmio.emit(str(self._case_id))
 
     def _papeles(self, examenes):
         """Los informes que el paciente acaba de entregar, como papeles en la

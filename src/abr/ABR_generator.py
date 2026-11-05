@@ -54,6 +54,7 @@ junto con abr/bezier_prop.py):
 import json
 import random
 import numpy as np
+from abr import vigilia
 from core import dsp
 from core.base import context
 from abr import ecochg
@@ -3056,7 +3057,9 @@ class ABRGenerator:
         #
         # sigma es el ruido de UN barrido; el modelo de ruido trabaja con
         # el residual al llegar a NOISE_REF_SWEEPS, que es sigma/sqrt(N).
-        quality = 1.0
+        # Despierto, el paciente mete mas ruido por barrido (ver
+        # abr/vigilia.py); dormido es el que declara el caso.
+        quality = float((case_config or {}).get('vigilia_ruido') or 1.0)
         sigma_paciente = None
         if str(referencia.get('respuesta_en_referencia', 'presente')) != 'ausente':
             nivel_ref = referencia.get('nivel_referencia')
@@ -3726,8 +3729,10 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         # A/B (ver false_wave). Los casos guardados antes no la traen.
         'falsa_v': preferences.get('falsa_v'),
         # Cuanto se mueve el paciente durante la captura (0 = quieto, que
-        # es lo que traen los casos de antes de esto).
-        'inquietud': preferences.get('inquietud', 0),
+        # es lo que traen los casos de antes de esto). Despierto se mueve
+        # al menos lo que dice abr/vigilia.py.
+        'inquietud': vigilia.inquietud(patient, preferences.get('inquietud', 0)),
+        'vigilia_ruido': vigilia.ruido(patient),
         # Reflejo post-auricular (miogenico, ~13 ms): 0 = no aparece.
         'pam': preferences.get('pam', 0),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
@@ -3783,7 +3788,7 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
 # Helpers que consume la UI (monitor de EEG, banda normativa, tabla)
 # ----------------------------------------------------------------------
 
-def agitation_factor(preferences, block):
+def agitation_factor(preferences, block, inquietud=None):
     """Factor de agitacion del caso en ese bloque de promediado.
 
     Lo usa el monitor de EEG para ensuciar el trazo en EL MISMO tramo en
@@ -3791,7 +3796,9 @@ def agitation_factor(preferences, block):
     monitor limpio mientras el promedio no avanza, el equipo le esta
     mintiendo.
     """
-    inquietud = float((preferences or {}).get('inquietud') or 0.0)
+    if inquietud is None:
+        inquietud = (preferences or {}).get('inquietud')
+    inquietud = float(inquietud or 0.0)
     if inquietud <= 0:
         return 1.0
     return _get_generator().agitation_run(

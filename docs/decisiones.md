@@ -7861,3 +7861,27 @@ entrega es para todas las citas, también las del curso.
   `previodoc:`. Sale en la ficha en su día, "Informe no adjunto" hasta que lo
   entrega. El backend suma los nombres a `trae` aunque la app no los mande.
 - En la práctica libre siguen además las hojas del libro.
+
+## El paciente llega despierto: hay que pedir que lo duerman (2026-11-05)
+
+Pedido: a la mamá o al acompañante hay que decirle que haga dormir al bebé, y
+al niño o adulto que se duerma, para que baje la actividad cerebral en los
+potenciales.
+
+- **Llega despierto** (`abr/vigilia.py`). Despierto, el ruido por barrido se
+  multiplica y el paciente se mueve más (inquietud mínima): bebé (<3 años)
+  ×3 y 0,8; niño ×2 y 0,45; desde los 13 años ×1,5 y 0,2. SIN FUENTE numérica:
+  órdenes de magnitud para que se note en el monitor, el FSP y el residual.
+- **Dormido queda el ruido que declara el caso**: los casos no cambian,
+  cambia el punto de partida.
+- **Se pide en el chat.** El prompt (`LlmConfig::sueno`) dice que llega
+  despierto y que, si el alumno lo pide, quien lo tiene a cargo lo duerme
+  (bebé) o el paciente se relaja y trata de dormir; la respuesta termina con
+  `[DUERME]`, el backend la saca del texto y responde `duerme: true`. Sin que
+  lo pidan no se duerme.
+- **Lo usan** ABR, ECochG, AABR (por ABR_Curve), ASSR y el monitor de EEG. Los
+  corticales no: su estado lo fija el docente en el bloque Central.
+- **Sin chat** (sin cuenta o curso sin el módulo) llega dormido, como los
+  informes que trae: no hay a quién pedírselo.
+- Atención nueva o retomada: vuelve a llegar despierto. Queda en el registro
+  (`paciente_duerme`).

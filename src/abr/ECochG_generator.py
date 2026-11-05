@@ -26,7 +26,7 @@ normal para que el equipo tenga algo que dibujar.
 """
 import numpy as np
 
-from abr import ecochg
+from abr import ecochg, vigilia
 from abr.ABR_generator import (AIR_MAX_OUTPUT_DB, BONE_MAX_OUTPUT_DB,
                                CASE_REFERENCE_DEFAULT, DEFAULT_FILTER_SLOPE,
                                NOISE_FLOOR_UV,
@@ -369,8 +369,10 @@ class ECochGGenerator:
         band_factor = abr.band_noise_factor(
             stimulus_config['filter_passhigh'], stimulus_config['filter_down'])
         rechazo = abr.effective_reject_uv(technical_config)
+        # Despierto, mas ruido por barrido (ver abr/vigilia.py)
+        quality = float((case_config or {}).get('vigilia_ruido') or 1.0)
         acceptance = abr.artifact_acceptance(
-            rechazo, 1.0,
+            rechazo, quality,
             abr.reject_impedance_factor(imp_max) * band_factor)
         current_avg = stimulus_config['current_avg']
         target_avg = stimulus_config['average']
@@ -391,7 +393,7 @@ class ECochGGenerator:
             seed_key = (case_config or {}).get('seed_key', '')
             agitacion = lambda i: abr.agitation_run(seed_key, inquietud, i)
         ruido, ruido_a, ruido_b, entraron = abr.averaged_noise(
-            t, accepted, growth_target, 1.0, rng,
+            t, accepted, growth_target, quality, rng,
             abr.impedance_noise_factor(imp_max), noise_floor, split=True,
             band_factor=band_factor, agitacion=agitacion,
             reject_uv=rechazo,
@@ -565,7 +567,8 @@ def ECochG_Curve(actual_intencity, control_setting, preferences, prom, done,
 
     case_config = {
         'desviaciones': preferences.get('desviaciones', {}),
-        'inquietud': preferences.get('inquietud', 0),
+        'inquietud': vigilia.inquietud(patient, preferences.get('inquietud', 0)),
+        'vigilia_ruido': vigilia.ruido(patient),
         'fsp_puntos': preferences.get('fsp_puntos'),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'umbral_por_estimulo': preferences.get('umbral_por_estimulo'),
