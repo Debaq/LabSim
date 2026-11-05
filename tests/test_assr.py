@@ -399,6 +399,74 @@ def test_un_lactante_ruidoso_llega_al_umbral():
         assert thr is not None and thr - rec.phys[c] <= 25, (c, thr, rec.phys[c])
 
 
+
+def test_un_registro_que_no_avanza_no_queda_registrando_para_siempre():
+    """El guardado (retomar la atención) o uno que llegó al tope: Iniciar
+    pregunta si empezar uno nuevo; con "no" queda detenido, no andando."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.control.start_capture()
+    for _ in range(3):
+        w.capture()
+    datos = w.session_payload()
+    w.control.stop_capture()
+    w2 = AbrMainWindow(DOCENTE)
+    w2.la_super(_caso(), 7)
+    w2.apply_restored([{'tipo': 'ASSR', 'data': datos}], 'u', 7)
+    assert getattr(w2.assr_panel.rec, 'guardado', False)
+    w2.preguntar_assr_nuevo = lambda: False
+    w2.control.start_capture()
+    assert w2.state_capture == 'stopped' and not w2.capture_timer.isActive()
+    w2.preguntar_assr_nuevo = lambda: True
+    w2.control.start_capture()
+    for _ in range(3):
+        w2.capture()
+    assert w2.state_capture == 'record' and not getattr(w2.assr_panel.rec, 'guardado', False)
+    assert w2.assr_panel.rec.n > 0
+    # Al tope de épocas, lo mismo.
+    w2.assr_panel.rec.n = assr.MAX_EPOCHS
+    w2.capture()
+    assert w2.state_capture == 'stopped'
+    w2.control.start_capture()
+    w2.capture()
+    assert w2.state_capture == 'record' and w2.assr_panel.rec.n < assr.MAX_EPOCHS
+
+
+
+def test_en_el_assr_la_ficha_es_de_umbrales_y_no_de_latencias():
+    """Donde el ABR tiene Latencia/Intensidad, el ASSR muestra la grilla de
+    detección y el audiograma estimado (sin la audiometría del caso)."""
+    if not HAS_UI:
+        return
+    from abr.AssrResumen import datos
+    w = _ventana()
+    assert w.tabWidget.tabText(w.tabWidget.indexOf(w.lat)) == 'Umbrales'
+    assert not w.assr_resumen.isHidden() and w.ficha_lat_int.isHidden()
+    assert w.report.text_edit_1.isHidden() and not w.report.text_edit_2.isHidden()   # solo conclusión
+    w.assr_panel.chk_auto.setChecked(True)
+    w.control.start_capture()
+    for _ in range(1500):
+        w.capture()
+        if w.state_capture != 'record':
+            break
+    d = datos(w.assr_panel.rec, w.assr_panel.correccion)
+    assert set(d) == {'OD', 'OI'}
+    for lado in d.values():
+        for f in assr.CARRIERS:
+            u = lado['umbral'][f]
+            assert u is None or lado['grilla'][(f, u)][0]       # el umbral es una celda con respuesta
+            assert u is None or lado['ehl'][f] == u - w.assr_panel.correccion[f]
+    w.tabWidget.setCurrentWidget(w.lat)
+    assert w.assr_resumen.d == d
+    assert 'hl_caso' not in str(w.assr_resumen.d)              # sin la audiometría del caso
+    w.assr_resumen.grab()
+    w.control.cb_test.setCurrentText('ABR')
+    assert w.tabWidget.tabText(w.tabWidget.indexOf(w.lat)) == 'Latencia/Intensidad'
+    assert not w.ficha_lat_int.isHidden() and w.assr_resumen.isHidden()
+    assert not w.report.text_edit_1.isHidden()
+
+
 if __name__ == "__main__":
     pruebas = [v for k, v in sorted(globals().items()) if k.startswith('test_')]
     for prueba in pruebas:

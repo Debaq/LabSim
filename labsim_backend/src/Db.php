@@ -325,6 +325,16 @@ final class Db
         self::addColumnIfMissing(self::get(), 'users', 'prefs', "TEXT NOT NULL DEFAULT '{}'");
     }
 
+    /**
+     * attendances.montaje_reinicio: el docente reinicia desde el panel el
+     * montaje de electrodos de un alumno (dashboard.php, "Reiniciar
+     * montaje"); la app lo lee con el sync (`SELECT *`) y empieza de cero.
+     */
+    public static function migrateMontajeReinicioIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'attendances', 'montaje_reinicio', 'INTEGER NOT NULL DEFAULT 0');
+    }
+
     public static function migrateSalaIfNeeded(): void
     {
         $pdo = self::get();

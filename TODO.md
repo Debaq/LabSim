@@ -186,18 +186,6 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 76. Fonos de inserción en el ASSR (hoy no los mira) y la profundidad
       de inserción en la atenuación interaural. § Fonos de inserción en la
       cabeza de electrodos
-- [ ] 78. **Volver a intentar desde cero** en la pestaña Electrodos (pedido
-      2026-11-05, práctico en kioscos): una alumna irritó tanto la piel con
-      el gel que no pudo seguir, y no había cómo reiniciarla (el montaje se
-      guarda por cita en el equipo y en el kiosko no se puede borrar).
-      - Botón en la pestaña Electrodos: piel nueva, sin electrodos ni fonos
-        (`MontajeElectrodos.reiniciar`), con confirmación; queda en
-        action_logs (`abr_montaje_reinicio`) y en los errores de la
-        preparación, para que el docente vea que tuvo que empezar de nuevo.
-      - El docente también desde el panel (dashboard de la cita, por
-        alumno), porque el alumno puede no darse cuenta: una marca en la
-        atención que la app lee al sincronizar y reinicia el montaje.
-      § Fonos de inserción en la cabeza de electrodos
 
 ### Voces sintéticas
 § Voces sintéticas con Google: plan. Avance en `docs/roadmap_voces.md`

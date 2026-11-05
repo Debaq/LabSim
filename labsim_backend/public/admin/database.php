@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'prompt OIRS' => static fn() => Db::migrateLlmOirsPromptIfNeeded(),
                 'tokens de anamnesis' => static fn() => Db::migrateLlmAnamnesisTokensIfNeeded(),
                 'sala del caso' => static fn() => Db::migrateSalaIfNeeded(),
+                'reinicio del montaje de electrodos' => static fn() => Db::migrateMontajeReinicioIfNeeded(),
                 'consumo de la API del LLM' => static fn() => Db::migrateLlmUsageIfNeeded(),
                 'equipos del laboratorio' => static fn() => Db::migrateAppEquiposIfNeeded(),
                 'historia clínica del paciente' => static fn() => Db::migratePatientHistoriaClinicaIfNeeded(),

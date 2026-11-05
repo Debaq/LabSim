@@ -8072,3 +8072,43 @@ quién lo hizo y qué concluyó.
   guarda en `previos_huellas.json` la huella del caso, la figura y el
   código del que depende su examen (tocar `src/abr` rehace solo los
   potenciales); `--todo` fuerza todo.
+
+## Volver a empezar el montaje y el ASSR que quedaba andando (2026-11-05)
+
+- **Volver a empezar** (TODO 78 hecho): botón en la pestaña Electrodos
+  (piel nueva, sin electrodos ni fonos, con confirmación) y "Reiniciar
+  montaje" por alumno en el panel de la cita. El del panel suma uno a
+  `attendances.montaje_reinicio` (columna nueva: "Aplicar schema", nunca
+  desde un endpoint; sin ella el panel avisa). Llega con el sync
+  (`SELECT *`), `helpers.reinicio_montaje` la lee y
+  `AbrMainWindow.reinicio_docente` la aplica una vez por pedido (lo
+  aplicado viaja con el montaje, no se repite al reabrir). Lo mal hecho
+  antes no se pierde: queda en los errores de la preparación más
+  `("montaje_reiniciado", origen)`, y `abr_montaje_reinicio` en action_logs.
+  Al docente no le aplica (su montaje se pone solo).
+- El botón del alumno se activa solo **después de intentarlo**: haber
+  medido con electrodos puestos (`MontajeElectrodos.intento`, se vuelve a
+  exigir tras cada reinicio). **A la tercera vez** que lo presiona
+  (`INTENTOS_ASISTIDO`; el reinicio del docente no cuenta) el montaje se lo
+  dejamos puesto con la piel bien preparada, la menor impedancia
+  (`de_libro` sin fonos, con el activo de la prueba: `cae_der` en el
+  ECochG), para que pueda seguir. Los fonos los pone él. Queda como
+  `("montaje_asistido", 3)` en los errores y `abr_montaje_asistido` en
+  action_logs.
+- **ASSR "andando para siempre":** al retomar la atención el ASSR vuelve
+  como registro guardado de solo lectura (no trae las épocas, no se puede
+  continuar) e Iniciar dejaba el timer corriendo sin entrar nada; lo mismo
+  con un registro que llegó al tope de épocas. Ahora Iniciar pregunta si
+  empezar uno nuevo (reemplaza al anterior en el informe); con "no" queda
+  detenido. La captura tampoco sigue corriendo si el registro no avanza.
+
+## ASSR: ficha de umbrales en vez de Latencia/Intensidad (2026-11-05)
+
+En el ASSR no hay latencias: la pestaña Latencia/Intensidad mostraba la
+ficha del ABR. Con el ASSR se llama **Umbrales** y muestra
+`abr/AssrResumen.py`, como la figura del libro (`fig_assr.py`): la grilla
+de detección por oído, portadora y nivel (verde con su p, gris ausente,
+naranja no concluyente, borde en el umbral) y el audiograma por oído con el
+umbral del ASSR (dB nHL, cuadrado vacío) y el estimado (dB eHL, lleno y con
+línea). **Sin la audiometría del caso**: es lo que el alumno estima. Sale
+del registro del panel, vivo o guardado, y se actualiza mientras registra.

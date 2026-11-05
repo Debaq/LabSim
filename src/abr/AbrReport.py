@@ -62,6 +62,11 @@ class AbrReport(QWidget, Ui_AbrReport):
             columnas.addLayout(columna, 1)
         raiz.addLayout(columnas, 1)
 
+    def set_descripcion_visible(self, visible):
+        """El ASSR se informa solo con la conclusión: sin descripción."""
+        self.label_3.setVisible(visible)
+        self.text_edit_1.setVisible(visible)
+
     @staticmethod
     def _seccion(texto):
         etiqueta = QLabel(texto)

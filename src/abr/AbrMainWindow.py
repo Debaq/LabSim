@@ -25,6 +25,7 @@ from abr.estilo import QSS_ABR, TARJETAS
 from core import tema
 from core.cabeza_electrodos import MontajeElectrodos, zona_de
 from abr.AssrPanel import AssrPanel
+from abr.AssrResumen import AssrResumen
 from abr.AbrAdvanceSettings import (ROTULO_MONTAJE, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
@@ -43,7 +44,7 @@ from abr.MarcasAbr import MarcasAbr
 from abr.CorticalTable import CorticalTable
 from abr.EcochgTable import EcochgTable
 from abr.protocols import standard_setup
-from abr import cortical, ecochg
+from abr import assr, cortical, ecochg
 from abr.EEG import EEG
 from abr.FSP import FSP
 from abr.UI.AbrMain_ui import Ui_MainWindow
@@ -57,7 +58,7 @@ from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, Qt, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (QComboBox, QFrame, QHBoxLayout, QLabel, QMainWindow,
-                               QPushButton, QScrollArea, QSizePolicy, QSpacerItem,
+                               QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem,
                                QTabWidget, QVBoxLayout, QWidget)
 
 tr = QCoreApplication.translate
@@ -207,6 +208,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.layout_resumen_lat_int = QVBoxLayout()
         columna_lat_int.addLayout(self.layout_resumen_lat_int)
         self.layout_lat_int.addWidget(ficha_lat_int)
+        self.ficha_lat_int = ficha_lat_int
+        # En el ASSR no hay latencias: en esa pestaña van los umbrales (la
+        # grilla de detección y el audiograma estimado, ver AssrResumen).
+        self.assr_resumen = AssrResumen()
+        self.assr_resumen.setVisible(False)
+        self.layout_lat_int.addWidget(self.assr_resumen)
         self.layout_report.addWidget(self.report)
         # Se guarda solo (core/report_autosave.py); bajo la conclusion se ve
         # si quedo guardado, con una linea por prueba (ABR, ECochG).
@@ -443,6 +450,28 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
         self.aplicar_monitor()
 
+    def reinicio_docente(self, pedido):
+        """El docente pidió desde el panel reiniciar el montaje de esta
+        atención (attendances.montaje_reinicio, ver main._reinicio_montaje).
+        `pedido` cuenta las veces: se aplica solo si es más que lo ya
+        aplicado, que viaja con el montaje (no se repite al reabrir)."""
+        if self.data_current is None or self._montaje_solo():
+            return False
+        if int(pedido or 0) <= self.montaje.reinicio_docente:
+            return False
+        self.montaje.reinicio_docente = int(pedido)
+        self.montaje.volver_a_empezar("docente")
+        self._con_montaje()
+        self._guardar_montaje()
+        self.tabWidget.setCurrentWidget(self.montaje)
+        aviso = QMessageBox(QMessageBox.Icon.Information, "Montaje reiniciado",
+                            "El docente reinició el montaje: la piel está nueva y sin "
+                            "electrodos ni fonos.", QMessageBox.StandardButton.Ok, self)
+        aviso.setWindowModality(Qt.WindowModality.NonModal)
+        aviso.show()
+        self._aviso_reinicio = aviso
+        return True
+
     def _registrar(self, accion, payload):
         """Lo que hace el alumno en el montaje, a action_logs (prefijo abr_),
         con la atencion y el caso, como los demas equipos."""
@@ -467,6 +496,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def _con_montaje(self):
         """Pone en el equipo lo que quedó en la pestaña Electrodos."""
+        # El activo con que se le deja hecho el montaje a quien lo intentó
+        # tres veces: en el conducto para el ECochG.
+        self.montaje.activo_de_rutina = 'cae_der' if self.test_actual == 'ECochG' else 'Cz'
         equipo = self.montaje.equipo()
         if self.test_actual == 'ECochG':
             # El activo del ECochG va en el conducto (o la membrana, según el
@@ -1397,6 +1429,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.panel_monitor.setVisible(False)
             self.graph_lat_int.clear_graph()
             return
+        if pagina is self.lat and self.es_assr():
+            self.panel_izquierdo.setVisible(False)
+            self.panel_monitor.setVisible(False)
+            self.assr_resumen.set_registro(self.assr_panel.rec, self.assr_panel.correccion)
+            return
         if pagina is self.lat:
             self.panel_izquierdo.setVisible(False)
             self.panel_monitor.setVisible(False)
@@ -1423,6 +1460,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # Sesion anterior abierta: se mira y se marca, no se registra.
             self.control.stop_capture()
             return
+        if state == 'record' and self.es_assr() and not self._assr_puede_seguir():
+            # El registro que hay no avanza: el guardado (se ve, no se sigue:
+            # no trae las épocas), o uno que llegó al tope. Antes Iniciar
+            # dejaba el equipo "registrando" para siempre sin entrar nada.
+            if self.assr_panel.rec is not None and self.preguntar_assr_nuevo():
+                self.assr_panel.reiniciar()
+            if not self._assr_puede_seguir():
+                self.control.stop_capture()
+                return
         if state == 'record':
             self.state_capture = state
             self.current_setting = self.control.get_data()
@@ -1475,8 +1521,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # setting quede congelado al iniciar la captura.
             self.current_setting['clamp'] = self.control.ch_clamp.isChecked()
             if self.es_assr():
+                if not self._assr_puede_seguir():
+                    self.control.stop_capture()
+                    return
                 self.assr_panel.actualizar_equipo(self.technical)
                 texto = self.assr_panel.tick()
+                if self.tabWidget.currentWidget() is self.lat:
+                    self.assr_resumen.set_registro(self.assr_panel.rec, self.assr_panel.correccion)
                 self.lbl_info.setText(texto)
                 return
             side = self.current_setting["side"]
@@ -1841,6 +1892,27 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """ASSR: se lee en frecuencia, con panel propio (ver AssrPanel)."""
         return self.test_actual == 'ASSR'
 
+    def _assr_puede_seguir(self):
+        """Si el registro del ASSR puede tomar más épocas."""
+        p = self.assr_panel
+        rec = p.rec
+        if rec is None or getattr(rec, 'guardado', False):
+            return False
+        if rec.n >= assr.MAX_EPOCHS:
+            return False
+        return not (p.chk_auto.isChecked() and rec.all_done())
+
+    def preguntar_assr_nuevo(self):
+        """Iniciar con un registro que no avanza: ¿uno nuevo? (reemplaza al
+        guardado al guardar el informe)."""
+        rec = self.assr_panel.rec
+        motivo = ("El registro guardado se puede mirar, pero no continuar."
+                  if getattr(rec, 'guardado', False) else "Este registro ya terminó.")
+        r = QMessageBox.question(
+            self, "ASSR", motivo + "\n\n¿Empezar un registro nuevo? Reemplaza al anterior "
+            "en el informe.")
+        return r == QMessageBox.StandardButton.Yes
+
     def assr_terminado(self, motivo):
         if self.state_capture == 'record':
             self.control.stop_capture()
@@ -1863,6 +1935,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         assr_on = test == 'ASSR'
         for grafico in (self.graph_r, self.graph_l):
             grafico.setVisible(not assr_on)
+        self.ficha_lat_int.setVisible(not assr_on)
+        self.assr_resumen.setVisible(assr_on)
+        self.report.set_descripcion_visible(not assr_on)
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.lat),
+                                  tr("AbrMainWindow", "Umbrales") if assr_on
+                                  else tr("AbrMainWindow", "Latencia/Intensidad"))
         self.assr_panel.setVisible(assr_on)
         self.fit_docks_for_assr(assr_on)
         self.control.set_assr_mode(assr_on)

@@ -112,6 +112,25 @@ if ($appointmentId !== null) {
             exit;
         }
 
+        if ($postAction === 'reset_montaje' && $uid > 0) {
+            // La piel que el alumno irritó (o el montaje enredado) no tiene
+            // vuelta en el kiosko: su app empieza de cero al sincronizar
+            // (ver AbrMainWindow.reinicio_docente). Sin la columna (falta
+            // "Aplicar schema") se avisa en vez de romper la página.
+            try {
+                $pdo->prepare(
+                    "UPDATE attendances SET montaje_reinicio = montaje_reinicio + 1, updated_at = CURRENT_TIMESTAMP
+                     WHERE appointment_id = ? AND student_id = ? AND estado = 'atendiendo'"
+                )->execute([$appointmentId, $uid]);
+                AdminAudit::log($me, 'attendance_reset_montaje', ['appointment_id' => $appointmentId, 'student_id' => $uid]);
+                $montaje = 'ok';
+            } catch (PDOException $e) {
+                $montaje = 'falta_schema';
+            }
+            header('Location: dashboard.php?appointment_id=' . $appointmentId . '&montaje=' . $montaje . '#student-' . $uid);
+            exit;
+        }
+
         if ($postAction === 'close_attendance' && $uid > 0) {
             // Contraparte de "Reactivar": el alumno no puede cerrar desde la app
             // (no llega su informe, se cayó el equipo) y el docente ve que lo
@@ -186,6 +205,11 @@ if ($appointmentId !== null) {
     admin_add_css('dashboard.css');
     admin_header('Cita · ' . ($appt ? $paciente($appt) : '#' . $appointmentId), $me);
     ?>
+    <?php if (($_GET['montaje'] ?? '') === 'ok'): ?>
+    <p class="success">Montaje reiniciado: la app del alumno empieza de cero al sincronizar (hasta 1 minuto).</p>
+    <?php elseif (($_GET['montaje'] ?? '') === 'falta_schema'): ?>
+    <p class="error">Para reiniciar el montaje falta aplicar el schema (Base de datos → Aplicar schema.sql).</p>
+    <?php endif; ?>
     <div class="card dash-cita-cabecera">
         <a href="dashboard.php">&larr; Volver al dashboard</a>
         <?php if ($appt): ?>
@@ -260,6 +284,12 @@ if ($appointmentId !== null) {
                 <input type="hidden" name="form_action" value="close_attendance">
                 <input type="hidden" name="user_id" value="<?= $uid ?>">
                 <button type="submit" class="btn btn--secondary btn--sm">Cerrar atención</button>
+            </form>
+            <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Reiniciar el montaje de electrodos de ' . $nombre . '? Su app deja la piel nueva, sin electrodos ni fonos, al sincronizar (hasta 1 minuto). Lo hecho antes queda registrado.'), ENT_QUOTES) ?>);">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="reset_montaje">
+                <input type="hidden" name="user_id" value="<?= $uid ?>">
+                <button type="submit" class="btn btn--secondary btn--sm" title="Para cuando irritó la piel o el montaje no tiene arreglo: empieza de cero en la misma atención">Reiniciar montaje</button>
             </form>
             <?php endif; ?>
             <?php if (in_array($a['estado'], ['atendido', 'no_show'], true)): ?>

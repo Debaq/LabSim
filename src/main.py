@@ -761,7 +761,21 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             hilos.en_fondo(inbox.inbox_list, dueno=self, nombre="bandeja",
                            listo=lambda items: inbox.actualizar_badge(self, items))
         app_config_store.update_from_sync(delta.get("config"))
+        self._reinicio_montaje()
         self._subir_pendientes_en_fondo()
+
+    def _reinicio_montaje(self):
+        """Si el docente pidió desde el panel reiniciar el montaje de esta
+        atención (pestaña Electrodos del ABR), se aplica: con cada sync y al
+        abrir el paciente (ver _hydrate_modules)."""
+        frame = getattr(self, "subw_abr", None)
+        if frame is None or self.data_current is None:
+            return
+        try:
+            from core.helpers import reinicio_montaje
+            frame.obj.reinicio_docente(reinicio_montaje(self.data_current_key))
+        except Exception:  # noqa: BLE001 -- no puede tumbar el sync
+            traceback.print_exc()
 
     def _sesion_perdida(self, motivo):
         """El servidor ya no acepta la sesión: venció (dura N horas desde el
@@ -1235,6 +1249,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 # (ni sin autoguardado) a los que vienen después.
                 print(f"{attr}: no se pudo cargar el caso:")
                 traceback.print_exc()
+        self._reinicio_montaje()
 
     # Los mismos códigos y nombres de Layout::APPS (Box_4 y Box_5).
     MODULOS_NASALES = {
@@ -1366,6 +1381,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             except Exception:  # noqa: BLE001 -- como en _hydrate_modules
                 print(f"{attr}: no se pudo cargar el caso:")
                 traceback.print_exc()
+            if attr == "subw_abr":
+                self._reinicio_montaje()
             if attr in self._ATTRS_EXAMEN:
                 self._subir_al_esconder(frame)
         self.subw.pendiente(nombre, armar, despues)

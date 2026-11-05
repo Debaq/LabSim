@@ -538,6 +538,9 @@ def ganancia_montaje(activo, referencias):
 # Son criterio de trabajo para que el ejercicio funcione, no cifras de una
 # norma: ajustarlas acá.
 FONOS = (("OD", "Rojo (OD)", tema.OD), ("OI", "Azul (OI)", tema.OI))
+# A la tercera vez que el alumno vuelve a empezar, el montaje se lo dejamos
+# hecho para que pueda seguir con el examen (pedido del docente, 2026-11-05).
+INTENTOS_ASISTIDO = 3
 OLIVAS = (("adulto", "Adulto"), ("infantil", "Infantil"))
 COMPRIMIR_S = 2.0               # apretando entre los dedos: de libre a enrollada
 EXPANDE_S = 10.0                # suelta, de enrollada a libre
@@ -1223,9 +1226,21 @@ class MontajeElectrodos(QWidget):
         self.btn_sacar_todos.setIcon(iconos.icono_boton("cerrar", tema.TEXTO_SUAVE, tam=14))
         self.btn_sacar_todos.clicked.connect(self.sacar_todos)
         pcol.addWidget(self.btn_sacar_todos)
+        # La piel que se irritó no se recupera sacando los electrodos: esto
+        # empieza de cero (piel nueva) y queda registrado.
+        self.btn_volver_a_empezar = QPushButton(" Volver a empezar")
+        self.btn_volver_a_empezar.setIcon(iconos.icono_boton("recargar", tema.TEXTO_SUAVE, tam=14))
+        self.btn_volver_a_empezar.setToolTip("Piel nueva, sin electrodos ni fonos. Queda registrado.")
+        self.btn_volver_a_empezar.clicked.connect(self._confirmar_volver_a_empezar)
+        pcol.addWidget(self.btn_volver_a_empezar)
         raiz.addWidget(panel)
 
         self.colocados = {}       # rol -> Electrodo
+        self._errores_antes = []  # de antes de cada "volver a empezar"
+        self.reinicios = []       # 'alumno' / 'docente', en orden
+        self.reinicio_docente = 0 # el último pedido del docente ya aplicado
+        self.intento = False      # midió con electrodos puestos: ya lo intentó
+        self.activo_de_rutina = "Cz"   # el equipo lo cambia ("cae_der" en el ECochG)
         self.canales = 1
         self._mostrar_roles()
         self._elegir_rol("activo")
@@ -1540,16 +1555,58 @@ class MontajeElectrodos(QWidget):
 
     def medir(self):
         self.impedancias.medir()
+        if self.colocados:
+            self.intento = True   # preparó, puso y midió: ya puede volver a empezar
         self._pintar()
 
     @property
     def errores(self):
         """Lo mal hecho en la preparación y con los fonos, para la evaluación
-        (no se muestra)."""
-        return list(self.impedancias.errores) + list(self.fonos.errores)
+        (no se muestra). Incluye lo de antes de cada "volver a empezar"."""
+        return (list(getattr(self, "_errores_antes", [])) + list(self.impedancias.errores)
+                + list(self.fonos.errores))
+
+    def _confirmar_volver_a_empezar(self):
+        if self.reinicios.count("alumno") + 1 >= INTENTOS_ASISTIDO:
+            texto = ("Es tu intento número {n}: dejamos los electrodos puestos sobre piel bien "
+                     "preparada para que puedas continuar. Los fonos los pones tú.\n\n"
+                     "Queda registrado. ¿Seguir?").format(n=self.reinicios.count("alumno") + 1)
+        else:
+            texto = ("Se borra todo lo hecho en la cabeza: la preparación de la piel, los "
+                     "electrodos y los fonos. La piel queda nueva.\n\nQueda registrado. ¿Seguir?")
+        if QMessageBox.question(self, "Volver a empezar", texto) == QMessageBox.StandardButton.Yes:
+            self.volver_a_empezar("alumno")
+
+    def volver_a_empezar(self, origen="alumno"):
+        """Piel nueva, sin electrodos ni fonos, en la misma atención. Lo mal
+        hecho antes no se pierde: queda en `errores` (más el reinicio), y
+        `reinicios` dice cuántas veces y quién lo pidió (el alumno, o el
+        docente desde el panel)."""
+        antes = [list(e) for e in self.errores]
+        historia = self._errores_antes + list(self.errores) + [("montaje_reiniciado", origen)]
+        reinicios = self.reinicios + [origen]
+        visto, canales = self.reinicio_docente, self.canales
+        self.reiniciar()
+        self._errores_antes, self.reinicios, self.reinicio_docente = historia, reinicios, visto
+        self.accion.emit("abr_montaje_reinicio", {"origen": origen, "vez": len(reinicios),
+                                                  "errores_previos": antes})
+        vez = reinicios.count("alumno")
+        if origen == "alumno" and vez >= INTENTOS_ASISTIDO:
+            # A la tercera, el montaje lo dejamos hecho (piel bien preparada,
+            # la menor impedancia) para que pueda seguir con el examen.
+            self.de_libro(canales, self.activo_de_rutina, fonos=False)
+            self._errores_antes.append(("montaje_asistido", vez))
+            self.intento = True
+            self.accion.emit("abr_montaje_asistido", {"vez": vez, "canales": canales,
+                                                      "activo": self.activo_de_rutina})
+        self._pintar()
 
     def reiniciar(self, rng=None):
         """Paciente nuevo: piel sin preparar y sin electrodos."""
+        self._errores_antes = []      # de antes de cada "volver a empezar"
+        self.reinicios = []           # 'alumno' / 'docente', en orden
+        self.reinicio_docente = 0     # el último pedido del docente ya aplicado
+        self.intento = False
         self.impedancias = Impedancias(rng or self.impedancias.piel.rng)
         self.cabeza.piel = self.impedancias.piel
         self.fonos = FonosInsercion()
@@ -1568,7 +1625,10 @@ class MontajeElectrodos(QWidget):
                                     "normal": np.round(e.normal, 5).tolist()}
                               for rol, e in self.colocados.items()},
                 "z": dict(self.impedancias.z), "medido": dict(self.impedancias.medido),
-                "fonos": self.fonos.estado()}
+                "fonos": self.fonos.estado(),
+                "reinicios": list(self.reinicios), "reinicio_docente": self.reinicio_docente,
+                "intento": self.intento,
+                "errores_antes": [list(e) for e in self._errores_antes]}
 
     def restaurar(self, estado):
         """Vuelve un montaje guardado con estado(). False si no se pudo."""
@@ -1584,6 +1644,10 @@ class MontajeElectrodos(QWidget):
             self.impedancias.medido = {k: float(v) for k, v in (estado.get("medido") or {}).items()
                                        if k in self.colocados}
             self.fonos.restaurar(estado.get("fonos"))
+            self.reinicios = [str(r) for r in estado.get("reinicios") or []]
+            self.reinicio_docente = int(estado.get("reinicio_docente") or 0)
+            self.intento = bool(estado.get("intento"))
+            self._errores_antes = [tuple(e) for e in estado.get("errores_antes") or []]
         except (KeyError, TypeError, ValueError) as exc:
             print(f"montaje: no se pudo restaurar: {exc!r}")
             return False
@@ -1617,10 +1681,10 @@ class MontajeElectrodos(QWidget):
                 # Por dónde sale cada canal del equipo (ver AbrMainWindow._por_los_fonos).
                 "fonos": self.fonos.equipo(adulto=self._es_adulto())}
 
-    def de_libro(self, canales=2, activo="Cz"):
+    def de_libro(self, canales=2, activo="Cz", fonos=True):
         """Montaje de rutina bien hecho: activo (Cz; "cae_der" para el
-        ECochG), mastoides y Fpz, con alcohol y gel. Para los tests y para
-        mostrar cómo queda."""
+        ECochG), mastoides y Fpz, con alcohol y gel. Para los tests, el
+        docente y el alumno que ya lo intentó tres veces (sin los fonos)."""
         self.sacar_todos()
         self.poner_canales(canales)
         sitios = (activo, "M2", "M1", "Fpz") if canales == 2 else (activo, "M2", "Fpz")
@@ -1638,7 +1702,7 @@ class MontajeElectrodos(QWidget):
             self.poner_en_sitio(sitio)
         # Y los fonos, enrollados y cada uno en su oído, con la oliva que va.
         oliva = "infantil" if self._es_bebe() else "adulto"
-        for canal, _, _ in FONOS:
+        for canal, _, _ in (FONOS if fonos else ()):
             self.fonos.cambiar_oliva(canal, oliva)
             self.fonos.apretar(canal, ahora=0.0)
             self.fonos.soltar(canal, ahora=COMPRIMIR_S)
@@ -1698,6 +1762,11 @@ class MontajeElectrodos(QWidget):
             sacar.setEnabled(e is not None)
             piel.setText(self.impedancias.piel.resumen(e.punto) if e is not None else "")
         self.btn_medir.setEnabled(bool(self.colocados))
+        # Volver a empezar, solo después de intentarlo: preparar, poner y medir.
+        self.btn_volver_a_empezar.setEnabled(self.intento)
+        self.btn_volver_a_empezar.setToolTip(
+            "Piel nueva, sin electrodos ni fonos. Queda registrado." if self.intento else
+            "Se activa cuando hayas preparado la piel, puesto los electrodos y medido.")
         informe = self.impedancias.informe()
         if informe is None:
             texto = (f"Cada electrodo bajo {limite:.0f} kΩ y entre ellos menos de "

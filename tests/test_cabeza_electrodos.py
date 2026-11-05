@@ -372,6 +372,69 @@ def test_oliva_de_adulto_a_un_bebe_llora():
     assert m.fonos.fonos["OD"].oido == "OD"
 
 
+
+def test_volver_a_empezar_deja_piel_nueva_y_guarda_lo_de_antes():
+    m = _montaje()
+    acciones = []
+    m.accion.connect(lambda a, d: acciones.append((a, d)))
+    d = ce.datos()
+    punto, normal = _sitio("Cz")
+    linea = np.array([punto + np.array([k / 9 - 0.5, 0, 0]) * 0.02 for k in range(10)])
+    for _ in range(4):                                   # ida y vuelta con gel: irrita
+        m.impedancias.piel.pasada("gel", linea, [normal] * 10, misma_direccion=False)
+    m.poner_en_sitio("Cz")
+    assert m.impedancias.piel.trazos and m.colocados
+    antes = list(m.errores)
+    m.volver_a_empezar("alumno")
+    assert m.impedancias.piel.trazos == [] and m.colocados == {}
+    assert all(f.oido is None for f in m.fonos.fonos.values())
+    assert m.errores[:len(antes)] == antes and ("montaje_reiniciado", "alumno") in m.errores
+    assert acciones[-1][0] == "abr_montaje_reinicio" and acciones[-1][1]["vez"] == 1
+    # Viaja con el montaje (retomar la atención) y un paciente nuevo lo olvida.
+    otro = _montaje()
+    assert otro.restaurar(m.estado())
+    assert otro.reinicios == ["alumno"] and ("montaje_reiniciado", "alumno") in otro.errores
+    otro.reiniciar()
+    assert otro.reinicios == [] and otro.errores == []
+    del d
+
+
+
+def _intentar(m):
+    """Un intento cualquiera: frota con alcohol, pone y mide."""
+    for sitio in ("Cz", "M2", "Fpz"):
+        punto, normal = _sitio(sitio)
+        linea = np.array([punto + np.array([k / 9 - 0.5, 0, 0]) * 0.02 for k in range(10)])
+        m.impedancias.piel.pasada("alcohol", linea, [normal] * 10)
+        m.poner_en_sitio(sitio)
+    m.medir()
+
+
+def test_volver_a_empezar_solo_tras_intentarlo_y_a_la_tercera_se_lo_dejamos_puesto():
+    m = _montaje()
+    acciones = []
+    m.accion.connect(lambda a, d: acciones.append(a))
+    assert not m.btn_volver_a_empezar.isEnabled()           # sin intentarlo, no
+    m.poner_en_sitio("Cz")
+    assert not m.btn_volver_a_empezar.isEnabled()           # poner sin medir no basta
+    m.sacar_todos()
+    for vez in (1, 2):
+        _intentar(m)
+        assert m.btn_volver_a_empezar.isEnabled()
+        m.volver_a_empezar("alumno")
+        assert m.colocados == {} and not m.btn_volver_a_empezar.isEnabled(), vez
+    m.volver_a_empezar("docente")                            # el del docente no cuenta
+    assert m.colocados == {}
+    _intentar(m)
+    m.volver_a_empezar("alumno")                             # tercera del alumno
+    assert set(m.colocados) == {"activo", "referencia", "tierra"}
+    limite, _ = ce.limites()
+    assert max(m.impedancias.medido.values()) < limite
+    assert all(f.oido is None for f in m.fonos.fonos.values())   # los fonos los pone él
+    assert ("montaje_asistido", 3) in m.errores and "abr_montaje_asistido" in acciones
+    assert m.btn_volver_a_empezar.isEnabled()
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

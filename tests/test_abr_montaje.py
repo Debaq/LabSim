@@ -276,6 +276,42 @@ def test_al_admin_no_le_toca_preparar_la_cabeza():
     assert a.tabWidget.currentWidget() is a.montaje and a.montaje.colocados == {}
 
 
+
+def test_el_docente_reinicia_el_montaje_desde_el_panel():
+    """attendances.montaje_reinicio llega con el sync: la app empieza de cero
+    una vez por pedido, y no lo repite al reabrir la atención."""
+    from core import helpers
+
+    class Cliente:
+        user = {"id": 34, "username": "dana", "role": "student"}
+    viejo_estado, viejo_cliente = helpers._estado_agenda, helpers._backend_client
+    try:
+        helpers._backend_client = Cliente()
+        helpers._estado_agenda = {"students": [], "appointments": {}, "cases": {},
+                                  "attendances": {1: {"id": 1, "appointment_id": 42, "student_id": 34,
+                                                      "montaje_reinicio": 0}}}
+        assert helpers.reinicio_montaje(42) == 0 and helpers.reinicio_montaje(99) == 0
+        w = _ventana(_de_libro)
+        assert not w.reinicio_docente(helpers.reinicio_montaje(42))
+        helpers._estado_agenda["attendances"][1]["montaje_reinicio"] = 1
+        assert w.reinicio_docente(helpers.reinicio_montaje(42))
+        assert w.montaje.colocados == {} and w.montaje.reinicios == ["docente"]
+        assert w.tabWidget.currentWidget() is w.montaje
+        w._aviso_reinicio.close()
+        assert not w.reinicio_docente(1)                  # el mismo pedido no se repite
+        guardado = w.montaje.estado()
+        w.la_super(_caso(), 43)                           # otro paciente y vuelve
+        w.la_super(_caso(), 42)
+        w.montaje.restaurar(guardado)
+        assert not w.reinicio_docente(1) and w.montaje.reinicio_docente == 1
+    finally:
+        helpers._estado_agenda, helpers._backend_client = viejo_estado, viejo_cliente
+    # Al docente no: su montaje se pone solo.
+    a = AbrMainWindow({'name': 'Admin', 'user': 'adm', 'permission': 777})
+    a.la_super(_caso(), 42)
+    assert not a.reinicio_docente(5)
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

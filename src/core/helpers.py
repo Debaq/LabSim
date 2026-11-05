@@ -421,6 +421,27 @@ def aplicar_delta(delta: dict):
     return "nuevo", data
 
 
+def reinicio_montaje(appointment_id) -> int:
+    """Cuántas veces pidió el docente, desde el panel, reiniciar el montaje
+    de electrodos de esta atención (attendances.montaje_reinicio, llega con
+    el sync). 0 si no lo pidió, si es otra persona o si no hay agenda."""
+    estado = _estado_agenda
+    if estado is None or appointment_id in (None, ""):
+        return 0
+    try:
+        cita = int(appointment_id)
+    except (TypeError, ValueError):
+        return 0
+    yo = (_get_backend_client().user or {}).get("id")
+    for fila in estado["attendances"].values():
+        if int(fila.get("appointment_id") or 0) == cita and fila.get("student_id") == yo:
+            try:
+                return int(fila.get("montaje_reinicio") or 0)
+            except (TypeError, ValueError):
+                return 0
+    return 0
+
+
 def entry_estado_por(entry, username: str) -> str | None:
     """Estado de atención de `username` sobre esta fila: None, "atendiendo", "atendido" o "no_show"."""
     valor = entry.atencion.get(username)

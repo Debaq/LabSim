@@ -44,6 +44,8 @@ final class Metrics
         'abr_fono_sacar' => 'Fono de inserción: sacar',
         'abr_fono_oliva' => 'Fono de inserción: cambio de oliva',
         'abr_fono_llanto' => 'Fono de inserción: oliva de adulto a un bebé (llora)',
+        'abr_montaje_reinicio' => 'Montaje de electrodos: volver a empezar (piel nueva)',
+        'abr_montaje_asistido' => 'Montaje de electrodos: puesto por el sistema (tercer intento)',
         // Impedanciómetro (Z)
         'z_dial_change' => 'Movimiento de dial',
         'z_direction_change' => 'Cambio de dirección de barrido',

@@ -350,6 +350,9 @@ CREATE TABLE IF NOT EXISTS attendances (
     nota TEXT NOT NULL DEFAULT '',
     hora_real TEXT NOT NULL DEFAULT '',
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- Veces que el docente pidió desde el panel reiniciar el montaje de
+    -- electrodos (piel nueva): la app lo aplica al sincronizar.
+    montaje_reinicio INTEGER NOT NULL DEFAULT 0,
     UNIQUE (appointment_id, student_id)
 );
 CREATE INDEX IF NOT EXISTS idx_attendances_updated ON attendances (updated_at);
