@@ -239,8 +239,8 @@ def conclusion_peatc(caso, niveles, umbrales, estimulo="click"):
                 texto += "; morfología alterada"
             elif intervalos:
                 texto += "; intervalos interpico prolongados"
-            else:
-                texto += "; intervalos interpico I-III, III-V e I-V dentro de rangos normales"
+            # Normal no se dice: la hoja puede no mostrar la I ni la III (el
+            # recién nacido, o a baja intensidad) y no hay intervalo que leer.
         lineas.append(f"{lado}: {texto[0].upper()}{texto[1:]} ({estimulo}).")
     return lineas
 

@@ -321,8 +321,11 @@ def main():
         firma = f"historia {h['dias']} {examen}"
         if h['hoja'] == 'tamizaje':
             # Sin la franja del título: el informe ya lo lleva arriba
-            tarjeta = tarjeta_tamizaje(h['prueba'], h['OD'], h['OI']).replace(
-                'viewBox="0 0 360 128" width="360" height="128"', 'viewBox="0 38 360 72" width="360" height="72"', 1)
+            # (recortar el viewBox no basta: lo que queda fuera igual se dibuja)
+            tarjeta = re.sub(r'<text [^>]*>[^<]*</text>', '', tarjeta_tamizaje(h['prueba'], h['OD'], h['OI']), count=1)
+            tarjeta = tarjeta.replace('viewBox="0 0 360 128" width="360" height="128"',
+                                      'viewBox="0 38 360 72" width="360" height="72"', 1)
+            tarjeta = tarjeta.replace('<rect width="100%" height="100%" fill="#ffffff"/>', '', 1)
             svg = IP.informe(tarjeta, examen, paciente,
                              IP.conclusion_tamizaje(h['prueba'], h['OD'], h['OI']),
                              IP.firmante(ficha, firma), prueba=h['prueba'])
