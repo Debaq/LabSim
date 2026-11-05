@@ -148,7 +148,28 @@ class AssrPanel(QWidget):
         grilla.addLayout(col1, 0, 0)
         grilla.addWidget(self.p_fft, 0, 1)
         grilla.addWidget(self.p_polar, 1, 0)
-        grilla.addWidget(self.p_audio, 1, 1)
+        # Audiograma con sus valores: el número que se informa, por oído y
+        # frecuencia (2026-11-05: solo había símbolos y no se podía concluir).
+        col_audio = QVBoxLayout()
+        col_audio.addWidget(self.p_audio, 1)
+        self.tabla_umbral = QTableWidget(2, len(assr.CARRIERS))
+        self.tabla_umbral.setHorizontalHeaderLabels(
+            [_etiqueta_freq(f) for f in assr.CARRIERS])
+        self.tabla_umbral.setVerticalHeaderLabels(["OD", "OI"])
+        self.tabla_umbral.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabla_umbral.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tabla_umbral.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tabla_umbral.setToolTip(tr(
+            "AssrPanel",
+            "Umbral estimado en dB eHL (menor nivel con respuesta menos la "
+            "corrección). NR: sin respuesta al mayor nivel probado. —: aún sin "
+            "conclusión"))
+        alto = (self.tabla_umbral.horizontalHeader().sizeHint().height()
+                + 2 * self.tabla_umbral.verticalHeader().defaultSectionSize() + 4)
+        self.tabla_umbral.setFixedHeight(alto)
+        col_audio.addWidget(QLabel(tr("AssrPanel", "Umbral estimado (dB eHL)")))
+        col_audio.addWidget(self.tabla_umbral)
+        grilla.addLayout(col_audio, 1, 1)
         self.lbl_polar = QLabel("")
         self.lbl_polar.setAlignment(Qt.AlignCenter)
         self.lbl_polar.setWordWrap(True)
@@ -227,6 +248,7 @@ class AssrPanel(QWidget):
 
     def limpiar(self):
         self.tabla.clearContents()
+        self.tabla_umbral.clearContents()
         for p in (self.p_rastro, self.p_fft, self.p_polar, self.p_audio):
             p.clear()
         self.lbl_polar.setText("")
@@ -615,6 +637,8 @@ class AssrPanel(QWidget):
         if rec is None:
             return
         p.clear()
+        if plot is None:
+            self.tabla_umbral.clearContents()
         p.addItem(pg.InfiniteLine(pos=20, angle=0,
                                   pen=pg.mkPen('#bbb', style=Qt.DashLine)))
         for side, simbolo in (('OD', 'o'), ('OI', 'x')):
@@ -640,6 +664,32 @@ class AssrPanel(QWidget):
                         sin_resp.append((i, max(mayor)))
             if len(xs) > 1:
                 p.plot(xs, ehl, pen=pg.mkPen(color, width=1.5))
+            # El valor al lado del símbolo: OD a la izquierda, OI a la derecha
+            # para que no se pisen cuando coinciden.
+            desp, ancla = (-0.12, (1.0, 0.5)) if side == 'OD' else (0.12, (0.0, 0.5))
+            for x, v in zip(xs, ehl):
+                txt = pg.TextItem(f"{v:.0f}", color=color, anchor=ancla)
+                txt.setFont(pg.QtGui.QFont('', 8, pg.QtGui.QFont.Bold))
+                txt.setPos(x + desp, v)
+                p.addItem(txt)
+            for x, v in sin_resp:
+                txt = pg.TextItem(f"NR {v:.0f}", color=color, anchor=ancla)
+                txt.setFont(pg.QtGui.QFont('', 7))
+                txt.setPos(x + desp, v)
+                p.addItem(txt)
+            if plot is None:
+                fila = 0 if side == 'OD' else 1
+                for i, f in enumerate(assr.CARRIERS):
+                    if i in xs:
+                        texto = f"{ehl[xs.index(i)]:.0f}"
+                    elif i in [x for x, _ in sin_resp]:
+                        texto = "NR"
+                    else:
+                        texto = "—"
+                    it = QTableWidgetItem(texto)
+                    it.setTextAlignment(Qt.AlignCenter)
+                    it.setForeground(QColor(color))
+                    self.tabla_umbral.setItem(fila, i, it)
             p.addItem(pg.ScatterPlotItem(
                 xs, bruto, size=6, symbol='d', brush=pg.mkBrush(None),
                 pen=pg.mkPen(color + '99', width=1)))

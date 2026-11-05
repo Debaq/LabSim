@@ -62,8 +62,17 @@ FM_BIN = {'OD': (82, 90, 98, 106), 'OI': (84, 92, 100, 108)}
 
 LEVEL_MIN, LEVEL_MAX, LEVEL_STEP = 0, 120, 5
 AUTO_STEP = 10
-MAX_EPOCHS = 1500
+# Tope del registro entero (todas las portadoras corren juntas). Con 1500
+# un lactante gastaba todo en el primer escalón (2026-11-05: ruido de
+# 15-25 nV, nunca bajaba de NOISE_CRITERION_NV) y no se llegaba a ningún
+# umbral. ~20 MB de épocas.
+MAX_EPOCHS = 6000
 MIN_EPOCHS = 30
+# Tiempo máximo por nivel (épocas de ~1 s, unos 6 minutos): si el ruido no
+# llegó al criterio, el equipo cierra ese nivel como "sin respuesta" con el
+# ruido que alcanzó, como un equipo clínico. Sin esto un paciente ruidoso
+# quedaba "en curso" para siempre.
+MAX_RUN_EPOCHS = 360
 # Alfa más estricto que el 5 % de rutina: el equipo mira el registro varias
 # veces mientras promedia, y cada mirada es otra oportunidad de un falso
 # positivo (con 0,05 y 60 miradas, 1 de cada 3 líneas sin respuesta se
@@ -104,12 +113,19 @@ DESYNC_AMP_FACTOR = {'total': 0.5, 'parcial': 0.7}
 # nivel de sensación (dB).
 AMP_SAT_UV = {500: 0.130, 1000: 0.110, 2000: 0.090, 4000: 0.070}
 AMP_TAU_DB = 28.0
+# Reclutamiento: con pérdida coclear la amplitud crece más rápido sobre el
+# umbral (por eso el ASSR estima mejor en las pérdidas severas). La
+# constante se divide por 1 + (umbral fisiológico - 25) / 40: ~11 dB con un
+# umbral de 90. SIN FUENTE numérica; sin esto un lactante con pérdida severa
+# solo respondía 20-40 dB arriba de su umbral y el audiograma salía corrido.
+RECRUIT_PHYS_REF_DB = 25.0
+RECRUIT_SPAN_DB = 40.0
 # Retardo de grupo (s): la fase de la línea es -2π·fm·retardo.
 GROUP_DELAY_S = {500: 0.022, 1000: 0.020, 2000: 0.017, 4000: 0.015}
 
 # EEG de fondo por bin y por época (µV) a 90 Hz en un registro tranquilo,
 # y cómo cae con la frecuencia.
-NOISE_UV = 0.30
+NOISE_UV = 0.18
 NOISE_SLOPE = 0.8
 # Pasa-alto de 30 Hz y pasa-bajo de 300 Hz del protocolo.
 HIGHPASS_HZ = 30.0
@@ -216,7 +232,8 @@ def response_amplitude_uv(level, phys, carrier):
     sl = level - phys
     if sl <= 0:
         return 0.0
-    return AMP_SAT_UV[carrier] * (1.0 - np.exp(-sl / AMP_TAU_DB))
+    tau = AMP_TAU_DB / (1.0 + max(phys - RECRUIT_PHYS_REF_DB, 0.0) / RECRUIT_SPAN_DB)
+    return AMP_SAT_UV[carrier] * (1.0 - np.exp(-sl / tau))
 
 
 def f_sf(f_ratio, vecinos):
@@ -461,10 +478,13 @@ class Recording:
         r = float(abs(np.exp(1j * fases).mean()))
         p_ray = float(np.exp(-n * r * r)) if n >= 2 else 1.0
         detectada = n >= MIN_EPOCHS and p < ALPHA
-        concluyente = detectada or (n >= MIN_EPOCHS
-                                    and noise * 1000.0 <= NOISE_CRITERION_NV)
+        por_tiempo = not detectada and n >= MAX_RUN_EPOCHS
+        concluyente = detectada or por_tiempo or (
+            n >= MIN_EPOCHS and noise * 1000.0 <= NOISE_CRITERION_NV)
         if detectada:
             estado = 'respuesta'
+        elif por_tiempo and noise * 1000.0 > NOISE_CRITERION_NV:
+            estado = 'sin respuesta (tiempo máx.)'
         elif concluyente:
             estado = 'sin respuesta'
         else:
@@ -603,6 +623,12 @@ class Recording:
                     t['level'], False)
         for nivel, det in por_nivel.items():
             if det and por_nivel.get(nivel - AUTO_STEP) is False:
+                return True
+            # Respuesta al mínimo, o nada ni al máximo del equipo: no hay
+            # adónde seguir (un oído sin ASSR no dejaba terminar nunca).
+            if det and nivel - AUTO_STEP < LEVEL_MIN:
+                return True
+            if not det and nivel + AUTO_STEP > LEVEL_MAX:
                 return True
         return False
 

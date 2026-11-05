@@ -7885,3 +7885,31 @@ potenciales.
   informes que trae: no hay a quién pedírselo.
 - Atención nueva o retomada: vuelve a llegar despierto. Queda en el registro
   (`paciente_duerme`).
+
+## ASSR: tiempo máximo por nivel y audiograma con valores (2026-11-05)
+
+En el práctico de lactantes (163/164) el ASSR no concluía nada: el ruido de un
+lactante (15-25 nV) nunca bajaba de `NOISE_CRITERION_NV` (12), cada nivel
+quedaba "en curso" y el registro entero (1500 épocas) se gastaba en el primer
+escalón; los umbrales estaban a 80-115 dB. Y el audiograma estimado no tenía
+números.
+
+- **Tiempo máximo por nivel** (`MAX_RUN_EPOCHS` = 360, ~6 min): si no hubo
+  respuesta y el ruido no llegó al criterio, el nivel se cierra como
+  "sin respuesta (tiempo máx.)", como un equipo clínico. Tope del registro
+  entero a 6000 épocas.
+- **Termina** también la portadora que no responde ni al máximo (o responde
+  al mínimo): un oído sin ASSR no dejaba terminar nunca el automático.
+- **Ruido de fondo** `NOISE_UV` 0,30 → 0,18 µV: con 0,30 un lactante seguía en
+  26 nV a los 6 minutos. Con 0,18 queda en ~8-15 nV, lo esperable en un
+  registro dormido (5-10 nV a los 3-5 minutos, según Picton y John de memoria:
+  falta verificarlo en la fuente).
+- **Reclutamiento**: la constante de crecimiento de la amplitud se divide por
+  1 + (umbral fisiológico − 25) / 40 (~11 dB con umbral 90). SIN FUENTE
+  numérica; sin esto, con pérdida severa solo respondía 20-40 dB arriba.
+- Con eso el 164 da OI 75-90 eHL (conductual 75-85) y OD 95-110 (100-110); el
+  163 (ANSD) responde solo a 110 en el OD y nada en el OI.
+- El oído sordo puede "responder" a ≥90 dB por **cruce al oído sano**: es
+  fisiológico y ahora se alcanza (antes el registro no llegaba).
+- **Audiograma con valores**: el número eHL al lado de cada símbolo, "NR" con
+  el nivel donde no respondió, y una tabla OD/OI × frecuencia debajo.

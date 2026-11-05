@@ -134,7 +134,11 @@ def test_auto_strategy_finishes_with_threshold_and_no_response():
             break
     od = [rec.threshold_hl(('OD', f)) for f in assr.CARRIERS]
     assert all(t is not None for t in od), od
-    assert rec.threshold_hl(('OI', 1000)) is None
+    # El oído sordo no responde: lo que puede aparecer arriba es el cruce
+    # al oído sano (65 dB de atenuación con inserción), no un umbral suyo.
+    oi = rec.threshold_hl(('OI', 1000))
+    assert oi is None or oi >= 90, oi
+    assert rec.all_done(), "un oído sin respuesta ni al máximo también termina"
 
 
 def test_same_patient_same_recording():
@@ -379,6 +383,21 @@ def test_looking_at_a_past_session_does_not_lose_the_live_recording():
 def test_report_type_maps_to_assr_and_back():
     from abr.AbrSessions import report_tipo, test_of_report
     assert report_tipo('ASSR') == 'ASSR' and test_of_report('ASSR') == 'ASSR'
+
+def test_un_lactante_ruidoso_llega_al_umbral():
+    """2026-11-05: con el ruido de un lactante el registro se agotaba en el
+    primer escalón y no concluía nada. Con tiempo máximo por nivel termina, y
+    el umbral queda cerca del fisiológico."""
+    oido = _oido([75, 80, 85, 85])
+    rec = assr.Recording({'OD': oido, 'OI': oido}, patient={'edad': 0}, quality=1.47, inquietud=0.25)
+    while rec.n < assr.MAX_EPOCHS and not rec.all_done():
+        rec.step(3)
+        rec.auto_step()
+    assert rec.all_done(), rec.n
+    for c in assr.channels():
+        thr = rec.threshold_hl(c)
+        assert thr is not None and thr - rec.phys[c] <= 25, (c, thr, rec.phys[c])
+
 
 if __name__ == "__main__":
     pruebas = [v for k, v in sorted(globals().items()) if k.startswith('test_')]
