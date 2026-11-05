@@ -171,6 +171,32 @@ def test_ventana_titulacion():
     assert p['criterio'] and p['case_id'] == 904 and 'p_eficaz_ahora' in p
 
 
+def test_monitor_reutiliza_sus_items_entre_tics():
+    """Antes cada tic de 200 ms hacía clear() de los cuatro gráficos y los
+    volvía a crear (el patrón de las caídas del ASSR, tickets 35 y 43). Los
+    tics no crean ni borran ítems; la SpO2 por tramos se va agregando."""
+    w = ventana()
+    w._empezar()
+    w.timer.stop()
+    w.T.avanzar(3600)
+    w._tic()
+    plots = w.monitor.plots.values()
+    antes = [set(map(id, p.items)) for p in plots]
+    for _ in range(30):
+        w._tic()
+    w._cambiar(1)
+    for _ in range(30):
+        w._tic()
+    despues = [set(map(id, p.items)) for p in plots]
+    for a, d in zip(antes, despues):
+        assert a <= d, "un tic borró ítems del monitor"
+    # Tramos de SpO2: los mismos que recalcularlo entero.
+    T = w.T
+    xs, ys = w.monitor._spo2_tramos(T, 30)
+    assert ys == [min(T.spo2(j) for j in range(k, k + 30)) for k in range(0, T.t - 30, 30)]
+    assert len(xs) == len(ys)
+
+
 def test_ventana_tic_avanza_y_pausa():
     w = ventana()
     w._empezar()

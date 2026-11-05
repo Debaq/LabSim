@@ -8228,3 +8228,17 @@ salieron dos bugs que ya estaban:
 - **Dentro de un diálogo abierto con un clic no se invertía nada**: la
   bandera de "estoy reenviando" quedaba puesta mientras el exec() del
   diálogo corría. Ahora el evento propio se reconoce por identidad.
+
+## Capas comunes: CPAP y rinomanometría sin clear() por tick (2026-11-05)
+
+`_Capas` del ASSR pasó a `core/capas.py` (`Capas`) y lo usan también:
+- **Monitor del CPAP**: cada tic de 200 ms hacía clear() de sus cuatro
+  gráficos y recreaba 8-9 ítems. Además la curva de SpO2 se recalculaba
+  entera desde la hora 0 en cada tic; ahora se van agregando los tramos de
+  30 s ya cerrados (el pasado no cambia: `_desaturar` solo escribe del
+  segundo actual en adelante). Medido: de 10-25 ms por tic a 2-3,5 ms.
+- **Curva presión-flujo de la rinomanometría**: se redibujaba entera en
+  cada ciclo respiratorio (~3 s) mientras mide.
+
+Las imágenes salen idénticas píxel a píxel a las de antes (CPAP a 0,5, 4 y
+7,9 h y vacío; rinomanometría vacía, medida, con Broms y en vivo).

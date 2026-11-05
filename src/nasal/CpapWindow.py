@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (QComboBox, QFrame, QHBoxLayout, QMainWindow, QPla
 
 from core import tema
 from core.base import context
+from core.capas import Capas
 from core.estado_informe import EstadoInforme
 from nasal import cpap as C
 from nasal import sesion as sesion_nasal
@@ -68,6 +69,13 @@ class Monitor:
                 p.setXLink(self.plots['etapa'])
             self.plots[clave] = p
             self.widget.nextRow()
+        # Los ítems se reutilizan entre ticks (ver core/capas.py): antes
+        # cada tick de 200 ms hacía clear() de los cuatro gráficos.
+        self._capas = {clave: Capas(p) for clave, p in self.plots.items()}
+        # SpO2 por tramos de 30 s ya calculados: el pasado no cambia
+        # (cpap._desaturar solo escribe del segundo actual en adelante) y
+        # recalcularlo entero en cada tick costaba ~28 ms al final de la noche.
+        self._spo2 = None
         self.plots['etapa'].getAxis('left').setTicks([[(4, 'W'), (3, 'R'), (1, 'N2'), (0, 'N3')]])
         self.plots['eventos'].getAxis('left').setTicks([[(3, 'Apn'), (2, 'Hip'), (1, 'RERA'), (0, 'Ron')]])
         self.plots['spo2'].getAxis('bottom').setLabel('horas', color=tema.TEXTO_TENUE)
@@ -76,10 +84,30 @@ class Monitor:
             lay.setRowStretchFactor(fila, k)
 
     def dibujar(self, T):
-        for p in self.plots.values():
-            p.clear()
-        if T is None:
-            return
+        for capas in self._capas.values():
+            capas.empezar()
+        try:
+            if T is not None:
+                self._dibujar(T)
+        finally:
+            for capas in self._capas.values():
+                capas.terminar()
+
+    def _spo2_tramos(self, T, paso):
+        """[(hora, mínimo de SpO2 del tramo)] de los tramos de `paso` s ya
+        cerrados, agregando solo los nuevos."""
+        c = self._spo2
+        if c is None or c['T'] is not T or c['k'] > T.t:
+            c = self._spo2 = {'T': T, 'k': 0, 'x': [], 'y': []}
+        while c['k'] < T.t - paso:
+            k = c['k']
+            c['x'].append(k / 3600)
+            c['y'].append(min(T.spo2(j) for j in range(k, k + paso)))
+            c['k'] += paso
+        return c['x'], c['y']
+
+    def _dibujar(self, T):
+        capas = self._capas
         horas = T.N / 3600
         for p in self.plots.values():
             p.setXRange(0, horas, padding=0)
@@ -90,33 +118,32 @@ class Monitor:
                 break
             xs += [a / 3600, min(b, t) / 3600]
             ys += [Z.ORDEN[e]] * 2
-        self.plots['etapa'].plot(xs, ys, pen=pg.mkPen(tema.TEXTO, width=1.3))
+        capas['etapa'].curva('hipnograma', xs, ys, pen=pg.mkPen(tema.TEXTO, width=1.3))
         self.plots['etapa'].setYRange(-0.5, 4.5, padding=0)
         xs, ys = [], []
         for a, b, p in T.escalones():
             xs += [a / 3600, b / 3600]
             ys += [p, p]
-        self.plots['presion'].plot(xs, ys, pen=pg.mkPen(tema.ACENTO, width=2))
+        capas['presion'].curva('escalones', xs, ys, pen=pg.mkPen(tema.ACENTO, width=2))
         self.plots['presion'].setYRange(C.P_MIN - 1, max(14, max(ys or [0]) + 2), padding=0)
         filas = {'ao': 3, 'am': 3, 'ac': 3, 'h': 2, 'rera': 1}
         for tipo, color in COLOR_TIPO.items():
             xe = [x['t'] / 3600 for x in T.eventos if x['tipo'] == tipo]
             if xe:
-                self.plots['eventos'].plot(xe, [filas[tipo]] * len(xe), pen=None, symbol='|', symbolSize=9,
-                                           symbolPen=pg.mkPen(color, width=1.2))
+                capas['eventos'].curva(('evento', tipo), xe, [filas[tipo]] * len(xe), pen=None,
+                                       symbol='|', symbolSize=9, symbolPen=pg.mkPen(color, width=1.2))
         xr = [m / 60 for m, r in T.ronquido if r]
         if xr:
-            self.plots['eventos'].plot(xr, [0] * len(xr), pen=None, symbol='s', symbolSize=4,
-                                       symbolBrush=pg.mkBrush(tema.TEXTO_TENUE), symbolPen=None)
+            capas['eventos'].curva('ronquido', xr, [0] * len(xr), pen=None, symbol='s', symbolSize=4,
+                                   symbolBrush=pg.mkBrush(tema.TEXTO_TENUE), symbolPen=None)
         self.plots['eventos'].setYRange(-0.6, 3.6, padding=0)
         paso = 30
         if t > paso:
-            self.plots['spo2'].plot([k / 3600 for k in range(0, t - paso, paso)],
-                                    [min(T.spo2(j) for j in range(k, k + paso)) for k in range(0, t - paso, paso)],
-                                    pen=pg.mkPen(tema.OI, width=1))
+            sx, sy = self._spo2_tramos(T, paso)
+            capas['spo2'].curva('spo2', sx, sy, pen=pg.mkPen(tema.OI, width=1))
         self.plots['spo2'].setYRange(80, 100, padding=0)
-        ahora = pg.InfiniteLine(pos=t / 3600, angle=90, pen=pg.mkPen(tema.ALERTA, width=1, style=Qt.PenStyle.DashLine))
-        self.plots['presion'].addItem(ahora)
+        capas['presion'].linea('ahora', t / 3600, 90,
+                               pg.mkPen(tema.ALERTA, width=1, style=Qt.PenStyle.DashLine))
 
     def exportar(self, ruta):
         exportador = pg.exporters.ImageExporter(self.widget.scene())

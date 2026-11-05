@@ -14,6 +14,7 @@ import pyqtgraph.exporters  # noqa: F401  (pg.exporters)
 from PySide6.QtCore import Qt
 
 from core import tema
+from core.capas import Capas
 from nasal.referencias import REFERENCIA_UNILATERAL_150
 from nasal.rinomanometria import PRESIONES, RADIO_BROMS
 from nasal.modelo import DX
@@ -85,6 +86,10 @@ class GraficoRinomanometria:
 
     def __init__(self):
         self.widget = _plot('presión (Pa)', 'flujo (cm³/s)')
+        # Se redibuja en cada ciclo respiratorio mientras mide: los ítems
+        # se reutilizan en vez de clear() (ver core/capas.py).
+        self._capas = Capas(self.widget)
+        self._actual = None
 
     def exportar(self, ruta):
         exportar(self.widget, ruta)
@@ -92,8 +97,15 @@ class GraficoRinomanometria:
     def dibujar(self, series, ciclos=True, referencia=True, broms=False, vivo=None):
         """series: [(fosas {D, I} de mide_fosa o None, vc bool)].
         vivo: (lado, [ciclos ya completos]) del registro en curso, o None."""
+        capas = self._capas
+        capas.empezar()
+        try:
+            self._dibujar(capas, series, ciclos, referencia, broms, vivo)
+        finally:
+            capas.terminar()
+
+    def _dibujar(self, capas, series, ciclos, referencia, broms, vivo):
         plot = self.widget
-        plot.clear()
         self._actual = None
         pmax = vmax = 0.0
         en_curso = vivo[1] if vivo else []
@@ -111,15 +123,17 @@ class GraficoRinomanometria:
         plot.setXRange(-P, P, padding=0)
         plot.setYRange(-V, V, padding=0)
 
-        plot.addItem(pg.InfiniteLine(pos=0, angle=90, pen=pg.mkPen(tema.BORDE_FUERTE, width=1.2)))
-        plot.addItem(pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen(tema.BORDE_FUERTE, width=1.2)))
+        capas.linea('eje_v', 0, 90, pg.mkPen(tema.BORDE_FUERTE, width=1.2))
+        capas.linea('eje_h', 0, 0, pg.mkPen(tema.BORDE_FUERTE, width=1.2))
         for pr in PRESIONES:
             for s in (-1, 1):
-                plot.addItem(pg.InfiniteLine(pos=s * pr, angle=90, pen=_tenue(Qt.PenStyle.DashLine, 0.8)))
+                capas.linea('presion', s * pr, 90, _tenue(Qt.PenStyle.DashLine, 0.8))
         for x, y, t in ((P, V, 'I'), (-P, V, 'II'), (-P, -V, 'III'), (P, -V, 'IV')):
-            _texto(plot, x * 0.95, y * 0.93, t)
-        _texto(plot, P / 2, -V * 0.93, 'FND: I y III', COLOR['D'], negrita=True)
-        _texto(plot, -P / 2, -V * 0.93, 'FNI: II y IV', COLOR['I'], negrita=True)
+            capas.texto('cuadrante', t, (x * 0.95, y * 0.93), tema.TEXTO_TENUE, (0.5, 0.5), None)
+        negrita = pg.QtGui.QFont()
+        negrita.setBold(True)
+        capas.texto('fosa', 'FND: I y III', (P / 2, -V * 0.93), COLOR['D'], (0.5, 0.5), negrita)
+        capas.texto('fosa', 'FNI: II y IV', (-P / 2, -V * 0.93), COLOR['I'], (0.5, 0.5), negrita)
 
         if referencia:
             # V = P / 0,4: una curva por encima a 150 Pa tiene menos
@@ -127,12 +141,13 @@ class GraficoRinomanometria:
             r = REFERENCIA_UNILATERAL_150['valor']
             fin = min(P, V * r)
             for a, b in ((1, 1), (-1, 1), (-1, -1), (1, -1)):
-                plot.plot([0, a * fin], [0, b * fin / r], pen=_tenue())
+                capas.curva('referencia', [0, a * fin], [0, b * fin / r], pen=_tenue())
         if broms:
             # Radio 200 con 1 Pa = 1 cm³/s: en pantalla es una elipse si los
             # ejes no tienen la misma escala (igual que en RinoSim).
             t = np.linspace(0, 2 * math.pi, 181)
-            plot.plot(RADIO_BROMS * np.cos(t), RADIO_BROMS * np.sin(t), pen=_tenue(Qt.PenStyle.DashLine))
+            capas.curva('broms', RADIO_BROMS * np.cos(t), RADIO_BROMS * np.sin(t),
+                        pen=_tenue(Qt.PenStyle.DashLine))
 
         for fosas, vc in series:
             for lado in ('D', 'I'):
@@ -144,17 +159,17 @@ class GraficoRinomanometria:
                     color = pg.mkColor(COLOR[lado])
                     color.setAlphaF(0.35)
                     for c in f['ciclos']:
-                        plot.plot([signo * p for p in c['P']], c['V'], pen=pg.mkPen(color, width=0.8))
+                        capas.curva('ciclo', [signo * p for p in c['P']], c['V'],
+                                    pen=pg.mkPen(color, width=0.8))
                 pluma = _pluma(lado, vc, 2.6)
                 ins = f['media']['insp']
                 esp = f['media']['esp']
-                plot.plot([signo * p for p, _ in ins], [v for _, v in ins], pen=pluma)
-                plot.plot([-signo * p for p, _ in esp], [-v for _, v in esp], pen=pluma)
+                capas.curva('media', [signo * p for p, _ in ins], [v for _, v in ins], pen=pluma)
+                capas.curva('media', [-signo * p for p, _ in esp], [-v for _, v in esp], pen=pluma)
                 if broms and f.get('broms') and not vc:
                     b = f['broms']
-                    plot.addItem(pg.ScatterPlotItem([signo * b['P']], [b['V']], size=8,
-                                                    pen=pg.mkPen('#ffffff', width=1.2),
-                                                    brush=pg.mkBrush(COLOR[lado])))
+                    capas.puntos('broms_punto', [signo * b['P']], [b['V']], size=8,
+                                 pen=pg.mkPen('#ffffff', width=1.2), brush=pg.mkBrush(COLOR[lado]))
 
         if vivo:
             lado, completos = vivo
@@ -162,8 +177,9 @@ class GraficoRinomanometria:
             color = pg.mkColor(COLOR[lado])
             color.setAlphaF(0.45)
             for c in completos:
-                plot.plot([self._signo * p for p in c['P']], c['V'], pen=pg.mkPen(color, width=1))
-            self._actual = plot.plot([], [], pen=pg.mkPen(COLOR[lado], width=2.4))
+                capas.curva('vivo_ciclo', [self._signo * p for p in c['P']], c['V'],
+                            pen=pg.mkPen(color, width=1))
+            self._actual = capas.curva('actual', [], [], pen=pg.mkPen(COLOR[lado], width=2.4))
 
     def actual(self, P, V):
         """El ciclo que se está registrando, punto a punto (sin redibujar todo)."""
