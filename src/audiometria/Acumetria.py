@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from audiometria import no_realizable
+from backend.log_queue import get_log_queue
 
 # Reglas propias de la ventana (el resto sale de core/tema.py): pestañas con
 # subrayado, y los botones de oído con el color de su lado cuando están
@@ -63,6 +64,7 @@ class Acumetria(QWidget):
         self.data = None
         self.appointment_id = None
         self._rinne_probado = {'mastoides': False, 'pabellon': False}
+        self.log_queue = get_log_queue()
 
         tema.aplicar_estilo(self, EXTRA_QSS)
         self.equipo = QWidget()
@@ -90,6 +92,18 @@ class Acumetria(QWidget):
         if motivo:
             self.aviso_bebe.texto.setText(motivo)
         self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
+
+    def _log(self, action, **payload):
+        """Encola una acción del alumno con los diapasones (prefijo ac_, ver
+        backend/log_queue.py), igual que Audiometer._log/Z._log. El payload
+        lleva la verdad del caso (resultado) para que el backend lea qué
+        respondió el paciente sin recalcularlo."""
+        case_id = self.data.get("id") if self.data else None
+        if case_id is not None:
+            payload.setdefault("case_id", case_id)
+        payload.setdefault("appointment_id", self.appointment_id)
+        payload.setdefault("con_paciente", case_id is not None)
+        self.log_queue.push(action, payload)
 
     # ------------------------------------------------------ piezas comunes ----
 
@@ -226,7 +240,8 @@ class Acumetria(QWidget):
         if not self.data:
             self._decir(self.rinne_log, "Paciente: (no hay un caso cargado)")
             return
-        _, _, lado_label, _ = self._rinne_seleccion()
+        hz, lado, lado_label, valor = self._rinne_seleccion()
+        self._log("ac_rinne_mastoides", hz=hz, oido=lado, resultado=valor)
         self._decir(self.rinne_log, f"Tú: apoyas el diapasón en la mastoides del oído {lado_label}.")
         self._decir(self.rinne_log, "Paciente: Sí, lo escucho.")
         self._rinne_probado['mastoides'] = True
@@ -235,7 +250,8 @@ class Acumetria(QWidget):
         if not self.data:
             self._decir(self.rinne_log, "Paciente: (no hay un caso cargado)")
             return
-        _, _, lado_label, valor = self._rinne_seleccion()
+        hz, lado, lado_label, valor = self._rinne_seleccion()
+        self._log("ac_rinne_pabellon", hz=hz, oido=lado, resultado=valor)
         self._decir(self.rinne_log, f"Tú: presentas el diapasón frente al pabellón auricular del oído {lado_label}.")
         if valor == 'positivo':
             self._decir(self.rinne_log, "Paciente: Sí, también lo escucho aquí.")
@@ -252,7 +268,8 @@ class Acumetria(QWidget):
         if not (self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']):
             self._decir(self.rinne_log, "Tú: (primero hay que probar mastoides y pabellón en este oído/diapasón)")
             return
-        _, _, _, valor = self._rinne_seleccion()
+        hz, lado, _, valor = self._rinne_seleccion()
+        self._log("ac_rinne_comparar", hz=hz, oido=lado, resultado=valor)
         self._decir(self.rinne_log, "Tú: ¿en cuál posición lo escuchas más fuerte?")
         if valor == 'positivo':
             self._decir(self.rinne_log, "Paciente: Frente al pabellón, y por más tiempo.")
@@ -294,6 +311,7 @@ class Acumetria(QWidget):
         hz = '500' if self.weber_500.isChecked() else '1000'
         weber = (self.data or {}).get('Weber') or {}
         valor = weber.get(hz, 'centrado')
+        self._log("ac_weber", hz=hz, resultado=valor)
         self._decir(self.weber_log, "Tú: apoyas el diapasón en la frente / vértex.")
         if valor == 'od':
             self._decir(self.weber_log, "Paciente: Lo escucho más fuerte en el oído derecho.")

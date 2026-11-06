@@ -62,6 +62,11 @@ final class Metrics
         'z_etf_prueba_change' => 'Cambio de prueba de función tubaria',
         'z_etf_test' => 'Prueba de función tubaria',
         'z_no_realizable' => 'FALTA GRAVE: impedanciómetro en un oído donde la sonda no iba',
+        // Diapasones (acumetría)
+        'ac_rinne_mastoides' => 'Rinne: diapasón en la mastoides',
+        'ac_rinne_pabellon' => 'Rinne: diapasón frente al pabellón',
+        'ac_rinne_comparar' => 'Rinne: pregunta dónde lo escucha más fuerte',
+        'ac_weber' => 'Weber: diapasón en la frente / vértex',
         // Rinomanómetro, rinómetro acústico y rinoscopía (nasal/, demo interna)
         'rm_adaptador' => 'Adaptador de presión en una narina',
         'rm_mascara' => 'Máscara puesta o sacada',
