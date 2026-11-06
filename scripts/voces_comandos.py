@@ -77,6 +77,9 @@ COMANDOS = {
     "escuche_mi_voz": "Apenas escuche mi voz, levante la mano.",
     "dictar_palabras": "Ahora le voy a dictar unas palabras. Necesito que las repita en voz alta, "
                        "y repita solo lo que entienda.",
+    "dictar_compuestas": "Ahora le voy a dictar unas palabras compuestas, como sacapuntas. "
+                         "Necesito que las repita en voz alta. Si entiende solo una parte de la "
+                         "palabra, repita esa parte, y si no está seguro, adivine.",
     "pitos_fuertes": "Ahora le voy a colocar unos pitos fuertes. Van a ser todos fuertes, y se "
                      "irán aumentando en volumen: serán cada vez más fuertes. Necesito que me "
                      "avise si alguno de esos pitos fuertes a usted le molesta.",

@@ -490,6 +490,8 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar (y Stenger) | Levanta la mano mientras suena un tono que oye |
 | **Aerea + ruido** / **vibrador + ruido** | Umbrales enmascarados | Igual, con ruido en el otro oído (sección 17) |
 | **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y *pa pa pa* elegido, levanta la mano si lo oye |
+| **Dictar palabras** | Logoaudiometría (discriminación) | Repite las palabras que entiende |
+| **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
 | **Cambie de volumen** | SISI | Dice *«sí»* cuando nota que el tono subió |
 | **Dos pitos**, luego **¿Sonidos iguales?** o **¿En qué oído?** | Fowler | Contesta si los dos tonos suenan igual o en qué oído suena más fuerte |
@@ -498,7 +500,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Mano levantada en ruido** | Deterioro tonal (Carhart) con ruido en el otro oído | Igual que Carhart; al ruido no le hace caso |
 
-> Cualquier otra instrucción **reemplaza** la anterior. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, el paciente deja de responder a la LDL hasta que repitas *Pitos fuertes*.
+> Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** no: el paciente las contesta y sigue con la instrucción que tenía. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, contesta y sigue respondiendo a la LDL.
 
 ## 17. Enmascaramiento
 
@@ -521,7 +523,7 @@ Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pant
 3. Haz clic en una palabra: suena por la salida del canal. El paciente la repite (o dice otra cosa, si no la entendió).
 4. Anota con **+1** o **-1** en el audiómetro. **<** y **>** cambian el total de palabras; **Limpiar** vuelve los aciertos a cero.
 
-Para el **SRT** usa la lista **Compuestas (SRT)**: desde el SDT, sube de 5 en 5 dB y dicta dos palabras en cada nivel. El paciente repite la palabra entera, solo una mitad (*«puntas»* de *sacapuntas*) o nada. El SRT es el primer nivel en que percibe la mitad del mensaje.
+Para el **SRT** dale la instrucción **Dictar palabras compuestas** y usa la lista **Compuestas (SRT)**: desde el SDT, sube de 5 en 5 dB y dicta dos palabras en cada nivel. El paciente repite la palabra entera, solo una mitad (*«puntas»* de *sacapuntas*) o nada. El SRT es el primer nivel en que percibe la mitad del mensaje.
 
 Para volver a los umbrales, elige **Tono** o **FM**.
 
