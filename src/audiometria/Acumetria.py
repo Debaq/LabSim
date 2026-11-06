@@ -129,6 +129,10 @@ class Acumetria(QWidget):
         color de su oído al marcarse (OD rojo, OI azul)."""
         fila = QHBoxLayout()
         fila.setSpacing(6)
+        # Dueño: la ventana (self). Antes era un QWidget suelto que después
+        # se metía en la pestaña sin layout: Qt lo mostraba de 640x480 en la
+        # esquina, encima del panel, y se tragaba todos los clics (los
+        # diapasones no respondían, 2026-11-06).
         grupo = QButtonGroup(tab)
         botones = []
         for texto, clave in opciones:
@@ -190,16 +194,15 @@ class Acumetria(QWidget):
 
     def _build_rinne_tab(self):
         panel, v = self._tarjeta()
-        tab_ref = QWidget()  # dueño de los QButtonGroup
 
         v.addWidget(self._seccion("DIAPASÓN"))
         fila, (self.rinne_500, self.rinne_1000) = self._segmentado(
-            tab_ref, (("500 Hz", "500"), ("1000 Hz", "1000")))
+            self, (("500 Hz", "500"), ("1000 Hz", "1000")))
         v.addLayout(fila)
 
         v.addWidget(self._seccion("OÍDO"))
         fila, (self.rinne_od, self.rinne_oi) = self._segmentado(
-            tab_ref, (("Derecho (OD)", "od"), ("Izquierdo (OI)", "oi")), lado=True)
+            self, (("Derecho (OD)", "od"), ("Izquierdo (OI)", "oi")), lado=True)
         v.addLayout(fila)
 
         for rb in (self.rinne_500, self.rinne_1000, self.rinne_od, self.rinne_oi):
@@ -221,7 +224,6 @@ class Acumetria(QWidget):
 
         self.rinne_log = self._conversacion("Prueba mastoides y pabellón en un oído y luego compara.")
         tab = self._armar_tab(panel, "CONVERSACIÓN", self.rinne_log)
-        tab_ref.setParent(tab)
         return tab
 
     def _rinne_seleccion(self):
@@ -283,11 +285,10 @@ class Acumetria(QWidget):
 
     def _build_weber_tab(self):
         panel, v = self._tarjeta()
-        tab_ref = QWidget()
 
         v.addWidget(self._seccion("DIAPASÓN"))
         fila, (self.weber_500, self.weber_1000) = self._segmentado(
-            tab_ref, (("500 Hz", "500"), ("1000 Hz", "1000")))
+            self, (("500 Hz", "500"), ("1000 Hz", "1000")))
         v.addLayout(fila)
 
         v.addSpacing(6)
@@ -301,7 +302,6 @@ class Acumetria(QWidget):
         for rb in (self.weber_500, self.weber_1000):
             rb.toggled.connect(lambda checked: checked and self.weber_log.clear())
         tab = self._armar_tab(panel, "CONVERSACIÓN", self.weber_log)
-        tab_ref.setParent(tab)
         return tab
 
     def _weber_probar(self):
