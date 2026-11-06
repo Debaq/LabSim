@@ -479,13 +479,17 @@ class BackendClient:
 
     def send_ticket(self, descripcion: str, equipo_info: dict | None, detalle: dict,
                     log_gz: bytes | None, timeout: int = 60,
-                    cierre_inesperado: bool = False, anonimo: bool = False) -> dict:
+                    cierre_inesperado: bool = False, anonimo: bool = False,
+                    sin_sesion: bool = False) -> dict:
         """Reporte de problema (Configuración → Reportar un problema, ver
         core/soporte.py y ticket.php). Solo se llama después de que el
         usuario aceptó mandar esta información. Devuelve {id}.
 
         `cierre_inesperado` + `anonimo`: el que se ofrece al reabrir tras
-        una caída, sin sesión (el servidor lo acepta solo en ese caso)."""
+        una caída, sin sesión. `sin_sesion` + `anonimo`: el de la ventana de
+        ingreso (no se pudo entrar) o uno guardado sin sesión que sale
+        después (ver core/tickets_pendientes.py). El servidor acepta sin
+        sesión solo esos dos."""
         form = {
             "descripcion": descripcion,
             "equipo": json.dumps(equipo_info or {}, ensure_ascii=False),
@@ -494,6 +498,8 @@ class BackendClient:
         }
         if cierre_inesperado:
             form["cierre_inesperado"] = "1"
+        if sin_sesion:
+            form["sin_sesion"] = "1"
         files = {"log": ("labsim.log.gz", log_gz, "application/gzip")} if log_gz else None
         resp = self._http.post(f"{self._base_url}/api/ticket.php", data=form, files=files,
                                headers={} if anonimo else self._headers(), timeout=timeout)

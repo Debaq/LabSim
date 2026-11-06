@@ -24,13 +24,18 @@ if ((string) ($_POST['acepta'] ?? '') !== '1') {
     Response::error('Falta aceptar el envío de la información del equipo.', 400);
 }
 
-// Cierre inesperado (la app se cayó y al volver a abrir ofrece mandar el
-// registro, ver core/soporte.py): si no quedó una sesión con la que
-// identificarse se acepta igual, sin usuario -- el registro vale más que
-// saber quién era. Solo para eso, y con tope por equipo y global.
+// Sin sesión se aceptan dos, sin usuario y con tope por equipo y global:
+// - cierre inesperado (la app se cayó y al volver a abrir ofrece mandar el
+//   registro, ver core/soporte.py): el registro vale más que saber quién era;
+// - sin_sesion: el que se manda desde la ventana de ingreso cuando no se
+//   puede entrar (2026-11-06: el servidor perdía paquetes y el equipo que
+//   no conectaba era justo el que no podía reportar), o uno que quedó
+//   guardado en el equipo y sale después (core/tickets_pendientes.py).
 $cierreInesperado = (string) ($_POST['cierre_inesperado'] ?? '') === '1';
+$sinSesion = (string) ($_POST['sin_sesion'] ?? '') === '1';
 $equipoRaw = json_decode((string) ($_POST['equipo'] ?? ''), true);
-if ($cierreInesperado && trim((string) ($_SERVER['HTTP_AUTHORIZATION'] ?? '')) === '') {
+$anonimo = ($cierreInesperado || $sinSesion) && trim((string) ($_SERVER['HTTP_AUTHORIZATION'] ?? '')) === '';
+if ($anonimo) {
     $userId = null;
     $equipoId = (string) ((Equipos::normalizar($equipoRaw) ?? [])['id'] ?? '');
     if (Tickets::excedeLimiteAnonimo($equipoId)) {
@@ -61,6 +66,8 @@ if (isset($_FILES['log']) && $_FILES['log']['error'] !== UPLOAD_ERR_NO_FILE) {
 $descripcion = (string) ($_POST['descripcion'] ?? '');
 if ($cierreInesperado) {
     $descripcion = trim('[Cierre inesperado] ' . $descripcion);
+} elseif ($anonimo) {
+    $descripcion = trim('[Sin sesión] ' . $descripcion);
 }
 $id = Tickets::crear(
     $userId,

@@ -712,6 +712,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return
         self.log_uploader = LogUploaderThread(LOCAL_LOG_QUEUE, client)
         self.log_uploader.start()
+        # Con sesión, los reportes guardados sin conexión salen a su nombre
+        from core import tickets_pendientes
+        hilos.en_fondo(tickets_pendientes.enviar, client, nombre="tickets")
 
     def _stop_log_uploader(self):
         if self.log_uploader is not None:
@@ -2049,6 +2052,10 @@ if __name__ == '__main__':
     if CIERRE_PREVIO:
         from core import soporte
         QTimer.singleShot(1500, lambda: soporte.ofrecer_envio_por_cierre(window, CIERRE_PREVIO))
+    # Reportes que no salieron la vez anterior (core/tickets_pendientes.py):
+    # sin sesión salen igual; al iniciar sesión se vuelve a probar.
+    from core import tickets_pendientes
+    QTimer.singleShot(8000, lambda: hilos.en_fondo(tickets_pendientes.enviar, nombre="tickets"))
     exit_code = context.app.exec()
     registro.marcar_salida()
     if hilos.quedan_vivos():

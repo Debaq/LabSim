@@ -10,7 +10,8 @@ import gzip
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QCheckBox, QDialog, QFormLayout, QFrame, QGroupBox, QHBoxLayout,
-                               QLabel, QPlainTextEdit, QPushButton, QScrollArea, QVBoxLayout, QWidget)
+                               QLabel, QPlainTextEdit, QPushButton, QScrollArea, QSizePolicy,
+                               QVBoxLayout, QWidget)
 
 from core import equipo, hilos, registro
 from core.base import context
@@ -23,27 +24,44 @@ _ROTULOS = {"so_version": "Sistema operativo", "distribucion": "Distribución",
             "pantalla": "Pantalla", "kiosko": "Equipo del laboratorio", "glibc": "glibc"}
 
 
-def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False):
-    """Manda el ticket con la cola del registro. Devuelve (ok, número de
-    ticket o motivo). Corre con hilos.en_fondo: nada de widgets acá."""
+# Lo que devuelve _enviar() cuando no salió pero quedó en el equipo.
+GUARDADO = "guardado"
+
+
+def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False, red=None):
+    """Manda el ticket con la cola del registro. Devuelve (True, número de
+    ticket), (None, GUARDADO) si no salió y quedó en el equipo para después
+    (core/tickets_pendientes.py) o (False, motivo). `red`: las claves de una
+    prueba de red ya hecha (la ventana de prueba); si no, el ticket manual
+    la hace acá. Sin sesión sale igual, marcado (ticket.php). Corre con
+    hilos.en_fondo: nada de widgets acá."""
     from backend import client as backend_client
     from backend.client import BackendClient
+    from core import tickets_pendientes
+    base_url = Preferences().get("BACKEND_URL")
+    args = None
     try:
-        base_url = Preferences().get("BACKEND_URL")
         if not cierre_inesperado:
-            detalle = dict(detalle, **_probar_red(base_url, backend_client))
+            detalle = dict(detalle, **(red if red is not None else _probar_red(base_url, backend_client)))
         log_gz = gzip.compress(registro.cola())
+        args = (descripcion, equipo_info, detalle, log_gz or None)
         client = BackendClient(base_url, context.get_resource("json/session.json"))
         if cierre_inesperado:
-            respuesta = _enviar_cierre(client, (descripcion, equipo_info, detalle, log_gz or None))
+            respuesta = _enviar_cierre(client, args)
         else:
-            if not client.is_logged_in():
-                raise RuntimeError("no hay sesión iniciada con el servidor")
-            respuesta = client.send_ticket(descripcion, equipo_info, detalle, log_gz or None)
+            respuesta = tickets_pendientes.mandar(client, *args)
     except Exception as exc:  # noqa: BLE001 -- se le muestra al usuario
         print(f"soporte: no se pudo enviar el reporte: {exc}")
+        if args is not None and tickets_pendientes.se_puede_guardar(exc):
+            try:
+                tickets_pendientes.guardar(*args, cierre_inesperado=cierre_inesperado)
+                return None, GUARDADO
+            except OSError as exc_disco:
+                print(f"soporte: tampoco se pudo guardar: {exc_disco}")
         return False, str(exc)
     print(f"soporte: reporte enviado, ticket #{respuesta.get('id')}")
+    # Ya que hay conexión, los que quedaron guardados de antes
+    tickets_pendientes.enviar(client)
     return True, str(respuesta.get("id", ""))
 
 
@@ -257,9 +275,15 @@ class PaginaSoporte(QWidget):
         fila_acepto.addWidget(texto_acepto, 1)
         caja.addLayout(fila_acepto)
 
+        botones = QHBoxLayout()
+        self.btn_probar = QPushButton("Probar conexión", self)
+        self.btn_probar.setToolTip("Mide la conexión de este equipo con el servidor. No envía nada.")
+        self.btn_probar.clicked.connect(lambda: abrir_prueba_red(self))
         self.btn_enviar = QPushButton("Enviar reporte", self)
         self.btn_enviar.clicked.connect(self._enviar)
-        caja.addWidget(self.btn_enviar)
+        botones.addWidget(self.btn_probar)
+        botones.addWidget(self.btn_enviar, 1)
+        caja.addLayout(botones)
 
         self.lbl_estado = QLabel(self)
         self.lbl_estado.setWordWrap(True)
@@ -291,7 +315,12 @@ class PaginaSoporte(QWidget):
 
     def _enviado(self, ok, detalle):
         self._envio = None
-        if ok:
+        if ok is None:
+            self.lbl_estado.setStyleSheet("color:#b9770e;")
+            self.lbl_estado.setText(TEXTO_GUARDADO)
+            self.txt_descripcion.clear()
+            self.chk_acepto.setChecked(False)
+        elif ok:
             self.lbl_estado.setStyleSheet("color:#27ae60;")
             self.lbl_estado.setText(f"Reporte enviado. Ticket #{detalle}. ¡Gracias!")
             self.txt_descripcion.clear()
@@ -302,3 +331,169 @@ class PaginaSoporte(QWidget):
                 "No se pudo enviar el reporte. Revisa la conexión e inténtalo de nuevo; "
                 f"el registro sigue guardado en este equipo.\n({detalle[:160]})")
         self._actualizar_boton()
+
+
+TEXTO_GUARDADO = ("No hay conexión con el servidor. El reporte quedó guardado en este equipo y "
+                  "se envía solo la próxima vez que LabSim tenga conexión.")
+
+
+def abrir_prueba_red(parent=None):
+    """La ventana de prueba de red (desde el ingreso o desde Configuración)."""
+    dlg = DialogoPruebaRed(parent)
+    dlg.exec()
+
+
+class DialogoPruebaRed(QDialog):
+    """Prueba la conexión de este equipo con el servidor y, si hace falta,
+    manda (o guarda para después) un reporte con el resultado.
+
+    Pensada para el docente en la sala: se abre desde la ventana de ingreso
+    sin haber entrado (2026-11-06, un equipo no lograba conectarse y no
+    había cómo saber por qué). Lo de arriba es para él: qué pasa y qué
+    revisar (prueba_red.CONSEJOS); el detalle técnico va abajo y en el
+    reporte. Nada sale del equipo sin aceptarlo."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        from agenda.vista import BotonAccion
+        self.setWindowTitle("Conexión con el servidor")
+        self.resize(560, 660)
+        self._claves = None
+        self._prueba = None
+        self._envio = None
+
+        caja = QVBoxLayout(self)
+        caja.setContentsMargins(14, 14, 14, 12)
+        caja.setSpacing(10)
+        caja.addWidget(cabecera_dialogo(
+            self, "alerta", "Conexión con el servidor",
+            "Mide la red de este equipo hacia el servidor de LabSim. Tarda unos segundos y no "
+            "envía nada a menos que lo pidas abajo."))
+
+        self.lbl_veredicto = QLabel("Probando la conexión…", self)
+        self.lbl_veredicto.setProperty("role", "titulo")
+        self.lbl_veredicto.setWordWrap(True)
+        caja.addWidget(self.lbl_veredicto)
+        self.lbl_consejo = QLabel("", self)
+        self.lbl_consejo.setWordWrap(True)
+        caja.addWidget(self.lbl_consejo)
+
+        self.txt_detalle = QPlainTextEdit(self)
+        self.txt_detalle.setReadOnly(True)
+        self.txt_detalle.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+        self.txt_detalle.setStyleSheet('QPlainTextEdit { font-family: "DejaVu Sans Mono", monospace; '
+                                       'font-size: 8pt; }')
+        self.txt_detalle.setMinimumHeight(110)
+        caja.addWidget(self.txt_detalle, 1)
+
+        self.btn_repetir = BotonAccion("Probar de nuevo", "recargar", parent=self)
+        self.btn_repetir.clicked.connect(self._probar)
+        fila = QHBoxLayout()
+        fila.addStretch(1)
+        fila.addWidget(self.btn_repetir)
+        caja.addLayout(fila)
+
+        reporte = QGroupBox("Reportar el problema", self)
+        reporte.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
+        col = QVBoxLayout(reporte)
+        self.txt_descripcion = QPlainTextEdit(reporte)
+        self.txt_descripcion.setPlaceholderText("¿Qué pasa? (opcional) Ej.: no puedo ingresar en este equipo.")
+        self.txt_descripcion.setMaximumHeight(60)
+        col.addWidget(self.txt_descripcion)
+        fila_acepto = QHBoxLayout()
+        self.chk_acepto = QCheckBox(reporte)
+        self.chk_acepto.toggled.connect(self._actualizar)
+        texto_acepto = QLabel(
+            "Acepto enviar al servidor de LabSim esta prueba, los datos de este equipo y el "
+            "registro de la app. Sin conexión, queda guardado y se envía solo después.", reporte)
+        texto_acepto.setWordWrap(True)
+        texto_acepto.mousePressEvent = lambda _e: self.chk_acepto.toggle()
+        fila_acepto.addWidget(self.chk_acepto, 0, Qt.AlignmentFlag.AlignTop)
+        fila_acepto.addWidget(texto_acepto, 1)
+        col.addLayout(fila_acepto)
+        self.btn_enviar = BotonAccion("Enviar reporte", "enviar", principal=True, parent=reporte)
+        self.btn_enviar.clicked.connect(self._enviar)
+        col.addWidget(self.btn_enviar)
+        self.lbl_estado = QLabel(reporte)
+        self.lbl_estado.setWordWrap(True)
+        col.addWidget(self.lbl_estado)
+        caja.addWidget(reporte)
+
+        pie = QHBoxLayout()
+        pie.addStretch(1)
+        cerrar = BotonAccion("Cerrar", "x", parent=self)
+        cerrar.clicked.connect(self.reject)
+        pie.addWidget(cerrar)
+        caja.addLayout(pie)
+        style_dialog(self)
+        self._probar()
+
+    def _actualizar(self, *_):
+        probando = self._prueba is not None
+        self.btn_repetir.setEnabled(not probando)
+        self.btn_enviar.setEnabled(self.chk_acepto.isChecked() and not probando and self._envio is None)
+
+    def _probar(self):
+        if self._prueba is not None:
+            return
+        self.lbl_veredicto.setText("Probando la conexión…")
+        self.lbl_veredicto.setStyleSheet("")
+        self.lbl_consejo.setText("Puede tardar hasta un minuto si la red está mal.")
+        self.txt_detalle.clear()
+        self._prueba = hilos.en_fondo(_medir_red, dueno=self, listo=self._medida, nombre="prueba-red")
+        self._actualizar()
+
+    def _medida(self, resultado):
+        from core import prueba_red
+        self._prueba = None
+        claves, texto = resultado
+        self._claves = claves
+        estado = prueba_red.estado(claves)
+        titulo, consejo = prueba_red.CONSEJOS[estado]
+        color = {"normal": "#27ae60", "problemas": "#b9770e"}.get(estado, "#c0392b")
+        self.lbl_veredicto.setText(titulo)
+        self.lbl_veredicto.setStyleSheet(f"color:{color};")
+        self.lbl_consejo.setText(consejo)
+        self.txt_detalle.setPlainText(texto)
+        self._actualizar()
+
+    def _enviar(self):
+        if not self.chk_acepto.isChecked() or self._envio is not None:
+            return
+        self.lbl_estado.setStyleSheet("color:#666666;")
+        self.lbl_estado.setText("Enviando…")
+        self._envio = hilos.en_fondo(_enviar, self.txt_descripcion.toPlainText().strip(),
+                                     equipo.identidad(), registro.detalle_sistema(), red=self._claves,
+                                     dueno=self, listo=lambda r: self._enviado(*r), nombre="soporte")
+        self._actualizar()
+
+    def _enviado(self, ok, detalle):
+        self._envio = None
+        if ok is None:
+            self.lbl_estado.setStyleSheet("color:#b9770e;")
+            self.lbl_estado.setText(TEXTO_GUARDADO)
+        elif ok:
+            self.lbl_estado.setStyleSheet("color:#27ae60;")
+            self.lbl_estado.setText(f"Reporte enviado. Ticket #{detalle}.")
+        else:
+            self.lbl_estado.setStyleSheet("color:#c0392b;")
+            self.lbl_estado.setText(f"No se pudo enviar el reporte.\n({detalle[:160]})")
+        if ok is not False:
+            self.txt_descripcion.clear()
+            self.chk_acepto.setChecked(False)
+        self._actualizar()
+
+
+def _medir_red():
+    """(claves, texto) de prueba_red.medir con la conexión compartida de la
+    app. El texto queda también en el registro."""
+    from backend import client as backend_client
+    from core import prueba_red
+    try:
+        claves, texto = prueba_red.medir(Preferences().get("BACKEND_URL"),
+                                         sesion=backend_client._sesion())
+    except Exception as exc:  # noqa: BLE001 -- se muestra como falla
+        texto = f"La prueba no se pudo hacer: {type(exc).__name__}: {exc}"
+        claves = {"red_resumen": "Red con problemas: la prueba no se pudo hacer."}
+    print(texto, flush=True)
+    return claves, texto

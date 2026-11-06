@@ -538,6 +538,111 @@ def test_el_reporte_de_una_caida_usa_la_sesion_que_quedo_o_va_sin_sesion():
     soporte._enviar_cierre(sin, args)
     assert sin.envios == [(True, True)]
 
+
+# -- tickets guardados y prueba de red (2026-11-06) ----------------------------
+
+class _ClienteCola:
+    """send_ticket que falla como se le diga: 'red', un código HTTP o bien."""
+
+    def __init__(self, respuestas, con_sesion=False):
+        self.respuestas = list(respuestas)
+        self.con_sesion = con_sesion
+        self.envios = []
+
+    def is_logged_in(self):
+        return self.con_sesion
+
+    def send_ticket(self, descripcion, equipo_info, detalle, log_gz, **kw):
+        r = self.respuestas.pop(0) if self.respuestas else "ok"
+        if r == "red":
+            raise requests.ConnectionError("sin red")
+        if isinstance(r, int):
+            resp = requests.Response()
+            resp.status_code = r
+            raise requests.HTTPError(str(r), response=resp)
+        self.envios.append((descripcion, detalle, log_gz, kw))
+        return {"id": len(self.envios)}
+
+
+def _vaciar_pendientes():
+    from core import tickets_pendientes as tp
+    for ruta in tp.pendientes():
+        tp._borrar(ruta)
+
+
+def test_un_ticket_guardado_sale_despues_con_su_registro():
+    from core import tickets_pendientes as tp
+    _vaciar_pendientes()
+    tp.guardar("no entra", {"nombre": "labsim3"}, {"red_resumen": "x"}, b"gz")
+    assert len(tp.pendientes()) == 1
+    cliente = _ClienteCola(["red"])
+    assert tp.enviar(cliente) == [] and len(tp.pendientes()) == 1, "sin red queda guardado"
+    assert tp.enviar(cliente) == [1] and tp.pendientes() == []
+    descripcion, detalle, log_gz, kw = cliente.envios[0]
+    assert descripcion == "no entra" and log_gz == b"gz"
+    assert detalle["enviado_tarde"].startswith("guardado el ")
+    assert kw == {"anonimo": True, "sin_sesion": True}, kw
+
+
+def test_un_ticket_que_el_servidor_rechaza_por_forma_se_bota():
+    from core import tickets_pendientes as tp
+    _vaciar_pendientes()
+    tp.guardar("a", {}, {}, None)
+    tp.guardar("b", {}, {}, None)
+    cliente = _ClienteCola([400, "ok"])
+    assert tp.enviar(cliente) == [1]
+    assert tp.pendientes() == [] and cliente.envios[0][0] == "b"
+
+
+def test_con_sesion_vencida_sale_sin_sesion():
+    from core import tickets_pendientes as tp
+    cliente = _ClienteCola([401], con_sesion=True)
+    assert tp.mandar(cliente, "x", {}, {}, None) == {"id": 1}
+    assert cliente.envios[0][3] == {"anonimo": True, "sin_sesion": True}
+
+
+def test_el_reporte_sin_conexion_queda_guardado():
+    from backend import client as cliente_mod
+    from core import soporte, tickets_pendientes as tp
+    _vaciar_pendientes()
+    original = cliente_mod.BackendClient
+    cliente_mod.BackendClient = lambda *a: _ClienteCola(["red"])
+    try:
+        ok, motivo = soporte._enviar("no conecta", {}, {}, red={"red_resumen": "Red con problemas"})
+    finally:
+        cliente_mod.BackendClient = original
+    assert (ok, motivo) == (None, soporte.GUARDADO)
+    assert len(tp.pendientes()) == 1
+    _vaciar_pendientes()
+
+
+def test_la_ventana_de_prueba_dice_que_revisar():
+    from core import soporte
+    original = soporte._medir_red
+    soporte._medir_red = lambda: ({"red_dns": "falla: sin nombre"}, "DNS: falla")
+    try:
+        dlg = soporte.DialogoPruebaRed()
+        for _ in range(100):
+            APP.processEvents()
+            if dlg._prueba is None:
+                break
+            time.sleep(0.02)
+        assert dlg.lbl_veredicto.text() == "Este equipo no tiene internet", dlg.lbl_veredicto.text()
+        assert not dlg.btn_enviar.isEnabled(), "sin aceptar no se envía"
+        dlg.chk_acepto.setChecked(True)
+        assert dlg.btn_enviar.isEnabled()
+        dlg.close()
+    finally:
+        soporte._medir_red = original
+
+
+def test_el_estado_de_la_red_se_lee_de_las_claves():
+    from core import prueba_red as pr
+    assert pr.estado({"red_dns": "falla: x"}) == "sin_dns"
+    assert pr.estado({"red_dns": "2 ms", "red_conexiones_nuevas": "0/5 ok"}) == "sin_respuesta"
+    assert pr.estado({"red_conexiones_nuevas": "3/5 ok", "red_resumen": "Red con problemas: 2"}) == "problemas"
+    assert pr.estado({"red_conexiones_nuevas": "5/5 ok", "red_resumen": "Red normal hacia el servidor."}) == "normal"
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

@@ -86,6 +86,11 @@ Los alumnos veían "problema de red"; algunos entraban y otros no.
    lectura 30 s, y se insiste por tiempo (45 s), no por intentos. Sin
    internet del todo (DNS, red inalcanzable) falla al tiro. Los tickets
    manuales llevan una prueba de red del equipo (`core/prueba_red.py`).
+   En la ventana de ingreso (usuario y contraseña) está "Probar conexión":
+   le dice al docente qué revisar y deja mandar un reporte sin haber
+   entrado (ticket.php lo acepta sin sesión, marcado "[Sin sesión]"). El
+   reporte que no sale queda en el equipo (`core/tickets_pendientes.py`)
+   y se envía solo al arrancar o al iniciar sesión.
    Lo que sigue es lo que se había planeado:
    - `HTTPAdapter` con `urllib3.Retry` en `_SesionHttp`: hasta 4
      reintentos con espera creciente (0,5-1-2-4 s) en errores de conexión,

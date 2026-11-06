@@ -145,3 +145,35 @@ def medir(base_url, sesion=None, ruta_estatica="/css/base.css"):
         claves["red_resumen"] = "Red normal hacia el servidor."
     lineas.append(claves["red_resumen"])
     return claves, "\n".join(lineas)
+
+
+def estado(claves):
+    """'sin_dns' | 'sin_respuesta' | 'problemas' | 'normal', leído de lo que
+    devolvió medir()."""
+    if str(claves.get("red_dns", "")).startswith("falla"):
+        return "sin_dns"
+    if str(claves.get("red_conexiones_nuevas", "")).startswith("0/"):
+        return "sin_respuesta"
+    if str(claves.get("red_resumen", "")).startswith("Red con problemas"):
+        return "problemas"
+    return "normal"
+
+
+# Lo que se le dice al docente en la sala: qué revisar, no la técnica.
+CONSEJOS = {
+    "sin_dns": ("Este equipo no tiene internet",
+                "No encuentra el servidor de LabSim. Revisa el cable de red o el wifi de este "
+                "equipo. Si los otros equipos sí entran, el problema es de este."),
+    "sin_respuesta": ("El servidor no responde desde este equipo",
+                      "Hay internet, pero el servidor de LabSim no contesta. Si los otros equipos "
+                      "tampoco entran, es el servidor o la red de la institución: espera unos "
+                      "minutos y prueba de nuevo. Envía el reporte: si no sale ahora, queda "
+                      "guardado y se envía solo después."),
+    "problemas": ("La conexión está lenta o se corta",
+                  "El servidor contesta, pero con cortes. LabSim reintenta solo: puede tardar más "
+                  "en entrar o en abrir una atención. Si no logra entrar, espera un momento y "
+                  "prueba de nuevo, y envía el reporte."),
+    "normal": ("La conexión con el servidor está bien",
+               "Si no se puede ingresar, revisa el usuario y la contraseña (o pide un código "
+               "nuevo en la actividad del curso)."),
+}

@@ -147,9 +147,24 @@ class MainLogin(QWidget):
         fila.addLayout(campos, 1)
         fila.addWidget(self.btn_login, 0, Qt.AlignBottom)
         col.addLayout(fila)
-        col.addWidget(self._link("Ingresar con código de ingreso", self.PAGINA_CODIGO))
+        enlaces = QHBoxLayout()
+        enlaces.addWidget(self._link("Ingresar con código de ingreso", self.PAGINA_CODIGO))
+        enlaces.addStretch(1)
+        # Sin haber entrado: probar la red del equipo y reportar (o guardar
+        # el reporte para después). Ver core/soporte.DialogoPruebaRed.
+        red = QLabel('<a href="#" style="color:#5D1049;">Probar conexión</a>')
+        red.setObjectName("login_probar_red")
+        red.setToolTip("Mide la conexión de este equipo con el servidor y permite enviar un reporte")
+        red.setTextInteractionFlags(Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard)
+        red.linkActivated.connect(lambda _href: self.probar_conexion())
+        enlaces.addWidget(red)
+        col.addLayout(enlaces)
         self.setTabOrder(self.Le_name, self.Le_passw)
         return pagina
+
+    def probar_conexion(self):
+        from core import soporte
+        soporte.abrir_prueba_red(self.window())
 
     def _link(self, texto, pagina):
         # El azul de enlace del sistema no es de la paleta: el acento de LabSim.
