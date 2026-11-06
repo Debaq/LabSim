@@ -223,8 +223,9 @@ class CabezaExamen(CabezaElectrodos):
 
 
 # ---------------------------------------------------------------- otoscopía
-LUPA = 0.30                 # radio de la lupa, como fracción del lado de la cabeza
-RECORRIDO_PX = 26.0         # px de la foto de la cabeza: cuánto se mueve el otoscopio en el conducto
+LUPA = 0.20                 # radio del disco del otoscopio, como fracción del lado de la cabeza
+RECORRIDO_PX = 12.0         # px de la foto de la cabeza: con eso se recorre todo el tímpano
+ZOOM_TIMPANO = 0.5          # el disco muestra esta fracción de la foto; el resto se recorre
 METAL = "#8E9098"
 NEGRO_VISOR = "#0E0A0D"
 PARED_CONDUCTO = "#B9786A"
@@ -343,33 +344,29 @@ class CabezaOtoscopia(CabezaExamen):
             self._flecha(p, self._a_pantalla(px[0]), self._a_pantalla(px[1]))
 
     def _pintar_otoscopio(self, p):
+        """El otoscopio en la oreja: lo que se ve se levanta ahí mismo, en un
+        disco que es la cabeza del otoscopio, y de él sale el mango. Mover
+        el mouse un poco dentro del conducto recorre todo el tímpano. El
+        disco claro es entero con el espéculo de adulto y de la mitad del
+        diámetro con el pediátrico."""
         oido = self._conducto
         centro = self._centro_conducto(oido)
         if centro is None:
             return
         marco, escala = self._marco()
-        # El otoscopio en el conducto ...
-        p.setPen(QPen(QColor(METAL), 2.4))
-        p.setBrush(QColor(40, 40, 46, 200))
-        p.drawEllipse(centro, 7 * escala * 1.4, 9 * escala * 1.4)
-        # ... y la lupa al lado, hacia la nuca (detrás del paciente, donde
-        # está el examinador), sin tapar la oreja: como la de la rinoscopía,
-        # que se abre al costado de la narina
-        hacia = self._hacia_la_nuca(oido, centro)
-        hueco = 18 * escala
-        espacio = {1: self.width() - centro.x(), -1: centro.x()}
-        if espacio[hacia] - hueco < 120:
-            hacia = -hacia
-        r = max(40.0, min(marco.width() * LUPA, (espacio[hacia] - hueco) / 2 - 6,
-                          self.height() / 2 - 6))
-        c = QPointF(centro.x() + hacia * (hueco + r), centro.y() - r * 0.15)
-        c.setY(max(r + 6, min(self.height() - r - 6, c.y())))
-        p.setPen(QPen(QColor(METAL), 1.6, Qt.PenStyle.DashLine))
-        d = centro - c
-        p.drawLine(centro, c + d * (r / max(1.0, math.hypot(d.x(), d.y()))))
+        r = marco.width() * LUPA
+        recorrido = RECORRIDO_PX * escala
+        m = self._mouse - centro
+        dx = max(-1.0, min(1.0, m.x() / recorrido))
+        dy = max(-1.0, min(1.0, m.y() / recorrido))
+        # El disco sigue un poco al mouse, sin salirse de la cabeza a la vista
+        c = QPointF(centro.x() + dx * recorrido, centro.y() + dy * recorrido)
+        c.setX(max(r + 6, min(self.width() - r - 6, c.x())))
+        c.setY(max(r + 6, min(self.height() - r * 2.2, c.y())))
+        self._pintar_mango(p, c, r, self._hacia_la_nuca(oido, centro))
+        caja = QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r)
         circulo = QPainterPath()
         circulo.addEllipse(c, r, r)
-        caja = QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r)
         p.save()
         p.setClipPath(circulo)
         p.fillRect(caja, QColor(NEGRO_VISOR))
@@ -377,37 +374,63 @@ class CabezaOtoscopia(CabezaExamen):
         foto = v.get("foto")
         if v.get("texto") or foto is None:
             p.setPen(QColor(tema.TEXTO_TENUE))
-            p.drawText(caja, Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
+            p.drawText(caja.adjusted(r * 0.2, 0, -r * 0.2, 0),
+                       Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
                        v.get("texto") or "Otoscopio sin batería")
         else:
-            # Mover el mouse dentro del conducto recorre el tímpano: la lupa
-            # muestra el campo del espéculo alrededor de ese punto
-            m = self._mouse - centro
-            dx = max(-1.0, min(1.0, m.x() / (RECORRIDO_PX * escala)))
-            dy = max(-1.0, min(1.0, m.y() / (RECORRIDO_PX * escala)))
-            lado = min(foto.width(), foto.height()) * max(0.05, min(1.0, 2 * v.get("cono", 0.2)))
+            claro = r * (1.0 if v.get("adulto") else 0.5)
+            # La mitad del tímpano llena el disco; el mouse recorre el resto
+            lado = min(foto.width(), foto.height()) * ZOOM_TIMPANO
             libre_x = (foto.width() - lado) / 2
             libre_y = (foto.height() - lado) / 2
             fuente = QRectF(libre_x + dx * libre_x, libre_y + dy * libre_y, lado, lado)
+            hueco = QPainterPath()
+            hueco.addEllipse(c, claro, claro)
+            p.save()
+            p.setClipPath(hueco)
             p.drawPixmap(caja, foto, fuente)
             if v.get("tapado"):
                 # Sin enderezar el conducto, la pared tapa casi todo
                 pared = QPainterPath()
-                pared.addEllipse(c, r, r)
-                hueco = QPainterPath()
-                hueco.addEllipse(QPointF(c.x() + r * 0.28, c.y() + r * 0.18), r * 0.42, r * 0.42)
-                p.fillPath(pared.subtracted(hueco), QColor(PARED_CONDUCTO))
+                pared.addEllipse(c, claro, claro)
+                ventana = QPainterPath()
+                ventana.addEllipse(QPointF(c.x() + claro * 0.3, c.y() + claro * 0.2), claro * 0.42, claro * 0.42)
+                p.fillPath(pared.subtracted(ventana), QColor(PARED_CONDUCTO))
             from PySide6.QtGui import QRadialGradient
-            luz = QRadialGradient(c, r)
+            luz = QRadialGradient(c, claro)
             luz.setColorAt(0.0, QColor(255, 220, 150, 30))
-            luz.setColorAt(0.75, QColor(0, 0, 0, 0))
-            luz.setColorAt(1.0, QColor(14, 10, 13, 230))
+            luz.setColorAt(0.8, QColor(0, 0, 0, 0))
+            luz.setColorAt(1.0, QColor(14, 10, 13, 220))
             p.fillRect(caja, luz)
+            p.restore()
         p.restore()
-        aro = max(5.0, r * 0.05)
-        p.setPen(QPen(QColor(METAL), aro))
+        aro = max(6.0, r * 0.07)
+        p.setPen(QPen(QColor("#2B2B30"), aro))
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawEllipse(c, r + aro / 2, r + aro / 2)
-        p.setPen(QColor(tema.TARJETA))
-        p.drawText(QRectF(c.x() - r, c.y() + r * 0.72, 2 * r, r * 0.2), Qt.AlignmentFlag.AlignCenter,
-                   "Oído derecho" if oido == "od" else "Oído izquierdo")
+        p.setPen(QPen(QColor(255, 255, 255, 90), aro * 0.3))
+        p.drawArc(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), 40 * 16, 70 * 16)
+
+    @staticmethod
+    def _pintar_mango(p, c, r, hacia):
+        """El mango del otoscopio, desde el disco hacia abajo y hacia la
+        nuca: el cuello y el mango moleteado."""
+        import math as _m
+        ang = _m.radians(90 + hacia * -25)          # hacia abajo, inclinado a la nuca
+        u = QPointF(_m.cos(ang), _m.sin(ang))
+        n = QPointF(-u.y(), u.x())
+        base = c + u * (r * 0.92)
+        cuello = [base + n * (r * 0.16), base + u * (r * 0.32) + n * (r * 0.11),
+                  base + u * (r * 0.32) - n * (r * 0.11), base - n * (r * 0.16)]
+        mango = [base + u * (r * 0.32) + n * (r * 0.17), base + u * (r * 1.45) + n * (r * 0.19),
+                 base + u * (r * 1.45) - n * (r * 0.19), base + u * (r * 0.32) - n * (r * 0.17)]
+        from PySide6.QtGui import QPolygonF
+        p.setPen(QPen(QColor("#1E1E22"), 1.5))
+        p.setBrush(QColor("#3A3A40"))
+        p.drawPolygon(QPolygonF(cuello))
+        p.setBrush(QColor("#2C2C31"))
+        p.drawPolygon(QPolygonF(mango))
+        p.setPen(QPen(QColor(255, 255, 255, 40), 1.2))
+        for k in range(1, 9):
+            a = base + u * (r * (0.32 + 0.13 * k))
+            p.drawLine(a + n * (r * 0.17), a - n * (r * 0.17))

@@ -378,7 +378,8 @@ class Otoscopia(QWidget):
             return {"texto": SIN_IMAGEN_TEXTO}
         cono = _OtoscopioVisor.CONO_ADULTO if self._especulo() == "adulto" else _OtoscopioVisor.CONO_PEDIATRICO
         tiron = self._tiron if self._tiron and self._tiron["oido"] == oido else None
-        return {"foto": foto, "cono": cono, "tapado": not (tiron and tiron["correcto"])}
+        return {"foto": foto, "cono": cono, "adulto": self._especulo() == "adulto",
+                "tapado": not (tiron and tiron["correcto"])}
 
     def _miro(self, oido):
         """El otoscopio entró al conducto (el mouse pasó por él)."""

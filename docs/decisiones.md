@@ -8329,8 +8329,11 @@ otro).
   inventa una respuesta normal), como el otoscopio sin batería. Los
   niveles y la caída son del modelo, no de una norma.
 - **Otoscopía como la rinoscopía** (`CabezaOtoscopia`), sin panel lateral:
-  el mouse es el otoscopio; sobre el conducto se abre la lupa hacia la nuca
-  sin tapar la oreja, y moverlo recorre el tímpano. Arrastrar desde la oreja
+  el mouse es el otoscopio; al llegar al conducto lo que se ve se levanta
+  ahí mismo, en un disco que es la cabeza del otoscopio, con el mango hacia
+  abajo y la nuca. Moverlo en un rango chico recorre todo el tímpano. El
+  disco claro es entero con el espéculo de adulto y de la mitad del
+  diámetro con el pediátrico (él, 2026-11-06). Arrastrar desde la oreja
   tira del pabellón (queda tirado con su flecha). Correcto: arriba y atrás;
   menores de 3 años, abajo y atrás. Sin buena tracción la pared del
   conducto tapa casi todo. El espéculo de adulto no entra antes de los 6
