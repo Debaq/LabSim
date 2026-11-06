@@ -73,6 +73,7 @@ def test_el_mouse_en_el_conducto_es_el_otoscopio():
     from PySide6.QtCore import QEvent
     w = _modulo()
     w.cabeza.resize(600, 600)
+    w._elegir_herramienta("otoscopia")   # como en los electrodos: la herramienta se elige
     w.cabeza.show()
     w.cabeza.mirar_oido("od")
     APP.processEvents()

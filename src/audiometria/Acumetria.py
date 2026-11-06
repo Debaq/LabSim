@@ -48,12 +48,14 @@ from backend.log_queue import get_log_queue
 from core import iconos, tema
 
 EXTRA_QSS = f"""
-QPushButton[paso="true"] {{ text-align: left; padding: 8px 12px; }}
 QTextEdit[conversacion="true"] {{ border: none; background: transparent; font-size: 10pt; }}
 QProgressBar#vibracion {{ border: 1px solid {tema.BORDE}; border-radius: 5px; background: {tema.TARJETA_ALT};
                           max-height: 10px; text-align: center; }}
 QProgressBar#vibracion::chunk {{ background: {tema.ACENTO}; border-radius: 4px; }}
 QLabel#armonicos {{ color: {tema.ALERTA}; font-weight: 600; }}
+QPushButton[segmento="true"] {{ padding: 4px 0px; }}
+QPushButton[herramienta="true"] {{ padding: 5px 0px; font-weight: 600; }}
+QPushButton[herramienta="true"]:checked {{ background: {tema.ACENTO}; border-color: {tema.ACENTO}; color: white; }}
 """
 
 # Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py).
@@ -84,6 +86,14 @@ NO_SABE = "¿Y qué tengo que hacer?"
 DONDE_WEBER = {"od": "En el oído derecho.", "oi": "En el oído izquierdo.",
                "centrado": "Al medio, en toda la cabeza."}
 ARMONICOS = "Diapasón sonando con armónicos"
+# Las herramientas y vistas de la cabeza, como las de los electrodos
+HERRAMIENTAS = (("girar", "Girar"), ("diapason", "Diapasón"))
+VISTAS = (("Frente", VISTA_FRENTE), ("Derecha", (90, 0)), ("Izquierda", (270, 0)),
+          ("Arriba", VISTA_ARRIBA), ("Atrás", (180, 20)))
+PISTAS = {
+    "girar": "Arrastra para girar la cabeza.",
+    "diapason": "Clic en la piel: ahí se apoya el diapasón (o frente a la oreja, sin tocar).",
+}
 LADO = {"od": "derecho", "oi": "izquierdo"}
 DONDE_TEXTO = {"mastoides": "en la mastoides", "pabellon": "frente al pabellón",
                "linea_media": "en la línea media", "fuera_de_linea": "en la frente, a un lado de la línea media",
@@ -130,56 +140,72 @@ class Acumetria(QWidget):
 
     # ------------------------------------------------------------ armado
     @staticmethod
-    def _tarjeta():
-        tarjeta = QFrame()
-        tarjeta.setProperty("card", "true")
-        col = QVBoxLayout(tarjeta)
-        col.setContentsMargins(14, 12, 14, 14)
-        col.setSpacing(8)
-        return tarjeta, col
-
-    @staticmethod
     def _seccion(texto):
         lbl = QLabel(texto)
         lbl.setProperty("role", "seccion")
         return lbl
 
     def _centro(self):
-        tarjeta, col = self._tarjeta()
+        """La cabeza con sus herramientas, sus vistas y la pista, como en el
+        posicionamiento de electrodos."""
+        lienzo = QFrame()
+        lienzo.setProperty("card", "true")
+        col = QVBoxLayout(lienzo)
+        col.setContentsMargins(8, 8, 8, 8)
         self.cabeza = CabezaExamen()
-        self.cabeza.poner_herramienta("diapason")
         self.cabeza.apoyado.connect(self._apoyar)
         col.addWidget(self.cabeza, 1)
+        herramientas = QHBoxLayout()
+        herramientas.setSpacing(4)
+        grupo = QButtonGroup(self)
+        self.botones_herramienta = {}
+        for clave, nombre in HERRAMIENTAS:
+            b = QPushButton(nombre)
+            b.setCheckable(True)
+            b.setProperty("herramienta", "true")
+            b.clicked.connect(lambda _c=False, k=clave: self._elegir_herramienta(k))
+            grupo.addButton(b)
+            herramientas.addWidget(b, 1)
+            self.botones_herramienta[clave] = b
+        col.addLayout(herramientas)
         vistas = QHBoxLayout()
-        vistas.setSpacing(6)
-        pista = QLabel("Arrastra para girar la cabeza. Clic en la piel: ahí se apoya el diapasón.")
-        pista.setProperty("role", "hint")
-        pista.setWordWrap(True)
-        vistas.addWidget(pista, 1)
-        for texto, vista in (("Frente", VISTA_FRENTE), ("Derecha", (90, 0)), ("Izquierda", (270, 0)),
-                             ("Arriba", VISTA_ARRIBA)):
+        vistas.setSpacing(4)
+        for texto, vista in VISTAS:
             b = QPushButton(texto)
+            b.setProperty("segmento", "true")
             b.clicked.connect(lambda _c=False, v=vista: self.cabeza.mirar(*v))
-            vistas.addWidget(b)
+            vistas.addWidget(b, 1)
         col.addLayout(vistas)
-        return tarjeta
+        self.pista = QLabel()
+        self.pista.setProperty("role", "hint")
+        self.pista.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        col.addWidget(self.pista)
+        self._elegir_herramienta("girar")
+        return lienzo
+
+    def _elegir_herramienta(self, clave):
+        self.botones_herramienta[clave].setChecked(True)
+        self.cabeza.poner_herramienta(clave)
+        self.pista.setText(PISTAS[clave])
 
     def _derecha(self):
-        caja = QWidget()
-        caja.setFixedWidth(340)
-        col = QVBoxLayout(caja)
-        col.setContentsMargins(0, 0, 0, 0)
-        col.setSpacing(10)
-
-        tarjeta, v = self._tarjeta()
-        v.addWidget(self._seccion("DIAPASÓN"))
+        """El panel: el diapasón (cuál, golpearlo, cuánto vibra, retirarlo)
+        y la conversación con el paciente."""
+        panel = QFrame()
+        panel.setProperty("card", "true")
+        panel.setFixedWidth(300)
+        pcol = QVBoxLayout(panel)
+        pcol.setContentsMargins(12, 10, 12, 12)
+        pcol.setSpacing(6)
+        pcol.addWidget(self._seccion("DIAPASÓN"))
         fila = QHBoxLayout()
-        fila.setSpacing(6)
+        fila.setSpacing(4)
         self.grupo_hz = QButtonGroup(self)
         self.botones_hz = {}
         for hz, texto in dp.DIAPASONES:
             b = QPushButton(texto)
             b.setCheckable(True)
+            b.setProperty("segmento", "true")
             self.grupo_hz.addButton(b)
             self.botones_hz[hz] = b
             fila.addWidget(b, 1)
@@ -187,42 +213,39 @@ class Acumetria(QWidget):
         self.botones_hz["500"].setChecked(True)
         for hz, b in self.botones_hz.items():
             b.toggled.connect(lambda marcado, h=hz: marcado and self._cambiar_diapason(h))
-        v.addLayout(fila)
+        pcol.addLayout(fila)
         self.btn_golpear = QPushButton(" Golpear el diapasón")
-        self.btn_golpear.setIcon(iconos.icono("diapason", tema.ACENTO, 18))
-        self.btn_golpear.setProperty("paso", "true")
+        self.btn_golpear.setIcon(iconos.icono_boton("diapason", tema.TEXTO_SUAVE, tam=16))
         self.btn_golpear.clicked.connect(self._golpear)
-        v.addWidget(self.btn_golpear)
+        pcol.addWidget(self.btn_golpear)
+        pcol.addSpacing(4)
+        pcol.addWidget(self._seccion("VIBRACIÓN"))
         self.barra = QProgressBar()
         self.barra.setObjectName("vibracion")
         self.barra.setRange(0, 100)
         self.barra.setValue(0)
         self.barra.setTextVisible(False)
-        v.addWidget(self.barra)
+        pcol.addWidget(self.barra)
         self.lbl_estado = QLabel("Quieto, sin golpear.")
         self.lbl_estado.setProperty("role", "hint")
-        v.addWidget(self.lbl_estado)
-        self.btn_retirar = QPushButton(" Retirar el diapasón")
-        self.btn_retirar.setIcon(iconos.icono("x", tema.TEXTO_SUAVE, 16))
-        self.btn_retirar.setProperty("paso", "true")
-        self.btn_retirar.clicked.connect(self._retirar)
-        v.addWidget(self.btn_retirar)
+        pcol.addWidget(self.lbl_estado)
         self.lbl_armonicos = QLabel(ARMONICOS)
         self.lbl_armonicos.setObjectName("armonicos")
         self.lbl_armonicos.setWordWrap(True)
         self.lbl_armonicos.hide()
-        v.addWidget(self.lbl_armonicos)
-        col.addWidget(tarjeta)
-
-        tarjeta, v = self._tarjeta()
-        v.addWidget(self._seccion("CONVERSACIÓN"))
+        pcol.addWidget(self.lbl_armonicos)
+        self.btn_retirar = QPushButton(" Retirar el diapasón")
+        self.btn_retirar.setIcon(iconos.icono_boton("cerrar", tema.TEXTO_SUAVE, tam=14))
+        self.btn_retirar.clicked.connect(self._retirar)
+        pcol.addWidget(self.btn_retirar)
+        pcol.addSpacing(4)
+        pcol.addWidget(self._seccion("CONVERSACIÓN"))
         self.log = QTextEdit()
         self.log.setReadOnly(True)
         self.log.setProperty("conversacion", "true")
         self.log.setPlaceholderText("Lo que le digas al paciente y lo que él conteste.")
-        v.addWidget(self.log, 1)
-        col.addWidget(tarjeta, 1)
-        return caja
+        pcol.addWidget(self.log, 1)
+        return panel
 
     # ------------------------------------------------------------ caso
     def la_super(self, data, appointment_id=None):
@@ -309,6 +332,7 @@ class Acumetria(QWidget):
         self._aviso_id += 1
         self.cabeza.poner_diapason(None)
         self._log("ac_golpe", hz=self.hz())
+        self._elegir_herramienta("diapason")
         self._decir(f"Tú: golpeas el diapasón de {dict(dp.DIAPASONES)[self.hz()]}.")
         self._tick.start()
         self._mostrar_vibracion()
@@ -321,6 +345,7 @@ class Acumetria(QWidget):
         self._aviso_id += 1
         self.cabeza.poner_diapason(None)
         self._decir("Tú: retiras el diapasón.")
+        self.btn_retirar.setEnabled(False)
 
     def _mostrar_vibracion(self):
         t = self._desde_golpe()
@@ -360,6 +385,7 @@ class Acumetria(QWidget):
         self._apoyo = apoyo
         self._aviso_id += 1
         self.cabeza.poner_diapason(punto, normal)
+        self.btn_retirar.setEnabled(True)
         hz = self.hz()
         t = self._desde_golpe()
         oye = self._oye_ahora(apoyo)

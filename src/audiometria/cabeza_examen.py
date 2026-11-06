@@ -257,19 +257,25 @@ class CabezaOtoscopia(CabezaExamen):
         normal = np.array([-1.0 if oido == "od" else 1.0, 0.0, 0.0])
         return self.en_pantalla(_pos(sitio), normal)
 
+    def poner_herramienta(self, herramienta):
+        """girar, traccion u otoscopia (como las herramientas de los
+        electrodos: cada una hace lo suyo con el mouse)."""
+        if herramienta != "otoscopia":
+            self._salir()
+        super().poner_herramienta(herramienta)
+
     def mousePressEvent(self, ev):
-        if ev.button() == Qt.MouseButton.LeftButton:
+        if ev.button() == Qt.MouseButton.LeftButton and self.herramienta == "traccion":
             tocado = self.tocar(ev.position())
             lado = oreja(tocado[0]) if tocado is not None else None
             if lado is not None:
                 self._tirando = (lado, ev.position(), ev.position())
-                self._salir()
                 self.update()
                 return
         CabezaElectrodos.mousePressEvent(self, ev)
 
     def mouseMoveEvent(self, ev):
-        if self._tirando is not None or self._apretado is not None:
+        if self._tirando is not None or self._apretado is not None or self.herramienta != "otoscopia":
             super().mouseMoveEvent(ev)
             return
         self._mouse = ev.position()
