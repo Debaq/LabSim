@@ -101,6 +101,24 @@ def test_el_tiron_del_otro_oido_no_endereza_este():
     assert w.vista("od")["pared"] == O.PARED["mala"]
 
 
+def test_el_area_util_es_el_circulo_sin_el_negro():
+    """Las fotos de otoscopio vienen en un círculo sobre negro: el recorrido
+    se mide en ese círculo, sin modificar la foto."""
+    from PySide6.QtCore import QPointF
+    from PySide6.QtGui import QPainter
+    from audiometria.cabeza_examen import area_util
+    foto = QPixmap(400, 400)
+    foto.fill(QColor("black"))
+    p = QPainter(foto)
+    p.setBrush(QColor("pink"))
+    p.drawEllipse(QPointF(220, 200), 120, 120)
+    p.end()
+    x, y, r = area_util(foto)
+    assert abs(x - 220) < 12 and abs(y - 200) < 12 and abs(r - 120) < 12, (x, y, r)
+    llena = QPixmap(400, 300)
+    llena.fill(QColor("pink"))
+    assert area_util(llena) == (200, 150, 150), "sin negro: el cuadro entero"
+
 def test_queda_en_el_registro():
     w = _modulo()
     w._traccionar("od", 1.5, 1.5)

@@ -260,11 +260,45 @@ class CabezaExamen(CabezaElectrodos):
 LUPA = 0.16                 # radio de la ventana del otoscopio, fracción del lado de la cabeza (80 % de 0.20, él)
 RECORRIDO_PX = 30.0         # px de la foto de la cabeza, desde donde entró: de borde a borde del tímpano
 ZOOM_TIMPANO = 0.5          # el disco muestra esta fracción de la foto; el resto se recorre
-ALCANCE = 0.85              # hasta dónde llega el centro de la vista (fracción del radio de la foto)
+ALCANCE = 0.62              # hasta dónde llega el centro de la vista (fracción del radio del área con
+                            # imagen): con el zoom, el borde de la vista pasa apenas el de la membrana
+BORDE_SUAVE = 0.80          # desde aquí (fracción del radio del área con imagen) la foto se funde con el negro
+UMBRAL_NEGRO = 28           # bajo esto (en el canal más claro) un píxel es el negro de alrededor
+LLENO = 0.92                # con más imagen que esto, la foto llena el cuadro (no hay círculo)
 METAL = "#8E9098"
 PARED_CLARA = "#C98E80"     # la piel del conducto cerca de la membrana
 PARED_OSCURA = "#6E3A31"    # y más afuera, en sombra
 NEGRO_VISOR = "#0E0A0D"
+
+
+_areas = {}
+
+
+def area_util(foto):
+    """(x, y, radio) en píxeles de la foto del círculo donde hay imagen. Las
+    fotos de otoscopio vienen en un círculo sobre negro: el centro y el
+    radio salen de lo que no es negro (en una copia chica, una vez por
+    foto). Si la imagen llena casi todo el cuadro, el cuadro entero. La foto
+    no se modifica."""
+    clave = foto.cacheKey()
+    if clave not in _areas:
+        lado = 64
+        chica = foto.toImage().scaled(lado, lado)
+        sx, sy, n = 0.0, 0.0, 0
+        for y in range(lado):
+            for x in range(lado):
+                c = chica.pixelColor(x, y)
+                if max(c.red(), c.green(), c.blue()) > UMBRAL_NEGRO:
+                    sx += x
+                    sy += y
+                    n += 1
+        ancho, alto = foto.width(), foto.height()
+        if n < lado * lado * 0.05 or n > lado * lado * LLENO:
+            _areas[clave] = (ancho / 2, alto / 2, min(ancho, alto) / 2)
+        else:
+            radio = math.sqrt(n / math.pi) / lado * min(ancho, alto)
+            _areas[clave] = ((sx / n + 0.5) / lado * ancho, (sy / n + 0.5) / lado * alto, radio)
+    return _areas[clave]
 
 
 class CabezaOtoscopia(CabezaExamen):
@@ -422,12 +456,17 @@ class CabezaOtoscopia(CabezaExamen):
                        v.get("texto") or "Otoscopio sin batería")
         else:
             claro = r * (1.0 if v.get("adulto") else 0.5)
-            # La foto ampliada (ZOOM_TIMPANO de ella llena el disco). El centro
-            # de la vista va de borde a borde de la membrana con el
-            # recorrido del mouse; lo que cae fuera de la foto se ve oscuro
-            lado = min(foto.width(), foto.height()) * ZOOM_TIMPANO
-            px = foto.width() / 2 + dx * foto.width() / 2 * ALCANCE
-            py = foto.height() / 2 + dy * foto.height() / 2 * ALCANCE
+            # La foto ampliada: ZOOM_TIMPANO del área con imagen llena el
+            # disco (area_util: sin el negro de alrededor, típico de las
+            # fotos de otoscopio). El recorrido lleva el centro de la vista
+            # de borde a borde de esa área, no de la foto con su negro
+            ux, uy, ur = area_util(foto)
+            lado = 2 * ur * ZOOM_TIMPANO
+            largo = math.hypot(dx, dy)
+            if largo > 1:
+                dx, dy = dx / largo, dy / largo   # dentro del círculo, no en las esquinas
+            px = ux + dx * ur * ALCANCE
+            py = uy + dy * ur * ALCANCE
             fuente = QRectF(px - lado / 2, py - lado / 2, lado, lado)
             dentro = fuente.intersected(QRectF(0, 0, foto.width(), foto.height()))
             k = 2 * r / lado
@@ -439,6 +478,14 @@ class CabezaOtoscopia(CabezaExamen):
             p.setClipPath(hueco)
             if not dentro.isEmpty():
                 p.drawPixmap(destino, foto, dentro)
+            # El borde de la foto se funde con el negro (no un corte seco):
+            # desde BORDE_SUAVE del radio del área con imagen hasta negro
+            from PySide6.QtGui import QRadialGradient as _Rad2
+            borde = _Rad2(QPointF(caja.x() + (ux - fuente.x()) * k, caja.y() + (uy - fuente.y()) * k), ur * k)
+            borde.setColorAt(0.0, QColor(0, 0, 0, 0))
+            borde.setColorAt(BORDE_SUAVE, QColor(0, 0, 0, 0))
+            borde.setColorAt(1.0, QColor(NEGRO_VISOR))
+            p.fillRect(caja, borde)
             pared = v.get("pared") or 0.0
             if pared > 0:
                 # La pared del conducto sin enderezar: un anillo concéntrico
@@ -457,9 +504,12 @@ class CabezaOtoscopia(CabezaExamen):
                 p.fillPath(anillo.subtracted(centro_libre), tunel)
             from PySide6.QtGui import QRadialGradient
             luz = QRadialGradient(c, claro)
+            # La luz del otoscopio: más cálida al centro y cayendo suave
+            # hacia el borde del espéculo
             luz.setColorAt(0.0, QColor(255, 220, 150, 30))
-            luz.setColorAt(0.8, QColor(0, 0, 0, 0))
-            luz.setColorAt(1.0, QColor(14, 10, 13, 220))
+            luz.setColorAt(0.55, QColor(0, 0, 0, 0))
+            luz.setColorAt(0.85, QColor(14, 10, 13, 120))
+            luz.setColorAt(1.0, QColor(14, 10, 13, 245))
             p.fillRect(caja, luz)
             p.restore()
         p.restore()
