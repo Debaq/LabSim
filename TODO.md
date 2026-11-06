@@ -208,6 +208,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
       plan B en modo invitado y, a diseñar, práctico sin servidor (casos
       bajados antes, llave del docente, todo sube al volver). Opciones en
       `docs/roadmap_sin_servidor.md`. § El práctico cuando el hosting se cae
+- [ ] 76. App resistente a un servidor lento o intermitente (06-11: 50-83 %
+      de paquetes perdidos): reintentos en el cliente, abrir y cerrar la
+      atención con cola local, chat que reintenta, indicador de conexión.
+      Plan en `docs/roadmap_sin_servidor.md`. § Servidor lento o intermitente
 
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).

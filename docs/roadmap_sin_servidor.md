@@ -48,3 +48,73 @@ tampoco abría. Con eso no hay práctico.
 Recomendación: 1 cuando se pueda, 2 como protocolo escrito, 3 diseñado con
 calma (comparte piezas con `docs/roadmap_practica_libro.md`: casos del libro
 sin red y anamnesis en vez de chat).
+
+## Servidor lento o intermitente (2026-11-06)
+
+Distinto de la caída del 30-10: el 06-11, en pleno práctico, el servidor
+contestaba pero mal. Medido desde fuera del laboratorio, 12:30-12:40 UTC:
+50-83 % de paquetes perdidos hacia 216.183.246.223, conexión TCP de 1-7 s
+(normal 0,24), handshake TLS de 3-17 s, y la mitad de los pedidos con
+timeout o conexión cortada. El traceroute llegaba limpio hasta
+dalult3.hostarmada.net: la pérdida es del servidor. PHP respondía en 0 ms.
+Los alumnos veían "problema de red"; algunos entraban y otros no.
+
+### Por qué la app no lo aguanta
+
+- **Un solo intento por pedido.** `backend/client.py` no reintenta nada: un
+  paquete perdido en el handshake = error para el alumno.
+- **Timeout de 10 s para todo** (`DEFAULT_TIMEOUT`), y con handshakes de
+  hasta 17 s muchos pedidos mueren antes de empezar.
+- **Abrir la atención encadena tres pedidos**, y tienen que salir los tres:
+  bajada completa del estado (`estado_completo`), casos, y la escritura de
+  la agenda para marcar "atendiendo". Si cada pedido sale la mitad de las
+  veces, la atención abre ~1 de cada 8 intentos. Además corre en el hilo de
+  la ventana: se congela mientras espera.
+- **La bajada completa pesa** (hasta ~1,4 MB con el admin) y con pérdida de
+  paquetes es lo primero que se corta, aunque la sincronización de cada
+  60 s ya tenga casi todo en el equipo.
+- **El cierre y el chat** fallan al primer error, sin reintentar solos.
+
+### Plan, de más barato a más caro
+
+1. **Reintentos en el cliente** (poco código, el mayor efecto).
+   - `HTTPAdapter` con `urllib3.Retry` en `_SesionHttp`: hasta 4
+     reintentos con espera creciente (0,5-1-2-4 s) en errores de conexión,
+     502/503/504 y timeouts de conexión. Los GET se reintentan siempre; los
+     POST solo cuando el pedido no alcanzó a salir (falla al conectar), así
+     no se duplica nada.
+   - Timeout separado: `(conectar 20 s, leer 30 s)` en lugar de 10 s para
+     todo. El chat y el cierre mantienen su lectura larga.
+   - La conexión se mantiene abierta entre pedidos (la `Session` ya lo hace
+     si el servidor deja); se paga el handshake una vez, no por pedido.
+   - Con esto, un 50 % de pérdida pasa de 1 en 8 atenciones a casi todas.
+2. **Abrir la atención con lo que ya está en el equipo.**
+   - El caso y la cita salen de la caché que deja la sincronización; si la
+     caché es reciente (< 5 min) no se baja el estado completo.
+   - Marcar "atendiendo" va a una cola local (como `log_queue`) que sube
+     en segundo plano con reintentos; la atención abre al tiro.
+   - Si no hay caché del caso, recién ahí se baja, y en segundo plano con
+     "Cargando el paciente…" en vez de congelar la ventana.
+   - Cuidado: el choque "ya lo está atendiendo otro" se resuelve en el
+     servidor al subir; si choca, avisar sin perder lo hecho.
+3. **Cierre de atención en cola.** Los informes ya se respaldan en el
+   equipo; el cierre también queda encolado y sube solo cuando hay red, con
+   "Cerrada, se está enviando" en vez de "No se pudo cerrar". El alumno
+   puede pasar al siguiente paciente.
+4. **Chat que reintenta.** Si el mensaje no llega, se reintenta solo 2 veces
+   y el paciente "se queda pensando"; si sigue sin red, se deja el mensaje en
+   la caja con un botón Reenviar, sin perderlo.
+5. **Indicador de conexión en vez de modales.** Un punto en la barra de
+   estado (verde / amarillo lento / rojo sin red) con lo que mide
+   `core/tiempos.py`; los avisos modales solo cuando algo de verdad se
+   perdió. Así el docente ve de un vistazo qué PC está sufriendo.
+6. **Menos bytes por pedido** (lado servidor). Gzip en las respuestas
+   JSON grandes y que la app use el delta de `sync.php` también al abrir.
+   Con pérdida de paquetes, menos bytes = menos cortes.
+
+Fuera de la app: ticket a HostArmada (redactado 06-11) y, si se repite,
+evaluar cambiar de hosting; eso lo decide él.
+
+Recomendación: 1 ya (resuelve la mayor parte del 06-11), 2 y 3 juntos
+(comparten la cola), 4 y 5 después, 6 cuando se mida cuánto pesa cada
+pedido en terreno.
