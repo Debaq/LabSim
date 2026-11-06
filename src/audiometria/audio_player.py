@@ -87,6 +87,13 @@ class Player(QObject):
         return players, outputs, buffer_outputs
 
     def _on_audio_buffer(self, ch, buffer):
+        # Un bloque que llega con el reproductor ya parado es uno que venía
+        # en camino cuando se soltó el estímulo (la señal llega encolada
+        # desde el hilo de audio): stop() ya dejó el vúmetro en 0 y este lo
+        # volvía a subir, y como no llega otro, quedaba pegado sin estímulo
+        # (2026-11-06).
+        if self.players[ch].playbackState() != QMediaPlayer.PlaybackState.PlayingState:
+            return
         self.level_changed.emit(ch, audio_buffer_level(buffer))
 
     def check_end_of_media(self, player, status: int):
