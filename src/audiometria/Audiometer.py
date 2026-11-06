@@ -573,6 +573,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             "freq": self.lbl_freq.text(),
             "step": self.step(),
             "instruccion": historia[0] if historia else None,
+            "talkback": self.dial_talkback.value(),
             "canales": canales,
         }
 
@@ -628,7 +629,8 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.activate_response = [1, 0]
 
     def talkback(self):
-        self._log("audio_talkback_press", command=self.state_supra[1] if self.state_supra else None)
+        self._log("audio_talkback_press", command=self.state_supra[1] if self.state_supra else None,
+                  volumen=self.dial_talkback.value())
         if self.state_supra is not None:
             if self.state_supra[1] != 'pa_pa_pa':
                 # solo lo que decia el talkback: cortar los canales apagaba el
@@ -1463,6 +1465,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.lbl_time.setText(f"{minutes}:{second}")
 
     def counter_stat(self, state=1):
+        # el cronómetro mide el minuto del deterioro tonal y de la
+        # inhibición residual: queda en el registro con lo que marcaba
+        self._log("audio_cronometro", accion={1: "iniciar", 2: "detener", 3: "borrar"}.get(state, state),
+                  marca=self.lbl_time.text())
         if state == 1:
             self.time.start(1000)
 

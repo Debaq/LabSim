@@ -8505,4 +8505,8 @@ viene del protocolo del docente; queda como **T03** en
 - Pruebas: `tests/test_acufeno.py`,
   `labsim_backend/tests/test_audiometria_tinnitus.php`. Sin probar en la app
   real ni en el navegador.
-
+- **Registro completo (después):** se agregaron `audio_cronometro` (iniciar,
+  detener o borrar, con la marca que mostraba: mide el minuto de la
+  inhibición y del deterioro tonal), `audio_paciente_dice` (toda frase del
+  paciente: molesta, sí, el derecho...; antes solo quedaba la mano) y el
+  volumen del talkback (en `audio_talkback_press` y en la foto del equipo).

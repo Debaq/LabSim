@@ -118,6 +118,7 @@ class ResponseAudiometry():
         super().__init__()
         self.data = {}
         self.other_response = Response()
+        self.other_response.log = getattr(obj_audio, "_log", None)
         # 'output' es el oido (0 OD, 1 OI); 'sim' marca el canal en
         # Simultaneo, que llega a los dos (su 'output' queda en OI para el
         # codigo que solo entiende un oido).

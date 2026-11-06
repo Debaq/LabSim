@@ -65,6 +65,11 @@ class Response(QWidget):
             self.sender().setPosition(0)
 
     def create_voice_(self, response_text):
+        # lo que dice el paciente (molesta, sí, el derecho...) al registro;
+        # ResponseAudiometry le pasa el _log del audiómetro
+        log = getattr(self, "log", None)
+        if log is not None:
+            log("audio_paciente_dice", frase=response_text)
         voice_ldl = create_voice(response_text, *self.voz)
         self.channel_0.setSource(voice_ldl)
         self.channel_0.play()
