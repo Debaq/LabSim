@@ -26,11 +26,14 @@ _ROTULOS = {"so_version": "Sistema operativo", "distribucion": "Distribución",
 def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False):
     """Manda el ticket con la cola del registro. Devuelve (ok, número de
     ticket o motivo). Corre con hilos.en_fondo: nada de widgets acá."""
+    from backend import client as backend_client
     from backend.client import BackendClient
     try:
+        base_url = Preferences().get("BACKEND_URL")
+        if not cierre_inesperado:
+            detalle = dict(detalle, **_probar_red(base_url, backend_client))
         log_gz = gzip.compress(registro.cola())
-        client = BackendClient(Preferences().get("BACKEND_URL"),
-                               context.get_resource("json/session.json"))
+        client = BackendClient(base_url, context.get_resource("json/session.json"))
         if cierre_inesperado:
             respuesta = _enviar_cierre(client, (descripcion, equipo_info, detalle, log_gz or None))
         else:
@@ -42,6 +45,20 @@ def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False):
         return False, str(exc)
     print(f"soporte: reporte enviado, ticket #{respuesta.get('id')}")
     return True, str(respuesta.get("id", ""))
+
+
+def _probar_red(base_url, backend_client):
+    """Las claves red_* del ticket (ver core/prueba_red.py). El detalle
+    largo va al registro antes de comprimirlo, así viaja en el mismo
+    ticket. Si la prueba misma se cae, el ticket sale igual."""
+    from core import prueba_red
+    try:
+        claves, texto = prueba_red.medir(base_url, sesion=backend_client._sesion())
+    except Exception as exc:  # noqa: BLE001 -- la prueba no frena el ticket
+        print(f"soporte: la prueba de red falló: {exc}")
+        return {"red_resumen": f"La prueba de red no se pudo hacer: {type(exc).__name__}"}
+    print(texto, flush=True)  # antes de leer la cola: que alcance a quedar en el archivo
+    return claves
 
 
 def _enviar_cierre(client, args):
@@ -140,9 +157,10 @@ def ofrecer_envio_por_cierre(parent, hora_arranque):
                           cierre_inesperado=True, nombre="soporte")
 
 
-def _caja_que_se_envia(parent, info_equipo, detalle, ventana=None):
+def _caja_que_se_envia(parent, info_equipo, detalle, ventana=None, prueba_red=False):
     """`ventana`: de quién cuelga el visor del registro, si `parent` todavía
-    no tiene dueño (la caja va a un scroll)."""
+    no tiene dueño (la caja va a un scroll). `prueba_red`: el envío mide la
+    conexión con el servidor (solo el ticket manual)."""
     box = QGroupBox("Qué se envía", parent)
     form = QFormLayout(box)
     e = info_equipo or {}
@@ -161,6 +179,12 @@ def _caja_que_se_envia(parent, info_equipo, detalle, ventana=None):
     donde = QLabel(f"Se guarda en: {_ruta_partible(registro.archivo())}", box)
     donde.setWordWrap(True)
     form.addRow("", donde)
+    if prueba_red:
+        red = QLabel("Al enviar se mide la conexión de este equipo con el servidor de LabSim "
+                     "(tiempos de conexión y pérdida de paquetes) y el resultado va en el reporte. "
+                     "Tarda unos segundos.", box)
+        red.setWordWrap(True)
+        form.addRow("Prueba de red:", red)
     return box
 
 
@@ -244,7 +268,7 @@ class PaginaSoporte(QWidget):
         self._actualizar_boton()
 
     def _caja_que_se_envia(self):
-        return _caja_que_se_envia(self, self._equipo, self._detalle)
+        return _caja_que_se_envia(self, self._equipo, self._detalle, prueba_red=True)
 
     def _ver_registro(self):
         _ver_registro(self)
@@ -257,7 +281,7 @@ class PaginaSoporte(QWidget):
         if not self.chk_acepto.isChecked() or self._envio is not None:
             return
         self.lbl_estado.setStyleSheet("color:#666666;")
-        self.lbl_estado.setText("Enviando…")
+        self.lbl_estado.setText("Probando la conexión con el servidor y enviando…")
         # Si se cierra Configuración mientras sube, sigue solo y el
         # resultado ya no le llega a nadie (dueno).
         self._envio = hilos.en_fondo(_enviar, self.txt_descripcion.toPlainText().strip(),

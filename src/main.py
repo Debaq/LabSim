@@ -130,6 +130,7 @@ sys.excepthook = _log_excepcion
 
 # Después del registro y del excepthook: si algo falla acá queda en el log.
 BACKEND_URL = Preferences.get("BACKEND_URL")
+backend_client.mantener_conexion(BACKEND_URL)
 _layout = fetch_layout(BACKEND_URL)
 if _layout:
     APPS = _layout["APP"]

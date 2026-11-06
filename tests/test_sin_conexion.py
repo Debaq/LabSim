@@ -274,12 +274,18 @@ def test_el_reporte_lleva_el_registro_comprimido():
 
         def send_ticket(self, descripcion, equipo_info, detalle, log_gz):
             enviados.append((descripcion, gzip.decompress(log_gz) if log_gz else b""))
+            red.append(detalle.get("red_resumen"))
             return {"id": 12}
 
+    red = []
     original = cliente_mod.BackendClient
     original_cola = registro.cola
+    original_red = soporte._probar_red
     cliente_mod.BackendClient = Falso
     registro.cola = lambda *a: b"linea del registro\n"
+    # La prueba de red de verdad sale a internet y tarda: acá solo importa
+    # que sus claves viajen en el detalle del ticket.
+    soporte._probar_red = lambda *a: {"red_resumen": "Red normal hacia el servidor."}
     try:
         pagina = soporte.PaginaSoporte()
         pagina.txt_descripcion.setPlainText("se cerró sin internet")
@@ -291,11 +297,13 @@ def test_el_reporte_lleva_el_registro_comprimido():
                 break
             time.sleep(0.02)
         assert enviados == [("se cerró sin internet", b"linea del registro\n")], enviados
+        assert red == ["Red normal hacia el servidor."], red
         assert "#12" in pagina.lbl_estado.text()
         assert not pagina.chk_acepto.isChecked()   # el siguiente se vuelve a aceptar
     finally:
         cliente_mod.BackendClient = original
         registro.cola = original_cola
+        soporte._probar_red = original_red
 
 
 

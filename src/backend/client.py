@@ -6,15 +6,39 @@ la app no se cuelga esperando -- se propaga requests.RequestException y
 quien llame decide (reintentar, avisar "sin conexión", etc.).
 """
 import json
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
 
 import requests
+from requests.adapters import HTTPAdapter
+import errno
+
+from urllib3.exceptions import ConnectTimeoutError, NewConnectionError
+
+try:
+    from urllib3.exceptions import NameResolutionError
+except ImportError:  # urllib3 < 2
+    NameResolutionError = ()
 
 from core import equipo
 
-DEFAULT_TIMEOUT = 10
+# Lectura: cuánto se espera la respuesta una vez conectado. La conexión
+# tiene su propio límite (CONEXION_S): el 2026-11-06, con HostArmada
+# perdiendo la mitad de los paquetes, solo el handshake TLS tardaba 3-17 s y
+# con 10 s para todo la mayoría de los pedidos moría antes de empezar.
+DEFAULT_TIMEOUT = 30
+CONEXION_S = 15
+# Cuánto se insiste en total con un pedido antes de rendirse: se cuenta en
+# tiempo y no en intentos, porque con el servidor lento cada intento ya
+# tarda. Ver _SesionHttp._pedir.
+PRESUPUESTO_S = 45
+# El servidor (LiteSpeed) cierra una conexión sin uso entre los 10 y los
+# 30 s, y abrir otra costaba 5-10 s ese día; reusarla, 0,2 s. El latido la
+# mantiene abierta con un HEAD a un archivo estático (sin PHP ni sesión).
+LATIDO_S = 8
+LATIDO_RUTA = "/css/base.css"
 # Cuanto se le tolera al reloj de la maquina antes de avisar, en segundos.
 # Dos minutos es latencia y deriva normal; mas que eso ya mueve una cita de
 # hora y hace llegar tarde a alguien convencido de que llega a tiempo.
@@ -35,25 +59,143 @@ al_perder_sesion = None
 sin_api = False
 
 
+_sesion_compartida = None
+_sesion_lock = threading.Lock()
+
+
+def _sesion() -> requests.Session:
+    """Una sola requests.Session para toda la app. Cada módulo crea su
+    BackendClient (ABR, VEMP, otoscopía, informes...) y cada uno tenía su
+    Session, o sea su conexión: con el servidor lento, cada módulo pagaba
+    su propio handshake de 5-10 s. Compartida, la conexión que mantiene
+    abierta el latido les sirve a todos. requests.Session aguanta pedidos
+    desde varios hilos (el pool de urllib3 es thread-safe)."""
+    global _sesion_compartida
+    with _sesion_lock:
+        if _sesion_compartida is None:
+            sesion = requests.Session()
+            # Sin reintentos de urllib3: los hace _pedir, por tiempo.
+            adaptador = HTTPAdapter(pool_connections=4, pool_maxsize=10, max_retries=0)
+            sesion.mount("https://", adaptador)
+            sesion.mount("http://", adaptador)
+            sesion.hooks["response"].append(_revisar_sesion)
+            _sesion_compartida = sesion
+        return _sesion_compartida
+
+
+def _timeouts(timeout):
+    """(conexión, lectura) a partir de lo que pasa quien llama, que suele
+    ser solo la lectura."""
+    if isinstance(timeout, tuple):
+        return timeout
+    return (CONEXION_S, timeout if timeout is not None else DEFAULT_TIMEOUT)
+
+
+def _no_alcanzo_a_salir(exc) -> bool:
+    """True si el pedido falló antes de mandarse: no se conectó. Solo eso
+    se reintenta en un POST; si se cortó después (al leer la respuesta), el
+    servidor pudo haberlo recibido y repetirlo lo duplicaría (un mensaje del
+    chat, un lote de registros, un informe)."""
+    if isinstance(exc, requests.ConnectTimeout):
+        return True
+    return isinstance(_causa(exc), (NewConnectionError, ConnectTimeoutError))
+
+
+def _causa(exc):
+    causa = exc.args[0] if exc.args else None
+    return getattr(causa, "reason", causa)
+
+
+def _sin_red(exc) -> bool:
+    """True si no hay red del todo (el nombre no resuelve, la red es
+    inalcanzable): ahí insistir no sirve y solo deja esperando a quien
+    llamó, a veces la ventana. Se falla al tiro, como antes."""
+    causa = _causa(exc)
+    if NameResolutionError and isinstance(causa, NameResolutionError):
+        return True
+    while causa is not None:
+        if isinstance(causa, OSError) and causa.errno in (errno.ENETUNREACH, errno.EHOSTUNREACH):
+            return True
+        if "Name or service not known" in str(causa) or "getaddrinfo failed" in str(causa):
+            return True
+        causa = causa.__cause__ or causa.__context__
+    return False
+
+
 class _SesionHttp:
-    """requests.Session que, en modo invitado, corta todo pedido antes de
-    salir: un error de conexión, que quien llama ya sabe manejar."""
+    """Pedidos HTTP de la app, con dos reglas:
+
+    - en modo invitado se corta todo pedido antes de salir: un error de
+      conexión, que quien llama ya sabe manejar;
+    - con el servidor lento o intermitente se insiste hasta PRESUPUESTO_S
+      segundos con esperas crecientes. Un GET se repite ante cualquier
+      error de red o un 502/503/504; un POST, solo si no alcanzó a salir.
+    """
 
     def __init__(self):
-        self._real = requests.Session()
-        self.hooks = self._real.hooks
+        self.hooks = _sesion().hooks
 
     def _revisar(self):
         if sin_api:
             raise requests.ConnectionError("modo invitado: sin acceso a la API")
 
     def get(self, *args, **kwargs):
-        self._revisar()
-        return self._real.get(*args, **kwargs)
+        return self._pedir("get", *args, **kwargs)
 
     def post(self, *args, **kwargs):
+        return self._pedir("post", *args, **kwargs)
+
+    def _pedir(self, metodo, *args, **kwargs):
         self._revisar()
-        return self._real.post(*args, **kwargs)
+        kwargs["timeout"] = _timeouts(kwargs.get("timeout"))
+        limite = time.monotonic() + PRESUPUESTO_S
+        espera = 0.5
+        intento = 1
+        while True:
+            try:
+                resp = getattr(_sesion(), metodo)(*args, **kwargs)
+            except requests.RequestException as exc:
+                reintentable = isinstance(exc, (requests.ConnectionError, requests.Timeout)) \
+                    and not _sin_red(exc) \
+                    and (metodo == "get" or _no_alcanzo_a_salir(exc))
+                if not reintentable or time.monotonic() + espera >= limite:
+                    raise
+                print(f"backend: intento {intento} falló ({type(exc).__name__}), reintento en {espera:g} s")
+            else:
+                if metodo != "get" or resp.status_code not in (502, 503, 504) \
+                        or time.monotonic() + espera >= limite:
+                    return resp
+                print(f"backend: intento {intento} con {resp.status_code}, reintento en {espera:g} s")
+            time.sleep(espera)
+            espera = min(espera * 2, 8)
+            intento += 1
+            self._revisar()
+
+
+_latido = None
+
+
+def mantener_conexion(base_url: str) -> None:
+    """Arranca (una vez) el latido que mantiene abierta la conexión con el
+    servidor: un HEAD cada LATIDO_S segundos a un archivo estático. Lo
+    llama main al iniciar; en modo invitado no sale nada. Hilo daemon de
+    Python, sin Qt (ver core/hilos.py): al cerrar la app no espera nada."""
+    global _latido
+    if _latido is not None or not base_url:
+        return
+    url = base_url.rstrip("/") + LATIDO_RUTA
+
+    def latir():
+        while True:
+            if not sin_api:
+                try:
+                    _sesion().head(url, timeout=(CONEXION_S, CONEXION_S))
+                except requests.RequestException:
+                    pass  # el próximo latido (o el próximo pedido) reconecta
+            time.sleep(LATIDO_S)
+
+    _latido = threading.Thread(target=latir, name="latido-backend", daemon=True)
+    _latido.start()
 
 
 def _revisar_sesion(resp, *args, **kwargs):
@@ -88,7 +230,6 @@ class BackendClient:
         # entre llamadas -- sin esto, SyncThread (polling cada 15s, ver
         # sync_thread.py) repetía el handshake completo en cada ciclo.
         self._http = _SesionHttp()
-        self._http.hooks["response"].append(_revisar_sesion)
         self._load_session()
 
     # -- sesión local -----------------------------------------------------

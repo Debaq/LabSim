@@ -77,7 +77,16 @@ Los alumnos veían "problema de red"; algunos entraban y otros no.
 
 ### Plan, de más barato a más caro
 
-1. **Reintentos en el cliente** (poco código, el mayor efecto).
+1. **Reintentos en el cliente** — HECHO 2026-11-06, distinto de lo
+   planeado tras medir: lo caro era abrir la conexión (5-10 s), no el
+   pedido (0,2 s por una conexión abierta), y el servidor la cierra entre
+   10 y 30 s sin uso. Quedó así en `backend/client.py`: una sola Session
+   para toda la app (antes una por módulo), un latido HEAD a
+   `/css/base.css` cada 8 s que la mantiene abierta, conexión 15 s +
+   lectura 30 s, y se insiste por tiempo (45 s), no por intentos. Sin
+   internet del todo (DNS, red inalcanzable) falla al tiro. Los tickets
+   manuales llevan una prueba de red del equipo (`core/prueba_red.py`).
+   Lo que sigue es lo que se había planeado:
    - `HTTPAdapter` con `urllib3.Retry` en `_SesionHttp`: hasta 4
      reintentos con espera creciente (0,5-1-2-4 s) en errores de conexión,
      502/503/504 y timeouts de conexión. Los GET se reintentan siempre; los
@@ -112,7 +121,8 @@ Los alumnos veían "problema de red"; algunos entraban y otros no.
    JSON grandes y que la app use el delta de `sync.php` también al abrir.
    Con pérdida de paquetes, menos bytes = menos cortes.
 
-Fuera de la app: ticket a HostArmada (redactado 06-11) y, si se repite,
+Fuera de la app: ticket a HostArmada (06-11; contestaron que su servidor
+estaba bien y que era el proveedor de internet) y, si se repite,
 evaluar cambiar de hosting; eso lo decide él.
 
 Recomendación: 1 ya (resuelve la mayor parte del 06-11), 2 y 3 juntos
