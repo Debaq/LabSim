@@ -175,10 +175,12 @@ if LAYOUT_AVAILABLE:
 class _Parte:
     """Un módulo que vive dentro de la ventana de otro (otoscopía y
     diapasones, ver load_sub_windows): lo que main le pide a un marco es
-    .obj."""
+    .obj y su visibility_changed (se sube el informe al esconderlo), que es
+    la de la ventana que lo contiene."""
 
-    def __init__(self, obj):
+    def __init__(self, obj, marco):
         self.obj = obj
+        self.visibility_changed = marco.visibility_changed
 
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
@@ -1409,11 +1411,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # como antes para cargar el caso y subir los informes (.obj).
         otoscopia = Otoscopia.Otoscopia(self.data_current)
         acumetria = Acumetria.Acumetria(self.data_current)
-        self.subw_ot = _Parte(otoscopia)
-        self.subw_ac = _Parte(acumetria)
         ventana_ot_ac = FrameSubMdi(OtoscopiaAcumetriaWindow(
             otoscopia, acumetria, con_otoscopia=self._module_visible("OT"),
             con_acumetria=self._module_visible("AC")), expand=True)
+        self.subw_ot = _Parte(otoscopia, ventana_ot_ac)
+        self.subw_ac = _Parte(acumetria, ventana_ot_ac)
         # Los pesados se arman después, con la agenda a la vista (ver
         # core/subventanas.py y _armar_modulos_en_fondo). expand: sin esto el
         # marco reparte el alto sobrante con un espaciador y el ABR se queda
