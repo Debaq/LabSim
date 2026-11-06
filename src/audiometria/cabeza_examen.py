@@ -224,8 +224,9 @@ class CabezaExamen(CabezaElectrodos):
 
 # ---------------------------------------------------------------- otoscopía
 LUPA = 0.20                 # radio del disco del otoscopio, como fracción del lado de la cabeza
-RECORRIDO_PX = 12.0         # px de la foto de la cabeza: con eso se recorre todo el tímpano
+RECORRIDO_PX = 30.0         # px de la foto de la cabeza, desde donde entró: de borde a borde del tímpano
 ZOOM_TIMPANO = 0.5          # el disco muestra esta fracción de la foto; el resto se recorre
+ALCANCE = 0.85              # hasta dónde llega el centro de la vista (fracción del radio de la foto)
 METAL = "#8E9098"
 NEGRO_VISOR = "#0E0A0D"
 PARED_CONDUCTO = "#B9786A"
@@ -251,6 +252,7 @@ class CabezaOtoscopia(CabezaExamen):
         self.herramienta = "otoscopia"
         self._mouse = None
         self._conducto = None   # el conducto donde está el otoscopio
+        self._ancla = None      # dónde entró el mouse al conducto: ahí la vista está centrada
 
     def _centro_conducto(self, oido):
         sitio = "cae_der" if oido == "od" else "cae_izq"
@@ -281,15 +283,16 @@ class CabezaOtoscopia(CabezaExamen):
         self._mouse = ev.position()
         tocado = self.tocar(ev.position())
         oido = conducto(tocado[0]) if tocado is not None else None
-        if self._conducto is not None:
-            # Dentro del conducto se puede mover un poco sin salir
-            c = self._centro_conducto(self._conducto)
+        if self._conducto is not None and self._ancla is not None:
+            # Una vez dentro, moverse para recorrer la membrana no saca el
+            # otoscopio: se sale alejándose más que el recorrido
             _, escala = self._marco()
-            if c is not None and math.hypot(c.x() - self._mouse.x(), c.y() - self._mouse.y()) \
-                    <= RECORRIDO_PX * escala * 1.4:
+            if math.hypot(self._ancla.x() - self._mouse.x(), self._ancla.y() - self._mouse.y()) \
+                    <= RECORRIDO_PX * escala * 1.5:
                 oido = self._conducto
         if oido != self._conducto:
             self._conducto = oido
+            self._ancla = QPointF(self._mouse) if oido is not None else None
             if oido is None:
                 self.salio.emit()
             else:
@@ -305,6 +308,7 @@ class CabezaOtoscopia(CabezaExamen):
     def _salir(self):
         if self._conducto is not None:
             self._conducto = None
+            self._ancla = None
             self.salio.emit()
 
     # El soltar lo resuelve CabezaExamen: el tirón, y el clic con el diapasón
@@ -356,11 +360,13 @@ class CabezaOtoscopia(CabezaExamen):
         marco, escala = self._marco()
         r = marco.width() * LUPA
         recorrido = RECORRIDO_PX * escala
-        m = self._mouse - centro
+        # Desde donde entró el mouse: ahí la vista está centrada, y el
+        # recorrido lleva de borde a borde de la foto
+        m = self._mouse - (self._ancla or centro)
         dx = max(-1.0, min(1.0, m.x() / recorrido))
         dy = max(-1.0, min(1.0, m.y() / recorrido))
-        # El disco sigue un poco al mouse, sin salirse de la cabeza a la vista
-        c = QPointF(centro.x() + dx * recorrido, centro.y() + dy * recorrido)
+        # El disco queda fijo en la oreja (sin salirse de la vista)
+        c = QPointF(centro)
         c.setX(max(r + 6, min(self.width() - r - 6, c.x())))
         c.setY(max(r + 6, min(self.height() - r * 2.2, c.y())))
         self._pintar_mango(p, c, r, self._hacia_la_nuca(oido, centro))
@@ -379,16 +385,23 @@ class CabezaOtoscopia(CabezaExamen):
                        v.get("texto") or "Otoscopio sin batería")
         else:
             claro = r * (1.0 if v.get("adulto") else 0.5)
-            # La mitad del tímpano llena el disco; el mouse recorre el resto
+            # La foto ampliada (ZOOM_TIMPANO de ella llena el disco). El centro
+            # de la vista va de borde a borde de la membrana con el
+            # recorrido del mouse; lo que cae fuera de la foto se ve oscuro
             lado = min(foto.width(), foto.height()) * ZOOM_TIMPANO
-            libre_x = (foto.width() - lado) / 2
-            libre_y = (foto.height() - lado) / 2
-            fuente = QRectF(libre_x + dx * libre_x, libre_y + dy * libre_y, lado, lado)
+            px = foto.width() / 2 + dx * foto.width() / 2 * ALCANCE
+            py = foto.height() / 2 + dy * foto.height() / 2 * ALCANCE
+            fuente = QRectF(px - lado / 2, py - lado / 2, lado, lado)
+            dentro = fuente.intersected(QRectF(0, 0, foto.width(), foto.height()))
+            k = 2 * r / lado
+            destino = QRectF(caja.x() + (dentro.x() - fuente.x()) * k, caja.y() + (dentro.y() - fuente.y()) * k,
+                             dentro.width() * k, dentro.height() * k)
             hueco = QPainterPath()
             hueco.addEllipse(c, claro, claro)
             p.save()
             p.setClipPath(hueco)
-            p.drawPixmap(caja, foto, fuente)
+            if not dentro.isEmpty():
+                p.drawPixmap(destino, foto, dentro)
             if v.get("tapado"):
                 # Sin enderezar el conducto, la pared tapa casi todo
                 pared = QPainterPath()
