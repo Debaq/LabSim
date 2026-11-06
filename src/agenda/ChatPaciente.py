@@ -10,7 +10,7 @@
 
 import re
 
-from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
 from PySide6.QtCore import QEvent, Qt, QTimer, Signal
 from agenda.vista import BotonAccion
@@ -321,7 +321,7 @@ class ChatPacienteWidget(QWidget):
         self._asegurar_avatar(self._PACIENTE_ID, self._nombre)
         self._poner_cara(self.cara_encabezado, self._PACIENTE_ID, 40)
         self._pedir_sala()
-        self.input.setFocus()
+        self._enfocar_input()
 
     # -----------------------------------------------------------------
     # Sala
@@ -617,7 +617,18 @@ class ChatPacienteWidget(QWidget):
             self._mostrar_estado("No hubo respuesta. Puedes reintentar.")
             self.btn_reintentar.show()
 
+    def _enfocar_input(self):
+        """El cursor vuelve al campo del chat solo si el alumno está en el
+        chat (o en ningún lado). Si mientras el paciente contestaba pasó al
+        audiómetro o al impedanciómetro, quitarle el foco dejaba la consola
+        física sin efecto: el audiómetro no mueve nada con un campo de
+        texto enfocado y las letras del controlador se escribían en el chat
+        (2026-11-06)."""
+        foco = QApplication.focusWidget()
+        if foco is None or foco is self or self.isAncestorOf(foco):
+            self.input.setFocus()
+
     def _on_thread_finished(self, aviso, *args):
         aviso(*args)
         self._thread = None
-        self.input.setFocus()
+        self._enfocar_input()
