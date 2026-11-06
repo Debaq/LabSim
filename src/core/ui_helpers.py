@@ -256,6 +256,10 @@ GATED_MODULE_CODES = {
 # dentro y ofrecer el tamizaje sin el diagnostico no tiene sentido. Asi el
 # docente prende "ABR" y le aparecen los dos botones.
 MODULE_ALIAS = {"AABR": "ABR"}
+# Ventanas de más de un módulo: se abren si el curso tiene cualquiera de
+# ellos. Otoscopía y diapasones van juntos en la de AC (ver
+# audiometria/ventana_ot_ac.py y chargeBtnsArea).
+VENTANA_DE = {"AC": ("AC", "OT")}
 
 
 # Ventanas cuyo alto sigue al de la pantalla (ver SubWindow.activate_subwindow):
@@ -303,7 +307,7 @@ class SubWindow():
             app(str): nombre de la aplicacion
             submdi(FrameSubMdi): objeto de la subventana
         """
-        if not self._module_visible(app):
+        if not any(self._module_visible(c) for c in VENTANA_DE.get(app, (app,))):
             return
         # Centro del área MDI, no de la ventana principal: esa incluye
         # barras y toolbar, y el centro quedaba corrido hacia abajo.
@@ -484,12 +488,22 @@ class ToolBar(SubWindow):
         self.chargeBtnsArea(obj_name)
 
     def chargeBtnsArea(self, area):
-        for i in self.boxs[area][1]:
-            if not self._module_visible(i):
+        codigos = self.boxs[area][1]
+        for i in codigos:
+            # Otoscopía y diapasones van juntos en la ventana de AC (ver
+            # audiometria/ventana_ot_ac.py): un solo botón, con los dos
+            # íconos, si el curso tiene cualquiera de los dos.
+            juntos = i == "AC" and "OT" in codigos
+            if i == "OT" and "AC" in codigos:
                 continue
-            btn = QPushButton(f'{i}')
+            if not any(self._module_visible(c) for c in (VENTANA_DE[i] if juntos else (i,))):
+                continue
+            btn = QPushButton("OT/AC" if juntos else f'{i}')
             btn.setObjectName(f"btn_{i}")
-            if i in iconos.ICONO_MODULO:
+            if juntos:
+                btn.setIcon(iconos.icono_boton_doble("otoscopio", "diapason", tema.TEXTO_SUAVE, tema.ACENTO, 18))
+                btn.setIconSize(QSize(38, 18))
+            elif i in iconos.ICONO_MODULO:
                 btn.setIcon(iconos.icono_boton(iconos.ICONO_MODULO[i], tema.TEXTO_SUAVE, tema.ACENTO, 18))
                 btn.setIconSize(QSize(18, 18))
             btn.clicked.connect(self.activate_soft)

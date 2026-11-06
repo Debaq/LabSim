@@ -16,6 +16,8 @@ from PySide6.QtWidgets import (
 )
 
 from audiometria import no_realizable
+from audiometria.comandos_voz import SILENCIO
+from audiometria.frases_habladas import FrasesHabladas
 from backend.log_queue import get_log_queue
 
 # Reglas propias de la ventana (el resto sale de core/tema.py): pestañas con
@@ -41,6 +43,34 @@ QPushButton[paso="true"] {{ text-align: left; padding: 8px 12px; }}
 QTextEdit[conversacion="true"] {{ border: none; background: transparent; font-size: 10pt; }}
 """
 
+# Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py).
+# Las claves son también el nombre del audio (resources/audio/comandos_ac/,
+# scripts/voces_comandos.py --ac): no se cambian aunque cambie el rótulo.
+GRUPOS = (
+    ("PREPARAR", (
+        ("Explicar el examen", "explicar_diapasones"),
+    )),
+    ("INSTRUCCIONES", (
+        ("Avíseme si lo escucha", "avise_si_escucha"),
+        ("Compare dónde suena más fuerte", "compare_sonidos"),
+        ("Dígame dónde lo escucha", "diga_donde"),
+    )),
+    ("PREGUNTAS", (
+        ("¿Lo escucha?", "lo_escucha"),
+        ("¿Dónde lo escuchó más fuerte?", "donde_mas_fuerte"),
+        ("¿Igual en los dos oídos?", "igual_ambos"),
+    )),
+)
+PRUEBA = {"compare_sonidos": "Rinne", "diga_donde": "Weber", "igual_ambos": "Weber"}
+INSTRUCCIONES = {"avise_si_escucha", "compare_sonidos", "diga_donde"}
+# Para qué prueba sirve cada instrucción: con otra, el paciente no sabe qué
+# hacer cuando siente el diapasón.
+SIRVE_PARA = {"avise_si_escucha": {"rinne", "weber"}, "compare_sonidos": {"rinne"},
+              "diga_donde": {"weber"}}
+NO_SABE = "¿Y qué tengo que hacer?"
+DONDE_WEBER = {"od": "En el oído derecho.", "oi": "En el oído izquierdo.",
+               "centrado": "Al medio, en toda la cabeza."}
+
 # Rinne no expone la etiqueta final (positivo/negativo/falso_negativo) --
 # eso lo concluye el alumno con la respuesta del paciente a la comparación.
 # Weber sí es directo: la lateralización que reporta el paciente ES el
@@ -54,24 +84,37 @@ WEBER_LABELS = {
 
 class Acumetria(QWidget):
     """Acumetría (Rinne/Weber, diapasones 500 y 1000 Hz): el alumno elige
-    diapasón + posición (mastoides/conducto para Rinne, frente para Weber) y
-    "pregunta" al paciente -- la respuesta sale del caso cargado
-    (cases.data.Rinne/Weber, ver CaseBuilder.php). Sin esas claves (casos
-    viejos) se responde como normal (Rinne positivo / Weber centrado)."""
+    diapasón + posición (mastoides/pabellón para Rinne, frente para Weber)
+    y le habla al paciente con el panel de frases (GRUPOS): instrucciones y
+    preguntas, como en el audiómetro. El paciente contesta lo que le
+    instruyeron o le preguntaron, con lo que dice el caso
+    (cases.data.Rinne/Weber, ver CaseBuilder.php); sin instrucción no sabe
+    qué hacer cuando siente el diapasón. Sin esas claves (casos viejos) se
+    responde como normal (Rinne positivo / Weber centrado)."""
 
     def __init__(self, thr=None):
         super().__init__()
         self.data = None
         self.appointment_id = None
         self._rinne_probado = {'mastoides': False, 'pabellon': False}
+        self._rinne_ultimo = None     # dónde está el diapasón ahora en el Rinne
+        self._weber_puesto = False    # si ya se apoyó en la frente con este diapasón
+        self._instruccion = None      # la instrucción vigente (INSTRUCCIONES)
         self.log_queue = get_log_queue()
 
         tema.aplicar_estilo(self, EXTRA_QSS)
         self.equipo = QWidget()
-        layout = QVBoxLayout(self.equipo)
+        layout = QHBoxLayout(self.equipo)
         layout.setContentsMargins(12, 8, 12, 12)
-        tabs = QTabWidget(self.equipo)
-        layout.addWidget(tabs)
+        layout.setSpacing(12)
+        # Lo que se le dice al paciente, a la izquierda como en el
+        # audiómetro y el impedanciómetro
+        self.frases = FrasesHabladas(GRUPOS, PRUEBA, "comandos_ac")
+        self.frases.setFixedWidth(250)
+        self.frases.btn_checked.connect(self._frase)
+        layout.addWidget(self.frases)
+        self.tabs = tabs = QTabWidget(self.equipo)
+        layout.addWidget(tabs, 1)
         tabs.addTab(self._build_rinne_tab(), "Rinne")
         tabs.addTab(self._build_weber_tab(), "Weber")
         # Con un bebé, en lugar de los diapasones va el aviso
@@ -88,10 +131,24 @@ class Acumetria(QWidget):
         por MainWindow._hydrate_modules() cada vez que cambia el caso activo."""
         self.data = data
         self.appointment_id = appointment_id
+        # Paciente nuevo: no le han dicho nada todavía
+        self._instruccion = None
+        self.frases.callar()
+        self.frases.silencio()
+        self._rinne_reset()
+        self.weber_log.clear()
+        self._weber_puesto = False
         motivo = no_realizable.motivo(data, "acumetría")
         if motivo:
             self.aviso_bebe.texto.setText(motivo)
         self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
+
+    def callar(self):
+        self.frases.callar()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.frases.callar()
 
     def _log(self, action, **payload):
         """Encola una acción del alumno con los diapasones (prefijo ac_, ver
@@ -217,12 +274,9 @@ class Acumetria(QWidget):
         v.addWidget(self.btn_mastoides)
         v.addWidget(self.btn_pabellon)
 
-        self.btn_comparar = self._paso("Preguntar dónde lo escucha más fuerte", "mensaje")
-        self.btn_comparar.clicked.connect(self._rinne_comparar)
-        v.addWidget(self.btn_comparar)
         v.addStretch(1)
 
-        self.rinne_log = self._conversacion("Prueba mastoides y pabellón en un oído y luego compara.")
+        self.rinne_log = self._conversacion("Lo que le digas al paciente y lo que él conteste.")
         tab = self._armar_tab(panel, "CONVERSACIÓN", self.rinne_log)
         return tab
 
@@ -235,51 +289,50 @@ class Acumetria(QWidget):
         return hz, lado, lado_label, valor
 
     def _rinne_reset(self):
+        """Otro diapasón u otro oído: se empieza de nuevo (la instrucción
+        dada sigue valiendo, el paciente no la olvida)."""
         self._rinne_probado = {'mastoides': False, 'pabellon': False}
+        self._rinne_ultimo = None
         self.rinne_log.clear()
 
-    def _rinne_probar_mastoides(self):
+    def _rinne_comparacion(self, valor):
+        """Lo que contesta al comparar las dos posiciones. Negativo y falso
+        negativo suenan igual para el paciente: la trampa del falso
+        negativo la descubre el alumno, no el paciente."""
+        if valor == 'positivo':
+            return "Adelante, frente a la oreja. Ahí suena más fuerte y dura más."
+        return "Atrás, en el hueso. Ahí suena más fuerte."
+
+    def _rinne_poner(self, donde):
+        """Apoya el diapasón (mastoides) o lo pone frente al pabellón. El
+        paciente contesta solo si le dijeron qué hacer."""
         if not self.data:
             self._decir(self.rinne_log, "Paciente: (no hay un caso cargado)")
             return
         hz, lado, lado_label, valor = self._rinne_seleccion()
-        self._log("ac_rinne_mastoides", hz=hz, oido=lado, resultado=valor)
-        self._decir(self.rinne_log, f"Tú: apoyas el diapasón en la mastoides del oído {lado_label}.")
-        self._decir(self.rinne_log, "Paciente: Sí, lo escucho.")
-        self._rinne_probado['mastoides'] = True
+        self._log(f"ac_rinne_{donde}", hz=hz, oido=lado, resultado=valor, instruccion=self._instruccion)
+        if donde == 'mastoides':
+            self._decir(self.rinne_log, f"Tú: apoyas el diapasón en la mastoides del oído {lado_label}.")
+        else:
+            self._decir(self.rinne_log, f"Tú: pones el diapasón frente al pabellón del oído {lado_label}.")
+        self._rinne_probado[donde] = True
+        self._rinne_ultimo = donde
+        oye = donde == 'mastoides' or valor != 'falso_negativo'
+        if self._instruccion not in SIRVE_PARA or 'rinne' not in SIRVE_PARA[self._instruccion]:
+            self._decir(self.rinne_log, f"Paciente: {NO_SABE}")
+        elif self._instruccion == 'avise_si_escucha':
+            self._decir(self.rinne_log, "Paciente: Sí, lo escucho." if oye else "Paciente: No... no escucho nada.")
+        elif self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']:
+            # compare_sonidos: con las dos posiciones, compara solo
+            self._decir(self.rinne_log, f"Paciente: {self._rinne_comparacion(valor)}")
+        else:
+            self._decir(self.rinne_log, "Paciente: Ya." if oye else "Paciente: Mm... no escucho nada.")
+
+    def _rinne_probar_mastoides(self):
+        self._rinne_poner('mastoides')
 
     def _rinne_probar_pabellon(self):
-        if not self.data:
-            self._decir(self.rinne_log, "Paciente: (no hay un caso cargado)")
-            return
-        hz, lado, lado_label, valor = self._rinne_seleccion()
-        self._log("ac_rinne_pabellon", hz=hz, oido=lado, resultado=valor)
-        self._decir(self.rinne_log, f"Tú: presentas el diapasón frente al pabellón auricular del oído {lado_label}.")
-        if valor == 'positivo':
-            self._decir(self.rinne_log, "Paciente: Sí, también lo escucho aquí.")
-        elif valor == 'negativo':
-            self._decir(self.rinne_log, "Paciente: Sí, lo escucho, pero se siente más débil.")
-        else:  # falso_negativo
-            self._decir(self.rinne_log, "Paciente: No... por acá no escucho nada.")
-        self._rinne_probado['pabellon'] = True
-
-    def _rinne_comparar(self):
-        if not self.data:
-            self._decir(self.rinne_log, "Paciente: (no hay un caso cargado)")
-            return
-        if not (self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']):
-            self._decir(self.rinne_log, "Tú: (primero hay que probar mastoides y pabellón en este oído/diapasón)")
-            return
-        hz, lado, _, valor = self._rinne_seleccion()
-        self._log("ac_rinne_comparar", hz=hz, oido=lado, resultado=valor)
-        self._decir(self.rinne_log, "Tú: ¿en cuál posición lo escuchas más fuerte?")
-        if valor == 'positivo':
-            self._decir(self.rinne_log, "Paciente: Frente al pabellón, y por más tiempo.")
-        else:  # negativo y falso_negativo suenan igual para el paciente -- la trampa del falso negativo
-            self._decir(self.rinne_log, "Paciente: En la mastoides.")
-        # Sin "Interpretación: ..." acá -- si lo da positivo/negativo (o si
-        # es un falso negativo) lo tiene que concluir el alumno con esta
-        # respuesta, no leerlo hecho.
+        self._rinne_poner('pabellon')
 
     # ---------------------------------------------------------- Weber ----
 
@@ -298,24 +351,93 @@ class Acumetria(QWidget):
         v.addWidget(self.btn_frente)
         v.addStretch(1)
 
-        self.weber_log = self._conversacion("Apoya el diapasón en la frente y observa dónde lo escucha.")
+        self.weber_log = self._conversacion("Lo que le digas al paciente y lo que él conteste.")
         for rb in (self.weber_500, self.weber_1000):
-            rb.toggled.connect(lambda checked: checked and self.weber_log.clear())
+            rb.toggled.connect(lambda checked: checked and self._weber_reset())
         tab = self._armar_tab(panel, "CONVERSACIÓN", self.weber_log)
         return tab
+
+    def _weber_reset(self):
+        self._weber_puesto = False
+        self.weber_log.clear()
 
     def _weber_probar(self):
         if not self.data:
             self._decir(self.weber_log, "Paciente: (no hay un caso cargado)")
             return
         hz = '500' if self.weber_500.isChecked() else '1000'
-        weber = (self.data or {}).get('Weber') or {}
-        valor = weber.get(hz, 'centrado')
-        self._log("ac_weber", hz=hz, resultado=valor)
+        valor = ((self.data or {}).get('Weber') or {}).get(hz, 'centrado')
+        self._log("ac_weber", hz=hz, resultado=valor, instruccion=self._instruccion)
         self._decir(self.weber_log, "Tú: apoyas el diapasón en la frente / vértex.")
-        if valor == 'od':
-            self._decir(self.weber_log, "Paciente: Lo escucho más fuerte en el oído derecho.")
-        elif valor == 'oi':
-            self._decir(self.weber_log, "Paciente: Lo escucho más fuerte en el oído izquierdo.")
+        self._weber_puesto = True
+        if self._instruccion not in SIRVE_PARA or 'weber' not in SIRVE_PARA[self._instruccion]:
+            self._decir(self.weber_log, f"Paciente: {NO_SABE}")
+        elif self._instruccion == 'diga_donde':
+            self._decir(self.weber_log, f"Paciente: {DONDE_WEBER.get(valor, DONDE_WEBER['centrado'])}")
         else:
-            self._decir(self.weber_log, "Paciente: Lo escucho igual en ambos oídos.")
+            self._decir(self.weber_log, "Paciente: Sí, lo escucho.")
+
+    # --------------------------------------------- lo que se le dice ----
+
+    def _prueba_actual(self):
+        return "weber" if self.tabs.currentIndex() == 1 else "rinne"
+
+    def _frase(self, clave):
+        """Una frase del panel: se dice (FrasesHabladas), queda en la
+        conversación de la prueba que está a la vista y el paciente la
+        contesta. Una instrucción queda vigente hasta que se dé otra; una
+        pregunta se contesta y no la reemplaza."""
+        if clave == SILENCIO:
+            return
+        prueba = self._prueba_actual()
+        log = self.weber_log if prueba == "weber" else self.rinne_log
+        texto = next((t for _g, frases in GRUPOS for t, c in frases if c == clave), clave)
+        self._decir(log, f"Tú: «{texto}»")
+        if not self.data:
+            self._decir(log, "Paciente: (no hay un caso cargado)")
+            return
+        if clave == "explicar_diapasones":
+            respuesta = "Bueno, ya."
+        elif clave in INSTRUCCIONES:
+            self._instruccion = clave
+            respuesta = "Ya, bueno."
+        else:
+            respuesta = self._contestar(clave, prueba)
+        self._decir(log, f"Paciente: {respuesta}")
+        tipo = "ac_pregunta" if clave not in INSTRUCCIONES and clave != "explicar_diapasones" else "ac_instruccion"
+        extra = {}
+        if prueba == "rinne":
+            hz, lado, _l, valor = self._rinne_seleccion()
+            extra = {"hz": hz, "oido": lado, "resultado": valor, "posicion": self._rinne_ultimo}
+        else:
+            hz = '500' if self.weber_500.isChecked() else '1000'
+            extra = {"hz": hz, "resultado": ((self.data or {}).get('Weber') or {}).get(hz, 'centrado'),
+                     "puesto": self._weber_puesto}
+        self._log(tipo, clave=clave, prueba=prueba, respuesta=respuesta, **extra)
+
+    def _contestar(self, clave, prueba):
+        if prueba == "rinne":
+            _hz, _lado, _l, valor = self._rinne_seleccion()
+            if clave == "lo_escucha":
+                if self._rinne_ultimo is None:
+                    return "¿Qué cosa? No siento nada."
+                oye = self._rinne_ultimo == 'mastoides' or valor != 'falso_negativo'
+                return "Sí." if oye else "No, nada."
+            if clave == "donde_mas_fuerte":
+                if self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']:
+                    return self._rinne_comparacion(valor)
+                if self._rinne_ultimo is None:
+                    return "¿Qué cosa?"
+                return "No sé... me lo puso en un solo lado."
+            return "No sé, lo siento de este lado nomás."
+        # Weber
+        hz = '500' if self.weber_500.isChecked() else '1000'
+        valor = ((self.data or {}).get('Weber') or {}).get(hz, 'centrado')
+        if not self._weber_puesto:
+            return "¿Qué cosa?"
+        if clave == "lo_escucha":
+            return "Sí."
+        if clave == "igual_ambos":
+            return {"od": "No, más en el derecho.", "oi": "No, más en el izquierdo."}.get(
+                valor, "Sí, igual en los dos.")
+        return DONDE_WEBER.get(valor, DONDE_WEBER["centrado"])

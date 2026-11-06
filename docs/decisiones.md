@@ -8281,3 +8281,33 @@ ya no toca ningún evento del mouse en el kiosko.
 Probado de punta a punta en un Xvfb propio con clics "físicos" de XTest: el
 izquierdo físico no aprieta el botón, el derecho sí, y al cerrar la sesión
 el mapeo vuelve a 1 2 3 (tests/test_mouse_zurdo_x11.py).
+
+## Otoscopía y diapasones: una ventana, con frases al paciente (2026-11-06)
+
+- **Una sola ventana a pantalla completa** con dos pestañas, Otoscopía y
+  Diapasones (`audiometria/ventana_ot_ac.py`), y un solo botón "OT/AC" con
+  los dos íconos. Se arma en la app: `Layout.php` sigue mandando OT y AC
+  por separado, así las versiones anteriores no pierden sus botones. Cada
+  pestaña aparece si el curso tiene su módulo; la ventana se abre con
+  cualquiera de los dos (`ui_helpers.VENTANA_DE`).
+- **Frases al paciente como en el impedanciómetro** (`frases_habladas.py`,
+  el panel de los comandos de voz sin talkback): se dicen al tocarlas, con
+  audio de la misma voz (`scripts/voces_comandos.py --ac / --ot`), y quedan
+  en el registro (`ac_instruccion`, `ac_pregunta`, `ot_instruccion`).
+- **Diapasones: el paciente contesta lo que le instruyeron o preguntaron.**
+  Sin instrucción, al sentir el diapasón dice "¿Y qué tengo que hacer?". Una
+  instrucción vale para su prueba ("Compare dónde suena más fuerte" es del
+  Rinne, "Dígame dónde lo escucha" del Weber, "Avíseme si lo escucha" de las
+  dos) y queda vigente hasta otra; una pregunta se contesta y no la
+  reemplaza, como en el audiómetro. El botón "Preguntar dónde lo escucha más
+  fuerte" pasó a ser la pregunta del panel. El falso negativo sigue sonando
+  igual que un negativo para el paciente.
+- **Otoscopía sin preguntas por ahora**: el caso solo trae las fotos y un
+  texto por fase; no dice si duele o molesta, y el paciente no contesta lo
+  que el caso no sabe. Llegan con la otoscopía sobre la cabeza (tracción del
+  pabellón, dolor si el caso lo marca).
+- **Los botones de los diapasones no recibían el clic** desde el rediseño
+  del 26-10 (un QWidget suelto de 640x480 encima del panel). Corregido, con
+  `tests/test_controles_tapados.py`, que revisa en todas las ventanas qué
+  widget recibe el clic en el centro de cada control.
+

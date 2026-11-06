@@ -195,6 +195,32 @@ ICONO_MODULO = {
 }
 
 
+def _dos(nombre_a, nombre_b, color, tam):
+    """Los dos iconos lado a lado, con un respiro al medio."""
+    a, b = pixmap(nombre_a, color, tam), pixmap(nombre_b, color, tam)
+    dpr = a.devicePixelRatio()
+    lienzo = QPixmap(round((2 * tam + 2) * dpr), round(tam * dpr))
+    lienzo.setDevicePixelRatio(dpr)
+    lienzo.fill(Qt.GlobalColor.transparent)
+    p = QPainter(lienzo)
+    p.drawPixmap(0, 0, a)
+    p.drawPixmap(tam + 2, 0, b)
+    p.end()
+    return lienzo
+
+
+def icono_boton_doble(nombre_a, nombre_b, color, color_activo=None, tam=18):
+    """Como icono_boton, con dos iconos (un botón para dos equipos: el de
+    otoscopía y diapasones)."""
+    ic = QIcon()
+    ic.addPixmap(_dos(nombre_a, nombre_b, color, tam), QIcon.Mode.Normal, QIcon.State.Off)
+    ic.addPixmap(_dos(nombre_a, nombre_b, color_activo or color, tam), QIcon.Mode.Normal, QIcon.State.On)
+    gris = _dos(nombre_a, nombre_b, "#A89DAA", tam)
+    ic.addPixmap(gris, QIcon.Mode.Disabled, QIcon.State.Off)
+    ic.addPixmap(gris, QIcon.Mode.Disabled, QIcon.State.On)
+    return ic
+
+
 def icono_boton(nombre, color, color_activo=None, tam=18):
     """Icono para un botón: `color` normal, `color_activo` cuando está marcado
     (checked) y gris cuando está deshabilitado."""

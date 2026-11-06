@@ -7,6 +7,9 @@
 #                                                               #
 #################################################################
 from audiometria.OtoscopiaInforme import InformeOtoscopia
+from audiometria.comandos_voz import SILENCIO
+from audiometria.frases_habladas import FrasesHabladas
+from backend.log_queue import get_log_queue
 from backend.client import BackendClient
 from core.base import context
 from core import hilos
@@ -28,6 +31,21 @@ from PySide6.QtWidgets import (
 )
 
 SIN_IMAGEN_TEXTO = "Otoscopio sin batería"
+
+# Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py;
+# audio en resources/audio/comandos_ot/, scripts/voces_comandos.py --ot).
+# Sin preguntas por ahora: el caso no dice si duele o molesta (solo trae
+# las fotos), y el paciente no contesta lo que el caso no sabe.
+GRUPOS = (
+    ("PREPARAR", (
+        ("Explicar el examen", "explicar_otoscopia"),
+    )),
+    ("INSTRUCCIONES", (
+        ("Quédese quieto", "quedese_quieto"),
+        ("Incline la cabeza", "incline_cabeza"),
+        ("Avíseme si le molesta", "avise_si_molesta"),
+    )),
+)
 
 # Lo que el visor pinta fuera de la foto y como máscara: negro con un dejo
 # del tinte de la app, para que no sea un agujero en la tarjeta.
@@ -205,6 +223,7 @@ class Otoscopia(QWidget):
         self.appointment_id = None
         self._fetch_thread = None
         self._case_id_pedido = None
+        self.log_queue = get_log_queue()
 
         tema.aplicar_estilo(self, EXTRA_QSS)
         layout = QVBoxLayout(self)
@@ -229,9 +248,17 @@ class Otoscopia(QWidget):
 
     def _build_tab_otoscopio(self):
         tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(0, 10, 0, 0)
+        fila = QHBoxLayout(tab)
+        fila.setContentsMargins(0, 10, 0, 0)
+        fila.setSpacing(12)
+        # Lo que se le dice al paciente, a la izquierda como en los otros equipos
+        self.frases = FrasesHabladas(GRUPOS, {}, "comandos_ot")
+        self.frases.setFixedWidth(250)
+        self.frases.btn_checked.connect(self._frase)
+        fila.addWidget(self.frases)
+        layout = QVBoxLayout()
         layout.setSpacing(10)
+        fila.addLayout(layout, 1)
         fila_visores = QHBoxLayout()
         fila_visores.setSpacing(10)
         self.lbl_od = self._build_slot()
@@ -296,12 +323,31 @@ class Otoscopia(QWidget):
     def _build_slot(self):
         return _OtoscopioVisor()
 
+    def _log(self, action, **payload):
+        """Encola una acción del alumno con el otoscopio (prefijo ot_, ver
+        backend/log_queue.py), como Acumetria._log."""
+        case_id = self.data.get("id") if self.data else None
+        if case_id is not None:
+            payload.setdefault("case_id", case_id)
+        payload.setdefault("appointment_id", self.appointment_id)
+        payload.setdefault("con_paciente", case_id is not None)
+        self.log_queue.push(action, payload)
+
+    def _frase(self, clave):
+        if clave != SILENCIO:
+            self._log("ot_instruccion", clave=clave)
+
+    def callar(self):
+        self.frases.callar()
+
     def la_super(self, data, appointment_id=None):
         """Hidrata (o deshidrata, data=None) el módulo con el caso actual --
         mismo patrón que Acumetria.la_super(), llamado por
         MainWindow._hydrate_modules() cada vez que cambia el caso activo."""
         self.data = data
         self.appointment_id = appointment_id
+        self.frases.callar()
+        self.frases.silencio()
         # El informe es de ESTE paciente: al cambiar de caso (o al
         # deshidratar) se limpia, si no el alumno arranca el siguiente con
         # los cuadrantes del anterior marcados.

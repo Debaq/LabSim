@@ -17,6 +17,9 @@ src/impedanciometria/instrucciones.py) en resources/audio/comandos_z/:
     /tmp/venv_edge/bin/python scripts/voces_comandos.py --z              # todas
     /tmp/venv_edge/bin/python scripts/voces_comandos.py --z trague_una_vez
 
+--ac y --ot hacen las de los diapasones (COMANDOS_AC, resources/audio/
+comandos_ac/) y del otoscopio (COMANDOS_OT, resources/audio/comandos_ot/).
+
 --estimulos hace, con la misma voz, las palabras de las listas
 (ListWords.PALABRAS) que todavía no tienen su logo/estimulos/<palabra>.mp3;
 no toca las que ya existen (las grabadas).
@@ -38,6 +41,8 @@ import edge_tts
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SALIDA = os.path.join(RAIZ, "resources", "audio", "comandos")
 SALIDA_Z = os.path.join(RAIZ, "resources", "audio", "comandos_z")
+SALIDA_AC = os.path.join(RAIZ, "resources", "audio", "comandos_ac")
+SALIDA_OT = os.path.join(RAIZ, "resources", "audio", "comandos_ot")
 
 # La de las grabaciones era femenina (~240 Hz): Catalina, un poco más lenta
 # para un paciente que oye mal.
@@ -126,6 +131,35 @@ COMANDOS_Z = {
     "esta_bien": "¿Está bien? ¿Puedo seguir?",
 }
 
+# Diapasones (src/audiometria/Acumetria.py, GRUPOS): en el box, sin talkback.
+COMANDOS_AC = {
+    # PREPARAR
+    "explicar_diapasones": "Le voy a hacer una prueba con este diapasón, que vibra y suena. Se lo "
+                           "voy a poner detrás de la oreja, frente a la oreja y en la frente. No "
+                           "duele.",
+    # INSTRUCCIONES
+    "avise_si_escucha": "Cada vez que le ponga el diapasón, dígame si lo escucha.",
+    "compare_sonidos": "Le voy a poner el diapasón detrás de la oreja y después frente a la "
+                       "oreja. Dígame dónde lo escucha más fuerte.",
+    "diga_donde": "Le voy a poner el diapasón en la frente. Dígame dónde lo escucha: en el oído "
+                  "derecho, en el izquierdo o al medio.",
+    # PREGUNTAS
+    "lo_escucha": "¿Lo escucha?",
+    "donde_mas_fuerte": "¿Dónde lo escuchó más fuerte?",
+    "igual_ambos": "¿Lo escucha igual en los dos oídos?",
+}
+
+# Otoscopía (src/audiometria/Otoscopia.py, GRUPOS).
+COMANDOS_OT = {
+    # PREPARAR
+    "explicar_otoscopia": "Le voy a revisar el oído con esta luz. No duele. Voy a tirar un "
+                          "poquito de su oreja para ver mejor.",
+    # INSTRUCCIONES
+    "quedese_quieto": "Quédese quieto, por favor, sin mover la cabeza.",
+    "incline_cabeza": "Incline un poco la cabeza hacia el otro lado.",
+    "avise_si_molesta": "Si le molesta o le duele, me avisa.",
+}
+
 
 def archivo(clave, salida=SALIDA):
     """Como h_audio.normalize: sin tildes (en_qué_oído -> en_que_oido)."""
@@ -192,6 +226,10 @@ if __name__ == "__main__":
     textos, salida = COMANDOS, SALIDA
     if args[:1] == ["--z"]:
         args, textos, salida = args[1:], COMANDOS_Z, SALIDA_Z
+    elif args[:1] == ["--ac"]:
+        args, textos, salida = args[1:], COMANDOS_AC, SALIDA_AC
+    elif args[:1] == ["--ot"]:
+        args, textos, salida = args[1:], COMANDOS_OT, SALIDA_OT
     pedidas = args or list(textos)
     desconocidas = [c for c in pedidas if c not in textos]
     if desconocidas:

@@ -35,8 +35,7 @@ def test_nada_tapa_los_botones_de_los_diapasones():
     APP.processEvents()
     win = marco.window()
     pestanas = w.findChildren(QTabWidget)[0]
-    botones = {0: ("rinne_500", "rinne_1000", "rinne_od", "rinne_oi", "btn_mastoides", "btn_pabellon",
-                   "btn_comparar"),
+    botones = {0: ("rinne_500", "rinne_1000", "rinne_od", "rinne_oi", "btn_mastoides", "btn_pabellon"),
                1: ("weber_500", "weber_1000", "btn_frente")}
     for pestana, nombres in botones.items():
         pestanas.setCurrentIndex(pestana)

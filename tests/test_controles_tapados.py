@@ -33,6 +33,7 @@ def fabricas():
     from audiometria.ventana import AudiometriaWindow
     from audiometria.Acumetria import Acumetria
     from audiometria.Otoscopia import Otoscopia
+    from audiometria.ventana_ot_ac import OtoscopiaAcumetriaWindow
     from impedanciometria.ventana import ImpedanciometriaWindow
     from abr.AbrMainWindow import AbrMainWindow
     from abr.AabrMainWindow import AabrMainWindow
@@ -53,6 +54,7 @@ def fabricas():
     return {
         "Audiometría": lambda: AudiometriaWindow(None, comandos=True, listas=True),
         "Acumetría": lambda: Acumetria(None),
+        "Otoscopía y diapasones": lambda: OtoscopiaAcumetriaWindow(Otoscopia(None), Acumetria(None)),
         "Otoscopía": lambda: Otoscopia(None),
         "Impedanciometría": lambda: ImpedanciometriaWindow(),
         "ABR": lambda: AbrMainWindow(data_login=LOGIN),

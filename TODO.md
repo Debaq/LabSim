@@ -215,6 +215,13 @@ gap significativo. § Parámetros de audiometría configurables por curso
       respuestas más livianas, y abrir con la app recién abierta sin red.
       Plan en `docs/roadmap_sin_servidor.md`. § Servidor lento o intermitente
 
+### Módulos por curso
+- [ ] 77. Quitar el bloqueo de módulos por curso (course_modules,
+      GATED_MODULE_CODES, Courses::MODULES en el panel): "es una basura"
+      (él, 2026-11-06). Queda solo ocultar los módulos en estado beta.
+      Al quitarlo, `ui_helpers.VENTANA_DE` y los `con_otoscopia/con_acumetria`
+      de la ventana OT/AC sobran.
+
 ### Manuales
 - [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
       § Manuales del estudiante y del docente

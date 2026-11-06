@@ -67,6 +67,10 @@ final class Metrics
         'ac_rinne_pabellon' => 'Rinne: diapasón frente al pabellón',
         'ac_rinne_comparar' => 'Rinne: pregunta dónde lo escucha más fuerte',
         'ac_weber' => 'Weber: diapasón en la frente / vértex',
+        'ac_instruccion' => 'Diapasones: instrucción al paciente',
+        'ac_pregunta' => 'Diapasones: pregunta al paciente',
+        // Otoscopio
+        'ot_instruccion' => 'Otoscopía: instrucción al paciente',
         // Rinomanómetro, rinómetro acústico y rinoscopía (nasal/, demo interna)
         'rm_adaptador' => 'Adaptador de presión en una narina',
         'rm_mascara' => 'Máscara puesta o sacada',

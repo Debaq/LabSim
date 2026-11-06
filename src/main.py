@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QMainWindow, QWidget, QPus
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
 from audiometria import Acumetria, Otoscopia
+from audiometria.ventana_ot_ac import OtoscopiaAcumetriaWindow
 from audiometria.DebugMkg import DebugMkgDialog
 from auth import login as Ui_login
 from core.base import context
@@ -156,15 +157,28 @@ _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
 # leía como "la configuración cambió".
 if LAYOUT_AVAILABLE:
     APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [760, 450], "pre"])
-    # Todos los exámenes van a pantalla completa menos acumetría y
-    # otoscopía, que se usan junto a otros. Layout.php ya los manda así;
+    # Todos los exámenes van a pantalla completa. Otoscopía y diapasones
+    # comparten la de AC (audiometria/ventana_ot_ac.py; Layout.php todavía
+    # los manda chicos y separados, para las versiones anteriores).
+    if "AC" in APPS:
+        APPS["AC"][1] = "Otoscopía y diapasones"
+    # Layout.php ya los manda así;
     # acá por el layout guardado sin red y por un backend que todavía no se
     # actualiza.
-    for codigo in ("A", "Z", "ABR", "AABR", "VEMP", "EOAS", "EOAC", "VNG",
+    for codigo in ("A", "Z", "AC", "ABR", "AABR", "VEMP", "EOAS", "EOAC", "VNG",
                    "VHIT", "POS", "RS", "RM", "RA", "OLF", "PRICK", "ESP",
                    "PSG", "CPAP"):
         if codigo in APPS:
             APPS[codigo][3:5] = [[False, True], "max"]
+
+
+class _Parte:
+    """Un módulo que vive dentro de la ventana de otro (otoscopía y
+    diapasones, ver load_sub_windows): lo que main le pide a un marco es
+    .obj."""
+
+    def __init__(self, obj):
+        self.obj = obj
 
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
@@ -1390,8 +1404,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         from vemp.VempMainWindow import VempMainWindow
 
         self.subw = Subventanas(self.subw or {})
-        self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current), expand=True)
-        self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current), expand=True)
+        # Otoscopía y diapasones: una sola ventana a pantalla completa con un
+        # botón (audiometria/ventana_ot_ac.py). subw_ot y subw_ac quedan
+        # como antes para cargar el caso y subir los informes (.obj).
+        otoscopia = Otoscopia.Otoscopia(self.data_current)
+        acumetria = Acumetria.Acumetria(self.data_current)
+        self.subw_ot = _Parte(otoscopia)
+        self.subw_ac = _Parte(acumetria)
+        ventana_ot_ac = FrameSubMdi(OtoscopiaAcumetriaWindow(
+            otoscopia, acumetria, con_otoscopia=self._module_visible("OT"),
+            con_acumetria=self._module_visible("AC")), expand=True)
         # Los pesados se arman después, con la agenda a la vista (ver
         # core/subventanas.py y _armar_modulos_en_fondo). expand: sin esto el
         # marco reparte el alto sobrante con un espaciador y el ABR se queda
@@ -1441,8 +1463,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 CpapWindow(data_login=self.data_login), expand=True))
 
         self.subw.update({
-            "AC": self.subw_ac,
-            "OT": self.subw_ot,
+            "AC": ventana_ot_ac,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self), expand=True),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")), expand=True),
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),
