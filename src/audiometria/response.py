@@ -917,12 +917,18 @@ class ResponseAudiometry():
         
     def rol_player(self, rol):
         if rol != 'pa_pa_pa':
-            # largo de sobra: las preguntas quedan en la historia pero no
-            # pueden empujar afuera la instruccion vigente (_instruccion)
+            # Las preguntas quedan en la historia pero no pueden empujar
+            # afuera la instruccion vigente (_instruccion): al llenarse se
+            # va la pregunta mas vieja. Antes salia el ultimo de la lista y,
+            # tras 12 preguntas seguidas en el Fowler, "Dos pitos" se perdia:
+            # "¿En qué oído?" pasaba a contestarse como en umbrales, con el
+            # canal que sonaba en ese instante del alternado, y la respuesta
+            # se invertia y volvia a invertir (tickets 53 y 55).
             max_list = 12
             self.history_command.insert(0, rol)
             while len(self.history_command) > max_list:
-                self.history_command.pop()
+                preguntas = [i for i, r in enumerate(self.history_command) if r in PREGUNTAS]
+                self.history_command.pop(preguntas[-1] if preguntas else -1)
             debug_print(self.history_command)
         if rol == 'pa_pa_pa':
             debug_print("ahora somos papapa")

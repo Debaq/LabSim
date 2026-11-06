@@ -58,6 +58,21 @@ def test_en_que_oido_y_otra_instruccion_la_reemplaza():
     assert r.contestadas == [2]
 
 
+def test_muchas_preguntas_no_borran_dos_pitos():
+    """Tickets 53/55: tras 12 preguntas seguidas "Dos pitos" salía de la
+    historia y "¿En qué oído?" se contestaba como en umbrales."""
+    r = _respuesta()
+    r.rol_player('colocar_fonos')
+    r.rol_player('dos_pitos')
+    for _ in range(40):
+        r.rol_player('sonidos_iguales')
+        r.rol_player('en_qué_oído')
+    assert r._instruccion() == 'dos_pitos'
+    assert len(r.history_command) <= 12
+    r.rol_player('mano_levantada')        # una instrucción nueva sí la reemplaza
+    assert r._instruccion() == 'mano_levantada'
+
+
 def test_el_reproductor_avisa_cuando_termina():
     p = Player(3)
     terminados = []
