@@ -257,13 +257,12 @@ class CabezaExamen(CabezaElectrodos):
 
 
 # ---------------------------------------------------------------- otoscopía
-LUPA = 0.20                 # radio del disco del otoscopio, como fracción del lado de la cabeza
+LUPA = 0.16                 # radio de la ventana del otoscopio, fracción del lado de la cabeza (80 % de 0.20, él)
 RECORRIDO_PX = 30.0         # px de la foto de la cabeza, desde donde entró: de borde a borde del tímpano
 ZOOM_TIMPANO = 0.5          # el disco muestra esta fracción de la foto; el resto se recorre
 ALCANCE = 0.85              # hasta dónde llega el centro de la vista (fracción del radio de la foto)
 METAL = "#8E9098"
 NEGRO_VISOR = "#0E0A0D"
-PARED_CONDUCTO = "#B9786A"
 
 
 class CabezaOtoscopia(CabezaExamen):
@@ -274,9 +273,9 @@ class CabezaOtoscopia(CabezaExamen):
     su flecha, hasta soltarlo); arrastrar fuera de la oreja gira la cabeza.
 
     `vista(oido)` dice qué se ve por ese conducto: {'foto': QPixmap o None,
-    'cono': fracción del ancho de la foto que deja ver el espéculo,
-    'tapado': sin el conducto enderezado se ve la pared, 'texto': lo que se
-    lee en la lupa en lugar de la foto, o None}."""
+    'adulto': el espéculo de adulto (disco claro entero; el pediátrico, la
+    mitad), 'texto': lo que se lee en lugar de la foto, o None}. La foto se
+    ve entera, sin nada encima."""
     miro = Signal(str)       # el otoscopio entró a ese conducto
     salio = Signal()
 
@@ -437,13 +436,6 @@ class CabezaOtoscopia(CabezaExamen):
             p.setClipPath(hueco)
             if not dentro.isEmpty():
                 p.drawPixmap(destino, foto, dentro)
-            if v.get("tapado"):
-                # Sin enderezar el conducto, la pared tapa casi todo
-                pared = QPainterPath()
-                pared.addEllipse(c, claro, claro)
-                ventana = QPainterPath()
-                ventana.addEllipse(QPointF(c.x() + claro * 0.3, c.y() + claro * 0.2), claro * 0.42, claro * 0.42)
-                p.fillPath(pared.subtracted(ventana), QColor(PARED_CONDUCTO))
             from PySide6.QtGui import QRadialGradient
             luz = QRadialGradient(c, claro)
             luz.setColorAt(0.0, QColor(255, 220, 150, 30))

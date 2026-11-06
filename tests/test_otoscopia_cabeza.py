@@ -1,7 +1,7 @@
 """Otoscopía sobre la cabeza, como la rinoscopía (2026-11-06): el mouse es
 el otoscopio y arrastrar desde la oreja tira del pabellón. Con el pabellón
-bien traccionado (arriba y atrás; abajo y atrás en menores de 3 años) se ve
-el tímpano; si no, la pared del conducto tapa casi todo.
+bien traccionado o no (arriba y atrás; abajo y atrás en menores de 3 años),
+la foto se ve entera: la tracción queda en el registro para la evaluación.
 """
 import os
 import sys
@@ -41,16 +41,17 @@ def _modulo(edad=40):
     return w
 
 
-def test_sin_traccion_la_pared_tapa():
+def test_la_foto_se_ve_entera_con_o_sin_traccion():
     w = _modulo()
-    v = w.vista("od")
-    assert v["tapado"] and v["cono"] == O._OtoscopioVisor.CONO_PEDIATRICO
+    assert set(w.vista("od")) == {"foto", "adulto"}, "nada encima de la foto"
+    w._traccionar("od", -1.5, -1.5)            # mal traccionado: solo queda en el registro
+    assert set(w.vista("od")) == {"foto", "adulto"}
 
 
 def test_adulto_arriba_y_atras_se_ve_todo():
     w = _modulo(edad=40)
     w._traccionar("od", 1.5, 1.5)
-    assert w._tiron["correcto"] and not w.vista("od")["tapado"]
+    assert w._tiron["correcto"]
     assert w.vista("oi")["texto"] == O.SIN_IMAGEN_TEXTO, "sin foto, otoscopio sin batería"
 
 

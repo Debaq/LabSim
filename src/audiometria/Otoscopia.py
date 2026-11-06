@@ -34,7 +34,6 @@ LADO_TEXTO = {"od": "derecho", "oi": "izquierdo"}
 TIRON_MIN_CM = 0.5          # menos que esto no es un tirón
 EDAD_TIRON_ABAJO = 3        # años: menor que esto, el pabellón va abajo y atrás
 EDAD_ESPECULO_ADULTO = 6    # años: menor que esto el espéculo de adulto no entra
-CAMPO_SIN_TRACCION = 0.5    # sin enderezar el conducto se ve la mitad del campo
 
 
 # Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py;
@@ -366,18 +365,16 @@ class Otoscopia(QWidget):
 
     def vista(self, oido):
         """Lo que se ve por el otoscopio en ese conducto (lo dibuja
-        CabezaOtoscopia): la foto del caso con el campo del espéculo; sin el
-        pabellón bien traccionado el conducto no se endereza y la pared tapa
-        casi todo. Sin foto, el otoscopio está sin batería."""
+        CabezaOtoscopia): la foto del caso entera, con el campo del espéculo.
+        Sin foto, el otoscopio está sin batería."""
         if self._no_entra():
             return {"texto": "El espéculo de adulto no entra en este conducto."}
         foto = self._fotos.get(oido)
         if foto is None:
             return {"texto": SIN_IMAGEN_TEXTO}
-        cono = _OtoscopioVisor.CONO_ADULTO if self._especulo() == "adulto" else _OtoscopioVisor.CONO_PEDIATRICO
-        tiron = self._tiron if self._tiron and self._tiron["oido"] == oido else None
-        return {"foto": foto, "cono": cono, "adulto": self._especulo() == "adulto",
-                "tapado": not (tiron and tiron["correcto"])}
+        # La foto entera: la tracción queda en el registro para la
+        # evaluación, no tapa nada (él, 2026-11-06)
+        return {"foto": foto, "adulto": self._especulo() == "adulto"}
 
     def _miro(self, oido):
         """El otoscopio entró al conducto (el mouse pasó por él)."""
