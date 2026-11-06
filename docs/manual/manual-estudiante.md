@@ -544,7 +544,7 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
     - *Intensidad*: con *Igual de fuerte que su ruido* y paso **1** dB, sube el sonido con el estímulo sonando hasta que levante la mano.
     - *NME*: con *Hasta que no escuche su ruido*, el ruido en el canal 2 (NBN o WN). Levanta la mano cuando el ruido le tapa el acúfeno; *¿Lo dejó de escuchar?* también lo contesta.
     - *Inhibición residual*: con *Un minuto de sonido*, deja el estímulo sonando un minuto (cronómetro) y apágalo. *¿Cómo está su ruido?* contesta según cuánto tiempo sonó y cuánto pasó desde que lo apagaste.
-    - Un paciente sin acúfeno contesta que no escucha ningún ruido.
+    - Un paciente sin acúfeno se extraña al terminar la instrucción (*«¿Qué ruido?»*), dice que no tiene con qué comparar y no levanta la mano.
 - **Stenger**: instrucción *Colocar fonos*, la misma de los umbrales (al paciente no se le anuncia nada distinto). Los dos canales en *Tono*, uno a cada oído, sonando a la vez. El paciente levanta la mano si oye un pito.
 
 ## 20. Acumetría

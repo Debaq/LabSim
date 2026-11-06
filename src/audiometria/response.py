@@ -935,6 +935,10 @@ class ResponseAudiometry():
         if rol == acufeno.INSTR_TONO and getattr(self, 'tinnitumetria', None):
             # "le voy a presentar sonidos": empieza una comparación nueva
             self.tinnitumetria.nueva_comparacion()
+        if rol in acufeno.INSTRUCCIONES:
+            # sin acúfeno, el paciente reacciona a la instrucción al
+            # terminar el talkback, como a una pregunta (ver _respuesta_tinnitus)
+            self._pregunta = rol
 
     # Pausa del paciente entre el fin de la pregunta y su respuesta, en ms.
     PAUSA_RESPUESTA_MS = (400, 900)
@@ -961,7 +965,7 @@ class ResponseAudiometry():
             self.other_response.fowler_q(1 if pregunta == 'sonidos_iguales' else 2,
                                          self.data)
             return
-        if pregunta in acufeno.PREGUNTAS or (
+        if pregunta in acufeno.PREGUNTAS or pregunta in acufeno.INSTRUCCIONES or (
                 pregunta == 'dejo_de_escuchar' and self._instruccion() == acufeno.INSTR_NME):
             respuesta = self._respuesta_tinnitus(pregunta)
         else:
@@ -1021,6 +1025,10 @@ class ResponseAudiometry():
         elif pregunta == acufeno.PREG_COMO:
             respuesta = tin.como_esta(audio)
             extra['corrida'] = tin.corrida()
+        elif pregunta in acufeno.INSTRUCCIONES:
+            respuesta = tin.ante_instruccion()
+            if respuesta is None:
+                return None   # con acúfeno, la instrucción no se contesta
         elif not tin.acufeno.presente:
             respuesta = acufeno.NO_TENGO
         else:                                           # ¿Lo dejó de escuchar?

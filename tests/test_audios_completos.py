@@ -28,6 +28,7 @@ NO_ENTENDIO = ("none1", "none2", "none3")
 FRASES_PACIENTE = ("si", "no", "molesta", "elderecho", "elizquierdo",
                    # tinnitumetría (acufeno.py)
                    "elprimero", "elsegundo", "eltercero", "notengoruido", "nose",
+                   "queruido", "nosecomparar",
                    "igualqueantes", "seescuchamasbajito", "yanoloescucho")
 
 

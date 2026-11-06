@@ -58,6 +58,8 @@ FRASES = {
     "elsegundo": "El segundo.",
     "eltercero": "El tercero.",
     "notengoruido": "Yo no escucho ningún ruido.",
+    "queruido": "¿Qué ruido? Yo no tengo ningún ruido en los oídos.",
+    "nosecomparar": "No sé con qué compararlo, si no escucho ningún ruido.",
     "nose": "No sé.",
     "igualqueantes": "Igual que antes.",
     "yanoloescucho": "Ya no lo escucho.",

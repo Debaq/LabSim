@@ -24,7 +24,10 @@ Las cuatro partes de la técnica tienen su instrucción en el talkback
   una octava o menos de él, contesta según la inhibición del caso; pasado
   otro minuto, vuelve a como estaba salvo que la inhibición se mantenga.
 
-Sin acúfeno, a las preguntas contesta que no escucha ningún ruido. El
+Sin acúfeno, el fallo se ve como en un paciente real: al terminar cualquiera
+de las cuatro instrucciones reacciona ("¿Qué ruido? Yo no tengo ningún
+ruido...", y si se insiste, "Yo no escucho ningún ruido"), a "¿Cuál se
+parece más?" dice que no sabe con qué compararlo, y la mano no sube. El
 pulsátil y el ocasional responden igual: la técnica dice que el pulsátil no
 se iguala (lo marca el indicador), y el ocasional se toma como presente el
 día del examen.
@@ -62,6 +65,8 @@ PREGUNTAS = (PREG_CUAL, PREG_COMO)
 # Lo que dice el paciente (resources/audio/paciente/<voz>/<clave>.mp3).
 ORDINALES = ("elprimero", "elsegundo", "eltercero")
 NO_TENGO = "notengoruido"
+QUE_RUIDO = "queruido"          # la primera instrucción, sin acúfeno
+NO_COMPARO = "nosecomparar"     # "¿Cuál se parece más?", sin acúfeno
 NO_SE = "nose"
 IGUAL = "igualqueantes"
 MAS_BAJO = "seescuchamasbajito"
@@ -213,6 +218,7 @@ class Tinnitumetria:
         self._reloj = reloj
         self.comparados = []    # [(stim, f_idx, oido)] desde la última pregunta
         self._corrida = None    # {'inicio', 'fin'} del estímulo de la inhibición
+        self._reclamo = False   # ya dijo "¿qué ruido?"
 
     # ---- lo que suena ----------------------------------------------------
 
@@ -225,6 +231,16 @@ class Tinnitumetria:
 
     def nueva_comparacion(self):
         self.comparados = []
+
+    def ante_instruccion(self):
+        """Lo que dice al terminar una instrucción de tinnitumetría: nada si
+        tiene acúfeno; si no, se extraña la primera vez y después lo repite."""
+        if self.acufeno.presente:
+            return None
+        if not self._reclamo:
+            self._reclamo = True
+            return QUE_RUIDO
+        return NO_TENGO
 
     def ver(self, audio, instruccion):
         """Cada cambio del equipo con una instrucción de tinnitumetría."""
@@ -247,7 +263,7 @@ class Tinnitumetria:
         siguiente pregunta compara lo que se presente después."""
         comparados, self.comparados = self.comparados[-3:], []
         if not self.acufeno.presente:
-            return NO_TENGO, comparados
+            return NO_COMPARO, comparados
         if len(comparados) < 2:
             return NO_SE, comparados
         tipo_de = lambda s: "tono" if s in _DE_TONO else "ruido"  # noqa: E731

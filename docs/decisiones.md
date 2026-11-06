@@ -8474,6 +8474,12 @@ viene del protocolo del docente; queda como **T03** en
   octava o menos, contesta según el caso y, pasado otro minuto, vuelve a
   "igual que antes" salvo que se mantenga. Sin acúfeno dice que no escucha
   ningún ruido. No confunde octavas: la verdad es la frecuencia del caso.
+- **Paciente sano:** el fallo tiene que parecer el de un paciente real, no
+  un equipo que no responde. Al terminar cualquiera de las cuatro
+  instrucciones dice *"¿Qué ruido? Yo no tengo ningún ruido en los oídos"*
+  (si se insiste, *"Yo no escucho ningún ruido"*); a *¿Cuál se parece más?*,
+  *"No sé con qué compararlo..."*; la mano no sube. Va al registro como
+  respuesta y el indicador lo deja como advertencia.
 - **Datos del caso:** la ficha 10 suma sonoridad (dB SL), NME (dB SL),
   inhibición residual y si se mantiene. Vacío o *Auto* = la app los sortea
   fijos por caso (`stable_seed`), como el SOAE; así los casos que ya

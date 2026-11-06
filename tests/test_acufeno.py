@@ -136,7 +136,9 @@ def test_inhibicion_residual():
 def test_sin_acufeno():
     tin = _tin({})
     tin.ver(_audio(on=(True, False)), acufeno.INSTR_TONO)
-    assert tin.cual()[0] == "notengoruido"
+    assert tin.cual()[0] == "nosecomparar"
+    assert tin.ante_instruccion() == "queruido"
+    assert tin.ante_instruccion() == "notengoruido"
     assert tin.como_esta(_audio()) == "notengoruido"
     assert not tin.iguala(_audio(on=(True, False), int_=(100, 20)))
 
@@ -197,6 +199,22 @@ def test_response_pregunta_queda_en_el_registro():
     assert [c["freq"] for c in payload["comparados"]] == [2000, 4000]
     # las preguntas no reemplazan la instrucción vigente
     assert r._instruccion() == acufeno.INSTR_TONO
+
+
+def test_response_sano_reacciona_a_la_instruccion():
+    r, audiometro = _respuesta()
+    r.set_case({**r.dbdata, "Tinnitus": {"presente": False}})
+    r.rol_player(acufeno.INSTR_TONO)
+    assert r._pregunta == acufeno.INSTR_TONO      # se contesta al terminar el talkback
+    assert r._respuesta_tinnitus(acufeno.INSTR_TONO) == "queruido"
+    assert audiometro.registro[-1][1]["respuesta"] == "queruido"
+    r.data["audio"].update(_audio(on=(True, False), int_=(100, 20)))
+    r.rol_player(acufeno.INSTR_SONORIDAD)
+    r.response_()
+    assert not r.mano
+    # con acúfeno la instrucción no se contesta
+    r2, _ = _respuesta()
+    assert r2._respuesta_tinnitus(acufeno.INSTR_TONO) is None
 
 
 if __name__ == "__main__":
