@@ -8340,3 +8340,22 @@ otro).
   años. No se le avisa al alumno si tiró bien: queda en ot_traccion /
   ot_otoscopio para la evaluación.
 
+### Una sola pantalla y un informe de dos secciones (2026-11-06, noche)
+
+- Otoscopía y diapasones comparten **una cabeza y una pantalla**
+  (`ventana_ot_ac.py`): herramientas Girar / Traccionar / Otoscopio /
+  Diapasón, un panel de frases con todas las instrucciones y preguntas, y
+  un panel derecho con las secciones de los dos exámenes y la conversación.
+  `Otoscopia` y `Acumetria` ya no arman pantalla: aportan sus secciones,
+  su lógica y (Otoscopia) el informe; la ventana los conecta a la cabeza.
+- **Informe**: pestaña con dos secciones, Otoscopía (por cuadrantes) y
+  Diapasones (`AcumetriaInforme.py`): solo símbolos y flechas por
+  diapasón, como en la ficha. Rinne: (+), (−) o FN (falso negativo, sin
+  signo, como en CaseSheetPdf::rinne); Weber: flecha izquierda roja (OD),
+  derecha azul (OI), las dos si no lateraliza.
+- **Los diapasones van dentro del informe OTOSCOPIA** (`data.acumetria`), no
+  en un tipo nuevo: la tabla reports tiene la lista de tipos en un CHECK y
+  agregar uno es una migración en producción (ver la caída de informes del
+  2026-10-08). El PDF del informe dibuja la sección
+  (`ReportPdfBuilder::acumetriaBody`).
+

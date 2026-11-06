@@ -76,6 +76,11 @@ final class ReportPdfBuilder
 
         if ($tipo === 'OTOSCOPIA') {
             $y = self::otoscopiaBody($pdf, $data, $y, $contentW);
+            // Los diapasones van en el mismo informe (misma pantalla en la
+            // app, ver src/audiometria/ventana_ot_ac.py)
+            if (is_array($data['acumetria'] ?? null)) {
+                $y = self::acumetriaBody($pdf, $data['acumetria'], $y);
+            }
             self::textSections($pdf, $data, $y, $contentW);
             return $pdf->output();
         }
@@ -382,6 +387,70 @@ final class ReportPdfBuilder
     }
 
     /** Hallazgos + conclusión (mismo bloque para todos los tipos de informe). */
+    // Los de la ficha (CaseCharts::COLOR_OD/OI): OD rojo, OI azul
+    private const COLOR_OD_AC = '#b33a3a';
+    private const COLOR_OI_AC = '#2255aa';
+
+    /**
+     * Diapasones como se anotan a mano y como los dibuja la ficha del caso
+     * (CaseSheetPdf::acumetria): Rinne (+), (-) o FN por oído y diapasón;
+     * Weber con flechas (izquierda = OD roja, derecha = OI azul, las dos si
+     * no lateraliza). Lo que el alumno no marcó queda en blanco.
+     */
+    private static function acumetriaBody(MiniPdf $pdf, array $ac, float $y): float
+    {
+        $diapasones = ['500' => '512 Hz', '1000' => '1024 Hz'];
+        $simbolo = ['positivo' => '(+)', 'negativo' => '(-)', 'falso_negativo' => 'FN'];
+        $rinne = is_array($ac['rinne'] ?? null) ? $ac['rinne'] : [];
+        $weber = is_array($ac['weber'] ?? null) ? $ac['weber'] : [];
+        $gap = 30.0;
+        $xRinne = self::MARGIN + 100.0;
+        $xWeber = self::MARGIN + 300.0;
+
+        $y = self::ensureSpace($pdf, $y, 18 + 14 + 14 * count($diapasones) + 10);
+        $pdf->text(self::MARGIN, $y, 'Diapasones', 12, true);
+        $y += 18;
+        $pdf->text(self::MARGIN, $y, 'Rinne', 9, true);
+        $pdf->textRight($xRinne - $gap, $y, 'OD', 8, true, self::COLOR_OD_AC);
+        $pdf->text($xRinne + $gap, $y, 'OI', 8, true, self::COLOR_OI_AC);
+        $pdf->text($xWeber - 60, $y, 'Weber', 9, true);
+        $y += 14;
+        foreach ($diapasones as $hz => $texto) {
+            foreach (['od' => [-1, self::COLOR_OD_AC], 'oi' => [1, self::COLOR_OI_AC]] as $oido => [$lado, $color]) {
+                $valor = (string) ($rinne[$hz][$oido] ?? '');
+                if (!isset($simbolo[$valor])) {
+                    continue;
+                }
+                if ($lado < 0) {
+                    $pdf->textRight($xRinne - $gap, $y, $simbolo[$valor], 9, true, $color);
+                } else {
+                    $pdf->text($xRinne + $gap, $y, $simbolo[$valor], 9, true, $color);
+                }
+            }
+            $pdf->textCenter($xRinne, $y, $texto, 8, true);
+            $pdf->textCenter($xWeber, $y, $texto, 8, true);
+            $w = (string) ($weber[$hz] ?? '');
+            $centro = $y - 3;
+            if ($w === 'od' || $w === 'centrado') {
+                self::flecha($pdf, $xWeber - $gap, $centro, -16.0, self::COLOR_OD_AC);
+            }
+            if ($w === 'oi' || $w === 'centrado') {
+                self::flecha($pdf, $xWeber + $gap, $centro, 16.0, self::COLOR_OI_AC);
+            }
+            $y += 14;
+        }
+        return $y + 10;
+    }
+
+    /** Flecha horizontal desde $x, de $largo pt (negativo = hacia la izquierda). */
+    private static function flecha(MiniPdf $pdf, float $x, float $y, float $largo, string $color): void
+    {
+        $punta = $x + $largo;
+        $pdf->line($x, $y, $punta, $y, 1.1, $color);
+        $sentido = $largo < 0 ? 1 : -1;
+        $pdf->polygon([[$punta, $y], [$punta + $sentido * 4, $y - 2.4], [$punta + $sentido * 4, $y + 2.4]], null, $color);
+    }
+
     private static function textSections(MiniPdf $pdf, array $data, float $y, float $contentW): void
     {
         foreach ([['Hallazgos', 'hallazgos'], ['Conclusión', 'conclusion']] as [$titulo, $clave]) {

@@ -9,9 +9,7 @@
 import math
 
 from audiometria.OtoscopiaInforme import InformeOtoscopia
-from audiometria.cabeza_examen import CabezaOtoscopia
 from audiometria.comandos_voz import SILENCIO
-from audiometria.frases_habladas import FrasesHabladas
 from backend.log_queue import get_log_queue
 from backend.client import BackendClient
 from core.base import context
@@ -23,12 +21,10 @@ from PySide6.QtCore import QPointF, QRect, QRectF, Qt
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPixmap, QRadialGradient
 from PySide6.QtWidgets import (
     QButtonGroup,
-    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QSizePolicy,
-    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -39,13 +35,7 @@ TIRON_MIN_CM = 0.5          # menos que esto no es un tirón
 EDAD_TIRON_ABAJO = 3        # años: menor que esto, el pabellón va abajo y atrás
 EDAD_ESPECULO_ADULTO = 6    # años: menor que esto el espéculo de adulto no entra
 CAMPO_SIN_TRACCION = 0.5    # sin enderezar el conducto se ve la mitad del campo
-# Las herramientas de la cabeza, como las de los electrodos
-HERRAMIENTAS = (("girar", "Girar"), ("traccion", "Traccionar"), ("otoscopia", "Otoscopio"))
-PISTAS = {
-    "girar": "Arrastra para girar la cabeza.",
-    "traccion": "Arrastra desde la oreja hacia donde quieras tirar del pabellón.",
-    "otoscopia": "Lleva el mouse al conducto: lo que se ve aparece ahí. Muévelo un poco para recorrer.",
-}
+
 
 # Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py;
 # audio en resources/audio/comandos_ot/, scripts/voces_comandos.py --ot).
@@ -53,7 +43,7 @@ PISTAS = {
 # las fotos), y el paciente no contesta lo que el caso no sabe.
 GRUPOS = (
     ("PREPARAR", (
-        ("Explicar el examen", "explicar_otoscopia"),
+        ("Explicar la otoscopía", "explicar_otoscopia"),
     )),
     ("INSTRUCCIONES", (
         ("Quédese quieto", "quedese_quieto"),
@@ -246,84 +236,33 @@ class Otoscopia(QWidget):
         self._tiron = None     # el pabellón traccionado: {'oido', 'arriba', 'atras', 'correcto'}
         self._dentro = None    # 'od'/'oi': el otoscopio metido en ese conducto
 
+        self.cabeza = None     # la de la ventana (conectar)
         tema.aplicar_estilo(self, EXTRA_QSS)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 8, 12, 12)
-        self.tabs = QTabWidget()
-        self.tabs.addTab(self._build_tab_otoscopio(), iconos.icono("otoscopio", tema.TEXTO_TENUE, 16), "Otoscopio")
+        # Este widget son las secciones del panel (espéculo, pabellón,
+        # otoscopio); la cabeza, las frases y las pestañas son de la ventana
+        # de otoscopía y diapasones (ventana_ot_ac.py)
+        self._build_secciones()
         self.informe = InformeOtoscopia()
         # Lo actualiza el autoguardado (core/report_autosave.py).
         self.estado_informe = self.informe.estado
-        self.tabs.addTab(self.informe, iconos.icono("evolucion", tema.TEXTO_TENUE, 16), "Informe")
-        self.tabs.currentChanged.connect(self._iconos_pestanas)
-        self._iconos_pestanas(0)
-        layout.addWidget(self.tabs)
+        # La sección de diapasones del mismo informe (la pone la ventana)
+        self.informe_acumetria = None
 
         self.la_super(thr)
 
-    def _iconos_pestanas(self, activa):
-        """El icono de la pestaña elegida va en el acento, el resto tenue."""
-        for i, nombre in enumerate(("otoscopio", "evolucion")):
-            color = tema.ACENTO if i == activa else tema.TEXTO_TENUE
-            self.tabs.setTabIcon(i, iconos.icono(nombre, color, 16))
+    def conectar(self, cabeza):
+        """La cabeza de la ventana: dibuja lo que se ve por el otoscopio
+        (vista) y avisa cuando entra al conducto y cuando se tira del
+        pabellón."""
+        self.cabeza = cabeza
+        cabeza.vista = self.vista
+        cabeza.miro.connect(self._miro)
+        cabeza.salio.connect(self._salio)
+        cabeza.traccionado.connect(self._traccionar)
 
-    def _build_tab_otoscopio(self):
-        """Por áreas, como el posicionamiento de electrodos: las frases a la
-        izquierda; al centro la cabeza (el mouse es el otoscopio,
-        cabeza_examen.CabezaOtoscopia) con sus herramientas, sus vistas y la
-        pista; a la derecha el panel con el espéculo y el pabellón."""
-        tab = QWidget()
-        fila = QHBoxLayout(tab)
-        fila.setContentsMargins(0, 10, 0, 0)
-        fila.setSpacing(10)
-        self.frases = FrasesHabladas(GRUPOS, {}, "comandos_ot")
-        self.frases.setFixedWidth(250)
-        self.frases.btn_checked.connect(self._frase)
-        fila.addWidget(self.frases)
-
-        lienzo = QFrame()
-        lienzo.setProperty("card", "true")
-        col = QVBoxLayout(lienzo)
-        col.setContentsMargins(8, 8, 8, 8)
-        self.cabeza = CabezaOtoscopia(self.vista)
-        self.cabeza.miro.connect(self._miro)
-        self.cabeza.salio.connect(self._salio)
-        self.cabeza.traccionado.connect(self._traccionar)
-        col.addWidget(self.cabeza, 1)
-        herramientas = QHBoxLayout()
-        herramientas.setSpacing(4)
-        grupo = QButtonGroup(self)
-        self.botones_herramienta = {}
-        for clave, nombre in HERRAMIENTAS:
-            b = QPushButton(nombre)
-            b.setCheckable(True)
-            b.setProperty("herramienta", "true")
-            b.clicked.connect(lambda _c=False, k=clave: self._elegir_herramienta(k))
-            grupo.addButton(b)
-            herramientas.addWidget(b, 1)
-            self.botones_herramienta[clave] = b
-        col.addLayout(herramientas)
-        vistas = QHBoxLayout()
-        vistas.setSpacing(4)
-        for nombre, accion in (("Frente", lambda: self.cabeza.mirar(0, 0)),
-                               ("Oído derecho", lambda: self.cabeza.mirar_oido("od")),
-                               ("Oído izquierdo", lambda: self.cabeza.mirar_oido("oi"))):
-            b = QPushButton(nombre)
-            b.setProperty("segmento", "true")
-            b.clicked.connect(accion)
-            vistas.addWidget(b, 1)
-        col.addLayout(vistas)
-        self.pista = QLabel()
-        self.pista.setProperty("role", "hint")
-        self.pista.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        col.addWidget(self.pista)
-        fila.addWidget(lienzo, 1)
-
-        panel = QFrame()
-        panel.setProperty("card", "true")
-        panel.setFixedWidth(262)
-        pcol = QVBoxLayout(panel)
-        pcol.setContentsMargins(12, 10, 12, 12)
+    def _build_secciones(self):
+        pcol = QVBoxLayout(self)
+        pcol.setContentsMargins(0, 0, 0, 0)
         pcol.setSpacing(6)
         pcol.addWidget(self._seccion("ESPÉCULO"))
         pcol.addLayout(self._build_conos())
@@ -341,10 +280,6 @@ class Otoscopia(QWidget):
         self.lbl_otoscopio = QLabel("Fuera del oído.")
         self.lbl_otoscopio.setWordWrap(True)
         pcol.addWidget(self.lbl_otoscopio)
-        pcol.addStretch(1)
-        fila.addWidget(panel)
-        self._elegir_herramienta("girar")
-        return tab
 
     @staticmethod
     def _seccion(texto):
@@ -370,11 +305,6 @@ class Otoscopia(QWidget):
         self.btn_cono_pediatrico.setChecked(True)
         return fila
 
-    def _elegir_herramienta(self, clave):
-        self.botones_herramienta[clave].setChecked(True)
-        self.cabeza.poner_herramienta(clave)
-        self.pista.setText(PISTAS[clave])
-
     # ------------------------------------------------------------ técnica
     def _edad(self):
         try:
@@ -399,7 +329,8 @@ class Otoscopia(QWidget):
             return   # fue un clic en la oreja, no un tirón
         correcto = self._tiron_correcto(arriba, atras)
         self._tiron = {"oido": oido, "arriba": arriba, "atras": atras, "correcto": correcto}
-        self.cabeza.poner_tiron((oido, arriba, atras))
+        if self.cabeza is not None:
+            self.cabeza.poner_tiron((oido, arriba, atras))
         self._log("ot_traccion", oido=oido, arriba_cm=arriba, atras_cm=atras, correcto=correcto,
                   edad=self._edad())
         self._pintar_estado()
@@ -409,7 +340,8 @@ class Otoscopia(QWidget):
             return
         self._log("ot_soltar", oido=self._tiron["oido"])
         self._tiron = None
-        self.cabeza.poner_tiron(None)
+        if self.cabeza is not None:
+            self.cabeza.poner_tiron(None)
         self._pintar_estado()
 
     def _pintar_estado(self):
@@ -426,7 +358,8 @@ class Otoscopia(QWidget):
 
     def _cambiar_especulo(self, clave):
         self._log("ot_especulo", especulo=clave)
-        self.cabeza.update()
+        if self.cabeza is not None:
+            self.cabeza.update()
 
     def _no_entra(self):
         return self._especulo() == "adulto" and self._edad() < EDAD_ESPECULO_ADULTO
@@ -479,26 +412,24 @@ class Otoscopia(QWidget):
         if clave != SILENCIO:
             self._log("ot_instruccion", clave=clave)
 
-    def callar(self):
-        self.frases.callar()
-
     def la_super(self, data, appointment_id=None):
         """Hidrata (o deshidrata, data=None) el módulo con el caso actual --
         mismo patrón que Acumetria.la_super(), llamado por
         MainWindow._hydrate_modules() cada vez que cambia el caso activo."""
         self.data = data
         self.appointment_id = appointment_id
-        self.frases.callar()
-        self.frases.silencio()
         # El informe es de ESTE paciente: al cambiar de caso (o al
         # deshidratar) se limpia, si no el alumno arranca el siguiente con
         # los cuadrantes del anterior marcados.
         self.informe.limpiar()
+        if self.informe_acumetria is not None:
+            self.informe_acumetria.limpiar()
         self._fotos = {"od": None, "oi": None}
         self._tiron = None
         self._dentro = None
-        self.cabeza.poner_tiron(None)
-        self.cabeza.mirar_oido("od")
+        if self.cabeza is not None:
+            self.cabeza.poner_tiron(None)
+            self.cabeza.mirar_oido("od")
         self._pintar_estado()
 
         case_id = data.get("id") if data else None
@@ -523,7 +454,8 @@ class Otoscopia(QWidget):
                     # el plugin qwebp en el build, ver LabSim.spec).
                     print(f"Otoscopia: no se pudo decodificar la imagen ({len(data)} bytes, {data[:12]!r})")
                 self._fotos[oido] = None
-        self.cabeza.update()
+        if self.cabeza is not None:
+            self.cabeza.update()
 
     def submit_report(self):
         """Sube el informe al cerrar la atención -- lo llama main.py::
@@ -540,22 +472,37 @@ class Otoscopia(QWidget):
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None.
         Sin imágenes: la foto del caso ya la tiene el backend."""
-        if self.appointment_id is None or not self.informe.tiene_algo():
+        if self.appointment_id is None or not self._informe_tiene_algo():
             return None
         try:
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
             return None
         return {"appointment_id": appointment_id, "tipo": "OTOSCOPIA",
-                "data": self.informe.to_dict(), "images": None}
+                "data": self.informe_dict(), "images": None}
+
+    def informe_dict(self):
+        """Las dos secciones del informe: la otoscopía (od, oi) y los
+        diapasones (acumetria). Van juntas en el tipo OTOSCOPIA: es la misma
+        pantalla y así no hace falta un tipo nuevo en la base."""
+        datos = self.informe.to_dict()
+        if self.informe_acumetria is not None and self.informe_acumetria.tiene_algo():
+            datos["acumetria"] = self.informe_acumetria.to_dict()
+        return datos
+
+    def _informe_tiene_algo(self):
+        return self.informe.tiene_algo() or (
+            self.informe_acumetria is not None and self.informe_acumetria.tiene_algo())
 
     def restore_report(self, data):
         """Retomar la atención: vuelve el informe ya guardado (ver
         core/report_autosave.py), si todavía no se marcó nada."""
-        if self.appointment_id is None or self.informe.tiene_algo():
+        if self.appointment_id is None or self._informe_tiene_algo():
             return False
         self.informe.from_dict(data or {})
-        return self.informe.tiene_algo()
+        if self.informe_acumetria is not None:
+            self.informe_acumetria.from_dict((data or {}).get("acumetria") or {})
+        return self._informe_tiene_algo()
 
     def _subir_informe(self):
         """(ok, detalle). Sube el informe tipo 'OTOSCOPIA' -- sin imágenes:

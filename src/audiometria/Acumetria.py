@@ -8,10 +8,11 @@
 #################################################################
 """Diapasones sobre la cabeza del paciente (2026-11-06).
 
-A la izquierda lo que se le dice al paciente (frases_habladas.py), al
-centro la cabeza (cabeza_examen.py: se gira y se le apoya el diapasón donde
-uno quiera) y a la derecha el diapasón (512 o 1024 Hz, golpearlo, cuánto
-vibra todavía) y la conversación.
+Va en la ventana de otoscopía y diapasones (ventana_ot_ac.py), que tiene
+la cabeza (cabeza_examen.py: se gira y se le apoya el diapasón donde uno
+quiera) y las frases al paciente. Este módulo pone sus secciones en el
+panel (el diapasón: 512 o 1024 Hz, golpearlo, cuánto vibra todavía), la
+conversación y lo que contesta el paciente.
 
 No hay botones de "Rinne" ni de "Weber": la prueba la hace el alumno con
 dónde pone el diapasón y lo que le dice al paciente.
@@ -33,22 +34,21 @@ Todo va a action_logs con prefijo ac_ y la verdad del caso en el payload.
 import html
 import time
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (
-    QButtonGroup, QFrame, QHBoxLayout, QLabel, QProgressBar, QPushButton, QSizePolicy,
+    QButtonGroup, QHBoxLayout, QLabel, QProgressBar, QPushButton,
     QStackedLayout, QTextEdit, QVBoxLayout, QWidget,
 )
 
 from audiometria import diapasones as dp
 from audiometria import no_realizable
-from audiometria.cabeza_examen import VISTA_ARRIBA, VISTA_FRENTE, CabezaExamen, zona
+from audiometria.cabeza_examen import zona
 from audiometria.comandos_voz import SILENCIO
-from audiometria.frases_habladas import FrasesHabladas
 from backend.log_queue import get_log_queue
 from core import iconos, tema
 
 EXTRA_QSS = f"""
-QTextEdit[conversacion="true"] {{ border: none; background: transparent; font-size: 10pt; }}
+QTextEdit[conversacion="true"] {{ border: none; background: {tema.TARJETA}; font-size: 10pt; }}
 QProgressBar#vibracion {{ border: 1px solid {tema.BORDE}; border-radius: 5px; background: {tema.TARJETA_ALT};
                           max-height: 10px; text-align: center; }}
 QProgressBar#vibracion::chunk {{ background: {tema.ACENTO}; border-radius: 4px; }}
@@ -63,7 +63,7 @@ QPushButton[herramienta="true"]:checked {{ background: {tema.ACENTO}; border-col
 # scripts/voces_comandos.py --ac): no se cambian aunque cambie el rótulo.
 GRUPOS = (
     ("PREPARAR", (
-        ("Explicar el examen", "explicar_diapasones"),
+        ("Explicar los diapasones", "explicar_diapasones"),
     )),
     ("INSTRUCCIONES", (
         ("Avíseme si lo escucha", "avise_si_escucha"),
@@ -86,14 +86,6 @@ NO_SABE = "¿Y qué tengo que hacer?"
 DONDE_WEBER = {"od": "En el oído derecho.", "oi": "En el oído izquierdo.",
                "centrado": "Al medio, en toda la cabeza."}
 ARMONICOS = "Diapasón sonando con armónicos"
-# Las herramientas y vistas de la cabeza, como las de los electrodos
-HERRAMIENTAS = (("girar", "Girar"), ("diapason", "Diapasón"))
-VISTAS = (("Frente", VISTA_FRENTE), ("Derecha", (90, 0)), ("Izquierda", (270, 0)),
-          ("Arriba", VISTA_ARRIBA), ("Atrás", (180, 20)))
-PISTAS = {
-    "girar": "Arrastra para girar la cabeza.",
-    "diapason": "Clic en la piel: ahí se apoya el diapasón (o frente a la oreja, sin tocar).",
-}
 LADO = {"od": "derecho", "oi": "izquierdo"}
 DONDE_TEXTO = {"mastoides": "en la mastoides", "pabellon": "frente al pabellón",
                "linea_media": "en la línea media", "fuera_de_linea": "en la frente, a un lado de la línea media",
@@ -116,18 +108,14 @@ class Acumetria(QWidget):
         self._aviso_id = 0          # para el "ya no lo escucho" programado
         self._reloj = time.monotonic
 
-        tema.aplicar_estilo(self, EXTRA_QSS)
-        self.equipo = QWidget()
-        fila = QHBoxLayout(self.equipo)
-        fila.setContentsMargins(12, 8, 12, 12)
-        fila.setSpacing(12)
-        self.frases = FrasesHabladas(GRUPOS, PRUEBA, "comandos_ac")
-        self.frases.setFixedWidth(250)
-        self.frases.btn_checked.connect(self._frase)
-        fila.addWidget(self.frases)
-        fila.addWidget(self._centro(), 1)
-        fila.addWidget(self._derecha())
+        self.cabeza = None            # la de la ventana (conectar)
+        self.pedir_herramienta = None # la ventana elige la herramienta Diapasón al golpear
 
+        tema.aplicar_estilo(self, EXTRA_QSS)
+        # Las secciones del panel (diapasón y vibración); la conversación va
+        # aparte para que la ventana la ponga abajo del panel
+        self.equipo = self._secciones()
+        self.conversacion = self._conversacion()
         self.aviso_bebe = no_realizable.AvisoNoRealizable("Acumetría no realizable")
         self.pila = QStackedLayout(self)
         self.pila.addWidget(self.equipo)
@@ -138,6 +126,19 @@ class Acumetria(QWidget):
         self._tick.timeout.connect(self._mostrar_vibracion)
         self.la_super(thr)
 
+    def conectar(self, cabeza):
+        """La cabeza de la ventana de otoscopía y diapasones."""
+        self.cabeza = cabeza
+        cabeza.apoyado.connect(self._apoyar_si_diapason)
+
+    def _sacar_de_la_cabeza(self):
+        if self.cabeza is not None:
+            self.cabeza.poner_diapason(None)
+
+    def _apoyar_si_diapason(self, punto, normal):
+        if self.cabeza is not None and self.cabeza.herramienta == "diapason":
+            self._apoyar(punto, normal)
+
     # ------------------------------------------------------------ armado
     @staticmethod
     def _seccion(texto):
@@ -145,57 +146,10 @@ class Acumetria(QWidget):
         lbl.setProperty("role", "seccion")
         return lbl
 
-    def _centro(self):
-        """La cabeza con sus herramientas, sus vistas y la pista, como en el
-        posicionamiento de electrodos."""
-        lienzo = QFrame()
-        lienzo.setProperty("card", "true")
-        col = QVBoxLayout(lienzo)
-        col.setContentsMargins(8, 8, 8, 8)
-        self.cabeza = CabezaExamen()
-        self.cabeza.apoyado.connect(self._apoyar)
-        col.addWidget(self.cabeza, 1)
-        herramientas = QHBoxLayout()
-        herramientas.setSpacing(4)
-        grupo = QButtonGroup(self)
-        self.botones_herramienta = {}
-        for clave, nombre in HERRAMIENTAS:
-            b = QPushButton(nombre)
-            b.setCheckable(True)
-            b.setProperty("herramienta", "true")
-            b.clicked.connect(lambda _c=False, k=clave: self._elegir_herramienta(k))
-            grupo.addButton(b)
-            herramientas.addWidget(b, 1)
-            self.botones_herramienta[clave] = b
-        col.addLayout(herramientas)
-        vistas = QHBoxLayout()
-        vistas.setSpacing(4)
-        for texto, vista in VISTAS:
-            b = QPushButton(texto)
-            b.setProperty("segmento", "true")
-            b.clicked.connect(lambda _c=False, v=vista: self.cabeza.mirar(*v))
-            vistas.addWidget(b, 1)
-        col.addLayout(vistas)
-        self.pista = QLabel()
-        self.pista.setProperty("role", "hint")
-        self.pista.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        col.addWidget(self.pista)
-        self._elegir_herramienta("girar")
-        return lienzo
-
-    def _elegir_herramienta(self, clave):
-        self.botones_herramienta[clave].setChecked(True)
-        self.cabeza.poner_herramienta(clave)
-        self.pista.setText(PISTAS[clave])
-
-    def _derecha(self):
-        """El panel: el diapasón (cuál, golpearlo, cuánto vibra, retirarlo)
-        y la conversación con el paciente."""
-        panel = QFrame()
-        panel.setProperty("card", "true")
-        panel.setFixedWidth(300)
-        pcol = QVBoxLayout(panel)
-        pcol.setContentsMargins(12, 10, 12, 12)
+    def _secciones(self):
+        caja = QWidget()
+        pcol = QVBoxLayout(caja)
+        pcol.setContentsMargins(0, 0, 0, 0)
         pcol.setSpacing(6)
         pcol.addWidget(self._seccion("DIAPASÓN"))
         fila = QHBoxLayout()
@@ -218,8 +172,6 @@ class Acumetria(QWidget):
         self.btn_golpear.setIcon(iconos.icono_boton("diapason", tema.TEXTO_SUAVE, tam=16))
         self.btn_golpear.clicked.connect(self._golpear)
         pcol.addWidget(self.btn_golpear)
-        pcol.addSpacing(4)
-        pcol.addWidget(self._seccion("VIBRACIÓN"))
         self.barra = QProgressBar()
         self.barra.setObjectName("vibracion")
         self.barra.setRange(0, 100)
@@ -238,14 +190,21 @@ class Acumetria(QWidget):
         self.btn_retirar.setIcon(iconos.icono_boton("cerrar", tema.TEXTO_SUAVE, tam=14))
         self.btn_retirar.clicked.connect(self._retirar)
         pcol.addWidget(self.btn_retirar)
-        pcol.addSpacing(4)
-        pcol.addWidget(self._seccion("CONVERSACIÓN"))
+        return caja
+
+    def _conversacion(self):
+        caja = QWidget()
+        col = QVBoxLayout(caja)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(6)
+        col.addWidget(self._seccion("CONVERSACIÓN"))
         self.log = QTextEdit()
         self.log.setReadOnly(True)
         self.log.setProperty("conversacion", "true")
         self.log.setPlaceholderText("Lo que le digas al paciente y lo que él conteste.")
-        pcol.addWidget(self.log, 1)
-        return panel
+        tema.aplicar_estilo(caja, EXTRA_QSS)
+        col.addWidget(self.log, 1)
+        return caja
 
     # ------------------------------------------------------------ caso
     def la_super(self, data, appointment_id=None):
@@ -260,11 +219,9 @@ class Acumetria(QWidget):
         self._apoyo = None
         self._rinne = None
         self._aviso_id += 1
-        self.frases.callar()
-        self.frases.silencio()
         self.log.clear()
-        self.cabeza.poner_diapason(None)
-        self.cabeza.mirar(*VISTA_FRENTE)
+        if self.cabeza is not None:
+            self.cabeza.poner_diapason(None)
         sirve = not data or self.modelo.disponible()
         self.lbl_armonicos.setVisible(not sirve)
         self.btn_golpear.setEnabled(sirve)
@@ -273,13 +230,6 @@ class Acumetria(QWidget):
         if motivo:
             self.aviso_bebe.texto.setText(motivo)
         self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
-
-    def callar(self):
-        self.frases.callar()
-
-    def hideEvent(self, event):
-        super().hideEvent(event)
-        self.frases.callar()
 
     def _log(self, action, **payload):
         """Encola una acción del alumno con los diapasones (prefijo ac_, ver
@@ -320,7 +270,7 @@ class Acumetria(QWidget):
         self._apoyo = None
         self._rinne = None
         self._aviso_id += 1
-        self.cabeza.poner_diapason(None)
+        self._sacar_de_la_cabeza()
         self._mostrar_vibracion()
 
     def _golpear(self):
@@ -330,9 +280,10 @@ class Acumetria(QWidget):
         self._apoyo = None
         self._rinne = None
         self._aviso_id += 1
-        self.cabeza.poner_diapason(None)
+        self._sacar_de_la_cabeza()
         self._log("ac_golpe", hz=self.hz())
-        self._elegir_herramienta("diapason")
+        if self.pedir_herramienta is not None:
+            self.pedir_herramienta("diapason")
         self._decir(f"Tú: golpeas el diapasón de {dict(dp.DIAPASONES)[self.hz()]}.")
         self._tick.start()
         self._mostrar_vibracion()
@@ -343,7 +294,7 @@ class Acumetria(QWidget):
         self._log("ac_retirar", hz=self.hz(), zona=self._apoyo["zona"])
         self._apoyo = None
         self._aviso_id += 1
-        self.cabeza.poner_diapason(None)
+        self._sacar_de_la_cabeza()
         self._decir("Tú: retiras el diapasón.")
         self.btn_retirar.setEnabled(False)
 
@@ -384,7 +335,8 @@ class Acumetria(QWidget):
         apoyo = {"zona": donde, "oido": oido, "sitio": sitio}
         self._apoyo = apoyo
         self._aviso_id += 1
-        self.cabeza.poner_diapason(punto, normal)
+        if self.cabeza is not None:
+            self.cabeza.poner_diapason(punto, normal)
         self.btn_retirar.setEnabled(True)
         hz = self.hz()
         t = self._desde_golpe()

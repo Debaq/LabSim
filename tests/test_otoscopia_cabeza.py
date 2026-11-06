@@ -28,7 +28,10 @@ class _Cola:
 
 
 def _modulo(edad=40):
+    from audiometria.Acumetria import Acumetria
+    from audiometria.ventana_ot_ac import OtoscopiaAcumetriaWindow
     w = O.Otoscopia(None)
+    w.ventana = OtoscopiaAcumetriaWindow(w, Acumetria(None))   # la cabeza es de la ventana
     w.log_queue = _Cola()
     w.data = {"id": 79, "edad": edad}
     w.appointment_id = 102
@@ -73,7 +76,7 @@ def test_el_mouse_en_el_conducto_es_el_otoscopio():
     from PySide6.QtCore import QEvent
     w = _modulo()
     w.cabeza.resize(600, 600)
-    w._elegir_herramienta("otoscopia")   # como en los electrodos: la herramienta se elige
+    w.ventana.elegir_herramienta("otoscopia")   # como en los electrodos: la herramienta se elige
     w.cabeza.show()
     w.cabeza.mirar_oido("od")
     APP.processEvents()
@@ -92,6 +95,31 @@ def test_queda_en_el_registro():
     acciones = [a for a, _p in w.log_queue.acciones]
     assert acciones == ["ot_traccion", "ot_otoscopio"], acciones
     assert w.log_queue.acciones[-1][1]["traccion_correcta"] is True
+
+
+
+def test_el_informe_lleva_las_dos_secciones_y_vuelve():
+    w = _modulo()
+    inf = w.ventana.informe_acumetria
+    inf._ciclar(("500", "od"))                      # (+)
+    for _ in range(3):
+        inf._ciclar(("1000", "oi"))                 # (+), (−), FN
+    inf._weber("500", "oi", True)
+    job = w.report_job()
+    assert job["tipo"] == "OTOSCOPIA"
+    assert job["data"]["acumetria"] == {"rinne": {"500": {"od": "positivo"}, "1000": {"oi": "falso_negativo"}},
+                                        "weber": {"500": "oi"}}, job["data"]
+    datos = job["data"]
+    w.la_super(dict(w.data), 102)                   # retomar: se limpia y vuelve
+    assert not inf.tiene_algo()
+    assert w.restore_report(datos) and inf.to_dict() == datos["acumetria"]
+
+
+def test_solo_diapasones_tambien_se_informa():
+    w = _modulo()
+    assert w.report_job() is None, "sin nada marcado no hay informe"
+    w.ventana.informe_acumetria._weber("1000", "centrado", True)
+    assert w.report_job()["data"]["acumetria"]["weber"] == {"1000": "centrado"}
 
 
 if __name__ == "__main__":

@@ -26,19 +26,22 @@ def _bajo_el_mouse(win, boton):
 
 
 def test_nada_tapa_los_botones_de_los_diapasones():
+    from audiometria.Otoscopia import Otoscopia
+    from audiometria.ventana_ot_ac import OtoscopiaAcumetriaWindow
     w = A.Acumetria(None)
-    marco = FrameSubMdi(w, expand=True)
+    v = OtoscopiaAcumetriaWindow(Otoscopia(None), w)
+    marco = FrameSubMdi(v, expand=True)
     marco.resize(1100, 650)
     marco.show()
     w.la_super({"id": 79, "edad": 24, "Rinne": {"500": {"od": "positivo"}}, "Weber": {"500": "oi"}}, 102)
     APP.processEvents()
     win = marco.window()
-    for boton in (w.botones_hz["500"], w.botones_hz["1000"], w.btn_golpear, w.btn_retirar):
-        bajo = _bajo_el_mouse(win, boton)
-        assert bajo is boton or boton.isAncestorOf(bajo), \
-            f"{boton.text()}: el clic lo recibe {type(bajo).__name__}"
-    bajo = _bajo_el_mouse(win, w.cabeza)
-    assert bajo is w.cabeza, f"la cabeza: el clic lo recibe {type(bajo).__name__}"
+    controles = [w.botones_hz["500"], w.botones_hz["1000"], w.btn_golpear, w.btn_retirar, v.cabeza]
+    controles += list(v.botones_herramienta.values())
+    for control in controles:
+        bajo = _bajo_el_mouse(win, control)
+        assert bajo is control or control.isAncestorOf(bajo), \
+            f"{type(control).__name__} {getattr(control, 'text', lambda: '')()}: el clic lo recibe {type(bajo).__name__}"
     marco.close()
 
 

@@ -27,7 +27,9 @@ class FrasesHabladas(ComandosVoz):
 
     def __init__(self, grupos, prueba, carpeta, volumen=VOLUMEN):
         super().__init__(grupos, prueba)
-        self._dir = os.path.join(context.get_resource("audio"), carpeta)
+        # Una carpeta o varias (otoscopía y diapasones comparten panel)
+        carpetas = (carpeta,) if isinstance(carpeta, str) else tuple(carpeta)
+        self._dirs = [os.path.join(context.get_resource("audio"), c) for c in carpetas]
         self._salida = QAudioOutput(self)
         self._salida.setVolume(volumen)
         self._player = QMediaPlayer(self)
@@ -44,10 +46,12 @@ class FrasesHabladas(ComandosVoz):
         self._player.stop()
         if clave == SILENCIO:
             return
-        ruta = os.path.join(self._dir, f"{clave}.mp3")
-        if os.path.exists(ruta):
-            self._player.setSource(QUrl.fromLocalFile(ruta))
-            self._player.play()
+        for carpeta in self._dirs:
+            ruta = os.path.join(carpeta, f"{clave}.mp3")
+            if os.path.exists(ruta):
+                self._player.setSource(QUrl.fromLocalFile(ruta))
+                self._player.play()
+                return
 
     def callar(self):
         self._player.stop()

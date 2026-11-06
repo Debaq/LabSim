@@ -42,10 +42,11 @@ def test_se_arman_y_otac_sube_los_dos_informes_al_esconderse():
         w.close()
 
 
-def test_con_solo_otoscopia_la_ventana_no_tiene_pestanas():
+def test_con_solo_otoscopia_no_hay_diapason():
     w = _ventana(["OT", "AGENDA"])
     try:
-        assert w.subw["AC"].obj.tabs is None
+        assert "diapason" not in w.subw["AC"].obj.botones_herramienta
+        assert "otoscopia" in w.subw["AC"].obj.botones_herramienta
     finally:
         w.close()
 

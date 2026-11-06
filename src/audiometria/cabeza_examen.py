@@ -245,9 +245,9 @@ class CabezaOtoscopia(CabezaExamen):
     miro = Signal(str)       # el otoscopio entró a ese conducto
     salio = Signal()
 
-    def __init__(self, vista, parent=None):
+    def __init__(self, vista=None, parent=None):
         super().__init__(parent)
-        self.vista = vista
+        self.vista = vista or (lambda _oido: {"texto": "Otoscopio sin batería"})
         self.herramienta = "otoscopia"
         self._mouse = None
         self._conducto = None   # el conducto donde está el otoscopio
@@ -307,24 +307,18 @@ class CabezaOtoscopia(CabezaExamen):
             self._conducto = None
             self.salio.emit()
 
-    def mouseReleaseEvent(self, ev):
-        if ev.button() == Qt.MouseButton.LeftButton and self._tirando is not None:
-            super().mouseReleaseEvent(ev)
-            return
-        CabezaElectrodos.mouseReleaseEvent(self, ev)
+    # El soltar lo resuelve CabezaExamen: el tirón, y el clic con el diapasón
 
     # ------------------------------------------------------------ dibujo
     def paintEvent(self, ev):
-        CabezaElectrodos.paintEvent(self, ev)
+        # La cabeza, el diapasón apoyado y el tirón en curso (CabezaExamen)
+        super().paintEvent(ev)
         from PySide6.QtGui import QPainter
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         if self.tiron is not None:
             self._flecha_tiron(p)
-        if self._tirando is not None:
-            _lado, inicio, fin = self._tirando
-            self._flecha(p, inicio, fin)
         if self._conducto is not None and self._mouse is not None:
             self._pintar_otoscopio(p)
         p.end()
