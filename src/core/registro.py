@@ -84,7 +84,58 @@ def detalle_sistema() -> dict:
         glibc = _glibc()
         if glibc:
             info["glibc"] = glibc
+        audio = diagnostico_audio()
+        if audio is not None:
+            try:
+                st = audio.stat()
+                info["diag_audio"] = (f"{audio.name} del {datetime.fromtimestamp(st.st_mtime):%Y-%m-%d %H:%M}"
+                                      f" ({max(1, st.st_size // 1024)} KB, va al final del registro)")
+            except OSError:
+                pass
     return info
+
+
+# -- Diagnóstico de audio del equipo -------------------------------------------------
+# En el laboratorio, diag-audio.sh (repo archcraft-postinstall) deja
+# ~/audio-<hostname>.txt con tarjetas, PipeWire, WirePlumber y el kernel.
+# Si está, va en el ticket: las caídas dentro del plugin de audio de Qt
+# (swr_init, tickets 50/52) dependen de la tarjeta y el registro de la app
+# no lo dice.
+MAX_DIAG_AUDIO = 512 * 1024
+
+
+def diagnostico_audio():
+    """Ruta del diagnóstico de audio de este equipo, o None."""
+    if not sys.platform.startswith("linux"):
+        return None
+    casa = Path.home()
+    try:
+        propio = casa / f"audio-{socket.gethostname()}.txt"
+        if propio.is_file():
+            return propio
+        # El hostname de Python puede no coincidir con el de hostnamectl.
+        otros = sorted(casa.glob("audio-*.txt"), key=lambda p: p.stat().st_mtime, reverse=True)
+    except OSError:
+        return None
+    return otros[0] if otros else None
+
+
+def con_diagnostico_audio(log: bytes) -> bytes:
+    """El registro con el diagnóstico de audio pegado al final, si existe."""
+    ruta = diagnostico_audio()
+    if ruta is None:
+        return log
+    try:
+        with open(ruta, "rb") as f:
+            f.seek(0, 2)
+            tam = f.tell()
+            f.seek(max(0, tam - MAX_DIAG_AUDIO))
+            texto = f.read()
+        hora = datetime.fromtimestamp(ruta.stat().st_mtime)
+    except OSError:
+        return log
+    cabeza = f"\n===== Diagnóstico de audio: {ruta} ({hora:%Y-%m-%d %H:%M}) =====\n".encode()
+    return log + cabeza + texto
 
 
 def _glibc() -> str:

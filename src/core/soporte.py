@@ -21,7 +21,8 @@ from core.ui_helpers import style_dialog
 # Rótulos de detalle_sistema() para mostrar.
 _ROTULOS = {"so_version": "Sistema operativo", "distribucion": "Distribución",
             "arquitectura": "Arquitectura", "python": "Python", "qt": "Qt",
-            "pantalla": "Pantalla", "kiosko": "Equipo del laboratorio", "glibc": "glibc"}
+            "pantalla": "Pantalla", "kiosko": "Equipo del laboratorio", "glibc": "glibc",
+            "diag_audio": "Diagnóstico de audio"}
 
 
 # Lo que devuelve _enviar() cuando no salió pero quedó en el equipo.
@@ -43,7 +44,7 @@ def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False, red=None
     try:
         if not cierre_inesperado:
             detalle = dict(detalle, **(red if red is not None else _probar_red(base_url, backend_client)))
-        log_gz = gzip.compress(registro.cola())
+        log_gz = gzip.compress(registro.con_diagnostico_audio(registro.cola()))
         args = (descripcion, equipo_info, detalle, log_gz or None)
         client = BackendClient(base_url, context.get_resource("json/session.json"))
         if cierre_inesperado:
