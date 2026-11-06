@@ -89,6 +89,11 @@ class Escalado(QGraphicsView):
                             | QPainter.RenderHint.SmoothPixmapTransform)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.escala = 1.0
+        # El equipo puede crecer después de armado: en el audiómetro, con
+        # "Narrow Band Noise" en los dos canales la pantalla pide ~30 px más.
+        # La escena quedaba del tamaño inicial y cortaba el borde derecho
+        # (ticket 54). Se sigue el tamaño real del proxy.
+        self._proxy.geometryChanged.connect(self._al_cambiar_equipo)
 
     def sizeHint(self):
         return self.base
@@ -96,11 +101,23 @@ class Escalado(QGraphicsView):
     def minimumSizeHint(self):
         return QSize(0, 0)
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
+    def _al_cambiar_equipo(self):
+        tam = self._proxy.size().toSize()
+        if tam == self.base or tam.isEmpty():
+            return
+        self.base = tam
+        self.setSceneRect(self._proxy.boundingRect())
+        self._reescalar()
+        self.updateGeometry()
+
+    def _reescalar(self):
         escala = min(self.width() / self.base.width(), self.height() / self.base.height())
         self.escala = max(ESCALA_MINIMA, min(ESCALA_MAXIMA, escala))
         self.setTransform(QTransform.fromScale(self.escala, self.escala))
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._reescalar()
 
     # El equipo se muestra y se esconde con la ventana: al esconderse corta
     # el sonido (Audiometer.hideEvent, por ejemplo). Dentro de la escena no

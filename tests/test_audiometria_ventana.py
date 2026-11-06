@@ -115,6 +115,21 @@ def test_cada_instruccion_dice_su_prueba_y_se_busca_por_ella():
     assert visibles == {"dos_pitos", "sonidos_iguales", "en_qué_oído"}
 
 
+def test_el_equipo_que_crece_no_se_corta():
+    """Ticket 54: con Narrow Band Noise en los dos canales la pantalla del
+    audiómetro pide más ancho; la escena tiene que crecer con él."""
+    from PySide6.QtWidgets import QPushButton
+    v = _ventana(1440, 760)
+    a = v.audiometro
+    for b in [b for b in a.findChildren(QPushButton) if b.text() == "NBN"]:
+        b.click()
+        QApplication.processEvents()   # el canal toma el estímulo antes del otro
+    QApplication.processEvents()
+    escena = v.escalado.sceneRect().size().toSize()
+    assert escena.width() >= a.width() and escena.height() >= a.height(), (escena, a.size())
+    assert _dibujado(v).right() <= _rect(v, v.escalado).right() + 1
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):
