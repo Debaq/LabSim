@@ -76,6 +76,8 @@ def _child() -> int:
 
     def siguiente_login():
         win._enable_widgets()
+        # Como lo hace una persona: el admin pasa a usuario y contraseña
+        win.mostrar_pagina(win.PAGINA_USUARIO)
         win.Le_name.setText("admin")
         win.Le_passw.setText("1234")
         win.get()

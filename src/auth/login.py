@@ -1,6 +1,8 @@
 # pylint: disable=no-name-in-module
-from PySide6.QtCore import QRegularExpression, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QPainter, QRegularExpressionValidator
+import re
+
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import (QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
                                QStackedWidget, QVBoxLayout, QWidget)
 from core import hilos, tema
@@ -87,8 +89,8 @@ class MainLogin(QWidget):
         self.Le_codigo = _CampoCodigo()
         self.Le_codigo.setObjectName("Le_codigo")
         self.Le_codigo.setPlaceholderText("6 dígitos")
-        self.Le_codigo.setMaxLength(LARGO_CODIGO)
-        self.Le_codigo.setValidator(QRegularExpressionValidator(QRegularExpression(r"\d{0,6}")))
+        # Con espacio para pegar con espacios o guiones: _codigo_cambio deja los 6 números
+        self.Le_codigo.setMaxLength(LARGO_CODIGO * 3)
         self.Le_codigo.setAlignment(Qt.AlignCenter)
         fuente = QFont(self.Le_codigo.font())
         fuente.setPointSizeF(fuente.pointSizeF() * 1.5)
@@ -192,14 +194,23 @@ class MainLogin(QWidget):
     # -----------------------------------------------------------------
 
     def _codigo_cambio(self, texto):
-        """El código completo se envía solo."""
-        if len(texto) == LARGO_CODIGO and texto.isdigit():
+        """Solo números (un código pegado con espacios o un salto de línea
+        queda limpio) y, completo, se envía solo."""
+        limpio = re.sub(r"\D", "", texto)[:LARGO_CODIGO]
+        if limpio != texto:
+            self.Le_codigo.setText(limpio)   # vuelve a entrar acá con el limpio
+            return
+        if len(texto) == LARGO_CODIGO:
             self.get()
 
     def _credenciales(self):
         """(usuario, contraseña) según la página: el alumno manda el código
         como contraseña y el usuario vacío (ver pair_exchange.php)."""
-        if self.paginas.currentIndex() == self.PAGINA_USUARIO or self.Le_name.text().strip():
+        # Manda la página que está a la vista: con el usuario escrito de un
+        # ingreso anterior (el admin), la página del código mandaba ese
+        # usuario sin contraseña y decía "El código tiene 6 dígitos"
+        # (2026-11-06).
+        if self.paginas.currentIndex() == self.PAGINA_USUARIO:
             return self.Le_name.text(), self.Le_passw.text()
         return "", self.Le_codigo.text()
 
