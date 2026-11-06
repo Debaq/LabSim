@@ -67,6 +67,7 @@ def test_audiometro_cambia_al_enchufar():
                               btn_freq_plus=QPushButton(), btn_step_5=QPushButton(),
                               btn_ext_range=QPushButton(), cycle_output=lambda c: None,
                               cycle_stim=lambda c: None, cycle_trans=lambda c: None)
+    a._mapas = lambda teclas: Audiometer._mapas(a, teclas)
     preferencias().cargar({})
     Audiometer._aplicar_atajos(a)
     assert a._dial_keys[Qt.Key_W] == (0, True) and a._dial_keys[Qt.Key_S] == (0, False)
@@ -83,6 +84,9 @@ def test_audiometro_cambia_al_enchufar():
     Audiometer._aplicar_atajos(a)
     assert a._dial_keys[Qt.Key_Up] == (0, True)
     assert a._stim_keys[Qt.Key_Space] == 0
+    # Lo leído directo del controlador usa siempre su firmware.
+    dial, _sw, stim = a._mapa_controlador
+    assert dial[Qt.Key_S] == (0, True) and stim[Qt.Key_V] == 0
     preferencias().cargar({})
 
 

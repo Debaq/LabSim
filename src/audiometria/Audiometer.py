@@ -22,7 +22,7 @@ from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QFont, QKeySequence
 from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QMdiSubWindow, QPlainTextEdit,
                                QTextEdit, QWidget)
-from core import atajos, keyboard_monitor
+from core import atajos, controlador_directo, keyboard_monitor
 from core.preferencias import preferencias
 from backend.log_queue import get_log_queue
 from audiometria.response import ESTIMULO_ENCENDIDO
@@ -276,6 +276,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.kb_monitor.connection_changed.connect(self._aplicar_atajos)
         preferencias().cambiaron.connect(self._aplicar_atajos)
         self._aplicar_atajos()
+        # El controlador leído directo, sin pasar por el foco (ver
+        # core/controlador_directo.py). El receptor es self: Qt corta la
+        # conexión si el audiómetro se destruye.
+        controlador_directo.controlador().tecla.connect(self._tecla_directa)
 
         # Shortcuts V/B del btn estimulo: no se usa QPushButton.setShortcut
         # porque eso dispara animateClick() (press+release fijo ~100ms) sin
@@ -415,34 +419,72 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def _aplicar_atajos(self, *_):
         teclas = atajos.teclas(self.kb_monitor.is_connected(), preferencias().atajos())
+        self._dial_keys, self._switch_keys, self._stim_keys = self._mapas(teclas)
+        # Lo que llega leído directo del controlador (core/controlador_directo)
+        # son siempre las teclas de su firmware.
+        self._mapa_controlador = self._mapas(dict(atajos.CONTROLADOR))
+        for btn in (self.btn_freq_minus, self.btn_freq_plus, self.btn_step_5,
+                    self.btn_ext_range):
+            btn.setShortcut(QKeySequence())
+
+    def _mapas(self, teclas):
+        """(dial, conmutadores, estímulo): Qt.Key -> acción, para un juego
+        de teclas de core/atajos.py."""
         k = lambda accion: atajos.qt_key(teclas[accion])  # noqa: E731
-        self._dial_keys = {
+        dial = {
             k("a_ch1_subir"): (0, True),
             k("a_ch1_bajar"): (0, False),
             k("a_ch2_subir"): (1, True),
             k("a_ch2_bajar"): (1, False),
         }
-        self._switch_keys = {
+        conmutadores = {
             k("a_salida_ch1"): lambda: self.cycle_output(0),
             k("a_tipo_estimulo_ch1"): lambda: self.cycle_stim(0),
             k("a_transductor_ch1"): lambda: self.cycle_trans(0),
             k("a_salida_ch2"): lambda: self.cycle_output(1),
             k("a_tipo_estimulo_ch2"): lambda: self.cycle_stim(1),
             k("a_transductor_ch2"): lambda: self.cycle_trans(1),
-        }
-        self._stim_keys = {k("a_estimulo_ch1"): 0, k("a_estimulo_ch2"): 1}
-        # Frecuencia, pasos de 5 y rango extendido también por el filtro y no
-        # con el atajo del botón: el audiómetro va dentro de una escena con
-        # zoom (audiometria/ventana.py) y ahí solo se comprobó el filtro.
-        self._switch_keys.update({
+            # Frecuencia, pasos de 5 y rango extendido también por aquí y no
+            # con el atajo del botón: el audiómetro va dentro de una escena
+            # con zoom (audiometria/ventana.py) y ahí solo se comprobó el filtro.
             k("a_freq_menos"): self.btn_freq_minus.click,
             k("a_freq_mas"): self.btn_freq_plus.click,
             Qt.Key_5: self.btn_step_5.click,
             Qt.Key_E: self.btn_ext_range.click,
-        })
-        for btn in (self.btn_freq_minus, self.btn_freq_plus, self.btn_step_5,
-                    self.btn_ext_range):
-            btn.setShortcut(QKeySequence())
+        }
+        estimulo = {k("a_estimulo_ch1"): 0, k("a_estimulo_ch2"): 1}
+        return dial, conmutadores, estimulo
+
+    def _atender(self, mapas, key, apretada, repetida):
+        """Hace lo que corresponde a la tecla; True si era del audiómetro."""
+        dial, conmutadores, estimulo = mapas
+        if apretada:
+            if key in dial:
+                ch, up = dial[key]
+                self.MoveDial(ch, up)
+                return True
+            if key in conmutadores:
+                conmutadores[key]()
+                return True
+        ch = estimulo.get(key)
+        if ch is not None:
+            if not repetida:
+                if apretada:
+                    self.btn_stims[ch].pressed.emit()
+                else:
+                    self.btn_stims[ch].released.emit()
+            return True
+        return False
+
+    def _tecla_directa(self, key, apretada, repetida):
+        """Del controlador leído directo (core/controlador_directo): va al
+        audiómetro si está a la vista, tenga el foco quien lo tenga."""
+        if not self.isVisible():
+            return
+        try:
+            self._atender(self._mapa_controlador, key, apretada, repetida)
+        except Exception:  # noqa: BLE001 -- una tecla rota no tumba la app
+            traceback.print_exc()
 
     def eventFilter(self, obj, event):
         # Instalado en el QWindow principal: le llegan las teclas, el mouse
@@ -466,23 +508,9 @@ class Audiometer(QWidget, Ui_Audiometer):
                 if _escribiendo(QApplication.focusWidget()):
                     return False
 
-                key = event.key()
-                if event_type == QEvent.KeyPress:
-                    if key in self._dial_keys:
-                        ch, up = self._dial_keys[key]
-                        self.MoveDial(ch, up)
-                        return True
-                    if key in self._switch_keys:
-                        self._switch_keys[key]()
-                        return True
-
-                ch = self._stim_keys.get(key)
-                if ch is not None and not event.isAutoRepeat():
-                    if event_type == QEvent.KeyPress:
-                        self.btn_stims[ch].pressed.emit()
-                    else:
-                        self.btn_stims[ch].released.emit()
-                    return True
+                return self._atender(
+                    (self._dial_keys, self._switch_keys, self._stim_keys),
+                    event.key(), event_type == QEvent.KeyPress, event.isAutoRepeat())
             return False
         except Exception:
             # Una excepcion que se escapa de un override llamado desde C++

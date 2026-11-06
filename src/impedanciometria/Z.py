@@ -10,6 +10,8 @@ from PySide6.QtWidgets import QWidget, QAbstractSlider
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtCore import QTimer, Qt
 from datetime import datetime
+import traceback
+
 import numpy as np
 
 from impedanciometria.control_ui import UiControlZ
@@ -29,7 +31,7 @@ from impedanciometria.aviso_grafico import AvisoGrafico
 from impedanciometria.ZDscreen import DECAY_FRECUENCIAS
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage, debug_print
-from core import atajos, keyboard_monitor
+from core import atajos, controlador_directo, keyboard_monitor
 from core.preferencias import preferencias
 
 
@@ -136,6 +138,10 @@ class ZControl(QWidget, UiControlZ):
         self.kb_monitor.connection_changed.connect(self._aplicar_atajos)
         preferencias().cambiaron.connect(self._aplicar_atajos)
         self._aplicar_atajos()
+        # El controlador leído directo, sin pasar por el foco (ver
+        # core/controlador_directo.py): con el foco en un campo de texto el
+        # campo se comía las letras de los atajos.
+        controlador_directo.controlador().tecla.connect(self._tecla_directa)
 
         self.btn_3.setEnabled(True)
         self.btn_3.clicked.connect(self.btn3_click)
@@ -201,6 +207,22 @@ class ZControl(QWidget, UiControlZ):
         self.shortcut_dial_up.setKey(QKeySequence(teclas["z_subir"]))
         self.shortcut_dial_down.setKey(QKeySequence(teclas["z_bajar"]))
         self.shortcut_stimulus.setKey(QKeySequence(teclas["z_estimulo"]))
+
+    def _tecla_directa(self, key, apretada, repetida):
+        """Del controlador leído directo: las teclas de su firmware, al Z si
+        está a la vista (como los atajos, sin repetición)."""
+        if not apretada or repetida or not self.isVisible():
+            return
+        teclas = {accion: atajos.qt_key(t) for accion, t in atajos.CONTROLADOR.items()}
+        try:
+            if key == teclas["z_subir"]:
+                self.dial.triggerAction(QAbstractSlider.SliderSingleStepAdd)
+            elif key == teclas["z_bajar"]:
+                self.dial.triggerAction(QAbstractSlider.SliderSingleStepSub)
+            elif key == teclas["z_estimulo"]:
+                self.btn_stimulus.click()
+        except Exception:  # noqa: BLE001 -- una tecla rota no tumba la app
+            traceback.print_exc()
 
     def _log(self, action, **payload):
         """Encola una interacción del alumno en el impedanciómetro (ver

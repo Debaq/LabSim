@@ -8430,7 +8430,25 @@ Z el campo se come las letras de sus atajos.
   suelta al elegir con Enter.
 - **El chat** ya no se lleva el foco al llegar la respuesta del paciente si
   el alumno está en otro lado (`ChatPaciente._enfocar_input`).
-- Offscreen no se reprodujo el fallo de abrir el equipo: falta verlo en el
-  kiosko. Si sigue, el arreglo de fondo es leer el controlador directo del
-  dispositivo (evdev, VID:PID 0483:5740) sin pasar por el foco.
+- Offscreen no se reprodujo el fallo de abrir el equipo, así que se hizo
+  también el arreglo de fondo (él: "sí, hazlo"):
+
+### El controlador se lee directo del dispositivo (2026-11-06)
+
+`core/controlador_directo.py` abre los `/dev/input/event*` del controlador
+(VID:PID 0483:5740, buscados con pyudev) y los toma en exclusiva
+(`EVIOCGRAB`): X ya no recibe sus letras, que no se escriben en ningún
+campo, y LabSim las manda al audiómetro o al Z que esté a la vista
+(`_tecla_directa`), tenga el foco quien lo tenga. Siempre con el mapa del
+firmware (`atajos.CONTROLADOR`). Lectura con `QSocketNotifier` en el hilo de
+Qt, sin hilos. Sigue el enchufe con `keyboard_monitor` (reintenta unos
+segundos: el nodo aparece después del aviso USB).
+
+- **Permiso:** regla udev en archcraft-postinstall
+  (`modules/70-kiosko.sh`, `70-labsim-controlador.rules`: `uaccess` +
+  grupo `input`). Sin permiso, o fuera de Linux, no se abre y todo sigue
+  por X como antes (los arreglos de foco de arriba siguen valiendo).
+- Al cerrar o caerse la app el sistema suelta el dispositivo solo.
+- Prueba: `tests/test_controlador_directo.py` (un pipe hace de dispositivo).
+  Falta probarlo con el controlador real en un kiosko.
 - Prueba: `tests/test_equipo_toma_foco.py`.
