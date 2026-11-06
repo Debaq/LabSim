@@ -187,7 +187,7 @@ class CabezaExamen(CabezaElectrodos):
         if self.diapason is not None:
             pos = self.en_pantalla(*self.diapason)
             if pos is not None:
-                self._icono(p, pos, "diapason", 34 * max(escala, 0.6))
+                self._dibujar_diapason(p, pos, max(escala, 0.6))
         if self.otoscopio is not None:
             sitio = "cae_der" if self.otoscopio == "od" else "cae_izq"
             normal = np.array([-1.0 if self.otoscopio == "od" else 1.0, 0.0, 0.0])
@@ -198,6 +198,40 @@ class CabezaExamen(CabezaElectrodos):
             _lado, inicio, fin = self._tirando
             self._flecha(p, inicio, fin)
         p.end()
+
+    @staticmethod
+    def _dibujar_diapason(p, punto, escala):
+        """El diapasón apoyado: un punto chico donde toca la piel (para que
+        se vea exactamente dónde quedó) y el diapasón saliendo de ahí,
+        mango y dos ramas, en metal."""
+        import math as _m
+        largo_mango = 30 * escala
+        largo_ramas = 34 * escala
+        abre = 5 * escala
+        ang = _m.radians(-60)                       # hacia arriba y a la derecha
+        u = QPointF(_m.cos(ang), _m.sin(ang))
+        n = QPointF(-u.y(), u.x())
+        horqueta = punto + u * largo_mango
+        metal = QColor("#7C808A")
+        p.setPen(QPen(QColor(255, 255, 255, 200), 5.5 * escala, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawLine(punto, horqueta)
+        p.setPen(QPen(metal, 3.2 * escala, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawLine(punto, horqueta)
+        # La U de las ramas
+        izq0, der0 = horqueta + n * abre, horqueta - n * abre
+        camino = QPainterPath(izq0 + u * largo_ramas)
+        camino.lineTo(izq0)
+        camino.quadTo(horqueta - u * (abre * 1.2), der0)
+        camino.lineTo(der0 + u * largo_ramas)
+        p.setPen(QPen(QColor(255, 255, 255, 200), 5 * escala, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawPath(camino)
+        p.setPen(QPen(metal, 2.8 * escala, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawPath(camino)
+        # Donde toca la piel
+        p.setPen(QPen(QColor("#FFFFFF"), 1.5))
+        p.setBrush(QColor(tema.ACENTO))
+        p.drawEllipse(punto, 4.2 * escala, 4.2 * escala)
 
     @staticmethod
     def _icono(p, pos, nombre, tam):
@@ -370,6 +404,7 @@ class CabezaOtoscopia(CabezaExamen):
         c.setX(max(r + 6, min(self.width() - r - 6, c.x())))
         c.setY(max(r + 6, min(self.height() - r * 2.2, c.y())))
         self._pintar_mango(p, c, r, self._hacia_la_nuca(oido, centro))
+        self._pintar_cabezal(p, c, r)
         caja = QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r)
         circulo = QPainterPath()
         circulo.addEllipse(c, r, r)
@@ -417,33 +452,59 @@ class CabezaOtoscopia(CabezaExamen):
             p.fillRect(caja, luz)
             p.restore()
         p.restore()
-        aro = max(6.0, r * 0.07)
-        p.setPen(QPen(QColor("#2B2B30"), aro))
+        # El borde de la ventana, encajado en el cabezal (sin brillo de vidrio:
+        # se mira a través del otoscopio, no de una lupa)
+        p.setPen(QPen(QColor("#0B0B0E"), max(3.0, r * 0.04)))
         p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawEllipse(c, r + aro / 2, r + aro / 2)
-        p.setPen(QPen(QColor(255, 255, 255, 90), aro * 0.3))
-        p.drawArc(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), 40 * 16, 70 * 16)
+        p.drawEllipse(c, r, r)
+
+    @staticmethod
+    def _pintar_cabezal(p, c, r):
+        """El cabezal del otoscopio: una caja oscura de esquinas redondeadas
+        con la ventana de visión al centro, como se ve desde el lado del
+        examinador."""
+        from PySide6.QtGui import QLinearGradient
+        lado = r * 2.36
+        caja = QRectF(c.x() - lado / 2, c.y() - lado / 2, lado, lado)
+        cuerpo = QLinearGradient(caja.topLeft(), caja.bottomRight())
+        cuerpo.setColorAt(0.0, QColor("#3A3B41"))
+        cuerpo.setColorAt(1.0, QColor("#17181C"))
+        p.setPen(QPen(QColor("#0B0B0E"), 1.5))
+        p.setBrush(cuerpo)
+        p.drawRoundedRect(caja, r * 0.42, r * 0.42)
+        # La lengüeta de la luz, arriba
+        lengueta = QRectF(c.x() - r * 0.22, caja.top() - r * 0.12, r * 0.44, r * 0.16)
+        p.setBrush(QColor("#2A2B30"))
+        p.drawRoundedRect(lengueta, r * 0.05, r * 0.05)
 
     @staticmethod
     def _pintar_mango(p, c, r, hacia):
-        """El mango del otoscopio, desde el disco hacia abajo y hacia la
-        nuca: el cuello y el mango moleteado."""
+        """El mango bajo el cabezal, apenas inclinado hacia la nuca: el
+        cuello, el anillo del reóstato, el mango moleteado y la tapa."""
         import math as _m
-        ang = _m.radians(90 + hacia * -25)          # hacia abajo, inclinado a la nuca
+        from PySide6.QtGui import QPolygonF
+        ang = _m.radians(90 + hacia * -12)
         u = QPointF(_m.cos(ang), _m.sin(ang))
         n = QPointF(-u.y(), u.x())
-        base = c + u * (r * 0.92)
-        cuello = [base + n * (r * 0.16), base + u * (r * 0.32) + n * (r * 0.11),
-                  base + u * (r * 0.32) - n * (r * 0.11), base - n * (r * 0.16)]
-        mango = [base + u * (r * 0.32) + n * (r * 0.17), base + u * (r * 1.45) + n * (r * 0.19),
-                 base + u * (r * 1.45) - n * (r * 0.19), base + u * (r * 0.32) - n * (r * 0.17)]
-        from PySide6.QtGui import QPolygonF
-        p.setPen(QPen(QColor("#1E1E22"), 1.5))
-        p.setBrush(QColor("#3A3A40"))
-        p.drawPolygon(QPolygonF(cuello))
-        p.setBrush(QColor("#2C2C31"))
-        p.drawPolygon(QPolygonF(mango))
-        p.setPen(QPen(QColor(255, 255, 255, 40), 1.2))
-        for k in range(1, 9):
-            a = base + u * (r * (0.32 + 0.13 * k))
-            p.drawLine(a + n * (r * 0.17), a - n * (r * 0.17))
+        base = c + u * (r * 1.12)
+
+        def tramo(desde, hasta, ancho_a, ancho_b, color):
+            a, b = base + u * desde, base + u * hasta
+            p.setBrush(QColor(color))
+            p.drawPolygon(QPolygonF([a + n * ancho_a, b + n * ancho_b, b - n * ancho_b, a - n * ancho_a]))
+
+        p.setPen(QPen(QColor("#0B0B0E"), 1.2))
+        tramo(0, r * 0.28, r * 0.15, r * 0.12, "#26272C")                 # cuello
+        tramo(r * 0.28, r * 0.50, r * 0.22, r * 0.22, "#5B5E66")          # reóstato
+        p.setPen(QPen(QColor(255, 255, 255, 70), 1))
+        for k in range(1, 6):
+            x = base + u * (r * (0.28 + 0.037 * k))
+            p.drawLine(x + n * (r * 0.22), x - n * (r * 0.22))
+        p.setPen(QPen(QColor("#0B0B0E"), 1.2))
+        tramo(r * 0.50, r * 1.75, r * 0.20, r * 0.21, "#2A2B30")          # mango
+        p.setPen(QPen(QColor(255, 255, 255, 35), 1))
+        for k in range(1, 16):
+            x = base + u * (r * (0.50 + 0.078 * k))
+            p.drawLine(x + n * (r * 0.20), x - n * (r * 0.20))
+        p.setPen(QPen(QColor("#0B0B0E"), 1.2))
+        tramo(r * 1.75, r * 1.86, r * 0.21, r * 0.18, "#1C1D21")          # tapa
