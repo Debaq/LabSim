@@ -8409,3 +8409,28 @@ regla del roadmap nasal ("sin datos del caso, el módulo no mide").
   y el resto: esto es solo nariz y sueño.
 - Pruebas: `tests/test_nasal_normales.py`; las de cada ventana piden el
   normal sin bloque y con el bloque malo.
+
+## Consola física: el equipo toma el foco al abrirse (2026-11-06)
+
+Él: "los estudiantes entran al audiómetro, no se dan cuenta y no tienen por
+qué saber lo del foco, y el audiómetro físico no responde" (también el
+impedanciómetro). El controlador manda letras comunes (S, W, V, 1…) como un
+teclado más: Qt no sabe de qué teclado vienen y las entrega al widget con
+foco. Con el foco en un campo de texto, el audiómetro no las atiende y en el
+Z el campo se come las letras de sus atajos.
+
+- **El equipo toma el foco al mostrarse** (`core/reparto.Escalado.tomar_foco`):
+  activa su subventana y se queda con el foco, salvo que ya lo tenga algo de
+  esa misma ventana (el buscador de frases). Antes, como ventana de fondo,
+  `raise_window` no la activaba si había otra encima.
+- **El audiómetro solo cede las teclas a un campo que se está usando**
+  (`Audiometer._escribiendo`): con foco, editable y en la subventana activa.
+  Un campo que quedó con el foco en una ventana de atrás ya no las retiene.
+- **El buscador de frases** (audiómetro y Z) toma el foco solo con clic y lo
+  suelta al elegir con Enter.
+- **El chat** ya no se lleva el foco al llegar la respuesta del paciente si
+  el alumno está en otro lado (`ChatPaciente._enfocar_input`).
+- Offscreen no se reprodujo el fallo de abrir el equipo: falta verlo en el
+  kiosko. Si sigue, el arreglo de fondo es leer el controlador directo del
+  dispositivo (evdev, VID:PID 0483:5740) sin pasar por el foco.
+- Prueba: `tests/test_equipo_toma_foco.py`.

@@ -20,7 +20,7 @@ from audiometria.h_audio import (calibrate, create_frecuency, create_intency,
 from core.helpers import Preferences
 from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QFont, QKeySequence
-from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QPlainTextEdit,
+from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QMdiSubWindow, QPlainTextEdit,
                                QTextEdit, QWidget)
 from core import atajos, keyboard_monitor
 from core.preferencias import preferencias
@@ -43,6 +43,24 @@ reverse_list = class_pref.get("reverse_list")
 tone_list = class_pref.get("tone_list")
 pulsatile_time = class_pref.get("pulsatile_time")
 alternate_time = class_pref.get("alternate_time")
+
+
+def _escribiendo(foco):
+    """True si el alumno está escribiendo en un campo de texto: el campo
+    tiene el foco Y su ventana es la subventana activa. Un campo que quedó
+    con el foco en una ventana que ya no se usa (la ficha, el chat, detrás
+    del audiómetro) no se queda con las teclas: el controlador mandaba
+    letras que se perdían y el alumno no sabía por qué (2026-11-06)."""
+    if not isinstance(foco, (QLineEdit, QTextEdit, QPlainTextEdit)):
+        return False
+    if foco.isReadOnly():
+        return False
+    sub = foco
+    while sub is not None and not isinstance(sub, QMdiSubWindow):
+        sub = sub.parentWidget()
+    if sub is None or sub.mdiArea() is None:
+        return True          # un campo fuera del MDI: un diálogo, una prueba
+    return sub.mdiArea().activeSubWindow() is sub
 
 
 class Audiometer(QWidget, Ui_Audiometer):
@@ -445,8 +463,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             # subventana MDI tenga el foco interno (ver comentario en
             # __init__).
             if self.isVisible():
-                focus = QApplication.focusWidget()
-                if isinstance(focus, (QLineEdit, QTextEdit, QPlainTextEdit)):
+                if _escribiendo(QApplication.focusWidget()):
                     return False
 
                 key = event.key()

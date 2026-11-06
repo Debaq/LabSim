@@ -135,6 +135,11 @@ class ComandosVoz(QWidget):
         self.buscar.addAction(iconos.icono("buscar", tema.TEXTO_TENUE, 16),
                               QLineEdit.ActionPosition.LeadingPosition)
         self.buscar.setClearButtonEnabled(True)
+        # Solo con clic: si el buscador se queda con el foco (al activarse la
+        # ventana, con Tab), el audiómetro suelta las teclas y en el Z las
+        # letras del controlador se escriben aquí: la consola física dejaba
+        # de responder sin que el alumno supiera por qué (2026-11-06).
+        self.buscar.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.buscar.textChanged.connect(self._filtrar)
         # Enter elige la primera que coincide: escribir "mano" + Enter.
         self.buscar.returnPressed.connect(self._elegir_primera)
@@ -275,6 +280,8 @@ class ComandosVoz(QWidget):
         self.btn_checked.emit(btn.property("clave"))
 
     def _elegir_primera(self):
+        # Elegida la frase, el foco vuelve al equipo (ver setFocusPolicy).
+        self.buscar.clearFocus()
         for _rotulo, _grilla, botones in self.secciones:
             for b in botones:
                 if not b.isHidden():

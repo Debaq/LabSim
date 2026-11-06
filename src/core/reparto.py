@@ -12,10 +12,10 @@ Lo usan el audiómetro (audiometria/ventana.py) y el impedanciómetro
 (impedanciometria/ventana.py).
 """
 import shiboken6
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtGui import QPainter, QTransform
-from PySide6.QtWidgets import (QFrame, QGraphicsScene, QGraphicsView, QHBoxLayout, QSizePolicy,
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsScene, QGraphicsView, QHBoxLayout,
+                               QMdiSubWindow, QSizePolicy, QVBoxLayout, QWidget)
 
 # Partes del ancho: lateral, equipo, lateral.
 PARTES = (1, 3, 1)
@@ -110,8 +110,35 @@ class Escalado(QGraphicsView):
         super().showEvent(event)
         if shiboken6.isValid(self._widget):
             self._widget.show()
+        # En la vuelta siguiente: la ventana termina de activarse primero.
+        QTimer.singleShot(0, self, self.tomar_foco)
+
+    def tomar_foco(self):
+        """El equipo recibe las teclas apenas se abre. Es una ventana de
+        fondo: al abrirla con la ficha o el chat encima, la subventana no se
+        activaba y el foco quedaba en un campo de texto de la otra; ahí el
+        audiómetro no atiende las teclas y en el Z se las comía el campo. Con
+        el controlador el alumno no hace clic en el equipo y no tiene por qué
+        saber del foco (2026-11-06). Lo que ya tiene el foco dentro de esta
+        misma ventana (el buscador de frases) se respeta."""
+        if not self.isVisible():
+            return
+        mia = _subventana(self)
+        foco = QApplication.focusWidget()
+        if foco is not None and mia is not None and _subventana(foco) is mia:
+            return
+        if mia is not None and mia.mdiArea() is not None:
+            mia.mdiArea().setActiveSubWindow(mia)
+        self.setFocus(Qt.FocusReason.OtherFocusReason)
 
     def hideEvent(self, event):
         super().hideEvent(event)
         if shiboken6.isValid(self._widget):
             self._widget.hide()
+
+
+def _subventana(w):
+    """La subventana MDI que contiene a `w`, o None."""
+    while w is not None and not isinstance(w, QMdiSubWindow):
+        w = w.parentWidget()
+    return w
