@@ -105,6 +105,7 @@ class Acumetria(QWidget):
         self._golpe = None          # time.monotonic() del último golpe
         self._apoyo = None          # dónde está el diapasón ahora (dict) o None
         self._rinne = None          # {'oido', 'hz', 'golpe', 'vistos': set()} para comparar
+        self._ultimo = None         # lo último que sintió (el apoyo ya retirado y si lo oía)
         self._aviso_id = 0          # para el "ya no lo escucho" programado
         self._reloj = time.monotonic
 
@@ -218,6 +219,7 @@ class Acumetria(QWidget):
         self._golpe = None
         self._apoyo = None
         self._rinne = None
+        self._ultimo = None
         self._aviso_id += 1
         self.log.clear()
         if self.cabeza is not None:
@@ -269,6 +271,7 @@ class Acumetria(QWidget):
         self._golpe = None
         self._apoyo = None
         self._rinne = None
+        self._ultimo = None
         self._aviso_id += 1
         self._sacar_de_la_cabeza()
         self._mostrar_vibracion()
@@ -279,6 +282,7 @@ class Acumetria(QWidget):
         self._golpe = self._reloj()
         self._apoyo = None
         self._rinne = None
+        self._ultimo = None
         self._aviso_id += 1
         self._sacar_de_la_cabeza()
         self._log("ac_golpe", hz=self.hz())
@@ -292,6 +296,8 @@ class Acumetria(QWidget):
         if self._apoyo is None:
             return
         self._log("ac_retirar", hz=self.hz(), zona=self._apoyo["zona"])
+        # Lo que sintió queda: se le puede preguntar después de sacarlo
+        self._ultimo = dict(self._apoyo, oia=self._oye_ahora(self._apoyo))
         self._apoyo = None
         self._aviso_id += 1
         self._sacar_de_la_cabeza()
@@ -334,6 +340,7 @@ class Acumetria(QWidget):
         donde, oido, sitio, dist = zona(punto)
         apoyo = {"zona": donde, "oido": oido, "sitio": sitio}
         self._apoyo = apoyo
+        self._ultimo = None
         self._aviso_id += 1
         if self.cabeza is not None:
             self.cabeza.poner_diapason(punto, normal)
@@ -395,6 +402,34 @@ class Acumetria(QWidget):
             return f"En el oído {LADO[apoyo['oido']]}." if oye else no_oye
         return "Acá, donde me lo puso." if oye else no_oye
 
+    def _contestar_despues(self, clave, ultimo):
+        """Con el diapasón ya retirado: contesta por lo que sintió mientras
+        estaba puesto (como se hace en la consulta: se pone, se saca y se
+        pregunta)."""
+        oia = ultimo["oia"]
+        contacto = ultimo["zona"] != "pabellon"
+        if clave in ("lo_escucha", "sigue_escuchando"):
+            return "Ahora no, ya lo sacó." if oia else "No, no lo escuché."
+        if clave == "escucha_o_vibra":
+            if oia:
+                return "Lo escuchaba."
+            return "Solo sentía que vibraba." if contacto else "No escuché nada."
+        if clave == "donde_mas_fuerte":
+            if self._rinne and ultimo["zona"] in ("pabellon", "mastoides") \
+                    and self._rinne["vistos"] >= {"pabellon", "mastoides"}:
+                return self._comparacion_rinne().replace("suena", "sonaba")
+            if ultimo["zona"] in ("linea_media", "fuera_de_linea"):
+                return DONDE_WEBER.get(self.modelo.weber(self.hz()), DONDE_WEBER["centrado"]) if oia \
+                    else "No lo escuché."
+            return "No sé... me lo puso en un solo lado."
+        # igual_ambos
+        if ultimo["zona"] in ("linea_media", "fuera_de_linea"):
+            if not oia:
+                return "No lo escuché."
+            return {"od": "No, más en el derecho.", "oi": "No, más en el izquierdo."}.get(
+                self.modelo.weber(self.hz()), "Sí, igual en los dos.")
+        return "No sé, lo sentí de un lado nomás."
+
     def _comparacion_rinne(self):
         """Negativo y falso negativo suenan igual para el paciente: la
         trampa del falso negativo la descubre el alumno."""
@@ -442,15 +477,17 @@ class Acumetria(QWidget):
             respuesta = self._contestar(clave)
         self._decir(f"Paciente: {respuesta}")
         tipo = "ac_instruccion" if clave in INSTRUCCIONES or clave == "explicar_diapasones" else "ac_pregunta"
-        apoyo = self._apoyo or {}
+        apoyo = self._apoyo or self._ultimo or {}
         self._log(tipo, clave=clave, respuesta=respuesta, hz=self.hz(), zona=apoyo.get("zona"),
-                  oido=apoyo.get("oido"), vibrando=self._vibra(),
-                  oye=bool(apoyo) and self._oye_ahora(apoyo))
+                  oido=apoyo.get("oido"), vibrando=self._vibra(), retirado=self._apoyo is None and bool(apoyo),
+                  oye=apoyo.get("oia") if self._apoyo is None else self._oye_ahora(apoyo))
 
     def _contestar(self, clave):
         apoyo = self._apoyo
         if not self.modelo.disponible():
             return "No escucho nada."
+        if apoyo is None and self._ultimo is not None:
+            return self._contestar_despues(clave, self._ultimo)
         if apoyo is None or not self._vibra():
             if clave in ("donde_mas_fuerte", "igual_ambos"):
                 return "¿Qué cosa?"

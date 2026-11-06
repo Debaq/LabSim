@@ -182,6 +182,50 @@ def test_los_tiempos_siguen_el_rinne_del_caso():
     assert t_aire < t_hueso, "negativo: por hueso dura más"
 
 
+def test_se_puede_preguntar_despues_de_sacarlo():
+    """Se pone en la línea media, se saca y recién ahí se pregunta."""
+    w = _modulo()
+    w._golpear()
+    _apoyar(w, "Cz")
+    w._retirar()
+    w._frase("donde_mas_fuerte")
+    assert _ultima(w) == "Paciente En el oído izquierdo."
+    w._frase("igual_ambos")
+    assert _ultima(w) == "Paciente No, más en el izquierdo."
+    w._frase("lo_escucha")
+    assert _ultima(w) == "Paciente Ahora no, ya lo sacó."
+    assert w.log_queue.acciones[-1][1]["retirado"] is True
+
+
+def test_el_rinne_se_compara_tambien_despues_de_sacarlo():
+    w = _modulo()
+    w._golpear()
+    _apoyar(w, "M2")
+    _apoyar(w, "cae_der")
+    w._retirar()
+    w._frase("donde_mas_fuerte")
+    assert "Adelante, frente a la oreja" in _ultima(w)
+
+
+def test_si_no_lo_oia_cuando_lo_saco_lo_dice():
+    w = _modulo()
+    w._golpear()
+    _apoyar(w, "M2")
+    w._reloj.t += 200          # ya no se oía
+    w._retirar()
+    w._frase("escucha_o_vibra")
+    assert _ultima(w) == "Paciente Solo sentía que vibraba."
+
+
+def test_al_golpear_de_nuevo_se_olvida_lo_anterior():
+    w = _modulo()
+    w._golpear()
+    _apoyar(w, "Cz")
+    w._retirar()
+    w._golpear()
+    w._frase("donde_mas_fuerte")
+    assert _ultima(w) == "Paciente ¿Qué cosa?"
+
 def test_un_paciente_nuevo_empieza_sin_instruccion():
     w = _modulo()
     w._frase("avise_si_escucha")
