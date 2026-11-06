@@ -61,14 +61,64 @@ def datos_login():
             "prefs": {}, "cases": {}, "invitado": True}
 
 
+# La copia que baja la app del servidor (descargar_catalogo): más nueva que
+# la que viene con la versión, que solo cambia al publicar una. Es lo que
+# queda para practicar si el servidor se cae (2026-11-06).
+DESCARGADO = "catalogo_practica.json.gz"
+
+
+def _leer_catalogo(ruta):
+    try:
+        cat = json.loads(gzip.decompress(ruta.read_bytes()))
+    except (OSError, ValueError):
+        return None
+    return cat if isinstance(cat, dict) and cat.get("items") and cat.get("casos") else None
+
+
 def catalogo():
     global _catalogo
     if _catalogo is None:
-        try:
-            _catalogo = json.loads(gzip.decompress((rutas.recursos() / "libro" / "catalogo.json.gz").read_bytes()))
-        except (OSError, ValueError):
-            _catalogo = {"carpetas": [], "items": [], "casos": {}}
+        _catalogo = (_leer_catalogo(rutas.datos() / DESCARGADO)
+                     or _leer_catalogo(rutas.recursos() / "libro" / "catalogo.json.gz")
+                     or {"carpetas": [], "items": [], "casos": {}})
     return _catalogo
+
+
+def descargar_catalogo(client, estado) -> int:
+    """Guarda en el equipo la práctica libre vigente (carpetas y pacientes
+    de api/practica.php, con el caso completo de `estado`, el de
+    helpers.estado_en_memoria), con la forma del catálogo de la app
+    (scripts/libro/catalogo_app.py). Devuelve cuántos pacientes quedaron.
+    Se llama al entrar con red (main.agenda_cargada), nunca con el admin:
+    él ve las carpetas solo_admin, que no son para practicar sin cuenta."""
+    global _catalogo
+    casos_estado = {str(c["id"]): c.get("data") for c in (estado or {}).get("cases") or []}
+    carpetas, items, casos = {}, [], {}
+    for it in client.get_practica():
+        ficha = str(it.get("case_id") or "")
+        data = casos_estado.get(ficha)
+        if not isinstance(data, dict):
+            continue
+        fid = it.get("folder_id")
+        if fid not in carpetas:
+            carpetas[fid] = {"id": fid, "nombre": it.get("carpeta") or "", "grupo": it.get("grupo"),
+                             "orden": len(carpetas) + 1}
+        data = dict(data)
+        data["id"] = int(ficha) if ficha.isdigit() else ficha
+        casos[ficha] = data
+        items.append({k: it.get(k) for k in ("id", "folder_id", "carpeta", "grupo", "case_id", "orden",
+                                              "procedimiento", "nombre", "apellido", "rut", "fecha_nac")})
+    if not items:
+        return 0
+    texto = json.dumps({"carpetas": list(carpetas.values()), "items": items, "casos": casos},
+                       ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    destino = rutas.datos() / DESCARGADO
+    tmp = destino.with_suffix(".tmp")
+    tmp.write_bytes(gzip.compress(texto, 6))
+    tmp.replace(destino)
+    _catalogo = None
+    print(f"práctica: catálogo guardado en el equipo ({len(items)} pacientes, {len(casos)} casos)")
+    return len(items)
 
 
 def items_practica():

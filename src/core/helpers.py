@@ -337,6 +337,7 @@ class Shedule:
         global _estado_agenda
         _estado_agenda = _indexar(state)
         data = backend_state_to_shedule(state, own_id, own_username)
+        con_pendientes(data, client.user)
         # deepcopy por la misma razón que en CasesOffline.get_cases():
         # self.data se muta en el sitio (nuevas citas, edición de filas)
         # y sin esto esa mutación se filtraba también al snapshot.
@@ -358,6 +359,51 @@ class Shedule:
         own_username = (client.user or {}).get("username", "")
         diff_and_push_shedule(client, data, _shedule_snapshot, own_username)
         _shedule_snapshot = deepcopy(data)
+
+
+def con_pendientes(data: dict, user: dict | None) -> None:
+    """Pone en la agenda lo que este usuario abrió o cerró y todavía no
+    llegó al servidor (core/acciones_pendientes.py): sin esto, una
+    atención cerrada sin red volvía a salir "atendiendo" con el sync. Va
+    antes del snapshot del diff, así Shedule.set() no lo empuja de nuevo
+    (lo manda la cola)."""
+    if not user:
+        return
+    from core import acciones_pendientes
+    username = user.get("username", "")
+    agenda = data.get("agenda_1", {})
+    for cita, accion in acciones_pendientes.ultimas(user).items():
+        entry = agenda.get(cita)
+        if entry is None:
+            continue
+        previa = entry.atencion.get(username) or {}
+        entry.atencion[username] = {
+            "estado": accion["accion"],
+            "nota": accion.get("nota") or previa.get("nota", ""),
+            "hora_real": previa.get("hora_real") or accion.get("cuando", "")[11:19],
+        }
+
+
+def estado_en_memoria():
+    """El último estado del servidor que tiene la app (lo bajó Shedule() y
+    lo mantiene al día el sync cada 60 s, ver aplicar_delta), con la forma
+    de get_full_state(). None si todavía no hay (o sin cuenta). Para abrir
+    y cerrar la atención sin esperar al servidor (2026-11-06)."""
+    estado = _estado_agenda
+    if estado is None or invitado.activo:
+        return None
+    return {"students": list(estado["students"]),
+            "appointments": list(estado["appointments"].values()),
+            "cases": list(estado["cases"].values()),
+            "attendances": list(estado["attendances"].values())}
+
+
+def anotar_en_snapshot(key, username: str, atencion: dict) -> None:
+    """Lo que se puso en la cola (acciones_pendientes) también va a la foto
+    del diff: así un Shedule.set() posterior no lo empuja otra vez."""
+    entry = _shedule_snapshot.get("agenda_1", {}).get(key)
+    if entry is not None:
+        entry.atencion[username] = dict(atencion)
 
 
 def _indexar(state: dict) -> dict:
@@ -417,6 +463,7 @@ def aplicar_delta(delta: dict):
              "cases": list(estado["cases"].values()),
              "attendances": list(estado["attendances"].values())}
     data = backend_state_to_shedule(state, user.get("id"), user.get("username", ""))
+    con_pendientes(data, user)
     _shedule_snapshot = deepcopy(data)
     return "nuevo", data
 

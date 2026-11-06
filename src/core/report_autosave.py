@@ -399,6 +399,9 @@ def subir_pendientes(appointment_id=None, client=None, excluir=None) -> tuple[bo
 # Motivo de la última subida sincrónica fallida de cada tipo: el cierre de
 # la atención lo muestra (sin esto el aviso solo decía el nombre del módulo).
 ultimos_errores = {}
+# Y si esa falla fue la red (o el servidor caído): el cierre sin red solo
+# sigue si todas lo fueron; un rechazo del servidor lo frena como siempre.
+ultimos_de_red = {}
 
 
 def subir_ahora(job, client=None) -> tuple[bool, str]:
@@ -424,7 +427,10 @@ def subir_ahora(job, client=None) -> tuple[bool, str]:
         respaldo_informes.guardar(usuario, job, huella(job), job["images_listas"])
         subir(job, cliente)
     except Exception as exc:  # noqa: BLE001
+        from core.acciones_pendientes import es_de_red
         ultimos_errores[job.get("tipo")] = str(exc)
+        ultimos_de_red[job.get("tipo")] = es_de_red(exc)
         return False, str(exc)
     ultimos_errores.pop(job.get("tipo"), None)
+    ultimos_de_red.pop(job.get("tipo"), None)
     return True, ""

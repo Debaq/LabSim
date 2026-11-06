@@ -35,9 +35,10 @@ from core.module_placeholder import ModulePlaceholder
 from core.subventanas import Subventanas
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
-                          es_docente, entry_estado_por, estado_completo,
-                          marcar_entry_atendiendo, marcar_entry_atendido,
+                          anotar_en_snapshot, es_docente, entry_estado_por, estado_completo,
+                          estado_en_memoria, marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
+from core import acciones_pendientes
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, raise_window
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
@@ -130,7 +131,6 @@ sys.excepthook = _log_excepcion
 
 # Después del registro y del excepthook: si algo falla acá queda en el log.
 BACKEND_URL = Preferences.get("BACKEND_URL")
-backend_client.mantener_conexion(BACKEND_URL)
 _layout = fetch_layout(BACKEND_URL)
 if _layout:
     APPS = _layout["APP"]
@@ -591,6 +591,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def agenda_cargada(self):
         """La agenda llegó por primera vez en esta sesión (ver Agenda)."""
         self._retomar_atencion_abierta()
+        self._descargar_catalogo_practica()
+
+    def _descargar_catalogo_practica(self):
+        """Hay red: la práctica libre vigente queda en el equipo, para
+        practicar sin cuenta si el servidor se cae (invitado.catalogo). No
+        con el admin (ve las carpetas de demo interna)."""
+        if invitado.activo or not self.data_login or str(self.data_login.get("permission")) == "777":
+            return
+        client = self._logged_in_client()
+        estado = estado_en_memoria()
+        if client is None or estado is None:
+            return
+        hilos.en_fondo(invitado.descargar_catalogo, client, estado, dueno=self, nombre="catalogo")
 
     def _retomar_atencion_abierta(self):
         """La app se cerró (o se cortó) con un paciente en atención: al entrar
@@ -715,6 +728,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # Con sesión, los reportes guardados sin conexión salen a su nombre
         from core import tickets_pendientes
         hilos.en_fondo(tickets_pendientes.enviar, client, nombre="tickets")
+        self._enviar_acciones_pendientes(client)
 
     def _stop_log_uploader(self):
         if self.log_uploader is not None:
@@ -768,6 +782,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         app_config_store.update_from_sync(delta.get("config"))
         self._reinicio_montaje()
         self._subir_pendientes_en_fondo()
+        # Hay red: lo que se abrió o cerró sin ella sale ahora
+        self._enviar_acciones_pendientes()
 
     def _reinicio_montaje(self):
         """Si el docente pidió desde el panel reiniciar el montaje de esta
@@ -1044,8 +1060,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._modulos_listos()
 
         try:
-            # Una sola bajada para la agenda y los casos (ver estado_completo)
-            estado = estado_completo()
+            # Lo que ya tiene la app (el sync lo mantiene al día): abrir no
+            # espera al servidor. Recién si no hay nada, una sola bajada
+            # para la agenda y los casos (ver estado_completo).
+            estado = estado_en_memoria()
+            if estado is None:
+                estado = estado_completo()
             shedule = Shedule(estado)
         except requests.RequestException as exc:
             return self._atender_sin_conexion(exc)
@@ -1073,11 +1093,22 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return  # el caso fue borrado/no sincronizó -- no dejamos marcar "atendiendo" un caso inexistente
 
         if not es_prueba:
-            marcar_entry_atendiendo(entry, self.data_login["user"])
-            try:
-                shedule.set(shedule.data)
-            except requests.RequestException as exc:
-                return self._atender_sin_conexion(exc)
+            usuario = self.data_login["user"]
+            if entry_estado_por(entry, usuario) == "atendido" \
+                    and (acciones_pendientes.ultimas(self._usuario_backend()).get(str(key)) or {}).get("accion") == "atendido":
+                # Cerrada sin red: reabrirla mandaría "atendiendo" detrás
+                # del cierre y el servidor la volvería a abrir.
+                self._aviso("Atención ya cerrada",
+                            "Esta atención ya está cerrada en este equipo. Se envía sola al "
+                            "servidor cuando vuelva la conexión.", QMessageBox.Icon.Information)
+                return
+            retomada = entry_estado_por(entry, usuario) == "atendiendo"
+            marcar_entry_atendiendo(entry, usuario)
+            if not retomada:
+                # A la cola y no al servidor directo: se abre igual sin red
+                # y "atendiendo" llega cuando haya (acciones_pendientes).
+                if not self._encolar_atencion(key, "atendiendo", entry):
+                    return self._atender_sin_conexion("sin sesión")
 
         self.data_current = cases[case_id]
         self.data_current_key = key
@@ -1162,7 +1193,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         sigue abierta, los exámenes quedan respaldados en el equipo y la
         evolución escrita no se borra, para reintentar."""
         try:
-            shedule = Shedule()
+            # Como al abrir: con lo que ya tiene la app, sin esperar al servidor
+            estado = estado_en_memoria()
+            shedule = Shedule(estado) if estado is not None else Shedule()
         except requests.RequestException as exc:
             return self._cierre_sin_conexion(exc)
         agenda = shedule.data.setdefault("agenda_1", {})
@@ -1191,35 +1224,78 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # ninguno. Además tiene que ser antes de _hydrate_modules(),
             # que les saca appointment_id/data_login.
             fallidos = self._subir_informes()
+        # Sin red no se frena el cierre: lo que no subió quedó en el equipo
+        # y la cola (acciones_pendientes) lo sube ANTES de marcar
+        # "atendido" (el servidor no acepta informes de una atención
+        # cerrada). Lo que sí lo frena es que el servidor rechace algo.
+        sin_red = bool(fallidos) and bool(report_autosave.ultimos_de_red) \
+            and all(report_autosave.ultimos_de_red.values())
+        if fallidos and not sin_red:
+            return self._cierre_sin_conexion(", ".join(fallidos), reanudar=actual)
         # Lo que quedó en el equipo sin subir de otra vuelta (la app se
         # cerró sin red y se cierra sin haberla retomado).
-        try:
-            pendientes_ok, error = subir_pendientes(int(key))
-        except (TypeError, ValueError):
-            pendientes_ok, error = True, ""
-        if fallidos or not pendientes_ok:
-            # Cerrar ahora dejaba esos exámenes fuera para siempre (el
-            # servidor no acepta informes de una atención cerrada).
-            return self._cierre_sin_conexion(
-                ", ".join(fallidos) or error, reanudar=actual)
+        if not sin_red:
+            try:
+                rechazados = acciones_pendientes.subir_informes_de(self._logged_in_client(), int(key))
+            except (TypeError, ValueError, AttributeError):
+                rechazados = []
+            except Exception as exc:  # noqa: BLE001 -- se clasifica
+                if not acciones_pendientes.es_de_red(exc):
+                    return self._cierre_sin_conexion(exc, reanudar=actual)
+                rechazados, sin_red = [], True
+            if rechazados:
+                return self._cierre_sin_conexion(", ".join(rechazados), reanudar=actual)
 
         marcar_entry_atendido(entry, self.data_login["user"], nota)
-        try:
-            shedule.set(shedule.data)
-        except requests.RequestException as exc:
-            if self._quedo_cerrada(key):
-                # El servidor la cerró y lo que se cortó fue la respuesta.
-                return self._cierre_ya_hecho(key, avisar=False)
-            return self._cierre_sin_conexion(exc, reanudar=actual)
-        return self._cierre_ya_hecho(key, avisar=False)
+        if not self._encolar_atencion(key, "atendido", entry, nota=nota):
+            return self._cierre_sin_conexion("sin sesión", reanudar=actual)
+        self._cierre_ya_hecho(key, avisar=False)
+        if sin_red:
+            self._aviso("Atención cerrada en este equipo",
+                        "No hay conexión con el servidor. La atención quedó cerrada y "
+                        "guardada en este equipo, con tus exámenes y tu evolución: se "
+                        "envía sola cuando vuelva la conexión. Puedes seguir con el "
+                        "siguiente paciente.", QMessageBox.Icon.Information)
+        return True
 
-    def _quedo_cerrada(self, key):
-        """Después de un error al cerrar: ¿el servidor la cerró igual?"""
-        try:
-            entry = Shedule().data.get("agenda_1", {}).get(key)
-        except requests.RequestException:
+    def _encolar_atencion(self, key, accion, entry, nota=""):
+        """Pone "atendiendo"/"atendido" en la cola (acciones_pendientes) y
+        trata de enviarla ya, en segundo plano. False si no hay sesión a
+        nombre de quién guardarla."""
+        client = self._logged_in_client()
+        if client is None:
             return False
-        return entry is not None and entry_estado_por(entry, self.data_login["user"]) == "atendido"
+        try:
+            acciones_pendientes.encolar(client, int(key), accion, nota)
+        except (TypeError, ValueError, RuntimeError, OSError) as exc:
+            print(f"atención: no se pudo encolar {accion} de {key}: {exc}")
+            return False
+        anotar_en_snapshot(key, self.data_login["user"], entry.atencion[self.data_login["user"]])
+        if self.subw and "AGENDA" in self.subw:
+            self.subw["AGENDA"].obj.mostrar_local()
+        self._enviar_acciones_pendientes(client)
+        return True
+
+    def _usuario_backend(self):
+        client = self._logged_in_client()
+        return (client.user or {}) if client is not None else {}
+
+    def _enviar_acciones_pendientes(self, client=None):
+        """Manda lo encolado (abrir/cerrar sin red) en segundo plano; al
+        terminar, que el sync traiga cómo quedó."""
+        if invitado.activo or not acciones_pendientes.hay_pendientes():
+            return
+        client = client or self._logged_in_client()
+        hilos.en_fondo(acciones_pendientes.vaciar, client, dueno=self, nombre="acciones",
+                       listo=self._acciones_enviadas)
+
+    def _acciones_enviadas(self, quedan):
+        if quedan == 0:
+            self.sync_ahora()
+        elif quedan > 0:
+            self.statusbar.showMessage(
+                "Sin conexión: hay atenciones abiertas o cerradas en este equipo que se "
+                "enviarán solas cuando vuelva la conexión.", 15000)
 
     def _cierre_ya_hecho(self, key, avisar=True):
         """La atención quedó cerrada en el servidor: se descarga de los
@@ -1589,6 +1665,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         quedó respaldado en el equipo, ver core/respaldo_informes.py)."""
         self.report_autosave.detener()
         report_autosave.ultimos_errores.clear()
+        report_autosave.ultimos_de_red.clear()
         fallidos = []
         for modulo in self._modulos_examen():
             try:
@@ -2004,6 +2081,9 @@ def _antes_de_buscar_update():
 
 
 if __name__ == '__main__':
+    # La conexión con el servidor abierta todo el rato (backend.client): al
+    # correr la app, no al importar main (los tests lo importan).
+    backend_client.mantener_conexion(BACKEND_URL)
     # Antes que la actualización: en el kiosko puede reiniciar sin mostrar
     # nada, y el aviso de una caída tiene que sobrevivir a eso.
     CIERRE_PREVIO = registro.marcar_inicio(LOG_FILE)

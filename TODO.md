@@ -209,8 +209,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
       bajados antes, llave del docente, todo sube al volver). Opciones en
       `docs/roadmap_sin_servidor.md`. § El práctico cuando el hosting se cae
 - [ ] 76. App resistente a un servidor lento o intermitente (06-11: 50-83 %
-      de paquetes perdidos): reintentos en el cliente, abrir y cerrar la
-      atención con cola local, chat que reintenta, indicador de conexión.
+      de paquetes perdidos). Hechos: reintentos, conexión compartida,
+      abrir y cerrar la atención con cola local, práctica libre guardada en
+      el equipo. Faltan: chat que reintenta solo, indicador de conexión,
+      respuestas más livianas, y abrir con la app recién abierta sin red.
       Plan en `docs/roadmap_sin_servidor.md`. § Servidor lento o intermitente
 
 ### Manuales

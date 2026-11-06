@@ -102,7 +102,11 @@ Los alumnos veían "problema de red"; algunos entraban y otros no.
    - La conexión se mantiene abierta entre pedidos (la `Session` ya lo hace
      si el servidor deja); se paga el handshake una vez, no por pedido.
    - Con esto, un 50 % de pérdida pasa de 1 en 8 atenciones a casi todas.
-2. **Abrir la atención con lo que ya está en el equipo.**
+2. **Abrir la atención con lo que ya está en el equipo** — HECHO
+   2026-11-06 junto con la 3: `helpers.estado_en_memoria()` (lo que bajó
+   Shedule() y mantiene el sync) en vez de bajar todo, y "atendiendo" a la
+   cola `core/acciones_pendientes.py`. Sin estado en memoria (la app recién
+   abierta sin red) todavía no se puede. Lo planeado era:
    - El caso y la cita salen de la caché que deja la sincronización; si la
      caché es reciente (< 5 min) no se baja el estado completo.
    - Marcar "atendiendo" va a una cola local (como `log_queue`) que sube
@@ -111,7 +115,18 @@ Los alumnos veían "problema de red"; algunos entraban y otros no.
      "Cargando el paciente…" en vez de congelar la ventana.
    - Cuidado: el choque "ya lo está atendiendo otro" se resuelve en el
      servidor al subir; si choca, avisar sin perder lo hecho.
-3. **Cierre de atención en cola.** Los informes ya se respaldan en el
+3. **Cierre de atención en cola** — HECHO 2026-11-06. Si lo que falla es
+   la red (no un rechazo del servidor), la atención se cierra en el equipo
+   y "atendido" va a la cola, que primero sube los informes de esa cita
+   (con la atención cerrada el servidor ya no los acepta). La agenda
+   muestra lo encolado (`helpers.con_pendientes`) y no deja reabrir una
+   cerrada sin red. Cada acción guarda el token de quien la hizo: si otro
+   alumno entra antes de que vuelva la red, lo del anterior sale con su
+   token (cabecera X-LabSim-Ajeno: su 401 no cierra la sesión del que
+   está). Limitación: hora_real la pone el servidor al recibirla. Además,
+   al entrar con red, la práctica libre vigente se guarda en el equipo y
+   "Practicar sin cuenta" la usa (`invitado.descargar_catalogo`), más
+   nueva que el catálogo que viene con la versión. Lo planeado era: Los informes ya se respaldan en el
    equipo; el cierre también queda encolado y sube solo cuando hay red, con
    "Cerrada, se está enviando" en vez de "No se pudo cerrar". El alumno
    puede pasar al siguiente paciente.

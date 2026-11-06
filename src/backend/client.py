@@ -59,6 +59,11 @@ al_perder_sesion = None
 sin_api = False
 
 
+# Pedidos con el token guardado de otro usuario del equipo (lo pendiente
+# de un alumno que ya salió, ver core/acciones_pendientes.py): su 401 no es
+# la sesión de quien está trabajando ahora.
+CABECERA_AJENO = "X-LabSim-Ajeno"
+
 _sesion_compartida = None
 _sesion_lock = threading.Lock()
 
@@ -203,6 +208,8 @@ def _revisar_sesion(resp, *args, **kwargs):
     aviso = al_perder_sesion
     if aviso is None or not resp.request.headers.get("Authorization"):
         return
+    if resp.request.headers.get(CABECERA_AJENO):
+        return   # token de otro usuario del equipo (ver BackendClient.ajeno)
     motivo = None
     if resp.status_code == 401:
         motivo = "vencida"
@@ -226,6 +233,9 @@ class BackendClient:
         self._session_file = Path(session_file)
         self.token: str | None = None
         self.user: dict | None = None
+        # True: este cliente usa el token de otro usuario del equipo (ver
+        # CABECERA_AJENO); un 401 suyo no avisa sesión perdida.
+        self.ajeno = False
         # Session en vez de requests.get/post sueltos: reusa la conexión TCP/TLS
         # entre llamadas -- sin esto, SyncThread (polling cada 15s, ver
         # sync_thread.py) repetía el handshake completo en cada ciclo.
@@ -264,6 +274,8 @@ class BackendClient:
     def _headers(self) -> dict:
         if not self.token or sin_api:
             return {}
+        if self.ajeno:
+            return {"Authorization": f"Bearer {self.token}", CABECERA_AJENO: "1"}
         return {"Authorization": f"Bearer {self.token}"}
 
     def _get(self, path: str, params: dict | None = None) -> dict:

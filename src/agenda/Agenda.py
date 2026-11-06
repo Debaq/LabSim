@@ -22,7 +22,7 @@ from agenda import vista
 from agenda.vista import BotonAccion, Contador, PanelDetalle
 from core import feriados as feriados_cl
 from core import hilos, iconos, invitado, respaldo_informes, tema
-from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline, debug_print,
+from core.helpers import (Shedule, aplicar_delta, estado_en_memoria, entry_estado_por, CasesOffline, debug_print,
                           es_docente, lista_practica, iniciar_practica,
                           marcar_entry_no_show,
                           obtener_nota_atencion,
@@ -884,6 +884,17 @@ class Agenda(QWidget, Ui_Form):
             _traer_agenda, self._modo_practica or self.is_admin, dueno=self,
             listo=self._on_refresh_async_done, fallo=self._on_refresh_async_fallo,
             nombre="agenda")
+
+    def mostrar_local(self):
+        """Rearma la agenda con lo que ya tiene la app, sin red: tras abrir
+        o cerrar una atención que quedó en cola (acciones_pendientes). Sin
+        esto, con la red caída la cita cerrada seguía "atendiendo" en
+        pantalla hasta el próximo sync."""
+        estado = estado_en_memoria()
+        if estado is None:
+            return
+        self.shedule = Shedule(estado).get()
+        self.populate_shedule()
 
     def aplicar_delta(self, delta):
         """Lo que trajo un ciclo de sync (main._on_backend_sync): se arma la
