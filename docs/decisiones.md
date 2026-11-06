@@ -8363,3 +8363,19 @@ otro).
   2026-10-08). El PDF del informe dibuja la sección
   (`ReportPdfBuilder::acumetriaBody`).
 
+
+### El diapasón suena al golpearlo (2026-11-06)
+
+- **Mismo apagado que la barra**: la fundamental (512 o 1024 Hz reales,
+  `diapasones.HZ_REAL`) baja `CAIDA_DB_S` por segundo, lineal en dB como
+  `vibracion()`, y el archivo dura `duracion_vibracion()` (46,7 s): se
+  calla cuando la barra llega a 0. Se sintetiza con numpy
+  (`audio_synth.diapason_file`), WAV mono cacheado en `_generated/`; el
+  nombre lleva caída y duración, así que si cambia el modelo se rehace solo.
+- **Tono de golpe**: un parcial a 6,25 veces la fundamental que se apaga en
+  ~0,1 s, como el clang de un diapasón real; sin él sonaba a tono de
+  audiómetro.
+- **Lo oye el alumno**, no depende de dónde esté apoyado: lo que oye el
+  paciente sigue saliendo del caso. Volver a golpear lo reinicia; tomar el
+  otro diapasón o cambiar de paciente lo calla. Retirarlo de la cabeza no:
+  sigue vibrando en la mano.

@@ -264,14 +264,15 @@ def _to_stereo(mono, ch):
 
 
 def _write_wav(path, stereo):
-    """Escribe WAV PCM 16 bit estereo de forma atomica."""
+    """Escribe WAV PCM 16 bit de forma atomica: estereo, o mono si llega un
+    array de una dimension (el diapason, que dura casi un minuto)."""
     samples = np.clip(stereo, -1.0, 1.0)
     pcm = np.round(samples * 32767.0).astype("<i2")
 
     tmp_path = f"{path}.{os.getpid()}.tmp"
     try:
         with wave.open(tmp_path, "wb") as handle:
-            handle.setnchannels(2)
+            handle.setnchannels(1 if samples.ndim == 1 else 2)
             handle.setsampwidth(2)
             handle.setframerate(SAMPLE_RATE)
             handle.writeframes(pcm.tobytes())
@@ -376,3 +377,43 @@ def stimulus_file(stim, freq, ch, audio_dir):
             print(f"audio_synth: no se pudo escribir {destination}: {exc}")
             return None
     return str(destination)
+
+
+# --------------------------------------------------------------- diapason
+
+# Tono de golpe (clang): el parcial alto que suena al golpear un diapason y
+# se apaga en una fraccion de segundo; despues queda solo la fundamental.
+CLANG_RAZON = 6.25
+CLANG_AMPLITUD = 0.35
+CLANG_TAU_S = 0.08
+ATAQUE_S = 0.004
+
+
+def diapason(hz, segundos, caida_db_s):
+    """Diapason recien golpeado, mono en [-1, 1]: la fundamental se apaga
+    caida_db_s por segundo (lineal en dB, como la barra de Acumetria) y el
+    tono de golpe desaparece en el primer instante."""
+    n = int(round(SAMPLE_RATE * segundos))
+    t = np.arange(n) / SAMPLE_RATE
+    envolvente = 10.0 ** (-caida_db_s * t / 20.0)
+    senal = np.sin(2.0 * np.pi * hz * t) * envolvente
+    if hz * CLANG_RAZON < SAMPLE_RATE / 2.0:
+        senal += (CLANG_AMPLITUD * np.sin(2.0 * np.pi * hz * CLANG_RAZON * t)
+                  * np.exp(-t / CLANG_TAU_S))
+    ataque = min(n, int(SAMPLE_RATE * ATAQUE_S))
+    senal[:ataque] *= np.linspace(0.0, 1.0, ataque, endpoint=False)
+    return senal * (PEAK_REF / max(np.max(np.abs(senal)), 1e-9))
+
+
+def diapason_file(hz, segundos, caida_db_s, audio_dir):
+    """Ruta al WAV del diapason, generandolo la primera vez. El nombre lleva
+    la duracion y la caida: si cambia el modelo, se rehace solo. None si no
+    se pudo escribir (el diapason queda mudo, la barra sigue)."""
+    destino = _cache_dir(audio_dir) / f"Diapason_{hz}_{caida_db_s:g}_{segundos:.1f}.wav"
+    if not destino.exists():
+        try:
+            _write_wav(str(destino), diapason(hz, segundos, caida_db_s))
+        except OSError as exc:
+            print(f"audio_synth: no se pudo escribir {destino}: {exc}")
+            return None
+    return str(destino)

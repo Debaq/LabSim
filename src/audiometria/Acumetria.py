@@ -20,7 +20,8 @@ dónde pone el diapasón y lo que le dice al paciente.
 - Mastoides: vía ósea de ese lado (responde la mejor cóclea).
 - Frente a la oreja: vía aérea de ese oído.
 - Línea media (frente, vértex): el Weber.
-- Golpeado: se apaga solo; sin golpear no suena.
+- Golpeado: suena y se apaga solo, con la misma caída que la barra de
+  vibración (audio_synth.diapason_file); sin golpear no suena.
 
 El paciente contesta lo que le instruyeron o le preguntaron, con lo que
 dice el caso (diapasones.py: los tiempos salen del audiograma y mandan el
@@ -34,18 +35,21 @@ Todo va a action_logs con prefijo ac_ y la verdad del caso en el payload.
 import html
 import time
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import (
     QButtonGroup, QHBoxLayout, QLabel, QProgressBar, QPushButton,
     QStackedLayout, QTextEdit, QVBoxLayout, QWidget,
 )
 
+from audiometria import audio_synth
 from audiometria import diapasones as dp
 from audiometria import no_realizable
 from audiometria.cabeza_examen import zona
 from audiometria.comandos_voz import SILENCIO
 from backend.log_queue import get_log_queue
 from core import iconos, tema
+from core.base import context
 
 EXTRA_QSS = f"""
 QTextEdit[conversacion="true"] {{ border: none; background: {tema.TARJETA}; font-size: 10pt; }}
@@ -91,6 +95,8 @@ DONDE_TEXTO = {"mastoides": "en la mastoides", "pabellon": "frente al pabellón"
                "linea_media": "en la línea media", "fuera_de_linea": "en la frente, a un lado de la línea media",
                "otro": "en la cabeza"}
 TICK_MS = 200
+# Recién golpeado suena como una frase del talkback, no como una alarma.
+VOLUMEN_DIAPASON = 0.6
 
 
 class Acumetria(QWidget):
@@ -125,6 +131,11 @@ class Acumetria(QWidget):
         self._tick = QTimer(self)
         self._tick.setInterval(TICK_MS)
         self._tick.timeout.connect(self._mostrar_vibracion)
+        # El sonido del diapasón golpeado (lo oye el alumno, no el paciente)
+        self._salida = QAudioOutput(self)
+        self._salida.setVolume(VOLUMEN_DIAPASON)
+        self._sonido = QMediaPlayer(self)
+        self._sonido.setAudioOutput(self._salida)
         self.la_super(thr)
 
     def conectar(self, cabeza):
@@ -221,6 +232,7 @@ class Acumetria(QWidget):
         self._rinne = None
         self._ultimo = None
         self._aviso_id += 1
+        self._sonido.stop()
         self.log.clear()
         if self.cabeza is not None:
             self.cabeza.poner_diapason(None)
@@ -273,8 +285,19 @@ class Acumetria(QWidget):
         self._rinne = None
         self._ultimo = None
         self._aviso_id += 1
+        self._sonido.stop()
         self._sacar_de_la_cabeza()
         self._mostrar_vibracion()
+
+    def _sonar(self):
+        """Desde el principio: golpearlo de nuevo lo vuelve a subir entero."""
+        ruta = audio_synth.diapason_file(dp.HZ_REAL[self.hz()], dp.duracion_vibracion(),
+                                         dp.CAIDA_DB_S, context.get_resource("audio"))
+        self._sonido.stop()
+        if ruta is None:
+            return
+        self._sonido.setSource(QUrl.fromLocalFile(ruta))
+        self._sonido.play()
 
     def _golpear(self):
         if not self.modelo.disponible():
@@ -289,6 +312,7 @@ class Acumetria(QWidget):
         if self.pedir_herramienta is not None:
             self.pedir_herramienta("diapason")
         self._decir(f"Tú: golpeas el diapasón de {dict(dp.DIAPASONES)[self.hz()]}.")
+        self._sonar()
         self._tick.start()
         self._mostrar_vibracion()
 
@@ -315,6 +339,7 @@ class Acumetria(QWidget):
         else:
             self.lbl_estado.setText("Ya no vibra: hay que golpearlo de nuevo.")
             self._tick.stop()
+            self._sonido.stop()
         self.btn_retirar.setEnabled(self._apoyo is not None)
 
     def _dura(self, apoyo):

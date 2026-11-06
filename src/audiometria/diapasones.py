@@ -26,6 +26,8 @@ import math
 
 FRECUENCIAS = [125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000]
 DIAPASONES = (("500", "512 Hz"), ("1000", "1024 Hz"))
+# La frecuencia real de cada diapasón, para el sonido (audio_synth.diapason_file)
+HZ_REAL = {"500": 512, "1000": 1024}
 INDICE = {"500": FRECUENCIAS.index(500), "1000": FRECUENCIAS.index(1000)}
 NIVEL_AIRE_DB = 70.0       # frente al pabellón, recién golpeado
 NIVEL_HUESO_DB = 45.0      # apoyado en el hueso, recién golpeado
@@ -109,6 +111,11 @@ def vibracion(segundos_desde_golpe):
     """0-1: cuánto vibra todavía el diapasón (para la barra), con la misma
     caída: llega a 0 cuando bajó NIVEL_AIRE_DB."""
     return max(0.0, 1.0 - segundos_desde_golpe * CAIDA_DB_S / NIVEL_AIRE_DB)
+
+
+def duracion_vibracion():
+    """Segundos desde el golpe hasta que deja de vibrar (vibracion() = 0)."""
+    return NIVEL_AIRE_DB / CAIDA_DB_S
 
 
 def segundos_que_quedan(dura, desde_golpe):
