@@ -2,45 +2,58 @@
 #################################################################
 #                                                               #
 #                  NOMBRE PROYECTO : LabSim                     #
-#                       VER. 0.2 - Acumetria                    #
+#                       VER. 0.3 - Acumetria                    #
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-import html
+"""Diapasones sobre la cabeza del paciente (2026-11-06).
 
-from core import iconos, tema
-from PySide6.QtCore import Qt
+A la izquierda lo que se le dice al paciente (frases_habladas.py), al
+centro la cabeza (cabeza_examen.py: se gira y se le apoya el diapasón donde
+uno quiera) y a la derecha el diapasón (512 o 1024 Hz, golpearlo, cuánto
+vibra todavía) y la conversación.
+
+No hay botones de "Rinne" ni de "Weber": la prueba la hace el alumno con
+dónde pone el diapasón y lo que le dice al paciente.
+
+- Mastoides: vía ósea de ese lado (responde la mejor cóclea).
+- Frente a la oreja: vía aérea de ese oído.
+- Línea media (frente, vértex): el Weber.
+- Golpeado: se apaga solo; sin golpear no suena.
+
+El paciente contesta lo que le instruyeron o le preguntaron, con lo que
+dice el caso (diapasones.py: los tiempos salen del audiograma y mandan el
+Rinne y el Weber que marcó el docente). Sin instrucción, al sentir el
+diapasón no sabe qué hacer. Con "Avíseme cuando deje de escucharlo" avisa
+solo cuando el diapasón baja de su umbral. Sin Rinne/Weber en el caso, el
+diapasón suena con armónicos y no sirve.
+
+Todo va a action_logs con prefijo ac_ y la verdad del caso en el payload.
+"""
+import html
+import time
+
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
-    QButtonGroup, QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy,
-    QStackedLayout, QTabWidget, QTextEdit, QVBoxLayout, QWidget,
+    QButtonGroup, QFrame, QHBoxLayout, QLabel, QProgressBar, QPushButton, QSizePolicy,
+    QStackedLayout, QTextEdit, QVBoxLayout, QWidget,
 )
 
+from audiometria import diapasones as dp
 from audiometria import no_realizable
+from audiometria.cabeza_examen import VISTA_ARRIBA, VISTA_FRENTE, CabezaExamen, zona
 from audiometria.comandos_voz import SILENCIO
 from audiometria.frases_habladas import FrasesHabladas
 from backend.log_queue import get_log_queue
+from core import iconos, tema
 
-# Reglas propias de la ventana (el resto sale de core/tema.py): pestañas con
-# subrayado, y los botones de oído con el color de su lado cuando están
-# marcados.
 EXTRA_QSS = f"""
-QTabWidget::pane {{ border: none; background: transparent; top: 0px; }}
-QTabBar::tab {{
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 7px 16px;
-    margin-right: 4px;
-    font-size: 9pt;
-    font-weight: 600;
-    color: {tema.TEXTO_TENUE};
-}}
-QTabBar::tab:selected {{ color: {tema.ACENTO}; border-bottom-color: {tema.ACENTO}; }}
-QTabBar::tab:hover:!selected {{ color: {tema.TEXTO_SUAVE}; }}
-QPushButton[lado="od"]:checked {{ background: {tema.OD_SUAVE}; border-color: {tema.OD}; color: {tema.OD}; }}
-QPushButton[lado="oi"]:checked {{ background: {tema.OI_SUAVE}; border-color: {tema.OI}; color: {tema.OI}; }}
 QPushButton[paso="true"] {{ text-align: left; padding: 8px 12px; }}
 QTextEdit[conversacion="true"] {{ border: none; background: transparent; font-size: 10pt; }}
+QProgressBar#vibracion {{ border: 1px solid {tema.BORDE}; border-radius: 5px; background: {tema.TARJETA_ALT};
+                          max-height: 10px; text-align: center; }}
+QProgressBar#vibracion::chunk {{ background: {tema.ACENTO}; border-radius: 4px; }}
+QLabel#armonicos {{ color: {tema.ALERTA}; font-weight: 600; }}
 """
 
 # Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py).
@@ -52,118 +65,70 @@ GRUPOS = (
     )),
     ("INSTRUCCIONES", (
         ("Avíseme si lo escucha", "avise_si_escucha"),
+        ("Avíseme cuando deje de escucharlo", "avise_cuando_deje"),
         ("Compare dónde suena más fuerte", "compare_sonidos"),
         ("Dígame dónde lo escucha", "diga_donde"),
     )),
     ("PREGUNTAS", (
         ("¿Lo escucha?", "lo_escucha"),
+        ("¿Lo sigue escuchando?", "sigue_escuchando"),
+        ("¿Lo escucha o lo siente vibrar?", "escucha_o_vibra"),
         ("¿Dónde lo escuchó más fuerte?", "donde_mas_fuerte"),
         ("¿Igual en los dos oídos?", "igual_ambos"),
     )),
 )
-PRUEBA = {"compare_sonidos": "Rinne", "diga_donde": "Weber", "igual_ambos": "Weber"}
-INSTRUCCIONES = {"avise_si_escucha", "compare_sonidos", "diga_donde"}
-# Para qué prueba sirve cada instrucción: con otra, el paciente no sabe qué
-# hacer cuando siente el diapasón.
-SIRVE_PARA = {"avise_si_escucha": {"rinne", "weber"}, "compare_sonidos": {"rinne"},
-              "diga_donde": {"weber"}}
+PRUEBA = {"compare_sonidos": "Rinne", "diga_donde": "Weber", "igual_ambos": "Weber",
+          "avise_cuando_deje": "Rinne por tiempo"}
+INSTRUCCIONES = {"avise_si_escucha", "avise_cuando_deje", "compare_sonidos", "diga_donde"}
 NO_SABE = "¿Y qué tengo que hacer?"
 DONDE_WEBER = {"od": "En el oído derecho.", "oi": "En el oído izquierdo.",
                "centrado": "Al medio, en toda la cabeza."}
-
-# Rinne no expone la etiqueta final (positivo/negativo/falso_negativo) --
-# eso lo concluye el alumno con la respuesta del paciente a la comparación.
-# Weber sí es directo: la lateralización que reporta el paciente ES el
-# hallazgo del examen, no hay nada que inferir aparte.
-WEBER_LABELS = {
-    'centrado': 'Sin lateralización (centrado)',
-    'od': 'Lateraliza a OD',
-    'oi': 'Lateraliza a OI',
-}
+ARMONICOS = "Diapasón sonando con armónicos"
+LADO = {"od": "derecho", "oi": "izquierdo"}
+DONDE_TEXTO = {"mastoides": "en la mastoides", "pabellon": "frente al pabellón",
+               "linea_media": "en la línea media", "fuera_de_linea": "en la frente, a un lado de la línea media",
+               "otro": "en la cabeza"}
+TICK_MS = 200
 
 
 class Acumetria(QWidget):
-    """Acumetría (Rinne/Weber, diapasones 500 y 1000 Hz): el alumno elige
-    diapasón + posición (mastoides/pabellón para Rinne, frente para Weber)
-    y le habla al paciente con el panel de frases (GRUPOS): instrucciones y
-    preguntas, como en el audiómetro. El paciente contesta lo que le
-    instruyeron o le preguntaron, con lo que dice el caso
-    (cases.data.Rinne/Weber, ver CaseBuilder.php); sin instrucción no sabe
-    qué hacer cuando siente el diapasón. Sin esas claves (casos viejos) se
-    responde como normal (Rinne positivo / Weber centrado)."""
 
     def __init__(self, thr=None):
         super().__init__()
         self.data = None
         self.appointment_id = None
-        self._rinne_probado = {'mastoides': False, 'pabellon': False}
-        self._rinne_ultimo = None     # dónde está el diapasón ahora en el Rinne
-        self._weber_puesto = False    # si ya se apoyó en la frente con este diapasón
-        self._instruccion = None      # la instrucción vigente (INSTRUCCIONES)
+        self.modelo = dp.ModeloDiapasones({})
         self.log_queue = get_log_queue()
+        self._instruccion = None    # la instrucción vigente (INSTRUCCIONES)
+        self._golpe = None          # time.monotonic() del último golpe
+        self._apoyo = None          # dónde está el diapasón ahora (dict) o None
+        self._rinne = None          # {'oido', 'hz', 'golpe', 'vistos': set()} para comparar
+        self._aviso_id = 0          # para el "ya no lo escucho" programado
+        self._reloj = time.monotonic
 
         tema.aplicar_estilo(self, EXTRA_QSS)
         self.equipo = QWidget()
-        layout = QHBoxLayout(self.equipo)
-        layout.setContentsMargins(12, 8, 12, 12)
-        layout.setSpacing(12)
-        # Lo que se le dice al paciente, a la izquierda como en el
-        # audiómetro y el impedanciómetro
+        fila = QHBoxLayout(self.equipo)
+        fila.setContentsMargins(12, 8, 12, 12)
+        fila.setSpacing(12)
         self.frases = FrasesHabladas(GRUPOS, PRUEBA, "comandos_ac")
         self.frases.setFixedWidth(250)
         self.frases.btn_checked.connect(self._frase)
-        layout.addWidget(self.frases)
-        self.tabs = tabs = QTabWidget(self.equipo)
-        layout.addWidget(tabs, 1)
-        tabs.addTab(self._build_rinne_tab(), "Rinne")
-        tabs.addTab(self._build_weber_tab(), "Weber")
-        # Con un bebé, en lugar de los diapasones va el aviso
+        fila.addWidget(self.frases)
+        fila.addWidget(self._centro(), 1)
+        fila.addWidget(self._derecha())
+
         self.aviso_bebe = no_realizable.AvisoNoRealizable("Acumetría no realizable")
         self.pila = QStackedLayout(self)
         self.pila.addWidget(self.equipo)
         self.pila.addWidget(self.aviso_bebe)
 
+        self._tick = QTimer(self)
+        self._tick.setInterval(TICK_MS)
+        self._tick.timeout.connect(self._mostrar_vibracion)
         self.la_super(thr)
 
-    def la_super(self, data, appointment_id=None):
-        """Hidrata (o deshidrata, data=None) el módulo con el caso actual --
-        mismo patrón que Audiometer.la_super()/ListWords.la_super(), llamado
-        por MainWindow._hydrate_modules() cada vez que cambia el caso activo."""
-        self.data = data
-        self.appointment_id = appointment_id
-        # Paciente nuevo: no le han dicho nada todavía
-        self._instruccion = None
-        self.frases.callar()
-        self.frases.silencio()
-        self._rinne_reset()
-        self.weber_log.clear()
-        self._weber_puesto = False
-        motivo = no_realizable.motivo(data, "acumetría")
-        if motivo:
-            self.aviso_bebe.texto.setText(motivo)
-        self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
-
-    def callar(self):
-        self.frases.callar()
-
-    def hideEvent(self, event):
-        super().hideEvent(event)
-        self.frases.callar()
-
-    def _log(self, action, **payload):
-        """Encola una acción del alumno con los diapasones (prefijo ac_, ver
-        backend/log_queue.py), igual que Audiometer._log/Z._log. El payload
-        lleva la verdad del caso (resultado) para que el backend lea qué
-        respondió el paciente sin recalcularlo."""
-        case_id = self.data.get("id") if self.data else None
-        if case_id is not None:
-            payload.setdefault("case_id", case_id)
-        payload.setdefault("appointment_id", self.appointment_id)
-        payload.setdefault("con_paciente", case_id is not None)
-        self.log_queue.push(action, payload)
-
-    # ------------------------------------------------------ piezas comunes ----
-
+    # ------------------------------------------------------------ armado
     @staticmethod
     def _tarjeta():
         tarjeta = QFrame()
@@ -179,265 +144,361 @@ class Acumetria(QWidget):
         lbl.setProperty("role", "seccion")
         return lbl
 
-    @staticmethod
-    def _segmentado(tab, opciones, lado=False):
-        """Botones marcables excluyentes (uno siempre marcado). Devuelve
-        (fila, [botones]); el primero queda marcado. `lado`: pintan con el
-        color de su oído al marcarse (OD rojo, OI azul)."""
+    def _centro(self):
+        tarjeta, col = self._tarjeta()
+        self.cabeza = CabezaExamen()
+        self.cabeza.poner_herramienta("diapason")
+        self.cabeza.apoyado.connect(self._apoyar)
+        col.addWidget(self.cabeza, 1)
+        vistas = QHBoxLayout()
+        vistas.setSpacing(6)
+        pista = QLabel("Arrastra para girar la cabeza. Clic en la piel: ahí se apoya el diapasón.")
+        pista.setProperty("role", "hint")
+        pista.setWordWrap(True)
+        vistas.addWidget(pista, 1)
+        for texto, vista in (("Frente", VISTA_FRENTE), ("Derecha", (90, 0)), ("Izquierda", (270, 0)),
+                             ("Arriba", VISTA_ARRIBA)):
+            b = QPushButton(texto)
+            b.clicked.connect(lambda _c=False, v=vista: self.cabeza.mirar(*v))
+            vistas.addWidget(b)
+        col.addLayout(vistas)
+        return tarjeta
+
+    def _derecha(self):
+        caja = QWidget()
+        caja.setFixedWidth(340)
+        col = QVBoxLayout(caja)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(10)
+
+        tarjeta, v = self._tarjeta()
+        v.addWidget(self._seccion("DIAPASÓN"))
         fila = QHBoxLayout()
         fila.setSpacing(6)
-        # Dueño: la ventana (self). Antes era un QWidget suelto que después
-        # se metía en la pestaña sin layout: Qt lo mostraba de 640x480 en la
-        # esquina, encima del panel, y se tragaba todos los clics (los
-        # diapasones no respondían, 2026-11-06).
-        grupo = QButtonGroup(tab)
-        botones = []
-        for texto, clave in opciones:
-            btn = QPushButton(texto)
-            btn.setCheckable(True)
-            if lado:
-                btn.setProperty("lado", clave)
-            grupo.addButton(btn)
-            fila.addWidget(btn, 1)
-            botones.append(btn)
-        botones[0].setChecked(True)
-        return fila, botones
+        self.grupo_hz = QButtonGroup(self)
+        self.botones_hz = {}
+        for hz, texto in dp.DIAPASONES:
+            b = QPushButton(texto)
+            b.setCheckable(True)
+            self.grupo_hz.addButton(b)
+            self.botones_hz[hz] = b
+            fila.addWidget(b, 1)
+        # Marcado antes de conectar: el cambio de diapasón necesita la barra
+        self.botones_hz["500"].setChecked(True)
+        for hz, b in self.botones_hz.items():
+            b.toggled.connect(lambda marcado, h=hz: marcado and self._cambiar_diapason(h))
+        v.addLayout(fila)
+        self.btn_golpear = QPushButton(" Golpear el diapasón")
+        self.btn_golpear.setIcon(iconos.icono("diapason", tema.ACENTO, 18))
+        self.btn_golpear.setProperty("paso", "true")
+        self.btn_golpear.clicked.connect(self._golpear)
+        v.addWidget(self.btn_golpear)
+        self.barra = QProgressBar()
+        self.barra.setObjectName("vibracion")
+        self.barra.setRange(0, 100)
+        self.barra.setValue(0)
+        self.barra.setTextVisible(False)
+        v.addWidget(self.barra)
+        self.lbl_estado = QLabel("Quieto, sin golpear.")
+        self.lbl_estado.setProperty("role", "hint")
+        v.addWidget(self.lbl_estado)
+        self.btn_retirar = QPushButton(" Retirar el diapasón")
+        self.btn_retirar.setIcon(iconos.icono("x", tema.TEXTO_SUAVE, 16))
+        self.btn_retirar.setProperty("paso", "true")
+        self.btn_retirar.clicked.connect(self._retirar)
+        v.addWidget(self.btn_retirar)
+        self.lbl_armonicos = QLabel(ARMONICOS)
+        self.lbl_armonicos.setObjectName("armonicos")
+        self.lbl_armonicos.setWordWrap(True)
+        self.lbl_armonicos.hide()
+        v.addWidget(self.lbl_armonicos)
+        col.addWidget(tarjeta)
 
-    @staticmethod
-    def _paso(texto, icono):
-        btn = QPushButton(" " + texto)
-        btn.setIcon(iconos.icono(icono, tema.ACENTO, 18))
-        btn.setProperty("paso", "true")
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        return btn
+        tarjeta, v = self._tarjeta()
+        v.addWidget(self._seccion("CONVERSACIÓN"))
+        self.log = QTextEdit()
+        self.log.setReadOnly(True)
+        self.log.setProperty("conversacion", "true")
+        self.log.setPlaceholderText("Lo que le digas al paciente y lo que él conteste.")
+        v.addWidget(self.log, 1)
+        col.addWidget(tarjeta, 1)
+        return caja
 
-    @staticmethod
-    def _conversacion(placeholder):
-        """Registro de lo dicho, para la tarjeta de la derecha."""
-        log = QTextEdit()
-        log.setReadOnly(True)
-        log.setProperty("conversacion", "true")
-        log.setPlaceholderText(placeholder)
-        return log
+    # ------------------------------------------------------------ caso
+    def la_super(self, data, appointment_id=None):
+        """Hidrata (o deshidrata, data=None) el módulo con el caso actual --
+        llamado por MainWindow._hydrate_modules() cada vez que cambia el
+        caso activo. Paciente nuevo: no le han dicho nada todavía."""
+        self.data = data
+        self.appointment_id = appointment_id
+        self.modelo = dp.ModeloDiapasones(data)
+        self._instruccion = None
+        self._golpe = None
+        self._apoyo = None
+        self._rinne = None
+        self._aviso_id += 1
+        self.frases.callar()
+        self.frases.silencio()
+        self.log.clear()
+        self.cabeza.poner_diapason(None)
+        self.cabeza.mirar(*VISTA_FRENTE)
+        sirve = not data or self.modelo.disponible()
+        self.lbl_armonicos.setVisible(not sirve)
+        self.btn_golpear.setEnabled(sirve)
+        self._mostrar_vibracion()
+        motivo = no_realizable.motivo(data, "acumetría")
+        if motivo:
+            self.aviso_bebe.texto.setText(motivo)
+        self.pila.setCurrentWidget(self.aviso_bebe if motivo else self.equipo)
 
-    @staticmethod
-    def _decir(log, texto):
-        """Una línea del registro: "Tú:" y "Paciente:" con su color."""
+    def callar(self):
+        self.frases.callar()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.frases.callar()
+
+    def _log(self, action, **payload):
+        """Encola una acción del alumno con los diapasones (prefijo ac_, ver
+        backend/log_queue.py), con la verdad del caso en el payload."""
+        case_id = self.data.get("id") if self.data else None
+        if case_id is not None:
+            payload.setdefault("case_id", case_id)
+        payload.setdefault("appointment_id", self.appointment_id)
+        payload.setdefault("con_paciente", case_id is not None)
+        self.log_queue.push(action, payload)
+
+    def _decir(self, texto):
+        """Una línea de la conversación: "Tú:" y "Paciente:" con su color."""
         quien, sep, resto = texto.partition(": ")
         if sep and quien in ("Tú", "Paciente"):
             color = tema.ACENTO if quien == "Tú" else tema.TEXTO_SUAVE
-            log.append(f'<p style="margin:0 0 6px 0"><b style="color:{color}">{quien}</b> '
-                       f'<span style="color:{tema.TEXTO}">{html.escape(resto)}</span></p>')
+            self.log.append(f'<p style="margin:0 0 6px 0"><b style="color:{color}">{quien}</b> '
+                            f'<span style="color:{tema.TEXTO}">{html.escape(resto)}</span></p>')
         else:
-            log.append(html.escape(texto))
+            self.log.append(html.escape(texto))
 
-    def _armar_tab(self, panel, titulo_log, log):
-        """Panel de mandos a la izquierda (angosto) y registro a la derecha:
-        sobra ancho, falta alto."""
-        tab = QWidget()
-        h = QHBoxLayout(tab)
-        h.setContentsMargins(0, 10, 0, 0)
-        h.setSpacing(10)
-        panel.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
-        panel.setFixedWidth(330)
-        h.addWidget(panel)
-        derecha, col = self._tarjeta()
-        col.addWidget(self._seccion(titulo_log))
-        col.addWidget(log, 1)
-        h.addWidget(derecha, 1)
-        return tab
+    # ------------------------------------------------------------ diapasón
+    def hz(self):
+        return next(h for h, b in self.botones_hz.items() if b.isChecked())
 
-    # ---------------------------------------------------------- Rinne ----
+    def _desde_golpe(self):
+        return None if self._golpe is None else self._reloj() - self._golpe
 
-    def _build_rinne_tab(self):
-        panel, v = self._tarjeta()
+    def _vibra(self):
+        t = self._desde_golpe()
+        return t is not None and dp.vibracion(t) > 0
 
-        v.addWidget(self._seccion("DIAPASÓN"))
-        fila, (self.rinne_500, self.rinne_1000) = self._segmentado(
-            self, (("500 Hz", "500"), ("1000 Hz", "1000")))
-        v.addLayout(fila)
+    def _cambiar_diapason(self, hz):
+        """Tomar el otro diapasón: está quieto, y el que estaba apoyado se va."""
+        if self._golpe is not None or self._apoyo is not None:
+            self._log("ac_cambiar_diapason", hz=hz)
+        self._golpe = None
+        self._apoyo = None
+        self._rinne = None
+        self._aviso_id += 1
+        self.cabeza.poner_diapason(None)
+        self._mostrar_vibracion()
 
-        v.addWidget(self._seccion("OÍDO"))
-        fila, (self.rinne_od, self.rinne_oi) = self._segmentado(
-            self, (("Derecho (OD)", "od"), ("Izquierdo (OI)", "oi")), lado=True)
-        v.addLayout(fila)
+    def _golpear(self):
+        if not self.modelo.disponible():
+            return
+        self._golpe = self._reloj()
+        self._apoyo = None
+        self._rinne = None
+        self._aviso_id += 1
+        self.cabeza.poner_diapason(None)
+        self._log("ac_golpe", hz=self.hz())
+        self._decir(f"Tú: golpeas el diapasón de {dict(dp.DIAPASONES)[self.hz()]}.")
+        self._tick.start()
+        self._mostrar_vibracion()
 
-        for rb in (self.rinne_500, self.rinne_1000, self.rinne_od, self.rinne_oi):
-            rb.toggled.connect(lambda checked: checked and self._rinne_reset())
+    def _retirar(self):
+        if self._apoyo is None:
+            return
+        self._log("ac_retirar", hz=self.hz(), zona=self._apoyo["zona"])
+        self._apoyo = None
+        self._aviso_id += 1
+        self.cabeza.poner_diapason(None)
+        self._decir("Tú: retiras el diapasón.")
 
-        v.addSpacing(6)
-        v.addWidget(self._seccion("PRUEBA"))
-        self.btn_mastoides = self._paso("Apoyar en mastoides (vía ósea)", "oido")
-        self.btn_pabellon = self._paso("Frente al pabellón (vía aérea)", "diapason")
-        self.btn_mastoides.clicked.connect(self._rinne_probar_mastoides)
-        self.btn_pabellon.clicked.connect(self._rinne_probar_pabellon)
-        v.addWidget(self.btn_mastoides)
-        v.addWidget(self.btn_pabellon)
+    def _mostrar_vibracion(self):
+        t = self._desde_golpe()
+        nivel = dp.vibracion(t) if t is not None else 0.0
+        self.barra.setValue(int(nivel * 100))
+        if t is None:
+            self.lbl_estado.setText("Quieto, sin golpear.")
+        elif nivel > 0:
+            self.lbl_estado.setText(f"Vibrando · {dp.redondear(t)} s desde el golpe")
+        else:
+            self.lbl_estado.setText("Ya no vibra: hay que golpearlo de nuevo.")
+            self._tick.stop()
+        self.btn_retirar.setEnabled(self._apoyo is not None)
 
-        v.addStretch(1)
+    def _dura(self, apoyo):
+        """Cuánto lo oye en esa posición, desde el golpe (segundos)."""
+        hz = self.hz()
+        if apoyo["zona"] == "pabellon":
+            return self.modelo.tiempos(hz, apoyo["oido"])[0]
+        if apoyo["zona"] == "mastoides":
+            return self.modelo.tiempos(hz, apoyo["oido"])[1]
+        return self.modelo.tiempo_weber(hz)
 
-        self.rinne_log = self._conversacion("Lo que le digas al paciente y lo que él conteste.")
-        tab = self._armar_tab(panel, "CONVERSACIÓN", self.rinne_log)
-        return tab
+    def _oye_ahora(self, apoyo):
+        t = self._desde_golpe()
+        return t is not None and dp.oye(self._dura(apoyo), t)
 
-    def _rinne_seleccion(self):
-        hz = '500' if self.rinne_500.isChecked() else '1000'
-        lado = 'od' if self.rinne_od.isChecked() else 'oi'
-        lado_label = 'derecho' if lado == 'od' else 'izquierdo'
-        rinne = (self.data or {}).get('Rinne') or {}
-        valor = (rinne.get(hz) or {}).get(lado, 'positivo')
-        return hz, lado, lado_label, valor
+    def _apoyar(self, punto, normal):
+        if not self.data:
+            self._decir("Paciente: (no hay un caso cargado)")
+            return
+        if not self.modelo.disponible():
+            self._decir(f"({ARMONICOS}: no sirve para examinar.)")
+            return
+        donde, oido, sitio, dist = zona(punto)
+        apoyo = {"zona": donde, "oido": oido, "sitio": sitio}
+        self._apoyo = apoyo
+        self._aviso_id += 1
+        self.cabeza.poner_diapason(punto, normal)
+        hz = self.hz()
+        t = self._desde_golpe()
+        oye = self._oye_ahora(apoyo)
+        verdad = {}
+        if donde in ("pabellon", "mastoides"):
+            t_aire, t_hueso = self.modelo.tiempos(hz, oido)
+            verdad = {"rinne": self.modelo.rinne(hz, oido), "t_aire": t_aire, "t_hueso": t_hueso}
+        elif donde in ("linea_media", "fuera_de_linea"):
+            verdad = {"weber": self.modelo.weber(hz), "t_weber": self.modelo.tiempo_weber(hz)}
+        self._log("ac_apoyo", hz=hz, zona=donde, oido=oido, sitio=sitio, distancia_mm=round(dist * 1000),
+                  desde_golpe_s=None if t is None else round(t, 1), vibrando=self._vibra(),
+                  oye=oye, instruccion=self._instruccion, **verdad)
+        lado = f" {LADO[oido]}" if oido in LADO and donde in ("mastoides", "pabellon") else ""
+        if donde == "pabellon":
+            self._decir(f"Tú: pones el diapasón frente al pabellón del oído{lado}.")
+        elif donde == "mastoides":
+            self._decir(f"Tú: apoyas el diapasón en la mastoides{lado}.")
+        else:
+            self._decir(f"Tú: apoyas el diapasón {DONDE_TEXTO[donde]}.")
+        # Para comparar en el Rinne: las dos posiciones del mismo oído con
+        # el mismo golpe
+        if donde in ("pabellon", "mastoides"):
+            if not self._rinne or self._rinne["oido"] != oido or self._rinne["golpe"] != self._golpe:
+                self._rinne = {"oido": oido, "golpe": self._golpe, "vistos": set()}
+            self._rinne["vistos"].add(donde)
+        respuesta = self._al_sentirlo(apoyo, oye)
+        if respuesta:
+            self._decir(f"Paciente: {respuesta}")
+        if oye and self._instruccion == "avise_cuando_deje":
+            self._programar_aviso(apoyo)
 
-    def _rinne_reset(self):
-        """Otro diapasón u otro oído: se empieza de nuevo (la instrucción
-        dada sigue valiendo, el paciente no la olvida)."""
-        self._rinne_probado = {'mastoides': False, 'pabellon': False}
-        self._rinne_ultimo = None
-        self.rinne_log.clear()
+    def _al_sentirlo(self, apoyo, oye):
+        """Lo que dice el paciente al ponerle el diapasón, según la
+        instrucción vigente."""
+        contacto = apoyo["zona"] != "pabellon"
+        if not self._vibra():
+            if self._instruccion in INSTRUCCIONES:
+                return "No escucho nada."
+            return None
+        if self._instruccion not in INSTRUCCIONES:
+            return NO_SABE
+        no_oye = "Siento que vibra, pero no lo escucho." if contacto else "No escucho nada."
+        if self._instruccion in ("avise_si_escucha", "avise_cuando_deje"):
+            return "Sí, lo escucho." if oye else no_oye
+        if self._instruccion == "compare_sonidos":
+            if apoyo["zona"] not in ("pabellon", "mastoides"):
+                return "¿Comparar con qué?"
+            if self._rinne and self._rinne["vistos"] >= {"pabellon", "mastoides"}:
+                return self._comparacion_rinne()
+            return "Ya." if oye else no_oye
+        # diga_donde
+        if apoyo["zona"] in ("linea_media", "fuera_de_linea"):
+            return DONDE_WEBER.get(self.modelo.weber(self.hz()), DONDE_WEBER["centrado"]) if oye else no_oye
+        if apoyo["zona"] in ("pabellon", "mastoides"):
+            return f"En el oído {LADO[apoyo['oido']]}." if oye else no_oye
+        return "Acá, donde me lo puso." if oye else no_oye
 
-    def _rinne_comparacion(self, valor):
-        """Lo que contesta al comparar las dos posiciones. Negativo y falso
-        negativo suenan igual para el paciente: la trampa del falso
-        negativo la descubre el alumno, no el paciente."""
-        if valor == 'positivo':
-            return "Adelante, frente a la oreja. Ahí suena más fuerte y dura más."
+    def _comparacion_rinne(self):
+        """Negativo y falso negativo suenan igual para el paciente: la
+        trampa del falso negativo la descubre el alumno."""
+        if self.modelo.rinne(self.hz(), self._rinne["oido"]) == "positivo":
+            return "Adelante, frente a la oreja. Ahí suena más fuerte."
         return "Atrás, en el hueso. Ahí suena más fuerte."
 
-    def _rinne_poner(self, donde):
-        """Apoya el diapasón (mastoides) o lo pone frente al pabellón. El
-        paciente contesta solo si le dijeron qué hacer."""
-        if not self.data:
-            self._decir(self.rinne_log, "Paciente: (no hay un caso cargado)")
-            return
-        hz, lado, lado_label, valor = self._rinne_seleccion()
-        self._log(f"ac_rinne_{donde}", hz=hz, oido=lado, resultado=valor, instruccion=self._instruccion)
-        if donde == 'mastoides':
-            self._decir(self.rinne_log, f"Tú: apoyas el diapasón en la mastoides del oído {lado_label}.")
-        else:
-            self._decir(self.rinne_log, f"Tú: pones el diapasón frente al pabellón del oído {lado_label}.")
-        self._rinne_probado[donde] = True
-        self._rinne_ultimo = donde
-        oye = donde == 'mastoides' or valor != 'falso_negativo'
-        if self._instruccion not in SIRVE_PARA or 'rinne' not in SIRVE_PARA[self._instruccion]:
-            self._decir(self.rinne_log, f"Paciente: {NO_SABE}")
-        elif self._instruccion == 'avise_si_escucha':
-            self._decir(self.rinne_log, "Paciente: Sí, lo escucho." if oye else "Paciente: No... no escucho nada.")
-        elif self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']:
-            # compare_sonidos: con las dos posiciones, compara solo
-            self._decir(self.rinne_log, f"Paciente: {self._rinne_comparacion(valor)}")
-        else:
-            self._decir(self.rinne_log, "Paciente: Ya." if oye else "Paciente: Mm... no escucho nada.")
+    def _programar_aviso(self, apoyo):
+        """Con "Avíseme cuando deje de escucharlo": avisa cuando el
+        diapasón baja de su umbral en esa posición."""
+        self._aviso_id += 1
+        mi_aviso = self._aviso_id
+        quedan = dp.segundos_que_quedan(self._dura(apoyo), self._desde_golpe() or 0.0)
+        QTimer.singleShot(int(quedan * 1000) + 300, self, lambda: self._ya_no(mi_aviso, apoyo))
 
-    def _rinne_probar_mastoides(self):
-        self._rinne_poner('mastoides')
+    def _ya_no(self, mi_aviso, apoyo):
+        if mi_aviso != self._aviso_id or self._apoyo is not apoyo:
+            return   # lo movieron, lo retiraron o lo volvieron a golpear
+        t = self._desde_golpe()
+        self._log("ac_deja_de_oir", hz=self.hz(), zona=apoyo["zona"], oido=apoyo["oido"],
+                  desde_golpe_s=None if t is None else round(t, 1))
+        self._decir("Paciente: Ya no lo escucho.")
 
-    def _rinne_probar_pabellon(self):
-        self._rinne_poner('pabellon')
-
-    # ---------------------------------------------------------- Weber ----
-
-    def _build_weber_tab(self):
-        panel, v = self._tarjeta()
-
-        v.addWidget(self._seccion("DIAPASÓN"))
-        fila, (self.weber_500, self.weber_1000) = self._segmentado(
-            self, (("500 Hz", "500"), ("1000 Hz", "1000")))
-        v.addLayout(fila)
-
-        v.addSpacing(6)
-        v.addWidget(self._seccion("PRUEBA"))
-        self.btn_frente = self._paso("Apoyar en la frente / vértex", "diapason")
-        self.btn_frente.clicked.connect(self._weber_probar)
-        v.addWidget(self.btn_frente)
-        v.addStretch(1)
-
-        self.weber_log = self._conversacion("Lo que le digas al paciente y lo que él conteste.")
-        for rb in (self.weber_500, self.weber_1000):
-            rb.toggled.connect(lambda checked: checked and self._weber_reset())
-        tab = self._armar_tab(panel, "CONVERSACIÓN", self.weber_log)
-        return tab
-
-    def _weber_reset(self):
-        self._weber_puesto = False
-        self.weber_log.clear()
-
-    def _weber_probar(self):
-        if not self.data:
-            self._decir(self.weber_log, "Paciente: (no hay un caso cargado)")
-            return
-        hz = '500' if self.weber_500.isChecked() else '1000'
-        valor = ((self.data or {}).get('Weber') or {}).get(hz, 'centrado')
-        self._log("ac_weber", hz=hz, resultado=valor, instruccion=self._instruccion)
-        self._decir(self.weber_log, "Tú: apoyas el diapasón en la frente / vértex.")
-        self._weber_puesto = True
-        if self._instruccion not in SIRVE_PARA or 'weber' not in SIRVE_PARA[self._instruccion]:
-            self._decir(self.weber_log, f"Paciente: {NO_SABE}")
-        elif self._instruccion == 'diga_donde':
-            self._decir(self.weber_log, f"Paciente: {DONDE_WEBER.get(valor, DONDE_WEBER['centrado'])}")
-        else:
-            self._decir(self.weber_log, "Paciente: Sí, lo escucho.")
-
-    # --------------------------------------------- lo que se le dice ----
-
-    def _prueba_actual(self):
-        return "weber" if self.tabs.currentIndex() == 1 else "rinne"
-
+    # ------------------------------------------------------------ lo que se le dice
     def _frase(self, clave):
         """Una frase del panel: se dice (FrasesHabladas), queda en la
-        conversación de la prueba que está a la vista y el paciente la
-        contesta. Una instrucción queda vigente hasta que se dé otra; una
-        pregunta se contesta y no la reemplaza."""
+        conversación y el paciente la contesta. Una instrucción queda
+        vigente hasta que se dé otra; una pregunta se contesta y no la
+        reemplaza."""
         if clave == SILENCIO:
             return
-        prueba = self._prueba_actual()
-        log = self.weber_log if prueba == "weber" else self.rinne_log
         texto = next((t for _g, frases in GRUPOS for t, c in frases if c == clave), clave)
-        self._decir(log, f"Tú: «{texto}»")
+        self._decir(f"Tú: «{texto}»")
         if not self.data:
-            self._decir(log, "Paciente: (no hay un caso cargado)")
+            self._decir("Paciente: (no hay un caso cargado)")
             return
         if clave == "explicar_diapasones":
             respuesta = "Bueno, ya."
         elif clave in INSTRUCCIONES:
             self._instruccion = clave
             respuesta = "Ya, bueno."
+            if clave == "avise_cuando_deje" and self._apoyo is not None and self._oye_ahora(self._apoyo):
+                self._programar_aviso(self._apoyo)
         else:
-            respuesta = self._contestar(clave, prueba)
-        self._decir(log, f"Paciente: {respuesta}")
-        tipo = "ac_pregunta" if clave not in INSTRUCCIONES and clave != "explicar_diapasones" else "ac_instruccion"
-        extra = {}
-        if prueba == "rinne":
-            hz, lado, _l, valor = self._rinne_seleccion()
-            extra = {"hz": hz, "oido": lado, "resultado": valor, "posicion": self._rinne_ultimo}
-        else:
-            hz = '500' if self.weber_500.isChecked() else '1000'
-            extra = {"hz": hz, "resultado": ((self.data or {}).get('Weber') or {}).get(hz, 'centrado'),
-                     "puesto": self._weber_puesto}
-        self._log(tipo, clave=clave, prueba=prueba, respuesta=respuesta, **extra)
+            respuesta = self._contestar(clave)
+        self._decir(f"Paciente: {respuesta}")
+        tipo = "ac_instruccion" if clave in INSTRUCCIONES or clave == "explicar_diapasones" else "ac_pregunta"
+        apoyo = self._apoyo or {}
+        self._log(tipo, clave=clave, respuesta=respuesta, hz=self.hz(), zona=apoyo.get("zona"),
+                  oido=apoyo.get("oido"), vibrando=self._vibra(),
+                  oye=bool(apoyo) and self._oye_ahora(apoyo))
 
-    def _contestar(self, clave, prueba):
-        if prueba == "rinne":
-            _hz, _lado, _l, valor = self._rinne_seleccion()
-            if clave == "lo_escucha":
-                if self._rinne_ultimo is None:
-                    return "¿Qué cosa? No siento nada."
-                oye = self._rinne_ultimo == 'mastoides' or valor != 'falso_negativo'
-                return "Sí." if oye else "No, nada."
-            if clave == "donde_mas_fuerte":
-                if self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']:
-                    return self._rinne_comparacion(valor)
-                if self._rinne_ultimo is None:
-                    return "¿Qué cosa?"
-                return "No sé... me lo puso en un solo lado."
-            return "No sé, lo siento de este lado nomás."
-        # Weber
-        hz = '500' if self.weber_500.isChecked() else '1000'
-        valor = ((self.data or {}).get('Weber') or {}).get(hz, 'centrado')
-        if not self._weber_puesto:
-            return "¿Qué cosa?"
+    def _contestar(self, clave):
+        apoyo = self._apoyo
+        if not self.modelo.disponible():
+            return "No escucho nada."
+        if apoyo is None or not self._vibra():
+            if clave in ("donde_mas_fuerte", "igual_ambos"):
+                return "¿Qué cosa?"
+            return "¿Qué cosa? No siento nada." if apoyo is None else "No, nada."
+        oye = self._oye_ahora(apoyo)
+        contacto = apoyo["zona"] != "pabellon"
         if clave == "lo_escucha":
-            return "Sí."
-        if clave == "igual_ambos":
+            return "Sí." if oye else ("Siento que vibra nomás." if contacto else "No.")
+        if clave == "sigue_escuchando":
+            return "Sí, todavía." if oye else "No, ya no."
+        if clave == "escucha_o_vibra":
+            if oye:
+                return "Lo escucho."
+            return "Solo siento que vibra." if contacto else "No escucho nada."
+        if clave == "donde_mas_fuerte":
+            if self._rinne and apoyo["zona"] in ("pabellon", "mastoides") \
+                    and self._rinne["vistos"] >= {"pabellon", "mastoides"}:
+                return self._comparacion_rinne()
+            if apoyo["zona"] in ("linea_media", "fuera_de_linea"):
+                return DONDE_WEBER.get(self.modelo.weber(self.hz()), DONDE_WEBER["centrado"]) if oye \
+                    else "No lo escucho."
+            return "No sé... me lo puso en un solo lado."
+        # igual_ambos
+        if apoyo["zona"] in ("linea_media", "fuera_de_linea") and oye:
             return {"od": "No, más en el derecho.", "oi": "No, más en el izquierdo."}.get(
-                valor, "Sí, igual en los dos.")
-        return DONDE_WEBER.get(valor, DONDE_WEBER["centrado"])
+                self.modelo.weber(self.hz()), "Sí, igual en los dos.")
+        if apoyo["zona"] in ("linea_media", "fuera_de_linea"):
+            return "No lo escucho."
+        return "No sé, lo siento de este lado nomás."

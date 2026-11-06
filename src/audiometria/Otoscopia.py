@@ -6,7 +6,10 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
+import math
+
 from audiometria.OtoscopiaInforme import InformeOtoscopia
+from audiometria.cabeza_examen import CabezaOtoscopia
 from audiometria.comandos_voz import SILENCIO
 from audiometria.frases_habladas import FrasesHabladas
 from backend.log_queue import get_log_queue
@@ -31,6 +34,11 @@ from PySide6.QtWidgets import (
 )
 
 SIN_IMAGEN_TEXTO = "Otoscopio sin batería"
+LADO_TEXTO = {"od": "derecho", "oi": "izquierdo"}
+TIRON_MIN_CM = 0.5          # menos que esto no es un tirón
+EDAD_TIRON_ABAJO = 3        # años: menor que esto, el pabellón va abajo y atrás
+EDAD_ESPECULO_ADULTO = 6    # años: menor que esto el espéculo de adulto no entra
+CAMPO_SIN_TRACCION = 0.5    # sin enderezar el conducto se ve la mitad del campo
 
 # Lo que el evaluador le dice al paciente (audiometria/frases_habladas.py;
 # audio en resources/audio/comandos_ot/, scripts/voces_comandos.py --ot).
@@ -224,6 +232,9 @@ class Otoscopia(QWidget):
         self._fetch_thread = None
         self._case_id_pedido = None
         self.log_queue = get_log_queue()
+        self._fotos = {"od": None, "oi": None}   # QPixmap por oído
+        self._tiron = None     # el pabellón traccionado: {'oido', 'arriba', 'atras', 'correcto'}
+        self._dentro = None    # 'od'/'oi': el otoscopio metido en ese conducto
 
         tema.aplicar_estilo(self, EXTRA_QSS)
         layout = QVBoxLayout(self)
@@ -247,78 +258,141 @@ class Otoscopia(QWidget):
             self.tabs.setTabIcon(i, iconos.icono(nombre, color, 16))
 
     def _build_tab_otoscopio(self):
+        """Como la rinoscopía: las frases a la izquierda, la cabeza grande
+        (el mouse es el otoscopio, cabeza_examen.CabezaOtoscopia) y una
+        columna angosta con el oído, el espéculo y soltar el pabellón."""
         tab = QWidget()
         fila = QHBoxLayout(tab)
         fila.setContentsMargins(0, 10, 0, 0)
-        fila.setSpacing(12)
-        # Lo que se le dice al paciente, a la izquierda como en los otros equipos
+        fila.setSpacing(10)
         self.frases = FrasesHabladas(GRUPOS, {}, "comandos_ot")
         self.frases.setFixedWidth(250)
         self.frases.btn_checked.connect(self._frase)
         fila.addWidget(self.frases)
-        layout = QVBoxLayout()
-        layout.setSpacing(10)
-        fila.addLayout(layout, 1)
-        fila_visores = QHBoxLayout()
-        fila_visores.setSpacing(10)
-        self.lbl_od = self._build_slot()
-        self.lbl_oi = self._build_slot()
-        fila_visores.addWidget(self._build_tarjeta("OD", "Oído derecho", self.lbl_od), 1)
-        fila_visores.addWidget(self._build_tarjeta("OI", "Oído izquierdo", self.lbl_oi), 1)
-        layout.addLayout(fila_visores, 1)
-        layout.addLayout(self._build_conos())
+        self.cabeza = CabezaOtoscopia(self.vista)
+        self.cabeza.miro.connect(self._miro)
+        self.cabeza.salio.connect(self._salio)
+        self.cabeza.traccionado.connect(self._traccionar)
+        fila.addWidget(self.cabeza, 1)
+
+        lado = QVBoxLayout()
+        lado.setSpacing(6)
+        lado.addStretch(1)
+        for titulo, botones in (("OÍDO", (("Derecho", lambda: self.cabeza.mirar_oido("od")),
+                                          ("Izquierdo", lambda: self.cabeza.mirar_oido("oi")))),):
+            rotulo = QLabel(titulo)
+            rotulo.setProperty("role", "seccion")
+            rotulo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+            lado.addWidget(rotulo)
+            for texto, accion in botones:
+                b = QPushButton(texto)
+                b.setFixedWidth(104)
+                b.clicked.connect(accion)
+                lado.addWidget(b, 0, Qt.AlignmentFlag.AlignHCenter)
+        lado.addSpacing(10)
+        lado.addLayout(self._build_conos())
+        lado.addSpacing(10)
+        self.btn_soltar = QPushButton("Soltar el\npabellón")
+        self.btn_soltar.setFixedWidth(104)
+        self.btn_soltar.clicked.connect(self._soltar_pabellon)
+        lado.addWidget(self.btn_soltar, 0, Qt.AlignmentFlag.AlignHCenter)
+        lado.addStretch(1)
+        fila.addLayout(lado)
         return tab
 
     def _build_conos(self):
-        """Elección del espéculo: el pediátrico deja el campo visible chico
-        (lo de siempre) y el de adulto lo duplica en diámetro."""
-        fila = QHBoxLayout()
-        fila.setSpacing(6)
+        """El espéculo: el pediátrico deja ver un campo chico y el de adulto
+        el doble (en un niño chico no entra)."""
+        col = QVBoxLayout()
+        col.setSpacing(6)
+        rotulo = QLabel("ESPÉCULO")
+        rotulo.setProperty("role", "seccion")
+        rotulo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        col.addWidget(rotulo)
         self.grupo_conos = QButtonGroup(self)
         self.grupo_conos.setExclusive(True)
-        self.btn_cono_pediatrico = QPushButton("Cono pediátrico")
-        self.btn_cono_adulto = QPushButton("Cono adulto")
-        pista = QLabel("Mueve el mouse sobre la imagen: el espéculo deja ver un círculo a la vez.")
-        pista.setProperty("role", "hint")
-        pista.setWordWrap(True)
-        lbl_cono = QLabel("ESPÉCULO")
-        lbl_cono.setProperty("role", "seccion")
-        for btn, fraccion in (
-            (self.btn_cono_pediatrico, _OtoscopioVisor.CONO_PEDIATRICO),
-            (self.btn_cono_adulto, _OtoscopioVisor.CONO_ADULTO),
-        ):
+        self.btn_cono_pediatrico = QPushButton("Pediátrico")
+        self.btn_cono_adulto = QPushButton("Adulto")
+        for btn, clave in ((self.btn_cono_pediatrico, "pediatrico"), (self.btn_cono_adulto, "adulto")):
             btn.setCheckable(True)
+            btn.setFixedWidth(104)
             self.grupo_conos.addButton(btn)
-            btn.clicked.connect(lambda _checked=False, f=fraccion: self._set_cono(f))
+            btn.clicked.connect(lambda _checked=False, k=clave: self._cambiar_especulo(k))
+            col.addWidget(btn, 0, Qt.AlignmentFlag.AlignHCenter)
         self.btn_cono_pediatrico.setChecked(True)
-        fila.addWidget(pista, 1)
-        fila.addWidget(lbl_cono)
-        fila.addWidget(self.btn_cono_pediatrico)
-        fila.addWidget(self.btn_cono_adulto)
-        return fila
+        return col
 
-    def _set_cono(self, fraccion):
-        self.lbl_od.setCono(fraccion)
-        self.lbl_oi.setCono(fraccion)
+    # ------------------------------------------------------------ técnica
+    def _edad(self):
+        try:
+            return float((self.data or {}).get("edad") or 0)
+        except (TypeError, ValueError):
+            return 0.0
 
-    def _build_tarjeta(self, lado, titulo, visor):
-        """Tarjeta de un oído: píldora OD/OI + título y el visor."""
-        tarjeta = QFrame()
-        tarjeta.setProperty("card", "true")
-        col = QVBoxLayout(tarjeta)
-        col.setContentsMargins(12, 10, 12, 12)
-        col.setSpacing(8)
-        cabecera = QHBoxLayout()
-        pastilla = QLabel(lado)
-        tema.pastilla_lado(pastilla, lado)
-        titulo_lbl = QLabel(titulo)
-        titulo_lbl.setProperty("role", "titulo")
-        cabecera.addWidget(pastilla)
-        cabecera.addWidget(titulo_lbl)
-        cabecera.addStretch(1)
-        col.addLayout(cabecera)
-        col.addWidget(visor, 1)
-        return tarjeta
+    def _especulo(self):
+        return "adulto" if self.btn_cono_adulto.isChecked() else "pediatrico"
+
+    def _tiron_correcto(self, arriba, atras):
+        """Adulto y niño grande: arriba y atrás. Menor de 3 años: abajo y
+        atrás (el conducto todavía es casi todo cartilaginoso)."""
+        if atras < TIRON_MIN_CM:
+            return False
+        if self._edad() < EDAD_TIRON_ABAJO:
+            return arriba <= -TIRON_MIN_CM
+        return arriba >= TIRON_MIN_CM
+
+    def _traccionar(self, oido, arriba, atras):
+        if math.hypot(arriba, atras) < TIRON_MIN_CM:
+            return   # fue un clic en la oreja, no un tirón
+        correcto = self._tiron_correcto(arriba, atras)
+        self._tiron = {"oido": oido, "arriba": arriba, "atras": atras, "correcto": correcto}
+        self.cabeza.poner_tiron((oido, arriba, atras))
+        self._log("ot_traccion", oido=oido, arriba_cm=arriba, atras_cm=atras, correcto=correcto,
+                  edad=self._edad())
+        self.btn_soltar.setEnabled(True)
+
+    def _soltar_pabellon(self):
+        if self._tiron is None:
+            return
+        self._log("ot_soltar", oido=self._tiron["oido"])
+        self._tiron = None
+        self.cabeza.poner_tiron(None)
+        self.btn_soltar.setEnabled(False)
+
+    def _cambiar_especulo(self, clave):
+        self._log("ot_especulo", especulo=clave)
+        self.cabeza.update()
+
+    def _no_entra(self):
+        return self._especulo() == "adulto" and self._edad() < EDAD_ESPECULO_ADULTO
+
+    def vista(self, oido):
+        """Lo que se ve por el otoscopio en ese conducto (lo dibuja
+        CabezaOtoscopia): la foto del caso con el campo del espéculo; sin el
+        pabellón bien traccionado el conducto no se endereza y la pared tapa
+        casi todo. Sin foto, el otoscopio está sin batería."""
+        if self._no_entra():
+            return {"texto": "El espéculo de adulto no entra en este conducto."}
+        foto = self._fotos.get(oido)
+        if foto is None:
+            return {"texto": SIN_IMAGEN_TEXTO}
+        cono = _OtoscopioVisor.CONO_ADULTO if self._especulo() == "adulto" else _OtoscopioVisor.CONO_PEDIATRICO
+        tiron = self._tiron if self._tiron and self._tiron["oido"] == oido else None
+        return {"foto": foto, "cono": cono, "tapado": not (tiron and tiron["correcto"])}
+
+    def _miro(self, oido):
+        """El otoscopio entró al conducto (el mouse pasó por él)."""
+        self._dentro = oido
+        tiron = self._tiron if self._tiron and self._tiron["oido"] == oido else None
+        if self._no_entra():
+            self._log("ot_especulo_grande", oido=oido, edad=self._edad())
+            return
+        self._log("ot_otoscopio", oido=oido, especulo=self._especulo(), traccion=bool(tiron),
+                  traccion_correcta=bool(tiron and tiron["correcto"]), edad=self._edad(),
+                  hay_foto=self._fotos.get(oido) is not None)
+
+    def _salio(self):
+        self._dentro = None
 
     def _build_slot(self):
         return _OtoscopioVisor()
@@ -352,8 +426,12 @@ class Otoscopia(QWidget):
         # deshidratar) se limpia, si no el alumno arranca el siguiente con
         # los cuadrantes del anterior marcados.
         self.informe.limpiar()
-        self.lbl_od.setText(SIN_IMAGEN_TEXTO)
-        self.lbl_oi.setText(SIN_IMAGEN_TEXTO)
+        self._fotos = {"od": None, "oi": None}
+        self._tiron = None
+        self._dentro = None
+        self.cabeza.poner_tiron(None)
+        self.cabeza.mirar_oido("od")
+        self.btn_soltar.setEnabled(False)
 
         case_id = data.get("id") if data else None
         self._case_id_pedido = str(case_id) if case_id is not None else None
@@ -367,16 +445,17 @@ class Otoscopia(QWidget):
     def _on_fotos_listas(self, case_id_solicitado, od_bytes, oi_bytes):
         if case_id_solicitado != self._case_id_pedido:
             return  # el alumno ya cambió de paciente (o se deshidrató) mientras se pedía
-        for lbl, data in ((self.lbl_od, od_bytes), (self.lbl_oi, oi_bytes)):
+        for oido, data in (("od", od_bytes), ("oi", oi_bytes)):
             pix = QPixmap()
             if data and pix.loadFromData(data):
-                lbl.setPixmap(pix)
+                self._fotos[oido] = pix
             else:
                 if data:
                     # Llegó la foto pero Qt no la sabe leer (p. ej. WebP sin
                     # el plugin qwebp en el build, ver LabSim.spec).
                     print(f"Otoscopia: no se pudo decodificar la imagen ({len(data)} bytes, {data[:12]!r})")
-                lbl.setText(SIN_IMAGEN_TEXTO)
+                self._fotos[oido] = None
+        self.cabeza.update()
 
     def submit_report(self):
         """Sube el informe al cerrar la atención -- lo llama main.py::

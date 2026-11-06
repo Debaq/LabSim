@@ -8311,3 +8311,29 @@ el mapeo vuelve a 1 2 3 (tests/test_mouse_zurdo_x11.py).
   `tests/test_controles_tapados.py`, que revisa en todas las ventanas qué
   widget recibe el clic en el centro de cada control.
 
+### Sobre la cabeza (2026-11-06, misma tarde)
+
+La cabeza de los electrodos al centro (`audiometria/cabeza_examen.py`,
+subclase de `CabezaElectrodos`): los clics caen en la piel 3D y `zona()`
+dice dónde quedó el diapasón (mastoides M1/M2, frente al pabellón cerca de
+los CAE y lóbulos, línea media Nz/Fpz/Fz/Cz, a un lado de la línea media,
+otro).
+
+- **Diapasones** (`Acumetria.py` + `diapasones.py`): sin pestañas Rinne y
+  Weber; la prueba la hace el alumno con dónde apoya el diapasón y lo que
+  dice. Se golpea (sin golpear no suena) y se apaga solo. Cuánto lo oye
+  cada vía sale del audiograma del caso (aire: ese oído; hueso: la mejor
+  cóclea, así el falso negativo sale solo), ajustado al Rinne y Weber que
+  marcó el docente, que mandan. "Avíseme cuando deje de escucharlo" avisa
+  solo. Sin Rinne/Weber en el caso, el diapasón suena con armónicos (no se
+  inventa una respuesta normal), como el otoscopio sin batería. Los
+  niveles y la caída son del modelo, no de una norma.
+- **Otoscopía como la rinoscopía** (`CabezaOtoscopia`), sin panel lateral:
+  el mouse es el otoscopio; sobre el conducto se abre la lupa hacia la nuca
+  sin tapar la oreja, y moverlo recorre el tímpano. Arrastrar desde la oreja
+  tira del pabellón (queda tirado con su flecha). Correcto: arriba y atrás;
+  menores de 3 años, abajo y atrás. Sin buena tracción la pared del
+  conducto tapa casi todo. El espéculo de adulto no entra antes de los 6
+  años. No se le avisa al alumno si tiró bien: queda en ot_traccion /
+  ot_otoscopio para la evaluación.
+

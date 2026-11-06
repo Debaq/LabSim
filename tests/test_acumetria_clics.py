@@ -13,7 +13,6 @@ import sys
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from PySide6.QtWidgets import QTabWidget  # noqa: E402
 
 from core.base import context  # noqa: E402  (crea la QApplication)
 from core.h_win import FrameSubMdi  # noqa: E402
@@ -31,20 +30,15 @@ def test_nada_tapa_los_botones_de_los_diapasones():
     marco = FrameSubMdi(w, expand=True)
     marco.resize(1100, 650)
     marco.show()
-    w.la_super({"id": 79, "edad": 24, "Weber": {"500": "oi"}}, 102)
+    w.la_super({"id": 79, "edad": 24, "Rinne": {"500": {"od": "positivo"}}, "Weber": {"500": "oi"}}, 102)
     APP.processEvents()
     win = marco.window()
-    pestanas = w.findChildren(QTabWidget)[0]
-    botones = {0: ("rinne_500", "rinne_1000", "rinne_od", "rinne_oi", "btn_mastoides", "btn_pabellon"),
-               1: ("weber_500", "weber_1000", "btn_frente")}
-    for pestana, nombres in botones.items():
-        pestanas.setCurrentIndex(pestana)
-        APP.processEvents()
-        for nombre in nombres:
-            boton = getattr(w, nombre)
-            bajo = _bajo_el_mouse(win, boton)
-            assert bajo is boton or boton.isAncestorOf(bajo), \
-                f"{nombre}: el clic lo recibe {type(bajo).__name__}"
+    for boton in (w.botones_hz["500"], w.botones_hz["1000"], w.btn_golpear, w.btn_retirar):
+        bajo = _bajo_el_mouse(win, boton)
+        assert bajo is boton or boton.isAncestorOf(bajo), \
+            f"{boton.text()}: el clic lo recibe {type(bajo).__name__}"
+    bajo = _bajo_el_mouse(win, w.cabeza)
+    assert bajo is w.cabeza, f"la cabeza: el clic lo recibe {type(bajo).__name__}"
     marco.close()
 
 
