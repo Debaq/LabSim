@@ -27,7 +27,7 @@ La lista de identificación es del simulador: 16 olores comunes con tres
 distractores cada uno, no la de un producto comercial (H28: una lista debe
 adaptarse y validarse en cada lugar).
 
-Sin `cases.data['OLFATO']` no hay paciente: el equipo no mide.
+Sin `cases.data['OLFATO']` el olfato es normal para la edad (nasal/normales.py).
 """
 
 import math
@@ -159,12 +159,17 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'olfato', 'edad', 'sexo'} o None si el caso no trae
-    olfatometría (o la trae mal escrita)."""
-    if not isinstance(data, dict) or not isinstance(data.get('OLFATO'), dict):
+    olfatometría mal escrita (o no hay caso). Sin bloque OLFATO, el olfato
+    normal para la edad (nasal/normales.py)."""
+    if not isinstance(data, dict):
         return None
     try:
-        bloque = normaliza(data['OLFATO'])
         edad = float(data.get('edad'))
+        crudo = data.get('OLFATO')
+        if not isinstance(crudo, dict):
+            from nasal import normales
+            crudo = normales.olfato(edad)
+        bloque = normaliza(crudo)
     except (TypeError, ValueError) as exc:
         print(f'olfatometría: el caso trae OLFATO inválido: {exc}')
         return None

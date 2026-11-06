@@ -284,8 +284,13 @@ def maniobra_en_ventana(w, reloj, **kw):
         avanzar(10)
 
 
-def test_ventana_sin_espiro_no_mide():
+def test_ventana_sin_espiro_es_normal():
     w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0})
+    assert w.panel_paciente.isEnabled() and 'ESPIRO' not in w.lbl_mensaje.text()
+
+
+def test_ventana_espiro_mal_escrito_no_mide():
+    w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0, 'ESPIRO': {'pre': 'x'}})
     assert not w.btn_iniciar.isEnabled() and not w.panel_paciente.isEnabled()
     assert 'ESPIRO' in w.lbl_mensaje.text()
 

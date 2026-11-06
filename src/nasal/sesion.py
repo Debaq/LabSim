@@ -18,8 +18,8 @@ consulta. El modelo de RinoSim lo trata como todo o nada.
 El ambiente de la sala (temperatura y humedad) es el que muestra el equipo:
 fijo por atención, con una deriva lenta. No mueve el modelo; se anota.
 
-Sin `cases.data['NASAL']` no hay paciente: el equipo no mide (no se rellena
-con una nariz normal).
+Sin `cases.data['NASAL']` la nariz es normal (nasal/normales.py, decidido
+2026-11-06); sin caso (data None) no hay paciente.
 """
 
 import math
@@ -30,14 +30,16 @@ from nasal import modelo
 
 
 def desde_caso(data):
-    """`cases.data` -> paciente de RinoSim, o None si el caso no trae nariz.
-    Un bloque mal escrito (un valor que no es número) también da None: el
-    módulo dice que no hay nariz cargada en vez de medir otra cosa."""
+    """`cases.data` -> paciente de RinoSim, o None sin caso. Si el caso no
+    trae nariz, la normal (nasal/normales.py). Un bloque mal escrito (un valor
+    que no es número) da None: el módulo dice que la nariz del caso no sirve
+    en vez de medir otra cosa."""
     if not isinstance(data, dict):
         return None
     nasal = data.get('NASAL')
     if not isinstance(nasal, dict) or not isinstance(nasal.get('lados'), dict):
-        return None
+        from nasal import normales
+        return modelo.normaliza(normales.NASAL)
     try:
         return modelo.normaliza(nasal)
     except ValueError as exc:

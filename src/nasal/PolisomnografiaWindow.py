@@ -18,7 +18,7 @@ capítulo) va a "Lo que el equipo no sabe" (docente) y al log, con prefijo
 psg_. El informe POLISOMNOGRAFIA guarda el montaje, la puntuación y los
 tramos excluidos: al retomar la atención la noche se rehace igual.
 
-Sin `cases.data['SUENO']` no se registra.
+Sin `cases.data['SUENO']` la noche es normal (nasal/normales.py).
 """
 
 import os
@@ -554,8 +554,8 @@ class PolisomnografiaWindow(QMainWindow):
             self._mensaje('Elige el estudio, monta los sensores y registra la noche. Después revisa la puntuación '
                           'automática y corrígela: los índices salen de lo que tú puntúes.')
         elif data is not None:
-            self._mensaje('Este paciente no tiene estudio de sueño cargado en el caso: no se puede registrar. '
-                          'Hace falta el bloque SUENO del caso.', 'alerta')
+            self._mensaje('Este paciente trae el estudio de sueño mal escrito en el caso: no se puede registrar. '
+                          'Hay que corregir el bloque SUENO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para registrar.')
         self.dibujar()

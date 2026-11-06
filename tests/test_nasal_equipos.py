@@ -150,11 +150,17 @@ def caso(cuadro='mixta'):
             'paciente_snapshot': {'nombre': 'Ana', 'apellido': 'Pérez'}}
 
 
-def test_sin_nariz_no_mide():
+def test_sin_nariz_es_normal():
     w = RinomanometriaWindow(data_login=ADMIN)
     w.la_super({'edad': 30}, 'sin-nariz')
+    assert w.panel_examen.isEnabled() and w.sesion.hay_paciente
+
+
+def test_nariz_mal_escrita_no_mide():
+    w = RinomanometriaWindow(data_login=ADMIN)
+    w.la_super({'edad': 30, 'NASAL': {'lados': {'D': {'narina': 'x'}}}}, 'nariz-mala')
     assert not w.panel_examen.isEnabled()
-    assert 'no tiene la nariz' in w.lbl_mensaje.text()
+    assert 'mal escrita' in w.lbl_mensaje.text()
     medir(w, 'D')
     assert w.res['reposo']['D'] is None
     w.la_super(None, None)

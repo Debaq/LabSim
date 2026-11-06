@@ -17,7 +17,7 @@ CÓMO se tomó cada medición (lado, estado, opciones, semilla): al retomar la
 atención se vuelven a calcular con el modelo y salen idénticas, en vez de
 guardar miles de puntos de cada curva.
 
-Sin `cases.data['NASAL']` el equipo no mide.
+Sin `cases.data['NASAL']` la nariz es normal (nasal/normales.py).
 """
 
 from PySide6.QtCore import QTimer, Qt
@@ -306,8 +306,8 @@ class EquipoNasal(QMainWindow):
         for panel in self._paneles():
             panel.setEnabled(False)
         if con_paciente:
-            self._mensaje('Este paciente no tiene la nariz cargada en el caso: el equipo no '
-                          'mide. Hace falta el bloque NASAL del caso.', 'alerta')
+            self._mensaje('Este paciente trae la nariz mal escrita en el caso: el equipo no '
+                          'mide. Hay que corregir el bloque NASAL del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para medir.')
         self.dibujar()

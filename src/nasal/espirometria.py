@@ -25,7 +25,7 @@ Tres partes, como un espirómetro de verdad:
 La verdad (el pulmón, lo que hizo el paciente) no la ve el equipo: va a "Lo
 que el equipo no sabe" y al log.
 
-Sin `cases.data['ESPIRO']` no hay paciente: el equipo no mide.
+Sin `cases.data['ESPIRO']` el pulmón es normal (nasal/normales.py).
 """
 
 import json
@@ -263,13 +263,18 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'pulmon', 'bloque', 'edad', 'sexo'} o None si el caso
-    no trae espirometría (o la trae mal escrita: el equipo dice que no hay
-    pulmón cargado en vez de medir otra cosa)."""
-    if not isinstance(data, dict) or not isinstance(data.get('ESPIRO'), dict):
+    trae la espirometría mal escrita (el equipo dice que no hay pulmón
+    cargado en vez de medir otra cosa) o no hay caso. Sin bloque ESPIRO, el
+    pulmón normal para su edad, sexo y talla (nasal/normales.py)."""
+    if not isinstance(data, dict):
         return None
     try:
-        bloque = normaliza(data['ESPIRO'])
         edad = float(data.get('edad'))
+        crudo = data.get('ESPIRO')
+        if not isinstance(crudo, dict):
+            from nasal import normales
+            crudo = normales.espiro(edad, 'F' if data.get('gender') == 1 else 'M')
+        bloque = normaliza(crudo)
     except (TypeError, ValueError) as exc:
         print(f'espirometría: el caso trae ESPIRO inválido: {exc}')
         return None

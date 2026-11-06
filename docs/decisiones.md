@@ -8379,3 +8379,30 @@ otro).
   paciente sigue saliendo del caso. Volver a golpear lo reinicia; tomar el
   otro diapasón o cambiar de paciente lo calla. Retirarlo de la cabeza no:
   sigue vibrando en la mano.
+
+## Nariz y sueño: sin bloque del caso, el paciente es normal (2026-11-06)
+
+Él: "en los pacientes que se crean y los del libro, si no tienen los datos
+de nasal, prick test, polisomnografía, etc., todos son normales". Revierte la
+regla del roadmap nasal ("sin datos del caso, el módulo no mide").
+
+- **Dónde:** cada `desde_caso` (`nasal/sesion.py`, `olfatometria.py`,
+  `prick.py`, `espirometria.py`, `sueno.py`) arma el bloque normal de
+  `nasal/normales.py` cuando el caso no trae NASAL, OLFATO, PRICK, ESPIRO o
+  SUENO, y lo pasa por el mismo `normaliza`. Cubre a la vez la rinoscopía,
+  la rinomanometría, la rinometría, la olfatometría, el prick, la
+  espirometría, la polisomnografía/poligrafía y el CPAP.
+- **Qué es normal:** nariz = `modelo.paciente_normal()`; olfato = la media
+  TDI del grupo de edad (Oleszkiewicz 2019) repartida T 24 %, D 36 %,
+  I 40 %, igual en las dos narinas; prick = histamina 5 mm, ningún alérgeno,
+  sin dermografismo ni fármaco; espirometría = el previsto GLI-2012 para
+  edad, sexo y una talla mediana por edad (PEF = 2,4 × FEV1, sin
+  broncodilatador ni tope); sueño = perfil personalizado con 1,5 eventos/h
+  (IAH < 5), la misma noche para el mismo caso (`stable_seed`).
+- **Lo que sigue sin medir:** sin caso (`data` None) no hay paciente, y un
+  bloque que viene **mal escrito** tampoco: es un error del caso, no un
+  sano. El mensaje del equipo ahora dice "mal escrito" y pide corregirlo.
+- La regla de "sin datos reales no se genera nada" sigue valiendo para ABR
+  y el resto: esto es solo nariz y sueño.
+- Pruebas: `tests/test_nasal_normales.py`; las de cada ventana ahora piden
+  normal sin bloque y "no mide" con el bloque malo.

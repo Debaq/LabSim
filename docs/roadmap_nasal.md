@@ -16,9 +16,10 @@ Revierte la decisión del 2026-10-16 de dejar lo nasal fuera de LabSim
   `main.py`). Los códigos van en `GATED_MODULE_CODES` pero **no** en
   `Courses::MODULES`: el docente no los puede prender en un curso hasta que
   se decida soltarlos.
-- **Sin datos del caso, el módulo no mide** (como el resto: nada de
-  pacientes "normales" de relleno). Cada examen lee su bloque de
-  `cases.data`.
+- **Sin datos del caso, el paciente es normal** (desde el 2026-11-06,
+  `nasal/normales.py`; antes no medía). Cada examen lee su bloque de
+  `cases.data`; un bloque mal escrito sigue sin medir. Ver § Nariz y sueño:
+  sin bloque del caso, el paciente es normal, en `docs/decisiones.md`.
 - **El modelo es el de RinoSim** (`~/Escritorio/Proyectos/rinosim`), portado
   a Python con los mismos números: el mismo paciente y la misma semilla dan
   la misma curva que las figuras del libro. RinoSim sigue siendo la fuente de

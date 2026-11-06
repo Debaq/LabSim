@@ -29,7 +29,7 @@ primero la que se pide y después las demás, y quedan guardadas en el equipo
 (local_cache/nasal/rinoscopia) para la próxima vez.
 
 Demo interna (docs/roadmap_nasal.md): solo el admin abre el módulo.
-Sin `cases.data['NASAL']` no hay nariz que mirar.
+Sin `cases.data['NASAL']` la nariz es normal (nasal/normales.py).
 """
 
 import hashlib

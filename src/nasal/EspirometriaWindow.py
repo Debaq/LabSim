@@ -24,7 +24,7 @@ El informe ESPIROMETRIA guarda la receta de cada maniobra (semilla e
 indicaciones con su muestra): al retomar la atención se rehacen idénticas.
 Cada acción va a action_logs con prefijo esp_ (nasal/sesion.registrar).
 
-Sin `cases.data['ESPIRO']` el equipo no mide.
+Sin `cases.data['ESPIRO']` el pulmón es normal (nasal/normales.py).
 """
 
 import math
@@ -656,8 +656,8 @@ class EspirometriaWindow(QMainWindow):
                           'mide la talla y verifica el equipo. Cada maniobra: Iniciar y las indicaciones '
                           '(teclas 1 a 5).')
         elif data is not None:
-            self._mensaje('Este paciente no tiene espirometría cargada en el caso: el equipo no mide. '
-                          'Hace falta el bloque ESPIRO del caso.', 'alerta')
+            self._mensaje('Este paciente trae la espirometría mal escrita en el caso: el equipo no mide. '
+                          'Hay que corregir el bloque ESPIRO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para medir.')
         self.dibujar()

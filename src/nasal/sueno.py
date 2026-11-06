@@ -17,7 +17,7 @@ paciente, lo que ven los sensores y lo que se calcula de la puntuación.
 La verdad (los eventos del modelo) no la ve el alumno: va a "Lo que el
 equipo no sabe" y al log.
 
-Sin `cases.data['SUENO']` no hay paciente: no se registra nada.
+Sin `cases.data['SUENO']` la noche es normal (nasal/normales.py).
 """
 
 import math
@@ -438,11 +438,17 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'sueno', 'edad', 'sexo'} o None si el caso no trae
-    estudio de sueño (o lo trae mal escrito)."""
-    if not isinstance(data, dict) or not isinstance(data.get('SUENO'), dict):
+    estudio de sueño mal escrito (o no hay caso). Sin bloque SUENO, una
+    noche normal, la misma para el mismo caso (nasal/normales.py)."""
+    if not isinstance(data, dict):
         return None
+    crudo = data.get('SUENO')
+    if not isinstance(crudo, dict):
+        from core.rng import stable_seed
+        from nasal import normales
+        crudo = normales.sueno(stable_seed('sueno_normal', data.get('id')) % 99999 + 1)
     try:
-        bloque = normaliza(data['SUENO'])
+        bloque = normaliza(crudo)
     except ValueError as exc:
         print(f'sueño: el caso trae SUENO inválido: {exc}')
         return None

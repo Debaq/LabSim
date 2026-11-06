@@ -18,7 +18,7 @@ reacciona a lo que hace el alumno.
 Lo que el equipo no tiene: no hay equipo. El alumno mide con la regla y
 decide el resultado; la verdad va a "Lo que el equipo no sabe" y al log.
 
-Sin `cases.data['PRICK']` no hay paciente: no se hace la prueba.
+Sin `cases.data['PRICK']` la piel es normal (nasal/normales.py).
 """
 
 import math
@@ -110,11 +110,16 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'piel', 'edad', 'sexo'} o None si el caso no trae
-    prick (o lo trae mal escrito)."""
-    if not isinstance(data, dict) or not isinstance(data.get('PRICK'), dict):
+    prick mal escrito (o no hay caso). Sin bloque PRICK, la piel normal:
+    histamina positiva y ningún alérgeno (nasal/normales.py)."""
+    if not isinstance(data, dict):
         return None
+    crudo = data.get('PRICK')
+    if not isinstance(crudo, dict):
+        from nasal import normales
+        crudo = normales.PRICK
     try:
-        piel = normaliza(data['PRICK'])
+        piel = normaliza(crudo)
     except ValueError as exc:
         print(f'prick: el caso trae PRICK inválido: {exc}')
         return None

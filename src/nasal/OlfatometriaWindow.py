@@ -16,7 +16,8 @@ paciente es de verdad, el T que da la regla con sus tríos y lo que hizo
 mal van a "Lo que el equipo no sabe" (docente) y al log, con prefijo olf_.
 
 El informe OLFATOMETRIA guarda los ensayos tal cual: al retomar la
-atención vuelven igual. Sin `cases.data['OLFATO']` no se mide.
+atención vuelven igual. Sin `cases.data['OLFATO']` el olfato es
+normal para la edad (nasal/normales.py).
 """
 
 import os
@@ -495,8 +496,8 @@ class OlfatometriaWindow(QMainWindow):
             self._mensaje('Prepara al paciente, véndale los ojos (clic en los ojos) para el umbral y la '
                           'discriminación, y presenta los bolígrafos. Entre un trío y otro, 20 s.')
         elif data is not None:
-            self._mensaje('Este paciente no tiene olfatometría cargada en el caso: no se puede medir. '
-                          'Hace falta el bloque OLFATO del caso.', 'alerta')
+            self._mensaje('Este paciente trae la olfatometría mal escrita en el caso: no se puede medir. '
+                          'Hay que corregir el bloque OLFATO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para medir.')
         self.dibujar()

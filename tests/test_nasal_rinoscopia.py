@@ -85,10 +85,17 @@ def test_vasoconstrictor_achica_el_cornete():
     assert oscuro(rinoscopia.render(sin, 0, 80)) > oscuro(rinoscopia.render(con, 0, 80))
 
 
-def test_modulo_sin_nariz():
+def test_modulo_sin_nariz_es_normal():
     sesion._actual = None
     w = RW.RinoscopiaWindow(data_login=ADMIN)
     w.la_super({'edad': 30}, '1')
+    assert w.btn_atras.isEnabled() and w.cara.activa
+
+
+def test_modulo_nariz_mal_escrita():
+    sesion._actual = None
+    w = RW.RinoscopiaWindow(data_login=ADMIN)
+    w.la_super({'edad': 30, 'NASAL': {'lados': {'D': {'narina': 'x'}}}}, '1')
     assert not w.btn_atras.isEnabled() and not w.cara.activa
     assert w.report_job() is None
 

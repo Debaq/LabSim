@@ -194,8 +194,13 @@ def presentar(w, reloj, paso=None):
     return w.ensayos[-1]
 
 
-def test_ventana_sin_olfato_no_mide():
+def test_ventana_sin_olfato_es_normal():
     w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0})
+    assert w.panel_paciente.isEnabled() and 'OLFATO' not in w.lbl_mensaje.text()
+
+
+def test_ventana_olfato_mal_escrito_no_mide():
+    w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0, 'OLFATO': {'lados': 'x'}})
     assert not w.btn_presentar.isEnabled() and not w.panel_paciente.isEnabled()
     assert 'OLFATO' in w.lbl_mensaje.text()
 

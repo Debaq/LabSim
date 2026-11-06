@@ -17,7 +17,7 @@ log, con prefijo prick_.
 
 El informe PRICK guarda los sitios y las lecturas: al retomar la atención
 vuelven, con las pápulas como a los 20 minutos. Sin `cases.data['PRICK']`
-no se hace la prueba.
+la piel es normal (nasal/normales.py).
 """
 
 import math
@@ -564,8 +564,8 @@ class PrickWindow(QMainWindow):
                           'antebrazo (a 2,5 cm entre sí y a 3 cm o más de los pliegues); puncha cada gota con una '
                           'lanceta nueva y lee a los 15-20 minutos.')
         elif data is not None:
-            self._mensaje('Este paciente no tiene prick test cargado en el caso: no se puede hacer. '
-                          'Hace falta el bloque PRICK del caso.', 'alerta')
+            self._mensaje('Este paciente trae el prick test mal escrito en el caso: no se puede hacer. '
+                          'Hay que corregir el bloque PRICK del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para hacer la prueba.')
         self.dibujar()
