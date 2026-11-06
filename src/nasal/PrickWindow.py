@@ -563,9 +563,6 @@ class PrickWindow(QMainWindow):
             self._mensaje('Pregunta por los fármacos. Elige un extracto y marca el sitio con un clic en el '
                           'antebrazo (a 2,5 cm entre sí y a 3 cm o más de los pliegues); puncha cada gota con una '
                           'lanceta nueva y lee a los 15-20 minutos.')
-        elif data is not None:
-            self._mensaje('Este paciente trae el prick test mal escrito en el caso: no se puede hacer. '
-                          'Hay que corregir el bloque PRICK del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para hacer la prueba.')
         self.dibujar()

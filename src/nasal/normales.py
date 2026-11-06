@@ -3,8 +3,9 @@ trae ese bloque en `cases.data`.
 
 Decidido por él el 2026-11-06: los pacientes creados y los del libro que no
 traen datos de nariz, olfato, prick, espirometría o sueño son normales en
-esos exámenes (antes el equipo no medía). Un bloque que SÍ viene pero mal
-escrito sigue sin medir: eso es un error del caso, no un paciente sano.
+esos exámenes (antes el equipo no medía). Un bloque mal escrito también da
+el normal: se valida al guardar el caso (CaseForm.php); el equipo no avisa
+errores de la base de datos, solo los deja en el log.
 
 Cada función devuelve el bloque tal como lo escribiría el docente, para que
 pase por el mismo `normaliza` que un bloque del caso.
@@ -19,6 +20,17 @@ NASAL = {'nombre': 'Normal (el caso no trae nariz)', 'cuadro': 'normal'}
 # repartida como en adultos sanos: umbral ~24 %, discriminación ~36 %,
 # identificación ~40 % (p. ej. 21-30 años: T 8,75, D 13, I 14).
 _REPARTO_TDI = (('T', 0.24), ('D', 0.36), ('I', 0.40))
+
+
+def edad(data):
+    """La edad del caso; si no viene o no es un número, la de un adulto (el
+    dato se valida en la base de datos, no aquí)."""
+    try:
+        e = float(data.get('edad'))
+    except (TypeError, ValueError):
+        print('nasal: el caso no trae una edad válida, se usa 30')
+        return 30.0
+    return e if e == e and 0 <= e <= 120 else 30.0
 
 
 def olfato(edad):

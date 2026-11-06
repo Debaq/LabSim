@@ -18,7 +18,8 @@ Revierte la decisión del 2026-10-16 de dejar lo nasal fuera de LabSim
   se decida soltarlos.
 - **Sin datos del caso, el paciente es normal** (desde el 2026-11-06,
   `nasal/normales.py`; antes no medía). Cada examen lee su bloque de
-  `cases.data`; un bloque mal escrito sigue sin medir. Ver § Nariz y sueño:
+  `cases.data`; un bloque mal escrito también da el normal (se valida al
+  guardar el caso; el equipo no avisa errores de la base de datos). Ver § Nariz y sueño:
   sin bloque del caso, el paciente es normal, en `docs/decisiones.md`.
 - **El modelo es el de RinoSim** (`~/Escritorio/Proyectos/rinosim`), portado
   a Python con los mismos números: el mismo paciente y la misma semilla dan

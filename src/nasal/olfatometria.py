@@ -158,21 +158,21 @@ def normaliza(bloque):
 
 
 def desde_caso(data):
-    """`cases.data` -> {'olfato', 'edad', 'sexo'} o None si el caso no trae
-    olfatometría mal escrita (o no hay caso). Sin bloque OLFATO, el olfato
-    normal para la edad (nasal/normales.py)."""
+    """`cases.data` -> {'olfato', 'edad', 'sexo'}, o None sin caso. Sin
+    bloque OLFATO, o mal escrito, el olfato normal para la edad
+    (nasal/normales.py; el error queda en el log, no en el equipo)."""
     if not isinstance(data, dict):
         return None
+    from nasal import normales
+    edad = normales.edad(data)
+    crudo = data.get('OLFATO')
     try:
-        edad = float(data.get('edad'))
-        crudo = data.get('OLFATO')
-        if not isinstance(crudo, dict):
-            from nasal import normales
-            crudo = normales.olfato(edad)
-        bloque = normaliza(crudo)
+        bloque = normaliza(crudo) if isinstance(crudo, dict) else None
     except (TypeError, ValueError) as exc:
-        print(f'olfatometría: el caso trae OLFATO inválido: {exc}')
-        return None
+        print(f'olfatometría: el caso trae OLFATO inválido, se usa el normal: {exc}')
+        bloque = None
+    if bloque is None:
+        bloque = normaliza(normales.olfato(edad))
     return {'olfato': bloque, 'edad': edad, 'sexo': 'F' if data.get('gender') == 1 else 'M'}
 
 

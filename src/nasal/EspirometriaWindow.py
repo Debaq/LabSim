@@ -655,9 +655,6 @@ class EspirometriaWindow(QMainWindow):
             self._mensaje('Pon la pinza nasal (clic en la nariz) y la boquilla con filtro (clic en la boca), '
                           'mide la talla y verifica el equipo. Cada maniobra: Iniciar y las indicaciones '
                           '(teclas 1 a 5).')
-        elif data is not None:
-            self._mensaje('Este paciente trae la espirometría mal escrita en el caso: el equipo no mide. '
-                          'Hay que corregir el bloque ESPIRO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para medir.')
         self.dibujar()

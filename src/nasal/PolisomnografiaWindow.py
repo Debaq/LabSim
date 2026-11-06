@@ -553,9 +553,6 @@ class PolisomnografiaWindow(QMainWindow):
         if hay:
             self._mensaje('Elige el estudio, monta los sensores y registra la noche. Después revisa la puntuación '
                           'automática y corrígela: los índices salen de lo que tú puntúes.')
-        elif data is not None:
-            self._mensaje('Este paciente trae el estudio de sueño mal escrito en el caso: no se puede registrar. '
-                          'Hay que corregir el bloque SUENO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para registrar.')
         self.dibujar()

@@ -31,20 +31,19 @@ from nasal import modelo
 
 def desde_caso(data):
     """`cases.data` -> paciente de RinoSim, o None sin caso. Si el caso no
-    trae nariz, la normal (nasal/normales.py). Un bloque mal escrito (un valor
-    que no es número) da None: el módulo dice que la nariz del caso no sirve
-    en vez de medir otra cosa."""
+    trae nariz, o la trae mal escrita, la normal (nasal/normales.py): el
+    bloque se valida al guardar el caso, el equipo no avisa errores de la
+    base de datos (solo queda en el log)."""
     if not isinstance(data, dict):
         return None
+    from nasal import normales
     nasal = data.get('NASAL')
-    if not isinstance(nasal, dict) or not isinstance(nasal.get('lados'), dict):
-        from nasal import normales
-        return modelo.normaliza(normales.NASAL)
-    try:
-        return modelo.normaliza(nasal)
-    except ValueError as exc:
-        print(f'nasal: el caso trae NASAL inválido: {exc}')
-        return None
+    if isinstance(nasal, dict) and isinstance(nasal.get('lados'), dict):
+        try:
+            return modelo.normaliza(nasal)
+        except ValueError as exc:
+            print(f'nasal: el caso trae NASAL inválido, se usa el normal: {exc}')
+    return modelo.normaliza(normales.NASAL)
 
 
 # Tiempo de acción del vasoconstrictor, segundos (H26).

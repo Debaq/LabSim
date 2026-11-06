@@ -263,21 +263,20 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'pulmon', 'bloque', 'edad', 'sexo'} o None si el caso
-    trae la espirometría mal escrita (el equipo dice que no hay pulmón
-    cargado en vez de medir otra cosa) o no hay caso. Sin bloque ESPIRO, el
-    pulmón normal para su edad, sexo y talla (nasal/normales.py)."""
+    hay caso. Sin bloque ESPIRO, o mal escrito, el pulmón normal para su
+    edad, sexo y talla (nasal/normales.py; el error queda en el log)."""
     if not isinstance(data, dict):
         return None
+    from nasal import normales
+    edad = normales.edad(data)
+    crudo = data.get('ESPIRO')
     try:
-        edad = float(data.get('edad'))
-        crudo = data.get('ESPIRO')
-        if not isinstance(crudo, dict):
-            from nasal import normales
-            crudo = normales.espiro(edad, 'F' if data.get('gender') == 1 else 'M')
-        bloque = normaliza(crudo)
-    except (TypeError, ValueError) as exc:
-        print(f'espirometría: el caso trae ESPIRO inválido: {exc}')
-        return None
+        bloque = normaliza(crudo) if isinstance(crudo, dict) else None
+    except (TypeError, ValueError, AttributeError) as exc:
+        print(f'espirometría: el caso trae ESPIRO inválido, se usa el normal: {exc}')
+        bloque = None
+    if bloque is None:
+        bloque = normaliza(normales.espiro(edad, 'F' if data.get('gender') == 1 else 'M'))
     return {'pulmon': Pulmon(bloque), 'bloque': bloque, 'edad': edad,
             'sexo': 'F' if data.get('gender') == 1 else 'M'}
 

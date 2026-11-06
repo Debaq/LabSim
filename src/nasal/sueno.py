@@ -438,20 +438,20 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'sueno', 'edad', 'sexo'} o None si el caso no trae
-    estudio de sueño mal escrito (o no hay caso). Sin bloque SUENO, una
-    noche normal, la misma para el mismo caso (nasal/normales.py)."""
+    hay caso. Sin bloque SUENO, o mal escrito, una noche normal, la misma
+    para el mismo caso (nasal/normales.py; el error queda en el log)."""
     if not isinstance(data, dict):
         return None
+    from core.rng import stable_seed
+    from nasal import normales
     crudo = data.get('SUENO')
-    if not isinstance(crudo, dict):
-        from core.rng import stable_seed
-        from nasal import normales
-        crudo = normales.sueno(stable_seed('sueno_normal', data.get('id')) % 99999 + 1)
     try:
-        bloque = normaliza(crudo)
+        bloque = normaliza(crudo) if isinstance(crudo, dict) else None
     except ValueError as exc:
-        print(f'sueño: el caso trae SUENO inválido: {exc}')
-        return None
+        print(f'sueño: el caso trae SUENO inválido, se usa el normal: {exc}')
+        bloque = None
+    if bloque is None:
+        bloque = normaliza(normales.sueno(stable_seed('sueno_normal', data.get('id')) % 99999 + 1))
     return {'sueno': bloque, 'edad': data.get('edad'), 'sexo': 'F' if data.get('gender') == 1 else 'M'}
 
 

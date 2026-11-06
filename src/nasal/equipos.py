@@ -305,11 +305,7 @@ class EquipoNasal(QMainWindow):
     def _sin_caso(self, con_paciente=False):
         for panel in self._paneles():
             panel.setEnabled(False)
-        if con_paciente:
-            self._mensaje('Este paciente trae la nariz mal escrita en el caso: el equipo no '
-                          'mide. Hay que corregir el bloque NASAL del caso.', 'alerta')
-        else:
-            self._mensaje('Abre una atención para medir.')
+        self._mensaje('Abre una atención para medir.')
         self.dibujar()
 
     # --- Informe (contrato de core/report_autosave.py) -----------------

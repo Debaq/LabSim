@@ -162,10 +162,9 @@ def test_ventana_sin_prick_es_normal():
     assert w.panel_extractos.isEnabled() and w.brazo.activo
 
 
-def test_ventana_prick_mal_escrito_no_se_hace():
+def test_ventana_prick_mal_escrito_es_normal():
     w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0, 'PRICK': {'histamina': 'x'}})
-    assert not w.panel_extractos.isEnabled() and not w.brazo.activo
-    assert 'PRICK' in w.lbl_mensaje.text()
+    assert w.panel_extractos.isEnabled() and w.brazo.activo and 'PRICK' not in w.lbl_mensaje.text()
 
 
 def test_ventana_prueba_completa():

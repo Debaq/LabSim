@@ -289,10 +289,9 @@ def test_ventana_sin_espiro_es_normal():
     assert w.panel_paciente.isEnabled() and 'ESPIRO' not in w.lbl_mensaje.text()
 
 
-def test_ventana_espiro_mal_escrito_no_mide():
+def test_ventana_espiro_mal_escrito_mide_el_normal():
     w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0, 'ESPIRO': {'pre': 'x'}})
-    assert not w.btn_iniciar.isEnabled() and not w.panel_paciente.isEnabled()
-    assert 'ESPIRO' in w.lbl_mensaje.text()
+    assert w.panel_paciente.isEnabled() and 'ESPIRO' not in w.lbl_mensaje.text()
 
 
 def test_ventana_pide_boquilla_y_talla():

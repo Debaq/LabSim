@@ -8399,10 +8399,13 @@ regla del roadmap nasal ("sin datos del caso, el módulo no mide").
   edad, sexo y una talla mediana por edad (PEF = 2,4 × FEV1, sin
   broncodilatador ni tope); sueño = perfil personalizado con 1,5 eventos/h
   (IAH < 5), la misma noche para el mismo caso (`stable_seed`).
-- **Lo que sigue sin medir:** sin caso (`data` None) no hay paciente, y un
-  bloque que viene **mal escrito** tampoco: es un error del caso, no un
-  sano. El mensaje del equipo ahora dice "mal escrito" y pide corregirlo.
+- **Bloque mal escrito = también normal.** Él: "el equipo no debe avisar
+  errores de la base de datos, eso es en la base de datos". El bloque se
+  valida al guardar el caso (CaseForm.php); si igual llega mal, el equipo
+  mide el normal y el error queda solo en el log (`print`). Lo mismo con una
+  edad que no es número (se usa 30). Sin caso (`data` None) no hay paciente:
+  "Abre una atención".
 - La regla de "sin datos reales no se genera nada" sigue valiendo para ABR
   y el resto: esto es solo nariz y sueño.
-- Pruebas: `tests/test_nasal_normales.py`; las de cada ventana ahora piden
-  normal sin bloque y "no mide" con el bloque malo.
+- Pruebas: `tests/test_nasal_normales.py`; las de cada ventana piden el
+  normal sin bloque y con el bloque malo.

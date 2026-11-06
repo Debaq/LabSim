@@ -1,8 +1,8 @@
 """El caso sin bloque nasal o de sueño es normal (nasal/normales.py).
 
-1. Sin NASAL, OLFATO, PRICK, ESPIRO o SUENO, cada `desde_caso` da el
-   paciente normal; sin caso (None) sigue sin paciente; un bloque mal
-   escrito sigue sin medir.
+1. Sin NASAL, OLFATO, PRICK, ESPIRO o SUENO, o con el bloque mal escrito,
+   cada `desde_caso` da el paciente normal (el error es de la base de
+   datos, el equipo no lo avisa); sin caso (None) no hay paciente.
 2. Lo normal es normal según los criterios del mismo equipo: olfato sobre
    el percentil 10 de la edad, histamina positiva y ningún alérgeno,
    espirometría sobre el LIN, IAH bajo 5, la nariz de RinoSim normal.
@@ -34,12 +34,17 @@ def test_sin_caso_sin_paciente():
         assert f(None) is None, f
 
 
-def test_mal_escrito_no_mide():
-    assert sesion.desde_caso({'edad': 30, 'NASAL': {'lados': {'D': {'narina': 'x'}}}}) is None
-    assert O.desde_caso({'edad': 30, 'OLFATO': {'lados': 'x'}}) is None
-    assert P.desde_caso({'edad': 30, 'PRICK': {'histamina': 'x'}}) is None
-    assert E.desde_caso({'edad': 30, 'ESPIRO': {'pre': {'fvc': 99}}}) is None
-    assert Z.desde_caso({'SUENO': {'perfil': 'x'}}) is None
+def test_mal_escrito_da_el_normal():
+    assert sesion.desde_caso({'edad': 30, 'NASAL': {'lados': {'D': {'narina': 'x'}}}}) == sesion.desde_caso({'edad': 30})
+    assert O.desde_caso({'edad': 30, 'OLFATO': {'lados': 'x'}}) == O.desde_caso({'edad': 30})
+    assert P.desde_caso({'edad': 30, 'PRICK': {'histamina': 'x'}}) == P.desde_caso({'edad': 30})
+    assert E.desde_caso({'edad': 30, 'ESPIRO': {'pre': {'fvc': 99}}})['bloque'] == E.desde_caso({'edad': 30})['bloque']
+    assert Z.desde_caso({'id': 3, 'SUENO': {'perfil': 'x'}}) == Z.desde_caso({'id': 3})
+
+
+def test_sin_edad_usa_adulto():
+    assert O.desde_caso({'id': 1})['edad'] == 30.0
+    assert E.desde_caso({'id': 1, 'edad': 'x'})['edad'] == 30.0
 
 
 # --- 2 -----------------------------------------------------------------------

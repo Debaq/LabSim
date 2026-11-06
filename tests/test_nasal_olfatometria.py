@@ -172,7 +172,7 @@ def test_normaliza_rechaza_lo_que_no_sirve():
         except ValueError:
             continue
         raise AssertionError(malo)
-    assert O.desde_caso({'edad': 30, 'OLFATO': {'lados': 'x'}}) is None
+    assert O.desde_caso({'edad': 30, 'OLFATO': {'lados': 'x'}}) == O.desde_caso({'edad': 30})
 
 
 # --- 5 -----------------------------------------------------------------------
@@ -199,10 +199,9 @@ def test_ventana_sin_olfato_es_normal():
     assert w.panel_paciente.isEnabled() and 'OLFATO' not in w.lbl_mensaje.text()
 
 
-def test_ventana_olfato_mal_escrito_no_mide():
+def test_ventana_olfato_mal_escrito_mide_el_normal():
     w, _r = ventana({'id': 1, 'edad': 30, 'gender': 0, 'OLFATO': {'lados': 'x'}})
-    assert not w.btn_presentar.isEnabled() and not w.panel_paciente.isEnabled()
-    assert 'OLFATO' in w.lbl_mensaje.text()
+    assert w.panel_paciente.isEnabled() and 'OLFATO' not in w.lbl_mensaje.text()
 
 
 def test_ventana_bateria_completa_e_informe():

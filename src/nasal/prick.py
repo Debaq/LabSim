@@ -110,19 +110,19 @@ def normaliza(bloque):
 
 def desde_caso(data):
     """`cases.data` -> {'piel', 'edad', 'sexo'} o None si el caso no trae
-    prick mal escrito (o no hay caso). Sin bloque PRICK, la piel normal:
-    histamina positiva y ningún alérgeno (nasal/normales.py)."""
+    hay caso. Sin bloque PRICK, o mal escrito, la piel normal: histamina
+    positiva y ningún alérgeno (nasal/normales.py; el error queda en el log)."""
     if not isinstance(data, dict):
         return None
+    from nasal import normales
     crudo = data.get('PRICK')
-    if not isinstance(crudo, dict):
-        from nasal import normales
-        crudo = normales.PRICK
     try:
-        piel = normaliza(crudo)
+        piel = normaliza(crudo) if isinstance(crudo, dict) else None
     except ValueError as exc:
-        print(f'prick: el caso trae PRICK inválido: {exc}')
-        return None
+        print(f'prick: el caso trae PRICK inválido, se usa el normal: {exc}')
+        piel = None
+    if piel is None:
+        piel = normaliza(normales.PRICK)
     edad = data.get('edad')
     return {'piel': piel, 'edad': edad, 'sexo': 'F' if data.get('gender') == 1 else 'M'}
 

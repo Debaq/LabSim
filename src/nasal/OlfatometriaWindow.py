@@ -495,9 +495,6 @@ class OlfatometriaWindow(QMainWindow):
         if hay:
             self._mensaje('Prepara al paciente, véndale los ojos (clic en los ojos) para el umbral y la '
                           'discriminación, y presenta los bolígrafos. Entre un trío y otro, 20 s.')
-        elif data is not None:
-            self._mensaje('Este paciente trae la olfatometría mal escrita en el caso: no se puede medir. '
-                          'Hay que corregir el bloque OLFATO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para medir.')
         self.dibujar()

@@ -366,9 +366,6 @@ class CpapWindow(QMainWindow):
         if hay:
             self._mensaje('Elige la interfaz y la talla, y empieza con la presión inicial. Sube de a 1 cmH₂O, '
                           'con 5 minutos o más entre cambios, mientras haya eventos o ronquido.')
-        elif data is not None:
-            self._mensaje('Este paciente trae el estudio de sueño mal escrito en el caso: no se puede titular. '
-                          'Hay que corregir el bloque SUENO del caso.', 'alerta')
         else:
             self._mensaje('Abre una atención para titular.')
         self.dibujar()

@@ -140,9 +140,9 @@ def test_ventana_sin_sueno_es_normal():
     assert w.panel_interfaz.isEnabled() and 'SUENO' not in w.lbl_mensaje.text()
 
 
-def test_ventana_sueno_mal_escrito():
+def test_ventana_sueno_mal_escrito_es_normal():
     w = ventana({'id': 1, 'edad': 30, 'gender': 0, 'SUENO': {'perfil': 'x'}})
-    assert not w.panel_interfaz.isEnabled() and 'SUENO' in w.lbl_mensaje.text()
+    assert w.panel_interfaz.isEnabled() and 'SUENO' not in w.lbl_mensaje.text()
 
 
 def test_ventana_titulacion():
