@@ -1661,6 +1661,16 @@ final class CaseSheetPdf
         if (!empty($tinnitus['pulsatil'])) {
             $datos[] = 'pulsátil';
         }
+        // lo que fijó el docente para la tinnitumetría; lo demás lo sortea la app
+        if (isset($tinnitus['sonoridad_sl']) && $tinnitus['sonoridad_sl'] !== null && $tinnitus['sonoridad_sl'] !== '') {
+            $datos[] = 'sonoridad ' . (int) $tinnitus['sonoridad_sl'] . ' dB SL';
+        }
+        if (isset($tinnitus['nme_sl']) && $tinnitus['nme_sl'] !== null && $tinnitus['nme_sl'] !== '') {
+            $datos[] = 'NME ' . (int) $tinnitus['nme_sl'] . ' dB SL';
+        }
+        if (in_array($tinnitus['inhibicion'] ?? 'auto', ['negativa', 'parcial', 'total'], true)) {
+            $datos[] = 'inhibición residual ' . $tinnitus['inhibicion'];
+        }
         return $frase . '  [' . implode(' · ', array_filter($datos)) . ']';
     }
 

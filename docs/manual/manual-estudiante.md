@@ -499,6 +499,10 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Rosemberg bilateral** | Deterioro tonal (Rosemberg) | Igual que Carhart |
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Mano levantada en ruido** | Deterioro tonal (Carhart) con ruido en el otro oído | Igual que Carhart; al ruido no le hace caso |
+| **Compare con su ruido**, luego **¿Cuál se parece más?** | Tinnitumetría: tono | Dice cuál de los últimos sonidos que oyó (hasta tres) se parece más a su acúfeno: *«el primero»*, *«el segundo»* o *«el tercero»* |
+| **Igual de fuerte que su ruido** | Tinnitumetría: intensidad | Levanta la mano cuando el sonido suena igual de fuerte que su acúfeno |
+| **Hasta que no escuche su ruido** | Tinnitumetría: NME | Levanta la mano cuando el ruido le tapa el acúfeno |
+| **Un minuto de sonido**, luego **¿Cómo está su ruido?** | Tinnitumetría: inhibición residual | Con el sonido ya apagado, dice cómo quedó su acúfeno |
 
 > Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** no: el paciente las contesta y sigue con la instrucción que tenía. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, contesta y sigue respondiendo a la LDL.
 
@@ -535,6 +539,12 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
 - **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿Sonidos iguales?* o *¿En qué oído?* y *Talkback*: el paciente contesta. Para otra frecuencia, repite *Dos pitos*.
 - **Deterioro tonal**: tono **continuo** por vía aérea en 500, 1000, 2000 o 4000 Hz, e instrucción *Mano levantada* (Carhart) o *Rosemberg bilateral*. El paciente mantiene la mano arriba mientras oye; cronometra con *Iniciar / Detener / Borrar*. El minuto es real.
 - **LDL**: instrucción *Pitos fuertes*. El paciente dice *«molesta»* al **presentar** el tono a una intensidad que le molesta.
+- **Tinnitumetría**: cuatro instrucciones, una por parte (tabla de la sección 16).
+    - *Tono*: después de *Compare con su ruido*, presenta los sonidos de a uno (Tono, FM o NBN) y pregunta *¿Cuál se parece más?*. El paciente compara solo lo que oyó desde la pregunta anterior, hasta los tres últimos; con menos de dos, dice *«no sé»*.
+    - *Intensidad*: con *Igual de fuerte que su ruido* y paso **1** dB, sube el sonido con el estímulo sonando hasta que levante la mano.
+    - *NME*: con *Hasta que no escuche su ruido*, el ruido en el canal 2 (NBN o WN). Levanta la mano cuando el ruido le tapa el acúfeno; *¿Lo dejó de escuchar?* también lo contesta.
+    - *Inhibición residual*: con *Un minuto de sonido*, deja el estímulo sonando un minuto (cronómetro) y apágalo. *¿Cómo está su ruido?* contesta según cuánto tiempo sonó y cuánto pasó desde que lo apagaste.
+    - Un paciente sin acúfeno contesta que no escucha ningún ruido.
 - **Stenger**: instrucción *Colocar fonos*, la misma de los umbrales (al paciente no se le anuncia nada distinto). Los dos canales en *Tono*, uno a cada oído, sonando a la vez. El paciente levanta la mano si oye un pito.
 
 ## 20. Acumetría

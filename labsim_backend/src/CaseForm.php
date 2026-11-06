@@ -313,6 +313,17 @@ final class CaseForm
         $tinnitusPermanente = isset($v['tinnitus']['permanente']);
         $tinnitusRuido = (string) ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]);
         $tinnitusFrecuencia = (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]);
+        // Tinnitumetría: vacío / 'auto' = lo sortea la app (acufeno.py).
+        $tinnitusNum = static function ($x): ?int {
+            $x = trim((string) $x);
+            return $x === '' ? null : (int) $x;
+        };
+        $tinnitusSonoridadRaw = trim((string) ($v['tinnitus']['sonoridad_sl'] ?? ''));
+        $tinnitusNmeRaw = trim((string) ($v['tinnitus']['nme_sl'] ?? ''));
+        $tinnitusSonoridad = $tinnitusNum($tinnitusSonoridadRaw);
+        $tinnitusNme = $tinnitusNum($tinnitusNmeRaw);
+        $tinnitusInhibicion = (string) ($v['tinnitus']['inhibicion'] ?? 'auto');
+        $tinnitusMantiene = (string) ($v['tinnitus']['inhibicion_mantiene'] ?? 'auto');
 
         // Otoscopia: sin modo -- 1 sola fase (índice 0) ya ES "única"; una
         // 2ª fase en adelante es lo que la convierte en "por fase".
@@ -458,6 +469,18 @@ final class CaseForm
             $error = 'Tipo de ruido del tinnitus inválido.';
         } elseif ($tinnitusPresente && !in_array($tinnitusFrecuencia, CaseBuilder::FREQUENCIES, true)) {
             $error = 'Frecuencia del tinnitus inválida.';
+        } elseif ($tinnitusPresente && $tinnitusSonoridadRaw !== ''
+                && (!ctype_digit($tinnitusSonoridadRaw) || $tinnitusSonoridad > CaseBuilder::TINNITUS_SONORIDAD_MAX_SL)) {
+            $error = 'Sonoridad del tinnitus inválida (0 a ' . CaseBuilder::TINNITUS_SONORIDAD_MAX_SL . ' dB SL, o vacío para sortear).';
+        } elseif ($tinnitusPresente && $tinnitusNmeRaw !== ''
+                && (!ctype_digit($tinnitusNmeRaw) || $tinnitusNme > CaseBuilder::TINNITUS_NME_MAX_SL)) {
+            $error = 'NME del tinnitus inválido (0 a ' . CaseBuilder::TINNITUS_NME_MAX_SL . ' dB SL, o vacío para sortear).';
+        } elseif ($tinnitusPresente && $tinnitusSonoridad !== null && $tinnitusNme !== null && $tinnitusNme < $tinnitusSonoridad) {
+            $error = 'El NME del tinnitus no puede quedar bajo su sonoridad: el ruido que lo tapa suena más fuerte que el acúfeno.';
+        } elseif ($tinnitusPresente && !isset(CaseBuilder::TINNITUS_INHIBICION_OPTIONS[$tinnitusInhibicion])) {
+            $error = 'Inhibición residual del tinnitus inválida.';
+        } elseif ($tinnitusPresente && !isset(CaseBuilder::TINNITUS_MANTIENE_OPTIONS[$tinnitusMantiene])) {
+            $error = 'Duración de la inhibición residual inválida.';
         } elseif (!in_array($abrOd['type'], CaseBuilder::ABR_TYPE_OPTIONS, true) || !in_array($abrOi['type'], CaseBuilder::ABR_TYPE_OPTIONS, true)) {
             $error = 'Patología ABR inválida.';
         } elseif (!in_array($eoasOd['type'], CaseBuilder::EOAS_TYPE_OPTIONS, true) || !in_array($eoasOi['type'], CaseBuilder::EOAS_TYPE_OPTIONS, true)) {
@@ -592,6 +615,10 @@ final class CaseForm
                     'permanente' => $tinnitusPermanente,
                     'ruido' => $tinnitusRuido,
                     'frecuencia' => $tinnitusFrecuencia,
+                    'sonoridad_sl' => $tinnitusSonoridad,
+                    'nme_sl' => $tinnitusNme,
+                    'inhibicion' => $tinnitusInhibicion,
+                    'inhibicion_mantiene' => $tinnitusMantiene,
                 ] : ['presente' => false],
                 'anamnesis' => [
                     'antecedentes' => $antecedentes,

@@ -1007,6 +1007,22 @@ final class CaseBuilder
     // "unilateral" pide oído; "bilateral" admite predominio (asimetría).
     public const TINNITUS_LATERALIDAD_OPTIONS = ['craneal', 'unilateral', 'bilateral'];
     public const TINNITUS_PREDOMINIO_OPTIONS = ['igual', 'od', 'oi'];
+    // Tinnitumetría (T03): lo que el paciente responde. 'auto' (o vacío en
+    // los números) = la app lo sortea, fijo por caso (src/audiometria/
+    // acufeno.py); el docente puede fijarlo.
+    public const TINNITUS_INHIBICION_OPTIONS = [
+        'auto' => 'Auto (sorteo)',
+        'negativa' => 'Negativa (sigue igual)',
+        'parcial' => 'Parcial (más bajo o distinto)',
+        'total' => 'Total (desaparece)',
+    ];
+    public const TINNITUS_MANTIENE_OPTIONS = [
+        'auto' => 'Auto (sorteo)',
+        'no' => 'No: al minuto vuelve como antes',
+        'si' => 'Sí: al minuto sigue igual',
+    ];
+    public const TINNITUS_SONORIDAD_MAX_SL = 60;
+    public const TINNITUS_NME_MAX_SL = 80;
 
     /**
      * Si el paciente tiene acúfeno. Lo normal es que NO tenga: la casilla de
@@ -1754,6 +1770,11 @@ final class CaseBuilder
         $v['tinnitus']['predominio'] = $tinnitus['predominio'] ?? 'igual';
         $v['tinnitus']['ruido'] = $tinnitus['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0];
         $v['tinnitus']['frecuencia'] = (string) ($tinnitus['frecuencia'] ?? self::FREQUENCIES[0]);
+        foreach (['sonoridad_sl', 'nme_sl'] as $k) {
+            $v['tinnitus'][$k] = isset($tinnitus[$k]) && $tinnitus[$k] !== null ? (string) $tinnitus[$k] : '';
+        }
+        $v['tinnitus']['inhibicion'] = $tinnitus['inhibicion'] ?? 'auto';
+        $v['tinnitus']['inhibicion_mantiene'] = $tinnitus['inhibicion_mantiene'] ?? 'auto';
 
         // 'modo' venía en versiones anteriores de esta ficha (antes de que
         // se sacara el selector) -- se ignora si aparece en un caso viejo,

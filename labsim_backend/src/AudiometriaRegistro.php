@@ -29,6 +29,16 @@ final class AudiometriaRegistro
         'mano_levantada_en_ruido', 'ruido_blanco_contralateral', 'rosemberg_bilateral',
         'sonidos_iguales', 'en_qué_oído',
     ];
+    /** Tinnitumetría (T03, src/audiometria/acufeno.py): instrucciones y sus dos preguntas. */
+    public const INSTR_TINNITUS = [
+        'acufeno_cual_se_parece', 'acufeno_igual_fuerte', 'acufeno_deje_de_escuchar', 'acufeno_un_minuto',
+    ];
+    public const PREG_TINNITUS = ['acufeno_cual', 'acufeno_como_esta'];
+    /** Preguntas del talkback: no cambian la instrucción vigente (comandos_voz.PREGUNTAS). */
+    public const PREGUNTAS = [
+        'escucha', 'dejo_de_escuchar', 'en_qué_oído', 'sonidos_iguales', 'no_entiende',
+        'molesta', 'molesto_o', 'muy_fuerte', 'acufeno_cual', 'acufeno_como_esta',
+    ];
 
     /**
      * $logs: filas de action_logs de UNA atención, en orden de id, ya con el
@@ -56,6 +66,7 @@ final class AudiometriaRegistro
             'freq' => 1000,
             'freq_idx' => 3,
             'instruccion' => null,
+            'step' => 5,
             'canales' => [
                 ['on' => false, 'invertido' => false, 'int' => 20, 'stim' => 'Tono', 'output' => 'Derecha', 'trans' => 'Aerea'],
                 ['on' => false, 'invertido' => false, 'int' => 20, 'stim' => 'Narrow Band Noise', 'output' => 'Izquierda', 'trans' => 'Aerea'],
@@ -65,6 +76,11 @@ final class AudiometriaRegistro
         $abiertas = [null, null];
         $presentaciones = [];
         $pruebas = [];
+        // Tinnitumetría: la verdad del acúfeno (audio_caso_cargado) y una
+        // foto del equipo por cada evento mientras rige una de sus
+        // instrucciones; AudiometriaTecnica::tinnitus() la evalúa.
+        $tin = ['verdad' => null, 'eventos' => []];
+        $instrTin = null;
 
         foreach ($logs as $l) {
             $p = $l['payload'] ?? [];
@@ -78,14 +94,27 @@ final class AudiometriaRegistro
             $ch = isset($p['ch']) ? ((int) $p['ch'] === 1 ? 1 : 0) : null;
             $cambioEncendido = false;
 
+            if (isset($p['step'])) {
+                $estado['step'] = (int) $p['step'];
+            } elseif (isset($p['estado']['step'])) {
+                $estado['step'] = (int) $p['estado']['step'];
+            }
             switch ($accion) {
+                case 'audio_caso_cargado':
+                    if (array_key_exists('acufeno', $p)) {
+                        $tin['verdad'] = $p['acufeno'];
+                    }
+                    break;
                 case 'audio_talkback_press':
                     $cmd = $p['command'] ?? null;
                     if ($cmd !== 'pa_pa_pa') {
                         $estado['instruccion'] = $cmd;
                     }
+                    if ($cmd !== null && $cmd !== 'pa_pa_pa' && !in_array($cmd, self::PREGUNTAS, true)) {
+                        $instrTin = in_array($cmd, self::INSTR_TINNITUS, true) ? $cmd : null;
+                    }
                     $fase = self::pruebaDeInstruccion($cmd);
-                    if ($fase === 'logo' || $fase === 'supra') {
+                    if ($fase === 'logo' || $fase === 'supra' || $fase === 'tinnitumetria') {
                         $pruebas[] = [$t, $fase];
                     }
                     break;
@@ -151,6 +180,20 @@ final class AudiometriaRegistro
                     break;
             }
 
+            if ($instrTin !== null || $accion === 'audio_acufeno_respuesta') {
+                $tin['eventos'][] = [
+                    't' => $t,
+                    'accion' => $accion,
+                    'instruccion' => $instrTin,
+                    'step' => $estado['step'],
+                    'freq' => (int) $estado['freq'],
+                    'canales' => $estado['canales'],
+                    'mano' => $mano,
+                    'p' => $accion === 'audio_acufeno_respuesta' ? $p
+                        : ($accion === 'audio_talkback_press' ? ['command' => $p['command'] ?? null] : []),
+                ];
+            }
+
             if (!$cambioEncendido) {
                 continue;
             }
@@ -191,6 +234,7 @@ final class AudiometriaRegistro
             'con_ms' => $conMs,
             'presentaciones' => $presentaciones,
             'pruebas' => $pruebas,
+            'tinnitus' => $tin,
         ];
     }
 
@@ -225,7 +269,7 @@ final class AudiometriaRegistro
     private static function pruebaDe(array $estado, string $via): string
     {
         $porInstr = self::pruebaDeInstruccion($estado['instruccion']);
-        if ($porInstr === 'supra' || $porInstr === 'logo') {
+        if ($porInstr === 'supra' || $porInstr === 'logo' || $porInstr === 'tinnitumetria') {
             return $porInstr;
         }
         if ($estado['prueba'] !== 'Umbrales') {
@@ -272,6 +316,9 @@ final class AudiometriaRegistro
         }
         if (in_array($cmd, self::INSTR_SUPRA, true)) {
             return 'supra';
+        }
+        if (in_array($cmd, self::INSTR_TINNITUS, true) || in_array($cmd, self::PREG_TINNITUS, true)) {
+            return 'tinnitumetria';
         }
         return null;
     }

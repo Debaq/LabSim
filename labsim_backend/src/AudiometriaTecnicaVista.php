@@ -49,6 +49,9 @@ final class AudiometriaTecnicaVista
                 $secciones[$via] = $titulo;
             }
         }
+        if (!empty($res['tinnitus'])) {
+            $secciones['tinnitus'] = 'Tinnitumetría';
+        }
         foreach ($secciones as $k => $titulo) {
             self::seccion($titulo, $res[$k], $docente);
         }

@@ -13,6 +13,7 @@ from audiometria.masking_params import (  # re-export: los usan
     STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal, es_ruido)  # el panel y los tests
 from audiometria.logoaudiometry import CalculateLogo
 from audiometria.comandos_voz import PREGUNTAS
+from audiometria import acufeno
 class_pref = Preferences()
 
 c_voice = class_pref.get('command_voice')
@@ -101,7 +102,7 @@ class ResponseAudiometry():
     # estimulo sonando (con el tono en continuo, subir el ruido tiene que
     # bajar la mano sin soltar el tono; subir el tono sostenido hasta el LDL
     # tiene que hacerlo hablar).
-    RECALCULA = UMBRAL + ('escuche_mi_voz', 'solo_si_molesta', 'pitos_fuertes')
+    RECALCULA = UMBRAL + ('escuche_mi_voz', 'solo_si_molesta', 'pitos_fuertes') + acufeno.INSTRUCCIONES
     # "Molesta" se dice una vez por nivel: el pulsado prende y apaga el tono
     # cada medio segundo y lo hacia repetir (cortandose) en cada pulso. Lo
     # vuelve a decir con otro nivel, oido o frecuencia, o si el tono estuvo
@@ -149,6 +150,9 @@ class ResponseAudiometry():
         self.dbdata = dbdata
         self._logo = None   # el del SDT, se arma al primer uso (_detecta_sdt)
         self.other_response.voz = voz_del_paciente(dbdata)
+        self.acufeno = acufeno.Acufeno(dbdata.get('Tinnitus'), dbdata.get('id'))
+        self.tinnitumetria = acufeno.Tinnitumetria(
+            self.acufeno, lambda o, f: self.aerea[o][f], self._oidos)
         self.aerea = [[dbdata['Aerea'][i][0] for i in range(len(dbdata['Aerea']))], 
                       [dbdata['Aerea'][i][1] for i in range(len(dbdata['Aerea']))]]
         self.oseo = [[dbdata['Osea'][i][0] for i in range(len(dbdata['Osea']))], 
@@ -156,6 +160,9 @@ class ResponseAudiometry():
         
     def response_(self):
         debug_print(f">>>{self.history_command}")
+        if self._instruccion() in acufeno.INSTRUCCIONES:
+            self.response_tinnitus(self._instruccion())
+            return
         list_ = [0,1,2]
         uphand = any(elem in self.data['audio']['stim'] for elem in list_)
         debug_print(uphand)
@@ -185,6 +192,26 @@ class ResponseAudiometry():
             pass
         if not any(self.data["audio"]['stimOn']):
             self.downHand()
+
+    def response_tinnitus(self, instruccion):
+        """Tinnitumetría (ver acufeno.py): la mano dice "igual de fuerte"
+        en la sonoridad y "dejé de escucharlo" en el NME; en el tono y la
+        inhibición residual el paciente contesta las preguntas."""
+        tin = getattr(self, 'tinnitumetria', None)
+        if tin is None or self.data['audio']['test'] != 'Umbrales':
+            self.downHand()
+            return
+        audio = self.data['audio']
+        tin.ver(audio, instruccion)
+        if instruccion == acufeno.INSTR_SONORIDAD:
+            self._mano(tin.iguala(audio))
+        elif instruccion == acufeno.INSTR_NME:
+            self._mano(tin.tapa(audio))
+        else:
+            self.downHand()
+            if instruccion == acufeno.INSTR_INHIBICION:
+                # el estímulo de la inhibición no puede pasar su LDL
+                self.ldl()
 
     def _instruccion(self):
         """La ultima instruccion dada, saltando las preguntas: antes la
@@ -905,6 +932,9 @@ class ResponseAudiometry():
         # (talkback_termino): antes el "sí" del Fowler salía encima de la
         # pregunta, y las demás no se contestaban.
         self._pregunta = rol if rol in PREGUNTAS else None
+        if rol == acufeno.INSTR_TONO and getattr(self, 'tinnitumetria', None):
+            # "le voy a presentar sonidos": empieza una comparación nueva
+            self.tinnitumetria.nueva_comparacion()
 
     # Pausa del paciente entre el fin de la pregunta y su respuesta, en ms.
     PAUSA_RESPUESTA_MS = (400, 900)
@@ -931,7 +961,11 @@ class ResponseAudiometry():
             self.other_response.fowler_q(1 if pregunta == 'sonidos_iguales' else 2,
                                          self.data)
             return
-        respuesta = self.respuesta_a(pregunta)
+        if pregunta in acufeno.PREGUNTAS or (
+                pregunta == 'dejo_de_escuchar' and self._instruccion() == acufeno.INSTR_NME):
+            respuesta = self._respuesta_tinnitus(pregunta)
+        else:
+            respuesta = self.respuesta_a(pregunta)
         debug_print(f"[pregunta] {pregunta} -> {respuesta}")
         if respuesta is not None:
             self.other_response.create_voice_(respuesta)
@@ -970,6 +1004,31 @@ class ResponseAudiometry():
         if pregunta == 'no_entiende':                   # ¿Escucha, pero no entiende?
             return self._no_entiende(pasado)
         return None
+
+    def _respuesta_tinnitus(self, pregunta):
+        """Lo que contesta en la tinnitumetría, y al registro con lo que
+        comparó: el backend evalúa la técnica (T03) con esto."""
+        tin = getattr(self, 'tinnitumetria', None)
+        if tin is None:
+            return None
+        audio = self.data['audio']
+        extra = {}
+        if pregunta == acufeno.PREG_CUAL:
+            respuesta, comparados = tin.cual()
+            extra['comparados'] = [
+                {'stim': stim_list[s] if s < len(stim_list) else s,
+                 'freq': self.frecuency[f], 'oido': o} for s, f, o in comparados]
+        elif pregunta == acufeno.PREG_COMO:
+            respuesta = tin.como_esta(audio)
+            extra['corrida'] = tin.corrida()
+        elif not tin.acufeno.presente:
+            respuesta = acufeno.NO_TENGO
+        else:                                           # ¿Lo dejó de escuchar?
+            respuesta = 'si' if tin.tapa(audio) else 'no'
+        log = getattr(self.obj_audio, "_log", None)
+        if log is not None:
+            log("audio_acufeno_respuesta", pregunta=pregunta, respuesta=respuesta, **extra)
+        return respuesta
 
     def _talkback_db(self):
         dial = getattr(self.obj_audio, 'dial_talkback', None)

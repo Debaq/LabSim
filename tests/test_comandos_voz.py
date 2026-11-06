@@ -30,7 +30,7 @@ def _claves():
 
 def test_estan_todas_las_del_motor():
     assert CLAVES_DEL_MOTOR <= set(_claves())
-    assert len(_claves()) == len(set(_claves())) == 24   # + dictar_compuestas (SRT), 2026-11-06
+    assert len(_claves()) == len(set(_claves())) == 30   # + 6 de tinnitumetría, 2026-11-06
 
 
 def test_cada_clave_tiene_su_audio():

@@ -98,6 +98,16 @@ COMANDOS = {
                            "que escuche el pito. Si lo deja de escuchar, baja la mano, y la "
                            "vuelve a levantar cuando lo escuche de nuevo.",
     "pa_pa_pa": "Hola, hola, hola, hola, hola, hola. Pa, pa, pa, pa, pa.",
+    # Tinnitumetría (T03): tono, intensidad, NME e inhibición residual.
+    "acufeno_cual_se_parece": "Le voy a presentar algunos sonidos, uno después del otro. Fíjese "
+                              "en lo agudo o lo grave de cada uno. Después le voy a preguntar "
+                              "cuál se parece más a su ruido.",
+    "acufeno_igual_fuerte": "Ahora va a escuchar un sonido que irá subiendo de a poco. Levante "
+                            "la mano cuando lo escuche igual de fuerte que su ruido.",
+    "acufeno_deje_de_escuchar": "Ahora va a escuchar un ruido que irá subiendo de a poco. "
+                                "Levante la mano cuando ya no escuche su propio ruido.",
+    "acufeno_un_minuto": "Ahora va a escuchar un sonido durante un minuto. No tiene que hacer "
+                         "nada. Cuando se apague, le voy a preguntar cómo está su ruido.",
     # PREGUNTAS
     "escucha": "¿Me escucha?",
     "dejo_de_escuchar": "¿Lo dejó de escuchar?",
@@ -107,6 +117,8 @@ COMANDOS = {
     "molesta": "¿Le molesta cuando le hablo?",
     "molesto_o": "¿Ese sonido le molestó, o solo lo escuchó fuerte?",
     "muy_fuerte": "¿Está muy fuerte mi voz?",
+    "acufeno_cual": "¿Cuál se parece más a su ruido: el primero, el segundo o el tercero?",
+    "acufeno_como_esta": "¿Cómo está su ruido ahora?",
 }
 
 # Impedanciómetro: se le habla al paciente en el box, sin talkback.

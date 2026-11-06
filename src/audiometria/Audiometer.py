@@ -320,7 +320,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
         # el caso que llegó al construir (la_super corrió antes de setupUi)
         if getattr(self, "id", None) is not None:
-            self._log("audio_caso_cargado", estado=self._estado())
+            self._log("audio_caso_cargado", estado=self._estado(), acufeno=self._acufeno())
 
 
     def _marcar_teclas(self, *_):
@@ -543,6 +543,12 @@ class Audiometer(QWidget, Ui_Audiometer):
         payload.setdefault("v", 2)
         self.log_queue.push(action, payload)
 
+    def _acufeno(self):
+        """El acúfeno del caso con lo sorteado (acufeno.py): el backend
+        evalúa la tinnitumetría contra esto, sin repetir el sorteo."""
+        ac = getattr(self.response, "acufeno", None)
+        return ac.verdad() if ac is not None else None
+
     def _estado(self):
         """Foto del equipo para el registro: los dos canales completos.
 
@@ -599,7 +605,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         # al construir el audiómetro, la_super corre antes de setupUi: todavía
         # no hay equipo que fotografiar
         if hasattr(self, "lbl_warnings"):
-            self._log("audio_caso_cargado", estado=self._estado())
+            self._log("audio_caso_cargado", estado=self._estado(), acufeno=self._acufeno())
         
     
     @Slot()

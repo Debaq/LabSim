@@ -65,6 +65,29 @@
             </select>
         </label>
     </div>
+    <p class="help" style="margin-top:0.8rem;">Tinnitumetría en el audiómetro: lo que responde el paciente. Vacío o <em>Auto</em> = la app lo sortea al abrir el caso y queda fijo para ese paciente (sonoridad de 2 a 10 dB SL; NME de 5 a 15 dB sobre la sonoridad; inhibición negativa, parcial o total). Los dB SL son sobre el umbral aéreo del oído y la frecuencia donde se mide.</p>
+    <div class="two-col">
+        <label>Sonoridad (dB SL, vacío = sortear)
+            <input type="number" min="0" max="<?= CaseBuilder::TINNITUS_SONORIDAD_MAX_SL ?>" step="1" name="tinnitus[sonoridad_sl]" value="<?= htmlspecialchars((string) ($v['tinnitus']['sonoridad_sl'] ?? '')) ?>" placeholder="Auto">
+        </label>
+        <label>Nivel mínimo de enmascaramiento (dB SL, vacío = sortear)
+            <input type="number" min="0" max="<?= CaseBuilder::TINNITUS_NME_MAX_SL ?>" step="1" name="tinnitus[nme_sl]" value="<?= htmlspecialchars((string) ($v['tinnitus']['nme_sl'] ?? '')) ?>" placeholder="Auto">
+        </label>
+        <label>Inhibición residual
+            <select name="tinnitus[inhibicion]">
+                <?php foreach (CaseBuilder::TINNITUS_INHIBICION_OPTIONS as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['inhibicion'] ?? 'auto') === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>¿La inhibición dura un minuto más?
+            <select name="tinnitus[inhibicion_mantiene]">
+                <?php foreach (CaseBuilder::TINNITUS_MANTIENE_OPTIONS as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['inhibicion_mantiene'] ?? 'auto') === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </div>
     </div>
 </div>
 </div>

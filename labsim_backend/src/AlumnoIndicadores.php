@@ -10,7 +10,7 @@ declare(strict_types=1);
  */
 final class AlumnoIndicadores
 {
-    private const SECCIONES = ['orden' => 'Orden', 'aereos' => 'Aéreos', 'oseos' => 'Óseos'];
+    private const SECCIONES = ['orden' => 'Orden', 'aereos' => 'Aéreos', 'oseos' => 'Óseos', 'tinnitus' => 'Tinnitumetría'];
 
     /**
      * Pasos de la técnica que el alumno no cumplió, sumados entre atenciones:

@@ -103,6 +103,25 @@ Informe completo, con citas textuales y la tabla paso a paso:
   y el Stenger dentro de la batería.
 - ISO 2010 y BSA piden una pausa pasados unos 20 minutos de examen.
 
+### T03: tinnitumetría
+
+- No hay norma ISO para la acufenometría. Las cuatro medidas (tono,
+  sonoridad, NME e inhibición residual) se aceptan desde 1981 y su técnica
+  sigue sin unificar (Henry y Meikle, 2000; leído solo en parte).
+- **Estímulo de la inhibición residual.** La literatura usa el mismo ruido
+  del NME, centrado en el acúfeno o de banda ancha, a NME + 10 dB durante un
+  minuto (Roberts, 2007; Henry y Meikle, 2000). La técnica del docente usa un
+  tono o ruido una octava arriba o abajo del acúfeno. LabSim evalúa la del
+  docente; el paciente simulado acepta cualquier estímulo a una octava o
+  menos del acúfeno.
+- **Paso de la intensidad.** El docente pide pasos finos (1 dB); la regla
+  acepta hasta 2 dB. Falta verificar el paso en Henry y Meikle (2000).
+- **Valores que sortea la app** (sin fuente que los fije por caso):
+  sonoridad 2-10 dB SL, NME 5-15 dB sobre la sonoridad, inhibición residual
+  negativa 25 %, parcial 50 %, total 25 %, y que se mantenga al minuto
+  siguiente en el 20 %. Roberts (2007) describe que suele durar menos de un
+  minuto; la proporción de cada resultado está por buscar.
+
 ## Fuentes que no se pudieron leer
 
 - ISO 8253-1:2010, cláusulas 6.2 (procedimiento manual) y 8 (vía ósea): de

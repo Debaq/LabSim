@@ -25,7 +25,10 @@ AUDIO = os.path.join(RAIZ, "resources", "audio")
 NO_ENTENDIO = ("none1", "none2", "none3")
 # Lo que dice el paciente fuera de las listas (create_voice): response.py y
 # response_A.py (LDL, SISI, Fowler, preguntas del talkback).
-FRASES_PACIENTE = ("si", "no", "molesta", "elderecho", "elizquierdo")
+FRASES_PACIENTE = ("si", "no", "molesta", "elderecho", "elizquierdo",
+                   # tinnitumetría (acufeno.py)
+                   "elprimero", "elsegundo", "eltercero", "notengoruido", "nose",
+                   "igualqueantes", "seescuchamasbajito", "yanoloescucho")
 
 
 def _faltan(rutas):

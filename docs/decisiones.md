@@ -8452,3 +8452,51 @@ segundos: el nodo aparece después del aviso USB).
 - Prueba: `tests/test_controlador_directo.py` (un pipe hace de dispositivo).
   Falta probarlo con el controlador real en un kiosko.
 - Prueba: `tests/test_equipo_toma_foco.py`.
+
+### Tinnitumetría en el audiómetro (2026-11-06)
+
+Cierra el TODO 63. La técnica es la del libro (H06, Acufenometría), que
+viene del protocolo del docente; queda como **T03** en
+`Bibliografia::TECNICAS`.
+
+- **Talkback:** cuatro instrucciones, una por parte (*Compare con su ruido*,
+  *Igual de fuerte que su ruido*, *Hasta que no escuche su ruido*, *Un minuto
+  de sonido*) y dos preguntas (*¿Cuál se parece más?*, *¿Cómo está su
+  ruido?*). Audios con `scripts/voces_comandos.py` (examinador) y
+  `scripts/voces_edge.py` (paciente: *el primero/segundo/tercero*, *no sé*,
+  *igual que antes*, *ya no lo escucho*, *no escucho ningún ruido*).
+- **El paciente** (`src/audiometria/acufeno.py`): en el tono compara lo que
+  oyó desde la última pregunta (los tres últimos) y elige el más cercano en
+  octavas; en la intensidad levanta la mano a su umbral + sonoridad; en el
+  NME, cuando un ruido que cubre el acúfeno (NBN a media octava o menos, o
+  banda ancha) llega al NME en cada oído donde suena; en la inhibición
+  residual, tras un minuto sobre el NME en el oído del acúfeno y a una
+  octava o menos, contesta según el caso y, pasado otro minuto, vuelve a
+  "igual que antes" salvo que se mantenga. Sin acúfeno dice que no escucha
+  ningún ruido. No confunde octavas: la verdad es la frecuencia del caso.
+- **Datos del caso:** la ficha 10 suma sonoridad (dB SL), NME (dB SL),
+  inhibición residual y si se mantiene. Vacío o *Auto* = la app los sortea
+  fijos por caso (`stable_seed`), como el SOAE; así los casos que ya
+  existían funcionan sin tocarlos. La app manda lo sorteado en
+  `audio_caso_cargado` (`acufeno`) y el backend evalúa contra eso, sin
+  repetir el sorteo en PHP.
+- **Pulsátil y ocasional:** el paciente responde igual. El pulsátil no se
+  iguala (lo marca el indicador); el ocasional se toma como presente el día
+  del examen.
+- **Indicador** (`AudiometriaTinnitus`, sección *Tinnitumetría* de la
+  técnica, `CACHE_VERSION` 4): las cuatro partes, oído de comparación,
+  tres frecuencias de partida, control de octava, intensidad desde bajo el
+  umbral en pasos finos (≤ 2 dB, contando solo con el estímulo sonando) y en
+  la frecuencia elegida, NME en el oído del acúfeno con NBN centrado o
+  ruido blanco hasta que deja de oírlo, inhibición residual en el oído del
+  acúfeno, a una octava, NME + 10 dB, bajo el LDL, un minuto, y dos
+  preguntas (al apagar y al minuto). Si NME + 10 llega al LDL, la
+  inhibición no se exige. Sin acúfeno, hacerla es una advertencia; con
+  acúfeno no pulsátil, no hacerla es un paso sin cumplir. El T00 la
+  reconoce por sus instrucciones.
+- Lo que la técnica del docente hace distinto de la literatura está en
+  `docs/observaciones_tecnicas.md` (T03).
+- Pruebas: `tests/test_acufeno.py`,
+  `labsim_backend/tests/test_audiometria_tinnitus.php`. Sin probar en la app
+  real ni en el navegador.
+

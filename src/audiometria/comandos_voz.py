@@ -40,6 +40,10 @@ GRUPOS = (
         ("Ruido blanco contralateral", "ruido_blanco_contralateral"),
         ("Rosemberg bilateral", "rosemberg_bilateral"),
         ("Pa pa pa", "pa_pa_pa"),
+        ("Compare con su ruido", "acufeno_cual_se_parece"),
+        ("Igual de fuerte que su ruido", "acufeno_igual_fuerte"),
+        ("Hasta que no escuche su ruido", "acufeno_deje_de_escuchar"),
+        ("Un minuto de sonido", "acufeno_un_minuto"),
     )),
     ("PREGUNTAS", (
         ("¿Escucha?", "escucha"),
@@ -50,6 +54,8 @@ GRUPOS = (
         ("¿Molesta?", "molesta"),
         ("Molesto ¿o?", "molesto_o"),
         ("¿Muy fuerte?", "muy_fuerte"),
+        ("¿Cuál se parece más?", "acufeno_cual"),
+        ("¿Cómo está su ruido?", "acufeno_como_esta"),
     )),
 )
 # Las preguntas se contestan pero no reemplazan la instrucción vigente: tras
@@ -78,6 +84,12 @@ PRUEBA = {
     "pa_pa_pa": "Detección de la voz",
     "sonidos_iguales": "Fowler",
     "en_qué_oído": "Fowler",
+    "acufeno_cual_se_parece": "Tinnitumetría: tono",
+    "acufeno_igual_fuerte": "Tinnitumetría: intensidad",
+    "acufeno_deje_de_escuchar": "Tinnitumetría: NME",
+    "acufeno_un_minuto": "Tinnitumetría: inhibición",
+    "acufeno_cual": "Tinnitumetría: tono",
+    "acufeno_como_esta": "Tinnitumetría: inhibición",
 }
 # Columnas como máximo; con menos ancho se reacomodan (ver resizeEvent).
 COLUMNAS = 3

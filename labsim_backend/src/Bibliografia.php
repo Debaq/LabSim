@@ -476,7 +476,7 @@ final class Bibliografia
                 'ISO2010' => ['usa' => ['La vía aérea antes que la ósea (4.1).']],
                 'ISP2012' => ['usa' => ['En la evaluación médico-legal (§2), logoaudiometría, tinnitumetría y supraliminares van en ese orden, después de los umbrales. El documento lo da como orden de secciones, no de aplicación.']],
             ],
-            'nota' => 'Decisión docente: la vía ósea va al final para hacer primero todo lo que va con fonos y cambiar el transductor una sola vez. Las fuentes que ordenan la batería la ponen justo después de la aérea (docs/observaciones_tecnicas.md). La tinnitumetría todavía no se simula en el audiómetro.',
+            'nota' => 'Decisión docente: la vía ósea va al final para hacer primero todo lo que va con fonos y cambiar el transductor una sola vez. Las fuentes que ordenan la batería la ponen justo después de la aérea (docs/observaciones_tecnicas.md). La tinnitumetría (T03) se reconoce por sus instrucciones del talkback.',
         ],
         'T01' => [
             'titulo' => 'Umbrales tonales por vía aérea',
@@ -564,6 +564,30 @@ final class Bibliografia
                 'NTP285' => ['usa' => ['La vía ósea interesa cuando la vía aérea está alterada (sobre 25 dB).']],
             ],
             'nota' => 'Técnica tal como la enseña el docente, contrastada con la literatura y la normativa el 2026-10-08. Lo que difiere o no se pudo verificar está en docs/observaciones_tecnicas.md. Falta agregar el enmascaramiento.',
+        ],
+        'T03' => [
+            'titulo' => 'Tinnitumetría (acufenometría)',
+            'resumen' => 'Describe el acúfeno comparándolo con los sonidos del audiómetro: tono, intensidad, nivel mínimo de enmascaramiento e inhibición residual.',
+            'pasos' => [
+                'Se hace cuando el paciente tiene acúfeno el día del examen. Un acúfeno pulsátil no se iguala: se deriva para buscar su causa.',
+                'Va después de la logoaudiometría y antes de las supraliminares (T00).',
+                'Los sonidos de comparación van al oído contrario si el acúfeno es de un lado, y al oído donde suena más débil si es de los dos lados y asimétrico. El enmascaramiento y la inhibición residual van al oído del acúfeno.',
+                'Tipo de sonido: tono puro para un pito o silbido; ruido (banda estrecha o blanco) para un siseo.',
+                'Tono: se presentan tres estímulos de distinta frecuencia, a un nivel que oiga cómodo, y se pregunta cuál se parece más a su ruido. Se afina con las frecuencias vecinas de la elegida, comparando de a dos.',
+                'Control de octava: al final se presenta la frecuencia una octava arriba y una abajo de la elegida.',
+                'Intensidad: con la frecuencia elegida, se parte bajo el umbral y se sube de 1 en 1 dB hasta que el sonido y el acúfeno suenen igual de fuertes. Se anota en dB HL y en dB SL (menos el umbral del mismo estímulo en el mismo oído).',
+                'Nivel mínimo de enmascaramiento (NME): en el oído del acúfeno, ruido de banda estrecha centrado en su frecuencia o ruido blanco, subiendo hasta que el paciente deja de oír su acúfeno.',
+                'Inhibición residual: un tono o ruido una octava arriba o abajo del acúfeno, 10 dB sobre el NME, durante un minuto, en el oído del acúfeno. Al apagarlo se pregunta cómo está el acúfeno (negativa, parcial o total) y se vuelve a preguntar un minuto después.',
+                'El estímulo de la inhibición residual no puede pasar el LDL: si no cabe, no se hace y se anota por qué.',
+            ],
+            'usa' => [
+                'Indicador "Tinnitumetría" de la atención (AudiometriaTecnica), que ven el docente y el alumno.',
+                'Respuestas del paciente en el audiómetro (src/audiometria/acufeno.py), con las instrucciones del talkback de la prueba.',
+            ],
+            'fuentes' => [
+                'ISP2012' => ['usa' => ['La tinnitumetría es parte de la evaluación audiológica médico-legal, después de la logoaudiometría y antes de las supraliminares (§2).']],
+            ],
+            'nota' => 'Técnica tal como la enseña el docente (libro, H06). No hay norma ISO para la acufenometría. La literatura mide la inhibición residual con el mismo ruido del NME, centrado en el acúfeno; aquí va una octava arriba o abajo (docs/observaciones_tecnicas.md).',
         ],
     ];
 

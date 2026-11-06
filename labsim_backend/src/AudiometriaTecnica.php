@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/AudiometriaPaciente.php';
 require_once __DIR__ . '/AudiometriaRegistro.php';
+require_once __DIR__ . '/AudiometriaTinnitus.php';
 require_once __DIR__ . '/AppConfig.php';
 require_once __DIR__ . '/CourseParams.php';
 
@@ -11,7 +12,7 @@ require_once __DIR__ . '/CourseParams.php';
  * Indicadores de técnica de la audiometría: compara lo que hizo el alumno
  * (AudiometriaRegistro) con las técnicas de la Bibliografía
  * (Bibliografia::TECNICAS): T00 orden de las pruebas, T01 umbrales aéreos,
- * T02 umbrales óseos.
+ * T02 umbrales óseos, T03 tinnitumetría (AudiometriaTinnitus).
  *
  * Cada regla dice qué pide la técnica ('texto'), si se cumplió ('cumple':
  * true, false o null cuando no se puede evaluar) y qué pasó ('detalle').
@@ -104,7 +105,8 @@ final class AudiometriaTecnica
     // antes trae el rótulo viejo en el ruido de cada presentación.
     // 3: el Stenger (mismo tono en los dos oídos) cuenta como supraliminar,
     // no como presentación de umbral aéreo (2026-10-15).
-    public const CACHE_VERSION = 3;
+    // 4: tinnitumetría (T03) como sección propia (2026-11-06).
+    public const CACHE_VERSION = 4;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null
@@ -309,14 +311,20 @@ final class AudiometriaTecnica
             'orden' => self::orden($registro['pruebas']),
             'aereos' => self::via('aereos', $registro, $paciente, $params['aereos']),
             'oseos' => self::via('oseos', $registro, $paciente, $params['oseos']),
+            // T03; null si no hubo acúfeno ni tinnitumetría
+            'tinnitus' => AudiometriaTinnitus::evaluar($registro['tinnitus'] ?? [], $caso),
         ];
-        foreach (['orden', 'aereos', 'oseos'] as $k) {
+        foreach (['orden', 'aereos', 'oseos', 'tinnitus'] as $k) {
+            if ($out[$k] === null) {
+                continue;
+            }
             $out[$k]['puntaje'] = self::sumar([$out[$k]]);
             foreach ($out[$k]['oidos'] ?? [] as $oido => $reglas) {
                 $out[$k]['puntaje_oidos'][$oido] = self::sumar([['reglas' => $reglas]]);
             }
         }
-        $out['puntaje'] = self::sumar([$out['orden'], $out['aereos'], $out['oseos']]);
+        $out['puntaje'] = self::sumar(array_values(array_filter(
+            [$out['orden'], $out['aereos'], $out['oseos'], $out['tinnitus']])));
         return $out;
     }
 

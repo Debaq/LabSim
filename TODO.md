@@ -172,8 +172,7 @@ gap significativo. § Parámetros de audiometría configurables por curso
 § Audiometría: leer el examen del alumno desde el registro
 - [ ] 62. Enmascaramiento como regla de la técnica (cuándo enmascarar,
       nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
-- [ ] 63. Tinnitumetría en el audiómetro, para que entre al orden (T00).
-- [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T03+).
+- [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T04+).
 
 ### Montaje de electrodos
 § Electrodos sobre una cabeza giratoria, sin 3D en vivo
