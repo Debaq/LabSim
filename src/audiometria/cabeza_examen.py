@@ -262,6 +262,8 @@ RECORRIDO_PX = 30.0         # px de la foto de la cabeza, desde donde entró: de
 ZOOM_TIMPANO = 0.5          # el disco muestra esta fracción de la foto; el resto se recorre
 ALCANCE = 0.85              # hasta dónde llega el centro de la vista (fracción del radio de la foto)
 METAL = "#8E9098"
+PARED_CLARA = "#C98E80"     # la piel del conducto cerca de la membrana
+PARED_OSCURA = "#6E3A31"    # y más afuera, en sombra
 NEGRO_VISOR = "#0E0A0D"
 
 
@@ -274,8 +276,9 @@ class CabezaOtoscopia(CabezaExamen):
 
     `vista(oido)` dice qué se ve por ese conducto: {'foto': QPixmap o None,
     'adulto': el espéculo de adulto (disco claro entero; el pediátrico, la
-    mitad), 'texto': lo que se lee en lugar de la foto, o None}. La foto se
-    ve entera, sin nada encima."""
+    mitad), 'pared': fracción del radio que tapa la pared del conducto (0
+    con buena tracción), 'texto': lo que se lee en lugar de la foto, o
+    None}."""
     miro = Signal(str)       # el otoscopio entró a ese conducto
     salio = Signal()
 
@@ -436,6 +439,22 @@ class CabezaOtoscopia(CabezaExamen):
             p.setClipPath(hueco)
             if not dentro.isEmpty():
                 p.drawPixmap(destino, foto, dentro)
+            pared = v.get("pared") or 0.0
+            if pared > 0:
+                # La pared del conducto sin enderezar: un anillo concéntrico
+                # que tapa el borde de la membrana (más, cuanto peor la
+                # tracción); más oscuro hacia afuera, como un túnel
+                from PySide6.QtGui import QRadialGradient as _Rad
+                hueco_r = claro * (1.0 - pared)
+                anillo = QPainterPath()
+                anillo.addEllipse(c, claro, claro)
+                centro_libre = QPainterPath()
+                centro_libre.addEllipse(c, hueco_r, hueco_r)
+                tunel = _Rad(c, claro)
+                tunel.setColorAt(0.0, QColor(PARED_CLARA))
+                tunel.setColorAt(max(0.0, 1.0 - pared), QColor(PARED_CLARA))
+                tunel.setColorAt(1.0, QColor(PARED_OSCURA))
+                p.fillPath(anillo.subtracted(centro_libre), tunel)
             from PySide6.QtGui import QRadialGradient
             luz = QRadialGradient(c, claro)
             luz.setColorAt(0.0, QColor(255, 220, 150, 30))

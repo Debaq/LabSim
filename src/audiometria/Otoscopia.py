@@ -32,6 +32,11 @@ from PySide6.QtWidgets import (
 SIN_IMAGEN_TEXTO = "Otoscopio sin batería"
 LADO_TEXTO = {"od": "derecho", "oi": "izquierdo"}
 TIRON_MIN_CM = 0.5          # menos que esto no es un tirón
+TIRON_BUENO_CM = 1.0        # para una buena tracción hay que tirar al menos esto
+ANGULO_BUENA = 30           # grados entre el tirón y la dirección correcta
+ANGULO_REGULAR = 65
+# Cuánto del radio del disco claro tapa la pared del conducto, por calidad
+PARED = {"buena": 0.0, "regular": 0.42, "mala": 0.78}
 EDAD_TIRON_ABAJO = 3        # años: menor que esto, el pabellón va abajo y atrás
 EDAD_ESPECULO_ADULTO = 6    # años: menor que esto el espéculo de adulto no entra
 
@@ -232,7 +237,7 @@ class Otoscopia(QWidget):
         self._case_id_pedido = None
         self.log_queue = get_log_queue()
         self._fotos = {"od": None, "oi": None}   # QPixmap por oído
-        self._tiron = None     # el pabellón traccionado: {'oido', 'arriba', 'atras', 'correcto'}
+        self._tiron = None     # el pabellón traccionado: {'oido', 'arriba', 'atras', 'correcto', 'calidad'}
         self._dentro = None    # 'od'/'oi': el otoscopio metido en ese conducto
 
         self.cabeza = None     # la de la ventana (conectar)
@@ -314,23 +319,35 @@ class Otoscopia(QWidget):
     def _especulo(self):
         return "adulto" if self.btn_cono_adulto.isChecked() else "pediatrico"
 
+    def _calidad_tiron(self, arriba, atras):
+        """'buena', 'regular' o 'mala'. La dirección correcta: arriba y
+        atrás en adultos y niños grandes; abajo y atrás en menores de 3
+        años (el conducto todavía es casi todo cartilaginoso). Se mide el
+        ángulo entre el tirón y esa dirección, y cuánto se tiró."""
+        esperado = (-1.0 if self._edad() < EDAD_TIRON_ABAJO else 1.0, 1.0)
+        fuerza = math.hypot(arriba, atras)
+        if fuerza < TIRON_MIN_CM:
+            return "mala"
+        coseno = (arriba * esperado[0] + atras * esperado[1]) / (fuerza * math.sqrt(2))
+        angulo = math.degrees(math.acos(max(-1.0, min(1.0, coseno))))
+        if angulo <= ANGULO_BUENA and fuerza >= TIRON_BUENO_CM:
+            return "buena"
+        if angulo <= ANGULO_REGULAR:
+            return "regular"
+        return "mala"
+
     def _tiron_correcto(self, arriba, atras):
-        """Adulto y niño grande: arriba y atrás. Menor de 3 años: abajo y
-        atrás (el conducto todavía es casi todo cartilaginoso)."""
-        if atras < TIRON_MIN_CM:
-            return False
-        if self._edad() < EDAD_TIRON_ABAJO:
-            return arriba <= -TIRON_MIN_CM
-        return arriba >= TIRON_MIN_CM
+        return self._calidad_tiron(arriba, atras) == "buena"
 
     def _traccionar(self, oido, arriba, atras):
         if math.hypot(arriba, atras) < TIRON_MIN_CM:
             return   # fue un clic en la oreja, no un tirón
-        correcto = self._tiron_correcto(arriba, atras)
-        self._tiron = {"oido": oido, "arriba": arriba, "atras": atras, "correcto": correcto}
+        calidad = self._calidad_tiron(arriba, atras)
+        correcto = calidad == "buena"
+        self._tiron = {"oido": oido, "arriba": arriba, "atras": atras, "correcto": correcto, "calidad": calidad}
         if self.cabeza is not None:
             self.cabeza.poner_tiron((oido, arriba, atras))
-        self._log("ot_traccion", oido=oido, arriba_cm=arriba, atras_cm=atras, correcto=correcto,
+        self._log("ot_traccion", oido=oido, arriba_cm=arriba, atras_cm=atras, correcto=correcto, calidad=calidad,
                   edad=self._edad())
         self._pintar_estado()
 
@@ -372,9 +389,12 @@ class Otoscopia(QWidget):
         foto = self._fotos.get(oido)
         if foto is None:
             return {"texto": SIN_IMAGEN_TEXTO}
-        # La foto entera: la tracción queda en el registro para la
-        # evaluación, no tapa nada (él, 2026-11-06)
-        return {"foto": foto, "adulto": self._especulo() == "adulto"}
+        # Sin enderezar el conducto la pared tapa la membrana, como un
+        # anillo: buena tracción, nada; regular, el borde; mala o ninguna,
+        # casi todo (se ve el contraconducto)
+        tiron = self._tiron if self._tiron and self._tiron["oido"] == oido else None
+        calidad = tiron["calidad"] if tiron else "mala"
+        return {"foto": foto, "adulto": self._especulo() == "adulto", "pared": PARED[calidad]}
 
     def _miro(self, oido):
         """El otoscopio entró al conducto (el mouse pasó por él)."""
@@ -385,7 +405,8 @@ class Otoscopia(QWidget):
             self._log("ot_especulo_grande", oido=oido, edad=self._edad())
             return
         self._log("ot_otoscopio", oido=oido, especulo=self._especulo(), traccion=bool(tiron),
-                  traccion_correcta=bool(tiron and tiron["correcto"]), edad=self._edad(),
+                  traccion_correcta=bool(tiron and tiron["correcto"]),
+                  traccion_calidad=tiron["calidad"] if tiron else "sin", edad=self._edad(),
                   hay_foto=self._fotos.get(oido) is not None)
 
     def _salio(self):

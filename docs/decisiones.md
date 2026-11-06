@@ -8335,8 +8335,12 @@ otro).
   disco claro es entero con el espéculo de adulto y de la mitad del
   diámetro con el pediátrico (él, 2026-11-06). Arrastrar desde la oreja
   tira del pabellón (queda tirado con su flecha). Correcto: arriba y atrás;
-  menores de 3 años, abajo y atrás. La foto se ve siempre entera (él: "el
-  visor del otoscopio muestra todo"); la tracción queda en el registro. El espéculo de adulto no entra antes de los 6
+  menores de 3 años, abajo y atrás. La tracción tiene tres niveles (ángulo
+  con la dirección correcta y cuánto se tiró): buena (≤30° y ≥1 cm) se ve
+  la membrana entera; regular (≤65° o débil) un anillo de pared tapa el
+  borde; mala o ninguna, se ve sobre todo el contraconducto. La pared es
+  siempre un anillo concéntrico, nunca una mancha en una esquina (él lo
+  rechazó así). Queda en ot_traccion (calidad) y ot_otoscopio. El espéculo de adulto no entra antes de los 6
   años. No se le avisa al alumno si tiró bien: queda en ot_traccion /
   ot_otoscopio para la evaluación.
 

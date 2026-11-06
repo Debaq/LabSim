@@ -41,11 +41,17 @@ def _modulo(edad=40):
     return w
 
 
-def test_la_foto_se_ve_entera_con_o_sin_traccion():
-    w = _modulo()
-    assert set(w.vista("od")) == {"foto", "adulto"}, "nada encima de la foto"
-    w._traccionar("od", -1.5, -1.5)            # mal traccionado: solo queda en el registro
-    assert set(w.vista("od")) == {"foto", "adulto"}
+def test_la_pared_tapa_segun_la_traccion():
+    w = _modulo(edad=40)
+    assert w.vista("od")["pared"] == O.PARED["mala"], "sin tracción se ve el contraconducto"
+    w._traccionar("od", 1.5, 1.5)                  # arriba y atrás, firme
+    assert w._tiron["calidad"] == "buena" and w.vista("od")["pared"] == 0.0
+    w._traccionar("od", 0.3, 1.5)                  # casi solo hacia atrás
+    assert w._tiron["calidad"] == "regular" and 0 < w.vista("od")["pared"] < O.PARED["mala"]
+    w._traccionar("od", -1.5, 1.5)                 # abajo y atrás en un adulto
+    assert w._tiron["calidad"] == "mala"
+    w._traccionar("od", 0.5, 0.5)                  # buena dirección pero débil
+    assert w._tiron["calidad"] == "regular"
 
 
 def test_adulto_arriba_y_atras_se_ve_todo():
@@ -87,6 +93,12 @@ def test_el_mouse_en_el_conducto_es_el_otoscopio():
     w.cabeza.mouseMoveEvent(ev)
     assert w._dentro == "od" and w.log_queue.acciones[-1][0] == "ot_otoscopio"
     w.cabeza.grab()   # dibuja la lupa sin caerse
+
+
+def test_el_tiron_del_otro_oido_no_endereza_este():
+    w = _modulo()
+    w._traccionar("oi", 1.5, 1.5)
+    assert w.vista("od")["pared"] == O.PARED["mala"]
 
 
 def test_queda_en_el_registro():
