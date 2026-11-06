@@ -292,101 +292,253 @@ final class ReportPdfBuilder
      * Las claves son las de OtoReport (proyecto aparte) a propósito -- acá
      * se traducen a texto clínico para el PDF que lee el docente.
      */
+    // Otoscopía: lo mismo que el alumno marca en la app
+    // (src/audiometria/OtoscopiaInforme.py): el dibujo de la membrana con los
+    // hallazgos por cuadrante, las casillas del CAE y las observaciones.
+    // Mapas y no match(): el hosting corre PHP 7.4 (ver tipoLabel).
+    private const OT_CUADRANTES = [
+        'anterior_superior' => 'Anterosuperior',
+        'anterior_inferior' => 'Anteroinferior',
+        'posterior_superior' => 'Posterosuperior',
+        'posterior_inferior' => 'Posteroinferior',
+        'pars_flaccida' => 'Pars flácida',
+    ];
+    // clave => [etiqueta, color, 'area' | 'punto'] (HALLAZGOS de la app)
+    private const OT_HALLAZGOS = [
+        'retraction' => ['Retracción', '#f59e0b', 'area'],
+        'perforation' => ['Perforación', '#ef4444', 'punto'],
+        'effusion' => ['Efusión', '#3b82f6', 'area'],
+        'tympanosclerosis' => ['Timpanoesclerosis', '#8b5cf6', 'area'],
+        'cholesteatoma' => ['Colesteatoma', '#f97316', 'area'],
+        'inflammation' => ['Inflamación', '#dc2626', 'area'],
+        'tube' => ['Tubo', '#10b981', 'punto'],
+        'myringitis' => ['Miringitis', '#ec4899', 'area'],
+    ];
+    private const OT_CAE = [
+        'cae_normal' => 'Normal',
+        'cae_cerumen' => 'Cerumen',
+        'cae_edema' => 'Edema',
+        'cae_otorrhea' => 'Otorrea',
+        'cae_exostosis' => 'Exostosis',
+    ];
+    private const OT_LADO_DIBUJO = 130.0;     // pt: el lado del esquema de cada oído
+
     private static function otoscopiaBody(MiniPdf $pdf, array $data, float $y, float $contentW): float
     {
-        // Mapas y no match(): el hosting corre PHP 7.4 (ver tipoLabel).
-        $cuadrantes = [
-            'anterior_superior' => 'Anterosuperior',
-            'anterior_inferior' => 'Anteroinferior',
-            'posterior_superior' => 'Posterosuperior',
-            'posterior_inferior' => 'Posteroinferior',
-            'pars_flaccida' => 'Pars flácida',
-        ];
-        $hallazgos = [
-            'retraction' => 'Retracción',
-            'perforation' => 'Perforación',
-            'effusion' => 'Efusión',
-            'tympanosclerosis' => 'Timpanoesclerosis',
-            'cholesteatoma' => 'Colesteatoma',
-            'inflammation' => 'Inflamación',
-            'tube' => 'Tubo',
-            'myringitis' => 'Miringitis',
-        ];
-        $cae = [
-            'cae_normal' => 'Normal',
-            'cae_cerumen' => 'Cerumen',
-            'cae_edema' => 'Edema',
-            'cae_otorrhea' => 'Otorrea',
-            'cae_exostosis' => 'Exostosis',
-        ];
-
-        foreach (['od' => 'Oído derecho (OD)', 'oi' => 'Oído izquierdo (OI)'] as $lado => $titulo) {
-            $oido = is_array($data[$lado] ?? null) ? $data[$lado] : [];
-            $y = self::ensureSpace($pdf, $y, 60);
-            $pdf->text(self::MARGIN, $y, $titulo, 12, true);
-            $y += 18;
-
+        $colW = ($contentW - 20) / 2;
+        $lado = self::OT_LADO_DIBUJO;
+        $y = self::ensureSpace($pdf, $y, $lado + 120);
+        $fin = $y;
+        foreach ([['od', 'Oído derecho (OD)', self::COLOR_OD_AC], ['oi', 'Oído izquierdo (OI)', self::COLOR_OI_AC]] as $i => [$oidoClave, $titulo, $color]) {
+            $oido = is_array($data[$oidoClave] ?? null) ? $data[$oidoClave] : [];
+            $x0 = self::MARGIN + $i * ($colW + 20);
+            $pdf->text($x0, $y, $titulo, 11, true, $color);
             $marcas = is_array($oido['cuadrantes'] ?? null) ? $oido['cuadrantes'] : [];
-            if ($marcas === []) {
-                $pdf->text(self::MARGIN + 12, $y, 'Membrana timpánica: sin hallazgos marcados.', 9);
-                $y += 14;
-            } else {
-                // Recorre el mapa (no las marcas) para que el orden sea
-                // siempre el mismo, entre por donde entre el alumno.
-                foreach ($cuadrantes as $clave => $nombre) {
-                    if (!isset($marcas[$clave])) {
-                        continue;
-                    }
-                    // Un cuadrante trae VARIOS hallazgos (en una zona se ve
-                    // más de una cosa). Los informes de la primera versión
-                    // traían un solo string: se aceptan las dos formas, si
-                    // no un informe viejo se imprimiría vacío.
-                    $delCuadrante = is_array($marcas[$clave]) ? $marcas[$clave] : [$marcas[$clave]];
-                    $etiquetas = [];
-                    foreach ($delCuadrante as $hallazgo) {
-                        $hallazgo = (string) $hallazgo;
-                        if ($hallazgo === '') {
-                            continue;
-                        }
-                        $etiquetas[] = $hallazgos[$hallazgo] ?? $hallazgo;
-                    }
-                    if ($etiquetas === []) {
-                        continue;
-                    }
-                    $linea = "{$nombre}: " . implode(', ', $etiquetas);
-                    $y = self::ensureSpace($pdf, $y, 14);
-                    $pdf->text(self::MARGIN + 12, $y, $linea, 9);
-                    $y += 14;
+            // Un cuadrante trae VARIOS hallazgos; los informes de la primera
+            // versión traían un solo string: se aceptan las dos formas.
+            $porCuadrante = [];
+            foreach ($marcas as $cuadrante => $lista) {
+                $lista = is_array($lista) ? $lista : [$lista];
+                $porCuadrante[(string) $cuadrante] = array_values(array_filter(array_map('strval', $lista)));
+            }
+            self::membrana($pdf, $x0 + $lado / 2, $y + 12 + $lado / 2, $lado, $oidoClave === 'od', $porCuadrante);
+
+            // Las casillas del CAE al lado del dibujo, con su tick
+            $xc = $x0 + $lado + 12;
+            $yc = $y + 22;
+            $pdf->text($xc, $yc, 'CAE', 8, true);
+            $yc += 12;
+            $marcadosCae = array_map('strval', is_array($oido['cae'] ?? null) ? $oido['cae'] : []);
+            foreach (self::OT_CAE as $clave => $nombre) {
+                $pdf->rect($xc, $yc - 7, 7, 7, 0.6, '#555555');
+                if (in_array($clave, $marcadosCae, true)) {
+                    $pdf->polyline([[$xc + 1.2, $yc - 3.4], [$xc + 3, $yc - 1.2], [$xc + 6, $yc - 6]], 1.2, '#111111');
+                }
+                $pdf->text($xc + 11, $yc, $nombre, 8);
+                $yc += 12;
+            }
+
+            // Debajo: lo marcado por cuadrante (el dibujo solo no siempre
+            // deja claro qué hay donde) y las observaciones
+            $yt = $y + 12 + $lado + 8;
+            foreach (self::OT_CUADRANTES as $clave => $nombre) {
+                if (empty($porCuadrante[$clave])) {
+                    continue;
+                }
+                $etiquetas = array_map(function ($h) {
+                    return self::OT_HALLAZGOS[$h][0] ?? $h;
+                }, $porCuadrante[$clave]);
+                $yt = $pdf->textBlock($x0, $yt, "{$nombre}: " . implode(', ', $etiquetas), $colW, 8);
+            }
+            if ($porCuadrante === [] || array_filter($porCuadrante) === []) {
+                $pdf->text($x0, $yt, 'Membrana timpánica: sin hallazgos marcados.', 8);
+                $yt += 12;
+            }
+            // El CAE también en texto: sin nada tildado es "sin evaluar", que
+            // no es lo mismo que "Normal"
+            $caeTexto = [];
+            foreach (self::OT_CAE as $clave => $nombre) {
+                if (in_array($clave, $marcadosCae, true)) {
+                    $caeTexto[] = $nombre;
                 }
             }
-
-            $marcadosCae = [];
-            foreach (is_array($oido['cae'] ?? null) ? $oido['cae'] : [] as $clave) {
-                $marcadosCae[] = $cae[(string) $clave] ?? (string) $clave;
-            }
-            $y = self::ensureSpace($pdf, $y, 14);
-            $pdf->text(
-                self::MARGIN + 12,
-                $y,
-                'CAE: ' . ($marcadosCae === [] ? 'sin evaluar' : implode(', ', $marcadosCae)),
-                9
-            );
-            $y += 14;
-
+            $yt = $pdf->textBlock($x0, $yt, 'CAE: ' . ($caeTexto === [] ? 'sin evaluar' : implode(', ', $caeTexto)), $colW, 8);
             $obs = trim((string) ($oido['observaciones'] ?? ''));
             if ($obs !== '') {
-                $y = self::ensureSpace($pdf, $y, 30);
-                $pdf->text(self::MARGIN + 12, $y, 'Observaciones:', 9, true);
-                $y += 14;
-                $y = $pdf->textBlock(self::MARGIN + 12, $y, $obs, $contentW - 12, 9);
+                $yt += 4;
+                $pdf->text($x0, $yt, 'Observaciones', 8, true);
+                $yt += 11;
+                $yt = $pdf->textBlock($x0, $yt, $obs, $colW, 8);
             }
-            $y += 16;
+            $fin = max($fin, $yt, $yc);
         }
 
-        return $y;
+        // Leyenda de los colores y marcadores, una fila
+        $y = self::ensureSpace($pdf, $fin + 8, 20);
+        $x = self::MARGIN;
+        foreach (self::OT_HALLAZGOS as $clave => [$nombre, $colorH, $tipo]) {
+            if ($tipo === 'area') {
+                $pdf->rectFilled($x, $y - 7, 8, 8, self::aclarar($colorH));
+            } elseif ($clave === 'tube') {
+                $pdf->circle($x + 4, $y - 3, 3.2, $colorH, null, 1.4);
+            } else {
+                $pdf->circle($x + 4, $y - 3, 3.6, '#ffffff', $colorH, 0.8);
+            }
+            $pdf->text($x + 11, $y, $nombre, 7);
+            $x += 13 + $pdf->textWidth($nombre, 7) + 10;
+            if ($x > self::MARGIN + $contentW - 60) {
+                $x = self::MARGIN;
+                $y += 12;
+            }
+        }
+        return $y + 22;
     }
 
-    /** Hallazgos + conclusión (mismo bloque para todos los tipos de informe). */
+    /** El color a 60 %, sobre blanco (el PDF no tiene transparencia aquí). */
+    private static function aclarar(string $hex): string
+    {
+        $c = sscanf(ltrim($hex, '#'), '%02x%02x%02x');
+        $mezcla = array_map(function ($v) {
+            return (int) round($v * 0.6 + 255 * 0.4);
+        }, $c);
+        return sprintf('#%02x%02x%02x', $mezcla[0], $mezcla[1], $mezcla[2]);
+    }
+
+    /** Puntos de un arco (grados, antihorario desde las 3, como QPainter.drawPie). */
+    private static function arco(float $cx, float $cy, float $r, float $desde, float $grados, int $pasos = 18): array
+    {
+        $pts = [];
+        for ($k = 0; $k <= $pasos; $k++) {
+            $a = deg2rad($desde + $grados * $k / $pasos);
+            $pts[] = [$cx + $r * cos($a), $cy - $r * sin($a)];
+        }
+        return $pts;
+    }
+
+    /**
+     * El esquema de la membrana como en la app (_DiagramaTimpanico): CAE,
+     * anillo, cuadrantes rellenos con sus hallazgos de área (en franjas si
+     * hay varios), pars flácida, mango del martillo, umbo, cono luminoso,
+     * marcadores de los hallazgos puntuales y siglas. Anterior a la derecha
+     * en el OD y a la izquierda en el OI (se mira al paciente de frente).
+     */
+    private static function membrana(MiniPdf $pdf, float $cx, float $cy, float $lado, bool $derecho, array $marcas): void
+    {
+        $r = $lado * 0.38;
+        $rCae = $lado * 0.46;
+        $pdf->circle($cx, $cy, $rCae, '#d97706', '#fef3c7', 1.2);
+        $pdf->circle($cx, $cy, $r, '#92400e', '#fde68a', 1.5);
+        $angulos = $derecho
+            ? ['anterior_superior' => 0, 'posterior_superior' => 90, 'posterior_inferior' => 180, 'anterior_inferior' => 270]
+            : ['posterior_superior' => 0, 'anterior_superior' => 90, 'anterior_inferior' => 180, 'posterior_inferior' => 270];
+        $esArea = function ($h) {
+            return (self::OT_HALLAZGOS[$h][2] ?? 'area') === 'area';
+        };
+        foreach ($angulos as $cuadrante => $angulo) {
+            $deArea = array_values(array_filter($marcas[$cuadrante] ?? [], $esArea));
+            $n = count($deArea);
+            foreach ($deArea as $k => $h) {
+                $franja = 90.0 / $n;
+                $pts = array_merge([[$cx, $cy]], self::arco($cx, $cy, $r, $angulo + $k * $franja, $franja));
+                $pdf->polygon($pts, null, self::aclarar(self::OT_HALLAZGOS[$h][1] ?? '#888888'), 0.5);
+            }
+        }
+        $pdf->line($cx - $r, $cy, $cx + $r, $cy, 0.7, '#92400e', [3, 2]);
+        $pdf->line($cx, $cy - $r, $cx, $cy + $r, 0.7, '#92400e', [3, 2]);
+
+        // Pars flácida (un óvalo arriba), en bandas verticales si hay áreas
+        $rx = $lado * 0.09;
+        $ry = $lado * 0.05;
+        $pcy = $cy - $r + $lado * 0.04;
+        $ovalo = [];
+        for ($k = 0; $k < 24; $k++) {
+            $a = 2 * M_PI * $k / 24;
+            $ovalo[] = [$cx + $rx * cos($a), $pcy + $ry * sin($a)];
+        }
+        $areaPf = array_values(array_filter($marcas['pars_flaccida'] ?? [], $esArea));
+        if ($areaPf !== []) {
+            $ancho = 2 * $rx / count($areaPf);
+            foreach ($areaPf as $k => $h) {
+                $x1 = $cx - $rx + $k * $ancho;
+                $banda = array_values(array_filter($ovalo, function ($p) use ($x1, $ancho) {
+                    return $p[0] >= $x1 - 0.01 && $p[0] <= $x1 + $ancho + 0.01;
+                }));
+                if (count($banda) >= 2) {
+                    $pdf->polygon($banda, null, self::aclarar(self::OT_HALLAZGOS[$h][1] ?? '#888888'), 0.5);
+                }
+            }
+        }
+        $pdf->polygon($ovalo, '#92400e', null, 0.7);
+
+        // Mango del martillo, umbo y cono luminoso
+        $yUmbo = $cy + $lado * 0.05;
+        $pdf->line($cx, $cy - $r + $lado * 0.075, $cx, $yUmbo, 2.0, '#78350f');
+        $pdf->circle($cx, $yUmbo, $lado * 0.015, null, '#78350f', 0.5);
+        $signo = $derecho ? 1 : -1;
+        $pdf->polygon([
+            [$cx + $signo * $lado * 0.015, $yUmbo + $lado * 0.015],
+            [$cx + $signo * $lado * 0.175, $yUmbo + $lado * 0.175],
+            [$cx + $signo * $lado * 0.10, $yUmbo + $lado * 0.20],
+        ], '#eab308', '#fdf3b0', 0.6);
+
+        // Hallazgos puntuales (perforación, tubo): marcadores encima
+        foreach ($angulos as $cuadrante => $angulo) {
+            $puntos = array_values(array_filter($marcas[$cuadrante] ?? [], function ($h) use ($esArea) {
+                return !$esArea($h);
+            }));
+            foreach ($puntos as $k => $h) {
+                $ang = deg2rad($angulo + 45.0 + ($k - (count($puntos) - 1) / 2) * 16.0);
+                self::marcador($pdf, $h, $cx + $r * 0.78 * cos($ang), $cy - $r * 0.78 * sin($ang), $lado);
+            }
+        }
+        $puntosPf = array_values(array_filter($marcas['pars_flaccida'] ?? [], function ($h) use ($esArea) {
+            return !$esArea($h);
+        }));
+        foreach ($puntosPf as $k => $h) {
+            self::marcador($pdf, $h, $cx - $rx + 2 * $rx * ($k + 1) / (count($puntosPf) + 1), $pcy, $lado);
+        }
+
+        // Siglas
+        $dx = $lado * 0.18;
+        $dy = $lado * 0.14;
+        foreach ([['AS', $signo * $dx, -$dy], ['AI', $signo * $dx, $dy], ['PS', -$signo * $dx, -$dy],
+                  ['PI', -$signo * $dx, $dy]] as [$sigla, $ox, $oy]) {
+            $pdf->textCenter($cx + $ox, $cy + $oy + 3, $sigla, 7, true, '#78350f');
+        }
+        $pdf->textCenter($cx, $cy - $r - $lado * 0.02 - 2, 'PF', 6.5, true, '#78350f');
+    }
+
+    private static function marcador(MiniPdf $pdf, string $h, float $x, float $y, float $lado): void
+    {
+        $color = self::OT_HALLAZGOS[$h][1] ?? '#888888';
+        $radio = max(2.5, $lado * 0.028);
+        if ($h === 'tube') {
+            $pdf->circle($x, $y, $radio, $color, null, max(1.2, $lado * 0.012));
+        } else {
+            $pdf->circle($x, $y, $radio, '#ffffff', $color, 1.0);
+        }
+    }
+
     // Los de la ficha (CaseCharts::COLOR_OD/OI): OD rojo, OI azul
     private const COLOR_OD_AC = '#b33a3a';
     private const COLOR_OI_AC = '#2255aa';
@@ -451,6 +603,7 @@ final class ReportPdfBuilder
         $pdf->polygon([[$punta, $y], [$punta + $sentido * 4, $y - 2.4], [$punta + $sentido * 4, $y + 2.4]], null, $color);
     }
 
+    /** Hallazgos + conclusión (mismo bloque para todos los tipos de informe). */
     private static function textSections(MiniPdf $pdf, array $data, float $y, float $contentW): void
     {
         foreach ([['Hallazgos', 'hallazgos'], ['Conclusión', 'conclusion']] as [$titulo, $clave]) {
