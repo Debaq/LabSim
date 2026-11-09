@@ -8510,3 +8510,11 @@ viene del protocolo del docente; queda como **T03** en
   inhibición y del deterioro tonal), `audio_paciente_dice` (toda frase del
   paciente: molesta, sí, el derecho...; antes solo quedaba la mano) y el
   volumen del talkback (en `audio_talkback_press` y en la foto del equipo).
+
+## Asistente de procedimientos para la práctica deliberada (idea, 2026-11-09)
+
+Idea del autor, sin diseñar. A veces el alumno no sabe cómo se hace un
+procedimiento, por ejemplo un Fowler. En el práctico no es problema porque
+está el docente; en la práctica deliberada el alumno atiende solo y no tiene
+apoyo alguno. La idea es un asistente de procedimientos que cubra ese hueco.
+Queda abierto qué muestra, cuándo aparece y si cuenta en la evaluación.

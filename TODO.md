@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 77).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 78).
 
 Revisado contra el código el 2026-09-24.
 
@@ -201,6 +201,12 @@ gap significativo. § Parámetros de audiometría configurables por curso
       audiómetro; qué medir lo decide él. Con eso, ver si se saca la pestaña
       "Lo que el equipo no sabe" de la app.
       § Equipos nasales: cada acción y todas las variables a action_logs
+
+### Práctica deliberada
+- [ ] 78. Asistente de procedimientos: en la práctica deliberada el alumno
+      no tiene a quién preguntar cómo se hace una prueba (p. ej. un Fowler);
+      en el práctico eso lo resuelve el docente. Idea sin diseñar.
+      § Asistente de procedimientos para la práctica deliberada (idea)
 
 ### Sin servidor
 - [ ] 75. El práctico cuando el hosting se cae: DNS fuera de HostArmada,
