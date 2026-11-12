@@ -15,7 +15,7 @@ from PySide6.QtGui import QPainter, QPixmap, QTextDocument
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QTextBrowser, QVBoxLayout, QWidget
 
-from core import iconos, informe_previo, invitado, rutas, tema
+from core import hoja_previa, iconos, informe_previo, invitado, rutas, tema
 
 from core.helpers import obtener_hora_real_atencion
 
@@ -175,12 +175,27 @@ def informe_del_docente(caso, row, previo, indice):
     cita = parse_fecha_agenda(getattr(row, "fecha", "") or "")
     if cita.isValid():
         paciente["fecha"] = cita.addDays(int(previo["dias"])).toString("dd-MM-yyyy")
+    firma = informe_previo.firmante(_ficha_de(row, caso), f"{indice}:{previo['prueba']}")
+    # Audiometría e impedanciometría se dibujan con los datos del caso: una
+    # audiometría sin audiograma no es una audiometría (hoja_previa). La
+    # conclusión del docente, si la escribió, va tal cual; si no, la arma
+    # la hoja con lo que muestra.
+    nombre = previo["prueba"].lower()
+    if isinstance(caso, dict) and "audiometr" in nombre:
+        conclusion = ([previo["conclusion"]] if previo.get("conclusion")
+                      else hoja_previa.conclusion_audiometria(caso))
+        return informe_previo.informe(hoja_previa.hoja_audiometria(caso), "Audiometría",
+                                      paciente, conclusion, firma)
+    if isinstance(caso, dict) and "impedanciometr" in nombre:
+        conclusion = ([previo["conclusion"]] if previo.get("conclusion")
+                      else informe_previo.conclusion_impedancia(caso))
+        return informe_previo.informe(hoja_previa.hoja_impedancia(caso), "Impedanciometría",
+                                      paciente, conclusion, firma)
     conclusion = ([previo["conclusion"]] if previo.get("conclusion")
                   else informe_previo.conclusion_tamizaje(previo["prueba"], previo["OD"], previo["OI"]))
     return informe_previo.informe(
         tarjeta_previo(previo["prueba"], previo["OD"], previo["OI"], titulo=False),
-        previo["prueba"], paciente, conclusion,
-        informe_previo.firmante(_ficha_de(row, caso), f"{indice}:{previo['prueba']}"),
+        previo["prueba"], paciente, conclusion, firma,
         prueba=previo["prueba"])
 
 
