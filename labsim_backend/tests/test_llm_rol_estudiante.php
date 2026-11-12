@@ -16,6 +16,8 @@ $sala = LlmConfig::rolDelEstudiante(true);
 t_true(strpos($solo, 'no médico') !== false && strpos($solo, 'lo aceptas') !== false,
     'El paciente acepta que el diagnóstico lo da el médico');
 t_true(strpos($solo, 'te vas calmando de a poco') !== false, 'Un paciente molesto se puede calmar');
+t_true(strpos($solo, 'a lo más haces UNA pregunta') !== false && strpos($sala, 'a lo más hacen UNA pregunta') !== false,
+    'Tras una explicación clara el paciente queda conforme: no pide más explicación');
 t_true(strpos($sala, 'lo aceptan') !== false && strpos($sala, 'se va calmando') !== false,
     'Con acompañantes, lo mismo para todos los presentes');
 t_true(strpos($solo, '{{') === false && strpos($sala, '{{') === false, 'Sin placeholders sueltos');
