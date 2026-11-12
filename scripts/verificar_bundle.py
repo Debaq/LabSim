@@ -108,12 +108,18 @@ def main():
             print("Sin Xvfb: la ventana de LabSim se abre en pantalla, "
                   f"no la cierres (se cierra sola en {args.segundos:g} s)")
     antes = _foto(dist)
+    # La salida va a un archivo: si la app se cae antes de medir, sus
+    # últimas líneas dicen por qué (sin esto, en CI no había forma de saber).
+    salida = open(os.path.join(datos, "salida.log"), "w+")
     proc = subprocess.Popen([os.path.join(dist, "LabSim")], cwd=dist, env=env,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            stdout=salida, stderr=subprocess.STDOUT)
     try:
         time.sleep(args.segundos)
         if proc.poll() is not None:
             print(f"LabSim terminó solo (código {proc.returncode}) antes de medir")
+            salida.seek(0)
+            for linea in salida.read().splitlines()[-40:]:
+                print(f"  | {linea}")
             if proc.returncode == 0 and not xvfb:
                 print("  (código 0 = se cerró la ventana: vuelve a correrlo "
                       "sin tocarla)")
