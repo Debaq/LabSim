@@ -422,7 +422,20 @@ final class CaseSheetPdf
 
         $alto = 168.0;
         $this->espacio($alto + 22);
-        CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido, $estudio);
+        // El Fowler se registra en el audiograma, no en una tabla: la
+        // escalera de cada frecuencia que califica (ver fowlerEscalera).
+        $fowler = [];
+        foreach ((array) (($data['Fowler'] ?? [])['patterns'] ?? []) as $freqIdx => $patron) {
+            $i = (int) $freqIdx;
+            $fowler[$i] = CaseBuilder::fowlerEscalera(
+                (int) ($aerea['od'][$i] ?? 0),
+                (int) ($aerea['oi'][$i] ?? 0),
+                (string) $patron,
+                (int) ($ldl['od'][$i] ?? 130),
+                (int) ($ldl['oi'][$i] ?? 130)
+            );
+        }
+        CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido, $estudio, $fowler);
 
         // Al lado del gráfico, la leyenda de símbolos: un audiograma sin
         // leyenda obliga a recordar la convención de memoria.
@@ -1099,43 +1112,10 @@ final class CaseSheetPdf
         // propia línea. Repetir en una tabla lo que el gráfico muestra
         // obliga a leer dos veces lo mismo y a dudar de cuál manda.
 
-        // Fowler: el patrón es por FRECUENCIA, no uno por oído -- compara los
-        // dos y por eso solo existe donde la asimetría califica. Lo que se
-        // informa no es el nombre del patrón sino DÓNDE pasa cada cosa: los
-        // cortes son dB sobre el umbral del oído en estudio (ver
-        // CaseBuilder::FOWLER_PATTERNS y Fowler.py), así que puestos en dB HL
-        // dicen a qué nivel el alumno va a ver que la sonoridad se empareja.
+        // Fowler: va dibujado en el audiograma (escalera a los lados de la
+        // frecuencia, ver audiometria()), no en una tabla.
         $patrones = (array) (($data['Fowler'] ?? [])['patterns'] ?? []);
-        if ($patrones !== []) {
-            $aereaFowler = self::desarmar($data['Aerea'] ?? []);
-            $filas = [['Fowler', 'En estudio', 'Patrón', 'Empieza a igualar', 'Iguala', 'Sobrepasa']];
-            foreach ($patrones as $freqIdx => $patron) {
-                $i = (int) $freqIdx;
-                $hz = CaseBuilder::FREQUENCIES[$i] ?? null;
-                // El oído en estudio es el PEOR en esa frecuencia: es de
-                // quien se juzga el crecimiento de sonoridad.
-                $peor = ($aereaFowler['od'][$i] ?? 0) >= ($aereaFowler['oi'][$i] ?? 0) ? 'od' : 'oi';
-                $umbralEstudio = (float) ($aereaFowler[$peor][$i] ?? 0);
-                $cortes = CaseBuilder::fowlerCutsForPattern((string) $patron);
-                $nivel = static function ($corte) use ($umbralEstudio): string {
-                    // 200 = el quiebre no ocurre dentro de la escala.
-                    return (float) $corte >= 200 ? 'no ocurre' : self::db($umbralEstudio + (float) $corte) . ' dB';
-                };
-                $filas[] = [
-                    $hz !== null ? self::hz($hz) . ' Hz' : (string) $freqIdx,
-                    strtoupper($peor),
-                    CaseBuilder::FOWLER_PATTERN_LABELS[(string) $patron] ?? (string) $patron,
-                    $nivel($cortes[0]),
-                    $nivel($cortes[1]),
-                    $nivel($cortes[2]),
-                ];
-            }
-            $this->tabla($filas, [0.11, 0.12, 0.29, 0.16, 0.16, 0.16], true);
-            $this->parrafo(
-                'Niveles en dB HL del oído en estudio. "No ocurre" = el quiebre queda fuera de la escala del audiómetro.',
-                7
-            );
-        } elseif (!$estudio) {
+        if ($patrones === [] && !$estudio) {
             // El criterio de cuándo califica una frecuencia (diferencia
             // interaural, oído bueno normal, sin gap) es la mecánica del
             // test, no algo que le sirva al alumno para leerlo.

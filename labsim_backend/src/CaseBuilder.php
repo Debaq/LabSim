@@ -1153,6 +1153,109 @@ final class CaseBuilder
         return self::FOWLER_PATTERNS[$pattern] ?? self::FOWLER_PATTERNS['none'];
     }
 
+    /** Techo del audiómetro (response.py MAX_OUTPUT_DB). */
+    public const FOWLER_SALIDA_MAX_DB = 120;
+
+    /**
+     * La escalera del Fowler tal como sale en el audiómetro: los pares de
+     * igual sonoridad [nivel OD, nivel OI], en dB HL, en el orden en que se
+     * obtienen.
+     *
+     * Procedimiento: se parte con los dos oídos en su umbral; el oído sano
+     * sube de 20 en 20 dB hasta la salida máxima o hasta antes de su LDL, y
+     * en cada escalón el afectado sube de 5 en 5 desde la última igualación
+     * hasta que el paciente dice que suenan igual (o hasta su propio techo:
+     * ahí la escalera termina). Quién iguala y dónde lo decide el MISMO
+     * motor que contesta en la cabina -- Fowler.evaluate() de
+     * src/audiometria/Fowler.py, portado línea a línea, con su estado --,
+     * así que la ficha dice lo que el alumno va a obtener.
+     *
+     * @return list<array{0:int,1:int}>
+     */
+    public static function fowlerEscalera(int $thOd, int $thOi, string $pattern, int $ldlOd = 130, int $ldlOi = 130): array
+    {
+        $cortes = self::fowlerCutsForPattern($pattern);
+        // set_th: el mejor oído es la referencia; empate -> referencia OI.
+        if ($thOd < $thOi) {
+            [$thRef, $thEst, $sideB] = [$thOd, $thOi, 0];
+        } else {
+            [$thRef, $thEst, $sideB] = [$thOi, $thOd, 1];
+        }
+        $cuts = [$thEst + $cortes[0], $thEst + $cortes[1], $thEst + $cortes[2]];
+        $lista = [];
+        $firstReclut = 0;
+        $s3 = ['level' => null, 'idx' => 0, 'steps' => []];
+
+        $evaluar = static function (int $ref, int $est) use (&$lista, &$firstReclut, &$s3, $thRef, $thEst, $cuts): bool {
+            $ya = in_array([$ref, $est], $lista, true);
+            if ($est === $thEst && $ref === $thRef) {
+                if (!$ya) {
+                    $lista[] = [$ref, $est];
+                }
+                return true;
+            }
+            if ($est < $cuts[0]) {
+                if ($ya) {
+                    return true;
+                }
+                $estN = $est < $thEst ? 0 : $est;
+                if (($ref - $thRef) - ($estN - $thEst) === 0) {
+                    $lista[] = [$ref, $estN];
+                    return true;
+                }
+                return false;
+            }
+            if ($est < $cuts[1]) {
+                if ($ya) {
+                    return true;
+                }
+                $equals = true;
+                if ($firstReclut === 0 && $est !== $ref) {
+                    $firstReclut = $est;
+                } elseif (!($firstReclut === $est && $est !== $ref)) {
+                    // step3
+                    if ($s3['level'] !== $ref) {
+                        $acum = $s3['level'] === null ? 0 : 1;
+                        $s3['level'] = $ref;
+                        $s3['steps'] = array_reverse(range($ref + 5, $ref + 15, 5));
+                        $s3['idx'] += $acum;
+                        if ($s3['idx'] + 1 > count($s3['steps'])) {
+                            $s3['idx'] = count($s3['steps']) - 1;
+                        }
+                    }
+                    $equals = $s3['steps'][$s3['idx']] === $est;
+                }
+                if ($equals) {
+                    $lista[] = [$ref, $est];
+                }
+                return $equals;
+            }
+            if ($est < $cuts[2]) {
+                return $ref === $est;
+            }
+            return ($ref - $est - 10) < 0;
+        };
+
+        $techoRef = min(self::FOWLER_SALIDA_MAX_DB, ($sideB === 0 ? $ldlOd : $ldlOi) - 5);
+        $techoEst = min(self::FOWLER_SALIDA_MAX_DB, ($sideB === 0 ? $ldlOi : $ldlOd) - 5);
+        $pares = [];
+        $est = $thEst;
+        for ($ref = $thRef; $ref <= $techoRef; $ref += 20) {
+            $igualo = false;
+            for (; $est <= $techoEst; $est += 5) {
+                if ($evaluar($ref, $est)) {
+                    $igualo = true;
+                    break;
+                }
+            }
+            if (!$igualo) {
+                break;
+            }
+            $pares[] = $sideB === 0 ? [$ref, $est] : [$est, $ref];
+        }
+        return $pares;
+    }
+
     // Tipo de curva del reflejo acústico, por oído -- morfología del trazo
     // (no la intensidad umbral, que ya se captura en reflex_ipsi/contra).
     // 'normal' ES el patrón "ON" (meseta sostenida); no existe un tipo "on"

@@ -74,6 +74,14 @@ final class CaseCharts
     public const DESPLAZAMIENTO_OSEA = 4.0;
 
     /**
+     * La escalera del Fowler va a los lados de la frecuencia, más afuera que
+     * la ósea para no montarse con los corchetes; entre 2 y 3 kHz (media
+     * octava) todavía queda aire entre la escalera de una y la de la otra.
+     */
+    public const DESPLAZAMIENTO_FOWLER = 8.0;
+    public const COLOR_FOWLER = '#555555';
+
+    /**
      * Frecuencias en las que SÍ se mide vía ósea y LDL: 250 a 4000 Hz.
      *
      * Ni 125 ni 6000/8000 se prueban por vía ósea --el vibrador no entrega
@@ -231,7 +239,8 @@ final class CaseCharts
         array $osea,
         array $ldl,
         array $ldlMedido,
-        bool $estudio = false
+        bool $estudio = false,
+        array $fowler = []
     ): void {
         // Margen inferior mayor que el resto: los símbolos de "no responde"
         // se dibujan en 120 dB y la flecha les cuelga por debajo.
@@ -369,6 +378,27 @@ final class CaseCharts
                         self::flechaAbajo($pdf, $cxOOi, $yOOi, self::COLOR_OI, 1);
                     }
                 }
+            }
+        }
+
+        // Fowler: se registra en el mismo audiograma. En la frecuencia
+        // probada, cada oído con su símbolo de vía aérea a su lado de la
+        // vertical (OD a la izquierda, OI a la derecha), en los niveles que
+        // el paciente iguala, y cada par unido con una línea: paralelas = sin
+        // reclutamiento, que se juntan = recluta. Los pares salen de
+        // CaseBuilder::fowlerEscalera (el motor de la cabina).
+        foreach ($fowler as $i => $pares) {
+            $hz = $freqs[(int) $i] ?? null;
+            if ($hz === null || !$pares) {
+                continue;
+            }
+            $cx = $fx((float) $hz);
+            foreach ($pares as [$nOd, $nOi]) {
+                $yOd = $fy((float) $nOd);
+                $yOi = $fy((float) $nOi);
+                $pdf->line($cx - self::DESPLAZAMIENTO_FOWLER, $yOd, $cx + self::DESPLAZAMIENTO_FOWLER, $yOi, 0.7, self::COLOR_FOWLER);
+                $pdf->circle($cx - self::DESPLAZAMIENTO_FOWLER, $yOd, 3.4, self::COLOR_OD, '#ffffff', 1.1);
+                self::cruz($pdf, $cx + self::DESPLAZAMIENTO_FOWLER, $yOi, self::COLOR_OI);
             }
         }
 
