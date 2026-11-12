@@ -78,11 +78,17 @@ class AbrDetailAllCurves(QWidget, Ui_DetailAllCurves):
             self.tw_curves_list.insertRow(current_row)
             self.tw_curves_list.setVerticalHeaderItem(current_row, QTableWidgetItem(main_key))
 
-       # Llenar las celdas con los datos
-        for header in header_labels:
-            col = header_labels.index(header)
-            value = row_data.get(header, '')
-            self.tw_curves_list.setItem(current_row, col, QTableWidgetItem(str(value)))
+        # Llenar las celdas con los datos. Esto corre en cada tick de captura
+        # (memory_curves): reemplazar el ítem hacía que Qt borrara el viejo y
+        # shiboken cayera en unregisterWrapper (ticket 58, segfault en el
+        # kiosko). Se reutiliza el ítem y solo se cambia el texto si cambió.
+        for col, header in enumerate(header_labels):
+            texto = str(row_data.get(header, ''))
+            item = self.tw_curves_list.item(current_row, col)
+            if item is None:
+                self.tw_curves_list.setItem(current_row, col, QTableWidgetItem(texto))
+            elif item.text() != texto:
+                item.setText(texto)
 
 
     @staticmethod
