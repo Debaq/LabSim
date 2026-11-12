@@ -225,3 +225,44 @@ if __name__ == "__main__":
             traceback.print_exc()
             print("FAIL", nombre, repr(exc))
     sys.exit(1 if fallos else 0)
+
+
+def test_mientras_piensa_el_foco_no_sale_del_chat():
+    """Tickets 56 y 57 (2026-11-12): al enviar, el campo se deshabilitaba y
+    el foco pasaba al botón "Hablar con el paciente" de la barra. El alumno
+    seguía escribiendo, la barra espaciadora pulsaba ese botón y el chat se
+    borraba y se cerraba."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication, QPushButton, QVBoxLayout, QWidget
+
+    pendientes = []
+    C.hilos.en_fondo = lambda *a, **k: pendientes.append(k) or object()
+    ventana = QWidget()
+    lay = QVBoxLayout(ventana)
+    w = C.ChatPacienteWidget("Ana Alumna")
+    w._case_id = "c1"
+    lay.addWidget(w)
+    boton = QPushButton("Hablar con el paciente")
+    clics = []
+    boton.clicked.connect(lambda: clics.append(1))
+    lay.addWidget(boton)
+    ventana.show()
+    ventana.activateWindow()
+    QTest.qWaitForWindowActive(ventana)
+    for enviar in (lambda: QTest.keyClick(w.input, Qt.Key.Key_Return),
+                   lambda: QTest.mouseClick(w.btn_enviar, Qt.MouseButton.LeftButton)):
+        w._thread = None  # la respuesta anterior "llegó"
+        w.btn_enviar.setEnabled(True)
+        pendientes.clear()
+        w.input.setFocus()
+        QTest.keyClicks(w.input, "hola")
+        enviar()
+        assert pendientes, "no se despachó"
+        foco = QApplication.focusWidget()
+        assert foco is w.input, type(foco).__name__
+        QTest.keyClicks(foco, "y usted ")
+        assert not clics
+        assert w.input.text() == "y usted "
+        w.input.clear()
+    ventana.close()

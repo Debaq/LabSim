@@ -1667,9 +1667,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                        trae=()):
         """Abre (o trae al frente) la subventana MDI de chat con el paciente,
         reapuntada al caso indicado. appointment_id=None = no se guarda el
-        chat (ver ChatPacienteWidget.set_paciente)."""
-        self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id,
-                                           trae)
+        chat (ver ChatPacienteWidget.set_paciente).
+
+        Con el chat ya abierto en esa misma cita solo se trae al frente: ni
+        se borra la conversación ni se esconde (activate_auto es un
+        interruptor). La conversación se pierde al reabrirlo después de
+        cerrarlo, que es lo buscado (el alumno toma nota)."""
+        chat = self.subw["CHAT"].obj
+        if (self._subventana_visible("CHAT") and chat._case_id == case_id
+                and chat._appointment_id == appointment_id):
+            raise_window(self.subw["CHAT"].parent())
+            chat.input.setFocus()
+            return
+        chat.set_paciente(case_id, nombre, edad, procedimiento, appointment_id, trae)
         self.activate_auto("CHAT")
 
     # -----------------------------------------------------------------

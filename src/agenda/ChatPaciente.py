@@ -261,6 +261,9 @@ class ChatPacienteWidget(QWidget):
         self.lbl_estado.setObjectName("estadoChat")
         self.btn_reintentar = BotonAccion("Reintentar", "practica", parent=self)
         self.btn_reintentar.clicked.connect(self._reintentar_manual)
+        # Se deshabilita o se esconde con el foco encima: pasaría el foco
+        # fuera del chat (ver _despachar).
+        self.btn_reintentar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         fila_estado.addWidget(self.icono_estado)
         fila_estado.addWidget(self.lbl_estado, 1)
         fila_estado.addWidget(self.btn_reintentar)
@@ -284,6 +287,7 @@ class ChatPacienteWidget(QWidget):
         self.btn_enviar.setIcon(iconos.icono("enviar", "#FFFFFF", 20))
         self.btn_enviar.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_enviar.clicked.connect(self._enviar)
+        self.btn_enviar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         fila_input.addWidget(self.btn_enviar)
         layout.addLayout(fila_input)
 
@@ -524,7 +528,13 @@ class ChatPacienteWidget(QWidget):
         self._mensaje_pendiente = mensaje
         self.btn_reintentar.hide()
         self._mostrar_estado("Pensando la respuesta…")
-        self.input.setEnabled(False)
+        # El campo NO se deshabilita: un widget enfocado que se deshabilita
+        # le pasa el foco al siguiente de la cadena, que era el botón
+        # "Hablar con el paciente" de la barra. El alumno seguía escribiendo,
+        # la barra espaciadora pulsaba ese botón y el chat se borraba y se
+        # cerraba (tickets 56 y 57, 2026-11-12). Mientras se espera se puede
+        # ir escribiendo la pregunta siguiente; _enviar no manda nada hasta
+        # que llegue la respuesta.
         self.btn_enviar.setEnabled(False)
 
         case_id_solicitado = self._case_id
@@ -538,7 +548,6 @@ class ChatPacienteWidget(QWidget):
                 self._on_fallo, case_id_solicitado, mensaje, str(e)))
 
     def _on_respuesta(self, case_id_solicitado, mensaje, resultado):
-        self.input.setEnabled(True)
         self.btn_enviar.setEnabled(True)
         self._mensaje_pendiente = None
         self._intentos = 0
@@ -597,7 +606,6 @@ class ChatPacienteWidget(QWidget):
             ventana.abrir_previo(ruta, examen)
 
     def _on_fallo(self, case_id_solicitado, mensaje, error):
-        self.input.setEnabled(True)
         self.btn_enviar.setEnabled(True)
         if case_id_solicitado != self._case_id:
             self._ocultar_estado()
