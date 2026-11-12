@@ -173,7 +173,7 @@ def test_las_marcas_se_van_y_la_piel_queda():
     limpia = m.cabeza.grab().toImage()
     cz = _en_pantalla(m, "Cz")
     _frotar(m, cz, "alcohol")
-    for _ in range(4):
+    for _ in range(ce.IDA_Y_VUELTA_PARA_IRRITAR + 1):
         _frotar(m, cz, "gel", ida_y_vuelta=True)          # hasta irritar
     assert m.cabeza.grab().toImage() != limpia             # recién frotado se ve
     for t in m.impedancias.piel.trazos:
