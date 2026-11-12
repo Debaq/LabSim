@@ -40,13 +40,20 @@ class Response(QWidget):
         if self.fowler_engine is None:
             # aun no se ha activado "dos_pitos" para setear los datos del Fowler
             return
-        if n == 3:
-            # "¿Los dos sonidos eran diferentes en forma?", al terminar la
-            # prueba: la diploacusia del caso. Contesta por lo que oyó en el
-            # Fowler, aunque ya no suene nada.
-            self.create_voice_('si' if self.fowler_engine.diplacusia else 'no')
-            return
         output = data_audio['audio']['output']
+        if n == 3:
+            # "¿Los dos sonidos eran diferentes en forma?", en cualquier nivel
+            # (al terminar ya no suena nada: data_audio es lo último que
+            # oyó). La diploacusia de esa frecuencia; si no oyó los dos
+            # tonos, no tiene cómo compararlos.
+            a = data_audio['audio']
+            oyo = output[0] != output[1] and self.fowler_engine.oye_los_dos(
+                a['int'][output.index(0)], a['int'][output.index(1)])
+            if not oyo:
+                self.create_voice_('nose')
+            else:
+                self.create_voice_('si' if self.fowler_engine.diplacusia else 'no')
+            return
         if output[0] == output[1]:
             # ambos canales apuntan al mismo oido, no se puede comparar
             return

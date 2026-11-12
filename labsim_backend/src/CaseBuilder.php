@@ -1156,6 +1156,29 @@ final class CaseBuilder
     public const FOWLER_SALIDA_MAX_DB = 120;
 
     /**
+     * Si el paciente tiene diploacusia en esa frecuencia del Fowler (índice
+     * de FREQUENCIES). Fowler.diplacusia es {índice: bool}, por frecuencia
+     * como el patrón: la diploacusia sale de la misma lesión de células
+     * ciliadas externas que el reclutamiento, en las frecuencias dañadas.
+     * Casos viejos: un bool para todo el caso. Espejo de
+     * ResponseAudiometry.diploacusia (src/audiometria/response.py).
+     */
+    public static function fowlerDiplacusia(array $fowler, int $freqIdx): bool
+    {
+        $d = $fowler['diplacusia'] ?? false;
+        if (is_array($d)) {
+            return !empty($d[(string) $freqIdx]) || !empty($d[$freqIdx]);
+        }
+        return (bool) $d;
+    }
+
+    /** La diploacusia sugerida para un patrón: con reclutamiento, sí. */
+    public static function fowlerDiplacusiaSugerida(string $pattern): bool
+    {
+        return $pattern !== 'none' && array_key_exists($pattern, self::FOWLER_PATTERNS);
+    }
+
+    /**
      * La escalera del Fowler tal como sale en el audiómetro: los pares de
      * igual sonoridad [nivel OD, nivel OI], en dB HL, en el orden en que se
      * obtienen.
@@ -1747,10 +1770,11 @@ final class CaseBuilder
         // un caso guardado con la versión anterior; el patrón por frecuencia
         // (abajo) es la única fuente de verdad ahora.
         $v['fowler_pattern'] = [];
+        $v['diplacusia'] = [];
         foreach ((array) ($fowler['patterns'] ?? []) as $freq => $pattern) {
             $v['fowler_pattern'][(string) $freq] = (string) $pattern;
+            $v['diplacusia'][(string) $freq] = self::fowlerDiplacusia((array) $fowler, (int) $freq) ? '1' : '0';
         }
-        if (!empty($fowler['diplacusia'])) { $v['diplacusia'] = '1'; }
 
         $stenger = $data['Stenger'] ?? [false, false];
         $v['stenger'] = [];

@@ -60,6 +60,20 @@ FOWLER_PATTERNS = {
     'over': (15, 0.0, 5),        # sobre-reclutamiento: el afectado iguala 5 dB bajo el sano
 }
 
+def diploacusia(fowler, freq_idx):
+    """Si el caso tiene diploacusia en esa frecuencia. Fowler.diplacusia es
+    {índice: bool}, por frecuencia como el patrón (la misma lesión de células
+    ciliadas externas que recluta corre la altura del tono); los casos
+    viejos traen un bool para todo el caso. Espejo de
+    CaseBuilder::fowlerDiplacusia."""
+    d = (fowler or {}).get('diplacusia', False) if isinstance(fowler, dict) else False
+    if isinstance(d, dict):
+        return bool(d.get(str(freq_idx)))
+    if isinstance(d, list):
+        return False    # {} de PHP vacío llega como []
+    return bool(d)
+
+
 # Paso del atenuador: el paciente dice "iguales" en el nivel del afectado más
 # cercano (de 5 en 5) al de igual sonoridad.
 PASO_DB = 5
@@ -124,6 +138,12 @@ class Fowler:
     def igual_a_paso(self, int_ref):
         """igual_a, al paso del atenuador más cercano."""
         return PASO_DB * math.floor(self.igual_a(int_ref) / PASO_DB + 0.5)
+
+    def oye_los_dos(self, int_od, int_oi):
+        """Los dos tonos llegan sobre el umbral de su oído."""
+        th_od, th_oi = ((self.th_ref, self.th_est) if self.side_b == 0
+                        else (self.th_est, self.th_ref))
+        return int_od >= th_od and int_oi >= th_oi
 
     def evaluate(self, int_od: int, int_oi: int):
         """(iguales, oído que suena más fuerte o None, zona). Zona: 0 bajo

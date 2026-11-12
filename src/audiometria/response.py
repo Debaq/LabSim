@@ -7,7 +7,7 @@ from core.helpers import Preferences
 from PySide6.QtCore import QObject, QTimer
 from audiometria.response_A import Response
 from audiometria.h_audio import voz_del_paciente
-from audiometria.Fowler import FOWLER_PATTERNS
+from audiometria.Fowler import FOWLER_PATTERNS, diploacusia
 from audiometria.masking_params import (  # re-export: los usan
     CE_TONAL, RUIDOS_ENMASCARANTES, STIM_FM, STIM_HABLA, STIM_NBN,  # noqa: F401
     STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal, es_ruido)  # el panel y los tests
@@ -373,7 +373,8 @@ class ResponseAudiometry():
                     pattern = patterns.get(str(freq), 'none')
                     cuts = FOWLER_PATTERNS.get(pattern, FOWLER_PATTERNS['none'])
                     air_pair = self.dbdata['Aerea'][freq]
-                    self.other_response.set_fowler_data(air_pair[0], air_pair[1], cuts, fdata.get('diplacusia', False))
+                    self.other_response.set_fowler_data(air_pair[0], air_pair[1], cuts,
+                                                        diploacusia(fdata, freq))
 
     def _decay_total(self, cfg, freq, ear):
         """dB que hay que subir sobre el umbral para que el oído sostenga el
@@ -974,7 +975,14 @@ class ResponseAudiometry():
         fowler = pregunta in self.FOWLER_PREGUNTAS or (
             pregunta == 'en_qué_oído' and self._instruccion() == 'dos_pitos')
         if fowler:
-            self.other_response.fowler_q(self.FOWLER_PREGUNTAS.get(pregunta, 2), self.data)
+            n = self.FOWLER_PREGUNTAS.get(pregunta, 2)
+            if n == 3:
+                # al terminar la prueba ya no suena nada: lo último que oyó
+                actual = self.data['audio']
+                pasado = actual if any(actual['stimOn']) else (self._ultima or actual)
+                self.other_response.fowler_q(3, {'audio': pasado})
+            else:
+                self.other_response.fowler_q(n, self.data)
             return
         if pregunta in acufeno.PREGUNTAS or pregunta in acufeno.INSTRUCCIONES or (
                 pregunta == 'dejo_de_escuchar' and self._instruccion() == acufeno.INSTR_NME):

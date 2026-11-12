@@ -42,12 +42,33 @@
         return out;
     }
 
+    // Con reclutamiento se sugiere diploacusia (CaseBuilder::fowlerDiplacusiaSugerida).
+    function sugerida(patron) { return patron !== 'none'; }
+
+    // Cambiar el patrón vuelve a sugerir la diploacusia de esa frecuencia;
+    // después el docente la puede desmarcar. profile-preview.js, al cambiar
+    // el patrón por la proyección, llama a lo mismo.
+    window.fowlerSugerirDiplacusia = function (freqIdx) {
+        var sel = container.querySelector('select[data-freq="' + freqIdx + '"]');
+        var chk = container.querySelector('input[type=checkbox][data-freq="' + freqIdx + '"]');
+        if (sel && chk) { chk.checked = sugerida(sel.value); }
+    };
+    container.addEventListener('change', function (e) {
+        if (e.target.tagName === 'SELECT' && e.target.dataset.freq) {
+            window.fowlerSugerirDiplacusia(e.target.dataset.freq);
+        }
+    });
+
     function rebuild() {
         // Preserva lo ya elegido en cada fila antes de reconstruir -- si
         // cambiar un umbral en OTRA frecuencia no debería resetear esta.
         var current = {};
+        var diplo = {};
         container.querySelectorAll('select[data-freq]').forEach(function (sel) {
             current[sel.dataset.freq] = sel.value;
+        });
+        container.querySelectorAll('input[type=checkbox][data-freq]').forEach(function (chk) {
+            diplo[chk.dataset.freq] = chk.checked;
         });
 
         var qualifying = qualifyingFreqs();
@@ -78,6 +99,23 @@
             select.value = current[q.idx] || DEFAULT_PATTERN;
             tdSelect.appendChild(select);
             tr.appendChild(tdSelect);
+
+            // Diploacusia: el 0 escondido hace que la casilla apagada
+            // también llegue (CaseForm la distingue de "sin dato").
+            var tdDip = document.createElement('td');
+            var oculto = document.createElement('input');
+            oculto.type = 'hidden';
+            oculto.name = 'diplacusia[' + q.idx + ']';
+            oculto.value = '0';
+            var chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.name = 'diplacusia[' + q.idx + ']';
+            chk.value = '1';
+            chk.dataset.freq = String(q.idx);
+            chk.checked = (q.idx in diplo) ? diplo[q.idx] : sugerida(select.value);
+            tdDip.appendChild(oculto);
+            tdDip.appendChild(chk);
+            tr.appendChild(tdDip);
 
             container.appendChild(tr);
         });

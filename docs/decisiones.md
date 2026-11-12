@@ -8558,3 +8558,17 @@ pititos alternados, uno en cada oído"); *¿Los escucha al mismo volumen?*
 terminar, *¿Los dos sonidos eran diferentes en forma?* para la diploacusia.
 Antes la diploacusia hacía que nunca dijera "sí" a "¿Los escuchó iguales?":
 el Fowler no se podía igualar.
+
+## Diploacusia por frecuencia, sugerida por el reclutamiento (2026-11-12)
+
+La diploacusia sale de la misma lesión que el reclutamiento: las células
+ciliadas externas dañadas dejan de comprimir (la sonoridad crece rápido) y
+de afinar (el tono excita una zona más ancha y corrida, o fibras vecinas si
+hay zona muerta, y suena con otra altura en ese oído). Por eso se guarda por
+frecuencia del Fowler (`Fowler.diplacusia = {índice: bool}`, antes un bool
+para el caso) y la ficha la marca sola al elegir un patrón con reclutamiento,
+desmarcable. No depende del nivel: la sintonía se pierde desde el umbral,
+así que *¿Diferentes en forma?* contesta "sí" en cualquier nivel en que oiga
+los dos tonos de esa frecuencia, y "no sé" si oye uno solo. Retrococlear y
+conductiva: sin reclutamiento ni diploacusia sugerida. Los casos viejos con
+el bool se leen como diploacusia en todas sus frecuencias.

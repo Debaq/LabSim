@@ -215,7 +215,13 @@
                 if (chk) { chk.checked = !!p.recruit.recruit[i]; }
             });
             Object.keys(p.recruit.fowler).forEach(function (freqIdx) {
+                var sel = campo('fowler_pattern[' + freqIdx + ']');
+                var antes = sel ? sel.value : null;
                 setVal('fowler_pattern[' + freqIdx + ']', p.recruit.fowler[freqIdx]);
+                // patrón nuevo: la diploacusia vuelve a la sugerida (fowler.js)
+                if (sel && sel.value !== antes && window.fowlerSugerirDiplacusia) {
+                    window.fowlerSugerirDiplacusia(freqIdx);
+                }
             });
             DECAY_MODES.forEach(function (modo) {
                 ['od', 'oi'].forEach(function (lado) {

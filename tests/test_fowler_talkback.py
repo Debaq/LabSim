@@ -104,9 +104,22 @@ def test_mismo_volumen_solo_sonoridad():
 
 
 def test_diferentes_en_forma_es_la_diploacusia():
-    """Al terminar: ¿Los dos sonidos eran diferentes en forma?"""
-    assert _dice(True, 3, 0, 0) == ['si']
-    assert _dice(False, 3, 0, 0) == ['no']
+    """¿Los dos sonidos eran diferentes en forma?, en cualquier nivel en que
+    oiga los dos tonos (OD 5 / OI 25)."""
+    for od, oi in ((5, 25), (45, 55), (90, 90)):
+        assert _dice(True, 3, od, oi) == ['si']
+        assert _dice(False, 3, od, oi) == ['no']
+    assert _dice(True, 3, 40, 20) == ['nose']    # el OI bajo su umbral
+    assert _dice(False, 3, 0, 0) == ['nose']
+
+
+def test_diploacusia_por_frecuencia():
+    from audiometria.Fowler import diploacusia
+    fowler = {'patterns': {'3': 'complete', '4': 'none'}, 'diplacusia': {'3': True, '4': False}}
+    assert diploacusia(fowler, 3) and not diploacusia(fowler, 4)
+    assert diploacusia({'diplacusia': True}, 5)          # caso viejo: todo el caso
+    assert not diploacusia({'diplacusia': []}, 3)
+    assert not diploacusia({}, 3) and not diploacusia(None, 3)
 
 
 def test_diferentes_en_forma_va_al_fowler():

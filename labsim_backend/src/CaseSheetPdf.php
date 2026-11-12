@@ -1125,8 +1125,15 @@ final class CaseSheetPdf
                 7.5
             );
         }
-        if (!empty(($data['Fowler'] ?? [])['diplacusia'])) {
-            $this->parrafo('Diplacusia referida por el paciente.', 7.5);
+        $conDiplo = [];
+        foreach (array_keys($patrones) as $freqIdx) {
+            if (CaseBuilder::fowlerDiplacusia((array) ($data['Fowler'] ?? []), (int) $freqIdx)) {
+                $conDiplo[] = CaseBuilder::FREQUENCIES[(int) $freqIdx] ?? $freqIdx;
+            }
+        }
+        if ($conDiplo) {
+            $ultima = array_pop($conDiplo);
+            $this->parrafo('Diploacusia en ' . ($conDiplo ? implode(', ', $conDiplo) . ' y ' : '') . $ultima . ' Hz.', 7.5);
         }
 
         // Deterioro tonal: las tres pruebas usan protocolos distintos y por

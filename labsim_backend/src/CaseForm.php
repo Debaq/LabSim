@@ -275,15 +275,19 @@ final class CaseForm
         // (no una única frecuencia "elegida" al crear el caso).
         $fowlerQualifying = CaseBuilder::fowlerQualifyingFreqs($airPairs, $bonePairs);
         $fowlerPatterns = [];
+        $fowlerDiplacusia = [];
         foreach ($fowlerQualifying as $freq) {
             $pattern = (string) self::val($v, ['fowler_pattern', (string) $freq], 'none');
             if (!array_key_exists($pattern, CaseBuilder::FOWLER_PATTERNS)) {
                 $pattern = 'none';
             }
             $fowlerPatterns[(string) $freq] = $pattern;
+            // Por frecuencia: la casilla manda un 0 escondido antes del 1,
+            // así que "0" es apagada. Sin dato, la sugerida por el patrón.
+            $dip = self::diplacusiaPosteada($v, (int) $freq);
+            $fowlerDiplacusia[(string) $freq] = $dip ?? CaseBuilder::fowlerDiplacusiaSugerida($pattern);
         }
         $fowlerEnabled = count($fowlerPatterns) > 0;
-        $fowlerDiplacusia = isset($v['diplacusia']);
         // Supraliminares: en variables (y no leídas inline más abajo) porque
         // la proyección del perfil las puede reescribir.
         $sisiVals = [(int) self::val($v, ['sisi', 'od'], 0), (int) self::val($v, ['sisi', 'oi'], 0)];
@@ -836,8 +840,42 @@ final class CaseForm
             foreach ($p['recruit']['fowler'] as $idx => $patron) {
                 $poner($v, ['fowler_pattern', (string) $idx], $patron);
             }
+            // La diploacusia sigue al patrón (misma lesión coclear), salvo
+            // la que ya viene marcada o desmarcada.
+            $previa = $v['diplacusia'] ?? null;
+            $porFrec = is_array($previa) ? $previa : [];
+            foreach ($p['recruit']['fowler'] as $idx => $patron) {
+                if (self::diplacusiaPosteada($v, (int) $idx) === null) {
+                    $final = (string) self::val($v, ['fowler_pattern', (string) $idx], $patron);
+                    $porFrec[(string) $idx] = CaseBuilder::fowlerDiplacusiaSugerida($final) ? '1' : '0';
+                } elseif (!is_array($previa)) {
+                    $porFrec[(string) $idx] = self::diplacusiaPosteada($v, (int) $idx) ? '1' : '0';
+                }
+            }
+            $v['diplacusia'] = $porFrec;
         }
         return $v;
+    }
+
+    /**
+     * La diploacusia del formulario en esa frecuencia: true/false, o null si
+     * no viene. diplacusia[idx] = '1'/'0' (la casilla con su 0 escondido);
+     * un escalar es el formato viejo, una casilla para todo el caso.
+     */
+    private static function diplacusiaPosteada(array $v, int $freqIdx): ?bool
+    {
+        if (!array_key_exists('diplacusia', $v)) {
+            return null;
+        }
+        $d = $v['diplacusia'];
+        if (!is_array($d)) {
+            return $d !== '' && $d !== '0' && $d !== false && $d !== null;
+        }
+        if (!array_key_exists((string) $freqIdx, $d) && !array_key_exists($freqIdx, $d)) {
+            return null;
+        }
+        $x = $d[(string) $freqIdx] ?? $d[$freqIdx];
+        return $x === '1' || $x === 1 || $x === true || $x === 'on';
     }
 
     /**
