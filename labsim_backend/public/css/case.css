@@ -254,6 +254,20 @@ main:has(.form-actions-sticky) { padding-bottom: 6rem; }
 /* Exámenes que trae (views/case/_paciente.php): días | examen | OD | OI | quitar */
 .previo-row { display: grid; grid-template-columns: 7rem 1fr 9rem 9rem auto; gap: var(--space-3); align-items: end; margin-bottom: var(--space-3); }
 .previo-row .previo-conclusion { grid-column: 1 / -1; }
+.previo-acciones { display: flex; gap: var(--space-2); }
+/* Vista previa del informe: imita la hoja que dibuja la app
+   (src/core/informe_previo.py), en blanco aunque el panel esté en oscuro. */
+.previo-preview { grid-column: 1 / -1; max-width: 560px; background: #ffffff; color: #1F2933; border: 1px solid #C9CED6; border-radius: 6px; padding: 16px; font-family: sans-serif; }
+.previo-preview .ip-titulo { font-size: 15px; font-weight: 700; }
+.previo-preview .ip-servicio { font-size: 10px; color: #5B6670; margin-top: 4px; }
+.previo-preview .ip-datos { font-size: 10.5px; margin-top: 6px; padding-bottom: 8px; border-bottom: 1px solid #C9CED6; }
+.previo-preview .ip-oidos { display: flex; gap: 20px; justify-content: center; margin: 12px 0; }
+.previo-preview .ip-oido { width: 150px; background: #F3F5F8; border-radius: 8px; padding: 8px 14px; }
+.previo-preview .ip-oido .ip-lado { font-size: 11px; font-weight: 700; }
+.previo-preview .ip-oido .ip-res { font-size: 13px; font-weight: 700; margin-top: 6px; }
+.previo-preview .ip-conclusion { background: #F3F5F8; border-radius: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.4; }
+.previo-preview .ip-conclusion strong { display: block; margin-bottom: 4px; }
+.previo-preview .ip-firma { text-align: right; font-size: 9px; color: #5B6670; margin-top: 14px; }
 @media (max-width: 40rem) {
   .previo-row { grid-template-columns: 1fr 1fr; }
 }

@@ -135,10 +135,14 @@
             <label>OI
                 <input type="text" name="prev_oi[]" maxlength="80" list="previo-resultados" value="<?= htmlspecialchars((string) ($e['OI'] ?? '')) ?>">
             </label>
-            <button type="button" class="secondary previo-remove">Quitar</button>
+            <div class="previo-acciones">
+                <button type="button" class="secondary previo-ver">Vista previa</button>
+                <button type="button" class="secondary previo-remove">Quitar</button>
+            </div>
             <label class="previo-conclusion">Conclusión del informe (opcional)
                 <input type="text" name="prev_conclusion[]" maxlength="300" value="<?= htmlspecialchars((string) ($e['conclusion'] ?? '')) ?>" placeholder="Vacío: se arma con el resultado de cada oído">
             </label>
+            <div class="previo-preview" hidden></div>
         </div>
         <?php
         return (string) ob_get_clean();
