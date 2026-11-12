@@ -88,21 +88,27 @@ CUADROS_EN_MEMORIA = 80
 # sitio de la norma y vale para la piel que lo rodea: no hay un valor de
 # fábrica que el alumno pueda aprenderse. Sin alcohol ni gel, ningún
 # electrodo queda en norma.
+#
+# 2026-11-12: más fácil. Con 15-40 kΩ en el cuero cabelludo, gel ×0,78 y un
+# algodón de 8 mm hacían falta ~7 pasadas derechas por electrodo para bajar
+# de 5 kΩ y el práctico no alcanzaba a llegar al registro. Ahora el peor
+# cuero cabelludo (25 kΩ) queda bajo 5 con alcohol + 3 pasadas de gel, y lo
+# típico es con 2.
 RANGO_KOHM = {
-    "frente": (8.0, 25.0), "lobulo": (8.0, 25.0), "mastoides": (8.0, 25.0),
-    "mejilla": (8.0, 22.0), "infraorbital": (8.0, 22.0), "menton": (8.0, 22.0),
-    "cae": (10.0, 30.0),
+    "frente": (6.0, 15.0), "lobulo": (6.0, 15.0), "mastoides": (6.0, 15.0),
+    "mejilla": (6.0, 14.0), "infraorbital": (6.0, 14.0), "menton": (6.0, 14.0),
+    "cae": (8.0, 18.0),
 }
-RANGO_CUERO_CABELLUDO = (15.0, 40.0)
+RANGO_CUERO_CABELLUDO = (10.0, 25.0)
 PISO_KOHM = (0.8, 2.0)    # lo más bajo que llega esa piel, por bien preparada que esté
 ESCALA_KOHM = 20.0        # tope de la barra
 
 # Preparación. Son criterio de trabajo para que el ejercicio funcione, no
 # cifras de una norma: ajustarlas acá.
-PINCEL_M = 0.008                      # radio de lo que limpia el algodón: 8 mm
-ALCOHOL_FACTOR = {1: 0.85, 2: 0.70}   # pasadas de alcohol -> lo que queda (2 o más: 0.70)
-GEL_POR_PASADA = 0.78                 # cada pasada de gel en la misma dirección
-GEL_SIN_ALCOHOL = 0.90                # con la grasa todavía ahí rinde menos
+PINCEL_M = 0.012                      # radio de lo que limpia el algodón: 12 mm
+ALCOHOL_FACTOR = {1: 0.70, 2: 0.55}   # pasadas de alcohol -> lo que queda (2 o más: 0.55)
+GEL_POR_PASADA = 0.60                 # cada pasada de gel en la misma dirección
+GEL_SIN_ALCOHOL = 0.80                # con la grasa todavía ahí rinde menos
 GEL_MAX_PASADAS = 10                  # sobre esto la piel se irrita y ya no baja
 IDA_Y_VUELTA_PARA_IRRITAR = 3         # pasadas de ida y vuelta que irritan
 PASADA_MIN_PX = 25                    # un arrastre más corto no es una pasada

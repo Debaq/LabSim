@@ -8518,3 +8518,15 @@ procedimiento, por ejemplo un Fowler. En el práctico no es problema porque
 está el docente; en la práctica deliberada el alumno atiende solo y no tiene
 apoyo alguno. La idea es un asistente de procedimientos que cubra ese hueco.
 Queda abierto qué muestra, cuándo aparece y si cuenta en la evaluación.
+
+## Preparación de la piel más fácil (2026-11-12)
+
+La limpieza de electrodos restringía demasiado los prácticos: con el cuero
+cabelludo en 15-40 kΩ, el gel a ×0,78 por pasada y un algodón de 8 mm hacían
+falta ~7 pasadas derechas por electrodo para bajar de 5 kΩ, y el práctico no
+llegaba al registro. Ahora (`src/core/cabeza_electrodos.py`): cuero
+cabelludo 10-25 kΩ, resto 6-15 (CAE 8-18), alcohol ×0,70 / ×0,55, gel ×0,60
+(×0,80 sin alcohol), algodón de 12 mm. El peor cuero cabelludo queda bajo
+5 kΩ con alcohol + 3 pasadas de gel; lo típico es 2. Se mantienen el sorteo
+por sitio, la irritación por ida y vuelta o exceso de gel y los límites del
+equipo (5 kΩ, 2 kΩ de balance).
