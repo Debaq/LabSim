@@ -8530,3 +8530,13 @@ cabelludo 10-25 kΩ, resto 6-15 (CAE 8-18), alcohol ×0,70 / ×0,55, gel ×0,60
 5 kΩ con alcohol + 3 pasadas de gel; lo típico es 2. Se mantienen el sorteo
 por sitio, la irritación por exceso de gel o ida y vuelta (5 pasadas, era 3) y los límites del
 equipo (5 kΩ, 2 kΩ de balance).
+
+## MC visible en la cóclea sana del ABR (2026-11-12)
+
+La microfónica del ABR era un pulso de 0,04 µV: en una cóclea viva sin ANSD
+(el schwannoma del caso 165) no se veía invertirse al cambiar de polaridad.
+Ahora (`ABR_generator.py`, `CM_SANA_*`) toda cóclea que no es ANSD tiene una
+MC de 0,10 µV desde 70 dB nHL, que baja a cero hacia 30 dB nHL; en la
+coclear queda en un tercio y en la conductiva cuenta el nivel que llega a la
+cóclea. Se invierte con la polaridad y se cancela en alternada. La de la
+ANSD (amplificada) no cambia.

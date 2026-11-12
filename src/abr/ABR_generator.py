@@ -421,6 +421,17 @@ NEURAL_CM_GAIN = {'normal': 1.0, 'amplificada': 7.0}
 # El CM de una desincronia no es el pulso corto pre-onda I del oido sano:
 # dura lo que dura el estimulo y se sigue viendo donde deberia estar la I.
 NEURAL_CM_SIGMA_GAIN = 3.5
+# Microfónica de la cóclea sana (todo lo que no es ANSD). Antes era un pulso
+# de 0,04 µV bajo el ruido: no se veía invertirse con la polaridad aunque la
+# cóclea estuviera viva (schwannoma, caso 165). Ahora pico de 0,10 µV desde
+# 70 dB nHL, que baja a cero hacia 30 dB nHL; en una coclear queda en un
+# tercio (ciliadas externas dañadas) y en una conductiva cuenta el nivel que
+# llega a la cóclea. Criterio de trabajo, no cifra de norma: ajustar acá.
+CM_SANA_UV = 0.10
+CM_SANA_NIVEL_MIN = 30.0
+CM_SANA_NIVEL_LLENO = 70.0
+CM_SANA_SALUD = {'normal': 1.0, 'conductive': 1.0, 'neural': 1.0, 'cochlear': 0.3}
+CM_PULSO_FRACCION = 0.25    # build_target_curve dibuja el pulso a CM_value * 0.25
 
 # Atenuacion interaural (dB): cuanto pierde el estimulo al cruzar el craneo
 # hasta la coclea del otro lado. Por debajo de esto no hay curva sombra.
@@ -2915,6 +2926,19 @@ class ABRGenerator:
             if pathology == 'neural'
             and self.neural_params(neural)['microfonica'] == 'amplificada'
             else 1.0)
+        # La MC de una cóclea sana: visible a intensidad alta (se invierte
+        # con la polaridad y se cancela en alternada), se apaga hacia los
+        # niveles bajos y es menor si las ciliadas externas están dañadas
+        # (coclear) o si el sonido llega atenuado (conductiva). La de la
+        # ANSD (amplificada) queda como estaba.
+        if CM_value is not None and cm_sigma_gain == 1.0:
+            nivel = stimulus_config['int']
+            if pathology == 'conductive':
+                nivel -= max(threshold - NORMAL_THRESHOLD_REF, 0.0)
+            escala = min(max((nivel - CM_SANA_NIVEL_MIN)
+                             / (CM_SANA_NIVEL_LLENO - CM_SANA_NIVEL_MIN), 0.0), 1.0)
+            CM_value = (float(np.sign(CM_value)) * CM_SANA_UV / CM_PULSO_FRACCION
+                        * CM_SANA_SALUD.get(pathology, 1.0) * escala)
 
         # 7b. Ajustes del equipo sobre las ondas: retardo del transductor y
         # montaje de electrodos. Van despues de polaridad/tasa porque son
