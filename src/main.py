@@ -10,7 +10,7 @@ import traceback
 import requests
 from PySide6.QtCore import QEvent, Qt, QSize, QThread, QTimer, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (QApplication, QDialog, QMainWindow, QWidget, QPushButton, QMessageBox,
+from PySide6.QtWidgets import (QApplication, QDialog, QMainWindow, QWidget, QPushButton, QMessageBox, QToolButton,
                                QProgressDialog, QFrame, QHBoxLayout, QLabel, QMdiArea)
 
 from agenda import Agenda
@@ -212,6 +212,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setWindowTitle(f"LabSim {DISPLAY_VERSION}")
         self.lbl_title.setText(f"LabSim {DISPLAY_VERSION}")
+        self._armar_boton_update()
         self.configure_btn()
         if not es_kiosko():
             # En el laboratorio la ventana no se mueve ni se restaura: va
@@ -228,6 +229,93 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             from core.actualizacion_kiosko import ChequeoPeriodico
             self._chequeo_update = ChequeoPeriodico(__VERSION__, BACKEND_URL, parent=self)
             self._chequeo_update.hay_update.connect(self._on_update_disponible)
+
+    # -----------------------------------------------------------------
+    # Buscar actualizaciones a mano (botón junto a la versión)
+    # -----------------------------------------------------------------
+
+    def _armar_boton_update(self):
+        """Botón junto al número de versión: busca una versión nueva sin
+        esperar al próximo arranque (o a la media hora del kiosko)."""
+        self._buscando_update = False
+        self.btn_buscar_update = QToolButton(self.barra)
+        self.btn_buscar_update.setObjectName("btn_buscar_update")
+        self.btn_buscar_update.setIcon(iconos.icono_boton("recargar", tema.TEXTO_SUAVE, tema.ACENTO, 16))
+        self.btn_buscar_update.setIconSize(QSize(16, 16))
+        self.btn_buscar_update.setAutoRaise(True)
+        self.btn_buscar_update.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.btn_buscar_update.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_buscar_update.setToolTip("Buscar actualizaciones")
+        self.btn_buscar_update.clicked.connect(self.buscar_actualizaciones)
+        fila = self.horizontalLayout_4
+        fila.insertWidget(fila.indexOf(self.lbl_title) + 1, self.btn_buscar_update)
+
+    def buscar_actualizaciones(self):
+        """Busca en segundo plano; la ventana sigue respondiendo."""
+        if self._buscando_update or self._actualizando:
+            return
+        if not getattr(sys, 'frozen', False):
+            self._aviso_update(QMessageBox.Information, "Buscar actualizaciones",
+                               "LabSim está corriendo desde el código fuente: no hay "
+                               "actualizaciones que instalar.")
+            return
+        from core.updater import check_for_update
+        self._buscando_update = True
+        self.btn_buscar_update.setEnabled(False)
+        self.btn_buscar_update.setToolTip("Buscando actualizaciones…")
+        hilos.en_fondo(check_for_update, __VERSION__, estricto=True, backend_url=BACKEND_URL,
+                       dueno=self, nombre="buscar actualización",
+                       listo=self._al_buscar_update, fallo=self._al_fallar_busqueda_update)
+
+    def _fin_busqueda_update(self):
+        self._buscando_update = False
+        self.btn_buscar_update.setEnabled(True)
+        self.btn_buscar_update.setToolTip("Buscar actualizaciones")
+
+    def _aviso_update(self, icono, titulo, texto):
+        aviso = QMessageBox(self)
+        aviso.setIcon(icono)
+        aviso.setWindowTitle(titulo)
+        aviso.setText(texto)
+        aviso.setStandardButtons(QMessageBox.Ok)
+        style_dialog(aviso)
+        aviso.exec()
+
+    def _al_fallar_busqueda_update(self, exc):
+        self._fin_busqueda_update()
+        print(f"actualización: búsqueda manual fallida: {exc}")
+        self._aviso_update(QMessageBox.Warning, "Buscar actualizaciones",
+                           "No se pudo consultar si hay una versión nueva. "
+                           f"Revisa la conexión e inténtalo de nuevo.\n\n{exc}")
+
+    def _al_buscar_update(self, update):
+        self._fin_busqueda_update()
+        if update is None:
+            self._aviso_update(QMessageBox.Information, "Buscar actualizaciones",
+                               f"LabSim está al día ({DISPLAY_VERSION}).")
+            return
+        con_sesion = self._sesion_activa()
+        if not _preguntar_update(update, con_sesion=con_sesion, parent=self):
+            return
+        if con_sesion:
+            # Instalar reinicia sin guardar nada: primero se cierra la
+            # sesión, que sube los informes de la atención abierta.
+            if not self.data_login:
+                # Está entrando (login en curso): no hay qué cerrar todavía.
+                self._aviso_update(QMessageBox.Information, "Buscar actualizaciones",
+                                   "Espera a que termine el ingreso y vuelve a intentarlo.")
+                return
+            self.logout()
+        QTimer.singleShot(0, lambda: self._instalar_update(update))
+
+    def _instalar_update(self, update):
+        if self._apagando or self._sesion_activa():
+            return
+        if es_kiosko():
+            # La pantalla del kiosko: tapa todo y reintenta si falla.
+            self._actualizar_ahora()
+        else:
+            _download_and_apply(update)
 
     def _on_update_disponible(self):
         """Kiosko: hay versión nueva. Sin sesión iniciada se aplica ya; con
@@ -2018,17 +2106,27 @@ def _check_and_apply_update():
     update = check_for_update(__VERSION__, backend_url=BACKEND_URL)
     if update is None:
         return
-    tag = update["tag"]
-    notes = update.get("notes") or ""
     if _auto_update_forzado():
         _download_and_apply(update, silencioso=True)
         return
+    if _preguntar_update(update):
+        _download_and_apply(update)
+
+
+def _preguntar_update(update, con_sesion=False, parent=None):
+    """Ofrece `update` (actualización o reparación). True si se acepta.
+    con_sesion: hay alguien adentro, y para instalar se cierra su sesión."""
+    tag = update["tag"]
+    notes = update.get("notes") or ""
+    cierre = ("Se cerrará tu sesión (tus informes se suben antes) y la aplicación "
+              "se reiniciará sola." if con_sesion
+              else "La aplicación se cerrará y volverá a abrir sola.")
+    prompt = QMessageBox(parent)
     if update.get("repair"):
         # El ejecutable instalado no coincide con el de la release que dice
         # tener: un swap que copió a medias (ver core/updater.py
         # _check_install_integrity). No es "hay algo nuevo", es "lo que
         # tenés no es lo que dice ser".
-        prompt = QMessageBox()
         prompt.setIcon(QMessageBox.Warning)
         prompt.setWindowTitle("Instalación incompleta")
         prompt.setText(
@@ -2036,42 +2134,30 @@ def _check_and_apply_update():
             "instalado no es ese: una actualización anterior se copió a "
             "medias, así que estás corriendo una versión vieja.\n"
             "Se descargará el paquete completo y se reinstalará.\n"
-            "¿Reparar ahora? La aplicación se cerrará y volverá a abrir sola."
+            f"¿Reparar ahora? {cierre}"
         )
-        prompt.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        prompt.setDefaultButton(QMessageBox.Yes)
-        style_dialog(prompt)
-        if prompt.exec() != QMessageBox.Yes:
-            return
-        _download_and_apply(update)
-        return
-    if update["mode"] == "chain":
-        n = len(update["hops"])
-        detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
-    elif update["mode"] == "setup":
-        detalle = "Se descargará el instalador y se ejecutará sin preguntar nada más."
     else:
-        detalle = "Se descargará el paquete completo."
-    # Prompt estilizado: logo + stylesheet del tema + release notes del
-    # GitHub release bajo "Show Details" (colapsable). Antes era un
-    # QMessageBox.question plano sin contexto.
-    prompt = QMessageBox()
-    prompt.setIcon(QMessageBox.Question)
-    prompt.setWindowTitle("Actualización disponible")
-    prompt.setText(
-        f"Hay una nueva versión disponible ({tag}).\n{detalle}\n"
-        "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola."
-    )
-    if notes:
-        prompt.setDetailedText(notes)
+        if update["mode"] == "chain":
+            n = len(update["hops"])
+            detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
+        elif update["mode"] == "setup":
+            detalle = "Se descargará el instalador y se ejecutará sin preguntar nada más."
+        else:
+            detalle = "Se descargará el paquete completo."
+        # Prompt estilizado: logo + stylesheet del tema + release notes del
+        # GitHub release bajo "Show Details" (colapsable).
+        prompt.setIcon(QMessageBox.Question)
+        prompt.setWindowTitle("Actualización disponible")
+        prompt.setText(
+            f"Hay una nueva versión disponible ({tag}).\n{detalle}\n"
+            f"¿Actualizar ahora? {cierre}"
+        )
+        if notes:
+            prompt.setDetailedText(notes)
     prompt.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
     prompt.setDefaultButton(QMessageBox.Yes)
     style_dialog(prompt)
-    resp = prompt.exec()
-    if resp != QMessageBox.Yes:
-        return
-
-    _download_and_apply(update)
+    return prompt.exec() == QMessageBox.Yes
 
 
 def _antes_de_buscar_update():
