@@ -947,6 +947,11 @@ class ResponseAudiometry():
             # terminar el talkback, como a una pregunta (ver _respuesta_tinnitus)
             self._pregunta = rol
 
+    # Preguntas del Fowler -> n de fowler_q: ¿mismo volumen? (1), ¿en qué
+    # oído más fuerte? (2, solo con "Dos pitos" vigente), ¿diferentes en
+    # forma? (3, la diploacusia, al terminar la prueba).
+    FOWLER_PREGUNTAS = {'sonidos_iguales': 1, 'sonidos_distintos': 3}
+
     # Pausa del paciente entre el fin de la pregunta y su respuesta, en ms.
     PAUSA_RESPUESTA_MS = (400, 900)
 
@@ -966,11 +971,10 @@ class ResponseAudiometry():
     def contestar(self, pregunta):
         """Contesta una pregunta del talkback con lo que este sonando (o con
         lo ultimo que sono, si ya no suena nada)."""
-        fowler = pregunta == 'sonidos_iguales' or (
+        fowler = pregunta in self.FOWLER_PREGUNTAS or (
             pregunta == 'en_qué_oído' and self._instruccion() == 'dos_pitos')
         if fowler:
-            self.other_response.fowler_q(1 if pregunta == 'sonidos_iguales' else 2,
-                                         self.data)
+            self.other_response.fowler_q(self.FOWLER_PREGUNTAS.get(pregunta, 2), self.data)
             return
         if pregunta in acufeno.PREGUNTAS or pregunta in acufeno.INSTRUCCIONES or (
                 pregunta == 'dejo_de_escuchar' and self._instruccion() == acufeno.INSTR_NME):

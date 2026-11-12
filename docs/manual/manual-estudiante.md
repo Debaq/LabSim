@@ -494,7 +494,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
 | **Cambie de volumen** | SISI | Dice *«sí»* cuando nota que el tono subió |
-| **Dos pitos**, luego **¿Sonidos iguales?** o **¿En qué oído?** | Fowler | Contesta si los dos tonos suenan igual o en qué oído suena más fuerte |
+| **Dos pitos**, luego **¿Mismo volumen?**; si dice que no, **¿En qué oído?**. Al terminar, **¿Diferentes en forma?** | Fowler | Dice *«sí»* o *«no»* al volumen y en qué oído suena más fuerte; al final, si los dos tonos sonaban distintos (diploacusia) |
 | **Mano levantada** | Deterioro tonal (Carhart) | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Rosemberg bilateral** | Deterioro tonal (Rosemberg) | Igual que Carhart |
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
@@ -536,7 +536,7 @@ Para volver a los umbrales, elige **Tono** o **FM**.
 Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 16.
 
 - **SISI**: instrucción *Cambie de volumen*, paso **1** dB. Con el tono sonando, sube la intensidad de a 1 dB; el paciente dice *«sí»* cuando lo nota. Las subidas de 5 dB las nota siempre (sirven para familiarizarlo).
-- **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿Sonidos iguales?* o *¿En qué oído?* y *Talkback*: el paciente contesta. Para otra frecuencia, repite *Dos pitos*.
+- **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿Mismo volumen?* y *Talkback*: si dice que no, *¿En qué oído?* para saber cuál suena más fuerte. Para otra frecuencia, repite *Dos pitos*. Al terminar la prueba, *¿Diferentes en forma?* para anotar la diploacusia.
 - **Deterioro tonal**: tono **continuo** por vía aérea en 500, 1000, 2000 o 4000 Hz, e instrucción *Mano levantada* (Carhart) o *Rosemberg bilateral*. El paciente mantiene la mano arriba mientras oye; cronometra con *Iniciar / Detener / Borrar*. El minuto es real.
 - **LDL**: instrucción *Pitos fuertes*. El paciente dice *«molesta»* al **presentar** el tono a una intensidad que le molesta.
 - **Tinnitumetría**: cuatro instrucciones, una por parte (tabla de la sección 16).

@@ -8540,3 +8540,21 @@ MC de 0,10 µV desde 70 dB nHL, que baja a cero hacia 30 dB nHL; en la
 coclear queda en un tercio y en la conductiva cuenta el nivel que llega a la
 cóclea. Se invierte con la polaridad y se cancela en alternada. La de la
 ANSD (amplificada) no cambia.
+
+## Fowler: curva sin estado y preguntas separadas (2026-11-12)
+
+El motor del Fowler recordaba la primera igualación en la zona de
+reclutamiento y desde ahí decía "iguales" a ese mismo nivel del afectado
+para cualquier nivel del sano; el completo nunca igualaba al mismo nivel.
+Ahora (`Fowler.igual_a`, mismo cálculo en `CaseBuilder::fowlerEscalera`) cada
+patrón es una curva fija: paralelas hasta 15 dB SL del sano y después la
+diferencia se achica (1 dB del afectado por cada 2 del sano) hasta la mitad
+(parcial), cero (completo) o 5 dB bajo el sano (sobre). Contesta lo mismo en
+cualquier orden.
+
+Preguntas, como en la clínica: *Dos pitos* explica qué va a pasar ("dos
+pititos alternados, uno en cada oído"); *¿Los escucha al mismo volumen?*
+(sí/no, solo sonoridad); si no, *¿En qué oído lo escuchó más fuerte?*; al
+terminar, *¿Los dos sonidos eran diferentes en forma?* para la diploacusia.
+Antes la diploacusia hacía que nunca dijera "sí" a "¿Los escuchó iguales?":
+el Fowler no se podía igualar.

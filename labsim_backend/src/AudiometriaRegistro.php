@@ -27,7 +27,7 @@ final class AudiometriaRegistro
     public const INSTR_SUPRA = [
         'pitos_fuertes', 'dos_pitos', 'cambie_de_volumen', 'mano_levantada',
         'mano_levantada_en_ruido', 'ruido_blanco_contralateral', 'rosemberg_bilateral',
-        'sonidos_iguales', 'en_qué_oído',
+        'sonidos_iguales', 'en_qué_oído', 'sonidos_distintos',
     ];
     /** Tinnitumetría (T03, src/audiometria/acufeno.py): instrucciones y sus dos preguntas. */
     public const INSTR_TINNITUS = [
@@ -37,7 +37,7 @@ final class AudiometriaRegistro
     /** Preguntas del talkback: no cambian la instrucción vigente (comandos_voz.PREGUNTAS). */
     public const PREGUNTAS = [
         'escucha', 'dejo_de_escuchar', 'en_qué_oído', 'sonidos_iguales', 'no_entiende',
-        'molesta', 'molesto_o', 'muy_fuerte', 'acufeno_cual', 'acufeno_como_esta',
+        'molesta', 'molesto_o', 'muy_fuerte', 'sonidos_distintos', 'acufeno_cual', 'acufeno_como_esta',
     ];
 
     /**

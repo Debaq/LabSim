@@ -295,6 +295,7 @@
         </div>
         <p class="help" id="fowler-none-msg" <?= $fwQualifying ? 'hidden' : '' ?>>Ningún umbral actual cumple los requisitos ABLB -- Fowler queda deshabilitado en este caso.</p>
         <label class="inline-check"><input type="checkbox" name="diplacusia" <?= isset($v['diplacusia']) ? 'checked' : '' ?>> Paciente refiere diploacusia</label>
+        <p class="help">Con diploacusia, en el audiómetro contesta «sí» a <em>¿Diferentes en forma?</em> (la pregunta del final del Fowler); sin ella, «no». No cambia la respuesta a <em>¿Mismo volumen?</em>.</p>
         <p class="help">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
         <p class="help">Hasta 15 dB sobre el umbral del sano las dos curvas suben paralelas (el afectado iguala a la diferencia interaural). Desde ahí, según el patrón, el afectado sube 1 dB por cada 2 del sano hasta que: Sin reclutamiento = no recluta, la diferencia se mantiene en toda la escalera. Parcial = la diferencia queda en la mitad y no cierra. Completo = iguala al mismo nivel que el sano. Sobre-reclutamiento = iguala 5 dB bajo el sano. El paciente dice "iguales" en el nivel del afectado más cercano, de 5 en 5.</p>
     </div>

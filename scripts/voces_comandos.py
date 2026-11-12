@@ -84,9 +84,9 @@ COMANDOS = {
                      "irán aumentando en volumen: serán cada vez más fuertes. Necesito que me "
                      "avise si alguno de esos pitos fuertes a usted le molesta.",
     "solo_si_molesta": "Solo si le molesta el pito fuerte, levante la mano.",
-    "dos_pitos": "Va a escuchar dos pitos de forma alternada: un oído primero y el otro después. "
-                 "Necesito que me diga si los escucha iguales en volumen, o si escucha uno más "
-                 "fuerte que el otro.",
+    "dos_pitos": "Va a escuchar dos pititos alternados, uno en cada oído: primero en uno y "
+                 "después en el otro. Cada tanto le voy a preguntar si los escucha al mismo "
+                 "volumen.",
     "cambie_de_volumen": "Va a escuchar un pito de forma continua. Necesito que me avise cuando "
                          "ese pito cambie de volumen, levantando la mano cada vez que ocurra.",
     "ruido_blanco_contralateral": "Va a escuchar un pito fuerte y continuo en esta orejita, y un "
@@ -112,7 +112,8 @@ COMANDOS = {
     "escucha": "¿Me escucha?",
     "dejo_de_escuchar": "¿Lo dejó de escuchar?",
     "en_qué_oído": "¿En qué oído lo escuchó más fuerte?",
-    "sonidos_iguales": "¿Los escuchó iguales?",
+    "sonidos_iguales": "¿Los escucha al mismo volumen?",
+    "sonidos_distintos": "¿Los dos sonidos eran diferentes en forma?",
     "no_entiende": "¿Escucha, pero no entiende?",
     "molesta": "¿Le molesta cuando le hablo?",
     "molesto_o": "¿Ese sonido le molestó, o solo lo escuchó fuerte?",

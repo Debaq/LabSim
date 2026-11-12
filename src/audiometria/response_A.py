@@ -28,9 +28,9 @@ class Response(QWidget):
 
     def set_fowler_data(self, thr_od, thr_oi, cuts, diplacusia=False):
         """Configura el motor de Fowler/ABLB (audiometria.Fowler.Fowler) con los
-        umbrales aereos del caso, los 3 cortes de reclutamiento y si el caso
-        marca diploacusia (el paciente igualado en sonoridad igual reporta
-        que los tonos no son iguales "en forma"/tono)."""
+        umbrales aereos del caso, el patrón de reclutamiento y si el caso
+        marca diploacusia (los tonos de un oído y otro suenan distintos en
+        forma: lo dice cuando se le pregunta, no cambia la sonoridad)."""
         self.fowler_engine = FowlerEngine()
         self.fowler_engine.set_th(thr_od, thr_oi)
         self.fowler_engine.set_cut(*cuts)
@@ -39,6 +39,12 @@ class Response(QWidget):
     def fowler_q(self, n, data_audio):
         if self.fowler_engine is None:
             # aun no se ha activado "dos_pitos" para setear los datos del Fowler
+            return
+        if n == 3:
+            # "¿Los dos sonidos eran diferentes en forma?", al terminar la
+            # prueba: la diploacusia del caso. Contesta por lo que oyó en el
+            # Fowler, aunque ya no suene nada.
+            self.create_voice_('si' if self.fowler_engine.diplacusia else 'no')
             return
         output = data_audio['audio']['output']
         if output[0] == output[1]:
@@ -50,10 +56,8 @@ class Response(QWidget):
         equals, side, _state = self.fowler_engine.evaluate(int_od, int_oi)
 
         if n == 1:
-            # Balance de sonoridad alcanzado (equals=True) no implica que el
-            # paciente los reporte "iguales" si el caso marca diploacusia:
-            # el paciente responde según si además son iguales en forma/tono.
-            equals = equals and not self.fowler_engine.diplacusia
+            # "¿Los escucha al mismo volumen?": solo sonoridad. La
+            # diploacusia no la cambia (se pregunta aparte, n == 3).
             self.create_voice_('si' if equals else 'no')
         elif side is not None:
             sides = ["elderecho", "elizquierdo"]

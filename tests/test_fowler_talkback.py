@@ -83,6 +83,41 @@ def test_el_reproductor_avisa_cuando_termina():
     assert terminados == [2, 2]
 
 
+def _dice(diplacusia, n, int_od, int_oi):
+    """Lo que contesta fowler_q con OD 5 / OI 25 y reclutamiento completo."""
+    from audiometria.Fowler import FOWLER_PATTERNS
+    r = ResponseAudiometry(_Audio())
+    o = r.other_response
+    dichas = []
+    o.create_voice_ = dichas.append
+    o.set_fowler_data(5, 25, FOWLER_PATTERNS['complete'], diplacusia)
+    o.fowler_q(n, {'audio': {'output': [0, 1], 'int': [int_od, int_oi]}})
+    return dichas
+
+
+def test_mismo_volumen_solo_sonoridad():
+    """¿Los escucha al mismo volumen?: la diploacusia no lo cambia."""
+    for diplacusia in (False, True):
+        assert _dice(diplacusia, 1, 65, 65) == ['si']
+        assert _dice(diplacusia, 1, 65, 50) == ['no']
+        assert _dice(diplacusia, 2, 65, 50) == ['elderecho']
+
+
+def test_diferentes_en_forma_es_la_diploacusia():
+    """Al terminar: ¿Los dos sonidos eran diferentes en forma?"""
+    assert _dice(True, 3, 0, 0) == ['si']
+    assert _dice(False, 3, 0, 0) == ['no']
+
+
+def test_diferentes_en_forma_va_al_fowler():
+    r = _respuesta()
+    r.rol_player('colocar_fonos')         # ya no está "Dos pitos": igual contesta
+    r.rol_player('sonidos_distintos')
+    r.talkback_termino()
+    QTest.qWait(ResponseAudiometry.PAUSA_RESPUESTA_MS[1] + 100)
+    assert r.contestadas == [3]
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):
