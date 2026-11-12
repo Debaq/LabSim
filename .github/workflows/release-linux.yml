@@ -1,0 +1,154 @@
+name: Release Linux (Python)
+
+# La release pyinstaller-v* de Linux armada en GitHub, para cuando no se
+# puede compilar en el PC del autor. Hace lo mismo que la parte Linux de
+# scripts/release_pyinstaller.sh (que sigue siendo la via normal y ademas
+# dispara Windows):
+#   - mismo env que build.sh: micromamba 'labsim' con Python 3.14 de
+#     conda-forge y las mismas versiones de PySide6/PyInstaller;
+#   - ./build.sh (PyInstaller + verificar_bundle.py en Xvfb);
+#   - BUILD_VERSION = <version>-r<sha corto> (o la version si se pide subirla);
+#   - LabSim-linux-x86_64.tar.gz (full), manifest.json y el paquete update
+#     (diff) contra la release pyinstaller-v* anterior, que es el eslabon de
+#     la cadena de updates de los kioskos (core/updater.py);
+#   - poda el full de las releases viejas (se quedan tag + update).
+# Sin Windows: esta release no lleva instalador ni manifest-windows.json, y
+# el proximo delta de Windows no tendra base (esos clientes bajan el full).
+#
+#   gh workflow run release-linux.yml                    (HEAD de main)
+#   gh workflow run release-linux.yml -f version=0.9.10  (sube la version)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Nueva version (ej 0.9.10). Vacio = mantener y tagear -r<sha>'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-linux
+  cancel-in-progress: false
+
+jobs:
+  release-linux:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Subir version si se pidio
+        id: version
+        run: |
+          set -e
+          ACTUAL=$(grep -oP "__VERSION__ = 'v\K[^']+" src/main.py)
+          NUEVA="${{ inputs.version }}"
+          NUEVA="${NUEVA#[vV]}"
+          if [ -n "$NUEVA" ] && ! [[ "$NUEVA" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]]; then
+            echo "Version invalida: '$NUEVA' (formato 0.9.9)"; exit 1
+          fi
+          if [ -n "$NUEVA" ] && [ "$NUEVA" != "$ACTUAL" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            sed -i "s/__VERSION__ = 'v${ACTUAL}'/__VERSION__ = 'v${NUEVA}'/" src/main.py
+            git commit -am "Sube versión a v${NUEVA}"
+            git push origin HEAD:main
+            BUILD_ID="$NUEVA"
+          else
+            BUILD_ID="${ACTUAL}-r$(git rev-parse --short HEAD)"
+          fi
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+          echo "tag=pyinstaller-v$BUILD_ID" >> "$GITHUB_OUTPUT"
+          echo "Build: $BUILD_ID"
+
+      - name: No repetir una release
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "La release ${{ steps.version.outputs.tag }} ya existe"; exit 1
+          fi
+
+      # Lo que el spec empaqueta del sistema (EMPAQUETAR_DEL_SISTEMA), lo que
+      # necesita Qt xcb para que verificar_bundle arranque la app en Xvfb, y
+      # objdump para el chequeo de encapsulado.
+      - name: Paquetes del sistema
+        shell: bash
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q xvfb binutils \
+            libxcb1 libharfbuzz0b libgraphite2-3 libwayland-client0 libwayland-cursor0 libdrm2 \
+            libegl1 libgl1 libopengl0 libglx0 libxkbcommon0 libxkbcommon-x11-0 \
+            libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
+            libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
+            libfontconfig1 libdbus-1-3 libasound2t64 libpulse0 libudev1
+
+      - name: Env micromamba 'labsim'
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: labsim
+          create-args: python=3.14 pip
+          condarc: |
+            channels:
+              - conda-forge
+          init-shell: bash
+          cache-environment: true
+
+      # Mismas versiones que el env del autor (micromamba env export).
+      - name: Dependencias Python
+        run: |
+          pip install PySide6==6.12.0 numpy==2.5.4 pyqtgraph==0.14.0 requests pyudev \
+            pyinstaller==6.22.3 pyinstaller-hooks-contrib==2026.8
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Paquetes
+        id: paquetes
+        run: |
+          set -e
+          echo "${{ steps.version.outputs.build_id }}" > dist/LabSim/BUILD_VERSION
+          tar -C dist -czf dist/LabSim-linux-x86_64.tar.gz LabSim
+          python scripts/update_diff.py manifest dist/LabSim dist/manifest.json
+          TAG="${{ steps.version.outputs.tag }}"
+          PREV=$(gh release list --limit 100 --json tagName,createdAt \
+            -q "[.[] | select(.tagName | startswith(\"pyinstaller-v\")) | select(.tagName != \"$TAG\")] | sort_by(.createdAt) | last | .tagName // empty")
+          echo "Release anterior: ${PREV:-ninguna}"
+          if [ -n "$PREV" ] && gh release download "$PREV" -p manifest.json -O dist/prev_manifest.json; then
+            if python scripts/update_diff.py diff dist/LabSim dist/prev_manifest.json dist/update_pkg; then
+              tar -C dist/update_pkg -czf dist/LabSim-linux-x86_64-update.tar.gz .
+            fi
+          fi
+          ls -la dist/*.tar.gz dist/manifest.json
+
+      - name: Release
+        run: |
+          set -e
+          TAG="${{ steps.version.outputs.tag }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+          ASSETS=(dist/LabSim-linux-x86_64.tar.gz dist/manifest.json)
+          [ -f dist/LabSim-linux-x86_64-update.tar.gz ] && ASSETS+=(dist/LabSim-linux-x86_64-update.tar.gz)
+          gh release create "$TAG" "${ASSETS[@]}" \
+            --title "LabSim $TAG (build PyInstaller)" \
+            --notes "Build PyInstaller (Linux) de LabSim, build ${{ steps.version.outputs.build_id }}. Armada en GitHub Actions, sin Windows."
+
+      # Como el script: el full de las viejas se borra; tag y update quedan
+      # (son la cadena). El instalador de Windows de la anterior NO se poda:
+      # esta release no trae uno.
+      - name: Podar full de releases viejas
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          for old in $(gh release list --limit 100 --json tagName -q ".[] | select(.tagName | startswith(\"pyinstaller-v\")) | select(.tagName != \"$TAG\") | .tagName"); do
+            gh release delete-asset "$old" LabSim-linux-x86_64.tar.gz --yes 2>/dev/null && echo "podado $old" || true
+          done
+          echo "Listo: https://github.com/${{ github.repository }}/releases/tag/$TAG"
