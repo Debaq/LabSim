@@ -156,7 +156,9 @@ _LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
 # la copia de arriba: si no, volver la red con un backend sin PREVIO se
 # leía como "la configuración cambió".
 if LAYOUT_AVAILABLE:
-    APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [760, 450], "pre"])
+    APPS.setdefault("PREVIO", [False, "Examen que trae el paciente", 22, [False, True], [1520, 900], "pre"])
+    # El doble de lo que manda Layout.php: a 760x450 la hoja no se leía.
+    APPS["PREVIO"][4] = [1520, 900]
     # Todos los exámenes van a pantalla completa. Otoscopía y diapasones
     # comparten la de AC (audiometria/ventana_ot_ac.py; Layout.php todavía
     # los manda chicos y separados, para las versiones anteriores).
