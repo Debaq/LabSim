@@ -3559,6 +3559,8 @@ final class CaseProfile
      * @param array<string,array> $eoas          idem
      * @param array{ipsi:array,contra:array} $reflex  filas por modo, ['od'=>[], 'oi'=>[]]
      * @param array<string,string> $tympPorLado  ['OD' => 'A', 'OI' => 'B']
+     * @param array<string,string> $fowlerPatterns índice de frecuencia => patrón elegido
+     * @param list<array{0:int,1:int}> $airPairs  aérea [OD, OI] por frecuencia (para el Fowler)
      * @return list<string>
      */
     public static function warnings(
@@ -3567,10 +3569,13 @@ final class CaseProfile
         array $abr,
         array $eoas,
         array $reflex,
-        array $tympPorLado
+        array $tympPorLado,
+        array $fowlerPatterns = [],
+        array $airPairs = []
     ): array {
         $avisos = [];
         $auto = $perfil['auto'] ?? [];
+        $avisos = array_merge($avisos, self::fowlerWarnings($decompPorLado, $perfil, $fowlerPatterns, $airPairs));
 
         foreach (['OD', 'OI'] as $lado) {
             $decomp = $decompPorLado[$lado] ?? null;
@@ -3670,6 +3675,59 @@ final class CaseProfile
             unset($ccePct, $retro);
         }
 
+        return $avisos;
+    }
+
+    /**
+     * El patrón del Fowler elegido contra el que da el perfil del oído en
+     * estudio. Reclutamiento y OEA salen de la misma lesión de CCE
+     * (recruitment() y oaeDeviations() leen cce_pct): reclutar con un oído
+     * retrococlear deja OEA presentes, y no reclutar con uno coclear las deja
+     * reducidas -- combinaciones que no existen. Solo el sí/no del
+     * reclutamiento: parcial contra completo es grado, no contradicción. Se
+     * mira aunque el módulo esté en auto: el select sigue editable.
+     *
+     * @param array<string,array> $decompPorLado
+     * @param array<string,mixed> $perfil
+     * @param array<string,string> $fowlerPatterns
+     * @param list<array{0:int,1:int}> $airPairs
+     * @return list<string>
+     */
+    public static function fowlerWarnings(array $decompPorLado, array $perfil, array $fowlerPatterns, array $airPairs): array
+    {
+        $grupos = [];   // [lado][tipo] => [Hz]
+        foreach ($fowlerPatterns as $freqIdx => $patron) {
+            $i = (int) $freqIdx;
+            if (!isset($airPairs[$i])) {
+                continue;
+            }
+            $lado = ($airPairs[$i][0] ?? 0) >= ($airPairs[$i][1] ?? 0) ? 'OD' : 'OI';
+            $decomp = $decompPorLado[$lado] ?? null;
+            if ($decomp === null) {
+                continue;
+            }
+            $cce = (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT);
+            $esperaRecluta = self::recruitment($cce, $decomp)['recruit'];
+            $recluta = (string) $patron !== 'none';
+            $hz = CaseBuilder::FREQUENCIES[$i] ?? $i;
+            if ($recluta && !$esperaRecluta && $cce < 50.0) {
+                $grupos[$lado]['retro'][] = $hz;
+            } elseif (!$recluta && $esperaRecluta) {
+                $grupos[$lado]['coclear'][] = $hz;
+            }
+        }
+        $avisos = [];
+        foreach ($grupos as $lado => $tipos) {
+            $cce = (int) round((float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT));
+            foreach ($tipos as $tipo => $hzs) {
+                $donde = implode(', ', $hzs) . ' Hz';
+                $avisos[] = $tipo === 'retro'
+                    ? sprintf('Fowler %s en %s: con reclutamiento, pero el perfil de ese oído es retrococlear (%d %% coclear): sin reclutamiento y con las OEA presentes. El reclutamiento es de la lesión de CCE, la misma que apaga las OEA: subí cce_pct o elegí sin reclutamiento.',
+                        $lado, $donde, $cce)
+                    : sprintf('Fowler %s en %s: sin reclutamiento, pero el perfil de ese oído es coclear (%d %% coclear): se espera reclutamiento y OEA reducidas. Elegí reclutamiento o bajá cce_pct (retrococlear).',
+                        $lado, $donde, $cce);
+            }
+        }
         return $avisos;
     }
 

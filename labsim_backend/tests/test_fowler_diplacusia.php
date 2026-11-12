@@ -68,3 +68,25 @@ t_eq($fdPat, ['3' => 'complete', '4' => 'complete'], 'Proyección: coclear pura 
 t_eq($fdDip, ['3' => '1', '4' => '1'], 'Proyección: con reclutamiento sugiere diploacusia');
 [, $fdDip] = $fdProy(['diplacusia' => ['3' => '0']]);
 t_eq($fdDip, ['3' => '0', '4' => '1'], 'Proyección: no pisa la diploacusia que desmarcó el docente');
+
+// Aviso del Fowler contra el perfil: el reclutamiento es de la lesión de
+// CCE, la misma que apaga las OEA (CaseProfile::fowlerWarnings).
+// OD 40 dB sensorioneural plana, OI 5: califican de 250 a 4000 Hz.
+$fdPares = array_fill(0, 9, [40, 5]);
+$fdAvisos = static function (float $cceOd, array $patrones) use ($fdPares): array {
+    $decomp = ['OD' => CaseProfile::decompose($fdPares, $fdPares, 0, $cceOd),
+               'OI' => CaseProfile::decompose($fdPares, $fdPares, 1, 100.0)];
+    $perfil = ['OD' => ['cce_pct' => $cceOd], 'OI' => ['cce_pct' => 100.0]];
+    return CaseProfile::fowlerWarnings($decomp, $perfil, $patrones, $fdPares);
+};
+t_eq($fdAvisos(100.0, ['3' => 'complete', '4' => 'partial']), [],
+    'Fowler coherente: coclear con reclutamiento no avisa (parcial o completo da igual)');
+t_eq($fdAvisos(10.0, ['3' => 'none']), [],
+    'Fowler coherente: retrococlear sin reclutamiento no avisa');
+$fdA = $fdAvisos(10.0, ['3' => 'complete', '4' => 'over']);
+t_eq(count($fdA), 1, 'Fowler con reclutamiento en un oído retrococlear: un aviso por oído');
+t_true(strpos($fdA[0], 'Fowler OD en 1000, 2000 Hz') === 0 && strpos($fdA[0], 'retrococlear') !== false,
+    'El aviso nombra oído, frecuencias y que el perfil es retrococlear');
+$fdA = $fdAvisos(100.0, ['3' => 'none']);
+t_true(count($fdA) === 1 && strpos($fdA[0], 'sin reclutamiento') !== false && strpos($fdA[0], 'coclear') !== false,
+    'Fowler sin reclutamiento en un oído coclear: avisa');

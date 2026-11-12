@@ -8572,3 +8572,10 @@ así que *¿Diferentes en forma?* contesta "sí" en cualquier nivel en que oiga
 los dos tonos de esa frecuencia, y "no sé" si oye uno solo. Retrococlear y
 conductiva: sin reclutamiento ni diploacusia sugerida. Los casos viejos con
 el bool se leen como diploacusia en todas sus frecuencias.
+
+Aviso al guardar (`CaseProfile::fowlerWarnings`): el patrón del Fowler
+contra el que da el perfil del oído en estudio. Reclutar con un oído
+retrococlear (cce_pct < 50) deja OEA presentes; no reclutar con uno coclear
+las deja reducidas. Solo el sí/no del reclutamiento (parcial contra completo
+es grado). Avisa, no bloquea. La diploacusia sin reclutamiento no avisa: es
+válida en retrococlear y en daño de CCI o zona muerta.

@@ -539,7 +539,9 @@ final class CaseForm
                 ['OD' => $abrOd, 'OI' => $abrOi],
                 ['OD' => $eoasOd, 'OI' => $eoasOi],
                 ['ipsi' => $reflexIpsi, 'contra' => $reflexContra],
-                ['OD' => $zOd, 'OI' => $zOi]
+                ['OD' => $zOd, 'OI' => $zOi],
+                $fowlerPatterns,
+                $airPairs
             );
             $avisosPerfil = array_merge($avisosPerfil, CaseBuilder::avisosVolumenCae(
                 ['OD' => $zOd, 'OI' => $zOi],
