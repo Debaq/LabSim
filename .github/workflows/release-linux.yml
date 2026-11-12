@@ -35,13 +35,31 @@ concurrency:
 
 jobs:
   release-linux:
+    # En un contenedor Arch y no en Ubuntu: PyInstaller empaqueta las libs
+    # del sistema (/usr/lib), no las del env conda, y el OpenSSL 3.0 de
+    # Ubuntu 24.04 no le sirve al _ssl del Python de conda (la app arrancaba
+    # sin HTTPS). Arch es lo mismo que el PC donde se compila a mano.
     runs-on: ubuntu-24.04
+    container: archlinux:latest
     env:
       GH_TOKEN: ${{ github.token }}
     defaults:
       run:
         shell: bash -el {0}
     steps:
+      # Lo que el spec empaqueta del sistema (EMPAQUETAR_DEL_SISTEMA), lo que
+      # necesita Qt xcb para que verificar_bundle arranque la app en Xvfb,
+      # objdump para el chequeo de encapsulado, y git/gh para la release.
+      - name: Paquetes del sistema
+        shell: bash
+        run: |
+          pacman -Syu --noconfirm --needed git github-cli which tar gzip binutils \
+            xorg-server-xvfb libxcb harfbuzz graphite wayland libdrm \
+            libglvnd mesa libxkbcommon libxkbcommon-x11 \
+            xcb-util-cursor xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil \
+            fontconfig ttf-dejavu dbus alsa-lib libpulse pipewire systemd-libs
+          git config --global --add safe.directory '*'
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -77,20 +95,6 @@ jobs:
           if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
             echo "La release ${{ steps.version.outputs.tag }} ya existe"; exit 1
           fi
-
-      # Lo que el spec empaqueta del sistema (EMPAQUETAR_DEL_SISTEMA), lo que
-      # necesita Qt xcb para que verificar_bundle arranque la app en Xvfb, y
-      # objdump para el chequeo de encapsulado.
-      - name: Paquetes del sistema
-        shell: bash
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q xvfb binutils \
-            libxcb1 libharfbuzz0b libgraphite2-3 libwayland-client0 libwayland-cursor0 libdrm2 \
-            libegl1 libgl1 libopengl0 libglx0 libxkbcommon0 libxkbcommon-x11-0 \
-            libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 \
-            libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
-            libfontconfig1 libdbus-1-3 libasound2t64 libpulse0 libudev1
 
       - name: Env micromamba 'labsim'
         uses: mamba-org/setup-micromamba@v2
