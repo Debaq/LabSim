@@ -1,4 +1,4 @@
-from core.helpers import debug_print
+import math
 
 # Requisitos clínicos de aplicabilidad de Fowler/I.W.A. (ABLB) -- deben
 # coincidir exactamente con CaseBuilder::fowlerValidationError en el backend
@@ -45,34 +45,55 @@ def fowler_applicable(freq_idx, air_pair, bone_pair):
     return True
 
 
-# Patrón de reclutamiento -> cortes para Fowler.set_cut(). Debe coincidir
-# exactamente con CaseBuilder::FOWLER_PATTERNS (PHP): 200 = quiebre por
-# sobre la salida práctica del audiómetro, o sea "nunca se alcanza esa zona".
+# Patrón de reclutamiento -> (inicio_sl, fraccion_final, sobre_db), lo que
+# recibe Fowler.set_cut(). Debe coincidir exactamente con
+# CaseBuilder::FOWLER_PATTERNS (PHP).
+#   inicio_sl: dB sobre su umbral desde los que el oído sano recluta (antes,
+#     las dos curvas suben paralelas); 200 = nunca.
+#   fraccion_final: qué parte de la diferencia interaural queda al final del
+#     reclutamiento (1 = toda, 0.5 = la mitad, 0 = nada).
+#   sobre_db: cuánto más abajo que el sano queda al final el afectado.
 FOWLER_PATTERNS = {
-    'none': [200, 200, 200],       # sin reclutamiento: crecimiento paralelo, nunca iguala
-    'partial': [15, 200, 200],     # reclutamiento parcial: se acerca pero no cierra del todo
-    'complete': [15, 30, 200],     # reclutamiento completo: iguala sonoridad, no sobrepasa
-    'over': [15, 30, 50],          # sobre-reclutamiento: en niveles altos el oído afectado suena más fuerte
+    'none': (200, 1.0, 0),       # sin reclutamiento: paralelas, la diferencia se mantiene
+    'partial': (15, 0.5, 0),     # parcial: la diferencia se achica a la mitad y no cierra
+    'complete': (15, 0.0, 0),    # completo: iguala al mismo nivel en los dos oídos
+    'over': (15, 0.0, 5),        # sobre-reclutamiento: el afectado iguala 5 dB bajo el sano
 }
+
+# Paso del atenuador: el paciente dice "iguales" en el nivel del afectado más
+# cercano (de 5 en 5) al de igual sonoridad.
+PASO_DB = 5
 
 
 class Fowler:
+    """Balance biaural de sonoridad (ABLB / Fowler).
+
+    La curva de igual sonoridad es fija para el caso: para cada nivel del oído
+    sano (referencia) hay un nivel del afectado (en estudio) que suena igual
+    (igual_a). Hasta inicio_sl sobre el umbral del sano, las dos suben
+    paralelas (la diferencia interaural se mantiene); desde ahí la diferencia
+    se achica en línea recta hasta su valor final (fraccion_final de la
+    diferencia, menos sobre_db) y se queda ahí. La rampa dura el doble de lo
+    que se achica: el afectado sube 1 dB por cada 2 del sano mientras
+    recluta.
+
+    Sin estado: la respuesta depende solo de los dos niveles, así que da lo
+    mismo el orden en que el alumno los pruebe. Antes recordaba la primera
+    igualación del reclutamiento y desde ahí contestaba "iguales" a ese mismo
+    nivel del afectado para cualquier nivel del sano.
+    """
+
     def __init__(self) -> None:
         self.th_est = None
         self.th_ref = None
-        self.cuts = [None, None, None]
-        self.side_b = None
-        self.int_est = None
-        self.int_ref = None
-        self.diff_rest = 0
-        self.step3_acum = {'level': None, 'idx': 0, 'steps':[]}
-        self.first_reclut = 0
-        self.list_recruit = []
+        self.side_b = None      # oído de referencia: 0 OD, 1 OI
+        self.inicio_sl = 200
+        self.fraccion_final = 1.0
+        self.sobre_db = 0
         self.diplacusia = False
 
-
-    def set_th(self, th_od:int, th_oi:int) -> None:
-        #se evalua el mejor oído se almacena el string para otras funciones
+    def set_th(self, th_od: int, th_oi: int) -> None:
+        """El mejor oído es la referencia; empate -> referencia OI."""
         if th_od < th_oi:
             self.th_ref, self.th_est = th_od, th_oi
             self.side_b = 0
@@ -80,156 +101,58 @@ class Fowler:
             self.th_ref, self.th_est = th_oi, th_od
             self.side_b = 1
 
-        self.diff_rest = self.th_ref - self.th_est
+    def set_cut(self, inicio_sl, fraccion_final, sobre_db) -> None:
+        self.inicio_sl = inicio_sl
+        self.fraccion_final = fraccion_final
+        self.sobre_db = sobre_db
 
-    def set_cut(self, cut_1, cut_2, cut_3) ->None:
-        self.cuts[0] = self.th_est + cut_1 #reclutamiento parcial
-        self.cuts[1] = self.th_est + cut_2 #reclutamiento
-        self.cuts[2] = self.th_est + cut_3 #sobre reclutamiento
-        debug_print(self.cuts)
-        
+    def igual_a(self, int_ref):
+        """Nivel (dB HL, sin redondear) del afectado que suena igual que
+        int_ref en el sano."""
+        gap = self.th_est - self.th_ref
+        final = gap * self.fraccion_final - self.sobre_db
+        sl = int_ref - self.th_ref
+        rampa = 2 * (gap - final)
+        if sl <= self.inicio_sl or rampa <= 0:
+            dif = gap
+        elif sl >= self.inicio_sl + rampa:
+            dif = final
+        else:
+            dif = gap - (gap - final) * (sl - self.inicio_sl) / rampa
+        return int_ref + dif
 
-    def define_ints(self, ints:list) -> None:
+    def igual_a_paso(self, int_ref):
+        """igual_a, al paso del atenuador más cercano."""
+        return PASO_DB * math.floor(self.igual_a(int_ref) / PASO_DB + 0.5)
+
+    def evaluate(self, int_od: int, int_oi: int):
+        """(iguales, oído que suena más fuerte o None, zona). Zona: 0 bajo
+        umbral, 1 paralelas, 2 reclutando, 3 al final del reclutamiento."""
         if self.side_b == 0:
-            self.int_ref = ints[0]
-            self.int_est = ints[1]
+            int_ref, int_est = int_od, int_oi
         else:
-            self.int_ref = ints[1]
-            self.int_est = ints[0]
+            int_ref, int_est = int_oi, int_od
+        oye_ref = int_ref >= self.th_ref
+        oye_est = int_est >= self.th_est
+        if not (oye_ref and oye_est):
+            if oye_ref:
+                return False, self.side_b, 0
+            if oye_est:
+                return False, 1 - self.side_b, 0
+            return False, None, 0
 
-    def step3(self, int_ref):
-        if self.step3_acum['level'] != int_ref:
-            acum = 0 if self.step3_acum['level'] == None else 1
-            self.step3_acum['level'] = int_ref
-            down = int_ref+5
-            up = int_ref + 20
-            list_int = list(range(down,up,5))
-            rev = list(reversed(list_int))
-            self.step3_acum['steps'] = rev
-            self.step3_acum['idx'] += acum
-            if self.step3_acum['idx'] + 1 > len(self.step3_acum['steps']):
-                self.step3_acum['idx'] = len(self.step3_acum['steps']) - 1
-            #si se hace otro fowler hay que resetear esto
- 
-
-    def evaluate(self, int_od:int, int_oi:int):
-        self.define_ints([int_od, int_oi])
- 
-        if self.int_est == self.th_est and self.int_ref == self.th_ref:  
-            #paso 1: estamos en umbral
-            if not [self.int_ref, self.int_est] in self.list_recruit:
-                self.list_recruit.append([self.int_ref, self.int_est])
-                return True, None, 0
-            else:
-                return True, None, 0
-        
-        if self.int_est < self.cuts[0]:
-            #paso 2: estamos bajo el reclutamiento
-            if [self.int_ref, self.int_est] in self.list_recruit:
-                return True, None, 1
-
-            self.int_est = 0 if self.int_est < self.th_est else self.int_est
-            diff = (self.int_ref-self.th_ref) - (self.int_est-self.th_est)
-            equals = diff == 0
-
-            if equals:
-                side = None
-                self.list_recruit.append([self.int_ref, self.int_est])
-
-            elif diff >= 0:
-                side = self.side_b
-            elif diff < 0:
-                side = int(not self.side_b)
-            return equals, side, 1
-
-
-        if self.cuts[0] <= self.int_est < self.cuts[1]:
-            #paso 3: comienza a reclutar 
-            if [self.int_ref, self.int_est] in self.list_recruit:
-                return True, None, 2
-
-            equals = True
-            side = None
-            state = 2
-            if self.first_reclut == 0 and self.int_est != self.int_ref:
-                self.first_reclut = self.int_est
-            else:
-                if self.first_reclut == self.int_est and self.int_est != self.int_ref:
-                    pass
-                else:
-                    self.step3(self.int_ref)
-                    idx = self.step3_acum['idx']
-                    test_value = self.step3_acum['steps'][idx]
-                    equals = test_value == self.int_est
-                    state = 2
-                    side = self.side_b
-                    if self.int_est  >= self.int_ref + 20:
-                        side = int(not self.side_b)
-            if equals:
-                self.list_recruit.append([self.int_ref, self.int_est])
-            return equals, side, state
-
-
-        if self.cuts[2] > self.int_est >= self.cuts[1]:
-            #paso 4 a reclutar se ha dicho
-            diff = self.int_ref - self.int_est
-            equals = diff == 0
-            if diff == 0:
-                side = None
-            if diff > 0:
-                side = self.side_b
-            if diff < 0 :
-                side = int(not self.side_b)
-            return equals, side, 3
-
-        if self.int_est >= self.cuts[2]:
-            diff = self.int_ref - self.int_est -10
-            equals = diff < 0
-
-            if equals:
-                side = None
-            elif diff >= 0:
-                side = self.side_b
-            elif diff < 0 :
-                side = int(not self.side_b)
-            return equals, side, 4
-
-        return False, None, 5
-
-"""
-# Datos iniciales
-fowler = Fowler()
-fowler.set_th(20,40)
-fowler.set_cut(20,40,60)
-val_min = 20
-val_max = 30
-# Loop para probar la función
-contador_true = 0
-while True:
-    resultado = fowler.evaluate(val_min, val_max)
-
-    if resultado[0]:
-        print(f"({val_min}) x---o ({val_max}), {resultado}")
-
-        contador_true += 1
-        val_min += 20
-    else:
-        if resultado[1] == 0:
-            side_letter = "<---"
+        sl = int_ref - self.th_ref
+        gap = self.th_est - self.th_ref
+        rampa = 2 * (gap - (gap * self.fraccion_final - self.sobre_db))
+        if sl <= self.inicio_sl or rampa <= 0:
+            zona = 1
+        elif sl < self.inicio_sl + rampa:
+            zona = 2
         else:
-            side_letter = "--->"
-        #print(f"({val_min}) {side_letter} ({val_max}), {resultado}")
+            zona = 3
 
-        contador_true = 0
-        val_max += 5
-        
-    # Añadir condición de parada para evitar un bucle infinito
-    if val_min > 150 or val_max > 150:
-        break
-
-
-val_min = 80
-val_max = 100
-resultado = fowler.evaluate(val_min, val_max)
-print(f"({val_min}) ---- ({val_max}), {resultado}")
-"""
+        objetivo = self.igual_a(int_ref)
+        if abs(int_est - self.igual_a_paso(int_ref)) < PASO_DB / 2:
+            return True, None, zona
+        # bajo el nivel de igual sonoridad, el sano suena más fuerte
+        return False, (self.side_b if int_est < objetivo else 1 - self.side_b), zona

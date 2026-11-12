@@ -1128,17 +1128,16 @@ final class CaseBuilder
         return $out;
     }
 
-    // Patrón de reclutamiento -> cortes que le pasan al motor (Fowler.py):
-    // ver docstring de Fowler.evaluate() para el porqué de estos valores --
-    // en corto, "cuts" son quiebres en dB sobre el umbral del oído en
-    // estudio que delimitan las zonas del algoritmo; un corte >= la salida
-    // máxima práctica del audiómetro (200) equivale a "nunca se alcanza esa
-    // zona". Debe coincidir exactamente con FOWLER_PATTERNS en Fowler.py.
+    // Patrón de reclutamiento -> [inicio_sl, fraccion_final, sobre_db], lo
+    // que recibe el motor (Fowler.set_cut en src/audiometria/Fowler.py):
+    // desde inicio_sl dB sobre el umbral del sano la diferencia interaural
+    // se achica hasta fraccion_final de ella menos sobre_db (200 = nunca
+    // recluta). Debe coincidir exactamente con FOWLER_PATTERNS en Fowler.py.
     public const FOWLER_PATTERNS = [
-        'none' => [200, 200, 200],       // sin reclutamiento: crecimiento paralelo, nunca iguala
-        'partial' => [15, 200, 200],     // reclutamiento parcial: se acerca pero no cierra del todo
-        'complete' => [15, 30, 200],     // reclutamiento completo: iguala sonoridad, no sobrepasa
-        'over' => [15, 30, 50],          // sobre-reclutamiento: en niveles altos el oído afectado suena más fuerte
+        'none' => [200, 1.0, 0],      // sin reclutamiento: paralelas, la diferencia se mantiene
+        'partial' => [15, 0.5, 0],    // parcial: la diferencia se achica a la mitad y no cierra
+        'complete' => [15, 0.0, 0],   // completo: iguala al mismo nivel en los dos oídos
+        'over' => [15, 0.0, 5],       // sobre-reclutamiento: el afectado iguala 5 dB bajo el sano
     ];
 
     public const FOWLER_PATTERN_LABELS = [
@@ -1167,8 +1166,9 @@ final class CaseBuilder
      * hasta que el paciente dice que suenan igual (o hasta su propio techo:
      * ahí la escalera termina). Quién iguala y dónde lo decide el MISMO
      * motor que contesta en la cabina -- Fowler.evaluate() de
-     * src/audiometria/Fowler.py, portado línea a línea, con su estado --,
-     * así que la ficha dice lo que el alumno va a obtener.
+     * src/audiometria/Fowler.py, portado línea a línea (sin estado: la
+     * respuesta depende solo de los dos niveles) --, así que la ficha dice
+     * lo que el alumno va a obtener.
      *
      * @return list<array{0:int,1:int}>
      */
@@ -1181,59 +1181,25 @@ final class CaseBuilder
         } else {
             [$thRef, $thEst, $sideB] = [$thOi, $thOd, 1];
         }
-        $cuts = [$thEst + $cortes[0], $thEst + $cortes[1], $thEst + $cortes[2]];
-        $lista = [];
-        $firstReclut = 0;
-        $s3 = ['level' => null, 'idx' => 0, 'steps' => []];
-
-        $evaluar = static function (int $ref, int $est) use (&$lista, &$firstReclut, &$s3, $thRef, $thEst, $cuts): bool {
-            $ya = in_array([$ref, $est], $lista, true);
-            if ($est === $thEst && $ref === $thRef) {
-                if (!$ya) {
-                    $lista[] = [$ref, $est];
-                }
-                return true;
-            }
-            if ($est < $cuts[0]) {
-                if ($ya) {
-                    return true;
-                }
-                $estN = $est < $thEst ? 0 : $est;
-                if (($ref - $thRef) - ($estN - $thEst) === 0) {
-                    $lista[] = [$ref, $estN];
-                    return true;
-                }
+        // Fowler.igual_a / evaluate: curva de igual sonoridad sin estado.
+        [$inicioSl, $fraccion, $sobre] = $cortes;
+        $gap = $thEst - $thRef;
+        $final = $gap * $fraccion - $sobre;
+        $rampa = 2 * ($gap - $final);
+        $evaluar = static function (int $ref, int $est) use ($thRef, $thEst, $gap, $final, $rampa, $inicioSl): bool {
+            if ($ref < $thRef || $est < $thEst) {
                 return false;
             }
-            if ($est < $cuts[1]) {
-                if ($ya) {
-                    return true;
-                }
-                $equals = true;
-                if ($firstReclut === 0 && $est !== $ref) {
-                    $firstReclut = $est;
-                } elseif (!($firstReclut === $est && $est !== $ref)) {
-                    // step3
-                    if ($s3['level'] !== $ref) {
-                        $acum = $s3['level'] === null ? 0 : 1;
-                        $s3['level'] = $ref;
-                        $s3['steps'] = array_reverse(range($ref + 5, $ref + 15, 5));
-                        $s3['idx'] += $acum;
-                        if ($s3['idx'] + 1 > count($s3['steps'])) {
-                            $s3['idx'] = count($s3['steps']) - 1;
-                        }
-                    }
-                    $equals = $s3['steps'][$s3['idx']] === $est;
-                }
-                if ($equals) {
-                    $lista[] = [$ref, $est];
-                }
-                return $equals;
+            $sl = $ref - $thRef;
+            if ($sl <= $inicioSl || $rampa <= 0) {
+                $dif = $gap;
+            } elseif ($sl >= $inicioSl + $rampa) {
+                $dif = $final;
+            } else {
+                $dif = $gap - ($gap - $final) * ($sl - $inicioSl) / $rampa;
             }
-            if ($est < $cuts[2]) {
-                return $ref === $est;
-            }
-            return ($ref - $est - 10) < 0;
+            $paso = 5 * floor(($ref + $dif) / 5 + 0.5);
+            return abs($est - $paso) < 2.5;
         };
 
         $techoRef = min(self::FOWLER_SALIDA_MAX_DB, ($sideB === 0 ? $ldlOd : $ldlOi) - 5);

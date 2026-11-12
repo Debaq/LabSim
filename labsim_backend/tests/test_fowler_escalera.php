@@ -22,3 +22,18 @@ t_eq(CaseBuilder::fowlerEscalera(35, 5, 'none', 120, 115)[1], [55, 25],
 // El sano no pasa de su LDL: con LDL 60 el último escalón es 45.
 t_eq(count(CaseBuilder::fowlerEscalera(5, 25, 'none', 60, 120)), 3,
     'Fowler: el oído sano se detiene antes de su LDL');
+
+// Los patrones con reclutamiento: la diferencia de 20 dB sigue paralela
+// hasta 15 dB sobre el umbral del sano y desde ahí se achica.
+t_eq(CaseBuilder::fowlerEscalera(5, 25, 'partial', 120, 120),
+    [[5, 25], [25, 45], [45, 55], [65, 75], [85, 95], [105, 115]],
+    'Fowler parcial: la diferencia baja a la mitad y no cierra');
+t_eq(CaseBuilder::fowlerEscalera(5, 25, 'complete', 120, 120),
+    [[5, 25], [25, 45], [45, 55], [65, 65], [85, 85], [105, 105]],
+    'Fowler completo: iguala al mismo nivel desde el final del reclutamiento');
+t_eq(CaseBuilder::fowlerEscalera(5, 25, 'over', 120, 120),
+    [[5, 25], [25, 45], [45, 55], [65, 65], [85, 80], [105, 100]],
+    'Fowler sobre-reclutamiento: el afectado iguala 5 dB bajo el sano');
+t_eq(CaseBuilder::fowlerEscalera(40, 10, 'complete', 120, 120),
+    [[40, 10], [60, 30], [70, 50], [80, 70], [90, 90], [110, 110]],
+    'Fowler completo con referencia OI');
