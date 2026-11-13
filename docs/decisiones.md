@@ -8961,3 +8961,18 @@ nada." (`noescuchonada`); si la oye y no la entiende, "No entendí.", "¿Qué
 dijo?" o "Escucho, pero no entiendo." (none3, antes "No sé."). Vale para
 las listas y para las compuestas del SRT. Voces nuevas en las cuatro voces
 del paciente.
+
+## Todas las voces son sintéticas: fuera las grabaciones (2026-11-13)
+
+Decisión del equipo: no se usan grabaciones reales en ninguna parte. Lo
+único que quedaba grabado eran 124 de las 149 palabras de las listas
+(`resources/audio/logo/estimulos`); se rehicieron todas con edge-tts y la
+voz del examinador (`es-CL-CatalinaNeural`, la del talkback), a -18 LUFS
+como las grabadas (el vúmetro no cambia). El final se recorta suave (-60 dB,
+150 ms) sin la cola de medio segundo de las instrucciones: el paciente
+contesta al terminar el archivo. Instrucciones, voces del paciente, Z,
+acumetría y otoscopio ya eran sintéticas.
+
+El caché `_panned` (la palabra recortada a un oído) se rehace si el audio
+es más nuevo que el caché: antes, en un equipo instalado habría seguido
+sonando la grabación vieja tras actualizar.

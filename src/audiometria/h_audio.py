@@ -134,7 +134,9 @@ def _panned_word_file(rel_path, side):
     suffix = "OD" if side == 0 else "OI"
     src = Path(context.get_resource(rel_path))
     dst = Path(context.get_resource("audio")) / "_panned" / f"{src.stem}_{suffix}{src.suffix}"
-    if not dst.exists():
+    # Se rehace si el audio cambió (una actualización que trae palabras
+    # nuevas): si no, seguía sonando la versión vieja cacheada (2026-11-13)
+    if not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
         # En Windows sin esto cada palabra abria una consola de ffmpeg
         flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
         try:

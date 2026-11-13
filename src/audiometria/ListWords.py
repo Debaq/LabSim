@@ -386,7 +386,7 @@ class ListWords(QWidget):
             falta = self._audio_faltante(btn.text())
             if falta:
                 btn.setEnabled(False)
-                btn.setToolTip(f"Sin audio grabado ({falta}): todavía no se puede usar.")
+                btn.setToolTip(f"Sin audio ({falta}): todavía no se puede usar.")
 
     @staticmethod
     def _audio_faltante(texto):

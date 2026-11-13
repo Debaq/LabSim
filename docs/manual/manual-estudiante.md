@@ -525,7 +525,7 @@ Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pant
 ![Las listas de palabras](img/estudiante/listas-de-palabras.png)
 
 1. Con *Habla* en un canal, las listas aparecen a la **derecha del audiómetro** (antes ese espacio dice dónde van a aparecer).
-2. Elige la lista: **Disílabos (Palacios)** o **Términos conocidos** para la discriminación, o **Compuestas (SRT)** para el umbral de reconocimiento. Las palabras desactivadas todavía no tienen su grabación: dejando el mouse encima dice cuál falta.
+2. Elige la lista: **Disílabos (Palacios)** o **Términos conocidos** para la discriminación, o **Compuestas (SRT)** para el umbral de reconocimiento. Las palabras desactivadas todavía no tienen su audio: dejando el mouse encima dice cuál falta.
 3. Haz clic en una palabra: suena por la salida del canal. El paciente la repite. Si la oye pero no la entiende, lo dice por su cuenta (*«No entendí»*, *«¿Qué dijo?»*, *«Escucho, pero no entiendo»*); si no la oye, *«No escucho nada»*.
 4. Anota con **+1** o **-1** en el audiómetro. **<** y **>** cambian el total de palabras; **Limpiar** vuelve los aciertos a cero.
 
@@ -821,7 +821,7 @@ Si LabSim se cerró solo, se colgó o algo no funcionó, avísalo desde **Config
 | *Atención abierta* al querer atender | Cierra primero la atención que tienes (*Cerrar/Evolucionar*) |
 | El paciente no levanta la mano | Revisa que le diste la instrucción con **Talkback** y que el canal suena (indicador lila) |
 | No aparecen las listas de palabras | Primero elige **Habla** en un canal del audiómetro |
-| Una palabra de la lista está desactivada | Todavía no tiene su grabación; usa otra |
+| Una palabra de la lista está desactivada | Todavía no tiene su audio; usa otra |
 | Una ventana quedó tapada o fuera de la pantalla | **Cerrar ventanas** y vuelve a abrir el equipo |
 | *sin conexión* bajo un equipo | Sigue trabajando: se guarda en el computador y se sube cuando vuelva internet |
 | *Sesión vencida* | Vuelve a ingresar con un código nuevo; lo hecho no se pierde |

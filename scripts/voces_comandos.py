@@ -9,7 +9,7 @@ las claves a rehacer.
     python -m venv /tmp/venv_edge && /tmp/venv_edge/bin/pip install edge-tts
     /tmp/venv_edge/bin/python scripts/voces_comandos.py                  # todas
     /tmp/venv_edge/bin/python scripts/voces_comandos.py dos_pitos escucha
-    /tmp/venv_edge/bin/python scripts/voces_comandos.py --estimulos      # palabras sin audio
+    /tmp/venv_edge/bin/python scripts/voces_comandos.py --estimulos      # palabras de las listas sin audio
 
 --z hace las instrucciones del impedanciómetro (COMANDOS_Z, las claves de
 src/impedanciometria/instrucciones.py) en resources/audio/comandos_z/:
@@ -21,8 +21,9 @@ src/impedanciometria/instrucciones.py) en resources/audio/comandos_z/:
 comandos_ac/) y del otoscopio (COMANDOS_OT, resources/audio/comandos_ot/).
 
 --estimulos hace, con la misma voz, las palabras de las listas
-(ListWords.PALABRAS) que todavía no tienen su logo/estimulos/<palabra>.mp3;
-no toca las que ya existen (las grabadas).
+(ListWords.PALABRAS) que todavía no tienen su logo/estimulos/<palabra>.mp3.
+Desde el 2026-11-13 todas son sintéticas (ya no se usan grabaciones): para
+rehacer una, se borra su mp3 y se corre de nuevo.
 
 Los textos salen de las grabaciones anteriores (transcritas, con la redacción
 del autor); ruido_blanco_contralateral y rosemberg_bilateral no tenían
@@ -206,10 +207,12 @@ async def generar(clave, textos=COMANDOS, salida=SALIDA):
 
 # Las palabras de las listas, al nivel de las grabadas (-18 LUFS, mono
 # 44,1 kHz): el vúmetro está calibrado con ellas.
-# Sin el colchón del final: son estímulos de la lista, no instrucciones.
+# Las palabras: el final se recorta suave como en las instrucciones (no se
+# come la última sílaba) pero sin el medio segundo extra: el paciente
+# contesta al terminar el archivo.
 FILTRO_ESTIMULO = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-                   "silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-                   "loudnorm=I=-18:TP=-1:LRA=11")
+                   "silenceremove=start_periods=1:start_threshold=-60dB:start_silence=0.15,"
+                   "areverse,loudnorm=I=-18:TP=-1:LRA=11")
 ESTIMULOS = os.path.join(RAIZ, "resources", "audio", "logo", "estimulos")
 
 
@@ -230,7 +233,19 @@ async def estimulos():
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             crudo = tmp.name
         try:
-            await edge_tts.Communicate(f"{palabra}.", VOZ, pitch=TONO, rate=VELOCIDAD).save(crudo)
+            # edge-tts a veces corta sin error y deja el archivo vacío
+            for intento in range(8):
+                try:
+                    await edge_tts.Communicate(f"{palabra}.", VOZ, pitch=TONO,
+                                               rate=VELOCIDAD).save(crudo)
+                    if os.path.getsize(crudo) > 0:
+                        break
+                except Exception as e:  # noqa: BLE001
+                    print("reintento", palabra, e)
+                await asyncio.sleep(2 * (intento + 1))
+            else:
+                print("FALLÓ", palabra)
+                continue
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", crudo, "-af", FILTRO_ESTIMULO,
                             "-ac", "1", "-ar", "44100", "-b:a", "64k", final], check=True)
         finally:
