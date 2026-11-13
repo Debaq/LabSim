@@ -53,7 +53,8 @@ GRUPOS = (
         ("¿Dejó de escuchar?", "dejo_de_escuchar"),
         ("¿En qué oído?", "en_qué_oído"),
         ("¿Dónde lo escucha ahora?", "donde_lo_escucha"),
-        ("¿El primero o el segundo?", "primero_o_segundo"),
+        # con "Reger" en el rótulo: junto a las del Fowler se confundía
+        ("Reger: ¿el primero o el segundo?", "primero_o_segundo"),
         ("¿No entiende?", "no_entiende"),
         ("Molesto ¿o?", "molesto_o"),
         ("¿Muy fuerte?", "muy_fuerte"),
