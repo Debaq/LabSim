@@ -179,13 +179,15 @@ class UiControlZ:
         der = QGridLayout()
         der.setHorizontalSpacing(6)
         der.setVerticalSpacing(6)
-        lbl_leak = QLabel("Leak")
-        lbl_leak.setProperty("role", "campo")
+        # El rótulo y el valor siguen a lo que mueve la perilla en cada
+        # pantalla: Leak (timpanograma), dB (reflejos/decay), daPa (ETF).
+        self.lbl_leak = QLabel("Leak")
+        self.lbl_leak.setProperty("role", "campo")
         self.label = QLabel()
         self.label.setObjectName("leak")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label.setFixedWidth(42)
-        der.addWidget(lbl_leak, 0, 0)
+        self.label.setFixedWidth(48)
+        der.addWidget(self.lbl_leak, 0, 0)
         der.addWidget(self.label, 0, 1)
 
         # Presión del conducto en reflejos y Tone Decay (de a 10 daPa).

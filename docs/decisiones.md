@@ -9045,3 +9045,9 @@ contra, medir, y dar vuelta todo para el otro oído.
   disfunción) y las tres curvas casi se tapan. Se agrega la línea
   "Dif. máx": la diferencia entre el pico mayor y el menor, el número que se
   informa. El equipo no la interpreta: el alumno concluye.
+- La perilla de Mandos: el rótulo de al lado decía "Leak 1" en todas las
+  pantallas. Ahora dice lo que la perilla mueve: *Leak* en el timpanograma,
+  *dB* en reflejos y decay, *daPa* en la ETF, con su valor. Y solo el leak
+  da la vuelta: en la ETF pasar de +200 daPa saltaba a -400, y en reflejos
+  de la intensidad máxima a la mínima (y al revés). Ahí la perilla tiene
+  tope (pista de 300°).

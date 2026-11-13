@@ -218,6 +218,21 @@ def test_etf_perforada_sin_presion_no_arranca():
     _parar(z)
 
 
+def test_la_perilla_dice_lo_que_mueve_y_tiene_tope():
+    from PySide6.QtWidgets import QAbstractSlider
+    v = _ventana()
+    z = v.z
+    z.show_screen(z.Z_etf)
+    assert z.lbl_leak.text() == "daPa" and not z.dial.wrapping()
+    z.dial.setValue(200)
+    z.dial.triggerAction(QAbstractSlider.SliderSingleStepAdd)
+    assert z.dial.value() == 200 and z.label.text() == "200"   # no salta a -400
+    z.show_screen(z.Z_reflex)
+    assert z.lbl_leak.text() == "dB" and z.label.text() == str(z.dB) and not z.dial.wrapping()
+    z.show_screen(z.Z)
+    assert z.lbl_leak.text() == "Leak" and z.label.text() == str(z.leak) and z.dial.wrapping()
+
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

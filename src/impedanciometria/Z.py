@@ -653,6 +653,9 @@ class ZControl(QWidget, UiControlZ):
         self.btn_down.setEnabled(screen in (self.Z_reflex, self.Z_decay))
 
         self.dial.blockSignals(True)
+        # Solo el leak da la vuelta: intensidad y presión tienen tope (antes
+        # pasar de +200 daPa saltaba a -400, y de 120 dB al mínimo).
+        self.dial.setWrapping(screen is self.Z)
         if screen is self.Z:
             self.dial.setMinimum(1)
             self.dial.setMaximum(20)
@@ -667,6 +670,23 @@ class ZControl(QWidget, UiControlZ):
             self.dial.setMaximum(200)
             self.dial.setValue(self.etf_pressure)
         self.dial.blockSignals(False)
+        self._rotulo_perilla()
+
+    def _rotulo_perilla(self):
+        """Rótulo y valor junto a la perilla: lo que ella mueve en la pantalla."""
+        if self.current_screen is self.Z:
+            self.lbl_leak.setText("Leak")
+            self.leak_change(self.leak)
+            return
+        if self.current_screen in (self.Z_reflex, self.Z_decay):
+            rotulo, valor = "dB", self.dB
+        elif self.current_screen is self.Z_etf:
+            rotulo, valor = "daPa", self.etf_pressure
+        else:
+            return
+        self.lbl_leak.setText(rotulo)
+        self.label.setText(str(valor))
+        self.label.setStyleSheet("background-color: rgb(152, 152, 152);")
 
     def dial_change(self, value):
         if self.current_screen is self.Z:
@@ -682,10 +702,12 @@ class ZControl(QWidget, UiControlZ):
             self.dB = value
             self.Z_reflex.set_intensity(self.dB)
             self.Z_decay.set_intensity(self.dB)
+            self._rotulo_perilla()
         elif self.current_screen is self.Z_etf:
             self._log("z_dial_change", screen='etf', pressure=value)
             self.etf_pressure = value
             self.Z_etf.set_pressure(self.etf_pressure)
+            self._rotulo_perilla()
 
     def set_reflex_mode(self, mode):
         if mode == self.reflex_mode:
