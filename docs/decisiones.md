@@ -8896,3 +8896,30 @@ otra mayúscula ("Sol" y la mitad "sol" de Girasol).
   otros valores del caso (10 % retrococlear, 50-90 % coclear, lo que fije el
   docente) se usan tal cual. La familiarización de 5 dB sigue notándose
   siempre.
+
+## Weber audiométrico e IWA (2026-11-13)
+
+Pedido del equipo: instrucción *Weber audiométrico* ("Va a escuchar un
+pitito, y debe indicarme en qué oído lo escucha más fuerte.") y pregunta
+*¿Dónde lo escucha ahora?* para la IWA (inversión del Weber audiométrico,
+H06). Se hacen con el vibrador.
+
+- Al prender el tono por vibrador el paciente dice dónde lo oye, una vez por
+  frecuencia y nivel; en cada nivel siguiente se le pregunta. Contesta "El
+  derecho.", "El izquierdo." o "Lo escucho al medio." (`almedio`, voz nueva
+  en las cuatro voces del paciente). Por fono no es un Weber: dice el oído
+  del fono.
+- `_weber_lado`: por vibrador llega igual a las dos cócleas. Un gap de 15 dB
+  o más lleva el Weber a ese oído (los dos conductivos con gaps a menos de
+  10 dB: al medio). Si no, cócleas a menos de 10 dB: al medio; si no, el
+  balance del Fowler con los umbrales óseos y el patrón de reclutamiento de
+  esa frecuencia: sin reclutamiento sigue en el sano, completo se centra,
+  sobrerreclutamiento pasa al oído con pérdida. Fowler e IWA salen de la
+  misma curva del caso.
+- Límite: el vibrador llega a 70 dB HL (50-60 en graves). Con la curva del
+  Fowler el centrado llega 15 dB SL + el doble de la diferencia sobre el
+  umbral del sano, así que con diferencias de más de ~20 dB el punto de
+  reclutamiento queda sobre el máximo del vibrador y el Weber no se invierte
+  dentro del rango.
+- Backend: `weber_audiometrico` y `donde_lo_escucha` cuentan como
+  supraliminares; la pregunta no cambia la instrucción.

@@ -85,6 +85,9 @@ COMANDOS = {
     "dos_pitos": "Va a escuchar dos pititos alternados, uno en cada oído: primero en uno y "
                  "después en el otro. Cada tanto le voy a preguntar en qué oído lo escucha "
                  "más fuerte, o si los escucha iguales.",
+    # Weber audiométrico e IWA (2026-11-13), con el vibrador
+    "weber_audiometrico": "Va a escuchar un pitito, y debe indicarme en qué oído lo escucha más "
+                          "fuerte.",
     "cambie_de_volumen": "Va a escuchar un pito de forma continua. Necesito que me avise cuando "
                          "ese pito cambie de volumen, levantando la mano cada vez que ocurra.",
     "ruido_blanco_contralateral": "Va a escuchar un pito fuerte y continuo en esta orejita, y un "
@@ -106,6 +109,7 @@ COMANDOS = {
     # PREGUNTAS
     "escucha": "¿Me escucha?",
     "dejo_de_escuchar": "¿Lo dejó de escuchar?",
+    "donde_lo_escucha": "¿Dónde lo escucha ahora?",
     "en_qué_oído": "¿En qué oído lo escuchó más fuerte?",
     "sonidos_distintos": "¿Los dos sonidos eran diferentes en forma?",
     "no_entiende": "¿Escucha, pero no entiende?",

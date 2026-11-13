@@ -7,7 +7,7 @@ from core.helpers import Preferences
 from PySide6.QtCore import QObject, QTimer
 from audiometria.response_A import Response
 from audiometria.h_audio import voz_del_paciente
-from audiometria.Fowler import FOWLER_PATTERNS, diploacusia
+from audiometria.Fowler import FOWLER_PATTERNS, Fowler as FowlerEngine, diploacusia
 from audiometria.masking_params import (  # re-export: los usan
     CE_TONAL, RUIDOS_ENMASCARANTES, STIM_FM, STIM_HABLA, STIM_NBN,  # noqa: F401
     STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal, es_ruido)  # el panel y los tests
@@ -123,6 +123,15 @@ class ResponseAudiometry():
     # el caso, pero un paciente normal igual nota algún incremento de 1 dB:
     # se sortea entre 5 y 20 % por oído y atención (negativo, bajo 25 %).
     SISI_MANO_MS = 1000
+    # Weber audiométrico e IWA (2026-11-13): con "Weber audiométrico" y el
+    # tono por vibrador, el paciente dice dónde lo oye más fuerte al
+    # prenderlo, y "¿Dónde lo escucha ahora?" lo pregunta en cada nivel.
+    WEBER = 'weber_audiometrico'
+    DONDE_AHORA = 'donde_lo_escucha'
+    # Componente conductivo que lleva el Weber a ese oído (dB de gap), y
+    # diferencia entre los gaps de los dos oídos que lo deja al medio.
+    WEBER_GAP_DB = 15
+    WEBER_GAP_PAREJO_DB = 10
     SISI_NEGATIVO_PCT = (5, 20)
     LDL_FALSO_DB = (80, 85, 90)
     # Talkback: el dial no esta calibrado; cada marca se toma como 5 dB HL
@@ -151,6 +160,7 @@ class ResponseAudiometry():
         self._ldl_falso = {}            # (oído, frecuencia) -> nivel o None
         self._ldl_aclarado = set()      # (oído, frecuencia) ya preguntados
         self._sisi_pct = {}             # oído -> % sorteado (caso en 0 %)
+        self._weber_dicho = None        # (frecuencia, nivel) que ya dijo
         self._sisi_timer = QTimer()
         self._sisi_timer.setSingleShot(True)
         self._sisi_timer.timeout.connect(self.downHand)
@@ -178,6 +188,7 @@ class ResponseAudiometry():
         self._ldl_falso = {}
         self._ldl_aclarado = set()
         self._sisi_pct = {}
+        self._weber_dicho = None
         self._logo = None   # el del SDT, se arma al primer uso (_detecta_sdt)
         self.other_response.voz = voz_del_paciente(dbdata)
         self.acufeno = acufeno.Acufeno(dbdata.get('Tinnitus'), dbdata.get('id'))
@@ -209,6 +220,8 @@ class ResponseAudiometry():
                 self.ldl(con_la_mano=True)
             elif instruccion == 'dos_pitos':
                 self.fowler()
+            elif instruccion == self.WEBER:
+                self._weber_al_prender()
             elif instruccion == 'cambie_de_volumen':
                 # prender el tono portador no es un incremento: el
                 # paciente responde recien cuando se sube la intensidad
@@ -782,6 +795,71 @@ class ResponseAudiometry():
                 log("audio_sisi_sorteo", oido=('OD', 'OI')[oido], pct=self._sisi_pct[oido])
         return self._sisi_pct[oido]
 
+    def _weber_al_prender(self):
+        """Weber audiométrico: al prender el tono dice solo dónde lo oye,
+        una vez por frecuencia y nivel (el pulsado no lo repite). Para los
+        niveles siguientes de la IWA se le pregunta."""
+        a = self.data['audio']
+        tonos = self._tonos_encendidos()
+        if len(tonos) != 1:
+            return
+        clave = (a['freq'], a['int'][tonos[0]], a['trans'][tonos[0]])
+        if clave == self._weber_dicho:
+            return
+        self._weber_dicho = clave
+        contexto = (self.obj_audio,) if isinstance(self.obj_audio, QObject) else ()
+        QTimer.singleShot(random.randint(*self.PAUSA_RESPUESTA_MS), *contexto,
+                          lambda: self.contestar(self.DONDE_AHORA))
+
+    def _weber_lado(self, a):
+        """Dónde oye el tono: 'elderecho', 'elizquierdo', 'almedio' o None
+        si no lo oye.
+
+        Por vibrador llega igual a las dos cócleas (atenuación ~0):
+        - un componente conductivo (gap de WEBER_GAP_DB o más) lo lleva a
+          ese oído; con los dos conductivos y gaps parejos, al medio;
+        - si no, va al oído donde suena más fuerte: el de mejor cóclea, hasta
+          que el reclutamiento del otro lo alcanza (IWA). Es el balance del
+          Fowler con los umbrales óseos y el patrón de esa frecuencia: con
+          reclutamiento completo se centra, con sobrerreclutamiento pasa al
+          oído con pérdida, sin reclutamiento se queda en el sano.
+        Por fono (no es un Weber) contesta como "¿En qué oído?"."""
+        tonos = self._tonos_encendidos(a)
+        if len(tonos) != 1:
+            return None
+        ch = tonos[0]
+        if a['trans'][ch] != 1:
+            caminos = [c for c in self._percepcion(ch, a)]
+            return ('elderecho', 'elizquierdo')[max(caminos)[1]] if caminos else None
+        f, nivel = a['freq'], a['int'][ch]
+        osea = self.dbdata['Osea_mkg'][f]
+        aerea = self.dbdata['Aerea_mkg'][f]
+        oye = [nivel >= osea[o] for o in (0, 1)]
+        if not any(oye):
+            return None
+        if oye.count(True) == 1:
+            return ('elderecho', 'elizquierdo')[oye.index(True)]
+        gaps = [aerea[o] - osea[o] for o in (0, 1)]
+        conductivos = [o for o in (0, 1) if gaps[o] >= self.WEBER_GAP_DB]
+        if len(conductivos) == 2:
+            if abs(gaps[0] - gaps[1]) < self.WEBER_GAP_PAREJO_DB:
+                return 'almedio'
+            return ('elderecho', 'elizquierdo')[0 if gaps[0] > gaps[1] else 1]
+        if conductivos:
+            return ('elderecho', 'elizquierdo')[conductivos[0]]
+        if abs(osea[0] - osea[1]) < self.WEBER_GAP_PAREJO_DB:
+            return 'almedio'        # cócleas parejas
+        fdata = self.dbdata.get('Fowler', {})
+        patrones = fdata.get('patterns') if isinstance(fdata, dict) else None
+        patron = (patrones or {}).get(str(f), 'none') if isinstance(patrones, dict) else 'none'
+        motor = FowlerEngine()
+        motor.set_th(osea[0], osea[1])
+        motor.set_cut(*FOWLER_PATTERNS.get(patron, FOWLER_PATTERNS['none']))
+        iguales, lado, _zona = motor.evaluate(nivel, nivel)
+        if iguales:
+            return 'almedio'
+        return None if lado is None else ('elderecho', 'elizquierdo')[lado]
+
     def _masking_calc(self, via, frecuency, o_e, o_n, ce=0):
         """
         Rango [mkg_min, mkg_max] de ruido de enmascaramiento valido, umbral
@@ -1121,6 +1199,9 @@ class ResponseAudiometry():
                 # en el deterioro tonal la mano es lo que percibe
                 return 'no' if self.mano else 'si'
             return 'no' if any(self._oye_tono(ch) for ch in tonos) else 'si'
+        if pregunta == self.DONDE_AHORA or (
+                pregunta == 'en_qué_oído' and self._instruccion() == self.WEBER):
+            return self._weber_lado(pasado)             # ¿Dónde lo escucha ahora?
         if pregunta == 'en_qué_oído':                   # ¿En qué oído...?
             caminos = [c for ch in self._tonos_encendidos(pasado)
                        for c in self._percepcion(ch, pasado)]

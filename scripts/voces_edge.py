@@ -54,6 +54,8 @@ FRASES = {
     "elderecho": "El derecho.",
     "elizquierdo": "El izquierdo.",
     "iguales": "Los escucho iguales.",
+    # Weber audiométrico / IWA (response._weber_lado)
+    "almedio": "Lo escucho al medio.",
     "dejaescucharse": "Dejó de escucharse.",
     "seescuchamasbajito": "Se escucha más bajito.",
     # tinnitumetría (audiometria/acufeno.py)
