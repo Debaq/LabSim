@@ -105,7 +105,7 @@ class ResponseAudiometry():
     # estimulo sonando (con el tono en continuo, subir el ruido tiene que
     # bajar la mano sin soltar el tono; subir el tono sostenido hasta el LDL
     # tiene que hacerlo hablar).
-    RECALCULA = UMBRAL + ('escuche_mi_voz', 'pitos_fuertes') + acufeno.INSTRUCCIONES
+    RECALCULA = UMBRAL + ('escuche_mi_voz', 'pitos_fuertes', 'reger') + acufeno.INSTRUCCIONES
     # "Molesta" se dice una vez por nivel: el pulsado prende y apaga el tono
     # cada medio segundo y lo hacia repetir (cortandose) en cada pulso. Lo
     # vuelve a decir con otro nivel, oido o frecuencia, o si el tono estuvo
@@ -132,6 +132,12 @@ class ResponseAudiometry():
     # diferencia entre los gaps de los dos oídos que lo deja al medio.
     WEBER_GAP_DB = 15
     WEBER_GAP_PAREJO_DB = 10
+    # Reger (balance monoaural bifrecuencial, 2026-11-13): el alumno
+    # presenta la frecuencia conservada, cambia a mano a la patológica y la
+    # presenta en el mismo oído; "¿El primero o el segundo?" compara las dos
+    # últimas presentaciones.
+    REGER = 'reger'
+    PRIMERO_O_SEGUNDO = 'primero_o_segundo'
     SISI_NEGATIVO_PCT = (5, 20)
     LDL_FALSO_DB = (80, 85, 90)
     # Talkback: el dial no esta calibrado; cada marca se toma como 5 dB HL
@@ -161,6 +167,8 @@ class ResponseAudiometry():
         self._ldl_aclarado = set()      # (oído, frecuencia) ya preguntados
         self._sisi_pct = {}             # oído -> % sorteado (caso en 0 %)
         self._weber_dicho = None        # (frecuencia, nivel) que ya dijo
+        self._reger = []                # presentaciones del Reger, la última al final
+        self._reger_sonando = None      # (oído, frecuencia) del tono que suena
         self._sisi_timer = QTimer()
         self._sisi_timer.setSingleShot(True)
         self._sisi_timer.timeout.connect(self.downHand)
@@ -222,6 +230,8 @@ class ResponseAudiometry():
                 self.fowler()
             elif instruccion == self.WEBER:
                 self._weber_al_prender()
+            elif instruccion == self.REGER:
+                self._reger_registrar()
             elif instruccion == 'cambie_de_volumen':
                 # prender el tono portador no es un incremento: el
                 # paciente responde recien cuando se sube la intensidad
@@ -795,6 +805,65 @@ class ResponseAudiometry():
                 log("audio_sisi_sorteo", oido=('OD', 'OI')[oido], pct=self._sisi_pct[oido])
         return self._sisi_pct[oido]
 
+    def _reger_registrar(self):
+        """Anota lo que suena: una presentación por oído y frecuencia. Subir
+        el nivel con el tono sonando la corrige; el pulsado, o volver a
+        prender la misma frecuencia, no abre otra."""
+        a = self.data['audio']
+        tonos = self._tonos_encendidos()
+        if len(tonos) != 1:
+            self._reger_sonando = None
+            return
+        ch = tonos[0]
+        p = {'oido': a['output'][ch], 'freq': a['freq'], 'int': a['int'][ch],
+             'trans': a['trans'][ch]}
+        clave = (p['oido'], p['freq'])
+        ultima = self._reger[-1] if self._reger else None
+        if ultima is not None and (ultima['oido'], ultima['freq']) == clave:
+            ultima.update(p)
+        else:
+            self._reger.append(p)
+            del self._reger[:-2]
+        self._reger_sonando = clave
+
+    def _reger_respuesta(self):
+        """'elprimero', 'elsegundo', 'iguales' o 'nose' (menos de dos
+        presentaciones, o no oyó ninguna).
+
+        Cada tono con el umbral de su oído y frecuencia; la frecuencia de
+        mejor umbral es la referencia y la otra recluta con el patrón del
+        caso en esa frecuencia (el del Fowler): la misma curva de igual
+        sonoridad, entre frecuencias en vez de entre oídos."""
+        if len(self._reger) < 2:
+            return 'nose'
+        p1, p2 = self._reger
+        umbrales = []
+        for p in (p1, p2):
+            tabla = self.dbdata['Osea_mkg' if p['trans'] == 1 else 'Aerea_mkg']
+            umbrales.append(tabla[p['freq']][p['oido']])
+        oye = [p1['int'] >= umbrales[0], p2['int'] >= umbrales[1]]
+        if not any(oye):
+            respuesta = 'nose'
+        elif oye.count(True) == 1:
+            respuesta = ('elprimero', 'elsegundo')[oye.index(True)]
+        else:
+            patologica = p1 if umbrales[0] > umbrales[1] else p2
+            fdata = self.dbdata.get('Fowler', {})
+            patrones = fdata.get('patterns') if isinstance(fdata, dict) else None
+            patron = (patrones.get(str(patologica['freq']), 'none')
+                      if isinstance(patrones, dict) else 'none')
+            motor = FowlerEngine()
+            motor.set_th(umbrales[0], umbrales[1])
+            motor.set_cut(*FOWLER_PATTERNS.get(patron, FOWLER_PATTERNS['none']))
+            iguales, lado, _zona = motor.evaluate(p1['int'], p2['int'])
+            respuesta = 'iguales' if iguales else ('elprimero', 'elsegundo')[lado]
+        log = getattr(self.obj_audio, "_log", None)
+        if log is not None:
+            log("audio_reger_respuesta", respuesta=respuesta,
+                comparados=[{'oido': ('OD', 'OI')[p['oido']], 'freq': self.frecuency[p['freq']],
+                             'int': p['int']} for p in (p1, p2)])
+        return respuesta
+
     def _weber_al_prender(self):
         """Weber audiométrico: al prender el tono dice solo dónde lo oye,
         una vez por frecuencia y nivel (el pulsado no lo repite). Para los
@@ -1100,6 +1169,9 @@ class ResponseAudiometry():
         self.state = (t,p,m)
         
     def rol_player(self, rol):
+        if rol == self.REGER:
+            self._reger = []            # empieza una comparación nueva
+            self._reger_sonando = None
         if rol != 'pa_pa_pa':
             # Las preguntas quedan en la historia pero no pueden empujar
             # afuera la instruccion vigente (_instruccion): al llenarse se
@@ -1199,6 +1271,8 @@ class ResponseAudiometry():
                 # en el deterioro tonal la mano es lo que percibe
                 return 'no' if self.mano else 'si'
             return 'no' if any(self._oye_tono(ch) for ch in tonos) else 'si'
+        if pregunta == self.PRIMERO_O_SEGUNDO:       # ¿El primero o el segundo?
+            return self._reger_respuesta()
         if pregunta == self.DONDE_AHORA or (
                 pregunta == 'en_qué_oído' and self._instruccion() == self.WEBER):
             return self._weber_lado(pasado)             # ¿Dónde lo escucha ahora?

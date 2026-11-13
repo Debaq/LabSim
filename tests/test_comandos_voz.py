@@ -30,7 +30,7 @@ def _claves():
 
 def test_estan_todas_las_del_motor():
     assert CLAVES_DEL_MOTOR <= set(_claves())
-    assert len(_claves()) == len(set(_claves())) == 26   # + 6 de tinnitumetría, 2026-11-06; + diploacusia; + solo el mío; - ¿Mismo volumen? (2026-11-13); 3 de ruido -> 1 aviso, - ¿Molesta?, - pa pa pa, Rosemberg = Mano levantada, - NME, - Solo si molesta, + Weber e IWA (2026-11-13)
+    assert len(_claves()) == len(set(_claves())) == 28   # + 6 de tinnitumetría, 2026-11-06; + diploacusia; + solo el mío; - ¿Mismo volumen? (2026-11-13); 3 de ruido -> 1 aviso, - ¿Molesta?, - pa pa pa, Rosemberg = Mano levantada, - NME, - Solo si molesta, + Weber e IWA, + Reger (2026-11-13)
 
 
 def test_cada_clave_tiene_su_audio():

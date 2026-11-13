@@ -33,7 +33,7 @@ final class AudiometriaRegistro
         // para leer las atenciones anteriores
         'sonidos_iguales', 'en_qué_oído', 'sonidos_distintos',
         // Weber audiométrico e IWA (2026-11-13)
-        'weber_audiometrico', 'donde_lo_escucha',
+        'weber_audiometrico', 'donde_lo_escucha', 'reger', 'primero_o_segundo',
     ];
     /** Tinnitumetría (T03, src/audiometria/acufeno.py): instrucciones y sus dos preguntas. */
     public const INSTR_TINNITUS = [
@@ -50,7 +50,7 @@ final class AudiometriaRegistro
     public const PREGUNTAS = [
         'escucha', 'dejo_de_escuchar', 'en_qué_oído', 'sonidos_iguales', 'no_entiende',
         'molesta', 'molesto_o', 'muy_fuerte', 'sonidos_distintos', 'acufeno_cual', 'acufeno_como_esta',
-        'donde_lo_escucha',
+        'donde_lo_escucha', 'primero_o_segundo',
     ];
 
     /**

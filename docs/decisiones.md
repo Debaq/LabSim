@@ -8924,3 +8924,25 @@ H06). Se hacen con el vibrador.
   que usar el Fowler (confirmado por el equipo): se deja así.
 - Backend: `weber_audiometrico` y `donde_lo_escucha` cuentan como
   supraliminares; la pregunta no cambia la instrucción.
+
+## Reger: balance monoaural bifrecuencial (2026-11-13)
+
+Pedido del equipo. Va en un oído con una frecuencia conservada y otra
+patológica (sobre 20 dB HL, 20 a 40 dB de diferencia) y se hace como el
+Fowler: la referencia sube de 20 en 20 y la otra se iguala de 5 en 5. El
+alumno **cambia la frecuencia a mano** (el audiómetro tiene una frecuencia
+para los dos canales y no se automatiza): presenta una, cambia, presenta la
+otra y pregunta.
+
+- Instrucción *Reger* y pregunta *¿El primero o el segundo?* ("¿Cuál
+  escuchó más fuerte, el primero o el segundo?"); el paciente contesta "El
+  primero.", "El segundo.", "Los escucho iguales." (voces que ya había) o
+  "No sé." con menos de dos presentaciones.
+- El motor anota una presentación por oído y frecuencia (subir el nivel con
+  el tono sonando la corrige; el pulsado no abre otra) y compara las dos
+  últimas con la curva del Fowler: umbral de cada frecuencia, la de mejor
+  umbral como referencia y el patrón de reclutamiento del caso en la
+  frecuencia patológica. Queda `audio_reger_respuesta` (las dos
+  presentaciones y la respuesta) en el registro.
+- Los requisitos (frecuencia conservada, diferencia 20-40) no bloquean: el
+  paciente compara igual; evaluarlos es del indicador.

@@ -88,6 +88,10 @@ COMANDOS = {
     # Weber audiométrico e IWA (2026-11-13), con el vibrador
     "weber_audiometrico": "Va a escuchar un pitito, y debe indicarme en qué oído lo escucha más "
                           "fuerte.",
+    # Reger: balance monoaural bifrecuencial (2026-11-13)
+    "reger": "Va a escuchar dos pititos en el mismo oído, uno después del otro. Cada vez le "
+             "voy a preguntar cuál escuchó más fuerte, el primero o el segundo, o si los "
+             "escuchó iguales.",
     "cambie_de_volumen": "Va a escuchar un pito de forma continua. Necesito que me avise cuando "
                          "ese pito cambie de volumen, levantando la mano cada vez que ocurra.",
     "ruido_blanco_contralateral": "Va a escuchar un pito fuerte y continuo en esta orejita, y un "
@@ -109,6 +113,7 @@ COMANDOS = {
     # PREGUNTAS
     "escucha": "¿Me escucha?",
     "dejo_de_escuchar": "¿Lo dejó de escuchar?",
+    "primero_o_segundo": "¿Cuál escuchó más fuerte, el primero o el segundo?",
     "donde_lo_escucha": "¿Dónde lo escucha ahora?",
     "en_qué_oído": "¿En qué oído lo escuchó más fuerte?",
     "sonidos_distintos": "¿Los dos sonidos eran diferentes en forma?",

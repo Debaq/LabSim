@@ -55,7 +55,7 @@ final class AudiometriaPaciente
     private const NO_RECONSTRUIBLES = [
         'mano_levantada', 'mano_levantada_en_ruido', 'ruido_blanco_contralateral',
         'rosemberg_bilateral', 'pitos_fuertes', 'dos_pitos', 'escuche_mi_voz',
-        'cambie_de_volumen', 'weber_audiometrico',
+        'cambie_de_volumen', 'weber_audiometrico', 'reger',
     ];
 
     /** @var array */
