@@ -96,13 +96,21 @@ def test_avise_si_escucha_y_el_falso_negativo_por_aire():
     assert _ultima(w) == "Paciente Sí, lo escucho.", "por hueso sí (lo oye el otro)"
 
 
-def test_compare_contesta_con_las_dos_posiciones_del_mismo_golpe():
+def test_rinne_el_paciente_contesta_solo_lo_que_se_le_pregunta():
+    """Instrucción, golpe, mastoides + ¿lo escucha?, frente a la oreja +
+    ¿lo escucha?, y recién ahí ¿dónde lo escuchó más fuerte?"""
     w = _modulo()
     w._frase("compare_sonidos")
     w._golpear()
     _apoyar(w, "M2")
-    assert _ultima(w) == "Paciente Ya."
+    assert _ultima(w).startswith("Tú"), "al apoyarlo no dice nada"
+    w._frase("lo_escucha")
+    assert _ultima(w) == "Paciente Sí."
     _apoyar(w, "cae_der")
+    assert _ultima(w).startswith("Tú"), "no compara antes de que le pregunten"
+    w._frase("lo_escucha")
+    assert _ultima(w) == "Paciente Sí."
+    w._frase("donde_mas_fuerte")
     assert "Adelante, frente a la oreja" in _ultima(w)
 
 
@@ -113,6 +121,9 @@ def test_el_falso_negativo_suena_como_un_negativo():
     w._golpear()
     _apoyar(w, "M1")
     _apoyar(w, "cae_izq")
+    w._frase("lo_escucha")
+    assert _ultima(w) == "Paciente No.", "oído muerto: por aire nada"
+    w._frase("donde_mas_fuerte")
     assert _ultima(w) == "Paciente Atrás, en el hueso. Ahí suena más fuerte."
 
 
@@ -121,6 +132,8 @@ def test_weber_en_la_linea_media():
     w._frase("diga_donde")
     w._golpear()
     _apoyar(w, "Cz")
+    assert _ultima(w).startswith("Tú"), "espera la pregunta"
+    w._frase("donde_mas_fuerte")
     assert _ultima(w) == "Paciente En el oído izquierdo."
     w._frase("igual_ambos")
     assert _ultima(w) == "Paciente No, más en el izquierdo."

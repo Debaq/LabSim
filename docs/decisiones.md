@@ -8700,3 +8700,15 @@ se borra. Eliminar un comentario de la atención se lleva su hilo (pide
 confirmar y lo dice); queda en el registro de auditoría como
 `comentario_borrar`. Editar no deja marca de "editado": el alumno ve el
 texto nuevo, como cualquier corrección del docente.
+
+## Diapasones: el paciente contesta lo que se le pregunta (2026-11-13)
+
+Con "Compare dónde suena más fuerte" (Rinne) y "Dígame dónde lo escucha"
+(Weber), el paciente ya no habla solo al apoyarle el diapasón: antes decía
+"Ya." en la primera posición y soltaba la comparación al cambiar de
+posición, antes de que el alumno preguntara. El flujo es el de la consulta:
+instrucción → golpear y apoyar en la mastoides → "¿Lo escucha?" → frente
+a la oreja → "¿Lo escucha?" → "¿Dónde lo escuchó más fuerte?". Así el
+alumno tiene que preguntar (y ponerse los fonos para oír la respuesta).
+Solo "Avíseme si lo escucha" y "Avíseme cuando deje de escucharlo" hacen
+hablar al paciente sin pregunta (`Acumetria._al_sentirlo`).

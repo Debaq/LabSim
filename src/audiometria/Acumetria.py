@@ -27,7 +27,10 @@ El paciente contesta lo que le instruyeron o le preguntaron, con lo que
 dice el caso (diapasones.py: los tiempos salen del audiograma y mandan el
 Rinne y el Weber que marcó el docente). Sin instrucción, al sentir el
 diapasón no sabe qué hacer. Con "Avíseme cuando deje de escucharlo" avisa
-solo cuando el diapasón baja de su umbral. Sin Rinne/Weber en el caso, el
+solo cuando el diapasón baja de su umbral. Con "Compare dónde suena más
+fuerte" (Rinne) y "Dígame dónde lo escucha" (Weber) no habla al apoyarle el
+diapasón: contesta lo que se le pregunta ("¿Lo escucha?" en cada posición,
+"¿Dónde lo escuchó más fuerte?" al final). Sin Rinne/Weber en el caso, el
 diapasón suena con armónicos y no sirve.
 
 Todo va a action_logs con prefijo ac_ y la verdad del caso en el payload.
@@ -403,8 +406,16 @@ class Acumetria(QWidget):
 
     def _al_sentirlo(self, apoyo, oye):
         """Lo que dice el paciente al ponerle el diapasón, según la
-        instrucción vigente."""
+        instrucción vigente.
+
+        Solo "Avíseme si lo escucha" y "Avíseme cuando deje" lo hacen hablar
+        solo. Con "Compare dónde suena más fuerte" (Rinne) y "Dígame dónde
+        lo escucha" (Weber) espera callado a que le pregunten: el alumno
+        apoya, pregunta "¿Lo escucha?", cambia de posición, vuelve a
+        preguntar y recién con "¿Dónde lo escuchó más fuerte?" compara."""
         contacto = apoyo["zona"] != "pabellon"
+        if self._instruccion in ("compare_sonidos", "diga_donde"):
+            return None
         if not self._vibra():
             if self._instruccion in INSTRUCCIONES:
                 return "No escucho nada."
@@ -412,20 +423,7 @@ class Acumetria(QWidget):
         if self._instruccion not in INSTRUCCIONES:
             return NO_SABE
         no_oye = "Siento que vibra, pero no lo escucho." if contacto else "No escucho nada."
-        if self._instruccion in ("avise_si_escucha", "avise_cuando_deje"):
-            return "Sí, lo escucho." if oye else no_oye
-        if self._instruccion == "compare_sonidos":
-            if apoyo["zona"] not in ("pabellon", "mastoides"):
-                return "¿Comparar con qué?"
-            if self._rinne and self._rinne["vistos"] >= {"pabellon", "mastoides"}:
-                return self._comparacion_rinne()
-            return "Ya." if oye else no_oye
-        # diga_donde
-        if apoyo["zona"] in ("linea_media", "fuera_de_linea"):
-            return DONDE_WEBER.get(self.modelo.weber(self.hz()), DONDE_WEBER["centrado"]) if oye else no_oye
-        if apoyo["zona"] in ("pabellon", "mastoides"):
-            return f"En el oído {LADO[apoyo['oido']]}." if oye else no_oye
-        return "Acá, donde me lo puso." if oye else no_oye
+        return "Sí, lo escucho." if oye else no_oye
 
     def _contestar_despues(self, clave, ultimo):
         """Con el diapasón ya retirado: contesta por lo que sintió mientras
