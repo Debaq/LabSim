@@ -130,6 +130,18 @@ def test_el_equipo_que_crece_no_se_corta():
     assert _dibujado(v).right() <= _rect(v, v.escalado).right() + 1
 
 
+def test_pa_pa_pa_va_en_el_panel_de_las_listas():
+    """Pa pa pa no es una frase del talkback: se prende en las listas y se
+    apaga solo al salir de la logoaudiometría."""
+    v = _ventana(1366)
+    assert "pa_pa_pa" not in v.comandos.botones
+    _logo(v)
+    v.listas.btn_papa.click()
+    assert v.audiometro.papa
+    _logo(v, activa=False)
+    assert not v.listas.btn_papa.isChecked() and not v.audiometro.papa
+
+
 def teardown_function(_fn=None):
     """Cierra las ventanas del test (pytest la llama tras cada uno). Cerrarlas
     saca el filtro de teclas de cada audiómetro; abiertas, Python las

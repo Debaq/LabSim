@@ -489,7 +489,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 |---|---|---|
 | **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar (y Stenger) | Levanta la mano mientras suena un tono que oye |
 | **Ruido en el otro oído** | Enmascaramiento (umbrales, Carhart) | Es un aviso: sigue con la instrucción que tenía y al ruido no le hace caso (sección 17) |
-| **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y *pa pa pa* elegido, levanta la mano si lo oye |
+| **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y **Pa pa pa** prendido (arriba, en el panel de las listas), levanta la mano si lo oye |
 | **Dictar palabras** | Logoaudiometría (discriminación) | Repite las palabras que entiende |
 | **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
@@ -504,7 +504,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Solo escuche el mío** | Tinnitumetría: inhibición residual | Dice *«Ahora solo escucho el suyo»* cuando el sonido le tapa el acúfeno |
 | **Un minuto de sonido**, luego **¿Cómo está su ruido?** | Tinnitumetría: inhibición residual | Con el sonido ya apagado, dice cómo quedó su acúfeno |
 
-> Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** y el aviso **Ruido en el otro oído** no: el paciente sigue con la instrucción que tenía. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, contesta y sigue respondiendo a la LDL.
+> Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** y el aviso **Ruido en el otro oído** no: el paciente sigue con la instrucción que tenía. Si después de *Solo si molesta* le preguntas *Molesto ¿o?*, contesta y sigue respondiendo a la LDL.
 
 > Con **tono y ruido sonando a la vez** el Talkback no habla: apaga el tono y el ruido antes de hablarle. Con solo el tono (Fowler) o solo el ruido sí se le puede preguntar.
 

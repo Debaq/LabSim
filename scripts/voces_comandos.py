@@ -95,6 +95,8 @@ COMANDOS = {
                            "en la otra. Necesito que mantenga la mano levantada todo el tiempo "
                            "que escuche el pito. Si lo deja de escuchar, baja la mano, y la "
                            "vuelve a levantar cuando lo escuche de nuevo.",
+    # No es una instrucción: la voz en vivo del SDT, en el panel de las
+    # listas (ListWords). Suena en bucle por el canal con Habla.
     "pa_pa_pa": "Hola, hola, hola, hola, hola, hola. Pa, pa, pa, pa, pa.",
     # Tinnitumetría (T03): tono, intensidad, NME e inhibición residual.
     "acufeno_cual_se_parece": "Le voy a presentar algunos sonidos, uno después del otro. Fíjese "
@@ -113,7 +115,6 @@ COMANDOS = {
     "en_qué_oído": "¿En qué oído lo escuchó más fuerte?",
     "sonidos_distintos": "¿Los dos sonidos eran diferentes en forma?",
     "no_entiende": "¿Escucha, pero no entiende?",
-    "molesta": "¿Le molesta cuando le hablo?",
     "molesto_o": "¿Ese sonido le molestó, o solo lo escuchó fuerte?",
     "muy_fuerte": "¿Está muy fuerte mi voz?",
     "acufeno_cual": "¿Cuál se parece más a su ruido: el primero, el segundo o el tercero?",

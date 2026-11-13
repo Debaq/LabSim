@@ -85,6 +85,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.setupUi(self)
         panel_ui.rearmar(self)
         self.supra("silencio")
+        # Pa pa pa (voz en vivo del SDT): se prende en el panel de las
+        # listas. Con él, Estímulo en el canal con Habla suena "pa pa pa" en
+        # bucle en lugar de habilitar las palabras.
+        self.papa = False
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
@@ -580,6 +584,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             "step": self.step(),
             "instruccion": historia[0] if historia else None,
             "talkback": self.dial_talkback.value(),
+            "papa": getattr(self, "papa", False),
             "canales": canales,
         }
 
@@ -769,7 +774,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
                 else:
                     self.stop(ch)
-                if self.state_supra[1] != "pa_pa_pa":
+                if not self.papa:
                     self.toggle_speech(ch, play)
         elif no_alternate:
             self.reverse(ch)
@@ -917,13 +922,23 @@ class Audiometer(QWidget, Ui_Audiometer):
                 "background-color: rgb(255, 255, 255);")
             self.lbl_warnings[ch].setText("")
 
+    @Slot(bool)
+    def set_papa(self, activo):
+        """Lo prende y apaga el panel de las listas (ListWords.papa_cambio).
+        Antes era una frase más del talkback, pero no se le dice al
+        paciente: es lo que oye por el canal (2026-11-13)."""
+        if activo == self.papa:
+            return
+        self.papa = activo
+        self._log("audio_papa", activo=activo, estado=self._estado())
+
     def play_papa(self,ch):
-        if self.state_supra[1] == "pa_pa_pa":
+        if self.papa:
             self.vu_meters[ch].setValue(50)
             self.lbl_warnings[ch].setStyleSheet(
             "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
             self.lbl_warnings[ch].setText(ESTIMULO_ENCENDIDO)
-            self.players.play(ch, self.state_supra[0], True)
+            self.players.play(ch, create_command("pa_pa_pa"), True)
             self.channel_on[ch] = True
             self.post_channel_on()
 

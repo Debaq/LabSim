@@ -20,7 +20,7 @@ from audiometria.comandos_voz import ComandosVoz, GRUPOS, SILENCIO  # noqa: E402
 CLAVES_DEL_MOTOR = {
     'colocar_fonos', 'colocar_vibrador', 'mano_levantada', 'ruido_otro_oido',
     'ruido_blanco_contralateral', 'rosemberg_bilateral', 'pitos_fuertes', 'dos_pitos',
-    'cambie_de_volumen', 'escuche_mi_voz', 'pa_pa_pa',
+    'cambie_de_volumen', 'escuche_mi_voz',
 }
 
 
@@ -30,7 +30,7 @@ def _claves():
 
 def test_estan_todas_las_del_motor():
     assert CLAVES_DEL_MOTOR <= set(_claves())
-    assert len(_claves()) == len(set(_claves())) == 29   # + 6 de tinnitumetría, 2026-11-06; + diploacusia; + solo el mío; - ¿Mismo volumen? (2026-11-13); 3 de ruido -> 1 aviso (2026-11-13)
+    assert len(_claves()) == len(set(_claves())) == 27   # + 6 de tinnitumetría, 2026-11-06; + diploacusia; + solo el mío; - ¿Mismo volumen? (2026-11-13); 3 de ruido -> 1 aviso, - ¿Molesta?, - pa pa pa (2026-11-13)
 
 
 def test_cada_clave_tiene_su_audio():
@@ -105,3 +105,10 @@ def test_el_aviso_no_cambia_la_instruccion():
     for _ in range(20):
         r.rol_player('ruido_otro_oido')
     assert r._instruccion() == 'colocar_vibrador'
+
+
+def test_pa_pa_pa_y_molesta_fuera_de_las_frases():
+    """Pa pa pa pasó al panel de las listas y ¿Molesta? se fusionó con
+    ¿Muy fuerte? (2026-11-13). El audio de pa pa pa sigue: lo usa el SDT."""
+    assert not set(_claves()) & {'pa_pa_pa', 'molesta'}
+    assert os.path.exists(os.path.join(RAIZ, "resources", "audio", "comandos", "pa_pa_pa.mp3"))

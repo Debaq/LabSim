@@ -8773,3 +8773,26 @@ diseñado el motor (`contestar` responde con lo que suena).
 de silencio (`COLA_S`), porque el reproductor corta apenas termina el
 archivo. Se rehicieron todas las de comandos, comandos_z, comandos_ac y
 comandos_ot. Las palabras de las listas no se tocaron.
+
+## Frases del talkback: fuera ¿Molesta? y pa pa pa (2026-11-13)
+
+Revisión de las frases con él, tras el aviso único de ruido:
+
+- **¿Molesta?** ("¿Le molesta cuando le hablo?") se fusionó con **¿Muy
+  fuerte?** ("¿Está muy fuerte mi voz?"): las dos preguntaban si la voz del
+  talkback le incomoda y solo cambiaba el umbral (LDL de la voz contra LDL
+  − 10 dB). Queda *¿Muy fuerte?*: "sí" desde 10 dB bajo el LDL de la voz,
+  "no" por debajo, calla si no oye el talkback. El backend conserva
+  `molesta` en PREGUNTAS para leer las atenciones anteriores.
+- **Pa pa pa** salió de las frases: no se le dice al paciente, es la voz en
+  vivo del SDT que suena por el canal con *Habla*. Ahora es un botón que se
+  prende en el panel de las listas (fila de "Última"), que solo se ve en
+  logoaudiometría y se apaga al salir de ella. `Audiometer.papa` reemplaza
+  al `state_supra == 'pa_pa_pa'`; el cambio queda en el registro como
+  `audio_papa` y en la foto del equipo (`papa`).
+- **Se quedan:** *Ruido blanco contralateral* (STAT) — deducirlo de cómo
+  está armado el equipo es difícil y los alumnos no lo notarían —; *Pitos
+  fuertes*, *Solo si molesta* y *Molesto ¿o?* — en la LDL el paciente
+  levanta la mano y se le pregunta "¿ese le molestó o solo sonó fuerte?":
+  si molestó se marca, si solo sonó fuerte se sigue subiendo. *Rosemberg
+  bilateral* queda pendiente.

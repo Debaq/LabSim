@@ -127,6 +127,8 @@ QStackedWidget#paginas, QStackedWidget#paginas > QWidget {{ background: transpar
 class ListWords(QWidget):
     # nivel normalizado 0.0-1.0 de la palabra reproducida (no de la respuesta del paciente)
     level_changed = QtCore.Signal(float)
+    # Pa pa pa prendido/apagado (Audiometer.set_papa, ver ventana.py).
+    papa_cambio = QtCore.Signal(bool)
 
     def __init__(self,data):
         QWidget.__init__(self)
@@ -183,11 +185,27 @@ class ListWords(QWidget):
         self.lbl_dictado_pista.setWordWrap(True)
         self.lbl_ultima = QLabel("Última: —")
         self.lbl_ultima.setProperty("role", "titulo")
-        col.addWidget(self.lbl_ultima)
+        # Pa pa pa: la voz en vivo del SDT. Estaba entre las frases del
+        # talkback, pero no se le dice al paciente: es lo que suena por el
+        # canal con Habla (2026-11-13). En la fila de "Última" para no
+        # alargar el panel en pantallas bajas.
+        self.btn_papa = QPushButton("Pa pa pa")
+        self.btn_papa.setCheckable(True)
+        self.btn_papa.setProperty("lista", "true")
+        self.btn_papa.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+        self.btn_papa.setToolTip("Voz en vivo para el SDT: con Escuche mi voz, Estímulo la "
+                                 "hace sonar en bucle por el canal con Habla.")
+        self.btn_papa.toggled.connect(self.papa_cambio)
+        fila = QHBoxLayout()
+        fila.setSpacing(6)
+        fila.addWidget(self.lbl_ultima, 1)
+        fila.addWidget(self.btn_papa)
+        col.addLayout(fila)
         col.addWidget(self.lbl_dictado, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         col.addWidget(self.lbl_dictado_pista)
         raiz.addWidget(estado)
         self._mostrar_dictado()
+
 
         # Selector de lista
         selector, col = self._tarjeta()

@@ -1004,11 +1004,13 @@ class ResponseAudiometry():
         pasado = actual if any(actual['stimOn']) else (self._ultima or actual)
         if pregunta == 'escucha':                       # ¿Me escucha?
             return 'si' if self._oye_talkback() else None
-        if pregunta in ('molesta', 'muy_fuerte'):       # ... mi voz
+        if pregunta == 'muy_fuerte':                    # ¿Está muy fuerte mi voz?
+            # Antes había además "¿Le molesta cuando le hablo?", la misma
+            # pregunta 10 dB más arriba: se fusionaron (2026-11-13).
             if not self._oye_talkback():
                 return None
-            margen = self.MUY_FUERTE_BAJO_LDL if pregunta == 'muy_fuerte' else 0
-            return 'si' if self._talkback_db() >= self._ldl_voz() - margen else 'no'
+            return ('si' if self._talkback_db() >= self._ldl_voz() - self.MUY_FUERTE_BAJO_LDL
+                    else 'no')
         if pregunta == 'dejo_de_escuchar':              # ¿Lo dejó de escuchar?
             tonos = self._tonos_encendidos()
             if not tonos:

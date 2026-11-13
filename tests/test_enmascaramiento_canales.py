@@ -165,7 +165,7 @@ class SimultaneoTest(Base):
 
 class PreguntasNoCortanTest(Base):
     def test_tras_una_pregunta_sigue_la_instruccion(self):
-        for pregunta in ('escucha', 'dejo_de_escuchar', 'molesta', 'muy_fuerte',
+        for pregunta in ('escucha', 'dejo_de_escuchar', 'muy_fuerte',
                          'no_entiende', 'molesto_o', 'en_qué_oído'):
             self.assertFalse(self.presentar(
                 [pregunta, 'ruido_otro_oido', 'colocar_fonos'], stimOn=[True, True],
@@ -191,12 +191,13 @@ class RespuestasTest(Base):
         self.r.set_case(caso(self.AEREA, self.OSEA, sdt=(90, 70)))
         self.assertIsNone(self.r.respuesta_a('escucha'))     # no la oye: calla
 
-    def test_voz_fuerte_y_molesta(self):
-        self.r.obj_audio.dial_talkback = FakeDial(19)        # 95 dB HL, LDL 100
+    def test_voz_muy_fuerte(self):
+        # ¿Molesta? se fusionó con ¿Muy fuerte? (2026-11-13): sí desde 10 dB
+        # bajo su LDL (100)
+        self.r.obj_audio.dial_talkback = FakeDial(17)        # 85 dB HL
+        self.assertEqual(self.r.respuesta_a('muy_fuerte'), 'no')
+        self.r.obj_audio.dial_talkback = FakeDial(18)        # 90 dB HL
         self.assertEqual(self.r.respuesta_a('muy_fuerte'), 'si')
-        self.assertEqual(self.r.respuesta_a('molesta'), 'no')
-        self.r.obj_audio.dial_talkback = FakeDial(20)
-        self.assertEqual(self.r.respuesta_a('molesta'), 'si')
 
     def test_en_que_oido_delata_la_sombra(self):
         """Sin enmascarar, el tono del OD muerto lo oye el OI."""

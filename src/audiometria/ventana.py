@@ -53,6 +53,7 @@ class AudiometriaWindow(QWidget):
         # Lo que antes conectaba main.connect_signals entre las tres ventanas.
         self.comandos.btn_checked.connect(self.audiometro.supra)
         self.audiometro.talkback_bloqueado.connect(self.comandos.avisar)
+        self.listas.papa_cambio.connect(self.audiometro.set_papa)
         self.audiometro.signal_speech.connect(self.listas.update_state)
         self.listas.level_changed.connect(
             lambda level: self.audiometro._on_player_level(self.listas.channel, level))
@@ -99,6 +100,9 @@ class AudiometriaWindow(QWidget):
 
     def _al_cambiar_prueba(self, prueba):
         self._logo = prueba == LOGO
+        if not self._logo:
+            # pa pa pa es de la logoaudiometría: no queda prendido escondido
+            self.listas.btn_papa.setChecked(False)
         self._visibles()
 
     def _visibles(self):
