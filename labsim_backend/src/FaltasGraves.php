@@ -71,7 +71,13 @@ final class FaltasGraves
     public static function describir(string $action, array $payload, string $hora): array
     {
         $detalle = '';
-        if ($action === 'z_no_realizable') {
+        if ($action === 'z_no_realizable' && ($payload['screen'] ?? '') === 'montaje') {
+            // Desde la cabeza del paciente (2026-11-13): la falta es al meter
+            // la sonda o el fono contralateral en el oído NR.
+            $detalle = sprintf('%s puesto en %s',
+                ($payload['que'] ?? '') === 'auricular' ? 'Fono contralateral' : 'Sonda',
+                (string) ($payload['oido_nr'] ?? '?'));
+        } elseif ($action === 'z_no_realizable') {
             $pantalla = self::PANTALLAS[(string) ($payload['screen'] ?? '')] ?? 'impedanciómetro';
             $detalle = sprintf('Sonda en %s, %s', (string) ($payload['side'] ?? '?'), $pantalla);
             if (($payload['screen'] ?? '') === 'reflex' || ($payload['screen'] ?? '') === 'decay') {

@@ -8986,3 +8986,44 @@ umbral (`ac_deja_de_oir`). Quedan el Rinne por comparación (*Compare dónde
 suena más fuerte*) y el Weber; *¿Lo sigue escuchando?* sigue como pregunta.
 El backend conserva el rótulo de `ac_deja_de_oir` en Metrics para las
 atenciones anteriores.
+
+## Impedanciómetro: el paciente a la derecha, con olivas, sonda y fono contra (2026-11-13)
+
+La columna derecha del impedanciómetro (vacía hasta hoy) lleva la cabeza de
+los electrodos (`core/cabeza_electrodos.py`) y, abajo, el set de olivas, la
+sonda y el fono contralateral (`impedanciometria/montaje.py`). Las tareas
+son las de la práctica: elegir la oliva, meter la sonda, poner el fono
+contra, medir, y dar vuelta todo para el otro oído.
+
+- **Olivas:** 7, 9, 11, 13, 15, 17 y 19 mm, cada una con su color (sin
+  rojo ni azul, que son OD/OI). Sella la mediana (13 mm) en todos los
+  pacientes por ahora (`oliva_que_sella`); cuando el caso traiga el tamaño
+  del conducto sale de ahí. La oliva se cambia con la sonda fuera del
+  oído; sin oliva la sonda no entra (`z_sonda_sin_oliva`). Una más grande
+  se dibuja quedando afuera, en la concha.
+- **Sin sellar no se mide:** sonda en la mesa = SONDA ABIERTA, oliva que no
+  sella = FUGA, en la pantalla del equipo como el aviso del NR; se
+  registra `z_sin_sello` (con `que`: sin_sonda / oliva). Vale para
+  timpanograma, reflejos, decay y ETF.
+- **La sonda define el oído medido:** al meterla el equipo pasa a ese oído
+  (`z_side_change` de siempre). Apretar el otro oído en el equipo con la
+  sonda puesta no cambia nada: aviso "LA SONDA ESTÁ EN ..." y
+  `z_lado_sin_sonda`. Elegido así para que nunca quede un resultado de un
+  oído guardado con el rótulo del otro.
+- **Fono contralateral:** de inserción, sin elegir oliva. En CONTRA (reflejo
+  y decay) el estímulo llega solo si el fono está en el oído opuesto a la
+  sonda; si no, el reflejo sale ausente sin aviso, como en el equipo real
+  (igual que el fono de inserción del ABR que no está puesto).
+- **Un conducto, una cosa:** meter la sonda donde estaba el fono (o al
+  revés) devuelve el otro a la mesa. Así "dar vuelta todo" es poner la
+  sonda en el otro oído y el fono en el primero.
+- **NR:** con la cabeza, la falta grave (`z_no_realizable`, `screen:
+  'montaje'`, `que: sonda|auricular`) es al meter la sonda o el fono en el
+  oído NR, no al medir. `FaltasGraves::describir` lo muestra como "Sonda /
+  Fono contralateral puesto en OD". Sin la ventana (ZControl suelto, como
+  en los tests viejos) sigue la regla anterior: falta al medir.
+- **Paciente nuevo** (`la_super`): todo a la mesa y la sonda sin oliva. El
+  montaje no se guarda por atención: las mediciones del Z tampoco.
+- Registro: `z_oliva`, `z_sonda_poner/sacar`, `z_contra_poner/sacar`,
+  `z_sin_sello`, `z_lado_sin_sonda` (rótulos en `Metrics.php`); los
+  estímulos de reflejo y decay llevan `fono_contra`.

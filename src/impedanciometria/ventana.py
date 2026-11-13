@@ -1,8 +1,8 @@
 """
 El impedanciómetro a pantalla completa, como el audiómetro: las
 instrucciones al paciente a la izquierda, el equipo escalado al centro (ver
-core/reparto.py) y la derecha libre por ahora; ahí irá la cabeza del
-paciente para ponerle la sonda.
+core/reparto.py) y a la derecha el paciente: la cabeza con el set de olivas,
+la sonda y el fono contralateral (impedanciometria/montaje.py).
 """
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
@@ -10,6 +10,7 @@ from audiometria.comandos_voz import SILENCIO
 from core import tema
 from core.reparto import Reparto
 from impedanciometria.instrucciones import InstruccionesZ
+from impedanciometria.montaje import PanelMontajeZ
 from impedanciometria.Z import ZControl
 
 
@@ -20,11 +21,15 @@ class ImpedanciometriaWindow(QWidget):
         tema.aplicar_estilo(self)
         self.z = ZControl()
         self.instrucciones = InstruccionesZ()
+        self.paciente = PanelMontajeZ(log=self.z._log)
+        self.z.montaje = self.paciente.montaje
+        self.paciente.puesto.connect(self.z.montaje_puesto)
+        self.paciente.sacado.connect(self.z.montaje_sacado)
         self.equipo = Reparto(self.z)
         self.escalado = self.equipo.escalado
         self.col_izq, self.col_der = self.equipo.col_izq, self.equipo.col_der
         self.equipo.izq.addWidget(self.instrucciones)
-        self.equipo.der.addStretch(1)
+        self.equipo.der.addWidget(self.paciente)
         raiz = QVBoxLayout(self)
         raiz.setContentsMargins(0, 0, 0, 0)
         raiz.addWidget(self.equipo)
@@ -33,6 +38,8 @@ class ImpedanciometriaWindow(QWidget):
     def la_super(self, data, appointment_id=None):
         self.instrucciones.callar()
         self.instrucciones.silencio()
+        # Paciente nuevo: la sonda y el fono vuelven a la mesa, sin oliva.
+        self.paciente.reiniciar()
         self.z.la_super(data, appointment_id)
 
     def _instruccion(self, clave):

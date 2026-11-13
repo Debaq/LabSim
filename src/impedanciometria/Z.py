@@ -198,6 +198,10 @@ class ZControl(QWidget, UiControlZ):
         self.side = 0
         self.test = 'Z_'
         self.fuera_de_uso = False
+        # El paciente con la sonda y el fono puestos (montaje.MontajeZ). Lo
+        # pone la ventana (impedanciometria/ventana.py); sin él, el equipo
+        # mide como si la sonda estuviera siempre bien puesta.
+        self.montaje = None
         self.store_data = [Storage(2), Storage(2)]
         self.new = [True, True]
 
@@ -265,6 +269,10 @@ class ZControl(QWidget, UiControlZ):
             self.avisos[screen].mostrar(
                 "FUERA DE USO\nel impedanciómetro quedó inutilizado\npor la falta grave de esta atención", grave=True)
             return True
+        if self.montaje is not None:
+            # Con el paciente a la vista la falta es al meter la sonda o el
+            # fono en el oído (montaje_puesto); acá solo falta ver si sella.
+            return self._bloquear_sin_sello(screen, pantalla)
         tocado = self._oido_nr_tocado(con_estimulo_contra)
         if tocado is None:
             return False
@@ -276,6 +284,57 @@ class ZControl(QWidget, UiControlZ):
             f"FALTA GRAVE\n{'la sonda' if que == 'sonda' else 'el auricular'} no debía entrar en {oido}\n"
             "impedanciómetro fuera de uso en esta atención", grave=True)
         return True
+
+    def _bloquear_sin_sello(self, screen, pantalla):
+        """Sin la sonda en el oído, o con una oliva que no sella, el equipo
+        no logra presurizar y no mide: lo dice en su pantalla, como el
+        equipo real (sonda abierta / fuga)."""
+        m = self.montaje
+        if m.sella(self.data):
+            return False
+        if m.sonda is None:
+            que, texto = 'sin_sonda', "SONDA ABIERTA\nla sonda no está en el oído"
+        else:
+            que, texto = 'oliva', "FUGA\nla oliva no sella el conducto"
+        self._log("z_sin_sello", screen=pantalla, side=self.Z.get_side(), que=que,
+                  sonda=m.sonda, oliva_mm=m.oliva)
+        self.avisos[screen].mostrar(texto)
+        return True
+
+    def _contra_llega(self):
+        """En CONTRA el estímulo sale por el fono contralateral: llega solo
+        si está puesto en el oído opuesto al de la sonda."""
+        return self.montaje is None or self.montaje.contra_en_el_otro()
+
+    def montaje_puesto(self, que, oido):
+        """La sonda o el fono entraron en un oído (montaje.PanelMontajeZ).
+        La sonda define el oído que se mide: el equipo pasa a ese oído.
+        Meter cualquiera de los dos en un oído NR es la falta grave."""
+        self._cortar_mediciones()
+        self._ocultar_avisos()
+        if que == 'sonda' and oido != self.Z.get_side():
+            self.side_change()
+        if self.data is not None and not self.fuera_de_uso \
+                and oido_no_realizable(self.data, 0 if oido == 'OD' else 1):
+            self.fuera_de_uso = True
+            self._log("z_no_realizable", screen='montaje', side=self.Z.get_side(),
+                      mode=self.reflex_mode, oido_nr=oido,
+                      que='sonda' if que == 'sonda' else 'auricular')
+            self.avisos[self.current_screen].mostrar(
+                f"FALTA GRAVE\n{'la sonda' if que == 'sonda' else 'el fono contralateral'} no debía entrar en {oido}\n"
+                "impedanciómetro fuera de uso en esta atención", grave=True)
+
+    def montaje_sacado(self, que, oido):
+        """Sacar la sonda (o el fono) corta lo que se estaba midiendo."""
+        self._cortar_mediciones()
+
+    def _cortar_mediciones(self):
+        self.time_ch0.stop()
+        self.probe_tone.stop()
+        self.time_reflex.stop()
+        self.reflex_tone.stop()
+        self.time_decay.stop()
+        self.time_etf.stop()
 
     def _ocultar_avisos(self):
         for aviso in self.avisos.values():
@@ -389,6 +448,14 @@ class ZControl(QWidget, UiControlZ):
         self.preCharger()
 
     def _elegir_lado(self, lado):
+        m = self.montaje
+        if m is not None and m.sonda is not None and m.sonda != lado:
+            # El oído que se mide es el de la sonda: para el otro hay que
+            # dar vuelta la sonda.
+            (self.btn_od if self.Z.get_side() == 'OD' else self.btn_oi).setChecked(True)
+            self._log("z_lado_sin_sonda", side=lado, sonda=m.sonda)
+            self.avisos[self.current_screen].mostrar(f"LA SONDA ESTÁ EN {m.sonda}\npóngala en {lado} para medirlo")
+            return
         if lado != self.Z.get_side():
             self.side_change()
 
@@ -710,6 +777,7 @@ class ZControl(QWidget, UiControlZ):
                 mode=self.reflex_mode,
                 freq=freqs[self.reflex_freq_idx],
                 dB=self.dB,
+                fono_contra=self.montaje.contra if self.montaje is not None else None,
             )
             self.reflex_stimulus()
         elif self.current_screen is self.Z_decay:
@@ -754,6 +822,8 @@ class ZControl(QWidget, UiControlZ):
             threshold = None
 
         present = threshold is not None and self.dB >= threshold
+        if self.reflex_mode == 'CONTRA' and not self._contra_llega():
+            present = False      # el tono sale por un fono que no está en el otro oído
         tipos = reflex.get('tipo')
         curve_type = tipos.get(side_key, 'normal') if isinstance(tipos, dict) else 'normal'
         x, y = Reflex_curve(present=present, dB=self.dB, threshold=threshold, curve_type=curve_type).getDataSet()
@@ -830,10 +900,13 @@ class ZControl(QWidget, UiControlZ):
         row_idx = ['500', '1000', '2000', '4000', 'NBN'].index(freq)
         threshold = self._umbral_reflejo(row_idx, probe_idx)
         present = threshold is not None and self.dB >= threshold
+        if self.reflex_mode == 'CONTRA' and not self._contra_llega():
+            present = False
         estimulado = probe_idx if self.reflex_mode == 'IPSI' else 1 - probe_idx
         decae = reflex_decay_del_caso(self.data.get('Reflex'), 'od' if estimulado == 0 else 'oi')
         x, y, pct5, pct10 = decay_curve(present, dB=self.dB, threshold=threshold, decae=decae)
-        self._log("z_stimulus_click", screen='decay', side=side, mode=self.reflex_mode, freq=freq, dB=self.dB)
+        self._log("z_stimulus_click", screen='decay', side=side, mode=self.reflex_mode, freq=freq, dB=self.dB,
+                  fono_contra=self.montaje.contra if self.montaje is not None else None)
 
         self.time_decay.stop()
         self.Z_decay.clear_response()
