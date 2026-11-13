@@ -73,11 +73,15 @@ FRASES = {
     "cansado4": "¿Cuánto dura esta atención?",
     "cansado5": "Disculpe, pero tengo calor.",
 }
-# Recorta el silencio del principio y del final, y deja todas las voces al
-# mismo volumen (el de las de niño, que ya estaban).
+# Recorta el silencio del principio y deja todas las voces al mismo volumen
+# (el de las de niño, que ya estaban). El final se recorta suave (-60 dB,
+# dejando 150 ms) y lleva medio segundo de silencio: con el corte a -45 dB
+# pegado a la voz se perdía la última sílaba, y el reproductor corta apenas
+# termina el archivo (como en scripts/voces_comandos.py, 2026-11-13).
+COLA_S = 0.5
 FILTRO = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-          "silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-          "loudnorm=I=-17:TP=-1.5:LRA=11")
+          "silenceremove=start_periods=1:start_threshold=-60dB:start_silence=0.15,areverse,"
+          f"loudnorm=I=-17:TP=-1.5:LRA=11,apad=pad_dur={COLA_S}")
 
 
 def _de_listwords(nombre):
@@ -120,13 +124,22 @@ async def generar(final, texto, voz, tono, velocidad):
         return
     os.makedirs(os.path.dirname(final), exist_ok=True)
     crudo = final + ".crudo.mp3"
-    for _ in range(4):
+    # edge-tts a veces corta sin error y deja el archivo vacío: también se
+    # reintenta (2026-11-13, al rehacer las 876 se cayó a la mitad)
+    for intento in range(8):
         try:
             await edge_tts.Communicate(texto, voz, rate=velocidad, pitch=tono).save(crudo)
-            break
+            if os.path.getsize(crudo) > 0:
+                break
+            print("vacío, reintento", final)
         except Exception as e:
             print("reintento", final, e)
-            await asyncio.sleep(2)
+        await asyncio.sleep(2 * (intento + 1))
+    else:
+        if os.path.exists(crudo):
+            os.remove(crudo)
+        print("FALLÓ", final)
+        return
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", crudo, "-af", FILTRO,
                     "-ac", "1", "-ar", "24000", "-b:a", "96k", final], check=True)
     os.remove(crudo)
@@ -134,9 +147,11 @@ async def generar(final, texto, voz, tono, velocidad):
 
 
 async def main(args):
-    pedidos = [(final, texto, VOCES[clave]) for clave, nombre, final, texto in trabajos()
-               if (not args or clave == args[0]) and (len(args) < 2 or nombre == args[1])]
-    sem = asyncio.Semaphore(4)
+    # "Sol" (lista) y "sol" (mitad de Girasol) van al mismo archivo: uno
+    # solo, si no las dos tareas pisan el mismo .crudo.mp3
+    pedidos = list({final: (final, texto, VOCES[clave]) for clave, nombre, final, texto in trabajos()
+                    if (not args or clave == args[0]) and (len(args) < 2 or nombre == args[1])}.values())
+    sem = asyncio.Semaphore(2)
 
     async def tarea(final, texto, cfg):
         async with sem:

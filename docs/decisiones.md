@@ -8872,3 +8872,14 @@ molesta, levante la mano." Preguntado en el falso aviso, el paciente baja la
 mano. El "molesta" hablado sigue para el estímulo de la inhibición residual
 que llega a su LDL y para el Stat. El backend conserva `pitos_fuertes` como
 supraliminar; `solo_si_molesta` nunca estuvo en sus listas.
+
+## Voces del paciente con cola de silencio (2026-11-13)
+
+Las 876 voces del paciente (4 voces × palabras de las listas, mitades del
+SRT, "no entendí" y frases) se rehicieron con el filtro de las
+instrucciones: el final se recorta suave (-60 dB, dejando 150 ms) y lleva
+0,5 s de silencio (`COLA_S` en `scripts/voces_edge.py`). Con el corte a
+-45 dB se perdía la última sílaba ("Sí" duraba 0,28 s; ahora 0,96 s). El
+script reintenta cuando edge-tts deja el archivo vacío (al rehacerlas se
+cayó a la mitad) y genera una sola vez las palabras que se repiten con
+otra mayúscula ("Sol" y la mitad "sol" de Girasol).
