@@ -326,6 +326,32 @@ function admin_footer(): void
     });
 })();
 </script>
+<?php
+    // Aviso de una sola vez que dejó un redirect (ver
+    // Auth::requireFullAdminSession): cartel con un botón, mismo aspecto que
+    // el de sesión por cerrarse (session_guard.js).
+    $avisoPortal = (string) ($_SESSION['aviso_portal'] ?? '');
+    unset($_SESSION['aviso_portal']);
+    if ($avisoPortal !== ''): ?>
+<div id="aviso-portal" style="position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9998; display:flex; align-items:center; justify-content:center; padding:1rem;">
+    <div role="alertdialog" aria-live="assertive" style="background:var(--color-surface, #fff); color:var(--color-text, #111); border-radius:0.6rem; padding:1.2rem 1.4rem; max-width:26rem; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.3); font-size:0.95rem;">
+        <p style="margin:0 0 0.9rem;"><?= htmlspecialchars($avisoPortal) ?></p>
+        <button type="button" class="btn" id="aviso-portal-ok">Entendido</button>
+    </div>
+</div>
+<script>
+(function () {
+    var aviso = document.getElementById('aviso-portal');
+    var ok = document.getElementById('aviso-portal-ok');
+    function cerrar() { aviso.remove(); document.removeEventListener('keydown', tecla); }
+    function tecla(e) { if (e.key === 'Escape') cerrar(); }
+    ok.addEventListener('click', cerrar);
+    aviso.addEventListener('click', function (e) { if (e.target === aviso) cerrar(); });
+    document.addEventListener('keydown', tecla);
+    ok.focus();
+})();
+</script>
+<?php endif; ?>
 <?php if (!empty($_SESSION['admin_user_id'])): ?>
 <script src="../js/session_guard.js?v=<?= admin_asset_version(__DIR__ . '/../js/session_guard.js') ?>"
         data-session-guard

@@ -404,11 +404,23 @@ final class Auth
         return self::activeStudentById((int) $viewAsId);
     }
 
-    /** Como requireAdminSession(), pero corta con 403 si es una cuenta docente (permission != admin). */
+    /**
+     * Como requireAdminSession(), pero no deja pasar a una cuenta docente
+     * (permission != admin). Al abrir la página se la devuelve a su inicio
+     * (dashboard.php) con un aviso que _layout.php muestra como cartel: un
+     * texto suelto en una página en blanco dejaba al docente sin salida. Un
+     * envío de formulario sí corta con 403, porque quien lo recibe no es
+     * una persona mirando la página.
+     */
     public static function requireFullAdminSession(): array
     {
         $user = self::requireAdminSession();
         if ((int) $user['permission'] !== self::PERMISSION_ADMIN) {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+                $_SESSION['aviso_portal'] = 'Esa sección es solo para el administrador. Te dejamos en tu inicio.';
+                header('Location: dashboard.php');
+                exit;
+            }
             http_response_code(403);
             exit('Requiere permisos de administrador completo.');
         }
