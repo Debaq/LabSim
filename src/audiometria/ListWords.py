@@ -103,6 +103,8 @@ MITADES = {
     'Rascacielos': ('rasca', 'cielos'), 'Tocadiscos': ('toca', 'discos'),
     'Medianoche': ('media', 'noche'),
 }
+# Lo que dice cuando no oye la palabra (ver no_repite).
+NO_ESCUCHA = "noescuchonada"
 # Columnas como máximo; en un panel angosto bajan hasta 2 (ver resizeEvent).
 COLUMNAS = 5
 ANCHO_PALABRA = 70
@@ -499,8 +501,7 @@ class ListWords(QWidget):
         if self.list_response[num] == 1:
             media = create_word_response(self.text, self.gender, self.id)
         else:
-            none_n = f"none{random.randint(1, 3)}"
-            media = create_word_response(none_n, self.gender, self.id)
+            media = create_word_response(self.no_repite(), self.gender, self.id)
         self.channel_0.setSource(media)
         self.channel_0.play()
 
@@ -534,6 +535,18 @@ class ListWords(QWidget):
             return self.text
         if oidas:
             return oidas[0]
+        return self.no_repite()
+
+    def no_repite(self):
+        """Lo que dice por su cuenta cuando no repite la palabra: si la oye
+        (sobre su SDT), "No entendí", "¿Qué dijo?" o "Escucho, pero no
+        entiendo" (none1-3); si no la oye, "No escucho nada". Antes decía
+        lo primero aunque no la oyera, y para separarlo había una pregunta
+        "¿No entiende?" que nadie sabía para qué era (2026-11-13)."""
+        _playable, intensidad, side, _con_mkg, int_mkg, stim_mkg = self.playable
+        if (self.prev is not None and side is not None and intensidad is not None
+                and not self.prev.detecta_sdt(side, intensidad, int_mkg or 0, stim_mkg)):
+            return NO_ESCUCHA
         return f"none{random.randint(1, 3)}"
 
     def list_success(self, number_success):

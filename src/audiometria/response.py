@@ -1300,8 +1300,6 @@ class ResponseAudiometry():
                     self.ldl(con_la_mano=True)   # baja la mano
                 return 'solofuerte'
             return 'no'
-        if pregunta == 'no_entiende':                   # ¿Escucha, pero no entiende?
-            return self._no_entiende(pasado)
         return None
 
     def _respuesta_tinnitus(self, pregunta):
@@ -1353,21 +1351,6 @@ class ResponseAudiometry():
         ldl = self.dbdata['LDL']
         return min(sum(ldl[f][o] for f in (2, 3, 4)) / 3 for o in (0, 1))
 
-    def _no_entiende(self, a):
-        """Con palabras sonando: 'si' si las detecta pero estan bajo su SRT,
-        'no' si las entiende o si ni las oye. Sin palabras, por el talkback."""
-        habla = [ch for ch in (0, 1) if a['stimOn'][ch] and a['stim'][ch] == STIM_HABLA]
-        if not habla:
-            return 'no' if self._oye_talkback() else None
-        ch = habla[0]
-        side, int_ = a['output'][ch], a['int'][ch]
-        if not self._detecta_sdt(side, int_):
-            return 'no'
-        return 'si' if int_ < self.dbdata['SRT'][side] else 'no'
-
- 
-                
-        
     def upHand(self):
         self._mano(True)
 

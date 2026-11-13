@@ -35,7 +35,7 @@ def test_cada_voz_tiene_las_palabras_el_no_entendi_y_las_frases():
         logo = os.path.join(AUDIO, "logo", "respuestas", voz)
         for p in palabras:
             assert os.path.exists(os.path.join(logo, normalize(p.lower()) + ".mp3")), (voz, p)
-        for n in ("none1", "none2", "none3"):
+        for n in ("none1", "none2", "none3", "noescuchonada"):
             assert os.path.exists(os.path.join(logo, n + ".mp3")), (voz, n)
         for f in FRASES_DEL_MOTOR:
             assert os.path.exists(os.path.join(AUDIO, "paciente", voz, f + ".mp3")), (voz, f)

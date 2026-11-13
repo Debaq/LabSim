@@ -117,7 +117,6 @@ COMANDOS = {
     "donde_lo_escucha": "¿Dónde lo escucha ahora?",
     "en_qué_oído": "¿En qué oído lo escuchó más fuerte?",
     "sonidos_distintos": "¿Los dos sonidos eran diferentes en forma?",
-    "no_entiende": "¿Escucha, pero no entiende?",
     # Lleva el recordatorio que era "Solo si molesta" (2026-11-13).
     "molesto_o": "¿Ese sonido le molestó, o solo lo escuchó fuerte? Recuerde: solo si le "
                  "molesta, levante la mano.",

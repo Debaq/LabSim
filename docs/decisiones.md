@@ -8946,3 +8946,18 @@ otra y pregunta.
   presentaciones y la respuesta) en el registro.
 - Los requisitos (frecuencia conservada, diferencia 20-40) no bloquean: el
   paciente compara igual; evaluarlos es del indicador.
+
+## Logo: el paciente dice si no oye o no entiende; fuera "¿No entiende?" (2026-11-13)
+
+La pregunta *¿No entiende?* ("¿Escucha, pero no entiende?") no la usaba
+nadie: ni el equipo sabía para qué era. En la logoaudiometría el paciente lo
+dice por su cuenta, así que salió el botón (el backend conserva
+`no_entiende` en PREGUNTAS para las atenciones anteriores).
+
+El problema que tapaba: cuando no repetía la palabra, el paciente elegía al
+azar "No entendí", "¿Qué dijo?" o "No sé" aunque ni la hubiera oído. Ahora
+(`ListWords.no_repite`), si la palabra llega bajo su SDT dice "No escucho
+nada." (`noescuchonada`); si la oye y no la entiende, "No entendí.", "¿Qué
+dijo?" o "Escucho, pero no entiendo." (none3, antes "No sé."). Vale para
+las listas y para las compuestas del SRT. Voces nuevas en las cuatro voces
+del paciente.

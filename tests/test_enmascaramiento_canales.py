@@ -167,7 +167,7 @@ class SimultaneoTest(Base):
 class PreguntasNoCortanTest(Base):
     def test_tras_una_pregunta_sigue_la_instruccion(self):
         for pregunta in ('escucha', 'dejo_de_escuchar', 'muy_fuerte',
-                         'no_entiende', 'molesto_o', 'en_qué_oído'):
+                         'molesto_o', 'en_qué_oído'):
             self.assertFalse(self.presentar(
                 [pregunta, 'ruido_otro_oido', 'colocar_fonos'], stimOn=[True, True],
                 stim=[STIM_NBN, STIM_TONO], output=[1, 0], int=[80, 70]), pregunta)

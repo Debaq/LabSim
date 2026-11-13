@@ -55,7 +55,6 @@ GRUPOS = (
         ("¿Dónde lo escucha ahora?", "donde_lo_escucha"),
         # con "Reger" en el rótulo: junto a las del Fowler se confundía
         ("Reger: ¿el primero o el segundo?", "primero_o_segundo"),
-        ("¿No entiende?", "no_entiende"),
         ("Molesto ¿o?", "molesto_o"),
         ("¿Muy fuerte?", "muy_fuerte"),
         ("¿Diferentes en forma?", "sonidos_distintos"),

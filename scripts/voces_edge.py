@@ -41,7 +41,9 @@ VOCES = {
     "male1": ("es-CL-LorenzoNeural", "+0Hz", "-10%"),
 }
 # Cuando no entendió la palabra (ListWords elige una al azar).
-NO_ENTENDIO = {"none1": "No entendí.", "none2": "¿Qué dijo?", "none3": "No sé."}
+NO_ENTENDIO = {"none1": "No entendí.", "none2": "¿Qué dijo?", "none3": "Escucho, pero no entiendo.",
+               # no oyó la palabra (ListWords.no_repite)
+               "noescuchonada": "No escucho nada."}
 # Respuestas en las otras pruebas (create_voice). Las claves son las que
 # pide el motor (response.py, response_A.py); los textos, los de las
 # grabaciones que había.

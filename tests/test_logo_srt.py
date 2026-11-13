@@ -94,6 +94,18 @@ class ListasSrtTest(unittest.TestCase):
             p, a, b = (normalize(x.lower()) for x in (palabra, a, b))
             self.assertTrue(p.startswith(a[:3]) and p.endswith(b[-3:]), palabra)
 
+    def test_si_no_la_oye_dice_que_no_escucha_nada(self):
+        """Bajo su SDT no oye la palabra: "No escucho nada". Sobre el SDT y
+        sin entenderla: "No entendí", "¿Qué dijo?" o "Escucho, pero no
+        entiendo" (2026-11-13)."""
+        caso = DEMO["40"]
+        w = ListWords(caso)
+        sdt = caso["SDT"][0]
+        w.playable = [True, sdt - 15, 0, False, None, None]
+        self.assertEqual(w.no_repite(), "noescuchonada")
+        w.playable = [True, sdt + 5, 0, False, None, None]
+        self.assertTrue(w.no_repite().startswith("none"))
+
     def test_repite_entera_media_o_nada(self):
         caso = DEMO["40"]                                  # SRT 35 en los dos
         w = ListWords(caso)

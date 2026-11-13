@@ -22,7 +22,7 @@ from impedanciometria import instrucciones  # noqa: E402
 
 AUDIO = os.path.join(RAIZ, "resources", "audio")
 # Cuando no entendió la palabra (ListWords.response elige una al azar).
-NO_ENTENDIO = ("none1", "none2", "none3")
+NO_ENTENDIO = ("none1", "none2", "none3", "noescuchonada")
 # Lo que dice el paciente fuera de las listas (create_voice): response.py y
 # response_A.py (LDL, SISI, Fowler, preguntas del talkback).
 FRASES_PACIENTE = ("si", "no", "molesta", "solofuerte", "elderecho", "elizquierdo", "iguales",
