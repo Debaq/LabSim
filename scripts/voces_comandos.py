@@ -75,8 +75,7 @@ COMANDOS = {
                       "escuche el pitito. Si lo escucha más despacio, mantenga la mano "
                       "levantada; si lo deja de escuchar, baje la mano.",
     "escuche_mi_voz": "Apenas escuche mi voz, levante la mano.",
-    "dictar_palabras": "Ahora le voy a dictar unas palabras. Necesito que las repita en voz alta, "
-                       "y repita solo lo que entienda.",
+    "dictar_palabras": "Ahora le voy a dictar unas palabras, y necesito que me las repita.",
     # SRT: el texto del equipo (2026-11-13)
     "dictar_compuestas": "Ahora le voy a dictar unas palabras. Necesito que me las repita, no "
                          "importa si entiende la mitad.",

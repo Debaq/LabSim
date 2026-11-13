@@ -490,7 +490,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar (y Stenger) | Levanta la mano mientras suena un tono que oye |
 | **Ruido en el otro oído** | Enmascaramiento (umbrales, Carhart) | Es un aviso: sigue con la instrucción que tenía y al ruido no le hace caso (sección 17) |
 | **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y **Pa pa pa** prendido (arriba, en el panel de las listas), levanta la mano si lo oye |
-| **Dictar palabras** | Logoaudiometría (discriminación) | Repite las palabras que entiende |
+| **Dictar palabras** | UMD (discriminación) | Repite las palabras que entiende |
 | **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
 | **Pitos fuertes**, luego **Molesto ¿o?** | Umbral de molestia (LDL) | Levanta la mano cuando el tono le molesta. A veces confunde fuerte con molesto y la levanta antes (entre 80 y 90 dB): pregúntale *Molesto ¿o?* (que le recuerda que la mano es solo si molesta). Si dice *«solo sonó fuerte»*, sigue subiendo; si dice *«molesta»*, esa es la LDL |
 | **Cambie de volumen** | SISI | Levanta la mano un momento cuando nota que el tono subió |

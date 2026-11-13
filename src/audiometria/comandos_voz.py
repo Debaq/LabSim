@@ -76,7 +76,7 @@ PRUEBA = {
     RUIDO_OTRO_OIDO: "Enmascaramiento",
     "mano_levantada": "Carhart / Rosemberg",
     "escuche_mi_voz": "Detección de la voz",
-    "dictar_palabras": "Logoaudiometría",
+    "dictar_palabras": "UMD",
     "dictar_compuestas": "SRT",
     "pitos_fuertes": "LDL",
     "dos_pitos": "Fowler",
