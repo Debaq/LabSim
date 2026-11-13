@@ -117,7 +117,8 @@ final class TinExaminador
 
 /**
  * La técnica completa. $err: 'oido' (compara en el oído del acúfeno),
- * 'paso5' (iguala la intensidad de a 5 dB), 'sin_octava', 'ir_corta'.
+ * 'paso5' (iguala la intensidad de a 5 dB), 'sin_octava', 'ir_corta',
+ * 'nme_tono' (el NME con tono en vez de ruido).
  */
 function tin_examen(array $err = [], $verdad = 'de fábrica'): array
 {
@@ -162,7 +163,7 @@ function tin_examen(array $err = [], $verdad = 'de fábrica'): array
     // NME: banda estrecha de 4 kHz en OI
     $x->decir('acufeno_deje_de_escuchar');
     $x->paso(5);
-    $x->canal(1, ['stim' => 'Narrow Band Noise', 'output' => 'Izquierda', 'int' => 50]);
+    $x->canal(1, ['stim' => in_array('nme_tono', $err, true) ? 'Tono' : 'Narrow Band Noise', 'output' => 'Izquierda', 'int' => 50]);
     $x->prender(1, true);
     for ($db = 55; $db <= 70; $db += 5) {
         $x->canal(1, ['int' => $db]);
@@ -220,6 +221,30 @@ t_eq(tin_regla($sec, 'Intensidad: se sube de 1 en 1')['cumple'], false, 'T03: ig
 
 $sec = tin_evaluar(tin_examen(['sin_octava']))['tinnitus'];
 t_eq(tin_regla($sec, 'Control de octava')['cumple'], false, 'T03: sin control de octava');
+
+$sec = tin_evaluar(tin_examen())['tinnitus'];
+t_eq(tin_regla($sec, 'Intensidad: el paciente avisa')['detalle'],
+    'Igualó con 16 dB HL en OD a 4 kHz: 6 dB SL sobre el umbral de ese oído (10 dB HL).', 'T03: la sonoridad en dB SL');
+t_eq(tin_regla($sec, 'NME: se sube')['detalle'],
+    'Lo dejó de oír con 70 dB HL en OI: 20 dB SL sobre el umbral de ese oído (50 dB HL).', 'T03: el NME en dB SL');
+
+// el NME con tono: la mano no sube y el indicador dice qué sonó
+$x = tin_examen(['nme_tono']);
+$x = array_values(array_filter($x, static function ($l) {
+    // sin la mano del NME: con tono el paciente no la levanta
+    static $nme = false;
+    if ($l['action'] === 'audio_talkback_press') {
+        $nme = $l['payload']['command'] === 'acufeno_deje_de_escuchar';
+    }
+    return !($nme && $l['action'] === 'audio_respuesta');
+}));
+$sec = tin_evaluar($x)['tinnitus'];
+$r = tin_regla($sec, 'NME: en el oído del acúfeno');
+t_eq($r['cumple'], false, 'T03: NME con tono no cumple');
+t_true(strpos($r['detalle'], 'Tono en OI (hasta 70 dB HL)') !== false, 'T03: NME con tono dice qué sonó -- ' . $r['detalle']);
+$r = tin_regla($sec, 'NME: se sube');
+t_eq($r['cumple'], false, 'T03: NME con tono no se mide');
+t_true(strpos($r['detalle'], 'no podía taparlo') !== false, 'T03: NME con tono dice por qué -- ' . $r['detalle']);
 
 $sec = tin_evaluar(tin_examen(['ir_corta']))['tinnitus'];
 t_eq(tin_regla($sec, 'Inhibición residual: el estímulo dura un minuto')['cumple'], false, 'T03: inhibición de medio minuto');

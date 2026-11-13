@@ -98,6 +98,9 @@ final class AudiometriaTinnitus
         $respuestasCual = [];
         $respuestasComo = [];
         $nmeNivel = null;
+        $nmeOido = null;
+        $nmeFreq = null;
+        $igualo = null;   // la última vez que levantó la mano en la intensidad
         $pasosGruesos = [];
         $tPrimeraCual = null;
         foreach ($eventos as $e) {
@@ -135,12 +138,24 @@ final class AudiometriaTinnitus
             if ($instr === self::SONORIDAD && $sonando && $e['accion'] === 'audio_intensity_change' && $e['step'] > self::PASO_FINO_DB) {
                 $pasosGruesos[] = (int) $e['step'];
             }
+            if ($instr === self::SONORIDAD && $e['mano']) {
+                foreach ([0, 1] as $c) {
+                    $canal = $e['canales'][$c];
+                    $stim = AudiometriaPaciente::estimulo((string) $canal['stim']);
+                    if (!empty($canal['on']) && (in_array($stim, self::DE_COMPARACION, true) || $stim === 'White Noise')) {
+                        $igualo = ['int' => (int) $canal['int'], 'oido' => self::oido((string) $canal['output']),
+                            'freq' => $e['freq'], 'stim' => $stim];
+                    }
+                }
+            }
             if ($instr === self::NME && $e['mano'] && $nmeNivel === null) {
                 foreach ([0, 1] as $c) {
                     $canal = $e['canales'][$c];
                     $stim = AudiometriaPaciente::estimulo((string) $canal['stim']);
                     if (!empty($canal['on']) && ($stim === 'Narrow Band Noise' || in_array($stim, self::DE_BANDA_ANCHA, true))) {
                         $nmeNivel = (int) $canal['int'];
+                        $nmeOido = self::oido((string) $canal['output']);
+                        $nmeFreq = in_array($stim, self::DE_BANDA_ANCHA, true) ? $fAcufeno : $e['freq'];
                     }
                 }
             }
@@ -245,6 +260,15 @@ final class AudiometriaTinnitus
                     'detalle' => 'Se igualó en ' . self::lista(array_map([self::class, 'hz'], $fs)) . '.',
                 ];
             }
+            // el resultado se informa en dB SL: el nivel igualado menos el
+            // umbral del oído donde se igualó, a esa frecuencia
+            $reglas[] = [
+                'texto' => 'Intensidad: el paciente avisa que suena igual de fuerte, y se informa en dB SL.',
+                'cumple' => $igualo !== null,
+                'detalle' => $igualo === null ? 'El paciente no avisó que sonara igual de fuerte.'
+                    : 'Igualó con ' . $igualo['int'] . ' dB HL en ' . self::donde($igualo['oido']) . ' a ' . self::hz($igualo['freq'])
+                        . self::enSl($paciente, $igualo['int'], $igualo['oido'], $igualo['freq']) . '.',
+            ];
         }
 
         // ---- NME -------------------------------------------------------------
@@ -265,18 +289,38 @@ final class AudiometriaTinnitus
                     $malos['banda'] = 'la banda estrecha no estaba centrada en la frecuencia elegida';
                 }
             }
+            // lo que sonó, por estímulo y oído, con el máximo al que llegó:
+            // un tono, o el ruido en el oído sin acúfeno, no lo tapan
+            $sono = [];
+            foreach ($muestras[self::NME] as $m) {
+                $k = $m['stim'] . ' en ' . self::donde($m['oido']);
+                $sono[$k] = max($sono[$k] ?? -999, $m['int']);
+            }
+            $sonoTxt = self::lista(array_map(static function ($k, $max) {
+                return $k . ' (hasta ' . $max . ' dB HL)';
+            }, array_keys($sono), $sono));
             $reglas[] = [
                 'texto' => 'NME: en el oído del acúfeno, con banda estrecha centrada en él o ruido blanco.',
                 'cumple' => $ruidos === [] ? false : $malos === [],
-                'detalle' => $ruidos === [] ? 'No se presentó ruido.'
-                    : ($malos ? ucfirst(self::lista(array_values($malos))) . '.' : 'Ruido en ' . self::lista(array_values(array_unique(array_map(static function ($m) {
-                        return $m['oido'] === null ? 'los dos oídos' : self::OIDOS[$m['oido']];
-                    }, $ruidos)))) . '.'),
+                'detalle' => $ruidos === [] ? 'No se presentó ruido: sonó ' . $sonoTxt . ', y con eso el acúfeno no se tapa.'
+                    : ($malos ? ucfirst(self::lista(array_values($malos))) . ': sonó ' . $sonoTxt . '.'
+                        : 'Ruido en ' . self::lista(array_values(array_unique(array_map(static function ($m) {
+                            return self::donde($m['oido']);
+                        }, $ruidos)))) . '.'),
             ];
+            if ($nmeNivel !== null) {
+                $nmeDetalle = 'Lo dejó de oír con ' . $nmeNivel . ' dB HL en ' . self::donde($nmeOido)
+                    . self::enSl($paciente, $nmeNivel, $nmeOido, (int) $nmeFreq) . '.';
+            } elseif ($ruidos === [] || $malos !== []) {
+                $nmeDetalle = 'El paciente no avisó que lo dejara de oír: el estímulo no podía taparlo (ver la regla anterior).';
+            } else {
+                $nmeDetalle = 'El paciente no avisó que lo dejara de oír: el ruido llegó hasta '
+                    . max(array_map(static function ($m) { return $m['int']; }, $ruidos)) . ' dB HL y no alcanzó.';
+            }
             $reglas[] = [
-                'texto' => 'NME: se sube hasta que el paciente deja de oír su acúfeno.',
+                'texto' => 'NME: se sube hasta que el paciente deja de oír su acúfeno, y se informa en dB SL.',
                 'cumple' => $nmeNivel !== null,
-                'detalle' => $nmeNivel !== null ? 'Lo dejó de oír con ' . $nmeNivel . ' dB HL.' : 'El paciente no avisó que lo dejara de oír.',
+                'detalle' => $nmeDetalle,
             ];
         }
 
@@ -402,6 +446,25 @@ final class AudiometriaTinnitus
     {
         $i = array_search($hz, AudiometriaPaciente::FRECUENCIAS, true);
         return $i === false ? null : (int) $i;
+    }
+
+    private static function donde(?int $oido): string
+    {
+        return $oido === null ? 'los dos oídos' : self::OIDOS[$oido];
+    }
+
+    /**
+     * ": N dB SL sobre el umbral de ese oído (U dB HL)", o '' si no se sabe
+     * el oído o la frecuencia no está en el audiograma.
+     */
+    private static function enSl(AudiometriaPaciente $paciente, int $nivel, ?int $oido, int $hz): string
+    {
+        $idx = self::idx($hz);
+        if ($oido === null || $idx === null) {
+            return '';
+        }
+        $umbral = $paciente->umbralReal('aerea', $idx, $oido);
+        return ': ' . ($nivel - $umbral) . ' dB SL sobre el umbral de ese oído (' . $umbral . ' dB HL)';
     }
 
     private static function oido(string $output): ?int
