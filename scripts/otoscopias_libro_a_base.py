@@ -12,6 +12,7 @@ por su ruta en el banco.
 
     python3 scripts/otoscopias_libro_a_base.py --ver     # qué subiría, sin subir
     python3 scripts/otoscopias_libro_a_base.py           # sube
+    python3 scripts/otoscopias_libro_a_base.py --normales 10   # todas las alteradas y solo 10 normales
 """
 import argparse
 import base64
@@ -138,11 +139,32 @@ def pool():
     return sorted(fotos.values(), key=lambda f: (f['tipo'] != 'normal', f['tipo'], f['ruta']))
 
 
+def elegir_normales(fotos, n):
+    """n normales repartidas por turno entre los bancos, para que haya variedad de equipo y de luz."""
+    por_banco = {}
+    for f in fotos:
+        if f['tipo'] == 'normal':
+            por_banco.setdefault(f['ruta'].split('/')[0], []).append(f)
+    elegidas = []
+    listas = [por_banco[b] for b in sorted(por_banco)]
+    i = 0
+    while len(elegidas) < n and any(listas):
+        lista = listas[i % len(listas)]
+        if lista:
+            elegidas.append(lista.pop(0))
+        i += 1
+    return elegidas
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--ver', action='store_true', help='solo mostrar qué subiría')
+    ap.add_argument('--normales', type=int, default=None,
+                    help='cuántas normales subir (repartidas entre los bancos); sin esto, todas')
     a = ap.parse_args()
     fotos = pool()
+    if a.normales is not None:
+        fotos = [f for f in fotos if f['tipo'] != 'normal'] + elegir_normales(fotos, a.normales)
     print(f'{len(fotos)} fotos:', dict(Counter(f['tipo'] for f in fotos)))
     if a.ver:
         for f in fotos:
@@ -164,6 +186,10 @@ def main():
             r = consola._llamar(url, token, cuerpo)
         except (SystemExit, Exception) as e:  # _llamar corta con sys.exit ante un error del servidor
             errores.append(f"{f['ruta']}: {e}")
+            if 'otoscopia o rostro' in str(e):
+                print('El servidor todavía no tiene el comando "biblioteca" de la consola: falta subir '
+                      'src/Consola.php, src/OtoscopiaBiblioteca.php y public/api/consola.php.')
+                sys.exit(1)
             continue
         if r.get('nuevo'):
             nuevas += 1
