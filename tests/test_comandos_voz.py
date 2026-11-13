@@ -19,7 +19,7 @@ from audiometria.comandos_voz import ComandosVoz, GRUPOS, SILENCIO  # noqa: E402
 # Las que lee response.py (history_command / DECAY_TESTS).
 CLAVES_DEL_MOTOR = {
     'colocar_fonos', 'colocar_vibrador', 'mano_levantada', 'ruido_otro_oido',
-    'ruido_blanco_contralateral', 'rosemberg_bilateral', 'pitos_fuertes', 'dos_pitos',
+    'ruido_blanco_contralateral', 'pitos_fuertes', 'dos_pitos',
     'cambie_de_volumen', 'escuche_mi_voz',
 }
 
@@ -30,7 +30,7 @@ def _claves():
 
 def test_estan_todas_las_del_motor():
     assert CLAVES_DEL_MOTOR <= set(_claves())
-    assert len(_claves()) == len(set(_claves())) == 27   # + 6 de tinnitumetría, 2026-11-06; + diploacusia; + solo el mío; - ¿Mismo volumen? (2026-11-13); 3 de ruido -> 1 aviso, - ¿Molesta?, - pa pa pa (2026-11-13)
+    assert len(_claves()) == len(set(_claves())) == 26   # + 6 de tinnitumetría, 2026-11-06; + diploacusia; + solo el mío; - ¿Mismo volumen? (2026-11-13); 3 de ruido -> 1 aviso, - ¿Molesta?, - pa pa pa, Rosemberg = Mano levantada (2026-11-13)
 
 
 def test_cada_clave_tiene_su_audio():

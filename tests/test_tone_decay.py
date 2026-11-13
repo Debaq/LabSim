@@ -127,8 +127,35 @@ class ToneDecayTest(unittest.TestCase):
         self.assertFalse(self.hand_up())
 
     # ---------- Rosemberg vs Carhart ----------
+    # Los dos con "Mano levantada": a 10 dB SL o más (umbral 20 -> 30 dB HL)
+    # la corrida es Rosemberg; más abajo, Carhart.
+    def test_el_nivel_de_partida_decide_la_prueba(self):
+        dichos = []
+        self.audio._log = lambda accion, **p: dichos.append((accion, p))
+        self.run_test("mano_levantada", stimOn=[True, False],
+                      stim=[0, 3], output=[0, 1], int=[25, 0])
+        self.assertEqual(self.r._decay_modo["cfg"]["data_key"], "Carhart")
+        self.set_audio(int=[35, 0])            # subir no la cambia
+        self.r.response_tone_decay("mano_levantada")
+        self.assertEqual(self.r._decay_modo["cfg"]["data_key"], "Carhart")
+        self.set_audio(stimOn=[False, False])  # apagar: otra corrida
+        self.r.response_tone_decay("mano_levantada")
+        self.set_audio(stimOn=[True, False], int=[30, 0])
+        self.r.response_tone_decay("mano_levantada")
+        self.assertEqual(self.r._decay_modo["cfg"]["data_key"], "Rosemberg")
+        self.assertEqual([p["prueba"] for a, p in dichos if a == "audio_deterioro_tonal"],
+                         ["Carhart", "Rosemberg"])
+        self.assertEqual([p["inicio_sl"] for a, p in dichos if a == "audio_deterioro_tonal"],
+                         [5, 10])
+
+    def test_rosemberg_usa_sus_valores_del_caso(self):
+        self.r.dbdata["Carhart"] = [[0, 0], [0, 0], [0, 0], [0, 0]]   # Carhart: no decae
+        self.run_test("mano_levantada", stimOn=[True, False],
+                      stim=[0, 3], output=[0, 1], int=[30, 0])
+        self.assertTrue(self.r.decay_timer.isActive())   # Rosemberg: 40 dB, decae
+
     def test_rosemberg_no_devuelve_tiempo_al_subir_el_nivel(self):
-        self.run_test("rosemberg_bilateral", stimOn=[True, False],
+        self.run_test("mano_levantada", stimOn=[True, False],
                       stim=[0, 3], output=[0, 1], int=[30, 0])
         primero = self.r.decay_timer.interval()
         self.assertTrue(self.hand_up())
@@ -137,7 +164,7 @@ class ToneDecayTest(unittest.TestCase):
         # pasan 20 s reales y el alumno sube 10 dB
         self.r._decay_run["start"] -= 20
         self.set_audio(int=[40, 0])
-        self.r.response_tone_decay("rosemberg_bilateral")
+        self.r.response_tone_decay("mano_levantada")
         segundo = self.r.decay_timer.interval()
 
         # a 40 dB el hold "bruto" es mayor que a 30, pero se le descuentan
@@ -146,27 +173,28 @@ class ToneDecayTest(unittest.TestCase):
         self.assertAlmostEqual(segundo, bruto_40 - 20000, delta=1500)
 
     def test_carhart_reinicia_el_minuto_en_cada_subida(self):
+        # parte a 5 dB SL (umbral 20): Carhart
         self.run_test("mano_levantada", stimOn=[True, False],
-                      stim=[0, 3], output=[0, 1], int=[30, 0])
+                      stim=[0, 3], output=[0, 1], int=[25, 0])
         self.set_audio(int=[40, 0])
         self.r.response_tone_decay("mano_levantada")
         bruto_40 = self.r.DECAY_HOLD_MS * (40 - 20) / 40
         self.assertAlmostEqual(self.r.decay_timer.interval(), bruto_40, delta=1)
 
     def test_rosemberg_agotado_el_minuto_ya_no_sostiene(self):
-        self.run_test("rosemberg_bilateral", stimOn=[True, False],
+        self.run_test("mano_levantada", stimOn=[True, False],
                       stim=[0, 3], output=[0, 1], int=[30, 0])
         self.r._decay_run["start"] -= 120
         self.set_audio(int=[35, 0])
-        self.r.response_tone_decay("rosemberg_bilateral")
+        self.r.response_tone_decay("mano_levantada")
         self.assertFalse(self.hand_up())
 
     def test_rosemberg_reinicia_al_cambiar_de_oido(self):
-        self.run_test("rosemberg_bilateral", stimOn=[True, False],
+        self.run_test("mano_levantada", stimOn=[True, False],
                       stim=[0, 3], output=[0, 1], int=[30, 0])
         self.r._decay_run["start"] -= 30
         self.set_audio(output=[1, 0])   # ahora OI, que no decae
-        self.r.response_tone_decay("rosemberg_bilateral")
+        self.r.response_tone_decay("mano_levantada")
         self.assertTrue(self.hand_up())
         self.assertFalse(self.r.decay_timer.isActive())
 
@@ -174,7 +202,7 @@ class ToneDecayTest(unittest.TestCase):
     def test_mover_otra_perilla_no_alarga_el_tono(self):
         # Carhart corriendo, mano arriba con un hold ya calculado
         self.run_test("mano_levantada", stimOn=[True, False],
-                      stim=[0, 3], output=[0, 1], int=[30, 0])
+                      stim=[0, 3], output=[0, 1], int=[25, 0])
         inicial = self.r.decay_timer.interval()
 
         # pasan 5 s y el alumno toca algo que no es el nivel (aca se simula
@@ -188,7 +216,7 @@ class ToneDecayTest(unittest.TestCase):
 
     def test_subir_el_nivel_si_reinicia_el_minuto_en_carhart(self):
         self.run_test("mano_levantada", stimOn=[True, False],
-                      stim=[0, 3], output=[0, 1], int=[30, 0])
+                      stim=[0, 3], output=[0, 1], int=[25, 0])
         self.r._decay_run["start"] -= 15
         self.set_audio(int=[35, 0])
         self.r.response_tone_decay("mano_levantada")
@@ -197,7 +225,7 @@ class ToneDecayTest(unittest.TestCase):
 
     def test_apagar_el_estimulo_reinicia_la_cuenta(self):
         self.run_test("mano_levantada", stimOn=[True, False],
-                      stim=[0, 3], output=[0, 1], int=[30, 0])
+                      stim=[0, 3], output=[0, 1], int=[25, 0])
         self.r._decay_run["start"] -= 30
         self.set_audio(stimOn=[False, False])
         self.r.response_tone_decay("mano_levantada")
@@ -206,8 +234,8 @@ class ToneDecayTest(unittest.TestCase):
 
         self.set_audio(stimOn=[True, False])
         self.r.response_tone_decay("mano_levantada")
-        bruto_30 = self.r.DECAY_HOLD_MS * (30 - 20) / 40
-        self.assertAlmostEqual(self.r.decay_timer.interval(), bruto_30, delta=1)
+        bruto_25 = self.r.DECAY_HOLD_MS * (25 - 20) / 40
+        self.assertAlmostEqual(self.r.decay_timer.interval(), bruto_25, delta=1)
 
     def test_stat_recalculado_no_estira_el_minuto(self):
         # OD con 40 dB de deterioro: lo sostiene ~22 s a 100 dB HL

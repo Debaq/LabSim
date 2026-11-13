@@ -69,9 +69,11 @@ COMANDOS = {
     "ruido_otro_oido": "Ahora le voy a poner un ruido en el otro oído. A ese ruido no le "
                        "haga caso.",
     # INSTRUCCIONES
-    "mano_levantada": "Va a escuchar un pito continuo. Necesito que mantenga la mano levantada "
-                      "todo el tiempo que escuche el pito. Si lo deja de escuchar, baja la mano. "
-                      "Si lo escucha más despacio, mantenga la mano levantada.",
+    # Carhart y Rosemberg: la misma consigna (el motor deduce cuál por el
+    # nivel en que parte, ver response.ROSEMBERG_DESDE_SL).
+    "mano_levantada": "Va a escuchar un pitito. Mantenga la mano levantada todo el tiempo que "
+                      "escuche el pitito. Si lo escucha más despacio, mantenga la mano "
+                      "levantada; si lo deja de escuchar, baje la mano.",
     "escuche_mi_voz": "Apenas escuche mi voz, levante la mano.",
     "dictar_palabras": "Ahora le voy a dictar unas palabras. Necesito que las repita en voz alta, "
                        "y repita solo lo que entienda.",
@@ -91,10 +93,6 @@ COMANDOS = {
                                   "ruido por la otra. A ese ruido no le haga caso. Necesito que "
                                   "mantenga la mano levantada todo el tiempo que escuche el "
                                   "pito. Si lo deja de escuchar, baja la mano.",
-    "rosemberg_bilateral": "Va a escuchar un pito continuo, primero en una orejita y después "
-                           "en la otra. Necesito que mantenga la mano levantada todo el tiempo "
-                           "que escuche el pito. Si lo deja de escuchar, baja la mano, y la "
-                           "vuelve a levantar cuando lo escuche de nuevo.",
     # No es una instrucción: la voz en vivo del SDT, en el panel de las
     # listas (ListWords). Suena en bucle por el canal con Habla.
     "pa_pa_pa": "Hola, hola, hola, hola, hola, hola. Pa, pa, pa, pa, pa.",

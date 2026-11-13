@@ -8796,3 +8796,27 @@ Revisión de las frases con él, tras el aviso único de ruido:
   levanta la mano y se le pregunta "¿ese le molestó o solo sonó fuerte?":
   si molestó se marca, si solo sonó fuerte se sigue subiendo. *Rosemberg
   bilateral* queda pendiente.
+
+## Carhart y Rosemberg: un solo botón, la prueba sale del nivel de partida (2026-11-13)
+
+En el laboratorio el Rosemberg se instruye igual que el Carhart ("va a
+escuchar un pitito, mantenga la mano levantada todo el tiempo que escuche el
+pitito") y se hace a 10 dB sobre el umbral. Se sacó *Rosemberg bilateral*:
+queda *Mano levantada* (rótulo "Carhart / Rosemberg", texto nuevo con
+"pitito") y el motor deduce cuál hace el alumno por el primer nivel de cada
+corrida (tono prendido en un oído y frecuencia), contra el umbral real del
+oído (enmascarado si corresponde):
+
+- menos de 10 dB SL (`ROSEMBERG_DESDE_SL`): Carhart — cada subida reinicia
+  el minuto, valores *Carhart* del caso;
+- 10 dB SL o más: Rosemberg — el minuto es total, valores *Rosemberg* del
+  caso.
+
+Subir el nivel no cambia la prueba; apagar el tono o cambiar de oído o de
+frecuencia empieza otra corrida. Cada corrida deja `audio_deterioro_tonal`
+(prueba, oído, frecuencia, `inicio_sl`) en el registro. El Rosemberg ahora
+admite enmascaramiento como el Carhart (antes no exigía nada en el otro
+oído). Se descartó deducirlo por cuándo para el alumno (minuto total vs
+minuto en un nivel): el paciente tiene que responder mientras la prueba
+corre, antes de saber dónde va a parar. El backend no evalúa todavía cuál
+eligió; conserva `rosemberg_bilateral` para las atenciones anteriores.

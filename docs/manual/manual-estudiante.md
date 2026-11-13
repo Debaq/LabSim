@@ -495,8 +495,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
 | **Cambie de volumen** | SISI | Dice *«sí»* cuando nota que el tono subió |
 | **Dos pitos**, luego **¿En qué oído?**. Al terminar, **¿Diferentes en forma?** | Fowler | Dice en qué oído suena más fuerte (*«el derecho»*, *«el izquierdo»*) o *«los escucho iguales»*; al final, si los dos tonos sonaban distintos (diploacusia) |
-| **Mano levantada** | Deterioro tonal (Carhart) | Mantiene la mano arriba mientras siga oyendo el tono |
-| **Rosemberg bilateral** | Deterioro tonal (Rosemberg) | Igual que Carhart |
+| **Mano levantada** | Deterioro tonal (Carhart o Rosemberg) | Mantiene la mano arriba mientras siga oyendo el tono. Si partes en el umbral (o 5 dB sobre él) es un Carhart: cada subida reinicia el minuto. Si partes 10 dB sobre el umbral o más es un Rosemberg: el minuto es uno solo |
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Compare con su ruido**, luego **¿Cuál se parece más?** | Tinnitumetría: tono | Dice cuál de los últimos sonidos que oyó (hasta tres) se parece más a su acúfeno: *«el primero»*, *«el segundo»* o *«el tercero»* |
 | **Igual de fuerte que su ruido** | Tinnitumetría: intensidad | Levanta la mano cuando el sonido suena igual de fuerte que su acúfeno |
@@ -539,7 +538,7 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
 
 - **SISI**: instrucción *Cambie de volumen*, paso **1** dB. Con el tono sonando, sube la intensidad de a 1 dB; el paciente dice *«sí»* cuando lo nota. Las subidas de 5 dB las nota siempre (sirven para familiarizarlo).
 - **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿En qué oído?* y *Talkback*: contesta cuál suena más fuerte o que los escucha iguales. Para otra frecuencia, repite *Dos pitos*. Al terminar la prueba, *¿Diferentes en forma?* para anotar la diploacusia.
-- **Deterioro tonal**: tono **continuo** por vía aérea en 500, 1000, 2000 o 4000 Hz, e instrucción *Mano levantada* (Carhart) o *Rosemberg bilateral*. El paciente mantiene la mano arriba mientras oye; cronometra con *Iniciar / Detener / Borrar*. El minuto es real.
+- **Deterioro tonal**: tono **continuo** por vía aérea en 500, 1000, 2000 o 4000 Hz, e instrucción *Mano levantada*, para el Carhart y para el Rosemberg: el nivel en que partes dice cuál haces (umbral o +5 dB = Carhart; +10 dB o más = Rosemberg). El paciente mantiene la mano arriba mientras oye; cronometra con *Iniciar / Detener / Borrar*. El minuto es real.
 - **LDL**: instrucción *Pitos fuertes*. El paciente dice *«molesta»* al **presentar** el tono a una intensidad que le molesta.
 - **Tinnitumetría**: una instrucción por parte, dos en la inhibición residual (tabla de la sección 16).
     - *Tono*: después de *Compare con su ruido*, presenta los sonidos de a uno (Tono, FM o NBN) y pregunta *¿Cuál se parece más?*. El paciente compara solo lo que oyó desde la pregunta anterior, hasta los tres últimos; con menos de dos, dice *«no sé»*.

@@ -294,10 +294,10 @@ Nota de registro: la app ya emite audio_logo_response, audio_logo_reset, audio_c
 - Dudas: (1) ¿se exigen dos frecuencias o una? (2) ¿Enmascarar contralateral siempre o según regla? (3) cortes sin fuente puntual.
 
 ### Deterioro tonal: Rosenberg (fuente: H06 §Rosenberg)
-- Resumen: igual que Carhart pero un único minuto total, desde 5 dB sobre el umbral.
+- Resumen: igual que Carhart pero un único minuto total, desde 10 dB sobre el umbral (el autor, 2026-11-13; el libro H06 dice 5 dB SL).
 - Pasos:
-  1. Instrucción "Rosemberg bilateral". [registrado: talkback rosemberg_bilateral]
-  2. Partir 5 dB sobre el umbral, tono continuo y cronómetro en marcha. [registrado]
+  1. Instrucción "Mano levantada", la misma del Carhart. [registrado: talkback; atenciones viejas: rosemberg_bilateral]
+  2. Partir 10 dB sobre el umbral, tono continuo y cronómetro en marcha: así el motor lo toma por Rosemberg. [registrado: audio_deterioro_tonal]
   3. Cada vez que baja la mano, subir 5 dB sin reiniciar el reloj. [registrado: audio_cronometro sin reinicio]
   4. Cortar a los 60 s totales. [registrado]
 - Lo que debería anotar: dB subidos durante ese minuto (mismas lecturas que Carhart).

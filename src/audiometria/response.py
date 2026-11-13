@@ -50,14 +50,13 @@ class ResponseAudiometry():
     # clínicamente válida (índices de self.frecuency) y qué debe pasar en el
     # oído contralateral. 'mask' = enmascarado en condiciones de umbral
     # aéreo (igual que colocar_fonos); 'white_noise' = ruido blanco
-    # obligatorio; None = sin exigencia (Rosemberg es bilateral pero cada
-    # oído se evalúa solo, uno a la vez).
+    # obligatorio.
     # 'fixed_level': el tono se presenta a un nivel unico de protocolo y no se
     # escala (Stat). 'cumulative': el minuto es total desde que empezo la
     # prueba y NO se reinicia al subir dB (Rosemberg); sin la marca, cada
     # subida reinicia el reloj (Carhart).
     DECAY_TESTS = {
-        'mano_levantada': {                  # Carhart
+        'mano_levantada': {                  # Carhart (o ROSEMBERG, ver abajo)
             'data_key': 'Carhart', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
         },
         # El Carhart enmascarado es "Mano levantada" + el aviso "Ruido en el
@@ -66,11 +65,18 @@ class ResponseAudiometry():
             'data_key': 'Stat', 'frequencies': [2, 3, 4], 'contra': 'white_noise',
             'fixed_level': True,
         },
-        'rosemberg_bilateral': {              # Rosemberg
-            'data_key': 'Rosemberg', 'frequencies': [2, 3, 4, 6], 'contra': None,
-            'cumulative': True,
-        },
     }
+    # Carhart y Rosemberg se instruyen igual ("Mano levantada"): el motor
+    # deduce cuál hace el alumno por dónde parte cada corrida (tono prendido
+    # en un oído y frecuencia). Desde ROSEMBERG_DESDE_SL dB sobre el umbral
+    # es Rosemberg (el laboratorio lo hace a 10 dB SL); más abajo, Carhart,
+    # que parte en el umbral (2026-11-13). Lo deducido queda en el registro
+    # (audio_deterioro_tonal).
+    ROSEMBERG = {
+        'data_key': 'Rosemberg', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
+        'cumulative': True,
+    }
+    ROSEMBERG_DESDE_SL = 10
 
     # Stat (Jerger): tono continuo a nivel fijo alto -- 110 dB SPL, que en
     # supraaural queda alrededor de 100 dB HL -- durante un minuto, con ruido
@@ -142,6 +148,8 @@ class ResponseAudiometry():
         # que prueba/oido/frecuencia empezo y cuando, para que subir dB no
         # devuelva el minuto entero
         self._decay_run = {}
+        # Carhart o Rosemberg de la corrida en curso (_carhart_o_rosemberg)
+        self._decay_modo = {}
 
 
     def set_case(self,dbdata):
@@ -402,7 +410,24 @@ class ResponseAudiometry():
         """Corta la corrida: sin tono válido no hay prueba que cronometrar."""
         self.decay_timer.stop()
         self._decay_run = {}
+        self._decay_modo = {}
         self.downHand()
+
+    def _carhart_o_rosemberg(self, cfg, ear, freq, sl):
+        """Con "Mano levantada" la prueba la decide el primer nivel de la
+        corrida: desde ROSEMBERG_DESDE_SL dB sobre el umbral, Rosemberg; si
+        no, Carhart. Subir el nivel no la cambia; apagar el tono, cambiar de
+        oído o de frecuencia empieza otra corrida."""
+        if self._decay_modo.get('key') != (ear, freq):
+            rosemberg = sl >= self.ROSEMBERG_DESDE_SL
+            self._decay_modo = {'key': (ear, freq),
+                                'cfg': self.ROSEMBERG if rosemberg else cfg}
+            log = getattr(self.obj_audio, "_log", None)
+            if log is not None:
+                log("audio_deterioro_tonal",
+                    prueba='Rosemberg' if rosemberg else 'Carhart',
+                    oido=('OD', 'OI')[ear], freq=self.frecuency[freq], inicio_sl=sl)
+        return self._decay_modo['cfg']
 
     def _decay_elapsed_ms(self, cfg, command, ear, freq, int_):
         """Milisegundos que lleva corriendo esta presentación, medidos en
@@ -466,8 +491,8 @@ class ResponseAudiometry():
         freq = self.data['audio']['freq']
         int_ = self.data['audio']['int'][stim_on]
 
-        decay_total = self._decay_total(cfg, freq, ear)
-        if decay_total is None:  # frecuencia fuera del protocolo de la prueba
+        if self._decay_total(cfg, freq, ear) is None:
+            # frecuencia fuera del protocolo de la prueba
             self._decay_abort()
             return
 
@@ -506,6 +531,10 @@ class ResponseAudiometry():
         if int_ < threshold:
             self._decay_abort()
             return
+
+        if command == 'mano_levantada':
+            cfg = self._carhart_o_rosemberg(cfg, ear, freq, int_ - threshold)
+        decay_total = self._decay_total(cfg, freq, ear)
 
         side = 'OD' if ear == 0 else 'OI'
         nivel_stat = self.STAT_LEVEL_DB.get(freq, 100)
