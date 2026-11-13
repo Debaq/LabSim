@@ -23,6 +23,12 @@ final class AudiometriaTinnitus
 {
     private const TONO = 'acufeno_cual_se_parece';
     private const SONORIDAD = 'acufeno_igual_fuerte';
+    /**
+     * NME con la mano ("Hasta que no escuche su ruido"): salió de la app el
+     * 2026-11-13; queda para leer las atenciones anteriores. Desde ese día
+     * el NME es "Solo escuche el mío": el nivel en que el paciente dice
+     * "ahora solo escucho el suyo".
+     */
     private const NME = 'acufeno_deje_de_escuchar';
     private const SOLO_EL_MIO = 'acufeno_solo_el_mio';
     private const INHIBICION = 'acufeno_un_minuto';
@@ -120,6 +126,7 @@ final class AudiometriaTinnitus
         $tPrimeraCual = null;
         $ref = null;            // donde dijo "ahora solo escucho el suyo"
         $pidioSoloElMio = false;
+        $dijoUnMinuto = false;
         foreach ($eventos as $e) {
             if ($e['accion'] === 'audio_acufeno_respuesta') {
                 $p = $e['p'];
@@ -139,8 +146,12 @@ final class AudiometriaTinnitus
             if ($instr === null) {
                 continue;
             }
+            if ($instr === self::INHIBICION) {
+                $dijoUnMinuto = true;
+            }
             if ($instr === self::SOLO_EL_MIO) {
-                // las dos instrucciones son la inhibición residual
+                // lo que suena va con la inhibición residual: es el mismo
+                // estímulo, que después se sube 15 dB
                 $pidioSoloElMio = true;
                 $instr = self::INHIBICION;
             }
@@ -195,12 +206,27 @@ final class AudiometriaTinnitus
             }))
         );
 
+        // NME: con la instrucción vieja, la mano; si no, "solo escuche el
+        // mío" (el nivel en que dijo "ahora solo escucho el suyo")
+        $nmeViejo = $muestras[self::NME] !== [];
+        if (!$nmeViejo && $ref !== null) {
+            $nmeNivel = $ref['int'];
+            $nmeOido = $ref['oido'];
+            $nmeFreq = (int) $ref['freq'];
+        }
+        // la inhibición residual es lo que sigue al NME: subir, el minuto y
+        // las preguntas
+        $despuesDelNme = $ref === null ? [] : array_values(array_filter($muestras[self::INHIBICION],
+            static function ($m) use ($ref) { return $m['t'] > $ref['t']; }));
+        $inhibicionHecha = $nmeViejo ? $muestras[self::INHIBICION] !== []
+            : ($dijoUnMinuto || $respuestasComo !== [] || $despuesDelNme !== []);
+
         // ---- las cuatro partes ---------------------------------------------
         $partes = [
             'tono' => $respuestasCual !== [],
             'intensidad' => $muestras[self::SONORIDAD] !== [],
-            'NME' => $muestras[self::NME] !== [],
-            'inhibición residual' => $muestras[self::INHIBICION] !== [],
+            'NME' => $nmeViejo || $pidioSoloElMio,
+            'inhibición residual' => $inhibicionHecha,
         ];
         // si no cabe bajo la molestia, la inhibición no se hace: 15 dB sobre
         // el nivel en que dijo "solo escucho el suyo" o, si no se llegó a
@@ -314,7 +340,29 @@ final class AudiometriaTinnitus
         }
 
         // ---- NME -------------------------------------------------------------
-        if ($partes['NME']) {
+        if ($partes['NME'] && !$nmeViejo) {
+            if ($ref !== null) {
+                $nmeDetalle = 'Solo escuchó el estímulo con ' . $ref['int'] . ' dB HL en ' . self::donde($ref['oido'])
+                    . ' a ' . self::hz((int) $ref['freq'])
+                    . self::enSl($paciente, $ref['int'], $ref['oido'], (int) $ref['freq']) . '.';
+            } else {
+                $sono = [];
+                foreach ($muestras[self::INHIBICION] as $m) {
+                    $k = $m['stim'] . ' de ' . self::hz((int) $m['freq']) . ' en ' . self::donde($m['oido']);
+                    $sono[$k] = max($sono[$k] ?? -999, $m['int']);
+                }
+                $nmeDetalle = 'El paciente no dijo que solo escuchara el estímulo'
+                    . ($sono === [] ? '.' : ': sonó ' . self::lista(array_map(static function ($k, $max) {
+                        return $k . ' (hasta ' . $max . ' dB HL)';
+                    }, array_keys($sono), $sono)) . '; tiene que ir al oído del acúfeno, a una octava o menos de él.');
+            }
+            $reglas[] = [
+                'texto' => 'NME: con "Solo escuche el mío", se sube hasta que el paciente solo escucha el estímulo, y se informa en dB SL.',
+                'cumple' => $ref !== null,
+                'detalle' => $nmeDetalle,
+            ];
+        }
+        if ($partes['NME'] && $nmeViejo) {
             $ruidos = array_values(array_filter($muestras[self::NME], static function ($m) {
                 return $m['stim'] === 'Narrow Band Noise' || in_array($m['stim'], self::DE_BANDA_ANCHA, true);
             }));
@@ -408,11 +456,14 @@ final class AudiometriaTinnitus
             } else {
                 $refDetalle = 'No se pidió: se pasó directo al minuto.';
             }
-            $reglas[] = [
-                'texto' => 'Inhibición residual: se parte con "avíseme cuando solo escuche el mío y no el suyo", subiendo hasta que el paciente solo escucha el estímulo.',
-                'cumple' => $ref !== null,
-                'detalle' => $refDetalle,
-            ];
+            if ($nmeViejo) {
+                // sin la NME vieja, este paso es la regla del NME
+                $reglas[] = [
+                    'texto' => 'Inhibición residual: se parte con "avíseme cuando solo escuche el mío y no el suyo", subiendo hasta que el paciente solo escucha el estímulo.',
+                    'cumple' => $ref !== null,
+                    'detalle' => $refDetalle,
+                ];
+            }
             // lo más alto que sonó después de que lo dijo: el minuto
             $despues = $ref === null ? [] : array_values(array_filter($ir, static function ($m) use ($ref) {
                 return $m['t'] >= $ref['t'];

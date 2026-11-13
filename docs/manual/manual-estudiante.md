@@ -500,8 +500,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Compare con su ruido**, luego **¿Cuál se parece más?** | Tinnitumetría: tono | Dice cuál de los últimos sonidos que oyó (hasta tres) se parece más a su acúfeno: *«el primero»*, *«el segundo»* o *«el tercero»* |
 | **Igual de fuerte que su ruido** | Tinnitumetría: intensidad | Levanta la mano cuando el sonido suena igual de fuerte que su acúfeno |
-| **Hasta que no escuche su ruido** | Tinnitumetría: NME | Levanta la mano cuando el ruido le tapa el acúfeno |
-| **Solo escuche el mío** | Tinnitumetría: inhibición residual | Dice *«Ahora solo escucho el suyo»* cuando el sonido le tapa el acúfeno |
+| **Solo escuche el mío** | Tinnitumetría: NME (y de ahí la inhibición residual) | Dice *«Ahora solo escucho el suyo»* cuando el sonido le tapa el acúfeno: ese nivel es el NME |
 | **Un minuto de sonido**, luego **¿Cómo está su ruido?** | Tinnitumetría: inhibición residual | Con el sonido ya apagado, dice cómo quedó su acúfeno |
 
 > Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** y el aviso **Ruido en el otro oído** no: el paciente sigue con la instrucción que tenía. Si después de *Solo si molesta* le preguntas *Molesto ¿o?*, contesta y sigue respondiendo a la LDL.
@@ -544,8 +543,8 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
 - **Tinnitumetría**: una instrucción por parte, dos en la inhibición residual (tabla de la sección 16).
     - *Tono*: después de *Compare con su ruido*, presenta los sonidos de a uno (Tono, FM o NBN) y pregunta *¿Cuál se parece más?*. El paciente compara solo lo que oyó desde la pregunta anterior, hasta los tres últimos; con menos de dos, dice *«no sé»*.
     - *Intensidad*: con *Igual de fuerte que su ruido* y paso **1** dB, sube el sonido con el estímulo sonando hasta que levante la mano.
-    - *NME*: con *Hasta que no escuche su ruido*, el ruido en el canal 2 (NBN o WN). Levanta la mano cuando el ruido le tapa el acúfeno; *¿Lo dejó de escuchar?* también lo contesta.
-    - *Inhibición residual*: en el oído del acúfeno, una octava abajo de su frecuencia. Con *Solo escuche el mío*, sube el estímulo hasta que el paciente diga *«Ahora solo escucho el suyo»*; súbelo 15 dB más, da *Un minuto de sonido* y déjalo sonar un minuto (cronómetro). Al apagarlo, *¿Cómo está su ruido?* contesta según cuánto tiempo sonó y cuánto pasó desde que lo apagaste.
+    - *NME*: en el oído del acúfeno, una octava abajo de su frecuencia (o a una octava o menos de ella). Con *Solo escuche el mío*, sube el estímulo hasta que el paciente diga *«Ahora solo escucho el suyo»*: ese nivel, en dB SL, es el NME.
+    - *Inhibición residual*: con el mismo estímulo, desde el NME súbelo 15 dB más, da *Un minuto de sonido* y déjalo sonar un minuto (cronómetro). Al apagarlo, *¿Cómo está su ruido?* contesta según cuánto tiempo sonó y cuánto pasó desde que lo apagaste.
     - Un paciente sin acúfeno se extraña al terminar la instrucción (*«¿Qué ruido?»*), dice que no tiene con qué comparar y no levanta la mano.
 - **Stenger**: instrucción *Colocar fonos*, la misma de los umbrales (al paciente no se le anuncia nada distinto). Los dos canales en *Tono*, uno a cada oído, sonando a la vez. El paciente levanta la mano si oye un pito.
 

@@ -8840,3 +8840,22 @@ pregunta no aportaba nada.
   quien no confirma anota una LDL falsa.
 - Registro: `audio_ldl_falso` (oído, frecuencia, nivel, LDL real) al
   sortearse y `audio_ldl_aclarado` cuando la pregunta lo deshace.
+
+## Tinnitumetría: el NME es "Solo escuche el mío" (2026-11-13)
+
+Se sacó *Hasta que no escuche su ruido* (`acufeno_deje_de_escuchar`): medía
+lo mismo que *Solo escuche el mío* ("Escuche mi pitido. Avíseme cuando solo
+escuche el mío y no el suyo"), que tiene la mejor lógica. El nivel en que el
+paciente dice "Ahora solo escucho el suyo" (el estímulo llega a su NME en el
+oído del acúfeno, a una octava o menos de él) es el NME; la inhibición
+residual sigue con el mismo estímulo, 15 dB más arriba, un minuto. En el
+motor salieron la mano del NME (`Tinnitumetria.tapa`) y su "¿Lo dejó de
+escuchar?".
+
+El indicador T03 (`AudiometriaTinnitus`) sigue con cuatro partes: el NME
+cuenta como hecho con *Solo escuche el mío* y su regla es "se sube hasta que
+el paciente solo escucha el estímulo, y se informa en dB SL"; el resultado
+(lo que debió anotar) sale de ese nivel. La inhibición residual cuenta como
+hecha con lo que sigue (subir, *Un minuto de sonido*, *¿Cómo está su
+ruido?*). Las atenciones anteriores, con la NME de la mano, se siguen
+leyendo como antes.

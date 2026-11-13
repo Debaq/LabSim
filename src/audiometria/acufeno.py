@@ -9,21 +9,21 @@ sortea acá, igual en cada apertura (stable_seed por caso): la sonoridad
 residual. El docente puede fijarlos en la ficha; "auto" o vacío = sorteo.
 
 Las cuatro partes de la técnica tienen su instrucción en el talkback
-(comandos_voz.py; la inhibición residual, dos) y el paciente responde así:
+(comandos_voz.py) y el paciente responde así:
 
 - Tono (`acufeno_cual_se_parece` + `¿Cuál se parece más?`): compara los
   estímulos que oyó desde la última pregunta (los tres últimos) y elige el
   más cercano en octavas a la frecuencia del acúfeno.
 - Sonoridad (`acufeno_igual_fuerte`): levanta la mano cuando el estímulo
   llega a su umbral + la sonoridad, en el oído donde suena.
-- NME (`acufeno_deje_de_escuchar`): levanta la mano cuando un ruido que
-  cubre la frecuencia del acúfeno llega al NME en todos los oídos donde
-  suena el acúfeno.
-- Inhibición residual: primero `acufeno_solo_el_mio` ("Escuche mi
-  pitido. Avíseme cuando solo escuche el mío y no el suyo"): el estímulo
-  sube y, cuando llega al NME en el oído del acúfeno a una octava o menos
-  de él, dice "Ahora solo escucho el suyo". El alumno sube 15 dB desde ahí y
-  lo deja un minuto (`acufeno_un_minuto`, o sin decir nada más). Con
+- NME (`acufeno_solo_el_mio`, "Escuche mi pitido. Avíseme cuando solo
+  escuche el mío y no el suyo"): el estímulo sube y, cuando llega al NME en
+  el oído del acúfeno a una octava o menos de él, dice "Ahora solo escucho
+  el suyo". Antes había además "Hasta que no escuche su ruido"
+  (`acufeno_deje_de_escuchar`, con la mano): era la misma medida y salió el
+  2026-11-13.
+- Inhibición residual: el alumno sube 15 dB desde el NME y lo deja un
+  minuto (`acufeno_un_minuto`, o sin decir nada más). Con
   `¿Cómo está su ruido?` contesta según la inhibición del caso; pasado otro
   minuto, vuelve a como estaba salvo que la inhibición se mantenga. El
   minuto lo cuenta desde que el estímulo pasa el NME, con cualquiera de las
@@ -60,10 +60,9 @@ MANTIENE_PROB = 0.2
 # Instrucciones y preguntas del talkback (claves de comandos_voz.py).
 INSTR_TONO = "acufeno_cual_se_parece"
 INSTR_SONORIDAD = "acufeno_igual_fuerte"
-INSTR_NME = "acufeno_deje_de_escuchar"
-INSTR_SOLO_EL_MIO = "acufeno_solo_el_mio"   # empieza la inhibición residual
+INSTR_SOLO_EL_MIO = "acufeno_solo_el_mio"   # el NME, y de ahí la inhibición residual
 INSTR_INHIBICION = "acufeno_un_minuto"
-INSTRUCCIONES = (INSTR_TONO, INSTR_SONORIDAD, INSTR_NME, INSTR_SOLO_EL_MIO, INSTR_INHIBICION)
+INSTRUCCIONES = (INSTR_TONO, INSTR_SONORIDAD, INSTR_SOLO_EL_MIO, INSTR_INHIBICION)
 DE_INHIBICION = (INSTR_SOLO_EL_MIO, INSTR_INHIBICION)
 PREG_CUAL = "acufeno_cual"
 PREG_COMO = "acufeno_como_esta"
@@ -93,9 +92,8 @@ JUNTAR_S = 1.5
 # El minuto de la inhibición, con la tolerancia de quien mira el reloj.
 MINUTO_S = 60
 MINUTO_TOLERANCIA_S = 5
-# El NBN tapa el acúfeno si está centrado a media octava o menos de él; el
-# estímulo de la inhibición, a una octava o menos.
-NBN_OCTAVAS = 0.5
+# El estímulo del NME y de la inhibición tapa el acúfeno a una octava o
+# menos de él.
 INHIBICION_OCTAVAS = 1.0
 
 
@@ -304,17 +302,6 @@ class Tinnitumetria:
         if octavas(FRECUENCIAS[audio["freq"]], self.acufeno.freq) > max_octavas:
             return False
         return self._sl(audio, ch, oido) >= sl_min
-
-    def tapa(self, audio):
-        """Dejó de oír su acúfeno: un ruido que cubre su frecuencia llega al
-        NME en cada oído donde suena."""
-        if not self.acufeno.presente:
-            return False
-        ruidos = self._canales(audio, (_NBN,) + _DE_BANDA_ANCHA)
-        return all(any(o in self._oidos(ch, audio)
-                       and self._cubre(audio, ch, o, NBN_OCTAVAS, self.acufeno.nme_sl)
-                       for ch in ruidos)
-                   for o in self.acufeno.oidos)
 
     # ---- inhibición residual ---------------------------------------------
 

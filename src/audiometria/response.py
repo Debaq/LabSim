@@ -213,8 +213,8 @@ class ResponseAudiometry():
 
     def response_tinnitus(self, instruccion):
         """Tinnitumetría (ver acufeno.py): la mano dice "igual de fuerte"
-        en la sonoridad y "dejé de escucharlo" en el NME; en el tono y la
-        inhibición residual el paciente contesta las preguntas."""
+        en la sonoridad; en el NME ("solo escuche el mío") lo dice, y en el
+        tono y la inhibición residual contesta las preguntas."""
         tin = getattr(self, 'tinnitumetria', None)
         if tin is None or self.data['audio']['test'] != 'Umbrales':
             self.downHand()
@@ -223,8 +223,6 @@ class ResponseAudiometry():
         tin.ver(audio, instruccion)
         if instruccion == acufeno.INSTR_SONORIDAD:
             self._mano(tin.iguala(audio))
-        elif instruccion == acufeno.INSTR_NME:
-            self._mano(tin.tapa(audio))
         else:
             self.downHand()
             if instruccion in acufeno.DE_INHIBICION:
@@ -1065,8 +1063,7 @@ class ResponseAudiometry():
             else:
                 self.other_response.fowler_q(n, self.data)
             return
-        if pregunta in acufeno.PREGUNTAS or pregunta in acufeno.INSTRUCCIONES or (
-                pregunta == 'dejo_de_escuchar' and self._instruccion() == acufeno.INSTR_NME):
+        if pregunta in acufeno.PREGUNTAS or pregunta in acufeno.INSTRUCCIONES:
             respuesta = self._respuesta_tinnitus(pregunta)
         else:
             respuesta = self.respuesta_a(pregunta)
@@ -1145,10 +1142,8 @@ class ResponseAudiometry():
             respuesta = tin.ante_instruccion()
             if respuesta is None:
                 return None   # con acúfeno, la instrucción no se contesta
-        elif not tin.acufeno.presente:
-            respuesta = acufeno.NO_TENGO
-        else:                                           # ¿Lo dejó de escuchar?
-            respuesta = 'si' if tin.tapa(audio) else 'no'
+        else:
+            return None
         self._registrar_tinnitus(pregunta, respuesta, extra)
         return respuesta
 

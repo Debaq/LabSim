@@ -96,19 +96,6 @@ def test_sonoridad_en_el_oido_de_comparacion():
     assert tin.iguala(_audio(on=(True, False), int_=(16, 20)))       # 6 dB SL
 
 
-def test_nme_con_ruido_que_cubre_el_acufeno():
-    tin = _tin()
-    # OI a 4 kHz: umbral 50 + NME 20 = 70 dB HL
-    assert not tin.tapa(_audio(on=(False, True), int_=(20, 69)))
-    assert tin.tapa(_audio(on=(False, True), int_=(20, 70)))
-    # NBN a 1 kHz no cubre un acúfeno de 4 kHz
-    assert not tin.tapa(_audio(on=(False, True), int_=(20, 100), freq=F[1000]))
-    # ruido blanco sí, sobre el umbral de la frecuencia del acúfeno
-    assert tin.tapa(_audio(on=(False, True), stim=(TONO, WN), int_=(20, 70), freq=F[1000]))
-    # en el otro oído no
-    assert not tin.tapa(_audio(on=(False, True), int_=(20, 90), output=(1, 0)))
-
-
 def test_inhibicion_residual():
     reloj = Reloj()
     tin = _tin(reloj=reloj)
@@ -207,7 +194,7 @@ def _respuesta():
     return r, audiometro
 
 
-def test_response_mano_en_sonoridad_y_nme():
+def test_response_mano_en_sonoridad():
     r, _ = _respuesta()
     r.rol_player(acufeno.INSTR_SONORIDAD)
     r.data["audio"].update(_audio(on=(True, False), int_=(16, 20)))
@@ -216,11 +203,6 @@ def test_response_mano_en_sonoridad_y_nme():
     r.data["audio"]["int"][0] = 12
     r.response_()
     assert not r.mano
-    r.rol_player(acufeno.INSTR_NME)
-    r.data["audio"].update(_audio(on=(False, True), int_=(20, 70)))
-    r.response_()
-    assert r.mano
-    assert r._respuesta_tinnitus("dejo_de_escuchar") == "si"
 
 
 def test_response_pregunta_queda_en_el_registro():

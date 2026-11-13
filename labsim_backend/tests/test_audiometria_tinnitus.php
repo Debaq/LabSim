@@ -120,7 +120,9 @@ final class TinExaminador
  * 'paso5' (iguala la intensidad de a 5 dB), 'sin_octava', 'ir_corta',
  * 'nme_tono' (el NME con tono en vez de ruido), 'ir_sin_inicio' (va directo
  * al minuto, sin "solo escuche el mío"), 'ir_poco' (sube 5 dB en vez de 15),
- * 'ir_arriba' (la octava de arriba).
+ * 'ir_arriba' (la octava de arriba), 'hoy' (como desde el 2026-11-13: sin
+ * "Hasta que no escuche su ruido", el NME es "solo escuche el mío"). Sin
+ * 'hoy' es una atención de antes, con el NME de la mano.
  */
 function tin_examen(array $err = [], $verdad = 'de fábrica'): array
 {
@@ -163,6 +165,7 @@ function tin_examen(array $err = [], $verdad = 'de fábrica'): array
     $x->mano(false);
 
     // NME: banda estrecha de 4 kHz en OI
+    if (!in_array('hoy', $err, true)) {
     $x->decir('acufeno_deje_de_escuchar');
     $x->paso(5);
     $x->canal(1, ['stim' => in_array('nme_tono', $err, true) ? 'Tono' : 'Narrow Band Noise', 'output' => 'Izquierda', 'int' => 50]);
@@ -173,6 +176,7 @@ function tin_examen(array $err = [], $verdad = 'de fábrica'): array
     $x->mano(true);
     $x->prender(1, false);
     $x->mano(false);
+    }
 
     // inhibición residual: tono una octava abajo en OI, se sube hasta que
     // solo escucha el estímulo (50 dB HL: 20 SL sobre 30), +15 y un minuto
@@ -323,6 +327,32 @@ t_true(strpos(implode(' ', $sec['observaciones']), 'Subir 15 dB llegaba a la mol
 
 $sec = tin_evaluar(tin_examen(['ir_corta']))['tinnitus'];
 t_eq(tin_regla($sec, 'Inhibición residual: el estímulo dura un minuto')['cumple'], false, 'T03: inhibición de medio minuto');
+
+// ---- hoy: el NME es "solo escuche el mío" (2026-11-13) ----------------------
+$sec = tin_evaluar(tin_examen(['hoy']))['tinnitus'];
+foreach ($sec['reglas'] as $r) {
+    t_true($r['cumple'] === true, 'T03 hoy cumple: ' . $r['texto'] . ' -- ' . $r['detalle']);
+}
+t_eq($sec['puntaje']['pct'], 100, 'T03 hoy: 100 %');
+t_eq(tin_regla($sec, 'NME: con "Solo escuche el mío"')['detalle'],
+    'Solo escuchó el estímulo con 50 dB HL en OI a 2 kHz: 20 dB SL sobre el umbral de ese oído (30 dB HL).', 'T03 hoy: el NME en dB SL');
+t_eq(tin_regla($sec, 'Inhibición residual: se parte'), null, 'T03 hoy: el paso de partida es la regla del NME');
+$res = [];
+foreach ($sec['resultado'] as $f) {
+    $res[$f['parte']] = $f;
+}
+t_true(strpos($res['NME']['anotar'], '50 dB HL en OI a 2 kHz → 20 dB SL') === 0, 'T03 hoy resultado: NME -- ' . $res['NME']['anotar']);
+
+$sec = tin_evaluar(tin_examen(['hoy', 'ir_sin_inicio']))['tinnitus'];
+t_eq(tin_regla($sec, 'Se hacen las cuatro partes')['detalle'], 'Faltó: NME.', 'T03 hoy: sin "solo escuche el mío" falta el NME');
+
+// se pidió, pero el paciente nunca lo dijo (el estímulo no le tapó el acúfeno)
+$x = array_values(array_filter(tin_examen(['hoy']), static function ($l) {
+    return !($l['action'] === 'audio_acufeno_respuesta' && ($l['payload']['pregunta'] ?? '') === 'acufeno_solo_el_mio');
+}));
+$r = tin_regla(tin_evaluar($x)['tinnitus'], 'NME: con "Solo escuche el mío"');
+t_eq($r['cumple'], false, 'T03 hoy: sin "solo escucho el suyo" no hay NME');
+t_true(strpos($r['detalle'], 'El paciente no dijo que solo escuchara') === 0, 'T03 hoy: dice qué pasó -- ' . $r['detalle']);
 
 // ---- sin acúfeno, pulsátil, y app anterior sin la verdad -------------------
 $sin = tin_caso(['presente' => false]);
