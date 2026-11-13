@@ -62,13 +62,14 @@ class Response(QWidget):
         int_oi = data_audio['audio']['int'][output.index(1)]
         equals, side, _state = self.fowler_engine.evaluate(int_od, int_oi)
 
-        if n == 1:
-            # "¿Los escucha al mismo volumen?": solo sonoridad. La
-            # diploacusia no la cambia (se pregunta aparte, n == 3).
-            self.create_voice_('si' if equals else 'no')
+        # "¿En qué oído lo escuchó más fuerte?" (n == 2): el derecho, el
+        # izquierdo o "los escucho iguales", como en el ABLB clínico (una
+        # sola pregunta). Solo sonoridad: la diploacusia no la cambia (se
+        # pregunta aparte, n == 3). Si no oye ninguno, calla.
+        if equals:
+            self.create_voice_('iguales')
         elif side is not None:
-            sides = ["elderecho", "elizquierdo"]
-            self.create_voice_(sides[side])
+            self.create_voice_(("elderecho", "elizquierdo")[side])
 
     def media_change(self, sender):
         state = self.sender().playbackState()

@@ -254,11 +254,11 @@ Nota de registro: la app ya emite audio_logo_response, audio_logo_reset, audio_c
   2. Instrucción "Dos pitos" (decir si suenan igual o cuál más fuerte). [registrado: talkback dos_pitos]
   3. Dos canales, uno por oído, Tono y Alternado, partiendo en los umbrales. [registrado: audio_alternate_toggle, audio_output_select] (lector pendiente)
   4. Subir 20 dB la referencia y dejarla fija. [registrado]
-  5. Subir el oído en estudio de 5 en 5 preguntando "¿Mismo volumen?" hasta que diga igual. [registrado: audio_intensity_change, talkback sonidos_iguales]
+  5. Subir el oído en estudio de 5 en 5 preguntando "¿En qué oído?" hasta que diga "los escucho iguales". [registrado: audio_intensity_change, talkback en_qué_oído]
   6. Repetir subiendo la referencia de 20 en 20 hasta cerca del LDL o el máximo (sin pasar la molestia). [registrado]
   7. Preguntar por diploacusia ("¿Diferentes en forma?"). [registrado: talkback sonidos_distintos]
 - Lo que debería anotar: pares de niveles igualados, tipo (sin reclutamiento / parcial / completo / sobrerreclutamiento) según se cierre o no la diferencia, y si hay diploacusia (según el caso del paciente).
-- Dudas: (1) ¿"¿En qué oído?" forma parte de la técnica o es solo auxiliar? (2) la app ¿acepta pasos de 10 en la referencia? (3) ¿Fowler en una sola frecuencia basta o se piden dos?
+- Dudas: (2) la app ¿acepta pasos de 10 en la referencia? (3) ¿Fowler en una sola frecuencia basta o se piden dos?
 
 ### IWA, reclutamiento por vía ósea (fuente: H06 §IWA)
 - Resumen: Weber audiométrico con vibrador en la frente subiendo hasta que se invierta.

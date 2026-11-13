@@ -8712,3 +8712,17 @@ a la oreja → "¿Lo escucha?" → "¿Dónde lo escuchó más fuerte?". Así el
 alumno tiene que preguntar (y ponerse los fonos para oír la respuesta).
 Solo "Avíseme si lo escucha" y "Avíseme cuando deje de escucharlo" hacen
 hablar al paciente sin pregunta (`Acumetria._al_sentirlo`).
+
+## Fowler: una sola pregunta, "¿En qué oído?" (2026-11-13)
+
+Se sacó el botón *¿Mismo volumen?*. En el ABLB clínico la consigna es una:
+"dígame en qué oído lo escucha más fuerte, o si los escucha iguales". Con
+dos preguntas el alumno igual preguntaba *¿En qué oído?* y, si estaban
+iguales, el paciente callaba (`fowler_q` solo sabía decir un lado). Ahora
+*¿En qué oído lo escuchó más fuerte?* con *Dos pitos* vigente contesta "El
+derecho.", "El izquierdo." o "Los escucho iguales." (voz `iguales` en
+resources/audio/paciente/*); si no oye ninguno, calla. La instrucción
+*Dos pitos* lo anuncia ("le voy a preguntar en qué oído lo escucha más
+fuerte, o si los escucha iguales"). *¿Diferentes en forma?* (diploacusia)
+sigue aparte, al terminar. El backend conserva `sonidos_iguales` en sus
+listas para leer las atenciones anteriores.

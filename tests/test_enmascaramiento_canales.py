@@ -235,13 +235,12 @@ class RespuestasTest(Base):
         self.assertFalse(self.presentar('solo_si_molesta', stimOn=[True, False],
                                         stim=[STIM_TONO, STIM_NBN], int=[80, 0]))
 
-    def test_sonidos_iguales_va_al_fowler(self):
+    def test_en_que_oido_con_dos_pitos_va_al_fowler(self):
         llamadas = []
         self.r.other_response.fowler_q = lambda n, data: llamadas.append(n)
-        self.r.contestar('sonidos_iguales')
         self.r.history_command = ['dos_pitos']
         self.r.contestar('en_qué_oído')
-        self.assertEqual(llamadas, [1, 2])
+        self.assertEqual(llamadas, [2])
 
 
 class LdlHabladoTest(Base):

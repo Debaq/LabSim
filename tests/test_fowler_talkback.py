@@ -1,5 +1,5 @@
-"""El paciente contesta las preguntas del Fowler (¿Los escuchó iguales?, ¿En
-qué oído?) cuando el talkback termina de decirlas, no encima: antes el "sí"
+"""El paciente contesta las preguntas del Fowler (¿En qué oído?, ¿Diferentes
+en forma?) cuando el talkback termina de decirlas, no encima: antes el "sí"
 salía al mismo tiempo que la pregunta."""
 import os
 import sys
@@ -33,16 +33,16 @@ def _respuesta():
 
 def test_contesta_despues_de_la_pregunta():
     r = _respuesta()
-    r.rol_player('sonidos_iguales')
+    r.rol_player('sonidos_distintos')
     QTest.qWait(1000)
     assert r.contestadas == []            # mientras suena la pregunta, nada
     r.talkback_termino()
     assert r.contestadas == []            # una pausa antes de contestar
     QTest.qWait(ResponseAudiometry.PAUSA_RESPUESTA_MS[1] + 100)
-    assert r.contestadas == [1]
+    assert r.contestadas == [3]
     r.talkback_termino()                  # otra instrucción que termina: no repite
     QTest.qWait(ResponseAudiometry.PAUSA_RESPUESTA_MS[1] + 100)
-    assert r.contestadas == [1]
+    assert r.contestadas == [3]
 
 
 def test_en_que_oido_y_otra_instruccion_la_reemplaza():
@@ -65,7 +65,7 @@ def test_muchas_preguntas_no_borran_dos_pitos():
     r.rol_player('colocar_fonos')
     r.rol_player('dos_pitos')
     for _ in range(40):
-        r.rol_player('sonidos_iguales')
+        r.rol_player('sonidos_distintos')
         r.rol_player('en_qué_oído')
     assert r._instruccion() == 'dos_pitos'
     assert len(r.history_command) <= 12
@@ -95,12 +95,16 @@ def _dice(diplacusia, n, int_od, int_oi):
     return dichas
 
 
-def test_mismo_volumen_solo_sonoridad():
-    """¿Los escucha al mismo volumen?: la diploacusia no lo cambia."""
+def test_en_que_oido_derecho_izquierdo_o_iguales():
+    """Una sola pregunta, como en el ABLB clínico: "¿En qué oído lo escuchó
+    más fuerte?" se contesta el derecho, el izquierdo o "los escucho
+    iguales" (antes, iguales, callaba). Solo sonoridad: la diploacusia no
+    lo cambia."""
     for diplacusia in (False, True):
-        assert _dice(diplacusia, 1, 65, 65) == ['si']
-        assert _dice(diplacusia, 1, 65, 50) == ['no']
+        assert _dice(diplacusia, 2, 65, 65) == ['iguales']
         assert _dice(diplacusia, 2, 65, 50) == ['elderecho']
+        assert _dice(diplacusia, 2, 65, 80) == ['elizquierdo']
+        assert _dice(diplacusia, 2, 0, 0) == []      # no oye ninguno: calla
 
 
 def test_diferentes_en_forma_es_la_diploacusia():
@@ -137,3 +141,4 @@ if __name__ == "__main__":
             fn()
             print(f"  {nombre} OK")
     print("TODOS LOS TESTS PASARON")
+

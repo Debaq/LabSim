@@ -954,10 +954,10 @@ class ResponseAudiometry():
             # terminar el talkback, como a una pregunta (ver _respuesta_tinnitus)
             self._pregunta = rol
 
-    # Preguntas del Fowler -> n de fowler_q: ¿mismo volumen? (1), ¿en qué
-    # oído más fuerte? (2, solo con "Dos pitos" vigente), ¿diferentes en
-    # forma? (3, la diploacusia, al terminar la prueba).
-    FOWLER_PREGUNTAS = {'sonidos_iguales': 1, 'sonidos_distintos': 3}
+    # Preguntas del Fowler -> n de fowler_q: ¿en qué oído más fuerte? (2,
+    # solo con "Dos pitos" vigente: derecho, izquierdo o iguales),
+    # ¿diferentes en forma? (3, la diploacusia, al terminar la prueba).
+    FOWLER_PREGUNTAS = {'sonidos_distintos': 3}
 
     # Pausa del paciente entre el fin de la pregunta y su respuesta, en ms.
     PAUSA_RESPUESTA_MS = (400, 900)

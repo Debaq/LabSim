@@ -51,6 +51,7 @@ FRASES = {
     "molesta": "Molesta.",
     "elderecho": "El derecho.",
     "elizquierdo": "El izquierdo.",
+    "iguales": "Los escucho iguales.",
     "dejaescucharse": "Dejó de escucharse.",
     "seescuchamasbajito": "Se escucha más bajito.",
     # tinnitumetría (audiometria/acufeno.py)

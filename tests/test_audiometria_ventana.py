@@ -112,7 +112,7 @@ def test_cada_instruccion_dice_su_prueba_y_se_busca_por_ella():
     assert [b for b in c.botones.values() if not b.isHidden()] == [btn]
     c.buscar.setText("fowler")
     visibles = {k for k, b in c.botones.items() if not b.isHidden()}
-    assert visibles == {"dos_pitos", "sonidos_iguales", "en_qué_oído", "sonidos_distintos"}
+    assert visibles == {"dos_pitos", "en_qué_oído", "sonidos_distintos"}
 
 
 def test_el_equipo_que_crece_no_se_corta():
