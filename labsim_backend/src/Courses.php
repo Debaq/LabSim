@@ -633,6 +633,7 @@ final class Courses
             }
             if ($attIds) {
                 $ph = implode(',', array_fill(0, count($attIds), '?'));
+                ComentarioRespuestas::borrarDeAtenciones($pdo, $attIds);
                 $pdo->prepare("DELETE FROM attendance_comments WHERE attendance_id IN ({$ph})")->execute($attIds);
             }
             $pdo->prepare('DELETE FROM llm_chat_logs WHERE student_id = ?')->execute([$userId]);

@@ -589,6 +589,22 @@ CREATE TABLE IF NOT EXISTS attendance_comments (
 );
 CREATE INDEX IF NOT EXISTS idx_attendance_comments_attendance ON attendance_comments (attendance_id, section);
 
+-- Feedback al feedback: el hilo que cuelga de cada comentario del docente.
+-- El alumno responde (qué entendió, qué hará distinto, o lo discute) y el
+-- docente puede contestarle en el mismo hilo (ver ComentarioRespuestas.php).
+-- `autor` dice de qué lado vino; `leido` es si el OTRO lado ya lo vio (hoy
+-- solo se usa para avisarle al docente que hay respuestas nuevas).
+CREATE TABLE IF NOT EXISTS attendance_comment_replies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    comment_id INTEGER NOT NULL REFERENCES attendance_comments(id),
+    author_id INTEGER NOT NULL REFERENCES users(id),
+    autor TEXT NOT NULL CHECK (autor IN ('alumno', 'docente')),
+    texto TEXT NOT NULL,
+    leido INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_attendance_comment_replies_comment ON attendance_comment_replies (comment_id);
+
 -- Bandeja de entrada del alumno: mensajes de dos orígenes distintos en una
 -- sola tabla genérica (no es exclusiva de OIRS).
 --  1) OirsEvaluator::evaluate() -- al cerrar una atención (ver

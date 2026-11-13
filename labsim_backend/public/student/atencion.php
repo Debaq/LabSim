@@ -17,7 +17,9 @@ require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
  * clínica (las atenciones previas del caso y las tuyas en una sola línea de
  * tiempo, ver HistoriaClinica::lineaTiempo) y la
  * conversación con el paciente simulado, con la retroalimentación que tu
- * docente haya dejado turno a turno (chat_comments) -- todo solo lectura,
+ * docente haya dejado turno a turno (chat_comments) -- todo solo lectura
+ * salvo la respuesta a los comentarios del docente sobre la atención
+ * (feedback al feedback, ver ComentarioRespuestas),
  * scopeado a la sesión de alumno (ver sso.php), nunca a otro appointment_id
  * o student_id que no sea el propio.
  */
@@ -127,28 +129,67 @@ $hayOirs = (bool) array_filter($mensajes, function (array $m): bool {
     return Oirs::esDeLaOirs((string) $m['tipo']);
 });
 
+// Feedback al feedback (ver ComentarioRespuestas): el alumno responde un
+// comentario de su docente. deAlumno() es el candado -- el comment_id del
+// POST tiene que ser de una atención propia. PRG para que un refresh no
+// reenvíe la respuesta.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
+    $commentId = (int) ($_POST['comment_id'] ?? 0);
+    if (ComentarioRespuestas::deAlumno($pdo, $commentId, (int) $me['id'])) {
+        ComentarioRespuestas::responder($pdo, $commentId, (int) $me['id'], 'alumno', (string) ($_POST['texto'] ?? ''));
+    }
+    header('Location: atencion.php?appointment_id=' . $appointmentId . '#comentario-' . $commentId);
+    exit;
+}
+
 $attendanceComments = ['evolucion' => [], 'procedimiento' => []];
 $stmt = $pdo->prepare(
-    "SELECT ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+    "SELECT ac.id, ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
      FROM attendance_comments ac JOIN users u ON u.id = ac.teacher_id
      WHERE ac.attendance_id = ? ORDER BY ac.id"
 );
 $stmt->execute([(int) $attendance['id']]);
-foreach ($stmt->fetchAll() as $c) {
+$filasComentarios = $stmt->fetchAll();
+foreach ($filasComentarios as $c) {
     $attendanceComments[$c['section']][] = $c;
 }
+$hilos = ComentarioRespuestas::porComentario($pdo, array_column($filasComentarios, 'id'));
+$puedeResponder = ComentarioRespuestas::listo($pdo);
 
-function render_attendance_comments(array $comments): void
+function render_attendance_comments(array $comments, array $hilos, bool $puedeResponder): void
 {
     foreach ($comments as $c) {
+        $cid = (int) $c['id'];
         ?>
-        <div class="bubble-row">
-            <div class="bubble-system">
-                <span class="bubble-system-header">
-                    <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
-                </span>
-                <?= nl2br(htmlspecialchars($c['comment'])) ?>
+        <div class="hilo" id="comentario-<?= $cid ?>">
+            <div class="bubble-row">
+                <div class="bubble-system">
+                    <span class="bubble-system-header">
+                        <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
+                    </span>
+                    <?= nl2br(htmlspecialchars($c['comment'])) ?>
+                </div>
             </div>
+            <?php foreach ($hilos[$cid] ?? [] as $r): $propia = $r['autor'] === 'alumno'; ?>
+            <div class="bubble-row<?= $propia ? ' bubble-row--user' : '' ?>">
+                <div class="<?= $propia ? 'bubble-respuesta' : 'bubble-system' ?>">
+                    <span class="bubble-system-header<?= $propia ? '--muted' : '' ?>">
+                        <?= $propia ? 'Tú' : htmlspecialchars($r['author_name']) . ' (docente)' ?> · <?= htmlspecialchars($r['created_at']) ?>
+                    </span>
+                    <?= nl2br(htmlspecialchars($r['texto'])) ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php if ($puedeResponder): ?>
+            <form method="post" class="responder">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
+                <input type="hidden" name="comment_id" value="<?= $cid ?>">
+                <textarea name="texto" rows="2" maxlength="<?= ComentarioRespuestas::MAX_CHARS ?>" required
+                    placeholder="Responde a tu docente: qué entendiste, qué harás distinto o qué no te queda claro."></textarea>
+                <button type="submit" class="btn btn--sm">Responder</button>
+            </form>
+            <?php endif; ?>
         </div>
         <?php
     }
@@ -180,7 +221,7 @@ student_header($paciente, $me);
     </p>
     <?php if ($attendanceComments['procedimiento']): ?>
     <p class="legend" style="margin-top:0.8rem;">Comentarios de tu docente sobre el procedimiento:</p>
-    <?php render_attendance_comments($attendanceComments['procedimiento']); ?>
+    <?php render_attendance_comments($attendanceComments['procedimiento'], $hilos, $puedeResponder); ?>
     <?php endif; ?>
 </div>
 
@@ -192,7 +233,7 @@ student_header($paciente, $me);
     <?php endif; ?>
     <?php if ($attendanceComments['evolucion']): ?>
     <p class="legend">Comentarios de tu docente sobre tu evolución:</p>
-    <?php render_attendance_comments($attendanceComments['evolucion']); ?>
+    <?php render_attendance_comments($attendanceComments['evolucion'], $hilos, $puedeResponder); ?>
     <?php endif; ?>
 </div>
 <?php endif; ?>

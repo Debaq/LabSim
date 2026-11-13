@@ -526,6 +526,13 @@ class BackendClient:
         comportamiento por atención (ver my_attendances.php)."""
         return self._get("/api/my_attendances.php")
 
+    def responder_comentario(self, comment_id: int, texto: str) -> list[dict]:
+        """Feedback al feedback: responde un comentario del docente sobre una
+        atención propia. Devuelve el hilo completo de ese comentario (ver
+        api/comment_reply.php)."""
+        return self._post("/api/comment_reply.php",
+                          {"comment_id": int(comment_id), "texto": texto}).get("respuestas", [])
+
     def get_practica(self) -> list[dict]:
         """Pacientes de práctica deliberada de los cursos del alumno, con
         sus intentos y el que tenga abierto (ver api/practica.php)."""

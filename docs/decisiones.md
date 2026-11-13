@@ -8579,3 +8579,28 @@ retrococlear (cce_pct < 50) deja OEA presentes; no reclutar con uno coclear
 las deja reducidas. Solo el sí/no del reclutamiento (parcial contra completo
 es grado). Avisa, no bloquea. La diploacusia sin reclutamiento no avisa: es
 válida en retrococlear y en daño de CCI o zona muerta.
+
+## Feedback al feedback: el alumno responde al comentario del docente (2026-11-12)
+
+Cada comentario del docente sobre una atención (`attendance_comments`,
+evolución y procedimiento) abre un hilo (`attendance_comment_replies`): el
+alumno responde qué entendió, qué hará distinto o por qué no está de
+acuerdo, y el docente puede contestarle en el mismo hilo. Se responde desde
+la app (Mis pacientes → Resumen, `_HiloComentario`), desde el portal web
+(`student/atencion.php`) y el docente desde `admin/chat_detail.php`. La
+ficha del alumno en el panel marca "N respuestas nuevas" en la atención
+hasta que el docente la abre (`leido`, solo para las del alumno).
+
+Por qué hilo y no un campo "respuesta" único: la conversación sobre un
+informe suele necesitar ida y vuelta (el alumno pregunta por qué, el docente
+explica), y una sola respuesta obligaba a abrir otro comentario. Por qué
+solo los comentarios de la atención y no los de cada turno del chat
+(`chat_comments`): el feedback de un práctico va sobre el examen y el
+informe, no sobre una frase del chat; si hace falta se extiende igual.
+
+Texto libre (hasta 2000 caracteres) con la sugerencia "qué entendiste, qué
+harás distinto o qué no te queda claro", sin campos obligatorios. El
+alumno solo responde en comentarios de SUS atenciones
+(`ComentarioRespuestas::deAlumno`). Mientras el servidor no tenga la tabla
+(se crea con "Aplicar schema.sql"), los comentarios se ven igual que antes,
+sin caja para responder.

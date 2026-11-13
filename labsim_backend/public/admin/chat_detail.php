@@ -70,24 +70,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // arriba (appointment_id + student_id), no llega del POST.
         $pdo->prepare('INSERT INTO attendance_comments (attendance_id, section, teacher_id, comment) VALUES (?, ?, ?, ?)')
             ->execute([$attendance['id'], $section, $me['id'], $comment]);
+    } elseif ($section === 'respuesta' && $attendance) {
+        // Feedback al feedback: el docente contesta en el hilo de uno de
+        // sus comentarios. El comment_id tiene que ser de ESTA atención.
+        $commentId = (int) ($_POST['comment_id'] ?? 0);
+        $stmt = $pdo->prepare('SELECT 1 FROM attendance_comments WHERE id = ? AND attendance_id = ?');
+        $stmt->execute([$commentId, $attendance['id']]);
+        if ($stmt->fetch()) {
+            ComentarioRespuestas::responder($pdo, $commentId, (int) $me['id'], 'docente', (string) ($_POST['texto'] ?? ''));
+        }
+        header('Location: chat_detail.php?appointment_id=' . $appointmentId . '&student_id=' . $studentId . '#comentario-' . $commentId);
+        exit;
     }
     header('Location: chat_detail.php?appointment_id=' . $appointmentId . '&student_id=' . $studentId);
     exit;
 }
 
 $attendanceComments = ['evolucion' => [], 'procedimiento' => []];
+$hilos = [];
 if ($attendance) {
     $stmt = $pdo->prepare(
-        "SELECT ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+        "SELECT ac.id, ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
          FROM attendance_comments ac
          JOIN users u ON u.id = ac.teacher_id
          WHERE ac.attendance_id = ? ORDER BY ac.id"
     );
     $stmt->execute([$attendance['id']]);
-    foreach ($stmt->fetchAll() as $c) {
+    $filasComentarios = $stmt->fetchAll();
+    foreach ($filasComentarios as $c) {
         $attendanceComments[$c['section']][] = $c;
     }
+    // Lo que el alumno respondió y el docente no había visto se marca como
+    // visto al abrir la atención, pero se pinta "nuevo" esta vez.
+    $ids = array_column($filasComentarios, 'id');
+    $hilos = ComentarioRespuestas::porComentario($pdo, $ids);
+    ComentarioRespuestas::marcarLeidas($pdo, $ids, 'docente');
 }
+$puedeResponder = ComentarioRespuestas::listo($pdo);
 
 // Informes de módulos de examen que el alumno subió en esta atención
 // (EOA/ABR/VEMP...) -- el PDF se sirve en admin/report_pdf.php.
@@ -149,20 +168,36 @@ admin_header('Atención: ' . $student['display_name'], $me);
 </div>
 
 <?php
-function render_section_comments(string $section, string $label, string $text, array $comments): void
+function render_section_comments(string $section, string $label, string $text, array $comments,
+                                 array $hilos, bool $puedeResponder, string $alumno): void
 {
     ?>
     <div class="card section-panel">
         <h3><?= htmlspecialchars($label) ?></h3>
         <div class="section-text"><?= $text !== '' ? nl2br(htmlspecialchars($text)) : '<span style="color:var(--color-muted);">Sin registro todavía.</span>' ?></div>
         <div class="section-comments">
-            <?php foreach ($comments as $c): ?>
+            <?php foreach ($comments as $c): $cid = (int) $c['id']; ?>
+            <div class="comment-hilo" id="comentario-<?= $cid ?>">
             <div class="comment-bubble">
                 <div class="avatar a-teacher" title="Docente"><?= htmlspecialchars(chat_initials($c['teacher_name'])) ?></div>
-                <div class="comment-body">
-                    <span class="chat-meta"><?= htmlspecialchars($c['teacher_name']) ?> · <?= htmlspecialchars($c['created_at']) ?></span>
-                    <?= nl2br(htmlspecialchars($c['comment'])) ?>
-                </div>
+                <?php // Sin espacios entre etiquetas: .comment-body es pre-wrap y la sangría del PHP se veía ?>
+                <div class="comment-body"><span class="chat-meta"><?= htmlspecialchars($c['teacher_name']) ?> · <?= htmlspecialchars($c['created_at']) ?></span><?= htmlspecialchars($c['comment']) ?></div>
+            </div>
+            <?php foreach ($hilos[$cid] ?? [] as $r): $delAlumno = $r['autor'] === 'alumno'; ?>
+            <div class="comment-bubble comment-reply<?= $delAlumno ? ' comment-reply--alumno' : '' ?>">
+                <div class="avatar <?= $delAlumno ? 'a-user' : 'a-teacher' ?>" title="<?= $delAlumno ? 'Alumno' : 'Docente' ?>"><?= htmlspecialchars(chat_initials($r['author_name'])) ?></div>
+                <div class="comment-body"><span class="chat-meta"><?= htmlspecialchars($r['author_name']) ?><?= $delAlumno ? ' (alumno)' : '' ?> · <?= htmlspecialchars($r['created_at']) ?><?php if ($delAlumno && !$r['leido']): ?> <span class="tag tag--warn">nuevo</span><?php endif; ?></span><?= htmlspecialchars($r['texto']) ?></div>
+            </div>
+            <?php endforeach; ?>
+            <?php if ($puedeResponder): ?>
+            <form method="post" class="comment-form comment-reply-form">
+                <?= csrf_field() ?>
+                <input type="hidden" name="section" value="respuesta">
+                <input type="hidden" name="comment_id" value="<?= $cid ?>">
+                <input type="text" name="texto" maxlength="<?= ComentarioRespuestas::MAX_CHARS ?>" placeholder="Contestarle a <?= htmlspecialchars($alumno) ?> en este hilo...">
+                <button type="submit" title="Contestar en el hilo">↩</button>
+            </form>
+            <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
@@ -177,8 +212,10 @@ function render_section_comments(string $section, string $label, string $text, a
 }
 
 if ($attendance) {
-    render_section_comments('evolucion', 'Evolución del alumno', (string) $attendance['nota'], $attendanceComments['evolucion']);
-    render_section_comments('procedimiento', 'Procedimiento', (string) $appointment['procedimiento'], $attendanceComments['procedimiento']);
+    render_section_comments('evolucion', 'Evolución del alumno', (string) $attendance['nota'], $attendanceComments['evolucion'],
+        $hilos, $puedeResponder, (string) $student['display_name']);
+    render_section_comments('procedimiento', 'Procedimiento', (string) $appointment['procedimiento'], $attendanceComments['procedimiento'],
+        $hilos, $puedeResponder, (string) $student['display_name']);
 }
 ?>
 

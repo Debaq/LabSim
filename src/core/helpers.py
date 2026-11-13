@@ -167,6 +167,13 @@ def mis_atenciones() -> list:
         return []
 
 
+def responder_comentario(comment_id: int, texto: str) -> list:
+    """El alumno responde un comentario de su docente (feedback al
+    feedback). Devuelve el hilo actualizado. Lanza si falla la red o el
+    servidor: quien llama le avisa al alumno y no pierde lo que escribió."""
+    return _get_backend_client().responder_comentario(comment_id, texto)
+
+
 def lista_practica() -> list:
     """Pacientes de práctica deliberada del alumno (ver api/practica.php).
     Lanza requests.RequestException si falla la red: quien llama distingue

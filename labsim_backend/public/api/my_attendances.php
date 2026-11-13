@@ -36,14 +36,23 @@ if ($attendances) {
     $attIds = array_column($attendances, 'id');
     $placeholders = implode(',', array_fill(0, count($attIds), '?'));
     $stmt = $pdo->prepare(
-        "SELECT ac.attendance_id, ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+        "SELECT ac.id, ac.attendance_id, ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
          FROM attendance_comments ac
          JOIN users u ON u.id = ac.teacher_id
          WHERE ac.attendance_id IN ($placeholders)
          ORDER BY ac.id"
     );
     $stmt->execute($attIds);
-    foreach ($stmt->fetchAll() as $c) {
+    $filas = $stmt->fetchAll();
+    // Hilo de cada comentario (feedback al feedback, ver ComentarioRespuestas):
+    // la app lo muestra debajo del comentario con la caja para responder.
+    // `responder` = false mientras el servidor no tenga la tabla.
+    $hilos = ComentarioRespuestas::porComentario($pdo, array_column($filas, 'id'));
+    $responder = ComentarioRespuestas::listo($pdo);
+    foreach ($filas as $c) {
+        $c['id'] = (int) $c['id'];
+        $c['respuestas'] = $hilos[$c['id']] ?? [];
+        $c['responder'] = $responder;
         $attendanceComments[(int) $c['attendance_id']][$c['section']][] = $c;
     }
 }

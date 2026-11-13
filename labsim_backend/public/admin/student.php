@@ -180,6 +180,9 @@ $tecnicaCompleta = array_filter(AudiometriaTecnica::deAtenciones(
     $verRegistro ? $allLogs : null
 ));
 $faltasByAppt = FaltasGraves::deAtenciones($studentId, array_map('intval', array_column($todasLasAtenciones, 'appointment_id')));
+// Respuestas del alumno a comentarios del docente que nadie ha visto todavía
+// (feedback al feedback): se avisan en el "Ver atención" de esa fila.
+$respuestasNuevas = ComentarioRespuestas::sinLeerDelAlumno($pdo, $studentId);
 $tecnicaByAppt = array_map(static function (array $t): array {
     return $t['puntaje'];
 }, $tecnicaCompleta);
@@ -352,7 +355,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 
 <?php
 /** Tabla de atenciones (prácticos o intentos de práctica), una fila por cita. */
-$tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAppt, $studentId, $reportsByAppt, $versionesPorInforme, $tecnicaByAppt, $preguntasByAppt, $estadoTag): void {
+$tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAppt, $studentId, $reportsByAppt, $versionesPorInforme, $tecnicaByAppt, $preguntasByAppt, $estadoTag, $faltasByAppt, $respuestasNuevas): void {
     ?>
     <div class="table-wrap">
     <table class="table-dense">
@@ -392,7 +395,11 @@ $tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAp
                 <?php if (empty($reportsByAppt[(int) $a['appointment_id']])): ?><span class="muted">—</span><?php endif; ?>
             </td>
             <td class="help"><?= htmlspecialchars($a['nota'] ?: '') ?></td>
-            <td class="nowrap"><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
+            <td class="nowrap"><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a>
+                <?php if (!empty($respuestasNuevas[(int) $a['appointment_id']])): $nResp = $respuestasNuevas[(int) $a['appointment_id']]; ?>
+                <a class="tag tag--warn" href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>"
+                   title="El alumno respondió a tus comentarios"><?= $nResp ?> respuesta<?= $nResp > 1 ? 's' : '' ?> nueva<?= $nResp > 1 ? 's' : '' ?></a>
+                <?php endif; ?></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$filas): ?>

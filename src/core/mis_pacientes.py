@@ -7,7 +7,8 @@ docente ya tiene su propia vista equivalente y más completa en el portal
 web: admin/student.php + admin/chat_detail.php). Lista los pacientes que el
 alumno ha atendido; al elegir uno, muestra en pestañas:
   - Resumen: stats de comportamiento de esa atención puntual, la evolución
-    que registró y lo que el docente le comentó.
+    que registró y lo que el docente le comentó, con la caja para responderle
+    (feedback al feedback, ver _HiloComentario).
   - Conversación: el chat con el paciente simulado, con la retroalimentación
     que el docente haya dejado turno a turno (ver chat_comments).
   - Ficha clínica: misma ficha que agenda.Agenda muestra al atender (motor
@@ -29,14 +30,14 @@ from types import SimpleNamespace
 import shiboken6
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
-                               QPushButton, QScrollArea, QTabWidget,
+                               QPlainTextEdit, QPushButton, QScrollArea, QTabWidget,
                                QTextBrowser, QVBoxLayout, QWidget)
 
 from agenda.ChatPaciente import QSS_CHAT, _burbuja, _ListaMensajes
 from core import hilos, iconos, tema
 from core.ficha import poner_html, render_ficha_html
 from core.helpers import (CasesOffline, Shedule, estado_completo, mi_conversacion, mis_atenciones,
-                          mis_informes)
+                          mis_informes, responder_comentario)
 from core.inbox import fecha_corta, fecha_larga, _Elidida
 from core.practica import abrir_ficha_estudio
 from core.borrado import borrar_luego
@@ -141,6 +142,20 @@ QFrame#notaDocente {{
     border-radius: 8px;
 }}
 QLabel#notaDe {{ color: {tema.NOTA_DOCENTE_TEXTO}; font-size: 8pt; font-weight: 700; }}
+QFrame#respuestaAlumno {{
+    background: {tema.ACENTO_SUAVE};
+    border: 1px solid {tema.BORDE_FUERTE};
+    border-radius: 8px;
+}}
+QLabel#respuestaDe {{ color: {tema.ACENTO}; font-size: 8pt; font-weight: 700; }}
+QPlainTextEdit#responder {{
+    background: {tema.TARJETA};
+    border: 1px solid {tema.BORDE_FUERTE};
+    border-radius: 7px;
+    padding: 4px 6px;
+}}
+QPlainTextEdit#responder:focus {{ border-color: {tema.ACENTO}; }}
+QLabel#avisoRespuesta {{ color: {tema.ALERTA}; font-size: 8pt; }}
 QFrame[examen="true"] {{
     background: {tema.TARJETA};
     border: 1px solid {tema.BORDE};
@@ -203,6 +218,105 @@ def _nota_docente(comentario):
     col.addWidget(de)
     col.addWidget(texto)
     return marco
+
+
+def _respuesta(r):
+    """Un mensaje del hilo de un comentario: el del alumno en el color de la
+    app, el del docente como nota amarilla."""
+    if r.get("autor") != "alumno":
+        return _nota_docente({"teacher_name": r.get("author_name"), "created_at": r.get("created_at"),
+                              "comment": r.get("texto", "")})
+    marco = QFrame()
+    marco.setObjectName("respuestaAlumno")
+    col = QVBoxLayout(marco)
+    col.setContentsMargins(10, 6, 10, 8)
+    col.setSpacing(2)
+    de = QLabel(f"Tú · {fecha_larga(r.get('created_at'))}")
+    de.setObjectName("respuestaDe")
+    texto = QLabel(r.get("texto", ""))
+    texto.setTextFormat(Qt.TextFormat.PlainText)
+    texto.setWordWrap(True)
+    texto.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+    col.addWidget(de)
+    col.addWidget(texto)
+    return marco
+
+
+class _HiloComentario(QWidget):
+    """Feedback al feedback: el comentario del docente, lo que se ha
+    respondido debajo (sangrado) y la caja para responderle. La respuesta
+    sale en segundo plano; si falla, el texto queda en la caja y se avisa.
+    Ver labsim_backend/src/ComentarioRespuestas.php."""
+
+    MAX_CHARS = 2000      # = ComentarioRespuestas::MAX_CHARS
+
+    def __init__(self, comentario, parent=None):
+        super().__init__(parent)
+        self.comentario = comentario
+        col = QVBoxLayout(self)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(4)
+        col.addWidget(_nota_docente(comentario))
+
+        sangria = QHBoxLayout()
+        sangria.setContentsMargins(24, 0, 0, 0)
+        self.col_hilo = QVBoxLayout()
+        self.col_hilo.setSpacing(4)
+        sangria.addLayout(self.col_hilo)
+        col.addLayout(sangria)
+        self._pintar_hilo()
+
+        if not comentario.get("responder", True) or not comentario.get("id"):
+            return      # servidor sin la tabla todavía: solo se lee
+        caja = QHBoxLayout()
+        caja.setContentsMargins(24, 0, 0, 0)
+        caja.setSpacing(6)
+        self.texto = QPlainTextEdit()
+        self.texto.setObjectName("responder")
+        self.texto.setPlaceholderText("Responde a tu docente: qué entendiste, qué harás distinto "
+                                      "o qué no te queda claro.")
+        self.texto.setFixedHeight(54)
+        self.btn = QPushButton("Responder")
+        self.btn.clicked.connect(self._enviar)
+        caja.addWidget(self.texto, 1)
+        caja.addWidget(self.btn, 0, Qt.AlignmentFlag.AlignBottom)
+        col.addLayout(caja)
+        self.aviso = QLabel()
+        self.aviso.setObjectName("avisoRespuesta")
+        self.aviso.setContentsMargins(24, 0, 0, 0)
+        self.aviso.hide()
+        col.addWidget(self.aviso)
+
+    def _pintar_hilo(self):
+        _vaciar(self.col_hilo)
+        for r in self.comentario.get("respuestas") or []:
+            self.col_hilo.addWidget(_respuesta(r))
+
+    def _enviar(self):
+        texto = self.texto.toPlainText().strip()[:self.MAX_CHARS]
+        if not texto:
+            return
+        self.btn.setEnabled(False)
+        self.btn.setText("Enviando…")
+        self.aviso.hide()
+        hilos.en_fondo(responder_comentario, self.comentario["id"], texto, dueno=self,
+                       nombre="mis_pacientes_respuesta", listo=self._enviado, fallo=self._no_enviado)
+
+    def _enviado(self, respuestas):
+        # El dict es el mismo que guarda la lista de atenciones: al volver a
+        # esta atención el hilo ya trae la respuesta sin pedir todo de nuevo.
+        self.comentario["respuestas"] = list(respuestas or [])
+        self._pintar_hilo()
+        self.texto.clear()
+        self.btn.setEnabled(True)
+        self.btn.setText("Responder")
+
+    def _no_enviado(self, exc):
+        self.btn.setEnabled(True)
+        self.btn.setText("Responder")
+        self.aviso.setText("No se pudo enviar (¿sin conexión?). Tu respuesta sigue en la caja; "
+                           "vuelve a intentarlo.")
+        self.aviso.show()
 
 
 def _vaciar(layout, _juntar=None):
@@ -601,7 +715,7 @@ class MisPacientesWidget(QWidget):
             if comentarios:
                 col.addWidget(_seccion(f"TU DOCENTE SOBRE {sobre}"))
                 for c in comentarios:
-                    col.addWidget(_nota_docente(c))
+                    col.addWidget(_HiloComentario(c))
         col.addStretch(1)
 
     def _pedir_conversacion(self, it):
