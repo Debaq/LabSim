@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 79).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 80).
 
 Revisado contra el código el 2026-09-24.
 
@@ -178,6 +178,13 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 62. Enmascaramiento como regla de la técnica (cuándo enmascarar,
       nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
 - [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T04+).
+- [ ] 80. Indicador del deterioro tonal: con `audio_deterioro_tonal` (qué
+      prueba dedujo el motor, oído, frecuencia, `inicio_sl`) decir "hizo
+      Carhart en OD 1000 Hz partiendo en el umbral" y revisar el cronómetro
+      según la prueba elegida: Carhart reinicia en cada subida y termina con
+      un minuto entero en un nivel; Rosemberg no reinicia y corta a los 60 s
+      totales. Hoy los dos cuentan juntos como "supraliminar".
+      § Carhart y Rosemberg: un solo botón, la prueba sale del nivel de partida
 
 ### Montaje de electrodos
 § Electrodos sobre una cabeza giratoria, sin 3D en vivo
