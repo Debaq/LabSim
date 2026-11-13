@@ -53,7 +53,7 @@ final class ComentarioRespuestas
 
     /**
      * Hilos de varios comentarios: [comment_id => [respuestas en orden]].
-     * Cada respuesta trae id, autor ('alumno'|'docente'), author_name,
+     * Cada respuesta trae id, author_id, autor ('alumno'|'docente'), author_name,
      * texto, leido y created_at.
      *
      * @param int[] $commentIds
@@ -66,7 +66,7 @@ final class ComentarioRespuestas
         }
         $ph = implode(',', array_fill(0, count($commentIds), '?'));
         $stmt = $pdo->prepare(
-            "SELECT r.id, r.comment_id, r.autor, r.texto, r.leido, r.created_at, u.display_name AS author_name
+            "SELECT r.id, r.comment_id, r.author_id, r.autor, r.texto, r.leido, r.created_at, u.display_name AS author_name
              FROM attendance_comment_replies r JOIN users u ON u.id = r.author_id
              WHERE r.comment_id IN ({$ph}) ORDER BY r.id"
         );
@@ -75,6 +75,7 @@ final class ComentarioRespuestas
         foreach ($stmt->fetchAll() as $r) {
             $out[(int) $r['comment_id']][] = [
                 'id' => (int) $r['id'],
+                'author_id' => (int) $r['author_id'],
                 'autor' => (string) $r['autor'],
                 'author_name' => (string) $r['author_name'],
                 'texto' => (string) $r['texto'],

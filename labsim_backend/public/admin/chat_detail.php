@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -54,6 +55,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
     $section = (string) ($_POST['section'] ?? 'chat');
     $comment = trim((string) ($_POST['comment'] ?? ''));
+    if (in_array($section, ['editar', 'borrar'], true)) {
+        // Editar o eliminar lo que escribió un docente (ver
+        // ComentariosDocente): el id tiene que ser de ESTA atención y del
+        // docente que lo pide, salvo el admin completo.
+        $tipo = (string) ($_POST['tipo'] ?? '');
+        $id = (int) ($_POST['id'] ?? 0);
+        $fila = in_array($tipo, ComentariosDocente::TIPOS, true)
+            ? ComentariosDocente::buscar($pdo, $tipo, $id, $appointmentId, $studentId) : null;
+        if ($fila && ComentariosDocente::puedeTocar((int) $fila['author_id'], (int) $me['id'], $isFullAdmin)) {
+            if ($section === 'editar') {
+                ComentariosDocente::editar($pdo, $tipo, $id, (string) ($_POST['texto'] ?? ''));
+            } else {
+                ComentariosDocente::borrar($pdo, $tipo, $id);
+                AdminAudit::log($me, 'comentario_borrar', ['tipo' => $tipo, 'id' => $id,
+                    'appointment_id' => $appointmentId, 'student_id' => $studentId]);
+            }
+        }
+        $ancla = (string) ($_POST['ancla'] ?? '');
+        header('Location: chat_detail.php?appointment_id=' . $appointmentId . '&student_id=' . $studentId
+            . (preg_match('/^[a-z0-9-]+$/', $ancla) ? '#' . $ancla : ''));
+        exit;
+    }
     if ($comment !== '' && $section === 'chat') {
         $chatLogId = (int) ($_POST['chat_log_id'] ?? 0);
         // El chat_log_id debe pertenecer a ESTA cita/alumno (ya scopeados
@@ -90,7 +113,7 @@ $attendanceComments = ['evolucion' => [], 'procedimiento' => []];
 $hilos = [];
 if ($attendance) {
     $stmt = $pdo->prepare(
-        "SELECT ac.id, ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+        "SELECT ac.id, ac.section, ac.comment, ac.created_at, ac.teacher_id, u.display_name AS teacher_name
          FROM attendance_comments ac
          JOIN users u ON u.id = ac.teacher_id
          WHERE ac.attendance_id = ? ORDER BY ac.id"
@@ -130,7 +153,7 @@ if ($log) {
     $logIds = array_column($log, 'id');
     $placeholders = implode(',', array_fill(0, count($logIds), '?'));
     $stmt = $pdo->prepare(
-        "SELECT c.chat_log_id, c.comment, c.created_at, u.display_name AS teacher_name
+        "SELECT c.id, c.chat_log_id, c.comment, c.created_at, c.teacher_id, u.display_name AS teacher_name
          FROM chat_comments c
          JOIN users u ON u.id = c.teacher_id
          WHERE c.chat_log_id IN ($placeholders)
@@ -140,6 +163,46 @@ if ($log) {
     foreach ($stmt->fetchAll() as $c) {
         $comments[(int) $c['chat_log_id']][] = $c;
     }
+}
+
+/**
+ * Editar / Eliminar bajo un "⋯" en lo que escribió un docente, solo si es
+ * suyo (o es admin completo). Sin JS: un <details> con los dos formularios.
+ */
+function acciones_comentario(string $tipo, int $id, int $autorId, string $texto, string $ancla): void
+{
+    global $me, $isFullAdmin;
+    if (!ComentariosDocente::puedeTocar($autorId, (int) $me['id'], (bool) $isFullAdmin)) {
+        return;
+    }
+    $aviso = $tipo === 'atencion'
+        ? '¿Eliminar este comentario? Se borra también lo que el alumno respondió. No se puede deshacer.'
+        : '¿Eliminar este comentario? No se puede deshacer.';
+    ?>
+    <details class="comment-actions">
+        <summary title="Editar o eliminar">⋯</summary>
+        <form method="post" class="comment-edit">
+            <?= csrf_field() ?>
+            <input type="hidden" name="section" value="editar">
+            <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipo) ?>">
+            <input type="hidden" name="id" value="<?= $id ?>">
+            <input type="hidden" name="ancla" value="<?= htmlspecialchars($ancla) ?>">
+            <textarea name="texto" rows="4" maxlength="<?= ComentarioRespuestas::MAX_CHARS ?>" required><?= htmlspecialchars($texto) ?></textarea>
+            <div class="comment-edit-botones">
+                <button type="submit" class="btn btn--sm">Guardar cambios</button>
+                <?php // Del otro formulario (atributo form): misma fila, y su onsubmit pide confirmar ?>
+                <button type="submit" class="btn btn--sm btn--danger" form="borrar-<?= htmlspecialchars($tipo) ?>-<?= $id ?>">Eliminar</button>
+            </div>
+        </form>
+        <form method="post" id="borrar-<?= htmlspecialchars($tipo) ?>-<?= $id ?>" hidden onsubmit="return confirm(<?= htmlspecialchars(json_encode($aviso), ENT_QUOTES) ?>);">
+            <?= csrf_field() ?>
+            <input type="hidden" name="section" value="borrar">
+            <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipo) ?>">
+            <input type="hidden" name="id" value="<?= $id ?>">
+            <input type="hidden" name="ancla" value="<?= htmlspecialchars($ancla) ?>">
+        </form>
+    </details>
+    <?php
 }
 
 function chat_initials(string $name): string
@@ -182,11 +245,13 @@ function render_section_comments(string $section, string $label, string $text, a
                 <div class="avatar a-teacher" title="Docente"><?= htmlspecialchars(chat_initials($c['teacher_name'])) ?></div>
                 <?php // Sin espacios entre etiquetas: .comment-body es pre-wrap y la sangría del PHP se veía ?>
                 <div class="comment-body"><span class="chat-meta"><?= htmlspecialchars($c['teacher_name']) ?> · <?= htmlspecialchars($c['created_at']) ?></span><?= htmlspecialchars($c['comment']) ?></div>
+                <?php acciones_comentario('atencion', $cid, (int) $c['teacher_id'], (string) $c['comment'], 'comentario-' . $cid); ?>
             </div>
             <?php foreach ($hilos[$cid] ?? [] as $r): $delAlumno = $r['autor'] === 'alumno'; ?>
             <div class="comment-bubble comment-reply<?= $delAlumno ? ' comment-reply--alumno' : '' ?>">
                 <div class="avatar <?= $delAlumno ? 'a-user' : 'a-teacher' ?>" title="<?= $delAlumno ? 'Alumno' : 'Docente' ?>"><?= htmlspecialchars(chat_initials($r['author_name'])) ?></div>
                 <div class="comment-body"><span class="chat-meta"><?= htmlspecialchars($r['author_name']) ?><?= $delAlumno ? ' (alumno)' : '' ?> · <?= htmlspecialchars($r['created_at']) ?><?php if ($delAlumno && !$r['leido']): ?> <span class="tag tag--warn">nuevo</span><?php endif; ?></span><?= htmlspecialchars($r['texto']) ?></div>
+                <?php if (!$delAlumno) { acciones_comentario('respuesta', (int) $r['id'], (int) $r['author_id'], (string) $r['texto'], 'comentario-' . $cid); } ?>
             </div>
             <?php endforeach; ?>
             <?php if ($puedeResponder): ?>
@@ -274,12 +339,10 @@ if ($attendance) {
             </div>
             <div class="comment-col">
                 <?php foreach ($turnComments as $c): ?>
-                <div class="comment-bubble">
+                <div class="comment-bubble" id="turno-<?= (int) $c['id'] ?>">
                     <div class="avatar a-teacher" title="Docente"><?= htmlspecialchars(chat_initials($c['teacher_name'])) ?></div>
-                    <div class="comment-body">
-                        <span class="chat-meta"><?= htmlspecialchars($c['teacher_name']) ?> · <?= htmlspecialchars($c['created_at']) ?></span>
-                        <?= htmlspecialchars($c['comment']) ?>
-                    </div>
+                    <div class="comment-body"><span class="chat-meta"><?= htmlspecialchars($c['teacher_name']) ?> · <?= htmlspecialchars($c['created_at']) ?></span><?= htmlspecialchars($c['comment']) ?></div>
+                    <?php acciones_comentario('chat', (int) $c['id'], (int) $c['teacher_id'], (string) $c['comment'], 'turno-' . (int) $c['id']); ?>
                 </div>
                 <?php endforeach; ?>
                 <form method="post" class="comment-form">

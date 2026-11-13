@@ -205,3 +205,34 @@
 .comment-reply--alumno { background: #eef2ff; border-color: #c7d2fe; }
 .comment-reply--alumno .chat-meta { color: #3b5bdb; }
 .comment-reply-form { margin-left: var(--space-7); }
+
+/* Editar / eliminar lo que escribió el docente: un "⋯" discreto al final del
+ * globo que despliega el texto editable y el botón para borrarlo. */
+.comment-bubble { position: relative; flex-wrap: wrap; }
+.comment-bubble .comment-body { flex: 1 1 0; min-width: 0; }
+.comment-actions { margin-left: auto; font-size: 0.8rem; }
+.comment-actions > summary {
+  list-style: none;
+  cursor: pointer;
+  color: #a3822f;
+  padding: 0 0.3rem;
+  border-radius: 6px;
+  line-height: 1.2;
+}
+.comment-actions > summary::-webkit-details-marker { display: none; }
+.comment-actions > summary:hover { background: #f3dfa0; }
+.comment-actions[open] { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-2); }
+.comment-actions[open] > summary { align-self: flex-end; }
+.comment-edit { display: flex; flex-direction: column; gap: var(--space-2); }
+.comment-edit textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e2e2e8;
+  border-radius: 6px;
+  resize: vertical;
+  margin: 0;
+}
+.comment-actions form { margin: 0; }
+.comment-edit-botones { display: flex; gap: var(--space-2); }

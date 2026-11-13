@@ -8604,3 +8604,15 @@ alumno solo responde en comentarios de SUS atenciones
 (`ComentarioRespuestas::deAlumno`). Mientras el servidor no tenga la tabla
 (se crea con "Aplicar schema.sql"), los comentarios se ven igual que antes,
 sin caja para responder.
+
+## Editar y eliminar comentarios del docente (2026-11-12)
+
+En `admin/chat_detail.php`, cada cosa que escribió un docente en la
+atención (comentario de evolución o procedimiento, comentario de un turno
+del chat y su respuesta en el hilo del alumno) trae un "⋯" con el texto
+editable y el botón Eliminar (`ComentariosDocente`). Cada docente toca solo
+lo suyo; el admin completo, todo. Lo que escribió el alumno no se edita ni
+se borra. Eliminar un comentario de la atención se lleva su hilo (pide
+confirmar y lo dice); queda en el registro de auditoría como
+`comentario_borrar`. Editar no deja marca de "editado": el alumno ve el
+texto nuevo, como cualquier corrección del docente.
