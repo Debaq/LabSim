@@ -5,6 +5,53 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Base de otoscopias: se marca dónde queda adelante y se espeja sola (2026-11-13)
+
+**Qué:** página nueva `admin/otoscopias.php` (Docencia → Base de otoscopias,
+solo administrador). Se suben muchas fotos de una vez y después, una por una,
+se giran (libre, ±1°, ±90°), se encuadran, se marca hacia qué lado de la
+imagen queda adelante (izquierda / derecha / no se distingue) y se les pone
+tipo (normal, perforación, tapón, OMA, OME, retracción, timpanoesclerosis,
+colesteatoma, tubo, otitis externa, cuerpo extraño, otra) más notas. En la
+ficha del caso cada oído tiene "Elegir de la base", que trae la foto ya
+orientada para ese oído. Código: `src/OtoscopiaBiblioteca.php`,
+`public/admin/otoscopia_biblioteca.php`, `public/js/otoscopias.js`; tablas
+`otoscopia_biblioteca` y `otoscopia_biblioteca_uso`.
+
+**Por qué alcanza con "dónde queda adelante":** el tímpano derecho y el
+izquierdo son imagen especular. Por el otoscopio, en el OD lo anterior cae a
+la derecha de la imagen y en el OI a la izquierda. Una foto con anterior a la
+derecha va tal cual en OD y espejada en OI. Espejar no cambia la anatomía de
+lugar (posterosuperior sigue siendo posterosuperior). "No se distingue" (un
+tapón que lo tapa todo) nunca se espeja.
+
+**Decisiones:**
+- **Se guarda el original + cómo encuadrarlo**, no la imagen ya recortada:
+  así el giro y el encuadre se pueden corregir después. El original se
+  achica a 1600 px de lado mayor (GD tiene que girarlo en la memoria del
+  hosting). El editor dibuja con el mismo modelo que el servidor (centro,
+  lado y giro en px del original), así lo que se ve es lo que queda.
+- **Al asignar se COPIA la foto al archivo de siempre del caso**
+  (`data/otoscopia_photos/`). La app, el PDF, la consola y el modo sin
+  cuenta no cambian. Descartado: guardar solo la referencia y armar la foto
+  al pedirla (había que tocar la app, el PDF y el paquete offline).
+- **El vínculo queda anotado** (`otoscopia_biblioteca_uso`): corregir una
+  foto en la base reescribe la de todos los casos que la usan. Subir otra,
+  borrar o espejar a mano en la ficha corta el vínculo, para que una
+  corrección en la base no pise lo que el docente puso a propósito.
+- **La misma foto no puede ir en los dos oídos del mismo caso:** el alumno
+  vería la misma imagen dada vuelta.
+- **Sacar una foto de la base no toca los casos:** conservan su copia.
+- **Solo el administrador cura la base** (lo que corrige se propaga a casos
+  de todos los docentes); los docentes eligen desde la ficha.
+- Botón **Espejar** en cada foto de la ficha (mismo día), para corregir a
+  mano fotos sueltas como la del OI del caso 166.
+
+Tests: `tests/test_otoscopia_biblioteca.php` (regla de espejado por oído,
+geometría del giro, límites del encuadre). Render, asignación, bloqueo de los
+dos oídos, reescritura y reclamo del id temporal se probaron con GD real en
+un contenedor.
+
 ## Reflejo: la forma de la curva y el decay, separados (2026-10-09)
 
 El perfil auditivo le ponía forma de curva **OFF** a todo oído

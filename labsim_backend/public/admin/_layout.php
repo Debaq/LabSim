@@ -181,6 +181,7 @@ function admin_header(string $title, ?array $currentUser = null): void
                     <a href="patients.php"<?= $ariaCurrent('patients.php') ?>>Fichas Clínicas</a>
                     <?php if ($isFullAdmin): ?>
                     <a href="practica.php"<?= $ariaCurrent('practica.php') ?>>Práctica libre</a>
+                    <a href="otoscopias.php"<?= $ariaCurrent('otoscopias.php') ?>>Base de otoscopias</a>
                     <?php endif; ?>
                     <hr>
                     <a href="courses.php"<?= $ariaCurrent('courses.php') ?>>Cursos</a>

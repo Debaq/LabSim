@@ -897,3 +897,41 @@ CREATE TABLE IF NOT EXISTS audiometria_tecnica_cache (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (appointment_id, student_id)
 );
+
+-- Base de otoscopias (ver src/OtoscopiaBiblioteca.php): fotos que se cargan
+-- una vez y se asignan a cualquier caso. El original vive en
+-- data/otoscopia_biblioteca/<id>_original.jpg; rotacion/centro/lado dicen
+-- cómo encuadrarlo (giro horario en grados, centro y lado del recuadro en
+-- px del original). anterior = hacia qué lado de la imagen encuadrada queda
+-- lo anterior ('izq'/'der'/'nd'); con eso se espeja sola para OD u OI.
+-- anterior o tipo en NULL = todavía sin clasificar. La crea también
+-- OtoscopiaBiblioteca::asegurarTablas (mismo SQL).
+CREATE TABLE IF NOT EXISTS otoscopia_biblioteca (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ancho INTEGER NOT NULL,
+    alto INTEGER NOT NULL,
+    rotacion REAL NOT NULL DEFAULT 0,
+    centro_x REAL NOT NULL,
+    centro_y REAL NOT NULL,
+    lado REAL NOT NULL,
+    anterior TEXT CHECK (anterior IS NULL OR anterior IN ('izq', 'der', 'nd')),
+    tipo TEXT,
+    notas TEXT NOT NULL DEFAULT '',
+    nombre_archivo TEXT NOT NULL DEFAULT '',
+    created_by INTEGER,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Qué oído/fase de qué caso usa una foto de la base. La foto del caso es
+-- una copia (data/otoscopia_photos/); esto sirve para reescribirla si la
+-- foto se corrige en la base. Subir, borrar o espejar a mano en la ficha
+-- borra la fila. case_id puede ser un id temporal "tmp..." hasta guardar.
+CREATE TABLE IF NOT EXISTS otoscopia_biblioteca_uso (
+    case_id TEXT NOT NULL,
+    side TEXT NOT NULL,
+    fase INTEGER NOT NULL,
+    biblioteca_id INTEGER NOT NULL,
+    PRIMARY KEY (case_id, side, fase)
+);
+CREATE INDEX IF NOT EXISTS idx_otoscopia_uso_biblioteca ON otoscopia_biblioteca_uso (biblioteca_id);

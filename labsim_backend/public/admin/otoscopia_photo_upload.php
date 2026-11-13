@@ -72,6 +72,22 @@ if ($action === 'delete') {
     exit;
 }
 
+if ($action === 'biblioteca') {
+    $bibliotecaId = (int) ($_POST['biblioteca_id'] ?? 0);
+    try {
+        OtoscopiaBiblioteca::asignar($caseId, $side, $faseIdx, $bibliotecaId);
+        AdminAudit::log($me, 'otoscopia_photo_biblioteca', ['case_id' => $caseId, 'side' => $side, 'fase' => $faseIdx, 'biblioteca_id' => $bibliotecaId]);
+        $fila = OtoscopiaBiblioteca::fila($bibliotecaId);
+        echo json_encode([
+            'ok' => true,
+            'origen' => 'De la base: ' . (OtoscopiaBiblioteca::TIPOS[$fila['tipo']] ?? $fila['tipo']) . ' (#' . $bibliotecaId . ')',
+        ]);
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
 if ($action === 'mirror') {
     try {
         OtoscopiaPhoto::mirror($caseId, $side, $faseIdx);

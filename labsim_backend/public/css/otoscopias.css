@@ -1,0 +1,148 @@
+/* Base de otoscopias (admin/otoscopias.php) y el selector de la ficha del caso. */
+
+.oto-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 1rem 0 0.8rem;
+  font-size: 0.92rem;
+}
+.oto-filtros a[aria-current="page"] { font-weight: 700; text-decoration: none; }
+
+.oto-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.8rem;
+}
+.oto-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-decoration: none;
+  color: inherit;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: 0.3rem;
+}
+.oto-tarjeta:hover { border-color: var(--color-border-strong); }
+.oto-tarjeta.activa { border-color: var(--color-primary); }
+.oto-tarjeta img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: #000;
+}
+.oto-tarjeta-pie { font-size: 0.78rem; line-height: 1.3; }
+
+.oto-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.oto-cerrar { margin-left: auto; }
+.oto-editor-cuerpo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+}
+.oto-lienzo-col { flex: 0 1 440px; min-width: 0; }
+.oto-datos-col {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.oto-lienzo-wrap { position: relative; }
+#oto-lienzo {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 1;
+  background: #000;
+  border-radius: var(--radius-lg);
+  cursor: grab;
+  touch-action: none;
+}
+#oto-lienzo:active { cursor: grabbing; }
+.oto-marca-adelante {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  color: #111;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+.oto-marca-adelante.izq { left: 0.4rem; }
+.oto-marca-adelante.der { right: 0.4rem; }
+.oto-marca-adelante[hidden] { display: none; }
+
+.oto-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.oto-controles input[type="range"] { width: 100%; border: none; padding: 0; }
+.oto-giro-botones {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.oto-giro-botones input[type="range"] { flex: 1; min-width: 60px; }
+.oto-giro-botones button { padding-left: 0.5rem; padding-right: 0.5rem; white-space: nowrap; }
+
+.oto-adelante { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.8rem; }
+.oto-adelante legend { font-weight: 600; padding: 0 0.3rem; }
+.oto-adelante-op {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.oto-adelante-op input { width: auto; margin: 0; }
+.oto-datos-col label { margin-top: 0; }
+.oto-datos-col textarea {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-1);
+  padding: 0.45rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font: inherit;
+}
+
+.oto-vistas { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+.oto-vistas figure { margin: 0; text-align: center; font-size: 0.8rem; }
+.oto-vistas canvas {
+  display: block;
+  width: 150px;
+  height: 150px;
+  background: #000;
+  border-radius: var(--radius-md);
+}
+.oto-vistas .side-tag { font-weight: 700; }
+.oto-vistas .side-tag.od { color: var(--color-od, #c62828); }
+.oto-vistas .side-tag.oi { color: var(--color-oi, #1565c0); }
+
+.oto-acciones { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.oto-borrar { margin-left: auto; }
+
+/* Selector "Elegir de la base" en la ficha del caso (js/case/otoscopia.js). */
+.oto-elegir-box { max-width: 46rem; width: 94%; max-height: 88vh; display: flex; flex-direction: column; }
+.oto-elegir-box .oto-grilla {
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  margin: 0.6rem 0;
+}
+.oto-elegir-box .oto-tarjeta { cursor: pointer; background: none; font: inherit; text-align: left; }
+.oto-espejada { transform: scaleX(-1); }
+.otoscopia-origen { display: block; font-size: 0.76rem; color: var(--color-muted); }
+.otoscopia-origen[hidden] { display: none; }

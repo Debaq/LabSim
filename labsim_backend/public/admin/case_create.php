@@ -453,6 +453,7 @@ $vempBaselineOverride = AppConfig::getEffective('normative_data.vemp', null) ?? 
 $umbralesAcumetria = CaseForm::umbralesAcumetria();
 
 admin_add_css('case.css');
+admin_add_css('otoscopias.css'); // selector "Elegir de la base" de la ficha Otoscopia
 // El JS de esta página vive en public/js/case/*.js y se emite al final del
 // <body> EN ESTE ORDEN (admin_footer). El orden importa: side-color publica
 // window.sideColor, que usa todo lo que dibuja; audiogram/logogram/

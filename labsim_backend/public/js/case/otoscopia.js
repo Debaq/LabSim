@@ -145,6 +145,7 @@
                     if (delBtn) { delBtn.hidden = false; }
                     var mirBtn = slot.querySelector('.otoscopia-mirror-photo');
                     if (mirBtn) { mirBtn.hidden = false; }
+                    setOrigen(slot, '');
                     var dlLink = slot.querySelector('.otoscopia-download-photo');
                     if (dlLink) { dlLink.hidden = false; }
                     showMsg('Imagen actualizada.', false);
@@ -174,6 +175,15 @@
         msgEl.textContent = text;
         msgEl.style.color = isError ? '#a33' : '#2a7a2a';
         msgEl.hidden = false;
+    }
+
+    // "De la base: ..." bajo la miniatura. Vacío = foto propia del caso
+    // (subida, borrada o espejada a mano: el servidor ya cortó el vínculo).
+    function setOrigen(slot, texto) {
+        var el = slot.querySelector('.otoscopia-origen');
+        if (!el) { return; }
+        el.textContent = texto;
+        el.hidden = texto === '';
     }
 
     function faseBlocks() {
@@ -212,6 +222,9 @@
         var mirBtn = slot.querySelector('.otoscopia-mirror-photo');
         mirBtn.setAttribute('data-side', side);
         mirBtn.setAttribute('data-fase-idx', idx);
+        var baseBtn = slot.querySelector('.otoscopia-elegir-base');
+        baseBtn.setAttribute('data-side', side);
+        baseBtn.setAttribute('data-fase-idx', idx);
         var dlLink = slot.querySelector('.otoscopia-download-photo');
         dlLink.setAttribute('data-side', side);
         dlLink.setAttribute('data-fase-idx', idx);
@@ -310,6 +323,7 @@
                     if (dlLink) { dlLink.hidden = true; }
                     var mirBtn = slot.querySelector('.otoscopia-mirror-photo');
                     if (mirBtn) { mirBtn.hidden = true; }
+                    setOrigen(slot, '');
                     showMsg('Imagen borrada.', false);
                 } else {
                     showMsg(data.error || 'No se pudo borrar la imagen.', true);
@@ -346,6 +360,7 @@
                 btn.disabled = false;
                 if (data.ok) {
                     img.src = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&v=' + Date.now();
+                    setOrigen(slot, '');
                     showMsg('Imagen espejada.', false);
                 } else {
                     showMsg(data.error || 'No se pudo espejar la imagen.', true);
@@ -356,6 +371,122 @@
                 showMsg('Error de red al espejar la imagen.', true);
             });
     });
+
+    // --- Elegir de la base de otoscopias (admin/otoscopias.php). La lista
+    // se pide una vez; cada foto se muestra ya como quedaría en ese oído
+    // (espejada con CSS si el lado anterior no calza), y al elegirla el
+    // servidor hace lo mismo de verdad (OtoscopiaBiblioteca::asignar). ---
+    var baseModal = document.getElementById('otoscopia-base-modal');
+    var baseGrilla = document.getElementById('otoscopia-base-grilla');
+    var baseTipo = document.getElementById('otoscopia-base-tipo');
+    var baseMsg = document.getElementById('otoscopia-base-msg');
+    var baseLado = document.getElementById('otoscopia-base-lado');
+    var baseFotos = null;
+    var baseSlot = null, baseSide = '', baseIdx = '';
+
+    function baseEspejar(anterior, side) {
+        if (anterior === 'der') { return side === 'oi'; }
+        if (anterior === 'izq') { return side === 'od'; }
+        return false;
+    }
+
+    function pintarBase() {
+        baseGrilla.innerHTML = '';
+        if (!baseFotos) { return; }
+        var tipo = baseTipo.value;
+        var lista = baseFotos.filter(function (f) { return !tipo || f.tipo === tipo; });
+        if (!lista.length) {
+            baseMsg.textContent = baseFotos.length ? 'No hay fotos de ese tipo.' : 'La base todavía no tiene fotos clasificadas.';
+            baseMsg.hidden = false;
+            return;
+        }
+        baseMsg.hidden = true;
+        lista.forEach(function (f) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'oto-tarjeta';
+            b.setAttribute('data-id', f.id);
+            b.title = f.notas || '';
+            var im = document.createElement('img');
+            im.loading = 'lazy';
+            im.alt = 'Otoscopia #' + f.id;
+            im.src = 'otoscopia_biblioteca.php?img=' + f.id + '&t=' + encodeURIComponent(f.t);
+            if (baseEspejar(f.anterior, baseSide)) { im.className = 'oto-espejada'; }
+            var pie = document.createElement('span');
+            pie.className = 'oto-tarjeta-pie';
+            pie.textContent = '#' + f.id + ' · ' + f.tipo_label;
+            b.appendChild(im);
+            b.appendChild(pie);
+            baseGrilla.appendChild(b);
+        });
+    }
+
+    function abrirBase(btn) {
+        baseSlot = btn.closest('.otoscopia-photo-slot');
+        baseSide = btn.getAttribute('data-side');
+        baseIdx = btn.getAttribute('data-fase-idx');
+        baseLado.textContent = '-- ' + baseSide.toUpperCase() + ', fase ' + (parseInt(baseIdx, 10) + 1);
+        baseModal.hidden = false;
+        if (baseFotos) { pintarBase(); return; }
+        baseMsg.textContent = 'Cargando...';
+        baseMsg.hidden = false;
+        fetch('otoscopia_biblioteca.php?lista=1')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                baseFotos = data.fotos || [];
+                var usados = {};
+                baseFotos.forEach(function (f) { usados[f.tipo] = true; });
+                Object.keys(data.tipos || {}).forEach(function (k) {
+                    if (!usados[k]) { return; }
+                    var o = document.createElement('option');
+                    o.value = k;
+                    o.textContent = data.tipos[k];
+                    baseTipo.appendChild(o);
+                });
+                pintarBase();
+            })
+            .catch(function () { baseMsg.textContent = 'No se pudo cargar la base.'; });
+    }
+
+    if (baseModal) {
+        container.addEventListener('click', function (e) {
+            var btn = e.target.closest('.otoscopia-elegir-base');
+            if (btn) { abrirBase(btn); }
+        });
+        baseTipo.addEventListener('change', pintarBase);
+        document.getElementById('otoscopia-base-cancelar').addEventListener('click', function () { baseModal.hidden = true; });
+        baseGrilla.addEventListener('click', function (e) {
+            var t = e.target.closest('.oto-tarjeta');
+            if (!t || !baseSlot) { return; }
+            var slot = baseSlot, side = baseSide, idx = baseIdx;
+            var fd = new FormData();
+            fd.append('csrf_token', csrfToken());
+            fd.append('case_id', CASE_ID);
+            fd.append('side', side);
+            fd.append('fase_idx', idx);
+            fd.append('action', 'biblioteca');
+            fd.append('biblioteca_id', t.getAttribute('data-id'));
+            baseMsg.textContent = 'Poniendo la foto...';
+            baseMsg.hidden = false;
+            fetch('otoscopia_photo_upload.php', { method: 'POST', body: fd })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.ok) { baseMsg.textContent = data.error || 'No se pudo poner la foto.'; return; }
+                    baseModal.hidden = true;
+                    var img = slot.querySelector('.otoscopia-thumb');
+                    img.src = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&v=' + Date.now();
+                    img.hidden = false;
+                    slot.querySelector('.otoscopia-thumb-empty').hidden = true;
+                    ['.otoscopia-delete-photo', '.otoscopia-mirror-photo', '.otoscopia-download-photo'].forEach(function (sel) {
+                        var el = slot.querySelector(sel);
+                        if (el) { el.hidden = false; }
+                    });
+                    setOrigen(slot, data.origen || '');
+                    showMsg('Imagen puesta desde la base.', false);
+                })
+                .catch(function () { baseMsg.textContent = 'Error de red.'; });
+        });
+    }
 
     updateRemoveButtons();
 })();

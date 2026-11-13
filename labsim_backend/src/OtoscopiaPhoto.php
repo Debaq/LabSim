@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/OtoscopiaBiblioteca.php';
+
 /**
  * Imágenes de otoscopia: una por oído (modo "única") o varias por oído
  * -- una por fase -- en modo "por fase" (ver CaseBuilder::buildCaseData,
@@ -23,6 +25,12 @@ declare(strict_types=1);
  * magic bytes. La extensión en el nombre de archivo SÍ importa acá: es lo
  * que dice con qué formato quedó guardada cada imagen (no hay columna en
  * la BD que lo registre), así que path()/has()/delete() prueban ambas.
+ *
+ * Una foto también puede venir de la base de otoscopias
+ * (OtoscopiaBiblioteca::asignar): se copia acá igual, y el vínculo queda
+ * en otra tabla. Todo lo que cambia la foto a mano (save, delete, mirror)
+ * corta ese vínculo, para que una corrección posterior en la base no pise
+ * lo que el docente puso a propósito.
  */
 final class OtoscopiaPhoto
 {
@@ -91,6 +99,12 @@ final class OtoscopiaPhoto
 
     public static function delete(string $caseId, string $side, int $faseIdx): void
     {
+        self::borrarArchivos($caseId, $side, $faseIdx);
+        OtoscopiaBiblioteca::desvincular($caseId, $side, $faseIdx);
+    }
+
+    private static function borrarArchivos(string $caseId, string $side, int $faseIdx): void
+    {
         try {
             foreach (self::FORMATS as $ext) {
                 $p = self::pathForFormat($caseId, $side, $faseIdx, $ext);
@@ -121,6 +135,61 @@ final class OtoscopiaPhoto
             $suffix = substr(basename($path), strlen($tempSafe));
             rename($path, self::dir() . '/' . $realSafe . $suffix);
         }
+        OtoscopiaBiblioteca::reclamar($tempId, $realCaseId);
+    }
+
+    /**
+     * Abre una imagen JPG/PNG/WEBP con GD, ya derecha según su EXIF.
+     *
+     * @return resource|\GdImage
+     */
+    public static function abrirImagen(string $ruta)
+    {
+        if (!extension_loaded('gd')) {
+            throw new RuntimeException('El servidor no tiene la extensión GD -- no se pueden procesar imágenes.');
+        }
+        $info = @getimagesize($ruta);
+        if ($info === false) {
+            throw new RuntimeException('El archivo no es una imagen válida.');
+        }
+        $mime = $info['mime'];
+        if ($mime === 'image/jpeg') {
+            $src = imagecreatefromjpeg($ruta);
+        } elseif ($mime === 'image/png') {
+            $src = imagecreatefrompng($ruta);
+        } elseif ($mime === 'image/webp' && function_exists('imagecreatefromwebp')) {
+            $src = imagecreatefromwebp($ruta);
+        } else {
+            $src = false;
+        }
+        if ($src === false) {
+            throw new RuntimeException('Formato de imagen no soportado (usa JPG, PNG o WEBP).');
+        }
+        if (!imageistruecolor($src)) {
+            imagepalettetotruecolor($src);
+        }
+        return self::applyExifOrientation($src, $ruta, $mime);
+    }
+
+    /**
+     * Escribe la imagen (ya del tamaño final) como la foto de ese oído/fase,
+     * en WebP si se puede, si no JPEG. Borra lo que hubiera antes (pudo
+     * haber quedado en el otro formato si el soporte de webp del servidor
+     * cambió entre subidas). No toca el vínculo con la base.
+     *
+     * @param resource|\GdImage $img
+     */
+    public static function escribirImagen(string $caseId, string $side, int $faseIdx, $img): void
+    {
+        self::borrarArchivos($caseId, $side, $faseIdx);
+        if (function_exists('imagewebp')) {
+            $ok = imagewebp($img, self::pathForFormat($caseId, $side, $faseIdx, 'webp'), 80);
+        } else {
+            $ok = imagejpeg($img, self::pathForFormat($caseId, $side, $faseIdx, 'jpg'), 85);
+        }
+        if (!$ok) {
+            throw new RuntimeException('No se pudo guardar la imagen.');
+        }
     }
 
     /**
@@ -130,30 +199,7 @@ final class OtoscopiaPhoto
      */
     public static function save(string $caseId, string $side, int $faseIdx, string $tmpPath, float $cropX, float $cropY, float $cropSize): void
     {
-        if (!extension_loaded('gd')) {
-            throw new RuntimeException('El servidor no tiene la extensión GD -- no se pueden procesar imágenes.');
-        }
-
-        $info = @getimagesize($tmpPath);
-        if ($info === false) {
-            throw new RuntimeException('El archivo no es una imagen válida.');
-        }
-        $mime = $info['mime'];
-
-        if ($mime === 'image/jpeg') {
-            $src = imagecreatefromjpeg($tmpPath);
-        } elseif ($mime === 'image/png') {
-            $src = imagecreatefrompng($tmpPath);
-        } elseif ($mime === 'image/webp' && function_exists('imagecreatefromwebp')) {
-            $src = imagecreatefromwebp($tmpPath);
-        } else {
-            $src = false;
-        }
-        if ($src === false) {
-            throw new RuntimeException('Formato de imagen no soportado (usa JPG, PNG o WEBP).');
-        }
-
-        $src = self::applyExifOrientation($src, $tmpPath, $mime);
+        $src = self::abrirImagen($tmpPath);
         $w = imagesx($src);
         $h = imagesy($src);
 
@@ -178,14 +224,8 @@ final class OtoscopiaPhoto
             (int) round($cropSize)
         );
 
-        // Borra lo que hubiera antes (pudo haber quedado en el otro formato
-        // si el soporte de webp del servidor cambió entre subidas).
-        self::delete($caseId, $side, $faseIdx);
-        if (function_exists('imagewebp')) {
-            imagewebp($dst, self::pathForFormat($caseId, $side, $faseIdx, 'webp'), 80);
-        } else {
-            imagejpeg($dst, self::pathForFormat($caseId, $side, $faseIdx, 'jpg'), 85);
-        }
+        self::escribirImagen($caseId, $side, $faseIdx, $dst);
+        OtoscopiaBiblioteca::desvincular($caseId, $side, $faseIdx);
         imagedestroy($dst);
         imagedestroy($src);
     }
@@ -219,6 +259,7 @@ final class OtoscopiaPhoto
         if (!$ok) {
             throw new RuntimeException('No se pudo guardar la imagen espejada.');
         }
+        OtoscopiaBiblioteca::desvincular($caseId, $side, $faseIdx);
     }
 
     /** @param resource|\GdImage $img */

@@ -14,6 +14,7 @@
 <div class="tab-panel" data-tab="otoscopia">
 <div class="card">
     <strong>Otoscopia</strong>
+    <p class="help">"Elegir de la base" trae una foto de la base de otoscopias ya orientada para ese oído (la da vuelta sola si hace falta); si después se corrige en la base, se actualiza acá. Subir otra, borrarla o espejarla a mano la deja como foto propia del caso. La misma foto de la base no puede ir en los dos oídos.</p>
     <p class="help">Una sola fase (la de por defecto) = una imagen por oído, nada más. Agregar una 2ª fase en adelante es lo que la convierte en "por fase": cada fase desde la 2ª lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Por ahora todos los alumnos ven la fase 1: la fase no avanza sola con el progreso de cada uno, así que las siguientes sirven para preparar el caso, no para mostrárselas todavía.</p>
 
     <input type="hidden" name="otoscopia[fase_count]" id="otoscopia-fase-count" value="<?= $otoscopiaCount ?>">
@@ -38,11 +39,14 @@
                 <div class="otoscopia-photo-slot">
                     <span class="side-tag <?= $lado ?>"><?= $ladoLabel ?></span><br>
                     <?php $hasOto = OtoscopiaPhoto::has($photoCaseId, $lado, $faseIdx); ?>
+                    <?php $usoBase = $hasOto ? OtoscopiaBiblioteca::usoDe($photoCaseId, $lado, $faseIdx) : null; ?>
                     <img class="otoscopia-thumb" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>"
                          src="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $lado ?>&amp;fase=<?= $faseIdx ?>&amp;v=<?= time() ?>"
                          alt="Otoscopia <?= $ladoLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
                     <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
+                    <span class="otoscopia-origen" <?= $usoBase ? '' : 'hidden' ?>><?= $usoBase ? htmlspecialchars('De la base: ' . (OtoscopiaBiblioteca::TIPOS[$usoBase['tipo']] ?? $usoBase['tipo']) . ' (#' . (int) $usoBase['id'] . ')') : '' ?></span>
                     <input type="file" class="otoscopia-photo-input" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
+                    <button type="button" class="secondary otoscopia-elegir-base" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>">Elegir de la base</button>
                     <button type="button" class="secondary otoscopia-mirror-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" title="Da vuelta la imagen de izquierda a derecha" <?= $hasOto ? '' : 'hidden' ?>>Espejar</button>
                     <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
                     <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $lado ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
@@ -62,7 +66,9 @@
             <span class="side-tag"></span><br>
             <img class="otoscopia-thumb" hidden>
             <div class="otoscopia-thumb-empty">Sin imagen</div>
+            <span class="otoscopia-origen" hidden></span>
             <input type="file" class="otoscopia-photo-input" accept="image/jpeg,image/png,image/webp">
+            <button type="button" class="secondary otoscopia-elegir-base">Elegir de la base</button>
             <button type="button" class="secondary otoscopia-mirror-photo" title="Da vuelta la imagen de izquierda a derecha" hidden>Espejar</button>
             <button type="button" class="secondary otoscopia-delete-photo" hidden>Borrar foto</button>
             <a class="otoscopia-download-photo" hidden>Descargar</a>
@@ -80,5 +86,19 @@
             <div class="two-col"></div>
         </div>
     </template>
+
+    <div id="otoscopia-base-modal" class="photo-modal" hidden>
+        <div class="photo-modal-box oto-elegir-box">
+            <strong>Elegir de la base de otoscopias <span id="otoscopia-base-lado"></span></strong>
+            <label>Tipo
+                <select id="otoscopia-base-tipo"><option value="">Todos</option></select>
+            </label>
+            <p class="help" id="otoscopia-base-msg">Cargando...</p>
+            <div class="oto-grilla" id="otoscopia-base-grilla"></div>
+            <div class="photo-modal-actions">
+                <button type="button" class="secondary" id="otoscopia-base-cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
