@@ -130,14 +130,20 @@ def test_el_equipo_que_crece_no_se_corta():
     assert _dibujado(v).right() <= _rect(v, v.escalado).right() + 1
 
 
+def teardown_function(_fn=None):
+    """Cierra las ventanas del test (pytest la llama tras cada uno). Cerrarlas
+    saca el filtro de teclas de cada audiómetro; abiertas, Python las
+    destruye al salir en cualquier orden y el hideEvent cae en un objeto ya
+    liberado: violación de segmento al terminar pytest."""
+    for w in QApplication.topLevelWidgets():
+        w.close()
+    QApplication.processEvents()
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):
             fn()
+            teardown_function()
             print(f"  {nombre} OK")
-    # Cerrarlas saca el filtro de teclas de cada audiómetro: si queda
-    # puesto, el cierre de Qt lo llama ya sin Python y ensucia la salida.
-    for w in QApplication.topLevelWidgets():
-        w.close()
-    QApplication.processEvents()
     print("TODOS LOS TESTS PASARON")
