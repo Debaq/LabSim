@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 80).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 81).
 
 Revisado contra el código el 2026-09-24.
 
@@ -185,6 +185,14 @@ gap significativo. § Parámetros de audiometría configurables por curso
       un minuto entero en un nivel; Rosemberg no reinicia y corta a los 60 s
       totales. Hoy los dos cuentan juntos como "supraliminar".
       § Carhart y Rosemberg: un solo botón, la prueba sale del nivel de partida
+- [ ] 81. Indicador del Reger: con `audio_reger_respuesta` (las dos
+      presentaciones comparadas y la respuesta) revisar los requisitos
+      (mismo oído; una frecuencia conservada como referencia y otra
+      patológica sobre 20 dB HL; diferencia entre 20 y 40 dB), que la
+      referencia suba de 20 en 20 y la patológica se iguale de 5 en 5, y
+      deducir lo que debió anotar (reclutamiento sí/no) contra el patrón del
+      caso. Hoy cuenta solo como "supraliminar".
+      § Reger: balance monoaural bifrecuencial
 
 ### Montaje de electrodos
 § Electrodos sobre una cabeza giratoria, sin 3D en vivo
