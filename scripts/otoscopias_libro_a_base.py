@@ -13,6 +13,8 @@ por su ruta en el banco.
     python3 scripts/otoscopias_libro_a_base.py --ver     # qué subiría, sin subir
     python3 scripts/otoscopias_libro_a_base.py           # sube
     python3 scripts/otoscopias_libro_a_base.py --normales 10   # todas las alteradas y solo 10 normales
+    python3 scripts/otoscopias_libro_a_base.py --normales 10 --hasta 10
+        # además completa cada tipo alterado hasta 10 con fotos del banco que el libro no usa
 """
 import argparse
 import base64
@@ -139,6 +141,59 @@ def pool():
     return sorted(fotos.values(), key=lambda f: (f['tipo'] != 'normal', f['tipo'], f['ruta']))
 
 
+# Carpetas de los bancos por tipo, para completar con fotos que el libro no usa.
+CARPETAS = {
+    'cerumen': ['viscaino/Datos/Training-validation/Earwax plug', 'basaran/eardrum/Abnormal/Earwax'],
+    'colesteatoma': ['kpj/chronic otitis media with cholesteatoma'],
+    'oma': ['kpj/Acute otitis media', 'basaran/eardrum/Abnormal/AOM'],
+    'omc': ['kpj/chronic active otitis media without cholesteatoma',
+            'viscaino/Datos/Training-validation/Chronic otitis media'],
+    'ome': ['kpj/otitis media effusion'],
+    'otitis_externa': ['basaran/eardrum/Abnormal/OtitisEksterna'],
+    'perforacion': ['kpj/chronic inactive otitis media', 'basaran/eardrum/Abnormal/CSOM'],
+    'timpanoesclerosis': ['viscaino/Datos/Training-validation/Myringosclerosis', 'basaran/eardrum/Abnormal/Miringoskleroz'],
+    'tubo': ['basaran/eardrum/Abnormal/TympanostomyTubes'],
+}
+
+
+def completar(fotos, hasta):
+    """Fotos del banco (no usadas por el libro) hasta llegar a `hasta` por tipo alterado.
+
+    Dentro de cada carpeta se toman archivos espaciados a lo largo de la lista
+    ordenada, no los primeros: en KPJ los nombres seguidos suelen ser la misma
+    sesión (el mismo oído varias veces).
+    """
+    usadas = {f['ruta'] for f in fotos}
+    extra = []
+    for tipo, carpetas in CARPETAS.items():
+        faltan = hasta - sum(1 for f in fotos if f['tipo'] == tipo)
+        if faltan <= 0:
+            continue
+        candidatas = []
+        for c in carpetas:
+            archivos = sorted(p for p in (BANCOS / c).iterdir()
+                              if p.suffix.lower() in ('.jpg', '.jpeg', '.png')
+                              and str(p.relative_to(BANCOS)) not in usadas)
+            paso = max(1, len(archivos) // max(1, faltan))
+            candidatas.append(archivos[::paso])
+        i = 0
+        while faltan > 0 and any(candidatas):
+            lista = candidatas[i % len(candidatas)]
+            if lista:
+                p = lista.pop(0)
+                ruta = str(p.relative_to(BANCOS))
+                banco = ruta.split('/')[0]
+                rotulo = p.parent.name
+                extra.append({
+                    'ruta': ruta, 'tipo': tipo,
+                    'notas': f'Rótulo del banco: {rotulo} (no la usa el libro; revisar). '
+                             f'Banco: {CREDITO_BANCO.get(banco, banco)}.',
+                })
+                faltan -= 1
+            i += 1
+    return extra
+
+
 def elegir_normales(fotos, n):
     """n normales repartidas por turno entre los bancos, para que haya variedad de equipo y de luz."""
     por_banco = {}
@@ -161,10 +216,14 @@ def main():
     ap.add_argument('--ver', action='store_true', help='solo mostrar qué subiría')
     ap.add_argument('--normales', type=int, default=None,
                     help='cuántas normales subir (repartidas entre los bancos); sin esto, todas')
+    ap.add_argument('--hasta', type=int, default=None,
+                    help='completar cada tipo alterado hasta este número con fotos del banco que el libro no usa')
     a = ap.parse_args()
     fotos = pool()
     if a.normales is not None:
         fotos = [f for f in fotos if f['tipo'] != 'normal'] + elegir_normales(fotos, a.normales)
+    if a.hasta is not None:
+        fotos += completar(fotos, a.hasta)
     print(f'{len(fotos)} fotos:', dict(Counter(f['tipo'] for f in fotos)))
     if a.ver:
         for f in fotos:
