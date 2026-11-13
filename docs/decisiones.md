@@ -8920,6 +8920,7 @@ H06). Se hacen con el vibrador.
   Fowler el centrado llega 15 dB SL + el doble de la diferencia sobre el
   umbral del sano, así que con diferencias de más de ~20 dB el punto de
   reclutamiento queda sobre el máximo del vibrador y el Weber no se invierte
-  dentro del rango.
+  dentro del rango. Es la limitación real de la IWA y por eso a veces hay
+  que usar el Fowler (confirmado por el equipo): se deja así.
 - Backend: `weber_audiometrico` y `donde_lo_escucha` cuentan como
   supraliminares; la pregunta no cambia la instrucción.
