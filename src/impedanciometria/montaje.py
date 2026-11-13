@@ -7,7 +7,9 @@ El orden es el de la práctica:
 
 1. elegir el tamaño de la oliva y ponérsela a la sonda;
 2. meter la sonda en el oído que se va a medir;
-3. poner el fono contralateral en el otro;
+3. poner el fono contralateral en el otro: un fono de concha (supraaural)
+   con cintillo, unilateral; del lado de la sonda el cintillo apoya en la
+   sien con un soporte;
 4. medir;
 5. dar vuelta todo -- la sonda al otro oído, el fono al primero -- y medir
    el otro.
@@ -53,8 +55,21 @@ HERRAMIENTAS = (("girar", "Girar"), (SONDA, "Sonda"), (CONTRA, "Fono"))
 PISTAS = {
     "girar": "Arrastra para girar la cabeza.",
     SONDA: "Clic en el conducto: ahí va la sonda.",
-    CONTRA: "Clic en el conducto: ahí va el fono contralateral.",
+    CONTRA: "Clic en la oreja: ahí va el fono; el cintillo apoya en la otra sien.",
 }
+DONDE = {SONDA: "va en el conducto auditivo", CONTRA: "va sobre la oreja"}
+OREJA_M = 0.040     # el fono de concha cubre la oreja: el clic cae a menos de 4 cm del conducto
+
+
+def oreja_en(punto):
+    """La oreja ('OD'/'OI') bajo un punto de la piel, o None."""
+    d = datos()
+    mejor = None
+    for sitio, oido in (("cae_der", "OD"), ("cae_izq", "OI")):
+        dist = float(np.linalg.norm(d["pos"][d["por_id"][sitio]] - np.asarray(punto)))
+        if dist <= OREJA_M and (mejor is None or dist < mejor[1]):
+            mejor = (oido, dist)
+    return mejor[0] if mejor else None
 
 
 def oliva_que_sella(caso=None):
@@ -191,32 +206,70 @@ class CabezaZ(CabezaElectrodos):
             p.drawEllipse(pant[0], radio, radio)
 
     def _dibujar_contra(self, p, oido, px_por_m):
-        """Fono de inserción: la espuma en el conducto, el tubo y la caja del
-        transductor colgando."""
+        """Fono de concha (supraaural) unilateral: la concha sobre la oreja,
+        el cintillo por encima de la cabeza y, del otro lado, el soporte
+        apoyado en la sien. Cada parte se ve mientras mire a la cámara."""
         c, lat = self._conducto(oido)
-        pant, vis = self._proyectar([
-            c + lat * 0.003,
-            c + lat * 0.009,
-            [c[0] + lat[0] * 0.018, c[1] - 0.030, c[2] - 0.012],
-            [c[0] + lat[0] * 0.014, -0.100, c[2] - 0.010],
-            [c[0] * 0.85, -0.150, c[2] + 0.010],
-        ], lat)
+        inc, giro = self._angulos()
+        # La concha: un disco en el plano de la oreja, con el auricular
+        # (más chico) por fuera.
+        centro = c + lat * 0.020 + np.array([0.0, 0.004, -0.008])
+        ang = np.linspace(0, 2 * np.pi, 28, endpoint=False)
+        def disco(cen, radio):
+            return cen + radio * (np.outer(np.cos(ang), [0, 1, 0]) + np.outer(np.sin(ang), [0, 0, 1]))
+        _, vis = self.geo.proyectar(centro, lat, inc, giro, umbral=-0.3)
+        # El cintillo: de lo alto de la concha, por sobre el vértex, al
+        # soporte en la sien del otro lado.
+        s = lat[0]
+        sien = np.array([-s * 0.078, 0.038, 0.026])
+        t = np.linspace(0.0, np.pi - 0.35, 24)
+        arco = np.stack([s * 0.100 * np.cos(t), 0.030 + 0.118 * np.sin(t),
+                         0.002 + 0.022 * t / np.pi], axis=1)
+        arco = np.vstack([arco, sien + np.array([-s * 0.006, 0.0, 0.0])])
+        normales = arco - np.array([0.0, 0.030, 0.0])
+        normales /= np.linalg.norm(normales, axis=1, keepdims=True)
+        px, vis_arco = self.geo.proyectar(arco, normales, inc, giro, umbral=-0.25)
+        pant = [self._a_pantalla(xy) for xy in px]
+        banda = QPen(QColor("#3B3F46"), max(3.0, 0.005 * px_por_m))
+        banda.setCapStyle(Qt.PenCapStyle.RoundCap)
+        p.setPen(banda)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        for k in range(len(pant) - 1):
+            if vis_arco[k] and vis_arco[k + 1]:
+                p.drawLine(pant[k], pant[k + 1])
+        # El soporte de la sien.
+        px, vis_sien = self.geo.proyectar(sien, -lat, inc, giro, umbral=-0.3)
+        if vis_sien[0]:
+            r = max(4.0, 0.009 * px_por_m)
+            p.setPen(QPen(QColor("#2F3238"), 1.5))
+            p.setBrush(QColor("#5A5F68"))
+            p.drawEllipse(self._a_pantalla(px[0]), r * 0.7, r)
         if not vis[0]:
             return
-        tubo = QPainterPath(pant[1])
-        tubo.cubicTo(pant[2], pant[3], pant[4])
+        # El cable baja desde el auricular.
+        afuera = centro + lat * 0.014
+        px, _ = self.geo.proyectar(np.array([
+            afuera - np.array([0.0, 0.018, 0.0]),
+            afuera + np.array([0.0, -0.060, -0.010]),
+            [afuera[0] * 0.95, -0.120, afuera[2] - 0.010],
+            [afuera[0] * 0.85, -0.170, afuera[2] + 0.010],
+        ]), [lat] * 4, inc, giro, umbral=-1.0)
+        q = [self._a_pantalla(xy) for xy in px]
+        cable = QPainterPath(q[0])
+        cable.cubicTo(q[1], q[2], q[3])
+        p.setPen(QPen(QColor(70, 74, 82, 230), max(2.0, 0.0022 * px_por_m)))
         p.setBrush(Qt.BrushStyle.NoBrush)
-        p.setPen(QPen(QColor(120, 125, 135, 220), max(2.0, 0.0025 * px_por_m)))
-        p.drawPath(tubo)
-        caja = QRectF(0, 0, 0.018 * px_por_m, 0.026 * px_por_m)
-        caja.moveCenter(pant[4])
-        p.setPen(QPen(QColor("white"), 1.5))
-        p.setBrush(QColor("#3B3F46"))
-        p.drawRoundedRect(caja, 3, 3)
-        radio = max(3.0, 0.0042 * px_por_m)
-        p.setPen(QPen(QColor("#3B3F46"), 1.5))
-        p.setBrush(QColor("#E8C46A"))
-        p.drawEllipse(pant[0], radio, radio)
+        p.drawPath(cable)
+        for cen, radio, relleno in ((centro, 0.028, "#2B2D31"),
+                                    (centro + lat * 0.012, 0.021, "#4A4F57")):
+            px, _ = self.geo.proyectar(disco(cen, radio), [lat] * len(ang), inc, giro, umbral=-1.0)
+            poli = QPainterPath(self._a_pantalla(px[0]))
+            for xy in px[1:]:
+                poli.lineTo(self._a_pantalla(xy))
+            poli.closeSubpath()
+            p.setPen(QPen(QColor("#1E1F22"), 1.5))
+            p.setBrush(QColor(relleno))
+            p.drawPath(poli)
 
 
 def _chip(color, texto, tam=26):
@@ -376,9 +429,9 @@ class PanelMontajeZ(QFrame):
 
     def _en_la_piel(self, punto, _normal):
         que = self.cabeza.herramienta
-        oido = FonosInsercion.oido_en(punto)
+        oido = FonosInsercion.oido_en(punto) if que == SONDA else oreja_en(punto)
         if oido is None:
-            self.pista.setText(f"{NOMBRE[que]} va en el conducto auditivo.")
+            self.pista.setText(f"{NOMBRE[que]} {DONDE[que]}.")
             return
         self.poner(que, oido)
 

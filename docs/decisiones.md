@@ -9010,7 +9010,10 @@ contra, medir, y dar vuelta todo para el otro oído.
   sonda puesta no cambia nada: aviso "LA SONDA ESTÁ EN ..." y
   `z_lado_sin_sonda`. Elegido así para que nunca quede un resultado de un
   oído guardado con el rótulo del otro.
-- **Fono contralateral:** de inserción, sin elegir oliva. En CONTRA (reflejo
+- **Fono contralateral:** fono de concha (supraaural) con cintillo,
+  unilateral: la concha va sobre la oreja (clic a menos de 4 cm del
+  conducto) y del otro lado, el de la sonda, el cintillo apoya en la sien
+  con un soporte (corrección del autor: no es de inserción). En CONTRA (reflejo
   y decay) el estímulo llega solo si el fono está en el oído opuesto a la
   sonda; si no, el reflejo sale ausente sin aviso, como en el equipo real
   (igual que el fono de inserción del ABR que no está puesto).

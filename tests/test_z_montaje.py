@@ -180,6 +180,9 @@ def test_la_cabeza_pone_la_sonda_en_el_conducto():
     v.paciente.elegir_herramienta(CONTRA)
     v.paciente._en_la_piel(d["pos"][d["por_id"]["Cz"]], None)   # el vértex no es un conducto
     assert v.paciente.montaje.contra is None
+    # El fono de concha va sobre la oreja: basta el pabellón, no el conducto.
+    v.paciente._en_la_piel(d["pos"][d["por_id"]["A2"]], None)
+    assert v.paciente.montaje.contra == 'OD'
     v.paciente.cabeza.grab()   # se dibuja sin caerse, con la sonda puesta
 
 
