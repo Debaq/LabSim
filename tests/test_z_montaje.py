@@ -186,6 +186,38 @@ def test_la_cabeza_pone_la_sonda_en_el_conducto():
     v.paciente.cabeza.grab()   # se dibuja sin caerse, con la sonda puesta
 
 
+def test_etf_arranca_en_membrana_integra_y_da_la_diferencia():
+    from impedanciometria.ZETFscreen import PRUEBA_INTEGRA
+    v = _ventana()
+    _armar(v)
+    z = v.z
+    z.show_screen(z.Z_etf)
+    assert z.Z_etf.prueba == PRUEBA_INTEGRA
+    for maniobra in ('reposo', 'positiva', 'negativa'):
+        z.etf_maniobra(maniobra)
+    assert z.Z_etf.lbl_info[3].text().startswith("Dif. máx"), z.Z_etf.lbl_info[3].text()
+    dif = int(z.Z_etf.lbl_info[3].text().split()[-2])
+    assert 8 <= dif <= 18, dif   # ETF Normal (Lu y Wang 2026)
+
+
+def test_etf_perforada_sin_presion_no_arranca():
+    v = _ventana()
+    _armar(v)
+    z = v.z
+    z.show_screen(z.Z_etf)
+    z.btn1_click()                       # a membrana perforada
+    z.etf_pressure = 0
+    z.etf_perforada()
+    assert not z.time_etf.isActive()
+    assert z.avisos[z.Z_etf].item.isVisible()
+    assert 'z_etf_sin_presion' in _acciones(v)
+    z.etf_pressure = -200
+    z.etf_perforada()
+    assert z.time_etf.isActive()
+    assert not z.avisos[z.Z_etf].item.isVisible()
+    _parar(z)
+
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

@@ -9030,3 +9030,18 @@ contra, medir, y dar vuelta todo para el otro oído.
 - Registro: `z_oliva`, `z_sonda_poner/sacar`, `z_contra_poner/sacar`,
   `z_sin_sello`, `z_lado_sin_sonda` (rótulos en `Metrics.php`); los
   estímulos de reflejo y decay llevan `fono_contra`.
+
+## ETF: arranca en membrana íntegra, sin presión no hay prueba perforada (2026-11-13)
+
+"La ETF no funciona para nada o no la entiendo". Andaba, pero confundía:
+
+- Abría en *Membrana perforada* con el dial en 0 daPa: "Inicio" dibujaba
+  una línea plana en 0 y parecía rota. Ahora arranca en *Membrana íntegra*
+  (la ETF1 de los equipos, la que corresponde en la mayoría de los oídos);
+  la tecla 1 sigue cambiando de prueba.
+- Perforada con el conducto en 0 daPa: el equipo no arranca y avisa
+  "PRESURICE EL CONDUCTO" (queda `z_etf_sin_presion` en el registro).
+- Íntegra: el corrimiento real del pico es de pocos daPa (8-18 sano, 0-2
+  disfunción) y las tres curvas casi se tapan. Se agrega la línea
+  "Dif. máx": la diferencia entre el pico mayor y el menor, el número que se
+  informa. El equipo no la interpreta: el alumno concluye.

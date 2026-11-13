@@ -7,7 +7,7 @@
   después de presurizar el conducto a +400 daPa y tragar, y después de
   -400 daPa y tragar. Si la trompa funciona, el pico se corre unos daPa.
 
-La tecla 1 elige la prueba. Las teclas bajo la pantalla (ver la fila de
+La tecla 1 elige la prueba (arranca en la de membrana íntegra). Las teclas bajo la pantalla (ver la fila de
 rótulos de abajo):
 - perforada: 1 prueba · 2 Inicio · 6 presión (con el dial);
 - íntegra:   1 prueba · 2 Reposo · 3 +400 y tragar · 4 -400 y tragar.
@@ -38,7 +38,9 @@ class ZETFscreen(QWidget):
         self.setMinimumSize(580, 280)
         self.setMaximumSize(580, 280)
         self.setStyleSheet("font: 10pt \"Monospace\";\ncolor: rgb(255, 255, 255);")
-        self.prueba = PRUEBA_PERFORADA
+        # Arranca en la de membrana íntegra (la ETF1 de los equipos): es la
+        # que corresponde en la mayoría de los oídos.
+        self.prueba = PRUEBA_INTEGRA
 
         raiz = QVBoxLayout(self)
         raiz.setContentsMargins(0, 0, 0, 0)
@@ -69,7 +71,7 @@ class ZETFscreen(QWidget):
         centro.addWidget(marco, 1)
 
         lateral = QVBoxLayout()
-        self.lbl_info = [_rotulo("", Qt.AlignLeft) for _ in range(3)]
+        self.lbl_info = [_rotulo("", Qt.AlignLeft) for _ in range(4)]
         for lbl in self.lbl_info:
             lateral.addWidget(lbl)
         lateral.addStretch(1)
@@ -83,6 +85,7 @@ class ZETFscreen(QWidget):
         raiz.addLayout(teclas)
 
         self.curvas = {}
+        self.picos = {}
         self.presion = 0
         self.set_prueba(self.prueba)
 
@@ -102,6 +105,7 @@ class ZETFscreen(QWidget):
         self.lbl_prueba.setText(NOMBRE_PRUEBA[prueba])
         self.pw.clear()
         self.curvas = {}
+        self.picos = {}
         textos = ["Prueba", "", "", "", "", ""]
         if prueba == PRUEBA_PERFORADA:
             self.pw.setRange(yRange=(-400, 200), xRange=(0, ETF_DURACION_S), disableAutoRange=True)
@@ -129,9 +133,9 @@ class ZETFscreen(QWidget):
 
     def limpiar_info(self):
         if self.prueba == PRUEBA_PERFORADA:
-            textos = ["Inicial: ---- daPa", "Final:   ---- daPa", ""]
+            textos = ["Inicial: ---- daPa", "Final:   ---- daPa", "", ""]
         else:
-            textos = [f"{NOMBRE_MANIOBRA[m]:<10}---- daPa" for m in MANIOBRAS]
+            textos = [f"{NOMBRE_MANIOBRA[m]:<10}---- daPa" for m in MANIOBRAS] + [""]
         for lbl, texto in zip(self.lbl_info, textos):
             lbl.setText(texto)
 
@@ -150,6 +154,14 @@ class ZETFscreen(QWidget):
         i = MANIOBRAS.index(maniobra)
         texto = f"{pico:>4} daPa" if pico is not None else "sin pico"
         self.lbl_info[i].setText(f"{NOMBRE_MANIOBRA[maniobra]:<10}{texto}")
+        # Diferencia máxima entre los picos: el número que se informa (las
+        # curvas se corren pocos daPa y en el gráfico casi se tapan).
+        self.picos[maniobra] = pico
+        picos = [v for v in self.picos.values() if v is not None]
+        if len(picos) >= 2:
+            self.lbl_info[3].setText(f"{'Dif. máx':<10}{max(picos) - min(picos):>4} daPa")
+        else:
+            self.lbl_info[3].setText("")
 
 
 if __name__ == "__main__":

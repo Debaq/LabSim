@@ -950,6 +950,13 @@ class ZControl(QWidget, UiControlZ):
             return
         if self._bloquear_si_no_realizable(self.Z_etf, 'etf'):
             return
+        if self.etf_pressure == 0:
+            # Sin presión en el conducto no hay nada que igualar: el equipo
+            # no arranca (antes dibujaba una línea plana en 0 y parecía roto).
+            self._log("z_etf_sin_presion", side=self.Z.get_side())
+            self.avisos[self.Z_etf].mostrar("PRESURICE EL CONDUCTO\ngire el dial (-400 a +200 daPa)\ny vuelva a Inicio")
+            return
+        self.avisos[self.Z_etf].ocultar()
         etf = self._etf_del_oido()
         x, y, final = etf_prueba_perforada(etf, self.etf_pressure)
         self._log("z_etf_test", prueba=PRUEBA_PERFORADA, side=self.Z.get_side(), pressure=self.etf_pressure)
