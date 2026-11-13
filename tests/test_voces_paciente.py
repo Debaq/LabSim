@@ -12,17 +12,18 @@ from audiometria.ListWords import MITADES, PALABRAS  # noqa: E402
 
 AUDIO = os.path.join(RAIZ, "resources", "audio")
 # Lo que piden response.py y response_A.py con create_voice.
-FRASES_DEL_MOTOR = {"si", "no", "molesta", "elderecho", "elizquierdo"}
+FRASES_DEL_MOTOR = {"si", "no", "molesta", "elderecho", "elizquierdo", "iguales"}
 
 
 def test_la_voz_sale_de_la_edad_y_el_sexo():
-    assert voz_del_paciente({"gender": 0, "edad": 45}) == ("feme", 1)
-    assert voz_del_paciente({"gender": 1, "edad": 45}) == ("male", 1)
-    assert voz_del_paciente({"gender": 0, "edad": 7}) == ("nina", 1)
-    assert voz_del_paciente({"gender": 1, "edad": 12}) == ("nino", 1)
-    assert voz_del_paciente({"gender": 1, "edad": 13}) == ("male", 1)
-    assert voz_del_paciente({"gender": 1}) == ("male", 1)       # sin edad: adulto
-    assert voz_del_paciente({"edad": ""}) == ("feme", 1)
+    # gender: 0 = hombre, 1 = mujer (views/case/_paciente.php)
+    assert voz_del_paciente({"gender": 1, "edad": 45}) == ("feme", 1)
+    assert voz_del_paciente({"gender": 0, "edad": 45}) == ("male", 1)
+    assert voz_del_paciente({"gender": 1, "edad": 7}) == ("nina", 1)
+    assert voz_del_paciente({"gender": 0, "edad": 12}) == ("nino", 1)
+    assert voz_del_paciente({"gender": 0, "edad": 13}) == ("male", 1)
+    assert voz_del_paciente({"gender": 0}) == ("male", 1)       # sin edad: adulto
+    assert voz_del_paciente({"edad": ""}) == ("male", 1)        # sin sexo: hombre, como el formulario
 
 
 def test_cada_voz_tiene_las_palabras_el_no_entendi_y_las_frases():
