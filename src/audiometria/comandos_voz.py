@@ -43,6 +43,7 @@ GRUPOS = (
         ("Compare con su ruido", "acufeno_cual_se_parece"),
         ("Igual de fuerte que su ruido", "acufeno_igual_fuerte"),
         ("Hasta que no escuche su ruido", "acufeno_deje_de_escuchar"),
+        ("Solo escuche el mío", "acufeno_solo_el_mio"),
         ("Un minuto de sonido", "acufeno_un_minuto"),
     )),
     ("PREGUNTAS", (
@@ -89,6 +90,7 @@ PRUEBA = {
     "acufeno_cual_se_parece": "Tinnitumetría: tono",
     "acufeno_igual_fuerte": "Tinnitumetría: intensidad",
     "acufeno_deje_de_escuchar": "Tinnitumetría: NME",
+    "acufeno_solo_el_mio": "Tinnitumetría: inhibición",
     "acufeno_un_minuto": "Tinnitumetría: inhibición",
     "acufeno_cual": "Tinnitumetría: tono",
     "acufeno_como_esta": "Tinnitumetría: inhibición",

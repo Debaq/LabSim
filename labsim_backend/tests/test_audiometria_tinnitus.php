@@ -118,7 +118,9 @@ final class TinExaminador
 /**
  * La técnica completa. $err: 'oido' (compara en el oído del acúfeno),
  * 'paso5' (iguala la intensidad de a 5 dB), 'sin_octava', 'ir_corta',
- * 'nme_tono' (el NME con tono en vez de ruido).
+ * 'nme_tono' (el NME con tono en vez de ruido), 'ir_sin_inicio' (va directo
+ * al minuto, sin "solo escuche el mío"), 'ir_poco' (sube 5 dB en vez de 15),
+ * 'ir_arriba' (la octava de arriba).
  */
 function tin_examen(array $err = [], $verdad = 'de fábrica'): array
 {
@@ -172,9 +174,28 @@ function tin_examen(array $err = [], $verdad = 'de fábrica'): array
     $x->prender(1, false);
     $x->mano(false);
 
-    // inhibición residual: tono una octava arriba, NME + 10, un minuto en OI
-    $x->decir('acufeno_un_minuto');
-    $x->canal(0, ['output' => 'Izquierda', 'freq' => 8000, 'int' => 80]);
+    // inhibición residual: tono una octava abajo en OI, se sube hasta que
+    // solo escucha el estímulo (50 dB HL: 20 SL sobre 30), +15 y un minuto
+    $hzIr = in_array('ir_arriba', $err, true) ? 8000 : 2000;
+    $refIr = $hzIr === 8000 ? 80 : 50;
+    $finIr = $refIr + (in_array('ir_poco', $err, true) ? 5 : 15);
+    if (in_array('ir_sin_inicio', $err, true)) {
+        $x->decir('acufeno_un_minuto');
+        $x->canal(0, ['output' => 'Izquierda', 'freq' => $hzIr, 'int' => $finIr]);
+        $x->prender(0, true);
+    } else {
+        $x->decir('acufeno_solo_el_mio');
+        $x->canal(0, ['output' => 'Izquierda', 'freq' => $hzIr, 'int' => $refIr - 15]);
+        $x->prender(0, true);
+        for ($db = $refIr - 10; $db <= $refIr; $db += 5) {
+            $x->canal(0, ['int' => $db]);
+        }
+        $x->log('audio_acufeno_respuesta', ['pregunta' => 'acufeno_solo_el_mio', 'respuesta' => 'ahorasoloescuchoelsuyo'], 0.3);
+        for ($db = $refIr + 5; $db <= $finIr; $db += 5) {
+            $x->canal(0, ['int' => $db]);
+        }
+        $x->decir('acufeno_un_minuto');
+    }
     $dur = in_array('ir_corta', $err, true) ? 30.0 : 61.0;
     $x->prender(0, true);
     $x->prender(0, false, $dur);
@@ -259,6 +280,46 @@ t_true(strpos($r['detalle'], 'Tono en OI (hasta 70 dB HL)') !== false, 'T03: NME
 $r = tin_regla($sec, 'NME: se sube');
 t_eq($r['cumple'], false, 'T03: NME con tono no se mide');
 t_true(strpos($r['detalle'], 'no podía taparlo') !== false, 'T03: NME con tono dice por qué -- ' . $r['detalle']);
+
+$sec = tin_evaluar(tin_examen())['tinnitus'];
+t_eq(tin_regla($sec, 'Inhibición residual: se parte')['detalle'],
+    'Dijo "ahora solo escucho el suyo" con 50 dB HL en OI a 2 kHz.', 'T03: nivel de partida de la inhibición');
+t_eq(tin_regla($sec, 'Inhibición residual: se sube 15')['detalle'],
+    'Solo el estímulo con 50 dB HL; después llegó a 65 dB HL.', 'T03: +15 de la inhibición');
+
+$sec = tin_evaluar(tin_examen(['ir_sin_inicio']))['tinnitus'];
+$r = tin_regla($sec, 'Inhibición residual: se parte');
+t_eq($r['cumple'], false, 'T03: inhibición sin "solo escuche el mío"');
+t_eq($r['detalle'], 'No se pidió: se pasó directo al minuto.', 'T03: inhibición sin inicio dice por qué');
+t_eq(tin_regla($sec, 'Inhibición residual: se sube 15')['cumple'], null, 'T03: sin nivel de partida no se compara el +15');
+
+$sec = tin_evaluar(tin_examen(['ir_poco']))['tinnitus'];
+t_eq(tin_regla($sec, 'Inhibición residual: se sube 15')['cumple'], false, 'T03: inhibición con +5 dB');
+
+$sec = tin_evaluar(tin_examen(['ir_arriba']))['tinnitus'];
+t_eq(tin_regla($sec, 'Inhibición residual: una octava abajo')['cumple'], false, 'T03: inhibición en la octava de arriba');
+
+// sin inhibición: falta, salvo que 15 dB sobre el NME (20 SL) en la octava
+// de abajo (2 kHz en OI: 30 + 20 = 50 dB HL) lleguen a la molestia
+$x = array_values(array_filter(tin_examen(), static function ($l) {
+    static $ir = false;
+    if ($l['action'] === 'audio_talkback_press') {
+        $c = $l['payload']['command'];
+        if (in_array($c, ['acufeno_solo_el_mio', 'acufeno_un_minuto'], true)) {
+            $ir = true;
+        } elseif ($c !== 'acufeno_como_esta') {
+            $ir = false;
+        }
+    }
+    return !$ir;
+}));
+$sec = tin_evaluar($x)['tinnitus'];
+t_eq(tin_regla($sec, 'Se hacen las cuatro partes')['detalle'], 'Faltó: inhibición residual.', 'T03: sin inhibición que cabía, falta');
+$molesta = tin_caso();
+$molesta['LDL'][4] = [100, 60];
+$sec = tin_evaluar($x, $molesta)['tinnitus'];
+t_eq(tin_regla($sec, 'Se hacen las cuatro partes')['cumple'], true, 'T03: sin inhibición que no cabía bajo la molestia, no se exige');
+t_true(strpos(implode(' ', $sec['observaciones']), 'Subir 15 dB llegaba a la molestia') !== false, 'T03: dice por qué no se hizo');
 
 $sec = tin_evaluar(tin_examen(['ir_corta']))['tinnitus'];
 t_eq(tin_regla($sec, 'Inhibición residual: el estímulo dura un minuto')['cumple'], false, 'T03: inhibición de medio minuto');

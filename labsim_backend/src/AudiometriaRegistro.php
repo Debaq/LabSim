@@ -31,7 +31,8 @@ final class AudiometriaRegistro
     ];
     /** Tinnitumetría (T03, src/audiometria/acufeno.py): instrucciones y sus dos preguntas. */
     public const INSTR_TINNITUS = [
-        'acufeno_cual_se_parece', 'acufeno_igual_fuerte', 'acufeno_deje_de_escuchar', 'acufeno_un_minuto',
+        'acufeno_cual_se_parece', 'acufeno_igual_fuerte', 'acufeno_deje_de_escuchar',
+        'acufeno_solo_el_mio', 'acufeno_un_minuto',
     ];
     public const PREG_TINNITUS = ['acufeno_cual', 'acufeno_como_esta'];
     /** Preguntas del talkback: no cambian la instrucción vigente (comandos_voz.PREGUNTAS). */

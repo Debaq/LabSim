@@ -577,8 +577,8 @@ final class Bibliografia
                 'Control de octava: al final se presenta la frecuencia una octava arriba y una abajo de la elegida.',
                 'Intensidad: con la frecuencia elegida, se parte bajo el umbral y se sube de 1 en 1 dB hasta que el sonido y el acúfeno suenen igual de fuertes. Se anota en dB HL y en dB SL (menos el umbral del mismo estímulo en el mismo oído).',
                 'Nivel mínimo de enmascaramiento (NME): en el oído del acúfeno, ruido de banda estrecha centrado en su frecuencia o ruido blanco, subiendo hasta que el paciente deja de oír su acúfeno.',
-                'Inhibición residual: un tono o ruido una octava arriba o abajo del acúfeno, 10 dB sobre el NME, durante un minuto, en el oído del acúfeno. Al apagarlo se pregunta cómo está el acúfeno (negativa, parcial o total) y se vuelve a preguntar un minuto después.',
-                'El estímulo de la inhibición residual no puede pasar el LDL: si no cabe, no se hace y se anota por qué.',
+                'Inhibición residual: en el oído del acúfeno, un tono o ruido una octava abajo de su frecuencia. Se le dice "Escuche mi pitido; avíseme cuando solo escuche el mío y no el suyo" y se sube hasta que el paciente dice que ya solo escucha el del audiómetro. Desde ese nivel se suben 15 dB y se deja sonar un minuto. Al apagarlo se pregunta cómo está el acúfeno (negativa, parcial o total) y se vuelve a preguntar un minuto después.',
+                'El estímulo de la inhibición residual (ese nivel + 15 dB) no puede pasar el LDL: si no cabe, no se hace y se anota por qué.',
             ],
             'usa' => [
                 'Indicador "Tinnitumetría" de la atención (AudiometriaTecnica), que ven el docente y el alumno.',
@@ -587,7 +587,7 @@ final class Bibliografia
             'fuentes' => [
                 'ISP2012' => ['usa' => ['La tinnitumetría es parte de la evaluación audiológica médico-legal, después de la logoaudiometría y antes de las supraliminares (§2).']],
             ],
-            'nota' => 'Técnica tal como la enseña el docente (libro, H06). No hay norma ISO para la acufenometría. La literatura mide la inhibición residual con el mismo ruido del NME, centrado en el acúfeno; aquí va una octava arriba o abajo (docs/observaciones_tecnicas.md).',
+            'nota' => 'Técnica tal como la enseña el docente (libro, H06). No hay norma ISO para la acufenometría. La literatura mide la inhibición residual con el mismo ruido del NME, centrado en el acúfeno, a NME + 10 dB; aquí va una octava abajo, 15 dB sobre el nivel en que ese mismo estímulo tapa el acúfeno (docs/observaciones_tecnicas.md).',
         ],
     ];
 

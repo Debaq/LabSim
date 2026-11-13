@@ -210,7 +210,13 @@ class ResponseAudiometry():
             self._mano(tin.tapa(audio))
         else:
             self.downHand()
-            if instruccion == acufeno.INSTR_INHIBICION:
+            if instruccion in acufeno.DE_INHIBICION:
+                if instruccion == acufeno.INSTR_SOLO_EL_MIO:
+                    # "avíseme cuando solo escuche el mío": lo dice solo
+                    dice = tin.solo_el_suyo()
+                    if dice is not None:
+                        self._registrar_tinnitus(instruccion, dice, {})
+                        self.other_response.create_voice_(dice)
                 # el estímulo de la inhibición no puede pasar su LDL
                 self.ldl()
 
@@ -1052,10 +1058,13 @@ class ResponseAudiometry():
             respuesta = acufeno.NO_TENGO
         else:                                           # ¿Lo dejó de escuchar?
             respuesta = 'si' if tin.tapa(audio) else 'no'
+        self._registrar_tinnitus(pregunta, respuesta, extra)
+        return respuesta
+
+    def _registrar_tinnitus(self, pregunta, respuesta, extra):
         log = getattr(self.obj_audio, "_log", None)
         if log is not None:
             log("audio_acufeno_respuesta", pregunta=pregunta, respuesta=respuesta, **extra)
-        return respuesta
 
     def _talkback_db(self):
         dial = getattr(self.obj_audio, 'dial_talkback', None)

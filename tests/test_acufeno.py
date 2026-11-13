@@ -133,6 +133,45 @@ def test_inhibicion_residual():
     assert tin.como_esta(callado) == "igualqueantes"   # no se mantiene
 
 
+def test_solo_el_suyo_al_tapar_el_acufeno():
+    """'Avíseme cuando solo escuche el mío': lo dice una vez, cuando el
+    estímulo (una octava abajo, en el oído del acúfeno) llega al NME; el
+    pulsado no lo repite, bajar y volver a subir sí."""
+    reloj = Reloj()
+    tin = _tin(reloj=reloj)
+    S = acufeno.INSTR_SOLO_EL_MIO
+    # 2 kHz en OI: umbral 30, NME 20 SL -> 50 dB HL
+    for db in (35, 40, 45):
+        tin.ver(_audio(on=(True, False), stim=(TONO, NBN), int_=(db, 20), output=(1, 1), freq=F[2000]), S)
+        assert tin.solo_el_suyo() is None
+    tapa = _audio(on=(True, False), int_=(50, 20), output=(1, 1), freq=F[2000])
+    tin.ver(tapa, S)
+    assert tin.solo_el_suyo() == "ahorasoloescuchoelsuyo"
+    assert tin.solo_el_suyo() is None                 # una sola vez
+    reloj.t += 0.5
+    tin.ver(_audio(), S)                               # corte del pulsado
+    reloj.t += 0.5
+    tin.ver(tapa, S)
+    assert tin.solo_el_suyo() is None
+    # en el oído sin acúfeno no lo tapa
+    tin2 = _tin(reloj=Reloj())
+    tin2.ver(_audio(on=(True, False), int_=(90, 20), output=(0, 1), freq=F[2000]), S)
+    assert tin2.solo_el_suyo() is None
+    # bajar y volver a subir: lo dice de nuevo
+    reloj.t += 0.5
+    tin.ver(_audio(), S)
+    reloj.t += 5
+    tin.ver(tapa, S)
+    assert tin.solo_el_suyo() == "ahorasoloescuchoelsuyo"
+    # el minuto corre desde ahí, siga o no con "un minuto de sonido"
+    reloj.t += 30
+    tin.ver(_audio(on=(True, False), int_=(65, 20), output=(1, 1), freq=F[2000]), acufeno.INSTR_INHIBICION)
+    reloj.t += 31
+    tin.ver(_audio(), acufeno.INSTR_INHIBICION)
+    reloj.t += 2
+    assert tin.como_esta(_audio()) == "seescuchamasbajito"
+
+
 def test_sin_acufeno():
     tin = _tin({})
     tin.ver(_audio(on=(True, False)), acufeno.INSTR_TONO)
@@ -199,6 +238,25 @@ def test_response_pregunta_queda_en_el_registro():
     assert [c["freq"] for c in payload["comparados"]] == [2000, 4000]
     # las preguntas no reemplazan la instrucción vigente
     assert r._instruccion() == acufeno.INSTR_TONO
+
+
+def test_response_solo_el_suyo_queda_en_el_registro():
+    r, audiometro = _respuesta()
+    dichos = []
+    r.other_response.create_voice_ = dichos.append
+    r.rol_player(acufeno.INSTR_SOLO_EL_MIO)
+    r.data["audio"].update(_audio(on=(True, False), int_=(45, 20), output=(1, 1), freq=F[2000]))
+    r.response_()
+    assert dichos == []
+    r.data["audio"]["int"][0] = 50
+    r.response_()
+    assert dichos == ["ahorasoloescuchoelsuyo"]
+    accion, payload = audiometro.registro[-1]
+    assert accion == "audio_acufeno_respuesta"
+    assert payload == {"pregunta": acufeno.INSTR_SOLO_EL_MIO, "respuesta": "ahorasoloescuchoelsuyo"}
+    r.data["audio"]["int"][0] = 55
+    r.response_()
+    assert dichos == ["ahorasoloescuchoelsuyo"]
 
 
 def test_response_sano_reacciona_a_la_instruccion():

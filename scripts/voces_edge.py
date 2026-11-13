@@ -63,6 +63,7 @@ FRASES = {
     "nose": "No sé.",
     "igualqueantes": "Igual que antes.",
     "yanoloescucho": "Ya no lo escucho.",
+    "ahorasoloescuchoelsuyo": "Ahora solo escucho el suyo.",
     "cansado1": "¡Me quiero ir!",
     "cansado2": "Estoy que me desmayo.",
     "cansado3": "¿Falta mucho?",

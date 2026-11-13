@@ -106,6 +106,7 @@ COMANDOS = {
                             "la mano cuando lo escuche igual de fuerte que su ruido.",
     "acufeno_deje_de_escuchar": "Ahora va a escuchar un ruido que irá subiendo de a poco. "
                                 "Levante la mano cuando ya no escuche su propio ruido.",
+    "acufeno_solo_el_mio": "Escuche mi pitido. Avíseme cuando solo escuche el mío y no el suyo.",
     "acufeno_un_minuto": "Ahora va a escuchar un sonido durante un minuto. No tiene que hacer "
                          "nada. Cuando se apague, le voy a preguntar cómo está su ruido.",
     # PREGUNTAS

@@ -106,7 +106,9 @@ final class AudiometriaTecnica
     // 3: el Stenger (mismo tono en los dos oídos) cuenta como supraliminar,
     // no como presentación de umbral aéreo (2026-10-15).
     // 4: tinnitumetría (T03) como sección propia (2026-11-06).
-    public const CACHE_VERSION = 4;
+    // 5: inhibición residual con su paso inicial ("solo escuche el mío"),
+    // +15 dB y una octava abajo (2026-11-13).
+    public const CACHE_VERSION = 5;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null

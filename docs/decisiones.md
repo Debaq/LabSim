@@ -5,6 +5,43 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
+
+**Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una
+instrucción nueva del talkback, *Solo escuche el mío* (`acufeno_solo_el_mio`:
+"Escuche mi pitido. Avíseme cuando solo escuche el mío y no el suyo"). Se
+sube el estímulo, en el oído del acúfeno y una octava abajo, hasta que el
+paciente dice *"Ahora solo escucho el suyo"* (`ahorasoloescuchoelsuyo`, las
+4 voces). Desde ese nivel se suben 15 dB y se deja un minuto. Antes la
+técnica era una octava arriba o abajo, a NME + 10.
+
+**Por qué:** así lo hacen en la práctica, según lo que le informaron al
+docente; el protocolo ORL 2019 (libro H06) decía NME + 10.
+
+- **El NME sigue aparte.** *Hasta que no escuche su ruido* mide el NME con
+  ruido centrado en el acúfeno y es un resultado que se informa; el nivel de
+  *Solo escuche el mío* es con el estímulo de la octava de abajo y solo sirve
+  de base para el +15. No se unificaron (lo decidió el docente).
+- **Paciente** (`acufeno.py`): dice la frase una vez por corrida, cuando el
+  estímulo llega al NME (en SL) en el oído del acúfeno a una octava o menos;
+  el pulsado no la repite, bajar y volver a subir sí. El minuto se cuenta
+  desde ahí con cualquiera de las dos instrucciones: el acúfeno del paciente
+  no sabe qué dijo el alumno. Va al registro como `audio_acufeno_respuesta`
+  con `pregunta = acufeno_solo_el_mio`, con la foto del equipo.
+- **Indicador** (`AudiometriaTinnitus`, `CACHE_VERSION` 5): reglas nuevas
+  "se parte con *avíseme cuando solo escuche el mío*" y "se sube 15 dB desde
+  ese nivel" (2 dB de holgura, contando lo que sonó después de la frase), y
+  "una octava abajo" en vez de "una octava arriba o abajo" (si el audiómetro
+  no tiene la de abajo, la de arriba). Sin el paso inicial, el +15 queda sin
+  evaluar. Si la inhibición no se hizo, no se exige cuando 15 dB sobre el
+  nivel en que el estímulo lo taparía llega a la molestia: con la frase, ese
+  nivel; sin ella, el NME pasado a la octava de abajo con el mismo SL.
+- **Descartado:** el paciente no exige la octava de abajo ni el +15 para
+  inhibir (un paciente real no conoce la técnica); lo marca el indicador.
+- Pruebas: `tests/test_acufeno.py`, `tests/test_comandos_voz.py`,
+  `labsim_backend/tests/test_audiometria_tinnitus.php`. Sin probar en la app
+  real.
+
 ## Base de otoscopias: se marca dónde queda adelante y se espeja sola (2026-11-13)
 
 **Qué:** página nueva `admin/otoscopias.php` (Docencia → Base de otoscopias,

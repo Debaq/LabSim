@@ -24,6 +24,7 @@ final class AudiometriaTinnitus
     private const TONO = 'acufeno_cual_se_parece';
     private const SONORIDAD = 'acufeno_igual_fuerte';
     private const NME = 'acufeno_deje_de_escuchar';
+    private const SOLO_EL_MIO = 'acufeno_solo_el_mio';
     private const INHIBICION = 'acufeno_un_minuto';
     private const PREG_CUAL = 'acufeno_cual';
     private const PREG_COMO = 'acufeno_como_esta';
@@ -37,9 +38,13 @@ final class AudiometriaTinnitus
     private const MINUTO_S = 55;
     /** Paso fino para igualar la intensidad. */
     private const PASO_FINO_DB = 2;
-    /** El estímulo de la inhibición: NME + 10, con un paso de 5 dB de holgura hacia abajo. */
-    private const SOBRE_NME_DB = 10;
-    private const SOBRE_NME_TOL_DB = 2;
+    /**
+     * El estímulo de la inhibición: 15 dB sobre el nivel en que el paciente
+     * dijo "ahora solo escucho el suyo", con 2 dB de holgura hacia abajo.
+     */
+    private const SOBRE_REF_DB = 15;
+    private const SOBRE_REF_TOL_DB = 2;
+    private const SOLO_EL_SUYO = 'ahorasoloescuchoelsuyo';
 
     /** Lo que contesta el paciente a "¿Cómo está su ruido?" -> inhibición residual. */
     private const INHIBICION_DE = ['igualqueantes' => 'negativa', 'seescuchamasbajito' => 'parcial', 'yanoloescucho' => 'total'];
@@ -113,6 +118,8 @@ final class AudiometriaTinnitus
         $igualo = null;   // la última vez que levantó la mano en la intensidad
         $pasosGruesos = [];
         $tPrimeraCual = null;
+        $ref = null;            // donde dijo "ahora solo escucho el suyo"
+        $pidioSoloElMio = false;
         foreach ($eventos as $e) {
             if ($e['accion'] === 'audio_acufeno_respuesta') {
                 $p = $e['p'];
@@ -121,12 +128,21 @@ final class AudiometriaTinnitus
                     $tPrimeraCual = $tPrimeraCual ?? $e['t'];
                 } elseif (($p['pregunta'] ?? '') === self::PREG_COMO) {
                     $respuestasComo[] = $p;
+                } elseif (($p['pregunta'] ?? '') === self::SOLO_EL_MIO && ($p['respuesta'] ?? '') === self::SOLO_EL_SUYO) {
+                    // la última vez que lo dijo: si el alumno repite el
+                    // paso, vale el nivel de la que siguió
+                    $ref = self::nivelInhibicion($e, $fAcufeno) ?? $ref;
                 }
                 continue;
             }
             $instr = $e['instruccion'];
             if ($instr === null) {
                 continue;
+            }
+            if ($instr === self::SOLO_EL_MIO) {
+                // las dos instrucciones son la inhibición residual
+                $pidioSoloElMio = true;
+                $instr = self::INHIBICION;
             }
             foreach ([0, 1] as $c) {
                 $canal = $e['canales'][$c];
@@ -186,19 +202,35 @@ final class AudiometriaTinnitus
             'NME' => $muestras[self::NME] !== [],
             'inhibición residual' => $muestras[self::INHIBICION] !== [],
         ];
+        // si no cabe bajo la molestia, la inhibición no se hace: 15 dB sobre
+        // el nivel en que dijo "solo escucho el suyo" o, si no se llegó a
+        // eso, sobre el NME llevado a la octava de abajo con el mismo SL
+        // (el paciente deja de oírlo al mismo SL en las dos)
         $ldlTapa = false;
-        if ($nmeNivel !== null) {
-            foreach ($oidosAcufeno as $o) {
-                $idx = self::idx($fAcufeno);
-                if ($idx !== null && $nmeNivel + self::SOBRE_NME_DB >= (int) ($caso['LDL'][$idx][$o] ?? 999)) {
-                    $ldlTapa = true;
+        $niveles = [];   // [oído, Hz, dB HL donde solo escucharía el estímulo]
+        if ($ref !== null) {
+            foreach ($ref['oido'] === null ? $oidosAcufeno : [$ref['oido']] as $o) {
+                $niveles[] = [$o, (int) $ref['freq'], $ref['int']];
+            }
+        } elseif ($nmeNivel !== null && $nmeOido !== null && self::idx((int) $nmeFreq) !== null) {
+            $sl = $nmeNivel - $paciente->umbralReal('aerea', self::idx((int) $nmeFreq), $nmeOido);
+            $fIr = self::octavaAbajo($fAcufeno) ?? self::octavaArriba($fAcufeno);
+            if (self::idx($fIr) !== null) {
+                foreach ($oidosAcufeno as $o) {
+                    $niveles[] = [$o, $fIr, $paciente->umbralReal('aerea', self::idx($fIr), $o) + $sl];
                 }
+            }
+        }
+        foreach ($niveles as [$o, $hz, $nivel]) {
+            $idx = self::idx($hz);
+            if ($idx !== null && $nivel + self::SOBRE_REF_DB >= (int) ($caso['LDL'][$idx][$o] ?? 999)) {
+                $ldlTapa = true;
             }
         }
         $faltan = array_keys(array_filter($partes, static function ($h) { return !$h; }));
         if ($ldlTapa && !$partes['inhibición residual']) {
             $faltan = array_values(array_diff($faltan, ['inhibición residual']));
-            $obs[] = 'El NME + 10 dB llegaba a la molestia del paciente: la inhibición residual no se hace, y se anota por qué.';
+            $obs[] = 'Subir 15 dB llegaba a la molestia del paciente: la inhibición residual no se hace, y se anota por qué.';
         }
         $reglas[] = [
             'texto' => 'Se hacen las cuatro partes: tono, intensidad, NME e inhibición residual.',
@@ -338,19 +370,19 @@ final class AudiometriaTinnitus
         if ($partes['inhibición residual']) {
             $ir = $muestras[self::INHIBICION];
             $centro = $elegida ?? $fAcufeno;
+            // una octava abajo; si el audiómetro no la tiene (acúfeno de
+            // 125 Hz), una arriba
+            $objetivo = self::octavaAbajo($centro) ?? self::octavaArriba($centro);
             $enOido = true;
             $octava = true;
-            $maxInt = 0;
             $pasaLdl = false;
             foreach ($ir as $m) {
                 if ($m['oido'] !== null && !in_array($m['oido'], $oidosAcufeno, true)) {
                     $enOido = false;
                 }
-                if (!in_array($m['stim'], self::DE_BANDA_ANCHA, true)
-                        && abs(abs(log($m['freq'] / $centro, 2)) - 1) > 0.01) {
+                if (!in_array($m['stim'], self::DE_BANDA_ANCHA, true) && $m['freq'] !== $objetivo) {
                     $octava = false;
                 }
-                $maxInt = max($maxInt, $m['int']);
                 $idx = self::idx($m['freq']);
                 foreach ($m['oido'] === null ? [0, 1] : [$m['oido']] as $o) {
                     if ($idx !== null && $m['int'] >= (int) ($caso['LDL'][$idx][$o] ?? 999)) {
@@ -364,14 +396,33 @@ final class AudiometriaTinnitus
                 'detalle' => $enOido ? 'Se presentó en el oído del acúfeno.' : 'Se presentó en el oído sin acúfeno.',
             ];
             $reglas[] = [
-                'texto' => 'Inhibición residual: una octava arriba o abajo de la frecuencia del acúfeno.',
+                'texto' => 'Inhibición residual: una octava abajo de la frecuencia del acúfeno.',
                 'cumple' => $octava,
                 'detalle' => 'Se usó ' . self::lista(array_map([self::class, 'hz'], array_values(array_unique(array_map(static function ($m) { return $m['freq']; }, $ir))))) . '.',
             ];
+            if ($ref !== null) {
+                $refDetalle = 'Dijo "ahora solo escucho el suyo" con ' . $ref['int'] . ' dB HL en ' . self::donde($ref['oido'])
+                    . ' a ' . self::hz((int) $ref['freq']) . '.';
+            } elseif ($pidioSoloElMio) {
+                $refDetalle = 'Se pidió, pero el paciente no dijo que solo escuchara el estímulo.';
+            } else {
+                $refDetalle = 'No se pidió: se pasó directo al minuto.';
+            }
             $reglas[] = [
-                'texto' => 'Inhibición residual: 10 dB sobre el NME.',
-                'cumple' => $nmeNivel === null ? null : $maxInt >= $nmeNivel + self::SOBRE_NME_DB - self::SOBRE_NME_TOL_DB,
-                'detalle' => $nmeNivel === null ? 'Sin NME medido no se puede comparar.' : 'NME ' . $nmeNivel . ' dB HL; estímulo hasta ' . $maxInt . ' dB HL.',
+                'texto' => 'Inhibición residual: se parte con "avíseme cuando solo escuche el mío y no el suyo", subiendo hasta que el paciente solo escucha el estímulo.',
+                'cumple' => $ref !== null,
+                'detalle' => $refDetalle,
+            ];
+            // lo más alto que sonó después de que lo dijo: el minuto
+            $despues = $ref === null ? [] : array_values(array_filter($ir, static function ($m) use ($ref) {
+                return $m['t'] >= $ref['t'];
+            }));
+            $maxInt = $despues === [] ? null : max(array_map(static function ($m) { return $m['int']; }, $despues));
+            $reglas[] = [
+                'texto' => 'Inhibición residual: se sube 15 dB desde ese nivel.',
+                'cumple' => $ref === null ? null : $maxInt !== null && $maxInt >= $ref['int'] + self::SOBRE_REF_DB - self::SOBRE_REF_TOL_DB,
+                'detalle' => $ref === null ? 'Sin ese nivel no se puede comparar.'
+                    : 'Solo el estímulo con ' . $ref['int'] . ' dB HL; después llegó a ' . ($maxInt ?? $ref['int']) . ' dB HL.',
             ];
             $reglas[] = [
                 'texto' => 'Inhibición residual: el estímulo no pasa la molestia del paciente.',
@@ -579,6 +630,32 @@ final class AudiometriaTinnitus
     private static function octavaArriba(int $hz): int
     {
         return $hz * 2;
+    }
+
+    /** La octava de abajo, o null si el audiómetro no la tiene. */
+    private static function octavaAbajo(int $hz): ?int
+    {
+        return $hz % 2 === 0 && self::idx(intdiv($hz, 2)) !== null ? intdiv($hz, 2) : null;
+    }
+
+    /**
+     * ['t', 'int', 'oido', 'freq'] del estímulo de la inhibición en el
+     * evento (el más fuerte que sonaba), o null si no sonaba ninguno.
+     */
+    private static function nivelInhibicion(array $e, int $fAcufeno): ?array
+    {
+        $mejor = null;
+        foreach ([0, 1] as $c) {
+            $canal = $e['canales'][$c];
+            $stim = AudiometriaPaciente::estimulo((string) $canal['stim']);
+            $sirve = in_array($stim, self::DE_COMPARACION, true) || in_array($stim, self::DE_BANDA_ANCHA, true);
+            if (empty($canal['on']) || !$sirve || ($mejor !== null && (int) $canal['int'] <= $mejor['int'])) {
+                continue;
+            }
+            $mejor = ['t' => $e['t'], 'int' => (int) $canal['int'], 'oido' => self::oido((string) $canal['output']),
+                'freq' => in_array($stim, self::DE_BANDA_ANCHA, true) ? $fAcufeno : $e['freq']];
+        }
+        return $mejor;
     }
 
     private static function idx(int $hz): ?int

@@ -110,10 +110,13 @@ Informe completo, con citas textuales y la tabla paso a paso:
   sigue sin unificar (Henry y Meikle, 2000; leído solo en parte).
 - **Estímulo de la inhibición residual.** La literatura usa el mismo ruido
   del NME, centrado en el acúfeno o de banda ancha, a NME + 10 dB durante un
-  minuto (Roberts, 2007; Henry y Meikle, 2000). La técnica del docente usa un
-  tono o ruido una octava arriba o abajo del acúfeno. LabSim evalúa la del
-  docente; el paciente simulado acepta cualquier estímulo a una octava o
-  menos del acúfeno.
+  minuto (Roberts, 2007; Henry y Meikle, 2000). La técnica del docente
+  (2026-11-13) usa un tono o ruido una octava abajo del acúfeno, en su oído:
+  se sube con "avíseme cuando solo escuche el mío y no el suyo" hasta que el
+  paciente solo oye el estímulo, y desde ahí +15 dB durante un minuto. El
+  protocolo ORL 2019 (libro H06) decía una octava arriba o abajo y NME + 10.
+  LabSim evalúa la del docente; el paciente simulado acepta cualquier
+  estímulo a una octava o menos del acúfeno.
 - **Paso de la intensidad.** El docente pide pasos finos (1 dB); la regla
   acepta hasta 2 dB. Falta verificar el paso en Henry y Meikle (2000).
 - **Valores que sortea la app** (sin fuente que los fije por caso):
