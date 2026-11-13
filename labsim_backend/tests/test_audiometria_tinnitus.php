@@ -228,6 +228,20 @@ t_eq(tin_regla($sec, 'Intensidad: el paciente avisa')['detalle'],
 t_eq(tin_regla($sec, 'NME: se sube')['detalle'],
     'Lo dejó de oír con 70 dB HL en OI: 20 dB SL sobre el umbral de ese oído (50 dB HL).', 'T03: el NME en dB SL');
 
+// lo que debería anotar, según las respuestas, y lo del paciente
+$res = [];
+foreach ($sec['resultado'] as $f) {
+    $res[$f['parte']] = $f;
+}
+t_eq($res['Tono']['anotar'], 'Tono puro de 4 kHz', 'T03 resultado: tono');
+t_eq($res['Tono']['paciente'], 'Tono puro de 4 kHz', 'T03 resultado: tono del paciente');
+t_true(strpos($res['Intensidad']['anotar'], '16 dB HL en OD a 4 kHz → 6 dB SL') === 0, 'T03 resultado: intensidad -- ' . $res['Intensidad']['anotar']);
+t_eq($res['Intensidad']['paciente'], '6 dB SL (16 dB HL en OD).', 'T03 resultado: intensidad del paciente');
+t_true(strpos($res['NME']['anotar'], '70 dB HL en OI a 4 kHz → 20 dB SL') === 0, 'T03 resultado: NME -- ' . $res['NME']['anotar']);
+t_eq($res['NME']['paciente'], '20 dB SL (70 dB HL en OI).', 'T03 resultado: NME del paciente');
+t_eq($res['Inhibición residual']['anotar'], 'Parcial, no se mantiene al minuto.', 'T03 resultado: inhibición');
+t_eq($res['Inhibición residual']['paciente'], 'Parcial, no se mantiene al minuto', 'T03 resultado: inhibición del paciente');
+
 // el NME con tono: la mano no sube y el indicador dice qué sonó
 $x = tin_examen(['nme_tono']);
 $x = array_values(array_filter($x, static function ($l) {

@@ -90,6 +90,7 @@ final class AudiometriaTecnicaVista
             </div>
             <?php endif; ?>
             <?php if (!empty($s['umbrales'])) { self::tabla($s['umbrales'], $docente); } ?>
+            <?php if (!empty($s['resultado'])) { self::resultado($s['resultado'], $docente); } ?>
         </details>
         <?php
     }
@@ -174,6 +175,37 @@ final class AudiometriaTecnicaVista
                 <td style="padding:0.2rem 0;"><span class="<?= $tipo === 'warn' ? 'badge-warn' : '' ?>"><?= htmlspecialchars($label) ?></span></td>
             </tr>
             <?php endforeach; ?>
+            <?php endforeach; ?>
+        </table>
+        <?php
+    }
+
+    /**
+     * Tinnitumetría: lo que debería haber anotado según lo que contestó el
+     * paciente (el alumno la informa por escrito y no llega al registro);
+     * el docente ve al lado lo que tenía el paciente.
+     */
+    private static function resultado(array $filas, bool $docente): void
+    {
+        ?>
+        <div style="margin-top:0.5rem; font-size:0.9em;"><strong>Lo que debería anotar</strong>
+            <span style="opacity:0.75;">(según lo que contestó el paciente<?= $docente ? '; compárelo con lo que escribió el alumno' : '' ?>)</span></div>
+        <table style="margin-top:0.2rem; font-size:0.85em; border-collapse:collapse;">
+            <tr>
+                <th style="text-align:left; padding:0.2rem 0.6rem 0.2rem 0;">Parte</th>
+                <th style="text-align:left; padding:0.2rem 0.6rem 0.2rem 0;">Según sus respuestas</th>
+                <?php if ($docente): ?>
+                <th style="text-align:left; padding:0.2rem 0;">Paciente</th>
+                <?php endif; ?>
+            </tr>
+            <?php foreach ($filas as $f): ?>
+            <tr style="border-top:1px solid var(--color-border, #ddd);">
+                <td style="padding:0.2rem 0.6rem 0.2rem 0; white-space:nowrap;"><?= htmlspecialchars($f['parte']) ?></td>
+                <td style="padding:0.2rem 0.6rem 0.2rem 0;"><?= htmlspecialchars($f['anotar']) ?></td>
+                <?php if ($docente): ?>
+                <td style="padding:0.2rem 0;"><?= htmlspecialchars($f['paciente']) ?></td>
+                <?php endif; ?>
+            </tr>
             <?php endforeach; ?>
         </table>
         <?php

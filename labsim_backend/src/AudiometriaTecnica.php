@@ -312,8 +312,9 @@ final class AudiometriaTecnica
             'aereos' => self::via('aereos', $registro, $paciente, $params['aereos']),
             'oseos' => self::via('oseos', $registro, $paciente, $params['oseos']),
             // T03; null si no hubo acúfeno ni tinnitumetría
-            'tinnitus' => AudiometriaTinnitus::evaluar($registro['tinnitus'] ?? [], $caso),
+            'tinnitus' => null,
         ];
+        $out['tinnitus'] = AudiometriaTinnitus::evaluar($registro['tinnitus'] ?? [], $caso, $out['aereos']['umbrales'] ?? []);
         foreach (['orden', 'aereos', 'oseos', 'tinnitus'] as $k) {
             if ($out[$k] === null) {
                 continue;

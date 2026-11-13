@@ -41,12 +41,22 @@ final class AudiometriaTinnitus
     private const SOBRE_NME_DB = 10;
     private const SOBRE_NME_TOL_DB = 2;
 
+    /** Lo que contesta el paciente a "¿Cómo está su ruido?" -> inhibición residual. */
+    private const INHIBICION_DE = ['igualqueantes' => 'negativa', 'seescuchamasbajito' => 'parcial', 'yanoloescucho' => 'total'];
+
     /**
-     * $tin: AudiometriaRegistro::leer()['tinnitus']. Devuelve la sección
-     * ('reglas', 'observaciones', 'hecha') o null si no hay nada que decir
-     * (sin acúfeno y sin tinnitumetría).
+     * $tin: AudiometriaRegistro::leer()['tinnitus']; $umbralesAlumno: los
+     * umbrales aéreos que obtuvo el alumno (AudiometriaTecnica, sección
+     * 'aereos' -> 'umbrales'), para pasar a dB SL como lo haría él.
+     * Devuelve la sección ('reglas', 'observaciones', 'hecha', 'resultado')
+     * o null si no hay nada que decir (sin acúfeno y sin tinnitumetría).
+     *
+     * 'resultado': el alumno anota la tinnitumetría por escrito, y eso no
+     * llega acá. Se deduce lo que debería haber anotado según lo que le
+     * contestó el paciente (con su propio umbral para el SL), y al lado lo
+     * que tenía el paciente: el docente compara con lo escrito.
      */
-    public static function evaluar(array $tin, array $caso): ?array
+    public static function evaluar(array $tin, array $caso, array $umbralesAlumno = []): ?array
     {
         $bloque = is_array($caso['Tinnitus'] ?? null) ? $caso['Tinnitus'] : [];
         $verdad = is_array($tin['verdad'] ?? null) ? $tin['verdad'] : null;
@@ -400,7 +410,136 @@ final class AudiometriaTinnitus
             ];
         }
 
-        return ['reglas' => $reglas, 'observaciones' => $obs, 'hecha' => true];
+        $resultado = self::resultado($verdad, $paciente, $umbralesAlumno, $respuestasCual, $igualo,
+            $nmeNivel, $nmeOido, $nmeFreq, $respuestasComo, $oidoComparacion, $oidosAcufeno);
+        return ['reglas' => $reglas, 'observaciones' => $obs, 'hecha' => true, 'resultado' => $resultado];
+    }
+
+    /**
+     * Filas ['parte', 'anotar', 'paciente']: lo que el alumno debería haber
+     * anotado según las respuestas del paciente, y lo del caso.
+     */
+    private static function resultado(?array $verdad, AudiometriaPaciente $paciente, array $umbralesAlumno,
+        array $respuestasCual, ?array $igualo, ?int $nmeNivel, ?int $nmeOido, ?int $nmeFreq,
+        array $respuestasComo, ?int $oidoComparacion, array $oidosAcufeno): array
+    {
+        $v = $verdad ?? [];
+        $filas = [];
+
+        // tono: la última elección del paciente, con el tipo de estímulo
+        $tono = 'El paciente no eligió ningún estímulo.';
+        for ($i = count($respuestasCual) - 1; $i >= 0; $i--) {
+            $r = $respuestasCual[$i];
+            $pos = self::ORDINALES[$r['respuesta'] ?? ''] ?? null;
+            if ($pos !== null && isset($r['comparados'][$pos]['freq'])) {
+                $c = $r['comparados'][$pos];
+                $tono = self::nombreEstimulo((string) ($c['stim'] ?? 'Tono')) . ' de ' . self::hz((int) $c['freq']);
+                break;
+            }
+        }
+        $filas[] = ['parte' => 'Tono', 'anotar' => $tono,
+            'paciente' => isset($v['freq']) ? (($v['tipo'] ?? 'tono') === 'ruido' ? 'Ruido de banda estrecha' : 'Tono puro')
+                . ' de ' . self::hz((int) $v['freq']) : '—'];
+
+        // intensidad y NME: el nivel, y el SL con el umbral que obtuvo el alumno
+        $filas[] = ['parte' => 'Intensidad',
+            'anotar' => $igualo === null ? 'El paciente no avisó que sonara igual de fuerte.'
+                : self::nivelSl($igualo["int"], $igualo["oido"], (int) $igualo["freq"], $umbralesAlumno, $paciente),
+            'paciente' => isset($v['sonoridad_sl'])
+                ? self::slPaciente((int) $v['sonoridad_sl'], $oidoComparacion, (int) ($v['freq'] ?? 0), $paciente) : '—'];
+        $filas[] = ['parte' => 'NME',
+            'anotar' => $nmeNivel === null ? 'El paciente no avisó que lo dejara de oír: no hay NME.'
+                : self::nivelSl($nmeNivel, $nmeOido, (int) $nmeFreq, $umbralesAlumno, $paciente),
+            'paciente' => isset($v['nme_sl'])
+                ? self::slPaciente((int) $v['nme_sl'], count($oidosAcufeno) === 1 ? $oidosAcufeno[0] : null, (int) ($v['freq'] ?? 0), $paciente) : '—'];
+
+        // inhibición residual: lo que dijo al apagar y al minuto
+        $alApagar = $alMinuto = null;
+        $dur = null;
+        foreach ($respuestasComo as $r) {
+            $desde = $r['corrida']['desde_s'] ?? null;
+            if ($desde === null) {
+                continue;
+            }
+            $dur = $dur ?? (float) $r['corrida']['duracion_s'];
+            if ($desde < 30) {
+                $alApagar = $alApagar ?? ($r['respuesta'] ?? null);
+            } elseif ($desde >= self::MINUTO_S) {
+                $alMinuto = $alMinuto ?? ($r['respuesta'] ?? null);
+            }
+        }
+        if ($alApagar === null) {
+            $ir = 'No preguntó con el estímulo recién apagado: no hay inhibición residual.';
+        } else {
+            $ir = ucfirst(self::INHIBICION_DE[$alApagar] ?? '—');
+            if ($alMinuto !== null && $alApagar !== 'igualqueantes') {
+                $ir .= ($alMinuto === $alApagar ? ', se mantiene al minuto' : ', no se mantiene al minuto');
+            }
+            if ($dur !== null && $dur < self::MINUTO_S) {
+                $ir .= ' (el estímulo duró ' . AudiometriaTecnica::tiempo($dur) . ': con menos de un minuto no vale)';
+            }
+            $ir .= '.';
+        }
+        $irPaciente = '—';
+        if (isset($v['inhibicion'])) {
+            $irPaciente = ucfirst($v['inhibicion']);
+            if ($v['inhibicion'] !== 'negativa') {
+                $irPaciente .= !empty($v['mantiene']) ? ', se mantiene al minuto' : ', no se mantiene al minuto';
+            }
+        }
+        $filas[] = ['parte' => 'Inhibición residual', 'anotar' => $ir, 'paciente' => $irPaciente];
+        return $filas;
+    }
+
+    private static function nombreEstimulo(string $stim): string
+    {
+        $stim = AudiometriaPaciente::estimulo($stim);
+        $nombres = ['Tono' => 'Tono puro', 'FM' => 'Tono FM', 'Narrow Band Noise' => 'Ruido de banda estrecha',
+            'White Noise' => 'Ruido blanco'];
+        return $nombres[$stim] ?? $stim;
+    }
+
+    /** "30 dB HL en OI → 10 dB SL (su umbral: 20 dB HL)". */
+    private static function nivelSl(int $nivel, ?int $oido, int $hz, array $umbralesAlumno, AudiometriaPaciente $paciente): string
+    {
+        $txt = $nivel . ' dB HL en ' . self::donde($oido) . ' a ' . self::hz($hz);
+        if ($oido === null) {
+            return $txt . '.';
+        }
+        $umbral = self::umbralAlumno($umbralesAlumno, $oido, $hz);
+        if ($umbral === null) {
+            // sin umbral propio: el que habría encontrado, avisando que no lo tomó
+            $idx = self::idx($hz);
+            if ($idx === null) {
+                return $txt . '.';
+            }
+            $real = $paciente->umbralReal('aerea', $idx, $oido);
+            return $txt . ' → ' . ($nivel - $real) . ' dB SL con el umbral de ' . self::OIDOS[$oido] . ' en ' . self::hz($hz)
+                . ' (' . $real . ' dB HL), que no terminó de tomar en esta atención.';
+        }
+        return $txt . ' → ' . ($nivel - $umbral) . ' dB SL (su umbral: ' . $umbral . ' dB HL).';
+    }
+
+    /** "7 dB SL (27 dB HL en OI)": el SL del caso y a qué nivel cae en ese oído. */
+    private static function slPaciente(int $sl, ?int $oido, int $hz, AudiometriaPaciente $paciente): string
+    {
+        $idx = self::idx($hz);
+        if ($oido === null || $idx === null) {
+            return $sl . ' dB SL.';
+        }
+        return $sl . ' dB SL (' . ($paciente->umbralReal('aerea', $idx, $oido) + $sl) . ' dB HL en ' . self::OIDOS[$oido] . ').';
+    }
+
+    /** El último umbral que obtuvo el alumno en ese oído y frecuencia, o null. */
+    private static function umbralAlumno(array $umbrales, int $oido, int $hz): ?int
+    {
+        $u = null;
+        foreach ($umbrales[self::OIDOS[$oido]] ?? [] as $f) {
+            if ((int) $f['freq'] === $hz && ($f['estimado'] ?? null) !== null) {
+                $u = (int) $f['estimado'];
+            }
+        }
+        return $u;
     }
 
     /** La frecuencia que eligió el paciente en la última comparación. */
