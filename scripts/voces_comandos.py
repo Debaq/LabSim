@@ -81,9 +81,8 @@ COMANDOS = {
                          "Necesito que las repita en voz alta. Si entiende solo una parte de la "
                          "palabra, repita esa parte, y si no está seguro, adivine.",
     "pitos_fuertes": "Ahora le voy a colocar unos pitos fuertes. Van a ser todos fuertes, y se "
-                     "irán aumentando en volumen: serán cada vez más fuertes. Necesito que me "
-                     "avise si alguno de esos pitos fuertes a usted le molesta.",
-    "solo_si_molesta": "Solo si le molesta el pito fuerte, levante la mano.",
+                     "irán aumentando en volumen: serán cada vez más fuertes. Si alguno de esos "
+                     "pitos fuertes a usted le molesta, levante la mano.",
     "dos_pitos": "Va a escuchar dos pititos alternados, uno en cada oído: primero en uno y "
                  "después en el otro. Cada tanto le voy a preguntar en qué oído lo escucha "
                  "más fuerte, o si los escucha iguales.",
@@ -111,7 +110,9 @@ COMANDOS = {
     "en_qué_oído": "¿En qué oído lo escuchó más fuerte?",
     "sonidos_distintos": "¿Los dos sonidos eran diferentes en forma?",
     "no_entiende": "¿Escucha, pero no entiende?",
-    "molesto_o": "¿Ese sonido le molestó, o solo lo escuchó fuerte?",
+    # Lleva el recordatorio que era "Solo si molesta" (2026-11-13).
+    "molesto_o": "¿Ese sonido le molestó, o solo lo escuchó fuerte? Recuerde: solo si le "
+                 "molesta, levante la mano.",
     "muy_fuerte": "¿Está muy fuerte mi voz?",
     "acufeno_cual": "¿Cuál se parece más a su ruido: el primero, el segundo o el tercero?",
     "acufeno_como_esta": "¿Cómo está su ruido ahora?",

@@ -38,7 +38,6 @@ GRUPOS = (
         ("Dictar palabras", "dictar_palabras"),
         ("Dictar palabras compuestas", "dictar_compuestas"),
         ("Pitos fuertes", "pitos_fuertes"),
-        ("Solo si molesta", "solo_si_molesta"),
         ("Dos pitos", "dos_pitos"),
         ("Cambie de volumen", "cambie_de_volumen"),
         ("Ruido blanco contralateral", "ruido_blanco_contralateral"),

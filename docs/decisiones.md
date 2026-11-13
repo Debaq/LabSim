@@ -8859,3 +8859,16 @@ el paciente solo escucha el estímulo, y se informa en dB SL"; el resultado
 hecha con lo que sigue (subir, *Un minuto de sonido*, *¿Cómo está su
 ruido?*). Las atenciones anteriores, con la NME de la mano, se siguen
 leyendo como antes.
+
+## LDL: fuera "Solo si molesta"; su recordatorio va en "Molesto ¿o?" (2026-11-13)
+
+Con el falso aviso de la LDL, el alumno pregunta *Molesto ¿o?* y el equipo
+acordó que la pregunta lleve el recordatorio: "¿Ese sonido le molestó, o
+solo lo escuchó fuerte? Recuerde: solo si le molesta, levante la mano." Con
+eso sobra *Solo si molesta*. *Pitos fuertes* queda como la instrucción de la
+LDL y se responde con la mano, como trabaja el equipo (antes decía
+"molesta"); su texto termina en "Si alguno de esos pitos fuertes a usted le
+molesta, levante la mano." Preguntado en el falso aviso, el paciente baja la
+mano. El "molesta" hablado sigue para el estímulo de la inhibición residual
+que llega a su LDL y para el Stat. El backend conserva `pitos_fuertes` como
+supraliminar; `solo_si_molesta` nunca estuvo en sus listas.

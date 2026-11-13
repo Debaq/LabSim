@@ -105,7 +105,7 @@ class ResponseAudiometry():
     # estimulo sonando (con el tono en continuo, subir el ruido tiene que
     # bajar la mano sin soltar el tono; subir el tono sostenido hasta el LDL
     # tiene que hacerlo hablar).
-    RECALCULA = UMBRAL + ('escuche_mi_voz', 'solo_si_molesta', 'pitos_fuertes') + acufeno.INSTRUCCIONES
+    RECALCULA = UMBRAL + ('escuche_mi_voz', 'pitos_fuertes') + acufeno.INSTRUCCIONES
     # "Molesta" se dice una vez por nivel: el pulsado prende y apaga el tono
     # cada medio segundo y lo hacia repetir (cortandose) en cada pulso. Lo
     # vuelve a decir con otro nivel, oido o frecuencia, o si el tono estuvo
@@ -193,8 +193,8 @@ class ResponseAudiometry():
             elif instruccion in self.DECAY_TESTS:
                 self.response_tone_decay(instruccion)
             elif instruccion == 'pitos_fuertes':
-                self.ldl()
-            elif instruccion == 'solo_si_molesta':
+                # con la mano: "Solo si molesta" salió y su recordatorio va
+                # en "Molesto ¿o?" (2026-11-13)
                 self.ldl(con_la_mano=True)
             elif instruccion == 'dos_pitos':
                 self.fowler()
@@ -345,8 +345,9 @@ class ResponseAudiometry():
         return self._logo.detecta_sdt(side, int_, int_mkg, stim_mkg)
 
     def ldl(self, con_la_mano=False):
-        """LDL: el tono llega a su nivel de molestia. Con "pitos fuertes" lo
-        dice; con "solo si molesta" levanta la mano (y la baja si no)."""
+        """LDL: el tono llega a su nivel de molestia. Con "Pitos fuertes"
+        levanta la mano (y la baja si no); sin la mano (el estímulo de la
+        inhibición residual) dice que le molesta."""
         if self.data['audio']['test'] != 'Umbrales':
             return
         a = self.data['audio']
@@ -1114,7 +1115,7 @@ class ResponseAudiometry():
                     for ch, (o, f) in falsos:
                         log("audio_ldl_aclarado", oido=('OD', 'OI')[o], freq=self.frecuency[f],
                             nivel=pasado['int'][ch])
-                if self._instruccion() == 'solo_si_molesta':
+                if self._instruccion() == 'pitos_fuertes':
                     self.ldl(con_la_mano=True)   # baja la mano
                 return 'solofuerte'
             return 'no'

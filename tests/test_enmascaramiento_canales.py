@@ -236,10 +236,10 @@ class RespuestasTest(Base):
                        stim=[STIM_TONO, STIM_NBN], output=[1, 0], int=[80, 0])
         self.assertEqual(self.r.respuesta_a('molesto_o'), 'no')
 
-    def test_solo_si_molesta_levanta_la_mano(self):
-        self.assertTrue(self.presentar('solo_si_molesta', stimOn=[True, False],
+    def test_pitos_fuertes_levanta_la_mano(self):
+        self.assertTrue(self.presentar('pitos_fuertes', stimOn=[True, False],
                                        stim=[STIM_TONO, STIM_NBN], int=[100, 0]))
-        self.assertFalse(self.presentar('solo_si_molesta', stimOn=[True, False],
+        self.assertFalse(self.presentar('pitos_fuertes', stimOn=[True, False],
                                         stim=[STIM_TONO, STIM_NBN], int=[80, 0]))
 
     def test_en_que_oido_con_dos_pitos_va_al_fowler(self):
@@ -250,8 +250,9 @@ class RespuestasTest(Base):
         self.assertEqual(llamadas, [2])
 
 
-class LdlHabladoTest(Base):
-    """Pitos fuertes: el paciente dice "molesta" al llegar a su LDL (100)."""
+class LdlConLaManoTest(Base):
+    """Pitos fuertes: con el tono sostenido, la mano sube al llegar a su LDL
+    (100) y no dice nada (2026-11-13: "Solo si molesta" salió)."""
 
     def setUp(self):
         super().setUp()
@@ -265,29 +266,13 @@ class LdlHabladoTest(Base):
     def nivel(self, db):
         self.r.set_config(FakeSender('lbl_int_ch0', f'{db} dB HL'))
 
-    def prender(self, on=True):
-        self.r.set_config(FakeSender('lbl_stimOn_ch0', ESTIMULO_ENCENDIDO if on else ''))
-
-    def test_presentado_al_ldl_lo_dice(self):
-        self.prender()
+    def test_subiendo_con_el_tono_sostenido_sube_la_mano(self):
+        self.r.set_config(FakeSender('lbl_stimOn_ch0', ESTIMULO_ENCENDIDO))
+        self.nivel(95)
+        self.assertFalse(self.r.mano)
+        self.nivel(100)
+        self.assertTrue(self.r.mano)
         self.assertEqual(self.dichas, [])
-        self.prender(False)
-        self.nivel(100)
-        self.prender()
-        self.assertEqual(self.dichas, ['molesta'])
-
-    def test_subiendo_con_el_tono_sostenido_lo_dice(self):
-        self.prender()
-        for db in (95, 100, 105):
-            self.nivel(db)
-        self.assertEqual(self.dichas, ['molesta', 'molesta'])
-
-    def test_el_pulsado_no_lo_repite_en_cada_pulso(self):
-        self.nivel(100)
-        for _ in range(6):
-            self.prender()
-            self.prender(False)
-        self.assertEqual(self.dichas, ['molesta'])
 
 
 class LdlFalsoAvisoTest(Base):
@@ -302,7 +287,7 @@ class LdlFalsoAvisoTest(Base):
         self.r.obj_audio._log = lambda accion, **p: self.registro.append((accion, p))
 
     def mano(self, db):
-        return self.presentar('solo_si_molesta', stimOn=[True, False],
+        return self.presentar('pitos_fuertes', stimOn=[True, False],
                               stim=[STIM_TONO, STIM_NBN], output=[0, 1], int=[db, 0])
 
     def test_avisa_en_falso_y_al_preguntar_solo_sono_fuerte(self):
@@ -330,13 +315,6 @@ class LdlFalsoAvisoTest(Base):
         self.assertFalse(self.mano(90))
         self.assertEqual(self.r.respuesta_a('molesto_o'), 'no')
 
-    def test_pitos_fuertes_dice_molesta_en_falso(self):
-        dichas = []
-        self.r.other_response.create_voice_ = dichas.append
-        self.presentar('pitos_fuertes', stimOn=[True, False],
-                       stim=[STIM_TONO, STIM_NBN], output=[0, 1], int=[85, 0])
-        self.assertEqual(dichas, ['molesta'])
-        self.assertEqual(self.r.respuesta_a('molesto_o'), 'solofuerte')
 
 
 class RecalculaTest(Base):

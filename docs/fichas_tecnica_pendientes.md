@@ -245,7 +245,7 @@ Nota de registro: la app ya emite audio_logo_response, audio_logo_reset, audio_c
   6. Repetir en cada frecuencia de 250 a 4.000 Hz (propuesto: ambos oídos). [registrado: audio_freq_change]
   7. Usar siempre la misma instrucción (no cambiar frase entre frecuencias). [registrado]
 - Lo que debería anotar: LDL por frecuencia y oído = primer nivel en que respondió "molesta" (en la app es la tolerancia sorteada del paciente, 90-120); campo dinámico = LDL − umbral. "Solo si molesta" va a la misma prueba?
-- Dudas: (1) "Solo si molesta" está en comandos_voz pero no aparece en PRUEBA: ¿es instrucción equivalente a "Pitos fuertes"? (2) ¿Se evalúa un orden (LDL antes de supraliminares, H06 dice "El LDL primero")? (3) límite de 80 dB HL: ¿penalizar partir distinto o el BSA a 60?
+- Dudas: (1) resuelta 2026-11-13: "Solo si molesta" salió; "Pitos fuertes" se responde con la mano y "Molesto ¿o?" trae el recordatorio. (2) ¿Se evalúa un orden (LDL antes de supraliminares, H06 dice "El LDL primero")? (3) límite de 80 dB HL: ¿penalizar partir distinto o el BSA a 60?
 
 ### Fowler / ABLB (fuente: H06 §Fowler)
 - Resumen: compara sonoridad entre oídos en una frecuencia; referencia +20 dB y se iguala el oído en estudio de 5 en 5.
