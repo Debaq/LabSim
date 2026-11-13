@@ -190,6 +190,37 @@ final class OtoscopiaPhoto
         imagedestroy($src);
     }
 
+    /**
+     * Da vuelta horizontalmente (izquierda <-> derecha) la imagen ya guardada
+     * de un oído/fase: para fotos que quedaron con la orientación del otro
+     * oído (mango del martillo hacia el lado equivocado). Reescribe el mismo
+     * archivo en el mismo formato.
+     */
+    public static function mirror(string $caseId, string $side, int $faseIdx): void
+    {
+        if (!extension_loaded('gd')) {
+            throw new RuntimeException('El servidor no tiene la extensión GD -- no se pueden procesar imágenes.');
+        }
+        $path = self::path($caseId, $side, $faseIdx);
+        if (!is_file($path)) {
+            throw new RuntimeException('No hay imagen para espejar.');
+        }
+        $esWebp = substr($path, -5) === '.webp';
+        if ($esWebp && !function_exists('imagecreatefromwebp')) {
+            throw new RuntimeException('El servidor no puede leer WEBP.');
+        }
+        $img = $esWebp ? imagecreatefromwebp($path) : imagecreatefromjpeg($path);
+        if ($img === false) {
+            throw new RuntimeException('No se pudo leer la imagen guardada.');
+        }
+        imageflip($img, IMG_FLIP_HORIZONTAL);
+        $ok = $esWebp ? imagewebp($img, $path, 80) : imagejpeg($img, $path, 85);
+        imagedestroy($img);
+        if (!$ok) {
+            throw new RuntimeException('No se pudo guardar la imagen espejada.');
+        }
+    }
+
     /** @param resource|\GdImage $img */
     private static function applyExifOrientation($img, string $path, string $mime)
     {

@@ -143,6 +143,8 @@
                     empty.hidden = true;
                     var delBtn = slot.querySelector('.otoscopia-delete-photo');
                     if (delBtn) { delBtn.hidden = false; }
+                    var mirBtn = slot.querySelector('.otoscopia-mirror-photo');
+                    if (mirBtn) { mirBtn.hidden = false; }
                     var dlLink = slot.querySelector('.otoscopia-download-photo');
                     if (dlLink) { dlLink.hidden = false; }
                     showMsg('Imagen actualizada.', false);
@@ -207,6 +209,9 @@
         var delBtn = slot.querySelector('.otoscopia-delete-photo');
         delBtn.setAttribute('data-side', side);
         delBtn.setAttribute('data-fase-idx', idx);
+        var mirBtn = slot.querySelector('.otoscopia-mirror-photo');
+        mirBtn.setAttribute('data-side', side);
+        mirBtn.setAttribute('data-fase-idx', idx);
         var dlLink = slot.querySelector('.otoscopia-download-photo');
         dlLink.setAttribute('data-side', side);
         dlLink.setAttribute('data-fase-idx', idx);
@@ -303,6 +308,8 @@
                     empty.hidden = false;
                     btn.hidden = true;
                     if (dlLink) { dlLink.hidden = true; }
+                    var mirBtn = slot.querySelector('.otoscopia-mirror-photo');
+                    if (mirBtn) { mirBtn.hidden = true; }
                     showMsg('Imagen borrada.', false);
                 } else {
                     showMsg(data.error || 'No se pudo borrar la imagen.', true);
@@ -311,6 +318,42 @@
             .catch(function () {
                 btn.disabled = false;
                 showMsg('Error de red al borrar la imagen.', true);
+            });
+    });
+
+    // Espejar: da vuelta izquierda <-> derecha la foto YA guardada (foto
+    // que quedó con la orientación del otro oído). Lo hace el servidor
+    // (OtoscopiaPhoto::mirror) y acá solo se refresca la miniatura.
+    container.addEventListener('click', function (e) {
+        var btn = e.target.closest('.otoscopia-mirror-photo');
+        if (!btn) { return; }
+        var side = btn.getAttribute('data-side');
+        var idx = btn.getAttribute('data-fase-idx');
+        var slot = btn.closest('.otoscopia-photo-slot');
+        var img = slot.querySelector('.otoscopia-thumb');
+
+        var fd = new FormData();
+        fd.append('csrf_token', csrfToken());
+        fd.append('case_id', CASE_ID);
+        fd.append('side', side);
+        fd.append('fase_idx', idx);
+        fd.append('action', 'mirror');
+
+        btn.disabled = true;
+        fetch('otoscopia_photo_upload.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                btn.disabled = false;
+                if (data.ok) {
+                    img.src = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&v=' + Date.now();
+                    showMsg('Imagen espejada.', false);
+                } else {
+                    showMsg(data.error || 'No se pudo espejar la imagen.', true);
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                showMsg('Error de red al espejar la imagen.', true);
             });
     });
 

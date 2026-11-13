@@ -72,6 +72,17 @@ if ($action === 'delete') {
     exit;
 }
 
+if ($action === 'mirror') {
+    try {
+        OtoscopiaPhoto::mirror($caseId, $side, $faseIdx);
+        AdminAudit::log($me, 'otoscopia_photo_mirror', ['case_id' => $caseId, 'side' => $side, 'fase' => $faseIdx]);
+        echo json_encode(['ok' => true]);
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
 $file = $_FILES['photo'] ?? null;
 if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
     echo json_encode(['ok' => false, 'error' => 'No se pudo recibir el archivo.']);

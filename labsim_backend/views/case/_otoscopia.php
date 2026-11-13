@@ -43,6 +43,7 @@
                          alt="Otoscopia <?= $ladoLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
                     <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
                     <input type="file" class="otoscopia-photo-input" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
+                    <button type="button" class="secondary otoscopia-mirror-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" title="Da vuelta la imagen de izquierda a derecha" <?= $hasOto ? '' : 'hidden' ?>>Espejar</button>
                     <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
                     <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $lado ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
                 </div>
@@ -62,6 +63,7 @@
             <img class="otoscopia-thumb" hidden>
             <div class="otoscopia-thumb-empty">Sin imagen</div>
             <input type="file" class="otoscopia-photo-input" accept="image/jpeg,image/png,image/webp">
+            <button type="button" class="secondary otoscopia-mirror-photo" title="Da vuelta la imagen de izquierda a derecha" hidden>Espejar</button>
             <button type="button" class="secondary otoscopia-delete-photo" hidden>Borrar foto</button>
             <a class="otoscopia-download-photo" hidden>Descargar</a>
         </div>
