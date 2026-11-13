@@ -493,7 +493,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Dictar palabras** | Logoaudiometría (discriminación) | Repite las palabras que entiende |
 | **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
 | **Pitos fuertes**, luego **Molesto ¿o?** | Umbral de molestia (LDL) | Levanta la mano cuando el tono le molesta. A veces confunde fuerte con molesto y la levanta antes (entre 80 y 90 dB): pregúntale *Molesto ¿o?* (que le recuerda que la mano es solo si molesta). Si dice *«solo sonó fuerte»*, sigue subiendo; si dice *«molesta»*, esa es la LDL |
-| **Cambie de volumen** | SISI | Dice *«sí»* cuando nota que el tono subió |
+| **Cambie de volumen** | SISI | Levanta la mano un momento cuando nota que el tono subió |
 | **Dos pitos**, luego **¿En qué oído?**. Al terminar, **¿Diferentes en forma?** | Fowler | Dice en qué oído suena más fuerte (*«el derecho»*, *«el izquierdo»*) o *«los escucho iguales»*; al final, si los dos tonos sonaban distintos (diploacusia) |
 | **Mano levantada** | Deterioro tonal (Carhart o Rosemberg) | Mantiene la mano arriba mientras siga oyendo el tono. Si partes en el umbral (o 5 dB sobre él) es un Carhart: cada subida reinicia el minuto. Si partes 10 dB sobre el umbral o más es un Rosemberg: el minuto es uno solo |
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
@@ -535,7 +535,7 @@ Para volver a los umbrales, elige **Tono** o **FM**.
 
 Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 16.
 
-- **SISI**: instrucción *Cambie de volumen*, paso **1** dB. Con el tono sonando, sube la intensidad de a 1 dB; el paciente dice *«sí»* cuando lo nota. Las subidas de 5 dB las nota siempre (sirven para familiarizarlo).
+- **SISI**: instrucción *Cambie de volumen*, paso **1** dB. Con el tono sonando, sube la intensidad de a 1 dB y vuelve al portador; el paciente levanta la mano un momento cuando lo nota. Las subidas de 5 dB las nota siempre (sirven para familiarizarlo). Un oído normal igual nota alguno de 1 dB (menos del 25 %).
 - **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿En qué oído?* y *Talkback*: contesta cuál suena más fuerte o que los escucha iguales. Para otra frecuencia, repite *Dos pitos*. Al terminar la prueba, *¿Diferentes en forma?* para anotar la diploacusia.
 - **Deterioro tonal**: tono **continuo** por vía aérea en 500, 1000, 2000 o 4000 Hz, e instrucción *Mano levantada*, para el Carhart y para el Rosemberg: el nivel en que partes dice cuál haces (umbral o +5 dB = Carhart; +10 dB o más = Rosemberg). El paciente mantiene la mano arriba mientras oye; cronometra con *Iniciar / Detener / Borrar*. El minuto es real.
 - **LDL**: instrucción *Pitos fuertes*. El paciente dice *«molesta»* al **presentar** el tono a una intensidad que le molesta.

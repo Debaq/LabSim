@@ -4,8 +4,10 @@ porque el motor solo miraba el encendido del tono y no las subidas de intensidad
 
 Ahora cada subida con el portador sonando es un incremento:
 - 5 dB (familiarizacion) se nota siempre, SISI positivo o negativo.
-- 1 dB (la prueba) se nota con el % SISI del caso.
+- 1 dB (la prueba) se nota con el % SISI del caso; un caso en 0 % (oido
+  normal) nota entre 5 y 20 % (2026-11-13).
 - bajar (volver al portador) no se responde.
+El paciente levanta la mano un momento (la instruccion lo pide), no dice "si".
 
 core.base crea un QApplication al importarse -> QT_QPA_PLATFORM=offscreen.
 """
@@ -60,6 +62,9 @@ class SisiTest(unittest.TestCase):
         })
         self.voces = []
         self.r.other_response.create_voice_ = self.voces.append
+        self.manos = []
+        sube = self.r.upHand
+        self.r.upHand = lambda: (self.manos.append(True), sube())
         self.r.history_command = ["cambie_de_volumen"]
 
     def portador(self, oido=0, nivel=65):
@@ -74,56 +79,60 @@ class SisiTest(unittest.TestCase):
 
     def test_prender_el_tono_no_es_un_incremento(self):
         self.portador(oido=1)
-        self.assertEqual(self.voces, [])
+        self.assertEqual(self.manos, [])
 
     def test_familiarizacion_de_5_db_siempre_responde_aunque_sea_negativo(self):
         self.portador(oido=0)
         for _ in range(5):
             self.nivel(70)
             self.nivel(65)
-        self.assertEqual(self.voces, ["si"] * 5)
+        self.assertEqual(len(self.manos), 5)
+        self.assertEqual(self.voces, [])   # la mano, no "sí"
+        self.assertTrue(self.r._sisi_timer.isActive())   # y la baja sola
 
-    def test_incremento_de_1_db_con_sisi_negativo_no_responde(self):
+    def test_oido_normal_nota_alguno_pero_menos_del_25(self):
         self.portador(oido=0)
-        for _ in range(20):
+        for _ in range(200):
             self.nivel(66)
             self.nivel(65)
-        self.assertEqual(self.voces, [])
+        pct = self.r._sisi_pct[0]
+        self.assertTrue(5 <= pct <= 20, pct)
+        self.assertTrue(0 < len(self.manos) < 50, len(self.manos))
 
     def test_incremento_de_1_db_con_sisi_positivo_responde_cada_vez(self):
         self.portador(oido=1)
         for _ in range(20):
             self.nivel(66)
             self.nivel(65)
-        self.assertEqual(self.voces, ["si"] * 20)
+        self.assertEqual(len(self.manos), 20)
 
     def test_incremento_de_1_db_usa_el_porcentaje_del_caso(self):
         self.r.dbdata["SISI"] = [40, 0]
         self.portador(oido=0)
-        with mock.patch("audiometria.response.random.random",
-                        side_effect=[0.39, 0.41]):
+        with mock.patch.object(self.r._rng, "random", side_effect=[0.39, 0.41]):
             self.nivel(66)
             self.nivel(65)
             self.nivel(66)
-        self.assertEqual(self.voces, ["si"])
+        self.assertEqual(len(self.manos), 1)
 
     def test_portador_bajo_el_umbral_no_deja_oir_incrementos(self):
         self.portador(oido=1, nivel=30)
         self.nivel(35)
-        self.assertEqual(self.voces, [])
+        self.assertEqual(self.manos, [])
 
     def test_sin_tono_no_hay_incremento(self):
         self.portador(oido=1)
         self.r.set_config(FakeSender("lbl_stimOn_ch0", ""))
         self.nivel(70)
-        self.assertEqual(self.voces, [])
+        self.assertEqual(self.manos, [])
 
     def test_otra_instruccion_no_responde_sisi(self):
         self.r.history_command = ["colocar_fonos"]
         self.portador(oido=1)
-        self.voces.clear()
         self.nivel(70)
-        self.assertEqual(self.voces, [])
+        # con "Colocar fonos" la mano es la del umbral (oye el tono), no el
+        # momento del incremento
+        self.assertFalse(self.r._sisi_timer.isActive())
 
 
 if __name__ == "__main__":

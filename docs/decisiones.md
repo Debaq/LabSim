@@ -8883,3 +8883,16 @@ instrucciones: el final se recorta suave (-60 dB, dejando 150 ms) y lleva
 script reintenta cuando edge-tts deja el archivo vacío (al rehacerlas se
 cayó a la mitad) y genera una sola vez las palabras que se repiten con
 otra mayúscula ("Sol" y la mitad "sol" de Girasol).
+
+## SISI: el paciente levanta la mano y el oído normal nota alguno (2026-11-13)
+
+- *Cambie de volumen* pide levantar la mano y el paciente decía "sí". Ahora
+  levanta la mano un momento (`SISI_MANO_MS` = 1 s) al notar el incremento;
+  queda en el registro como cualquier mano (`audio_respuesta`).
+- Un oído sin reclutamiento trae SISI 0 % (CaseProfile::recruitment) y con
+  1 dB no respondía nunca. Un paciente normal nota alguno: si el caso trae
+  0 %, se sortea entre 5 y 20 % (`SISI_NEGATIVO_PCT`) por oído y atención,
+  negativo y bajo el 25 %, y queda `audio_sisi_sorteo` en el registro. Los
+  otros valores del caso (10 % retrococlear, 50-90 % coclear, lo que fije el
+  docente) se usan tal cual. La familiarización de 5 dB sigue notándose
+  siempre.

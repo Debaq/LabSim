@@ -118,6 +118,12 @@ class ResponseAudiometry():
     # real. Sin preguntar, sigue avisando desde ese nivel: el alumno que no
     # lo confirma anota una LDL falsa.
     LDL_FALSO_PROB = 0.30
+    # SISI: la instrucción pide levantar la mano y el paciente la levanta un
+    # momento al notar el incremento. Un oído sin reclutamiento trae 0 % en
+    # el caso, pero un paciente normal igual nota algún incremento de 1 dB:
+    # se sortea entre 5 y 20 % por oído y atención (negativo, bajo 25 %).
+    SISI_MANO_MS = 1000
+    SISI_NEGATIVO_PCT = (5, 20)
     LDL_FALSO_DB = (80, 85, 90)
     # Talkback: el dial no esta calibrado; cada marca se toma como 5 dB HL
     # de voz en los fonos (ver docs/decisiones.md).
@@ -144,6 +150,10 @@ class ResponseAudiometry():
         self._rng = random.Random()
         self._ldl_falso = {}            # (oído, frecuencia) -> nivel o None
         self._ldl_aclarado = set()      # (oído, frecuencia) ya preguntados
+        self._sisi_pct = {}             # oído -> % sorteado (caso en 0 %)
+        self._sisi_timer = QTimer()
+        self._sisi_timer.setSingleShot(True)
+        self._sisi_timer.timeout.connect(self.downHand)
 
         self.history_command= []
         self._pregunta = None   # pregunta del Fowler esperando que termine el talkback
@@ -167,6 +177,7 @@ class ResponseAudiometry():
         self.dbdata = dbdata
         self._ldl_falso = {}
         self._ldl_aclarado = set()
+        self._sisi_pct = {}
         self._logo = None   # el del SDT, se arma al primer uso (_detecta_sdt)
         self.other_response.voz = voz_del_paciente(dbdata)
         self.acufeno = acufeno.Acufeno(dbdata.get('Tinnitus'), dbdata.get('id'))
@@ -732,11 +743,12 @@ class ResponseAudiometry():
 
     def response_sisi(self, channel, delta):
         """SISI: con el tono portador sonando, cada subida de intensidad es
-        un incremento y el paciente dice "si" si lo nota. Se decide por el
+        un incremento y el paciente levanta la mano un momento si lo nota
+        (antes decía "sí", y la instrucción pide la mano). Se decide por el
         tamano del salto, sin importar si el alumno esta familiarizando o
         midiendo -- el paciente no sabe en que etapa esta:
         - 5 dB o mas (familiarizacion): lo nota siempre.
-        - 1 dB (la prueba): lo nota con el % SISI del caso.
+        - 1 dB (la prueba): lo nota con el % SISI del caso (_sisi_base).
         - entre medio (paso de 3 dB): interpolado entre ambos.
         Bajar la intensidad (volver al portador) no se responde, y un tono
         bajo el umbral no deja oir ningun incremento."""
@@ -751,10 +763,24 @@ class ResponseAudiometry():
         if delta >= self.STEP_DB:
             pct = 100
         else:
-            base = self.dbdata.get('SISI', [0, 0])[output]
+            base = self._sisi_base(output)
             pct = base + (100 - base) * (delta - 1) / (self.STEP_DB - 1)
-        if random.random() * 100 < pct:
-            self.other_response.create_voice_('si')
+        if self._rng.random() * 100 < pct:
+            self.upHand()
+            self._sisi_timer.start(self.SISI_MANO_MS)
+
+    def _sisi_base(self, oido):
+        """% de incrementos de 1 dB que nota: el del caso o, si el caso
+        trae 0 (oído sin reclutamiento), el sorteado en SISI_NEGATIVO_PCT."""
+        base = self.dbdata.get('SISI', [0, 0])[oido]
+        if base:
+            return base
+        if oido not in self._sisi_pct:
+            self._sisi_pct[oido] = self._rng.randint(*self.SISI_NEGATIVO_PCT)
+            log = getattr(self.obj_audio, "_log", None)
+            if log is not None:
+                log("audio_sisi_sorteo", oido=('OD', 'OI')[oido], pct=self._sisi_pct[oido])
+        return self._sisi_pct[oido]
 
     def _masking_calc(self, via, frecuency, o_e, o_n, ce=0):
         """
