@@ -45,6 +45,7 @@ final class OtoscopiaBiblioteca
         'cerumen' => 'Tapón de cerumen',
         'oma' => 'Otitis media aguda',
         'ome' => 'Otitis media con efusión',
+        'omc' => 'Otitis media crónica',
         'retraccion' => 'Retracción / atelectasia',
         'timpanoesclerosis' => 'Timpanoesclerosis',
         'colesteatoma' => 'Colesteatoma',
@@ -250,6 +251,32 @@ final class OtoscopiaBiblioteca
             throw $e;
         }
         return $id;
+    }
+
+    /** Id de la foto subida con ese nombre de archivo, o null (para no subir dos veces la misma en lote). */
+    public static function idPorNombre(string $nombre): ?int
+    {
+        self::asegurarTablas();
+        $stmt = Db::get()->prepare('SELECT id FROM otoscopia_biblioteca WHERE nombre_archivo = ? ORDER BY id LIMIT 1');
+        $stmt->execute([mb_substr($nombre, 0, 200)]);
+        $id = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $id === false ? null : (int) $id;
+    }
+
+    /**
+     * Tipo y notas sin tocar el encuadre ni el lado: para la carga en lote
+     * (consola), donde el tipo ya se sabe pero el giro y el lado anterior
+     * los revisa una persona en otoscopias.php. Sin lado sigue "sin clasificar".
+     */
+    public static function catalogar(int $id, ?string $tipo, string $notas): void
+    {
+        if ($tipo !== null && !isset(self::TIPOS[$tipo])) {
+            throw new InvalidArgumentException('Tipo inválido: ' . $tipo);
+        }
+        self::asegurarTablas();
+        Db::get()->prepare('UPDATE otoscopia_biblioteca SET tipo = ?, notas = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+            ->execute([$tipo, mb_substr(trim($notas), 0, 500), $id]);
     }
 
     public static function fila(int $id): array

@@ -15,6 +15,8 @@ Lee LABSIM_CONSOLA_URL y LABSIM_CONSOLA_TOKEN de --env, del entorno o de
     consola.py leer tickets/ticket_3.log.gz [-o salida]
     consola.py otoscopia 41 oi 0 foto.jpg [--recorte x,y,lado]   (fase 0 = la unica o la primera)
     consola.py rostro 41 cara.png [--persona id] [--recorte x,y,lado]
+    consola.py biblioteca foto.jpg --nombre banco/ruta.jpg [--clase normal] [--notas texto]
+                                           (a la base de otoscopias, sin clasificar)
     consola.py revocar                     (corta el token y borra el archivo)
 
 Solo stdlib: no depende del entorno de la app.
@@ -110,6 +112,11 @@ def main() -> None:
     s.add_argument("imagen")
     s.add_argument("--persona", default="")
     s.add_argument("--recorte", help="x,y,lado en pixeles de la imagen")
+    s = sub.add_parser("biblioteca", help="agrega una foto a la base de otoscopias (entra sin clasificar)")
+    s.add_argument("imagen")
+    s.add_argument("--nombre", required=True, help="identifica la foto; si ya esta en la base no se sube de nuevo")
+    s.add_argument("--clase", default="", help="tipo: normal, perforacion, cerumen, oma, ome, ...")
+    s.add_argument("--notas", default="")
     a = ap.parse_args()
 
     url, token, ruta_env = _cargar_env(a.env)
@@ -129,6 +136,9 @@ def main() -> None:
             cuerpo["persona"] = a.persona
         if a.recorte:
             cuerpo["recorte"] = [float(v) for v in a.recorte.split(",")]
+    elif a.cmd == "biblioteca":
+        cuerpo = {"accion": "foto", "tipo": "biblioteca", "nombre": a.nombre, "clase": a.clase, "notas": a.notas,
+                  "imagen": base64.b64encode(Path(a.imagen).read_bytes()).decode("ascii")}
     else:
         cuerpo = {"accion": a.cmd}
     r = _llamar(url, token, cuerpo)
@@ -156,6 +166,8 @@ def main() -> None:
     elif a.cmd in ("otoscopia", "rostro"):
         donde = f"{r['side']} fase {r['fase']}" if a.cmd == "otoscopia" else (r["persona"] or "paciente")
         print(f"{a.cmd} del caso {r['case_id']} ({donde}) subida, {r['ancho']}x{r['alto']}")
+    elif a.cmd == "biblioteca":
+        print(f"#{r['id']} {'subida' if r['nuevo'] else 'ya estaba'}: {r['nombre']}")
     elif a.cmd == "leer":
         datos = r["contenido"]
         crudo = base64.b64decode(datos) if r["codificacion"] == "base64" else datos.encode("utf-8")

@@ -16,6 +16,7 @@ require_once __DIR__ . '/../../src/Consola.php';
  *   {"accion": "backup"}                           copia de la base (data/backups/)
  *   {"accion": "archivos", "ruta": "tickets"}      listado dentro de data/
  *   {"accion": "leer", "ruta": "tickets/x.log.gz"} un archivo de data/
+ *   {"accion": "foto", "tipo": "biblioteca", "nombre": .., "clase": .., "notas": .., "imagen": base64}
  *   {"accion": "foto", "tipo": "otoscopia"|"rostro", "case_id": .., "imagen": base64,
  *    "side": "od"|"oi", "fase": 0, "persona": "", "recorte": [x, y, lado]}
  *                                                  una otoscopía o una cara (Consola::subirFoto)
@@ -84,7 +85,7 @@ try {
             $texto = implode(' ', array_filter([
                 (string) ($body['tipo'] ?? ''), (string) ($body['case_id'] ?? ''),
                 (string) ($body['side'] ?? ''), isset($body['fase']) ? 'fase ' . (int) $body['fase'] : '',
-                (string) ($body['persona'] ?? ''),
+                (string) ($body['persona'] ?? ''), (string) ($body['nombre'] ?? ''),
             ], 'strlen'));
         } elseif ($tipo === 'revocar') {
             Consola::revocar($tokenId);

@@ -279,8 +279,11 @@ final class Consola
         require_once __DIR__ . '/OtoscopiaPhoto.php';
         require_once __DIR__ . '/PatientPhoto.php';
         $tipo = (string) ($datos['tipo'] ?? '');
+        if ($tipo === 'biblioteca') {
+            return self::subirABiblioteca($datos);
+        }
         if ($tipo !== 'otoscopia' && $tipo !== 'rostro') {
-            throw new InvalidArgumentException('"tipo" tiene que ser otoscopia o rostro');
+            throw new InvalidArgumentException('"tipo" tiene que ser otoscopia, rostro o biblioteca');
         }
         $caseId = trim((string) ($datos['case_id'] ?? ''));
         $stmt = Db::get()->prepare('SELECT id FROM cases WHERE id = ?');
@@ -331,6 +334,49 @@ final class Consola
             PatientPhoto::save(PatientPhoto::key($caseId, $persona), $tmp, $x, $y, $lado);
             return ['tipo' => $tipo, 'case_id' => $caseId, 'persona' => $persona,
                     'ancho' => $info[0], 'alto' => $info[1]];
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    /**
+     * Agrega una foto a la base de otoscopias (OtoscopiaBiblioteca), sin
+     * girar y sin lado anterior: entra "sin clasificar" para revisarla en
+     * admin/otoscopias.php. $datos: imagen (base64), nombre (identifica la
+     * foto: si ya hay una con ese nombre no se sube de nuevo), clase (clave
+     * de OtoscopiaBiblioteca::TIPOS o vacío) y notas.
+     */
+    private static function subirABiblioteca(array $datos): array
+    {
+        require_once __DIR__ . '/OtoscopiaBiblioteca.php';
+        $nombre = trim((string) ($datos['nombre'] ?? ''));
+        if ($nombre === '') {
+            throw new InvalidArgumentException('"nombre" no puede ir vacío');
+        }
+        $clase = trim((string) ($datos['clase'] ?? ''));
+        $notas = (string) ($datos['notas'] ?? '');
+        if ($clase !== '' && !isset(OtoscopiaBiblioteca::TIPOS[$clase])) {
+            throw new InvalidArgumentException('Tipo inválido: ' . $clase);
+        }
+        $ya = OtoscopiaBiblioteca::idPorNombre($nombre);
+        if ($ya !== null) {
+            return ['tipo' => 'biblioteca', 'id' => $ya, 'nuevo' => false, 'nombre' => $nombre];
+        }
+        $bytes = base64_decode((string) ($datos['imagen'] ?? ''), true);
+        if ($bytes === false || $bytes === '') {
+            throw new InvalidArgumentException('"imagen" tiene que ser la imagen en base64');
+        }
+        if (strlen($bytes) > self::MAX_FOTO_BYTES) {
+            throw new InvalidArgumentException('La imagen pesa más de 12 MB');
+        }
+        $tmp = tempnam(sys_get_temp_dir(), 'lsc_oto_');
+        if ($tmp === false || file_put_contents($tmp, $bytes) === false) {
+            throw new RuntimeException('No se pudo escribir la imagen en el servidor');
+        }
+        try {
+            $id = OtoscopiaBiblioteca::agregar($tmp, $nombre, null);
+            OtoscopiaBiblioteca::catalogar($id, $clase === '' ? null : $clase, $notas);
+            return ['tipo' => 'biblioteca', 'id' => $id, 'nuevo' => true, 'nombre' => $nombre];
         } finally {
             @unlink($tmp);
         }
