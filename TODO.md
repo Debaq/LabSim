@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 78).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 79).
 
 Revisado contra el código el 2026-09-24.
 
@@ -36,6 +36,11 @@ Revisado contra el código el 2026-09-24.
 - [ ] 9. El informe de otoscopia no se guarda local: sin conexión, al cerrar la
       atención se pierde (el autosave de 30 s lo mitiga, pero solo sube).
       § Otoscopia: cono del espéculo e informe por cuadrantes
+- [ ] 79. Revisar la suite de tests completa con pytest (incluido
+      `test_aabr.py`, ~10 min): el barrido del 2026-11-13 se cortó a medias.
+      Desde ese día `tests/conftest.py` sale con `os._exit`; ver qué otros
+      archivos fallan o dependen del estado del equipo (como pasaba con
+      `test_invitado`). § Tests: pytest sale con os._exit como la app
 
 ## Decisiones pendientes
 

@@ -8726,3 +8726,21 @@ resources/audio/paciente/*); si no oye ninguno, calla. La instrucción
 fuerte, o si los escucha iguales"). *¿Diferentes en forma?* (diploacusia)
 sigue aparte, al terminar. El backend conserva `sonidos_iguales` en sus
 listas para leer las atenciones anteriores.
+
+## Tests: pytest sale con os._exit como la app (2026-11-13)
+
+Varios archivos (ABR, ECochG, rinoscopía, informes ABR) pasaban todos sus
+tests y pytest terminaba con violación de segmento: al desarmar el
+intérprete, Python destruye las ventanas que quedaron vivas en cualquier
+orden y Qt les manda eventos a objetos ya liberados. `tests/conftest.py`
+hace lo mismo que `main.py`: con Qt cargado, al final sale con `os._exit`
+(después del resumen y con el código de salida de pytest). Se probó cerrar o
+borrar las ventanas entre tests y no sirve: rompe `test_abr_montaje` (sus
+tests dependen de lo que hace el cierre) y el borrado final igual se cae con
+pyqtgraph. Los tests que se corren como script no pasan por el conftest.
+
+Una de las caídas era de la app: en Mis pacientes, "Ver en el ABR" se
+conectaba con una lambda que retenía la ventana; al borrarse el botón
+soltaba la última referencia y Python destruía la ventana en medio del
+deleteLater. Ahora va a un método. `test_invitado` leía el catálogo que la
+app bajó en la carpeta de datos del equipo; ahora usa una vacía.
