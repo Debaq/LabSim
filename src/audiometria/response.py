@@ -12,7 +12,7 @@ from audiometria.masking_params import (  # re-export: los usan
     CE_TONAL, RUIDOS_ENMASCARANTES, STIM_FM, STIM_HABLA, STIM_NBN,  # noqa: F401
     STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal, es_ruido)  # el panel y los tests
 from audiometria.logoaudiometry import CalculateLogo
-from audiometria.comandos_voz import PREGUNTAS
+from audiometria.comandos_voz import AVISOS, PREGUNTAS
 from audiometria import acufeno
 class_pref = Preferences()
 
@@ -60,12 +60,8 @@ class ResponseAudiometry():
         'mano_levantada': {                  # Carhart
             'data_key': 'Carhart', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
         },
-        # Carhart enmascarado: la misma prueba, con la instruccion que avisa
-        # del ruido en el otro oido. Antes iba al Stenger, que no lleva ruido
-        # ni se instruye asi (ver response_stenger).
-        'mano_levantada_en_ruido': {
-            'data_key': 'Carhart', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
-        },
+        # El Carhart enmascarado es "Mano levantada" + el aviso "Ruido en el
+        # otro oido" (comandos_voz.AVISOS), que no cambia la instruccion.
         'ruido_blanco_contralateral': {       # Stat
             'data_key': 'Stat', 'frequencies': [2, 3, 4], 'contra': 'white_noise',
             'fixed_level': True,
@@ -94,10 +90,11 @@ class ResponseAudiometry():
     # en casi todo oido retrococlear: a 100 dB HL sobran 70-85 dB.
     STAT_POSITIVO_DB = 30
 
-    # Instrucciones de umbral: "cada pito que escuche, levante la mano". Las
-    # cuatro se responden igual -- el paciente no sabe si el alumno pensaba
-    # enmascarar --; lo que cambia la respuesta es lo que suena y por donde.
-    UMBRAL = ('colocar_fonos', 'colocar_vibrador', 'aerea_+_ruido', 'vibrador_+_ruido')
+    # Instrucciones de umbral: "cada pito que escuche, levante la mano". Con
+    # o sin el aviso del ruido se responden igual -- el paciente no sabe si
+    # el alumno pensaba enmascarar --; lo que cambia la respuesta es lo que
+    # suena y por donde.
+    UMBRAL = ('colocar_fonos', 'colocar_vibrador')
     # Instrucciones cuya respuesta se recalcula al mover una perilla con el
     # estimulo sonando (con el tono en continuo, subir el ruido tiene que
     # bajar la mano sin soltar el tono; subir el tono sostenido hasta el LDL
@@ -167,7 +164,6 @@ class ResponseAudiometry():
         list_ = [0,1,2]
         uphand = any(elem in self.data['audio']['stim'] for elem in list_)
         debug_print(uphand)
-        #['dictar_palabras', 'vibrador_+_ruido', 'molesto_o', 'dictar_palabras']
         if uphand:
             instruccion = self._instruccion()
             if instruccion in self.UMBRAL:
@@ -221,11 +217,11 @@ class ResponseAudiometry():
                 self.ldl()
 
     def _instruccion(self):
-        """La ultima instruccion dada, saltando las preguntas: antes la
-        pregunta pasaba a ser el comando vigente y tras "¿Me escucha?" el
-        paciente dejaba de responder a los tonos."""
+        """La ultima instruccion dada, saltando las preguntas y los avisos:
+        antes la pregunta pasaba a ser el comando vigente y tras "¿Me
+        escucha?" el paciente dejaba de responder a los tonos."""
         for rol in self.history_command:
-            if rol not in PREGUNTAS:
+            if rol not in PREGUNTAS and rol not in AVISOS:
                 return rol
         return None
 
@@ -934,7 +930,8 @@ class ResponseAudiometry():
             max_list = 12
             self.history_command.insert(0, rol)
             while len(self.history_command) > max_list:
-                preguntas = [i for i, r in enumerate(self.history_command) if r in PREGUNTAS]
+                preguntas = [i for i, r in enumerate(self.history_command)
+                             if r in PREGUNTAS or r in AVISOS]
                 self.history_command.pop(preguntas[-1] if preguntas else -1)
             debug_print(self.history_command)
         if rol == 'pa_pa_pa':

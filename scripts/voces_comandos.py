@@ -49,9 +49,14 @@ SALIDA_OT = os.path.join(RAIZ, "resources", "audio", "comandos_ot")
 VOZ, TONO, VELOCIDAD = "es-CL-CatalinaNeural", "+0Hz", "-8%"
 # Igual que las grabadas: -21 LUFS de mediana, sin pasar de -1.5 dBTP, para
 # que el vúmetro y el nivel del talkback no cambien. Mono 48 kHz, 64 kbit/s.
+# El final se recorta suave (-60 dB, dejando 150 ms) y se le agrega medio
+# segundo de silencio: con el corte a -45 dB pegado a la voz se perdía la
+# última sílaba (la "s" de "caso"), y el reproductor corta apenas termina el
+# archivo, así que el colchón va en el audio (pedido del equipo, 2026-11-13).
+COLA_S = 0.5
 FILTRO = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-          "silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-          "loudnorm=I=-21:TP=-1.5:LRA=11")
+          "silenceremove=start_periods=1:start_threshold=-60dB:start_silence=0.15,areverse,"
+          f"loudnorm=I=-21:TP=-1.5:LRA=11,apad=pad_dur={COLA_S}")
 
 COMANDOS = {
     # PREPARAR
@@ -60,20 +65,13 @@ COMANDOS = {
                      "pequeños, me avisa todos los pitos que escuche.",
     "colocar_vibrador": "Le voy a colocar este aparato detrás de su oreja. Necesito que me avise "
                         "los pitos igual que al comienzo del examen, aunque suenen muy bajitos.",
-    "aerea_+_ruido": "Ahora va a escuchar un ruido por la otra orejita. Necesito que no le haga "
-                     "caso a ese ruido, y que me siga avisando los pitos de esta orejita.",
-    "vibrador_+_ruido": "Le voy a colocar este aparato detrás de su oreja. Necesito que me avise "
-                        "los pitos, aunque suenen muy bajitos. Por la otra oreja va un ruido: a "
-                        "ese ruido no le haga caso, y me sigue avisando los pitos que escuche.",
+    # Aviso de enmascaramiento: va además de la instrucción de la prueba.
+    "ruido_otro_oido": "Ahora le voy a poner un ruido en el otro oído. A ese ruido no le "
+                       "haga caso.",
     # INSTRUCCIONES
     "mano_levantada": "Va a escuchar un pito continuo. Necesito que mantenga la mano levantada "
                       "todo el tiempo que escuche el pito. Si lo deja de escuchar, baja la mano. "
                       "Si lo escucha más despacio, mantenga la mano levantada.",
-    "mano_levantada_en_ruido": "Va a escuchar un ruido fuerte por la otra orejita, y un pito por "
-                               "esta. A ese ruido no le haga caso. Necesito que mantenga la mano "
-                               "levantada todo el tiempo que escuche el pito. Solo si deja de "
-                               "escuchar el pito, baja la mano. Si lo escucha más bajito, "
-                               "mantenga la mano levantada.",
     "escuche_mi_voz": "Apenas escuche mi voz, levante la mano.",
     "dictar_palabras": "Ahora le voy a dictar unas palabras. Necesito que las repita en voz alta, "
                        "y repita solo lo que entienda.",
@@ -203,7 +201,10 @@ async def generar(clave, textos=COMANDOS, salida=SALIDA):
 
 # Las palabras de las listas, al nivel de las grabadas (-18 LUFS, mono
 # 44,1 kHz): el vúmetro está calibrado con ellas.
-FILTRO_ESTIMULO = FILTRO.replace("loudnorm=I=-21:TP=-1.5", "loudnorm=I=-18:TP=-1")
+# Sin el colchón del final: son estímulos de la lista, no instrucciones.
+FILTRO_ESTIMULO = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+                   "silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+                   "loudnorm=I=-18:TP=-1:LRA=11")
 ESTIMULOS = os.path.join(RAIZ, "resources", "audio", "logo", "estimulos")
 
 

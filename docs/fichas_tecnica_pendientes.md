@@ -285,7 +285,7 @@ Nota de registro: la app ya emite audio_logo_response, audio_logo_reset, audio_c
 ### Deterioro tonal: Carhart (fuente: H06 §Carhart)
 - Resumen: tono continuo en el umbral; si baja la mano antes de 60 s, +5 dB sin cortar y el minuto reinicia.
 - Pasos:
-  1. Instrucción "Mano levantada" (con ruido contralateral: "Mano levantada en ruido"). [registrado: talkback]
+  1. Instrucción "Mano levantada" (con ruido contralateral, más el aviso "Ruido en el otro oído"). [registrado: talkback]
   2. Dos frecuencias contiguas de 500 a 4.000 Hz por oído. [registrado: audio_freq_change]
   3. Tono continuo en el umbral con Invertir encendido, y cronómetro iniciado. [registrado: audio_reverse_toggle, audio_cronometro]
   4. Si baja la mano antes de 60 s, subir 5 dB sin cortar el tono y reiniciar el cronómetro. [registrado: audio_intensity_change, audio_cronometro, audio_respuesta]

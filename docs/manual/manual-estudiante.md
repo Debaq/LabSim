@@ -488,7 +488,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | Instrucción | Para | Qué hace el paciente |
 |---|---|---|
 | **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar (y Stenger) | Levanta la mano mientras suena un tono que oye |
-| **Aerea + ruido** / **vibrador + ruido** | Umbrales enmascarados | Igual, con ruido en el otro oído (sección 17) |
+| **Ruido en el otro oído** | Enmascaramiento (umbrales, Carhart) | Es un aviso: sigue con la instrucción que tenía y al ruido no le hace caso (sección 17) |
 | **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y *pa pa pa* elegido, levanta la mano si lo oye |
 | **Dictar palabras** | Logoaudiometría (discriminación) | Repite las palabras que entiende |
 | **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
@@ -498,20 +498,21 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Mano levantada** | Deterioro tonal (Carhart) | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Rosemberg bilateral** | Deterioro tonal (Rosemberg) | Igual que Carhart |
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
-| **Mano levantada en ruido** | Deterioro tonal (Carhart) con ruido en el otro oído | Igual que Carhart; al ruido no le hace caso |
 | **Compare con su ruido**, luego **¿Cuál se parece más?** | Tinnitumetría: tono | Dice cuál de los últimos sonidos que oyó (hasta tres) se parece más a su acúfeno: *«el primero»*, *«el segundo»* o *«el tercero»* |
 | **Igual de fuerte que su ruido** | Tinnitumetría: intensidad | Levanta la mano cuando el sonido suena igual de fuerte que su acúfeno |
 | **Hasta que no escuche su ruido** | Tinnitumetría: NME | Levanta la mano cuando el ruido le tapa el acúfeno |
 | **Solo escuche el mío** | Tinnitumetría: inhibición residual | Dice *«Ahora solo escucho el suyo»* cuando el sonido le tapa el acúfeno |
 | **Un minuto de sonido**, luego **¿Cómo está su ruido?** | Tinnitumetría: inhibición residual | Con el sonido ya apagado, dice cómo quedó su acúfeno |
 
-> Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** no: el paciente las contesta y sigue con la instrucción que tenía. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, contesta y sigue respondiendo a la LDL.
+> Cualquier otra instrucción **reemplaza** la anterior. Las **preguntas** y el aviso **Ruido en el otro oído** no: el paciente sigue con la instrucción que tenía. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, contesta y sigue respondiendo a la LDL.
+
+> Con **tono y ruido sonando a la vez** el Talkback no habla: apaga el tono y el ruido antes de hablarle. Con solo el tono (Fowler) o solo el ruido sí se le puede preguntar.
 
 ## 17. Enmascaramiento
 
 Para enmascarar, usa el **canal 1 para el tono** y el **canal 2 para el ruido**, en el oído contrario:
 
-1. Instrucción **Aerea + ruido** (o **vibrador + ruido** para la vía ósea) y *Talkback*.
+1. La instrucción de la prueba (**Colocar fonos**, **Colocar vibrador** o **Mano levantada** para el Carhart) y, antes de prender el ruido, el aviso **Ruido en el otro oído**, cada uno con *Talkback*.
 2. Canal 2: salida al **oído contrario**, estímulo **NBN**, **WN** o **PN**, y el transductor que corresponda. Con **Invertir** el ruido queda encendido.
 3. Canal 1: el tono al oído que estás evaluando, como siempre.
 

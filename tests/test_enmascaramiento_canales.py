@@ -69,6 +69,11 @@ def caso(aerea, osea, sdt=(20, 20), srt=(25, 25), ldl=100):
 F1000 = 3
 
 
+# Enmascarar = la instrucción de la prueba + el aviso del ruido (el más
+# reciente primero, como history_command).
+AEREA_RUIDO = ['ruido_otro_oido', 'colocar_fonos']
+OSEA_RUIDO = ['ruido_otro_oido', 'colocar_vibrador']
+
 class Base(unittest.TestCase):
     AEREA = tabla(90, 5)    # OD neurosensorial profundo, OI normal
     OSEA = tabla(90, 5)
@@ -103,28 +108,28 @@ class CanalDelTonoTest(Base):
 
     def test_aerea_ruido_en_canal_0(self):
         for ruido in range(0, 121, 5):
-            normal, cruzado = self.par('aerea_+_ruido', ruido)
+            normal, cruzado = self.par(AEREA_RUIDO, ruido)
             self.assertIsNotNone(cruzado, f"ruido {ruido}: no respondió nada")
             self.assertEqual(normal, cruzado, f"ruido {ruido} dB")
 
     def test_osea_ruido_en_canal_0(self):
         for ruido in range(0, 121, 5):
-            normal, cruzado = self.par('vibrador_+_ruido', ruido, tono=40, trans_tono=1)
+            normal, cruzado = self.par(OSEA_RUIDO, ruido, tono=40, trans_tono=1)
             self.assertIsNotNone(cruzado, f"ruido {ruido}: no respondió nada")
             self.assertEqual(normal, cruzado, f"ruido {ruido} dB")
 
     def test_el_cruzado_tambien_enmascara(self):
         """Tono 70 en el OD muerto: sin ruido lo oye el OI (sombra), con 80 de
         NBN en el OI, que va por el canal 0, deja de oírlo."""
-        self.assertEqual(self.par('aerea_+_ruido', 0), (True, True))
-        self.assertEqual(self.par('aerea_+_ruido', 80), (False, False))
+        self.assertEqual(self.par(AEREA_RUIDO, 0), (True, True))
+        self.assertEqual(self.par(AEREA_RUIDO, 80), (False, False))
 
     def test_fm_en_canal_0_es_el_tono(self):
         self.assertFalse(self.presentar(
-            'aerea_+_ruido', stimOn=[True, True], stim=[STIM_FM, STIM_NBN],
+            AEREA_RUIDO, stimOn=[True, True], stim=[STIM_FM, STIM_NBN],
             output=[0, 1], int=[70, 80]))
         self.assertTrue(self.presentar(
-            'aerea_+_ruido', stimOn=[True, True], stim=[STIM_FM, STIM_NBN],
+            AEREA_RUIDO, stimOn=[True, True], stim=[STIM_FM, STIM_NBN],
             output=[0, 1], int=[70, 0]))
 
     def test_colocar_fonos_con_ruido_tambien_enmascara(self):
@@ -139,10 +144,10 @@ class CanalDelTonoTest(Base):
         tapa el tono ahí mismo."""
         self.r.set_case(caso(tabla(5, 5), tabla(5, 5)))
         self.assertTrue(self.presentar(
-            'aerea_+_ruido', stimOn=[True, True], stim=[STIM_TONO, STIM_NBN],
+            AEREA_RUIDO, stimOn=[True, True], stim=[STIM_TONO, STIM_NBN],
             output=[0, 0], int=[30, 20]))
         self.assertFalse(self.presentar(
-            'aerea_+_ruido', stimOn=[True, True], stim=[STIM_TONO, STIM_NBN],
+            AEREA_RUIDO, stimOn=[True, True], stim=[STIM_TONO, STIM_NBN],
             output=[0, 0], int=[30, 60]))
 
 
@@ -163,10 +168,10 @@ class PreguntasNoCortanTest(Base):
         for pregunta in ('escucha', 'dejo_de_escuchar', 'molesta', 'muy_fuerte',
                          'no_entiende', 'molesto_o', 'en_qué_oído'):
             self.assertFalse(self.presentar(
-                [pregunta, 'aerea_+_ruido'], stimOn=[True, True],
+                [pregunta, 'ruido_otro_oido', 'colocar_fonos'], stimOn=[True, True],
                 stim=[STIM_NBN, STIM_TONO], output=[1, 0], int=[80, 70]), pregunta)
             self.assertTrue(self.presentar(
-                [pregunta, 'aerea_+_ruido'], stimOn=[True, True],
+                [pregunta, 'ruido_otro_oido', 'colocar_fonos'], stimOn=[True, True],
                 stim=[STIM_NBN, STIM_TONO], output=[1, 0], int=[0, 70]), pregunta)
 
     def test_muchas_preguntas_no_borran_la_instruccion(self):
@@ -286,7 +291,7 @@ class LdlHabladoTest(Base):
 class RecalculaTest(Base):
     def test_subir_el_ruido_con_el_tono_sonando_baja_la_mano(self):
         self.assertTrue(self.presentar(
-            'aerea_+_ruido', stimOn=[True, True], stim=[STIM_NBN, STIM_TONO],
+            AEREA_RUIDO, stimOn=[True, True], stim=[STIM_NBN, STIM_TONO],
             output=[1, 0], int=[0, 70]))
         self.manos.clear()
         self.r.set_config(FakeSender('lbl_int_ch0', '80 dB HL'))

@@ -13,7 +13,8 @@ Stat y Stenger contra la clínica (2026-10-15).
    en el malo) una pérdida orgánica da negativo y una no orgánica positivo.
    Antes la no orgánica daba negativo.
 3. Instrucción: el Stenger se instruye como los umbrales ("colocar_fonos");
-   "Mano levantada en ruido" es el Carhart con ruido contralateral.
+   "Mano levantada" + el aviso "Ruido en el otro oído" es el Carhart con
+   ruido contralateral.
 
 core.base crea un QApplication al importarse -> QT_QPA_PLATFORM=offscreen.
 """
@@ -67,7 +68,7 @@ class Base(unittest.TestCase):
                 "test": "Umbrales", "step": 5}
         base.update(kw)
         self.r.data["audio"].update(base)
-        self.r.history_command = [comando]
+        self.r.history_command = [comando] if isinstance(comando, str) else list(comando)
         self.r.response_()
 
 
@@ -222,15 +223,15 @@ class StengerTest(Base):
         self.r.response_()
         self.assertTrue(self.r.mano)
 
-    def test_mano_levantada_en_ruido_es_carhart_enmascarado(self):
+    def test_mano_levantada_con_aviso_de_ruido_es_carhart_enmascarado(self):
         # ya no rutea al Stenger: con dos tonos no hay tono único que
         # cronometrar y la mano baja
         self.assertFalse(self.stenger(self.no_organico_oi(), 15, 45,
-                                      comando="mano_levantada_en_ruido"))
+                                      comando=["ruido_otro_oido", "mano_levantada"]))
         # con tono en el OD y ruido en el OI corre el Carhart: OD sano,
         # deterioro 0 -> sostiene el minuto
         self.nuevo(demo(38))
-        self.presentar("mano_levantada_en_ruido", freq=3,
+        self.presentar(["ruido_otro_oido", "mano_levantada"], freq=3,
                        stimOn=[True, True], stim=[0, 3], output=[0, 1],
                        int=[25, 40])
         self.assertTrue(self.hand_up())

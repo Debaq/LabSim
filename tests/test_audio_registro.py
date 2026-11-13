@@ -133,3 +133,49 @@ if __name__ == "__main__":
                 fallas += 1
                 print(f"FAIL {nombre}: {exc!r}")
     sys.exit(1 if fallas else 0)
+
+
+def _sonando(a, stims):
+    """Pone a sonar los canales: stims = [índice de stim_list o None]."""
+    for ch, s in enumerate(stims):
+        if s is not None:
+            a.lbl_stim[ch].setText(modulo.stim_list[s])
+        a.lbl_warnings[ch].setText(modulo.ESTIMULO_ENCENDIDO if s is not None else "")
+
+
+def test_con_tono_y_ruido_sonando_el_talkback_no_habla():
+    """Con tono y masking puestos no se le habla al paciente (2026-11-13):
+    no suena, no cuenta como instrucción y queda en el registro."""
+    from audiometria.masking_params import STIM_NBN, STIM_TONO
+    a, cola = _audiometro()
+    avisos = []
+    a.talkback_bloqueado.connect(avisos.append)
+    a.supra("colocar_fonos")
+    a.talkback()
+    a.supra("ruido_otro_oido")
+    _sonando(a, [STIM_TONO, STIM_NBN])
+    a.talkback()
+    assert [p["command"] for p in cola.de("audio_talkback_bloqueado")] == ["ruido_otro_oido"]
+    assert [p["command"] for p in cola.de("audio_talkback_press")] == ["colocar_fonos"]
+    assert avisos == [a.TALKBACK_BLOQUEADO]
+    assert a.response.history_command == ["colocar_fonos"]
+
+
+def test_solo_tono_o_solo_ruido_si_se_habla():
+    """Fowler (dos tonos) y NME (ruido solo) se preguntan con el estímulo puesto."""
+    from audiometria.masking_params import STIM_NBN, STIM_TONO
+    for stims in ([STIM_TONO, STIM_TONO], [None, STIM_NBN], [STIM_TONO, None]):
+        a, cola = _audiometro()
+        a.supra("escucha")
+        _sonando(a, stims)
+        a.talkback()
+        assert cola.de("audio_talkback_press") and not cola.de("audio_talkback_bloqueado"), stims
+
+
+def test_el_aviso_de_ruido_no_cambia_la_instruccion_de_la_foto():
+    a, _cola = _audiometro()
+    a.supra("colocar_vibrador")
+    a.talkback()
+    a.supra("ruido_otro_oido")
+    a.talkback()
+    assert a._estado()["instruccion"] == "colocar_vibrador"

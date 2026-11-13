@@ -17,6 +17,12 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
 from core import iconos, tema
 
 SILENCIO = "silencio"
+# Un solo aviso para todo enmascaramiento, acordado con el equipo
+# (2026-11-13): "ahora le voy a poner un ruido en el otro oído, no le haga
+# caso". Reemplaza a Aérea + ruido, Vibrador + ruido y Mano levantada en
+# ruido: se dice además de la instrucción de la prueba (Colocar fonos,
+# Colocar vibrador, Mano levantada) y no la reemplaza.
+RUIDO_OTRO_OIDO = "ruido_otro_oido"
 
 # (título, [(rótulo, clave)]). El orden es el de una sesión: primero se
 # prepara al paciente, después se le explica qué hacer y se le pregunta.
@@ -24,12 +30,10 @@ GRUPOS = (
     ("PREPARAR", (
         ("Colocar fonos", "colocar_fonos"),
         ("Colocar vibrador", "colocar_vibrador"),
-        ("Aérea + ruido", "aerea_+_ruido"),
-        ("Vibrador + ruido", "vibrador_+_ruido"),
+        ("Ruido en el otro oído", RUIDO_OTRO_OIDO),
     )),
     ("INSTRUCCIONES", (
         ("Mano levantada", "mano_levantada"),
-        ("Mano levantada en ruido", "mano_levantada_en_ruido"),
         ("Escuche mi voz", "escuche_mi_voz"),
         ("Dictar palabras", "dictar_palabras"),
         ("Dictar palabras compuestas", "dictar_compuestas"),
@@ -63,6 +67,10 @@ GRUPOS = (
 # "¿Me escucha?" el paciente sigue respondiendo como se le instruyó.
 PREGUNTAS = frozenset(clave for titulo, frases in GRUPOS if titulo == "PREGUNTAS"
                       for _, clave in frases)
+# Avisos: tampoco reemplazan la instrucción vigente ni se contestan. Tras
+# "Colocar vibrador" + "Ruido en el otro oído" el paciente sigue con la vía
+# ósea; tras "Mano levantada" + el aviso sigue el Carhart.
+AVISOS = frozenset({RUIDO_OTRO_OIDO})
 # La prueba en que se usa cada frase, a la vista en su botón: los alumnos
 # no sabían qué instrucción iba con qué prueba. Lo mismo que la tabla de la
 # sección 16 del manual del estudiante. Las preguntas que no son de una sola
@@ -70,10 +78,8 @@ PREGUNTAS = frozenset(clave for titulo, frases in GRUPOS if titulo == "PREGUNTAS
 PRUEBA = {
     "colocar_fonos": "Vía aérea",
     "colocar_vibrador": "Vía ósea",
-    "aerea_+_ruido": "Aérea enmascarada",
-    "vibrador_+_ruido": "Ósea enmascarada",
+    RUIDO_OTRO_OIDO: "Enmascaramiento",
     "mano_levantada": "Carhart",
-    "mano_levantada_en_ruido": "Carhart con ruido",
     "escuche_mi_voz": "Detección de la voz",
     "dictar_palabras": "Logoaudiometría",
     "dictar_compuestas": "SRT",
@@ -318,10 +324,19 @@ class ComandosVoz(QWidget):
             prueba = btn.property("prueba")
             pista = self.PISTA
             self.lbl_pista.setText(f"{prueba} · {pista}" if prueba else pista)
+        self.lbl_pista.setProperty("estado", None)
+        tema.repintar(self.lbl_pista)
         self.btn_silencio.setEnabled(btn is not None)
         self.caja_elegida.setProperty("vacia", "true" if btn is None else "false")
         tema.repintar(self.caja_elegida)
         tema.repintar(self.lbl_frase)
+
+    def avisar(self, texto):
+        """Un aviso en lugar de la pista (p. ej. el talkback que no habló):
+        queda hasta que se elige otra frase."""
+        self.lbl_pista.setText(texto)
+        self.lbl_pista.setProperty("estado", "alerta")
+        tema.repintar(self.lbl_pista)
 
     def _filtrar(self, texto):
         """Muestra las frases que contienen lo escrito (sin tildes ni

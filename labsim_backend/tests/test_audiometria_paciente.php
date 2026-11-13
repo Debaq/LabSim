@@ -63,3 +63,33 @@ $wnViejo = $wnRegistro('Withe Noise');
 $wnNuevo = $wnRegistro('White Noise');
 t_eq($wnViejo['stim'] ?? null, 'White Noise', 'Registro viejo: el ruido "Withe Noise" se reconoce como White Noise');
 t_eq($wnViejo, $wnNuevo, 'Registro viejo y nuevo: el mismo ruido');
+
+// --- "Ruido en el otro oído": aviso, no instrucción (2026-11-13) -------------
+// Se dice además de Colocar vibrador / Mano levantada y no cambia la prueba:
+// ni en el registro viejo (sin foto) ni si la foto trae el aviso.
+$conAviso = static function (string $instr, bool $fotoConAviso, string $trans): array {
+    $estado = [
+        'prueba' => 'Umbrales', 'freq' => '1000 Hz', 'step' => 5,
+        'instruccion' => $fotoConAviso ? 'ruido_otro_oido' : $instr,
+        'canales' => [
+            ['on' => true, 'invertido' => false, 'intensity' => '40 dB HL', 'stim' => 'Tono', 'output' => 'Derecha', 'trans' => $trans, 'contin' => 'Continuo'],
+            ['on' => true, 'invertido' => false, 'intensity' => '50 dB HL', 'stim' => 'Narrow Band Noise', 'output' => 'Izquierda', 'trans' => 'Aerea', 'contin' => 'Continuo'],
+        ],
+    ];
+    $base = ['ch' => 0, 'freq' => '1000 Hz', 'intensity' => '40 dB HL', 'stim' => 'Tono', 'output' => 'Derecha', 'trans' => $trans,
+             'appointment_id' => 7, 'case_id' => 3, 'v' => 2];
+    $logs = [
+        ['client_ts' => '2026-11-13 10:00:00.000', 'action' => 'audio_talkback_press', 'payload' => ['command' => $instr, 'v' => 2]],
+        ['client_ts' => '2026-11-13 10:00:01.000', 'action' => 'audio_talkback_press', 'payload' => ['command' => 'ruido_otro_oido', 'v' => 2]],
+        ['client_ts' => '2026-11-13 10:00:02.000', 'action' => 'audio_stim_button', 'payload' => $base + ['play' => true, 'estado' => $estado]],
+        ['client_ts' => '2026-11-13 10:00:03.000', 'action' => 'audio_stim_button', 'payload' => $base + ['play' => false, 'estado' => $estado]],
+    ];
+    $p = AudiometriaRegistro::leer($logs, at_caso_wn())['presentaciones'][0] ?? [];
+    return [$p['instruccion'] ?? null, $p['prueba'] ?? null];
+};
+foreach ([false, true] as $foto) {
+    $q = $foto ? ' (foto con el aviso)' : '';
+    t_eq($conAviso('colocar_vibrador', $foto, 'Oséa'), ['colocar_vibrador', 'oseos'], 'Aviso de ruido: la ósea enmascarada sigue en óseos' . $q);
+    t_eq($conAviso('colocar_fonos', $foto, 'Aerea'), ['colocar_fonos', 'aereos'], 'Aviso de ruido: la aérea enmascarada sigue en aéreos' . $q);
+    t_eq($conAviso('mano_levantada', $foto, 'Aerea'), ['mano_levantada', 'supra'], 'Aviso de ruido: el Carhart enmascarado sigue en supra' . $q);
+}

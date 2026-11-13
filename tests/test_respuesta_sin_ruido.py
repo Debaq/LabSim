@@ -1,6 +1,6 @@
 """Instrucción de enmascaramiento dada, pero sin ruido encendido.
 
-Regresión: tras el comando 'aerea_+_ruido' (o 'vibrador_+_ruido') el paciente
+Regresión: tras el aviso del ruido en el otro oído (con fonos o vibrador) el paciente
 dejaba de responder mientras el canal de ruido estuviera apagado. La
 instrucción no lo enmudece: sigue oyendo el tono y, si necesitaba
 enmascaramiento, contesta la CURVA SOMBRA (el otro oído).
@@ -55,7 +55,7 @@ class SinRuidoTest(unittest.TestCase):
     def motor(self, comando, stim_on, int_, stim=None, trans=None):
         r = ResponseAudiometry(FakeAudio())
         r.set_case(caso(self.AEREA, self.OSEA))
-        r.history_command.insert(0, comando)
+        r.history_command[:0] = [comando] if isinstance(comando, str) else comando
         r.data['audio'].update({
             'test': 'Umbrales', 'freq': F1000, 'stimOn': list(stim_on),
             'int': list(int_), 'output': [0, 1],
@@ -70,30 +70,30 @@ class SinRuidoTest(unittest.TestCase):
 
     def test_aereo_sin_ruido_da_curva_sombra(self):
         """Tono 70 dB en el OD muerto: cruza (70-40=30) y lo oye el OI."""
-        r = self.motor('aerea_+_ruido', [True, False], [70, 0])
+        r = self.motor(['ruido_otro_oido', 'colocar_fonos'], [True, False], [70, 0])
         self.assertTrue(self.mano_arriba(r))
 
     def test_aereo_sin_ruido_bajo_la_sombra_no_responde(self):
         """40 dB no alcanzan a cruzar: no hay respuesta, pero por nivel, no
         por haber dado la instrucción."""
-        r = self.motor('aerea_+_ruido', [True, False], [40, 0])
+        r = self.motor(['ruido_otro_oido', 'colocar_fonos'], [True, False], [40, 0])
         self.assertFalse(self.mano_arriba(r))
 
     def test_oseo_sin_ruido_da_curva_sombra(self):
         """Vía ósea: la AI es ~0, el OI sano contesta desde su propio umbral."""
-        r = self.motor('vibrador_+_ruido', [True, False], [30, 0],
+        r = self.motor(['ruido_otro_oido', 'colocar_vibrador'], [True, False], [30, 0],
                        trans=[1, 0])
         self.assertTrue(self.mano_arriba(r))
 
     def test_solo_el_ruido_encendido_no_levanta_la_mano(self):
         """Oye el ruido, pero no es el pitito por el que se le pidió responder."""
-        r = self.motor('aerea_+_ruido', [False, True], [0, 90],
+        r = self.motor(['ruido_otro_oido', 'colocar_fonos'], [False, True], [0, 90],
                        stim=[STIM_TONO, STIM_NBN])
         self.assertFalse(self.mano_arriba(r))
 
     def test_con_ruido_suficiente_no_hay_sombra(self):
         """Control: con el enmascaramiento puesto, el OD muerto no responde."""
-        r = self.motor('aerea_+_ruido', [True, True], [70, 90])
+        r = self.motor(['ruido_otro_oido', 'colocar_fonos'], [True, True], [70, 90])
         self.assertFalse(self.mano_arriba(r))
 
 

@@ -21,6 +21,8 @@ require_once __DIR__ . '/AudiometriaPaciente.php';
 final class AudiometriaRegistro
 {
     /** Instrucciones del talkback por prueba (resources/json/command_voice.json). */
+    // aerea_+_ruido, vibrador_+_ruido y mano_levantada_en_ruido salieron de la
+    // app el 2026-11-13 (ver AVISOS): quedan para leer las atenciones anteriores
     public const INSTR_AEREA = ['colocar_fonos', 'aerea_+_ruido'];
     public const INSTR_OSEA = ['colocar_vibrador', 'vibrador_+_ruido'];
     public const INSTR_LOGO = ['escuche_mi_voz', 'dictar_palabras'];
@@ -37,6 +39,11 @@ final class AudiometriaRegistro
         'acufeno_solo_el_mio', 'acufeno_un_minuto',
     ];
     public const PREG_TINNITUS = ['acufeno_cual', 'acufeno_como_esta'];
+    /**
+     * Avisos del talkback (comandos_voz.AVISOS): "Ruido en el otro oído" se
+     * dice además de la instrucción de la prueba y no la cambia.
+     */
+    public const AVISOS = ['ruido_otro_oido'];
     /** Preguntas del talkback: no cambian la instrucción vigente (comandos_voz.PREGUNTAS). */
     public const PREGUNTAS = [
         'escucha', 'dejo_de_escuchar', 'en_qué_oído', 'sonidos_iguales', 'no_entiende',
@@ -110,10 +117,11 @@ final class AudiometriaRegistro
                     break;
                 case 'audio_talkback_press':
                     $cmd = $p['command'] ?? null;
-                    if ($cmd !== 'pa_pa_pa') {
+                    if ($cmd !== 'pa_pa_pa' && !in_array($cmd, self::AVISOS, true)) {
                         $estado['instruccion'] = $cmd;
                     }
-                    if ($cmd !== null && $cmd !== 'pa_pa_pa' && !in_array($cmd, self::PREGUNTAS, true)) {
+                    if ($cmd !== null && $cmd !== 'pa_pa_pa' && !in_array($cmd, self::PREGUNTAS, true)
+                        && !in_array($cmd, self::AVISOS, true)) {
                         $instrTin = in_array($cmd, self::INSTR_TINNITUS, true) ? $cmd : null;
                     }
                     $fase = self::pruebaDeInstruccion($cmd);
@@ -358,7 +366,7 @@ final class AudiometriaRegistro
         if (isset($foto['freq'])) {
             $estado = self::ponerFrecuencia($estado, (int) $foto['freq']);
         }
-        if (array_key_exists('instruccion', $foto)) {
+        if (array_key_exists('instruccion', $foto) && !in_array($foto['instruccion'], self::AVISOS, true)) {
             $estado['instruccion'] = $foto['instruccion'];
         }
         foreach ([0, 1] as $c) {

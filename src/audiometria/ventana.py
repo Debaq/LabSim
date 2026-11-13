@@ -52,6 +52,7 @@ class AudiometriaWindow(QWidget):
 
         # Lo que antes conectaba main.connect_signals entre las tres ventanas.
         self.comandos.btn_checked.connect(self.audiometro.supra)
+        self.audiometro.talkback_bloqueado.connect(self.comandos.avisar)
         self.audiometro.signal_speech.connect(self.listas.update_state)
         self.listas.level_changed.connect(
             lambda level: self.audiometro._on_player_level(self.listas.channel, level))

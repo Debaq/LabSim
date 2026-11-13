@@ -8744,3 +8744,32 @@ conectaba con una lambda que retenía la ventana; al borrarse el botón
 soltaba la última referencia y Python destruía la ventana en medio del
 deleteLater. Ahora va a un método. `test_invitado` leía el catálogo que la
 app bajó en la carpeta de datos del equipo; ahora usa una vacía.
+
+## Enmascaramiento: un solo aviso de ruido + talkback y cola de los audios (2026-11-13)
+
+Acordado con el equipo: para enmascarar basta un botón, *Ruido en el otro
+oído* ("Ahora le voy a poner un ruido en el otro oído. A ese ruido no le haga
+caso."), clave `ruido_otro_oido`. Reemplaza a *Aérea + ruido*, *Vibrador +
+ruido* y *Mano levantada en ruido*: economía. Es un **aviso**
+(`comandos_voz.AVISOS`), no una instrucción: se dice además de *Colocar
+fonos*, *Colocar vibrador* o *Mano levantada* y no la reemplaza, igual que
+las preguntas. El motor ya respondía igual con o sin el aviso (el paciente
+no sabe si el alumno pensaba enmascarar), así que no cambia ninguna
+respuesta. La foto del registro (`Audiometer._estado`) y el backend
+(`AudiometriaRegistro::AVISOS`) se saltan el aviso para que la técnica siga
+leyendo la vía ósea o el Carhart. El backend conserva las tres claves viejas
+para leer las atenciones anteriores; sus mp3 se borraron.
+
+**Talkback con tono y ruido sonando:** no habla. Se registra
+`audio_talkback_bloqueado` (no cuenta como instrucción) y el panel de frases
+dice "Apaga el tono y el ruido antes de hablarle.". Solo se bloquea la
+combinación: el Fowler pregunta *¿En qué oído?* con los dos tonos
+alternando y la NME *¿Lo dejó de escuchar?* con el ruido solo, como está
+diseñado el motor (`contestar` responde con lo que suena).
+
+**Cola de los audios:** las instrucciones cortaban muy pronto y se comían el
+último sonido. El filtro de `scripts/voces_comandos.py` recortaba el final a
+-45 dB pegado a la voz; ahora recorta a -60 dB dejando 150 ms y agrega 0,5 s
+de silencio (`COLA_S`), porque el reproductor corta apenas termina el
+archivo. Se rehicieron todas las de comandos, comandos_z, comandos_ac y
+comandos_ot. Las palabras de las listas no se tocaron.

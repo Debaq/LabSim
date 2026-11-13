@@ -33,6 +33,16 @@ class _Audiometro:
     lbl_response = _Lbl()
 
 
+# El fixture conserva las claves viejas (los registros de antes del
+# 2026-11-13 las traen y el PHP las lee); en la app de hoy son la
+# instrucción de la prueba + el aviso "Ruido en el otro oído".
+HOY = {
+    "aerea_+_ruido": ["ruido_otro_oido", "colocar_fonos"],
+    "vibrador_+_ruido": ["ruido_otro_oido", "colocar_vibrador"],
+    "mano_levantada_en_ruido": ["ruido_otro_oido", "mano_levantada"],
+}
+
+
 def _mano(caso, escena):
     r = ResponseAudiometry(_Audiometro())
     r.set_case({**caso, "Aerea": caso["Aerea_mkg"], "Osea": caso["Osea_mkg"]})
@@ -43,7 +53,8 @@ def _mano(caso, escena):
         "int": [c[0]["int"], c[1]["int"]], "output": [c[0]["output"], c[1]["output"]],
         "trans": [c[0]["trans"], c[1]["trans"]], "stim": [c[0]["stim"], c[1]["stim"]],
         "test": est["prueba"]})
-    r.history_command = [est["instruccion"]] if est["instruccion"] is not None else []
+    instr = est["instruccion"]
+    r.history_command = HOY.get(instr, [instr] if instr is not None else [])
     r.mano = escena["previa"]
     r.response_()
     return r.mano

@@ -14,6 +14,7 @@ import numpy as np
 #from audiometria.response_A import Response
 from audiometria.audio_player import Player
 from audiometria.masking_params import es_ruido
+from audiometria.comandos_voz import AVISOS
 #from lib.API_connector import API, PostData
 from audiometria.h_audio import (calibrate, create_frecuency, create_intency,
                          create_command, create_sound, data_basic)
@@ -68,6 +69,9 @@ class Audiometer(QWidget, Ui_Audiometer):
     # Umbrales / Logoaudiometría: con la logo se muestran las listas de
     # palabras (ver audiometria/ventana.py).
     prueba_cambio = Signal(str)
+    # El talkback no habla con tono y ruido sonando a la vez: el texto va al
+    # panel de frases (ventana.py).
+    talkback_bloqueado = Signal(str)
     def __init__(self, thr):
         # Inicialización de la ventana y propiedades
         #super(Audiometer, self).__init__()
@@ -567,7 +571,9 @@ class Audiometer(QWidget, Ui_Audiometer):
                 "trans": self.lbl_trans[c].text(),
                 "contin": self.lbl_contin[c].text(),
             })
-        historia = self.response.history_command
+        # El aviso del ruido en el otro oído no cambia la prueba en curso:
+        # la instrucción es la de antes del aviso (comandos_voz.AVISOS).
+        historia = [r for r in self.response.history_command if r not in AVISOS]
         return {
             "prueba": self.lbl_prueba.text(),
             "freq": self.lbl_freq.text(),
@@ -628,7 +634,26 @@ class Audiometer(QWidget, Ui_Audiometer):
         if command != None and command == "colocar_fonos":
             self.activate_response = [1, 0]
 
+    TALKBACK_BLOQUEADO = "Apaga el tono y el ruido antes de hablarle."
+
+    def _tono_y_ruido_sonando(self):
+        """Tono (o habla) en un canal y ruido en el otro, los dos sonando:
+        así no se le habla al paciente (acordado con el equipo, 2026-11-13).
+        El aviso del ruido va antes de prenderlo. Solo el tono (Fowler) o
+        solo el ruido (NME) no bloquean: ahí se pregunta con el estímulo
+        puesto."""
+        sonando = [self._stim_index(c) for c in (0, 1)
+                   if self.lbl_warnings[c].text() == ESTIMULO_ENCENDIDO]
+        return (any(es_ruido(s) for s in sonando)
+                and any(s is not None and not es_ruido(s) for s in sonando))
+
     def talkback(self):
+        if (self.state_supra is not None and self.state_supra[1] is not None
+                and self._tono_y_ruido_sonando()):
+            self._log("audio_talkback_bloqueado", command=self.state_supra[1],
+                      estado=self._estado())
+            self.talkback_bloqueado.emit(self.TALKBACK_BLOQUEADO)
+            return
         self._log("audio_talkback_press", command=self.state_supra[1] if self.state_supra else None,
                   volumen=self.dial_talkback.value())
         if self.state_supra is not None:
