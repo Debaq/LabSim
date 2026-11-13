@@ -11,6 +11,9 @@ import tempfile
 from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+# Carpeta de datos vacía: el catálogo que la app ya bajó del servidor
+# (catalogo_practica.json.gz, más nuevo) no cuenta; se prueba el del repo.
+os.environ["LABSIM_DATA_DIR"] = tempfile.mkdtemp(prefix="labsim_invitado_")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import requests  # noqa: E402
