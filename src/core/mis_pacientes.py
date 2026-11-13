@@ -816,6 +816,7 @@ class MisPacientesWidget(QWidget):
         self._examenes = list(informes or [])
         _vaciar(self.col_examenes)
         self.botones_abr = []
+        self._informes_abr = []
         for informe in self._examenes:
             tipo = informe.get("tipo", "")
             marco = QFrame()
@@ -840,12 +841,24 @@ class MisPacientesWidget(QWidget):
                 btn = QPushButton(" Ver en el ABR")
                 btn.setIcon(iconos.icono_boton("onda_abr", tema.TEXTO_SUAVE, tam=15))
                 btn.setToolTip("Abre las curvas en el módulo ABR, solo para mirarlas")
-                btn.clicked.connect(lambda _=False, inf=informe: self._ver_en_abr(inf))
+                # A un método, no a una lambda con self: la lambda vive en el
+                # botón y retiene la ventana; al borrarse el botón (deleteLater
+                # de _vaciar) soltaba la última referencia y Python destruía
+                # la ventana en medio del borrado (violación de segmento).
+                btn.clicked.connect(self._clic_ver_en_abr)
                 fila.addWidget(btn)
                 self.botones_abr.append(btn)
+                self._informes_abr.append(informe)
             self.col_examenes.addWidget(marco)
         self.lbl_examenes.setText(
             AVISO_PDF if self._examenes else "Esta atención no tiene exámenes guardados.")
+
+    def _clic_ver_en_abr(self):
+        btn = self.sender()
+        for b, informe in zip(self.botones_abr, self._informes_abr):
+            if b is btn:
+                self._ver_en_abr(informe)
+                return
 
     def _ver_en_abr(self, informe):
         if informe is None or informe.get("tipo") not in SE_ABREN_EN_EL_ABR:
