@@ -118,9 +118,5 @@ def duracion_vibracion():
     return NIVEL_AIRE_DB / CAIDA_DB_S
 
 
-def segundos_que_quedan(dura, desde_golpe):
-    return max(0.0, dura - desde_golpe)
-
-
 def redondear(segundos):
     return int(math.floor(segundos + 0.5))

@@ -26,8 +26,8 @@ dónde pone el diapasón y lo que le dice al paciente.
 El paciente contesta lo que le instruyeron o le preguntaron, con lo que
 dice el caso (diapasones.py: los tiempos salen del audiograma y mandan el
 Rinne y el Weber que marcó el docente). Sin instrucción, al sentir el
-diapasón no sabe qué hacer. Con "Avíseme cuando deje de escucharlo" avisa
-solo cuando el diapasón baja de su umbral. Con "Compare dónde suena más
+diapasón no sabe qué hacer. ("Avíseme cuando deje de escucharlo", el Rinne
+por tiempo, salió el 2026-11-13: nadie lo usaba.) Con "Compare dónde suena más
 fuerte" (Rinne) y "Dígame dónde lo escucha" (Weber) no habla al apoyarle el
 diapasón: contesta lo que se le pregunta ("¿Lo escucha?" en cada posición,
 "¿Dónde lo escuchó más fuerte?" al final). Sin Rinne/Weber en el caso, el
@@ -74,7 +74,6 @@ GRUPOS = (
     )),
     ("INSTRUCCIONES", (
         ("Avíseme si lo escucha", "avise_si_escucha"),
-        ("Avíseme cuando deje de escucharlo", "avise_cuando_deje"),
         ("Compare dónde suena más fuerte", "compare_sonidos"),
         ("Dígame dónde lo escucha", "diga_donde"),
     )),
@@ -86,9 +85,8 @@ GRUPOS = (
         ("¿Igual en los dos oídos?", "igual_ambos"),
     )),
 )
-PRUEBA = {"compare_sonidos": "Rinne", "diga_donde": "Weber", "igual_ambos": "Weber",
-          "avise_cuando_deje": "Rinne por tiempo"}
-INSTRUCCIONES = {"avise_si_escucha", "avise_cuando_deje", "compare_sonidos", "diga_donde"}
+PRUEBA = {"compare_sonidos": "Rinne", "diga_donde": "Weber", "igual_ambos": "Weber"}
+INSTRUCCIONES = {"avise_si_escucha", "compare_sonidos", "diga_donde"}
 NO_SABE = "¿Y qué tengo que hacer?"
 DONDE_WEBER = {"od": "En el oído derecho.", "oi": "En el oído izquierdo.",
                "centrado": "Al medio, en toda la cabeza."}
@@ -115,7 +113,6 @@ class Acumetria(QWidget):
         self._apoyo = None          # dónde está el diapasón ahora (dict) o None
         self._rinne = None          # {'oido', 'hz', 'golpe', 'vistos': set()} para comparar
         self._ultimo = None         # lo último que sintió (el apoyo ya retirado y si lo oía)
-        self._aviso_id = 0          # para el "ya no lo escucho" programado
         self._reloj = time.monotonic
 
         self.cabeza = None            # la de la ventana (conectar)
@@ -234,7 +231,6 @@ class Acumetria(QWidget):
         self._apoyo = None
         self._rinne = None
         self._ultimo = None
-        self._aviso_id += 1
         self._sonido.stop()
         self.log.clear()
         if self.cabeza is not None:
@@ -287,7 +283,6 @@ class Acumetria(QWidget):
         self._apoyo = None
         self._rinne = None
         self._ultimo = None
-        self._aviso_id += 1
         self._sonido.stop()
         self._sacar_de_la_cabeza()
         self._mostrar_vibracion()
@@ -309,7 +304,6 @@ class Acumetria(QWidget):
         self._apoyo = None
         self._rinne = None
         self._ultimo = None
-        self._aviso_id += 1
         self._sacar_de_la_cabeza()
         self._log("ac_golpe", hz=self.hz())
         if self.pedir_herramienta is not None:
@@ -326,7 +320,6 @@ class Acumetria(QWidget):
         # Lo que sintió queda: se le puede preguntar después de sacarlo
         self._ultimo = dict(self._apoyo, oia=self._oye_ahora(self._apoyo))
         self._apoyo = None
-        self._aviso_id += 1
         self._sacar_de_la_cabeza()
         self._decir("Tú: retiras el diapasón.")
         self.btn_retirar.setEnabled(False)
@@ -369,7 +362,6 @@ class Acumetria(QWidget):
         apoyo = {"zona": donde, "oido": oido, "sitio": sitio}
         self._apoyo = apoyo
         self._ultimo = None
-        self._aviso_id += 1
         if self.cabeza is not None:
             self.cabeza.poner_diapason(punto, normal)
         self.btn_retirar.setEnabled(True)
@@ -401,15 +393,12 @@ class Acumetria(QWidget):
         respuesta = self._al_sentirlo(apoyo, oye)
         if respuesta:
             self._decir(f"Paciente: {respuesta}")
-        if oye and self._instruccion == "avise_cuando_deje":
-            self._programar_aviso(apoyo)
 
     def _al_sentirlo(self, apoyo, oye):
         """Lo que dice el paciente al ponerle el diapasón, según la
         instrucción vigente.
 
-        Solo "Avíseme si lo escucha" y "Avíseme cuando deje" lo hacen hablar
-        solo. Con "Compare dónde suena más fuerte" (Rinne) y "Dígame dónde
+        Solo "Avíseme si lo escucha" lo hace hablar solo. Con "Compare dónde suena más fuerte" (Rinne) y "Dígame dónde
         lo escucha" (Weber) espera callado a que le pregunten: el alumno
         apoya, pregunta "¿Lo escucha?", cambia de posición, vuelve a
         preguntar y recién con "¿Dónde lo escuchó más fuerte?" compara."""
@@ -460,22 +449,6 @@ class Acumetria(QWidget):
             return "Adelante, frente a la oreja. Ahí suena más fuerte."
         return "Atrás, en el hueso. Ahí suena más fuerte."
 
-    def _programar_aviso(self, apoyo):
-        """Con "Avíseme cuando deje de escucharlo": avisa cuando el
-        diapasón baja de su umbral en esa posición."""
-        self._aviso_id += 1
-        mi_aviso = self._aviso_id
-        quedan = dp.segundos_que_quedan(self._dura(apoyo), self._desde_golpe() or 0.0)
-        QTimer.singleShot(int(quedan * 1000) + 300, self, lambda: self._ya_no(mi_aviso, apoyo))
-
-    def _ya_no(self, mi_aviso, apoyo):
-        if mi_aviso != self._aviso_id or self._apoyo is not apoyo:
-            return   # lo movieron, lo retiraron o lo volvieron a golpear
-        t = self._desde_golpe()
-        self._log("ac_deja_de_oir", hz=self.hz(), zona=apoyo["zona"], oido=apoyo["oido"],
-                  desde_golpe_s=None if t is None else round(t, 1))
-        self._decir("Paciente: Ya no lo escucho.")
-
     # ------------------------------------------------------------ lo que se le dice
     def _frase(self, clave):
         """Una frase del panel: se dice (FrasesHabladas), queda en la
@@ -494,8 +467,6 @@ class Acumetria(QWidget):
         elif clave in INSTRUCCIONES:
             self._instruccion = clave
             respuesta = "Ya, bueno."
-            if clave == "avise_cuando_deje" and self._apoyo is not None and self._oye_ahora(self._apoyo):
-                self._programar_aviso(self._apoyo)
         else:
             respuesta = self._contestar(clave)
         self._decir(f"Paciente: {respuesta}")

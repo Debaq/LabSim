@@ -159,8 +159,6 @@ COMANDOS_AC = {
                            "duele.",
     # INSTRUCCIONES
     "avise_si_escucha": "Cada vez que le ponga el diapasón, dígame si lo escucha.",
-    "avise_cuando_deje": "Le voy a poner el diapasón. Avíseme justo cuando deje de "
-                         "escucharlo.",
     "compare_sonidos": "Le voy a poner el diapasón detrás de la oreja y después frente a la "
                        "oreja. Dígame dónde lo escucha más fuerte.",
     "diga_donde": "Le voy a poner el diapasón en la frente. Dígame dónde lo escucha: en el oído "

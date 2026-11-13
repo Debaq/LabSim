@@ -8976,3 +8976,13 @@ acumetría y otoscopio ya eran sintéticas.
 El caché `_panned` (la palabra recortada a un oído) se rehace si el audio
 es más nuevo que el caché: antes, en un equipo instalado habría seguido
 sonando la grabación vieja tras actualizar.
+
+## Acumetría: fuera el Rinne por tiempo (2026-11-13)
+
+Se sacó *Avíseme cuando deje de escucharlo* (`avise_cuando_deje`, rotulada
+"Rinne por tiempo"): nadie del equipo la conocía ni la usaba. Con ella el
+paciente avisaba solo "Ya no lo escucho" cuando el diapasón bajaba de su
+umbral (`ac_deja_de_oir`). Quedan el Rinne por comparación (*Compare dónde
+suena más fuerte*) y el Weber; *¿Lo sigue escuchando?* sigue como pregunta.
+El backend conserva el rótulo de `ac_deja_de_oir` en Metrics para las
+atenciones anteriores.

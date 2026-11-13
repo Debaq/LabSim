@@ -155,18 +155,6 @@ def test_el_diapason_se_apaga_con_el_tiempo():
     assert _ultima(w) == "Paciente Sí, lo escucho.", "y frente a la oreja todavía lo oye"
 
 
-def test_avise_cuando_deje_avisa_solo():
-    w = _modulo()
-    w._frase("avise_cuando_deje")
-    w._golpear()
-    _apoyar(w, "M2")
-    _, t_hueso = w.modelo.tiempos("500", "od")
-    w._reloj.t += t_hueso + 1
-    w._ya_no(w._aviso_id, w._apoyo)     # lo que dispara el temporizador
-    assert _ultima(w) == "Paciente Ya no lo escucho."
-    assert w.log_queue.acciones[-1][0] == "ac_deja_de_oir"
-
-
 def test_sin_rinne_ni_weber_suena_con_armonicos():
     w = _modulo({"id": 5, "edad": 30, "Aerea": CASO["Aerea"]})
     assert not w.modelo.disponible()
