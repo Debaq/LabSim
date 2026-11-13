@@ -12,7 +12,7 @@ from audiometria.ListWords import MITADES, PALABRAS  # noqa: E402
 
 AUDIO = os.path.join(RAIZ, "resources", "audio")
 # Lo que piden response.py y response_A.py con create_voice.
-FRASES_DEL_MOTOR = {"si", "no", "molesta", "elderecho", "elizquierdo", "iguales"}
+FRASES_DEL_MOTOR = {"si", "no", "molesta", "solofuerte", "elderecho", "elizquierdo", "iguales"}
 
 
 def test_la_voz_sale_de_la_edad_y_el_sexo():

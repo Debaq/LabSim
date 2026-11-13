@@ -8820,3 +8820,23 @@ oído). Se descartó deducirlo por cuándo para el alumno (minuto total vs
 minuto en un nivel): el paciente tiene que responder mientras la prueba
 corre, antes de saber dónde va a parar. El backend no evalúa todavía cuál
 eligió; conserva `rosemberg_bilateral` para las atenciones anteriores.
+
+## LDL: falso aviso entre 80 y 90 dB (2026-11-13)
+
+Acordado con el equipo: un 30 % de las veces el paciente se equivoca y avisa
+(mano con *Solo si molesta*, "molesta" con *Pitos fuertes*) entre 80 y 90 dB,
+bajo su LDL. Para eso está *Molesto ¿o?*: en el falso aviso contesta "No me
+molestó, solo sonó fuerte." (`solofuerte`, voz nueva en las cuatro voces del
+paciente), baja la mano y en ese oído y frecuencia ya no se equivoca; en la
+LDL real contesta "molesta". Antes la mano subía justo en la LDL y la
+pregunta no aportaba nada.
+
+- El sorteo (`LDL_FALSO_PROB`, nivel en `LDL_FALSO_DB` = 80/85/90) es por
+  oído y frecuencia, la primera vez que se explora, y dura la atención.
+  Distintos alumnos ven pacientes distintos: es lo realista.
+- Solo bajo la LDL real: si la LDL cae entre 80 y 90, avisar ahí no es un
+  error ("a menos que ese sea el LDL claramente").
+- Si el alumno no pregunta, el paciente sigue avisando desde el nivel falso:
+  quien no confirma anota una LDL falsa.
+- Registro: `audio_ldl_falso` (oído, frecuencia, nivel, LDL real) al
+  sortearse y `audio_ldl_aclarado` cuando la pregunta lo deshace.

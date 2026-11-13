@@ -493,6 +493,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Dictar palabras** | Logoaudiometría (discriminación) | Repite las palabras que entiende |
 | **Dictar palabras compuestas** | SRT | Repite la palabra compuesta, o la mitad que entendió |
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
+| **Solo si molesta**, luego **Molesto ¿o?** | Umbral de molestia (LDL) | Levanta la mano cuando el tono le molesta. A veces confunde fuerte con molesto y avisa antes (entre 80 y 90 dB): pregúntale *Molesto ¿o?*. Si dice *«solo sonó fuerte»*, sigue subiendo; si dice *«molesta»*, esa es la LDL |
 | **Cambie de volumen** | SISI | Dice *«sí»* cuando nota que el tono subió |
 | **Dos pitos**, luego **¿En qué oído?**. Al terminar, **¿Diferentes en forma?** | Fowler | Dice en qué oído suena más fuerte (*«el derecho»*, *«el izquierdo»*) o *«los escucho iguales»*; al final, si los dos tonos sonaban distintos (diploacusia) |
 | **Mano levantada** | Deterioro tonal (Carhart o Rosemberg) | Mantiene la mano arriba mientras siga oyendo el tono. Si partes en el umbral (o 5 dB sobre él) es un Carhart: cada subida reinicia el minuto. Si partes 10 dB sobre el umbral o más es un Rosemberg: el minuto es uno solo |

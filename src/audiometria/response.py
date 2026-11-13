@@ -111,6 +111,14 @@ class ResponseAudiometry():
     # vuelve a decir con otro nivel, oido o frecuencia, o si el tono estuvo
     # este rato sin molestarle.
     LDL_REPITE_S = 3
+    # Falso aviso en la LDL (acordado con el equipo, 2026-11-13): un 30 % de
+    # las veces, por oído y frecuencia, el paciente confunde fuerte con
+    # molesto y avisa entre 80 y 90 dB, bajo su LDL. Si se le pregunta
+    # "Molesto ¿o?" dice que solo sonó fuerte y desde ahí avisa en su LDL
+    # real. Sin preguntar, sigue avisando desde ese nivel: el alumno que no
+    # lo confirma anota una LDL falsa.
+    LDL_FALSO_PROB = 0.30
+    LDL_FALSO_DB = (80, 85, 90)
     # Talkback: el dial no esta calibrado; cada marca se toma como 5 dB HL
     # de voz en los fonos (ver docs/decisiones.md).
     TALKBACK_DB_POR_MARCA = 5
@@ -133,6 +141,9 @@ class ResponseAudiometry():
         # pasado ("¿en qué oído lo escuchó?") se contestan sobre eso
         self._ultima = None
         self._ldl_dicho = (None, 0.0)   # (que le molesto, cuando)
+        self._rng = random.Random()
+        self._ldl_falso = {}            # (oído, frecuencia) -> nivel o None
+        self._ldl_aclarado = set()      # (oído, frecuencia) ya preguntados
 
         self.history_command= []
         self._pregunta = None   # pregunta del Fowler esperando que termine el talkback
@@ -154,6 +165,8 @@ class ResponseAudiometry():
 
     def set_case(self,dbdata):
         self.dbdata = dbdata
+        self._ldl_falso = {}
+        self._ldl_aclarado = set()
         self._logo = None   # el del SDT, se arma al primer uso (_detecta_sdt)
         self.other_response.voz = voz_del_paciente(dbdata)
         self.acufeno = acufeno.Acufeno(dbdata.get('Tinnitus'), dbdata.get('id'))
@@ -339,7 +352,7 @@ class ResponseAudiometry():
         if self.data['audio']['test'] != 'Umbrales':
             return
         a = self.data['audio']
-        molestos = [ch for ch in self._tonos_encendidos() if self._le_molesta(ch)]
+        molestos = [ch for ch in self._tonos_encendidos() if self._avisa_molestia(ch)]
         if con_la_mano:
             if molestos:
                 self.upHand()
@@ -360,6 +373,42 @@ class ResponseAudiometry():
         a = a or self.data['audio']
         return any(a['int'][ch] >= self.dbdata['LDL'][a['freq']][o]
                    for o in self._oidos(ch, a))
+
+    def _avisa_molestia(self, ch, a=None):
+        """Avisa que le molesta: en su LDL, o en el falso aviso de ese oído
+        y frecuencia (LDL_FALSO_PROB) mientras no se le haya preguntado."""
+        return self._le_molesta(ch, a) or bool(self._falsos(ch, a))
+
+    def _falsos(self, ch, a=None):
+        """(oído, frecuencia) en que el canal `ch` está en el falso aviso:
+        sobre el nivel sorteado y todavía bajo la LDL real."""
+        a = a or self.data['audio']
+        freq, nivel = a['freq'], a['int'][ch]
+        claves = []
+        for o in self._oidos(ch, a):
+            falso = self._nivel_falso(o, freq)
+            if (falso is not None and (o, freq) not in self._ldl_aclarado
+                    and falso <= nivel < self.dbdata['LDL'][freq][o]):
+                claves.append((o, freq))
+        return claves
+
+    def _nivel_falso(self, o, freq):
+        """Se sortea la primera vez que se explora ese oído y frecuencia, y
+        queda para toda la atención. Solo bajo la LDL real: si la LDL está
+        entre 80 y 90, avisar ahí no es un error."""
+        clave = (o, freq)
+        if clave not in self._ldl_falso:
+            ldl = self.dbdata['LDL'][freq][o]
+            niveles = [n for n in self.LDL_FALSO_DB if n < ldl]
+            nivel = None
+            if niveles and self._rng.random() < self.LDL_FALSO_PROB:
+                nivel = self._rng.choice(niveles)
+                log = getattr(self.obj_audio, "_log", None)
+                if log is not None:
+                    log("audio_ldl_falso", oido=('OD', 'OI')[o], freq=self.frecuency[freq],
+                        nivel=nivel, ldl=ldl)
+            self._ldl_falso[clave] = nivel
+        return self._ldl_falso[clave]
 
     def fowler(self):
         if self.data['audio']['test'] == 'Umbrales':
@@ -1056,8 +1105,22 @@ class ResponseAudiometry():
             return ('elderecho', 'elizquierdo')[max(caminos)[1]]
         if pregunta == 'molesto_o':                     # ¿Le molestó, o fuerte?
             encendidos = [ch for ch in (0, 1) if pasado['stimOn'][ch]]
-            return ('molesta' if any(self._le_molesta(ch, pasado) for ch in encendidos)
-                    else 'no')
+            if any(self._le_molesta(ch, pasado) for ch in encendidos):
+                return 'molesta'
+            falsos = [(ch, c) for ch in encendidos for c in self._falsos(ch, pasado)]
+            if falsos:
+                # el falso aviso: solo sonó fuerte, y ya no se vuelve a
+                # equivocar en ese oído y frecuencia
+                self._ldl_aclarado.update(c for _ch, c in falsos)
+                log = getattr(self.obj_audio, "_log", None)
+                if log is not None:
+                    for ch, (o, f) in falsos:
+                        log("audio_ldl_aclarado", oido=('OD', 'OI')[o], freq=self.frecuency[f],
+                            nivel=pasado['int'][ch])
+                if self._instruccion() == 'solo_si_molesta':
+                    self.ldl(con_la_mano=True)   # baja la mano
+                return 'solofuerte'
+            return 'no'
         if pregunta == 'no_entiende':                   # ¿Escucha, pero no entiende?
             return self._no_entiende(pasado)
         return None

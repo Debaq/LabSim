@@ -49,6 +49,8 @@ FRASES = {
     "si": "¡Sí!",
     "no": "No.",
     "molesta": "Molesta.",
+    # "Molesto ¿o?" en el falso aviso de la LDL (response.LDL_FALSO_PROB)
+    "solofuerte": "No me molestó, solo sonó fuerte.",
     "elderecho": "El derecho.",
     "elizquierdo": "El izquierdo.",
     "iguales": "Los escucho iguales.",

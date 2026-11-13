@@ -81,6 +81,7 @@ class Base(unittest.TestCase):
     def setUp(self):
         self.r = ResponseAudiometry(FakeAudio())
         self.r.set_case(caso(self.AEREA, self.OSEA))
+        self.r.LDL_FALSO_PROB = 0   # el falso aviso tiene sus propios tests
         self.manos = []
         sube, baja = self.r.upHand, self.r.downHand
         self.r.upHand = lambda: (self.manos.append(True), sube())
@@ -287,6 +288,55 @@ class LdlHabladoTest(Base):
             self.prender()
             self.prender(False)
         self.assertEqual(self.dichas, ['molesta'])
+
+
+class LdlFalsoAvisoTest(Base):
+    """30 % de las veces avisa entre 80 y 90 dB, bajo su LDL (100):
+    preguntándole "Molesto ¿o?" dice que solo sonó fuerte (2026-11-13)."""
+
+    def setUp(self):
+        super().setUp()
+        self.r.LDL_FALSO_PROB = 1
+        self.r.LDL_FALSO_DB = (85,)
+        self.registro = []
+        self.r.obj_audio._log = lambda accion, **p: self.registro.append((accion, p))
+
+    def mano(self, db):
+        return self.presentar('solo_si_molesta', stimOn=[True, False],
+                              stim=[STIM_TONO, STIM_NBN], output=[0, 1], int=[db, 0])
+
+    def test_avisa_en_falso_y_al_preguntar_solo_sono_fuerte(self):
+        self.assertFalse(self.mano(80))
+        self.assertTrue(self.mano(85))          # se equivoca
+        self.assertTrue(self.mano(95))          # sin preguntarle sigue avisando
+        self.assertEqual(self.r.respuesta_a('molesto_o'), 'solofuerte')
+        self.assertFalse(self.r.mano)           # baja la mano
+        self.assertFalse(self.mano(95))         # ya no se equivoca en esta frecuencia
+        self.assertTrue(self.mano(100))         # avisa en su LDL real
+        self.assertEqual(self.r.respuesta_a('molesto_o'), 'molesta')
+        acciones = [a for a, _p in self.registro]
+        self.assertEqual(acciones.count('audio_ldl_falso'), 1)
+        self.assertEqual(acciones.count('audio_ldl_aclarado'), 1)
+
+    def test_con_ldl_entre_80_y_90_no_es_un_error(self):
+        self.r.set_case(caso(self.AEREA, self.OSEA, ldl=85))
+        self.r.LDL_FALSO_DB = (85, 90)          # ninguno bajo su LDL
+        self.assertFalse(self.mano(80))
+        self.assertTrue(self.mano(85))          # es su LDL de verdad
+        self.assertEqual(self.r.respuesta_a('molesto_o'), 'molesta')
+
+    def test_sin_sorteo_no_se_equivoca(self):
+        self.r.LDL_FALSO_PROB = 0
+        self.assertFalse(self.mano(90))
+        self.assertEqual(self.r.respuesta_a('molesto_o'), 'no')
+
+    def test_pitos_fuertes_dice_molesta_en_falso(self):
+        dichas = []
+        self.r.other_response.create_voice_ = dichas.append
+        self.presentar('pitos_fuertes', stimOn=[True, False],
+                       stim=[STIM_TONO, STIM_NBN], output=[0, 1], int=[85, 0])
+        self.assertEqual(dichas, ['molesta'])
+        self.assertEqual(self.r.respuesta_a('molesto_o'), 'solofuerte')
 
 
 class RecalculaTest(Base):
