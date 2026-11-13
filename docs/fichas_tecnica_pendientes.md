@@ -2,7 +2,7 @@
 
 Borrador para que el docente lo corrija antes de escribir reglas. Cada ficha sigue el formato de T03 (tinnitumetría) en `labsim_backend/src/Bibliografia.php`: pasos cortos, cada uno verificable con lo que registra la app, más **lo que debería anotar** (el alumno informa por escrito y el sistema deduce el valor esperado desde las respuestas del paciente).
 
-La técnica sale del libro (capítulos H, `libro-orl/texto/capitulos/`) y, en segundo lugar, del protocolo técnico ORL 2019. Lo que el libro no dice va marcado **(propuesto)**.
+La técnica sale del libro (capítulos H, `libro-orl/texto/capitulos/`). El protocolo técnico ORL 2019 solo manda en el **procedimiento general de atención**, que el libro no cubre; en las demás fichas aparece cuando el libro mismo lo cita (partida del reflejo en 80 dB, SRT ascendente) o como respaldo. Lo que no dice ni el libro ni el protocolo va marcado **(propuesto)**.
 
 Marcas al final de cada paso:
 - **[registrado]**: ya está en `action_logs`; se puede escribir la regla.
