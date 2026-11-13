@@ -129,75 +129,11 @@ $misPacientesUrl = !$isPortalUser
     ? '../student/sso.php?token=' . urlencode(Auth::issuePortalSsoToken($userId))
     : null;
 
-// Stats embebidas en la misma pantalla del código (el docente/alumno no
-// entra a la plataforma para verlas -- ver dashboard.php para el detalle
-// completo por sesión, esto es solo el resumen a simple vista).
-if ($isPortalUser) {
-    // Docente/admin: agregado de todos los alumnos (mismo criterio sin
-    // filtro que dashboard.php -- no hay noción de "curso" en el schema,
-    // cada instalación de LabSim es de un solo cliente/institución).
-    // Un ranking top-10 no le dice al docente qué hacer -- lo accionable es
-    // quién no ha partido, cómo va la participación general, y si la
-    // actividad se frenó últimamente.
-    $allStudents = Db::get()->query("SELECT id, display_name FROM users WHERE role = 'student' AND active = 1")->fetchAll();
-    $totalStudents = count($allStudents);
-
-    $rows = Db::get()->query(
-        "SELECT al.* FROM action_logs al JOIN users u ON u.id = al.user_id WHERE u.role = 'student' ORDER BY al.id"
-    )->fetchAll();
-    // Los intentos de práctica deliberada no cuentan acá: el resumen habla
-    // de los prácticos (ver Practica).
-    $citasPractica = array_flip(array_map(
-        'intval',
-        array_column(Db::get()->query('SELECT id FROM appointments WHERE ' . Practica::soloPractica())->fetchAll(), 'id')
-    ));
-    $logsByUser = [];
-    foreach (Metrics::decodeLogs($rows) as $log) {
-        if ($log['appointment_id'] !== null && $log['appointment_id'] !== ''
-            && isset($citasPractica[(int) $log['appointment_id']])) {
-            continue;
-        }
-        $logsByUser[(int) $log['user_id']][] = $log;
-    }
-
-    $noActivity = [];
-    $totalAttentions = 0;
-    $activeStudents = 0;
-    foreach ($allStudents as $s) {
-        $n = Metrics::countAttentions($logsByUser[(int) $s['id']] ?? []);
-        if ($n === 0) {
-            $noActivity[] = $s['display_name'];
-        } else {
-            $activeStudents++;
-            $totalAttentions += $n;
-        }
-    }
-    $avgAttentions = $activeStudents > 0 ? round($totalAttentions / $activeStudents, 1) : 0;
-
-    // Últimos 7 días vs los 7 anteriores -- ¿la actividad se frenó? La clave
-    // incluye user_id: la agenda es cola compartida, distintos alumnos
-    // pueden atender la misma cita, cada uno cuenta su propia atención.
-    $recentCutoff = time() - 7 * 86400;
-    $priorCutoff = time() - 14 * 86400;
-    $recentSet = [];
-    $priorSet = [];
-    foreach ($logsByUser as $uid => $logsForUser) {
-        foreach ($logsForUser as $log) {
-            if (!($log['con_paciente'] ?? false)) {
-                continue;
-            }
-            $ts = strtotime((string) $log['client_ts']) ?: 0;
-            $key = $uid . '|' . ($log['case_id'] ?? '') . '|' . ($log['appointment_id'] ?? '');
-            if ($ts >= $recentCutoff) {
-                $recentSet[$key] = true;
-            } elseif ($ts >= $priorCutoff) {
-                $priorSet[$key] = true;
-            }
-        }
-    }
-    $recentAttentions = count($recentSet);
-    $priorAttentions = count($priorSet);
-} else {
+// Stats embebidas en la misma pantalla del código, solo para el alumno. El
+// docente no tiene resumen acá: para eso entra a la plataforma (el botón de
+// abajo). Antes se cargaba action_logs entero para armarle uno y, al pasar
+// las 180 mil filas, el hosting respondía 503 en el iframe de Moodle.
+if (!$isPortalUser) {
     $stmt = Db::get()->prepare('SELECT * FROM action_logs WHERE user_id = ? ORDER BY id');
     $stmt->execute([$userId]);
     $myLogs = Metrics::decodeLogs($stmt->fetchAll());
@@ -290,9 +226,7 @@ header('Content-Type: text/html; charset=utf-8');
     .status { min-height: 1.2em; color: #555; }
     .stats { margin-top: 2.5rem; text-align: left; max-width: 560px; margin-left: auto; margin-right: auto; }
     .stats h2 { font-size: 1.1rem; text-align: center; }
-    .stats-summary, .stats-caption { text-align: center; color: #555; font-size: 0.9rem; }
-    .stats-empty { text-align: center; color: #888; font-size: 0.9rem; }
-    .no-activity-list { columns: 2; column-gap: 1.5rem; font-size: 0.9rem; margin: 0.3rem 0; padding-left: 1.2rem; }
+    .stats-summary { text-align: center; color: #555; font-size: 0.9rem; }
     .last-attention { margin-top: 1.8rem; }
     .last-attention h3 { font-size: 1rem; margin-bottom: 0.2rem; text-align: center; }
     .tecnica-logro { display: flex; justify-content: center; align-items: center; gap: 1.2rem; margin-top: 0.8rem; flex-wrap: wrap; }
@@ -311,7 +245,6 @@ header('Content-Type: text/html; charset=utf-8');
 
     @media (max-width: 30rem) {
         body { margin-top: 2rem; }
-        .no-activity-list { columns: 1; }
     }
 </style>
 </head>
@@ -332,40 +265,7 @@ header('Content-Type: text/html; charset=utf-8');
     <p class="status" id="status"></p>
 
     <div class="stats">
-        <?php if ($isPortalUser): ?>
-            <h2>Actividad de los alumnos</h2>
-            <?php if ($totalStudents === 0): ?>
-                <p class="stats-empty">Todavía no hay alumnos registrados.</p>
-            <?php else: ?>
-                <p class="stats-summary">
-                    <?= $activeStudents ?>/<?= $totalStudents ?> alumnos con al menos un paciente atendido
-                    <?php if ($activeStudents > 0): ?>
-                        · promedio <?= $avgAttentions ?> pacientes por alumno activo
-                    <?php endif; ?>
-                </p>
-                <p class="stats-summary">
-                    <?= $recentAttentions ?> atenciones en los últimos 7 días
-                    <?php if ($priorAttentions > 0): ?>
-                        (<?= $recentAttentions >= $priorAttentions ? '+' : '' ?><?= $recentAttentions - $priorAttentions ?> vs los 7 anteriores)
-                    <?php elseif ($recentAttentions === 0): ?>
-                        · sin actividad esta semana
-                    <?php endif; ?>
-                </p>
-                <?php if ($noActivity): ?>
-                    <p class="stats-caption">Alumnos sin ningún paciente atendido todavía:</p>
-                    <ul class="no-activity-list">
-                        <?php foreach (array_slice($noActivity, 0, 15) as $name): ?>
-                            <li><?= htmlspecialchars($name) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                    <?php if (count($noActivity) > 15): ?>
-                        <p class="stats-caption">+<?= count($noActivity) - 15 ?> más</p>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <p class="stats-empty">Todos los alumnos han atendido al menos un paciente.</p>
-                <?php endif; ?>
-            <?php endif; ?>
-        <?php elseif ($myAttentions + $myPracticas > 0): ?>
+        <?php if (!$isPortalUser && $myAttentions + $myPracticas > 0): ?>
             <h2>Tu actividad</h2>
             <p class="stats-summary">
                 <?= $myAttentions ?> paciente<?= $myAttentions === 1 ? '' : 's' ?> atendido<?= $myAttentions === 1 ? '' : 's' ?><?= $myPracticas ? ' (+ ' . $myPracticas . ' de práctica libre)' : '' ?> · <?= (int) round($mySummary['total_duration_s'] / 60) ?> min en total
