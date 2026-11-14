@@ -79,3 +79,4 @@ jobs:
           name: labsim-macos
           path: dist/LabSim-macos-arm64.zip
           if-no-files-found: error
+          retention-days: 1

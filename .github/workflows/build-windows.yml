@@ -168,6 +168,7 @@ jobs:
             dist/LabSim-windows-x86_64-update-setup.exe
             dist/manifest-windows.json
           if-no-files-found: error
+          retention-days: 1
 
       - name: Subir portable
         uses: actions/upload-artifact@v4
@@ -175,3 +176,4 @@ jobs:
           name: labsim-windows-portable
           path: dist/LabSim-windows-x86_64.zip
           if-no-files-found: error
+          retention-days: 1
