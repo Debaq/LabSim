@@ -1094,8 +1094,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.subw.cancelar()
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
-        for attr in ("subw_a", "subw_z", "subw_ac", "subw_ot", "subw_abr",
-                     "subw_aabr", "subw_eoas", "subw_vemp"):
+        # Todos los módulos, no solo los de audiología: un subw_psg que
+        # sobrevive al cierre apunta a un frame ya destruido y el próximo
+        # ingreso revienta al conectarle señales ("Signal source has been
+        # deleted", ticket #64).
+        for attr in self._ATTRS_MODULOS:
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -1452,13 +1455,17 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                     "abierta (lo que escribiste en la evolución no se borró).\n\n" + motivo)
         return False
 
+    # Atributos con el frame de cada módulo de equipo (load_sub_windows los
+    # arma; _close_sub_windows los suelta todos al cerrar sesión).
+    _ATTRS_MODULOS = ("subw_a", "subw_z", "subw_ac", "subw_ot", "subw_abr",
+                      "subw_aabr", "subw_eoas", "subw_vemp", "subw_rm", "subw_ra", "subw_rs",
+                      "subw_esp", "subw_olf", "subw_prick", "subw_psg", "subw_cpap")
+
     def _hydrate_modules(self):
         """Carga self.data_current en los módulos ya construidos, o los
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
-        for attr in ("subw_a", "subw_z", "subw_ac", "subw_ot", "subw_abr",
-                     "subw_aabr", "subw_eoas", "subw_vemp", "subw_rm", "subw_ra", "subw_rs",
-                     "subw_esp", "subw_olf", "subw_prick", "subw_psg", "subw_cpap"):
+        for attr in self._ATTRS_MODULOS:
             frame = getattr(self, attr, None)
             if frame is None:
                 continue
