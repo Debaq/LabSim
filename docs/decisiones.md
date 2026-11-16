@@ -9150,3 +9150,28 @@ corazón, peso y alcohol o drogas.
   tabaco y drogas, orina nocturna y remedios para dormir suspendidos
   (Raquel: clonazepam de una vecina; Yolanda: melatonina y zopiclona). Aviso
   al libro en `pendientes_urgentes.md`.
+
+## PSG: la pieza por la ventanilla y la cámara del techo (2026-11-16)
+
+Él: "pongamos a un personaje y lo miremos por una ventanilla mientras
+duerme... la misma técnica de imágenes planas para simular la sensación 3d".
+Decidió: ventanilla grande y cámara del techo chica (un clic las
+intercambia), un paciente genérico por ahora, y primero poses y respiración
+(los eventos después).
+
+- Fotos y no 3D (el build no usa OpenGL), como la cabeza de electrodos:
+  `scripts/psg_pieza` (MakeHuman + Blender) → `resources/psg_pieza` →
+  `nasal/pieza_vista.py`, que reemplaza a la silueta dibujada (`Camara`).
+- La ventanilla da al costado izquierdo del paciente, no a los pies: desde
+  los pies la frazada tapa la cara y el tórax, que es lo que se vigila.
+- Sensación de profundidad: 5 puntos de vista a lo largo del vidrio; el
+  mouse elige (se funden los vecinos) y el marco se corre más que la cama;
+  el reflejo del vidrio lo pone LabSim y se corre al revés.
+- Respira a ritmo real aunque la noche vaya acelerada (es lo que se ve por
+  el vidrio): 4 niveles fundidos, 4,4 s el ciclo dormido y 3,4 s despierto.
+  Despierto = ojos abiertos y la cabeza algo girada.
+- Peso: una base por vista y solo el recorte de la cama por estado, en WebP.
+- Doble clic la amplía en su propia ventana (`psg_ver_pieza` al log); se
+  cierra sola cuando la noche termina.
+- Queda fuera: el montaje se ve completo aunque el alumno no haya puesto un
+  sensor, y los eventos (paradoja, despertar, ronquido).

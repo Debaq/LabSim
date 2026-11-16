@@ -1,0 +1,15 @@
+{
+ "salida": "~/.cache/labsim/psg_mh",
+ "modelos": [
+  {"nombre": "paciente", "mhm": null,
+   "modificadores": {"macrodetails/Gender": 1.0, "macrodetails/Age": 0.69, "macrodetails-universal/Muscle": 0.4,
+                     "macrodetails-universal/Weight": 0.8, "macrodetails-height/Height": 0.5,
+                     "macrodetails-proportions/BodyProportions": 0.5,
+                     "macrodetails/African": 0.05, "macrodetails/Asian": 0.35, "macrodetails/Caucasian": 0.6},
+   "piel": "skins/middleage_caucasian_male/middleage_caucasian_male.mhmat",
+   "ropa": ["male_casualsuit06"],
+   "cejas": "eyebrow001", "pestanas": "eyelashes01",
+   "pelos": ["short02"], "zapatos": [],
+   "expresiones": ["neutra", "sleep01", "vocalize01"]}
+ ]
+}

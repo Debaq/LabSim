@@ -5,7 +5,8 @@ Como se hace: el alumno elige el estudio (polisomnografía en el laboratorio
 o poligrafía en la casa), monta los sensores y registra la noche. En el
 laboratorio la noche corre (entera en 15 min, o ×60 a ×300; con pausa y
 "Hasta la mañana"):
-desde la sala de control ve al paciente por la cámara y puede entrar a
+desde la sala de control ve al paciente por la ventanilla y la cámara
+infrarroja del techo (nasal/pieza_vista.py) y puede entrar a
 acomodarlo de espaldas o de lado (sueno.acomodar: se despierta un rato y la
 noche se rehace desde ahí). En la casa no hay técnico: llega entera. Después
 revisa el registro como en el programa del equipo: arriba la noche entera
@@ -30,8 +31,8 @@ import os
 import time
 
 import pyqtgraph as pg
-from PySide6.QtCore import QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QPainter, QPen
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QMainWindow, QPlainTextEdit,
                                QPushButton, QScrollArea, QSplitter, QTabWidget, QVBoxLayout, QWidget)
 
@@ -42,6 +43,7 @@ from nasal import sesion as sesion_nasal
 from nasal import sueno as Z
 from nasal.equipos import PERMISOS_DOCENTE, QSS_NASAL, Tabla, num
 from nasal.graficos import exportar
+from nasal.pieza_vista import VistaPieza
 from vemp.widgets.kit import Campos, Pastilla, Tarjeta, etiqueta
 
 VENTANAS = ((30, '30 s'), (120, '2 min'), (300, '5 min'))
@@ -336,80 +338,6 @@ class Detalle:
                 p.addItem(r)
 
 
-# ── La cámara de la pieza ──────────────────────────────────────────────────
-
-class Camara(QWidget):
-    """El paciente en la cama, visto desde la cámara del techo: de espaldas
-    (la cara arriba, los dos brazos a los lados) o de lado (el cuerpo
-    angosto, la cara y las rodillas hacia ese lado)."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.pos = None
-        self.despierto = False
-        self.setMinimumSize(120, 96)
-
-    def poner(self, pos, despierto):
-        self.pos, self.despierto = pos, despierto
-        self.update()
-
-    def paintEvent(self, _evento):
-        q = QPainter(self)
-        q.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        def caja(x, y, ancho, alto, radio):
-            q.drawRoundedRect(QRectF(x, y, ancho, alto), radio, radio)
-
-        def circulo(x, y, radio):
-            q.drawEllipse(QRectF(x - radio, y - radio, 2 * radio, 2 * radio))
-
-        w, h = self.width(), self.height()
-        # La cama, con la almohada arriba.
-        bw, bh = min(w - 16, 110), h - 10
-        x0, y0 = (w - bw) / 2, 5
-        q.setPen(QPen(QColor(tema.BORDE_FUERTE), 1.5))
-        q.setBrush(QColor(tema.FONDO))
-        caja(x0, y0, bw, bh, 8)
-        q.setBrush(QColor(tema.TARJETA))
-        caja(x0 + bw * 0.2, y0 + 5, bw * 0.6, bh * 0.16, 5)
-        if self.pos is None:
-            q.end()
-            return
-        cx = x0 + bw / 2
-        piel, ropa = QColor('#E2B48C'), QColor(COLOR_POS[self.pos])
-        ropa.setAlpha(170)
-        q.setPen(QPen(QColor(tema.TEXTO_SUAVE), 1))
-        lado = {'supino': 0, 'izquierda': -1, 'derecha': 1}[self.pos]
-        ancho = bw * (0.42 if lado == 0 else 0.26)
-        # Tronco y piernas (de lado, las rodillas dobladas hacia ese lado).
-        q.setBrush(ropa)
-        caja(cx - ancho / 2, y0 + bh * 0.3, ancho, bh * 0.36, 8)
-        if lado == 0:
-            for dx in (-0.1, 0.1):
-                caja(cx + bw * dx - bw * 0.06, y0 + bh * 0.64, bw * 0.12, bh * 0.32, 5)
-            q.setBrush(piel)
-            for dx in (-1, 1):
-                caja(cx + dx * (ancho / 2 + bw * 0.04) - bw * 0.04, y0 + bh * 0.32, bw * 0.08, bh * 0.3, 4)
-        else:
-            caja(cx + lado * bw * 0.06 - bw * 0.07, y0 + bh * 0.62, bw * 0.14, bh * 0.16, 5)
-            caja(cx + lado * bw * 0.17 - bw * 0.07, y0 + bh * 0.74, bw * 0.14, bh * 0.2, 5)
-            q.setBrush(piel)
-            caja(cx + lado * (ancho / 2) - bw * 0.04, y0 + bh * 0.36, bw * 0.08, bh * 0.22, 4)
-        # La cabeza, con la cara hacia donde mira (ojos abiertos si despierta).
-        q.setBrush(piel)
-        r = bh * 0.11
-        hy = y0 + bh * 0.19
-        circulo(cx, hy, r)
-        q.setBrush(QColor(tema.TEXTO))
-        ojo = 2.2 if self.despierto else 1.0
-        if lado == 0:
-            for dx in (-0.4, 0.4):
-                circulo(cx + dx * r, hy, ojo)
-        else:
-            circulo(cx + lado * 0.55 * r, hy, ojo)
-        q.end()
-
-
 # ── La ventana ──────────────────────────────────────────────────────────────
 
 class PolisomnografiaWindow(QMainWindow):
@@ -527,7 +455,10 @@ class PolisomnografiaWindow(QMainWindow):
         """Mientras la noche corre: la cámara de la pieza y lo que hace el
         técnico (entrar a acomodar al paciente, pausar, adelantar)."""
         self.panel_sala = Tarjeta('Sala de control')
-        self.camara = Camara()
+        # La pieza por la ventanilla (y la cámara del techo): doble clic la amplía.
+        self.camara = VistaPieza()
+        self.camara.ampliar.connect(self._ampliar_pieza)
+        self.pieza_grande = None
         self.panel_sala.agregar(self.camara)
         self.lbl_camara = etiqueta('', rol='hint')
         self.lbl_camara.setWordWrap(True)
@@ -555,6 +486,20 @@ class PolisomnografiaWindow(QMainWindow):
         self.btn_manana.setToolTip('Adelantar hasta que se enciende la luz')
         self.panel_sala.agregar(self.btn_manana)
         izq.addWidget(self.panel_sala)
+
+    def _ampliar_pieza(self):
+        """La pieza en grande, en su propia ventana (sigue a la noche mientras esté abierta)."""
+        if self.pieza_grande is None:
+            self.pieza_grande = VistaPieza(grande=True)
+            self.pieza_grande.setParent(self, Qt.WindowType.Window)
+            self.pieza_grande.setWindowTitle('Sala de control: la pieza')
+            self.pieza_grande.resize(960, 600)
+        c = self.camara
+        self.pieza_grande.principal = c.principal
+        self.pieza_grande.poner(c.pos, c.despierto, c.hora)
+        self.pieza_grande.show()
+        self.pieza_grande.raise_()
+        self._log('ver_pieza')
 
     def _panel_puntuacion(self, izq):
         self.panel_puntuacion = Tarjeta('Puntuación')
@@ -1088,10 +1033,14 @@ class PolisomnografiaWindow(QMainWindow):
         for b in (self.btn_atras, self.btn_adelante, self.cmb_ventana):
             b.setEnabled(registrado)
         self.panel_sala.setVisible(vivo)
+        if not vivo and self.pieza_grande is not None:
+            self.pieza_grande.hide()
         if vivo:
             t = min(self.S['N'] - 1, int(self.t_actual))
             pos, etapa = self.S['pos'][t], self.S['etapa'][t]
-            self.camara.poner(pos, etapa == 'W')
+            self.camara.poner(pos, etapa == 'W', hhmm(t))
+            if self.pieza_grande is not None:
+                self.pieza_grande.poner(pos, etapa == 'W', hhmm(t))
             estado = 'Despierto' if etapa == 'W' else 'Duerme'
             self.lbl_camara.setText(f'{hhmm(t)} · {estado} {NOMBRE_POS[pos]}'
                                     + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})'))
