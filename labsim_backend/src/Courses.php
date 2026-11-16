@@ -31,6 +31,7 @@ final class Courses
         'FICHA' => 'Ficha clínica',
         'EVOLUCION' => 'Evolución',
         'MIS_PACIENTES' => 'Mis pacientes',
+        'PSG' => 'Polisomnografía y poligrafía',
     ];
 
     /**

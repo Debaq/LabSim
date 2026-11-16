@@ -9051,3 +9051,21 @@ contra, medir, y dar vuelta todo para el otro oído.
   da la vuelta: en la ETF pasar de +200 daPa saltaba a -400, y en reflejos
   de la intensidad máxima a la mínima (y al revés). Ahí la perilla tiene
   tope (pista de 300°).
+
+## Polisomnografía soltada para el práctico de ETMP172 (2026-11-16)
+
+Él: práctico de polisomnografía con la guía del estudiante (fichas 159-162,
+cap. 38) en el curso nuevo "Metd. Nasorespiratorio ETMP172" (docente Vanessa
+Uribe, clave LTI 1.1 propia que matricula sola).
+
+- **PSG pasa a 'pre'** en `Layout::APPS`, el Laboratorio de sueño (Box_5)
+  queda activo y PSG entra a `Courses::MODULES`: el docente lo prende por
+  curso. CPAP y el resto de nariz siguen en 'development'
+  (`tests/test_layout_nasal_oculto.php` lo cuida). La app no cambia: ya
+  trae PSG en `GATED_MODULE_CODES`.
+- **Corregir lo que corrigió el alumno**: `scripts/nasal/revisar_psg.py`
+  rehace la noche de cada informe POLISOMNOGRAFIA y compara evento por
+  evento con la verdad (bien, tipo equivocado, sobra, se le pasó), su IAH
+  contra el de la automática que vio (semilla `psg/<cita>`) y el de la noche
+  bien puntuada con su misma regla, la gravedad elegida y lo que la guía
+  prohíbe escribir. `--pauta` da la pauta de las cuatro fichas sin red.

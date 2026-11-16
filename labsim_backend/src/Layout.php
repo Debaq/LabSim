@@ -58,13 +58,15 @@ final class Layout
         // Nariz y sueño (H25-H32 del libro): demo interna, solo la ve el admin
         // (docs/roadmap_nasal.md). 'development' + boxes inactivos y fuera de
         // Courses::MODULES, para que ningún curso los pueda prender todavía.
+        // PSG se soltó el 2026-11-16 para el práctico de polisomnografía:
+        // 'pre', Box_5 activo y en Courses::MODULES (el docente lo prende).
         'RS'         => [false, 'Rinoscopía', 23, [false, true], 'max', 'development'],
         'RM'         => [false, 'Rinomanometría anterior', 24, [false, true], 'max', 'development'],
         'RA'         => [false, 'Rinometría acústica', 25, [false, true], 'max', 'development'],
         'OLF'        => [false, 'Olfatometría', 26, [false, true], 'max', 'development'],
         'PRICK'      => [false, 'Prick test', 27, [false, true], 'max', 'development'],
         'ESP'        => [false, 'Espirometría', 28, [false, true], 'max', 'development'],
-        'PSG'        => [false, 'Polisomnografía y poligrafía', 29, [false, true], 'max', 'development'],
+        'PSG'        => [false, 'Polisomnografía y poligrafía', 29, [false, true], 'max', 'pre'],
         'CPAP'       => [false, 'CPAP y avance mandibular', 30, [false, true], 'max', 'development'],
     ];
 
@@ -87,7 +89,7 @@ final class Layout
         'Box_2'       => [true,  ['ABR', 'AABR', 'VEMP', 'EOAS'],                     'Box Electrofisiología'],
         'Box_3'       => [false, ['VNG', 'VHIT', 'POS'],                              'Box Otoneurología'],
         'Box_4'       => [false, ['RS', 'RM', 'RA', 'OLF', 'PRICK', 'ESP'],           'Box Rinología'],
-        'Box_5'       => [false, ['PSG', 'CPAP'],                                     'Laboratorio de sueño'],
+        'Box_5'       => [true,  ['PSG', 'CPAP'],                                     'Laboratorio de sueño'],
     ];
 
     /** Payload serializable que devuelve GET /api/layout.php. */
