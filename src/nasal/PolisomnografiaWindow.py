@@ -824,10 +824,14 @@ class PolisomnografiaWindow(QMainWindow):
     def _tic(self):
         if not self._en_vivo() or not self.corriendo or self.recalculando:
             return
-        self.t_actual = min(self.S['N'], self.t_actual + self._velocidad() * TIC_MS / 1000)
-        if self.t_actual >= self.S['N']:
-            self._manana()
+        avance = self.t_actual + self._velocidad() * TIC_MS / 1000
+        if avance >= self.S['N']:
+            # La luz se enciende con la noche todavía en vivo: con t_actual
+            # ya en el final, _manana no hacía nada (sin puntuación ni
+            # resultados, ticket #65).
+            self._manana(por_reloj=True)
             return
+        self.t_actual = avance
         # Corriendo, el detalle sigue lo último registrado.
         self.t0 = max(0, int(self.t_actual) - self._dur())
         self.dibujar()
@@ -845,14 +849,15 @@ class PolisomnografiaWindow(QMainWindow):
         self._log('pausa', pausa=not self.corriendo, t=int(self.t_actual))
         self.dibujar()
 
-    def _manana(self):
+    def _manana(self, por_reloj=False):
         """Se enciende la luz: la noche termina y el programa propone su
-        puntuación automática."""
+        puntuación automática. por_reloj: llegó al final sola (no con
+        "Hasta la mañana")."""
         if not self._en_vivo() or self.recalculando:
             return
         self.timer.stop()
         self.corriendo = False
-        adelantada = self.t_actual < self.S['N'] - 1
+        adelantada = not por_reloj and self.t_actual < self.S['N'] - 1
         self.t_actual = self.S['N']
         self.eventos = Z.auto_puntuar(self.S, self.montaje, f'psg/{self.appointment_id}')
         self.t0 = self._primer_sueno()
