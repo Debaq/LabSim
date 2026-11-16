@@ -337,39 +337,7 @@ def ventana(S, t0, dur, fs=20):
     eeg_amp = {'W': 0.25, 'N1': 0.35, 'N2': 0.45, 'N3': 0.9, 'R': 0.3}[et]
     for i in range(int(dur * fs)):
         t = t0 + i / fs
-        env_f, env_e, par, lim, silencio_e = 1.0, 1.0, 0.0, False, False
-        arousal_on = False
-        ron_amp = 0.0
-        for x in evs:
-            a, b = x['t'], x['t'] + x['dur']
-            if a <= t <= b:
-                u = (t - a) / x['dur']
-                tp = x['tipo']
-                if tp == 'ao':
-                    env_f, env_e, par = 0.05, 0.5 + 1.1 * u, min(1.0, 0.4 + 0.8 * u)
-                elif tp == 'ac':
-                    env_f, env_e = 0.05, 0.05
-                elif tp == 'am':
-                    env_f = 0.05
-                    if u < 0.4:
-                        env_e = 0.05
-                    else:
-                        env_e, par = 0.5 + 1.1 * (u - 0.4) / 0.6, min(1.0, 0.4 + 0.8 * (u - 0.4) / 0.6)
-                elif tp == 'h':
-                    env_f, env_e, par, lim = 0.5, 0.8 + 0.4 * u, 0.3, True
-                else:  # RERA: flujo casi normal, aplanado; esfuerzo creciente
-                    env_f, env_e, par, lim = 0.8, 0.8 + 0.7 * u, 0.4, True
-            elif b < t <= b + 4:
-                if x['tipo'] != 'rera':
-                    env_f, env_e = 1.45, 1.4
-                    ron_amp = 0.9
-            if x['arousal'] and b - 1 <= t <= b + 5:
-                arousal_on = True
-        for s0 in S['esp']:
-            if s0 - 0 <= t <= s0 + 5:
-                arousal_on = True
-        if S['ron'][min(len(S['ron']) - 1, int(t // 60))] and ron_amp == 0.0:
-            ron_amp = 0.45
+        env_f, env_e, par, lim, ron_amp, arousal_on = respiracion_en(S, evs, t)
         ph += 2 * math.pi * f / fs * (1 + 0.04 * math.sin(t / 3.1))
         base = math.sin(ph)
         sn = base
@@ -578,6 +546,76 @@ def sensores_del_estudio(estudio):
     return [k for k, _n, pg in SENSORES if estudio == 'psg' or pg]
 
 
+# Biocalibraciones (LabSim: el técnico las pide por el intercomunicador con
+# la luz encendida; nasal/intercom.py). clave -> (s desde que se pide hasta
+# que la hace: lo que dura la frase; s que dura la maniobra). S['bio'] =
+# [(t, clave)], solo las que hizo (despierto).
+BIOCAL = {
+    'ojos_abiertos': (5, 30), 'ojos_cerrados': (6, 30), 'mire_a_los_lados': (5, 10),
+    'mire_arriba_abajo': (5, 10), 'parpadee': (2, 5), 'apriete_dientes': (1, 3),
+    'respire_nariz': (3, 15), 'respire_boca': (3, 15), 'aguante': (4, 10), 'ronque': (4, 9),
+}
+
+
+def maniobra_en(S, t):
+    """(clave, s desde que empezó) de la biocalibración que hace en t, o None."""
+    for t0, clave in reversed(S.get('bio') or ()):
+        retardo, dur = BIOCAL[clave]
+        if t0 + retardo <= t < t0 + retardo + dur:
+            return clave, t - t0 - retardo
+    return None
+
+
+def respiracion_en(S, evs, t):
+    """Cómo respira en el segundo t (lo usan las señales y la pieza de LabSim):
+    (flujo, esfuerzo, paradoja 0-1 (el abdomen al revés que el tórax), flujo
+    limitado, ronquido, despertar). `evs`: los eventos de S['ev'] cercanos a t."""
+    env_f, env_e, par, lim = 1.0, 1.0, 0.0, False
+    arousal_on = False
+    ron_amp = 0.0
+    for x in evs:
+        a, b = x['t'], x['t'] + x['dur']
+        if a <= t <= b:
+            u = (t - a) / x['dur']
+            tp = x['tipo']
+            if tp == 'ao':
+                env_f, env_e, par = 0.05, 0.5 + 1.1 * u, min(1.0, 0.4 + 0.8 * u)
+            elif tp == 'ac':
+                env_f, env_e = 0.05, 0.05
+            elif tp == 'am':
+                env_f = 0.05
+                if u < 0.4:
+                    env_e = 0.05
+                else:
+                    env_e, par = 0.5 + 1.1 * (u - 0.4) / 0.6, min(1.0, 0.4 + 0.8 * (u - 0.4) / 0.6)
+            elif tp == 'h':
+                env_f, env_e, par, lim = 0.5, 0.8 + 0.4 * u, 0.3, True
+            else:  # RERA: flujo casi normal, aplanado; esfuerzo creciente
+                env_f, env_e, par, lim = 0.8, 0.8 + 0.7 * u, 0.4, True
+        elif b < t <= b + 4:
+            if x['tipo'] != 'rera':
+                env_f, env_e = 1.45, 1.4
+                ron_amp = 0.9
+        if x['arousal'] and b - 1 <= t <= b + 5:
+            arousal_on = True
+    for s0 in S['esp']:
+        if s0 - 0 <= t <= s0 + 5:
+            arousal_on = True
+    if S['ron'][min(len(S['ron']) - 1, int(t // 60))] and ron_amp == 0.0:
+        ron_amp = 0.45
+    m = maniobra_en(S, t) if S.get('bio') else None
+    if m and m[0] == 'aguante':
+        env_f, env_e = 0.03, 0.03
+    elif m and m[0] == 'ronque':
+        env_f, ron_amp = 0.8, 0.9
+    return env_f, env_e, par, lim, ron_amp, arousal_on
+
+
+def eventos_cerca(S, t, antes=10):
+    """Los eventos que pueden tocar el segundo t (para respiracion_en)."""
+    return [x for x in S['ev'] if x['t'] - 1 <= t <= x['t'] + x['dur'] + antes]
+
+
 def senales(S, t0, dur, montados, fs=10):
     """Los canales de una ventana [t0, t0+dur) s, como los ve el equipo: lo
     no montado no está (None) y la cánula suelta da una línea plana."""
@@ -615,10 +653,45 @@ def senales(S, t0, dur, montados, fs=10):
         spo2.append(sp[a] + (sp[b] - sp[a]) * (t - int(t)))
     canales = {'eeg': v['eeg'], 'eog': eog, 'emg': v['emg'], 'termico': termico, 'canula': canula,
                'torax': v['torax'], 'abd': v['abd'], 'spo2': spo2, 'ron': v['ron']}
+    if S.get('bio'):
+        _biocalibrar(S, canales, t0, fs)
     for k, x in canales.items():
         out[k] = x if k in montados else None
     out['t'] = [t0 + i / fs for i in range(n)]
     return out
+
+
+def _biocalibrar(S, c, t0, fs):
+    """Lo que las biocalibraciones dejan en los canales (en el sitio)."""
+    rng = random.Random(S['P']['semilla'] * 7 + int(t0))
+    for i in range(len(c['eeg'])):
+        t = t0 + i / fs
+        m = maniobra_en(S, t)
+        if m is None:
+            continue
+        clave, u = m
+        if clave == 'ojos_abiertos':       # EEG rápido y bajo, sin alfa; algún movimiento ocular
+            c['eeg'][i] = 0.12 * rng.uniform(-1, 1) + 0.08 * math.sin(2 * math.pi * 21 * t)
+            c['eog'][i] = 0.15 * math.sin(2 * math.pi * 0.3 * t) + rng.uniform(-0.05, 0.05)
+        elif clave == 'ojos_cerrados':     # alfa occipital (10,5 Hz como el del despertar: a 10 Hz justos
+            #                                  la ventana muestreada a 10 Hz lo vería plano)
+            c['eeg'][i] = 0.5 * math.sin(2 * math.pi * 10.5 * t) * (0.7 + 0.3 * math.sin(t)) \
+                + 0.06 * rng.uniform(-1, 1)
+            c['eog'][i] = 0.1 * math.sin(2 * math.pi * 0.1 * t)
+        elif clave == 'mire_a_los_lados':  # cinco idas y vueltas: E1 y E2 en oposición de fase
+            c['eog'][i] = 0.95 * math.tanh(4 * math.sin(2 * math.pi * 0.5 * u)) + rng.uniform(-0.04, 0.04)
+        elif clave == 'mire_arriba_abajo':  # en la derivación horizontal se ve menos
+            c['eog'][i] = 0.4 * math.tanh(4 * math.sin(2 * math.pi * 0.5 * u)) + rng.uniform(-0.04, 0.04)
+        elif clave == 'parpadee':          # cinco parpadeos: espigas en el EOG y en el EEG frontal
+            pico = sum(math.exp(-((u - k - 0.5) / 0.12) ** 2) for k in range(5))
+            c['eog'][i] = 0.9 * pico + rng.uniform(-0.04, 0.04)
+            c['eeg'][i] += 0.6 * pico
+        elif clave == 'apriete_dientes':   # EMG del mentón (y artefacto muscular en el EEG)
+            c['emg'][i] = rng.uniform(-1, 1)
+            c['eeg'][i] += 0.35 * rng.uniform(-1, 1)
+        elif clave == 'respire_boca':      # la cánula (nasal) casi no ve; el térmico (oronasal) sí
+            c['canula'][i] *= 0.12
+        # aguante y ronque cambian la respiración misma (respiracion_en)
 
 
 def posicion_en(S, t):

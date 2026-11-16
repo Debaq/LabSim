@@ -29,6 +29,7 @@ Sin `cases.data['SUENO']` la noche es normal (nasal/normales.py).
 
 import os
 import time
+from functools import partial
 
 import pyqtgraph as pg
 from PySide6.QtCore import Qt, QTimer
@@ -43,6 +44,7 @@ from nasal import sesion as sesion_nasal
 from nasal import sueno as Z
 from nasal.equipos import PERMISOS_DOCENTE, QSS_NASAL, Tabla, num
 from nasal.graficos import exportar
+from nasal.intercom import APAGAR_LUZ, CLAVES as COMANDOS_INTERCOM, POSICION, Intercom
 from nasal.pieza_vista import VistaPieza
 from vemp.widgets.kit import Campos, Pastilla, Tarjeta, etiqueta
 
@@ -51,8 +53,12 @@ VENTANAS = ((30, '30 s'), (120, '2 min'), (300, '5 min'))
 # 0 = la noche entera en NOCHE_EN_MIN minutos reales, sea cual sea su largo
 # (≈ ×31 en una noche de 470 min); el resto, factores fijos para ir más rápido.
 NOCHE_EN_MIN = 15
-VELOCIDADES = ((0, f'Noche en {NOCHE_EN_MIN} min'), (60, '×60'), (120, '×120'), (300, '×300'))
+# Tiempo real: para mirar por la ventanilla cómo respira en una apnea (a ×31 dura menos de un segundo).
+VELOCIDADES = ((0, f'Noche en {NOCHE_EN_MIN} min'), (1, 'Tiempo real'), (60, '×60'), (120, '×120'),
+               (300, '×300'))
 TIC_MS = 200
+# Lo que dura la frase de posición: el paciente se da vuelta al terminar de oírla.
+RETARDO_POSICION_MS = 4000
 NOMBRE_POS = {'supino': 'de espaldas', 'izquierda': 'sobre el lado izquierdo', 'derecha': 'sobre el lado derecho'}
 COLOR_TIPO = {'ao': '#C62F3A', 'am': '#8E44AD', 'ac': '#2F5D9E', 'h': '#D98E04', 'rera': '#21796C'}
 ABREV_TIPO = {'ao': 'AO', 'am': 'AM', 'ac': 'AC', 'h': 'H', 'rera': 'RERA'}
@@ -453,22 +459,32 @@ class PolisomnografiaWindow(QMainWindow):
 
     def _panel_sala(self, izq):
         """Mientras la noche corre: la cámara de la pieza y lo que hace el
-        técnico (entrar a acomodar al paciente, pausar, adelantar)."""
+        técnico (hablarle por el intercomunicador, pedirle que se dé vuelta,
+        pausar, adelantar)."""
         self.panel_sala = Tarjeta('Sala de control')
         # La pieza por la ventanilla (y la cámara del techo): doble clic la amplía.
-        self.camara = VistaPieza()
+        self.camara = VistaPieza(sonido=True)
         self.camara.ampliar.connect(self._ampliar_pieza)
         self.pieza_grande = None
         self.panel_sala.agregar(self.camara)
         self.lbl_camara = etiqueta('', rol='hint')
         self.lbl_camara.setWordWrap(True)
         self.panel_sala.agregar(self.lbl_camara)
-        self.panel_sala.agregar(etiqueta('Entrar a acomodarlo', rol='campo'))
+        # El intercomunicador: frases de la noche, biocalibraciones y posiciones.
+        self.intercom = Intercom()
+        self.intercom.setParent(self, Qt.WindowType.Window)
+        self.intercom.setWindowTitle('Intercomunicador de la sala de control')
+        self.intercom.resize(760, 520)
+        self.intercom.btn_checked.connect(self._intercom)
+        self.btn_intercom = self._boton('Intercomunicador…', self._abrir_intercom)
+        self.btn_intercom.setToolTip('Hablarle al paciente: saludar, biocalibraciones, apagar la luz')
+        self.panel_sala.agregar(self.btn_intercom)
+        self.panel_sala.agregar(etiqueta('Pedirle que se dé vuelta', rol='campo'))
         fila = QHBoxLayout()
         self.btn_acomodar = {}
         for pos, texto in (('supino', 'De espaldas'), ('izquierda', 'Lado izq.'), ('derecha', 'Lado der.')):
-            b = self._boton(texto, lambda p=pos: self._acomodar(p))
-            b.setToolTip(f'Entrar a la pieza y acomodar al paciente {NOMBRE_POS[pos]} (se despierta un rato)')
+            b = self._boton(texto, lambda p=pos: self._pedir_posicion(p))
+            b.setToolTip(f'Pedirle por el intercomunicador que se ponga {NOMBRE_POS[pos]} (se despierta un rato)')
             b.setStyleSheet('min-width: 0px; padding: 4px 2px;')
             self.btn_acomodar[pos] = b
             fila.addWidget(b)
@@ -487,6 +503,45 @@ class PolisomnografiaWindow(QMainWindow):
         self.panel_sala.agregar(self.btn_manana)
         izq.addWidget(self.panel_sala)
 
+    def _abrir_intercom(self):
+        self.intercom.show()
+        self.intercom.raise_()
+
+    def _pedir_posicion(self, pos):
+        clave = next(k for k, p in POSICION.items() if p == pos)
+        self.intercom.decir(clave)
+        self._intercom(clave)
+
+    def _intercom(self, clave):
+        """Lo que el técnico dijo por el intercomunicador y lo que hace el paciente."""
+        if not self._en_vivo() or clave not in COMANDOS_INTERCOM:
+            return
+        t = int(self.t_actual)
+        etapa = self.S['etapa'][min(self.S['N'] - 1, t)]
+        hizo = None
+        if clave in POSICION:
+            pos = POSICION[clave]
+            if pos == self.S['pos'][min(self.S['N'] - 1, t)]:
+                self._mensaje(f'Ya está {NOMBRE_POS[pos]}.')
+            else:
+                # Se da vuelta cuando termina de oír la frase.
+                self._mensaje('Se lo pediste por el intercomunicador…')
+                QTimer.singleShot(RETARDO_POSICION_MS, self, partial(self._acomodar, pos))
+                hizo = pos
+        elif clave in Z.BIOCAL:
+            if etapa == 'W':
+                self.S.setdefault('bio', []).append((t, clave))
+                hizo = clave
+            else:
+                self._mensaje('Está dormido: no oye la instrucción.')
+        elif clave == APAGAR_LUZ:
+            if self.cmb_velocidad.currentData() == 1:
+                self.cmb_velocidad.setCurrentIndex(self.cmb_velocidad.findData(0))
+            self._mensaje('Apagaste la luz: la noche corre. Desde la sala de control la vigilas y puedes '
+                          'pedirle que se dé vuelta; la puntuación automática está lista al encender la luz.')
+            hizo = 'luz'
+        self._log('intercom', clave=clave, t=t, etapa=etapa, hizo=hizo)
+
     def _ampliar_pieza(self):
         """La pieza en grande, en su propia ventana (sigue a la noche mientras esté abierta)."""
         if self.pieza_grande is None:
@@ -496,7 +551,7 @@ class PolisomnografiaWindow(QMainWindow):
             self.pieza_grande.resize(960, 600)
         c = self.camara
         self.pieza_grande.principal = c.principal
-        self.pieza_grande.poner(c.pos, c.despierto, c.hora)
+        self.pieza_grande.poner(c.pos, c.despierto, c.hora, c.resp)
         self.pieza_grande.show()
         self.pieza_grande.raise_()
         self._log('ver_pieza')
@@ -629,6 +684,10 @@ class PolisomnografiaWindow(QMainWindow):
         self.sesion = SesionSueno(data, appointment_id) if data is not None else None
         self.data_caso = data
         self.appointment_id = appointment_id
+        # Ronca con la voz de su sexo (gender 1 = mujer, como en sueno.desde_caso), siempre la misma
+        # grabación para el mismo caso.
+        if data is not None:
+            self.camara.paciente('mujer' if data.get('gender') == 1 else 'hombre', int(data.get('id') or 0))
         self.S = None
         self.montaje = []
         self.eventos = []
@@ -676,6 +735,7 @@ class PolisomnografiaWindow(QMainWindow):
                         for e in self.eventos],
             'excluidos': [[a, b] for a, b in self.excluidos],
             'acomodos': [[t, p] for t, p in self.S.get('acomodos') or []],
+            'bio': [[t, c] for t, c in self.S.get('bio') or []],
             't_actual': None if self._de_dia() else int(self.t_actual),
             'indices': {k: v for k, v in r.items() if isinstance(v, (int, float)) or v is None},
             'tabla': getattr(self.tabla_informe, 'contenido', {}),
@@ -707,6 +767,7 @@ class PolisomnografiaWindow(QMainWindow):
             c.setChecked(k in self.montaje)
         acomodos = [(int(t), p) for t, p in data.get('acomodos') or [] if p in Z.POSICIONES]
         self.S = Z.noche(self.sesion.sueno, estudio, acomodos)
+        self.S['bio'] = [(int(t), c) for t, c in data.get('bio') or [] if c in Z.BIOCAL]
         # A medio correr: queda en pausa donde iba (se sigue con "Seguir").
         t = data.get('t_actual')
         self.t_actual = self.S['N'] if t is None else max(0, min(self.S['N'], int(t)))
@@ -787,10 +848,13 @@ class PolisomnografiaWindow(QMainWindow):
                 self.t_actual = 0
                 self.t0 = 0
                 self.corriendo = True
+                # Con la luz encendida y en tiempo real: el técnico saluda y
+                # hace las biocalibraciones; "Apagar la luz" larga la noche.
+                self.cmb_velocidad.setCurrentIndex(self.cmb_velocidad.findData(1))
                 self.timer.start()
-                self._mensaje(sin + 'Se apagó la luz y la noche corre. Desde la sala de control puedes entrar a '
-                              'acomodar al paciente; la puntuación automática está lista al encender la luz.',
-                              'alerta' if faltan else 'ok')
+                self._mensaje(sin + 'El paciente está acostado con la luz encendida y el registro corre en tiempo '
+                              'real. Por el intercomunicador salúdalo, haz las biocalibraciones y apaga la luz: '
+                              'ahí la noche corre.', 'alerta' if faltan else 'ok')
             else:
                 # En la casa no hay técnico: llega la noche entera.
                 self.t_actual = self.S['N']
@@ -870,7 +934,7 @@ class PolisomnografiaWindow(QMainWindow):
         self.dibujar()
 
     def _acomodar(self, pos):
-        """El técnico entra a la pieza y acomoda al paciente: la noche se
+        """El paciente se da vuelta (se lo pidió el técnico): la noche se
         rehace desde ahora (lo anterior no cambia)."""
         if not self._en_vivo() or self.recalculando:
             return
@@ -890,10 +954,11 @@ class PolisomnografiaWindow(QMainWindow):
             if self.sesion is not sesion:
                 return
             self.recalculando = False
+            S['bio'] = list(self.S.get('bio') or [])
             self.S = S
             self._log('acomodar', t=t, de=antes, a=pos, etapa=etapa,
                       verdad={'min_sueno_supino_hasta_ahora': round(sup_antes, 1)})
-            self._mensaje(f'Entraste a la pieza: el paciente quedó {NOMBRE_POS[pos]}'
+            self._mensaje(f'El paciente se dio vuelta: quedó {NOMBRE_POS[pos]}'
                           + (' y se despertó un rato.' if etapa != 'W' else '.'))
             if seguia:
                 self.timer.start()
@@ -1040,12 +1105,16 @@ class PolisomnografiaWindow(QMainWindow):
         self.panel_sala.setVisible(vivo)
         if not vivo and self.pieza_grande is not None:
             self.pieza_grande.hide()
+        if not vivo:
+            self.intercom.hide()
         if vivo:
             t = min(self.S['N'] - 1, int(self.t_actual))
             pos, etapa = self.S['pos'][t], self.S['etapa'][t]
-            self.camara.poner(pos, etapa == 'W', hhmm(t))
-            if self.pieza_grande is not None:
-                self.pieza_grande.poner(pos, etapa == 'W', hhmm(t))
+            # Cómo respira en este segundo (lo mismo que dibujan las bandas y la cánula).
+            resp = Z.respiracion_en(self.S, Z.eventos_cerca(self.S, self.t_actual), self.t_actual)
+            for vista in (self.camara, self.pieza_grande):
+                if vista is not None:
+                    vista.poner(pos, etapa == 'W', hhmm(t), resp)
             estado = 'Despierto' if etapa == 'W' else 'Duerme'
             self.lbl_camara.setText(f'{hhmm(t)} · {estado} {NOMBRE_POS[pos]}'
                                     + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})'))

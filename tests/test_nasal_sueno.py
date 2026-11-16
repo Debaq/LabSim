@@ -351,6 +351,9 @@ def test_la_noche_entera_en_15_minutos():
     w._registrar()
     esperar(lambda: w.S is not None)
     w.timer.stop()
+    # Con la luz encendida corre en tiempo real (biocalibraciones); al apagarla, en 15 min.
+    assert w.cmb_velocidad.currentData() == 1
+    w._intercom('apagar_luz')
     assert w.cmb_velocidad.currentData() == 0
     tics = NOCHE_EN_MIN * 60 * 1000 / TIC_MS
     cerca(w._velocidad() * TIC_MS / 1000 * tics, w.S['N'], 1)

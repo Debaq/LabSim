@@ -1,11 +1,15 @@
 """La pieza del laboratorio de sueño (nasal/pieza_vista.py, resources/psg_pieza).
 
 - El paquete trae, para cada punto de vista de la ventanilla y para la cámara del techo, un recorte por
-  cada pose, dormido/despierto y nivel de respiración, y todos se leen.
-- Cada pose se ve distinta (el recorte de la cama cambia) y la respiración mueve algo.
+  cada pose y estado (dormido: grilla tórax × abdomen; despierto y roncando: en fase), y todos se leen.
+- Cada pose se ve distinta (el recorte de la cama cambia); la respiración, la paradoja y la boca abierta
+  mueven algo.
+- Respira como las bandas: en la apnea obstructiva el abdomen va al revés del tórax, en la central se
+  queda quieto, después del evento ronca con la boca abierta; despierto no hay paradoja.
 - La vista: dibuja la pieza; el mouse cambia el punto de vista; clic en la cámara chica intercambia las
   vistas; doble clic en la grande pide ampliarla; sin paquete no se cae.
-- En la ventana del PSG la vista sigue a la noche (pose y vigilia del segundo en curso).
+- En la ventana del PSG la vista sigue a la noche (pose, vigilia y respiración del segundo en curso) y
+  hay velocidad de tiempo real.
 """
 import os
 import sys
@@ -31,7 +35,9 @@ def _paquete():
 
 
 def _claves(P):
-    return {f'{p}_{d}_{r}' for p in POSES for d in (0, 1) for r in range(P.respira)}
+    n = range(P.respira)
+    return ({f'{p}_0_{i}_{j}' for p in POSES for i in n for j in n}
+            | {f'{p}_{e}_{r}_{r}' for p in POSES for e in (1, 2) for r in n})
 
 
 def test_el_paquete_trae_todo():
@@ -64,10 +70,63 @@ def _distintas(a, b, umbral=1500):
 def test_cada_pose_se_ve_distinta_y_respira():
     P = _paquete()
     g = P.vistas[2]
-    im = {p: P.imagen(g['cuadros'][f'{p}_0_0']) for p in POSES}
+    n = P.respira - 1
+    im = {p: P.imagen(g['cuadros'][f'{p}_0_0_0']) for p in POSES}
     assert _distintas(im['supino'], im['izquierda']) and _distintas(im['izquierda'], im['derecha'])
-    hondo = P.imagen(g['cuadros'][f'supino_0_{P.respira - 1}'])
+    hondo = P.imagen(g['cuadros'][f'supino_0_{n}_{n}'])
     assert _distintas(im['supino'], hondo, umbral=60)
+    paradoja = P.imagen(g['cuadros'][f'supino_0_{n}_0'])     # tórax arriba, abdomen abajo
+    assert _distintas(paradoja, hondo, umbral=30) and _distintas(paradoja, im['supino'], umbral=30)
+    # La boca abierta se ve en el primer plano de la cámara (techo), aunque sea poco.
+    t = P.techo
+    assert _distintas(P.imagen(t['cuadros'][f'supino_0_{n}_{n}']), P.imagen(t['cuadros'][f'supino_2_{n}_{n}']),
+                      umbral=3)
+
+
+def _recorrido(v, resp, despierto=False):
+    """(tórax, abdomen) a lo largo de un ciclo, con la respiración `resp`, ya asentada."""
+    v.poner('supino', despierto, '', resp)
+    v.esfuerzo, v.paradoja = resp[1], resp[2]
+    out = []
+    for k in range(20):
+        v.fase = k / 20
+        out.append(v.niveles())
+    return out
+
+
+def test_respira_como_las_bandas():
+    from nasal import sueno as Z
+    v = pv.VistaPieza()
+    ev = [dict(t=100, dur=20, tipo='ao', arousal=True), dict(t=200, dur=20, tipo='ac', arousal=False),
+          dict(t=300, dur=20, tipo='am', arousal=False)]
+    S = {'ev': ev, 'esp': [], 'ron': [False] * 10}
+    # Normal: tórax y abdomen juntos, todo el rango.
+    normal = _recorrido(v, Z.respiracion_en(S, ev, 50))
+    assert max(t for t, _ in normal) > 2.8 and min(t for t, _ in normal) < 0.2
+    assert all(abs(t - a) < 0.5 for t, a in normal)
+    # Final de la obstructiva: el abdomen sube cuando el tórax baja.
+    ao = _recorrido(v, Z.respiracion_en(S, Z.eventos_cerca(S, 118), 118))
+    assert all((t - 1.5) * (a - 1.5) <= 0.05 for t, a in ao) and max(abs(t - a) for t, a in ao) > 2
+    # Central: quieto. Mixta: empieza quieta y termina paradójica.
+    ac = _recorrido(v, Z.respiracion_en(S, Z.eventos_cerca(S, 210), 210))
+    assert max(t for t, _ in ac) - min(t for t, _ in ac) < 0.2
+    am0 = _recorrido(v, Z.respiracion_en(S, Z.eventos_cerca(S, 303), 303))
+    am1 = _recorrido(v, Z.respiracion_en(S, Z.eventos_cerca(S, 318), 318))
+    assert max(t for t, _ in am0) - min(t for t, _ in am0) < 0.2
+    assert max(abs(t - a) for t, a in am1) > 1.5
+    # Después de la obstructiva: respiraciones hondas y ronca (boca abierta).
+    rec = Z.respiracion_en(S, Z.eventos_cerca(S, 122), 122)
+    v.poner('supino', False, '', rec)
+    for _ in range(40):
+        v._t -= 0.05
+        v._tic()
+    assert v.boca > 0.8 and v.esfuerzo > 1.2
+    # Sin ronquido ni evento la boca se cierra.
+    v.poner('supino', False, '', Z.respiracion_en(S, ev, 50))
+    for _ in range(40):
+        v._t -= 0.05
+        v._tic()
+    assert v.boca < 0.1
 
 
 def _foto(v):
@@ -141,6 +200,14 @@ def test_en_la_ventana_del_psg():
     t = int(w.t_actual)
     assert w.camara.pos == w.S['pos'][t]
     assert w.camara.despierto == (w.S['etapa'][t] == 'W')
+    assert w.camara.resp == Z.respiracion_en(w.S, Z.eventos_cerca(w.S, w.t_actual), w.t_actual)
+    # En una apnea obstructiva la pieza recibe la paradoja de las bandas.
+    ao = next(x for x in w.S['ev'] if x['tipo'] == 'ao')
+    w.t_actual = ao['t'] + ao['dur'] - 2
+    w.dibujar()
+    assert w.camara.resp[2] > 0.9 and w.camara.pos == w.S['pos'][int(w.t_actual)]
+    w.cmb_velocidad.setCurrentIndex(w.cmb_velocidad.findData(1))
+    assert w._velocidad() == 1
     w._ampliar_pieza()
     assert w.pieza_grande.isVisible() and w.pieza_grande.pos == w.camara.pos
     w._manana()

@@ -17,6 +17,9 @@ src/impedanciometria/instrucciones.py) en resources/audio/comandos_z/:
     /tmp/venv_edge/bin/python scripts/voces_comandos.py --z              # todas
     /tmp/venv_edge/bin/python scripts/voces_comandos.py --z trague_una_vez
 
+--psg hace las del intercomunicador del laboratorio de sueño (COMANDOS_PSG,
+las claves de src/nasal/intercom.py) en resources/audio/comandos_psg/.
+
 --ac y --ot hacen las de los diapasones (COMANDOS_AC, resources/audio/
 comandos_ac/) y del otoscopio (COMANDOS_OT, resources/audio/comandos_ot/).
 
@@ -44,6 +47,7 @@ SALIDA = os.path.join(RAIZ, "resources", "audio", "comandos")
 SALIDA_Z = os.path.join(RAIZ, "resources", "audio", "comandos_z")
 SALIDA_AC = os.path.join(RAIZ, "resources", "audio", "comandos_ac")
 SALIDA_OT = os.path.join(RAIZ, "resources", "audio", "comandos_ot")
+SALIDA_PSG = os.path.join(RAIZ, "resources", "audio", "comandos_psg")
 
 # La de las grabaciones era femenina (~240 Hz): Catalina, un poco más lenta
 # para un paciente que oye mal.
@@ -183,6 +187,39 @@ COMANDOS_OT = {
 }
 
 
+# El técnico por el intercomunicador del laboratorio de sueño (src/nasal/intercom.py).
+COMANDOS_PSG = {
+    # NOCHE
+    "buenas_noches": "Buenas noches. Le hablo desde la sala de control, por el intercomunicador. "
+                     "Si necesita algo durante la noche, solo hable: yo lo escucho.",
+    "explicar_calibracion": "Antes de apagar la luz vamos a revisar que los sensores funcionen bien. "
+                            "Le voy a pedir algunas cosas: hágalas sin levantarse de la cama.",
+    "esta_comodo": "¿Está cómodo? Si le molesta algún sensor, me avisa.",
+    "no_se_levante": "Por favor, no se levante solo. Si necesita ir al baño, me avisa y entro a "
+                     "ayudarlo con los cables.",
+    "apagar_luz": "Muy bien, terminamos. Voy a apagar la luz. Duerma como lo hace en su casa. "
+                  "Que descanse.",
+    "buenos_dias": "Buenos días. Ya terminó el estudio. Voy a entrar a sacarle los sensores.",
+    # BIOCALIBRACIÓN
+    "ojos_abiertos": "Quédese quieto, con los ojos abiertos, mirando al frente, durante treinta "
+                     "segundos.",
+    "ojos_cerrados": "Ahora cierre los ojos y quédese tranquilo, sin dormirse, durante treinta "
+                     "segundos.",
+    "mire_a_los_lados": "Sin mover la cabeza, mire a la derecha y a la izquierda, cinco veces.",
+    "mire_arriba_abajo": "Sin mover la cabeza, mire hacia arriba y hacia abajo, cinco veces.",
+    "parpadee": "Parpadee cinco veces.",
+    "apriete_dientes": "Apriete los dientes con fuerza... y suelte.",
+    "respire_nariz": "Respire normal, por la nariz, con la boca cerrada.",
+    "respire_boca": "Ahora respire solo por la boca.",
+    "aguante": "Bote el aire y aguante la respiración unos diez segundos.",
+    "ronque": "Ahora haga como que ronca, unas tres veces.",
+    # POSICIÓN
+    "pos_supino": "Por favor, póngase de espaldas, mirando al techo.",
+    "pos_izquierda": "Por favor, gírese y quédese sobre su lado izquierdo.",
+    "pos_derecha": "Por favor, gírese y quédese sobre su lado derecho.",
+}
+
+
 def archivo(clave, salida=SALIDA):
     """Como h_audio.normalize: sin tildes (en_qué_oído -> en_que_oido)."""
     plano = unicodedata.normalize("NFKD", clave).encode("ascii", "ignore").decode()
@@ -269,6 +306,8 @@ if __name__ == "__main__":
         args, textos, salida = args[1:], COMANDOS_AC, SALIDA_AC
     elif args[:1] == ["--ot"]:
         args, textos, salida = args[1:], COMANDOS_OT, SALIDA_OT
+    elif args[:1] == ["--psg"]:
+        args, textos, salida = args[1:], COMANDOS_PSG, SALIDA_PSG
     pedidas = args or list(textos)
     desconocidas = [c for c in pedidas if c not in textos]
     if desconocidas:

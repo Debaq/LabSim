@@ -16,8 +16,12 @@ OpenGL), como la cabeza de `scripts/cabeza_electrodos`. Resultado en
   - Los cables llegan al cabezal del velador.
 - **Respiración:** shape keys `torax` y `abdomen` (separadas, para poder desfasarlas
   en la apnea obstructiva) en el cuerpo, la polera y las fajas.
-- **Estados:** 3 poses × dormido/despierto (ojos abiertos y la cabeza algo girada)
-  × 4 niveles de respiración.
+- **Estados:** 3 poses, cada una con:
+  - dormido: grilla de 4 niveles del tórax × 4 del abdomen, para la respiración en fase, la paradoja de
+    la apnea obstructiva y el quedarse quieto de la central;
+  - despierto (ojos abiertos y la cabeza algo girada): en fase;
+  - roncando (boca abierta): en fase.
+  LabSim funde los vecinos según `sueno.respiracion_en`, lo mismo que dibujan las bandas.
 - **Vistas:** la ventanilla desde 5 puntos corridos a lo largo del vidrio (la
   sensación de profundidad al mover el mouse) y la cámara del techo.
 
@@ -33,11 +37,15 @@ pathlib.Path('/tmp/psg_mh.json').write_text(json.dumps(d))
 EOF
 python3 ~/Escritorio/Proyectos/makehuman-lotes/lotes.py /tmp/psg_mh.json
 
-# 2. Blender: todos los cuadros (~25 min, 144 PNG)
+# 2. Blender: todos los cuadros (~1 h, 432 PNG)
 blender -b -P scripts/psg_pieza/gen_pieza.py -- todo /tmp/psg_todo
 
 # 3. Paquete para LabSim
 python3 scripts/psg_pieza/empaquetar.py /tmp/psg_todo
+
+# Los ronquidos (grabaciones CC0 de Freesound, recortadas por inspiración y por sexo):
+# resources/audio/psg/<sexo>/<id>_<n>.wav y FUENTES.md
+python3 scripts/psg_pieza/ronquidos.py
 ```
 
 Para revisar algo suelto: `blender -b -P scripts/psg_pieza/gen_pieza.py -- muestra
@@ -47,5 +55,5 @@ Para revisar algo suelto: `blender -b -P scripts/psg_pieza/gen_pieza.py -- muest
 
 - El montaje se ve siempre completo, aunque el alumno no haya puesto algún
   sensor (habría que renderizar cada sensor como capa aparte).
-- Los eventos: el esfuerzo paradójico de la apnea obstructiva (tórax y abdomen
-  desfasados), el despertar (sacudón) y el ronquido con la boca abierta.
+- El despertar se ve solo como respiraciones hondas con ronquido (las de recuperación); no hay
+  movimiento del cuerpo.

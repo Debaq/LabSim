@@ -9175,3 +9175,62 @@ intercambia), un paciente genérico por ahora, y primero poses y respiración
   cierra sola cuando la noche termina.
 - Queda fuera: el montaje se ve completo aunque el alumno no haya puesto un
   sensor, y los eventos (paradoja, despertar, ronquido).
+
+### Los eventos en la pieza (2026-11-16)
+
+Él: "ahora haz los eventos de la apnea en la pieza".
+
+- Respira lo mismo que dibujan las bandas: `sueno.respiracion_en(S, evs, t)`
+  (sacada de `senales`, sin cambiar un número) da esfuerzo, paradoja y
+  ronquido del segundo en curso; la pieza pone tórax = esfuerzo·sen y
+  abdomen = esfuerzo·sen(+0,2)·(1 − 2·paradoja), igual que las bandas.
+  Obstructiva: el abdomen sube cuando el tórax baja, cada vez más fuerte;
+  central: quieto; mixta: quieto y después paradójico; hipopnea y RERA:
+  algo de desfase; después del evento: respiraciones hondas y más rápidas
+  con la boca abierta (ronquido), igual en los minutos que ronca.
+- Fotos: dormido, la grilla tórax × abdomen (4×4, se funden los cuatro
+  vecinos); despierto y roncando, solo en fase (en vigilia no hay eventos).
+- Velocidad nueva "Tiempo real": a ×31 una apnea de 20 s dura menos de un
+  segundo en pantalla; en pausa la pieza sigue respirando como en ese
+  segundo (también sirve para mirarla).
+- El despertar no mueve el cuerpo: solo las respiraciones de recuperación.
+
+### El intercomunicador, las biocalibraciones y el ronquido (2026-11-16)
+
+Él: los audios de instrucciones "las dos [frases de la noche y
+biocalibraciones] y las posiciones en las que debe estar el paciente,
+además la grabación es automática ahora las posiciones y no atiende a la
+instrucción"; el ronquido, sintético.
+
+- `nasal/intercom.py`: el panel de frases de los otros equipos
+  (FrasesHabladas) en su propia ventana ("Intercomunicador…" en la sala),
+  con NOCHE, BIOCALIBRACIÓN y POSICIÓN. Audios edge-tts con la voz de la
+  examinadora (`scripts/voces_comandos.py --psg`, resources/audio/comandos_psg).
+  Cada frase va al registro (`psg_intercom`: clave, t, etapa, lo que hizo).
+- "Registrar la noche" ya no apaga la luz: parte en tiempo real, con el
+  paciente despierto, para saludar y calibrar; "Apagar la luz" pasa a la
+  noche en 15 min (si sigue en tiempo real; la velocidad igual se puede
+  cambiar a mano).
+- Biocalibraciones (`sueno.BIOCAL`, `S['bio']`): las hace solo despierto
+  (dormido no oye) y se ven en el canal que se calibra: EEG sin alfa con
+  ojos abiertos y con alfa cerrados, EOG al mirar a los lados (menos arriba
+  y abajo: la derivación es horizontal) y al parpadear, EMG al apretar los
+  dientes, la cánula casi plana respirando por la boca (el térmico no),
+  flujo y bandas quietos al aguantar, ronquido al simularlo. Empiezan
+  cuando termina la frase. Van al informe (`bio`) y vuelven al retomar.
+- Posiciones: los botones de la sala se lo piden por el intercomunicador
+  ("Pedirle que se dé vuelta"); se da vuelta al terminar la frase (4 s) y
+  sigue la regla de antes (sueno.acomodar: se despierta un rato).
+- Ronquido: el sintético sonaba "como un motor, muy metálico" (él); se usan
+  grabaciones CC0 de Freesound ("están buenas, aplícalas, así tenemos para
+  diferentes pacientes hombres o mujeres"): **excepción a "todo sintético"
+  (13-11), que es para voces**. `scripts/psg_pieza/ronquidos.py` recorta
+  cada inspiración roncada de 4 grabaciones de hombre y 2 de mujer
+  (resources/audio/psg/<sexo>/, FUENTES.md con el origen de cada una); cada
+  caso usa una grabación de su sexo (gender 1 = mujer), la misma siempre
+  (id del caso). Suena al empezar cada inspiración mientras el modelo dice
+  que ronca, más fuerte en la recuperación tras un evento; no en la apnea
+  (no pasa aire). Solo la vista de la sala (la ampliada no, para no sonar
+  doble).
+- Queda fuera: el paciente no contesta por el intercomunicador; mover los
+  pies (no hay canal de EMG de piernas).

@@ -284,11 +284,14 @@ class Paciente:
                 else:
                     b.inputs['Roughness'].default_value = 0.6
 
-    def expresion(self, nombre):
+    def expresion(self, nombre, boca=0.0):
+        """nombre: 'dormido' o None (despierto, ojos abiertos); boca: cuánto abre la boca (ronquido)."""
         for o in self.mallas:
             if o.data.shape_keys:
                 for kb in o.data.shape_keys.key_blocks[1:]:
-                    if kb.name in EXPRESIONES:
+                    if kb.name == 'boca':
+                        kb.value = boca
+                    elif kb.name in EXPRESIONES:
                         kb.value = 1.0 if kb.name == nombre else 0.0
 
     def respirar(self, torax, abdomen):
@@ -888,14 +891,25 @@ def muestra(salida, pose='supino', despierto=False):
         foto(camara_cara(p), 800, 600, salida / f'cara_{fin}.png')
 
 
-RESPIRA = 4     # cuadros de la inspiración (0 = fin de la espiración, RESPIRA-1 = fin de la inspiración)
+RESPIRA = 4     # niveles del tórax y del abdomen (0 = fin de la espiración, RESPIRA-1 = fin de la inspiración)
 POSES_ORDEN = ('supino', 'izquierda', 'derecha')
+BOCA = 0.8      # cuánto abre la boca al roncar
+# Estados (clave pose_estado_tórax_abdomen):
+#   0 dormido: la grilla entera de tórax × abdomen (en fase, paradoja de la apnea obstructiva, quieto);
+#   1 despierto: respira en fase (la diagonal);
+#   2 dormido roncando (boca abierta): en fase.
+
+
+def estados():
+    n = RESPIRA
+    return ([(0, i, j) for i in range(n) for j in range(n)] + [(1, r, r) for r in range(n)]
+            + [(2, r, r) for r in range(n)])
 
 
 def todo(salida, poses=POSES_ORDEN):
-    """Todos los cuadros: por pose, dormido/despierto y nivel de respiración, la ventanilla desde cada
-    punto de vista y la cámara del techo. Deja también vistas.json (dónde cae el vano de la
-    ventanilla en cada punto de vista, para que LabSim ponga el reflejo del vidrio)."""
+    """Todos los cuadros: por pose y estado, la ventanilla desde cada punto de vista y la cámara del
+    techo. Deja también vistas.json (dónde cae el vano de la ventanilla en cada punto de vista, para que
+    LabSim ponga el reflejo del vidrio)."""
     salida = pathlib.Path(salida)
     salida.mkdir(parents=True, exist_ok=True)
     p, colchon, alm, centro, vano = armar()
@@ -915,14 +929,15 @@ def todo(salida, poses=POSES_ORDEN):
         p.expresion('dormido')
         p.respirar(0, 0)
         f = frazada(pose, colchon, alm, p)
-        for despierto in (0, 1):
-            p.posar(pose, bool(despierto))
-            p.expresion(None if despierto else 'dormido')
+        for despierto in (False, True):
+            p.posar(pose, despierto)
             cables(p)
-            for r in range(RESPIRA):
-                nivel = r / (RESPIRA - 1)
-                p.respirar(nivel, nivel)
-                clave = f'{pose}_{despierto}_{r}'
+            for e, i, j in estados():
+                if (e == 1) != despierto:
+                    continue
+                p.expresion(None if despierto else 'dormido', BOCA if e == 2 else 0.0)
+                p.respirar(i / (RESPIRA - 1), j / (RESPIRA - 1))
+                clave = f'{pose}_{e}_{i}_{j}'
                 for k, cam in enumerate(camaras):
                     foto(cam, ANCHO_V, ALTO_V, salida / f'v{k}_{clave}.png')
                 foto(techo, ANCHO_T, ALTO_T, salida / f't_{clave}.png')
