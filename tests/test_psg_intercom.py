@@ -93,6 +93,9 @@ def test_la_sala_de_control():
     T.LOGS.eventos.clear()
     w = _noche_en_vivo()
     assert w.cmb_velocidad.currentData() == 1 and w.S['etapa'][0] == 'W'
+    # Con la luz encendida el botón para apagarla está a la vista en la sala.
+    w.dibujar()
+    assert w.luz_encendida and not w.btn_luz.isHidden() and 'Luz encendida' in w.lbl_camara.text()
     w.t_actual = 20
     w._intercom('mire_a_los_lados')
     assert w.S['bio'] == [(20, 'mire_a_los_lados')]
@@ -105,9 +108,16 @@ def test_la_sala_de_control():
     w.t_actual = dormido
     w._intercom('apriete_dientes')
     assert len(w.S['bio']) == 1 and 'dormido' in w.lbl_mensaje.text()
-    # Apagar la luz larga la noche.
-    w._intercom('apagar_luz')
-    assert w.cmb_velocidad.currentData() == 0
+    # Apagar la luz (el botón de la sala) larga la noche.
+    w._apagar_luz()
+    assert w.cmb_velocidad.currentData() == 0 and not w.luz_encendida and w.btn_luz.isHidden()
+    assert 'Luz encendida' not in w.lbl_camara.text()
+    # Dormido y roncando, la sala lo dice (y la pieza ronca).
+    ronca = next(t for t in range(dormido, w.S['N']) if w.S['etapa'][t] != 'W' and w.S['ron'][t // 60]
+                 and Z.respiracion_en(w.S, Z.eventos_cerca(w.S, t), t)[0] > 0.3)
+    w.t_actual = ronca
+    w.dibujar()
+    assert 'ronca' in w.lbl_camara.text()
     # Pedirle otra posición: se da vuelta al terminar la frase y conserva las biocalibraciones.
     antes = w.S['pos'][dormido]
     otra = next(p for p in Z.POSICIONES if p != antes)

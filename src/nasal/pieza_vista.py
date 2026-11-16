@@ -168,7 +168,7 @@ class VistaPieza(QWidget):
         self.fase = (self.fase + dt / ciclo) % 1.0
         # Empieza la inspiración (el tórax sale de su punto más bajo): ronca si corresponde.
         if antes < 0.78 <= self.fase and ron > 0 and env_f > 0.3 and par < 0.35 and self.pos is not None:
-            self._roncar(min(1.0, 0.35 + 0.5 * ron))
+            self._roncar(min(1.0, 0.6 + 0.45 * ron))
         k = min(1.0, dt * 4)
         self.esfuerzo += (env_e - self.esfuerzo) * k
         self.paradoja += (par - self.paradoja) * k

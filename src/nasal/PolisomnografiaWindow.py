@@ -476,6 +476,13 @@ class PolisomnografiaWindow(QMainWindow):
         self.intercom.setWindowTitle('Intercomunicador de la sala de control')
         self.intercom.resize(760, 520)
         self.intercom.btn_checked.connect(self._intercom)
+        # Mientras la luz está encendida (calibrando, en tiempo real) el paciente está despierto y no
+        # ronca: apagarla tiene que estar a la vista, no solo dentro del intercomunicador.
+        self.luz_encendida = False
+        self.btn_luz = self._boton('Apagar la luz', self._apagar_luz, True)
+        self.btn_luz.setToolTip('Decirle por el intercomunicador que se apaga la luz: empieza la noche '
+                                '(deja el tiempo real)')
+        self.panel_sala.agregar(self.btn_luz)
         self.btn_intercom = self._boton('Intercomunicador…', self._abrir_intercom)
         self.btn_intercom.setToolTip('Hablarle al paciente: saludar, biocalibraciones, apagar la luz')
         self.panel_sala.agregar(self.btn_intercom)
@@ -506,6 +513,10 @@ class PolisomnografiaWindow(QMainWindow):
     def _abrir_intercom(self):
         self.intercom.show()
         self.intercom.raise_()
+
+    def _apagar_luz(self):
+        self.intercom.decir(APAGAR_LUZ)
+        self._intercom(APAGAR_LUZ)
 
     def _pedir_posicion(self, pos):
         clave = next(k for k, p in POSICION.items() if p == pos)
@@ -539,7 +550,9 @@ class PolisomnografiaWindow(QMainWindow):
                 self.cmb_velocidad.setCurrentIndex(self.cmb_velocidad.findData(0))
             self._mensaje('Apagaste la luz: la noche corre. Desde la sala de control la vigilas y puedes '
                           'pedirle que se dé vuelta; la puntuación automática está lista al encender la luz.')
+            self.luz_encendida = False
             hizo = 'luz'
+            self.dibujar()
         self._log('intercom', clave=clave, t=t, etapa=etapa, hizo=hizo)
 
     def _ampliar_pieza(self):
@@ -678,6 +691,7 @@ class PolisomnografiaWindow(QMainWindow):
 
     def la_super(self, data, appointment_id=None):
         self.timer.stop()
+        self.luz_encendida = False
         self.corriendo = False
         self.recalculando = False
         self.t_actual = None
@@ -851,6 +865,7 @@ class PolisomnografiaWindow(QMainWindow):
                 # Con la luz encendida y en tiempo real: el técnico saluda y
                 # hace las biocalibraciones; "Apagar la luz" larga la noche.
                 self.cmb_velocidad.setCurrentIndex(self.cmb_velocidad.findData(1))
+                self.luz_encendida = True
                 self.timer.start()
                 self._mensaje(sin + 'El paciente está acostado con la luz encendida y el registro corre en tiempo '
                               'real. Por el intercomunicador salúdalo, haz las biocalibraciones y apaga la luz: '
@@ -1116,8 +1131,12 @@ class PolisomnografiaWindow(QMainWindow):
                 if vista is not None:
                     vista.poner(pos, etapa == 'W', hhmm(t), resp)
             estado = 'Despierto' if etapa == 'W' else 'Duerme'
-            self.lbl_camara.setText(f'{hhmm(t)} · {estado} {NOMBRE_POS[pos]}'
-                                    + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})'))
+            ronca = resp[4] > 0 and resp[0] > 0.3 and etapa != 'W'
+            self.lbl_camara.setText(('Luz encendida · ' if self.luz_encendida else '')
+                                    + f'{hhmm(t)} · {estado} {NOMBRE_POS[pos]}'
+                                    + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})')
+                                    + (' · ronca' if ronca else ''))
+            self.btn_luz.setVisible(self.luz_encendida)
             for p_, b in self.btn_acomodar.items():
                 b.setEnabled(not self.recalculando and p_ != pos)
             self.btn_pausa.setText('Pausa' if self.corriendo else 'Seguir')
