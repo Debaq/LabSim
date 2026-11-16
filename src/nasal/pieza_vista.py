@@ -9,6 +9,11 @@ abdomen; despierto y roncando (boca abierta), en fase. Por la ventanilla hay cin
 mover el mouse se pasa de uno a otro y el marco se corre más que la cama, como al mover la cabeza frente
 a un vidrio; el reflejo del vidrio se corre al revés.
 
+Dos modos. En vivo (la noche en tiempo real o en pausa) respira, ronca y se ven los eventos. Con la
+noche acelerada (`adelantar(factor)`) es como adelantar la grabación: la imagen solo cambia con lo que
+dura (posición, despierto o dormido), sin respirar ni sonar, y lo dice encima ("⏩ ×31 · sin sonido");
+respirar o roncar a ×31 no tendría sentido.
+
 Respira como dicen las bandas del registro (sueno.respiracion_en, del segundo de la noche en curso): el
 esfuerzo da la amplitud y la paradoja pone el abdomen al revés del tórax (apnea obstructiva); en la
 central se queda quieto; al terminar el evento, respiraciones hondas con ronquido (boca abierta). El
@@ -112,6 +117,7 @@ class VistaPieza(QWidget):
         self.hora = ''
         self.principal = 'ventanilla'
         self.resp = NORMAL
+        self.factor = None             # noche acelerada (modo adelantar) o None (en vivo)
         self.fase = 0.0                # ciclo respiratorio (vueltas)
         self.esfuerzo, self.paradoja, self.boca = 1.0, 0.0, 0.0   # suavizados hacia self.resp
         self.u = self.u_meta = 2.0     # punto de vista de la ventanilla (0..4, 2 = centro)
@@ -130,6 +136,16 @@ class VistaPieza(QWidget):
 
     # --- estado ---------------------------------------------------------
 
+    def adelantar(self, factor):
+        """factor (segundos de noche por segundo real) > 1: modo adelantar; None o ≤ 1: en vivo."""
+        factor = factor if factor and factor > 1 else None
+        if factor != self.factor:
+            self.factor = factor
+            if factor:
+                self.callar()
+                self.boca = 0.0
+            self.update()
+
     def poner(self, pos, despierto, hora='', resp=None):
         """resp: sueno.respiracion_en del segundo en curso (None = respira normal)."""
         self.resp = tuple(resp) if resp else NORMAL
@@ -140,6 +156,8 @@ class VistaPieza(QWidget):
     def niveles(self):
         """(tórax, abdomen) en niveles del paquete (0 = fin de la espiración), como las bandas."""
         n = (self.P.respira - 1) if self.P else 3
+        if self.factor:
+            return n / 2, n / 2
         fi = 2 * math.pi * self.fase
         torax = self.esfuerzo * math.sin(fi)
         abd = self.esfuerzo * math.sin(fi + 0.2) * (1 - 2 * self.paradoja)
@@ -165,6 +183,11 @@ class VistaPieza(QWidget):
         ahora = time.monotonic()
         dt, self._t = min(0.2, ahora - self._t), ahora
         env_f, env_e, par, _lim, ron, _ar = self.resp
+        if self.factor:
+            self.u += (self.u_meta - self.u) * min(1.0, dt * 6)
+            if abs(self.u - self.u_meta) > 0.01:
+                self.update()
+            return
         ciclo = CICLO_RECUPERA if env_e > 1.2 else CICLO[self.despierto]
         antes = self.fase
         self.fase = (self.fase + dt / ciclo) % 1.0
@@ -387,4 +410,20 @@ class VistaPieza(QWidget):
         q.setBrush(Qt.BrushStyle.NoBrush)
         q.setPen(QPen(QColor(255, 255, 255, 170), 1.2))
         q.drawRect(chica)
+        if self.factor:
+            self._letrero(q, area, f'⏩ ×{self.factor:.0f} · sin sonido')
         q.end()
+
+    def _letrero(self, q, area, texto):
+        f = QFont(self.font())
+        f.setPixelSize(max(10, round(area.height() * 0.06)))
+        f.setBold(True)
+        q.setFont(f)
+        caja = q.fontMetrics().boundingRect(texto).adjusted(-8, -4, 8, 4)
+        caja.moveCenter(QPointF(area.center().x(), area.bottom() - caja.height()).toPoint())
+        q.setOpacity(1)
+        q.setPen(Qt.PenStyle.NoPen)
+        q.setBrush(QColor(0, 0, 0, 150))
+        q.drawRoundedRect(QRectF(caja), 6, 6)
+        q.setPen(QColor(255, 255, 255, 235))
+        q.drawText(QRectF(caja), Qt.AlignmentFlag.AlignCenter, texto)

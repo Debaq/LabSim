@@ -57,6 +57,8 @@ NOCHE_EN_MIN = 15
 VELOCIDADES = ((0, f'Noche en {NOCHE_EN_MIN} min'), (1, 'Tiempo real'), (60, '×60'), (120, '×120'),
                (300, '×300'))
 TIC_MS = 200
+# "Ver la próxima apnea": cuántos segundos antes de que empiece (se alcanza a oírlo roncar).
+ANTES_DE_LA_APNEA = 20
 # Lo que dura la frase de posición: el paciente se da vuelta al terminar de oírla.
 RETARDO_POSICION_MS = 4000
 NOMBRE_POS = {'supino': 'de espaldas', 'izquierda': 'sobre el lado izquierdo', 'derecha': 'sobre el lado derecho'}
@@ -505,6 +507,13 @@ class PolisomnografiaWindow(QMainWindow):
         fila.addWidget(self.cmb_velocidad)
         fila.addWidget(self.btn_pausa)
         self.panel_sala.agregar_layout(fila)
+        self.cmb_velocidad.currentIndexChanged.connect(self._al_cambiar_velocidad)
+        # Acelerada, la pieza se ve como una grabación adelantada (sin respirar ni sonar): para mirar
+        # y oír una apnea, se adelanta hasta poco antes de la próxima y se pasa a tiempo real.
+        self.btn_apnea = self._boton('Ver la próxima apnea', self._proxima_apnea)
+        self.btn_apnea.setToolTip(f'Adelantar hasta {ANTES_DE_LA_APNEA} s antes de la próxima apnea y mirarla '
+                                  'en tiempo real (ronquido, paradoja, recuperación)')
+        self.panel_sala.agregar(self.btn_apnea)
         self.btn_manana = self._boton('Hasta la mañana', self._manana)
         self.btn_manana.setToolTip('Adelantar hasta que se enciende la luz')
         self.panel_sala.agregar(self.btn_manana)
@@ -513,6 +522,35 @@ class PolisomnografiaWindow(QMainWindow):
     def _abrir_intercom(self):
         self.intercom.show()
         self.intercom.raise_()
+
+    def _al_cambiar_velocidad(self, _i):
+        if self._en_vivo():
+            self._log('velocidad', velocidad=self.cmb_velocidad.currentData(), t=int(self.t_actual))
+            self.dibujar()
+
+    def _proxima_apnea(self):
+        """Adelanta la noche hasta poco antes de la próxima apnea y la deja en tiempo real."""
+        if not self._en_vivo() or self.recalculando:
+            return
+        ahora = self.t_actual
+        ev = next((x for x in self.S['ev'] if x['tipo'] in Z.APNEAS and x['t'] - ANTES_DE_LA_APNEA > ahora), None)
+        if ev is None:
+            self._mensaje('No quedan apneas esta noche.')
+            return
+        self.t_actual = ev['t'] - ANTES_DE_LA_APNEA
+        self.t0 = max(0, int(self.t_actual) - self._dur())
+        self.luz_encendida = False
+        self.cmb_velocidad.blockSignals(True)
+        self.cmb_velocidad.setCurrentIndex(self.cmb_velocidad.findData(1))
+        self.cmb_velocidad.blockSignals(False)
+        if not self.corriendo:
+            self.corriendo = True
+            self.timer.start()
+        self._log('proxima_apnea', desde=int(ahora), hasta=int(self.t_actual), verdad={'tipo': ev['tipo'],
+                  't': ev['t'], 'dur': ev['dur']})
+        self._mensaje(f'Adelantaste hasta {hhmm(self.t_actual)}: mira y escucha al paciente en tiempo real. '
+                      'Para seguir la noche, vuelve a acelerarla.')
+        self.dibujar()
 
     def _apagar_luz(self):
         self.intercom.decir(APAGAR_LUZ)
@@ -548,8 +586,9 @@ class PolisomnografiaWindow(QMainWindow):
         elif clave == APAGAR_LUZ:
             if self.cmb_velocidad.currentData() == 1:
                 self.cmb_velocidad.setCurrentIndex(self.cmb_velocidad.findData(0))
-            self._mensaje('Apagaste la luz: la noche corre. Desde la sala de control la vigilas y puedes '
-                          'pedirle que se dé vuelta; la puntuación automática está lista al encender la luz.')
+            self._mensaje('Apagaste la luz: la noche corre acelerada y la pieza se ve adelantada, sin sonido. '
+                          'Para mirar y oír una apnea: «Ver la próxima apnea» (o Tiempo real). La puntuación '
+                          'automática está lista al encender la luz.')
             self.luz_encendida = False
             hizo = 'luz'
             self.dibujar()
@@ -1127,8 +1166,11 @@ class PolisomnografiaWindow(QMainWindow):
             pos, etapa = self.S['pos'][t], self.S['etapa'][t]
             # Cómo respira en este segundo (lo mismo que dibujan las bandas y la cánula).
             resp = Z.respiracion_en(self.S, Z.eventos_cerca(self.S, self.t_actual), self.t_actual)
+            # Acelerada (y corriendo) es adelantar la grabación; en tiempo real o en pausa, en vivo.
+            factor = self._velocidad() if self.corriendo else None
             for vista in (self.camara, self.pieza_grande):
                 if vista is not None:
+                    vista.adelantar(factor)
                     vista.poner(pos, etapa == 'W', hhmm(t), resp)
             estado = 'Despierto' if etapa == 'W' else 'Duerme'
             ronca = resp[4] > 0 and resp[0] > 0.3 and etapa != 'W'
@@ -1137,6 +1179,7 @@ class PolisomnografiaWindow(QMainWindow):
                                     + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})')
                                     + (' · ronca' if ronca else ''))
             self.btn_luz.setVisible(self.luz_encendida)
+            self.btn_apnea.setEnabled(not self.recalculando)
             for p_, b in self.btn_acomodar.items():
                 b.setEnabled(not self.recalculando and p_ != pos)
             self.btn_pausa.setText('Pausa' if self.corriendo else 'Seguir')

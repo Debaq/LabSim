@@ -9234,3 +9234,21 @@ instrucción"; el ronquido, sintético.
   doble).
 - Queda fuera: el paciente no contesta por el intercomunicador; mover los
   pies (no hay canal de EMG de piernas).
+
+### Noche acelerada = adelantar la grabación (2026-11-16)
+
+Él: "los estudiantes lo ven rapidísimo los ronquidos y el sonido a velocidad
+normal, a otra velocidad será raro... no sé cómo hacer el realismo". A ×31
+respirar o roncar acelerado no tiene sentido (7 respiraciones por segundo),
+y respirar a ritmo real con el hipnograma volando tampoco calza.
+
+- Acelerada y corriendo: la pieza es una grabación adelantada
+  (`VistaPieza.adelantar`): cambia solo con lo que dura (posición, despierto
+  o dormido), sin respirar ni sonar, con "⏩ ×31 · sin sonido" encima.
+- En tiempo real o en pausa: en vivo (respira, ronca, eventos).
+- "Ver la próxima apnea" (sala): adelanta hasta 20 s antes de la próxima
+  apnea (`sueno.APNEAS`) y pasa a tiempo real: se oye roncar, callarse con
+  la paradoja y recuperar. Log `psg_proxima_apnea` (con el evento en
+  `verdad`) y `psg_velocidad` al cambiar la velocidad.
+- El técnico real vigila en tiempo real; acelerar es una licencia del
+  simulador para que el práctico quepa en la clase.

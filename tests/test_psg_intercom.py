@@ -186,6 +186,59 @@ def test_ronca_al_inspirar():
     assert correr(Z.respiracion_en(ao, ao['ev'], 122), 6) >= 1
 
 
+def test_acelerada_es_adelantar_la_grabacion():
+    w = _noche_en_vivo()
+    w._apagar_luz()                                     # pasa a "Noche en 15 min" (~×31)
+    w.timer.stop()
+    S = w.S
+    t = next(t for t in range(S['N']) if S['etapa'][t] != 'W' and all(S['ron'][(t // 60) + k] for k in range(3)))
+    w.t_actual = t
+    w.dibujar()
+    v = w.camara
+    assert v.factor and v.factor > 20
+    v.ronco = 0
+    for _ in range(200):                                # 10 s: ni respira ni ronca
+        v._t -= 0.05
+        v._tic()
+    assert v.ronco == 0 and v.niveles() == (1.5, 1.5) and v.boca == 0
+    # En pausa o en tiempo real: en vivo, ronca.
+    w._pausa()
+    assert v.factor is None
+    for _ in range(200):
+        v._t -= 0.05
+        v._tic()
+    assert v.ronco >= 1
+    w._pausa()
+    assert v.factor
+    w.cmb_velocidad.setCurrentIndex(w.cmb_velocidad.findData(1))
+    assert v.factor is None and T.LOGS.de('psg_velocidad')
+
+
+def test_ver_la_proxima_apnea():
+    from nasal.PolisomnografiaWindow import ANTES_DE_LA_APNEA
+    T.LOGS.eventos.clear()
+    w = _noche_en_vivo()
+    w._apagar_luz()
+    w.timer.stop()
+    ev = next(x for x in w.S['ev'] if x['tipo'] in Z.APNEAS)
+    w._proxima_apnea()
+    w.timer.stop()
+    assert w.t_actual == ev['t'] - ANTES_DE_LA_APNEA and w.cmb_velocidad.currentData() == 1
+    assert w.camara.factor is None and w.corriendo
+    assert T.LOGS.de('psg_proxima_apnea')[0]['verdad']['t'] == ev['t']
+    # Al llegar a la apnea, la pieza recibe la apnea (la obstructiva, con paradoja).
+    w.t_actual = ev['t'] + ev['dur'] - 2
+    w.dibujar()
+    assert w.camara.resp[1] < 0.1 if ev['tipo'] == 'ac' else w.camara.resp[0] < 0.1
+    # La siguiente vez va a la apnea que sigue; al final de la noche, no hay más.
+    w._proxima_apnea()
+    sig = next(x for x in w.S['ev'] if x['tipo'] in Z.APNEAS and x['t'] > ev['t'])
+    assert w.t_actual == sig['t'] - ANTES_DE_LA_APNEA
+    w.t_actual = w.S['N'] - 5
+    w._proxima_apnea()
+    assert 'No quedan apneas' in w.lbl_mensaje.text()
+
+
 if __name__ == '__main__':
     for nombre, fn in list(globals().items()):
         if nombre.startswith('test_') and callable(fn):
