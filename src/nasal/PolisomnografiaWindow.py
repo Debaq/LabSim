@@ -2,7 +2,11 @@
 demo interna del Laboratorio de sueño.
 
 Como se hace: el alumno elige el estudio (polisomnografía en el laboratorio
-o poligrafía en la casa), monta los sensores y registra la noche. Después
+o poligrafía en la casa), monta los sensores y registra la noche. En el
+laboratorio la noche corre (×60 a ×600, con pausa y "Hasta la mañana"):
+desde la sala de control ve al paciente por la cámara y puede entrar a
+acomodarlo de espaldas o de lado (sueno.acomodar: se despierta un rato y la
+noche se rehace desde ahí). En la casa no hay técnico: llega entera. Después
 revisa el registro como en el programa del equipo: arriba la noche entera
 (hipnograma en la polisomnografía, posición, eventos y SpO2), abajo la
 ventana de 30 s a 5 min con cada canal. El programa propone una puntuación
@@ -25,8 +29,8 @@ import os
 import time
 
 import pyqtgraph as pg
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QColor
+from PySide6.QtCore import QRectF, Qt, QTimer
+from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QHBoxLayout, QMainWindow, QPlainTextEdit,
                                QPushButton, QScrollArea, QSplitter, QTabWidget, QVBoxLayout, QWidget)
 
@@ -40,6 +44,10 @@ from nasal.graficos import exportar
 from vemp.widgets.kit import Campos, Pastilla, Tarjeta, etiqueta
 
 VENTANAS = ((30, '30 s'), (120, '2 min'), (300, '5 min'))
+# La noche corre en la PSG (el técnico la vigila y puede acomodar al paciente).
+VELOCIDADES = ((60, '×60'), (120, '×120'), (300, '×300'), (600, '×600'))
+TIC_MS = 200
+NOMBRE_POS = {'supino': 'de espaldas', 'izquierda': 'sobre el lado izquierdo', 'derecha': 'sobre el lado derecho'}
 COLOR_TIPO = {'ao': '#C62F3A', 'am': '#8E44AD', 'ac': '#2F5D9E', 'h': '#D98E04', 'rera': '#21796C'}
 ABREV_TIPO = {'ao': 'AO', 'am': 'AM', 'ac': 'AC', 'h': 'H', 'rera': 'RERA'}
 COLOR_POS = {'supino': '#C62F3A', 'izquierda': '#21796C', 'derecha': '#2F5D9E'}
@@ -139,7 +147,8 @@ class Noche:
                 self.al_clic(x * 3600)
                 return
 
-    def dibujar(self, S, eventos, excluidos, t0, dur):
+    def dibujar(self, S, eventos, excluidos, t0, dur, hasta=None):
+        """`hasta`: mientras la noche corre, lo que va registrado (s)."""
         for p in (self.p_etapa, self.p_ev, self.p_sp):
             for item in list(p.items):
                 if item is not self.seleccion:
@@ -149,28 +158,36 @@ class Noche:
         horas = S['N'] / 3600
         for p in (self.p_etapa, self.p_ev, self.p_sp):
             p.setXRange(0, horas, padding=0)
+        hasta = S['N'] if hasta is None else max(0, min(S['N'], int(hasta)))
+        if hasta <= 0:
+            return
         if S['estudio'] == 'psg':
             self.p_etapa.getAxis('left').setTicks([[(4, 'W'), (3, 'R'), (2, 'N1'), (1, 'N2'), (0, 'N3')]])
             xs, ys = [], []
             for e, a, b in S['seg']:
-                xs += [a / 3600, b / 3600]
+                if a >= hasta:
+                    break
+                xs += [a / 3600, min(b, hasta) / 3600]
                 ys += [Z.ORDEN[e], Z.ORDEN[e]]
             self.p_etapa.plot(xs, ys, pen=pg.mkPen(tema.TEXTO, width=1.4))
             self.p_etapa.setYRange(-0.5, 4.5, padding=0)
         else:
             self.p_etapa.getAxis('left').setTicks([[(1, 'Sup'), (0, 'Lat')]])
             xs, ys = [], []
-            for a, b, p in S['P']['pos']:
+            for a, b, p in Z.tramos_posicion(S):
                 y = 1 if p == 'supino' else 0
-                xs += [a / 60, min(b * 60, S['N']) / 3600]
+                xs += [a / 3600, b / 3600]
                 ys += [y, y]
             self.p_etapa.plot(xs, ys, pen=pg.mkPen(tema.TEXTO, width=1.4))
             self.p_etapa.setYRange(-0.5, 1.5, padding=0)
-        # La posición, como una franja de color bajo el hipnograma.
-        for a, b, p in S['P']['pos']:
+        # La posición (la de verdad, con los acomodos), como una franja de
+        # color bajo el hipnograma; cada acomodo, una línea.
+        for a, b, p in Z.tramos_posicion(S):
+            if a >= hasta:
+                break
             color = QColor(COLOR_POS[p])
             color.setAlpha(45)
-            r = pg.LinearRegionItem(values=(a / 60, min(b * 60, S['N']) / 3600), movable=False,
+            r = pg.LinearRegionItem(values=(a / 3600, min(b, hasta) / 3600), movable=False,
                                     brush=pg.mkBrush(color))
             r.setZValue(-20)
             for linea in r.lines:
@@ -189,11 +206,14 @@ class Noche:
                 self.p_ev.plot(xs, [y] * len(xs), pen=None, symbol='|', symbolSize=9,
                                symbolPen=pg.mkPen(color, width=1.2))
         self.p_ev.setYRange(-0.8, 4.8, padding=0)
+        for t, _p in S.get('acomodos') or ():
+            if t < hasta:
+                self.p_etapa.addItem(pg.InfiniteLine(t / 3600, pen=pg.mkPen(tema.ACENTO, width=1.5)))
         paso = 30
-        self.p_sp.plot([k / 3600 for k in range(0, S['N'], paso)],
-                       [min(S['sp'][k:k + paso]) for k in range(0, S['N'], paso)],
+        self.p_sp.plot([k / 3600 for k in range(0, hasta, paso)],
+                       [min(S['sp'][k:min(k + paso, hasta)]) for k in range(0, hasta, paso)],
                        pen=pg.mkPen(tema.OI, width=1))
-        self.p_sp.setYRange(min(80, min(S['sp']) - 1), 100, padding=0)
+        self.p_sp.setYRange(min(80, min(S['sp'][:hasta]) - 1), 100, padding=0)
         self.p_sp.getAxis('left').setTicks([[(90, '90')]])
         r = pg.LinearRegionItem(values=(t0 / 3600, (t0 + dur) / 3600), movable=False,
                                 brush=pg.mkBrush(QColor(tema.ACENTO).lighter(150)))
@@ -280,6 +300,9 @@ class Detalle:
                 p.addItem(txt)
                 p.setYRange(-1, 1, padding=0)
                 continue
+            if not y:      # la noche que corre todavía no llega aquí
+                p.setYRange(-1, 1, padding=0)
+                continue
             p.plot(xs, y, pen=pg.mkPen(tema.TEXTO if clave != 'spo2' else tema.OI, width=1))
             if clave == 'spo2':
                 p.setYRange(min(85, min(y) - 1), 100, padding=0)
@@ -309,6 +332,80 @@ class Detalle:
                 p.addItem(r)
 
 
+# ── La cámara de la pieza ──────────────────────────────────────────────────
+
+class Camara(QWidget):
+    """El paciente en la cama, visto desde la cámara del techo: de espaldas
+    (la cara arriba, los dos brazos a los lados) o de lado (el cuerpo
+    angosto, la cara y las rodillas hacia ese lado)."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.pos = None
+        self.despierto = False
+        self.setMinimumSize(120, 96)
+
+    def poner(self, pos, despierto):
+        self.pos, self.despierto = pos, despierto
+        self.update()
+
+    def paintEvent(self, _evento):
+        q = QPainter(self)
+        q.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        def caja(x, y, ancho, alto, radio):
+            q.drawRoundedRect(QRectF(x, y, ancho, alto), radio, radio)
+
+        def circulo(x, y, radio):
+            q.drawEllipse(QRectF(x - radio, y - radio, 2 * radio, 2 * radio))
+
+        w, h = self.width(), self.height()
+        # La cama, con la almohada arriba.
+        bw, bh = min(w - 16, 110), h - 10
+        x0, y0 = (w - bw) / 2, 5
+        q.setPen(QPen(QColor(tema.BORDE_FUERTE), 1.5))
+        q.setBrush(QColor(tema.FONDO))
+        caja(x0, y0, bw, bh, 8)
+        q.setBrush(QColor(tema.TARJETA))
+        caja(x0 + bw * 0.2, y0 + 5, bw * 0.6, bh * 0.16, 5)
+        if self.pos is None:
+            q.end()
+            return
+        cx = x0 + bw / 2
+        piel, ropa = QColor('#E2B48C'), QColor(COLOR_POS[self.pos])
+        ropa.setAlpha(170)
+        q.setPen(QPen(QColor(tema.TEXTO_SUAVE), 1))
+        lado = {'supino': 0, 'izquierda': -1, 'derecha': 1}[self.pos]
+        ancho = bw * (0.42 if lado == 0 else 0.26)
+        # Tronco y piernas (de lado, las rodillas dobladas hacia ese lado).
+        q.setBrush(ropa)
+        caja(cx - ancho / 2, y0 + bh * 0.3, ancho, bh * 0.36, 8)
+        if lado == 0:
+            for dx in (-0.1, 0.1):
+                caja(cx + bw * dx - bw * 0.06, y0 + bh * 0.64, bw * 0.12, bh * 0.32, 5)
+            q.setBrush(piel)
+            for dx in (-1, 1):
+                caja(cx + dx * (ancho / 2 + bw * 0.04) - bw * 0.04, y0 + bh * 0.32, bw * 0.08, bh * 0.3, 4)
+        else:
+            caja(cx + lado * bw * 0.06 - bw * 0.07, y0 + bh * 0.62, bw * 0.14, bh * 0.16, 5)
+            caja(cx + lado * bw * 0.17 - bw * 0.07, y0 + bh * 0.74, bw * 0.14, bh * 0.2, 5)
+            q.setBrush(piel)
+            caja(cx + lado * (ancho / 2) - bw * 0.04, y0 + bh * 0.36, bw * 0.08, bh * 0.22, 4)
+        # La cabeza, con la cara hacia donde mira (ojos abiertos si despierta).
+        q.setBrush(piel)
+        r = bh * 0.11
+        hy = y0 + bh * 0.19
+        circulo(cx, hy, r)
+        q.setBrush(QColor(tema.TEXTO))
+        ojo = 2.2 if self.despierto else 1.0
+        if lado == 0:
+            for dx in (-0.4, 0.4):
+                circulo(cx + dx * r, hy, ojo)
+        else:
+            circulo(cx + lado * 0.55 * r, hy, ojo)
+        q.end()
+
+
 # ── La ventana ──────────────────────────────────────────────────────────────
 
 class PolisomnografiaWindow(QMainWindow):
@@ -330,8 +427,16 @@ class PolisomnografiaWindow(QMainWindow):
         self.t0 = 0
         self.elegido = None
         self.tarea = None
+        # La noche en la PSG corre: hasta dónde va (s; None = sin noche) y si
+        # está corriendo. Llegada la mañana, t_actual = N.
+        self.t_actual = None
+        self.corriendo = False
+        self.recalculando = False
         self.setWindowTitle(self.TITULO)
         self._construir()
+        self.timer = QTimer(self)
+        self.timer.setInterval(TIC_MS)
+        self.timer.timeout.connect(self._tic)
         self.la_super(None)
 
     # --- UI -------------------------------------------------------------
@@ -359,6 +464,7 @@ class PolisomnografiaWindow(QMainWindow):
         izq.setContentsMargins(0, 0, 0, 0)
         izq.setSpacing(10)
         self._panel_estudio(izq)
+        self._panel_sala(izq)
         self._panel_puntuacion(izq)
         izq.addStretch(1)
         desplazable = QScrollArea()
@@ -412,6 +518,39 @@ class PolisomnografiaWindow(QMainWindow):
         self.btn_registrar.setToolTip('Apagar la luz y registrar la noche con los sensores montados')
         self.panel_estudio.agregar(self.btn_registrar)
         izq.addWidget(self.panel_estudio)
+
+    def _panel_sala(self, izq):
+        """Mientras la noche corre: la cámara de la pieza y lo que hace el
+        técnico (entrar a acomodar al paciente, pausar, adelantar)."""
+        self.panel_sala = Tarjeta('Sala de control')
+        self.camara = Camara()
+        self.panel_sala.agregar(self.camara)
+        self.lbl_camara = etiqueta('', rol='hint')
+        self.lbl_camara.setWordWrap(True)
+        self.panel_sala.agregar(self.lbl_camara)
+        self.panel_sala.agregar(etiqueta('Entrar a acomodarlo', rol='campo'))
+        fila = QHBoxLayout()
+        self.btn_acomodar = {}
+        for pos, texto in (('supino', 'De espaldas'), ('izquierda', 'Lado izq.'), ('derecha', 'Lado der.')):
+            b = self._boton(texto, lambda p=pos: self._acomodar(p))
+            b.setToolTip(f'Entrar a la pieza y acomodar al paciente {NOMBRE_POS[pos]} (se despierta un rato)')
+            b.setStyleSheet('min-width: 0px; padding: 4px 2px;')
+            self.btn_acomodar[pos] = b
+            fila.addWidget(b)
+        self.panel_sala.agregar_layout(fila)
+        fila = QHBoxLayout()
+        self.cmb_velocidad = QComboBox()
+        for v, nombre in VELOCIDADES:
+            self.cmb_velocidad.addItem(nombre, v)
+        self.cmb_velocidad.setCurrentIndex(2)
+        self.btn_pausa = self._boton('Pausa', self._pausa)
+        fila.addWidget(self.cmb_velocidad)
+        fila.addWidget(self.btn_pausa)
+        self.panel_sala.agregar_layout(fila)
+        self.btn_manana = self._boton('Hasta la mañana', self._manana)
+        self.btn_manana.setToolTip('Adelantar hasta que se enciende la luz')
+        self.panel_sala.agregar(self.btn_manana)
+        izq.addWidget(self.panel_sala)
 
     def _panel_puntuacion(self, izq):
         self.panel_puntuacion = Tarjeta('Puntuación')
@@ -534,6 +673,10 @@ class PolisomnografiaWindow(QMainWindow):
     # --- Ciclo de vida (API que llama main.py) --------------------------
 
     def la_super(self, data, appointment_id=None):
+        self.timer.stop()
+        self.corriendo = False
+        self.recalculando = False
+        self.t_actual = None
         self.sesion = SesionSueno(data, appointment_id) if data is not None else None
         self.data_caso = data
         self.appointment_id = appointment_id
@@ -583,6 +726,8 @@ class PolisomnografiaWindow(QMainWindow):
             'eventos': [{'t': e['t'], 'dur': e['dur'], 'tipo': e['tipo'], 'auto': bool(e.get('auto'))}
                         for e in self.eventos],
             'excluidos': [[a, b] for a, b in self.excluidos],
+            'acomodos': [[t, p] for t, p in self.S.get('acomodos') or []],
+            't_actual': None if self._de_dia() else int(self.t_actual),
             'indices': {k: v for k, v in r.items() if isinstance(v, (int, float)) or v is None},
             'tabla': getattr(self.tabla_informe, 'contenido', {}),
             'avisos': [a.lstrip('• ') for a in self.lbl_avisos.text().split('\n') if a.strip()],
@@ -611,10 +756,15 @@ class PolisomnografiaWindow(QMainWindow):
         self._pintar_sensores()
         for k, c in self.chk_sensor.items():
             c.setChecked(k in self.montaje)
-        self.S = Z.noche(self.sesion.sueno, estudio)
+        acomodos = [(int(t), p) for t, p in data.get('acomodos') or [] if p in Z.POSICIONES]
+        self.S = Z.noche(self.sesion.sueno, estudio, acomodos)
+        # A medio correr: queda en pausa donde iba (se sigue con "Seguir").
+        t = data.get('t_actual')
+        self.t_actual = self.S['N'] if t is None else max(0, min(self.S['N'], int(t)))
+        self.corriendo = False
         self.eventos = [{'t': int(e['t']), 'dur': int(e['dur']), 'tipo': e['tipo'], 'auto': bool(e.get('auto'))}
                         for e in data.get('eventos') or []
-                        if isinstance(e, dict) and e.get('tipo') in Z.NOMBRE_TIPO]
+                        if isinstance(e, dict) and e.get('tipo') in Z.NOMBRE_TIPO] if self._de_dia() else []
         self.excluidos = [(int(a), int(b)) for a, b in data.get('excluidos') or []]
         i = self.cmb_regla.findData(data.get('regla'))
         self.cmb_regla.blockSignals(True)
@@ -676,17 +826,29 @@ class PolisomnografiaWindow(QMainWindow):
             if self.sesion is not sesion or self.S is not None:
                 return
             self.S, auto = res
-            self.eventos = auto
-            self.t0 = self._primer_sueno()
             verdad = Z.resumen(self.S, estudio)
             self._log('registrar', estudio=estudio, montaje=montados, faltan=faltan, n_auto=len(auto),
                       canula_suelta=self.S.get('canula_suelta'),
                       verdad={'IAH': verdad['IAH'], 'REI': verdad['REI'], 'IDO3': verdad['IDO3']})
-            if faltan:
-                self._mensaje('Noche registrada sin: ' + ', '.join(Z.NOMBRE_SENSOR[k].lower() for k in faltan)
-                              + '.', 'alerta')
+            sin = ('Sin ' + ', '.join(Z.NOMBRE_SENSOR[k].lower() for k in faltan) + '. ') if faltan else ''
+            if estudio == 'psg':
+                # En el laboratorio la noche corre: el técnico la vigila y
+                # puede entrar a acomodar al paciente.
+                self.eventos = []
+                self.t_actual = 0
+                self.t0 = 0
+                self.corriendo = True
+                self.timer.start()
+                self._mensaje(sin + 'Se apagó la luz y la noche corre. Desde la sala de control puedes entrar a '
+                              'acomodar al paciente; la puntuación automática está lista al encender la luz.',
+                              'alerta' if faltan else 'ok')
             else:
-                self._mensaje('Noche registrada. Revisa la puntuación automática ventana por ventana.', 'ok')
+                # En la casa no hay técnico: llega la noche entera.
+                self.t_actual = self.S['N']
+                self.eventos = auto
+                self.t0 = self._primer_sueno()
+                self._mensaje(sin + 'Noche registrada en la casa (sin técnico: el paciente durmió como quiso). '
+                              'Revisa la puntuación automática ventana por ventana.', 'alerta' if faltan else 'ok')
             self.dibujar()
 
         self.tarea = hilos.en_fondo(calcular, listo=listo, dueno=self, nombre='noche de sueño')
@@ -698,10 +860,98 @@ class PolisomnografiaWindow(QMainWindow):
     def _dur(self):
         return self.cmb_ventana.currentData()
 
+    # --- La noche que corre (PSG) ----------------------------------------
+
+    def _de_dia(self):
+        """La noche terminó (o no corre: la poligrafía llega entera)."""
+        return self.S is not None and (self.t_actual is None or self.t_actual >= self.S['N'])
+
+    def _en_vivo(self):
+        return self.S is not None and not self._de_dia()
+
+    def _hasta(self):
+        return self.S['N'] if self._de_dia() else int(self.t_actual)
+
+    def _tic(self):
+        if not self._en_vivo() or not self.corriendo or self.recalculando:
+            return
+        self.t_actual = min(self.S['N'], self.t_actual + self.cmb_velocidad.currentData() * TIC_MS / 1000)
+        if self.t_actual >= self.S['N']:
+            self._manana()
+            return
+        # Corriendo, el detalle sigue lo último registrado.
+        self.t0 = max(0, int(self.t_actual) - self._dur())
+        self.dibujar()
+
+    def _pausa(self):
+        if not self._en_vivo():
+            return
+        self.corriendo = not self.corriendo
+        self.timer.start() if self.corriendo else self.timer.stop()
+        self._log('pausa', pausa=not self.corriendo, t=int(self.t_actual))
+        self.dibujar()
+
+    def _manana(self):
+        """Se enciende la luz: la noche termina y el programa propone su
+        puntuación automática."""
+        if not self._en_vivo() or self.recalculando:
+            return
+        self.timer.stop()
+        self.corriendo = False
+        adelantada = self.t_actual < self.S['N'] - 1
+        self.t_actual = self.S['N']
+        self.eventos = Z.auto_puntuar(self.S, self.montaje, f'psg/{self.appointment_id}')
+        self.t0 = self._primer_sueno()
+        self.elegido = None
+        self._log('manana', adelantada=adelantada, acomodos=[[t, p] for t, p in self.S.get('acomodos') or []],
+                  n_auto=len(self.eventos))
+        n_ac = len(self.S.get('acomodos') or [])
+        self._mensaje('Se encendió la luz' + (f' ({n_ac} acomodo{"s" if n_ac != 1 else ""} en la noche)' if n_ac else '')
+                      + '. Revisa la puntuación automática ventana por ventana.', 'ok')
+        self.dibujar()
+
+    def _acomodar(self, pos):
+        """El técnico entra a la pieza y acomoda al paciente: la noche se
+        rehace desde ahora (lo anterior no cambia)."""
+        if not self._en_vivo() or self.recalculando:
+            return
+        t = int(self.t_actual)
+        antes = self.S['pos'][min(self.S['N'] - 1, t)]
+        if pos == antes:
+            self._mensaje(f'Ya está {NOMBRE_POS[pos]}.')
+            return
+        etapa = self.S['etapa'][min(self.S['N'] - 1, t)]
+        acomodos = list(self.S.get('acomodos') or []) + [(t, pos)]
+        sueno, sesion, seguia = self.sesion.sueno, self.sesion, self.corriendo
+        self.timer.stop()
+        self.recalculando = True
+        sup_antes = sum(1 for k in range(t) if self.S['pos'][k] == 'supino' and self.S['etapa'][k] != 'W') / 60
+
+        def listo(S):
+            if self.sesion is not sesion:
+                return
+            self.recalculando = False
+            self.S = S
+            self._log('acomodar', t=t, de=antes, a=pos, etapa=etapa,
+                      verdad={'min_sueno_supino_hasta_ahora': round(sup_antes, 1)})
+            self._mensaje(f'Entraste a la pieza: el paciente quedó {NOMBRE_POS[pos]}'
+                          + (' y se despertó un rato.' if etapa != 'W' else '.'))
+            if seguia:
+                self.timer.start()
+            self.dibujar()
+
+        def fallo(_exc):
+            self.recalculando = False
+            if seguia:
+                self.timer.start()
+
+        self.tarea = hilos.en_fondo(Z.noche, sueno, 'psg', acomodos, listo=listo, fallo=fallo, dueno=self,
+                                    nombre='noche acomodada')
+
     def _mover(self, signo):
         if self.S is None:
             return
-        self.t0 = max(0, min(self.S['N'] - self._dur(), self.t0 + signo * self._dur()))
+        self.t0 = max(0, min(self._hasta() - self._dur(), self.t0 + signo * self._dur()))
         self.elegido = None
         self._dibujar_detalle()
         self._dibujar_noche()
@@ -709,7 +959,7 @@ class PolisomnografiaWindow(QMainWindow):
     def _ir_a(self, t):
         if self.S is None:
             return
-        self.t0 = int(max(0, min(self.S['N'] - self._dur(), t - self._dur() / 2)) // 10 * 10)
+        self.t0 = int(max(0, min(self._hasta() - self._dur(), t - self._dur() / 2)) // 10 * 10)
         self.elegido = None
         self._dibujar_detalle()
         self._dibujar_noche()
@@ -822,10 +1072,23 @@ class PolisomnografiaWindow(QMainWindow):
         for k, c in self.chk_sensor.items():
             c.setVisible(not registrado and k in validos)
         self.btn_registrar.setEnabled(hay and not registrado)
-        self.btn_registrar.setText('Noche registrada' if registrado else 'Registrar la noche')
-        self.panel_puntuacion.setEnabled(registrado)
+        vivo = self._en_vivo()
+        self.btn_registrar.setText('La noche corre…' if vivo else 'Noche registrada' if registrado
+                                   else 'Registrar la noche')
+        self.panel_puntuacion.setEnabled(registrado and not vivo)
         for b in (self.btn_atras, self.btn_adelante, self.cmb_ventana):
             b.setEnabled(registrado)
+        self.panel_sala.setVisible(vivo)
+        if vivo:
+            t = min(self.S['N'] - 1, int(self.t_actual))
+            pos, etapa = self.S['pos'][t], self.S['etapa'][t]
+            self.camara.poner(pos, etapa == 'W')
+            estado = 'Despierto' if etapa == 'W' else 'Duerme'
+            self.lbl_camara.setText(f'{hhmm(t)} · {estado} {NOMBRE_POS[pos]}'
+                                    + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})'))
+            for p_, b in self.btn_acomodar.items():
+                b.setEnabled(not self.recalculando and p_ != pos)
+            self.btn_pausa.setText('Pausa' if self.corriendo else 'Seguir')
         self.pill_estudio.setVisible(registrado)
         if registrado:
             self.pill_estudio.set(dict(Z.ESTUDIOS)[self.S['estudio']], 'acento')
@@ -834,7 +1097,8 @@ class PolisomnografiaWindow(QMainWindow):
         self._pintar_informe()
 
     def _dibujar_noche(self):
-        self.noche.dibujar(self.S, self.eventos, self.excluidos, self.t0, self._dur())
+        self.noche.dibujar(self.S, self.eventos, self.excluidos, self.t0, self._dur(),
+                           None if self.S is None else self._hasta())
 
     def _dibujar_detalle(self):
         if self.S is None:
@@ -843,8 +1107,12 @@ class PolisomnografiaWindow(QMainWindow):
             self.lbl_elegido.setText('')
             return
         dur = self._dur()
-        self.t0 = max(0, min(self.S['N'] - dur, self.t0))
+        self.t0 = max(0, min(self._hasta() - dur, self.t0))
         sen = Z.senales(self.S, self.t0, dur, self.montaje)
+        if self._en_vivo():
+            # Lo que todavía no pasa no se ve.
+            corte = max(0, int((self._hasta() - self.t0) * len(sen['t']) / dur))
+            sen = {k: (None if v is None else v[:corte]) for k, v in sen.items()}
         a, b = self.detalle.seleccion.getRegion()
         if not (self.t0 <= a and b <= self.t0 + dur):
             mitad = self.t0 + dur / 2
@@ -869,9 +1137,10 @@ class PolisomnografiaWindow(QMainWindow):
         return Z.indices(self.S, [dict(e) for e in self.eventos], self.cmb_regla.currentData(), self.excluidos)
 
     def _pintar_informe(self):
-        if self.S is None:
+        if self.S is None or self._en_vivo():
             self.tabla_informe.poblar(['Parámetro', 'Valor'], [])
-            self.lbl_avisos.setText('')
+            self.lbl_avisos.setText('La noche está corriendo: los resultados salen de la puntuación, que está lista '
+                                    'al encender la luz.' if self.S is not None else '')
             self._pintar_verdad()
             return
         r = self._indices()
@@ -935,6 +1204,20 @@ class PolisomnografiaWindow(QMainWindow):
             return {}
         return {'psg_noche': ruta}
 
+    def _sueno_supino(self, acomodos):
+        """(min de sueño de espaldas, de esos en REM, IAH de espaldas bien
+        puntuado) de la noche con esos acomodos; se guarda por acomodos."""
+        cache = self.__dict__.setdefault('_cache_supino', {})
+        clave = (self.appointment_id, acomodos)
+        if clave not in cache:
+            S = self.S if acomodos == tuple(self.S.get('acomodos') or ()) else \
+                Z.noche(self.sesion.sueno, self.S['estudio'], acomodos)
+            sup = [k for k in range(S['N']) if S['pos'][k] == 'supino' and S['etapa'][k] != 'W']
+            ideal = [{'t': x['t'], 'dur': x['dur'], 'tipo': x['tipo']} for x in S['ev']]
+            cache[clave] = (len(sup) / 60, sum(1 for k in sup if S['etapa'][k] == 'R') / 60,
+                            Z.indices(S, ideal, '3')['IAH supino'])
+        return cache[clave]
+
     def _texto_verdad(self):
         s = self.sesion.sueno
         perfil = dict(Z.PERFILES_LIBRO).get(s['perfil'], 'Perfil personalizado')
@@ -944,6 +1227,18 @@ class PolisomnografiaWindow(QMainWindow):
                          f'a {hhmm(s["canula_suelta"]["hasta"] * 60)}.')
         if self.S is None:
             return '<br>'.join(filas)
+        acomodos = self.S.get('acomodos') or []
+        if acomodos:
+            filas.append('<b>Acomodos</b>: ' + '; '.join(
+                f'{hhmm(t)} {NOMBRE_POS[p]}' for t, p in acomodos) + '.')
+        if self._en_vivo():
+            filas.append(f'La noche corre ({hhmm(self.t_actual)}): el resto se calcula al encender la luz.')
+            return '<br>'.join(filas)
+        if acomodos:
+            sin, con = self._sueno_supino(()), self._sueno_supino(tuple(acomodos))
+            filas.append(f'Sueño de espaldas: {n(con[0], 0)} min (REM {n(con[1], 0)}); sin acomodarlo habría sido '
+                         f'{n(sin[0], 0)} min (REM {n(sin[1], 0)}). IAH de espaldas con lo que pasó: {n(con[2])}; '
+                         f'sin acomodarlo: {n(sin[2])}.')
         R = Z.resumen(self.S, self.S['estudio'])
         c = R['n']
         filas.append(f'<b>La noche de verdad</b>: {c["ao"]} obstructivas, {c["am"]} mixtas, {c["ac"]} centrales, '

@@ -167,6 +167,11 @@ def montar(w, estudio='psg', sin=()):
             w.chk_sensor[k].click()
     w._registrar()
     esperar(lambda: w.S is not None)
+    if estudio == 'psg':
+        # La noche corre en el laboratorio: se adelanta hasta la mañana.
+        assert w._en_vivo() and w.eventos == []
+        w._manana()
+    assert w._de_dia()
 
 
 def test_ventana_sin_sueno_es_normal():
@@ -272,3 +277,66 @@ if __name__ == '__main__':
             f()
             print(f'  {nombre} OK')
     print('TODOS LOS TESTS PASARON')
+
+
+# --- El técnico acomoda al paciente (2026-11-16) ------------------------------
+
+def test_sin_acomodos_la_noche_es_la_de_siempre():
+    # La pauta del práctico (fichas 159-162) depende de esto.
+    for perfil in ('roncador', 'moderado', 'grave', 'dudosa'):
+        S = Z.noche(Z.normaliza({'perfil': perfil}), 'psg', [])
+        L = Z.simular(perfil)
+        assert S['ev'] == L['ev'] and S['seg'] == L['seg'] and S['sp'] == L['sp'] and S['pos'] == L['pos']
+
+
+def test_acomodar_cambia_desde_ahi_hasta_que_se_da_vuelta_solo():
+    bloque = Z.normaliza({'perfil': 'moderado'})
+    S = Z.noche(bloque, 'psg')
+    t = 150 * 60                       # moderado: de lado derecho de 140 a 210 min
+    A = Z.noche(bloque, 'psg', [(t, 'supino')])
+    assert S['pos'][t] == 'derecha' and A['pos'][t] == 'supino' and A['pos'][t - 1] == 'derecha'
+    assert A['pos'][340 * 60] == 'izquierda'          # su próximo cambio propio sigue igual
+    assert A['etapa'][t] == 'W' and A['etapa'][t + Z.VIGILIA_ACOMODO - 1] == 'W'
+    assert [x for x in S['ev'] if x['t'] < t] == [x for x in A['ev'] if x['t'] < t]
+    ideal = lambda X: [{'t': x['t'], 'dur': x['dur'], 'tipo': x['tipo']} for x in X['ev']]
+    assert Z.indices(A, ideal(A))['min supino'] > Z.indices(S, ideal(S))['min supino'] + 40
+    assert A['seg'][0] == S['seg'][0] and sum(b - a for _e, a, b in A['seg']) == A['N']
+    assert Z.tramos_posicion(A)[1] == (140 * 60, t, 'derecha')
+    # En la casa no hay técnico.
+    assert Z.noche(bloque, 'pg', [(t, 'supino')])['pos'] == Z.noche(bloque, 'pg')['pos']
+
+
+def test_ventana_acomodar_en_vivo_y_retomar():
+    LOGS.eventos.clear()
+    w = ventana(caso({'perfil': 'moderado'}, edad=52, gender=0), login={'permission': 444, 'name': 'a'})
+    w.cmb_estudio.setCurrentIndex(w.cmb_estudio.findData('psg'))
+    for k in Z.sensores_del_estudio('psg'):
+        w.chk_sensor[k].click()
+    w._registrar()
+    esperar(lambda: w.S is not None)
+    assert w._en_vivo() and not w.panel_puntuacion.isEnabled() and w.panel_sala.isVisibleTo(w)
+    w._pausa()
+    w.t_actual = 150 * 60
+    w._ir_a(200 * 60)                                   # el futuro no se mira
+    assert w.t0 + w._dur() <= w.t_actual
+    w._acomodar('derecha')                              # ya está de lado derecho: nada
+    assert not w.S['acomodos']
+    w._acomodar('supino')
+    esperar(lambda: not w.recalculando)
+    assert w.S['acomodos'] == [(150 * 60, 'supino')] and w.S['pos'][150 * 60] == 'supino'
+    assert LOGS.de('psg_acomodar')[0]['de'] == 'derecha'
+    job = w.report_job()
+    assert job['data']['acomodos'] == [[9000, 'supino']] and job['data']['t_actual'] == 9000
+    # Retomar a medio correr: en pausa donde iba.
+    w2 = ventana(caso({'perfil': 'moderado'}, edad=52, gender=0), login={'permission': 444, 'name': 'a'})
+    assert w2.restore_report(job['data']) and w2._en_vivo() and not w2.corriendo
+    assert w2.S['pos'] == w.S['pos']
+    w._manana()
+    assert w._de_dia() and w.eventos and w.panel_puntuacion.isEnabled()
+    assert LOGS.de('psg_manana')[0]['acomodos'] == [[9000, 'supino']]
+    job = w.report_job()
+    assert job['data']['t_actual'] is None
+    w3 = ventana(caso({'perfil': 'moderado'}, edad=52, gender=0), login={'permission': 444, 'name': 'a'})
+    assert w3.restore_report(job['data']) and w3._de_dia() and w3.S['ev'] == w.S['ev']
+    assert w3._indices()['IAH'] == w._indices()['IAH']
+

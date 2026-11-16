@@ -12,6 +12,9 @@ caso (nasal/sueno.py), así que aquí se rehace y se compara evento por evento:
 - **sobra**: no se cruza con ningún evento de verdad.
 - **se le pasó**: un evento de verdad (no RERA) sin nada puntuado encima.
 
+Si el alumno acomodó al paciente durante la noche (informe `acomodos`), la
+noche se rehace con esos acomodos: la verdad es la de esa noche.
+
 Y los índices: el del alumno (con su regla), el de la automática sin tocar
 (la misma que vio él: semilla psg/<cita>) y el de la noche bien puntuada con
 la misma regla. La gravedad que eligió se compara con la que da su índice y
@@ -104,6 +107,8 @@ def revisar(S, data, appointment_id):
         grav_verdad=Z.gravedad_clave(r_ideal3['IAH']),
         prohibido=prohibido, dice_regla=dice_regla,
         sin_texto=not (data.get('conclusion') or '').strip(),
+        acomodos=[(int(t), p) for t, p in data.get('acomodos') or []],
+        sin_terminar=data.get('t_actual') is not None,
     )
 
 
@@ -132,7 +137,13 @@ def observaciones(R):
         obs.append('escribe: ' + ', '.join(f'"{p}"' for p in R['prohibido']))
     if R['regla'] == '4':
         obs.append('quedó con la regla del 4 %')
+    if R['sin_terminar']:
+        obs.append('cerró con la noche corriendo')
     return '; '.join(obs)
+
+
+def acomodos_txt(R):
+    return ', '.join(f"{hhmm(t)[:5]} {p}" for t, p in R['acomodos']) or '—'
 
 
 def detalle(R, S):
@@ -222,18 +233,19 @@ def main():
         caso = json.loads(casos[str(x['case_id'])]['data'] or '{}')
         caso.setdefault('id', x['case_id'])
         s = Z.desde_caso(caso)
-        S = Z.noche(s['sueno'], data.get('estudio') or 'psg')
+        acomodos = [(int(t), p) for t, p in data.get('acomodos') or []]
+        S = Z.noche(s['sueno'], data.get('estudio') or 'psg', acomodos)
         R = revisar(S, data, x['cita'])
         salida.append((x, R, S))
 
     print(f"| Ficha | Alumno | Estudio | Regla | IAH auto | IAH alumno | IAH correcto | Bien | Tipo mal | Sobran | "
-          f"Se le pasaron | Gravedad (elegida / correcta) | Observaciones |")
-    print('|' + '---|' * 13)
+          f"Se le pasaron | Gravedad (elegida / correcta) | Acomodos | Observaciones |")
+    print('|' + '---|' * 14)
     for x, R, S in salida:
         print(f"| {x['case_id']} | {x['alumno']} | {R['estudio'].upper()} | {R['regla']} % | {f(R['iah_auto'])} | "
               f"{f(R['iah_alumno'])} | {f(R['iah_ideal'])} | {len(R['bien'])} | {len(R['mal'])} | "
               f"{len(R['sobra'])} | {len(R['perdidos'])} | {R['gravedad'] or '—'} / {R['grav_verdad']} | "
-              f"{observaciones(R)} |")
+              f"{acomodos_txt(R)} | {observaciones(R)} |")
     if a.detalle:
         for x, R, S in salida:
             print(f"\n### {x['alumno']} · ficha {x['case_id']} (cita {x['cita']}, informe {x['id']})")
@@ -252,11 +264,12 @@ def main():
             w = csv.writer(fh)
             w.writerow(['ficha', 'alumno', 'cita', 'informe', 'estudio', 'regla', 'iah_auto', 'iah_alumno',
                         'iah_correcto', 'bien', 'tipo_mal', 'sobran', 'se_le_pasaron', 'gravedad_elegida',
-                        'gravedad_correcta', 'observaciones'])
+                        'gravedad_correcta', 'acomodos', 'observaciones'])
             for x, R, S in salida:
                 w.writerow([x['case_id'], x['alumno'], x['cita'], x['id'], R['estudio'], R['regla'],
                             f(R['iah_auto']), f(R['iah_alumno']), f(R['iah_ideal']), len(R['bien']), len(R['mal']),
-                            len(R['sobra']), len(R['perdidos']), R['gravedad'], R['grav_verdad'], observaciones(R)])
+                            len(R['sobra']), len(R['perdidos']), R['gravedad'], R['grav_verdad'], acomodos_txt(R),
+                            observaciones(R)])
         print(f'\nTabla guardada en {a.csv}')
 
 
