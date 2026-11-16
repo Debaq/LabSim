@@ -570,6 +570,67 @@ TXT;
     }
 
     /**
+     * El estudio de sueño en el laboratorio (polisomnografía, titulación de
+     * CPAP): el paciente viene a pasar la noche y llega preparado como le
+     * explicó la secretaria al agendarlo. Lo que el estudiante debe hacer
+     * (pedirle que orine antes de acostarse, la anamnesis de sueño) queda a
+     * su cargo: el paciente no lo adelanta. Vacío para cualquier otro examen
+     * (la poligrafía se hace en la casa).
+     */
+    public static function estudioDeSueno(string $procedimiento, bool $sala): string
+    {
+        if (!preg_match('/polisomnograf|titulaci[oó]n/iu', $procedimiento)) {
+            return '';
+        }
+        if ($sala) {
+            return "\n\n" . <<<'TXT'
+El paciente viene a un estudio de sueño que dura toda la noche en el
+laboratorio: llegó cerca de las nueve de la noche y se irá temprano en la
+mañana. Al agendar, la secretaria le explicó cómo venir y lo cumplió: trae un
+bolso con su pijama y sus cosas de aseo; sabe que va a dormir aquí con
+sensores puestos y que no se puede ir antes de la mañana; dejó los
+medicamentos que dan sueño (pastillas para dormir, tranquilizantes,
+antialérgicos que dan sueño) los días que ella le indicó; hoy no tomó
+alcohol, no tomó café en la tarde ni durmió siesta. Los demás remedios (la
+presión, el azúcar) los tomó como siempre. Si la historia dice otra cosa
+sobre algo de esto, vale la historia. No lo cuentan todo de una vez: lo dicen
+si se lo preguntan.
+
+Si el estudiante le pide al paciente que vaya al baño a orinar antes de
+acostarse (con los sensores puestos no se podrá levantar en la noche), el
+paciente acepta, va y vuelve, y lo dice. Si no se lo piden, no va ni lo
+menciona.
+
+Sobre el ronquido, el cansancio o el sueño de día, cómo duerme en la noche,
+el corazón, el peso y el alcohol, el tabaco o las drogas, se contesta según
+la historia. Lo que la historia no menciona, el paciente no lo tiene: no
+inventen enfermedades ni hábitos.
+TXT;
+        }
+        return "\n\n" . <<<'TXT'
+Vienes a un estudio de sueño que dura toda la noche en el laboratorio:
+llegaste cerca de las nueve de la noche y te irás temprano en la mañana. Al
+agendar, la secretaria te explicó cómo venir y lo cumpliste: traes un bolso
+con tu pijama y tus cosas de aseo; sabes que vas a dormir aquí con sensores
+puestos y que no te puedes ir antes de la mañana; dejaste los medicamentos
+que dan sueño (pastillas para dormir, tranquilizantes, antialérgicos que dan
+sueño) los días que ella te indicó; hoy no tomaste alcohol, no tomaste café
+en la tarde ni dormiste siesta. Los demás remedios (la presión, el azúcar)
+los tomaste como siempre. Si tu historia dice otra cosa sobre algo de esto,
+vale tu historia. No lo cuentas todo de una vez: lo dices si te lo preguntan.
+
+Si el estudiante te pide que vayas al baño a orinar antes de acostarte (con
+los sensores puestos no te podrás levantar en la noche), aceptas, vas y
+vuelves, y lo dices. Si no te lo piden, no vas ni lo mencionas.
+
+Sobre el ronquido, el cansancio o el sueño de día, cómo duermes en la noche,
+el corazón, el peso y el alcohol, el tabaco o las drogas, contestas según tu
+historia. Lo que tu historia no menciona, no lo tienes: no inventes
+enfermedades ni hábitos.
+TXT;
+    }
+
+    /**
      * Saca la marca [DUERME] (ver sueno) y dice si estaba.
      *
      * @return array{0:string, 1:bool}

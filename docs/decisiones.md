@@ -9129,3 +9129,24 @@ entra y lo acomoda.
   espaldas con y sin los acomodos.
 - Queda fuera: acomodar en la titulación de CPAP (allí también se pide
   supino en REM para validar la presión).
+
+## Chat: el paciente del estudio de sueño viene a pasar la noche (2026-11-16)
+
+Él: los pacientes vienen a hacerse el examen; la secretaria al agendar les
+dijo que traigan pijama, que dura toda la noche y que suspendan lo que da
+sueño; el alumno les pide que orinen antes de acostarse (con los sensores no
+se pueden levantar) y hace la anamnesis de ronquido, somnolencia, sueño,
+corazón, peso y alcohol o drogas.
+
+- `LlmConfig::estudioDeSueno($procedimiento, $sala)`: con un procedimiento
+  de polisomnografía o titulación, el paciente llega a las nueve de la noche
+  con su bolso y pijama, sabe que se queda hasta la mañana, dejó lo que da
+  sueño, hoy sin alcohol, café de tarde ni siesta, y el resto de los
+  remedios como siempre (lo que diga su historia manda). Lo cuenta si se lo
+  preguntan. Si le piden orinar antes de acostarse, va y vuelve; si no, no lo
+  menciona. Lo que su historia no dice, no lo tiene. La poligrafía (en la
+  casa) no lleva el bloque.
+- Fichas 159-162 (prod): la anamnesis suma corazón, talla y peso, alcohol,
+  tabaco y drogas, orina nocturna y remedios para dormir suspendidos
+  (Raquel: clonazepam de una vecina; Yolanda: melatonina y zopiclona). Aviso
+  al libro en `pendientes_urgentes.md`.
