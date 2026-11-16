@@ -57,6 +57,8 @@ NOCHE_EN_MIN = 15
 VELOCIDADES = ((0, f'Noche en {NOCHE_EN_MIN} min'), (1, 'Tiempo real'), (60, '×60'), (120, '×120'),
                (300, '×300'))
 TIC_MS = 200
+ANCHO_IZQUIERDA = 300
+ANCHO_DERECHA = 270
 # "Ver la próxima apnea": cuántos segundos antes de que empiece (se alcanza a oírlo roncar).
 ANTES_DE_LA_APNEA = 20
 # Lo que dura la frase de posición: el paciente se da vuelta al terminar de oírla.
@@ -399,21 +401,23 @@ class PolisomnografiaWindow(QMainWindow):
         cuerpo = QHBoxLayout()
         cuerpo.setSpacing(12)
         raiz.addLayout(cuerpo, 1)
+        # Izquierda: el estudio (antes de la noche) o la sala de control con el intercomunicador (mientras
+        # corre); al medio el registro; a la derecha la puntuación.
         izquierda = QWidget()
+        izquierda.setFixedWidth(ANCHO_IZQUIERDA)
         izq = QVBoxLayout(izquierda)
         izq.setContentsMargins(0, 0, 0, 0)
         izq.setSpacing(10)
-        self._panel_estudio(izq)
+        estudio = QWidget()
+        lay = QVBoxLayout(estudio)
+        lay.setContentsMargins(0, 0, 0, 0)
+        self._panel_estudio(lay)
+        lay.addStretch(1)
+        self.col_estudio = self._desplazable(estudio)
+        izq.addWidget(self.col_estudio, 1)
         self._panel_sala(izq)
-        self._panel_puntuacion(izq)
-        izq.addStretch(1)
-        desplazable = QScrollArea()
-        desplazable.setWidget(izquierda)
-        desplazable.setWidgetResizable(True)
-        desplazable.setFrameShape(QFrame.Shape.NoFrame)
-        desplazable.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        desplazable.setFixedWidth(300)
-        cuerpo.addWidget(desplazable)
+        self._panel_intercom(izq)
+        cuerpo.addWidget(izquierda)
 
         self.tabs = QTabWidget()
         self.tabs.addTab(self._pantalla(), 'Registro')
@@ -429,6 +433,22 @@ class PolisomnografiaWindow(QMainWindow):
             caja.setWidget(self.verdad)
             self.tabs.addTab(caja, 'Lo que el equipo no sabe')
         cuerpo.addWidget(self.tabs, 1)
+        derecha = QWidget()
+        der = QVBoxLayout(derecha)
+        der.setContentsMargins(0, 0, 0, 0)
+        self._panel_puntuacion(der)
+        der.addStretch(1)
+        col_derecha = self._desplazable(derecha)
+        col_derecha.setFixedWidth(ANCHO_DERECHA)
+        cuerpo.addWidget(col_derecha)
+
+    def _desplazable(self, widget):
+        caja = QScrollArea()
+        caja.setWidget(widget)
+        caja.setWidgetResizable(True)
+        caja.setFrameShape(QFrame.Shape.NoFrame)
+        caja.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        return caja
 
     def _boton(self, texto, accion, principal=False):
         b = QPushButton(texto)
@@ -472,32 +492,7 @@ class PolisomnografiaWindow(QMainWindow):
         self.lbl_camara = etiqueta('', rol='hint')
         self.lbl_camara.setWordWrap(True)
         self.panel_sala.agregar(self.lbl_camara)
-        # El intercomunicador: frases de la noche, biocalibraciones y posiciones.
-        self.intercom = Intercom()
-        self.intercom.setParent(self, Qt.WindowType.Window)
-        self.intercom.setWindowTitle('Intercomunicador de la sala de control')
-        self.intercom.resize(760, 520)
-        self.intercom.btn_checked.connect(self._intercom)
-        # Mientras la luz está encendida (calibrando, en tiempo real) el paciente está despierto y no
-        # ronca: apagarla tiene que estar a la vista, no solo dentro del intercomunicador.
         self.luz_encendida = False
-        self.btn_luz = self._boton('Apagar la luz', self._apagar_luz, True)
-        self.btn_luz.setToolTip('Decirle por el intercomunicador que se apaga la luz: empieza la noche '
-                                '(deja el tiempo real)')
-        self.panel_sala.agregar(self.btn_luz)
-        self.btn_intercom = self._boton('Intercomunicador…', self._abrir_intercom)
-        self.btn_intercom.setToolTip('Hablarle al paciente: saludar, biocalibraciones, apagar la luz')
-        self.panel_sala.agregar(self.btn_intercom)
-        self.panel_sala.agregar(etiqueta('Pedirle que se dé vuelta', rol='campo'))
-        fila = QHBoxLayout()
-        self.btn_acomodar = {}
-        for pos, texto in (('supino', 'De espaldas'), ('izquierda', 'Lado izq.'), ('derecha', 'Lado der.')):
-            b = self._boton(texto, lambda p=pos: self._pedir_posicion(p))
-            b.setToolTip(f'Pedirle por el intercomunicador que se ponga {NOMBRE_POS[pos]} (se despierta un rato)')
-            b.setStyleSheet('min-width: 0px; padding: 4px 2px;')
-            self.btn_acomodar[pos] = b
-            fila.addWidget(b)
-        self.panel_sala.agregar_layout(fila)
         fila = QHBoxLayout()
         self.cmb_velocidad = QComboBox()
         for v, nombre in VELOCIDADES:
@@ -519,9 +514,14 @@ class PolisomnografiaWindow(QMainWindow):
         self.panel_sala.agregar(self.btn_manana)
         izq.addWidget(self.panel_sala)
 
-    def _abrir_intercom(self):
-        self.intercom.show()
-        self.intercom.raise_()
+    def _panel_intercom(self, izq):
+        """El intercomunicador, a la vista bajo la cámara mientras la noche corre: frases de la noche
+        (también "Apagar la luz"), biocalibraciones y las posiciones que se le piden."""
+        self.panel_intercom = Tarjeta('Intercomunicador')
+        self.intercom = Intercom()
+        self.intercom.btn_checked.connect(self._intercom)
+        self.panel_intercom.agregar(self.intercom)
+        izq.addWidget(self.panel_intercom, 1)
 
     def _al_cambiar_velocidad(self, _i):
         if self._en_vivo():
@@ -1157,10 +1157,12 @@ class PolisomnografiaWindow(QMainWindow):
         for b in (self.btn_atras, self.btn_adelante, self.cmb_ventana):
             b.setEnabled(registrado)
         self.panel_sala.setVisible(vivo)
+        self.panel_intercom.setVisible(vivo)
+        self.col_estudio.setVisible(not vivo)
         if not vivo and self.pieza_grande is not None:
             self.pieza_grande.hide()
         if not vivo:
-            self.intercom.hide()
+            self.intercom.callar()
         if vivo:
             t = min(self.S['N'] - 1, int(self.t_actual))
             pos, etapa = self.S['pos'][t], self.S['etapa'][t]
@@ -1178,10 +1180,12 @@ class PolisomnografiaWindow(QMainWindow):
                                     + f'{hhmm(t)} · {estado} {NOMBRE_POS[pos]}'
                                     + ('' if etapa == 'W' else f' ({Z.NOM_ETAPA[etapa]})')
                                     + (' · ronca' if ronca else ''))
-            self.btn_luz.setVisible(self.luz_encendida)
+            # Con la luz encendida, "Apagar la luz" resaltada; la posición en que ya está, apagada.
+            self.intercom.botones[APAGAR_LUZ].setStyleSheet(
+                f'QPushButton {{ border: 2px solid {tema.ACENTO}; }}' if self.luz_encendida else '')
+            for clave, p_ in POSICION.items():
+                self.intercom.botones[clave].setEnabled(not self.recalculando and p_ != pos)
             self.btn_apnea.setEnabled(not self.recalculando)
-            for p_, b in self.btn_acomodar.items():
-                b.setEnabled(not self.recalculando and p_ != pos)
             self.btn_pausa.setText('Pausa' if self.corriendo else 'Seguir')
         self.pill_estudio.setVisible(registrado)
         if registrado:

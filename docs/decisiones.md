@@ -9252,3 +9252,18 @@ y respirar a ritmo real con el hipnograma volando tampoco calza.
   `verdad`) y `psg_velocidad` al cambiar la velocidad.
 - El técnico real vigila en tiempo real; acelerar es una licencia del
   simulador para que el práctico quepa en la clase.
+
+### Tres columnas: sala e intercomunicador a la izquierda, puntuación a la derecha (2026-11-16)
+
+Él: "el panel de instrucciones no nos gustó: haz un panel derecho y uno
+izquierdo; a la derecha el de marcado y a la izquierda la cámara y las
+instrucciones, así eliminas lo repetido".
+
+- Izquierda (300 px): antes de la noche, el estudio y el montaje; mientras
+  corre, la sala de control (cámara, velocidad, pausa, "Ver la próxima
+  apnea", "Hasta la mañana") y debajo el intercomunicador a la vista (ya no
+  en una ventana aparte). Al medio el registro; a la derecha (270 px) la
+  puntuación.
+- Fuera lo repetido: los botones de posición de la sala y el "Apagar la
+  luz" suelto (están en el intercomunicador). Con la luz encendida, "Apagar
+  la luz" va resaltada; la posición en que ya está, apagada.

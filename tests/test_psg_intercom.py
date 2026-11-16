@@ -93,9 +93,15 @@ def test_la_sala_de_control():
     T.LOGS.eventos.clear()
     w = _noche_en_vivo()
     assert w.cmb_velocidad.currentData() == 1 and w.S['etapa'][0] == 'W'
-    # Con la luz encendida el botón para apagarla está a la vista en la sala.
+    # Con la noche corriendo, el intercomunicador está a la vista bajo la cámara (no el estudio) y,
+    # con la luz encendida, "Apagar la luz" resaltada.
     w.dibujar()
-    assert w.luz_encendida and not w.btn_luz.isHidden() and 'Luz encendida' in w.lbl_camara.text()
+    assert not w.panel_intercom.isHidden() and not w.panel_sala.isHidden() and w.col_estudio.isHidden()
+    assert w.luz_encendida and 'Luz encendida' in w.lbl_camara.text()
+    assert 'border' in w.intercom.botones['apagar_luz'].styleSheet()
+    # La posición en que ya está no se puede pedir.
+    actual = w.S['pos'][0]
+    assert not w.intercom.botones[f'pos_{actual}'].isEnabled()
     w.t_actual = 20
     w._intercom('mire_a_los_lados')
     assert w.S['bio'] == [(20, 'mire_a_los_lados')]
@@ -110,7 +116,8 @@ def test_la_sala_de_control():
     assert len(w.S['bio']) == 1 and 'dormido' in w.lbl_mensaje.text()
     # Apagar la luz (el botón de la sala) larga la noche.
     w._apagar_luz()
-    assert w.cmb_velocidad.currentData() == 0 and not w.luz_encendida and w.btn_luz.isHidden()
+    assert w.cmb_velocidad.currentData() == 0 and not w.luz_encendida
+    assert w.intercom.botones['apagar_luz'].styleSheet() == ''
     assert 'Luz encendida' not in w.lbl_camara.text()
     # Dormido y roncando, la sala lo dice (y la pieza ronca).
     ronca = next(t for t in range(dormido, w.S['N']) if w.S['etapa'][t] != 'W' and w.S['ron'][t // 60]
