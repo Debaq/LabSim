@@ -340,3 +340,17 @@ def test_ventana_acomodar_en_vivo_y_retomar():
     assert w3.restore_report(job['data']) and w3._de_dia() and w3.S['ev'] == w.S['ev']
     assert w3._indices()['IAH'] == w._indices()['IAH']
 
+
+
+def test_la_noche_entera_en_15_minutos():
+    from nasal.PolisomnografiaWindow import NOCHE_EN_MIN, TIC_MS
+    w = ventana(caso({'perfil': 'moderado'}, edad=52, gender=0))
+    w.cmb_estudio.setCurrentIndex(w.cmb_estudio.findData('psg'))
+    for k in Z.sensores_del_estudio('psg'):
+        w.chk_sensor[k].click()
+    w._registrar()
+    esperar(lambda: w.S is not None)
+    w.timer.stop()
+    assert w.cmb_velocidad.currentData() == 0
+    tics = NOCHE_EN_MIN * 60 * 1000 / TIC_MS
+    cerca(w._velocidad() * TIC_MS / 1000 * tics, w.S['N'], 1)

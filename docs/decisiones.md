@@ -9086,8 +9086,9 @@ verlo. En la PSG real el técnico vigila la noche y, si el paciente no ha
 dormido de espaldas (el índice por posición lo necesita, sobre todo en REM),
 entra y lo acomoda.
 
-- **La noche corre** en la polisomnografía (×60 a ×600, ×300 por defecto:
-  ~1,5 min reales), con Pausa/Seguir y "Hasta la mañana". Mientras corre, la
+- **La noche corre** en la polisomnografía: por defecto la noche entera en
+  15 min reales (él; el factor sale del largo de cada noche, ≈ ×31), o ×60,
+  ×120 y ×300, con Pausa/Seguir y "Hasta la mañana". Mientras corre, la
   noche y el detalle llegan solo hasta lo registrado y la puntuación está
   cerrada: la automática sale al encender la luz. La poligrafía sigue
   llegando entera (en la casa no hay técnico).

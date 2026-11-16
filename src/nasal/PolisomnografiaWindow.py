@@ -3,7 +3,8 @@ demo interna del Laboratorio de sueño.
 
 Como se hace: el alumno elige el estudio (polisomnografía en el laboratorio
 o poligrafía en la casa), monta los sensores y registra la noche. En el
-laboratorio la noche corre (×60 a ×600, con pausa y "Hasta la mañana"):
+laboratorio la noche corre (entera en 15 min, o ×60 a ×300; con pausa y
+"Hasta la mañana"):
 desde la sala de control ve al paciente por la cámara y puede entrar a
 acomodarlo de espaldas o de lado (sueno.acomodar: se despierta un rato y la
 noche se rehace desde ahí). En la casa no hay técnico: llega entera. Después
@@ -45,7 +46,10 @@ from vemp.widgets.kit import Campos, Pastilla, Tarjeta, etiqueta
 
 VENTANAS = ((30, '30 s'), (120, '2 min'), (300, '5 min'))
 # La noche corre en la PSG (el técnico la vigila y puede acomodar al paciente).
-VELOCIDADES = ((60, '×60'), (120, '×120'), (300, '×300'), (600, '×600'))
+# 0 = la noche entera en NOCHE_EN_MIN minutos reales, sea cual sea su largo
+# (≈ ×31 en una noche de 470 min); el resto, factores fijos para ir más rápido.
+NOCHE_EN_MIN = 15
+VELOCIDADES = ((0, f'Noche en {NOCHE_EN_MIN} min'), (60, '×60'), (120, '×120'), (300, '×300'))
 TIC_MS = 200
 NOMBRE_POS = {'supino': 'de espaldas', 'izquierda': 'sobre el lado izquierdo', 'derecha': 'sobre el lado derecho'}
 COLOR_TIPO = {'ao': '#C62F3A', 'am': '#8E44AD', 'ac': '#2F5D9E', 'h': '#D98E04', 'rera': '#21796C'}
@@ -542,7 +546,7 @@ class PolisomnografiaWindow(QMainWindow):
         self.cmb_velocidad = QComboBox()
         for v, nombre in VELOCIDADES:
             self.cmb_velocidad.addItem(nombre, v)
-        self.cmb_velocidad.setCurrentIndex(2)
+        self.cmb_velocidad.setCurrentIndex(0)
         self.btn_pausa = self._boton('Pausa', self._pausa)
         fila.addWidget(self.cmb_velocidad)
         fila.addWidget(self.btn_pausa)
@@ -875,13 +879,18 @@ class PolisomnografiaWindow(QMainWindow):
     def _tic(self):
         if not self._en_vivo() or not self.corriendo or self.recalculando:
             return
-        self.t_actual = min(self.S['N'], self.t_actual + self.cmb_velocidad.currentData() * TIC_MS / 1000)
+        self.t_actual = min(self.S['N'], self.t_actual + self._velocidad() * TIC_MS / 1000)
         if self.t_actual >= self.S['N']:
             self._manana()
             return
         # Corriendo, el detalle sigue lo último registrado.
         self.t0 = max(0, int(self.t_actual) - self._dur())
         self.dibujar()
+
+    def _velocidad(self):
+        """Segundos de noche por segundo real."""
+        v = self.cmb_velocidad.currentData()
+        return v if v else self.S['N'] / (NOCHE_EN_MIN * 60)
 
     def _pausa(self):
         if not self._en_vivo():
