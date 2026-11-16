@@ -9077,3 +9077,24 @@ Uribe, clave LTI 1.1 propia que matricula sola).
   a la barra del detalle; el detalle pide 250 px, con alto propio para la
   SpO₂ y el ronquido, y el divisor no colapsa. Registrada la noche, los
   sensores se esconden: tipos, Borrar y Excluir quedan a la vista.
+
+## LTI: un mismo Moodle, una sola clave (2026-11-16)
+
+Al conectar ETMP172 con una clave nueva, Vanessa entró como una cuenta de
+alumna nueva (id 35): LabSim reconoce a la persona por clave + id de Moodle
+(`users.lti_platform_id` + `lti_sub`), así que dos claves del mismo Moodle
+duplican a quien está en los dos cursos (ya pasaba: David Ávila, ids 2 y 20).
+
+- **Arreglo de hoy (datos):** el curso Moodle 36666 usa la clave del curso 1
+  y `course_lti_contexts` (2, '36666') → curso 3; el vínculo por contexto
+  manda sobre el curso por defecto de la clave. La 35 quedó inactiva y fuera
+  del curso 3.
+- **Panel (admin/lti.php):** recuadro "Datos para la herramienta en Moodle"
+  con cada campo (URL, ícono `public/img/labsim_icono.png` para "URL del
+  icono" y "del icono seguro", enlaces profundos/selección de contenido sin
+  usar, privacidad: nombre y correo Siempre). "Ver secreto" en cada clave
+  1.1 (solo admin completo): sin el secreto no se puede reusar la clave. El
+  consejo pasa de "una clave por curso" a "una clave por Moodle + Vínculos".
+- Pendiente: reconocer a la persona por su id de Moodle entre claves del
+  mismo Moodle (tool_consumer_instance_guid), para que una clave nueva no
+  duplique.

@@ -36,7 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($ltiVersion === '1.1') {
         // El backend genera las credenciales (como hace Moodle al registrar
         // un tool) en vez de que el admin las invente a mano -- menos typos,
-        // más entropía. El shared_secret solo se muestra esta vez.
+        // más entropía. El shared_secret queda a la vista del admin completo
+        // ("Ver secreto" en la tabla): sin él no se puede reusar la clave en
+        // otro curso del mismo Moodle.
         $consumerKey = bin2hex(random_bytes(16));
         $sharedSecret = bin2hex(random_bytes(24));
         $nuevoId = Lti::upsertPlatform11($id, $consumerKey, $sharedSecret);
@@ -76,6 +78,9 @@ $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' :
 $baseDir = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME']))), '/');
 $loginUrl = "{$scheme}://{$_SERVER['HTTP_HOST']}{$baseDir}/lti/login.php";
 $launchUrl = "{$scheme}://{$_SERVER['HTTP_HOST']}{$baseDir}/lti/launch.php";
+// El ícono de la actividad en Moodle ("URL del icono" y "URL del icono
+// seguro": la segunda es la misma en https, que es como corre el backend).
+$iconUrl = "{$scheme}://{$_SERVER['HTTP_HOST']}{$baseDir}/img/labsim_icono.png";
 
 $platforms = Lti::listPlatforms();
 $cursos = Courses::listActive();
@@ -102,6 +107,33 @@ admin_header('Conexión LTI (Moodle)', $me);
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <div class="card">
+    <strong>Datos para la herramienta en Moodle (LTI 1.1)</strong>
+    <p class="muted">Lo que va en cada campo de "Editar herramienta" (en el curso de Moodle o en el sitio):</p>
+    <table>
+        <tr><td>URL de la herramienta</td><td class="mono"><?= htmlspecialchars($launchUrl) ?></td></tr>
+        <tr><td>Versión LTI</td><td>LTI 1.0/1.1</td></tr>
+        <tr><td>Clave de cliente y Secreto compartido</td><td>Los de la clave en la tabla de abajo ("Ver secreto").</td></tr>
+        <tr><td>URL del icono</td><td class="mono"><?= htmlspecialchars($iconUrl) ?></td></tr>
+        <tr><td>URL del icono seguro</td><td class="mono"><?= htmlspecialchars($iconUrl) ?></td></tr>
+        <tr><td>Admite enlaces profundos / URL de selección de contenido</td>
+            <td>Sin marcar y vacía. Es para herramientas que dejan elegir un contenido al crear la actividad
+                (un libro, un video); LabSim no lo usa: la actividad siempre abre la misma pantalla.</td></tr>
+        <tr><td>Contenedor de inicio</td><td>Incrustar, sin bloques (o Nueva ventana).</td></tr>
+        <tr><td>Privacidad</td>
+            <td>Compartir el nombre <strong>Siempre</strong> y el correo <strong>Siempre</strong> (si no, el
+                usuario del alumno en LabSim queda como "NOMBRE (clave:id)"); aceptar calificaciones:
+                Nunca.</td></tr>
+    </table>
+    <p class="muted">
+        <strong>Un mismo Moodle, una sola clave.</strong> LabSim reconoce a la persona por la clave y su id de
+        Moodle: si un alumno entra a dos cursos del mismo Moodle con claves distintas, queda con dos cuentas
+        (la segunda, vacía). Para otro curso del mismo Moodle se usa la clave que ya existe y ese curso de
+        Moodle se vincula al curso de LabSim en <a href="courses.php">Cursos → Vínculos</a>; el vínculo manda
+        sobre el curso por defecto de la clave.
+    </p>
+</div>
+
+<div class="card">
     <strong>LTI 1.1 (OAuth1) -- más simple, recomendado si 1.3 da problemas</strong>
     <p class="muted">
         Primero crea la herramienta acá abajo (el backend genera las credenciales), después regístrala en Moodle:
@@ -111,7 +143,7 @@ admin_header('Conexión LTI (Moodle)', $me);
 
     <?php if ($generated11 !== null): ?>
     <div style="background:var(--color-warn-bg); border:1px solid var(--color-warn-text); padding:0.75rem; margin:0.5rem 0;">
-        <strong>Copia esto en Moodle ahora -- el shared secret no se vuelve a mostrar:</strong>
+        <strong>Copia esto en Moodle (el secreto queda después en "Ver secreto" de la tabla):</strong>
         <p>Tool URL<br><span class="mono"><?= htmlspecialchars($launchUrl) ?></span></p>
         <p>Consumer key<br><span class="mono"><?= htmlspecialchars($generated11['consumer_key']) ?></span></p>
         <p>Shared secret<br><span class="mono"><?= htmlspecialchars($generated11['shared_secret']) ?></span></p>
@@ -128,10 +160,10 @@ admin_header('Conexión LTI (Moodle)', $me);
         <p class="muted">
             Con un curso elegido acá, la clave <strong>matricula sola</strong>: el alumno entra
             desde Moodle y queda en el roster de ese curso en el primer launch, sin que nadie lo
-            agregue a mano ni vincule nada después. Lo normal es entonces una clave por curso.
-            Si el mismo Moodle tiene varios cursos y querés separarlos con una sola clave, dejalo
-            en "ninguno" y vinculá cada curso de Moodle desde
-            <a href="courses.php">Cursos → Vínculos</a>.
+            agregue a mano ni vincule nada después. Una clave nueva es para <strong>otro
+            Moodle</strong>: para otro curso del mismo Moodle se reusa la que ya existe y se vincula
+            ese curso desde <a href="courses.php">Cursos → Vínculos</a> (con dos claves, el alumno
+            que está en los dos cursos queda con dos cuentas).
         </p>
         <button type="submit">Crear nueva herramienta LTI 1.1</button>
     </form>
@@ -193,7 +225,14 @@ admin_header('Conexión LTI (Moodle)', $me);
             ? (int) $p['default_course_id'] : null; ?>
         <tr>
             <td><?= htmlspecialchars($p['version']) ?></td>
-            <td><?= htmlspecialchars($p['version'] === '1.1' ? $p['consumer_key'] : $p['issuer']) ?></td>
+            <td>
+                <span class="mono"><?= htmlspecialchars($p['version'] === '1.1' ? $p['consumer_key'] : $p['issuer']) ?></span>
+                <?php if ($p['version'] === '1.1' && (string) $p['shared_secret'] !== ''): ?>
+                <details><summary>Ver secreto</summary>
+                    <span class="mono"><?= htmlspecialchars((string) $p['shared_secret']) ?></span>
+                </details>
+                <?php endif; ?>
+            </td>
             <td><?= htmlspecialchars($p['client_id']) ?></td>
             <td><?= htmlspecialchars($p['deployment_id']) ?></td>
             <td>
