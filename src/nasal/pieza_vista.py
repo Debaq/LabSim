@@ -26,7 +26,7 @@ import time
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QImage, QLinearGradient, QPainter, QPen, QPixmap, QPolygonF
 from PySide6.QtCore import QUrl
-from PySide6.QtMultimedia import QSoundEffect
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from core import tema
@@ -101,7 +101,8 @@ class VistaPieza(QWidget):
     def __init__(self, parent=None, grande=False, sonido=False):
         super().__init__(parent)
         self.sonido = sonido
-        self.ronquidos = []
+        self.ronquidos = []            # rutas de los ronquidos de la grabación del paciente
+        self._reproductores = []       # dos QMediaPlayer que se turnan (un ronquido puede montarse con el siguiente)
         self._n_ronquido = 0
         self.ronco = 0                 # ronquidos tocados (para el test)
         self.P = Paquete.cargar()
@@ -157,6 +158,7 @@ class VistaPieza(QWidget):
 
     def hideEvent(self, e):
         self.timer.stop()
+        self.callar()
         super().hideEvent(e)
 
     def _tic(self):
@@ -181,27 +183,35 @@ class VistaPieza(QWidget):
     def paciente(self, sexo, semilla):
         """Elige la grabación de ronquidos: del sexo del paciente ('hombre'/'mujer'), la misma para la
         misma semilla (el id del caso)."""
-        for fx in self.ronquidos:
-            fx.deleteLater()
         self.ronquidos = []
         if not self.sonido:
             return
         grabaciones = ronquidos_de(sexo)
-        if not grabaciones:
-            return
-        for ruta in grabaciones[int(semilla) % len(grabaciones)]:
-            fx = QSoundEffect(self)
-            fx.setSource(QUrl.fromLocalFile(ruta))
-            self.ronquidos.append(fx)
+        if grabaciones:
+            self.ronquidos = list(grabaciones[int(semilla) % len(grabaciones)])
 
     def _roncar(self, volumen):
+        """Con QMediaPlayer, como las frases: QSoundEffect no remuestrea y en algunos equipos (el del
+        autor, con PipeWire) decía estar sonando sin que se oyera nada."""
         self.ronco += 1
         if not self.ronquidos:
             return
-        fx = self.ronquidos[self._n_ronquido % len(self.ronquidos)]
+        if not self._reproductores:
+            for _ in range(2):
+                salida = QAudioOutput(self)
+                reproductor = QMediaPlayer(self)
+                reproductor.setAudioOutput(salida)
+                self._reproductores.append((reproductor, salida))
+        reproductor, salida = self._reproductores[self._n_ronquido % 2]
+        ruta = self.ronquidos[self._n_ronquido % len(self.ronquidos)]
         self._n_ronquido += 1
-        fx.setVolume(volumen)
-        fx.play()
+        salida.setVolume(volumen)
+        reproductor.setSource(QUrl.fromLocalFile(ruta))
+        reproductor.play()
+
+    def callar(self):
+        for reproductor, _ in self._reproductores:
+            reproductor.stop()
 
     # --- mouse ----------------------------------------------------------
 

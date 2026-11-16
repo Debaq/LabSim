@@ -146,22 +146,27 @@ def test_ronquidos_por_sexo():
     assert set(map(str, pv.ronquidos_de('hombre'))) .isdisjoint(map(str, pv.ronquidos_de('mujer')))
     v = pv.VistaPieza(sonido=True)
     v.paciente('mujer', 7)
-    a = [fx.source().toLocalFile() for fx in v.ronquidos]
+    a = list(v.ronquidos)
     assert a and all('/mujer/' in r for r in a)
     v.paciente('mujer', 7)
-    assert [fx.source().toLocalFile() for fx in v.ronquidos] == a          # mismo caso, misma grabación
+    assert list(v.ronquidos) == a          # mismo caso, misma grabación
     v.paciente('hombre', 7)
-    assert all('/hombre/' in fx.source().toLocalFile() for fx in v.ronquidos)
+    assert all('/hombre/' in r for r in v.ronquidos)
     assert not pv.VistaPieza(sonido=False).ronquidos
     # En la ventana: la paciente mujer ronca con voz de mujer.
     w = T.ventana(T.caso({'perfil': 'moderado'}, edad=52, gender=1))
-    assert all('/mujer/' in fx.source().toLocalFile() for fx in w.camara.ronquidos) and w.camara.ronquidos
+    assert all('/mujer/' in r for r in w.camara.ronquidos) and w.camara.ronquidos
 
 
 def test_ronca_al_inspirar():
     v = pv.VistaPieza(sonido=True)
     v.paciente('hombre', 3)
     assert v.ronquidos
+    # Suena con QMediaPlayer (QSoundEffect no se oía en el equipo del autor): el archivo queda cargado.
+    v._roncar(0.8)
+    reproductor, salida = v._reproductores[0]
+    assert reproductor.source().toLocalFile() == v.ronquidos[0] and abs(salida.volume() - 0.8) < 0.01
+    v.callar()
 
     def correr(resp, segundos=12):
         v.poner('supino', False, '', resp)
