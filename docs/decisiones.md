@@ -9069,3 +9069,11 @@ Uribe, clave LTI 1.1 propia que matricula sola).
   contra el de la automática que vio (semilla `psg/<cita>`) y el de la noche
   bien puntuada con su misma regla, la gravedad elegida y lo que la guía
   prohíbe escribir. `--pauta` da la pauta de las cuatro fichas sin red.
+- **Pantallas de 768 px** (auditoría antes del práctico): a 1366×768 el
+  detalle medía 172 px para 9 canales y la SpO₂ y el ronquido quedaban
+  cortados sin aviso (ni el divisor los recuperaba: "La noche" pedía 230 px).
+  Ahora la noche pide 175 y muestra las horas una sola vez, sin rótulos
+  rotados, y con N1 en el hipnograma; la casilla "Selección en la noche" pasa
+  a la barra del detalle; el detalle pide 250 px, con alto propio para la
+  SpO₂ y el ronquido, y el divisor no colapsa. Registrada la noche, los
+  sensores se esconden: tipos, Borrar y Excluir quedan a la vista.

@@ -91,7 +91,9 @@ class Noche:
     def __init__(self, al_clic):
         self.widget = pg.GraphicsLayoutWidget()
         self.widget.setBackground(tema.TARJETA)
-        self.widget.setMinimumHeight(230)
+        # Chico a propósito: a 1366×768 el detalle (9 canales) necesita el
+        # resto del alto, si no el SpO₂ y el ronquido quedan fuera.
+        self.widget.setMinimumHeight(175)
         self.al_clic = al_clic
         self.p_etapa = self._plot('Etapa')
         self.p_etapa.getAxis('left').setTicks([[(4, 'W'), (3, 'R'), (2, 'N1'), (1, 'N2'), (0, 'N3')]])
@@ -100,9 +102,12 @@ class Noche:
         self.p_ev.getAxis('left').setTicks([[]])
         self.widget.nextRow()
         self.p_sp = self._plot('SpO₂')
-        self.p_sp.getAxis('bottom').setLabel('horas desde que se apagó la luz', color=tema.TEXTO_TENUE)
         for p in (self.p_ev, self.p_sp):
             p.setXLink(self.p_etapa)
+        # Las horas, una sola vez (abajo, en la SpO₂): el alto va a los trazos.
+        for p in (self.p_etapa, self.p_ev):
+            p.getAxis('bottom').setStyle(showValues=False)
+            p.getAxis('bottom').setHeight(4)
         self.widget.ci.layout.setRowStretchFactor(0, 3)
         self.widget.ci.layout.setRowStretchFactor(1, 2)
         self.widget.ci.layout.setRowStretchFactor(2, 2)
@@ -119,8 +124,7 @@ class Noche:
         p.hideButtons()
         p.getViewBox().setMouseEnabled(x=False, y=False)
         p.showGrid(x=True, y=False, alpha=0.2)
-        p.getAxis('left').setWidth(54)
-        p.getAxis('left').setLabel(rotulo, color=tema.TEXTO_TENUE)
+        p.getAxis('left').setWidth(34)
         for eje in ('left', 'bottom'):
             p.getAxis(eje).setPen(pg.mkPen(tema.BORDE_FUERTE))
             p.getAxis(eje).setTextPen(pg.mkPen(tema.TEXTO_TENUE))
@@ -146,8 +150,7 @@ class Noche:
         for p in (self.p_etapa, self.p_ev, self.p_sp):
             p.setXRange(0, horas, padding=0)
         if S['estudio'] == 'psg':
-            self.p_etapa.getAxis('left').setLabel('Etapa', color=tema.TEXTO_TENUE)
-            self.p_etapa.getAxis('left').setTicks([[(4, 'W'), (3, 'R'), (1, 'N2'), (0, 'N3')]])
+            self.p_etapa.getAxis('left').setTicks([[(4, 'W'), (3, 'R'), (2, 'N1'), (1, 'N2'), (0, 'N3')]])
             xs, ys = [], []
             for e, a, b in S['seg']:
                 xs += [a / 3600, b / 3600]
@@ -155,7 +158,6 @@ class Noche:
             self.p_etapa.plot(xs, ys, pen=pg.mkPen(tema.TEXTO, width=1.4))
             self.p_etapa.setYRange(-0.5, 4.5, padding=0)
         else:
-            self.p_etapa.getAxis('left').setLabel('Posición', color=tema.TEXTO_TENUE)
             self.p_etapa.getAxis('left').setTicks([[(1, 'Sup'), (0, 'Lat')]])
             xs, ys = [], []
             for a, b, p in S['P']['pos']:
@@ -192,6 +194,7 @@ class Noche:
                        [min(S['sp'][k:k + paso]) for k in range(0, S['N'], paso)],
                        pen=pg.mkPen(tema.OI, width=1))
         self.p_sp.setYRange(min(80, min(S['sp']) - 1), 100, padding=0)
+        self.p_sp.getAxis('left').setTicks([[(90, '90')]])
         r = pg.LinearRegionItem(values=(t0 / 3600, (t0 + dur) / 3600), movable=False,
                                 brush=pg.mkBrush(QColor(tema.ACENTO).lighter(150)))
         r.setZValue(-5)
@@ -239,7 +242,14 @@ class Detalle:
             self.plots[clave] = p
             self.widget.nextRow()
         self.widget.ci.layout.setColumnFixedWidth(0, 92)
+        # El ronquido lleva además el eje de las horas: sin un mínimo propio
+        # queda en una línea (y la SpO₂ casi plana).
+        self.plots['ron'].setMinimumHeight(46)
+        self.plots['spo2'].setMinimumHeight(28)
         self.widget.ci.layout.setVerticalSpacing(0)
+        # Lo que piden los 9 canales: el divisor no lo achica más (si no, se
+        # cortan los de abajo sin aviso).
+        self.widget.setMinimumHeight(250)
         self.seleccion = pg.LinearRegionItem(values=(0, 10), brush=pg.mkBrush(120, 120, 120, 45),
                                              pen=pg.mkPen(tema.TEXTO, width=1.2))
         self.plots['canula'].addItem(self.seleccion)
@@ -451,12 +461,11 @@ class PolisomnografiaWindow(QMainWindow):
         self.noche = Noche(self._ir_a)
         caja = Tarjeta('La noche')
         caja.agregar(self.noche.widget, 1)
-        fila = QHBoxLayout()
-        self.chk_sel_noche = QCheckBox('Selección en la noche (para excluir tramos largos)')
+        # La casilla va en la barra de abajo: en "La noche" el alto es para
+        # el hipnograma (pantallas de 768 px).
+        self.chk_sel_noche = QCheckBox('Selección en la noche')
+        self.chk_sel_noche.setToolTip('Muestra una selección en la noche entera para excluir tramos largos')
         self.chk_sel_noche.toggled.connect(self._al_sel_noche)
-        fila.addWidget(self.chk_sel_noche)
-        fila.addStretch(1)
-        caja.agregar_layout(fila)
         abajo = Tarjeta()
         barra = QHBoxLayout()
         self.btn_atras = self._boton('◀', lambda: self._mover(-1))
@@ -471,6 +480,7 @@ class PolisomnografiaWindow(QMainWindow):
         barra.addWidget(self.btn_adelante)
         barra.addWidget(self.cmb_ventana)
         barra.addWidget(self.lbl_donde, 1)
+        barra.addWidget(self.chk_sel_noche)
         abajo.agregar_layout(barra)
         self.detalle = Detalle(self._clic_detalle)
         abajo.agregar(self.detalle.widget, 1)
@@ -479,6 +489,7 @@ class PolisomnografiaWindow(QMainWindow):
         vertical.addWidget(abajo)
         vertical.setStretchFactor(0, 2)
         vertical.setStretchFactor(1, 5)
+        vertical.setChildrenCollapsible(False)
         layout.addWidget(vertical, 1)
         return contenedor
 
@@ -804,6 +815,12 @@ class PolisomnografiaWindow(QMainWindow):
         hay = self.sesion is not None and self.sesion.hay_paciente
         registrado = self.S is not None
         self.panel_estudio.setEnabled(hay and not registrado)
+        # Registrada la noche, los sensores ya no se tocan: se esconden para que
+        # la puntuación (tipos, Borrar, Excluir) quede a la vista en pantallas
+        # bajas. La pastilla de arriba dice el estudio; el informe, lo que faltó.
+        validos = Z.sensores_del_estudio(self._estudio())
+        for k, c in self.chk_sensor.items():
+            c.setVisible(not registrado and k in validos)
         self.btn_registrar.setEnabled(hay and not registrado)
         self.btn_registrar.setText('Noche registrada' if registrado else 'Registrar la noche')
         self.panel_puntuacion.setEnabled(registrado)
