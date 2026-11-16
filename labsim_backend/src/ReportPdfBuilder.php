@@ -1235,6 +1235,22 @@ final class ReportPdfBuilder
         if ($faltan !== []) {
             $lineas[] = 'Sensores que faltan para este estudio: ' . implode(', ', $faltan) . '.';
         }
+        // Las veces que el técnico entró a acomodar al paciente
+        // (nasal/PolisomnografiaWindow.py, solo en el laboratorio).
+        $nombresPos = ['supino' => 'de espaldas', 'izquierda' => 'lado izquierdo', 'derecha' => 'lado derecho'];
+        $acomodos = [];
+        foreach (is_array($data['acomodos'] ?? null) ? $data['acomodos'] : [] as $a) {
+            if (is_array($a) && count($a) === 2 && is_numeric($a[0]) && isset($nombresPos[$a[1]])) {
+                $s = (int) $a[0];
+                $acomodos[] = sprintf('%02d:%02d %s', intdiv($s, 3600), intdiv($s % 3600, 60), $nombresPos[$a[1]]);
+            }
+        }
+        if ($acomodos !== []) {
+            $lineas[] = 'Paciente acomodado durante la noche (hora desde que se apagó la luz): ' . implode('; ', $acomodos) . '.';
+        }
+        if (array_key_exists('t_actual', $data) && $data['t_actual'] !== null) {
+            $lineas[] = 'La noche quedó sin terminar al cerrar la atención.';
+        }
         foreach ($lineas as $linea) {
             $y = self::ensureSpace($pdf, $y, 14.0);
             $y = $pdf->textBlock(self::MARGIN, $y, $linea, $contentW, 9);

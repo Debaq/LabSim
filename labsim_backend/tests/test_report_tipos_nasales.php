@@ -155,6 +155,11 @@ $pg = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', ['estudio' => 'pg', 'monta
 t_true(strpos($pg, 'Poligraf') !== false && strpos($pg, 'domiciliaria') !== false, 'La poligrafía lleva su título');
 t_true(strpos($pg, 'faltan') === false, 'Con el montaje completo de la poligrafía no falta nada');
 t_true(strpos($pg, 'sin elegir') !== false, 'Sin gravedad elegida lo dice');
+t_true(strpos($psg, 'acomodado') === false, 'Sin acomodos no dice nada de acomodar');
+$acom = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', ['acomodos' => [[9000, 'supino'], [15000, 'x']], 't_actual' => 12000] + $datosPsg, $paciente, 'Alumno X', '16-11-2026');
+t_true(strpos($acom, '02:30 de espaldas') !== false && strpos($acom, 'acomodado') !== false, 'Dice cuándo y cómo se acomodó al paciente');
+t_true(strpos($acom, ' x.') === false, 'Una posición desconocida no sale');
+t_true(strpos($acom, 'sin terminar') !== false, 'Avisa que la noche quedó sin terminar');
 
 // Lo que WinAnsi no tiene no sale como "?": ≥ y los subíndices.
 $sp = ReportPdfBuilder::build(999, 'POLISOMNOGRAFIA', [

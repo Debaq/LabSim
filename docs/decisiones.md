@@ -9098,3 +9098,34 @@ duplican a quien está en los dos cursos (ya pasaba: David Ávila, ids 2 y 20).
 - Pendiente: reconocer a la persona por su id de Moodle entre claves del
   mismo Moodle (tool_consumer_instance_guid), para que una clave nueva no
   duplique.
+
+## PSG: la noche corre y el técnico acomoda al paciente (2026-11-16)
+
+Él, tras la auditoría del práctico: "falta cómo ir acomodando al paciente en
+las diferentes posiciones en la cama"; eligió que lo haga el alumno, no solo
+verlo. En la PSG real el técnico vigila la noche y, si el paciente no ha
+dormido de espaldas (el índice por posición lo necesita, sobre todo en REM),
+entra y lo acomoda.
+
+- **La noche corre** en la polisomnografía: por defecto la noche entera en
+  15 min reales (él; el factor sale del largo de cada noche, ≈ ×31), o ×60,
+  ×120 y ×300, con Pausa/Seguir y "Hasta la mañana". Mientras corre, la
+  noche y el detalle llegan solo hasta lo registrado y la puntuación está
+  cerrada: la automática sale al encender la luz. La poligrafía sigue
+  llegando entera (en la casa no hay técnico).
+- **Sala de control**: la cámara (el paciente en la cama, de espaldas o de
+  lado, ojos abiertos si está despierto) y "Entrar a acomodarlo": De
+  espaldas, Lado izq., Lado der.
+- **Qué hace un acomodo** (`sueno.acomodar`): la posición cambia desde ese
+  segundo hasta el próximo cambio propio del paciente (su guion,
+  `P['pos']`); entrar lo despierta 120 s (`VIGILIA_ACOMODO`). Lo anterior no
+  cambia (el azar es secuencial); lo posterior es otra noche, con la tasa de
+  eventos de la posición nueva. **Sin acomodos la noche es idéntica** a la
+  de antes: la pauta de las fichas 159-162 sigue valiendo (test).
+- Informe: `acomodos` [[t, posición]] y `t_actual` (si se cerró con la
+  noche corriendo se retoma en pausa); el PDF los dice; `revisar_psg.py`
+  rehace la noche con ellos. Log `psg_acomodar`, `psg_pausa`, `psg_manana`.
+  El docente ve los minutos de sueño de espaldas (y en REM) y el IAH de
+  espaldas con y sin los acomodos.
+- Queda fuera: acomodar en la titulación de CPAP (allí también se pide
+  supino en REM para validar la presión).

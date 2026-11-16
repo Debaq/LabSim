@@ -86,8 +86,10 @@ TIPOS = [('ao', 'apnea obstructiva'), ('am', 'apnea mixta'), ('ac', 'apnea centr
 
 
 # ----------------------------------------------------------------------------------- simulación
-def simular(clave, P=None):
-    # LabSim: `P` permite un perfil que no es del libro (perfil_personalizado).
+def simular(clave, P=None, acomodos=()):
+    # LabSim: `P` permite un perfil que no es del libro (perfil_personalizado);
+    # `acomodos`, las veces que el técnico cambió de posición al paciente
+    # (ver `acomodar`).
     P = P or PACIENTES[clave]
     rng = random.Random(P['semilla'])
     seg, t = [], 0
@@ -108,6 +110,8 @@ def simular(clave, P=None):
     for a, b, p in P['pos']:
         for s in range(a * 60, min(b * 60, N)):
             pos[s] = p
+    if acomodos:
+        seg = acomodar(P, etapa, pos, acomodos)
     ev, s, libre = [], 0, 0
     tipos, pesos = zip(*P['mix'].items())
     while s < N:
@@ -182,6 +186,46 @@ def simular(clave, P=None):
             p = P['ron_p'][pos[m * 60 + 30]] * (0.4 if etapa[m * 60 + 30] == 'N3' else 1.0)
             ron[m] = rr.random() < p
     return dict(P=P, clave=clave, seg=seg, N=N, etapa=etapa, pos=pos, ev=ev, esp=esp, sp=sp, ron=ron)
+
+
+# LabSim: el técnico entra a la pieza y acomoda al paciente (solo en el
+# laboratorio). Entrar lo despierta un rato; la posición nueva dura hasta que
+# él mismo se da vuelta (el próximo cambio de su guion, P['pos']).
+VIGILIA_ACOMODO = 120
+POSICIONES = ('supino', 'izquierda', 'derecha')
+
+
+def acomodar(P, etapa, pos, acomodos):
+    """Aplica los acomodos sobre `etapa` y `pos` (en el sitio) y devuelve los
+    tramos de etapa rehechos. Lo anterior a cada acomodo no cambia."""
+    N = len(etapa)
+    bordes = sorted({min(N, a * 60) for a, _b, _p in P['pos']} | {N})
+    for t, p in sorted((int(t), p) for t, p in acomodos):
+        if not (0 <= t < N) or p not in POSICIONES:
+            continue
+        hasta = next(b for b in bordes if b > t)
+        for k in range(t, hasta):
+            pos[k] = p
+        if etapa[t] != 'W':
+            for k in range(t, min(N, t + VIGILIA_ACOMODO)):
+                etapa[k] = 'W'
+    seg, a = [], 0
+    for k in range(1, N + 1):
+        if k == N or etapa[k] != etapa[a]:
+            seg.append((etapa[a], a, k))
+            a = k
+    return seg
+
+
+def tramos_posicion(S):
+    """(desde, hasta, posición) en segundos, de lo que de verdad pasó en la
+    noche (con los acomodos), no del guion del perfil."""
+    pos, out, a = S['pos'], [], 0
+    for k in range(1, S['N'] + 1):
+        if k == S['N'] or pos[k] != pos[a]:
+            out.append((a, k, pos[a]))
+            a = k
+    return out
 
 
 def odi(sp, etapa, umbral=3):
@@ -494,15 +538,18 @@ def perfil_personalizado(p):
         **({'gap': (3, 10)} if tasa >= 40 else {}))
 
 
-def noche(sueno, estudio):
+def noche(sueno, estudio, acomodos=()):
     """La noche simulada del caso para ese estudio ('psg' o 'pg'). La
-    poligrafía se hace en la casa: puede ser otra noche (38.4) y la cánula
-    se puede soltar."""
+    poligrafía se hace en la casa: puede ser otra noche (38.4), la cánula
+    se puede soltar y no hay técnico que acomode al paciente (los
+    `acomodos` [(t s, posición)] solo valen en el laboratorio)."""
+    acomodos = [(int(t), p) for t, p in acomodos or ()] if estudio == 'psg' else []
     if sueno['perfil'] == 'personalizado':
-        S = simular('personalizado', perfil_personalizado(sueno['params']))
+        S = simular('personalizado', perfil_personalizado(sueno['params']), acomodos)
     else:
         clave = PG_LIBRO.get(sueno['perfil'], sueno['perfil']) if estudio == 'pg' else sueno['perfil']
-        S = simular(clave)
+        S = simular(clave, None, acomodos)
+    S['acomodos'] = sorted(acomodos)
     S['estudio'] = estudio
     c = sueno['canula_suelta'] if estudio == 'pg' else None
     S['canula_suelta'] = None if not c else (int(c['desde'] * 60), int(c['hasta'] * 60))
