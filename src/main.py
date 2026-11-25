@@ -709,8 +709,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     # tiene su propio equipo; todo lo demás va en el ABR).
     _OSCE_MODULO = {"ABR": "subw_abr", "VEMP": "subw_vemp"}
 
-    def _osce_modulo(self):
-        codigo = (osce.estacion or {}).get("modulo") or "ABR"
+    def _osce_modulo(self, codigo=None):
+        """Módulo de la tarea abierta (o el que se pide); al partir, el primero de la estación."""
+        codigo = codigo or getattr(self, "_osce_mod_actual", None) or (osce.estacion or {}).get("modulo") or "ABR"
         return codigo, getattr(self, self._OSCE_MODULO.get(codigo, "subw_abr"), None)
 
     def _iniciar_osce(self):
@@ -718,10 +719,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return
         from core.osce_barra import BarraOsce
         self._modulos_listos()
-        codigo, frame = self._osce_modulo()
-        if frame is None:
-            self._aviso("Estación OSCE", f"Este equipo no tiene el módulo {codigo}.")
-            return
+        self._osce_mod_actual = None
+        info = osce.estacion or {}
+        for codigo in info.get("modulos") or [info.get("modulo") or "ABR"]:
+            if self._osce_modulo(codigo)[1] is None:
+                self._aviso("Estación OSCE", f"Este equipo no tiene el módulo {codigo}.")
+                return
         self.barra_osce = BarraOsce(self._osce_abrir, self._osce_entrega, self._osce_cerrar)
         self.toolbar_osce = QToolBar("Estación OSCE", self)
         self.toolbar_osce.setMovable(False)
@@ -738,8 +741,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.activate_auto(codigo)
 
     def _osce_abrir(self, respuesta):
-        """Llegó el caso de un alumno: al equipo de la estación, preparado
-        según su tipo (osce_preparar del ABR o del VEMP)."""
+        """Una tarea del alumno: su caso al equipo de esa tarea (ABR o VEMP),
+        preparado según el tipo de estación (osce_preparar)."""
+        self._osce_mod_actual = respuesta.get("modulo") or (osce.estacion or {}).get("modulo") or "ABR"
         caso = respuesta["caso"]
         self.data_current = caso
         self.data_current_key = f"osce-{respuesta['codigo']}"

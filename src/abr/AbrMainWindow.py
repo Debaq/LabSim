@@ -2577,6 +2577,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             'transducer': rng.choice([t for t in TRANSDUCERS.values() if t != 'insert_earphone']),
             'artifact_reject_uv': float(rng.choice([10, 15, 20, 30, 40, 60])),
         })
+        if prueba in cortical.ODDBALL_TESTS:
+            # El oddball también se configura: instrucción, raro y proporción.
+            from abr.AbrAdvanceSettings import ODDBALL_PCT, ODDBALL_RARE
+            otras = [i for i in range(c.cb_tarea.count()) if c.cb_tarea.itemData(i) != control.get('tarea')]
+            if otras:
+                c.cb_tarea.setCurrentIndex(rng.choice(otras))
+            raros = [r for r in ODDBALL_RARE.values() if r != tecnica.get('oddball_rare')]
+            pcts = [x for x in ODDBALL_PCT.values() if x != tecnica.get('oddball_pct')]
+            self.technical.update({'oddball_rare': rng.choice(raros), 'oddball_pct': rng.choice(pcts)})
         self._con_montaje()
         self.apply_window()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))

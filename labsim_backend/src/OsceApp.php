@@ -206,18 +206,19 @@ TXT;
                     'filter_passhigh' => '3', 'filter_down' => '1500', 'maniobra' => 'Rotación cefálica sostenida'],
         'ovemp' => ['transducer' => 'Inserto (vía aérea)', 'freq' => '1000 Hz | 500 Hz', 'pol' => 'Rarefacción', 'rate' => '5.1',
                     'filter_passhigh' => '1', 'filter_down' => '1000', 'maniobra' => 'Mirada superior ~30°'],
-        // El Protocolo ORL 2019 no trae estas pruebas: parten con lo
-        // habitual de la literatura (Hall 2007) y el docente lo ajusta.
-        'ecochg' => ['test' => 'ECochG', 'stim' => 'Click', 'pol' => 'Alternada', 'rate' => '7.1–11.1',
-                     'filter_passhigh' => '5 | 10', 'filter_down' => '3000', 'transducer' => 'insert_earphone'],
-        'latencia_media' => ['test' => 'MLR', 'stim' => 'Click', 'rate' => '7.1–11.1',
-                             'filter_passhigh' => '10 | 33', 'filter_down' => '100 | 300'],
-        'latencia_tardia' => ['test' => 'CAEP', 'stim' => 'Burst 500 Hz | Burst 1 kHz | Burst 2 kHz', 'rate' => '0.5–1.1',
-                              'filter_passhigh' => '0.5 | 1', 'filter_down' => '30'],
-        'p300' => ['test' => 'P300', 'stim' => 'Burst 1 kHz', 'rate' => '0.5–1.1', 'filter_passhigh' => '0.5 | 1',
-                   'filter_down' => '30', 'tarea' => 'contar | boton', 'oddball_rare' => 'Burst 2 kHz', 'oddball_pct' => '15–20'],
-        'mmn' => ['test' => 'MMN', 'stim' => 'Burst 1 kHz', 'rate' => '1.1–2.1', 'filter_passhigh' => '0.5 | 1',
-                  'filter_down' => '30', 'tarea' => 'pasiva', 'oddball_pct' => '10–20'],
+        // El Protocolo ORL 2019 no trae estas pruebas: parten con la
+        // configuración de rutina de LabSim (protocols.STANDARD_SETUP, la de
+        // la clase de latencia media y tardía) y el docente la ajusta.
+        'ecochg' => ['test' => 'ECochG', 'stim' => 'Click', 'pol' => 'Alternada', 'rate' => '11.1',
+                     'filter_passhigh' => '5', 'filter_down' => '3000', 'window_ms' => '10', 'gain' => '100000'],
+        'latencia_media' => ['test' => 'MLR', 'stim' => 'Click', 'rate' => '7.1', 'filter_passhigh' => '10',
+                             'filter_down' => '300', 'window_ms' => '100', 'gain' => '50000', 'artifact_reject_uv' => '50'],
+        'latencia_tardia' => ['test' => 'CAEP', 'stim' => 'Burst 1 kHz', 'rate' => '1', 'filter_passhigh' => '1',
+                              'filter_down' => '30', 'window_ms' => '500', 'gain' => '50000', 'artifact_reject_uv' => '100'],
+        'p300' => ['test' => 'P300', 'stim' => 'Burst 1 kHz', 'rate' => '1', 'filter_passhigh' => '0.5', 'filter_down' => '30',
+                   'window_ms' => '800', 'tarea' => 'contar', 'oddball_rare' => 'Burst 2 kHz', 'oddball_pct' => '20'],
+        'mmn' => ['test' => 'MMN', 'stim' => 'Burst 1 kHz', 'rate' => '1.5', 'filter_passhigh' => '1', 'filter_down' => '30',
+                  'window_ms' => '500', 'tarea' => 'pasiva', 'oddball_rare' => 'Burst 2 kHz', 'oddball_pct' => '20'],
     ];
     /** En la estación de protocolo, lo que se pide a cada curva (difiere de la configuración final). */
     public const ESPERADO_CURVAS = [

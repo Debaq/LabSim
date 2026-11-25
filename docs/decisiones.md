@@ -218,6 +218,37 @@ equipo (ABR o VEMP).
 - **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
   otra pasada de la IA lo pisan (probado).
 
+**Estaciones por competencias: tareas con peso y pacientes variantes (2026-11-25).**
+Él: "lo importante de esta prueba no es hacer todos los exámenes completos, es
+que los estudiantes en esos 8 minutos demuestren sus competencias completas
+en la asignatura"; "pautas por estación con porcentajes diferentes […]
+mismo porcentaje para cada estación o rendirán menos en una cosa que en
+otra"; "lo de los pacientes está súper".
+
+- **Cada estación de la app es una lista de tareas cortas** (examen, peso %,
+  pacientes, pauta). Configuración: PEATC para umbral, ECochG, P300 y cVEMP;
+  marcaje: un registro por prueba (PEATC, ECochG, MLR, CAEP, P300/MMN, cVEMP).
+  El ASSR no va en configuración ("muy simple, no vale 8 minutos"): queda en
+  preguntas técnicas. Pediatría va en protocolo.
+- **El peso se aplica escalando los puntos de la tarea** a su porcentaje: la
+  estación suma 100 y la nota no cambia de fórmula; los puntos que el
+  docente pone dentro de la tarea son relativos.
+- **Pacientes variantes de igual dificultad**, repartidos por número y
+  corridos en cada tarea (`(N−1+k) mod n`): la rotación en cadena hace que
+  los primeros conversen con los que esperan, y así no sirve pasarse la
+  respuesta. Cada alumno se corrige con la verdad de su paciente; en
+  conclusión, cada paciente trae su conclusión esperada para la IA.
+- **En el PC, las tareas van en orden y sin volver** ("Siguiente tarea", dos
+  toques): restaurar el estado de un equipo a medias es frágil y en 8
+  minutos no aporta. Lo hecho queda en memoria (no como entrega pendiente,
+  que el reintento mandaría antes de tiempo) y la entrega lleva todas.
+- **Esperados de ECochG, MLR, CAEP, P300 y MMN = la rutina de LabSim**
+  (`protocols.STANDARD_SETUP`, la de la clase): el Protocolo ORL 2019 no
+  trae esas pruebas. El oddball también parte al azar (instrucción, raro y
+  proporción).
+- **Las preguntas son técnicas**, no de conocimiento teórico: la prueba es
+  práctica y tienen pruebas teóricas aparte.
+
 **Sin timbre ni proyector; gafete y talón; panel de control (2026-11-25).**
 Él: "la tarjeta se la pegarán en el pecho visible para todos los evaluadores
 […] ¿de dónde sacaste eso del timbre? […] todas las apps avisan los tiempos,

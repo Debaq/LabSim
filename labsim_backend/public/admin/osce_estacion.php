@@ -409,7 +409,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
         <p class="help"><?= $esProtocolo
             ? '<strong>Parámetros de cada curva registrada:</strong> el puntaje es la proporción de curvas que cumplen.'
             : '<strong>Configuración al entregar.</strong>' ?>
-            Esperado: un valor, varios separados por <code>|</code> (cualquiera vale) o un rango <code>10–12</code>. Vacío = no se evalúa. <?= in_array($examen, ['peatc', 'cvemp', 'ovemp'], true) ? 'Precargado del Protocolo Técnico ORL 2019' : 'El protocolo ORL 2019 no trae esta prueba: precargado con lo habitual (Hall 2007), ajústalo a tu práctica' ?><?= $examen === 'peatc' ? ' (la ventana del protocolo dice "10 s", es 10 ms; ganancia "10k" = 10000)' : '' ?>.</p>
+            Esperado: un valor, varios separados por <code>|</code> (cualquiera vale) o un rango <code>10–12</code>. Vacío = no se evalúa. <?= in_array($examen, ['peatc', 'cvemp', 'ovemp'], true) ? 'Precargado del Protocolo Técnico ORL 2019' : 'El protocolo ORL 2019 no trae esta prueba: precargado con la configuración de rutina de LabSim (la de la clase), ajústala si quieres' ?><?= $examen === 'peatc' ? ' (la ventana del protocolo dice "10 s", es 10 ms; ganancia "10k" = 10000)' : '' ?>.</p>
         <div class="table-wrap"><table>
             <thead><tr><th>Parámetro</th><th>Esperado</th><th>Puntos</th><th>Crítico</th></tr></thead>
             <tbody>

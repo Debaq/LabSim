@@ -2,9 +2,14 @@
 regresiva de su tiempo y "Entregar".
 
 No sabe nada del ABR: main le pasa tres funciones.
-- abrir(respuesta): carga el caso que mandó el servidor y prepara el equipo.
-- entrega(): lo que se sube (AbrMainWindow.osce_entrega).
-- cerrar(): deja el equipo vacío para el siguiente.
+- abrir(tarea): carga el caso de esa tarea y prepara su equipo (ABR o VEMP).
+- entrega(): lo que se sube de la tarea abierta (AbrMainWindow.osce_entrega).
+- cerrar(): deja el equipo vacío para la tarea o el alumno siguiente.
+
+Una estación puede tener varias tareas (cada una con su examen, su peso y
+el paciente que le toca al alumno). Se hacen en orden: "Siguiente tarea"
+guarda lo hecho y abre la próxima, sin volver. La entrega lleva lo de
+todas las tareas a las que llegó.
 
 El reloj se pide al servidor cada pocos segundos y entre medio corre solo.
 Al llegar a cero entrega sola. Si la entrega no sale, queda guardada en el
@@ -32,6 +37,11 @@ class BarraOsce(QWidget):
         self.datos_reloj = None
         self._entregando = False
         self._confirmar = False
+        self._confirmar_sig = False
+        self.tareas = []            # las tareas del alumno (respuesta['tareas'])
+        self.k = 0                  # la que tiene abierta
+        self.hechas = {}            # k -> lo que entregó de esa tarea
+        self._respuesta = None
 
         fila = QHBoxLayout(self)
         fila.setContentsMargins(10, 4, 10, 4)
@@ -60,6 +70,14 @@ class BarraOsce(QWidget):
         self.lbl_alumno.setFont(fuente)
         for w in (self.lbl_codigo, self.campo, self.btn_entrar, self.lbl_alumno):
             fila.addWidget(w)
+
+        self.lbl_tarea = QLabel("")
+        self.lbl_tarea.setWordWrap(True)
+        self.lbl_tarea.setMaximumWidth(260)
+        fila.addWidget(self.lbl_tarea)
+        self.btn_siguiente = QPushButton("Siguiente tarea →")
+        self.btn_siguiente.clicked.connect(self.pedir_siguiente)
+        fila.addWidget(self.btn_siguiente)
 
         self.lbl_cuenta = QLabel("")
         grande = QFont(self.font())
@@ -106,6 +124,14 @@ class BarraOsce(QWidget):
         self.ventana = None
         self._entregando = False
         self._confirmar = False
+        self._confirmar_sig = False
+        self.tareas = []
+        self.k = 0
+        self.hechas = {}
+        self._respuesta = None
+        self.lbl_tarea.setText("")
+        self.btn_siguiente.setVisible(False)
+        self.btn_siguiente.setText("Siguiente tarea →")
         for w in (self.lbl_codigo, self.campo, self.btn_entrar):
             w.setVisible(True)
         self.campo.setEnabled(True)
@@ -141,12 +167,83 @@ class BarraOsce(QWidget):
                        dueno=self, nombre="osce_entrar")
 
     def _entro(self, respuesta):
+        # Una estación de antes (sin 'tareas') es una sola tarea con todo arriba.
+        tareas = respuesta.get("tareas") or [{k: respuesta.get(k) for k in
+                                              ("tipo", "modulo", "prueba", "curvas", "caso")}]
+        self._respuesta = respuesta
+        self.tareas = tareas
+        self.k = 0
+        self.hechas = {}
         try:
-            self._abrir(respuesta)
+            self._abrir_tarea(0)
         except Exception as exc:  # noqa: BLE001 -- que el alumno no quede pegado
             self._modo_espera(f"No se pudo abrir el equipo: {exc}")
             return
         self._modo_alumno(respuesta["codigo"], respuesta.get("ventana") or {}, respuesta.get("numero"))
+        self._mostrar_tarea()
+
+    def _abrir_tarea(self, k):
+        tarea = dict(self.tareas[k])
+        tarea["codigo"] = self._respuesta["codigo"]
+        tarea["numero"] = self._respuesta.get("numero")
+        tarea.setdefault("tipo", self._respuesta.get("tipo"))
+        self._abrir(tarea)
+
+    def _mostrar_tarea(self):
+        n = len(self.tareas)
+        t = self.tareas[self.k] if self.tareas else {}
+        if n > 1:
+            peso = t.get("peso")
+            peso = f" ({peso:g} %)" if isinstance(peso, (int, float)) else ""
+            self.lbl_tarea.setText(f"<b>Tarea {self.k + 1} de {n}</b> · {t.get('titulo', '')}{peso}")
+        else:
+            self.lbl_tarea.setText("")
+        self.btn_siguiente.setVisible(self.k < n - 1)
+        self.btn_siguiente.setEnabled(True)
+        self.btn_siguiente.setText("Siguiente tarea →")
+        self._confirmar_sig = False
+
+    # -- Siguiente tarea -------------------------------------------------------
+
+    def pedir_siguiente(self):
+        """Dos toques, como Entregar: no se vuelve a la tarea anterior."""
+        if self.alumno is None or self._entregando or self.k >= len(self.tareas) - 1:
+            return
+        if not self._confirmar_sig:
+            self._confirmar_sig = True
+            self.btn_siguiente.setText("¿Seguro? No se vuelve")
+            QTimer.singleShot(4000, self, self._olvidar_siguiente)
+            return
+        self.siguiente()
+
+    def _olvidar_siguiente(self):
+        if self._confirmar_sig and self.alumno is not None:
+            self._confirmar_sig = False
+            self.btn_siguiente.setText("Siguiente tarea →")
+
+    def _guardar_tarea_actual(self):
+        try:
+            self.hechas[self.k] = self._entrega()
+        except Exception as exc:  # noqa: BLE001
+            self.hechas[self.k] = {"error_app": str(exc)}
+
+    def siguiente(self):
+        if self.alumno is None or self.k >= len(self.tareas) - 1:
+            return
+        # Lo hecho queda en memoria hasta la entrega (no como pendiente: el
+        # reintento automático lo entregaría antes de tiempo).
+        self._guardar_tarea_actual()
+        self._cerrar()
+        self.k += 1
+        try:
+            self._abrir_tarea(self.k)
+        except Exception as exc:  # noqa: BLE001
+            self.lbl_estado.setText(f"No se pudo abrir la tarea: {exc}")
+        self._mostrar_tarea()
+
+    def _entrega_total(self):
+        """Lo de cada tarea en orden (null en las que no alcanzó a abrir)."""
+        return {"tareas": [self.hechas.get(i) for i in range(len(self.tareas))]}
 
     def _no_entro(self, exc):
         self.campo.setEnabled(True)
@@ -212,11 +309,10 @@ class BarraOsce(QWidget):
             return
         self._entregando = True
         self.btn_entregar.setEnabled(False)
+        self.btn_siguiente.setEnabled(False)
         alumno = self.alumno
-        try:
-            entrega = self._entrega()
-        except Exception as exc:  # noqa: BLE001
-            entrega = {"error_app": str(exc)}
+        self._guardar_tarea_actual()
+        entrega = self._entrega_total()
         entrega["auto"] = bool(auto)
         try:
             osce.guardar_pendiente(alumno, entrega)

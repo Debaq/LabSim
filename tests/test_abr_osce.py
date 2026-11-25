@@ -154,6 +154,16 @@ def test_marcaje_corticales_traen_sus_componentes():
         assert curvas[f'R1.{canal}']['canal'] == canal and curvas[f'R1.{canal}']['test'] == prueba
 
 
+def test_configuracion_p300_sortea_el_oddball():
+    for semilla in range(4):
+        w = AbrMainWindow(dict(ALUMNO))
+        w.la_super(_caso_completo(), 'osce-X')
+        w.osce_preparar('config_equipo', 'P300', [], random.Random(semilla))
+        e = w.osce_entrega()
+        assert e['panel']['test'] == 'P300' and e['panel'].get('tarea') not in (None, 'contar'), e['panel']
+        assert e['equipo']['oddball_rare'] != 'Burst 2 kHz' and e['equipo']['oddball_pct'] != 20.0, e['equipo']
+
+
 def test_alumno_nuevo_borra_lo_del_anterior():
     w = _estacion('marcaje', [('OD', 80)])
     w.la_super(None, None)
