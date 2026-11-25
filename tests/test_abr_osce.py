@@ -104,6 +104,19 @@ def test_protocolo_parte_al_azar_y_se_registra():
     assert w.control.get_data()['pol'] != 'Alternada'
 
 
+def test_en_la_estacion_la_curva_sale_al_instante():
+    """Iniciar no anima el promediado: la curva queda entera y el equipo
+    vuelve a "Iniciar" en la misma llamada."""
+    w = _estacion('protocolo')
+    control, _ = standard_setup('ABR')
+    w.control.set_data(dict(control, side='OD', int=80))
+    w.control.start_capture()
+    assert w.state_capture != 'record' and not w.capture_timer.isActive()
+    assert list(w.memory) == ['R1'] and w.graph_r.data['R1']['done']
+    assert w.memory['R1']['average'] == 2000
+    assert w.verdad_curvas['R1']['visible']
+
+
 def test_alumno_nuevo_borra_lo_del_anterior():
     w = _estacion('marcaje', [('OD', 80)])
     w.la_super(None, None)

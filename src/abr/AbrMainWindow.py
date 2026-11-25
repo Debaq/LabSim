@@ -1487,6 +1487,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 self.fmp.clear_curve()
             self.fmp.set_mean(self.current_setting["average"])
             self.fmp.set_criterion(self.technical.get('fsp_criterion'))
+            if getattr(self, 'osce_instantaneo', False) and not self.es_assr():
+                # Estación OSCE: la curva sale entera de una vez (con el
+                # promedio completo que se pidió), sin la animación del
+                # promediado: el tiempo del alumno es para decidir, no para
+                # esperar.
+                self._capturar_de_una_vez()
+                return
             self.capture_timer.start(TIEMPO_ENTR_PROM)
         elif state == 'stopped':
             self.state_capture = state
@@ -2482,10 +2489,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
     # Marcaje: las curvas ya registradas, solo para marcar.
     # ------------------------------------------------------------------
 
+    def _capturar_de_una_vez(self):
+        """Corre la captura entera sin el timer (ver capture_state)."""
+        self.capture_timer.stop()
+        self.total_averages = 1
+        vueltas = 0
+        while self.state_capture == 'record' and vueltas < 5:
+            self.capture()
+            vueltas += 1
+        if self.state_capture == 'record':
+            self.control.stop_capture()
+
     def osce_preparar(self, tipo, prueba, curvas, rng):
         """Deja el equipo listo para el alumno que acaba de entrar (el caso
         ya llegó por la_super). El montaje viene hecho: los electrodos son
-        otra estación del OSCE."""
+        otra estación del OSCE. Las curvas salen al instante."""
+        self.osce_instantaneo = True
         if prueba != self.test_actual:
             self.control.cb_test.setCurrentText(prueba)   # test_changed
         if prueba == 'ECochG':
@@ -2494,9 +2513,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.montaje.de_libro(2)
         self._con_montaje()
         self.tabWidget.setCurrentWidget(self.abr)
-        if tipo == 'marcaje':
+        if tipo in ('marcaje', 'conclusion'):
             self.osce_registrar_curvas(prueba, curvas)
-            # Se marca, no se registra: el equipo queda quieto.
+            # Se marca (y se informa), no se registra: el equipo queda quieto.
             self.control.setEnabled(False)
         else:
             # Configuración y protocolo: el alumno parte con el equipo al
@@ -2558,14 +2577,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         for lado, nivel in curvas:
             self.control.set_data(dict(control, side=lado, int=nivel))
             self.control.start_capture()          # capture_state('record')
-            self.capture_timer.stop()             # se avanza a mano, sin esperar
-            self.total_averages = 1
-            vueltas = 0
-            while self.state_capture == 'record' and vueltas < 5:
-                self.capture()
-                vueltas += 1
-            if self.state_capture == 'record':
-                self.control.stop_capture()
+            self._capturar_de_una_vez()
 
     def osce_curvas(self):
         """Las curvas en el orden en que se registraron, con lo que el

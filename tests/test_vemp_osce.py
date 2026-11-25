@@ -68,6 +68,20 @@ def test_entrega_serializable_con_marcas():
     assert nombre in entrega["verdad"]
 
 
+def test_en_la_estacion_el_registro_sale_al_instante():
+    v = _estacion("protocolo", umbral=90)
+    c = v.control
+    c.cb_maniobra.setCurrentText("Rotación cefálica sostenida")
+    c.cb_transductor.setCurrentText(protocol.AEREO)
+    c.sb_int.setValue(120)
+    c.sb_promedios.setValue(200)
+    v.segundos_sostenido = 0.0
+    v.iniciar()
+    assert v.estado == "detenido" and not v.timer_captura.isActive()
+    regs = list(v.sesion.registros.values())
+    assert len(regs) == 1 and regs[0].terminado and regs[0].aceptados >= 200, regs
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

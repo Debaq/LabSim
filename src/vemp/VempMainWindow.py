@@ -396,6 +396,15 @@ class VempMainWindow(QMainWindow):
         self.control.set_registrando(True)
         self.trazas[ajustes.lado].agregar(self.registro_actual)
         self.analisis.sincronizar(ajustes.transductor, ajustes.freq)
+        if getattr(self, 'osce_instantaneo', False):
+            # Estación OSCE: el registro sale entero de una vez, con la
+            # contracción de este momento (sin la animación del promediado).
+            registro = self.registro_actual
+            vueltas = 0
+            while self.registro_actual is registro and self.estado == 'registrando' and vueltas < 2000:
+                self._tick_registro()
+                vueltas += 1
+            return
         self.timer_captura.start(TICK_MS)
         self._refrescar_encabezado()
 
@@ -782,11 +791,12 @@ class VempMainWindow(QMainWindow):
     def osce_preparar(self, tipo, prueba, curvas, rng):
         """Deja el equipo listo para el alumno que acaba de entrar (el caso
         ya llegó por la_super)."""
+        self.osce_instantaneo = True
         subtipo = prueba if prueba in protocol.SUBTIPOS else protocol.CVEMP
         indice = self.control.cb_subtipo.findData(subtipo)
         if indice >= 0:
             self.control.cb_subtipo.setCurrentIndex(indice)
-        if tipo == 'marcaje':
+        if tipo in ('marcaje', 'conclusion'):
             self.osce_registrar_curvas(subtipo, curvas)
             self.control.habilitar(False)
         else:
