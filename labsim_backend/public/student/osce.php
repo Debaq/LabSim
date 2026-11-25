@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
 require_once __DIR__ . '/../../src/OscePauta.php';
 require_once __DIR__ . '/../../src/OscePreguntas.php';
+require_once __DIR__ . '/../../src/OsceApp.php';
 
 /**
  * Página del QR de la tarjeta OSCE. Sin login: el alumno la abre en su
@@ -170,6 +171,18 @@ $cabeza('OSCE · ' . $o['nombre']);
                     <span class="det-v det-<?= htmlspecialchars((string) ($g['valor'] ?? '')) ?>"><?= htmlspecialchars(OscePauta::TICK[$g['valor'] ?? ''] ?? 'Sin marcar') ?></span>
                 <?php endif; ?>
                 <?php if ($g && trim((string) $g['comentario']) !== ''): ?><div class="det-com"><?= nl2br(htmlspecialchars((string) $g['comentario'])) ?></div><?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+        </ul>
+    <?php elseif (OsceApp::esApp((string) $e['tipo'])): ?>
+        <ul class="det-lista">
+        <?php foreach (OsceApp::detalle((int) $e['id'], (int) $p['id']) as $d): $ev = $d['eval'] ?? []; $r = $d['resultado']; ?>
+            <li>
+                <span><?= htmlspecialchars($d['item']['texto']) ?><?= (int) $d['item']['critico'] ? ' <span class="tag tag--danger">crítico</span>' : '' ?>
+                    <span class="muted">· <?= $pts($r['puntaje'] ?? null) ?> / <?= $pts($d['item']['puntaje']) ?> pt</span></span>
+                <span class="det-v <?= !empty($ev['ok']) ? 'det-cumple' : 'det-no_cumple' ?>">Tú: <?= htmlspecialchars((string) ($ev['alumno'] ?? '—')) ?></span>
+                <span class="det-com">Esperado: <?= htmlspecialchars((string) ($ev['esperado'] ?? '—')) ?></span>
+                <?php if ($r && trim((string) $r['comentario']) !== ''): ?><div class="det-com"><strong>Docente:</strong> <?= nl2br(htmlspecialchars((string) $r['comentario'])) ?></div><?php endif; ?>
             </li>
         <?php endforeach; ?>
         </ul>

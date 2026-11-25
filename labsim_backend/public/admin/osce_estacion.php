@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
 require_once __DIR__ . '/../../src/OscePauta.php';
 require_once __DIR__ . '/../../src/OscePreguntas.php';
+require_once __DIR__ . '/../../src/OsceApp.php';
 require_once __DIR__ . '/../../src/QrSvg.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
@@ -61,6 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'q_down':
                 OscePreguntas::mover($estId, $qId, $accion === 'q_up' ? -1 : 1);
                 break;
+            case 'app':
+                OsceApp::guardarContenido($est, $_POST);
+                $est = Osce::estacion($estId);
+                $success = 'Contenido de la estación guardado y criterios rehechos.';
+                break;
             case 'gift':
                 $r = OscePreguntas::importarGift($estId, (string) ($_POST['gift'] ?? ''));
                 $success = "Importadas {$r['importadas']} preguntas." . ($r['errores'] ? ' No se importó: ' . implode(' ', $r['errores']) : '');
@@ -97,6 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $items = OscePauta::items($estId);
 $preguntas = $est['tipo'] === 'preguntas' ? OscePreguntas::preguntas($estId) : [];
 $urlTablet = $est['tipo'] === 'preguntas' ? Osce::urlPublica('student/osce_estacion.php?k=' . OscePreguntas::tokenTablet($estId)) : '';
+$esApp = OsceApp::esApp((string) $est['tipo']);
+$appCfg = $esApp ? OsceApp::config($est) : [];
+$appCodigo = $esApp ? OsceApp::codigoEstacion($estId) : '';
 $totalPts = array_sum(array_map(static fn ($i) => (float) $i['puntaje'], $items));
 $montaje = OscePauta::montaje((string) $est['examen']);
 $fmt = static fn ($x): string => rtrim(rtrim(number_format((float) $x, 2, ',', ''), '0'), ',');
@@ -120,6 +129,8 @@ admin_header('Estación · ' . $est['titulo'], $me);
     <a class="btn btn--sm" href="osce_evaluar.php?estacion=<?= $estId ?>">Evaluar en esta estación</a>
     <?php elseif ($est['tipo'] === 'preguntas'): ?>
     <a class="btn btn--sm" href="osce_revision.php?estacion=<?= $estId ?>">Revisión y réplicas</a>
+    <?php elseif (OsceApp::esApp((string) $est['tipo'])): ?>
+    <a class="btn btn--sm" href="osce_app_revision.php?estacion=<?= $estId ?>">Revisión</a>
     <?php endif; ?>
 </div>
 
@@ -133,6 +144,13 @@ admin_header('Estación · ' . $est['titulo'], $me);
         <p class="help">Alternativas: con una correcta, todo o nada; con varias, el alumno marca todas las que crea correctas y cada marca incorrecta descuenta una correcta (nunca bajo 0). Las opciones salen en orden distinto para cada alumno. Desarrollo: la IA corrige contra la pauta al entregar; tú revisas, ajustas y das el feedback en "Revisión y réplicas".</p>
         <?php if (!$editable): ?>
             <p class="text-warn"><?= $evaluados ?> entrega<?= $evaluados > 1 ? 's' : '' ?>: las preguntas quedan fijas.</p>
+        <?php endif; ?>
+    <?php elseif ($esApp): ?>
+        <p class="help"><?= $est['tipo'] === 'config_equipo'
+            ? 'El alumno encuentra el ABR con el montaje hecho y todos los controles al azar; al entregar (o al terminar el tiempo) se compara lo que dejó configurado con lo esperado. Cada parámetro es un criterio.'
+            : 'La app registra sola las curvas indicadas, con el equipo en su configuración de rutina, y el alumno solo marca. Se compara cada marca con la latencia verdadera del generador; donde no hay onda, lo correcto es no marcarla.' ?></p>
+        <?php if (!$editable): ?>
+            <p class="text-warn"><?= $evaluados ?> entrega<?= $evaluados > 1 ? 's' : '' ?>: el contenido queda fijo.</p>
         <?php endif; ?>
     <?php elseif ($est['tipo'] !== 'pauta_docente'): ?>
         <p class="muted">El contenido de este tipo de estación se arma en los pasos siguientes del plan (docs/osce_plan.md).</p>
@@ -240,6 +258,81 @@ admin_header('Estación · ' . $est['titulo'], $me);
     </script>
     <?php endif; ?>
 </div>
+<?php endif; ?>
+
+<?php if ($esApp):
+    $casos = OsceApp::casosConAbr();
+    $esperado = $appCfg['esperado'] ?? OsceApp::ESPERADO_PEATC;
+    $puntosItem = [];
+    foreach ($items as $it) {
+        if (($it['cfg']['regla'] ?? '') === 'param') {
+            $puntosItem[$it['cfg']['clave']] = $it;
+        }
+    }
+    ?>
+<div class="card">
+    <h2>PC de la estación</h2>
+    <p>En el PC de la estación, abre LabSim y en la ventana de ingreso elige <strong>Estación OSCE</strong>. Escribe este código:</p>
+    <p class="mono" style="font-size:2.2rem; font-weight:700; letter-spacing:0.08em; margin:0.3rem 0;"><?= htmlspecialchars($appCodigo) ?></p>
+    <p class="help">El PC queda como esta estación (solo el ABR). Cada alumno escribe su código, que solo sirve en su turno según el reloj; al terminar el tiempo la app entrega sola.</p>
+    <?php if (empty($appCfg['case_id'])): ?><p class="text-warn">Falta elegir el paciente y guardar el contenido: sin eso la estación no abre.</p><?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Contenido</h2>
+    <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $estId ?>">
+        <input type="hidden" name="accion" value="app">
+        <fieldset <?= $editable ? '' : 'disabled' ?> style="border:0; padding:0; margin:0;">
+        <label>Paciente (caso con ABR)
+            <select name="case_id" required>
+                <option value="">— Elegir —</option>
+                <?php foreach ($casos as $c): ?>
+                <option value="<?= htmlspecialchars($c['id']) ?>"<?= ($appCfg['case_id'] ?? '') === $c['id'] ? ' selected' : '' ?>><?= htmlspecialchars($c['rotulo']) ?></option>
+                <?php endforeach; ?>
+            </select></label>
+        <p class="help">Abre en la prueba <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR') ?></strong> (según el examen de la estación).</p>
+        <?php if ($est['tipo'] === 'config_equipo'): ?>
+        <p class="help">Esperado: un valor, varios separados por <code>|</code> (cualquiera vale) o un rango <code>10–12</code>. Vacío = no se evalúa. Precargado del Protocolo Técnico ORL 2019 (PEATC: la ventana del protocolo dice "10 s", es 10 ms; ganancia "10k" = 10000). Si el caso es sospecha de neuropatía, cambia la tasa a 81.1.</p>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Parámetro</th><th>Esperado</th><th>Puntos</th><th>Crítico</th></tr></thead>
+            <tbody>
+            <?php foreach (OsceApp::PARAMETROS as $clave => [$fuente, $rotulo]): $itp = $puntosItem[$clave] ?? null; ?>
+                <tr>
+                    <td><?= htmlspecialchars($rotulo) ?> <span class="help help--xs"><?= $fuente === 'equipo' ? 'parámetros avanzados' : 'panel' ?></span></td>
+                    <td><input type="text" name="esperado[<?= $clave ?>]" value="<?= htmlspecialchars((string) ($esperado[$clave] ?? '')) ?>"></td>
+                    <td><input type="text" inputmode="decimal" name="puntos[<?= $clave ?>]" value="<?= $itp ? $fmt($itp['puntaje']) : '1' ?>" class="input--narrow"></td>
+                    <td><input type="checkbox" name="critico[<?= $clave ?>]" value="1"<?= $itp && (int) $itp['critico'] ? ' checked' : '' ?>></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table></div>
+        <?php else: ?>
+        <div class="row row--gap-lg">
+            <label>Curvas que registra la app (una por línea: oído e intensidad)
+                <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : OsceApp::CURVAS_BASE) ?></textarea></label>
+            <label>Tolerancia de latencia (ms)
+                <input type="text" inputmode="decimal" name="tol_ms" value="<?= $fmt($appCfg['tol_ms'] ?? 0.2) ?>" class="input--narrow"></label>
+        </div>
+        <p class="help">Se evalúan las ondas I, III y V en la intensidad más alta de cada oído y la V en las demás (1 punto cada una).</p>
+        <?php endif; ?>
+        <?php if ($editable): ?><button type="submit" class="btn btn--sm">Guardar contenido</button><?php endif; ?>
+        </fieldset>
+    </form>
+</div>
+
+<?php if ($items): ?>
+<div class="card">
+    <h2>Criterios (<?= count($items) ?> · <?= $fmt($totalPts) ?> puntos)</h2>
+    <ul>
+    <?php foreach ($items as $it): ?>
+        <li><?= htmlspecialchars($it['texto']) ?><?= ($it['cfg']['regla'] ?? '') === 'param' ? ': <span class="mono">' . htmlspecialchars((string) $it['cfg']['esperado']) . '</span>' : '' ?>
+            <span class="muted">(<?= $fmt($it['puntaje']) ?> pt)</span><?= (int) $it['critico'] ? ' <span class="tag tag--danger">crítico</span>' : '' ?></li>
+    <?php endforeach; ?>
+    </ul>
+</div>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php if ($est['tipo'] === 'preguntas'): $totalQ = array_sum(array_map(static fn ($q) => (float) $q['puntaje'], $preguntas)); ?>

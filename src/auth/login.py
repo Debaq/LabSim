@@ -54,6 +54,7 @@ class MainLogin(QWidget):
 
     PAGINA_CODIGO = 0
     PAGINA_USUARIO = 1
+    PAGINA_OSCE = 2
 
     def __init__(self) -> None:
         QWidget.__init__(self)
@@ -66,6 +67,7 @@ class MainLogin(QWidget):
         self.paginas = QStackedWidget(self)
         self.paginas.addWidget(self._pagina_codigo())
         self.paginas.addWidget(self._pagina_usuario())
+        self.paginas.addWidget(self._pagina_osce())
         raiz = QVBoxLayout(self)
         raiz.setContentsMargins(10, 6, 10, 6)
         raiz.addWidget(self.paginas)
@@ -152,6 +154,8 @@ class MainLogin(QWidget):
         enlaces = QHBoxLayout()
         enlaces.addWidget(self._link("Ingresar con código de ingreso", self.PAGINA_CODIGO))
         enlaces.addStretch(1)
+        # El docente deja este PC como una estación del OSCE (core/osce.py).
+        enlaces.addWidget(self._link("Estación OSCE", self.PAGINA_OSCE))
         # Sin haber entrado: probar la red del equipo y reportar (o guardar
         # el reporte para después). Ver core/soporte.DialogoPruebaRed.
         red = QLabel('<a href="#" style="color:#5D1049;">Probar conexión</a>')
@@ -163,6 +167,63 @@ class MainLogin(QWidget):
         col.addLayout(enlaces)
         self.setTabOrder(self.Le_name, self.Le_passw)
         return pagina
+
+    def _pagina_osce(self):
+        """El PC queda como una estación del OSCE: se escribe el código de la
+        estación que muestra el panel (admin/osce_estacion.php)."""
+        pagina = QWidget()
+        col = QVBoxLayout(pagina)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(4)
+        fila = QHBoxLayout()
+        fila.addWidget(QLabel("Código de la estación :"))
+        self.Le_osce = QLineEdit()
+        self.Le_osce.setObjectName("Le_osce")
+        self.Le_osce.setPlaceholderText("K7F-3QM")
+        self.Le_osce.setMaxLength(9)
+        self.Le_osce.setAlignment(Qt.AlignCenter)
+        self.Le_osce.returnPressed.connect(self.entrar_osce)
+        fila.addWidget(self.Le_osce, 1)
+        self.btn_osce = QPushButton("Usar este equipo")
+        self.btn_osce.clicked.connect(self.entrar_osce)
+        fila.addWidget(self.btn_osce)
+        col.addLayout(fila)
+        self.lbl_osce = QLabel("Lo muestra el panel, en el contenido de la estación.")
+        self.lbl_osce.setObjectName("login_ayuda")
+        col.addWidget(self.lbl_osce)
+        enlaces = QHBoxLayout()
+        enlaces.addWidget(self._link("Volver", self.PAGINA_USUARIO))
+        enlaces.addStretch(1)
+        col.addLayout(enlaces)
+        return pagina
+
+    def entrar_osce(self):
+        from core import osce
+        codigo = self.Le_osce.text().strip()
+        if not codigo:
+            return
+        self.Le_osce.setEnabled(False)
+        self.btn_osce.setEnabled(False)
+        self.lbl_osce.setText("Buscando la estación…")
+        hilos.en_fondo(osce.consultar_estacion, codigo, listo=self._osce_lista,
+                       fallo=self._osce_fallo, dueno=self, nombre="osce_estacion")
+
+    def _osce_lista(self, info):
+        from core import osce
+        self.Le_osce.setEnabled(True)
+        self.btn_osce.setEnabled(True)
+        if not info.get("lista"):
+            self.lbl_osce.setText("La estación aún no tiene paciente: el docente debe guardar su contenido.")
+            return
+        self.lbl_osce.setText("Lo muestra el panel, en el contenido de la estación.")
+        self.data_login_signal.emit(osce.datos_login(info))
+
+    def _osce_fallo(self, exc):
+        from core import osce
+        self.Le_osce.setEnabled(True)
+        self.btn_osce.setEnabled(True)
+        self.lbl_osce.setText(str(exc) if isinstance(exc, osce.ErrorOsce)
+                              else "Sin conexión con el servidor.")
 
     def probar_conexion(self):
         from core import soporte
@@ -182,6 +243,8 @@ class MainLogin(QWidget):
     def _enfocar(self):
         if self.paginas.currentIndex() == self.PAGINA_CODIGO:
             self.Le_codigo.setFocus()
+        elif self.paginas.currentIndex() == self.PAGINA_OSCE:
+            self.Le_osce.setFocus()
         else:
             self.Le_name.setFocus()
 

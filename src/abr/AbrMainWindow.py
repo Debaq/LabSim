@@ -43,7 +43,7 @@ from abr.AbrTable import AbrTable
 from abr.MarcasAbr import MarcasAbr
 from abr.CorticalTable import CorticalTable
 from abr.EcochgTable import EcochgTable
-from abr.protocols import standard_setup
+from abr.protocols import get_protocol, standard_setup
 from abr import assr, cortical, ecochg
 from abr.EEG import EEG
 from abr.FSP import FSP
@@ -381,6 +381,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.total_averages = 20
         self.current_measuring = [None, None]
         self.memory = {}
+        self.verdad_curvas = {}
         # Conteo de raros del paciente en la P300, por oido (ver
         # Cortical_generator.patient_count).
         self.cortical_conteo = {}
@@ -1251,6 +1252,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         # Limpiar memoria
         self.memory = {}
+        self.verdad_curvas = {}
         self.fsp_tracks = {}
         self.fsp_shown = None
         # Una captura a medias no sobrevive al cambio de paciente.
@@ -1579,6 +1581,16 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         i_xy, c_xy, repro, metadata = self.test_test(side)
         self.last_metadata = metadata
+        # Lo que el equipo no muestra (latencia verdadera de cada onda y si
+        # hay respuesta): solo viaja en la entrega del OSCE (osce_entrega),
+        # nunca en el informe que el alumno puede volver a abrir.
+        self.verdad_curvas[self.current_capture_curve] = {
+            'visible': bool(metadata.get('waves_visible')),
+            'waves': {w: {'lat': float(d.get('lat', 0.0)), 'amp': float(d.get('amp', 0.0))}
+                      for w, d in (metadata.get('waves') or {}).items()},
+            'threshold': (float(metadata['threshold'])
+                          if metadata.get('threshold') is not None else None),
+        }
 
         data_line = {self.current_capture_curve: {
             "ipsi_xy": i_xy,
@@ -2463,6 +2475,104 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         contra = (dx, dy) if dy is not None else None
         return (x, y), contra, repro, metadata
+
+    # ------------------------------------------------------------------
+    # Estación OSCE (core/osce.py): el PC rinde una estación con el caso que
+    # manda el servidor. Configuración: montaje hecho y equipo al azar.
+    # Marcaje: las curvas ya registradas, solo para marcar.
+    # ------------------------------------------------------------------
+
+    def osce_preparar(self, tipo, prueba, curvas, rng):
+        """Deja el equipo listo para el alumno que acaba de entrar (el caso
+        ya llegó por la_super). El montaje viene hecho: los electrodos son
+        otra estación del OSCE."""
+        if prueba != self.test_actual:
+            self.control.cb_test.setCurrentText(prueba)   # test_changed
+        if prueba == 'ECochG':
+            self.montaje.de_libro(1, activo='cae_der')
+        else:
+            self.montaje.de_libro(2)
+        self._con_montaje()
+        self.tabWidget.setCurrentWidget(self.abr)
+        if tipo == 'marcaje':
+            self.osce_registrar_curvas(prueba, curvas)
+            # Se marca, no se registra: el equipo queda quieto.
+            self.control.setEnabled(False)
+        else:
+            self.osce_sortear_equipo(prueba, rng)
+
+    def osce_sortear_equipo(self, prueba, rng):
+        """Todos los mandos al azar, nunca en el valor de rutina de la prueba
+        (configurar el equipo es lo que se evalúa: ver
+        AbrControl.randomize_initial_values)."""
+        rutina = standard_setup(prueba) or ({}, {})
+        control, tecnica = rutina
+        c = self.control
+
+        def combo(cb, evitar=None):
+            modelo = cb.model()
+            opciones = [i for i in range(1, cb.count())
+                        if modelo.item(i) is None or modelo.item(i).isEnabled()]
+            if evitar is not None and len(opciones) > 1:
+                opciones = [i for i in opciones if cb.itemText(i) != str(evitar)] or opciones
+            if opciones:
+                cb.setCurrentIndex(rng.choice(opciones))
+
+        combo(c.cb_stim, control.get('stim'))
+        combo(c.cb_pol, control.get('pol'))
+        combo(c.cb_filter_up, control.get('filter_passhigh'))
+        combo(c.cb_filter_down, control.get('filter_down'))
+        combo(c.cb_side)
+        paso = max(c.sb_intencity.singleStep(), 5)
+        niveles = [n for n in range(int(c.sb_intencity.minimum()), int(c.sb_intencity.maximum()) + 1, int(paso))
+                   if n != control.get('int')]
+        if niveles:
+            c.sb_intencity.setValue(rng.choice(niveles))
+        c.sb_rate.setValue(round(rng.uniform(11.1, 91.1), 1))
+        c.sb_prom.setValue(rng.randrange(200, 4001, 10))
+        protocolo = get_protocol(prueba)
+        lo, hi = protocolo.window_range
+        ventana = round(rng.uniform(lo, hi), 1)
+        if abs(ventana - float(tecnica.get('window_ms', protocolo.window_ms))) < 0.5:
+            ventana = round(hi, 1)
+        from abr.AbrAdvanceSettings import GAINS
+        self.technical.update({
+            'window_ms': ventana,
+            'gain': rng.choice(list(GAINS.values())),
+            'transducer': rng.choice([t for t in TRANSDUCERS.values() if t != 'insert_earphone']),
+            'artifact_reject_uv': float(rng.choice([10, 15, 20, 30, 40, 60])),
+        })
+        self._con_montaje()
+        self.apply_window()
+        self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+
+    def osce_registrar_curvas(self, prueba, curvas):
+        """Registra de una vez las curvas de la estación de marcaje con el
+        equipo de rutina de la prueba (cada una con su promedio completo)."""
+        control, tecnica = standard_setup(prueba) or ({}, {})
+        self.technical.update(tecnica)
+        self._con_montaje()
+        self.apply_window()
+        for lado, nivel in curvas:
+            self.control.set_data(dict(control, side=lado, int=nivel))
+            self.control.start_capture()          # capture_state('record')
+            self.capture_timer.stop()             # se avanza a mano, sin esperar
+            self.total_averages = 1
+            vueltas = 0
+            while self.state_capture == 'record' and vueltas < 5:
+                self.capture()
+                vueltas += 1
+            if self.state_capture == 'record':
+                self.control.stop_capture()
+
+    def osce_entrega(self):
+        """Lo que la estación manda al servidor: la sesión tal cual, el panel
+        y la verdad de cada curva (para corregir el marcaje)."""
+        return {
+            'abr': self.session_payload(),
+            'panel': self.control.get_data(),
+            'verdad': {nombre: v for nombre, v in self.verdad_curvas.items() if nombre in self.memory},
+        }
 
     #########EVENTS
     def hideEvent(self, event):

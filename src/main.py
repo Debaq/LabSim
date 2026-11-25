@@ -7,11 +7,12 @@ import faulthandler
 import os
 import sys
 import traceback
+import random
 import requests
 from PySide6.QtCore import QEvent, Qt, QSize, QThread, QTimer, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QDialog, QMainWindow, QWidget, QPushButton, QMessageBox, QToolButton,
-                               QProgressDialog, QFrame, QHBoxLayout, QLabel, QMdiArea)
+                               QProgressDialog, QFrame, QHBoxLayout, QLabel, QMdiArea, QToolBar)
 
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
@@ -47,7 +48,7 @@ from backend import client as backend_client
 from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
-from core import app_layout, invitado
+from core import app_layout, invitado, osce
 from core import ficha as ficha_clinica
 from core.ficha import HojaPrevia, examenes_que_trae, fila_de_practica
 from abr import vigilia
@@ -636,6 +637,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             if data.get("invitado"):
                 # Sin cuenta: nada de API ni de la sesión que haya en el equipo
                 invitado.activar()
+            if data.get("osce"):
+                # Estación OSCE: como el invitado, más su propia API (core/osce.py)
+                osce.activar(data["osce"])
             reset_backend_session()
             show_hide(self.modules, 0)
             self.lbl_name.setText(f"{user}")
@@ -693,6 +697,73 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # La atención abierta se retoma cuando la agenda termina de
             # llegar (agenda_cargada): ya no se baja antes de mostrarla.
             self._armar_modulos_en_fondo()
+            if osce.activo:
+                QTimer.singleShot(0, self, self._iniciar_osce)
+
+    # ------------------------------------------------------------------
+    # Estación OSCE (core/osce.py): el PC rinde una estación. Solo el ABR,
+    # con la barra de la estación arriba; cada alumno entra con su código.
+    # ------------------------------------------------------------------
+
+    def _iniciar_osce(self):
+        if not osce.activo or not self.data_login:
+            return
+        from core.osce_barra import BarraOsce
+        self._modulos_listos()
+        if getattr(self, "subw_abr", None) is None:
+            self._aviso("Estación OSCE", "Este equipo no tiene el módulo ABR.")
+            return
+        self.barra_osce = BarraOsce(self._osce_abrir, self._osce_entrega, self._osce_cerrar)
+        self.toolbar_osce = QToolBar("Estación OSCE", self)
+        self.toolbar_osce.setMovable(False)
+        self.toolbar_osce.setFloatable(False)
+        self.toolbar_osce.addWidget(self.barra_osce)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar_osce)
+        self._osce_mostrar_abr()
+
+    def _osce_mostrar_abr(self):
+        _, _, pos_z, *_ = self.apps["ABR"]
+        sub = self.modules.get(pos_z) if self.modules.is_full(pos_z) else None
+        if sub is None or sub.isHidden():
+            self.activate_auto("ABR")
+
+    def _osce_abrir(self, respuesta):
+        """Llegó el caso de un alumno: al ABR, con el equipo preparado según
+        la estación (AbrMainWindow.osce_preparar)."""
+        caso = respuesta["caso"]
+        self.data_current = caso
+        self.data_current_key = f"osce-{respuesta['codigo']}"
+        self.paciente_actual = {"case_id": caso.get("id"), "nombre": "el paciente", "edad": 0,
+                                "procedimiento": "", "appointment_id": None, "trae": []}
+        abr = self.subw_abr.obj
+        abr.la_super(caso, self.data_current_key)
+        abr.osce_preparar(respuesta.get("tipo"), respuesta.get("prueba") or "ABR",
+                          [tuple(c) for c in respuesta.get("curvas") or []], random.Random())
+        self._osce_mostrar_abr()
+
+    def _osce_entrega(self):
+        return self.subw_abr.obj.osce_entrega()
+
+    def _osce_cerrar(self):
+        """El alumno entregó: el equipo queda vacío para el siguiente."""
+        self.data_current = None
+        self.data_current_key = None
+        self.paciente_actual = None
+        abr = getattr(self, "subw_abr", None)
+        if abr is not None:
+            abr.obj.la_super(None, None)
+
+    def _terminar_osce(self):
+        barra = getattr(self, "barra_osce", None)
+        if barra is not None:
+            barra.detener()
+        toolbar = getattr(self, "toolbar_osce", None)
+        if toolbar is not None:
+            self.removeToolBar(toolbar)
+            borrar_luego([toolbar], "barra OSCE")
+        self.barra_osce = None
+        self.toolbar_osce = None
+        osce.desactivar()
 
     def agenda_cargada(self):
         """La agenda llegó por primera vez en esta sesión (ver Agenda)."""
@@ -1038,6 +1109,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.paciente_actual = None
         if invitado.activo:
             invitado.desactivar()
+        if osce.activo:
+            self._terminar_osce()
         preferencias().limpiar()
         self._aplicar_kiosko()
         if self._update_pendiente:

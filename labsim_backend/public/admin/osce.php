@@ -412,6 +412,7 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
                     <a href="osce_estacion.php?id=<?= (int) $e['id'] ?>" class="btn btn--xs btn--secondary">Contenido</a>
                     <?php if ($e['tipo'] === 'pauta_docente'): ?><a href="osce_evaluar.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Evaluar</a><?php endif; ?>
                     <?php if ($e['tipo'] === 'preguntas'): ?><a href="osce_revision.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Revisión</a><?php endif; ?>
+                    <?php if ($e['tipo'] === 'config_equipo' || $e['tipo'] === 'marcaje'): ?><a href="osce_app_revision.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Revisión</a><?php endif; ?>
                 </td>
                 <?php endif; ?>
             </tr>

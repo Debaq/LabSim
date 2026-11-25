@@ -117,6 +117,42 @@ en `student/osce.php`.
   emparejamiento y lo demás se informa y no se importa. Los ensayos entran
   con la pauta por escribir.
 
+**Paso 4 hecho (2026-11-25): estaciones en la app LabSim (configuración y
+marcaje).** Backend `src/OsceApp.php`, `api/osce_app.php`,
+`admin/osce_app_revision.php` y el contenido en `admin/osce_estacion.php`;
+app `core/osce.py`, `core/osce_barra.py`, página "Estación OSCE" en el
+ingreso (auth/login.py), `main._iniciar_osce` y `AbrMainWindow.osce_*`.
+
+- **El PC se vuelve estación** desde el ingreso de usuario y contraseña →
+  "Estación OSCE" con el código corto que muestra el panel (no el del
+  alumno). Entra como el invitado (sin la API normal) y solo habla con
+  `api/osce_app.php` y `api/osce_reloj.php`, que no piden sesión. Solo el ABR
+  y una barra arriba: código del alumno, cuenta regresiva de SU tiempo,
+  Entregar (dos toques, sin diálogos que bloqueen el equipo).
+- **Entrar exige la ventana del reloj; entregar no.** Si al sonar el timbre
+  no hay red, la entrega queda en el equipo (`<datos>/osce/`) y se reintenta
+  sola cada 15 s; el alumno sigue a la próxima estación igual. Probado
+  apagando el servidor.
+- **Configuración:** montaje hecho (`montaje.de_libro`) y TODOS los mandos al
+  azar, nunca en el valor de rutina de la prueba (estímulo, polaridad,
+  intensidad, filtros, oído, tasa, promediaciones, ventana, ganancia,
+  transductor, rechazo). Se compara el panel y Parámetros avanzados al
+  entregar con lo esperado, precargado de la tabla del Protocolo 2019 (ventana
+  10 ms, ganancia ×10.000; el protocolo acepta cualquier estímulo). El tipo
+  de prueba no se precarga: la estación ya abre en la de su examen.
+- **Marcaje:** la app registra sola las curvas que pide el docente (equipo de
+  rutina, promedio completo, `osce_registrar_curvas`) y bloquea el panel. Se
+  corrige cada marca contra la latencia verdadera del generador (±0,2 ms por
+  defecto): I, III y V en la intensidad mayor de cada oído, V en las demás;
+  donde no hay onda, lo correcto es no marcarla.
+- **La verdad viaja solo en la entrega del OSCE** (`verdad_curvas`, de la
+  metadata `waves`/`waves_visible`), nunca en `session_payload`: el alumno no
+  la puede leer en un informe.
+- **Criterios = `osce_item` tipo `auto`** con su regla en config; se rehacen
+  al guardar el contenido. La entrega completa queda como fila `registro` y
+  "Volver a corregir" recalcula todas sin pisar lo que el docente ajustó.
+- **Pendiente:** probar en un PC del laboratorio (kiosko) con el build.
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una
