@@ -17,6 +17,7 @@ require_once __DIR__ . '/../../src/OscePreguntas.php';
  *   {"accion": "estacion", "estacion": "K7F-3QM"}
  *   {"accion": "entrar",   "estacion": ..., "codigo": "T24-TFJ"}
  *   {"accion": "entregar", "estacion": ..., "codigo": ..., "entrega": {...}}
+ *   {"accion": "corregir", "estacion": ..., "codigo": ...}   (conclusión: IA)
  */
 
 header('Cache-Control: no-store');
@@ -49,6 +50,23 @@ $p = Osce::participantePorCodigo((int) $o['id'], (string) ($body['codigo'] ?? ''
 if ($p === null) {
     Response::error('Código no encontrado. Revisa tu tarjeta.', 404);
 }
+if ($accion === 'corregir') {
+    // La app la llama después de entregar, sin esperar: la IA corrige la
+    // conclusión en el servidor aunque la app ya pasó al alumno siguiente.
+    ignore_user_abort(true);
+    @set_time_limit(300);
+    if (!in_array((int) $p['id'], OsceApp::pendientesIa((int) $est['id']), true)) {
+        Response::json(['ok' => true, 'corregida' => false]);
+    }
+    try {
+        OsceApp::corregirIa((int) $est['id'], (int) $p['id']);
+    } catch (Throwable $e) {
+        error_log('[osce_app corregir] ' . $e->getMessage());
+        Response::json(['ok' => true, 'corregida' => false]);
+    }
+    Response::json(['ok' => true, 'corregida' => true]);
+}
+
 // Entrar exige la ventana del reloj. Entregar no: si se cortó la red, la app
 // reintenta después y lo hecho no se puede perder (una sola entrega por
 // alumno y estación, y nunca con los resultados ya publicados).
@@ -78,7 +96,7 @@ if ($accion === 'entrar') {
         'tipo' => $est['tipo'],
         'modulo' => OsceApp::modulo((string) $est['examen']),
         'prueba' => $cfg['prueba'] ?? (OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR'),
-        'curvas' => $est['tipo'] === 'marcaje' ? ($cfg['curvas'] ?? []) : [],
+        'curvas' => in_array($est['tipo'], ['marcaje', 'conclusion'], true) ? ($cfg['curvas'] ?? []) : [],
         'ventana' => Osce::ventana($reloj, $p, $indice),
         'caso' => $caso,
     ]);

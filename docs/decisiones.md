@@ -186,6 +186,38 @@ equipo que dice la estación (`modulo`).
   protocolo dice "100 dB nHL": intensidad esperada y nivel de inicio del VEMP
   los escribe el docente. Ganancia y ventana no son mandos del VEMP simulado.
 
+**Curvas al instante en la estación (2026-11-25).** Él: "cuando los
+estudiantes hacen la evaluación las curvas deben aparecer de inmediato sin
+animación para que no pierdan el tiempo". En modo estación (`osce_instantaneo`,
+lo pone `osce_preparar`) Iniciar registra la curva entera de una vez, con el
+promedio completo pedido; en el VEMP con la contracción de ese momento. Fuera
+del OSCE no cambia nada.
+
+**Paso 6 hecho (2026-11-25): estación de conclusión con IA.** Tipo
+`conclusion` en `OsceApp`: la app registra las curvas del caso (como el
+marcaje), el alumno marca y escribe hallazgos y conclusión en el informe del
+equipo (ABR o VEMP).
+
+- **Criterios = ítems `ia`** ("texto | puntos" en el editor), precargados del
+  formato de informe del Protocolo 2019: PEATC (ondas a 80 por oído,
+  latencias e interpeaks, umbral de V, tipo de audición, grado 2–4 kHz,
+  formato), cVEMP (P1-N1, latencias, amplitud y asimetría ≥35 %, umbral,
+  función sacular), oVEMP (N1-P1, asimetría ≥33 %, función utricular).
+- **La IA recibe** los criterios, la conclusión esperada que escribe el
+  docente (obligatoria), los datos reales del caso (cuadro de cada oído en ese
+  equipo, si había respuesta en cada curva, latencias de las ondas que de
+  verdad se ven, umbral real), lo que el alumno marcó y su informe. Devuelve
+  puntaje por criterio (pasos de 0,5) con un comentario al alumno y un
+  comentario general, que queda como feedback si el docente no escribió uno.
+  No castiga diferencias pequeñas con la verdad si el alumno informa lo que
+  marcó (±0,3 ms, ±10 dB): de nuevo, no castigar dos veces.
+- **Cuándo corre:** la app la pide al entregar sin esperar
+  (`accion=corregir`, `ignore_user_abort`); la revisión tiene "Corregir con
+  IA las pendientes" de respaldo. Mientras no corrige, el criterio queda
+  pendiente (cuenta 0 y no reprueba por crítico).
+- **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
+  otra pasada de la IA lo pisan (probado).
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una

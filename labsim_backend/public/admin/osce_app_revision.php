@@ -37,6 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: osce_app_revision.php?estacion=' . $estId . '&ok=' . $pid . '#p' . $pid);
             exit;
         }
+        if ($accion === 'ia') {
+            try {
+                OsceApp::corregirIa($estId, (int) ($_POST['participante'] ?? 0));
+                Response::json(['ok' => true]);
+            } catch (Throwable $e) {
+                Response::error($e->getMessage(), 502);
+            }
+        }
         if ($accion === 'recorregir') {
             $n = 0;
             foreach (Osce::participantes((int) $osce['id']) as $p) {
@@ -86,8 +94,36 @@ details.rev-alumno > summary { cursor: pointer; padding: 0.4rem 0; font-size: 1.
     <span class="muted"><?= htmlspecialchars($osce['nombre']) ?></span>
 </div>
 
+<?php $pendIa = $est['tipo'] === 'conclusion' ? OsceApp::pendientesIa($estId) : []; ?>
 <div class="card">
-    <p><strong><?= count($entregas) ?></strong> entregas desde la app.</p>
+    <p><strong><?= count($entregas) ?></strong> entregas desde la app.<?= $est['tipo'] === 'conclusion' ? ' <strong>' . count($pendIa) . '</strong> sin corregir por la IA.' : '' ?></p>
+    <?php if ($pendIa): ?>
+    <p><button type="button" class="btn btn--sm" id="ia-todo">Corregir con IA las <?= count($pendIa) ?> pendientes</button> <span class="help" id="ia-estado"></span></p>
+    <script>
+    (function () {
+        var pend = <?= json_encode($pendIa) ?>, csrf = <?= json_encode(Auth::csrfToken()) ?>;
+        var btn = document.getElementById('ia-todo'), est = document.getElementById('ia-estado');
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            var ok = 0, fallas = [];
+            (function sig(i) {
+                if (i >= pend.length) {
+                    est.textContent = 'Listo: ' + ok + ' corregidas' + (fallas.length ? ', ' + fallas.length + ' con error (' + fallas[0] + ')' : '') + '. Recargando…';
+                    setTimeout(function () { location.reload(); }, 1200);
+                    return;
+                }
+                est.textContent = 'Corrigiendo ' + (i + 1) + ' de ' + pend.length + '…';
+                var fd = new FormData();
+                fd.append('csrf_token', csrf); fd.append('estacion', <?= $estId ?>); fd.append('accion', 'ia'); fd.append('participante', pend[i]);
+                fetch('osce_app_revision.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+                    .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error); ok++; }); })
+                    .catch(function (e) { fallas.push(e.message); })
+                    .then(function () { sig(i + 1); });
+            })(0);
+        });
+    })();
+    </script>
+    <?php endif; ?>
     <form method="post">
         <?= csrf_field() ?>
         <input type="hidden" name="estacion" value="<?= $estId ?>">
@@ -117,8 +153,12 @@ details.rev-alumno > summary { cursor: pointer; padding: 0.4rem 0; font-size: 1.
             <?php foreach ($e['detalle'] as $d): $it = $d['item']; $r = $d['resultado']; $ev = $d['eval'] ?? []; ?>
                 <tr>
                     <td><?= htmlspecialchars($it['texto']) ?><?= (int) $it['critico'] ? ' <span class="tag tag--danger">crítico</span>' : '' ?></td>
+                    <?php if (!empty($ev['ia']) || !empty($ev['pendiente'])): ?>
+                    <td colspan="2" class="<?= !empty($ev['pendiente']) ? 'muted' : '' ?>"><?= !empty($ev['pendiente']) ? 'Pendiente de la IA' : '<strong>IA:</strong> ' . htmlspecialchars((string) ($ev['alumno'] ?? '')) ?></td>
+                    <?php else: ?>
                     <td class="<?= !empty($ev['ok']) ? 'ok' : 'mal' ?>"><?= htmlspecialchars((string) ($ev['alumno'] ?? '—')) ?></td>
                     <td><?= htmlspecialchars((string) ($ev['esperado'] ?? '—')) ?></td>
+                    <?php endif; ?>
                     <td class="nowrap"><input type="text" inputmode="decimal" name="it[<?= (int) $it['id'] ?>][puntaje]" value="<?= $fmt($r['puntaje'] ?? null) ?>" class="input--narrow">
                         <span class="help help--xs">/ <?= $fmt($it['puntaje']) ?><?= ($r['fuente'] ?? '') === 'docente' ? ' · tuyo' : '' ?></span></td>
                     <td><textarea name="it[<?= (int) $it['id'] ?>][comentario]" rows="1"><?= htmlspecialchars((string) ($r['comentario'] ?? '')) ?></textarea></td>
@@ -127,7 +167,11 @@ details.rev-alumno > summary { cursor: pointer; padding: 0.4rem 0; font-size: 1.
             </tbody>
         </table></div>
         <?php $abr = $e['registro']['abr'] ?? ($e['registro']['vemp'] ?? []); if (trim((string) ($abr['hallazgos'] ?? '')) !== '' || trim((string) ($abr['conclusion'] ?? '')) !== ''): ?>
-        <p class="help">Hallazgos: <?= htmlspecialchars((string) ($abr['hallazgos'] ?? '')) ?><br>Conclusión: <?= htmlspecialchars((string) ($abr['conclusion'] ?? '')) ?></p>
+        <div class="card" style="padding:0.7rem; margin:0.6rem 0; background:var(--color-surface-2, #f4f4f6);">
+            <strong>Informe del alumno</strong>
+            <p style="white-space:pre-wrap; margin:0.3rem 0;"><em>Hallazgos:</em> <?= htmlspecialchars((string) ($abr['hallazgos'] ?? '')) ?></p>
+            <p style="white-space:pre-wrap; margin:0;"><em>Conclusión:</em> <?= htmlspecialchars((string) ($abr['conclusion'] ?? '')) ?></p>
+        </div>
         <?php endif; ?>
         <?php $cs = $e['registro']['curvas'] ?? []; if ($cs): ?>
         <p class="help">Curvas en el orden en que se registraron: <?= htmlspecialchars(implode(' → ', array_map(static fn ($c) => ($c['side'] ?? '') . ' ' . $fmt($c['int'] ?? null)

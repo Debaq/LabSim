@@ -78,6 +78,12 @@ def entregar(codigo_alumno, entrega):
                   "codigo": normalizar(codigo_alumno), "entrega": entrega})
 
 
+def corregir(codigo_alumno):
+    """Pide al servidor que corrija con IA la conclusión entregada (no se
+    espera: la app ya pasó al alumno siguiente)."""
+    return _post({"accion": "corregir", "estacion": estacion["codigo"], "codigo": normalizar(codigo_alumno)})
+
+
 def reloj():
     """Estado del reloj del OSCE (api/osce_reloj.php) y cuándo se pidió."""
     try:

@@ -179,4 +179,5 @@ App LabSim:
    entra como "Estación OSCE" con el código de la estación.
 5. ✅ `protocolo`: parámetros de cada curva + estrategia sobre las curvas de la
    entrega (no `action_logs`), con bonificaciones; ABR y VEMP (2026-11-25).
-6. `conclusion` con IA + revisión docente; publicar resultados.
+6. ✅ `conclusion` con IA + revisión docente (2026-11-25). Publicar resultados ya
+   estaba desde el paso 3.

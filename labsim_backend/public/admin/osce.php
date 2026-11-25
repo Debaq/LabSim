@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
 require_once __DIR__ . '/../../src/OscePauta.php';
+require_once __DIR__ . '/../../src/OsceApp.php';
 require_once __DIR__ . '/../../src/QrSvg.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
@@ -412,7 +413,7 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
                     <a href="osce_estacion.php?id=<?= (int) $e['id'] ?>" class="btn btn--xs btn--secondary">Contenido</a>
                     <?php if ($e['tipo'] === 'pauta_docente'): ?><a href="osce_evaluar.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Evaluar</a><?php endif; ?>
                     <?php if ($e['tipo'] === 'preguntas'): ?><a href="osce_revision.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Revisión</a><?php endif; ?>
-                    <?php if (in_array($e['tipo'], ['config_equipo', 'marcaje', 'protocolo'], true)): ?><a href="osce_app_revision.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Revisión</a><?php endif; ?>
+                    <?php if (OsceApp::esApp((string) $e['tipo'])): ?><a href="osce_app_revision.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Revisión</a><?php endif; ?>
                 </td>
                 <?php endif; ?>
             </tr>

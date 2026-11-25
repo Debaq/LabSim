@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/Osce.php';
 require_once __DIR__ . '/OscePauta.php';
+require_once __DIR__ . '/LlmChat.php';
+require_once __DIR__ . '/AnamnesisDraft.php';
 
 /**
  * Estaciones del OSCE que se rinden en la app LabSim (pasos 4 y 5 de
@@ -39,7 +41,75 @@ require_once __DIR__ . '/OscePauta.php';
  */
 final class OsceApp
 {
-    public const TIPOS = ['config_equipo', 'marcaje', 'protocolo'];
+    public const TIPOS = ['config_equipo', 'marcaje', 'protocolo', 'conclusion'];
+
+    /**
+     * Criterios de la estación de conclusión (los corrige la IA): el
+     * formato de informe del Protocolo Técnico ORL 2019. "texto | puntos"
+     * por línea en el editor.
+     */
+    public const CRITERIOS_CONCLUSION = [
+        'peatc' => [
+            ['Describe por OD y OI qué ondas se registran a la intensidad máxima, con su morfología y replicabilidad', 1],
+            ['Informa por oído si las latencias absolutas (I, III, V) y los interpeaks (I-III, III-V, I-V) están dentro de lo esperado', 2],
+            ['Informa el umbral de la onda V de cada oído', 1],
+            ['Concluye el tipo de audición correcto en cada oído (normal, transmisión, sensorioneural, mixta o compromiso retrococlear)', 2],
+            ['Estima el grado (dB HL aproximados) para el rango 2-4 kHz', 1],
+            ['Sigue el formato del protocolo: por oído y con observaciones (estado del paciente, exámenes que se adjuntan)', 1],
+        ],
+        'cvemp' => [
+            ['Informa por OD y OI la presencia del complejo P1-N1 a la intensidad máxima', 1],
+            ['Informa las latencias de P1 y N1 de cada oído', 1],
+            ['Informa la amplitud de cada oído y el porcentaje de asimetría con su significancia (35 % o más es significativo)', 2],
+            ['Informa el umbral del potencial de cada oído', 1],
+            ['Concluye correctamente sobre la función sacular (vía vestíbulo-cólica) de cada oído', 2],
+        ],
+        'ovemp' => [
+            ['Informa por OD y OI la presencia del complejo N1-P1 (registro contralateral)', 1],
+            ['Informa las latencias de N1 y P1 de cada oído', 1],
+            ['Informa la amplitud de cada oído y el porcentaje de asimetría con su significancia (33 % o más es significativo)', 2],
+            ['Concluye correctamente sobre la función utricular (vía vestíbulo-ocular) de cada oído', 2],
+        ],
+        'otro' => [
+            ['Describe por OD y OI lo que se registró, con sus valores', 2],
+            ['Interpreta los hallazgos contra lo esperado', 2],
+            ['Concluye correctamente para cada oído', 2],
+        ],
+    ];
+
+    public const PROMPT_CONCLUSION = <<<'TXT'
+Eres el corrector de la estación de conclusión de una evaluación práctica
+tipo OSCE de Tecnología Médica, mención Otorrinolaringología
+(electrofisiología). El estudiante vio las curvas de un paciente, marcó las
+ondas y escribió el informe (hallazgos y conclusión). Corriges ese informe.
+
+Tienes:
+- CRITERIOS numerados, cada uno con su puntaje máximo.
+- CONCLUSIÓN ESPERADA que escribió el docente: es la referencia.
+- DATOS REALES del caso, que el estudiante no veía: si en cada curva había
+  respuesta, las latencias verdaderas y el umbral real de cada oído.
+- LO QUE MARCÓ el estudiante en cada curva.
+- El INFORME del estudiante.
+
+Reglas:
+- Asigna a cada criterio un puntaje de 0 a su máximo, en pasos de 0,5.
+- Juzga el informe contra la conclusión esperada y los datos reales. Si el
+  estudiante informa un valor que coincide con lo que él mismo marcó y su
+  marca era razonable, no lo castigues por diferencias pequeñas con la
+  latencia verdadera (±0,3 ms) ni con el umbral (±10 dB).
+- Un error de interpretación (tipo de audición equivocado, oído cambiado,
+  asimetría mal calculada o mal juzgada) descuenta en el criterio que
+  corresponde, no en todos.
+- Acepta sinónimos, abreviaturas clínicas y redacción informal. La ortografía
+  no descuenta.
+- Lo que el informe no dice no se da por dicho.
+- Cada comentario va al estudiante, en español de Chile, una o dos frases
+  concretas y respetuosas. No digas que eres una IA.
+
+Responde SOLO con este JSON, sin texto alrededor ni bloques de código:
+{"criterios": [{"n": 1, "puntaje": <número>, "comentario": "<texto>"}, ...],
+ "comentario_general": "<dos o tres frases para el estudiante>"}
+TXT;
 
     /** Equipo de la app que abre cada examen. */
     public const MODULO_DE_EXAMEN = ['cvemp' => 'VEMP', 'ovemp' => 'VEMP'];
@@ -348,6 +418,25 @@ final class OsceApp
                                 'config' => ['regla' => 'marca', 'lado' => $lado, 'int' => $int, 'onda' => $onda, 'tol_ms' => $tol]];
                 }
             }
+        } elseif ($est['tipo'] === 'conclusion') {
+            $curvas = self::leerCurvas((string) ($in['curvas'] ?? ''));
+            if (!$curvas) {
+                throw new InvalidArgumentException('Indica las curvas a registrar: una por línea, como "OD 80".');
+            }
+            $esperada = trim((string) ($in['conclusion_esperada'] ?? ''));
+            if ($esperada === '') {
+                throw new InvalidArgumentException('Escribe la conclusión esperada: es la referencia con que corrige la IA.');
+            }
+            $criterios = self::leerCriterios((string) ($in['criterios'] ?? ''));
+            if (!$criterios) {
+                throw new InvalidArgumentException('Indica al menos un criterio: "texto | puntos" por línea.');
+            }
+            $cfg['curvas'] = $curvas;
+            $cfg['conclusion_esperada'] = mb_substr($esperada, 0, 4000);
+            foreach ($criterios as $k => [$texto, $pts]) {
+                $items[] = ['texto' => $texto, 'puntaje' => $pts, 'critico' => false,
+                            'config' => ['regla' => 'ia', 'n' => $k + 1]];
+            }
         } else {
             $onda = trim((string) ($in['onda'] ?? ''));
             if ($onda === '') {
@@ -392,6 +481,32 @@ final class OsceApp
             }
             $pdo->commit();
         });
+    }
+
+    /** "texto | puntos" por línea → [[texto, puntos], ...] (sin puntos = 1). */
+    public static function leerCriterios(string $texto): array
+    {
+        $out = [];
+        foreach (preg_split('/\r?\n/', $texto) ?: [] as $linea) {
+            $linea = trim($linea);
+            if ($linea === '') {
+                continue;
+            }
+            $pts = 1.0;
+            if (preg_match('/^(.*)\|\s*([\d.,]+)\s*$/u', $linea, $m)) {
+                $linea = trim($m[1]);
+                $pts = (float) str_replace(',', '.', $m[2]);
+            }
+            if ($linea !== '' && $pts > 0 && $pts <= 100) {
+                $out[] = [mb_substr($linea, 0, 400), $pts];
+            }
+        }
+        return array_slice($out, 0, 20);
+    }
+
+    public static function criteriosTexto(array $criterios): string
+    {
+        return implode("\n", array_map(static fn ($c) => $c[0] . ' | ' . rtrim(rtrim(number_format((float) $c[1], 1, '.', ''), '0'), '.'), $criterios));
     }
 
     /** "OD 80" por línea → [["OD", 80], ...] (sin repetidas, en el orden dado). */
@@ -584,6 +699,11 @@ final class OsceApp
             return ['puntaje' => $ok ? $pts : 0.0, 'ok' => $ok, 'alumno' => $fmt($marca),
                     'esperado' => $existe ? number_format((float) $lat, 2, ',', '') . ' ms ± ' . str_replace('.', ',', (string) $tol)
                                           : 'sin onda ' . $onda . ' (no marcar)'];
+        }
+
+        if ($regla === 'ia') {
+            return ['puntaje' => null, 'ok' => false, 'pendiente' => true, 'ia' => true,
+                    'alumno' => 'pendiente de corrección', 'esperado' => 'según la conclusión esperada'];
         }
 
         return self::evaluarEstrategia($regla, $r, $payload, $pts);
@@ -792,11 +912,11 @@ final class OsceApp
         foreach ($filas as $f) {
             $it = $f['item'];
             $bonus = !empty(($it['cfg'] ?? [])['bonus']);
-            $total += (float) $f['puntaje'];
+            $total += (float) ($f['puntaje'] ?? 0);
             if (!$bonus) {
                 $max += (float) $it['puntaje'];
             }
-            $critico = $critico || ((int) $it['critico'] === 1 && (float) $f['puntaje'] <= 0.0);
+            $critico = $critico || ((int) $it['critico'] === 1 && $f['puntaje'] !== null && (float) $f['puntaje'] <= 0.0);
         }
         return ['puntaje' => round(min($total, $max), 2), 'puntaje_max' => round($max, 2), 'critico_fallado' => $critico];
     }
@@ -865,7 +985,7 @@ final class OsceApp
         $items = OscePauta::items($estacionId);
         $pdo = Db::get();
         $entregaId = self::entregaId($estacionId, $participanteId);
-        $stmt = $pdo->prepare("SELECT item_id, puntaje, comentario, fuente FROM osce_resultado WHERE entrega_id = ? AND item_id IS NOT NULL");
+        $stmt = $pdo->prepare("SELECT item_id, puntaje, comentario, fuente, valor FROM osce_resultado WHERE entrega_id = ? AND item_id IS NOT NULL");
         $stmt->execute([$entregaId]);
         $previos = [];
         foreach ($stmt->fetchAll() as $r) {
@@ -874,8 +994,15 @@ final class OsceApp
         $filas = [];
         $paraTotal = [];
         foreach ($items as $it) {
-            $e = self::evaluarItem($it, $payload);
             $prev = $previos[(int) $it['id']] ?? null;
+            if (($it['cfg']['regla'] ?? '') === 'ia' && $prev !== null && $prev['fuente'] !== 'auto') {
+                // Lo que ya corrigió la IA (o el docente) no se vuelve a pedir.
+                $pts = $prev['puntaje'] === null ? null : (float) $prev['puntaje'];
+                $paraTotal[] = ['item' => $it, 'puntaje' => $pts];
+                $filas[] = [(int) $it['id'], (string) $prev['valor'], $pts, (string) $prev['comentario'], (string) $prev['fuente']];
+                continue;
+            }
+            $e = self::evaluarItem($it, $payload);
             $manual = $prev !== null && $prev['fuente'] === 'docente';
             $pts = $manual ? (float) $prev['puntaje'] : $e['puntaje'];
             $paraTotal[] = ['item' => $it, 'puntaje' => $pts];
@@ -934,18 +1061,24 @@ final class OsceApp
             if ($r === null) {
                 continue;
             }
-            $pts = (float) $r['puntaje'];
+            $pts = $r['puntaje'] === null ? null : (float) $r['puntaje'];
             $comentario = (string) $r['comentario'];
             $fuente = (string) $r['fuente'];
             $in = $porItem[(int) $d['item']['id']] ?? null;
             if ($in !== null) {
                 $max = (float) $d['item']['puntaje'];
                 $raw = trim(str_replace(',', '.', (string) ($in['puntaje'] ?? '')));
-                $auto = (float) ($d['eval']['puntaje'] ?? 0);
+                $auto = $d['eval']['puntaje'] ?? null;
                 if ($raw !== '' && is_numeric($raw)) {
                     $pts = max(0.0, min($max, (float) $raw));
                 }
-                $fuente = abs($pts - $auto) > 0.001 ? 'docente' : 'auto';
+                if ($pts === null) {
+                    $fuente = $fuente;   // sigue pendiente de la IA
+                } elseif ($auto === null || abs($pts - (float) $auto) > 0.001) {
+                    $fuente = 'docente';
+                } else {
+                    $fuente = ($d['eval']['ia'] ?? false) ? 'ia' : 'auto';
+                }
                 $comentario = mb_substr(trim((string) ($in['comentario'] ?? '')), 0, 2000);
                 $cambios[] = [$pts, $comentario, $fuente, (int) $r['id']];
             }
@@ -963,6 +1096,189 @@ final class OsceApp
                 ->execute([mb_substr($feedback, 0, 4000), $t['puntaje'], $t['puntaje_max'], $t['critico_fallado'] ? 1 : 0, $entregaId]);
             $pdo->commit();
         });
+    }
+
+    // -- Conclusión: corrección con IA ------------------------------------------
+
+    /** Participantes con criterios de IA sin corregir en la estación. */
+    public static function pendientesIa(int $estacionId): array
+    {
+        $stmt = Db::get()->prepare(
+            "SELECT DISTINCT e.participante_id FROM osce_resultado r
+               JOIN osce_entrega e ON e.id = r.entrega_id
+               JOIN osce_item i ON i.id = r.item_id
+              WHERE e.estacion_id = ? AND r.puntaje IS NULL AND i.config LIKE '%\"regla\":\"ia\"%'"
+        );
+        $stmt->execute([$estacionId]);
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    /** Lo que el estudiante no veía, en texto para la IA. */
+    public static function datosReales(array $payload, ?array $caso): string
+    {
+        $lineas = [];
+        $tipos = [];
+        // Solo el equipo de la estación: el cuadro del VEMP no dice nada de un PEATC.
+        $sec = ($payload['modulo'] ?? 'ABR') === 'VEMP' ? 'VEMP' : 'ABR';
+        foreach (['OD', 'OI'] as $lado) {
+            $t = $caso[$sec][$lado]['type'] ?? null;
+            if ($t) {
+                $tipos[] = "{$sec} {$lado}: cuadro del caso = {$t}";
+            }
+        }
+        if ($tipos) {
+            $lineas[] = implode('; ', $tipos);
+        }
+        foreach (self::curvas($payload) as $c) {
+            $v = $payload['verdad'][$c['nombre'] ?? ''] ?? null;
+            $desc = ($c['side'] ?? '?') . ' ' . self::db(self::nivel($c)) . ' dB'
+                . (isset($c['stim']) ? ' ' . $c['stim'] : '') . (isset($c['freq']) ? ' ' . $c['freq'] : '') . ': ';
+            if ($v === null) {
+                $lineas[] = $desc . 'sin datos';
+                continue;
+            }
+            $ondas = [];
+            foreach (($v['waves'] ?? []) as $w => $d) {
+                if (isset($d['amp']) && abs((float) $d['amp']) < 0.02) {
+                    continue;   // a esa intensidad la onda ya no se ve
+                }
+                $ondas[] = $w . ' ' . number_format((float) $d['lat'], 2, ',', '') . ' ms'
+                    . (isset($d['amp']) ? ' (amp ' . number_format(abs((float) $d['amp']), 2, ',', '') . ')' : '');
+            }
+            $lineas[] = $desc . (!empty($v['visible']) ? 'HAY respuesta; ' . implode(', ', $ondas) : 'SIN respuesta')
+                . (isset($v['threshold']) ? '; umbral real del oído ' . self::db((float) $v['threshold']) . ' dB' : '');
+        }
+        return implode("\n", $lineas);
+    }
+
+    private static function marcasTexto(array $payload): string
+    {
+        $out = [];
+        foreach (self::curvas($payload) as $c) {
+            $m = [];
+            foreach (($c['marcas'] ?? []) as $w => $lat) {
+                if (is_numeric($lat)) {
+                    $m[] = $w . ' ' . number_format((float) $lat, 2, ',', '') . ' ms';
+                }
+            }
+            $out[] = ($c['side'] ?? '?') . ' ' . self::db(self::nivel($c)) . ' dB: ' . ($m ? implode(', ', $m) : 'sin marcas');
+        }
+        return implode("\n", $out);
+    }
+
+    /** El informe que escribió el estudiante en el equipo. */
+    public static function informe(array $payload): string
+    {
+        $sec = $payload['abr'] ?? ($payload['vemp'] ?? []);
+        $txt = 'HALLAZGOS:' . "\n" . trim((string) ($sec['hallazgos'] ?? '')) . "\n\nCONCLUSIÓN:\n" . trim((string) ($sec['conclusion'] ?? ''));
+        if (!empty($sec['umbral_informado'])) {
+            $txt .= "\n\nUMBRALES INFORMADOS: " . json_encode($sec['umbral_informado'], JSON_UNESCAPED_UNICODE);
+        }
+        return $txt;
+    }
+
+    /** Lee la respuesta de la IA: n => [puntaje, comentario], y el comentario general. */
+    public static function parsearIaConclusion(string $raw, array $maximos): ?array
+    {
+        $clean = trim($raw);
+        if (substr($clean, 0, 3) === '```') {
+            $clean = trim((string) preg_replace('/^```[a-zA-Z]*\n?|```$/', '', $clean));
+        }
+        if (!preg_match('/\{.*\}/s', $clean, $m)) {
+            return null;
+        }
+        $d = json_decode($m[0], true);
+        if (!is_array($d) || !is_array($d['criterios'] ?? null)) {
+            return null;
+        }
+        $out = [];
+        foreach ($d['criterios'] as $c) {
+            $n = (int) ($c['n'] ?? 0);
+            if (!isset($maximos[$n]) || !is_numeric($c['puntaje'] ?? null)) {
+                continue;
+            }
+            $p = round(((float) $c['puntaje']) * 2) / 2;
+            $out[$n] = [max(0.0, min($maximos[$n], $p)), trim((string) ($c['comentario'] ?? ''))];
+        }
+        if (!$out) {
+            return null;
+        }
+        return ['criterios' => $out, 'general' => trim((string) ($d['comentario_general'] ?? ''))];
+    }
+
+    /**
+     * Corrige con IA los criterios de la conclusión de un alumno. Lo que el
+     * docente ya puso a mano se respeta. Lanza si la IA no está o no responde.
+     */
+    public static function corregirIa(int $estacionId, int $participanteId): array
+    {
+        $est = Osce::estacion($estacionId);
+        $cfg = self::config($est ?? []);
+        $payload = self::registro($estacionId, $participanteId);
+        if ($est === null || $payload === null) {
+            throw new InvalidArgumentException('Entrega no encontrada.');
+        }
+        if (!LlmConfig::get()['active']) {
+            throw new RuntimeException('La IA está desactivada (Admin → IA Paciente).');
+        }
+        $items = array_values(array_filter(OscePauta::items($estacionId), static fn ($it) => ($it['cfg']['regla'] ?? '') === 'ia'));
+        $maximos = [];
+        $lista = [];
+        foreach ($items as $it) {
+            $n = (int) $it['cfg']['n'];
+            $maximos[$n] = (float) $it['puntaje'];
+            $lista[] = "{$n}. {$it['texto']} (máximo " . self::db((float) $it['puntaje']) . ')';
+        }
+        $caso = self::caso((string) ($cfg['case_id'] ?? ''));
+        $mensaje = "CRITERIOS:\n" . implode("\n", $lista)
+            . "\n\nCONCLUSIÓN ESPERADA (docente):\n" . ($cfg['conclusion_esperada'] ?? '')
+            . "\n\nDATOS REALES DEL CASO:\n" . self::datosReales($payload, $caso)
+            . "\n\nLO QUE MARCÓ EL ESTUDIANTE:\n" . self::marcasTexto($payload)
+            . "\n\nINFORME DEL ESTUDIANTE:\n" . self::informe($payload);
+        $stmt = Db::get()->prepare('SELECT p.user_id, o.course_id FROM osce_participante p JOIN osce o ON o.id = p.osce_id WHERE p.id = ?');
+        $stmt->execute([$participanteId]);
+        $quien = $stmt->fetch() ?: [];
+        $stmt->closeCursor();
+        $presupuesto = AnamnesisDraft::maxTokens();
+        $opciones = ['model' => AnamnesisDraft::model(), 'max_tokens' => $presupuesto, 'timeout' => AnamnesisDraft::TIMEOUT_S,
+                     'campo_tokens' => 'Máximo de tokens del borrador de anamnesis', 'tarea' => 'osce',
+                     'course_id' => (int) ($quien['course_id'] ?? 0), 'user_id' => (int) ($quien['user_id'] ?? 0)];
+        try {
+            $raw = LlmChat::reply(self::PROMPT_CONCLUSION, [], $mensaje, $opciones);
+        } catch (LlmBudgetException $e) {
+            $reintento = AnamnesisDraft::retryBudget($presupuesto);
+            if ($reintento <= $presupuesto) {
+                throw $e;
+            }
+            $opciones['max_tokens'] = $reintento;
+            $raw = LlmChat::reply(self::PROMPT_CONCLUSION, [], $mensaje, $opciones);
+        }
+        $v = self::parsearIaConclusion($raw, $maximos);
+        if ($v === null) {
+            throw new RuntimeException('La IA no devolvió una corrección legible.');
+        }
+        $entregaId = self::entregaId($estacionId, $participanteId);
+        Db::reintentar(static function () use ($items, $v, $entregaId): void {
+            $pdo = Db::get();
+            $pdo->beginTransaction();
+            $upd = $pdo->prepare("UPDATE osce_resultado SET puntaje = ?, valor = ?, fuente = 'ia', updated_at = CURRENT_TIMESTAMP
+                                   WHERE entrega_id = ? AND item_id = ? AND fuente <> 'docente'");
+            foreach ($items as $it) {
+                $n = (int) $it['cfg']['n'];
+                if (!isset($v['criterios'][$n])) {
+                    continue;
+                }
+                [$pts, $coment] = $v['criterios'][$n];
+                $eval = ['ia' => true, 'puntaje' => $pts, 'ok' => $pts >= (float) $it['puntaje'] - 1e-9,
+                         'alumno' => $coment, 'esperado' => 'según la conclusión esperada'];
+                $upd->execute([$pts, json_encode($eval, JSON_UNESCAPED_UNICODE), $entregaId, (int) $it['id']]);
+            }
+            if ($v['general'] !== '') {
+                $pdo->prepare("UPDATE osce_entrega SET feedback = ? WHERE id = ? AND feedback = ''")->execute([$v['general'], $entregaId]);
+            }
+            $pdo->commit();
+        });
+        return self::corregir($estacionId, $participanteId);
     }
 
     // -- Lo que recibe la app al entrar ------------------------------------------

@@ -95,8 +95,6 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 
 ## Funcionalidades
 
-- [ ] 82. OSCE, paso 6 de `docs/osce_plan.md` (para el 4-dic): conclusión
-      con IA. § OSCE: estaciones configurables al crearlo
 
 ### Otoscopia: derivación + aprobación docente + fase por alumno
 Hoy todo alumno ve la fase 1 (`FASE_FIJA = 0` en `Otoscopia.py`).

@@ -155,3 +155,36 @@ t_eq(OsceApp::ESPERADO['ovemp']['filter_down'], '1000', 'oVEMP: 1 Hz – 1 kHz')
 t_eq(OsceApp::ESTRATEGIA_BASE['cvemp']['sube'][1], '5', 'cVEMP: sin respuesta sube 5');
 t_true(OsceApp::ESTRATEGIA_BASE['peatc']['umbral_chirp'][3], 'PEATC: el chirp es bonificación');
 t_eq(OsceApp::textoRegla('baja', '20'), 'Con respuesta, baja de 20 en 20 dB', 'Texto del criterio');
+
+// -- Conclusión (la corrige la IA) -------------------------------------------
+t_eq(OsceApp::leerCriterios("Describe ondas | 2\n\nConcluye | 1,5\nSin puntos\nMalo | 0"),
+     [['Describe ondas', 2.0], ['Concluye', 1.5], ['Sin puntos', 1.0]], 'Criterios: "texto | puntos", sin puntos = 1, 0 no vale');
+t_eq(OsceApp::leerCriterios(OsceApp::criteriosTexto(OsceApp::CRITERIOS_CONCLUSION['peatc'])), array_map(
+    static fn ($c) => [$c[0], (float) $c[1]], OsceApp::CRITERIOS_CONCLUSION['peatc']), 'Criterios precargados ida y vuelta');
+$r = OsceApp::evaluarItem($item(['regla' => 'ia', 'n' => 1]), []);
+t_eq([$r['puntaje'], $r['pendiente']], [null, true], 'Criterio de IA sin corregir: pendiente, sin puntaje');
+$ia = OsceApp::parsearIaConclusion('```json
+{"criterios": [{"n": 1, "puntaje": 1.3, "comentario": "Bien OD."}, {"n": 2, "puntaje": 9, "comentario": "x"}, {"n": 7, "puntaje": 1}],
+ "comentario_general": "Buen informe."}
+```', [1 => 2.0, 2 => 2.0]);
+t_eq($ia['criterios'], [1 => [1.5, 'Bien OD.'], 2 => [2.0, 'x']], 'IA: redondea a 0,5, recorta al máximo e ignora criterios que no existen');
+t_eq($ia['general'], 'Buen informe.', 'IA: comentario general');
+t_eq(OsceApp::parsearIaConclusion('no sé', [1 => 1.0]), null, 'IA ilegible: null');
+$t = OsceApp::totales([
+    ['item' => ['puntaje' => 2, 'critico' => 0, 'cfg' => ['regla' => 'ia']], 'puntaje' => null],
+    ['item' => ['puntaje' => 2, 'critico' => 1, 'cfg' => ['regla' => 'ia']], 'puntaje' => null],
+]);
+t_eq([$t['puntaje'], $t['puntaje_max'], $t['critico_fallado']], [0.0, 4.0, false], 'Pendientes: cuentan 0 y no reprueban por crítico');
+$datos = OsceApp::datosReales(['curvas' => [$curva('R1', 'OD', 80, ['V' => 5.6]), $curva('R2', 'OD', 10, [])],
+    'verdad' => ['R1' => ['visible' => true, 'waves' => ['V' => ['lat' => 5.62, 'amp' => 0.5]], 'threshold' => 20.0],
+                 'R2' => ['visible' => false, 'waves' => [], 'threshold' => 20.0]]],
+    ['ABR' => ['OD' => ['type' => 'normal'], 'OI' => ['type' => 'coclear']]]);
+t_true(strpos($datos, 'ABR OD: cuadro del caso = normal') !== false && strpos($datos, 'ABR OI: cuadro del caso = coclear') !== false, 'Datos reales: el cuadro de cada oído');
+$soloV = OsceApp::datosReales(['modulo' => 'ABR', 'curvas' => [$curva('R1', 'OD', 20, [])],
+    'verdad' => ['R1' => ['visible' => true, 'waves' => ['I' => ['lat' => 3.9, 'amp' => 0.0], 'V' => ['lat' => 7.7, 'amp' => 0.24]], 'threshold' => 20.0]]],
+    ['ABR' => ['OD' => ['type' => 'normal']], 'VEMP' => ['OD' => ['type' => 'sacular']]]);
+t_true(strpos($soloV, 'I 3,9') === false && strpos($soloV, 'V 7,70') !== false, 'Datos reales: sin las ondas que ya no se ven');
+t_true(strpos($soloV, 'VEMP') === false, 'Datos reales: solo el equipo de la estación');
+t_true(strpos($datos, 'OD 80 dB Click: HAY respuesta; V 5,62 ms') !== false, 'Datos reales: latencia verdadera');
+t_true(strpos($datos, 'OD 10 dB Click: SIN respuesta; umbral real del oído 20 dB') !== false, 'Datos reales: sin respuesta y umbral');
+t_true(strpos(OsceApp::informe(['abr' => ['hallazgos' => 'h', 'conclusion' => 'c']]), "HALLAZGOS:\nh\n\nCONCLUSIÓN:\nc") === 0, 'Informe del alumno');

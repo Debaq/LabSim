@@ -150,7 +150,9 @@ admin_header('Estación · ' . $est['titulo'], $me);
             ? 'El alumno encuentra el ABR con el montaje hecho y todos los controles al azar; al entregar (o al terminar el tiempo) se compara lo que dejó configurado con lo esperado. Cada parámetro es un criterio.'
             : ($est['tipo'] === 'marcaje'
                 ? 'La app registra sola las curvas indicadas, con el equipo en su configuración de rutina, y el alumno solo marca. Se compara cada marca con la latencia verdadera del generador; donde no hay onda, lo correcto es no marcarla.'
-                : 'El alumno hace el examen completo: parte con el equipo al azar y el montaje hecho, configura, registra, marca y busca el umbral. Se evalúa cómo tomó cada curva (parámetros) y la secuencia (estrategia).') ?></p>
+                : ($est['tipo'] === 'conclusion'
+                    ? 'La app registra las curvas del caso; el alumno las marca y escribe hallazgos y conclusión en el informe del equipo. La IA corrige el informe criterio por criterio y tú lo revisas.'
+                    : 'El alumno hace el examen completo: parte con el equipo al azar y el montaje hecho, configura, registra, marca y busca el umbral. Se evalúa cómo tomó cada curva (parámetros) y la secuencia (estrategia).')) ?></p>
         <?php if (!$editable): ?>
             <p class="text-warn"><?= $evaluados ?> entrega<?= $evaluados > 1 ? 's' : '' ?>: el contenido queda fijo.</p>
         <?php endif; ?>
@@ -302,7 +304,18 @@ admin_header('Estación · ' . $est['titulo'], $me);
             </select></label>
         <p class="help">Abre el equipo <strong><?= $modulo ?></strong> en <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR') ?></strong> (según el examen de la estación).
             <?= $modulo === 'VEMP' ? 'El VEMP de LabSim mide la intensidad en dB SPL (el protocolo dice "100 dB nHL"): escribe tú la intensidad esperada.' : '' ?></p>
-        <?php if ($est['tipo'] === 'marcaje'): ?>
+        <?php if ($est['tipo'] === 'conclusion'): ?>
+        <div class="row row--gap-lg">
+            <label>Curvas que registra la app (una por línea)
+                <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : ($modulo === 'VEMP' ? "OD 120\nOD 110\nOD 100\nOI 120\nOI 110\nOI 100" : OsceApp::CURVAS_BASE)) ?></textarea></label>
+            <label style="flex:1 1 24rem;">Conclusión esperada (la referencia de la IA: qué debe informar por oído y qué concluir)
+                <textarea name="conclusion_esperada" rows="8" style="display:block; width:100%;" placeholder="OD: ondas I, III y V a 80 dB con latencias normales; umbral de V en 20 dB. OI: ... Conclusión: examen sugiere audición normal en ambos oídos."><?= htmlspecialchars((string) ($appCfg['conclusion_esperada'] ?? '')) ?></textarea></label>
+        </div>
+        <label>Criterios que corrige la IA (uno por línea: <code>texto | puntos</code>)
+            <textarea name="criterios" rows="7" style="display:block; width:100%;"><?= htmlspecialchars(OsceApp::criteriosTexto(array_map(static fn ($it) => [$it['texto'], (float) $it['puntaje']], $items)
+                ?: (OsceApp::CRITERIOS_CONCLUSION[$est['examen']] ?? OsceApp::CRITERIOS_CONCLUSION['otro']))) ?></textarea></label>
+        <p class="help">El alumno ve las curvas ya registradas, las marca y escribe hallazgos y conclusión en el informe del equipo. Al entregar, la IA corrige cada criterio contra la conclusión esperada, los datos reales del caso (umbrales, latencias, si había respuesta) y lo que el alumno marcó. Tú revisas y ajustas en "Revisión". Criterios precargados del formato de informe del Protocolo Técnico ORL 2019.</p>
+        <?php elseif ($est['tipo'] === 'marcaje'): ?>
         <div class="row row--gap-lg">
             <label>Curvas que registra la app (una por línea: oído e intensidad)
                 <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : ($modulo === 'VEMP' ? "OD 120\nOD 110\nOD 100\nOI 120\nOI 110\nOI 100" : OsceApp::CURVAS_BASE)) ?></textarea></label>

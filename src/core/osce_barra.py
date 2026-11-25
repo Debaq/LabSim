@@ -227,6 +227,9 @@ class BarraOsce(QWidget):
             osce.borrar_pendiente(alumno)
         if ok:
             mensaje = f"Entregado ✓ ({alumno}). Pasa a la siguiente estación."
+            if (osce.estacion or {}).get("tipo") == "conclusion":
+                # La IA corrige el informe en el servidor; acá no se espera.
+                hilos.en_fondo(osce.corregir, alumno, dueno=self, nombre="osce_corregir")
         elif isinstance(exc, osce.ErrorOsce):
             mensaje = f"{alumno}: {exc}"
         else:
