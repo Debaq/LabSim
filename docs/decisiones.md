@@ -5,6 +5,49 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## OSCE: estaciones configurables al crearlo (2026-11-25)
+
+**Qué:** LabSim tendrá OSCE (plan en `docs/osce_plan.md`). Primer uso: prueba
+práctica de ETMP196 el 4-dic-2026, 17 alumnos, estaciones de 8 min, toda la
+electrofisiología. Seis tipos de estación: pauta docente (limpieza y
+preparación de electrodos con impedancias), preguntas, configuración del
+equipo, marcaje de curvas, ejecución del protocolo y conclusión.
+
+**Por qué así:** él: "estas preguntas deberían ser configuraciones en el
+sistema al crear el OSCE". Cantidad de alumnos, duración, pausa, examen de
+cada estación, casos, límites y pesos se llenan en el asistente; el sistema
+calcula vueltas, circuitos, códigos/QR e interelectrodo.
+
+- Pautas precargadas desde el Protocolo Técnico ORL 2019 (editables).
+- Impedancias: el docente anota cada cable; el interelectrodo (mayor − menor
+  y par a par) lo calcula el sistema con los límites del examen.
+- Preguntas: corrección automática (IA en desarrollo); feedback y réplica a
+  mano con el docente.
+- Resultados al alumno por QR solo cuando el docente publica.
+
+**Paso 1 hecho (2026-11-25):** `src/Osce.php` (tablas, vueltas, reloj, nota),
+`src/QrSvg.php` (QR propio en SVG, sin dependencias; leído con zbarimg en las
+versiones 1 a 10), `admin/osce.php` (lista, asistente, estaciones, alumnos,
+tarjetas para imprimir), `admin/osce_vivo.php` (reloj para el proyector con
+timbre y quién está en cada estación), `student/osce.php` (página del QR) y
+`api/osce_reloj.php`. Menú Docencia → OSCE; la tabla también la crea
+"Aplicar schema".
+
+- **Rotación por circuitos, no copias por estación:** un circuito es un juego
+  completo de estaciones; con más PC o docentes se agrega otro circuito. Copias
+  sueltas de una estación rompen la rotación sincronizada.
+- **Vueltas parejas:** 13 en 6 puestos son 5 + 4 + 4, no 6 + 6 + 1. Quién va
+  en qué vuelta se sortea al traer los alumnos (o con "Sortear de nuevo").
+- **Pausa final de una vuelta + pausa entre vueltas = un solo descanso.**
+- **Reloj en la base:** iniciar, pausar, ±1 min y cerrar se guardan en `osce`
+  y todas las pantallas lo leen de `api/osce_reloj.php` (cada 5–10 s, entre
+  medio cuentan solas). La API no pide sesión: entra con token largo del OSCE o
+  del alumno y no devuelve nombres.
+- **La estructura se congela al iniciar.** "Volver a borrador" existe para un
+  inicio por error y se niega si ya hay entregas.
+- **Nota:** escala 1–7 con exigencia y nota de aprobación del OSCE; la final
+  pondera el % de logro de cada estación por su peso.
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una

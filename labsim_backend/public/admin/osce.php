@@ -1,0 +1,457 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/Osce.php';
+require_once __DIR__ . '/../../src/QrSvg.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/_layout.php';
+
+/**
+ * OSCE del curso: lista, creación y armado (configuración, estaciones,
+ * alumnos con código y QR). Plan en docs/osce_plan.md. El reloj en vivo
+ * está en osce_vivo.php.
+ */
+
+$me = Auth::requireAdminSession();
+$esAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
+$misCursos = $esAdmin ? null : Courses::teacherCourseIds((int) $me['id']);
+$ctx = admin_course_context($me);
+$cursosElegibles = admin_context_courses($me);
+
+$id = (int) ($_GET['id'] ?? $_POST['id'] ?? 0);
+$osce = $id > 0 ? Osce::obtener($id) : null;
+if ($id > 0 && ($osce === null || !Courses::canAdminister((int) $osce['course_id'], $me))) {
+    http_response_code(404);
+    exit('OSCE no encontrado.');
+}
+
+/** URL absoluta de la página del alumno (la que abre el QR). */
+$urlAlumno = static function (string $token): string {
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $base = rtrim(str_replace('\\', '/', dirname(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/public/admin/osce.php')))), '/');
+    return ($https ? 'https' : 'http') . '://' . $host . $base . '/student/osce.php?t=' . rawurlencode($token);
+};
+
+$min = static fn (int $s): string => rtrim(rtrim(number_format($s / 60, 1, ',', ''), '0'), ',');
+
+// Hora local de inicio (si ya partió, la real; si no, la programada).
+$inicioEpoch = static function (array $o): ?int {
+    if ($o['inicio_epoch'] !== null) {
+        return (int) $o['inicio_epoch'] + (int) $o['pausado_acum_s'];
+    }
+    if ($o['inicio_programado'] === '') {
+        return null;
+    }
+    $t = strtotime($o['inicio_programado']);
+    return $t === false ? null : $t;
+};
+
+// -- Tarjetas para imprimir (página suelta, sin el layout del panel) --------
+if ($osce !== null && isset($_GET['tarjetas'])) {
+    $parts = Osce::participantes($id);
+    $estaciones = Osce::estaciones($id);
+    $S = count($estaciones);
+    $cfg = Osce::cfgReloj($osce, $S, count($parts));
+    $t0 = $inicioEpoch($osce);
+    usort($parts, static fn ($a, $b) => strcmp((string) $a['display_name'], (string) $b['display_name']));
+    header('Content-Type: text/html; charset=utf-8');
+    ?>
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Tarjetas OSCE — <?= htmlspecialchars($osce['nombre']) ?></title>
+<style>
+body { font-family: system-ui, sans-serif; margin: 0; color: #111; }
+.hoja { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.tarjeta { border: 1px dashed #999; padding: 10mm 8mm; display: flex; gap: 6mm; align-items: center; break-inside: avoid; height: 62mm; box-sizing: border-box; }
+.tarjeta svg { width: 38mm; height: 38mm; flex: none; }
+.cod { font: 700 22pt ui-monospace, monospace; letter-spacing: 1pt; margin: 2mm 0; }
+.nom { font-size: 10pt; }
+.det { font-size: 9pt; color: #444; margin-top: 2mm; line-height: 1.35; }
+.osce { font-size: 8pt; color: #666; text-transform: uppercase; letter-spacing: .5pt; }
+.no-print { padding: 1rem; }
+@media print { .no-print { display: none; } @page { margin: 8mm; } }
+</style></head><body>
+<div class="no-print"><button onclick="window.print()">Imprimir</button> · <?= count($parts) ?> tarjetas · <a href="osce.php?id=<?= $id ?>">Volver</a></div>
+<div class="hoja">
+<?php foreach ($parts as $p):
+    $primera = $S > 0 ? $estaciones[Osce::estacionEn((int) $p['puesto'], 0, $S)]['titulo'] : '—';
+    $hora = $t0 !== null && $S > 0 ? date('H:i', $t0 + Osce::inicioSlot($cfg, (int) $p['vuelta'], 0)) : null;
+    ?>
+<div class="tarjeta">
+    <?= QrSvg::svg($urlAlumno((string) $p['token']), 3) ?>
+    <div>
+        <div class="osce"><?= htmlspecialchars($osce['nombre']) ?></div>
+        <div class="cod"><?= htmlspecialchars($p['codigo']) ?></div>
+        <div class="nom"><?= htmlspecialchars((string) $p['display_name']) ?></div>
+        <div class="det">
+            Vuelta <?= (int) $p['vuelta'] + 1 ?><?= (int) $osce['circuitos'] > 1 ? ' · circuito ' . ((int) $p['circuito'] + 1) : '' ?><?= $hora ? ' · ' . $hora : '' ?><br>
+            Parte en: <?= htmlspecialchars($primera) ?><br>
+            Escanea el QR para ver tu avance y tu resultado.
+        </div>
+    </div>
+</div>
+<?php endforeach; ?>
+</div>
+</body></html>
+<?php
+    exit;
+}
+
+// -- Acciones ---------------------------------------------------------------
+$error = null;
+$success = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
+    $accion = (string) ($_POST['accion'] ?? '');
+    try {
+        if ($accion === 'crear') {
+            $courseId = (int) ($_POST['course_id'] ?? 0);
+            Courses::assertAdministers($courseId, $me);
+            $cfg = Osce::limpiarConfig($_POST);
+            $nuevo = Osce::crear($courseId, $cfg, (int) $me['id'], !empty($_POST['estaciones_base']));
+            Osce::sincronizarAlumnos($nuevo);
+            AdminAudit::log($me, 'osce_crear', ['osce_id' => $nuevo, 'course_id' => $courseId]);
+            header('Location: osce.php?id=' . $nuevo . '&creado=1');
+            exit;
+        }
+        if ($osce === null) {
+            throw new InvalidArgumentException('OSCE no encontrado.');
+        }
+        $estId = (int) ($_POST['estacion_id'] ?? 0);
+        switch ($accion) {
+            case 'config':
+                Osce::actualizarConfig($id, Osce::limpiarConfig($_POST));
+                $success = 'Configuración guardada.';
+                break;
+            case 'est_add':
+                Osce::agregarEstacion($id, $_POST);
+                $success = 'Estación agregada.';
+                break;
+            case 'est_edit':
+                Osce::editarEstacion($id, $estId, $_POST);
+                $success = 'Estación guardada.';
+                break;
+            case 'est_del':
+                Osce::quitarEstacion($id, $estId);
+                $success = 'Estación quitada.';
+                break;
+            case 'est_up':
+            case 'est_down':
+                Osce::moverEstacion($id, $estId, $accion === 'est_up' ? -1 : 1);
+                break;
+            case 'sync':
+                $r = Osce::sincronizarAlumnos($id);
+                $success = "Alumnos al día: {$r['agregados']} agregados, {$r['quitados']} quitados. Vueltas sorteadas de nuevo.";
+                break;
+            case 'sortear':
+                Osce::reasignar($id, true);
+                $success = 'Vueltas y puestos sorteados de nuevo.';
+                break;
+            case 'quitar':
+                Osce::quitarParticipante($id, (int) ($_POST['participante_id'] ?? 0));
+                $success = 'Alumno quitado del OSCE.';
+                break;
+            case 'eliminar':
+                Osce::eliminar($id);
+                AdminAudit::log($me, 'osce_eliminar', ['osce_id' => $id]);
+                header('Location: osce.php');
+                exit;
+            default:
+                throw new InvalidArgumentException('Acción desconocida.');
+        }
+        AdminAudit::log($me, 'osce_' . $accion, ['osce_id' => $id]);
+        $osce = Osce::obtener($id);
+    } catch (InvalidArgumentException $e) {
+        $error = $e->getMessage();
+    }
+}
+if (isset($_GET['creado'])) {
+    $success = 'OSCE creado con los alumnos del curso. Revisa las estaciones y luego imprime las tarjetas.';
+}
+
+$tipoOpts = static function (string $sel): string {
+    $h = '';
+    foreach (Osce::TIPOS as $k => $v) {
+        $h .= '<option value="' . $k . '"' . ($k === $sel ? ' selected' : '') . '>' . htmlspecialchars($v) . '</option>';
+    }
+    return $h;
+};
+$examenOpts = static function (string $sel): string {
+    $h = '';
+    foreach (Osce::EXAMENES as $k => $v) {
+        $h .= '<option value="' . $k . '"' . ($k === $sel ? ' selected' : '') . '>' . htmlspecialchars($v) . '</option>';
+    }
+    return $h;
+};
+
+// -- Lista + crear ----------------------------------------------------------
+if ($osce === null) {
+    $ids = $ctx !== null ? [$ctx] : $misCursos;
+    $lista = Osce::porCurso($ids);
+    admin_header('OSCE', $me);
+    ?>
+<?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+
+<div class="card">
+    <h2>Evaluaciones OSCE</h2>
+    <?php if (!$lista): ?>
+        <p class="empty-state">Todavía no hay OSCE<?= $ctx !== null ? ' en este curso' : '' ?>.</p>
+    <?php else: ?>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Nombre</th><th>Curso</th><th>Inicio</th><th>Estaciones</th><th>Alumnos</th><th>Estado</th></tr></thead>
+        <tbody>
+        <?php foreach ($lista as $o): ?>
+            <tr>
+                <td><a href="osce.php?id=<?= (int) $o['id'] ?>"><?= htmlspecialchars($o['nombre']) ?></a></td>
+                <td><?= htmlspecialchars($o['curso']) ?></td>
+                <td class="nowrap"><?= htmlspecialchars($o['inicio_programado'] ?: '—') ?></td>
+                <td><?= (int) $o['n_estaciones'] ?></td>
+                <td><?= (int) $o['n_alumnos'] ?></td>
+                <td><span class="tag<?= $o['estado'] === 'en_curso' ? ' tag--warn' : ($o['estado'] === 'borrador' ? ' tag--muted' : ' tag--success') ?>"><?= htmlspecialchars(Osce::ESTADOS[$o['estado']] ?? $o['estado']) ?></span></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table></div>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Nuevo OSCE</h2>
+    <?php if (!$cursosElegibles): ?>
+        <p class="muted">No tienes cursos a cargo.</p>
+    <?php else: ?>
+    <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="accion" value="crear">
+        <label>Curso
+            <select name="course_id" required>
+                <?php foreach ($cursosElegibles as $c): ?>
+                <option value="<?= (int) $c['id'] ?>"<?= $ctx === (int) $c['id'] ? ' selected' : '' ?>><?= htmlspecialchars($c['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Nombre <input type="text" name="nombre" required maxlength="120" placeholder="Prueba práctica electrofisiología"></label>
+        <label>Inicio <input type="datetime-local" name="inicio_programado"></label>
+        <div class="row row--gap-lg">
+            <label>Duración de la estación (min) <input type="number" name="duracion_min" value="8" min="1" max="60" step="0.5" class="input--narrow"></label>
+            <label>Pausa entre estaciones (min) <input type="number" name="pausa_min" value="2" min="0" max="30" step="0.5" class="input--narrow"></label>
+            <label>Pausa entre vueltas (min) <input type="number" name="pausa_vueltas_min" value="10" min="0" max="120" step="1" class="input--narrow"></label>
+            <label>Circuitos paralelos <input type="number" name="circuitos" value="1" min="1" max="6" class="input--narrow"></label>
+        </div>
+        <div class="row row--gap-lg">
+            <label>Exigencia (%) <input type="number" name="exigencia" value="60" min="30" max="90" class="input--narrow"></label>
+            <label>Nota de aprobación <input type="number" name="nota_aprobacion" value="4.0" min="1" max="7" step="0.1" class="input--narrow"></label>
+        </div>
+        <label class="inline-check"><input type="checkbox" name="estaciones_base" value="1" checked>
+            Partir con las 6 estaciones de electrofisiología (limpieza y preparación, preguntas, configuración, marcaje, protocolo, conclusión)</label>
+        <p class="help">Se inscriben solos los alumnos del curso, cada uno con su código y QR. Todo se puede cambiar hasta que el OSCE parta.</p>
+        <button type="submit" class="btn">Crear OSCE</button>
+    </form>
+    <?php endif; ?>
+</div>
+<?php
+    admin_footer();
+    exit;
+}
+
+// -- Detalle ----------------------------------------------------------------
+$estaciones = Osce::estaciones($id);
+$parts = Osce::participantes($id);
+$S = count($estaciones);
+$N = count($parts);
+$cfg = Osce::cfgReloj($osce, $S, $N);
+$total = Osce::duracionTotal($cfg);
+$t0 = $inicioEpoch($osce);
+$editable = $osce['estado'] === 'borrador';
+$porEstacionPeso = array_sum(array_map(static fn ($e) => (float) $e['peso'], $estaciones));
+
+admin_header('OSCE · ' . $osce['nombre'], $me);
+?>
+<?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+<?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
+
+<p class="row row--between">
+    <a href="osce.php">← Todos los OSCE</a>
+    <span class="row row--gap-sm">
+        <a class="btn btn--sm" href="osce_vivo.php?id=<?= $id ?>">Reloj en vivo</a>
+        <a class="btn btn--sm btn--secondary" href="osce.php?id=<?= $id ?>&amp;tarjetas=1" target="_blank">Tarjetas con QR</a>
+    </span>
+</p>
+
+<div class="card">
+    <h2>Resumen</h2>
+    <p>
+        <strong><?= htmlspecialchars($osce['curso']) ?></strong> ·
+        <span class="tag<?= $editable ? ' tag--muted' : ' tag--warn' ?>"><?= htmlspecialchars(Osce::ESTADOS[$osce['estado']] ?? $osce['estado']) ?></span>
+    </p>
+    <?php if ($S === 0 || $N === 0): ?>
+        <p class="text-warn">Faltan <?= $S === 0 ? 'estaciones' : 'alumnos' ?> para calcular las vueltas.</p>
+    <?php else: ?>
+        <p>
+            <?= $N ?> alumnos · <?= $S ?> estaciones × <?= (int) $osce['circuitos'] ?> circuito<?= (int) $osce['circuitos'] > 1 ? 's' : '' ?>
+            = <?= $S * (int) $osce['circuitos'] ?> puestos por vuelta →
+            <strong><?= $cfg['vueltas'] ?> vuelta<?= $cfg['vueltas'] > 1 ? 's' : '' ?></strong>
+            (<?= implode(' + ', array_map(static fn ($v) => count(array_filter($parts, static fn ($p) => (int) $p['vuelta'] === $v)), range(0, $cfg['vueltas'] - 1))) ?> alumnos).
+        </p>
+        <p>
+            Cada estación <?= $min((int) $osce['duracion_s']) ?> min + <?= $min((int) $osce['pausa_s']) ?> min de cambio;
+            <?= $min((int) $osce['pausa_vueltas_s']) ?> min entre vueltas.
+            Duración total: <strong><?= intdiv($total, 3600) ?> h <?= str_pad((string) intdiv($total % 3600, 60), 2, '0', STR_PAD_LEFT) ?> min</strong>
+            <?php if ($t0 !== null): ?>
+                (<?= date('d-m-Y H:i', $t0) ?> → <?= date('H:i', $t0 + $total) ?>)
+            <?php endif; ?>
+        </p>
+        <div class="table-wrap table-wrap--narrow"><table>
+            <thead><tr><th>Vuelta</th><th>Empieza</th><th>Termina</th></tr></thead>
+            <tbody>
+            <?php for ($v = 0; $v < $cfg['vueltas']; $v++):
+                $a = Osce::inicioSlot($cfg, $v, 0);
+                $b = Osce::inicioSlot($cfg, $v, $S - 1) + (int) $osce['duracion_s']; ?>
+                <tr><td><?= $v + 1 ?></td>
+                    <td><?= $t0 !== null ? date('H:i', $t0 + $a) : '+' . $min($a) . ' min' ?></td>
+                    <td><?= $t0 !== null ? date('H:i', $t0 + $b) : '+' . $min($b) . ' min' ?></td></tr>
+            <?php endfor; ?>
+            </tbody>
+        </table></div>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Configuración</h2>
+    <?php if (!$editable): ?><p class="help">El OSCE ya partió: la configuración queda fija.</p><?php endif; ?>
+    <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="accion" value="config">
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <fieldset <?= $editable ? '' : 'disabled' ?> style="border:0; padding:0; margin:0;">
+        <label>Nombre <input type="text" name="nombre" required maxlength="120" value="<?= htmlspecialchars($osce['nombre']) ?>"></label>
+        <label>Inicio <input type="datetime-local" name="inicio_programado" value="<?= htmlspecialchars(str_replace(' ', 'T', $osce['inicio_programado'])) ?>"></label>
+        <div class="row row--gap-lg">
+            <label>Duración de la estación (min) <input type="number" name="duracion_min" value="<?= $osce['duracion_s'] / 60 ?>" min="1" max="60" step="0.5" class="input--narrow"></label>
+            <label>Pausa entre estaciones (min) <input type="number" name="pausa_min" value="<?= $osce['pausa_s'] / 60 ?>" min="0" max="30" step="0.5" class="input--narrow"></label>
+            <label>Pausa entre vueltas (min) <input type="number" name="pausa_vueltas_min" value="<?= $osce['pausa_vueltas_s'] / 60 ?>" min="0" max="120" class="input--narrow"></label>
+            <label>Circuitos paralelos <input type="number" name="circuitos" value="<?= (int) $osce['circuitos'] ?>" min="1" max="6" class="input--narrow"></label>
+        </div>
+        <div class="row row--gap-lg">
+            <label>Exigencia (%) <input type="number" name="exigencia" value="<?= (int) $osce['exigencia'] ?>" min="30" max="90" class="input--narrow"></label>
+            <label>Nota de aprobación <input type="number" name="nota_aprobacion" value="<?= htmlspecialchars((string) $osce['nota_aprobacion']) ?>" min="1" max="7" step="0.1" class="input--narrow"></label>
+        </div>
+        <?php if ($editable): ?><button type="submit" class="btn">Guardar configuración</button><?php endif; ?>
+        </fieldset>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Estaciones (orden del circuito)</h2>
+    <p class="help">Cada alumno parte en una estación y avanza a la siguiente; al terminar la última sigue con la primera. El peso define cuánto vale cada estación en la nota final. Las pautas, preguntas y casos de cada estación se arman en los pasos siguientes.</p>
+    <?php if (!$estaciones): ?>
+        <p class="empty-state">Sin estaciones.</p>
+    <?php else: ?>
+    <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Título</th><th>Tipo</th><th>Examen</th><th>Peso</th><th></th></tr></thead>
+        <tbody>
+        <?php foreach ($estaciones as $k => $e): $fid = 'est' . (int) $e['id']; ?>
+            <tr>
+                <td><?= $k + 1 ?></td>
+                <?php if ($editable): ?>
+                <td><input form="<?= $fid ?>" type="text" name="titulo" value="<?= htmlspecialchars($e['titulo']) ?>" maxlength="120"></td>
+                <td><select form="<?= $fid ?>" name="tipo"><?= $tipoOpts($e['tipo']) ?></select></td>
+                <td><select form="<?= $fid ?>" name="examen"><?= $examenOpts($e['examen']) ?></select></td>
+                <td><input form="<?= $fid ?>" type="number" name="peso" value="<?= htmlspecialchars((string) $e['peso']) ?>" min="0.1" max="100" step="0.1" class="input--narrow">
+                    <span class="help help--xs"><?= $porEstacionPeso > 0 ? round(100 * (float) $e['peso'] / $porEstacionPeso) : 0 ?> %</span></td>
+                <td class="nowrap">
+                    <form id="<?= $fid ?>" method="post" style="display:inline">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="id" value="<?= $id ?>">
+                        <input type="hidden" name="estacion_id" value="<?= (int) $e['id'] ?>">
+                        <button type="submit" name="accion" value="est_edit" class="btn btn--xs">Guardar</button>
+                        <button type="submit" name="accion" value="est_up" class="btn btn--xs btn--ghost" title="Subir"<?= $k === 0 ? ' disabled' : '' ?>>↑</button>
+                        <button type="submit" name="accion" value="est_down" class="btn btn--xs btn--ghost" title="Bajar"<?= $k === $S - 1 ? ' disabled' : '' ?>>↓</button>
+                        <button type="submit" name="accion" value="est_del" class="btn btn--xs btn--danger" onclick="return confirm('¿Quitar esta estación?')">Quitar</button>
+                    </form>
+                </td>
+                <?php else: ?>
+                <td><?= htmlspecialchars($e['titulo']) ?></td>
+                <td><?= htmlspecialchars(Osce::TIPOS[$e['tipo']] ?? $e['tipo']) ?></td>
+                <td><?= htmlspecialchars(Osce::EXAMENES[$e['examen']] ?? $e['examen']) ?></td>
+                <td><?= htmlspecialchars((string) $e['peso']) ?> (<?= $porEstacionPeso > 0 ? round(100 * (float) $e['peso'] / $porEstacionPeso) : 0 ?> %)</td>
+                <td></td>
+                <?php endif; ?>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table></div>
+    <?php endif; ?>
+    <?php if ($editable): ?>
+    <form method="post" class="row row--gap-sm row--baseline" style="margin-top:0.8rem; flex-wrap:wrap;">
+        <?= csrf_field() ?>
+        <input type="hidden" name="accion" value="est_add">
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <input type="text" name="titulo" placeholder="Título" maxlength="120" aria-label="Título" style="width:auto; flex:1 1 14rem;">
+        <select name="tipo" aria-label="Tipo" style="width:auto;"><?= $tipoOpts('pauta_docente') ?></select>
+        <select name="examen" aria-label="Examen" style="width:auto;"><?= $examenOpts('peatc') ?></select>
+        <label class="row row--gap-sm row--baseline" style="margin:0;">Peso <input type="number" name="peso" value="1" min="0.1" max="100" step="0.1" class="input--narrow"></label>
+        <button type="submit" class="btn btn--sm">Agregar estación</button>
+    </form>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Alumnos (<?= $N ?>)</h2>
+    <?php if ($editable): ?>
+    <form method="post" class="row row--gap-sm" style="margin-bottom:0.8rem;">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <button type="submit" name="accion" value="sync" class="btn btn--sm">Traer alumnos del curso</button>
+        <button type="submit" name="accion" value="sortear" class="btn btn--sm btn--secondary" onclick="return confirm('¿Sortear de nuevo vueltas y puestos? Si ya imprimiste tarjetas, la vuelta y la estación de partida cambian.')">Sortear vueltas de nuevo</button>
+    </form>
+    <?php endif; ?>
+    <?php if (!$parts): ?>
+        <p class="empty-state">Sin alumnos. El curso no tiene alumnos inscritos o hay que traerlos.</p>
+    <?php else: ?>
+    <div class="table-wrap"><table>
+        <thead><tr><th>Código</th><th>Alumno</th><th>Vuelta</th><?php if ((int) $osce['circuitos'] > 1): ?><th>Circuito</th><?php endif; ?><th>Parte en</th><th>Hora</th><th></th></tr></thead>
+        <tbody>
+        <?php foreach ($parts as $p):
+            $primera = $S > 0 ? $estaciones[Osce::estacionEn((int) $p['puesto'], 0, $S)]['titulo'] : '—';
+            $hora = $S > 0 ? Osce::inicioSlot($cfg, (int) $p['vuelta'], 0) : 0; ?>
+            <tr>
+                <td class="mono"><strong><?= htmlspecialchars($p['codigo']) ?></strong></td>
+                <td><?= htmlspecialchars((string) $p['display_name']) ?></td>
+                <td><?= (int) $p['vuelta'] + 1 ?></td>
+                <?php if ((int) $osce['circuitos'] > 1): ?><td><?= (int) $p['circuito'] + 1 ?></td><?php endif; ?>
+                <td><?= htmlspecialchars($primera) ?></td>
+                <td class="nowrap"><?= $t0 !== null ? date('H:i', $t0 + $hora) : '+' . $min($hora) . ' min' ?></td>
+                <td class="nowrap">
+                    <a href="<?= htmlspecialchars($urlAlumno((string) $p['token'])) ?>" target="_blank" class="btn btn--xs btn--ghost">Ver su página</a>
+                    <?php if ($editable): ?>
+                    <form method="post" style="display:inline">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="id" value="<?= $id ?>">
+                        <input type="hidden" name="participante_id" value="<?= (int) $p['id'] ?>">
+                        <button type="submit" name="accion" value="quitar" class="btn btn--xs btn--danger" onclick="return confirm('¿Quitar a este alumno del OSCE?')">Quitar</button>
+                    </form>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table></div>
+    <?php endif; ?>
+</div>
+
+<?php if ($editable): ?>
+<div class="card">
+    <h2>Eliminar</h2>
+    <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <button type="submit" name="accion" value="eliminar" class="btn btn--danger btn--sm" onclick="return confirm('¿Eliminar este OSCE con sus estaciones y alumnos? No se puede deshacer.')">Eliminar OSCE</button>
+    </form>
+</div>
+<?php endif; ?>
+<?php
+admin_footer();

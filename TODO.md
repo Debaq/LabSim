@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 81).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 82).
 
 Revisado contra el código el 2026-09-24.
 
@@ -94,6 +94,12 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
       § Rediseño de la gestión de cursos en el backend
 
 ## Funcionalidades
+
+- [ ] 82. OSCE, pasos 2 a 6 de `docs/osce_plan.md` (para el 4-dic): pauta
+      docente con impedancias e interelectrodo, preguntas con IA + feedback y
+      réplica, modo OSCE en LabSim (configuración y marcaje), protocolo desde
+      `action_logs`, conclusión con IA y publicar resultados. § OSCE:
+      estaciones configurables al crearlo
 
 ### Otoscopia: derivación + aprobación docente + fase por alumno
 Hoy todo alumno ve la fase 1 (`FASE_FIJA = 0` en `Otoscopia.py`).

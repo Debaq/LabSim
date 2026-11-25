@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Backups.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/AppReleases.php';
+require_once __DIR__ . '/../../src/Osce.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
@@ -83,6 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Después de cursos: la columna referencia courses(id).
                 'curso por defecto de la clave LTI' => static fn() => Db::migrateLtiDefaultCourseIfNeeded(),
                 'autoría de las fichas' => static fn() => Db::migrateCaseAuthorshipIfNeeded(),
+                // Después de cursos: osce.course_id referencia courses(id).
+                'OSCE' => static fn() => Osce::migrar(),
                 // Después de cursos: patients ya existe (la creó schema.sql),
                 // recién ahí se puede backfillear patient_id.
                 'backfill de pacientes' => static fn() => Db::migratePatientsIfNeeded(),
