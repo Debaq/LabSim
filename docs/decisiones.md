@@ -218,6 +218,16 @@ equipo (ABR o VEMP).
 - **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
   otra pasada de la IA lo pisan (probado).
 
+**La sugerencia del oído contrario no pisa uno ya elegido (2026-11-25).**
+Al armar pacientes de práctica, elegir OD y después un cuadro unilateral en OI
+dejaba el OD en normal sin aviso (la sugerencia "un cuadro unilateral propone
+el contrario normal"). Él preguntó si era "una restricción sin sentido". Era
+un fallo: la sugerencia solo debe completar lo que la docente no eligió
+(perfil sugiere, no bloquea). Ahora el editor recuerda qué oídos eligió ella
+y no los toca. De paso: la clave `sensorioneural` es "Coclear con componente
+retrococlear" (microvascular, unilateral), no una hipoacusia sensorioneural
+genérica; y GJB2 parte en moderada a propósito (el 35delG es severo-profundo).
+
 **Estaciones por competencias: tareas con peso y pacientes variantes (2026-11-25).**
 Él: "lo importante de esta prueba no es hacer todos los exámenes completos, es
 que los estudiantes en esos 8 minutos demuestren sus competencias completas

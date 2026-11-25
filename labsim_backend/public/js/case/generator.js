@@ -871,6 +871,11 @@
     }
 
     // --- Cableado de los selectores ----------------------------------------
+    // Oídos cuyo cuadro eligió la docente: la sugerencia para el contrario
+    // (abajo) no los pisa. Antes, elegir OD y después un cuadro unilateral
+    // en OI dejaba el OD en normal sin aviso. Las sugerencias cambian el
+    // valor sin disparar `change`, así que solo marca lo que eligió ella.
+    var elegido = { od: false, oi: false };
     ['od', 'oi'].forEach(function (lado) {
         var otro = lado === 'od' ? 'oi' : 'od';
         function espejar() {
@@ -883,18 +888,20 @@
         }
         if (categorias[lado]) {
             categorias[lado].addEventListener('change', function () {
+                elegido[lado] = true;
                 sincronizarCuadros(lado);
                 espejar();
             });
         }
         selectores[lado].addEventListener('change', function () {
+            elegido[lado] = true;
             sincronizarGrados(lado);
             // Sugerencia para el otro oído cuando NO están igualados (ver
             // `lateralidad`): un cuadro unilateral propone dejar el contrario
             // normal, uno bilateral propone repetirlo.
             if (igualar && igualar.checked) { espejar(); return; }
             var esc = ESCENARIOS[selectores[lado].value];
-            if (!esc || !categorias[otro]) { return; }
+            if (!esc || !categorias[otro] || elegido[otro]) { return; }
             var contra = cuadrosContralaterales(esc);
             if (contra.length) {
                 ponerCuadro(otro, alAzar(contra), 'profunda');
