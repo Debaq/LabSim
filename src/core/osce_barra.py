@@ -43,9 +43,9 @@ class BarraOsce(QWidget):
         fila.addWidget(self.lbl_estacion)
         fila.addStretch(1)
 
-        self.lbl_codigo = QLabel("Tu código:")
+        self.lbl_codigo = QLabel("Tu número:")
         self.campo = QLineEdit()
-        self.campo.setPlaceholderText("K7F-3QM")
+        self.campo.setPlaceholderText("N.º")
         self.campo.setMaxLength(9)
         self.campo.setFixedWidth(130)
         self.campo.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -118,12 +118,12 @@ class BarraOsce(QWidget):
         self.campo.clear()
         self.campo.setFocus()
 
-    def _modo_alumno(self, codigo, ventana):
+    def _modo_alumno(self, codigo, ventana, numero=None):
         self.alumno = codigo
         self.ventana = ventana
         for w in (self.lbl_codigo, self.campo, self.btn_entrar):
             w.setVisible(False)
-        self.lbl_alumno.setText(codigo)
+        self.lbl_alumno.setText(f"N.º {numero}" if numero else codigo)
         self.btn_entregar.setVisible(True)
         self.btn_entregar.setEnabled(True)
         self.lbl_estado.setText("")
@@ -146,7 +146,7 @@ class BarraOsce(QWidget):
         except Exception as exc:  # noqa: BLE001 -- que el alumno no quede pegado
             self._modo_espera(f"No se pudo abrir el equipo: {exc}")
             return
-        self._modo_alumno(respuesta["codigo"], respuesta.get("ventana") or {})
+        self._modo_alumno(respuesta["codigo"], respuesta.get("ventana") or {}, respuesta.get("numero"))
 
     def _no_entro(self, exc):
         self.campo.setEnabled(True)

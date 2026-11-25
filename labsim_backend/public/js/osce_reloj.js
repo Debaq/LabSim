@@ -12,7 +12,8 @@
     'use strict';
 
     function estadoReloj(cfg, t) {
-        var S = cfg.estaciones, V = cfg.vueltas, dur = cfg.duracion_s;
+        // Tiempos por vuelta: uno por estación en vueltas; en cadena, todos los turnos.
+        var S = cfg.turnos || cfg.estaciones, V = cfg.vueltas, dur = cfg.duracion_s;
         var paso = dur + cfg.pausa_s;
         if (S <= 0 || V <= 0) return { fase: 'terminado', vuelta: 0, slot: 0, restante_s: 0 };
         if (t < 0) return { fase: 'antes', vuelta: 0, slot: 0, restante_s: -t };
@@ -30,7 +31,7 @@
 
     function inicioSlot(cfg, vuelta, slot) {
         var paso = cfg.duracion_s + cfg.pausa_s;
-        return vuelta * (cfg.estaciones * paso + cfg.pausa_vueltas_s) + slot * paso;
+        return vuelta * ((cfg.turnos || cfg.estaciones) * paso + cfg.pausa_vueltas_s) + slot * paso;
     }
 
     function mmss(s) {

@@ -55,8 +55,12 @@ def _post(datos):
 
 
 def normalizar(codigo):
-    """'k7f 3qm' -> 'K7F-3QM' (como Osce::normalizarCodigo)."""
-    limpio = "".join(ch for ch in str(codigo).upper() if ch.isalnum())
+    """'k7f 3qm' -> 'K7F-3QM' (como Osce::normalizarCodigo). El número de la
+    tarjeta ('7', ' 07 ') queda en cifras: el servidor acepta los dos."""
+    texto = str(codigo).strip()
+    if texto.isdigit():
+        return str(int(texto))
+    limpio = "".join(ch for ch in texto.upper() if ch.isalnum())
     return f"{limpio[:3]}-{limpio[3:]}" if len(limpio) == 6 else limpio
 
 

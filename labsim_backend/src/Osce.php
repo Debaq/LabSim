@@ -80,6 +80,8 @@ final class Osce
                 circuitos INTEGER NOT NULL DEFAULT 1,
                 exigencia INTEGER NOT NULL DEFAULT 60,
                 nota_aprobacion REAL NOT NULL DEFAULT 4.0,
+                rotacion TEXT NOT NULL DEFAULT 'cadena',
+                por_turno INTEGER NOT NULL DEFAULT 2,
                 estado TEXT NOT NULL DEFAULT 'borrador',
                 inicio_epoch INTEGER,
                 pausado_desde INTEGER,
@@ -131,7 +133,8 @@ final class Osce
             "CREATE TABLE IF NOT EXISTS osce_participante (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 osce_id INTEGER NOT NULL REFERENCES osce(id) ON DELETE CASCADE,
-                user_id INTEGER NOT NULL REFERENCES users(id),
+                user_id INTEGER REFERENCES users(id),
+                numero INTEGER NOT NULL DEFAULT 0,
                 codigo TEXT NOT NULL,
                 token TEXT NOT NULL UNIQUE,
                 vuelta INTEGER NOT NULL DEFAULT 0,
@@ -186,6 +189,7 @@ final class Osce
                 resuelta_at TEXT
             )"
         );
+        self::migrarTarjetas($pdo);
         // Columnas que llegaron después de crear la tabla (paso 3: corrección con IA).
         $cols = array_column($pdo->query('PRAGMA table_info(osce_resultado)')->fetchAll(), 'name');
         if (!in_array('ia_puntaje', $cols, true)) {
@@ -217,6 +221,59 @@ final class Osce
         $pos = strrpos($script, '/public/');
         $base = $pos === false ? rtrim(dirname(dirname($script)), '/') : substr($script, 0, $pos + 7);
         return ($https ? 'https' : 'http') . '://' . $host . $base . '/' . ltrim($rel, '/');
+    }
+
+    /**
+     * Tarjetas sorteadas (2026-11-25): la tarjeta nace sin dueño (user_id
+     * NULL) y con número de entrada; rotación en cadena y "de a cuántos" en
+     * osce. Bases creadas antes: se agregan las columnas y se rehace
+     * osce_participante (user_id dejaba de poder ser NULL).
+     */
+    private static function migrarTarjetas(PDO $pdo): void
+    {
+        $cols = array_column($pdo->query('PRAGMA table_info(osce)')->fetchAll(), 'name');
+        if (!in_array('rotacion', $cols, true)) {
+            $pdo->exec("ALTER TABLE osce ADD COLUMN rotacion TEXT NOT NULL DEFAULT 'vueltas'");
+        }
+        if (!in_array('por_turno', $cols, true)) {
+            $pdo->exec('ALTER TABLE osce ADD COLUMN por_turno INTEGER NOT NULL DEFAULT 2');
+        }
+        $info = $pdo->query('PRAGMA table_info(osce_participante)')->fetchAll();
+        if (in_array('numero', array_column($info, 'name'), true)) {
+            return;
+        }
+        $pdo->exec('PRAGMA foreign_keys = OFF');
+        $pdo->beginTransaction();
+        $pdo->exec(
+            "CREATE TABLE osce_participante_n (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                osce_id INTEGER NOT NULL REFERENCES osce(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES users(id),
+                numero INTEGER NOT NULL DEFAULT 0,
+                codigo TEXT NOT NULL,
+                token TEXT NOT NULL UNIQUE,
+                vuelta INTEGER NOT NULL DEFAULT 0,
+                circuito INTEGER NOT NULL DEFAULT 0,
+                puesto INTEGER NOT NULL DEFAULT 0,
+                variante TEXT NOT NULL DEFAULT '{}',
+                UNIQUE (osce_id, user_id),
+                UNIQUE (osce_id, codigo)
+            )"
+        );
+        $pdo->exec('INSERT INTO osce_participante_n (id, osce_id, user_id, numero, codigo, token, vuelta, circuito, puesto, variante)
+                    SELECT id, osce_id, user_id, 0, codigo, token, vuelta, circuito, puesto, variante FROM osce_participante');
+        $pdo->exec('DROP TABLE osce_participante');
+        $pdo->exec('ALTER TABLE osce_participante_n RENAME TO osce_participante');
+        // Número de entrada para lo que ya había: en el orden de su vuelta y puesto.
+        $filas = $pdo->query('SELECT id, osce_id FROM osce_participante ORDER BY osce_id, vuelta, circuito, puesto, id')->fetchAll();
+        $upd = $pdo->prepare('UPDATE osce_participante SET numero = ? WHERE id = ?');
+        $n = [];
+        foreach ($filas as $f) {
+            $n[$f['osce_id']] = ($n[$f['osce_id']] ?? 0) + 1;
+            $upd->execute([$n[$f['osce_id']], $f['id']]);
+        }
+        $pdo->commit();
+        $pdo->exec('PRAGMA foreign_keys = ON');
     }
 
     // -- Cálculos puros (sin base) ---------------------------------------
@@ -282,16 +339,18 @@ final class Osce
     public static function inicioSlot(array $cfg, int $vuelta, int $slot): int
     {
         $paso = $cfg['duracion_s'] + $cfg['pausa_s'];
-        return $vuelta * ($cfg['estaciones'] * $paso + $cfg['pausa_vueltas_s']) + $slot * $paso;
+        $turnos = $cfg['turnos'] ?? $cfg['estaciones'];
+        return $vuelta * ($turnos * $paso + $cfg['pausa_vueltas_s']) + $slot * $paso;
     }
 
     /** Duración total del OSCE en segundos (sin la pausa tras la última estación). */
     public static function duracionTotal(array $cfg): int
     {
-        if ($cfg['vueltas'] <= 0 || $cfg['estaciones'] <= 0) {
+        $turnos = $cfg['turnos'] ?? $cfg['estaciones'];
+        if ($cfg['vueltas'] <= 0 || $turnos <= 0) {
             return 0;
         }
-        return self::inicioSlot($cfg, $cfg['vueltas'] - 1, $cfg['estaciones'] - 1) + $cfg['duracion_s'];
+        return self::inicioSlot($cfg, $cfg['vueltas'] - 1, $turnos - 1) + $cfg['duracion_s'];
     }
 
     /**
@@ -305,7 +364,9 @@ final class Osce
      */
     public static function estadoReloj(array $cfg, int $t): array
     {
-        $S = $cfg['estaciones'];
+        // Tiempos por vuelta: en vueltas, uno por estación; en cadena, todos
+        // los turnos van en una sola vuelta.
+        $S = $cfg['turnos'] ?? $cfg['estaciones'];
         $V = $cfg['vueltas'];
         $dur = $cfg['duracion_s'];
         $paso = $dur + $cfg['pausa_s'];
@@ -333,6 +394,31 @@ final class Osce
             return ['fase' => 'terminado', 'vuelta' => $v, 'slot' => $j, 'restante_s' => 0];
         }
         return ['fase' => 'entre_vueltas', 'vuelta' => $v, 'slot' => $j, 'restante_s' => $largoVuelta - $r];
+    }
+
+    /** Grupo de entrada (0, 1, ...) y carril (puesto dentro del grupo) de una tarjeta en cadena. */
+    public static function grupo(int $numero, int $porTurno): int
+    {
+        return intdiv(max(1, $numero) - 1, max(1, $porTurno));
+    }
+
+    public static function carril(int $numero, int $porTurno): int
+    {
+        return (max(1, $numero) - 1) % max(1, $porTurno);
+    }
+
+    /**
+     * En cadena, el turno en que el grupo hace de paciente en la limpieza
+     * (la primera estación): el turno anterior al suyo; el primer grupo es
+     * el paciente del último (por eso los primeros se quedan hasta el
+     * final). null si hay un solo grupo.
+     */
+    public static function turnoPaciente(int $grupo, int $grupos): ?int
+    {
+        if ($grupos <= 1) {
+            return null;
+        }
+        return $grupo === 0 ? $grupos - 1 : $grupo - 1;
     }
 
     /** Segundos de reloj corridos (descontando pausas); null si no ha partido. */
@@ -418,6 +504,14 @@ final class Osce
         if ($circuitos < 1 || $circuitos > 6) {
             throw new InvalidArgumentException('Circuitos: entre 1 y 6.');
         }
+        $rotacion = (string) ($in['rotacion'] ?? 'cadena');
+        if (!in_array($rotacion, ['cadena', 'vueltas'], true)) {
+            throw new InvalidArgumentException('Rotación no válida.');
+        }
+        $porTurno = (int) ($in['por_turno'] ?? 2);
+        if ($porTurno < 1 || $porTurno > 8) {
+            throw new InvalidArgumentException('Alumnos por estación: entre 1 y 8.');
+        }
         return [
             'nombre' => mb_substr($nombre, 0, 120),
             'inicio_programado' => $inicio,
@@ -427,6 +521,8 @@ final class Osce
             'circuitos' => $circuitos,
             'exigencia' => $exigencia,
             'nota_aprobacion' => round($nota, 1),
+            'rotacion' => $rotacion,
+            'por_turno' => $porTurno,
         ];
     }
 
@@ -438,12 +534,12 @@ final class Osce
             $pdo->beginTransaction();
             $pdo->prepare(
                 'INSERT INTO osce (course_id, nombre, inicio_programado, duracion_s, pausa_s, pausa_vueltas_s,
-                                   circuitos, exigencia, nota_aprobacion, reloj_token, created_by)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                                   circuitos, exigencia, nota_aprobacion, rotacion, por_turno, reloj_token, created_by)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             )->execute([
                 $courseId, $cfg['nombre'], $cfg['inicio_programado'], $cfg['duracion_s'], $cfg['pausa_s'],
                 $cfg['pausa_vueltas_s'], $cfg['circuitos'], $cfg['exigencia'], $cfg['nota_aprobacion'],
-                bin2hex(random_bytes(12)), $userId,
+                $cfg['rotacion'], $cfg['por_turno'], bin2hex(random_bytes(12)), $userId,
             ]);
             $id = (int) $pdo->lastInsertId();
             if ($estacionesBase) {
@@ -463,10 +559,10 @@ final class Osce
         Db::reintentar(static function () use ($id, $cfg): void {
             Db::get()->prepare(
                 'UPDATE osce SET nombre = ?, inicio_programado = ?, duracion_s = ?, pausa_s = ?, pausa_vueltas_s = ?,
-                                 circuitos = ?, exigencia = ?, nota_aprobacion = ? WHERE id = ?'
+                                 circuitos = ?, exigencia = ?, nota_aprobacion = ?, rotacion = ?, por_turno = ? WHERE id = ?'
             )->execute([
                 $cfg['nombre'], $cfg['inicio_programado'], $cfg['duracion_s'], $cfg['pausa_s'], $cfg['pausa_vueltas_s'],
-                $cfg['circuitos'], $cfg['exigencia'], $cfg['nota_aprobacion'], $id,
+                $cfg['circuitos'], $cfg['exigencia'], $cfg['nota_aprobacion'], $cfg['rotacion'], $cfg['por_turno'], $id,
             ]);
         });
         self::reasignar($id);
@@ -604,8 +700,8 @@ final class Osce
         self::migrar();
         $stmt = Db::get()->prepare(
             'SELECT p.*, u.display_name, u.username FROM osce_participante p
-               JOIN users u ON u.id = p.user_id
-              WHERE p.osce_id = ? ORDER BY p.vuelta, p.circuito, p.puesto, p.id'
+               LEFT JOIN users u ON u.id = p.user_id
+              WHERE p.osce_id = ? ORDER BY p.numero, p.id'
         );
         $stmt->execute([$osceId]);
         return $stmt->fetchAll();
@@ -618,7 +714,7 @@ final class Osce
             return null;
         }
         $stmt = Db::get()->prepare(
-            'SELECT p.*, u.display_name FROM osce_participante p JOIN users u ON u.id = p.user_id WHERE p.token = ?'
+            'SELECT p.*, u.display_name FROM osce_participante p LEFT JOIN users u ON u.id = p.user_id WHERE p.token = ?'
         );
         $stmt->execute([$token]);
         $row = $stmt->fetch();
@@ -626,23 +722,37 @@ final class Osce
         return $row ?: null;
     }
 
+    /**
+     * Tarjeta por lo que el alumno escribe en una estación: su NÚMERO (lo
+     * que se usa el día del OSCE: es más rápido) o su código.
+     */
     public static function participantePorCodigo(int $osceId, string $codigo): ?array
     {
         self::migrar();
+        $raw = trim($codigo);
+        $porNumero = ctype_digit($raw);
         $stmt = Db::get()->prepare(
-            'SELECT p.*, u.display_name FROM osce_participante p JOIN users u ON u.id = p.user_id
-              WHERE p.osce_id = ? AND p.codigo = ?'
+            'SELECT p.*, u.display_name FROM osce_participante p LEFT JOIN users u ON u.id = p.user_id
+              WHERE p.osce_id = ? AND ' . ($porNumero ? 'p.numero = ?' : 'p.codigo = ?')
         );
-        $stmt->execute([$osceId, self::normalizarCodigo($codigo)]);
+        $stmt->execute([$osceId, $porNumero ? (int) $raw : self::normalizarCodigo($raw)]);
         $row = $stmt->fetch();
         $stmt->closeCursor();
         return $row ?: null;
     }
 
+    /** Alumnos del curso que cuentan para el OSCE (sin el alumno demo). */
+    public static function alumnosDelCurso(int $courseId): array
+    {
+        return array_values(array_filter(Courses::students($courseId), static fn ($u) => !(int) $u['is_demo']));
+    }
+
     /**
-     * Agrega a los alumnos del curso que falten (sin el alumno demo) con
-     * código y token nuevos, y saca a los que ya no están en el curso. Los
-     * que siguen conservan su código. Después reparte vueltas y puestos.
+     * Deja tantas tarjetas como alumnos tiene el curso (sin el demo),
+     * numeradas 1..N. Las tarjetas nacen SIN DUEÑO: el número se sortea en
+     * papel el día del OSCE y cada alumno amarra la suya escaneando el QR
+     * (reclamarTarjeta) o el docente la asigna en el panel. Si sobran, se
+     * quitan las de número más alto que no tienen dueño.
      *
      * @return array{agregados:int, quitados:int}
      */
@@ -650,55 +760,85 @@ final class Osce
     {
         self::exigirBorrador($osceId);
         $o = self::obtener($osceId);
-        $curso = array_filter(Courses::students((int) $o['course_id']), static fn ($u) => !(int) $u['is_demo']);
-        $enCurso = array_map(static fn ($u) => (int) $u['id'], $curso);
-        $actuales = array_map(static fn ($p) => (int) $p['user_id'], self::participantes($osceId));
-        $nuevos = array_values(array_diff($enCurso, $actuales));
-        $fuera = array_values(array_diff($actuales, $enCurso));
-
-        Db::reintentar(static function () use ($osceId, $nuevos, $fuera): void {
+        $n = count(self::alumnosDelCurso((int) $o['course_id']));
+        $actuales = self::participantes($osceId);
+        $agregados = 0;
+        $quitados = 0;
+        Db::reintentar(static function () use ($osceId, $n, $actuales, &$agregados, &$quitados): void {
             $pdo = Db::get();
             $pdo->beginTransaction();
-            if ($fuera) {
-                $pdo->prepare(
-                    'DELETE FROM osce_participante WHERE osce_id = ? AND user_id IN (' . implode(',', array_fill(0, count($fuera), '?')) . ')'
-                )->execute(array_merge([$osceId], $fuera));
-            }
-            $stmt = $pdo->prepare('SELECT codigo FROM osce_participante WHERE osce_id = ?');
-            $stmt->execute([$osceId]);
-            $usados = array_flip($stmt->fetchAll(PDO::FETCH_COLUMN));
-            $ins = $pdo->prepare('INSERT INTO osce_participante (osce_id, user_id, codigo, token) VALUES (?, ?, ?, ?)');
-            foreach ($nuevos as $uid) {
+            $usados = array_flip(array_column($actuales, 'codigo'));
+            $numeros = array_map('intval', array_column($actuales, 'numero'));
+            $ins = $pdo->prepare('INSERT INTO osce_participante (osce_id, user_id, numero, codigo, token) VALUES (?, NULL, ?, ?, ?)');
+            for ($num = 1; $num <= $n; $num++) {
+                if (in_array($num, $numeros, true)) {
+                    continue;
+                }
                 do {
                     $codigo = self::nuevoCodigo();
                 } while (isset($usados[$codigo]));
                 $usados[$codigo] = true;
-                $ins->execute([$osceId, $uid, $codigo, bin2hex(random_bytes(12))]);
+                $ins->execute([$osceId, $num, $codigo, bin2hex(random_bytes(12))]);
+                $agregados++;
+            }
+            $del = $pdo->prepare('DELETE FROM osce_participante WHERE id = ? AND user_id IS NULL');
+            foreach ($actuales as $p) {
+                if ((int) $p['numero'] > $n && $p['user_id'] === null) {
+                    $del->execute([(int) $p['id']]);
+                    $quitados++;
+                }
             }
             $pdo->commit();
         });
-        self::reasignar($osceId, true);
-        return ['agregados' => count($nuevos), 'quitados' => count($fuera)];
+        self::reasignar($osceId);
+        return ['agregados' => $agregados, 'quitados' => $quitados];
     }
 
     /**
-     * Reparte vueltas, circuitos y puestos. Con $sortear, el orden de los
-     * alumnos se baraja (quién va en qué vuelta); si no, se mantiene el
-     * orden que ya tenían y solo se recalcula (cambió el n° de estaciones o
-     * de circuitos).
+     * El alumno amarra la tarjeta que sacó (escaneando su QR): solo si la
+     * tarjeta no tiene dueño y él no tiene otra en este OSCE.
      */
-    public static function reasignar(int $osceId, bool $sortear = false): void
+    public static function reclamarTarjeta(array $p, int $userId): void
+    {
+        $o = self::obtener((int) $p['osce_id']);
+        if ($p['user_id'] !== null) {
+            throw new InvalidArgumentException('Esta tarjeta ya tiene dueño. Si es un error, avisa al docente.');
+        }
+        if (!in_array($userId, array_map(static fn ($u) => (int) $u['id'], self::alumnosDelCurso((int) $o['course_id'])), true)) {
+            throw new InvalidArgumentException('Ese alumno no es del curso.');
+        }
+        self::asignarTarjeta((int) $p['osce_id'], (int) $p['id'], $userId);
+    }
+
+    /** El docente asigna (o suelta, con null) la tarjeta de un alumno. */
+    public static function asignarTarjeta(int $osceId, int $participanteId, ?int $userId): void
+    {
+        Db::reintentar(static function () use ($osceId, $participanteId, $userId): void {
+            $pdo = Db::get();
+            if ($userId !== null) {
+                $stmt = $pdo->prepare('SELECT numero FROM osce_participante WHERE osce_id = ? AND user_id = ? AND id <> ?');
+                $stmt->execute([$osceId, $userId, $participanteId]);
+                $otra = $stmt->fetchColumn();
+                $stmt->closeCursor();
+                if ($otra !== false) {
+                    throw new InvalidArgumentException("Ese alumno ya tiene la tarjeta N.º {$otra}.");
+                }
+            }
+            $pdo->prepare('UPDATE osce_participante SET user_id = ? WHERE id = ? AND osce_id = ?')
+                ->execute([$userId, $participanteId, $osceId]);
+        });
+    }
+
+    /**
+     * Reparte vueltas, circuitos y puestos (rotación en vueltas) según el
+     * número de cada tarjeta. En cadena no hace falta: el número ya dice el
+     * grupo y el carril (grupo(), carril()).
+     */
+    public static function reasignar(int $osceId): void
     {
         $o = self::obtener($osceId);
         $S = count(self::estaciones($osceId));
         $parts = self::participantes($osceId);
-        if ($sortear) {
-            // Fisher-Yates con random_int: shuffle() usa el generador no criptográfico.
-            for ($i = count($parts) - 1; $i > 0; $i--) {
-                $j = random_int(0, $i);
-                [$parts[$i], $parts[$j]] = [$parts[$j], $parts[$i]];
-            }
-        }
         $plan = self::planVueltas(count($parts), $S, (int) $o['circuitos']);
         Db::reintentar(static function () use ($parts, $plan): void {
             $pdo = Db::get();
@@ -723,17 +863,34 @@ final class Osce
 
     // -- Reloj ---------------------------------------------------------
 
-    /** Configuración que necesita estadoReloj(), con las vueltas ya calculadas. */
+    /**
+     * Configuración que necesita estadoReloj(), con las vueltas o turnos ya
+     * calculados. En cadena: grupos de "por_turno" alumnos que entran uno
+     * por turno y recorren las estaciones en orden; los turnos son
+     * grupos + estaciones − 1, en una sola vuelta.
+     */
     public static function cfgReloj(array $o, int $estaciones, int $alumnos): array
     {
-        $cupo = max(1, $estaciones * max(1, (int) $o['circuitos']));
-        return [
+        $cfg = [
+            'modo' => ($o['rotacion'] ?? 'vueltas') === 'cadena' ? 'cadena' : 'vueltas',
             'estaciones' => $estaciones,
-            'vueltas' => $alumnos > 0 && $estaciones > 0 ? (int) ceil($alumnos / $cupo) : 0,
             'duracion_s' => (int) $o['duracion_s'],
             'pausa_s' => (int) $o['pausa_s'],
             'pausa_vueltas_s' => (int) $o['pausa_vueltas_s'],
+            'por_turno' => max(1, (int) ($o['por_turno'] ?? 1)),
         ];
+        if ($cfg['modo'] === 'cadena') {
+            $grupos = $alumnos > 0 ? (int) ceil($alumnos / $cfg['por_turno']) : 0;
+            $cfg['grupos'] = $grupos;
+            $cfg['turnos'] = $grupos > 0 && $estaciones > 0 ? $grupos + $estaciones - 1 : 0;
+            $cfg['vueltas'] = $cfg['turnos'] > 0 ? 1 : 0;
+            $cfg['pausa_vueltas_s'] = 0;
+            return $cfg;
+        }
+        $cupo = max(1, $estaciones * max(1, (int) $o['circuitos']));
+        $cfg['vueltas'] = $alumnos > 0 && $estaciones > 0 ? (int) ceil($alumnos / $cupo) : 0;
+        $cfg['turnos'] = $estaciones;
+        return $cfg;
     }
 
     public static function iniciar(int $id): void
@@ -811,6 +968,11 @@ final class Osce
      */
     public static function ventana(array $cfg, array $p, int $indiceEstacion): array
     {
+        if (($cfg['modo'] ?? 'vueltas') === 'cadena') {
+            $slot = self::grupo((int) $p['numero'], (int) $cfg['por_turno']) + $indiceEstacion;
+            $inicio = self::inicioSlot($cfg, 0, $slot);
+            return ['slot' => $slot, 'inicio_s' => $inicio, 'fin_s' => $inicio + $cfg['duracion_s']];
+        }
         $S = max(1, $cfg['estaciones']);
         $slot = (($indiceEstacion - (int) $p['puesto']) % $S + $S) % $S;
         $inicio = self::inicioSlot($cfg, (int) $p['vuelta'], $slot);
@@ -882,17 +1044,22 @@ final class Osce
         if ($participante !== null) {
             $out['participante'] = [
                 'codigo' => $participante['codigo'],
+                'numero' => (int) $participante['numero'],
                 'vuelta' => (int) $participante['vuelta'],
                 'circuito' => (int) $participante['circuito'],
                 'puesto' => (int) $participante['puesto'],
+                'grupo' => self::grupo((int) $participante['numero'], $cfg['por_turno']),
+                'carril' => self::carril((int) $participante['numero'], $cfg['por_turno']),
             ];
         }
         return $out;
     }
 
     /**
-     * Recorrido de un alumno: estación por tiempo, con el segundo de inicio
-     * de cada una (desde el inicio del reloj) y la entrega si ya la hay.
+     * Recorrido de un alumno, en orden de tiempo: cada estación con el
+     * segundo en que empieza (desde el inicio del reloj) y la entrega si ya
+     * la hay. En cadena va además su turno de PACIENTE en la limpieza (la
+     * primera estación), con el número de quien lo limpia.
      */
     public static function recorrido(array $o, array $p): array
     {
@@ -900,8 +1067,9 @@ final class Osce
         $S = count($estaciones);
         $stmt = Db::get()->prepare('SELECT COUNT(*) FROM osce_participante WHERE osce_id = ?');
         $stmt->execute([(int) $o['id']]);
-        $cfg = self::cfgReloj($o, $S, (int) $stmt->fetchColumn());
+        $n = (int) $stmt->fetchColumn();
         $stmt->closeCursor();
+        $cfg = self::cfgReloj($o, $S, $n);
         $stmt = Db::get()->prepare('SELECT * FROM osce_entrega WHERE participante_id = ?');
         $stmt->execute([(int) $p['id']]);
         $entregas = [];
@@ -909,15 +1077,21 @@ final class Osce
             $entregas[(int) $en['estacion_id']] = $en;
         }
         $filas = [];
-        for ($slot = 0; $slot < $S; $slot++) {
-            $e = $estaciones[self::estacionEn((int) $p['puesto'], $slot, $S)];
-            $filas[] = [
-                'slot' => $slot,
-                'estacion' => $e,
-                'inicio_s' => self::inicioSlot($cfg, (int) $p['vuelta'], $slot),
-                'entrega' => $entregas[(int) $e['id']] ?? null,
-            ];
+        foreach ($estaciones as $i => $e) {
+            $v = self::ventana($cfg, $p, $i);
+            $filas[] = ['slot' => $v['slot'], 'estacion' => $e, 'inicio_s' => $v['inicio_s'],
+                        'entrega' => $entregas[(int) $e['id']] ?? null, 'paciente' => null];
         }
+        if ($cfg['modo'] === 'cadena' && $S > 0) {
+            $k = $cfg['por_turno'];
+            $tp = self::turnoPaciente(self::grupo((int) $p['numero'], $k), $cfg['grupos']);
+            $quien = $tp === null ? null : $tp * $k + self::carril((int) $p['numero'], $k) + 1;
+            if ($tp !== null && $quien <= $n) {
+                $filas[] = ['slot' => $tp, 'estacion' => $estaciones[0], 'inicio_s' => self::inicioSlot($cfg, 0, $tp),
+                            'entrega' => null, 'paciente' => $quien];
+            }
+        }
+        usort($filas, static fn ($a, $b) => $a['inicio_s'] <=> $b['inicio_s']);
         return $filas;
     }
 

@@ -218,6 +218,32 @@ equipo (ABR o VEMP).
 - **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
   otra pasada de la IA lo pisan (probado).
 
+**Rotación en cadena y tarjetas sorteadas con número (2026-11-25).** Él: los
+estudiantes se juntan, sortean un número (la tarjeta trae QR, código y
+número), en las estaciones escriben solo el número, entran de a 4 a la
+limpieza (2 limpian a 2) y van rotando; "el último limpia al primero, los
+primeros siempre se quedan".
+
+- **Rotación `cadena`** (por defecto; `vueltas` sigue existiendo): todos
+  parten en la 1 y avanzan en orden. "Alumnos por estación a la vez" (k,
+  editable hasta Iniciar): el grupo g = (número − 1) / k entra a la estación i
+  en el turno g + i. Turnos = grupos + estaciones − 1 (17 de a 2: 14 turnos,
+  2 h 18 min). Hacen falta k puestos por estación.
+- **Paciente:** cada grupo es paciente en la limpieza el turno anterior al
+  suyo; el primero lo es del último y se queda hasta el final
+  (`Osce::turnoPaciente`). Lo ven el proyector ("Pacientes en la limpieza",
+  "Prepárense"), la página del QR (fila de paciente con quién lo limpia) y la
+  tablet del docente ("Limpia a N.º …").
+- **Tarjetas sin nombre:** se crea una por alumno del curso, con número 1..N,
+  código y QR. El alumno escanea y elige su nombre (`reclamarTarjeta`, una
+  por alumno); el docente corrige en el panel. `osce_participante.user_id`
+  pasó a admitir NULL (se rehace la tabla al migrar).
+- **Se entra con el número** en tablets y PCs (o con el código); solo entra
+  quien tiene turno en esa estación, así que el número no deja rendir por
+  otro. La nota se ve solo con el código o el QR.
+- En la tablet del docente se toca el **número del alumno** a evaluar entre
+  los que están en la estación (él: nada de "camilla 1 o 2").
+
 **Bonificación por la estrategia que pide el caso (2026-11-25).** Él: "no
 solo chirp, usar otras estrategias según el caso también es bonificación".
 En la estación de protocolo, "Estrategias extra según el caso": se cumple si

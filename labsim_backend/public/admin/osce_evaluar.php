@@ -77,7 +77,10 @@ $items = array_map(static fn ($it) => [
     'cfg' => $it['cfg'],
 ], OscePauta::items($estId));
 $estados = OscePauta::estadosEstacion($estId);
+$cadena = ($osce['rotacion'] ?? 'vueltas') === 'cadena';
+$porTurno = max(1, (int) ($osce['por_turno'] ?? 1));
 $parts = array_map(static fn ($p) => [
+    'numero' => (int) $p['numero'],
     'id' => (int) $p['id'],
     'codigo' => $p['codigo'],
     'vuelta' => (int) $p['vuelta'],
@@ -85,7 +88,7 @@ $parts = array_map(static fn ($p) => [
     'puesto' => (int) $p['puesto'],
     'estado' => $estados[(int) $p['id']] ?? null,
 ], $participantes);
-usort($parts, static fn ($a, $b) => [$a['vuelta'], $a['circuito'], $a['puesto']] <=> [$b['vuelta'], $b['circuito'], $b['puesto']]);
+usort($parts, static fn ($a, $b) => $a['numero'] <=> $b['numero']);
 
 admin_header('Evaluar · ' . $est['titulo'], $me);
 ?>
@@ -93,6 +96,10 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
 .ev-barra { position: sticky; top: 0; z-index: 5; background: var(--color-surface, #fff); border-bottom: 1px solid var(--color-border, #ddd);
             padding: 0.6rem 0.2rem; display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: center; justify-content: space-between; }
 .ev-cod { font: 700 2rem ui-monospace, monospace; letter-spacing: 0.04em; }
+.ev-grupo { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.ev-grupo button { min-width: 6.5rem; min-height: 3.2rem; font-size: 1.3rem; font-weight: 800; border-radius: 0.6rem; border: 2px solid var(--color-border, #ccc);
+                   background: var(--color-surface, #fff); color: inherit; cursor: pointer; }
+.ev-grupo button[aria-pressed="true"] { background: #5d1049; border-color: #5d1049; color: #fff; }
 .ev-reloj { font: 700 1.6rem ui-monospace, monospace; }
 .ev-reloj small { font: 400 0.85rem system-ui, sans-serif; color: var(--color-text-muted, #666); display: block; }
 .ev-item { border: 1px solid var(--color-border, #ddd); border-radius: 0.6rem; padding: 0.8rem; margin: 0.7rem 0; }
@@ -133,13 +140,15 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
     <div>
         <div class="muted" id="ev-quien-label">Alumno</div>
         <div class="ev-cod" id="ev-cod">—</div>
+        <div class="muted" id="ev-paciente"></div>
     </div>
     <div class="ev-reloj" id="ev-reloj">--:--<small>Cargando reloj…</small></div>
     <div class="row row--gap-sm row--center">
-        <?php if ((int) $osce['circuitos'] > 1): ?>
+        <div id="ev-grupo" class="ev-grupo" aria-label="Alumnos en la estación ahora"></div>
+        <?php $carriles = $cadena ? 1 : (int) $osce['circuitos']; if ($carriles > 1): ?>
         <label>Circuito
             <select id="ev-circuito" style="width:auto;">
-                <?php for ($c = 0; $c < (int) $osce['circuitos']; $c++): ?><option value="<?= $c ?>">Circuito <?= $c + 1 ?></option><?php endfor; ?>
+                <?php for ($c = 0; $c < $carriles; $c++): ?><option value="<?= $c ?>">Circuito <?= $c + 1 ?></option><?php endfor; ?>
             </select></label>
         <?php endif; ?>
         <label>Otro alumno
@@ -386,12 +395,13 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
             actual = p;
             if (!p) {
                 $('ev-cod').textContent = '—';
+                $('ev-paciente').textContent = '';
                 $('ev-items').innerHTML = '<p class="muted">No hay alumno en esta estación en este momento.</p>';
                 $('ev-puntaje').textContent = '—';
                 $('ev-guardado').textContent = '';
                 return;
             }
-            $('ev-cod').textContent = p.codigo;
+            $('ev-cod').textContent = 'N.º ' + p.numero;
             $('ev-guardado').textContent = 'Cargando…';
             fetch('osce_evaluar.php?estacion=' + EST + '&cargar=' + p.id, { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
@@ -422,7 +432,7 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
         var sel = $('ev-elegir'), val = sel.value;
         var h = '<option value="">Seguir el reloj</option>';
         PARTS.forEach(function (p) {
-            h += '<option value="' + p.id + '">' + esc(p.codigo) + ' · vuelta ' + (p.vuelta + 1)
+            h += '<option value="' + p.id + '">N.º ' + p.numero + ' · ' + esc(p.codigo)
                + (p.estado === 'enviada' ? ' ✓' : p.estado ? ' …' : '') + '</option>';
         });
         sel.innerHTML = h;
@@ -477,12 +487,57 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
         if (manual) abrir(PARTS.filter(function (p) { return p.id === +this.value; }, this)[0]);
         else seguirReloj(ultimoReloj);
     });
+    $('ev-grupo').addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        var botones = Array.prototype.slice.call(this.querySelectorAll('button'));
+        pos = botones.indexOf(b);
+        manual = false;
+        $('ev-elegir').value = '';
+        botones.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        abrir(PARTS.filter(function (p) { return p.id === +b.dataset.id; })[0]);
+        grupoPintado = null;
+    });
     if ($('ev-circuito')) $('ev-circuito').addEventListener('change', function () { circuito = +this.value; manual = false; $('ev-elegir').value = ''; seguirReloj(ultimoReloj); });
     window.addEventListener('beforeunload', function (e) { if (sucio) { e.preventDefault(); e.returnValue = ''; } });
 
     // -- Reloj: quién está en esta estación ----------------------------------
     var ultimoReloj = null, ultimaActividad = 0;
+    // En cadena (CADENA): el grupo g está en esta estación en el turno g + INDICE;
+    // en la camilla c, el de número g*k + c + 1. Su paciente es el de la misma
+    // camilla del grupo siguiente (el último limpia al primero).
+    var CADENA = <?= $cadena ? 'true' : 'false' ?>, K = <?= $porTurno ?>;
+    function porNumero(n) { return PARTS.filter(function (p) { return p.numero === n; })[0] || null; }
+    // El docente elige a quién evalúa tocando su número entre los que están
+    // ahora en la estación; al cambiar de turno queda en la misma posición.
+    var pos = 0, grupoPintado = null;
+    function miembros(cfg, g) {
+        if (g < 0 || g >= cfg.grupos) return [];
+        return PARTS.filter(function (p) { return Math.floor((p.numero - 1) / K) === g; });
+    }
+    function pintarGrupo(lista, elegido) {
+        var clave = lista.map(function (p) { return p.id; }).join(',') + '|' + (elegido ? elegido.id : '');
+        if (clave === grupoPintado) return;
+        grupoPintado = clave;
+        $('ev-grupo').innerHTML = lista.length > 1 ? lista.map(function (p) {
+            return '<button type="button" data-id="' + p.id + '" aria-pressed="' + (elegido && elegido.id === p.id) + '">N.º ' + p.numero + '</button>';
+        }).join('') : '';
+    }
     function enEstacion(cfg, vuelta, slot) {
+        if (CADENA) {
+            var g = slot - INDICE, lista = miembros(cfg, g);
+            var p = lista.length ? lista[Math.min(pos, lista.length - 1)] : null;
+            // Su paciente (solo en la limpieza): el de la misma posición del grupo
+            // siguiente; el último grupo limpia al primero.
+            var pac = null;
+            if (p && INDICE === 0 && cfg.grupos > 1) {
+                var siguientes = miembros(cfg, g + 1 < cfg.grupos ? g + 1 : 0);
+                pac = siguientes[Math.min(lista.indexOf(p), siguientes.length - 1)] || null;
+            }
+            $('ev-paciente').textContent = pac ? 'Limpia a N.º ' + pac.numero : '';
+            pintarGrupo(lista, p);
+            return p;
+        }
         var S = cfg.estaciones, puesto = ((INDICE - slot) % S + S) % S;
         return PARTS.filter(function (p) { return p.vuelta === vuelta && p.circuito === circuito && p.puesto === puesto; })[0] || null;
     }
@@ -511,7 +566,7 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
         var fase = reloj ? reloj.fase : 'antes';
         if (d.estado === 'cerrado' || d.estado === 'publicado') fase = 'terminado';
         $('ev-reloj').innerHTML = (reloj && fase !== 'terminado' ? OsceReloj.mmss(reloj.restante_s) : '--:--')
-            + '<small>' + nombres[fase] + (d.pausado ? ' · en pausa' : '') + (reloj ? ' · vuelta ' + (reloj.vuelta + 1) : '') + '</small>';
+            + '<small>' + nombres[fase] + (d.pausado ? ' · en pausa' : '') + (reloj ? (CADENA ? ' · turno ' + (reloj.slot + 1) : ' · vuelta ' + (reloj.vuelta + 1)) : '') + '</small>';
         seguirReloj(ultimoReloj);
         if (d.estado === 'en_curso' && window.LabSimSesion && Date.now() - ultimaActividad > 60000) {
             ultimaActividad = Date.now();

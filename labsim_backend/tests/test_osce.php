@@ -115,3 +115,21 @@ $m = QrSvg::matriz('https://ejemplo.cl/public/student/osce.php?t=0123456789abcde
 t_eq(count($m), 17 + 4 * 5, 'URL con token: QR versión 5 (37 módulos)');
 t_true($m[0][0] && $m[6][6] && !$m[7][7], 'Patrón buscador arriba a la izquierda');
 t_true(strpos(QrSvg::svg('hola'), '<svg') === 0, 'Sale SVG');
+
+// -- Rotación en cadena (2026-11-25): entran de a 2 por estación, en orden --
+$oc = ['rotacion' => 'cadena', 'por_turno' => 2, 'circuitos' => 1, 'duracion_s' => 480, 'pausa_s' => 120, 'pausa_vueltas_s' => 600];
+$cc = Osce::cfgReloj($oc, 6, 17);
+t_eq([$cc['grupos'], $cc['turnos'], $cc['vueltas']], [9, 14, 1], 'Cadena: 17 de a 2 = 9 grupos, 14 turnos, una vuelta');
+t_eq(Osce::duracionTotal($cc), 13 * 600 + 480, 'Cadena: 14 turnos de 10 min menos la última pausa');
+t_eq([Osce::grupo(1, 2), Osce::grupo(2, 2), Osce::grupo(3, 2), Osce::grupo(17, 2)], [0, 0, 1, 8], 'Grupo por número');
+t_eq([Osce::carril(5, 2), Osce::carril(6, 2)], [0, 1], 'Carril dentro del grupo');
+t_eq(Osce::ventana($cc, ['numero' => 5], 0), ['slot' => 2, 'inicio_s' => 1200, 'fin_s' => 1680], 'N.º 5 limpia en el turno 3');
+t_eq(Osce::ventana($cc, ['numero' => 5], 5)['slot'], 7, 'N.º 5 termina en la estación 6 en el turno 8');
+t_eq(Osce::ventana($cc, ['numero' => 17], 5)['slot'], 13, 'El 17 termina en el último turno');
+t_eq([Osce::turnoPaciente(1, 9), Osce::turnoPaciente(4, 9)], [0, 3], 'Cada grupo es paciente el turno anterior al suyo');
+t_eq(Osce::turnoPaciente(0, 9), 8, 'El primer grupo es paciente del último: se queda hasta el final');
+t_eq(Osce::turnoPaciente(0, 1), null, 'Con un solo grupo no hay paciente');
+$r = Osce::estadoReloj($cc, 7 * 600 + 100);
+t_eq([$r['fase'], $r['vuelta'], $r['slot']], ['estacion', 0, 7], 'Reloj en cadena: turno 8');
+t_eq(Osce::estadoReloj($cc, Osce::duracionTotal($cc))['fase'], 'terminado', 'Reloj en cadena: termina');
+t_eq(Osce::limpiarConfig(['nombre' => 'x', 'rotacion' => 'cadena', 'por_turno' => '2'])['por_turno'], 2, 'De a cuántos se configura');

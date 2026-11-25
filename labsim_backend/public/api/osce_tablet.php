@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $accion = (string) ($_POST['accion'] ?? '');
 $p = Osce::participantePorCodigo((int) $o['id'], (string) ($_POST['codigo'] ?? ''));
 if ($p === null) {
-    Response::error('Código no encontrado. Revisa tu tarjeta.', 404);
+    Response::error('Número no encontrado. Revisa tu tarjeta.', 404);
 }
 
 if ($accion === 'corregir') {
@@ -73,6 +73,7 @@ if ($accion === 'entrar') {
     Response::json([
         'ok' => true,
         'codigo' => $p['codigo'],
+        'numero' => (int) $p['numero'],
         'ventana' => $ventana,
         'preguntas' => OscePreguntas::paraAlumno($est, $p),
     ]);

@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $parts = array_map(static fn ($p) => [
+    'numero' => (int) $p['numero'],
     'codigo' => $p['codigo'],
     'vuelta' => (int) $p['vuelta'],
     'circuito' => (int) $p['circuito'],
@@ -101,6 +102,7 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
     <div class="osce-fase" id="osce-fase">Cargando…</div>
     <div class="osce-cuenta" id="osce-cuenta">--:--</div>
     <div class="osce-sub" id="osce-donde"></div>
+    <div class="osce-sub" id="osce-sala" style="margin-top:0.8rem;"></div>
     <div class="table-wrap" style="margin-top:1.2rem;">
         <table class="osce-puestos">
             <thead><tr><th>Estación</th><th id="osce-col-ahora">Ahora</th><th id="osce-col-sig">Siguiente</th></tr></thead>
@@ -149,7 +151,19 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
         if (el.requestFullscreen) el.requestFullscreen();
     });
 
+    // En cadena: el grupo g está en la estación e en el turno g + e.
+    function grupoEn(cfg, turno, estacion) {
+        var g = turno - estacion;
+        if (g < 0 || g >= cfg.grupos) return '—';
+        return numerosDe(cfg, g);
+    }
+    function numerosDe(cfg, g) {
+        var ns = parts.filter(function (p) { return Math.floor((p.numero - 1) / cfg.por_turno) === g; })
+                      .map(function (p) { return p.numero; });
+        return ns.length ? 'N.º ' + ns.join(' · ') : '—';
+    }
     function quien(cfg, vuelta, slot, estacion, circuito) {
+        if (cfg.modo === 'cadena') return grupoEn(cfg, slot, estacion);
         var S = cfg.estaciones;
         var puesto = ((estacion - slot) % S + S) % S;
         for (var i = 0; i < parts.length; i++) {
@@ -167,7 +181,8 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
             ultimaActividad = Date.now();
             window.LabSimSesion.actividad();
         }
-        var cfg = d.cfg, S = cfg.estaciones, C = d.circuitos;
+        var cfg = d.cfg, S = cfg.estaciones, T = cfg.turnos || S;
+        var C = cfg.modo === 'cadena' ? 1 : d.circuitos;
         var cont = $('osce-vivo');
         if (!reloj) {
             $('osce-fase').textContent = d.estado === 'borrador' ? 'Aún no parte' : (NOMBRE_FASE[d.estado] || d.estado);
@@ -182,7 +197,9 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
             $('osce-fase').textContent = (NOMBRE_FASE[fase] || fase) + (d.pausado ? ' · EN PAUSA' : '');
             $('osce-cuenta').textContent = fase === 'terminado' ? '0:00' : OsceReloj.mmss(reloj.restante_s);
             $('osce-donde').textContent = fase === 'terminado' ? '' :
-                'Vuelta ' + (reloj.vuelta + 1) + ' de ' + cfg.vueltas + ' · Tiempo ' + (reloj.slot + 1) + ' de ' + S;
+                (cfg.modo === 'cadena'
+                    ? 'Turno ' + (reloj.slot + 1) + ' de ' + T
+                    : 'Vuelta ' + (reloj.vuelta + 1) + ' de ' + cfg.vueltas + ' · Tiempo ' + (reloj.slot + 1) + ' de ' + S);
 
             // Timbre: fin de estación (3 largos), empieza la siguiente (1), queda 1 minuto (2 cortos).
             var clave = fase + ':' + reloj.vuelta + ':' + reloj.slot;
@@ -200,7 +217,7 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
             var filas = '';
             var ahoraV = reloj.vuelta, ahoraJ = reloj.slot;
             var sigV = ahoraV, sigJ = ahoraJ + 1;
-            if (fase === 'entre_vueltas' || sigJ >= S) { sigV = ahoraV + 1; sigJ = 0; }
+            if (fase === 'entre_vueltas' || sigJ >= T) { sigV = ahoraV + 1; sigJ = 0; }
             var haySig = sigV < cfg.vueltas && fase !== 'terminado';
             $('osce-col-ahora').textContent = fase === 'estacion' ? 'Ahora' : 'Recién';
             for (var e = 0; e < S; e++) {
@@ -211,6 +228,16 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
                 }
             }
             $('osce-tabla').innerHTML = filas;
+            // Cadena: quiénes hacen de paciente en la limpieza y quiénes entran después.
+            var sala = '';
+            if (cfg.modo === 'cadena' && fase !== 'terminado') {
+                var turnoP = fase === 'estacion' ? ahoraJ : sigJ;
+                var gp = turnoP + 1 < cfg.grupos ? turnoP + 1 : (cfg.grupos > 1 && turnoP === cfg.grupos - 1 ? 0 : -1);
+                if (gp >= 0) sala += 'Pacientes en la limpieza: ' + numerosDe(cfg, gp) + (gp === 0 ? ' (el primer grupo vuelve)' : '');
+                var gs = turnoP + 2;
+                if (gs < cfg.grupos) sala += (sala ? '  ·  ' : '') + 'Prepárense: ' + numerosDe(cfg, gs);
+            }
+            $('osce-sala').textContent = sala;
         }
     });
 

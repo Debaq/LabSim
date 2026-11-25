@@ -69,10 +69,10 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
 </div>
 
 <div class="pantalla entrar" id="p-entrar">
-    <h1>Escribe tu código</h1>
-    <p class="muted">Está en tu tarjeta (por ejemplo, K7F-3QM).</p>
+    <h1>Escribe tu número</h1>
+    <p class="muted">El número grande de tu tarjeta.</p>
     <form id="f-entrar" autocomplete="off">
-        <input type="text" id="codigo" maxlength="8" autocapitalize="characters" spellcheck="false" aria-label="Código">
+        <input type="text" id="codigo" maxlength="8" inputmode="numeric" autocapitalize="characters" spellcheck="false" aria-label="Número">
         <br><button type="submit" class="btn">Entrar</button>
     </form>
     <div class="error-grande" id="error-entrar"></div>
@@ -141,7 +141,7 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
             } catch (err) {}
             pintar();
             mostrar('p-preguntas');
-            $('quien').textContent = 'Alumno ' + d.codigo;
+            $('quien').textContent = 'N.º ' + d.numero;
             $('codigo').value = '';
             if (pendiente) aGuardar();
         }).catch(function (err) { $('error-entrar').textContent = err.message; });

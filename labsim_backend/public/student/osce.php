@@ -46,6 +46,8 @@ body { max-width: 34rem; margin: 0 auto; padding: 1rem; }
 .recorrido li.actual { font-weight: 700; }
 .recorrido li.hecha { color: var(--color-text-muted, #777); }
 .recorrido { list-style: none; padding: 0; margin: 0; }
+.numero { font-size: 3.4rem; font-weight: 800; color: var(--color-primary, #5d1049); line-height: 1; }
+.numero small { display: block; font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted, #666); }
 .nota { font-size: 2.6rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 0.2rem 0; }
 .det-lista { list-style: none; padding: 0; margin: 0; }
 .det-lista li { padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #ddd); }
@@ -68,6 +70,50 @@ if ($p === null || $o === null) {
     http_response_code(404);
     $cabeza('OSCE');
     echo '<div class="card"><h1>Código no encontrado</h1><p>Revisa que escaneaste el QR de tu tarjeta. Si el problema sigue, avisa al docente.</p></div></body></html>';
+    exit;
+}
+
+// Tarjeta sorteada sin dueño: el alumno la amarra eligiendo su nombre.
+if ($p['user_id'] === null) {
+    $errTarjeta = null;
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && hash_equals($token, (string) ($_POST['t'] ?? ''))) {
+        try {
+            Osce::reclamarTarjeta($p, (int) ($_POST['user_id'] ?? 0));
+            header('Location: osce.php?t=' . rawurlencode($token));
+            exit;
+        } catch (InvalidArgumentException $e) {
+            $errTarjeta = $e->getMessage();
+        }
+    }
+    $conTarjeta = [];
+    foreach (Osce::participantes((int) $o['id']) as $x) {
+        if ($x['user_id'] !== null) {
+            $conTarjeta[(int) $x['user_id']] = true;
+        }
+    }
+    $libres = array_filter(Osce::alumnosDelCurso((int) $o['course_id']), static fn ($u) => !isset($conTarjeta[(int) $u['id']]));
+    $cabeza('OSCE · tarjeta ' . (int) $p['numero']);
+    ?>
+<main id="main-content">
+<div class="card">
+    <div class="muted"><?= htmlspecialchars($o['nombre']) ?></div>
+    <div class="numero"><small>N.º</small><?= (int) $p['numero'] ?></div>
+    <h1 style="font-size:1.3rem; margin:0.4rem 0;">¿Quién eres?</h1>
+    <p>Elige tu nombre para quedarte con esta tarjeta. Desde aquí verás tu avance y, al final, tu nota.</p>
+    <?php if ($errTarjeta !== null): ?><p class="error"><?= htmlspecialchars($errTarjeta) ?></p><?php endif; ?>
+    <form method="post">
+        <input type="hidden" name="t" value="<?= htmlspecialchars($token) ?>">
+        <select name="user_id" required style="width:100%; font-size:1.1rem; padding:0.5rem;">
+            <option value="">— Tu nombre —</option>
+            <?php foreach ($libres as $u): ?><option value="<?= (int) $u['id'] ?>"><?= htmlspecialchars((string) $u['display_name']) ?></option><?php endforeach; ?>
+        </select>
+        <button type="submit" class="btn" style="margin-top:0.8rem; width:100%;">Esta es mi tarjeta</button>
+    </form>
+    <p class="help help--mt">Si tu nombre no aparece o te equivocaste, avisa al docente.</p>
+</div>
+</main>
+</body></html>
+<?php
     exit;
 }
 
@@ -99,6 +145,9 @@ if ($publicado) {
     $sumaPct = 0.0;
     $filas = [];
     foreach ($recorrido as $f) {
+        if ($f['paciente'] !== null) {
+            continue;   // el turno de paciente no se evalúa
+        }
         $e = $f['estacion'];
         $en = $f['entrega'];
         $peso = (float) $e['peso'];
@@ -131,8 +180,11 @@ $cabeza('OSCE · ' . $o['nombre']);
 <main id="main-content">
 <div class="card">
     <div class="muted"><?= htmlspecialchars($o['nombre']) ?></div>
-    <div class="cod"><?= htmlspecialchars($p['codigo']) ?></div>
-    <div><?= htmlspecialchars((string) $p['display_name']) ?> · vuelta <?= (int) $p['vuelta'] + 1 ?><?= (int) $o['circuitos'] > 1 ? ' · circuito ' . ((int) $p['circuito'] + 1) : '' ?></div>
+    <div class="row row--between row--center">
+        <div class="numero"><small>N.º</small><?= (int) $p['numero'] ?></div>
+        <div style="text-align:right;"><div class="cod" style="font-size:1.3rem;"><?= htmlspecialchars($p['codigo']) ?></div>
+            <div><?= htmlspecialchars((string) $p['display_name']) ?></div></div>
+    </div>
 </div>
 
 <?php if ($msgReplica !== null): ?><p class="success"><?= htmlspecialchars($msgReplica) ?></p><?php endif; ?>
@@ -252,8 +304,12 @@ $cabeza('OSCE · ' . $o['nombre']);
     <h2>Tu recorrido</h2>
     <ol class="recorrido" id="recorrido">
     <?php foreach ($recorrido as $f): ?>
-        <li data-slot="<?= (int) $f['slot'] ?>" data-inicio="<?= (int) $f['inicio_s'] ?>">
-            <span><?= (int) $f['slot'] + 1 ?>. <?= htmlspecialchars($f['estacion']['titulo']) ?></span>
+        <li data-inicio="<?= (int) $f['inicio_s'] ?>" data-nombre="<?= htmlspecialchars($f['paciente'] !== null
+                ? 'Paciente en ' . $f['estacion']['titulo'] . ' (te limpia el N.º ' . (int) $f['paciente'] . ')'
+                : $f['estacion']['titulo']) ?>" data-paciente="<?= $f['paciente'] !== null ? 1 : 0 ?>">
+            <span><?= $f['paciente'] !== null
+                ? '<em>Paciente</em> en ' . htmlspecialchars($f['estacion']['titulo']) . ' <span class="muted">(te limpia el N.º ' . (int) $f['paciente'] . ')</span>'
+                : htmlspecialchars($f['estacion']['titulo']) ?></span>
             <span class="hora muted"></span>
         </li>
     <?php endforeach; ?>
@@ -277,10 +333,10 @@ $cabeza('OSCE · ' . $o['nombre']);
         return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
     }
 
+    // El estado sale de las horas del recorrido (sirve igual en vueltas y en
+    // cadena, y con el turno de paciente): dónde está ahora, a dónde va.
     OsceReloj.iniciar(url, function (d, reloj, t) {
-        var yo = d.participante, S = d.cfg.estaciones;
-        // Hora estimada de cada estación: con el reloj andando, ahora - t; si
-        // no, el inicio programado (hora del curso, tal como se escribió).
+        var dur = d.cfg.duracion_s, pausa = d.cfg.pausa_s;
         var t0 = null;
         if (d.inicio_real && d.estado !== 'en_curso') t0 = d.inicio_real;
         else if (t !== null) t0 = Date.now() / 1000 - t;
@@ -288,42 +344,38 @@ $cabeza('OSCE · ' . $o['nombre']);
             var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)$/.exec(d.inicio_programado);
             if (m) t0 = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]).getTime() / 1000;
         }
-        var miSlot = -1, termine = false;
-        if (reloj) {
-            if (reloj.fase === 'terminado' || reloj.vuelta > yo.vuelta
-                || (reloj.vuelta === yo.vuelta && reloj.fase === 'entre_vueltas')) termine = true;
-            else if (reloj.vuelta === yo.vuelta) miSlot = reloj.slot;
-        }
-        if (d.estado === 'cerrado' || d.estado === 'publicado') termine = true;
-        for (var i = 0; i < items.length; i++) {
-            var li = items[i], slot = +li.dataset.slot;
-            li.querySelector('.hora').textContent = t0 !== null ? hora(t0 + +li.dataset.inicio) : '';
-            li.classList.toggle('actual', !termine && slot === miSlot && reloj && reloj.fase === 'estacion');
-            li.classList.toggle('hecha', termine || (miSlot >= 0 && (slot < miSlot || (slot === miSlot && reloj.fase !== 'estacion'))));
-        }
+        var filas = Array.prototype.map.call(items, function (li) {
+            return { li: li, ini: +li.dataset.inicio, nombre: li.dataset.nombre, paciente: li.dataset.paciente === '1' };
+        });
+        var termine = d.estado === 'cerrado' || d.estado === 'publicado'
+            || (t !== null && filas.length && t >= filas[filas.length - 1].ini + dur);
+        var actual = null, siguiente = null;
+        filas.forEach(function (f) {
+            f.li.querySelector('.hora').textContent = t0 !== null ? hora(t0 + f.ini) : '';
+            var en = t !== null && t >= f.ini && t < f.ini + dur;
+            if (en) actual = f;
+            if (t !== null && f.ini > t && siguiente === null) siguiente = f;
+            f.li.classList.toggle('actual', !termine && en);
+            f.li.classList.toggle('hecha', termine || (t !== null && t >= f.ini + dur));
+        });
         if (!$('ahora')) return;
         var fase = '', est = '', cuenta = '';
         if (termine) {
             fase = 'Terminaste el OSCE';
             est = 'Gracias. Tu resultado aparecerá aquí cuando se publique.';
-        } else if (!reloj || reloj.fase === 'antes') {
+        } else if (t === null || (reloj && reloj.fase === 'antes')) {
             fase = 'Aún no parte';
-            var primera = items[0] ? items[0].querySelector('span').textContent.replace(/^\d+\.\s*/, '') : '';
-            est = 'Partes en: ' + primera;
-            cuenta = t0 !== null ? hora(t0 + +items[0].dataset.inicio) : '';
-        } else if (reloj.vuelta < yo.vuelta) {
-            fase = 'Esperando tu vuelta (' + (yo.vuelta + 1) + ')';
-            est = 'Partes en: ' + items[0].querySelector('span').textContent.replace(/^\d+\.\s*/, '');
-            var falta = OsceReloj.inicioSlot(d.cfg, yo.vuelta, 0) - t;
-            cuenta = 'en ' + OsceReloj.mmss(falta);
-        } else if (reloj.fase === 'estacion') {
-            fase = 'Estás en';
-            est = items[miSlot].querySelector('span').textContent;
-            cuenta = OsceReloj.mmss(reloj.restante_s);
-        } else {
-            fase = reloj.fase === 'cambio' ? 'Cambio: dirígete a' : 'Pausa';
-            est = miSlot + 1 < S ? items[miSlot + 1].querySelector('span').textContent : '';
-            cuenta = OsceReloj.mmss(reloj.restante_s);
+            est = filas.length ? 'Primero: ' + filas[0].nombre : '';
+            cuenta = t0 !== null && filas.length ? hora(t0 + filas[0].ini) : '';
+        } else if (actual) {
+            fase = actual.paciente ? 'Ahora eres' : 'Estás en';
+            est = actual.nombre;
+            cuenta = OsceReloj.mmss(actual.ini + dur - t);
+        } else if (siguiente) {
+            var falta = siguiente.ini - t;
+            fase = falta <= pausa ? 'Cambio: dirígete a' : (t < filas[0].ini ? 'Espera tu turno en la sala' : 'Espera: lo próximo es');
+            est = siguiente.nombre;
+            cuenta = falta <= pausa ? OsceReloj.mmss(falta) : 'en ' + OsceReloj.mmss(falta);
         }
         if (d.pausado) fase += ' · EN PAUSA';
         $('ahora-fase').textContent = fase;

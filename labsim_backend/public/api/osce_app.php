@@ -48,7 +48,7 @@ if ($accion === 'estacion') {
 
 $p = Osce::participantePorCodigo((int) $o['id'], (string) ($body['codigo'] ?? ''));
 if ($p === null) {
-    Response::error('Código no encontrado. Revisa tu tarjeta.', 404);
+    Response::error('Número no encontrado. Revisa tu tarjeta.', 404);
 }
 if ($accion === 'corregir') {
     // La app la llama después de entregar, sin esperar: la IA corrige la
@@ -93,6 +93,7 @@ if ($accion === 'entrar') {
     Response::json([
         'ok' => true,
         'codigo' => $p['codigo'],
+        'numero' => (int) $p['numero'],
         'tipo' => $est['tipo'],
         'modulo' => OsceApp::modulo((string) $est['examen']),
         'prueba' => $cfg['prueba'] ?? (OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR'),
