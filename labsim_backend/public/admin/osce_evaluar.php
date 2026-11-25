@@ -75,6 +75,7 @@ $items = array_map(static fn ($it) => [
     'critico' => (int) $it['critico'] === 1,
     'tipo' => $it['tipo'],
     'cfg' => $it['cfg'],
+    'ops' => $it['tipo'] === 'impedancias' ? [] : OscePauta::opciones($it),
 ], OscePauta::items($estId));
 $estados = OscePauta::estadosEstacion($estId);
 $cadena = ($osce['rotacion'] ?? 'vueltas') === 'cadena';
@@ -112,6 +113,13 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
 .ev-botones button[aria-pressed="true"][data-v="cumple"] { background: #15803d; border-color: #15803d; color: #fff; }
 .ev-botones button[aria-pressed="true"][data-v="parcial"] { background: #b45309; border-color: #b45309; color: #fff; }
 .ev-botones button[aria-pressed="true"][data-v="no_cumple"] { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+.ev-botones.escala { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.ev-botones.escala button { text-align: left; padding: 0.5rem 0.7rem; font-size: 0.95rem; line-height: 1.25; }
+.ev-botones.escala button small { display: block; font-size: 0.82rem; opacity: 0.85; margin-top: 0.2rem; }
+.ev-botones button[aria-pressed="true"][data-v="n3"] { background: #15803d; border-color: #15803d; color: #fff; }
+.ev-botones button[aria-pressed="true"][data-v="n2"] { background: #4d7c0f; border-color: #4d7c0f; color: #fff; }
+.ev-botones button[aria-pressed="true"][data-v="n1"] { background: #b45309; border-color: #b45309; color: #fff; }
+.ev-botones button[aria-pressed="true"][data-v="n0"] { background: #b91c1c; border-color: #b91c1c; color: #fff; }
 .ev-com { margin-top: 0.5rem; }
 .ev-com textarea { width: 100%; min-height: 3rem; }
 .ev-imp { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.6rem; }
@@ -182,7 +190,6 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
     var EST = <?= $estId ?>;
     var CSRF = <?= json_encode(Auth::csrfToken()) ?>;
     var URL_RELOJ = '../api/osce_reloj.php?r=<?= htmlspecialchars($osce['reloj_token']) ?>';
-    var TICK = { cumple: 'Cumple', parcial: 'Parcial', no_cumple: 'No cumple' };
     var $ = function (id) { return document.getElementById(id); };
     var circuito = 0;
     var actual = null;       // participante en pantalla
@@ -249,9 +256,10 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
                 });
                 h += '</div><div class="ev-calc" data-calc></div><div class="ev-pares" data-pares></div>';
             } else {
-                h += '<div class="ev-botones">';
-                ['cumple', 'parcial', 'no_cumple'].forEach(function (v) {
-                    h += '<button type="button" data-v="' + v + '" aria-pressed="' + (dato.valor === v) + '">' + TICK[v] + '</button>';
+                h += '<div class="ev-botones' + (it.tipo === 'escala' ? ' escala' : '') + '">';
+                it.ops.forEach(function (o) {
+                    h += '<button type="button" data-v="' + o.v + '" aria-pressed="' + (dato.valor === o.v) + '"><b>' + esc(o.rotulo) + '</b>'
+                       + (o.desc ? '<small>' + esc(o.desc) + '</small>' : '') + '</button>';
                 });
                 h += '</div>';
             }
@@ -311,9 +319,10 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
                     fallo = it.critico && checks.length > 0 && ok === 0;
                 }
             } else {
-                marcado = !!TICK[dato.valor];
-                pts = dato.valor === 'cumple' ? it.puntaje : dato.valor === 'parcial' ? it.puntaje / 2 : 0;
-                fallo = it.critico && dato.valor === 'no_cumple';
+                var op = it.ops.filter(function (o) { return o.v === dato.valor; })[0];
+                marcado = !!op;
+                pts = op ? it.puntaje * op.frac : 0;
+                fallo = it.critico && !!op && op.frac <= 0;
             }
             total += pts;
             critico = critico || fallo;

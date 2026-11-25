@@ -43,6 +43,23 @@ $critico = ['tipo' => 'tick', 'puntaje' => 1, 'critico' => 1];
 t_eq(OscePauta::evaluarItem($critico, 'no_cumple')['critico_fallado'], true, 'Crítico en no cumple reprueba');
 t_eq(OscePauta::evaluarItem($critico, 'parcial')['critico_fallado'], false, 'Crítico en parcial no reprueba');
 
+$si = ['tipo' => 'si_no', 'puntaje' => 2, 'critico' => 1];
+t_eq(OscePauta::evaluarItem($si, 'cumple')['puntaje'], 2.0, 'Dicotómico: sí = completo');
+$r = OscePauta::evaluarItem($si, 'no_cumple');
+t_eq([$r['puntaje'], $r['critico_fallado']], [0.0, true], 'Dicotómico crítico en no: 0 y reprueba');
+t_eq(OscePauta::evaluarItem($si, 'parcial')['marcado'], false, 'Dicotómico no tiene parcial');
+t_eq(array_column(OscePauta::opciones($si), 'rotulo'), ['Sí', 'No'], 'Dicotómico se ve como Sí / No');
+$esc = ['tipo' => 'escala', 'puntaje' => 3, 'critico' => 0, 'cfg' => ['niveles' => [3 => 'a', 2 => 'b', 1 => 'c', 0 => 'd']]];
+t_eq(array_map(static fn ($v) => OscePauta::evaluarItem($esc, $v)['puntaje'], ['n3', 'n2', 'n1', 'n0']), [3.0, 2.0, 1.0, 0.0],
+     'Escala: cada nivel vale su tercio');
+t_eq(OscePauta::opciones($esc)[1], ['v' => 'n2', 'rotulo' => 'Mayormente logrado', 'frac' => 2 / 3, 'desc' => 'b'], 'Escala con su descriptor');
+t_eq(OscePauta::rotuloValor($esc, 'n0'), 'No logrado', 'Rótulo de lo marcado');
+$e = OscePauta::limpiarItem(['texto' => 'Global', 'tipo' => 'escala', 'puntaje' => '3', 'niveles' => "3: Todo\n2: Casi\n1: Poco\n0: Nada"]);
+t_eq(json_decode($e['config'], true)['niveles'], ['3' => 'Todo', '2' => 'Casi', '1' => 'Poco', '0' => 'Nada'], 'Editor: descriptores sin el número');
+$err = null;
+try { OscePauta::limpiarItem(['texto' => 'x', 'tipo' => 'escala', 'niveles' => "a\nb"]); } catch (InvalidArgumentException $ex) { $err = $ex->getMessage(); }
+t_true($err !== null && strpos($err, '4 descriptores') !== false, 'Escala sin los 4 descriptores no se guarda');
+
 $imp = ['tipo' => 'impedancias', 'puntaje' => 2, 'critico' => 1,
         'cfg' => ['electrodos' => ['B', 'N', 'R', 'A'], 'max_kohm' => 5, 'inter_kohm' => 2]];
 t_eq(OscePauta::evaluarItem($imp, [3, 3.5, 4, 2.5])['puntaje'], 2.0, 'Impedancias bien: completo');
@@ -65,6 +82,9 @@ t_true(strpos($textos, 'una sola dirección') !== false, 'PEATC: gel abrasivo en
 t_true(strpos($textos, 'decúbito dorsal') !== false, 'PEATC: decúbito dorsal');
 t_true(strpos($textos, 'rojo en OD, azul en OI') !== false, 'PEATC: fono rojo OD, azul OI');
 t_true(count(array_filter($peatc, static fn ($i) => $i['critico'])) >= 2, 'PEATC: lavado de manos y montaje son críticos');
+t_eq(array_count_values(array_column($peatc, 'tipo')), ['si_no' => 10, 'escala' => 2, 'tick' => 1, 'impedancias' => 1],
+     'PEATC: pasos dicotómicos, comunicación y desempeño global en escala');
+t_eq(array_sum(array_column($peatc, 'puntaje')), 19.0, 'PEATC: 19 puntos');
 
 $ov = OscePauta::montaje('ovemp');
 t_eq([$ov['max_kohm'], $ov['inter_kohm']], [3.0, 1.0], 'oVEMP: < 3 kΩ e interelectrodo < 1');

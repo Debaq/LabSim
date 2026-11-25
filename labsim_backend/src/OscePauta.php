@@ -6,10 +6,16 @@ require_once __DIR__ . '/Osce.php';
 
 /**
  * Estación de pauta docente del OSCE (paso 2 de docs/osce_plan.md): el
- * docente evalúa en vivo, ítem por ítem, en una tablet. Hay dos tipos de
- * ítem:
+ * docente evalúa en vivo, ítem por ítem, en una tablet. Tipos de ítem:
  *
- * - tick: cumple (puntaje completo), parcial (la mitad) o no cumple (0).
+ * - si_no: dicotómico, sí (puntaje completo) o no (0). Para pasos que se
+ *   hacen o no se hacen (lavado de manos, montaje en su sitio).
+ * - tick: escala de tres niveles, cumple (completo), parcial (la mitad) o
+ *   no cumple (0).
+ * - escala: escala de apreciación con descriptores, niveles 3 (logrado) a
+ *   0 (no logrado); vale nivel/3 del puntaje. Para lo que se juzga por
+ *   calidad (comunicación, desempeño global): el descriptor dice qué se ve
+ *   en cada nivel, así dos docentes ponen lo mismo.
  * - impedancias: el docente anota el valor de cada cable en kΩ y el sistema
  *   calcula el interelectrodo (mayor − menor, y la tabla par a par) contra
  *   los límites del examen. Puntaje completo si cumplen el límite por
@@ -26,6 +32,55 @@ require_once __DIR__ . '/Osce.php';
 final class OscePauta
 {
     public const TICK = ['cumple' => 'Cumple', 'parcial' => 'Parcial', 'no_cumple' => 'No cumple'];
+
+    public const TIPOS_ITEM = [
+        'si_no' => 'Dicotómico (sí / no)',
+        'tick' => 'Escala de 3 niveles (cumple / parcial / no cumple)',
+        'escala' => 'Escala con descriptores (logrado a no logrado)',
+        'impedancias' => 'Impedancias (kΩ por cable)',
+    ];
+
+    /** Niveles de la escala con descriptores, del más alto al más bajo. */
+    public const NIVELES = [3 => 'Logrado', 2 => 'Mayormente logrado', 1 => 'Parcialmente logrado', 0 => 'No logrado'];
+
+    /**
+     * Opciones que el docente puede marcar en un ítem: valor, rótulo,
+     * fracción del puntaje y descriptor (solo en la escala).
+     *
+     * @return list<array{v: string, rotulo: string, frac: float, desc: string}>
+     */
+    public static function opciones(array $item): array
+    {
+        $tipo = (string) ($item['tipo'] ?? 'tick');
+        if ($tipo === 'si_no') {
+            return [['v' => 'cumple', 'rotulo' => 'Sí', 'frac' => 1.0, 'desc' => ''],
+                    ['v' => 'no_cumple', 'rotulo' => 'No', 'frac' => 0.0, 'desc' => '']];
+        }
+        if ($tipo === 'escala') {
+            $desc = ($item['cfg'] ?? json_decode((string) ($item['config'] ?? '{}'), true) ?: [])['niveles'] ?? [];
+            $out = [];
+            foreach (self::NIVELES as $n => $rotulo) {
+                $out[] = ['v' => 'n' . $n, 'rotulo' => $rotulo, 'frac' => $n / 3, 'desc' => (string) ($desc[$n] ?? $desc[(string) $n] ?? '')];
+            }
+            return $out;
+        }
+        $out = [];
+        foreach (self::TICK as $v => $rotulo) {
+            $out[] = ['v' => $v, 'rotulo' => $rotulo, 'frac' => $v === 'cumple' ? 1.0 : ($v === 'parcial' ? 0.5 : 0.0), 'desc' => ''];
+        }
+        return $out;
+    }
+
+    /** Rótulo de lo marcado en un ítem ("Sí", "Logrado"...), o null. */
+    public static function rotuloValor(array $item, $valor): ?string
+    {
+        foreach (self::opciones($item) as $o) {
+            if ($o['v'] === $valor) {
+                return $o['rotulo'];
+            }
+        }
+        return null;
+    }
 
     /**
      * Montaje por examen: electrodos (nombre del cable y sitio), límites en
@@ -129,20 +184,31 @@ final class OscePauta
     {
         $m = self::montaje($examen);
         $sitios = implode('; ', array_map(static fn ($e) => $e[0] . ': ' . $e[1], $m['electrodos']));
-        $tick = static fn (string $t, float $p = 1, bool $c = false): array =>
-            ['texto' => $t, 'puntaje' => $p, 'critico' => $c, 'tipo' => 'tick', 'config' => []];
+        $item = static fn (string $tipo, string $t, float $p = 1, bool $c = false, array $cfg = []): array =>
+            ['texto' => $t, 'puntaje' => $p, 'critico' => $c, 'tipo' => $tipo, 'config' => $cfg];
+        $si = static fn (string $t, float $p = 1, bool $c = false): array => $item('si_no', $t, $p, $c);
+        $escala = static fn (string $t, float $p, array $niveles): array => $item('escala', $t, $p, false, ['niveles' => $niveles]);
         return [
-            $tick('Prepara el material: alcohol, algodón, gel abrasivo, gel conductor, cinta adhesiva, electrodos y cables; ' . $m['material_extra'] . '.'),
-            $tick('Enciende y verifica el funcionamiento del equipo.'),
-            $tick('Mantiene separadas las áreas limpias y sucias.'),
-            $tick('Realiza lavado clínico de manos.', 1, true),
-            $tick('Se presenta como estudiante bajo supervisión docente y explica en qué consiste el examen.'),
-            $tick('Explica la limpieza (' . $m['zonas'] . ') y que la piel puede quedar enrojecida o hacer una costra que desaparece en pocos días.'),
-            $tick('Limpia con alcohol las zonas de los electrodos.'),
-            $tick('Aplica gel abrasivo en una sola dirección, sin dañar la piel.'),
-            $tick($m['posicion'] . '.'),
-            $tick('Montaje: ' . $sitios . '.', 2, true),
-            $tick('Usa gel conductor en cada electrodo y los fija con cinta adhesiva.'),
+            // A. Preparación y bioseguridad (dicotómicos: se hace o no se hace)
+            $si('Prepara el material antes de empezar: alcohol, algodón, gel abrasivo, gel conductor, cinta adhesiva, electrodos y cables; ' . $m['material_extra'] . '.'),
+            $si('Enciende y verifica el funcionamiento del equipo.'),
+            $si('Realiza lavado clínico de manos (o higiene con alcohol gel) antes de tocar al paciente.', 1, true),
+            $si('Mantiene separadas las áreas limpia y sucia y desecha el material usado donde corresponde.'),
+            // B. Comunicación (escala: se juzga la calidad)
+            $escala('Comunicación con el paciente: se presenta como estudiante bajo supervisión docente, explica el examen y la limpieza ('
+                    . $m['zonas'] . ') y avisa que la piel puede quedar enrojecida o hacer una costra que desaparece en pocos días.', 2, [
+                3 => 'Se presenta y explica todo con lenguaje claro, sin tecnicismos, y verifica que el paciente entendió.',
+                2 => 'Explica el examen y la limpieza, pero omite un aviso (la piel enrojecida) o usa tecnicismos sin aclararlos.',
+                1 => 'Explica solo parte (o lo hace mientras ya está limpiando); el paciente queda con dudas.',
+                0 => 'No se presenta ni explica: empieza a limpiar sin decir nada.',
+            ]),
+            $si($m['posicion'] . '.'),
+            // C. Limpieza y montaje
+            $si('Limpia con alcohol cada zona de electrodo (' . $m['zonas'] . ').'),
+            $item('tick', 'Aplica gel abrasivo en una sola dirección, con la presión justa y sin dañar la piel.'),
+            $si('Montaje correcto: ' . $sitios . '. Cada electrodo en su sitio y con su color.', 2, true),
+            $si('Pone gel conductor en cada electrodo y los fija con cinta adhesiva.'),
+            // D. Impedancias
             [
                 'texto' => 'Impedancias obtenidas',
                 'puntaje' => 2,
@@ -154,8 +220,15 @@ final class OscePauta
                     'inter_kohm' => $m['inter_kohm'],
                 ],
             ],
-            $tick('Si alguna impedancia no cumple, repite la limpieza o agrega gel conductor antes de seguir.'),
-            $tick($m['transductor'] . '.'),
+            $si('Revisa las impedancias y, si alguna no cumple, repite la limpieza o agrega gel conductor antes de seguir (si todas cumplen de entrada: Sí).'),
+            $si($m['transductor'] . '.'),
+            // E. Desempeño global (escala: el juicio del docente sobre el conjunto)
+            $escala('Desempeño global del procedimiento', 3, [
+                3 => 'Trabaja con orden, seguridad y sin ayuda; el paciente queda cómodo e informado y el montaje queda listo para registrar.',
+                2 => 'Completa el procedimiento con errores menores que corrige solo, o pierde algo de orden o de tiempo.',
+                1 => 'Necesita indicaciones del docente o repite pasos; el montaje queda con fallas que afectarían el registro.',
+                0 => 'No completa el montaje o pone en riesgo al paciente (bioseguridad, daño de la piel).',
+            ]),
         ];
     }
 
@@ -252,15 +325,16 @@ final class OscePauta
                     'marcado' => true, 'calculo' => $c];
         }
         $valor = is_string($valor) ? $valor : '';
-        switch ($valor) {
-            case 'cumple': $pts = $p; break;
-            case 'parcial': $pts = $p / 2; break;
-            default: $pts = 0.0;
+        $op = null;
+        foreach (self::opciones($item) as $o) {
+            if ($o['v'] === $valor) {
+                $op = $o;
+            }
         }
         return [
-            'puntaje' => round($pts, 2),
-            'critico_fallado' => $critico && $valor === 'no_cumple',
-            'marcado' => isset(self::TICK[$valor]),
+            'puntaje' => $op !== null ? round($p * $op['frac'], 2) : 0.0,
+            'critico_fallado' => $critico && $op !== null && $op['frac'] <= 0.0,
+            'marcado' => $op !== null,
             'calculo' => null,
         ];
     }
@@ -303,7 +377,7 @@ final class OscePauta
             throw new InvalidArgumentException('El ítem necesita un texto.');
         }
         $tipo = (string) ($in['tipo'] ?? 'tick');
-        if (!in_array($tipo, ['tick', 'impedancias'], true)) {
+        if (!isset(self::TIPOS_ITEM[$tipo])) {
             throw new InvalidArgumentException('Tipo de ítem no válido.');
         }
         $puntaje = (float) str_replace(',', '.', (string) ($in['puntaje'] ?? '1'));
@@ -311,6 +385,19 @@ final class OscePauta
             throw new InvalidArgumentException('Puntaje del ítem: mayor que 0 y hasta 100.');
         }
         $cfg = [];
+        if ($tipo === 'escala') {
+            // Un descriptor por línea, del nivel 3 (logrado) al 0 (no logrado).
+            $lineas = array_values(array_filter(array_map('trim', preg_split('/\r?\n/', (string) ($in['niveles'] ?? '')) ?: []),
+                                                static fn ($l) => $l !== ''));
+            if (count($lineas) !== 4) {
+                throw new InvalidArgumentException('Escala: escribe los 4 descriptores, uno por línea, de "logrado" a "no logrado".');
+            }
+            $niveles = [];
+            foreach ($lineas as $k => $l) {
+                $niveles[3 - $k] = mb_substr((string) preg_replace('/^\s*[0-3]\s*[:.\-–]\s*/u', '', $l), 0, 400);
+            }
+            $cfg = ['niveles' => $niveles];
+        }
         if ($tipo === 'impedancias') {
             $lineas = preg_split('/\r?\n/', (string) ($in['electrodos'] ?? '')) ?: [];
             $elec = array_values(array_filter(array_map('trim', $lineas), static fn ($l) => $l !== ''));
@@ -429,7 +516,7 @@ final class OscePauta
             }
             $guardar = $it['tipo'] === 'impedancias'
                 ? ['kohm' => $r['calculo']['valores'] ?? [], 'calculo' => $r['calculo']]
-                : (is_string($valor) && isset(self::TICK[$valor]) ? $valor : '');
+                : ($r['marcado'] ? (string) $valor : '');
             $filas[] = [(int) $it['id'], json_encode($guardar, JSON_UNESCAPED_UNICODE), $r['puntaje'],
                         mb_substr(trim((string) ($dato['comentario'] ?? '')), 0, 2000)];
         }

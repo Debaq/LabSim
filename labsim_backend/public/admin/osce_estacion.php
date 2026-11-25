@@ -218,13 +218,21 @@ admin_header('Estación · ' . $est['titulo'], $me);
     <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Ítem</th><th>Puntos</th><th>Crítico</th><th></th></tr></thead>
         <tbody>
-        <?php foreach ($items as $k => $it): $fid = 'it' . (int) $it['id']; $imp = $it['tipo'] === 'impedancias'; ?>
+        <?php foreach ($items as $k => $it): $fid = 'it' . (int) $it['id']; $imp = $it['tipo'] === 'impedancias'; $esc = $it['tipo'] === 'escala'; ?>
             <tr class="pauta-item">
                 <td><?= $k + 1 ?></td>
                 <?php if ($editable): ?>
                 <td>
                     <textarea form="<?= $fid ?>" name="texto" rows="2"><?= htmlspecialchars($it['texto']) ?></textarea>
-                    <input form="<?= $fid ?>" type="hidden" name="tipo" value="<?= htmlspecialchars($it['tipo']) ?>">
+                    <?php if ($imp): ?>
+                    <input form="<?= $fid ?>" type="hidden" name="tipo" value="impedancias">
+                    <?php else: ?>
+                    <select form="<?= $fid ?>" name="tipo" style="width:auto; margin-top:0.3rem;" data-tipo-item>
+                        <?php foreach (OscePauta::TIPOS_ITEM as $tk => $tv): if ($tk === 'impedancias') { continue; } ?><option value="<?= $tk ?>"<?= $tk === $it['tipo'] ? ' selected' : '' ?>><?= htmlspecialchars($tv) ?></option><?php endforeach; ?>
+                    </select>
+                    <label data-niveles<?= $esc ? '' : ' hidden' ?>>Descriptores (uno por línea: logrado, mayormente, parcialmente, no logrado)
+                        <textarea form="<?= $fid ?>" name="niveles" rows="4"><?= htmlspecialchars(implode("\n", array_map(static fn ($n) => $n . ': ' . ($it['cfg']['niveles'][$n] ?? ''), [3, 2, 1, 0]))) ?></textarea></label>
+                    <?php endif; ?>
                     <?php if ($imp): ?>
                     <div class="pauta-imp">
                         <label>Electrodos (uno por línea)
@@ -250,7 +258,8 @@ admin_header('Estación · ' . $est['titulo'], $me);
                     </form>
                 </td>
                 <?php else: ?>
-                <td><?= htmlspecialchars($it['texto']) ?>
+                <td><?= htmlspecialchars($it['texto']) ?> <span class="help help--xs"><?= htmlspecialchars(OscePauta::TIPOS_ITEM[$it['tipo']] ?? '') ?></span>
+                    <?php if ($esc): ?><ul class="help help--xs" style="margin:0.2rem 0 0;"><?php foreach (OscePauta::NIVELES as $n => $rot): ?><li><strong><?= $rot ?>:</strong> <?= htmlspecialchars((string) ($it['cfg']['niveles'][$n] ?? '')) ?></li><?php endforeach; ?></ul><?php endif; ?>
                     <?php if ($imp): ?><div class="help help--xs"><?= htmlspecialchars(implode(' · ', $it['cfg']['electrodos'] ?? [])) ?> — &lt; <?= $fmt($it['cfg']['max_kohm'] ?? 0) ?> kΩ<?= isset($it['cfg']['inter_kohm']) ? ', interelectrodo &lt; ' . $fmt($it['cfg']['inter_kohm']) . ' kΩ' : '' ?></div><?php endif; ?></td>
                 <td><?= $fmt($it['puntaje']) ?></td>
                 <td><?= (int) $it['critico'] ? '<span class="tag tag--danger">crítico</span>' : '' ?></td>
@@ -272,12 +281,13 @@ admin_header('Estación · ' . $est['titulo'], $me);
         <div class="row row--gap-lg row--center">
             <label>Tipo
                 <select name="tipo" id="nuevo-tipo">
-                    <option value="tick">Cumple / parcial / no cumple</option>
-                    <option value="impedancias">Impedancias (kΩ por cable)</option>
+                    <?php foreach (OscePauta::TIPOS_ITEM as $tk => $tv): ?><option value="<?= $tk ?>"><?= htmlspecialchars($tv) ?></option><?php endforeach; ?>
                 </select></label>
             <label>Puntos <input type="text" inputmode="decimal" name="puntaje" value="1" class="input--narrow"></label>
             <label class="inline-check"><input type="checkbox" name="critico" value="1"> Crítico</label>
         </div>
+        <label id="nuevo-niveles" hidden>Descriptores (uno por línea: logrado, mayormente, parcialmente, no logrado)
+            <textarea name="niveles" rows="4" style="display:block; width:100%;" placeholder="Lo hace completo, ordenado y sin ayuda&#10;Lo completa con errores menores que corrige solo&#10;Necesita indicaciones o queda incompleto&#10;No lo hace o pone en riesgo al paciente"></textarea></label>
         <div class="pauta-imp" id="nuevo-imp" hidden>
             <label>Electrodos (uno por línea)
                 <textarea name="electrodos"><?= htmlspecialchars(implode("\n", array_map(static fn ($e) => $e[0] . ' · ' . $e[1], $montaje['electrodos']))) ?></textarea></label>
@@ -289,6 +299,12 @@ admin_header('Estación · ' . $est['titulo'], $me);
     <script>
     document.getElementById('nuevo-tipo').addEventListener('change', function () {
         document.getElementById('nuevo-imp').hidden = this.value !== 'impedancias';
+        document.getElementById('nuevo-niveles').hidden = this.value !== 'escala';
+    });
+    document.querySelectorAll('[data-tipo-item]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            sel.parentNode.querySelector('[data-niveles]').hidden = sel.value !== 'escala';
+        });
     });
     </script>
     <?php endif; ?>

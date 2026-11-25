@@ -70,6 +70,35 @@ final class OsceApp
             ['Informa la amplitud de cada oído y el porcentaje de asimetría con su significancia (33 % o más es significativo)', 2],
             ['Concluye correctamente sobre la función utricular (vía vestíbulo-ocular) de cada oído', 2],
         ],
+        // Pruebas que no están en el protocolo 2019: los límites son los del
+        // simulador (src/abr/ecochg.py y cortical.py), los que se vieron en clases.
+        'ecochg' => [
+            ['Informa por OD y OI si se registran el PS y el PA, con la latencia del PA', 1],
+            ['Informa la razón PS/PA de cada oído y la compara con el límite de su electrodo (conducto 0,50; tímpano 0,40; promontorio 0,35)', 2],
+            ['Si la midió, informa la razón de áreas PS/PA (límite 1,94)', 1],
+            ['Concluye por oído si el registro es compatible o no con hidrops endolinfático', 2],
+        ],
+        'latencia_media' => [
+            ['Informa por oído y por electrodo (C3, Cz, C4) la presencia de Na y Pa con sus latencias (adulto: Na ~18 ms, Pa ~30 ms)', 1],
+            ['Informa la amplitud Na-Pa de cada electrodo (normal 0,5 a 2 µV)', 1],
+            ['Calcula e interpreta el efecto electrodo y el efecto oído (una diferencia de 50 % o más es significativa)', 2],
+            ['Concluye si hay compromiso de la vía tálamo-cortical y de qué lado (hemisferio u oído)', 2],
+        ],
+        'latencia_tardia' => [
+            ['Informa por oído si se registran P1, N1 y P2 en Cz, con sus latencias (adulto: P1 ~55, N1 ~100, P2 ~180 ms; en niños la P1 depende de la edad)', 2],
+            ['Informa la amplitud N1-P2 (adulto 4 a 15 µV)', 1],
+            ['Concluye si la respuesta cortical es normal para la edad y si sugiere detección cortical del sonido', 2],
+        ],
+        'p300' => [
+            ['Informa la presencia de la P3 en Pz frente al frecuente, con su latencia (adulto ~300 ms, sube con la edad)', 2],
+            ['Informa la amplitud de la P3 y si el paciente atendió la tarea (cuenta de raros)', 1],
+            ['Concluye si el procesamiento cognitivo-auditivo (discriminación y atención) está conservado', 2],
+        ],
+        'mmn' => [
+            ['Informa la presencia de la MMN en la onda de diferencia (Fz), con su latencia (150 a 250 ms)', 2],
+            ['Informa la amplitud de la MMN (0,5 a 5 µV) y que el registro fue pasivo', 1],
+            ['Concluye si la discriminación auditiva preatencional está conservada', 2],
+        ],
         'otro' => [
             ['Describe por OD y OI lo que se registró, con sus valores', 2],
             ['Interpreta los hallazgos contra lo esperado', 2],

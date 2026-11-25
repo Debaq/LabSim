@@ -53,7 +53,7 @@ body { max-width: 34rem; margin: 0 auto; padding: 1rem; }
 .det-lista li { padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #ddd); }
 .det-lista li > span:first-child { display: block; }
 .det-v { font-weight: 600; font-size: 0.95rem; }
-.det-cumple { color: #15803d; } .det-parcial { color: #b45309; } .det-no_cumple { color: #b91c1c; }
+.det-cumple, .det-n3 { color: #15803d; } .det-n2 { color: #4d7c0f; } .det-parcial, .det-n1 { color: #b45309; } .det-no_cumple, .det-n0 { color: #b91c1c; }
 .det-com { font-size: 0.92rem; color: var(--color-text-muted, #555); margin-top: 0.3rem; }
 .det-q { padding: 0.6rem 0; border-bottom: 1px solid var(--color-border, #ddd); }
 .det-ops { list-style: none; padding: 0; margin: 0.3rem 0; }
@@ -220,7 +220,7 @@ $cabeza('OSCE · ' . $o['nombre']);
                         ? htmlspecialchars(implode(' · ', array_map(static fn ($x) => $x === null ? '—' : str_replace('.', ',', (string) $x), $calc['valores']))) . ' kΩ · interelectrodo ' . str_replace('.', ',', (string) $calc['inter'])
                         : 'sin registro' ?></span>
                 <?php else: ?>
-                    <span class="det-v det-<?= htmlspecialchars((string) ($g['valor'] ?? '')) ?>"><?= htmlspecialchars(OscePauta::TICK[$g['valor'] ?? ''] ?? 'Sin marcar') ?></span>
+                    <span class="det-v det-<?= htmlspecialchars((string) ($g['valor'] ?? '')) ?>"><?= htmlspecialchars(OscePauta::rotuloValor($it, $g['valor'] ?? '') ?? 'Sin marcar') ?></span>
                 <?php endif; ?>
                 <?php if ($g && trim((string) $g['comentario']) !== ''): ?><div class="det-com"><?= nl2br(htmlspecialchars((string) $g['comentario'])) ?></div><?php endif; ?>
             </li>
