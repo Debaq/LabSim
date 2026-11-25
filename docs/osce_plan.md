@@ -181,8 +181,8 @@ App LabSim:
    entrega (no `action_logs`), con bonificaciones; ABR y VEMP (2026-11-25).
 6. ✅ `conclusion` con IA + revisión docente (2026-11-25). Publicar resultados ya
    estaba desde el paso 3.
-7. ✅ Rotación en cadena, tarjetas sorteadas con número (gafete en el pecho +
-   talón privado con QR), panel de control del coordinador, avisos de tiempo
+7. ✅ Rotación en cadena, tarjetas sorteadas con número (un solo gafete en el
+   pecho: número grande + QR y código chicos), panel de control del coordinador, avisos de tiempo
    en cada pantalla y cierre automático; sin timbre ni proyector (2026-11-25).
 8. ✅ Estaciones por competencias: tareas con peso %, pacientes variantes por
    número (el mismo en todas las tareas), barra "Siguiente tarea" sin volver,
@@ -230,7 +230,13 @@ Contenido que falta cargar (en el sistema, por estación):
 Sistema:
 - Probar el día completo de punta a punta con 17 números (sorteo, cadena,
   las 6 estaciones, panel de control, cierre automático, publicación).
-- Gafetes temáticos de 2026 (ver memoria: dinosaurio, animal chileno, pez en
-  años anteriores): elegir tema, ilustración + nombre en el gafete.
+- **Imágenes de los gafetes (tradición del curso, él pidió anotarlo):** cada
+  año el gafete lleva el dibujo de un ser vivo con su nombre, de un tema que
+  cambia por año, "para culturizar" (hace tres años peces, después un animal
+  chileno, el año pasado dinosaurios). Los alumnos los guardan; los de 2026
+  esperan el suyo. Falta: elegir el tema de 2026 (sin repetir), hacer las
+  ilustraciones (una por número, 17+) con nombre común y científico, y
+  ponerlas en la tarjeta (`admin/osce.php?tarjetas=1`) junto al número sin
+  tapar el QR ni el código.
 - Opcional: tabla consolidada de notas con exportación CSV; pauta en papel de
   respaldo por si falla la red.

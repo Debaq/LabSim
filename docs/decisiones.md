@@ -218,6 +218,13 @@ equipo (ABR o VEMP).
 - **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
   otra pasada de la IA lo pisan (probado).
 
+**Gafete único con QR y código chicos (2026-11-25).** Reemplaza el "gafete
++ talón privado" de más abajo. Él: "en gafete tendrá el QR y el código
+chiquito, así no imprimo dos cosas aparte". Una sola pieza de 92×64 mm, seis
+por hoja: número grande, y abajo el QR (17 mm, se lee a 300 dpi), el código y
+la hora de la limpieza. Como el QR queda a la vista, el alumno lo escanea
+apenas saca la tarjeta: el primer escaneo la deja a su nombre.
+
 **La sugerencia del oído contrario no pisa uno ya elegido (2026-11-25).**
 Al armar pacientes de práctica, elegir OD y después un cuadro unilateral en OI
 dejaba el OD en normal sin aviso (la sugerencia "un cuadro unilateral propone

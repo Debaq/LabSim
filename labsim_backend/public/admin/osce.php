@@ -47,10 +47,11 @@ $inicioEpoch = static function (array $o): ?int {
 };
 
 // -- Tarjetas para imprimir (página suelta, sin el layout del panel) --------
-// Se imprimen SIN NOMBRE: el número se sortea en papel el día del OSCE. Cada
-// tarjeta se recorta en dos: el gafete (número grande) va en el pecho, a la
-// vista de los evaluadores; el talón con el QR y el código es privado (con él
-// se ve la nota) y con él el alumno amarra la tarjeta (student/osce.php).
+// Se imprimen SIN NOMBRE: el número se sortea en papel el día del OSCE. Una
+// sola pieza, el gafete, que va en el pecho a la vista de los evaluadores:
+// el número grande y, abajo y en chico, el QR y el código (él: "así no
+// imprimo dos cosas aparte"). Con el QR el alumno amarra la tarjeta y ve su
+// avance y su nota (student/osce.php). Dos por fila en A4.
 if ($osce !== null && isset($_GET['tarjetas'])) {
     $parts = Osce::participantes($id);
     $estaciones = Osce::estaciones($id);
@@ -63,23 +64,21 @@ if ($osce !== null && isset($_GET['tarjetas'])) {
 <html lang="es"><head><meta charset="utf-8"><title>Tarjetas OSCE — <?= htmlspecialchars($osce['nombre']) ?></title>
 <style>
 body { font-family: system-ui, sans-serif; margin: 0; color: #111; }
-.tarjeta { display: grid; grid-template-columns: 1.45fr 1fr; height: 66mm; border-bottom: 1px dashed #999; break-inside: avoid; box-sizing: border-box; }
-.gafete { display: grid; place-items: center; text-align: center; padding: 4mm; border-right: 1.5px dashed #5d1049; position: relative; }
-.gafete .num { font-size: 120pt; font-weight: 900; color: #5d1049; line-height: .9; }
-.gafete .osce { font-size: 9pt; color: #666; text-transform: uppercase; letter-spacing: 1pt; }
-.gafete .tijera, .talon .tijera { position: absolute; top: 1mm; font-size: 9pt; color: #5d1049; }
-.gafete .tijera { right: -3mm; background: #fff; }
-.talon { display: grid; grid-template-columns: auto 1fr; gap: 4mm; align-items: center; padding: 4mm 6mm; }
-.talon svg { width: 30mm; height: 30mm; }
-.talon .priv { font-size: 8pt; font-weight: 700; color: #b91c1c; text-transform: uppercase; letter-spacing: .5pt; }
-.talon .n { font-size: 16pt; font-weight: 800; color: #5d1049; }
-.talon .cod { font: 700 13pt ui-monospace, monospace; letter-spacing: 1pt; margin: 1mm 0; }
-.talon .det { font-size: 8pt; color: #333; line-height: 1.35; }
+.hoja { display: grid; grid-template-columns: repeat(2, 92mm); gap: 4mm; justify-content: center; }
+.gafete { width: 92mm; height: 64mm; border: 1px dashed #999; box-sizing: border-box; padding: 3mm 4mm; break-inside: avoid;
+          display: grid; grid-template-rows: auto 1fr auto; }
+.gafete .osce { font-size: 8pt; color: #666; text-transform: uppercase; letter-spacing: 1pt; text-align: center; }
+.gafete .num { font-size: 92pt; font-weight: 900; color: #5d1049; line-height: .85; text-align: center; align-self: center; }
+.gafete .pie { display: grid; grid-template-columns: auto 1fr; gap: 3mm; align-items: center; }
+.gafete .pie svg { width: 17mm; height: 17mm; display: block; }
+.gafete .cod { font: 700 9pt ui-monospace, monospace; letter-spacing: .5pt; }
+.gafete .det { font-size: 6.5pt; color: #333; line-height: 1.3; }
 .no-print { padding: 1rem; }
 @media print { .no-print { display: none; } @page { margin: 8mm; } }
 </style></head><body>
 <div class="no-print"><button onclick="window.print()">Imprimir</button> · <?= count($parts) ?> tarjetas · <a href="osce.php?id=<?= $id ?>">Volver</a>
-    · Se recorta por la línea punteada: el <strong>gafete</strong> va en el pecho, el <strong>talón</strong> (QR) lo guarda el alumno.</div>
+    · Se recorta por la línea punteada. El gafete va en el pecho; el alumno escanea su QR apenas lo saca, así la tarjeta queda a su nombre.</div>
+<div class="hoja">
 <?php foreach ($parts as $p):
     $entra = null;
     if ($S > 0 && ($cfg['modo'] ?? '') === 'cadena') {
@@ -90,26 +89,20 @@ body { font-family: system-ui, sans-serif; margin: 0; color: #111; }
         $entra = Osce::inicioSlot($cfg, (int) $p['vuelta'], 0);
     }
     ?>
-<div class="tarjeta">
-    <div class="gafete">
-        <span class="tijera">✂</span>
-        <div><div class="osce"><?= htmlspecialchars($osce['nombre']) ?></div><div class="num"><?= (int) $p['numero'] ?></div></div>
-    </div>
-    <div class="talon">
+<div class="gafete">
+    <div class="osce"><?= htmlspecialchars($osce['nombre']) ?></div>
+    <div class="num"><?= (int) $p['numero'] ?></div>
+    <div class="pie">
         <?= QrSvg::svg($urlAlumno((string) $p['token']), 3) ?>
         <div>
-            <div class="priv">Talón privado · no lo muestres</div>
-            <div class="n">N.º <?= (int) $p['numero'] ?></div>
             <div class="cod"><?= htmlspecialchars($p['codigo']) ?></div>
-            <div class="det">
-                Escanea el QR y elige tu nombre: ahí ves tu avance y, al final, tu nota.
-                <?php if ($entra !== null): ?><br>Te presentas en la limpieza: <strong><?= $t0 !== null ? date('H:i', $t0 + $entra) : '+' . $min($entra) . ' min' ?></strong><?php endif; ?>
-                <br>En las estaciones escribe tu número.
-            </div>
+            <div class="det">Escanea el QR y elige tu nombre: tu avance y tu nota.
+                <?php if ($entra !== null): ?><br>Limpieza: <strong><?= $t0 !== null ? date('H:i', $t0 + $entra) : '+' . $min($entra) . ' min' ?></strong> · <?php else: ?><br><?php endif; ?>En las estaciones escribe tu número.</div>
         </div>
     </div>
 </div>
 <?php endforeach; ?>
+</div>
 </body></html>
 <?php
     exit;
