@@ -150,6 +150,8 @@ def test_marcaje_corticales_traen_sus_componentes():
         v = w.verdad_curvas.get(f'R1.{canal}')
         assert v is not None and v['visible'], (prueba, w.verdad_curvas.keys())
         assert comps <= set(v['waves']), (prueba, v['waves'].keys())
+        if prueba == 'MLR':
+            assert v['waves']['Na']['amp'] < 0 and abs(v['waves']['Na']['amp']) < 0.5, v['waves']['Na']
         curvas = {c['nombre']: c for c in w.osce_entrega()['curvas']}
         assert curvas[f'R1.{canal}']['canal'] == canal and curvas[f'R1.{canal}']['test'] == prueba
 

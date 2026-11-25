@@ -1648,11 +1648,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.last_metadata = metadata
         grupo = self.current_capture_curve
         # Verdad por canal (ver osce_entrega): dónde puso el generador cada
-        # componente. Los que en ese electrodo casi no se ven no cuentan.
+        # componente. Los que en ese electrodo casi no se ven no cuentan, y
+        # "casi no se ve" es relativo al canal: el Na del MLR mide décimas de
+        # µV y la P1 de un niño varios µV.
         for canal, comps in (metadata.get('componentes') or {}).items():
+            mayor = max((abs(c.get('amp', 0.0)) for c in comps.values()), default=0.0)
             self.verdad_curvas[f"{grupo}.{canal}"] = {
                 'visible': bool(metadata.get('waves_visible')),
-                'waves': {n: c for n, c in comps.items() if abs(c.get('amp', 0.0)) >= 0.15},
+                'waves': {n: c for n, c in comps.items()
+                          if mayor > 0 and abs(c.get('amp', 0.0)) >= self.OSCE_VISIBLE_FRAC * mayor},
                 'threshold': None,
             }
         data_line = {}
@@ -1687,6 +1691,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if motivo and self.state_capture == 'record' and not self.done:
             self.control.stop_capture()
             self.lbl_info.setText(self.lbl_info.text() + "  ·  " + motivo)
+
+    # Fracción del componente más grande del canal desde la que un componente
+    # cortical cuenta como visible en la verdad del OSCE (graph_cortical).
+    OSCE_VISIBLE_FRAC = 0.15
 
     # Barridos minimos antes de que la parada automatica pueda actuar: con
     # pocos el FSP sale alto por azar y el ruido residual no es confiable.
