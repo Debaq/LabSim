@@ -2592,6 +2592,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 'filter_passhigh': c.get('filter_passhigh'), 'filter_down': c.get('filter_down'),
                 'average': c.get('average'), 'transducer': c.get('transducer'),
                 'window_ms': tecnica.get('ventana_ms'), 'test': c.get('test'),
+                'mkg': c.get('mkg'), 'clamp': 'sí' if c.get('clamp') else 'no',
                 'marcas': {onda: (v[0] if isinstance(v, (list, tuple)) and v and v[0] is not None else None)
                            for onda, v in (c.get('LatAmp') or {}).items()},
             })

@@ -218,6 +218,22 @@ equipo (ABR o VEMP).
 - **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
   otra pasada de la IA lo pisan (probado).
 
+**Bonificación por la estrategia que pide el caso (2026-11-25).** Él: "no
+solo chirp, usar otras estrategias según el caso también es bonificación".
+En la estación de protocolo, "Estrategias extra según el caso": se cumple si
+el alumno registró alguna curva con ese parámetro en ese valor. Precargadas
+(apagadas, el docente activa las del caso): tone burst / NB chirp para umbral
+por frecuencia, vía ósea, enmascaramiento, tasa 81,1, tubo pinzado; en el
+VEMP, vía ósea y otra frecuencia (sintonía). Más "polaridades opuestas"
+(rarefacción y condensación en el mismo oído e intensidad) como regla propia.
+El docente agrega las suyas (parámetro + valor). Por defecto son bonificación.
+
+- **Lo que el caso pide no descuenta:** con vía ósea o polaridades opuestas
+  activas, "Transductor/Polaridad en cada curva" aceptan también esos valores
+  (`tambien` en el criterio). Sin esto, el alumno ganaba la bonificación y
+  perdía los mismos puntos en parámetros.
+- El ABR ahora manda por curva el enmascaramiento (`mkg`) y el tubo pinzado.
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una

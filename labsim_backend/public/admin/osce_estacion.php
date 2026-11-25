@@ -363,6 +363,27 @@ admin_header('Estación · ' . $est['titulo'], $me);
             <?php endforeach; ?>
             </tbody>
         </table></div>
+        <h3 style="margin-top:1rem;">Estrategias extra según el caso</h3>
+        <p class="help">Lo que este caso en particular pide además de la escalera: se cumple si el alumno registró <strong>alguna curva</strong> con ese parámetro en ese valor. Activa las que correspondan al caso (vienen apagadas) y agrega las tuyas en las filas vacías. Por defecto son bonificación.</p>
+        <?php $extrasEst = OsceApp::extras($est); $parExtra = OsceApp::parametrosExtra((string) $est['examen']);
+              $filasExtra = array_merge($extrasEst, array_fill(0, 3, ['activa' => false, 'texto' => '', 'clave' => 'stim', 'esperado' => '', 'puntos' => 1, 'bonus' => true])); ?>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Activa</th><th>Estrategia</th><th>Parámetro</th><th>Valor en alguna curva</th><th>Puntos</th><th>Bonificación</th></tr></thead>
+            <tbody>
+            <?php foreach ($filasExtra as $k => $x): ?>
+                <tr>
+                    <td><input type="checkbox" name="extras[<?= $k ?>][activa]" value="1"<?= !empty($x['activa']) ? ' checked' : '' ?>></td>
+                    <td><input type="text" name="extras[<?= $k ?>][texto]" value="<?= htmlspecialchars((string) $x['texto']) ?>" placeholder="Qué hace el alumno"></td>
+                    <td><select name="extras[<?= $k ?>][clave]" style="width:auto;">
+                        <?php foreach ($parExtra as $ck => $cr): ?><option value="<?= $ck ?>"<?= $ck === $x['clave'] ? ' selected' : '' ?>><?= htmlspecialchars($cr) ?></option><?php endforeach; ?>
+                    </select></td>
+                    <td><input type="text" name="extras[<?= $k ?>][esperado]" value="<?= htmlspecialchars((string) $x['esperado']) ?>" placeholder="valor, a | b o 1–120"></td>
+                    <td><input type="text" inputmode="decimal" name="extras[<?= $k ?>][puntos]" value="<?= $fmt($x['puntos']) ?>" class="input--narrow"></td>
+                    <td><input type="checkbox" name="extras[<?= $k ?>][bonus]" value="1"<?= !empty($x['bonus']) ? ' checked' : '' ?>></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table></div>
         <?php endif; ?>
         <?php if ($editable): ?><button type="submit" class="btn btn--sm">Guardar contenido</button><?php endif; ?>
         </fieldset>

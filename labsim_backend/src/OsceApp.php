@@ -217,7 +217,36 @@ TXT;
         'ambos' => ['Evalúa ambos oídos', ''],
         'umbral' => ['Umbral encontrado a ±{v} dB del real', 'tolerancia dB'],
         'umbral_chirp' => ['Se acerca al umbral con chirp y lo encuentra (±{v} dB)', 'tolerancia dB'],
-        'alguna_tasa' => ['Registra alguna curva a tasa {v} (sospecha de neuropatía)', 'tasa'],
+        'polaridades' => ['Registra el mismo oído e intensidad en rarefacción y en condensación (microfónica coclear)', ''],
+    ];
+
+    /**
+     * Estrategias extra según el caso: "registra alguna curva con <parámetro>
+     * = <valor>". El docente activa las que el caso pide (y agrega las
+     * suyas); por defecto son bonificación. [texto, parámetro, esperado].
+     */
+    public const EXTRAS_BASE = [
+        'peatc' => [
+            ['Usa tone burst para el umbral por frecuencia', 'stim', 'Burst 500 Hz | Burst 1 kHz | Burst 2 kHz | Burst 4 kHz | NB CE-Chirp LS 500 Hz | NB CE-Chirp LS 1 kHz | NB CE-Chirp LS 2 kHz | NB CE-Chirp LS 4 kHz'],
+            ['Registra por vía ósea (cuadro conductivo)', 'transducer', 'bone_vibrator'],
+            ['Enmascara el oído contralateral (asimetría)', 'mkg', '1–120'],
+            ['Sube la tasa a 81,1 (sospecha de neuropatía)', 'rate', '81.1'],
+            ['Pinza el tubo para descartar artefacto (microfónica coclear)', 'clamp', 'sí'],
+        ],
+        'cvemp' => [
+            ['Registra por vía ósea (cuadro conductivo)', 'transducer', 'Vibrador óseo (mastoides)'],
+            ['Prueba otra frecuencia del tone burst (sintonía)', 'freq', '750 Hz | 1000 Hz'],
+        ],
+        'ovemp' => [
+            ['Registra por vía ósea (cuadro conductivo)', 'transducer', 'Vibrador óseo (mastoides)'],
+            ['Prueba otra frecuencia del tone burst (sintonía)', 'freq', '500 Hz | 750 Hz'],
+        ],
+    ];
+
+    /** Parámetros de curva que solo sirven para las estrategias extra. */
+    public const PARAMETROS_EXTRA = [
+        'ABR' => ['mkg' => 'Enmascaramiento (dB)', 'clamp' => 'Tubo pinzado (sí/no)'],
+        'VEMP' => [],
     ];
 
     /** Por examen: clave => [activa, valor, puntos, bonificación]. */
@@ -226,7 +255,7 @@ TXT;
             'inicio' => [true, '80', 1, false], 'baja' => [true, '20', 1, false], 'sube' => [true, '10', 1, false],
             'sube_max' => [true, '90–100', 1, false], 'replica_max' => [true, '', 1, false],
             'replica_umbral' => [true, '', 1, false], 'ambos' => [true, '', 1, false], 'umbral' => [true, '10', 2, false],
-            'umbral_chirp' => [true, '10', 1, true], 'alguna_tasa' => [false, '81.1', 1, false],
+            'umbral_chirp' => [true, '10', 1, true], 'polaridades' => [false, '', 1, true],
         ],
         'cvemp' => [
             'inicio' => [false, '', 1, false], 'baja' => [true, '10', 1, false], 'sube' => [true, '5', 1, false],
@@ -358,6 +387,28 @@ TXT;
         return $out;
     }
 
+    /** Estrategias extra de la estación (las guardadas o las del examen, apagadas). */
+    public static function extras(array $est): array
+    {
+        $cfg = self::config($est);
+        if (isset($cfg['extras']) && is_array($cfg['extras'])) {
+            return $cfg['extras'];
+        }
+        return array_map(static fn ($e) => ['activa' => false, 'texto' => $e[0], 'clave' => $e[1], 'esperado' => $e[2],
+                                            'puntos' => 1, 'bonus' => true],
+                         self::EXTRAS_BASE[$est['examen']] ?? []);
+    }
+
+    /** Parámetros que se pueden pedir en una estrategia extra: clave => rótulo. */
+    public static function parametrosExtra(string $examen): array
+    {
+        $out = [];
+        foreach (self::parametros($examen) as $clave => [, $rotulo]) {
+            $out[$clave] = $rotulo;
+        }
+        return $out + self::PARAMETROS_EXTRA[self::modulo($examen)];
+    }
+
     /**
      * Guarda el contenido de una estación de la app y rehace sus ítems.
      * config_equipo: un ítem por parámetro con esperado. marcaje: uno por
@@ -463,6 +514,49 @@ TXT;
                                          'bonus' => $estrategia[$clave]['bonus']]];
             }
             $cfg['estrategia'] = $estrategia;
+            $extras = [];
+            $validos = self::parametrosExtra($examen);
+            foreach ((array) ($in['extras'] ?? []) as $e) {
+                $texto = trim((string) ($e['texto'] ?? ''));
+                $clave = (string) ($e['clave'] ?? '');
+                $esperado = trim((string) ($e['esperado'] ?? ''));
+                if ($texto === '' && $esperado === '') {
+                    continue;   // fila vacía
+                }
+                if (!isset($validos[$clave]) || $esperado === '' || $texto === '') {
+                    throw new InvalidArgumentException('Cada estrategia extra necesita texto, parámetro y valor.');
+                }
+                $extra = ['activa' => !empty($e['activa']), 'texto' => mb_substr($texto, 0, 200), 'clave' => $clave,
+                          'esperado' => $esperado, 'puntos' => $num($e['puntos'] ?? 1, 1.0) ?: 1.0, 'bonus' => !empty($e['bonus'])];
+                $extras[] = $extra;
+                if ($extra['activa']) {
+                    $items[] = ['texto' => $extra['texto'] . ($extra['bonus'] ? ' (bonificación)' : ''),
+                                'puntaje' => $extra['puntos'], 'critico' => false,
+                                'config' => ['regla' => 'alguna_curva', 'clave' => $clave, 'esperado' => $esperado,
+                                             'bonus' => $extra['bonus']]];
+                }
+            }
+            $cfg['extras'] = $extras;
+            // Lo que el caso pide no puede descontar en "parámetros en cada
+            // curva": si la estrategia del caso es la vía ósea, esas curvas
+            // también valen con vibrador (y con rarefacción/condensación si
+            // pide comparar polaridades).
+            $tambien = [];
+            foreach ($extras as $x) {
+                if ($x['activa']) {
+                    $tambien[$x['clave']][] = $x['esperado'];
+                }
+            }
+            if (!empty($estrategia['polaridades']['activa'])) {
+                $tambien['pol'][] = 'Rarefacción | Condensación';
+            }
+            foreach ($items as &$it) {
+                $c = $it['config'];
+                if ($c['regla'] === 'curvas_param' && !empty($tambien[$c['clave']])) {
+                    $it['config']['tambien'] = implode(' | ', $tambien[$c['clave']]);
+                }
+            }
+            unset($it);
             if (!$items) {
                 throw new InvalidArgumentException('Activa al menos un criterio.');
             }
@@ -670,8 +764,10 @@ TXT;
             }
             $bien = 0;
             $malos = [];
+            $tambien = (string) ($r['tambien'] ?? '');
             foreach ($curvas as $c) {
-                if (self::cumpleEsperado($c[$r['clave']] ?? null, (string) $r['esperado'])) {
+                $v = $c[$r['clave']] ?? null;
+                if (self::cumpleEsperado($v, (string) $r['esperado']) || ($tambien !== '' && self::cumpleEsperado($v, $tambien))) {
                     $bien++;
                 } elseif (count($malos) < 3) {
                     $malos[] = self::mostrar($r['clave'], $c[$r['clave']] ?? '—');
@@ -679,7 +775,8 @@ TXT;
             }
             return self::resultado($bien / count($curvas), "{$bien} de " . count($curvas) . ' curvas'
                 . ($malos ? ' (también ' . implode(', ', array_unique($malos)) . ')' : ''),
-                self::mostrarEsperado($r['clave'], (string) $r['esperado']), $pts);
+                self::mostrarEsperado($r['clave'], (string) $r['esperado'])
+                    . ($tambien !== '' ? ' (o ' . self::mostrarEsperado($r['clave'], $tambien) . ', por el caso)' : ''), $pts);
         }
 
         if ($regla === 'marca') {
@@ -860,13 +957,28 @@ TXT;
                 }
                 return self::resultado($bien / 2, implode(' · ', $txt), $esperado, $pts);
 
-            case 'alguna_tasa':
+            case 'alguna_curva':
+                $clave = (string) ($r['clave'] ?? '');
+                $esp = self::mostrarEsperado($clave, (string) ($r['esperado'] ?? ''));
                 foreach (self::curvas($payload) as $c) {
-                    if (self::cumpleEsperado($c['rate'] ?? null, $valor)) {
-                        return self::resultado(1.0, 'sí (' . ($c['side'] ?? '') . ' ' . self::db(self::nivel($c)) . ' dB)', $esperado, $pts);
+                    if (self::cumpleEsperado($c[$clave] ?? null, (string) ($r['esperado'] ?? ''))) {
+                        return self::resultado(1.0, 'sí: ' . ($c['side'] ?? '') . ' ' . self::db(self::nivel($c)) . ' dB, '
+                            . self::mostrar($clave, $c[$clave]), $esp, $pts);
                     }
                 }
-                return self::resultado(0.0, 'ninguna', $esperado, $pts);
+                return self::resultado(0.0, 'ninguna curva', $esp, $pts);
+
+            case 'polaridades':
+                $vistas = [];
+                foreach (self::curvas($payload) as $c) {
+                    $vistas[($c['side'] ?? '') . '|' . self::db(self::nivel($c))][(string) ($c['pol'] ?? '')] = true;
+                }
+                foreach ($vistas as $donde => $pols) {
+                    if (isset($pols['Rarefacción'], $pols['Condensación'])) {
+                        return self::resultado(1.0, 'sí: ' . str_replace('|', ' ', $donde) . ' dB', $esperado, $pts);
+                    }
+                }
+                return self::resultado(0.0, 'no', $esperado, $pts);
         }
         return ['puntaje' => 0.0, 'ok' => false, 'alumno' => '—', 'esperado' => '—'];
     }

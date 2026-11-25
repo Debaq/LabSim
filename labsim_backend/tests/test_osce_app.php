@@ -125,7 +125,27 @@ t_eq([$r['puntaje'], $r['alumno']], [2.0, 'OD 30 (real 25) · OI 50 (real 45)'],
 t_eq(OsceApp::evaluarItem($reg('umbral', '3'), $prot)['puntaje'], 0.0, 'Con ±3 dB ninguno');
 $r = OsceApp::evaluarItem($reg('umbral_chirp', '10', true), $prot);
 t_eq([$r['puntaje'], $r['alumno']], [0.5, 'OD sin umbral con chirp · OI 50 (real 45)'], 'Bonificación chirp: un oído');
-t_eq(OsceApp::evaluarItem($reg('alguna_tasa', '81.1'), $prot)['alumno'], 'ninguna', 'Sin curva a 81,1');
+$extra = static fn (string $clave, string $esperado) => $item(['regla' => 'alguna_curva', 'clave' => $clave, 'esperado' => $esperado, 'bonus' => true]);
+t_eq(OsceApp::evaluarItem($extra('rate', '81.1'), $prot)['alumno'], 'ninguna curva', 'Extra: sin curva a 81,1');
+$r = OsceApp::evaluarItem($extra('stim', 'CE-Chirp LS'), $prot);
+t_eq([$r['puntaje'], $r['alumno']], [1.0, 'sí: OI 80 dB, CE-Chirp LS'], 'Extra: alguna curva con chirp');
+$conMkg = $prot;
+$conMkg['curvas'][3]['mkg'] = 50;
+$conMkg['curvas'][4]['clamp'] = 'sí';
+$conMkg['curvas'][4]['transducer'] = 'bone_vibrator';
+t_eq(OsceApp::evaluarItem($extra('mkg', '1–120'), $conMkg)['ok'], true, 'Extra: enmascaró');
+t_eq(OsceApp::evaluarItem($extra('clamp', 'sí'), $conMkg)['ok'], true, 'Extra: pinzó el tubo');
+t_eq(OsceApp::evaluarItem($extra('transducer', 'bone_vibrator'), $conMkg)['alumno'], 'sí: OD 20 dB, Vibrador óseo', 'Extra: vía ósea');
+t_eq(OsceApp::evaluarItem($reg('polaridades'), $prot)['puntaje'], 0.0, 'Polaridades: no registró las dos');
+$pol = $prot;
+$pol['curvas'][] = $curva('R8', 'OD', 80, [], ['pol' => 'Rarefacción']);
+$pol['curvas'][] = $curva('R9', 'OD', 80, [], ['pol' => 'Condensación']);
+t_eq(OsceApp::evaluarItem($reg('polaridades'), $pol)['alumno'], 'sí: OD 80 dB', 'Polaridades: rarefacción y condensación en OD 80');
+t_true(count(OsceApp::EXTRAS_BASE['peatc']) === 5, 'PEATC: 5 estrategias extra precargadas');
+$cp = static fn (string $tambien = '') => $item(['regla' => 'curvas_param', 'clave' => 'transducer', 'esperado' => 'insert_earphone', 'tambien' => $tambien]);
+t_eq(OsceApp::evaluarItem($cp(), $conMkg)['alumno'], '9 de 10 curvas (también Vibrador óseo)', 'Sin la estrategia del caso, la vía ósea descuenta');
+$r = OsceApp::evaluarItem($cp('bone_vibrator'), $conMkg);
+t_eq([$r['puntaje'], $r['esperado']], [1.0, 'Fono de inserción (o Vibrador óseo, por el caso)'], 'Con vía ósea pedida por el caso, no descuenta');
 // Nunca bajó viendo respuesta: no buscó el umbral
 $quieto = ['curvas' => [$curva('R1', 'OD', 80, ['V' => 5.6]), $curva('R2', 'OD', 80, ['V' => 5.6])]];
 t_eq(OsceApp::evaluarItem($reg('baja', '20'), $quieto)['puntaje'], 0.0, 'Vio respuesta y nunca bajó: 0');
@@ -154,6 +174,7 @@ t_eq(OsceApp::ESPERADO['cvemp']['filter_passhigh'], '3', 'cVEMP: 3 Hz – 1,5 kH
 t_eq(OsceApp::ESPERADO['ovemp']['filter_down'], '1000', 'oVEMP: 1 Hz – 1 kHz');
 t_eq(OsceApp::ESTRATEGIA_BASE['cvemp']['sube'][1], '5', 'cVEMP: sin respuesta sube 5');
 t_true(OsceApp::ESTRATEGIA_BASE['peatc']['umbral_chirp'][3], 'PEATC: el chirp es bonificación');
+t_true(OsceApp::ESTRATEGIA_BASE['peatc']['polaridades'][3], 'PEATC: polaridades opuestas es bonificación');
 t_eq(OsceApp::textoRegla('baja', '20'), 'Con respuesta, baja de 20 en 20 dB', 'Texto del criterio');
 
 // -- Conclusión (la corrige la IA) -------------------------------------------
