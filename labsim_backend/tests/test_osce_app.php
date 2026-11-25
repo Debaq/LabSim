@@ -209,3 +209,24 @@ t_true(strpos($soloV, 'VEMP') === false, 'Datos reales: solo el equipo de la est
 t_true(strpos($datos, 'OD 80 dB Click: HAY respuesta; V 5,62 ms') !== false, 'Datos reales: latencia verdadera');
 t_true(strpos($datos, 'OD 10 dB Click: SIN respuesta; umbral real del oído 20 dB') !== false, 'Datos reales: sin respuesta y umbral');
 t_true(strpos(OsceApp::informe(['abr' => ['hallazgos' => 'h', 'conclusion' => 'c']]), "HALLAZGOS:\nh\n\nCONCLUSIÓN:\nc") === 0, 'Informe del alumno');
+
+// -- Tareas de una estación ------------------------------------------------------
+$tarea = ['variantes' => [['case_id' => 'a'], ['case_id' => 'b'], ['case_id' => 'c']]];
+t_eq(array_map(static fn ($n) => OsceApp::variante($tarea, $n, 0)['case_id'], [1, 2, 3, 4]), ['a', 'b', 'c', 'a'],
+     'Variantes: el paciente sale del número del alumno');
+t_eq(OsceApp::variante($tarea, 1, 1)['case_id'], 'b', 'Y se corre en cada tarea (no siempre "la primera" al mismo)');
+t_eq(OsceApp::variante(['variantes' => []], 3, 0), null, 'Tarea sin paciente');
+$varias = ['tareas' => [['panel' => ['pol' => 'Alternada']], ['panel' => ['pol' => 'Rarefacción']]]];
+t_eq(OsceApp::payloadDe($varias, 1)['panel']['pol'], 'Rarefacción', 'Entrega por tarea: cada ítem lee la suya');
+t_eq(OsceApp::payloadDe(['panel' => ['pol' => 'X']], 0)['panel']['pol'], 'X', 'Entrega de una sola tarea (como antes)');
+t_eq(OsceApp::payloadDe($varias, 5), [], 'Tarea a la que no llegó: vacía');
+t_eq(OsceApp::ondas('ecochg'), [['PS', 'PA'], ['PA']], 'ECochG: PS y PA arriba, PA en las demás');
+t_eq(OsceApp::CANAL_LECTURA['mmn'], 'Fz', 'MMN se marca en Fz');
+t_true(isset(OsceApp::parametros('p300')['tarea']) && !isset(OsceApp::parametros('peatc')['tarea']),
+       'La instrucción al paciente solo en el oddball');
+$cortical = ['curvas' => [
+    ['nombre' => 'R1.Fz', 'canal' => 'Fz', 'side' => 'OD', 'int' => 70, 'marcas' => ['P3' => 300.0]],
+    ['nombre' => 'R1.Pz', 'canal' => 'Pz', 'side' => 'OD', 'int' => 70, 'marcas' => ['P3' => 318.0]]],
+    'verdad' => ['R1.Pz' => ['visible' => true, 'waves' => ['P3' => ['lat' => 330.0, 'amp' => 9.0]]]]];
+$r = OsceApp::evaluarItem($item(['regla' => 'marca', 'lado' => 'OD', 'int' => 70, 'onda' => 'P3', 'tol_ms' => 25.0, 'canal' => 'Pz']), $cortical);
+t_eq([$r['ok'], $r['alumno']], [true, '318,00 ms'], 'P3 se corrige en Pz, no en el primer canal');

@@ -41,8 +41,9 @@ if ($accion === 'estacion') {
         'tipo' => $est['tipo'],
         'osce' => $o['nombre'],
         'reloj' => $o['reloj_token'],
-        'modulo' => OsceApp::modulo((string) $est['examen']),
-        'lista' => !empty($cfg['case_id']),
+        'modulo' => OsceApp::modulos($est)[0],
+        'modulos' => OsceApp::modulos($est),
+        'lista' => OsceApp::tareas($est) !== [],
     ]);
 }
 
@@ -86,21 +87,28 @@ $indice = (int) array_search((int) $est['id'], array_map('intval', array_column(
 $reloj = Osce::cfgReloj($o, count($estaciones), count(Osce::participantes((int) $o['id'])));
 
 if ($accion === 'entrar') {
-    $caso = OsceApp::caso((string) ($cfg['case_id'] ?? ''));
-    if ($caso === null) {
+    try {
+        $tareas = OsceApp::tareasParaAlumno($est, (int) $p['numero']);
+    } catch (InvalidArgumentException $e) {
+        Response::error($e->getMessage(), 409);
+    }
+    if (!$tareas) {
         Response::error('La estación no tiene paciente configurado. Avisa al docente.', 409);
     }
     Osce::marcarEntrada((int) $p['id'], (int) $est['id']);
+    // Arriba, la primera tarea suelta (como una estación de un solo caso).
+    $t0 = $tareas[0];
     Response::json([
         'ok' => true,
         'codigo' => $p['codigo'],
         'numero' => (int) $p['numero'],
         'tipo' => $est['tipo'],
-        'modulo' => OsceApp::modulo((string) $est['examen']),
-        'prueba' => $cfg['prueba'] ?? (OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR'),
-        'curvas' => in_array($est['tipo'], ['marcaje', 'conclusion'], true) ? ($cfg['curvas'] ?? []) : [],
+        'modulo' => $t0['modulo'],
+        'prueba' => $t0['prueba'],
+        'curvas' => $t0['curvas'],
+        'caso' => $t0['caso'],
+        'tareas' => $tareas,
         'ventana' => Osce::ventana($reloj, $p, $indice),
-        'caso' => $caso,
     ]);
 }
 

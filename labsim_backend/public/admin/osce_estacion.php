@@ -63,9 +63,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 OscePreguntas::mover($estId, $qId, $accion === 'q_up' ? -1 : 1);
                 break;
             case 'app':
-                OsceApp::guardarContenido($est, $_POST);
+                OsceApp::guardarTarea($est, (int) ($_POST['tarea'] ?? 0), $_POST);
                 $est = Osce::estacion($estId);
-                $success = 'Contenido de la estación guardado y criterios rehechos.';
+                $success = 'Tarea guardada y criterios rehechos.';
+                break;
+            case 'tarea_quitar':
+                OsceApp::quitarTarea($est, (int) ($_POST['tarea'] ?? -1));
+                $est = Osce::estacion($estId);
+                $success = 'Tarea quitada.';
+                break;
+            case 'tarea_up':
+            case 'tarea_down':
+                OsceApp::moverTarea($est, (int) ($_POST['tarea'] ?? -1), $accion === 'tarea_up' ? -1 : 1);
+                $est = Osce::estacion($estId);
+                break;
+            case 'pesos':
+                OsceApp::guardarPesos($est, (array) ($_POST['peso'] ?? []));
+                $est = Osce::estacion($estId);
+                $success = 'Pesos guardados.';
                 break;
             case 'gift':
                 $r = OscePreguntas::importarGift($estId, (string) ($_POST['gift'] ?? ''));
@@ -265,81 +280,147 @@ admin_header('Estación · ' . $est['titulo'], $me);
 <?php endif; ?>
 
 <?php if ($esApp):
-    $modulo = OsceApp::modulo((string) $est['examen']);
+    $tareas = OsceApp::tareas($est);
+    $nTareas = count($tareas);
+    // Tarea que se edita: ?tarea=k (k = nTareas es una nueva, con ?examen=).
+    $kTarea = isset($_GET['tarea']) ? max(0, min($nTareas, (int) $_GET['tarea'])) : (isset($_POST['tarea']) && $error !== null ? (int) $_POST['tarea'] : 0);
+    $nueva = $kTarea >= $nTareas;
+    $appCfg = $nueva ? [] : $tareas[$kTarea];
+    $examen = (string) ($appCfg['examen'] ?? ($_GET['examen'] ?? ($_POST['examen'] ?? $est['examen'])));
+    if (!isset(Osce::EXAMENES[$examen])) {
+        $examen = 'peatc';
+    }
+    $modulo = OsceApp::modulo($examen);
     $casos = OsceApp::casos($modulo);
     $esProtocolo = $est['tipo'] === 'protocolo';
     $esperado = $esProtocolo
-        ? ($appCfg['esperado_curvas'] ?? OsceApp::ESPERADO_CURVAS[$est['examen']] ?? [])
-        : ($appCfg['esperado'] ?? OsceApp::ESPERADO[$est['examen']] ?? []);
+        ? ($appCfg['esperado_curvas'] ?? OsceApp::ESPERADO_CURVAS[$examen] ?? [])
+        : ($appCfg['esperado'] ?? OsceApp::ESPERADO[$examen] ?? []);
     $puntosItem = [];
-    foreach ($items as $it) {
-        if (in_array($it['cfg']['regla'] ?? '', ['param', 'curvas_param'], true)) {
-            $puntosItem[$it['cfg']['clave']] = $it;
+    foreach ($appCfg['items'] ?? [] as $it) {
+        if (in_array($it['config']['regla'] ?? '', ['param', 'curvas_param'], true)) {
+            $puntosItem[$it['config']['clave']] = ['puntaje' => $it['puntaje'], 'critico' => !empty($it['critico'])];
         }
     }
-    $estrategia = OsceApp::estrategia($est);
-    $ondaResp = $appCfg['onda'] ?? OsceApp::ondas((string) $est['examen'])[1][0];
+    $estrategia = OsceApp::estrategia($appCfg + ['examen' => $examen]);
+    $ondaResp = $appCfg['onda'] ?? OsceApp::ondas($examen)[1][0];
+    $sumaPesos = OsceApp::sumaPesos($tareas);
+    $variantes = array_values($appCfg['variantes'] ?? []);
+    $filasVar = array_merge($variantes, array_fill(0, max(1, 3 - count($variantes)), ['case_id' => '', 'conclusion_esperada' => '']));
+    $curvasBase = $modulo === 'VEMP' ? "OD 120\nOD 110\nOD 100\nOI 120\nOI 110\nOI 100"
+        : (in_array($examen, ['latencia_media', 'latencia_tardia', 'p300', 'mmn'], true) ? "OD 70\nOI 70"
+        : ($examen === 'ecochg' ? "OD 90\nOI 90" : OsceApp::CURVAS_BASE));
     ?>
 <div class="card">
     <h2>PC de la estación</h2>
     <p>En el PC de la estación, abre LabSim y en la ventana de ingreso elige <strong>Ingresar con usuario y contraseña → Estación OSCE</strong>. Escribe este código:</p>
     <p class="mono" style="font-size:2.2rem; font-weight:700; letter-spacing:0.08em; margin:0.3rem 0;"><?= htmlspecialchars($appCodigo) ?></p>
-    <p class="help">El PC queda como esta estación (solo el <?= $modulo ?>). Cada alumno escribe su código, que solo sirve en su turno según el reloj; al terminar el tiempo la app entrega sola.</p>
-    <?php if (empty($appCfg['case_id'])): ?><p class="text-warn">Falta elegir el paciente y guardar el contenido: sin eso la estación no abre.</p><?php endif; ?>
+    <p class="help">El PC queda como esta estación. Cada alumno escribe su número, que solo sirve en su turno según el reloj; hace las tareas en orden (pasa a la siguiente cuando quiere, sin volver) y al terminar el tiempo la app entrega sola.</p>
+    <?php if (!$tareas): ?><p class="text-warn">Falta al menos una tarea con su paciente: sin eso la estación no abre.</p><?php endif; ?>
 </div>
 
 <div class="card">
-    <h2>Contenido</h2>
+    <h2>Tareas</h2>
+    <p class="help">Cada tarea es una competencia corta con su <strong>peso</strong> dentro de la estación: sus puntos se escalan a ese porcentaje, así una tarea con muchos ítems no pesa más que otra con pocos. A cada alumno le toca uno de los pacientes de la tarea según su número (variantes de igual dificultad, para que no sirva pasarse la respuesta).</p>
+    <?php if ($tareas): ?>
+    <form method="post" id="f-pesos"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $estId ?>"><input type="hidden" name="accion" value="pesos"></form>
+    <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Tarea</th><th>Examen</th><th>Pacientes</th><th>Peso %</th><th></th></tr></thead>
+        <tbody>
+        <?php foreach ($tareas as $k => $t): ?>
+            <tr<?= $k === $kTarea ? ' style="background:var(--color-surface-2, #f3eef2);"' : '' ?>>
+                <td><?= $k + 1 ?></td>
+                <td><a href="?id=<?= $estId ?>&amp;tarea=<?= $k ?>#contenido"><?= htmlspecialchars((string) $t['titulo']) ?></a></td>
+                <td><?= htmlspecialchars(Osce::EXAMENES[$t['examen']] ?? $t['examen']) ?></td>
+                <td><?= count($t['variantes'] ?? []) ?></td>
+                <td><input form="f-pesos" type="text" inputmode="decimal" name="peso[<?= $k ?>]" value="<?= $fmt($t['peso']) ?>" class="input--narrow"<?= $editable ? '' : ' disabled' ?>></td>
+                <td class="row row--gap-sm">
+                    <?php if ($editable): foreach ([['tarea_up', '↑', $k > 0], ['tarea_down', '↓', $k < $nTareas - 1], ['tarea_quitar', 'Quitar', true]] as [$acc, $txt, $ver]): if (!$ver) { continue; } ?>
+                    <form method="post"<?= $acc === 'tarea_quitar' ? ' onsubmit="return confirm(\'¿Quitar la tarea?\')"' : '' ?>><?= csrf_field() ?><input type="hidden" name="id" value="<?= $estId ?>"><input type="hidden" name="accion" value="<?= $acc ?>"><input type="hidden" name="tarea" value="<?= $k ?>"><button class="btn btn--sm btn--ghost"><?= $txt ?></button></form>
+                    <?php endforeach; endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table></div>
+    <p class="<?= abs($sumaPesos - 100) > 0.01 ? 'text-warn' : 'help' ?>">Suma de los pesos: <strong><?= $fmt($sumaPesos) ?> %</strong><?= abs($sumaPesos - 100) > 0.01 ? ' (debería ser 100: la nota se calcula igual sobre el total, pero cada peso deja de ser su porcentaje)' : '' ?>
+        <?php if ($editable && $nTareas > 1): ?><button form="f-pesos" class="btn btn--sm">Guardar pesos</button><?php endif; ?></p>
+    <?php endif; ?>
+    <?php if ($editable && $nTareas < 8): ?>
+    <form method="get" class="row row--gap-sm row--center" action="#contenido">
+        <input type="hidden" name="id" value="<?= $estId ?>"><input type="hidden" name="tarea" value="<?= $nTareas ?>">
+        <label class="row row--gap-sm row--center">Agregar tarea de
+            <select name="examen" style="width:auto;"><?php foreach (Osce::EXAMENES as $ck => $cr): if ($ck === 'general') { continue; } ?><option value="<?= $ck ?>"><?= htmlspecialchars($cr) ?></option><?php endforeach; ?></select></label>
+        <button class="btn btn--sm btn--ghost">Agregar</button>
+    </form>
+    <?php endif; ?>
+</div>
+
+<div class="card" id="contenido">
+    <h2><?= $nueva ? 'Nueva tarea' : 'Tarea ' . ($kTarea + 1) . ': ' . htmlspecialchars((string) $appCfg['titulo']) ?> · <?= htmlspecialchars(Osce::EXAMENES[$examen] ?? $examen) ?></h2>
     <form method="post">
         <?= csrf_field() ?>
         <input type="hidden" name="id" value="<?= $estId ?>">
         <input type="hidden" name="accion" value="app">
+        <input type="hidden" name="tarea" value="<?= $kTarea ?>">
+        <input type="hidden" name="examen" value="<?= htmlspecialchars($examen) ?>">
         <fieldset <?= $editable ? '' : 'disabled' ?> style="border:0; padding:0; margin:0;">
-        <label>Paciente (caso con <?= $modulo ?>)
-            <select name="case_id" required>
-                <option value="">— Elegir —</option>
-                <?php foreach ($casos as $c): ?>
-                <option value="<?= htmlspecialchars($c['id']) ?>"<?= ($appCfg['case_id'] ?? '') === $c['id'] ? ' selected' : '' ?>><?= htmlspecialchars($c['rotulo']) ?></option>
-                <?php endforeach; ?>
-            </select></label>
-        <p class="help">Abre el equipo <strong><?= $modulo ?></strong> en <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR') ?></strong> (según el examen de la estación).
+        <div class="row row--gap-lg">
+            <label>Nombre de la tarea <input type="text" name="titulo" value="<?= htmlspecialchars((string) ($appCfg['titulo'] ?? (Osce::EXAMENES[$examen] ?? ''))) ?>" maxlength="80"></label>
+            <label>Peso (% de la estación) <input type="text" inputmode="decimal" name="peso" value="<?= $fmt($appCfg['peso'] ?? ($nTareas ? max(1, 100 - $sumaPesos) : 100)) ?>" class="input--narrow"></label>
+        </div>
+        <h3 style="margin-top:0.8rem;">Pacientes (variantes de igual dificultad)</h3>
+        <p class="help">Abre el equipo <strong><?= $modulo ?></strong> en <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR') ?></strong>. Con 3 pacientes, al N.º 1 le toca el 1.º, al 2 el 2.º, al 3 el 3.º, al 4 de nuevo el 1.º (corrido en cada tarea). Una fila vacía no cuenta.
             <?= $modulo === 'VEMP' ? 'El VEMP de LabSim mide la intensidad en dB SPL (el protocolo dice "100 dB nHL"): escribe tú la intensidad esperada.' : '' ?></p>
+        <?php foreach ($filasVar as $vk => $v): ?>
+        <div class="row row--gap-lg" style="align-items:flex-start; margin-bottom:0.4rem;">
+            <label>Paciente <?= $vk + 1 ?>
+                <select name="variantes[<?= $vk ?>][case_id]">
+                    <option value="">—</option>
+                    <?php foreach ($casos as $c): ?>
+                    <option value="<?= htmlspecialchars($c['id']) ?>"<?= ($v['case_id'] ?? '') === $c['id'] ? ' selected' : '' ?>><?= htmlspecialchars($c['rotulo']) ?></option>
+                    <?php endforeach; ?>
+                </select></label>
+            <?php if ($est['tipo'] === 'conclusion'): ?>
+            <label style="flex:1 1 24rem;">Conclusión esperada de este paciente (la referencia de la IA)
+                <textarea name="variantes[<?= $vk ?>][conclusion_esperada]" rows="3" style="display:block; width:100%;" placeholder="OD: ... OI: ... Conclusión: ..."><?= htmlspecialchars((string) ($v['conclusion_esperada'] ?? '')) ?></textarea></label>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
         <?php if ($est['tipo'] === 'conclusion'): ?>
         <div class="row row--gap-lg">
             <label>Curvas que registra la app (una por línea)
-                <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : ($modulo === 'VEMP' ? "OD 120\nOD 110\nOD 100\nOI 120\nOI 110\nOI 100" : OsceApp::CURVAS_BASE)) ?></textarea></label>
-            <label style="flex:1 1 24rem;">Conclusión esperada (la referencia de la IA: qué debe informar por oído y qué concluir)
-                <textarea name="conclusion_esperada" rows="8" style="display:block; width:100%;" placeholder="OD: ondas I, III y V a 80 dB con latencias normales; umbral de V en 20 dB. OI: ... Conclusión: examen sugiere audición normal en ambos oídos."><?= htmlspecialchars((string) ($appCfg['conclusion_esperada'] ?? '')) ?></textarea></label>
+                <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : $curvasBase) ?></textarea></label>
         </div>
         <label>Criterios que corrige la IA (uno por línea: <code>texto | puntos</code>)
-            <textarea name="criterios" rows="7" style="display:block; width:100%;"><?= htmlspecialchars(OsceApp::criteriosTexto(array_map(static fn ($it) => [$it['texto'], (float) $it['puntaje']], $items)
-                ?: (OsceApp::CRITERIOS_CONCLUSION[$est['examen']] ?? OsceApp::CRITERIOS_CONCLUSION['otro']))) ?></textarea></label>
+            <textarea name="criterios" rows="7" style="display:block; width:100%;"><?= htmlspecialchars(OsceApp::criteriosTexto(array_map(static fn ($it) => [$it['texto'], (float) $it['puntaje']], $appCfg['items'] ?? [])
+                ?: (OsceApp::CRITERIOS_CONCLUSION[$examen] ?? OsceApp::CRITERIOS_CONCLUSION['otro']))) ?></textarea></label>
         <p class="help">El alumno ve las curvas ya registradas, las marca y escribe hallazgos y conclusión en el informe del equipo. Al entregar, la IA corrige cada criterio contra la conclusión esperada, los datos reales del caso (umbrales, latencias, si había respuesta) y lo que el alumno marcó. Tú revisas y ajustas en "Revisión". Criterios precargados del formato de informe del Protocolo Técnico ORL 2019.</p>
         <?php elseif ($est['tipo'] === 'marcaje'): ?>
         <div class="row row--gap-lg">
             <label>Curvas que registra la app (una por línea: oído e intensidad)
-                <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : ($modulo === 'VEMP' ? "OD 120\nOD 110\nOD 100\nOI 120\nOI 110\nOI 100" : OsceApp::CURVAS_BASE)) ?></textarea></label>
+                <textarea name="curvas" rows="8" style="display:block; width:14rem;"><?= htmlspecialchars(isset($appCfg['curvas']) ? OsceApp::curvasTexto($appCfg['curvas']) : $curvasBase) ?></textarea></label>
             <label>Tolerancia de latencia (ms)
-                <input type="text" inputmode="decimal" name="tol_ms" value="<?= $fmt($appCfg['tol_ms'] ?? 0.2) ?>" class="input--narrow"></label>
+                <input type="text" inputmode="decimal" name="tol_ms" value="<?= $fmt($appCfg['tol_ms'] ?? (OsceApp::TOL_MS[$examen] ?? 0.2)) ?>" class="input--narrow"></label>
         </div>
-        <?php [$ondasMax, $ondasResto] = OsceApp::ondas((string) $est['examen']); ?>
-        <p class="help">Se evalúan las ondas <?= htmlspecialchars(implode(', ', $ondasMax)) ?> en la intensidad más alta de cada oído y <?= htmlspecialchars(implode(', ', $ondasResto)) ?> en las demás (1 punto cada una).</p>
+        <?php [$ondasMax, $ondasResto] = OsceApp::ondas($examen); $canalL = OsceApp::CANAL_LECTURA[$examen] ?? null; ?>
+        <p class="help">Se evalúan <?= htmlspecialchars(implode(', ', $ondasMax)) ?> en la intensidad más alta de cada oído y <?= htmlspecialchars(implode(', ', $ondasResto)) ?> en las demás (1 punto cada una)<?= $canalL ? ', marcadas en el canal <strong>' . $canalL . '</strong>' : '' ?>.</p>
         <?php else: ?>
         <p class="help"><?= $esProtocolo
             ? '<strong>Parámetros de cada curva registrada:</strong> el puntaje es la proporción de curvas que cumplen.'
             : '<strong>Configuración al entregar.</strong>' ?>
-            Esperado: un valor, varios separados por <code>|</code> (cualquiera vale) o un rango <code>10–12</code>. Vacío = no se evalúa. Precargado del Protocolo Técnico ORL 2019<?= $est['examen'] === 'peatc' ? ' (la ventana del protocolo dice "10 s", es 10 ms; ganancia "10k" = 10000)' : '' ?>.</p>
+            Esperado: un valor, varios separados por <code>|</code> (cualquiera vale) o un rango <code>10–12</code>. Vacío = no se evalúa. <?= in_array($examen, ['peatc', 'cvemp', 'ovemp'], true) ? 'Precargado del Protocolo Técnico ORL 2019' : 'El protocolo ORL 2019 no trae esta prueba: precargado con lo habitual (Hall 2007), ajústalo a tu práctica' ?><?= $examen === 'peatc' ? ' (la ventana del protocolo dice "10 s", es 10 ms; ganancia "10k" = 10000)' : '' ?>.</p>
         <div class="table-wrap"><table>
             <thead><tr><th>Parámetro</th><th>Esperado</th><th>Puntos</th><th>Crítico</th></tr></thead>
             <tbody>
-            <?php foreach (OsceApp::parametros((string) $est['examen']) as $clave => [$fuente, $rotulo]):
+            <?php foreach (OsceApp::parametros($examen) as $clave => [$fuente, $rotulo]):
                 if (!$esProtocolo && $clave === 'emg_ok') { continue; }
                 $itp = $puntosItem[$clave] ?? null; ?>
                 <tr>
                     <td><?= htmlspecialchars($rotulo) ?><?= $modulo === 'ABR' && !$esProtocolo ? ' <span class="help help--xs">' . ($fuente === 'equipo' ? 'parámetros avanzados' : 'panel') . '</span>' : '' ?></td>
                     <td><input type="text" name="esperado[<?= $clave ?>]" value="<?= htmlspecialchars((string) ($esperado[$clave] ?? '')) ?>"></td>
                     <td><input type="text" inputmode="decimal" name="puntos[<?= $clave ?>]" value="<?= $itp ? $fmt($itp['puntaje']) : '1' ?>" class="input--narrow"></td>
-                    <td><input type="checkbox" name="critico[<?= $clave ?>]" value="1"<?= $itp && (int) $itp['critico'] ? ' checked' : '' ?>></td>
+                    <td><input type="checkbox" name="critico[<?= $clave ?>]" value="1"<?= $itp && $itp['critico'] ? ' checked' : '' ?>></td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
@@ -365,7 +446,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
         </table></div>
         <h3 style="margin-top:1rem;">Estrategias extra según el caso</h3>
         <p class="help">Lo que este caso en particular pide además de la escalera: se cumple si el alumno registró <strong>alguna curva</strong> con ese parámetro en ese valor. Activa las que correspondan al caso (vienen apagadas) y agrega las tuyas en las filas vacías. Por defecto son bonificación.</p>
-        <?php $extrasEst = OsceApp::extras($est); $parExtra = OsceApp::parametrosExtra((string) $est['examen']);
+        <?php $extrasEst = OsceApp::extras($appCfg + ['examen' => $examen]); $parExtra = OsceApp::parametrosExtra($examen);
               $filasExtra = array_merge($extrasEst, array_fill(0, 3, ['activa' => false, 'texto' => '', 'clave' => 'stim', 'esperado' => '', 'puntos' => 1, 'bonus' => true])); ?>
         <div class="table-wrap"><table>
             <thead><tr><th>Activa</th><th>Estrategia</th><th>Parámetro</th><th>Valor en alguna curva</th><th>Puntos</th><th>Bonificación</th></tr></thead>
@@ -385,7 +466,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
             </tbody>
         </table></div>
         <?php endif; ?>
-        <?php if ($editable): ?><button type="submit" class="btn btn--sm">Guardar contenido</button><?php endif; ?>
+        <?php if ($editable): ?><button type="submit" class="btn btn--sm"><?= $nueva ? 'Agregar tarea' : 'Guardar tarea' ?></button><?php endif; ?>
         </fieldset>
     </form>
 </div>

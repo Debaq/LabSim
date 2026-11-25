@@ -117,16 +117,30 @@ TXT;
     /** Prueba que abre (combo "Tipo de prueba" del ABR o subtipo del VEMP). */
     public const PRUEBA_DE_EXAMEN = [
         'peatc' => 'ABR', 'aabr' => 'ABR', 'general' => 'ABR', 'ecochg' => 'ECochG',
-        'latencia_media' => 'MLR', 'latencia_tardia' => 'CAEP', 'estado_estable' => 'ASSR',
+        'latencia_media' => 'MLR', 'latencia_tardia' => 'CAEP', 'p300' => 'P300', 'mmn' => 'MMN', 'estado_estable' => 'ASSR',
         'cvemp' => 'CVEMP', 'ovemp' => 'OVEMP',
     ];
 
     /** Ondas a marcar: [en la intensidad mayor de cada oído, en las demás]; la primera de las demás define "hay respuesta". */
     public const ONDAS = [
         'peatc' => [['I', 'III', 'V'], ['V']],
+        'ecochg' => [['PS', 'PA'], ['PA']],
+        'latencia_media' => [['Na', 'Pa'], ['Na', 'Pa']],
+        'latencia_tardia' => [['P1', 'N1', 'P2'], ['N1', 'P2']],
+        'p300' => [['N1', 'P2', 'P3'], ['P3']],
+        'mmn' => [['MMN'], ['MMN']],
         'cvemp' => [['p13', 'n23'], ['p13', 'n23']],
         'ovemp' => [['n10', 'p16'], ['n10', 'p16']],
     ];
+
+    /** Canal del ABR donde se lee (y se marca) cada potencial multicanal. */
+    public const CANAL_LECTURA = ['latencia_media' => 'Cz', 'latencia_tardia' => 'Cz', 'p300' => 'Pz', 'mmn' => 'Fz'];
+
+    /** Tolerancia de latencia con que parte el marcaje (ms): la del pico que se busca. */
+    public const TOL_MS = ['ecochg' => 0.2, 'latencia_media' => 3.0, 'latencia_tardia' => 15.0, 'p300' => 25.0, 'mmn' => 20.0];
+
+    /** Parámetros que solo existen en el oddball (P300 y MMN). */
+    private const SOLO_ODDBALL = ['tarea', 'oddball_rare', 'oddball_pct'];
 
     /**
      * Parámetros que se pueden evaluar: clave => [fuente, rótulo].
@@ -149,6 +163,9 @@ TXT;
             'gain' => ['equipo', 'Ganancia'],
             'transducer' => ['equipo', 'Transductor'],
             'artifact_reject_uv' => ['equipo', 'Rechazo de artefacto (µV)'],
+            'tarea' => ['panel', 'Instrucción al paciente (oddball)'],
+            'oddball_rare' => ['equipo', 'Oddball: estímulo infrecuente'],
+            'oddball_pct' => ['equipo', 'Oddball: proporción de infrecuentes (%)'],
         ],
         'VEMP' => [
             'transducer' => ['panel', 'Transductor'],
@@ -189,6 +206,18 @@ TXT;
                     'filter_passhigh' => '3', 'filter_down' => '1500', 'maniobra' => 'Rotación cefálica sostenida'],
         'ovemp' => ['transducer' => 'Inserto (vía aérea)', 'freq' => '1000 Hz | 500 Hz', 'pol' => 'Rarefacción', 'rate' => '5.1',
                     'filter_passhigh' => '1', 'filter_down' => '1000', 'maniobra' => 'Mirada superior ~30°'],
+        // El Protocolo ORL 2019 no trae estas pruebas: parten con lo
+        // habitual de la literatura (Hall 2007) y el docente lo ajusta.
+        'ecochg' => ['test' => 'ECochG', 'stim' => 'Click', 'pol' => 'Alternada', 'rate' => '7.1–11.1',
+                     'filter_passhigh' => '5 | 10', 'filter_down' => '3000', 'transducer' => 'insert_earphone'],
+        'latencia_media' => ['test' => 'MLR', 'stim' => 'Click', 'rate' => '7.1–11.1',
+                             'filter_passhigh' => '10 | 33', 'filter_down' => '100 | 300'],
+        'latencia_tardia' => ['test' => 'CAEP', 'stim' => 'Burst 500 Hz | Burst 1 kHz | Burst 2 kHz', 'rate' => '0.5–1.1',
+                              'filter_passhigh' => '0.5 | 1', 'filter_down' => '30'],
+        'p300' => ['test' => 'P300', 'stim' => 'Burst 1 kHz', 'rate' => '0.5–1.1', 'filter_passhigh' => '0.5 | 1',
+                   'filter_down' => '30', 'tarea' => 'contar | boton', 'oddball_rare' => 'Burst 2 kHz', 'oddball_pct' => '15–20'],
+        'mmn' => ['test' => 'MMN', 'stim' => 'Burst 1 kHz', 'rate' => '1.1–2.1', 'filter_passhigh' => '0.5 | 1',
+                  'filter_down' => '30', 'tarea' => 'pasiva', 'oddball_pct' => '10–20'],
     ];
     /** En la estación de protocolo, lo que se pide a cada curva (difiere de la configuración final). */
     public const ESPERADO_CURVAS = [
@@ -286,7 +315,11 @@ TXT;
 
     public static function parametros(string $examen): array
     {
-        return self::PARAMETROS[self::modulo($examen)];
+        $out = self::PARAMETROS[self::modulo($examen)];
+        if (!in_array($examen, ['p300', 'mmn'], true)) {
+            $out = array_diff_key($out, array_flip(self::SOLO_ODDBALL));
+        }
+        return $out;
     }
 
     /** [ondas en la intensidad mayor, ondas en las demás] del examen. */
@@ -372,14 +405,13 @@ TXT;
         return str_replace('{v}', $valor !== '' ? $valor : '…', $rotulo);
     }
 
-    /** Las reglas de estrategia con que parte la estación (las guardadas o las del examen). */
-    public static function estrategia(array $est): array
+    /** Las reglas de estrategia con que parte la tarea (las guardadas o las del examen). */
+    public static function estrategia(array $t): array
     {
-        $cfg = self::config($est);
-        if (isset($cfg['estrategia']) && is_array($cfg['estrategia'])) {
-            return $cfg['estrategia'];
+        if (isset($t['estrategia']) && is_array($t['estrategia'])) {
+            return $t['estrategia'];
         }
-        $base = self::ESTRATEGIA_BASE[$est['examen']] ?? self::ESTRATEGIA_BASE['otro'];
+        $base = self::ESTRATEGIA_BASE[$t['examen'] ?? ''] ?? self::ESTRATEGIA_BASE['otro'];
         $out = [];
         foreach ($base as $clave => [$activa, $valor, $pts, $bonus]) {
             $out[$clave] = ['activa' => $activa, 'valor' => $valor, 'puntos' => $pts, 'bonus' => $bonus];
@@ -387,16 +419,15 @@ TXT;
         return $out;
     }
 
-    /** Estrategias extra de la estación (las guardadas o las del examen, apagadas). */
-    public static function extras(array $est): array
+    /** Estrategias extra de la tarea (las guardadas o las del examen, apagadas). */
+    public static function extras(array $t): array
     {
-        $cfg = self::config($est);
-        if (isset($cfg['extras']) && is_array($cfg['extras'])) {
-            return $cfg['extras'];
+        if (isset($t['extras']) && is_array($t['extras'])) {
+            return $t['extras'];
         }
         return array_map(static fn ($e) => ['activa' => false, 'texto' => $e[0], 'clave' => $e[1], 'esperado' => $e[2],
                                             'puntos' => 1, 'bonus' => true],
-                         self::EXTRAS_BASE[$est['examen']] ?? []);
+                         self::EXTRAS_BASE[$t['examen'] ?? ''] ?? []);
     }
 
     /** Parámetros que se pueden pedir en una estrategia extra: clave => rótulo. */
@@ -410,20 +441,34 @@ TXT;
     }
 
     /**
-     * Guarda el contenido de una estación de la app y rehace sus ítems.
+     * Arma una tarea de una estación de la app con lo que mandó el
+     * formulario: [config de la tarea, ítems con sus puntos sin escalar].
      * config_equipo: un ítem por parámetro con esperado. marcaje: uno por
-     * onda y curva. protocolo: parámetros en cada curva + estrategia.
+     * onda y curva. conclusión: criterios de la IA. protocolo: parámetros
+     * en cada curva + estrategia.
      */
-    public static function guardarContenido(array $est, array $in): void
+    public static function armarTarea(string $tipo, string $examen, array $in): array
     {
-        $cfg = self::config($est);
-        $caseId = trim((string) ($in['case_id'] ?? ''));
-        if ($caseId === '') {
-            throw new InvalidArgumentException('Elige el caso del paciente de la estación.');
+        if (!isset(Osce::EXAMENES[$examen])) {
+            throw new InvalidArgumentException('Examen desconocido.');
         }
-        $examen = (string) $est['examen'];
-        $cfg['case_id'] = $caseId;
-        $cfg['prueba'] = self::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR';
+        $cfg = ['examen' => $examen, 'prueba' => self::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR', 'modulo' => self::modulo($examen)];
+        $variantes = [];
+        foreach ((array) ($in['variantes'] ?? []) as $v) {
+            $caseId = trim((string) ($v['case_id'] ?? ''));
+            if ($caseId === '') {
+                continue;
+            }
+            $esperada = mb_substr(trim((string) ($v['conclusion_esperada'] ?? '')), 0, 4000);
+            if ($tipo === 'conclusion' && $esperada === '') {
+                throw new InvalidArgumentException('Cada paciente necesita su conclusión esperada: es la referencia con que corrige la IA.');
+            }
+            $variantes[] = ['case_id' => $caseId, 'conclusion_esperada' => $esperada];
+        }
+        if (!$variantes) {
+            throw new InvalidArgumentException('Elige al menos un paciente para la tarea.');
+        }
+        $cfg['variantes'] = array_slice($variantes, 0, 6);
         $items = [];
         $num = static fn ($v, float $def): float => is_numeric(str_replace(',', '.', (string) $v)) ? (float) str_replace(',', '.', (string) $v) : $def;
         $params = static function (string $regla) use ($in, $examen, $num): array {
@@ -442,23 +487,25 @@ TXT;
             }
             return [$out, $esperado];
         };
-        if ($est['tipo'] === 'config_equipo') {
+        if ($tipo === 'config_equipo') {
             [$items, $cfg['esperado']] = $params('param');
             if (!$items) {
                 throw new InvalidArgumentException('Indica al menos un parámetro esperado.');
             }
-        } elseif ($est['tipo'] === 'marcaje') {
+        } elseif ($tipo === 'marcaje') {
             $curvas = self::leerCurvas((string) ($in['curvas'] ?? ''));
             if (!$curvas) {
                 throw new InvalidArgumentException('Indica las curvas a registrar: una por línea, como "OD 80".');
             }
-            $tol = $num($in['tol_ms'] ?? '0.2', 0.2);
-            if ($tol <= 0 || $tol > 2) {
-                throw new InvalidArgumentException('Tolerancia: entre 0,05 y 2 ms.');
+            $tolBase = self::TOL_MS[$examen] ?? 0.2;
+            $tol = $num($in['tol_ms'] ?? $tolBase, $tolBase);
+            if ($tol <= 0 || $tol > 50) {
+                throw new InvalidArgumentException('Tolerancia: entre 0,05 y 50 ms.');
             }
             $cfg['curvas'] = $curvas;
             $cfg['tol_ms'] = $tol;
             [$ondasMax, $ondasResto] = self::ondas($examen);
+            $canal = self::CANAL_LECTURA[$examen] ?? null;
             $maxPorLado = [];
             foreach ($curvas as [$lado, $int]) {
                 $maxPorLado[$lado] = max($maxPorLado[$lado] ?? -100, $int);
@@ -466,24 +513,20 @@ TXT;
             foreach ($curvas as [$lado, $int]) {
                 foreach ($int === $maxPorLado[$lado] ? $ondasMax : $ondasResto as $onda) {
                     $items[] = ['texto' => "{$lado} {$int} dB: onda {$onda}", 'puntaje' => 1.0, 'critico' => false,
-                                'config' => ['regla' => 'marca', 'lado' => $lado, 'int' => $int, 'onda' => $onda, 'tol_ms' => $tol]];
+                                'config' => ['regla' => 'marca', 'lado' => $lado, 'int' => $int, 'onda' => $onda, 'tol_ms' => $tol,
+                                             'canal' => $canal]];
                 }
             }
-        } elseif ($est['tipo'] === 'conclusion') {
+        } elseif ($tipo === 'conclusion') {
             $curvas = self::leerCurvas((string) ($in['curvas'] ?? ''));
             if (!$curvas) {
                 throw new InvalidArgumentException('Indica las curvas a registrar: una por línea, como "OD 80".');
-            }
-            $esperada = trim((string) ($in['conclusion_esperada'] ?? ''));
-            if ($esperada === '') {
-                throw new InvalidArgumentException('Escribe la conclusión esperada: es la referencia con que corrige la IA.');
             }
             $criterios = self::leerCriterios((string) ($in['criterios'] ?? ''));
             if (!$criterios) {
                 throw new InvalidArgumentException('Indica al menos un criterio: "texto | puntos" por línea.');
             }
             $cfg['curvas'] = $curvas;
-            $cfg['conclusion_esperada'] = mb_substr($esperada, 0, 4000);
             foreach ($criterios as $k => [$texto, $pts]) {
                 $items[] = ['texto' => $texto, 'puntaje' => $pts, 'critico' => false,
                             'config' => ['regla' => 'ia', 'n' => $k + 1]];
@@ -561,6 +604,151 @@ TXT;
                 throw new InvalidArgumentException('Activa al menos un criterio.');
             }
         }
+        return [$cfg, $items];
+    }
+
+    // -- Tareas de la estación ------------------------------------------------
+
+    /**
+     * Las tareas de la estación, en orden. Cada una: titulo, examen, prueba,
+     * modulo, peso (%), variantes [{case_id, conclusion_esperada}], lo propio
+     * de su tipo (curvas, esperado, estrategia...) e items (sin escalar).
+     * Una estación de antes (un solo caso) es una tarea de peso 100.
+     */
+    public static function tareas(array $est): array
+    {
+        $cfg = self::config($est);
+        if (isset($cfg['tareas']) && is_array($cfg['tareas'])) {
+            return array_map(static function ($t) {
+                $t['peso'] = (float) ($t['peso'] ?? 100);
+                return $t;
+            }, array_values($cfg['tareas']));
+        }
+        if (empty($cfg['case_id'])) {
+            return [];
+        }
+        $examen = (string) $est['examen'];
+        $t = $cfg;
+        unset($t['app_codigo'], $t['case_id'], $t['conclusion_esperada']);
+        $t += ['examen' => $examen, 'prueba' => self::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR', 'modulo' => self::modulo($examen)];
+        $t['titulo'] = Osce::EXAMENES[$examen] ?? $examen;
+        $t['peso'] = 100.0;
+        $t['variantes'] = [['case_id' => (string) $cfg['case_id'], 'conclusion_esperada' => (string) ($cfg['conclusion_esperada'] ?? '')]];
+        $t['items'] = array_map(static fn ($it) => ['texto' => $it['texto'], 'puntaje' => (float) $it['puntaje'],
+                                                    'critico' => (int) $it['critico'] === 1, 'config' => $it['cfg']],
+                                OscePauta::items((int) $est['id']));
+        return [$t];
+    }
+
+    /**
+     * Paciente de la tarea k para el alumno N.º numero. Las variantes son de
+     * igual dificultad y se reparten por número, corridas en cada tarea para
+     * que no le toque siempre "la primera" al mismo alumno.
+     */
+    public static function variante(array $tarea, int $numero, int $k): ?array
+    {
+        $v = array_values($tarea['variantes'] ?? []);
+        if (!$v) {
+            return null;
+        }
+        return $v[(max(1, $numero) - 1 + $k) % count($v)];
+    }
+
+    /** Guarda (o agrega, con k = número de tareas) la tarea k y rehace los ítems. */
+    public static function guardarTarea(array $est, int $k, array $in): void
+    {
+        $tareas = self::tareas($est);
+        if ($k < 0 || $k > count($tareas)) {
+            throw new InvalidArgumentException('Tarea no encontrada.');
+        }
+        if ($k === count($tareas) && $k >= 8) {
+            throw new InvalidArgumentException('Hasta 8 tareas por estación.');
+        }
+        $examen = (string) ($in['examen'] ?? ($tareas[$k]['examen'] ?? $est['examen']));
+        [$t, $items] = self::armarTarea((string) $est['tipo'], $examen, $in);
+        $titulo = trim((string) ($in['titulo'] ?? ''));
+        $t['titulo'] = mb_substr($titulo !== '' ? $titulo : (Osce::EXAMENES[$examen] ?? $examen), 0, 80);
+        $peso = str_replace(',', '.', (string) ($in['peso'] ?? ''));
+        $t['peso'] = is_numeric($peso) && (float) $peso > 0 ? min(100.0, (float) $peso) : (float) ($tareas[$k]['peso'] ?? 100);
+        $t['items'] = $items;
+        $tareas[$k] = $t;
+        self::guardarTareas($est, $tareas);
+    }
+
+    public static function quitarTarea(array $est, int $k): void
+    {
+        $tareas = self::tareas($est);
+        if (!isset($tareas[$k])) {
+            throw new InvalidArgumentException('Tarea no encontrada.');
+        }
+        array_splice($tareas, $k, 1);
+        self::guardarTareas($est, $tareas);
+    }
+
+    public static function moverTarea(array $est, int $k, int $dir): void
+    {
+        $tareas = self::tareas($est);
+        $j = $k + $dir;
+        if (!isset($tareas[$k], $tareas[$j])) {
+            return;
+        }
+        [$tareas[$k], $tareas[$j]] = [$tareas[$j], $tareas[$k]];
+        self::guardarTareas($est, $tareas);
+    }
+
+    /** Pesos de las tareas (%): k => peso. */
+    public static function guardarPesos(array $est, array $pesos): void
+    {
+        $tareas = self::tareas($est);
+        foreach ($tareas as $k => &$t) {
+            $p = str_replace(',', '.', (string) ($pesos[$k] ?? ''));
+            if (!is_numeric($p) || (float) $p <= 0 || (float) $p > 100) {
+                throw new InvalidArgumentException('Cada peso va entre 1 y 100 %.');
+            }
+            $t['peso'] = (float) $p;
+        }
+        unset($t);
+        self::guardarTareas($est, $tareas);
+    }
+
+    /** Suma de los pesos (debería ser 100). */
+    public static function sumaPesos(array $tareas): float
+    {
+        return array_sum(array_map(static fn ($t) => (float) ($t['peso'] ?? 0), $tareas));
+    }
+
+    /**
+     * Guarda las tareas y rehace los ítems de la estación: los de cada
+     * tarea escalados para que su máximo (sin bonificaciones) sea su peso.
+     * Así la estación suma 100 y cada tarea pesa lo que el docente dijo,
+     * sin importar cuántos ítems tenga.
+     */
+    private static function guardarTareas(array $est, array $tareas): void
+    {
+        $cfg = self::config($est);
+        $tareas = array_values($tareas);
+        $cfg['tareas'] = $tareas;
+        unset($cfg['case_id'], $cfg['conclusion_esperada'], $cfg['curvas'], $cfg['esperado'], $cfg['esperado_curvas'],
+              $cfg['estrategia'], $cfg['extras'], $cfg['onda'], $cfg['tol_ms'], $cfg['prueba']);
+        $varias = count($tareas) > 1;
+        $items = [];
+        foreach ($tareas as $k => $t) {
+            $max = 0.0;
+            foreach ($t['items'] ?? [] as $it) {
+                if (empty($it['config']['bonus'])) {
+                    $max += (float) $it['puntaje'];
+                }
+            }
+            $escala = $max > 0 ? (float) $t['peso'] / $max : 1.0;
+            foreach ($t['items'] ?? [] as $it) {
+                $it['puntaje'] = round((float) $it['puntaje'] * $escala, 4);
+                $it['config']['tarea'] = $k;
+                if ($varias) {
+                    $it['texto'] = $t['titulo'] . ' · ' . $it['texto'];
+                }
+                $items[] = $it;
+            }
+        }
         $estId = (int) $est['id'];
         Db::reintentar(static function () use ($estId, $cfg, $items): void {
             $pdo = Db::get();
@@ -569,12 +757,61 @@ TXT;
                 ->execute([json_encode($cfg, JSON_UNESCAPED_UNICODE), $estId]);
             $pdo->prepare('DELETE FROM osce_item WHERE estacion_id = ?')->execute([$estId]);
             $ins = $pdo->prepare("INSERT INTO osce_item (estacion_id, orden, texto, puntaje, critico, tipo, config) VALUES (?, ?, ?, ?, ?, 'auto', ?)");
-            foreach ($items as $k => $it) {
-                $ins->execute([$estId, $k + 1, $it['texto'], $it['puntaje'], $it['critico'] ? 1 : 0,
+            foreach ($items as $n => $it) {
+                $ins->execute([$estId, $n + 1, $it['texto'], $it['puntaje'], !empty($it['critico']) ? 1 : 0,
                                json_encode($it['config'], JSON_UNESCAPED_UNICODE)]);
             }
             $pdo->commit();
         });
+    }
+
+    /**
+     * Estación de un solo caso (como antes): la tarea 0 con el examen de la
+     * estación. Acepta case_id y conclusion_esperada sueltos.
+     */
+    public static function guardarContenido(array $est, array $in): void
+    {
+        if (!isset($in['variantes'])) {
+            $in['variantes'] = [['case_id' => $in['case_id'] ?? '', 'conclusion_esperada' => $in['conclusion_esperada'] ?? '']];
+        }
+        $in['examen'] = $in['examen'] ?? (self::tareas($est)[0]['examen'] ?? $est['examen']);
+        self::guardarTarea($est, 0, $in);
+    }
+
+    /** Lo que la app entregó de la tarea k (o la entrega entera, si es de una sola). */
+    public static function payloadDe(array $payload, ?int $k): array
+    {
+        if (!isset($payload['tareas']) || !is_array($payload['tareas'])) {
+            return $payload;
+        }
+        $t = $payload['tareas'][$k ?? 0] ?? ($payload['tareas'][(string) ($k ?? 0)] ?? null);
+        return is_array($t) ? $t : [];
+    }
+
+    /** Lo que recibe la app al entrar un alumno: cada tarea con su paciente. */
+    public static function tareasParaAlumno(array $est, int $numero): array
+    {
+        $out = [];
+        foreach (self::tareas($est) as $k => $t) {
+            $v = self::variante($t, $numero, $k);
+            $caso = $v !== null ? self::caso((string) $v['case_id']) : null;
+            if ($caso === null) {
+                throw new InvalidArgumentException('Una tarea de la estación no tiene paciente. Avisa al docente.');
+            }
+            $out[] = ['n' => $k, 'titulo' => $t['titulo'], 'peso' => (float) $t['peso'], 'tipo' => $est['tipo'],
+                      'examen' => $t['examen'], 'modulo' => $t['modulo'] ?? self::modulo((string) $t['examen']),
+                      'prueba' => $t['prueba'] ?? 'ABR',
+                      'curvas' => in_array($est['tipo'], ['marcaje', 'conclusion'], true) ? ($t['curvas'] ?? []) : [],
+                      'caso' => $caso];
+        }
+        return $out;
+    }
+
+    /** Módulos de la app que usa la estación (ABR, VEMP). */
+    public static function modulos(array $est): array
+    {
+        $m = array_values(array_unique(array_map(static fn ($t) => (string) ($t['modulo'] ?? self::modulo((string) $t['examen'])), self::tareas($est))));
+        return $m ?: [self::modulo((string) $est['examen'])];
     }
 
     /** "texto | puntos" por línea → [[texto, puntos], ...] (sin puntos = 1). */
@@ -666,10 +903,13 @@ TXT;
         return array_values(array_filter($payload['curvas'] ?? [], 'is_array'));
     }
 
-    /** Curva con ese lado e intensidad (la primera registrada). */
-    private static function curvaDe(array $payload, string $lado, int $int): ?array
+    /** Curva con ese lado e intensidad (la primera registrada; en ese canal si es multicanal). */
+    private static function curvaDe(array $payload, string $lado, int $int, ?string $canal = null): ?array
     {
         foreach (self::curvas($payload) as $c) {
+            if ($canal !== null && isset($c['canal']) && $c['canal'] !== $canal) {
+                continue;
+            }
             if (($c['side'] ?? '') === $lado && (int) round((float) ($c['int'] ?? -999)) === $int) {
                 return $c;
             }
@@ -780,7 +1020,7 @@ TXT;
         }
 
         if ($regla === 'marca') {
-            $curva = self::curvaDe($payload, (string) $r['lado'], (int) $r['int']);
+            $curva = self::curvaDe($payload, (string) $r['lado'], (int) $r['int'], isset($r['canal']) ? (string) $r['canal'] : null);
             if ($curva === null) {
                 return ['puntaje' => 0.0, 'ok' => false, 'alumno' => 'sin curva', 'esperado' => '—'];
             }
@@ -1114,7 +1354,7 @@ TXT;
                 $filas[] = [(int) $it['id'], (string) $prev['valor'], $pts, (string) $prev['comentario'], (string) $prev['fuente']];
                 continue;
             }
-            $e = self::evaluarItem($it, $payload);
+            $e = self::evaluarItem($it, self::payloadDe($payload, isset($it['cfg']['tarea']) ? (int) $it['cfg']['tarea'] : null));
             $manual = $prev !== null && $prev['fuente'] === 'docente';
             $pts = $manual ? (float) $prev['puntaje'] : $e['puntaje'];
             $paraTotal[] = ['item' => $it, 'puntaje' => $pts];
@@ -1325,7 +1565,6 @@ TXT;
     public static function corregirIa(int $estacionId, int $participanteId): array
     {
         $est = Osce::estacion($estacionId);
-        $cfg = self::config($est ?? []);
         $payload = self::registro($estacionId, $participanteId);
         if ($est === null || $payload === null) {
             throw new InvalidArgumentException('Entrega no encontrada.');
@@ -1333,63 +1572,81 @@ TXT;
         if (!LlmConfig::get()['active']) {
             throw new RuntimeException('La IA está desactivada (Admin → IA Paciente).');
         }
-        $items = array_values(array_filter(OscePauta::items($estacionId), static fn ($it) => ($it['cfg']['regla'] ?? '') === 'ia'));
-        $maximos = [];
-        $lista = [];
-        foreach ($items as $it) {
-            $n = (int) $it['cfg']['n'];
-            $maximos[$n] = (float) $it['puntaje'];
-            $lista[] = "{$n}. {$it['texto']} (máximo " . self::db((float) $it['puntaje']) . ')';
-        }
-        $caso = self::caso((string) ($cfg['case_id'] ?? ''));
-        $mensaje = "CRITERIOS:\n" . implode("\n", $lista)
-            . "\n\nCONCLUSIÓN ESPERADA (docente):\n" . ($cfg['conclusion_esperada'] ?? '')
-            . "\n\nDATOS REALES DEL CASO:\n" . self::datosReales($payload, $caso)
-            . "\n\nLO QUE MARCÓ EL ESTUDIANTE:\n" . self::marcasTexto($payload)
-            . "\n\nINFORME DEL ESTUDIANTE:\n" . self::informe($payload);
-        $stmt = Db::get()->prepare('SELECT p.user_id, o.course_id FROM osce_participante p JOIN osce o ON o.id = p.osce_id WHERE p.id = ?');
+        $stmt = Db::get()->prepare('SELECT p.user_id, p.numero, o.course_id FROM osce_participante p JOIN osce o ON o.id = p.osce_id WHERE p.id = ?');
         $stmt->execute([$participanteId]);
         $quien = $stmt->fetch() ?: [];
         $stmt->closeCursor();
-        $presupuesto = AnamnesisDraft::maxTokens();
-        $opciones = ['model' => AnamnesisDraft::model(), 'max_tokens' => $presupuesto, 'timeout' => AnamnesisDraft::TIMEOUT_S,
-                     'campo_tokens' => 'Máximo de tokens del borrador de anamnesis', 'tarea' => 'osce',
-                     'course_id' => (int) ($quien['course_id'] ?? 0), 'user_id' => (int) ($quien['user_id'] ?? 0)];
-        try {
-            $raw = LlmChat::reply(self::PROMPT_CONCLUSION, [], $mensaje, $opciones);
-        } catch (LlmBudgetException $e) {
-            $reintento = AnamnesisDraft::retryBudget($presupuesto);
-            if ($reintento <= $presupuesto) {
-                throw $e;
+        $tareas = self::tareas($est);
+        // Una llamada por tarea con criterios de IA: cada una con su paciente.
+        $porTarea = [];
+        foreach (OscePauta::items($estacionId) as $it) {
+            if (($it['cfg']['regla'] ?? '') === 'ia') {
+                $porTarea[(int) ($it['cfg']['tarea'] ?? 0)][] = $it;
             }
-            $opciones['max_tokens'] = $reintento;
-            $raw = LlmChat::reply(self::PROMPT_CONCLUSION, [], $mensaje, $opciones);
-        }
-        $v = self::parsearIaConclusion($raw, $maximos);
-        if ($v === null) {
-            throw new RuntimeException('La IA no devolvió una corrección legible.');
         }
         $entregaId = self::entregaId($estacionId, $participanteId);
-        Db::reintentar(static function () use ($items, $v, $entregaId): void {
-            $pdo = Db::get();
-            $pdo->beginTransaction();
-            $upd = $pdo->prepare("UPDATE osce_resultado SET puntaje = ?, valor = ?, fuente = 'ia', updated_at = CURRENT_TIMESTAMP
-                                   WHERE entrega_id = ? AND item_id = ? AND fuente <> 'docente'");
+        $generales = [];
+        foreach ($porTarea as $k => $items) {
+            $tarea = $tareas[$k] ?? [];
+            $v = self::variante($tarea, (int) ($quien['numero'] ?? 1), $k) ?? [];
+            $datos = self::payloadDe($payload, $k);
+            $maximos = [];
+            $lista = [];
             foreach ($items as $it) {
                 $n = (int) $it['cfg']['n'];
-                if (!isset($v['criterios'][$n])) {
-                    continue;
+                $maximos[$n] = (float) $it['puntaje'];
+                $lista[] = "{$n}. {$it['texto']} (máximo " . self::db((float) $it['puntaje']) . ')';
+            }
+            $mensaje = "CRITERIOS:\n" . implode("\n", $lista)
+                . "\n\nCONCLUSIÓN ESPERADA (docente):\n" . ($v['conclusion_esperada'] ?? '')
+                . "\n\nDATOS REALES DEL CASO:\n" . self::datosReales($datos, self::caso((string) ($v['case_id'] ?? '')))
+                . "\n\nLO QUE MARCÓ EL ESTUDIANTE:\n" . self::marcasTexto($datos)
+                . "\n\nINFORME DEL ESTUDIANTE:\n" . self::informe($datos);
+            $presupuesto = AnamnesisDraft::maxTokens();
+            $opciones = ['model' => AnamnesisDraft::model(), 'max_tokens' => $presupuesto, 'timeout' => AnamnesisDraft::TIMEOUT_S,
+                         'campo_tokens' => 'Máximo de tokens del borrador de anamnesis', 'tarea' => 'osce',
+                         'course_id' => (int) ($quien['course_id'] ?? 0), 'user_id' => (int) ($quien['user_id'] ?? 0)];
+            try {
+                $raw = LlmChat::reply(self::PROMPT_CONCLUSION, [], $mensaje, $opciones);
+            } catch (LlmBudgetException $e) {
+                $reintento = AnamnesisDraft::retryBudget($presupuesto);
+                if ($reintento <= $presupuesto) {
+                    throw $e;
                 }
-                [$pts, $coment] = $v['criterios'][$n];
-                $eval = ['ia' => true, 'puntaje' => $pts, 'ok' => $pts >= (float) $it['puntaje'] - 1e-9,
-                         'alumno' => $coment, 'esperado' => 'según la conclusión esperada'];
-                $upd->execute([$pts, json_encode($eval, JSON_UNESCAPED_UNICODE), $entregaId, (int) $it['id']]);
+                $opciones['max_tokens'] = $reintento;
+                $raw = LlmChat::reply(self::PROMPT_CONCLUSION, [], $mensaje, $opciones);
             }
-            if ($v['general'] !== '') {
-                $pdo->prepare("UPDATE osce_entrega SET feedback = ? WHERE id = ? AND feedback = ''")->execute([$v['general'], $entregaId]);
+            $r = self::parsearIaConclusion($raw, $maximos);
+            if ($r === null) {
+                throw new RuntimeException('La IA no devolvió una corrección legible.');
             }
-            $pdo->commit();
-        });
+            Db::reintentar(static function () use ($items, $r, $entregaId): void {
+                $pdo = Db::get();
+                $pdo->beginTransaction();
+                $upd = $pdo->prepare("UPDATE osce_resultado SET puntaje = ?, valor = ?, fuente = 'ia', updated_at = CURRENT_TIMESTAMP
+                                       WHERE entrega_id = ? AND item_id = ? AND fuente <> 'docente'");
+                foreach ($items as $it) {
+                    $n = (int) $it['cfg']['n'];
+                    if (!isset($r['criterios'][$n])) {
+                        continue;
+                    }
+                    [$pts, $coment] = $r['criterios'][$n];
+                    $eval = ['ia' => true, 'puntaje' => $pts, 'ok' => $pts >= (float) $it['puntaje'] - 1e-9,
+                             'alumno' => $coment, 'esperado' => 'según la conclusión esperada'];
+                    $upd->execute([$pts, json_encode($eval, JSON_UNESCAPED_UNICODE), $entregaId, (int) $it['id']]);
+                }
+                $pdo->commit();
+            });
+            if ($r['general'] !== '') {
+                $generales[] = (count($porTarea) > 1 ? ($tarea['titulo'] ?? '') . ': ' : '') . $r['general'];
+            }
+        }
+        if ($generales) {
+            Db::reintentar(static function () use ($generales, $entregaId): void {
+                Db::get()->prepare("UPDATE osce_entrega SET feedback = ? WHERE id = ? AND feedback = ''")
+                    ->execute([implode("\n", $generales), $entregaId]);
+            });
+        }
         return self::corregir($estacionId, $participanteId);
     }
 

@@ -166,17 +166,22 @@ details.rev-alumno > summary { cursor: pointer; padding: 0.4rem 0; font-size: 1.
             <?php endforeach; ?>
             </tbody>
         </table></div>
-        <?php $abr = $e['registro']['abr'] ?? ($e['registro']['vemp'] ?? []); if (trim((string) ($abr['hallazgos'] ?? '')) !== '' || trim((string) ($abr['conclusion'] ?? '')) !== ''): ?>
+        <?php $tareasEst = OsceApp::tareas($est); foreach ($tareasEst ?: [['titulo' => '']] as $tk => $tt):
+            $reg = OsceApp::payloadDe($e['registro'] ?? [], $tk);
+            $abr = $reg['abr'] ?? ($reg['vemp'] ?? []);
+            $cs = $reg['curvas'] ?? [];
+            if (count($tareasEst) > 1): ?><h4 style="margin:0.6rem 0 0.2rem;"><?= htmlspecialchars((string) $tt['titulo']) ?><?= $reg ? '' : ' <span class="muted">(no llegó a esta tarea)</span>' ?></h4><?php endif; ?>
+        <?php if (trim((string) ($abr['hallazgos'] ?? '')) !== '' || trim((string) ($abr['conclusion'] ?? '')) !== ''): ?>
         <div class="card" style="padding:0.7rem; margin:0.6rem 0; background:var(--color-surface-2, #f4f4f6);">
             <strong>Informe del alumno</strong>
             <p style="white-space:pre-wrap; margin:0.3rem 0;"><em>Hallazgos:</em> <?= htmlspecialchars((string) ($abr['hallazgos'] ?? '')) ?></p>
             <p style="white-space:pre-wrap; margin:0;"><em>Conclusión:</em> <?= htmlspecialchars((string) ($abr['conclusion'] ?? '')) ?></p>
         </div>
         <?php endif; ?>
-        <?php $cs = $e['registro']['curvas'] ?? []; if ($cs): ?>
+        <?php if ($cs): ?>
         <p class="help">Curvas en el orden en que se registraron: <?= htmlspecialchars(implode(' → ', array_map(static fn ($c) => ($c['side'] ?? '') . ' ' . $fmt($c['int'] ?? null)
-            . (array_filter($c['marcas'] ?? [], 'is_numeric') ? '✓' : ''), $cs))) ?> <span class="muted">(✓ = marcó alguna onda)</span></p>
-        <?php endif; ?>
+            . (isset($c['canal']) ? ' ' . $c['canal'] : '') . (array_filter($c['marcas'] ?? [], 'is_numeric') ? '✓' : ''), $cs))) ?> <span class="muted">(✓ = marcó alguna onda)</span></p>
+        <?php endif; endforeach; ?>
         <label>Comentario general para el alumno
             <textarea name="feedback" rows="2" style="width:100%;"><?= htmlspecialchars((string) $en['feedback']) ?></textarea></label>
         <button type="submit" class="btn btn--sm">Guardar revisión de <?= htmlspecialchars($p['codigo']) ?></button>
