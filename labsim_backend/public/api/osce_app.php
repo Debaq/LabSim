@@ -90,6 +90,7 @@ if ($accion === 'entrar') {
     if ($caso === null) {
         Response::error('La estación no tiene paciente configurado. Avisa al docente.', 409);
     }
+    Osce::marcarEntrada((int) $p['id'], (int) $est['id']);
     Response::json([
         'ok' => true,
         'codigo' => $p['codigo'],

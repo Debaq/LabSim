@@ -218,6 +218,27 @@ equipo (ABR o VEMP).
 - **El docente manda:** lo que ajusta queda suyo y ni "Volver a corregir" ni
   otra pasada de la IA lo pisan (probado).
 
+**Sin timbre ni proyector; gafete y talón; panel de control (2026-11-25).**
+Él: "la tarjeta se la pegarán en el pecho visible para todos los evaluadores
+[…] ¿de dónde sacaste eso del timbre? […] todas las apps avisan los tiempos,
+solo la estación 1 avisará la docente, pero estará un docente siempre
+controlando todo con otro portal […] las pantallas deberían avisar los
+tiempos que quedan e ir guardando y cerrar cuando todo se acaba".
+
+- **Tarjeta en dos partes:** gafete con el número grande (pecho, a la vista)
+  y talón privado con QR y código (con él se ve la nota y se amarra la
+  tarjeta). El QR no puede ir en el pecho.
+- **Cada pantalla avisa:** cuenta regresiva del alumno, aviso del último
+  minuto ("al llegar a cero se entrega solo"), guardado continuo, entrega
+  automática. En la limpieza avisa la docente (su tablet se pone roja en el
+  último minuto).
+- **El OSCE se cierra solo** al terminar el último turno, con margen para las
+  entregas automáticas (`Osce::cerrarSiTermino`, al pedir el reloj).
+- **osce_vivo.php pasa a "Panel de control"** del docente que coordina: el
+  turno, quién debería estar en cada estación y, en vivo, quién entró
+  (`Osce::marcarEntrada` al entrar en tablet o PC) y quién entregó. El sonido
+  queda solo como opción de ese equipo.
+
 **Rotación en cadena y tarjetas sorteadas con número (2026-11-25).** Él: los
 estudiantes se juntan, sortean un número (la tarjeta trae QR, código y
 número), en las estaciones escriben solo el número, entran de a 4 a la

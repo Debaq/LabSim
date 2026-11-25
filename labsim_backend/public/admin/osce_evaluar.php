@@ -565,6 +565,7 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
         var nombres = { antes: 'Aún no parte', estacion: 'En estación', cambio: 'Cambio', entre_vueltas: 'Pausa entre vueltas', terminado: 'Terminado' };
         var fase = reloj ? reloj.fase : 'antes';
         if (d.estado === 'cerrado' || d.estado === 'publicado') fase = 'terminado';
+        $('ev-reloj').style.color = reloj && fase === 'estacion' && reloj.restante_s <= 60 ? '#b91c1c' : '';
         $('ev-reloj').innerHTML = (reloj && fase !== 'terminado' ? OsceReloj.mmss(reloj.restante_s) : '--:--')
             + '<small>' + nombres[fase] + (d.pausado ? ' · en pausa' : '') + (reloj ? (CADENA ? ' · turno ' + (reloj.slot + 1) : ' · vuelta ' + (reloj.vuelta + 1)) : '') + '</small>';
         seguirReloj(ultimoReloj);

@@ -70,6 +70,7 @@ $cfg = Osce::cfgReloj($o, count($estaciones), count(Osce::participantes((int) $o
 $ventana = Osce::ventana($cfg, $p, $indice);
 
 if ($accion === 'entrar') {
+    Osce::marcarEntrada((int) $p['id'], (int) $est['id']);
     Response::json([
         'ok' => true,
         'codigo' => $p['codigo'],

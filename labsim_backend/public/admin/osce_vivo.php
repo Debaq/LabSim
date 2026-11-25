@@ -8,8 +8,10 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
- * Reloj del OSCE para el proyector: fase, cuenta regresiva, timbre y quién
- * está en cada estación. Los controles (iniciar, pausar, correr el reloj,
+ * Panel de control del docente que coordina el OSCE: fase, cuenta
+ * regresiva, quién debería estar en cada estación y, en vivo, si ya entró o
+ * entregó (las tablets y los PCs avisan los tiempos a cada alumno; acá se ve
+ * el conjunto). Los controles (iniciar, pausar, correr el reloj,
  * cerrar) mueven el reloj de todas las pantallas a la vez: el estado vive en
  * la base (Osce::iniciar/pausar/...) y cada pantalla lo lee de
  * api/osce_reloj.php.
@@ -21,6 +23,11 @@ $osce = Osce::obtener($id);
 if ($osce === null || !Courses::canAdminister((int) $osce['course_id'], $me)) {
     http_response_code(404);
     exit('OSCE no encontrado.');
+}
+
+if (isset($_GET['estado'])) {
+    // Quién entró y quién entregó en cada estación (lo pide el panel cada pocos segundos).
+    Response::json(['entregas' => (object) array_map(static fn ($m) => (object) $m, Osce::estadosEntregas($id))]);
 }
 
 $error = null;
@@ -54,7 +61,7 @@ $parts = array_map(static fn ($p) => [
     'puesto' => (int) $p['puesto'],
 ], Osce::participantes($id));
 
-admin_header('Reloj · ' . $osce['nombre'], $me);
+admin_header('Panel de control · ' . $osce['nombre'], $me);
 ?>
 <style>
 .osce-vivo { text-align: center; }
@@ -68,6 +75,10 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
 .osce-puestos td, .osce-puestos th { font-size: 1.05rem; }
 .osce-puestos .mono { font-size: 1.2rem; }
 .osce-controles form { display: inline; margin: 0; }
+.chip { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 1rem; margin: 0.1rem 0.15rem; font-weight: 700; border: 1.5px solid #c9c2cc; color: #6b6070; }
+.chip.en_curso { border-color: #b45309; color: #b45309; background: #fff7e6; }
+.chip.enviada { border-color: #15803d; color: #fff; background: #15803d; }
+.leyenda { font-size: 0.9rem; color: var(--color-text-muted, #666); margin-top: 0.4rem; }
 .osce-controles .btn { margin: 0; }
 .osce-vivo:fullscreen { background: var(--color-surface, #fff); padding: 2rem; overflow: auto; }
 </style>
@@ -92,7 +103,7 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
             <?= $boton('cerrar', 'Cerrar OSCE', 'btn--sm btn--danger', '¿Cerrar el OSCE? El reloj se detiene para todos.') ?>
             <?= $boton('borrador', 'Volver a borrador', 'btn--sm btn--ghost', 'Solo si se inició por error: el reloj vuelve a cero. ¿Seguir?') ?>
         <?php endif; ?>
-        <button type="button" class="btn btn--sm btn--secondary" id="osce-sonido">🔇 Activar timbre</button>
+        <button type="button" class="btn btn--sm btn--secondary" id="osce-sonido">🔇 Sonido en este equipo</button>
         <button type="button" class="btn btn--sm btn--ghost" id="osce-pantalla">Pantalla completa</button>
     </span>
 </div>
@@ -109,6 +120,7 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
             <tbody id="osce-tabla"></tbody>
         </table>
     </div>
+    <div class="leyenda" id="osce-leyenda"></div>
 </div>
 
 <script src="../js/osce_reloj.js?v=<?= admin_asset_version(__DIR__ . '/../js/osce_reloj.js') ?>"></script>
@@ -152,18 +164,33 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
     });
 
     // En cadena: el grupo g está en la estación e en el turno g + e.
-    function grupoEn(cfg, turno, estacion) {
+    var ENTREGAS = {};
+    function pedirEstados() {
+        fetch('osce_vivo.php?id=<?= $id ?>&estado=1', { credentials: 'same-origin', cache: 'no-store' })
+            .then(function (r) { return r.json(); }).then(function (d) { ENTREGAS = d.entregas || {}; })
+            .catch(function () {});
+    }
+    pedirEstados();
+    setInterval(pedirEstados, 5000);
+    function grupoEn(cfg, turno, estacion, estId) {
         var g = turno - estacion;
         if (g < 0 || g >= cfg.grupos) return '—';
-        return numerosDe(cfg, g);
+        return numerosDe(cfg, g, estId);
     }
-    function numerosDe(cfg, g) {
+    // Con estId, cada número dice si entró (naranjo) o entregó (verde).
+    function numerosDe(cfg, g, estId) {
         var ns = parts.filter(function (p) { return Math.floor((p.numero - 1) / cfg.por_turno) === g; })
                       .map(function (p) { return p.numero; });
-        return ns.length ? 'N.º ' + ns.join(' · ') : '—';
+        if (!ns.length) return '—';
+        if (estId === undefined) return 'N.º ' + ns.join(' · ');
+        var est = ENTREGAS[estId] || {};
+        return ns.map(function (n) {
+            var st = est[n] || '';
+            return '<span class="chip ' + st + '">' + n + (st === 'enviada' ? ' ✓' : '') + '</span>';
+        }).join('');
     }
-    function quien(cfg, vuelta, slot, estacion, circuito) {
-        if (cfg.modo === 'cadena') return grupoEn(cfg, slot, estacion);
+    function quien(cfg, vuelta, slot, estacion, circuito, estId) {
+        if (cfg.modo === 'cadena') return grupoEn(cfg, slot, estacion, estId);
         var S = cfg.estaciones;
         var puesto = ((estacion - slot) % S + S) % S;
         for (var i = 0; i < parts.length; i++) {
@@ -223,11 +250,13 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
             for (var e = 0; e < S; e++) {
                 for (var c = 0; c < C; c++) {
                     filas += '<tr><td>' + (e + 1) + '. ' + escapar(d.estaciones[e].titulo) + (C > 1 ? ' · circuito ' + (c + 1) : '') + '</td>'
-                        + '<td class="mono">' + (fase === 'terminado' ? '—' : quien(cfg, ahoraV, ahoraJ, e, c)) + '</td>'
+                        + '<td class="mono">' + (fase === 'terminado' ? '—' : quien(cfg, ahoraV, ahoraJ, e, c, d.estaciones[e].id)) + '</td>'
                         + '<td class="mono">' + (haySig ? quien(cfg, sigV, sigJ, e, c) : '—') + '</td></tr>';
                 }
             }
             $('osce-tabla').innerHTML = filas;
+            $('osce-leyenda').innerHTML = cfg.modo === 'cadena'
+                ? '<span class="chip">N.º</span> no ha entrado · <span class="chip en_curso">N.º</span> entró / en evaluación · <span class="chip enviada">N.º ✓</span> entregó' : '';
             // Cadena: quiénes hacen de paciente en la limpieza y quiénes entran después.
             var sala = '';
             if (cfg.modo === 'cadena' && fase !== 'terminado') {

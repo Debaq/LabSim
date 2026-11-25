@@ -991,6 +991,59 @@ final class Osce
         return $t >= $v['inicio_s'] - max(30, $cfg['pausa_s']) && $t <= $v['fin_s'] + $gracia;
     }
 
+    /**
+     * Cierra solo el OSCE cuando terminó el último turno, con margen para que
+     * las tablets y los PCs alcancen a entregar solos (lo llaman las
+     * pantallas al pedir el reloj). Devuelve el OSCE como quedó.
+     */
+    public static function cerrarSiTermino(array $o): array
+    {
+        if ($o['estado'] !== 'en_curso' || $o['pausado_desde'] !== null) {
+            return $o;
+        }
+        $S = count(self::estaciones((int) $o['id']));
+        $stmt = Db::get()->prepare('SELECT COUNT(*) FROM osce_participante WHERE osce_id = ?');
+        $stmt->execute([(int) $o['id']]);
+        $cfg = self::cfgReloj($o, $S, (int) $stmt->fetchColumn());
+        $stmt->closeCursor();
+        $t = self::transcurrido($o, time());
+        $margen = max(60, $cfg['pausa_s']) + 60;
+        if ($t === null || $t < self::duracionTotal($cfg) + $margen) {
+            return $o;
+        }
+        self::cerrar((int) $o['id']);
+        return self::obtener((int) $o['id']) ?? $o;
+    }
+
+    /**
+     * El alumno entró a una estación (tablet o PC): queda la entrega abierta,
+     * para que el panel de control vea quién está y quién falta.
+     */
+    public static function marcarEntrada(int $participanteId, int $estacionId): void
+    {
+        Db::reintentar(static function () use ($participanteId, $estacionId): void {
+            Db::get()->prepare(
+                'INSERT INTO osce_entrega (participante_id, estacion_id) VALUES (?, ?)
+                 ON CONFLICT (participante_id, estacion_id) DO NOTHING'
+            )->execute([$participanteId, $estacionId]);
+        });
+    }
+
+    /** Estado de cada entrega del OSCE: estacion_id => numero => en_curso|enviada. */
+    public static function estadosEntregas(int $osceId): array
+    {
+        $stmt = Db::get()->prepare(
+            'SELECT e.estacion_id, p.numero, e.estado FROM osce_entrega e
+               JOIN osce_participante p ON p.id = e.participante_id WHERE p.osce_id = ?'
+        );
+        $stmt->execute([$osceId]);
+        $out = [];
+        foreach ($stmt->fetchAll() as $r) {
+            $out[(int) $r['estacion_id']][(int) $r['numero']] = $r['estado'];
+        }
+        return $out;
+    }
+
     /** Vuelve a borrador un OSCE que se inició por error (sin entregas). */
     public static function volverABorrador(int $id): void
     {
@@ -1016,6 +1069,7 @@ final class Osce
      */
     public static function estadoPublico(array $o, ?array $participante = null): array
     {
+        $o = self::cerrarSiTermino($o);
         $estaciones = self::estaciones((int) $o['id']);
         $S = count($estaciones);
         $stmt = Db::get()->prepare('SELECT COUNT(*) FROM osce_participante WHERE osce_id = ?');
@@ -1039,7 +1093,7 @@ final class Osce
             'circuitos' => (int) $o['circuitos'],
             'total_s' => self::duracionTotal($cfg),
             'reloj' => $t === null ? null : self::estadoReloj($cfg, $t),
-            'estaciones' => array_map(static fn ($e) => ['titulo' => $e['titulo'], 'tipo' => $e['tipo']], $estaciones),
+            'estaciones' => array_map(static fn ($e) => ['id' => (int) $e['id'], 'titulo' => $e['titulo'], 'tipo' => $e['tipo']], $estaciones),
         ];
         if ($participante !== null) {
             $out['participante'] = [

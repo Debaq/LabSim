@@ -182,6 +182,10 @@ class BarraOsce(QWidget):
         s = max(0, int(queda + 0.999))
         self.lbl_cuenta.setText(f"{s // 60}:{s % 60:02d}")
         self.lbl_cuenta.setStyleSheet("color: #b91c1c;" if queda <= 60 else "")
+        if 0 < queda <= 60 and not self._entregando:
+            self.lbl_estado.setText("Queda menos de 1 minuto: al llegar a cero se entrega solo.")
+        elif queda > 60 and self.lbl_estado.text().startswith("Queda menos"):
+            self.lbl_estado.setText("")
         if queda <= 0 and not self._entregando:
             self.entregar(auto=True)
 

@@ -79,6 +79,7 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
 </div>
 
 <div class="pantalla" id="p-preguntas" hidden>
+    <p id="aviso-fin" hidden style="background:#fde8e8;color:#991b1b;border-radius:0.5rem;padding:0.6rem 0.9rem;font-weight:600;margin:0.8rem 0 0;">Queda menos de 1 minuto: al llegar a cero tus respuestas se entregan solas.</p>
     <div id="preguntas"></div>
     <div class="pie">
         <span class="muted" id="guardado"></span>
@@ -260,6 +261,7 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
             var queda = sesion.ventana.fin_s - t;
             c.textContent = OsceReloj.mmss(queda);
             c.classList.toggle('ultimo', queda <= 60);
+            $('aviso-fin').hidden = !(queda <= 60 && queda > 0);
             // Se acabó el tiempo: entrega sola con lo que haya.
             if (queda <= 0 && !autoEntrega) {
                 autoEntrega = true;
