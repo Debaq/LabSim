@@ -48,6 +48,39 @@ timbre y quién está en cada estación), `student/osce.php` (página del QR) y
 - **Nota:** escala 1–7 con exigencia y nota de aprobación del OSCE; la final
   pondera el % de logro de cada estación por su peso.
 
+**Paso 2 hecho (2026-11-25): pauta docente con impedancias.** `src/OscePauta.php`,
+`admin/osce_estacion.php` (editor de la pauta) y `admin/osce_evaluar.php`
+(tablet del docente).
+
+- **Pautas desde el Protocolo Técnico ORL 2019**, una por examen: PEATC
+  clínico, PEAAT (GSI), cVEMP, oVEMP y estado estable, con material, zonas que
+  se limpian, posición, montaje cable por cable y transductor. ECochG y
+  latencias media y tardía no están en el protocolo: llevan el montaje del
+  simulador y la página lo dice. Lavado de manos y montaje parten críticos.
+  Copiados tal cual del protocolo aunque choquen con la práctica habitual
+  (cVEMP: activo en la unión esternoclavicular; oVEMP: "referencia izquierda
+  bajo la pupila del ojo derecho"): el docente los corrige en el editor.
+- **Límites por examen:** PEATC y cVEMP < 5 kΩ e interelectrodo < 2; oVEMP
+  < 3 y < 1; PEAAT < 12 y estado estable < 3, sin número para el
+  interelectrodo (el protocolo solo pide "similares": se muestra la
+  diferencia y no se puntúa).
+- **Interelectrodo = mayor − menor**, más la diferencia par a par a la vista.
+  Un valor igual al límite no cumple ("bajo 5 kΩ").
+- **Puntaje:** cumple completo, parcial la mitad, no cumple 0; impedancias
+  completo si cumplen los dos límites, la mitad si uno. Crítico en "no
+  cumple" (o impedancias en 0) = estación reprobada aunque sume.
+- **La tablet sigue el reloj**: muestra solo el código del alumno de la
+  estación, en el cambio se queda con el que salió (para terminar de anotar)
+  y al partir el tiempo nuevo pasa al siguiente. "Otro alumno" deja corregir
+  a cualquiera a mano.
+- **Cada toque se guarda solo**, y queda copia en la tablet: sin red avisa
+  y reintenta cada 5 s (probado apagando el servidor). El puntaje que vale
+  lo calcula el servidor.
+- **La pauta se congela con la primera evaluación** de esa estación.
+- **Sesión:** el proyector y la tablet cuentan como actividad mientras el
+  OSCE está en curso (`window.LabSimSesion.actividad` en session_guard.js);
+  si no, la sesión de 72 min se cortaba en medio del OSCE.
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una

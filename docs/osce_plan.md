@@ -172,7 +172,7 @@ App LabSim:
 1. ✅ Tablas + asistente de creación + códigos/QR + página del QR + reloj
    (2026-11-25). Rotación por circuitos paralelos (no copias sueltas de una
    estación).
-2. `pauta_docente` con impedancias (tablet docente).
+2. ✅ `pauta_docente` con impedancias (tablet docente) (2026-11-25).
 3. `preguntas` con corrección automática e IA; feedback y réplica.
 4. Modo OSCE en LabSim: `config_equipo` y `marcaje`.
 5. `protocolo` (evaluador de estrategia sobre `action_logs`).

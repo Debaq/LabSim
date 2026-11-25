@@ -476,6 +476,16 @@ final class Osce
         return $stmt->fetchAll();
     }
 
+    public static function estacion(int $estacionId): ?array
+    {
+        self::migrar();
+        $stmt = Db::get()->prepare('SELECT * FROM osce_estacion WHERE id = ?');
+        $stmt->execute([$estacionId]);
+        $row = $stmt->fetch();
+        $stmt->closeCursor();
+        return $row ?: null;
+    }
+
     private static function limpiarEstacion(array $in): array
     {
         $tipo = (string) ($in['tipo'] ?? '');

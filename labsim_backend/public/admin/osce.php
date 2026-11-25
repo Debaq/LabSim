@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
+require_once __DIR__ . '/../../src/OscePauta.php';
 require_once __DIR__ . '/../../src/QrSvg.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
@@ -112,6 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Courses::assertAdministers($courseId, $me);
             $cfg = Osce::limpiarConfig($_POST);
             $nuevo = Osce::crear($courseId, $cfg, (int) $me['id'], !empty($_POST['estaciones_base']));
+            // Las estaciones de pauta parten con la del protocolo de su examen.
+            foreach (Osce::estaciones($nuevo) as $e) {
+                if ($e['tipo'] === 'pauta_docente') {
+                    OscePauta::cargarBase((int) $e['id'], (string) $e['examen']);
+                }
+            }
             Osce::sincronizarAlumnos($nuevo);
             AdminAudit::log($me, 'osce_crear', ['osce_id' => $nuevo, 'course_id' => $courseId]);
             header('Location: osce.php?id=' . $nuevo . '&creado=1');
@@ -161,6 +168,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             default:
                 throw new InvalidArgumentException('Acción desconocida.');
+        }
+        if ($accion === 'est_add' || $accion === 'est_edit') {
+            // Una estación de pauta sin ítems parte con la del protocolo de su examen.
+            foreach (Osce::estaciones($id) as $e) {
+                if ($e['tipo'] === 'pauta_docente' && !OscePauta::items((int) $e['id'])) {
+                    OscePauta::cargarBase((int) $e['id'], (string) $e['examen']);
+                }
+            }
         }
         AdminAudit::log($me, 'osce_' . $accion, ['osce_id' => $id]);
         $osce = Osce::obtener($id);
@@ -367,6 +382,7 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
                         <?= csrf_field() ?>
                         <input type="hidden" name="id" value="<?= $id ?>">
                         <input type="hidden" name="estacion_id" value="<?= (int) $e['id'] ?>">
+                        <a href="osce_estacion.php?id=<?= (int) $e['id'] ?>" class="btn btn--xs btn--secondary">Contenido</a>
                         <button type="submit" name="accion" value="est_edit" class="btn btn--xs">Guardar</button>
                         <button type="submit" name="accion" value="est_up" class="btn btn--xs btn--ghost" title="Subir"<?= $k === 0 ? ' disabled' : '' ?>>↑</button>
                         <button type="submit" name="accion" value="est_down" class="btn btn--xs btn--ghost" title="Bajar"<?= $k === $S - 1 ? ' disabled' : '' ?>>↓</button>
@@ -378,7 +394,10 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
                 <td><?= htmlspecialchars(Osce::TIPOS[$e['tipo']] ?? $e['tipo']) ?></td>
                 <td><?= htmlspecialchars(Osce::EXAMENES[$e['examen']] ?? $e['examen']) ?></td>
                 <td><?= htmlspecialchars((string) $e['peso']) ?> (<?= $porEstacionPeso > 0 ? round(100 * (float) $e['peso'] / $porEstacionPeso) : 0 ?> %)</td>
-                <td></td>
+                <td class="nowrap">
+                    <a href="osce_estacion.php?id=<?= (int) $e['id'] ?>" class="btn btn--xs btn--secondary">Contenido</a>
+                    <?php if ($e['tipo'] === 'pauta_docente'): ?><a href="osce_evaluar.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Evaluar</a><?php endif; ?>
+                </td>
                 <?php endif; ?>
             </tr>
         <?php endforeach; ?>

@@ -130,6 +130,11 @@
         document.addEventListener(evento, huboActividad, { passive: true });
     });
 
+    // Pantallas que trabajan solas mientras alguien sí está presente (el
+    // reloj del OSCE en el proyector, la tablet del docente entre alumnos):
+    // llaman a esto para contar como actividad. Solo mientras el OSCE corre.
+    window.LabSimSesion = { actividad: huboActividad };
+
     setInterval(tick, 1000);
     tick();
 })();

@@ -159,8 +159,14 @@ admin_header('Reloj · ' . $osce['nombre'], $me);
         return '—';
     }
 
-    var faseAnterior = null, avisoMinuto = null;
+    var faseAnterior = null, avisoMinuto = null, ultimaActividad = 0;
     OsceReloj.iniciar(url, function (d, reloj) {
+        // El proyector pasa horas sin que nadie lo toque: mientras el OSCE
+        // corre cuenta como actividad (si no, la sesión se corta a los 72 min).
+        if (d.estado === 'en_curso' && window.LabSimSesion && Date.now() - ultimaActividad > 60000) {
+            ultimaActividad = Date.now();
+            window.LabSimSesion.actividad();
+        }
         var cfg = d.cfg, S = cfg.estaciones, C = d.circuitos;
         var cont = $('osce-vivo');
         if (!reloj) {

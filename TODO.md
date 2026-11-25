@@ -95,9 +95,8 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 
 ## Funcionalidades
 
-- [ ] 82. OSCE, pasos 2 a 6 de `docs/osce_plan.md` (para el 4-dic): pauta
-      docente con impedancias e interelectrodo, preguntas con IA + feedback y
-      réplica, modo OSCE en LabSim (configuración y marcaje), protocolo desde
+- [ ] 82. OSCE, pasos 3 a 6 de `docs/osce_plan.md` (para el 4-dic):
+      preguntas con IA + feedback y réplica, modo OSCE en LabSim (configuración y marcaje), protocolo desde
       `action_logs`, conclusión con IA y publicar resultados. § OSCE:
       estaciones configurables al crearlo
 
