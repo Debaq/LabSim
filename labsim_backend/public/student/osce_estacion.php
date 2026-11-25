@@ -52,6 +52,7 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
        padding: 0.7rem 1rem; display: flex; justify-content: center; align-items: center; gap: 1.2rem; }
 .pie button { font-size: 1.2rem; padding: 0.7rem 2rem; }
 .listo { text-align: center; padding: 3rem 1rem; font-size: 1.4rem; }
+.preg-img { display:block; max-width:100%; max-height:60vh; margin:0.4rem 0 0.6rem; border:1px solid #ddd; border-radius:6px; background:#fff; }
 </style>
 </head>
 <body>
@@ -155,6 +156,9 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
             var pts = (Math.round(q.puntaje * 100) / 100).toString().replace('.', ',');
             h += '<div class="preg" data-q="' + q.id + '"><div class="enun"><strong>' + (n + 1) + '.</strong> '
                + esc(q.enunciado).replace(/\n/g, '<br>') + ' <span class="muted">(' + pts + ' pt)</span></div>';
+            if (q.imagen) {
+                h += '<img class="preg-img" alt="Imagen de la pregunta" src="../api/osce_imagen.php?k=' + encodeURIComponent(K) + '&q=' + q.id + '">';
+            }
             if (q.tipo === 'alternativa') {
                 if (q.varias) h += '<p class="muted">Marca todas las correctas. Cada marca incorrecta descuenta.</p>';
                 var marcadas = respuestas[q.id] || [];

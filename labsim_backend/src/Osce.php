@@ -200,6 +200,11 @@ final class Osce
         if (!in_array('ia_comentario', $cols, true)) {
             $pdo->exec("ALTER TABLE osce_resultado ADD COLUMN ia_comentario TEXT NOT NULL DEFAULT ''");
         }
+        // Imagen de una pregunta técnica (una curva, un montaje): paso de 2026-11-25.
+        $colsQ = array_column($pdo->query('PRAGMA table_info(osce_pregunta)')->fetchAll(), 'name');
+        if (!in_array('imagen', $colsQ, true)) {
+            $pdo->exec("ALTER TABLE osce_pregunta ADD COLUMN imagen TEXT NOT NULL DEFAULT ''");
+        }
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_course ON osce(course_id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_estacion ON osce_estacion(osce_id, orden)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_item ON osce_item(estacion_id, orden)');

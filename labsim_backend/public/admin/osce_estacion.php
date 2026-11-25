@@ -45,13 +45,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new InvalidArgumentException('La estación ya tiene entregas: su contenido queda fijo.');
         }
         $qId = (int) ($_POST['pregunta_id'] ?? 0);
+        // Imagen de la pregunta (opcional): una curva, un montaje, una pantalla.
+        $subirImagen = static function (int $qId) use ($estId): void {
+            $f = $_FILES['imagen'] ?? null;
+            if (!$f || ($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                return;
+            }
+            if ($f['error'] !== UPLOAD_ERR_OK) {
+                throw new InvalidArgumentException('No se pudo recibir la imagen (¿pesa más de 8 MB?).');
+            }
+            OscePreguntas::guardarImagen($estId, $qId, (string) $f['tmp_name'], (int) $f['size']);
+        };
         switch ($accion) {
             case 'q_add':
-                OscePreguntas::agregar($estId, OscePreguntas::limpiar($_POST));
+                $qId = OscePreguntas::agregar($estId, OscePreguntas::limpiar($_POST));
+                $subirImagen($qId);
                 $success = 'Pregunta agregada.';
                 break;
             case 'q_edit':
                 OscePreguntas::editar($estId, $qId, OscePreguntas::limpiar($_POST));
+                if (!empty($_POST['quitar_imagen'])) {
+                    OscePreguntas::quitarImagen($estId, $qId);
+                }
+                $subirImagen($qId);
                 $success = 'Pregunta guardada.';
                 break;
             case 'q_del':
@@ -484,7 +500,21 @@ admin_header('Estación · ' . $est['titulo'], $me);
 <?php endif; ?>
 <?php endif; ?>
 
-<?php if ($est['tipo'] === 'preguntas'): $totalQ = array_sum(array_map(static fn ($q) => (float) $q['puntaje'], $preguntas)); ?>
+<?php if ($est['tipo'] === 'preguntas'):
+    $tokenTablet = OscePreguntas::tokenTablet($estId);
+    $imagenPregunta = static function (array $q, bool $editar) use ($tokenTablet): string {
+        $hay = OscePreguntas::rutaImagen($q) !== null;
+        $h = $hay ? '<p><img src="../api/osce_imagen.php?k=' . rawurlencode($tokenTablet) . '&amp;q=' . (int) $q['id']
+            . '" alt="Imagen de la pregunta" style="max-width:100%; max-height:22rem; border:1px solid #ddd; border-radius:6px;"></p>' : '';
+        if ($editar) {
+            $h .= '<div class="row row--gap-lg row--center"><label>' . ($hay ? 'Cambiar imagen' : 'Imagen (opcional)')
+                . ' <input type="file" name="imagen" accept="image/png,image/jpeg,image/gif,image/webp"></label>'
+                . ($hay ? '<label class="row row--gap-sm row--center"><input type="checkbox" name="quitar_imagen" value="1"> Quitar la imagen</label>' : '')
+                . '</div>';
+        }
+        return $h;
+    };
+    $totalQ = array_sum(array_map(static fn ($q) => (float) $q['puntaje'], $preguntas)); ?>
 <div class="card">
     <h2>Tablet de la estación</h2>
     <div class="row row--gap-lg row--center">
@@ -504,7 +534,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
     <?php foreach ($preguntas as $k => $q): $fid = 'q' . (int) $q['id']; ?>
     <div class="card" style="margin:0.6rem 0; padding:0.8rem;">
         <?php if ($editable): ?>
-        <form id="<?= $fid ?>" method="post">
+        <form id="<?= $fid ?>" method="post" enctype="multipart/form-data">
             <?= csrf_field() ?>
             <input type="hidden" name="id" value="<?= $estId ?>">
             <input type="hidden" name="pregunta_id" value="<?= (int) $q['id'] ?>">
@@ -516,6 +546,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
                 <label>Puntos <input type="text" inputmode="decimal" name="puntaje" value="<?= $fmt($q['puntaje']) ?>" class="input--narrow"></label>
             </div>
             <label>Enunciado <textarea name="enunciado" rows="2" style="display:block; width:100%;"><?= htmlspecialchars($q['enunciado']) ?></textarea></label>
+            <?= $imagenPregunta($q, true) ?>
             <label data-para="alternativa"<?= $q['tipo'] === 'alternativa' ? '' : ' hidden' ?>>Alternativas (una por línea; <strong>*</strong> al inicio en las correctas)
                 <textarea name="opciones" rows="<?= max(3, count($q['opciones'])) ?>" style="display:block; width:100%;"><?= htmlspecialchars(OscePreguntas::opcionesTexto($q)) ?></textarea></label>
             <label data-para="desarrollo"<?= $q['tipo'] === 'desarrollo' ? '' : ' hidden' ?>>Pauta para la IA (qué debe contener la respuesta y cuánto vale cada parte)
@@ -529,6 +560,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
         </form>
         <?php else: ?>
             <p><strong><?= $k + 1 ?>.</strong> <?= nl2br(htmlspecialchars($q['enunciado'])) ?> <span class="muted">(<?= $fmt($q['puntaje']) ?> pt)</span></p>
+            <?= $imagenPregunta($q, false) ?>
             <?php if ($q['tipo'] === 'alternativa'): ?>
             <ul><?php foreach ($q['opciones'] as $i => $o): ?><li<?= in_array($i, $q['correctas'], true) ? ' style="font-weight:600"' : '' ?>><?= htmlspecialchars($o) ?><?= in_array($i, $q['correctas'], true) ? ' ✓' : '' ?></li><?php endforeach; ?></ul>
             <?php else: ?>
@@ -540,7 +572,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
 
     <?php if ($editable): ?>
     <h3 style="margin-top:1.2rem;">Agregar pregunta</h3>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <?= csrf_field() ?>
         <input type="hidden" name="id" value="<?= $estId ?>">
         <input type="hidden" name="accion" value="q_add">
@@ -551,6 +583,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
             <label>Puntos <input type="text" inputmode="decimal" name="puntaje" value="1" class="input--narrow"></label>
         </div>
         <label>Enunciado <textarea name="enunciado" rows="2" required style="display:block; width:100%;"></textarea></label>
+        <label>Imagen (opcional: la curva, el montaje o la pantalla que hay que leer) <input type="file" name="imagen" accept="image/png,image/jpeg,image/gif,image/webp"></label>
         <label id="q-opciones">Alternativas (una por línea; <strong>*</strong> al inicio en las correctas)
             <textarea name="opciones" rows="4" style="display:block; width:100%;" placeholder="*Alternada&#10;Rarefacción&#10;Condensación"></textarea></label>
         <label id="q-pauta" hidden>Pauta para la IA (qué debe contener la respuesta y cuánto vale cada parte)

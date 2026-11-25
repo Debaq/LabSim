@@ -133,9 +133,9 @@ TXT;
         return implode("\n", $lineas);
     }
 
-    public static function agregar(int $estacionId, array $q): void
+    public static function agregar(int $estacionId, array $q): int
     {
-        Db::reintentar(static function () use ($estacionId, $q): void {
+        return (int) Db::reintentar(static function () use ($estacionId, $q): int {
             $pdo = Db::get();
             $stmt = $pdo->prepare('SELECT COALESCE(MAX(orden), 0) + 1 FROM osce_pregunta WHERE estacion_id = ?');
             $stmt->execute([$estacionId]);
@@ -143,6 +143,7 @@ TXT;
             $stmt->closeCursor();
             $pdo->prepare('INSERT INTO osce_pregunta (estacion_id, orden, tipo, enunciado, alternativas, clave, pauta, puntaje) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
                 ->execute([$estacionId, $orden, $q['tipo'], $q['enunciado'], $q['alternativas'], $q['clave'], $q['pauta'], $q['puntaje']]);
+            return (int) $pdo->lastInsertId();
         });
     }
 
@@ -154,8 +155,92 @@ TXT;
         });
     }
 
+    // -- Imagen de la pregunta ----------------------------------------------------
+
+    /** Formatos que se aceptan: lo que muestra cualquier tablet. */
+    private const IMAGEN_TIPOS = [IMAGETYPE_PNG => 'png', IMAGETYPE_JPEG => 'jpg', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
+    public const IMAGEN_MAX_BYTES = 8 * 1024 * 1024;
+
+    public static function dirImagenes(): string
+    {
+        $dir = __DIR__ . '/../data/osce_imagenes';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        return $dir;
+    }
+
+    /** Ruta del archivo de la imagen de una pregunta, o null. */
+    public static function rutaImagen(array $q): ?string
+    {
+        $nombre = (string) ($q['imagen'] ?? '');
+        if ($nombre === '' || !preg_match('/^[0-9]+_[0-9a-f]{12}\.(png|jpg|gif|webp)$/', $nombre)) {
+            return null;
+        }
+        $ruta = self::dirImagenes() . '/' . $nombre;
+        return is_file($ruta) ? $ruta : null;
+    }
+
+    public static function pregunta(int $estacionId, int $id): ?array
+    {
+        Osce::migrar();
+        $stmt = Db::get()->prepare('SELECT * FROM osce_pregunta WHERE id = ? AND estacion_id = ?');
+        $stmt->execute([$id, $estacionId]);
+        $q = $stmt->fetch();
+        $stmt->closeCursor();
+        return $q ? self::decodificar($q) : null;
+    }
+
+    /** Guarda (o reemplaza) la imagen de una pregunta desde un archivo subido. */
+    public static function guardarImagen(int $estacionId, int $id, string $tmp, int $bytes): void
+    {
+        $q = self::pregunta($estacionId, $id);
+        if ($q === null) {
+            throw new InvalidArgumentException('Pregunta no encontrada.');
+        }
+        if ($bytes <= 0 || $bytes > self::IMAGEN_MAX_BYTES) {
+            throw new InvalidArgumentException('La imagen debe pesar menos de 8 MB.');
+        }
+        $info = @getimagesize($tmp);
+        $ext = $info !== false ? (self::IMAGEN_TIPOS[$info[2]] ?? null) : null;
+        if ($ext === null) {
+            throw new InvalidArgumentException('La imagen debe ser PNG, JPG, GIF o WebP.');
+        }
+        $nombre = $estacionId . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+        $destino = self::dirImagenes() . '/' . $nombre;
+        if (!(is_uploaded_file($tmp) ? move_uploaded_file($tmp, $destino) : copy($tmp, $destino))) {
+            throw new InvalidArgumentException('No se pudo guardar la imagen.');
+        }
+        $vieja = self::rutaImagen($q);
+        Db::reintentar(static function () use ($estacionId, $id, $nombre): void {
+            Db::get()->prepare('UPDATE osce_pregunta SET imagen = ? WHERE id = ? AND estacion_id = ?')->execute([$nombre, $id, $estacionId]);
+        });
+        if ($vieja !== null) {
+            @unlink($vieja);
+        }
+    }
+
+    public static function quitarImagen(int $estacionId, int $id): void
+    {
+        $q = self::pregunta($estacionId, $id);
+        if ($q === null) {
+            return;
+        }
+        $vieja = self::rutaImagen($q);
+        Db::reintentar(static function () use ($estacionId, $id): void {
+            Db::get()->prepare("UPDATE osce_pregunta SET imagen = '' WHERE id = ? AND estacion_id = ?")->execute([$id, $estacionId]);
+        });
+        if ($vieja !== null) {
+            @unlink($vieja);
+        }
+    }
+
     public static function quitar(int $estacionId, int $id): void
     {
+        $q = self::pregunta($estacionId, $id);
+        if ($q !== null && ($vieja = self::rutaImagen($q)) !== null) {
+            @unlink($vieja);
+        }
         Db::reintentar(static function () use ($estacionId, $id): void {
             Db::get()->prepare('DELETE FROM osce_pregunta WHERE id = ? AND estacion_id = ?')->execute([$id, $estacionId]);
         });
@@ -409,6 +494,7 @@ TXT;
                 'enunciado' => $q['enunciado'],
                 'puntaje' => (float) $q['puntaje'],
                 'respuesta' => $guardadas[(int) $q['id']] ?? null,
+                'imagen' => self::rutaImagen($q) !== null,
             ];
             if ($q['tipo'] === 'alternativa') {
                 $orden = self::ordenOpciones((int) $p['id'], (int) $q['id'], count($q['opciones']));
