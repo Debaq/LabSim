@@ -694,12 +694,13 @@ def build_traces(test, t, edad, central, side, ctx):
     canales = CHANNELS[test]
     if test == 'MLR':
         comps = mlr_components(edad, central, side, ctx)
-        return {'main': _superpose(t, comps, test, rate), 'overlays': {}}
+        return {'main': _superpose(t, comps, test, rate), 'overlays': {},
+                'comps': _verdad(comps)}
     frecuentes = late_components(edad, central, ctx)
     if test == 'CAEP':
         return {'main': _superpose(t, {c: frecuentes for c in canales},
                                    test, rate),
-                'overlays': {}}
+                'overlays': {}, 'comps': _verdad({c: frecuentes for c in canales})}
     raros = late_components(edad, central, ctx, rare=bool(ctx['deviance']))
     # Atendido (contar o botón), el raro suma N2b y P3b; si no, en la
     # P300 queda la P3a pasiva y la MMN sale limpia.
@@ -715,9 +716,24 @@ def build_traces(test, t, edad, central, side, ctx):
     cola = {c: y_frec[c] - _evaluate(t, frecuentes, c) for c in canales}
     y_raro = {c: _evaluate(t, raros, c) + cola[c] for c in canales}
     if test == 'P300':
-        return {'main': y_raro, 'overlays': {'frecuente': y_frec}}
+        return {'main': y_raro, 'overlays': {'frecuente': y_frec},
+                'comps': _verdad({c: raros for c in canales})}
+    # MMN: el trazo es la resta, así que lo que se marca es lo propio del raro.
+    propios = {k: raros[k] for k in ('MMN', 'P3a', 'N2b', 'P3') if k in raros}
     return {'main': {c: y_raro[c] - y_frec[c] for c in canales},
-            'overlays': {'frecuente': y_frec, 'raro': y_raro}}
+            'overlays': {'frecuente': y_frec, 'raro': y_raro},
+            'comps': _verdad({c: propios for c in canales})}
+
+
+def _verdad(comps_by_channel):
+    """Dónde quedó cada componente en cada canal (latencia y amplitud con
+    el peso del electrodo): la verdad para corregir el marcaje del OSCE."""
+    out = {}
+    for canal, comps in comps_by_channel.items():
+        out[canal] = {nombre: {'lat': float(c['lat']),
+                               'amp': float(c['amp'] * c['topo'].get(canal, 0.0))}
+                      for nombre, c in comps.items()}
+    return out
 
 
 # ---------------------------------------------------------------------

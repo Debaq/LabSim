@@ -117,6 +117,43 @@ def test_en_la_estacion_la_curva_sale_al_instante():
     assert w.verdad_curvas['R1']['visible']
 
 
+def _caso_completo():
+    """Caso con ECochG y bloque Central: sirve para todas las pruebas del ABR."""
+    oido = {'umbral': 15, 'type': 'normal', 'repro': True, 'repro_var': 0.3, 'desviaciones': {},
+            'fsp_puntos': {'800': 2.3, '2000': 2.8}, 'average_objetivo': 1500, 'ecochg': {'sp_ap': 0.45}}
+    return {'edad': 30, 'gender': 1, 'ABR': {'OD': dict(oido), 'OI': dict(oido)},
+            'Central': {'estado': 'despierto'}}
+
+
+def _marcaje(prueba, curvas):
+    w = AbrMainWindow(dict(ALUMNO))
+    w.la_super(_caso_completo(), 'osce-X')
+    w.osce_preparar('marcaje', prueba, list(curvas), random.Random(1))
+    return w
+
+
+def test_marcaje_ecochg_trae_ps_y_pa():
+    w = _marcaje('ECochG', [('OD', 90)])
+    v = w.verdad_curvas['R1']
+    assert v['visible'] and set(v['waves']) == {'PS', 'PA'}, v
+    assert v['waves']['PS']['lat'] < v['waves']['PA']['lat'] < 3.0, v
+    w.ecochg_mark_changed({'R1': {'PA': [v['waves']['PA']['lat'], -1.0]}})
+    c = w.osce_entrega()['curvas'][0]
+    assert c['test'] == 'ECochG' and abs(c['marcas']['PA'] - v['waves']['PA']['lat']) < 1e-6, c
+
+
+def test_marcaje_corticales_traen_sus_componentes():
+    esperado = {'MLR': ('Cz', {'Na', 'Pa'}), 'CAEP': ('Cz', {'P1', 'N1', 'P2'}),
+                'P300': ('Pz', {'P3'}), 'MMN': ('Fz', {'MMN'})}
+    for prueba, (canal, comps) in esperado.items():
+        w = _marcaje(prueba, [('OD', 70)])
+        v = w.verdad_curvas.get(f'R1.{canal}')
+        assert v is not None and v['visible'], (prueba, w.verdad_curvas.keys())
+        assert comps <= set(v['waves']), (prueba, v['waves'].keys())
+        curvas = {c['nombre']: c for c in w.osce_entrega()['curvas']}
+        assert curvas[f'R1.{canal}']['canal'] == canal and curvas[f'R1.{canal}']['test'] == prueba
+
+
 def test_alumno_nuevo_borra_lo_del_anterior():
     w = _estacion('marcaje', [('OD', 80)])
     w.la_super(None, None)

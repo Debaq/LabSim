@@ -1591,10 +1591,16 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # Lo que el equipo no muestra (latencia verdadera de cada onda y si
         # hay respuesta): solo viaja en la entrega del OSCE (osce_entrega),
         # nunca en el informe que el alumno puede volver a abrir.
+        ondas = {w: {'lat': float(d.get('lat', 0.0)), 'amp': float(d.get('amp', 0.0))}
+                 for w, d in (metadata.get('waves') or {}).items()}
+        if self.es_ecochg():
+            # El ECochG se marca con PS y PA (ecochg.MARKS), no con I-V.
+            ondas = {m: {'lat': float(metadata[k]), 'amp': 1.0}
+                     for m, k in (('PA', 'ecochg_ap_lat'), ('PS', 'ecochg_sp_lat'))
+                     if metadata.get(k) is not None}
         self.verdad_curvas[self.current_capture_curve] = {
             'visible': bool(metadata.get('waves_visible')),
-            'waves': {w: {'lat': float(d.get('lat', 0.0)), 'amp': float(d.get('amp', 0.0))}
-                      for w, d in (metadata.get('waves') or {}).items()},
+            'waves': ondas,
             'threshold': (float(metadata['threshold'])
                           if metadata.get('threshold') is not None else None),
         }
@@ -1641,6 +1647,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             capture_id=self.current_capture_curve, technical=technical)
         self.last_metadata = metadata
         grupo = self.current_capture_curve
+        # Verdad por canal (ver osce_entrega): dónde puso el generador cada
+        # componente. Los que en ese electrodo casi no se ven no cuentan.
+        for canal, comps in (metadata.get('componentes') or {}).items():
+            self.verdad_curvas[f"{grupo}.{canal}"] = {
+                'visible': bool(metadata.get('waves_visible')),
+                'waves': {n: c for n, c in comps.items() if abs(c.get('amp', 0.0)) >= 0.15},
+                'threshold': None,
+            }
         data_line = {}
         for canal in metadata['channels']:
             subs = metadata['channel_subs'][canal]
@@ -2593,8 +2607,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 'average': c.get('average'), 'transducer': c.get('transducer'),
                 'window_ms': tecnica.get('ventana_ms'), 'test': c.get('test'),
                 'mkg': c.get('mkg'), 'clamp': 'sí' if c.get('clamp') else 'no',
-                'marcas': {onda: (v[0] if isinstance(v, (list, tuple)) and v and v[0] is not None else None)
-                           for onda, v in (c.get('LatAmp') or {}).items()},
+                'canal': c.get('canal'),
+                # I-V del PEATC (LatAmp) y las del ECochG y los corticales
+                # (marcas: PS, PA, Na, Pa, P1, N1, P2, P3, MMN...).
+                'marcas': dict(
+                    {onda: (v[0] if isinstance(v, (list, tuple)) and v and v[0] is not None else None)
+                     for onda, v in (c.get('LatAmp') or {}).items()},
+                    **{m: float(xy[0]) for m, xy in (c.get('marcas') or {}).items()
+                       if isinstance(xy, (list, tuple)) and xy}),
             })
         return curvas
 

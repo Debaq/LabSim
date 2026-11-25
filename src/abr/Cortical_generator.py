@@ -454,6 +454,7 @@ class CorticalGenerator:
             'fsp_pass': (fsp >= criterio) if criterio else None,
         }
         meta['tarea'] = ctx['tarea']
+        meta['componentes'] = traces.get('comps') or {}
         if test == 'P300' and datos:
             meta['conteo'] = self.patient_count(central, current_avg,
                                                 rare_fraction, rng,

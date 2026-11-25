@@ -461,6 +461,8 @@ class ECochGGenerator:
             # los tests la usan para auditar la marca del alumno. La razon
             # PS/PA NO va, que es el resultado que tiene que medir.
             'ecochg_ap_lat': (ec_params or {}).get('ap_lat'),
+            # Y la del PS (hombro antes del PA): la corrige el marcaje del OSCE.
+            'ecochg_sp_lat': (ec_params or {}).get('sp_lat'),
             'waves_visible': bool(hay_registro and case_ec),
             'current_avg': current_avg,
             'target_avg': target_avg,
