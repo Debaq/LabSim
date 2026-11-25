@@ -95,10 +95,10 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 
 ## Funcionalidades
 
-- [ ] 82. OSCE, pasos 3 a 6 de `docs/osce_plan.md` (para el 4-dic):
-      preguntas con IA + feedback y réplica, modo OSCE en LabSim (configuración y marcaje), protocolo desde
-      `action_logs`, conclusión con IA y publicar resultados. § OSCE:
-      estaciones configurables al crearlo
+- [ ] 82. OSCE, pasos 4 a 6 de `docs/osce_plan.md` (para el 4-dic): modo
+      OSCE en LabSim (configuración y marcaje), protocolo desde
+      `action_logs` y conclusión con IA. § OSCE: estaciones configurables
+      al crearlo
 
 ### Otoscopia: derivación + aprobación docente + fase por alumno
 Hoy todo alumno ve la fase 1 (`FASE_FIJA = 0` en `Otoscopia.py`).

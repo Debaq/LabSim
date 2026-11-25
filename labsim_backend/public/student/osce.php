@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
+require_once __DIR__ . '/../../src/OscePauta.php';
+require_once __DIR__ . '/../../src/OscePreguntas.php';
 
 /**
  * Página del QR de la tarjeta OSCE. Sin login: el alumno la abre en su
  * teléfono escaneando el QR (token largo aleatorio en ?t=). Durante el OSCE
  * muestra dónde le toca estar y cuánto queda; al final, su resultado, pero
- * solo cuando el docente lo publica (estado 'publicado').
+ * solo cuando el docente lo publica (estado 'publicado'): nota, detalle por
+ * estación con el feedback, y la réplica de las respuestas de preguntas.
  */
 
 header('Content-Type: text/html; charset=utf-8');
@@ -42,7 +45,19 @@ body { max-width: 34rem; margin: 0 auto; padding: 1rem; }
 .recorrido li.actual { font-weight: 700; }
 .recorrido li.hecha { color: var(--color-text-muted, #777); }
 .recorrido { list-style: none; padding: 0; margin: 0; }
-.nota { font: 700 2.4rem ui-monospace, monospace; }
+.nota { font-size: 2.6rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 0.2rem 0; }
+.det-lista { list-style: none; padding: 0; margin: 0; }
+.det-lista li { padding: 0.5rem 0; border-bottom: 1px solid var(--color-border, #ddd); }
+.det-lista li > span:first-child { display: block; }
+.det-v { font-weight: 600; font-size: 0.95rem; }
+.det-cumple { color: #15803d; } .det-parcial { color: #b45309; } .det-no_cumple { color: #b91c1c; }
+.det-com { font-size: 0.92rem; color: var(--color-text-muted, #555); margin-top: 0.3rem; }
+.det-q { padding: 0.6rem 0; border-bottom: 1px solid var(--color-border, #ddd); }
+.det-ops { list-style: none; padding: 0; margin: 0.3rem 0; }
+.op-ok { color: #15803d; font-weight: 600; } .op-mal { color: #b91c1c; } .op-falto { color: #15803d; }
+.det-resp { background: var(--color-surface-2, #f4f4f6); border-radius: 0.4rem; padding: 0.5rem 0.7rem; }
+.det-rep { border-left: 3px solid #b45309; padding-left: 0.6rem; margin-top: 0.5rem; font-size: 0.95rem; }
+.det-rep-form summary { cursor: pointer; font-size: 0.92rem; margin-top: 0.4rem; color: var(--color-primary, #7a1f3d); }
 </style>
 </head>
 <body>
@@ -57,6 +72,24 @@ if ($p === null || $o === null) {
 
 $recorrido = Osce::recorrido($o, $p);
 $publicado = $o['estado'] === 'publicado';
+
+// Réplica de una respuesta (solo con resultados publicados). Sin sesión: el
+// token del QR es la identidad, y tiene que venir también en el formulario.
+$msgReplica = null;
+$errReplica = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $publicado && hash_equals($token, (string) ($_POST['t'] ?? ''))) {
+    try {
+        OscePreguntas::replicar((int) $p['id'], (int) ($_POST['resultado'] ?? 0), (string) ($_POST['texto'] ?? ''));
+        header('Location: osce.php?t=' . rawurlencode($token) . '&replica=1#r' . (int) ($_POST['resultado'] ?? 0));
+        exit;
+    } catch (InvalidArgumentException $e) {
+        $errReplica = $e->getMessage();
+    }
+}
+if (isset($_GET['replica'])) {
+    $msgReplica = 'Réplica enviada. El docente la revisará y verás su respuesta aquí.';
+}
+$pts = static fn ($x): string => $x === null ? '—' : rtrim(rtrim(number_format((float) $x, 2, ',', ''), '0'), ',');
 
 // Resultado: nota por estación y final ponderada por peso.
 $resultado = null;
@@ -75,6 +108,8 @@ if ($publicado) {
         $sumaPeso += $peso;
         $sumaPct += $peso * ($pct ?? 0.0);
         $filas[] = [
+            'estacion' => $e,
+            'entrega' => $en,
             'titulo' => $e['titulo'],
             'pct' => $pct,
             'nota' => $pct === null ? null : Osce::nota($pct * 100, 100, (int) $o['exigencia'], (float) $o['nota_aprobacion']),
@@ -99,6 +134,8 @@ $cabeza('OSCE · ' . $o['nombre']);
     <div><?= htmlspecialchars((string) $p['display_name']) ?> · vuelta <?= (int) $p['vuelta'] + 1 ?><?= (int) $o['circuitos'] > 1 ? ' · circuito ' . ((int) $p['circuito'] + 1) : '' ?></div>
 </div>
 
+<?php if ($msgReplica !== null): ?><p class="success"><?= htmlspecialchars($msgReplica) ?></p><?php endif; ?>
+<?php if ($errReplica !== null): ?><p class="error"><?= htmlspecialchars($errReplica) ?></p><?php endif; ?>
 <?php if ($resultado !== null): ?>
 <div class="card">
     <h2>Tu resultado</h2>
@@ -114,6 +151,78 @@ $cabeza('OSCE · ' . $o['nombre']);
     <?php endforeach; ?>
     </ul>
 </div>
+
+<?php foreach ($resultado['filas'] as $f): $e = $f['estacion']; if ($f['entrega'] === null) { continue; } ?>
+<div class="card detalle">
+    <h2><?= htmlspecialchars($e['titulo']) ?> <span class="muted" style="font-size:1rem;"><?= $pts($f['entrega']['puntaje']) ?> / <?= $pts($f['entrega']['puntaje_max']) ?> pt</span></h2>
+    <?php if ($e['tipo'] === 'pauta_docente'):
+        $guardado = OscePauta::cargar((int) $e['id'], (int) $p['id'])['items']; ?>
+        <ul class="det-lista">
+        <?php foreach (OscePauta::items((int) $e['id']) as $it): $g = $guardado[(int) $it['id']] ?? null; ?>
+            <li>
+                <span><?= htmlspecialchars($it['texto']) ?><?= (int) $it['critico'] ? ' <span class="tag tag--danger">crítico</span>' : '' ?></span>
+                <?php if ($it['tipo'] === 'impedancias'):
+                    $calc = $g['valor']['calculo'] ?? null; ?>
+                    <span class="det-v"><?= $calc && $calc['inter'] !== null
+                        ? htmlspecialchars(implode(' · ', array_map(static fn ($x) => $x === null ? '—' : str_replace('.', ',', (string) $x), $calc['valores']))) . ' kΩ · interelectrodo ' . str_replace('.', ',', (string) $calc['inter'])
+                        : 'sin registro' ?></span>
+                <?php else: ?>
+                    <span class="det-v det-<?= htmlspecialchars((string) ($g['valor'] ?? '')) ?>"><?= htmlspecialchars(OscePauta::TICK[$g['valor'] ?? ''] ?? 'Sin marcar') ?></span>
+                <?php endif; ?>
+                <?php if ($g && trim((string) $g['comentario']) !== ''): ?><div class="det-com"><?= nl2br(htmlspecialchars((string) $g['comentario'])) ?></div><?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+        </ul>
+    <?php elseif ($e['tipo'] === 'preguntas'): ?>
+        <?php foreach (OscePreguntas::detalleAlumno((int) $e['id'], (int) $p['id']) as $n => $d):
+            $q = $d['pregunta']; $r = $d['resultado']; ?>
+        <div class="det-q" id="r<?= $r ? (int) $r['id'] : 0 ?>">
+            <p><strong><?= $n + 1 ?>.</strong> <?= nl2br(htmlspecialchars($q['enunciado'])) ?>
+               <span class="muted">· <?= $pts($r['puntaje'] ?? null) ?> / <?= $pts($q['puntaje']) ?> pt</span></p>
+            <?php if ($q['tipo'] === 'alternativa'): $marc = is_array($d['valor']) ? $d['valor'] : []; ?>
+                <ul class="det-ops">
+                <?php foreach ($q['opciones'] as $i => $op): $esC = in_array($i, $q['correctas'], true); $m = in_array($i, $marc, true); ?>
+                    <li class="<?= $m ? ($esC ? 'op-ok' : 'op-mal') : ($esC ? 'op-falto' : '') ?>"><?= $m ? '☑' : '☐' ?> <?= htmlspecialchars($op) ?><?= $esC ? ' <span class="muted">(correcta)</span>' : '' ?></li>
+                <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <div class="det-resp"><?= trim((string) $d['valor']) === '' ? '<span class="muted">(sin respuesta)</span>' : nl2br(htmlspecialchars((string) $d['valor'])) ?></div>
+            <?php endif; ?>
+            <?php if ($r && trim((string) $r['ia_comentario']) !== '' && $r['fuente'] !== 'docente'): ?>
+                <div class="det-com"><?= nl2br(htmlspecialchars((string) $r['ia_comentario'])) ?></div>
+            <?php endif; ?>
+            <?php if ($r && trim((string) $r['comentario']) !== ''): ?>
+                <div class="det-com"><strong>Docente:</strong> <?= nl2br(htmlspecialchars((string) $r['comentario'])) ?></div>
+            <?php endif; ?>
+            <?php if ($r && $r['replica_texto'] !== null): ?>
+                <div class="det-rep">
+                    <strong>Tu réplica:</strong> <?= nl2br(htmlspecialchars((string) $r['replica_texto'])) ?><br>
+                    <?php if ($r['replica_estado'] === 'pendiente'): ?>
+                        <span class="muted">En revisión.</span>
+                    <?php else: ?>
+                        <strong><?= $r['replica_estado'] === 'aceptada' ? 'Aceptada' : 'No aceptada' ?>.</strong>
+                        <?= nl2br(htmlspecialchars((string) $r['replica_respuesta'])) ?>
+                    <?php endif; ?>
+                </div>
+            <?php elseif ($r && (float) $r['puntaje'] < (float) $q['puntaje']): ?>
+                <details class="det-rep-form">
+                    <summary>Hacer réplica de esta respuesta</summary>
+                    <form method="post" action="osce.php?t=<?= htmlspecialchars(rawurlencode($token)) ?>">
+                        <input type="hidden" name="t" value="<?= htmlspecialchars($token) ?>">
+                        <input type="hidden" name="resultado" value="<?= (int) $r['id'] ?>">
+                        <textarea name="texto" rows="3" required maxlength="2000" placeholder="Explica por qué crees que tu respuesta merece otro puntaje" style="width:100%;"></textarea>
+                        <button type="submit" class="btn btn--sm">Enviar réplica</button>
+                    </form>
+                </details>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <?php if (trim((string) $f['feedback']) !== ''): ?>
+        <div class="det-com"><strong>Comentario general:</strong> <?= nl2br(htmlspecialchars((string) $f['feedback'])) ?></div>
+    <?php endif; ?>
+</div>
+<?php endforeach; ?>
 <?php else: ?>
 <div class="card ahora" id="ahora">
     <div class="fase" id="ahora-fase">Cargando…</div>
@@ -156,7 +265,8 @@ $cabeza('OSCE · ' . $o['nombre']);
         // Hora estimada de cada estación: con el reloj andando, ahora - t; si
         // no, el inicio programado (hora del curso, tal como se escribió).
         var t0 = null;
-        if (t !== null) t0 = Date.now() / 1000 - t;
+        if (d.inicio_real && d.estado !== 'en_curso') t0 = d.inicio_real;
+        else if (t !== null) t0 = Date.now() / 1000 - t;
         else if (d.inicio_programado) {
             var m = /^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)$/.exec(d.inicio_programado);
             if (m) t0 = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]).getTime() / 1000;

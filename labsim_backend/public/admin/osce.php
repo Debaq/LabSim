@@ -29,13 +29,7 @@ if ($id > 0 && ($osce === null || !Courses::canAdminister((int) $osce['course_id
 }
 
 /** URL absoluta de la página del alumno (la que abre el QR). */
-$urlAlumno = static function (string $token): string {
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
-    $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
-    $base = rtrim(str_replace('\\', '/', dirname(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/public/admin/osce.php')))), '/');
-    return ($https ? 'https' : 'http') . '://' . $host . $base . '/student/osce.php?t=' . rawurlencode($token);
-};
+$urlAlumno = static fn (string $token): string => Osce::urlPublica('student/osce.php?t=' . rawurlencode($token));
 
 $min = static fn (int $s): string => rtrim(rtrim(number_format($s / 60, 1, ',', ''), '0'), ',');
 
@@ -160,6 +154,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'quitar':
                 Osce::quitarParticipante($id, (int) ($_POST['participante_id'] ?? 0));
                 $success = 'Alumno quitado del OSCE.';
+                break;
+            case 'publicar':
+            case 'despublicar':
+                Osce::publicar($id, $accion === 'publicar');
+                $success = $accion === 'publicar'
+                    ? 'Resultados publicados: cada alumno los ve (y puede hacer réplica) desde su QR.'
+                    : 'Publicación retirada.';
                 break;
             case 'eliminar':
                 Osce::eliminar($id);
@@ -302,6 +303,19 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
         <strong><?= htmlspecialchars($osce['curso']) ?></strong> ·
         <span class="tag<?= $editable ? ' tag--muted' : ' tag--warn' ?>"><?= htmlspecialchars(Osce::ESTADOS[$osce['estado']] ?? $osce['estado']) ?></span>
     </p>
+    <?php if ($osce['estado'] === 'cerrado' || $osce['estado'] === 'publicado'): ?>
+    <form method="post" class="row row--gap-sm row--center">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <?php if ($osce['estado'] === 'cerrado'): ?>
+        <button type="submit" name="accion" value="publicar" class="btn btn--sm" onclick="return confirm('¿Publicar? Cada alumno verá su nota, el detalle y el feedback desde su QR, y podrá hacer réplica en las preguntas.')">Publicar resultados</button>
+        <span class="help">Antes de publicar, revisa las estaciones de preguntas (corrección IA y feedback).</span>
+        <?php else: ?>
+        <button type="submit" name="accion" value="despublicar" class="btn btn--sm btn--secondary">Retirar publicación</button>
+        <span class="help">Publicado <?= htmlspecialchars(Clock::fromUtc((string) $osce['publicado_at'])->format('d-m-Y H:i')) ?>. Las réplicas llegan a la revisión de cada estación de preguntas.</span>
+        <?php endif; ?>
+    </form>
+    <?php endif; ?>
     <?php if ($S === 0 || $N === 0): ?>
         <p class="text-warn">Faltan <?= $S === 0 ? 'estaciones' : 'alumnos' ?> para calcular las vueltas.</p>
     <?php else: ?>
@@ -397,6 +411,7 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
                 <td class="nowrap">
                     <a href="osce_estacion.php?id=<?= (int) $e['id'] ?>" class="btn btn--xs btn--secondary">Contenido</a>
                     <?php if ($e['tipo'] === 'pauta_docente'): ?><a href="osce_evaluar.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Evaluar</a><?php endif; ?>
+                    <?php if ($e['tipo'] === 'preguntas'): ?><a href="osce_revision.php?estacion=<?= (int) $e['id'] ?>" class="btn btn--xs">Revisión</a><?php endif; ?>
                 </td>
                 <?php endif; ?>
             </tr>

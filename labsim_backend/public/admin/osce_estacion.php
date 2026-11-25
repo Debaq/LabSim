@@ -5,17 +5,20 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
 require_once __DIR__ . '/../../src/OscePauta.php';
+require_once __DIR__ . '/../../src/OscePreguntas.php';
+require_once __DIR__ . '/../../src/QrSvg.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
- * Contenido de una estación del OSCE. Hoy: la pauta docente (ítems tick e
- * impedancias), precargable desde el Protocolo Técnico ORL 2019 según el
- * examen. Los demás tipos se arman en los pasos 3 a 6 de docs/osce_plan.md.
+ * Contenido de una estación del OSCE: la pauta docente (ítems tick e
+ * impedancias, precargable desde el Protocolo Técnico ORL 2019 según el
+ * examen) o las preguntas (alternativas y desarrollo, importables en GIFT,
+ * con el enlace y QR de la tablet de la estación). Los demás tipos se arman
+ * en los pasos 4 a 6 de docs/osce_plan.md.
  *
- * La pauta se puede editar hasta que la estación tenga la primera
- * evaluación: después, cambiarla dejaría a los alumnos medidos con
- * pautas distintas.
+ * Pauta y preguntas se pueden editar hasta la primera entrega de la
+ * estación: después, cambiarlas dejaría a los alumnos medidos distinto.
  */
 
 $me = Auth::requireAdminSession();
@@ -38,9 +41,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $itemId = (int) ($_POST['item_id'] ?? 0);
     try {
         if (!$editable) {
-            throw new InvalidArgumentException('La estación ya tiene evaluaciones: la pauta queda fija.');
+            throw new InvalidArgumentException('La estación ya tiene entregas: su contenido queda fijo.');
         }
+        $qId = (int) ($_POST['pregunta_id'] ?? 0);
         switch ($accion) {
+            case 'q_add':
+                OscePreguntas::agregar($estId, OscePreguntas::limpiar($_POST));
+                $success = 'Pregunta agregada.';
+                break;
+            case 'q_edit':
+                OscePreguntas::editar($estId, $qId, OscePreguntas::limpiar($_POST));
+                $success = 'Pregunta guardada.';
+                break;
+            case 'q_del':
+                OscePreguntas::quitar($estId, $qId);
+                $success = 'Pregunta quitada.';
+                break;
+            case 'q_up':
+            case 'q_down':
+                OscePreguntas::mover($estId, $qId, $accion === 'q_up' ? -1 : 1);
+                break;
+            case 'gift':
+                $r = OscePreguntas::importarGift($estId, (string) ($_POST['gift'] ?? ''));
+                $success = "Importadas {$r['importadas']} preguntas." . ($r['errores'] ? ' No se importó: ' . implode(' ', $r['errores']) : '');
+                break;
             case 'base':
                 OscePauta::cargarBase($estId, (string) $est['examen']);
                 $success = 'Pauta del protocolo cargada.';
@@ -71,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $items = OscePauta::items($estId);
+$preguntas = $est['tipo'] === 'preguntas' ? OscePreguntas::preguntas($estId) : [];
+$urlTablet = $est['tipo'] === 'preguntas' ? Osce::urlPublica('student/osce_estacion.php?k=' . OscePreguntas::tokenTablet($estId)) : '';
 $totalPts = array_sum(array_map(static fn ($i) => (float) $i['puntaje'], $items));
 $montaje = OscePauta::montaje((string) $est['examen']);
 $fmt = static fn ($x): string => rtrim(rtrim(number_format((float) $x, 2, ',', ''), '0'), ',');
@@ -92,6 +118,8 @@ admin_header('Estación · ' . $est['titulo'], $me);
     <a href="osce.php?id=<?= $osceId ?>">← <?= htmlspecialchars($osce['nombre']) ?></a>
     <?php if ($est['tipo'] === 'pauta_docente'): ?>
     <a class="btn btn--sm" href="osce_evaluar.php?estacion=<?= $estId ?>">Evaluar en esta estación</a>
+    <?php elseif ($est['tipo'] === 'preguntas'): ?>
+    <a class="btn btn--sm" href="osce_revision.php?estacion=<?= $estId ?>">Revisión y réplicas</a>
     <?php endif; ?>
 </div>
 
@@ -101,7 +129,12 @@ admin_header('Estación · ' . $est['titulo'], $me);
         <?= htmlspecialchars(Osce::EXAMENES[$est['examen']] ?? $est['examen']) ?> ·
         peso <?= $fmt($est['peso']) ?>
     </p>
-    <?php if ($est['tipo'] !== 'pauta_docente'): ?>
+    <?php if ($est['tipo'] === 'preguntas'): ?>
+        <p class="help">Alternativas: con una correcta, todo o nada; con varias, el alumno marca todas las que crea correctas y cada marca incorrecta descuenta una correcta (nunca bajo 0). Las opciones salen en orden distinto para cada alumno. Desarrollo: la IA corrige contra la pauta al entregar; tú revisas, ajustas y das el feedback en "Revisión y réplicas".</p>
+        <?php if (!$editable): ?>
+            <p class="text-warn"><?= $evaluados ?> entrega<?= $evaluados > 1 ? 's' : '' ?>: las preguntas quedan fijas.</p>
+        <?php endif; ?>
+    <?php elseif ($est['tipo'] !== 'pauta_docente'): ?>
         <p class="muted">El contenido de este tipo de estación se arma en los pasos siguientes del plan (docs/osce_plan.md).</p>
     <?php else: ?>
         <p class="help">Cumple = puntaje completo, parcial = la mitad, no cumple = 0. Impedancias: completo si cumplen el límite por electrodo y el interelectrodo, la mitad si cumple uno. Un ítem <strong>crítico</strong> en "no cumple" reprueba la estación aunque sume puntos.</p>
@@ -205,6 +238,104 @@ admin_header('Estación · ' . $est['titulo'], $me);
         document.getElementById('nuevo-imp').hidden = this.value !== 'impedancias';
     });
     </script>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<?php if ($est['tipo'] === 'preguntas'): $totalQ = array_sum(array_map(static fn ($q) => (float) $q['puntaje'], $preguntas)); ?>
+<div class="card">
+    <h2>Tablet de la estación</h2>
+    <div class="row row--gap-lg row--center">
+        <?= QrSvg::svg($urlTablet, 3) ?>
+        <div>
+            <p>Abre este enlace en la tablet de la estación (o escanea el QR con ella) y déjala ahí. Cada alumno escribe su código; solo entra cuando el reloj dice que le toca, y la tablet entrega sola al terminar el tiempo.</p>
+            <p><a href="<?= htmlspecialchars($urlTablet) ?>" target="_blank" class="mono" style="word-break:break-all;"><?= htmlspecialchars($urlTablet) ?></a></p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Preguntas (<?= count($preguntas) ?> · <?= $fmt($totalQ) ?> puntos)</h2>
+    <?php if (!$preguntas): ?>
+        <p class="empty-state">Sin preguntas. Agrégalas abajo o impórtalas en formato GIFT.</p>
+    <?php endif; ?>
+    <?php foreach ($preguntas as $k => $q): $fid = 'q' . (int) $q['id']; ?>
+    <div class="card" style="margin:0.6rem 0; padding:0.8rem;">
+        <?php if ($editable): ?>
+        <form id="<?= $fid ?>" method="post">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= $estId ?>">
+            <input type="hidden" name="pregunta_id" value="<?= (int) $q['id'] ?>">
+            <div class="row row--gap-lg row--center">
+                <strong><?= $k + 1 ?>.</strong>
+                <label>Tipo <select name="tipo" style="width:auto;" data-q-tipo>
+                    <?php foreach (OscePreguntas::TIPOS as $tk => $tv): ?><option value="<?= $tk ?>"<?= $tk === $q['tipo'] ? ' selected' : '' ?>><?= htmlspecialchars($tv) ?></option><?php endforeach; ?>
+                </select></label>
+                <label>Puntos <input type="text" inputmode="decimal" name="puntaje" value="<?= $fmt($q['puntaje']) ?>" class="input--narrow"></label>
+            </div>
+            <label>Enunciado <textarea name="enunciado" rows="2" style="display:block; width:100%;"><?= htmlspecialchars($q['enunciado']) ?></textarea></label>
+            <label data-para="alternativa"<?= $q['tipo'] === 'alternativa' ? '' : ' hidden' ?>>Alternativas (una por línea; <strong>*</strong> al inicio en las correctas)
+                <textarea name="opciones" rows="<?= max(3, count($q['opciones'])) ?>" style="display:block; width:100%;"><?= htmlspecialchars(OscePreguntas::opcionesTexto($q)) ?></textarea></label>
+            <label data-para="desarrollo"<?= $q['tipo'] === 'desarrollo' ? '' : ' hidden' ?>>Pauta para la IA (qué debe contener la respuesta y cuánto vale cada parte)
+                <textarea name="pauta" rows="3" style="display:block; width:100%;"><?= htmlspecialchars($q['pauta']) ?></textarea></label>
+            <div class="row row--gap-sm">
+                <button type="submit" name="accion" value="q_edit" class="btn btn--xs">Guardar</button>
+                <button type="submit" name="accion" value="q_up" class="btn btn--xs btn--ghost"<?= $k === 0 ? ' disabled' : '' ?>>↑</button>
+                <button type="submit" name="accion" value="q_down" class="btn btn--xs btn--ghost"<?= $k === count($preguntas) - 1 ? ' disabled' : '' ?>>↓</button>
+                <button type="submit" name="accion" value="q_del" class="btn btn--xs btn--danger" onclick="return confirm('¿Quitar esta pregunta?')">Quitar</button>
+            </div>
+        </form>
+        <?php else: ?>
+            <p><strong><?= $k + 1 ?>.</strong> <?= nl2br(htmlspecialchars($q['enunciado'])) ?> <span class="muted">(<?= $fmt($q['puntaje']) ?> pt)</span></p>
+            <?php if ($q['tipo'] === 'alternativa'): ?>
+            <ul><?php foreach ($q['opciones'] as $i => $o): ?><li<?= in_array($i, $q['correctas'], true) ? ' style="font-weight:600"' : '' ?>><?= htmlspecialchars($o) ?><?= in_array($i, $q['correctas'], true) ? ' ✓' : '' ?></li><?php endforeach; ?></ul>
+            <?php else: ?>
+            <p class="help">Pauta: <?= nl2br(htmlspecialchars($q['pauta'])) ?></p>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+    <?php endforeach; ?>
+
+    <?php if ($editable): ?>
+    <h3 style="margin-top:1.2rem;">Agregar pregunta</h3>
+    <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $estId ?>">
+        <input type="hidden" name="accion" value="q_add">
+        <div class="row row--gap-lg row--center">
+            <label>Tipo <select name="tipo" id="q-tipo" style="width:auto;">
+                <?php foreach (OscePreguntas::TIPOS as $tk => $tv): ?><option value="<?= $tk ?>"><?= htmlspecialchars($tv) ?></option><?php endforeach; ?>
+            </select></label>
+            <label>Puntos <input type="text" inputmode="decimal" name="puntaje" value="1" class="input--narrow"></label>
+        </div>
+        <label>Enunciado <textarea name="enunciado" rows="2" required style="display:block; width:100%;"></textarea></label>
+        <label id="q-opciones">Alternativas (una por línea; <strong>*</strong> al inicio en las correctas)
+            <textarea name="opciones" rows="4" style="display:block; width:100%;" placeholder="*Alternada&#10;Rarefacción&#10;Condensación"></textarea></label>
+        <label id="q-pauta" hidden>Pauta para la IA (qué debe contener la respuesta y cuánto vale cada parte)
+            <textarea name="pauta" rows="3" style="display:block; width:100%;" placeholder="Menciona X (1 pt) y explica Y (1 pt)."></textarea></label>
+        <button type="submit" class="btn btn--sm">Agregar pregunta</button>
+    </form>
+    <script>
+    document.getElementById('q-tipo').addEventListener('change', function () {
+        document.getElementById('q-opciones').hidden = this.value !== 'alternativa';
+        document.getElementById('q-pauta').hidden = this.value !== 'desarrollo';
+    });
+    document.querySelectorAll('[data-q-tipo]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            sel.form.querySelectorAll('[data-para]').forEach(function (l) { l.hidden = l.dataset.para !== sel.value; });
+        });
+    });
+    </script>
+
+    <h3 style="margin-top:1.2rem;">Importar GIFT</h3>
+    <form method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $estId ?>">
+        <input type="hidden" name="accion" value="gift">
+        <p class="help">Alternativas (<code>=correcta ~incorrecta</code>, varias correctas con <code>~%50%</code>), verdadero/falso (<code>{T}</code>) y ensayo (<code>{}</code>). A los ensayos hay que escribirles la pauta después.</p>
+        <textarea name="gift" rows="6" style="display:block; width:100%;" placeholder="::P1:: ¿Qué polaridad usa el protocolo del PEATC? {=Alternada ~Rarefacción ~Condensación}"></textarea>
+        <button type="submit" class="btn btn--sm btn--secondary">Importar</button>
+    </form>
     <?php endif; ?>
 </div>
 <?php endif; ?>

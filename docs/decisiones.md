@@ -81,6 +81,42 @@ timbre y quién está en cada estación), `student/osce.php` (página del QR) y
   OSCE está en curso (`window.LabSimSesion.actividad` en session_guard.js);
   si no, la sesión de 72 min se cortaba en medio del OSCE.
 
+**Paso 3 hecho (2026-11-25): preguntas con corrección automática, feedback y
+réplica.** `src/OscePreguntas.php`, tablet del alumno
+`student/osce_estacion.php` + `api/osce_tablet.php`, revisión
+`admin/osce_revision.php`, publicar en `admin/osce.php` y detalle con réplica
+en `student/osce.php`.
+
+- **Tablet sin login:** el docente la abre con el enlace/QR de la estación
+  (token propio en `osce_estacion.config`). El alumno escribe su código y
+  entra solo en su ventana del reloj: desde el cambio previo hasta el fin de
+  su tiempo más una gracia (`Osce::enVentana`). Antes de partir, a destiempo
+  o ya entregado, no entra. Nunca se envían clave ni pauta.
+- **Se guarda solo** (con copia en la tablet si cae la red) y **entrega sola
+  al terminar el tiempo**. Si aun así queda abierta, la revisión la cierra
+  con lo guardado (`cerrarVencidas`).
+- **Alternativas:** con una correcta, todo o nada; con varias, (aciertos −
+  marcas incorrectas) / correctas, nunca bajo 0 (marcar todo no regala).
+  Opciones barajadas por alumno (crc32 de alumno+pregunta: fijo, sin
+  `hash()`).
+- **Desarrollo:** la IA corrige contra la pauta del docente (puntaje en pasos
+  de 0,5 + justificación al alumno). La tablet la dispara al entregar sin
+  esperar (`ignore_user_abort`); la revisión tiene "Corregir con IA las
+  pendientes" de respaldo. Mismo modelo y presupuesto que el redactor de la
+  ficha; el consumo va a `llm_usage` como tarea `osce`. Desarrollo sin pauta
+  no se acepta (la IA no tendría con qué corregir).
+- **El docente manda:** un puntaje que cambia queda como suyo (`fuente =
+  docente`) y la IA ya no lo pisa; la nota de la IA se sigue viendo al lado.
+- **Réplica:** solo con resultados publicados, una por respuesta, solo en
+  preguntas y no en las que ya tienen puntaje completo. El docente la acepta
+  (y ajusta el puntaje) o la rechaza con respuesta; el alumno la ve en su QR.
+- **Publicar** (OSCE cerrado → publicado) abre a cada alumno su nota, el
+  detalle por estación (pauta marcada con comentarios; preguntas con lo que
+  marcó, la correcta y el feedback) y las réplicas. Se puede retirar.
+- **GIFT:** alternativas (= / ~, ~%50% como correcta), V/F y ensayo; el
+  emparejamiento y lo demás se informa y no se importa. Los ensayos entran
+  con la pauta por escribir.
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una

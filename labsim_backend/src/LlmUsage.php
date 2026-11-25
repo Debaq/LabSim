@@ -70,6 +70,7 @@ final class LlmUsage
         'sala' => 'Chat con acompañantes',
         'anamnesis' => 'Borrador de anamnesis',
         'oirs' => 'Evaluador OIRS',
+        'osce' => 'Corrección de preguntas OSCE',
         'prueba' => 'Pruebas del admin',
         '' => 'Sin clasificar',
     ];

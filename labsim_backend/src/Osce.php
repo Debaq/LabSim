@@ -168,6 +168,8 @@ final class Osce
                 valor TEXT NOT NULL DEFAULT '',
                 puntaje REAL,
                 comentario TEXT NOT NULL DEFAULT '',
+                ia_puntaje REAL,
+                ia_comentario TEXT NOT NULL DEFAULT '',
                 fuente TEXT NOT NULL DEFAULT 'docente',
                 evaluador_id INTEGER,
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -184,6 +186,14 @@ final class Osce
                 resuelta_at TEXT
             )"
         );
+        // Columnas que llegaron después de crear la tabla (paso 3: corrección con IA).
+        $cols = array_column($pdo->query('PRAGMA table_info(osce_resultado)')->fetchAll(), 'name');
+        if (!in_array('ia_puntaje', $cols, true)) {
+            $pdo->exec('ALTER TABLE osce_resultado ADD COLUMN ia_puntaje REAL');
+        }
+        if (!in_array('ia_comentario', $cols, true)) {
+            $pdo->exec("ALTER TABLE osce_resultado ADD COLUMN ia_comentario TEXT NOT NULL DEFAULT ''");
+        }
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_course ON osce(course_id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_estacion ON osce_estacion(osce_id, orden)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_item ON osce_item(estacion_id, orden)');
@@ -191,6 +201,22 @@ final class Osce
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_entrega ON osce_entrega(estacion_id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_osce_resultado ON osce_resultado(entrega_id)');
         $hecho = true;
+    }
+
+    /**
+     * URL absoluta de una página bajo public/ ($rel = 'student/osce.php?t=...'),
+     * para los QR. Sale del request actual: el hosting puede vivir en una
+     * subcarpeta y no hay una URL base configurada.
+     */
+    public static function urlPublica(string $rel): string
+    {
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+        $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+        $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/public/admin/x.php'));
+        $pos = strrpos($script, '/public/');
+        $base = $pos === false ? rtrim(dirname(dirname($script)), '/') : substr($script, 0, $pos + 7);
+        return ($https ? 'https' : 'http') . '://' . $host . $base . '/' . ltrim($rel, '/');
     }
 
     // -- Cálculos puros (sin base) ---------------------------------------
@@ -764,6 +790,45 @@ final class Osce
         });
     }
 
+    /** Los alumnos ven su resultado (y pueden hacer réplica) desde el QR. */
+    public static function publicar(int $id, bool $publicar): void
+    {
+        Db::reintentar(static function () use ($id, $publicar): void {
+            if ($publicar) {
+                Db::get()->prepare("UPDATE osce SET estado = 'publicado', publicado_at = CURRENT_TIMESTAMP WHERE id = ? AND estado = 'cerrado'")
+                    ->execute([$id]);
+            } else {
+                Db::get()->prepare("UPDATE osce SET estado = 'cerrado' WHERE id = ? AND estado = 'publicado'")->execute([$id]);
+            }
+        });
+    }
+
+    /**
+     * Cuándo le toca a un alumno una estación: segundos desde el inicio del
+     * reloj en que empieza y termina su tiempo ahí.
+     *
+     * @return array{slot:int, inicio_s:int, fin_s:int}
+     */
+    public static function ventana(array $cfg, array $p, int $indiceEstacion): array
+    {
+        $S = max(1, $cfg['estaciones']);
+        $slot = (($indiceEstacion - (int) $p['puesto']) % $S + $S) % $S;
+        $inicio = self::inicioSlot($cfg, (int) $p['vuelta'], $slot);
+        return ['slot' => $slot, 'inicio_s' => $inicio, 'fin_s' => $inicio + $cfg['duracion_s']];
+    }
+
+    /**
+     * ¿Puede el alumno trabajar ahora en esa estación? Desde la pausa que la
+     * antecede (llega y escribe su código durante el cambio) hasta el fin de
+     * su tiempo más una gracia para que la tablet alcance a entregar sola.
+     */
+    public static function enVentana(array $cfg, array $p, int $indiceEstacion, int $t): bool
+    {
+        $v = self::ventana($cfg, $p, $indiceEstacion);
+        $gracia = max(30, $cfg['pausa_s']);
+        return $t >= $v['inicio_s'] - max(30, $cfg['pausa_s']) && $t <= $v['fin_s'] + $gracia;
+    }
+
     /** Vuelve a borrador un OSCE que se inició por error (sin entregas). */
     public static function volverABorrador(int $id): void
     {
@@ -803,6 +868,9 @@ final class Osce
             'estado' => $o['estado'],
             'inicio_programado' => $o['inicio_programado'],
             'servidor_epoch' => $ahora,
+            // Hora real de partida corrida por las pausas: con el OSCE
+            // cerrado, las horas del recorrido salen de acá y no de "ahora".
+            'inicio_real' => $o['inicio_epoch'] === null ? null : (int) $o['inicio_epoch'] + (int) $o['pausado_acum_s'],
             'transcurrido_s' => $t,
             'pausado' => $o['pausado_desde'] !== null,
             'cfg' => $cfg,

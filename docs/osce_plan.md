@@ -173,7 +173,8 @@ App LabSim:
    (2026-11-25). Rotación por circuitos paralelos (no copias sueltas de una
    estación).
 2. ✅ `pauta_docente` con impedancias (tablet docente) (2026-11-25).
-3. `preguntas` con corrección automática e IA; feedback y réplica.
+3. ✅ `preguntas` con corrección automática e IA; feedback y réplica; publicar
+   resultados (2026-11-25).
 4. Modo OSCE en LabSim: `config_equipo` y `marcaje`.
 5. `protocolo` (evaluador de estrategia sobre `action_logs`).
 6. `conclusion` con IA + revisión docente; publicar resultados.
