@@ -672,8 +672,11 @@ TXT;
 
     /**
      * Paciente de la tarea k para el alumno N.º numero. Las variantes son de
-     * igual dificultad y se reparten por número, corridas en cada tarea para
-     * que no le toque siempre "la primera" al mismo alumno.
+     * igual dificultad y se reparten por número, sin correrlas entre tareas:
+     * el "paciente 1" de cada tarea le toca al mismo alumno, así un caso
+     * integrado (PEATC y VEMP del mismo paciente, en dos tareas) es uno solo
+     * si el docente pone los pacientes en el mismo orden. $k queda por si
+     * algún día se quiere correr.
      */
     public static function variante(array $tarea, int $numero, int $k): ?array
     {
@@ -681,7 +684,7 @@ TXT;
         if (!$v) {
             return null;
         }
-        return $v[(max(1, $numero) - 1 + $k) % count($v)];
+        return $v[(max(1, $numero) - 1) % count($v)];
     }
 
     /** Guarda (o agrega, con k = número de tareas) la tarea k y rehace los ítems. */

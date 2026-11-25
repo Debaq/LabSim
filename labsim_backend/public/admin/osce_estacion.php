@@ -402,7 +402,7 @@ admin_header('Estación · ' . $est['titulo'], $me);
             <label>Peso (% de la estación) <input type="text" inputmode="decimal" name="peso" value="<?= $fmt($appCfg['peso'] ?? ($nTareas ? max(1, 100 - $sumaPesos) : 100)) ?>" class="input--narrow"></label>
         </div>
         <h3 style="margin-top:0.8rem;">Pacientes (variantes de igual dificultad)</h3>
-        <p class="help">Abre el equipo <strong><?= $modulo ?></strong> en <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR') ?></strong>. Con 3 pacientes, al N.º 1 le toca el 1.º, al 2 el 2.º, al 3 el 3.º, al 4 de nuevo el 1.º (corrido en cada tarea). Una fila vacía no cuenta.
+        <p class="help">Abre el equipo <strong><?= $modulo ?></strong> en <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR') ?></strong>. Con 3 pacientes, al N.º 1 le toca el 1.º, al 2 el 2.º, al 3 el 3.º, al 4 de nuevo el 1.º. El paciente 1 de cada tarea le toca al mismo alumno: para un caso integrado (por ejemplo PEATC y VEMP de la misma persona) pon los pacientes en el mismo orden en las dos tareas. Una fila vacía no cuenta.
             <?= $modulo === 'VEMP' ? 'El VEMP de LabSim mide la intensidad en dB SPL (el protocolo dice "100 dB nHL"): escribe tú la intensidad esperada.' : '' ?></p>
         <?php foreach ($filasVar as $vk => $v): ?>
         <div class="row row--gap-lg" style="align-items:flex-start; margin-bottom:0.4rem;">

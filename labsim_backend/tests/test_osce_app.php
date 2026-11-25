@@ -214,7 +214,7 @@ t_true(strpos(OsceApp::informe(['abr' => ['hallazgos' => 'h', 'conclusion' => 'c
 $tarea = ['variantes' => [['case_id' => 'a'], ['case_id' => 'b'], ['case_id' => 'c']]];
 t_eq(array_map(static fn ($n) => OsceApp::variante($tarea, $n, 0)['case_id'], [1, 2, 3, 4]), ['a', 'b', 'c', 'a'],
      'Variantes: el paciente sale del número del alumno');
-t_eq(OsceApp::variante($tarea, 1, 1)['case_id'], 'b', 'Y se corre en cada tarea (no siempre "la primera" al mismo)');
+t_eq(OsceApp::variante($tarea, 1, 1)['case_id'], 'a', 'El mismo paciente en todas las tareas: el caso integrado es uno');
 t_eq(OsceApp::variante(['variantes' => []], 3, 0), null, 'Tarea sin paciente');
 $varias = ['tareas' => [['panel' => ['pol' => 'Alternada']], ['panel' => ['pol' => 'Rarefacción']]]];
 t_eq(OsceApp::payloadDe($varias, 1)['panel']['pol'], 'Rarefacción', 'Entrega por tarea: cada ítem lee la suya');

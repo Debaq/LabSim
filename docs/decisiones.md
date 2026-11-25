@@ -233,8 +233,9 @@ otra"; "lo de los pacientes está súper".
 - **El peso se aplica escalando los puntos de la tarea** a su porcentaje: la
   estación suma 100 y la nota no cambia de fórmula; los puntos que el
   docente pone dentro de la tarea son relativos.
-- **Pacientes variantes de igual dificultad**, repartidos por número y
-  corridos en cada tarea (`(N−1+k) mod n`): la rotación en cadena hace que
+- **Pacientes variantes de igual dificultad**, repartidos por número
+  (`(N−1) mod n`, el mismo en todas las tareas de la estación, para que un
+  caso integrado en dos tareas sea un solo paciente): la rotación en cadena hace que
   los primeros conversen con los que esperan, y así no sirve pasarse la
   respuesta. Cada alumno se corrige con la verdad de su paciente; en
   conclusión, cada paciente trae su conclusión esperada para la IA.
