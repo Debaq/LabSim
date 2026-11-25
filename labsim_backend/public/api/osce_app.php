@@ -40,6 +40,7 @@ if ($accion === 'estacion') {
         'tipo' => $est['tipo'],
         'osce' => $o['nombre'],
         'reloj' => $o['reloj_token'],
+        'modulo' => OsceApp::modulo((string) $est['examen']),
         'lista' => !empty($cfg['case_id']),
     ]);
 }
@@ -75,7 +76,8 @@ if ($accion === 'entrar') {
         'ok' => true,
         'codigo' => $p['codigo'],
         'tipo' => $est['tipo'],
-        'prueba' => $cfg['prueba'] ?? 'ABR',
+        'modulo' => OsceApp::modulo((string) $est['examen']),
+        'prueba' => $cfg['prueba'] ?? (OsceApp::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR'),
         'curvas' => $est['tipo'] === 'marcaje' ? ($cfg['curvas'] ?? []) : [],
         'ventana' => Osce::ventana($reloj, $p, $indice),
         'caso' => $caso,

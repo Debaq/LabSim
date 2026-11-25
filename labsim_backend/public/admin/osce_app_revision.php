@@ -126,10 +126,13 @@ details.rev-alumno > summary { cursor: pointer; padding: 0.4rem 0; font-size: 1.
             <?php endforeach; ?>
             </tbody>
         </table></div>
-        <?php $abr = $e['registro']['abr'] ?? []; if (trim((string) ($abr['hallazgos'] ?? '')) !== '' || trim((string) ($abr['conclusion'] ?? '')) !== ''): ?>
+        <?php $abr = $e['registro']['abr'] ?? ($e['registro']['vemp'] ?? []); if (trim((string) ($abr['hallazgos'] ?? '')) !== '' || trim((string) ($abr['conclusion'] ?? '')) !== ''): ?>
         <p class="help">Hallazgos: <?= htmlspecialchars((string) ($abr['hallazgos'] ?? '')) ?><br>Conclusión: <?= htmlspecialchars((string) ($abr['conclusion'] ?? '')) ?></p>
         <?php endif; ?>
-        <p class="help">Curvas en la entrega: <?= count($abr['curvas'] ?? []) ?>.</p>
+        <?php $cs = $e['registro']['curvas'] ?? []; if ($cs): ?>
+        <p class="help">Curvas en el orden en que se registraron: <?= htmlspecialchars(implode(' → ', array_map(static fn ($c) => ($c['side'] ?? '') . ' ' . $fmt($c['int'] ?? null)
+            . (array_filter($c['marcas'] ?? [], 'is_numeric') ? '✓' : ''), $cs))) ?> <span class="muted">(✓ = marcó alguna onda)</span></p>
+        <?php endif; ?>
         <label>Comentario general para el alumno
             <textarea name="feedback" rows="2" style="width:100%;"><?= htmlspecialchars((string) $en['feedback']) ?></textarea></label>
         <button type="submit" class="btn btn--sm">Guardar revisión de <?= htmlspecialchars($p['codigo']) ?></button>

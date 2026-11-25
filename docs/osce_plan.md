@@ -177,5 +177,6 @@ App LabSim:
    resultados (2026-11-25).
 4. ✅ Modo OSCE en LabSim: `config_equipo` y `marcaje` (2026-11-25). El PC
    entra como "Estación OSCE" con el código de la estación.
-5. `protocolo` (evaluador de estrategia sobre `action_logs`).
+5. ✅ `protocolo`: parámetros de cada curva + estrategia sobre las curvas de la
+   entrega (no `action_logs`), con bonificaciones; ABR y VEMP (2026-11-25).
 6. `conclusion` con IA + revisión docente; publicar resultados.

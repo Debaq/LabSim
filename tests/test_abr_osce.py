@@ -87,6 +87,23 @@ def test_entrega_serializable_y_verdad_solo_en_la_entrega():
     assert 'verdad' not in json.dumps(w.session_payload()), "la verdad no va en el informe"
 
 
+def test_curvas_en_orden_con_marcas_y_tecnica():
+    w = _estacion('marcaje', [('OD', 80), ('OI', 60)])
+    v = w.verdad_curvas['R1']['waves']['V']['lat']
+    w.update_memory_from_graph_mark({'R1': {'V': [v, 0.4]}})
+    curvas = w.osce_entrega()['curvas']
+    assert [(c['nombre'], c['side'], c['int']) for c in curvas] == [('R1', 'OD', 80), ('L1', 'OI', 60)]
+    assert curvas[0]['marcas']['V'] == v and curvas[0]['marcas']['I'] is None
+    assert curvas[0]['window_ms'] == 12.0 and curvas[0]['rate'] == 21.1
+    assert curvas[0]['transducer'] == 'insert_earphone'
+
+
+def test_protocolo_parte_al_azar_y_se_registra():
+    w = _estacion('protocolo')
+    assert w.control.isEnabled()
+    assert w.control.get_data()['pol'] != 'Alternada'
+
+
 def test_alumno_nuevo_borra_lo_del_anterior():
     w = _estacion('marcaje', [('OD', 80)])
     w.la_super(None, None)

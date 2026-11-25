@@ -153,6 +153,39 @@ ingreso (auth/login.py), `main._iniciar_osce` y `AbrMainWindow.osce_*`.
   "Volver a corregir" recalcula todas sin pisar lo que el docente ajustó.
 - **Pendiente:** probar en un PC del laboratorio (kiosko) con el build.
 
+**Paso 5 hecho (2026-11-25): estación de protocolo, VEMP y bonificaciones.**
+`OsceApp.php` reescrito sobre un formato común de entrega (panel, curvas en
+orden con sus marcas, verdad), que mandan el ABR y el VEMP
+(`osce_entrega`/`osce_curvas`); `VempMainWindow.osce_*`; `main` abre el
+equipo que dice la estación (`modulo`).
+
+- **El protocolo no es solo la escalera:** se evalúan los parámetros de CADA
+  curva registrada (proporción que cumple: filtros, polaridad, tasa,
+  ventana, transductor; en el VEMP además frecuencia y EMG en banda) y la
+  estrategia: nivel de inicio, paso al bajar con respuesta, paso al subir
+  sin ella, subir a 90–100 si no hay respuesta al partir, réplica en el
+  máximo y en el umbral, ambos oídos, umbral ±10 dB del real, alguna curva a
+  81,1 (neuropatía, apagado por defecto).
+- **"Hay respuesta" = el alumno marcó la onda de respuesta** (V en PEATC,
+  p13 en cVEMP, n10 en oVEMP) en esa curva: se juzga si la estrategia es
+  coherente con lo que vio. La verdad del generador solo decide si el umbral
+  encontrado es el real, y del estímulo con que lo encontró. Él: "no está
+  bien castigar dos veces".
+- **Criterios que no aplican dan el puntaje completo** (subir sin haber
+  dejado de ver respuesta, etc.). Ver respuesta y no bajar nunca da 0 en
+  "baja".
+- **Bonificación** (`bonus` en el criterio): suma, no entra en el máximo y
+  la estación no pasa del 100 %. Precargada en el PEATC: acercarse al umbral
+  con CE-Chirp (LS o NB) y encontrarlo a ±10 dB. Pedido: premiar al que usa
+  LS-Chirp para acercarse al umbral.
+- **Precargas por examen** del Protocolo 2019: PEATC (80, baja 20, sube 10,
+  90–100), cVEMP (3–1500 Hz, 5,1/s, rarefacción, burst 500, baja 10, sube 5,
+  réplica a máxima), oVEMP (1–1000 Hz, réplica, ambos oídos). ECochG y
+  latencias: genéricos (ambos oídos, réplica) para que el docente complete.
+- **VEMP en dB SPL:** el equipo de LabSim mide en dB SPL (50–125 aéreo) y el
+  protocolo dice "100 dB nHL": intensidad esperada y nivel de inicio del VEMP
+  los escribe el docente. Ganancia y ventana no son mandos del VEMP simulado.
+
 ## Inhibición residual: paso inicial "solo escuche el mío", +15 dB y octava abajo (2026-11-13)
 
 **Qué:** la inhibición residual de la tinnitumetría (T03) empieza con una

@@ -23,6 +23,7 @@ cargado, el módulo lo dice y no deja registrar: no hay respuesta sintética
 """
 
 import os
+import random
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QMainWindow, QProgressBar,
@@ -762,6 +763,121 @@ class VempMainWindow(QMainWindow):
                 continue
             imagenes[sufijo] = path
         return imagenes
+
+    # =====================================================================
+    # Estación OSCE (core/osce.py): mismo contrato que AbrMainWindow.osce_*
+    # =====================================================================
+
+    # Equipo de rutina del Protocolo Técnico ORL 2019 para registrar las
+    # curvas de la estación de marcaje (la intensidad la pone cada curva).
+    OSCE_RUTINA = {
+        protocol.CVEMP: dict(transductor=protocol.AEREO, freq='500 Hz', polaridad='Rarefacción',
+                             tasa=5.1, promedios=200, filtro_alto=3.0, filtro_bajo=1500.0,
+                             rechazo=5.0, maniobra='Rotación cefálica sostenida'),
+        protocol.OVEMP: dict(transductor=protocol.AEREO, freq='500 Hz', polaridad='Rarefacción',
+                             tasa=5.1, promedios=200, filtro_alto=1.0, filtro_bajo=1000.0,
+                             rechazo=5.0, maniobra='Mirada superior ~30°'),
+    }
+
+    def osce_preparar(self, tipo, prueba, curvas, rng):
+        """Deja el equipo listo para el alumno que acaba de entrar (el caso
+        ya llegó por la_super)."""
+        subtipo = prueba if prueba in protocol.SUBTIPOS else protocol.CVEMP
+        indice = self.control.cb_subtipo.findData(subtipo)
+        if indice >= 0:
+            self.control.cb_subtipo.setCurrentIndex(indice)
+        if tipo == 'marcaje':
+            self.osce_registrar_curvas(subtipo, curvas)
+            self.control.habilitar(False)
+        else:
+            self.osce_sortear(subtipo, rng)
+
+    def osce_sortear(self, subtipo, rng):
+        """Mandos al azar, nunca en el valor de rutina del protocolo."""
+        c = self.control
+        rutina = self.OSCE_RUTINA.get(subtipo, self.OSCE_RUTINA[protocol.CVEMP])
+
+        def combo(cb, evitar=None):
+            opciones = [i for i in range(cb.count()) if cb.itemText(i) != evitar] or list(range(cb.count()))
+            if opciones:
+                cb.setCurrentIndex(rng.choice(opciones))
+
+        combo(c.cb_transductor)
+        combo(c.cb_freq, rutina['freq'])
+        combo(c.cb_pol, rutina['polaridad'])
+        combo(c.cb_maniobra, rutina['maniobra'])
+        lo, hi = c.sb_int.minimum(), c.sb_int.maximum()
+        c.sb_int.setValue(rng.randrange(int(lo), int(hi) + 1, protocol.PASO_INTENSIDAD))
+        tasa = round(rng.uniform(3.1, 13.0), 1)
+        c.sb_tasa.setValue(tasa if abs(tasa - rutina['tasa']) > 0.05 else 7.1)
+        c.sb_promedios.setValue(rng.randrange(80, 401, 10))
+        c.sb_filtro_alto.setValue(float(rng.choice([f for f in (1, 3, 5, 10, 20) if f != rutina['filtro_alto']])))
+        c.sb_filtro_bajo.setValue(float(rng.choice([f for f in (500, 750, 1000, 1500, 2000) if f != rutina['filtro_bajo']])))
+        (c.btn_od if rng.random() < 0.5 else c.btn_oi).click()
+
+    def osce_registrar_curvas(self, subtipo, curvas):
+        """Registra de una vez las curvas de la estación de marcaje con el
+        equipo de rutina y el músculo en la banda."""
+        if self.caso is None or self.motor is None:
+            return
+        rutina = self.OSCE_RUTINA.get(subtipo, self.OSCE_RUTINA[protocol.CVEMP])
+        for lado, nivel in curvas:
+            if self.caso.oido(lado) is None:
+                continue
+            ajustes = engine.Ajustes(subtipo=subtipo, lado=lado, intensidad=int(nivel), **rutina)
+            registro = self.sesion.nuevo(ajustes, self.motor.eje(subtipo))
+            lote = self.motor.lote(ajustes, protocol.EMG_REFERENCIA[subtipo], ajustes.promedios)
+            registro.acumular(lote)
+            registro.terminado = True
+            self.trazas[lado].agregar(registro)
+        self._refrescar_tabla()
+        self._refrescar_analisis()
+
+    def osce_curvas(self):
+        """Las curvas en orden, en el formato común (ver AbrMainWindow.osce_curvas)."""
+        curvas = []
+        for nombre, registro in self.sesion.registros.items():
+            d = registro.a_dict()
+            curvas.append({
+                'nombre': nombre, 'side': d['side'], 'int': d['int'], 'subtipo': d['subtipo'],
+                'freq': d['freq'], 'pol': d['pol'], 'rate': d['rate'],
+                'filter_passhigh': d['filter_passhigh'], 'filter_down': d['filter_down'],
+                'average': registro.ajustes.promedios, 'transducer': d['transductor'],
+                'maniobra': d['maniobra'], 'emg_ok': 'sí' if d['emg_ok'] else 'no',
+                'marcas': {p: (v[0] if v and v[0] is not None else None) for p, v in d['LatAmp'].items()},
+            })
+        return curvas
+
+    def osce_verdad(self):
+        """Lo que el equipo no muestra: si hay respuesta en esa intensidad
+        (sobre el umbral del caso), dónde están los picos y el umbral."""
+        verdad = {}
+        if self.motor is None:
+            return verdad
+        for nombre, registro in self.sesion.registros.items():
+            picos, info = self.motor.picos(registro.ajustes, max(registro.emg_medio, 1.0))
+            verdad[nombre] = {
+                'visible': bool(info) and float(info.get('sl', -1)) >= 0,
+                'waves': {p: {'lat': float(v['lat']), 'amp': float(v['amp'])} for p, v in picos.items()},
+                'threshold': float(info['umbral']) if info else None,
+            }
+        return verdad
+
+    def osce_entrega(self):
+        ajustes = self.control.ajustes()
+        return {
+            'modulo': 'VEMP',
+            'panel': {'subtipo': ajustes.subtipo, 'side': ajustes.lado, 'transducer': ajustes.transductor,
+                      'freq': ajustes.freq, 'pol': ajustes.polaridad, 'int': ajustes.intensidad,
+                      'rate': ajustes.tasa, 'average': ajustes.promedios,
+                      'filter_passhigh': ajustes.filtro_alto, 'filter_down': ajustes.filtro_bajo,
+                      'maniobra': ajustes.maniobra},
+            'equipo': {},
+            'curvas': self.osce_curvas(),
+            'verdad': self.osce_verdad(),
+            'vemp': {'curvas': self.sesion.curvas_dict(), 'umbral_informado': self.informe.umbrales(),
+                     'hallazgos': self.informe.hallazgos(), 'conclusion': self.informe.conclusion()},
+        }
 
     def hideEvent(self, evento):
         # Ventana escondida: ni el EMG de fondo ni la captura siguen

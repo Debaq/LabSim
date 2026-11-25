@@ -705,13 +705,22 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     # con la barra de la estación arriba; cada alumno entra con su código.
     # ------------------------------------------------------------------
 
+    # Módulo de la app que abre cada estación (lo dice el servidor: el VEMP
+    # tiene su propio equipo; todo lo demás va en el ABR).
+    _OSCE_MODULO = {"ABR": "subw_abr", "VEMP": "subw_vemp"}
+
+    def _osce_modulo(self):
+        codigo = (osce.estacion or {}).get("modulo") or "ABR"
+        return codigo, getattr(self, self._OSCE_MODULO.get(codigo, "subw_abr"), None)
+
     def _iniciar_osce(self):
         if not osce.activo or not self.data_login:
             return
         from core.osce_barra import BarraOsce
         self._modulos_listos()
-        if getattr(self, "subw_abr", None) is None:
-            self._aviso("Estación OSCE", "Este equipo no tiene el módulo ABR.")
+        codigo, frame = self._osce_modulo()
+        if frame is None:
+            self._aviso("Estación OSCE", f"Este equipo no tiene el módulo {codigo}.")
             return
         self.barra_osce = BarraOsce(self._osce_abrir, self._osce_entrega, self._osce_cerrar)
         self.toolbar_osce = QToolBar("Estación OSCE", self)
@@ -719,39 +728,40 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.toolbar_osce.setFloatable(False)
         self.toolbar_osce.addWidget(self.barra_osce)
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar_osce)
-        self._osce_mostrar_abr()
+        self._osce_mostrar_modulo()
 
-    def _osce_mostrar_abr(self):
-        _, _, pos_z, *_ = self.apps["ABR"]
+    def _osce_mostrar_modulo(self):
+        codigo, _frame = self._osce_modulo()
+        _, _, pos_z, *_ = self.apps[codigo]
         sub = self.modules.get(pos_z) if self.modules.is_full(pos_z) else None
         if sub is None or sub.isHidden():
-            self.activate_auto("ABR")
+            self.activate_auto(codigo)
 
     def _osce_abrir(self, respuesta):
-        """Llegó el caso de un alumno: al ABR, con el equipo preparado según
-        la estación (AbrMainWindow.osce_preparar)."""
+        """Llegó el caso de un alumno: al equipo de la estación, preparado
+        según su tipo (osce_preparar del ABR o del VEMP)."""
         caso = respuesta["caso"]
         self.data_current = caso
         self.data_current_key = f"osce-{respuesta['codigo']}"
         self.paciente_actual = {"case_id": caso.get("id"), "nombre": "el paciente", "edad": 0,
                                 "procedimiento": "", "appointment_id": None, "trae": []}
-        abr = self.subw_abr.obj
-        abr.la_super(caso, self.data_current_key)
-        abr.osce_preparar(respuesta.get("tipo"), respuesta.get("prueba") or "ABR",
-                          [tuple(c) for c in respuesta.get("curvas") or []], random.Random())
-        self._osce_mostrar_abr()
+        _codigo, frame = self._osce_modulo()
+        frame.obj.la_super(caso, self.data_current_key)
+        frame.obj.osce_preparar(respuesta.get("tipo"), respuesta.get("prueba") or "ABR",
+                                [tuple(c) for c in respuesta.get("curvas") or []], random.Random())
+        self._osce_mostrar_modulo()
 
     def _osce_entrega(self):
-        return self.subw_abr.obj.osce_entrega()
+        return self._osce_modulo()[1].obj.osce_entrega()
 
     def _osce_cerrar(self):
         """El alumno entregó: el equipo queda vacío para el siguiente."""
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
-        abr = getattr(self, "subw_abr", None)
-        if abr is not None:
-            abr.obj.la_super(None, None)
+        frame = self._osce_modulo()[1]
+        if frame is not None:
+            frame.obj.la_super(None, None)
 
     def _terminar_osce(self):
         barra = getattr(self, "barra_osce", None)

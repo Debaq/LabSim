@@ -179,7 +179,7 @@ $cabeza('OSCE · ' . $o['nombre']);
         <?php foreach (OsceApp::detalle((int) $e['id'], (int) $p['id']) as $d): $ev = $d['eval'] ?? []; $r = $d['resultado']; ?>
             <li>
                 <span><?= htmlspecialchars($d['item']['texto']) ?><?= (int) $d['item']['critico'] ? ' <span class="tag tag--danger">crítico</span>' : '' ?>
-                    <span class="muted">· <?= $pts($r['puntaje'] ?? null) ?> / <?= $pts($d['item']['puntaje']) ?> pt</span></span>
+                    <span class="muted">· <?= $pts($r['puntaje'] ?? null) ?> / <?= $pts($d['item']['puntaje']) ?> pt<?= !empty($d['item']['cfg']['bonus']) ? ' extra' : '' ?></span></span>
                 <span class="det-v <?= !empty($ev['ok']) ? 'det-cumple' : 'det-no_cumple' ?>">Tú: <?= htmlspecialchars((string) ($ev['alumno'] ?? '—')) ?></span>
                 <span class="det-com">Esperado: <?= htmlspecialchars((string) ($ev['esperado'] ?? '—')) ?></span>
                 <?php if ($r && trim((string) $r['comentario']) !== ''): ?><div class="det-com"><strong>Docente:</strong> <?= nl2br(htmlspecialchars((string) $r['comentario'])) ?></div><?php endif; ?>

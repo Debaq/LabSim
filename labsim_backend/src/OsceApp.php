@@ -6,66 +6,101 @@ require_once __DIR__ . '/Osce.php';
 require_once __DIR__ . '/OscePauta.php';
 
 /**
- * Estaciones del OSCE que se rinden en la app LabSim (paso 4 de
- * docs/osce_plan.md): configuración del equipo y marcaje de curvas.
+ * Estaciones del OSCE que se rinden en la app LabSim (pasos 4 y 5 de
+ * docs/osce_plan.md): configuración del equipo, marcaje de curvas y
+ * ejecución del protocolo, en el ABR (PEATC, ECochG, latencias, ASSR) o en
+ * el VEMP (cVEMP, oVEMP).
  *
  * El PC de la estación entra a LabSim como "Estación OSCE" con el código
  * corto de la estación (app_codigo en osce_estacion.config); cada alumno
- * escribe el suyo y la app abre el ABR con el caso de la estación. Al
- * entregar, la app manda la sesión del ABR tal cual (session_payload), el
- * panel de control y la verdad del generador de cada curva (latencias que
- * el equipo no muestra). Acá se corrige.
+ * escribe el suyo y la app abre el equipo con el caso de la estación. Al
+ * entregar, la app manda (osce_entrega del ABR o del VEMP, mismo formato):
  *
- * Cada criterio es un osce_item de tipo 'auto' con su regla en config:
+ *   panel/equipo  lo que quedó configurado al entregar
+ *   curvas        cada curva EN EL ORDEN en que se registró: cómo se tomó
+ *                 (oído, intensidad, estímulo, filtros...) y las ondas que el
+ *                 alumno marcó
+ *   verdad        por curva, lo que el equipo no muestra: si hay respuesta en
+ *                 esa intensidad, la latencia de cada onda y el umbral
  *
- * - param:  {"fuente": "panel"|"equipo", "clave": "rate", "esperado": "21.1"}
- *           esperado: "a | b" (cualquiera), "10–12" (rango) o un valor.
- * - marca:  {"lado": "OD", "int": 80, "onda": "V", "tol_ms": 0.2}
- *           si en esa curva la onda existe, marcada a ±tol de la verdadera;
- *           si no existe (sin respuesta), no marcarla.
+ * Cada criterio es un osce_item de tipo 'auto' con su regla en config
+ * ({"regla": ..., "bonus": true|false}). Las bonificaciones suman pero no
+ * suben el máximo (la estación no pasa del 100 %).
+ *
+ * "Hay respuesta" en una curva, para juzgar la ESTRATEGIA, es que el alumno
+ * marcó en ella la onda de respuesta del examen (V en el PEATC, p13 en el
+ * cVEMP...): se evalúa si lo que hizo es coherente con lo que vio. La verdad
+ * del generador se usa solo para saber si el umbral que encontró es el
+ * real: un error de lectura no se castiga dos veces (decidido 2026-11-25).
  *
  * La entrega completa queda en una fila de osce_resultado sin ítem
- * (registro): con ella se puede volver a corregir si el docente ajusta la
- * pauta, sin pisar los puntajes que él puso a mano.
+ * (registro): con ella se vuelve a corregir si el docente ajusta la pauta,
+ * sin pisar los puntajes que él puso a mano.
  */
 final class OsceApp
 {
-    public const TIPOS = ['config_equipo', 'marcaje'];
+    public const TIPOS = ['config_equipo', 'marcaje', 'protocolo'];
 
-    /** Prueba del ABR que abre cada examen (combo "Tipo de prueba" de la app). */
+    /** Equipo de la app que abre cada examen. */
+    public const MODULO_DE_EXAMEN = ['cvemp' => 'VEMP', 'ovemp' => 'VEMP'];
+
+    /** Prueba que abre (combo "Tipo de prueba" del ABR o subtipo del VEMP). */
     public const PRUEBA_DE_EXAMEN = [
         'peatc' => 'ABR', 'aabr' => 'ABR', 'general' => 'ABR', 'ecochg' => 'ECochG',
         'latencia_media' => 'MLR', 'latencia_tardia' => 'CAEP', 'estado_estable' => 'ASSR',
-        'cvemp' => 'ABR', 'ovemp' => 'ABR',
+        'cvemp' => 'CVEMP', 'ovemp' => 'OVEMP',
+    ];
+
+    /** Ondas a marcar: [en la intensidad mayor de cada oído, en las demás]; la primera de las demás define "hay respuesta". */
+    public const ONDAS = [
+        'peatc' => [['I', 'III', 'V'], ['V']],
+        'cvemp' => [['p13', 'n23'], ['p13', 'n23']],
+        'ovemp' => [['n10', 'p16'], ['n10', 'p16']],
     ];
 
     /**
      * Parámetros que se pueden evaluar: clave => [fuente, rótulo].
      * panel = lo que se ve en el panel de control; equipo = Parámetros
-     * avanzados (technical).
+     * avanzados del ABR (technical). En la estación de protocolo se miran
+     * en cada curva registrada (la fuente da lo mismo).
      */
     public const PARAMETROS = [
-        'test' => ['panel', 'Tipo de prueba'],
-        'stim' => ['panel', 'Estímulo'],
-        'pol' => ['panel', 'Polaridad'],
-        'int' => ['panel', 'Intensidad (dB nHL)'],
-        'rate' => ['panel', 'Tasa de estimulación (est/s)'],
-        'filter_passhigh' => ['panel', 'Filtro pasa alto (Hz)'],
-        'filter_down' => ['panel', 'Filtro pasa bajo (Hz)'],
-        'average' => ['panel', 'Promediaciones'],
-        'side' => ['panel', 'Oído'],
-        'window_ms' => ['equipo', 'Ventana de análisis (ms)'],
-        'gain' => ['equipo', 'Ganancia'],
-        'transducer' => ['equipo', 'Transductor'],
-        'artifact_reject_uv' => ['equipo', 'Rechazo de artefacto (µV)'],
+        'ABR' => [
+            'test' => ['panel', 'Tipo de prueba'],
+            'stim' => ['panel', 'Estímulo'],
+            'pol' => ['panel', 'Polaridad'],
+            'int' => ['panel', 'Intensidad (dB nHL)'],
+            'rate' => ['panel', 'Tasa de estimulación (est/s)'],
+            'filter_passhigh' => ['panel', 'Filtro pasa alto (Hz)'],
+            'filter_down' => ['panel', 'Filtro pasa bajo (Hz)'],
+            'average' => ['panel', 'Promediaciones'],
+            'side' => ['panel', 'Oído'],
+            'window_ms' => ['equipo', 'Ventana de análisis (ms)'],
+            'gain' => ['equipo', 'Ganancia'],
+            'transducer' => ['equipo', 'Transductor'],
+            'artifact_reject_uv' => ['equipo', 'Rechazo de artefacto (µV)'],
+        ],
+        'VEMP' => [
+            'transducer' => ['panel', 'Transductor'],
+            'freq' => ['panel', 'Frecuencia del tone burst'],
+            'pol' => ['panel', 'Polaridad'],
+            'int' => ['panel', 'Intensidad (dB SPL)'],
+            'rate' => ['panel', 'Tasa de estimulación (est/s)'],
+            'filter_passhigh' => ['panel', 'Filtro pasa alto (Hz)'],
+            'filter_down' => ['panel', 'Filtro pasa bajo (Hz)'],
+            'average' => ['panel', 'Promediaciones'],
+            'side' => ['panel', 'Oído'],
+            'maniobra' => ['panel', 'Maniobra (contracción)'],
+            'emg_ok' => ['panel', 'EMG en la banda'],
+        ],
     ];
 
     /**
-     * Configuración esperada del PEATC clínico, como la escribe el
-     * Protocolo Técnico ORL 2019 (tabla de "Parámetros"). La ventana dice
-     * "10 s" en el protocolo: es 10 ms. "Delay 0" no existe en el equipo
-     * simulado. La ganancia "10k" es ×10.000. El tipo de prueba no va: la
-     * estación ya abre en la prueba de su examen.
+     * Configuración del Protocolo Técnico ORL 2019. PEATC: la ventana dice
+     * "10 s", es 10 ms; ganancia "10k" = ×10.000; acepta cualquier estímulo.
+     * VEMP: el equipo de LabSim mide en dB SPL y el protocolo dice "100 dB
+     * nHL", así que la intensidad la escribe el docente; ganancia y ventana
+     * no son mandos del VEMP simulado.
      */
     public const ESPERADO_PEATC = [
         'stim' => 'Click | CE-Chirp | CE-Chirp LS | NB CE-Chirp LS 500 Hz | NB CE-Chirp LS 1 kHz | NB CE-Chirp LS 2 kHz | NB CE-Chirp LS 4 kHz | Burst 500 Hz | Burst 1 kHz | Burst 2 kHz | Burst 4 kHz',
@@ -78,6 +113,64 @@ final class OsceApp
         'window_ms' => '10',
         'transducer' => 'insert_earphone',
     ];
+    public const ESPERADO = [
+        'peatc' => self::ESPERADO_PEATC,
+        'cvemp' => ['transducer' => 'Inserto (vía aérea)', 'freq' => '500 Hz', 'pol' => 'Rarefacción', 'rate' => '5.1',
+                    'filter_passhigh' => '3', 'filter_down' => '1500', 'maniobra' => 'Rotación cefálica sostenida'],
+        'ovemp' => ['transducer' => 'Inserto (vía aérea)', 'freq' => '1000 Hz | 500 Hz', 'pol' => 'Rarefacción', 'rate' => '5.1',
+                    'filter_passhigh' => '1', 'filter_down' => '1000', 'maniobra' => 'Mirada superior ~30°'],
+    ];
+    /** En la estación de protocolo, lo que se pide a cada curva (difiere de la configuración final). */
+    public const ESPERADO_CURVAS = [
+        'peatc' => ['pol' => 'Alternada', 'rate' => '21.1 | 81.1', 'filter_passhigh' => '100', 'filter_down' => '3000',
+                    'transducer' => 'insert_earphone', 'window_ms' => '10'],
+        'cvemp' => ['transducer' => 'Inserto (vía aérea)', 'freq' => '500 Hz', 'pol' => 'Rarefacción', 'rate' => '5.1',
+                    'filter_passhigh' => '3', 'filter_down' => '1500', 'emg_ok' => 'sí'],
+        'ovemp' => ['transducer' => 'Inserto (vía aérea)', 'freq' => '1000 Hz | 500 Hz', 'pol' => 'Rarefacción', 'rate' => '5.1',
+                    'filter_passhigh' => '1', 'filter_down' => '1000', 'emg_ok' => 'sí'],
+    ];
+
+    /** Estímulos chirp (bonificación por acercarse al umbral con ellos). */
+    public const CHIRPS = 'CE-Chirp | CE-Chirp LS | NB CE-Chirp LS 500 Hz | NB CE-Chirp LS 1 kHz | NB CE-Chirp LS 2 kHz | NB CE-Chirp LS 4 kHz';
+
+    /**
+     * Reglas de estrategia: clave => [rótulo, qué se escribe en "valor"].
+     * El texto del criterio sale del rótulo con el valor.
+     */
+    public const ESTRATEGIA = [
+        'inicio' => ['Parte cada oído en {v} dB', 'nivel o rango'],
+        'baja' => ['Con respuesta, baja de {v} en {v} dB', 'paso en dB'],
+        'sube' => ['Sin respuesta, sube de {v} en {v} dB', 'paso en dB'],
+        'sube_max' => ['Sin respuesta al partir, sube a {v} dB', 'rango'],
+        'replica_max' => ['Replica la curva en la intensidad máxima', ''],
+        'replica_umbral' => ['Replica la curva en el umbral', ''],
+        'ambos' => ['Evalúa ambos oídos', ''],
+        'umbral' => ['Umbral encontrado a ±{v} dB del real', 'tolerancia dB'],
+        'umbral_chirp' => ['Se acerca al umbral con chirp y lo encuentra (±{v} dB)', 'tolerancia dB'],
+        'alguna_tasa' => ['Registra alguna curva a tasa {v} (sospecha de neuropatía)', 'tasa'],
+    ];
+
+    /** Por examen: clave => [activa, valor, puntos, bonificación]. */
+    public const ESTRATEGIA_BASE = [
+        'peatc' => [
+            'inicio' => [true, '80', 1, false], 'baja' => [true, '20', 1, false], 'sube' => [true, '10', 1, false],
+            'sube_max' => [true, '90–100', 1, false], 'replica_max' => [true, '', 1, false],
+            'replica_umbral' => [true, '', 1, false], 'ambos' => [true, '', 1, false], 'umbral' => [true, '10', 2, false],
+            'umbral_chirp' => [true, '10', 1, true], 'alguna_tasa' => [false, '81.1', 1, false],
+        ],
+        'cvemp' => [
+            'inicio' => [false, '', 1, false], 'baja' => [true, '10', 1, false], 'sube' => [true, '5', 1, false],
+            'replica_max' => [true, '', 1, false], 'replica_umbral' => [false, '', 1, false],
+            'ambos' => [true, '', 1, false], 'umbral' => [true, '10', 2, false],
+        ],
+        'ovemp' => [
+            'inicio' => [false, '', 1, false], 'replica_max' => [true, '', 1, false], 'ambos' => [true, '', 1, false],
+        ],
+        'otro' => [
+            'inicio' => [false, '', 1, false], 'baja' => [false, '', 1, false], 'sube' => [false, '', 1, false],
+            'replica_max' => [true, '', 1, false], 'ambos' => [true, '', 1, false], 'umbral' => [false, '10', 2, false],
+        ],
+    ];
 
     /** Curvas que la app registra sola para la estación de marcaje. */
     public const CURVAS_BASE = "OD 80\nOD 60\nOD 40\nOD 20\nOI 80\nOI 60\nOI 40\nOI 20";
@@ -85,6 +178,22 @@ final class OsceApp
     public static function esApp(string $tipo): bool
     {
         return in_array($tipo, self::TIPOS, true);
+    }
+
+    public static function modulo(string $examen): string
+    {
+        return self::MODULO_DE_EXAMEN[$examen] ?? 'ABR';
+    }
+
+    public static function parametros(string $examen): array
+    {
+        return self::PARAMETROS[self::modulo($examen)];
+    }
+
+    /** [ondas en la intensidad mayor, ondas en las demás] del examen. */
+    public static function ondas(string $examen): array
+    {
+        return self::ONDAS[$examen] ?? self::ONDAS['peatc'];
     }
 
     public static function config(array $est): array
@@ -134,8 +243,8 @@ final class OsceApp
 
     // -- Contenido de la estación (editor) -----------------------------------
 
-    /** Casos con ABR configurado, para elegir el de la estación. */
-    public static function casosConAbr(): array
+    /** Casos con datos para ese equipo (ABR o VEMP), para elegir el de la estación. */
+    public static function casos(string $modulo): array
     {
         $stmt = Db::get()->query(
             "SELECT c.id, c.data, p.nombre, p.apellido FROM cases c LEFT JOIN patients p ON p.id = c.patient_id
@@ -144,11 +253,12 @@ final class OsceApp
         $out = [];
         foreach ($stmt->fetchAll() as $c) {
             $data = json_decode((string) $c['data'], true) ?: [];
-            if (empty($data['ABR']['OD']) && empty($data['ABR']['OI'])) {
+            $sec = $data[$modulo] ?? [];
+            if (empty($sec['OD']) && empty($sec['OI'])) {
                 continue;
             }
-            $tipoOd = (string) ($data['ABR']['OD']['type'] ?? '');
-            $tipoOi = (string) ($data['ABR']['OI']['type'] ?? '');
+            $tipoOd = (string) ($sec['OD']['type'] ?? '');
+            $tipoOi = (string) ($sec['OI']['type'] ?? '');
             $nombre = trim(($c['nombre'] ?? '') . ' ' . ($c['apellido'] ?? ''));
             $out[] = ['id' => (string) $c['id'], 'rotulo' => ($nombre !== '' ? $nombre : 'Caso ' . $c['id'])
                 . ' · OD ' . ($tipoOd ?: '—') . ' / OI ' . ($tipoOi ?: '—')];
@@ -156,11 +266,32 @@ final class OsceApp
         return $out;
     }
 
+    /** Texto de un criterio de estrategia con su valor. */
+    public static function textoRegla(string $clave, string $valor): string
+    {
+        $rotulo = self::ESTRATEGIA[$clave][0] ?? $clave;
+        return str_replace('{v}', $valor !== '' ? $valor : '…', $rotulo);
+    }
+
+    /** Las reglas de estrategia con que parte la estación (las guardadas o las del examen). */
+    public static function estrategia(array $est): array
+    {
+        $cfg = self::config($est);
+        if (isset($cfg['estrategia']) && is_array($cfg['estrategia'])) {
+            return $cfg['estrategia'];
+        }
+        $base = self::ESTRATEGIA_BASE[$est['examen']] ?? self::ESTRATEGIA_BASE['otro'];
+        $out = [];
+        foreach ($base as $clave => [$activa, $valor, $pts, $bonus]) {
+            $out[$clave] = ['activa' => $activa, 'valor' => $valor, 'puntos' => $pts, 'bonus' => $bonus];
+        }
+        return $out;
+    }
+
     /**
      * Guarda el contenido de una estación de la app y rehace sus ítems.
-     * config_equipo: un ítem por parámetro con esperado; marcaje: uno por
-     * onda y curva (I, III y V en la intensidad máxima de cada oído, V en
-     * las demás).
+     * config_equipo: un ítem por parámetro con esperado. marcaje: uno por
+     * onda y curva. protocolo: parámetros en cada curva + estrategia.
      */
     public static function guardarContenido(array $est, array $in): void
     {
@@ -169,46 +300,82 @@ final class OsceApp
         if ($caseId === '') {
             throw new InvalidArgumentException('Elige el caso del paciente de la estación.');
         }
+        $examen = (string) $est['examen'];
         $cfg['case_id'] = $caseId;
-        $cfg['prueba'] = self::PRUEBA_DE_EXAMEN[$est['examen']] ?? 'ABR';
+        $cfg['prueba'] = self::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR';
         $items = [];
-        if ($est['tipo'] === 'config_equipo') {
+        $num = static fn ($v, float $def): float => is_numeric(str_replace(',', '.', (string) $v)) ? (float) str_replace(',', '.', (string) $v) : $def;
+        $params = static function (string $regla) use ($in, $examen, $num): array {
+            $out = [];
             $esperado = [];
-            foreach (self::PARAMETROS as $clave => [$fuente, $rotulo]) {
+            foreach (self::parametros($examen) as $clave => [$fuente, $rotulo]) {
                 $valor = trim((string) ($in['esperado'][$clave] ?? ''));
-                if ($valor === '') {
+                if ($valor === '' || ($regla === 'param' && $clave === 'emg_ok')) {
                     continue;
                 }
                 $esperado[$clave] = $valor;
-                $items[] = ['texto' => $rotulo, 'puntaje' => (float) str_replace(',', '.', (string) ($in['puntos'][$clave] ?? '1')) ?: 1.0,
-                            'critico' => !empty($in['critico'][$clave]),
-                            'config' => ['regla' => 'param', 'fuente' => $fuente, 'clave' => $clave, 'esperado' => $valor]];
+                $out[] = ['texto' => $regla === 'curvas_param' ? "{$rotulo} en cada curva" : $rotulo,
+                          'puntaje' => $num($in['puntos'][$clave] ?? 1, 1.0) ?: 1.0,
+                          'critico' => !empty($in['critico'][$clave]),
+                          'config' => ['regla' => $regla, 'fuente' => $fuente, 'clave' => $clave, 'esperado' => $valor]];
             }
+            return [$out, $esperado];
+        };
+        if ($est['tipo'] === 'config_equipo') {
+            [$items, $cfg['esperado']] = $params('param');
             if (!$items) {
                 throw new InvalidArgumentException('Indica al menos un parámetro esperado.');
             }
-            $cfg['esperado'] = $esperado;
-        } else {
+        } elseif ($est['tipo'] === 'marcaje') {
             $curvas = self::leerCurvas((string) ($in['curvas'] ?? ''));
             if (!$curvas) {
                 throw new InvalidArgumentException('Indica las curvas a registrar: una por línea, como "OD 80".');
             }
-            $tol = (float) str_replace(',', '.', (string) ($in['tol_ms'] ?? '0.2'));
+            $tol = $num($in['tol_ms'] ?? '0.2', 0.2);
             if ($tol <= 0 || $tol > 2) {
                 throw new InvalidArgumentException('Tolerancia: entre 0,05 y 2 ms.');
             }
             $cfg['curvas'] = $curvas;
             $cfg['tol_ms'] = $tol;
+            [$ondasMax, $ondasResto] = self::ondas($examen);
             $maxPorLado = [];
             foreach ($curvas as [$lado, $int]) {
                 $maxPorLado[$lado] = max($maxPorLado[$lado] ?? -100, $int);
             }
             foreach ($curvas as [$lado, $int]) {
-                $ondas = $int === $maxPorLado[$lado] ? ['I', 'III', 'V'] : ['V'];
-                foreach ($ondas as $onda) {
+                foreach ($int === $maxPorLado[$lado] ? $ondasMax : $ondasResto as $onda) {
                     $items[] = ['texto' => "{$lado} {$int} dB: onda {$onda}", 'puntaje' => 1.0, 'critico' => false,
                                 'config' => ['regla' => 'marca', 'lado' => $lado, 'int' => $int, 'onda' => $onda, 'tol_ms' => $tol]];
                 }
+            }
+        } else {
+            $onda = trim((string) ($in['onda'] ?? ''));
+            if ($onda === '') {
+                throw new InvalidArgumentException('Indica la onda que define que hay respuesta (V en el PEATC).');
+            }
+            $cfg['onda'] = $onda;
+            [$items, $cfg['esperado_curvas']] = $params('curvas_param');
+            $estrategia = [];
+            foreach (self::ESTRATEGIA as $clave => [$rotulo, $pide]) {
+                $r = $in['estrategia'][$clave] ?? [];
+                $activa = !empty($r['activa']);
+                $valor = trim((string) ($r['valor'] ?? ''));
+                $estrategia[$clave] = ['activa' => $activa, 'valor' => $valor,
+                                       'puntos' => $num($r['puntos'] ?? 1, 1.0) ?: 1.0, 'bonus' => !empty($r['bonus'])];
+                if (!$activa) {
+                    continue;
+                }
+                if ($pide !== '' && $valor === '') {
+                    throw new InvalidArgumentException('"' . self::textoRegla($clave, '…') . '" necesita su valor (' . $pide . ').');
+                }
+                $items[] = ['texto' => self::textoRegla($clave, $valor) . ($estrategia[$clave]['bonus'] ? ' (bonificación)' : ''),
+                            'puntaje' => $estrategia[$clave]['puntos'], 'critico' => false,
+                            'config' => ['regla' => $clave, 'valor' => $valor, 'onda' => $onda,
+                                         'bonus' => $estrategia[$clave]['bonus']]];
+            }
+            $cfg['estrategia'] = $estrategia;
+            if (!$items) {
+                throw new InvalidArgumentException('Activa al menos un criterio.');
             }
         }
         $estId = (int) $est['id'];
@@ -236,7 +403,7 @@ final class OsceApp
                 continue;
             }
             $par = [strtoupper($m[1]), (int) $m[2]];
-            if ($par[1] < -10 || $par[1] > 110 || in_array($par, $out, true)) {
+            if ($par[1] < -10 || $par[1] > 130 || in_array($par, $out, true)) {
                 continue;
             }
             $out[] = $par;
@@ -256,6 +423,9 @@ final class OsceApp
     {
         if ($valor === null || $valor === '') {
             return false;
+        }
+        if (is_bool($valor)) {
+            $valor = $valor ? 'sí' : 'no';
         }
         $v = trim((string) $valor);
         $num = static fn (string $s): ?float => is_numeric(str_replace(',', '.', trim($s))) ? (float) str_replace(',', '.', trim($s)) : null;
@@ -281,15 +451,79 @@ final class OsceApp
         return mb_strtolower($v) === mb_strtolower(trim($esperado));
     }
 
-    /** Curva de la entrega con ese lado e intensidad (la primera registrada). */
+    /** Las curvas de la entrega, en orden (formato común de la app). */
+    private static function curvas(array $payload): array
+    {
+        return array_values(array_filter($payload['curvas'] ?? [], 'is_array'));
+    }
+
+    /** Curva con ese lado e intensidad (la primera registrada). */
     private static function curvaDe(array $payload, string $lado, int $int): ?array
     {
-        foreach (($payload['abr']['curvas'] ?? []) as $nombre => $c) {
+        foreach (self::curvas($payload) as $c) {
             if (($c['side'] ?? '') === $lado && (int) round((float) ($c['int'] ?? -999)) === $int) {
-                return ['nombre' => (string) $nombre] + $c;
+                return $c;
             }
         }
         return null;
+    }
+
+    /** Las curvas de cada oído, en el orden en que se registraron. */
+    private static function porOido(array $payload): array
+    {
+        $out = ['OD' => [], 'OI' => []];
+        foreach (self::curvas($payload) as $c) {
+            $lado = (string) ($c['side'] ?? '');
+            if (isset($out[$lado])) {
+                $out[$lado][] = $c;
+            }
+        }
+        return $out;
+    }
+
+    private static function respondio(array $c, string $onda): bool
+    {
+        $v = $c['marcas'][$onda] ?? null;
+        return is_numeric($v);
+    }
+
+    private static function nivel(array $c): float
+    {
+        return (float) ($c['int'] ?? 0);
+    }
+
+    /** Umbral que encontró el alumno en un oído: la curva de menor intensidad con respuesta. */
+    private static function curvaUmbral(array $curvas, string $onda, ?string $estimulos = null): ?array
+    {
+        $mejor = null;
+        foreach ($curvas as $c) {
+            if (!self::respondio($c, $onda)) {
+                continue;
+            }
+            if ($estimulos !== null && !self::cumpleEsperado($c['stim'] ?? '', $estimulos)) {
+                continue;
+            }
+            if ($mejor === null || self::nivel($c) < self::nivel($mejor)) {
+                $mejor = $c;
+            }
+        }
+        return $mejor;
+    }
+
+    private static function db(float $x): string
+    {
+        return rtrim(rtrim(number_format($x, 1, ',', ''), '0'), ',');
+    }
+
+    /** Resultado de un criterio: fracción cumplida (0..1) o null si no aplica. */
+    private static function resultado(?float $fraccion, string $alumno, string $esperado, float $pts): array
+    {
+        if ($fraccion === null) {
+            return ['puntaje' => $pts, 'ok' => true, 'alumno' => $alumno ?: 'no aplica', 'esperado' => $esperado, 'fraccion' => null];
+        }
+        $fraccion = max(0.0, min(1.0, $fraccion));
+        return ['puntaje' => round($pts * $fraccion, 2), 'ok' => $fraccion >= 0.999, 'alumno' => $alumno,
+                'esperado' => $esperado, 'fraccion' => $fraccion];
     }
 
     /**
@@ -301,24 +535,48 @@ final class OsceApp
     {
         $r = $item['cfg'] ?? (json_decode((string) ($item['config'] ?? '{}'), true) ?: []);
         $pts = (float) $item['puntaje'];
-        if (($r['regla'] ?? '') === 'param') {
-            $fuente = $r['fuente'] === 'equipo' ? ($payload['abr']['equipo'] ?? []) : ($payload['panel'] ?? []);
+        $regla = (string) ($r['regla'] ?? '');
+
+        if ($regla === 'param') {
+            $fuente = $r['fuente'] === 'equipo'
+                ? ($payload['equipo'] ?? ($payload['abr']['equipo'] ?? []))
+                : ($payload['panel'] ?? []);
             $valor = $fuente[$r['clave']] ?? null;
-            $ok = self::cumpleEsperado(is_bool($valor) ? ($valor ? 'sí' : 'no') : $valor, (string) $r['esperado']);
+            $ok = self::cumpleEsperado($valor, (string) $r['esperado']);
             return ['puntaje' => $ok ? $pts : 0.0, 'ok' => $ok,
                     'alumno' => $valor === null ? '—' : self::mostrar($r['clave'], $valor),
                     'esperado' => self::mostrarEsperado($r['clave'], (string) $r['esperado'])];
         }
-        if (($r['regla'] ?? '') === 'marca') {
+
+        if ($regla === 'curvas_param') {
+            $curvas = self::curvas($payload);
+            if (!$curvas) {
+                return self::resultado(0.0, 'sin curvas', self::mostrarEsperado($r['clave'], (string) $r['esperado']), $pts);
+            }
+            $bien = 0;
+            $malos = [];
+            foreach ($curvas as $c) {
+                if (self::cumpleEsperado($c[$r['clave']] ?? null, (string) $r['esperado'])) {
+                    $bien++;
+                } elseif (count($malos) < 3) {
+                    $malos[] = self::mostrar($r['clave'], $c[$r['clave']] ?? '—');
+                }
+            }
+            return self::resultado($bien / count($curvas), "{$bien} de " . count($curvas) . ' curvas'
+                . ($malos ? ' (también ' . implode(', ', array_unique($malos)) . ')' : ''),
+                self::mostrarEsperado($r['clave'], (string) $r['esperado']), $pts);
+        }
+
+        if ($regla === 'marca') {
             $curva = self::curvaDe($payload, (string) $r['lado'], (int) $r['int']);
             if ($curva === null) {
                 return ['puntaje' => 0.0, 'ok' => false, 'alumno' => 'sin curva', 'esperado' => '—'];
             }
-            $verdad = $payload['verdad'][$curva['nombre']] ?? null;
+            $verdad = $payload['verdad'][$curva['nombre'] ?? ''] ?? null;
             $onda = (string) $r['onda'];
             $lat = $verdad['waves'][$onda]['lat'] ?? null;
             $existe = $verdad !== null && !empty($verdad['visible']) && $lat !== null;
-            $marca = $curva['LatAmp'][$onda][0] ?? null;
+            $marca = $curva['marcas'][$onda] ?? null;
             $marca = is_numeric($marca) ? (float) $marca : null;
             $tol = (float) ($r['tol_ms'] ?? 0.2);
             $ok = $existe ? ($marca !== null && abs($marca - (float) $lat) <= $tol + 1e-9) : $marca === null;
@@ -326,6 +584,169 @@ final class OsceApp
             return ['puntaje' => $ok ? $pts : 0.0, 'ok' => $ok, 'alumno' => $fmt($marca),
                     'esperado' => $existe ? number_format((float) $lat, 2, ',', '') . ' ms ± ' . str_replace('.', ',', (string) $tol)
                                           : 'sin onda ' . $onda . ' (no marcar)'];
+        }
+
+        return self::evaluarEstrategia($regla, $r, $payload, $pts);
+    }
+
+    /** Criterios de estrategia (estación de protocolo). */
+    private static function evaluarEstrategia(string $regla, array $r, array $payload, float $pts): array
+    {
+        $onda = (string) ($r['onda'] ?? 'V');
+        $valor = (string) ($r['valor'] ?? '');
+        $oidos = self::porOido($payload);
+        $esperado = self::textoRegla($regla, $valor);
+        $conCurvas = array_filter($oidos, static fn ($cs) => $cs !== []);
+
+        switch ($regla) {
+            case 'ambos':
+                $n = count($conCurvas);
+                return self::resultado($n / 2, $n === 2 ? 'OD y OI' : ($n === 1 ? 'solo ' . array_keys($conCurvas)[0] : 'ninguno'), 'OD y OI', $pts);
+
+            case 'inicio':
+                $bien = 0;
+                $txt = [];
+                foreach ($oidos as $lado => $cs) {
+                    if (!$cs) {
+                        continue;
+                    }
+                    $primero = self::nivel($cs[0]);
+                    $txt[] = "{$lado} " . self::db($primero);
+                    $bien += self::cumpleEsperado($primero, $valor) ? 1 : 0;
+                }
+                return self::resultado($bien / 2, implode(' · ', $txt) ?: 'sin curvas', $valor . ' dB en cada oído', $pts);
+
+            case 'baja':
+            case 'sube':
+                $paso = (float) str_replace(',', '.', $valor);
+                $fracciones = [];
+                $malos = [];
+                foreach ($oidos as $lado => $cs) {
+                    $total = 0;
+                    $bien = 0;
+                    for ($i = 1; $i < count($cs); $i++) {
+                        $antes = $cs[$i - 1];
+                        $ahora = $cs[$i];
+                        $resp = self::respondio($antes, $onda);
+                        $delta = self::nivel($ahora) - self::nivel($antes);
+                        if ($regla === 'baja' && $resp && $delta < 0) {
+                            $total++;
+                            $ok = abs(-$delta - $paso) < 0.01;
+                        } elseif ($regla === 'sube' && !$resp && $delta > 0) {
+                            $total++;
+                            $ok = abs($delta - $paso) < 0.01;
+                        } else {
+                            continue;
+                        }
+                        $bien += $ok ? 1 : 0;
+                        if (!$ok) {
+                            $malos[] = "{$lado} " . self::db(self::nivel($antes)) . '→' . self::db(self::nivel($ahora));
+                        }
+                    }
+                    $conRespuesta = array_filter($cs, static fn ($c) => self::respondio($c, $onda));
+                    if ($total > 0) {
+                        $fracciones[] = $bien / $total;
+                    } elseif ($regla === 'baja' && $conRespuesta) {
+                        // Vio respuesta y nunca bajó: no buscó el umbral.
+                        $fracciones[] = 0.0;
+                        $malos[] = "{$lado} no bajó";
+                    }
+                }
+                if (!$fracciones) {
+                    return self::resultado(null, 'no aplica', $esperado, $pts);
+                }
+                return self::resultado(array_sum($fracciones) / count($fracciones),
+                    $malos ? 'fuera de paso: ' . implode(', ', array_slice($malos, 0, 4)) : 'siempre de ' . self::db($paso), $esperado, $pts);
+
+            case 'sube_max':
+                $aplica = 0;
+                $bien = 0;
+                $txt = [];
+                foreach ($oidos as $lado => $cs) {
+                    if (!$cs || self::respondio($cs[0], $onda)) {
+                        continue;
+                    }
+                    $aplica++;
+                    $sube = false;
+                    foreach (array_slice($cs, 1) as $c) {
+                        $sube = $sube || self::cumpleEsperado(self::nivel($c), $valor);
+                    }
+                    $bien += $sube ? 1 : 0;
+                    $txt[] = $lado . ($sube ? ' subió' : ' no subió');
+                }
+                return self::resultado($aplica ? $bien / $aplica : null, implode(' · ', $txt), $esperado, $pts);
+
+            case 'replica_max':
+            case 'replica_umbral':
+                $aplica = 0;
+                $bien = 0;
+                $txt = [];
+                foreach ($oidos as $lado => $cs) {
+                    if (!$cs) {
+                        $aplica++;
+                        $txt[] = "{$lado} sin curvas";
+                        continue;
+                    }
+                    if ($regla === 'replica_max') {
+                        $nivel = max(array_map([self::class, 'nivel'], $cs));
+                    } else {
+                        $u = self::curvaUmbral($cs, $onda);
+                        if ($u === null) {
+                            continue;   // sin respuesta en ese oído: no hay umbral que replicar
+                        }
+                        $nivel = self::nivel($u);
+                    }
+                    $aplica++;
+                    $n = count(array_filter($cs, static fn ($c) => abs(self::nivel($c) - $nivel) < 0.01));
+                    $bien += $n >= 2 ? 1 : 0;
+                    $txt[] = "{$lado} " . self::db($nivel) . " dB: {$n} curva" . ($n === 1 ? '' : 's');
+                }
+                return self::resultado($aplica ? $bien / $aplica : null, implode(' · ', $txt), $esperado, $pts);
+
+            case 'umbral':
+            case 'umbral_chirp':
+                $tol = (float) str_replace(',', '.', $valor ?: '10');
+                $filtro = $regla === 'umbral_chirp' ? self::CHIRPS : null;
+                $bien = 0;
+                $txt = [];
+                foreach ($oidos as $lado => $cs) {
+                    if (!$cs) {
+                        $txt[] = "{$lado} sin curvas";
+                        continue;
+                    }
+                    $u = self::curvaUmbral($cs, $onda, $filtro);
+                    if ($u === null) {
+                        if ($filtro !== null) {
+                            $txt[] = "{$lado} sin umbral con chirp";
+                            continue;
+                        }
+                        // Dice que no hay respuesta: bien si de verdad no la hay en lo más alto que registró.
+                        $mayor = $cs[0];
+                        foreach ($cs as $c) {
+                            if (self::nivel($c) > self::nivel($mayor)) {
+                                $mayor = $c;
+                            }
+                        }
+                        $v = $payload['verdad'][$mayor['nombre'] ?? ''] ?? null;
+                        $ok = $v !== null && empty($v['visible']);
+                        $bien += $ok ? 1 : 0;
+                        $txt[] = "{$lado} sin respuesta hasta " . self::db(self::nivel($mayor)) . ($ok ? '' : ' (sí había)');
+                        continue;
+                    }
+                    $real = $payload['verdad'][$u['nombre'] ?? '']['threshold'] ?? null;
+                    $ok = $real !== null && abs(self::nivel($u) - (float) $real) <= $tol + 1e-9;
+                    $bien += $ok ? 1 : 0;
+                    $txt[] = "{$lado} " . self::db(self::nivel($u)) . ($real !== null ? ' (real ' . self::db((float) $real) . ')' : '');
+                }
+                return self::resultado($bien / 2, implode(' · ', $txt), $esperado, $pts);
+
+            case 'alguna_tasa':
+                foreach (self::curvas($payload) as $c) {
+                    if (self::cumpleEsperado($c['rate'] ?? null, $valor)) {
+                        return self::resultado(1.0, 'sí (' . ($c['side'] ?? '') . ' ' . self::db(self::nivel($c)) . ' dB)', $esperado, $pts);
+                    }
+                }
+                return self::resultado(0.0, 'ninguna', $esperado, $pts);
         }
         return ['puntaje' => 0.0, 'ok' => false, 'alumno' => '—', 'esperado' => '—'];
     }
@@ -338,6 +759,9 @@ final class OsceApp
     {
         if ($clave === 'gain' && is_numeric($valor)) {
             return '×' . number_format((float) $valor, 0, ',', '.');
+        }
+        if (is_bool($valor)) {
+            return $valor ? 'sí' : 'no';
         }
         if (is_numeric($valor)) {
             return rtrim(rtrim(number_format((float) $valor, 2, ',', ''), '0'), ',');
@@ -354,6 +778,29 @@ final class OsceApp
         return implode(' o ', array_map(static fn ($p) => preg_match('/[–-]/u', $p) && !is_numeric($p) ? str_replace('-', '–', $p) : self::mostrar($clave, $p), $partes));
     }
 
+    /**
+     * Totales de una estación: las bonificaciones suman pero no entran en
+     * el máximo, y el total no pasa del máximo.
+     *
+     * @param array<int, array{item: array, puntaje: float}> $filas
+     */
+    public static function totales(array $filas): array
+    {
+        $total = 0.0;
+        $max = 0.0;
+        $critico = false;
+        foreach ($filas as $f) {
+            $it = $f['item'];
+            $bonus = !empty(($it['cfg'] ?? [])['bonus']);
+            $total += (float) $f['puntaje'];
+            if (!$bonus) {
+                $max += (float) $it['puntaje'];
+            }
+            $critico = $critico || ((int) $it['critico'] === 1 && (float) $f['puntaje'] <= 0.0);
+        }
+        return ['puntaje' => round(min($total, $max), 2), 'puntaje_max' => round($max, 2), 'critico_fallado' => $critico];
+    }
+
     // -- Entrega ---------------------------------------------------------------
 
     /**
@@ -363,7 +810,7 @@ final class OsceApp
     public static function entregar(int $estacionId, int $participanteId, array $payload): array
     {
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE);
-        if ($json === false || strlen($json) > 6_000_000) {
+        if ($json === false || strlen($json) > 6000000) {
             throw new InvalidArgumentException('Entrega demasiado grande o ilegible.');
         }
         Db::reintentar(static function () use ($estacionId, $participanteId, $json): void {
@@ -402,37 +849,40 @@ final class OsceApp
         return $v === false ? null : (json_decode((string) $v, true) ?: []);
     }
 
+    private static function entregaId(int $estacionId, int $participanteId): int
+    {
+        $stmt = Db::get()->prepare('SELECT id FROM osce_entrega WHERE estacion_id = ? AND participante_id = ?');
+        $stmt->execute([$estacionId, $participanteId]);
+        $id = (int) $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $id;
+    }
+
     /** Corrige (o vuelve a corregir) una entrega con los ítems actuales. */
     public static function corregir(int $estacionId, int $participanteId): array
     {
         $payload = self::registro($estacionId, $participanteId) ?? [];
         $items = OscePauta::items($estacionId);
         $pdo = Db::get();
-        $stmt = $pdo->prepare('SELECT id FROM osce_entrega WHERE estacion_id = ? AND participante_id = ?');
-        $stmt->execute([$estacionId, $participanteId]);
-        $entregaId = (int) $stmt->fetchColumn();
-        $stmt->closeCursor();
+        $entregaId = self::entregaId($estacionId, $participanteId);
         $stmt = $pdo->prepare("SELECT item_id, puntaje, comentario, fuente FROM osce_resultado WHERE entrega_id = ? AND item_id IS NOT NULL");
         $stmt->execute([$entregaId]);
         $previos = [];
         foreach ($stmt->fetchAll() as $r) {
             $previos[(int) $r['item_id']] = $r;
         }
-        $total = 0.0;
-        $max = 0.0;
-        $critico = false;
         $filas = [];
+        $paraTotal = [];
         foreach ($items as $it) {
             $e = self::evaluarItem($it, $payload);
             $prev = $previos[(int) $it['id']] ?? null;
             $manual = $prev !== null && $prev['fuente'] === 'docente';
             $pts = $manual ? (float) $prev['puntaje'] : $e['puntaje'];
-            $total += $pts;
-            $max += (float) $it['puntaje'];
-            $critico = $critico || ((int) $it['critico'] === 1 && $pts <= 0.0);
+            $paraTotal[] = ['item' => $it, 'puntaje' => $pts];
             $filas[] = [(int) $it['id'], json_encode($e, JSON_UNESCAPED_UNICODE), $pts, $prev['comentario'] ?? '', $manual ? 'docente' : 'auto'];
         }
-        Db::reintentar(static function () use ($pdo, $entregaId, $filas, $total, $max, $critico): void {
+        $t = self::totales($paraTotal);
+        Db::reintentar(static function () use ($pdo, $entregaId, $filas, $t): void {
             $pdo->beginTransaction();
             $pdo->prepare('DELETE FROM osce_resultado WHERE entrega_id = ? AND item_id IS NOT NULL')->execute([$entregaId]);
             $ins = $pdo->prepare('INSERT INTO osce_resultado (entrega_id, item_id, valor, puntaje, comentario, fuente) VALUES (?, ?, ?, ?, ?, ?)');
@@ -440,10 +890,10 @@ final class OsceApp
                 $ins->execute(array_merge([$entregaId], $f));
             }
             $pdo->prepare('UPDATE osce_entrega SET puntaje = ?, puntaje_max = ?, critico_fallado = ? WHERE id = ?')
-                ->execute([$total, $max, $critico ? 1 : 0, $entregaId]);
+                ->execute([$t['puntaje'], $t['puntaje_max'], $t['critico_fallado'] ? 1 : 0, $entregaId]);
             $pdo->commit();
         });
-        return ['puntaje' => round($total, 2), 'puntaje_max' => round($max, 2), 'critico_fallado' => $critico];
+        return $t;
     }
 
     /** Lo que ve el docente (y el alumno, publicado): ítem, valor del alumno, esperado, puntaje. */
@@ -473,49 +923,45 @@ final class OsceApp
     public static function guardarRevision(int $estacionId, int $participanteId, array $porItem, string $feedback): void
     {
         $detalle = self::detalle($estacionId, $participanteId);
-        $stmt = Db::get()->prepare('SELECT id FROM osce_entrega WHERE estacion_id = ? AND participante_id = ?');
-        $stmt->execute([$estacionId, $participanteId]);
-        $entregaId = (int) $stmt->fetchColumn();
-        $stmt->closeCursor();
+        $entregaId = self::entregaId($estacionId, $participanteId);
         if ($entregaId === 0) {
             throw new InvalidArgumentException('Entrega no encontrada.');
         }
-        Db::reintentar(static function () use ($detalle, $porItem, $feedback, $entregaId): void {
-            $pdo = Db::get();
-            $pdo->beginTransaction();
-            $upd = $pdo->prepare('UPDATE osce_resultado SET puntaje = ?, comentario = ?, fuente = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            foreach ($detalle as $d) {
-                $r = $d['resultado'];
-                if ($r === null) {
-                    continue;
-                }
-                $in = $porItem[(int) $d['item']['id']] ?? null;
-                if ($in === null) {
-                    continue;
-                }
+        $paraTotal = [];
+        $cambios = [];
+        foreach ($detalle as $d) {
+            $r = $d['resultado'];
+            if ($r === null) {
+                continue;
+            }
+            $pts = (float) $r['puntaje'];
+            $comentario = (string) $r['comentario'];
+            $fuente = (string) $r['fuente'];
+            $in = $porItem[(int) $d['item']['id']] ?? null;
+            if ($in !== null) {
                 $max = (float) $d['item']['puntaje'];
                 $raw = trim(str_replace(',', '.', (string) ($in['puntaje'] ?? '')));
                 $auto = (float) ($d['eval']['puntaje'] ?? 0);
-                $pts = $raw === '' || !is_numeric($raw) ? (float) $r['puntaje'] : max(0.0, min($max, (float) $raw));
+                if ($raw !== '' && is_numeric($raw)) {
+                    $pts = max(0.0, min($max, (float) $raw));
+                }
                 $fuente = abs($pts - $auto) > 0.001 ? 'docente' : 'auto';
-                $upd->execute([$pts, mb_substr(trim((string) ($in['comentario'] ?? '')), 0, 2000), $fuente, (int) $r['id']]);
+                $comentario = mb_substr(trim((string) ($in['comentario'] ?? '')), 0, 2000);
+                $cambios[] = [$pts, $comentario, $fuente, (int) $r['id']];
             }
-            $pdo->prepare('UPDATE osce_entrega SET feedback = ? WHERE id = ?')->execute([mb_substr($feedback, 0, 4000), $entregaId]);
+            $paraTotal[] = ['item' => $d['item'], 'puntaje' => $pts];
+        }
+        $t = self::totales($paraTotal);
+        Db::reintentar(static function () use ($cambios, $feedback, $entregaId, $t): void {
+            $pdo = Db::get();
+            $pdo->beginTransaction();
+            $upd = $pdo->prepare('UPDATE osce_resultado SET puntaje = ?, comentario = ?, fuente = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            foreach ($cambios as $c) {
+                $upd->execute($c);
+            }
+            $pdo->prepare('UPDATE osce_entrega SET feedback = ?, puntaje = ?, puntaje_max = ?, critico_fallado = ? WHERE id = ?')
+                ->execute([mb_substr($feedback, 0, 4000), $t['puntaje'], $t['puntaje_max'], $t['critico_fallado'] ? 1 : 0, $entregaId]);
             $pdo->commit();
-        });
-        // Totales con lo que quedó (mismo cálculo que corregir, sin reevaluar).
-        $pdo = Db::get();
-        $stmt = $pdo->prepare(
-            "SELECT COALESCE(SUM(r.puntaje), 0), COALESCE(SUM(i.puntaje), 0),
-                    COALESCE(MAX(CASE WHEN i.critico = 1 AND r.puntaje <= 0 THEN 1 ELSE 0 END), 0)
-               FROM osce_resultado r JOIN osce_item i ON i.id = r.item_id WHERE r.entrega_id = ?"
-        );
-        $stmt->execute([$entregaId]);
-        [$total, $max, $crit] = $stmt->fetch(PDO::FETCH_NUM);
-        $stmt->closeCursor();
-        Db::reintentar(static function () use ($pdo, $total, $max, $crit, $entregaId): void {
-            $pdo->prepare('UPDATE osce_entrega SET puntaje = ?, puntaje_max = ?, critico_fallado = ? WHERE id = ?')
-                ->execute([$total, $max, $crit, $entregaId]);
         });
     }
 

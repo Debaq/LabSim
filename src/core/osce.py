@@ -117,7 +117,8 @@ def datos_login(info):
     """Lo que la ventana de ingreso entrega a main._data_login: como el
     invitado (sin API normal) y con solo el ABR."""
     return {"user": "osce", "name": f"Estación OSCE · {info.get('titulo', '')}", "permission": 444,
-            "modules": ["ABR"], "prefs": {}, "cases": {}, "invitado": True, "osce": info}
+            "modules": [info.get("modulo") or "ABR"], "prefs": {}, "cases": {}, "invitado": True,
+            "osce": info}
 
 
 # -- Entregas que no alcanzaron a salir ------------------------------------------

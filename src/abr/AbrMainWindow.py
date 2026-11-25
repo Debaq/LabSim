@@ -2499,6 +2499,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # Se marca, no se registra: el equipo queda quieto.
             self.control.setEnabled(False)
         else:
+            # Configuración y protocolo: el alumno parte con el equipo al
+            # azar (en protocolo además registra y busca el umbral).
             self.osce_sortear_equipo(prueba, rng)
 
     def osce_sortear_equipo(self, prueba, rng):
@@ -2565,12 +2567,34 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             if self.state_capture == 'record':
                 self.control.stop_capture()
 
+    def osce_curvas(self):
+        """Las curvas en el orden en que se registraron, con lo que el
+        servidor corrige (labsim_backend/src/OsceApp.php): cómo se tomó cada
+        una y qué ondas marcó el alumno. Mismo formato que el VEMP."""
+        curvas = []
+        for nombre, c in self.memory.items():
+            tecnica = c.get('tecnica') or {}
+            curvas.append({
+                'nombre': nombre, 'side': c.get('side'), 'int': c.get('int'),
+                'stim': c.get('stim'), 'pol': c.get('pol'), 'rate': c.get('rate'),
+                'filter_passhigh': c.get('filter_passhigh'), 'filter_down': c.get('filter_down'),
+                'average': c.get('average'), 'transducer': c.get('transducer'),
+                'window_ms': tecnica.get('ventana_ms'), 'test': c.get('test'),
+                'marcas': {onda: (v[0] if isinstance(v, (list, tuple)) and v and v[0] is not None else None)
+                           for onda, v in (c.get('LatAmp') or {}).items()},
+            })
+        return curvas
+
     def osce_entrega(self):
-        """Lo que la estación manda al servidor: la sesión tal cual, el panel
-        y la verdad de cada curva (para corregir el marcaje)."""
+        """Lo que la estación manda al servidor: la sesión tal cual, el panel,
+        las curvas en orden y la verdad de cada una (para corregir el
+        marcaje y el umbral)."""
         return {
+            'modulo': 'ABR',
             'abr': self.session_payload(),
             'panel': self.control.get_data(),
+            'equipo': dict(self.technical),
+            'curvas': self.osce_curvas(),
             'verdad': {nombre: v for nombre, v in self.verdad_curvas.items() if nombre in self.memory},
         }
 
