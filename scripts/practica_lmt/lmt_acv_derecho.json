@@ -1,0 +1,22 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 56,
+    "sexo": "mujer",
+    "semilla": 2,
+    "central": "acv_temporal",
+    "anamnesis": {
+      "otros": "Tiene 56 años, es secretaria y volvió a trabajar hace dos meses. Hace un año tuvo un infarto cerebral en el lado derecho y se recuperó bien de la fuerza del brazo izquierdo. Desde entonces le cuesta saber de dónde viene un sonido y seguir una conversación cuando en la oficina hay otras personas hablando. Por teléfono y a solas entiende bien. No tiene mareos ni zumbidos.",
+      "historia": "{{-365}} Neurología: infarto isquémico temporoparietal derecho. Hemiparesia izquierda leve, recuperada.\n{{-20}} Neurología: queja de comprensión en ruido y de localización del sonido. Se solicitan potenciales de latencia media.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Atorvastatina 20 mg al día; aspirina 100 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

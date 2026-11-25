@@ -1,0 +1,26 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 74,
+    "sexo": "mujer",
+    "semilla": 5,
+    "central": "deterioro_cognitivo",
+    "anamnesis": {
+      "otros": "Viene con su hija. Tiene 74 años, es dueña de casa y vive sola. Desde hace unos dos años se le olvidan las cosas: deja la tetera en el fuego, repite las mismas preguntas y se pierde en las conversaciones largas. Ella dice que es porque no oye bien. La hija cree que oye bastante y que el problema es otro. No tiene mareos.",
+      "historia": "{{-180}} Neurología: deterioro cognitivo leve en estudio (MoCA 22/30). Descartar hipoacusia como factor.\n{{-25}} Neurología: se solicita audiometría y P300.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Amlodipino 5 mg al día",
+      "cirugias": ""
+    },
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    }
+  },
+  "figuras": []
+}

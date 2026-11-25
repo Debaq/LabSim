@@ -1,0 +1,26 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 63,
+    "sexo": "hombre",
+    "semilla": 1,
+    "central": "acv_temporal",
+    "anamnesis": {
+      "otros": "Tiene 63 años, es contador jubilado y vive con su señora. Hace ocho meses tuvo un infarto cerebral en el lado izquierdo; quedó con algo de dificultad para encontrar palabras, que ha mejorado con la fonoaudióloga. Dice que oye, pero que cuando le hablan rápido o hay varias personas conversando \"se le arrancan las palabras\". En la radio y la tele entiende mejor si sube el volumen. No tiene mareos ni zumbidos que le molesten.",
+      "historia": "{{-240}} Neurología: infarto isquémico temporal izquierdo, territorio de la arteria cerebral media. Alta con rehabilitación fonoaudiológica.\n{{-30}} Neurología: persiste dificultad para comprender en ambientes con ruido. Se solicitan potenciales de latencia media y tardía.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día; aspirina 100 mg al día",
+      "cirugias": ""
+    },
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    }
+  },
+  "figuras": []
+}

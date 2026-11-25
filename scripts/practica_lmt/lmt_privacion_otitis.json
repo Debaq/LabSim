@@ -1,0 +1,22 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "disfuncion_tubaria",
+      "OI": "disfuncion_tubaria"
+    },
+    "edad": 5,
+    "sexo": "hombre",
+    "semilla": 3,
+    "central": "privacion_implante_tardio",
+    "anamnesis": {
+      "otros": "Viene con su mamá. Tiene 5 años y va a kínder. Desde los 2 años tuvo otitis con líquido muy seguido y a los 4 le pusieron tubos en los dos oídos, que ya se cayeron. Habló tarde y todavía cambia sonidos al hablar; la fonoaudióloga dice que el lenguaje va atrasado para su edad. La mamá encuentra que ahora oye mejor que antes, pero que se distrae mucho cuando le hablan.",
+      "historia": "{{-400}} Otorrinolaringología: otitis media con efusión bilateral persistente. Instalación de tubos de ventilación bilaterales.\n{{-40}} Fonoaudiología: trastorno del lenguaje. Se solicita estudio de maduración cortical auditiva (P1 del CAEP).",
+      "hist": [
+        "otitis"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

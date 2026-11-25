@@ -1,0 +1,24 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "gjb2",
+      "OI": "gjb2"
+    },
+    "edad": 8,
+    "sexo": "mujer",
+    "semilla": 14,
+    "central": "privacion_implante_tardio",
+    "anamnesis": {
+      "otros": "Viene con su papá. Tiene 8 años y está en tercero básico. La hipoacusia se la descubrieron a los 5 años, cuando entró al colegio, y usa audífonos en los dos oídos desde los 5 y medio. Habla bien pero con algunos errores, y le cuesta seguir a la profesora cuando hay ruido en la sala. Hoy vino sin los audífonos, como se le pidió.",
+      "historia": "{{-1100}} Otorrinolaringología: hipoacusia sensorioneural bilateral diagnosticada a los 5 años; estudio genético GJB2 positivo. Indicación de audífonos.\n{{-60}} Fonoaudiología: control de adaptación de audífonos. Se solicita CAEP para evaluar la maduración cortical.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    },
+    "grado": {
+      "OD": "moderada",
+      "OI": "moderada"
+    }
+  },
+  "figuras": []
+}

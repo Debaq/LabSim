@@ -1,0 +1,20 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 12,
+    "sexo": "mujer",
+    "semilla": 8,
+    "central": "tpac",
+    "anamnesis": {
+      "otros": "Viene con su papá. Tiene 12 años y está en séptimo básico. Desde chica le cuesta entender cuando hay ruido, en los recreos y en el bus, y confunde palabras parecidas. Lee lento. En silencio no tiene problemas. Ya le hicieron una audiometría que salió normal y la psicopedagoga pidió un estudio del procesamiento auditivo.",
+      "historia": "{{-150}} Audiometría tonal y logoaudiometría normales.\n{{-30}} Psicopedagogía: sospecha de trastorno del procesamiento auditivo. Se solicitan potenciales de latencia media, MMN y P300.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

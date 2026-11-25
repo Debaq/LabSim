@@ -1,0 +1,26 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "presbiacusia",
+      "OI": "presbiacusia"
+    },
+    "edad": 67,
+    "sexo": "hombre",
+    "semilla": 6,
+    "central": "deterioro_cognitivo",
+    "anamnesis": {
+      "otros": "Viene con su hijo. Tiene 67 años y fue profesor de historia. El hijo lo nota más lento para responder, que a veces no encuentra el camino a la feria y que lee el diario sin recordar lo que leyó. Él dice que está bien y que solo le cuesta oír en las reuniones familiares. No tiene zumbidos ni mareos.",
+      "historia": "{{-120}} Neurología: sospecha de deterioro cognitivo. Neuroimagen sin lesiones focales.\n{{-15}} Neurología: se solicita P300 y evaluación audiológica.",
+      "hist": [
+        "diabetes"
+      ],
+      "medicamentos": "Metformina 850 mg dos veces al día",
+      "cirugias": ""
+    },
+    "grado": {
+      "OD": "leve",
+      "OI": "leve"
+    }
+  },
+  "figuras": []
+}

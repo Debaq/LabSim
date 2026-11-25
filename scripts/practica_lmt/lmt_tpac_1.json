@@ -1,0 +1,20 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "normal"
+    },
+    "edad": 9,
+    "sexo": "hombre",
+    "semilla": 7,
+    "central": "tpac",
+    "anamnesis": {
+      "otros": "Viene con su mamá. Tiene 9 años y está en cuarto básico. La profesora dice que no sigue las instrucciones en la sala, que pregunta \"¿qué?\" muy seguido y que se distrae. En la casa, a solas, entiende bien. La audiometría que le hicieron en el colegio salió normal. Le cuesta leer y las notas han bajado.",
+      "historia": "{{-90}} Psicopedagogía: dificultades de comprensión de instrucciones orales en sala. Sugiere evaluación auditiva central.\n{{-20}} Otorrinolaringología: otoscopía normal. Se solicitan potenciales de latencia media y MMN.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}
