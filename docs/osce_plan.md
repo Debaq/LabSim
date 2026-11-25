@@ -194,9 +194,14 @@ App LabSim:
 11. ✅ Pauta docente con ítems dicotómicos y escala con descriptores; pauta de
     limpieza de 19 pts con escala de comunicación y de desempeño global;
     criterios de conclusión de ECochG y corticales (2026-11-25).
-12. ✅ Guía de una hoja con plano de la sala y manual de 11 hojas en
-    `~/Escritorio/osce/` (fuentes HTML en el scratchpad de la sesión del
-    2026-11-25; el manual no nombra la IA, a pedido).
+12. ✅ Guía de una hoja con plano de la sala y manual (12 hojas, la guía va
+    como hoja 2) en `~/Escritorio/osce/`; fuentes HTML y cómo armarlos en
+    `~/Escritorio/osce/fuentes/`. El manual no nombra la IA (a pedido) y trae
+    por estación la tabla "Practica en LabSim" con pacientes de la práctica
+    libre.
+13. ✅ 8 pacientes de latencia media y tardía en la práctica libre (casos
+    167-174, fuera del libro; `scripts/practica_lmt/`). Aviso al libro en
+    `libro-orl/pendientes_urgentes.md`, sin commitear allá.
 
 ## Pendiente (roadmap al 2026-11-25)
 
