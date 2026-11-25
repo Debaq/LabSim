@@ -181,3 +181,56 @@ App LabSim:
    entrega (no `action_logs`), con bonificaciones; ABR y VEMP (2026-11-25).
 6. ✅ `conclusion` con IA + revisión docente (2026-11-25). Publicar resultados ya
    estaba desde el paso 3.
+7. ✅ Rotación en cadena, tarjetas sorteadas con número (gafete en el pecho +
+   talón privado con QR), panel de control del coordinador, avisos de tiempo
+   en cada pantalla y cierre automático; sin timbre ni proyector (2026-11-25).
+8. ✅ Estaciones por competencias: tareas con peso %, pacientes variantes por
+   número (el mismo en todas las tareas), barra "Siguiente tarea" sin volver,
+   ABR y VEMP en la misma estación (2026-11-25).
+9. ✅ Marcaje de ECochG (PS/PA) y corticales en su canal (MLR/CAEP Cz, P300
+   Pz, MMN Fz); P300 y MMN como exámenes; esperados = `STANDARD_SETUP`;
+   oddball al azar en configuración (2026-11-25).
+10. ✅ Imagen en las preguntas técnicas (2026-11-25).
+11. ✅ Pauta docente con ítems dicotómicos y escala con descriptores; pauta de
+    limpieza de 19 pts con escala de comunicación y de desempeño global;
+    criterios de conclusión de ECochG y corticales (2026-11-25).
+12. ✅ Guía de una hoja con plano de la sala y manual de 11 hojas en
+    `~/Escritorio/osce/` (fuentes HTML en el scratchpad de la sesión del
+    2026-11-25; el manual no nombra la IA, a pedido).
+
+## Pendiente (roadmap al 2026-11-25)
+
+Decisiones que tiene que tomar él:
+- **IA en la corrección**: la consulta con el equipo ("muchos odian la IA").
+  Si no va, desactivarla y corregir conclusión y desarrollo a mano en la
+  revisión. El manual ya no la nombra.
+- **Ítem crítico**: hoy solo se marca; ¿reprueba la estación?
+- Supuestos del manual a confirmar: exigencia 60 % → 4,0; estación 6 con dos
+  exámenes 50/50; estación 5 = 40 % parámetros / 60 % estrategia; esperados
+  de configuración (protocolo 2019 + rutina de clases).
+- Qué es el rectángulo del centro del plano (¿mesón?) y dónde se juntan para
+  el sorteo; grupos de 2 o de 4 (`por_turno`).
+
+Contenido que falta cargar (en el sistema, por estación):
+- Estación 2: banco de preguntas técnicas (40 % PEATC, 40 % U-II, 20 % VEMP)
+  con imágenes de curvas; ofrecido un borrador en GIFT. Las imágenes se pueden
+  sacar de LabSim (capturas de registros con artefacto, impedancia alta,
+  filtro mal puesto, tubo pinzado, EMG insuficiente en VEMP).
+- Estación 3: las 4 tareas (PEATC umbral 30, ECochG 25, P300 25, cVEMP 20)
+  con 2-3 pacientes cada una.
+- Estación 4: las 6 tareas de marcaje (PEATC 25, cVEMP 20, ECochG 15, MLR 15,
+  CAEP 15, P300 o MMN 10) con pacientes variantes y sus curvas.
+- Estación 5: caso pediátrico (lactante que refiere en el tamizaje) en 2-3
+  variantes de igual dificultad, con su estrategia y bonificaciones.
+- Estación 6: caso integrado (PEATC + VEMP o PEATC + ECochG del mismo
+  paciente) en 2-3 variantes, con la conclusión esperada de cada paciente.
+- Pacientes nuevos que hagan falta para las variantes (casos con ECochG,
+  bloque Central y VEMP).
+
+Sistema:
+- Probar el día completo de punta a punta con 17 números (sorteo, cadena,
+  las 6 estaciones, panel de control, cierre automático, publicación).
+- Gafetes temáticos de 2026 (ver memoria: dinosaurio, animal chileno, pez en
+  años anteriores): elegir tema, ilustración + nombre en el gafete.
+- Opcional: tabla consolidada de notas con exportación CSV; pauta en papel de
+  respaldo por si falla la red.
