@@ -252,6 +252,11 @@ final class Osce
         if (!in_array('por_turno', $cols, true)) {
             $pdo->exec('ALTER TABLE osce ADD COLUMN por_turno INTEGER NOT NULL DEFAULT 2');
         }
+        if (!in_array('resultados_al_entregar', $cols, true)) {
+            // El alumno ve su resultado acumulado apenas entrega cada estación,
+            // sin esperar que se cierre y publique (demo ETMP196, 2026-11-26).
+            $pdo->exec('ALTER TABLE osce ADD COLUMN resultados_al_entregar INTEGER NOT NULL DEFAULT 0');
+        }
         $info = $pdo->query('PRAGMA table_info(osce_participante)')->fetchAll();
         if (in_array('numero', array_column($info, 'name'), true)) {
             return;
@@ -1113,6 +1118,15 @@ final class Osce
     }
 
     /** Los alumnos ven su resultado (y pueden hacer réplica) desde el QR. */
+    /** El alumno ve (o deja de ver) su resultado acumulado al entregar cada estación. */
+    public static function resultadosAlEntregar(int $id, bool $si): void
+    {
+        self::migrar();
+        Db::reintentar(static function () use ($id, $si): void {
+            Db::get()->prepare('UPDATE osce SET resultados_al_entregar = ? WHERE id = ?')->execute([$si ? 1 : 0, $id]);
+        });
+    }
+
     public static function publicar(int $id, bool $publicar): void
     {
         Db::reintentar(static function () use ($id, $publicar): void {

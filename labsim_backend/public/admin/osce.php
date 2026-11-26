@@ -169,6 +169,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Osce::quitarParticipante($id, (int) ($_POST['participante_id'] ?? 0));
                 $success = 'Alumno quitado del OSCE.';
                 break;
+            case 'resultados_si':
+            case 'resultados_no':
+                Osce::resultadosAlEntregar($id, $accion === 'resultados_si');
+                $success = $accion === 'resultados_si'
+                    ? 'Cada alumno ve su resultado acumulado desde su enlace apenas entrega cada estación.'
+                    : 'Los alumnos ya no ven resultados hasta que publiques.';
+                break;
             case 'publicar':
             case 'despublicar':
                 Osce::publicar($id, $accion === 'publicar');
@@ -335,6 +342,19 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
         <strong><?= htmlspecialchars($osce['curso']) ?></strong> ·
         <span class="tag<?= $editable ? ' tag--muted' : ' tag--warn' ?>"><?= htmlspecialchars(Osce::ESTADOS[$osce['estado']] ?? $osce['estado']) ?></span>
     </p>
+    <?php if ($osce['estado'] !== 'publicado'): $alEntregar = !empty($osce['resultados_al_entregar']); ?>
+    <form method="post" class="row row--gap-sm row--center">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <?php if ($alEntregar): ?>
+        <button type="submit" name="accion" value="resultados_no" class="btn btn--sm btn--secondary">Ocultar resultados al entregar</button>
+        <span class="help">Cada alumno ve en su enlace la nota y el detalle de las estaciones que ya entregó (nota acumulada), sin esperar a que cierres.</span>
+        <?php else: ?>
+        <button type="submit" name="accion" value="resultados_si" class="btn btn--sm btn--secondary" onclick="return confirm('¿Mostrar resultados al entregar? Cada alumno verá en su enlace la nota y el detalle (con las respuestas correctas) de cada estación apenas la entregue. Úsalo cuando ya nadie que falte pueda verlo de un compañero.')">Mostrar resultados al entregar</button>
+        <span class="help">Para una práctica o demo: el alumno ve su nota acumulada apenas entrega cada estación.</span>
+        <?php endif; ?>
+    </form>
+    <?php endif; ?>
     <?php if ($osce['estado'] === 'cerrado' || $osce['estado'] === 'publicado'): ?>
     <form method="post" class="row row--gap-sm row--center">
         <?= csrf_field() ?>

@@ -119,6 +119,9 @@ if ($p['user_id'] === null) {
 
 $recorrido = Osce::recorrido($o, $p);
 $publicado = $o['estado'] === 'publicado';
+// Resultados al entregar: lo de cada estación ya entregada, sin esperar a que
+// se cierre y publique. La réplica sigue siendo solo con resultados publicados.
+$parcial = !$publicado && !empty($o['resultados_al_entregar']) && in_array($o['estado'], ['en_curso', 'cerrado'], true);
 
 // Réplica de una respuesta (solo con resultados publicados). Sin sesión: el
 // token del QR es la identidad, y tiene que venir también en el formulario.
@@ -140,7 +143,7 @@ $pts = static fn ($x): string => $x === null ? '—' : rtrim(rtrim(number_format
 
 // Resultado: nota por estación y final ponderada por peso.
 $resultado = null;
-if ($publicado) {
+if ($publicado || $parcial) {
     $sumaPeso = 0.0;
     $sumaPct = 0.0;
     $filas = [];
@@ -150,6 +153,9 @@ if ($publicado) {
         }
         $e = $f['estacion'];
         $en = $f['entrega'];
+        if ($parcial && ($en === null || $en['estado'] !== 'enviada')) {
+            continue;   // acumulada: solo lo ya entregado
+        }
         $peso = (float) $e['peso'];
         $pct = null;
         if ($en !== null && $en['puntaje'] !== null && (float) $en['puntaje_max'] > 0) {
@@ -168,7 +174,7 @@ if ($publicado) {
         ];
     }
     $pctFinal = $sumaPeso > 0 ? $sumaPct / $sumaPeso : 0.0;
-    $resultado = [
+    $resultado = $parcial && $filas === [] ? null : [
         'filas' => $filas,
         'nota' => Osce::nota($pctFinal * 100, 100, (int) $o['exigencia'], (float) $o['nota_aprobacion']),
         'pct' => $pctFinal,
@@ -191,9 +197,10 @@ $cabeza('OSCE · ' . $o['nombre']);
 <?php if ($errReplica !== null): ?><p class="error"><?= htmlspecialchars($errReplica) ?></p><?php endif; ?>
 <?php if ($resultado !== null): ?>
 <div class="card">
-    <h2>Tu resultado</h2>
+    <h2><?= $parcial ? 'Tu resultado acumulado' : 'Tu resultado' ?></h2>
     <p class="nota"><?= number_format($resultado['nota'], 1, ',', '') ?></p>
     <p class="muted"><?= round($resultado['pct'] * 100) ?> % de logro · exigencia <?= (int) $o['exigencia'] ?> %</p>
+    <?php if ($parcial): ?><p class="help">Cuenta solo las estaciones que ya entregaste. Puede cambiar si el docente ajusta algún puntaje.</p><?php endif; ?>
     <ul class="recorrido">
     <?php foreach ($resultado['filas'] as $f): ?>
         <li><span><?= htmlspecialchars($f['titulo']) ?><?= $f['critico'] ? ' <span class="tag tag--danger">ítem crítico</span>' : '' ?></span>
@@ -273,7 +280,7 @@ $cabeza('OSCE · ' . $o['nombre']);
                         <?= nl2br(htmlspecialchars((string) $r['replica_respuesta'])) ?>
                     <?php endif; ?>
                 </div>
-            <?php elseif ($r && (float) $r['puntaje'] < (float) $q['puntaje']): ?>
+            <?php elseif ($publicado && $r && (float) $r['puntaje'] < (float) $q['puntaje']): ?>
                 <details class="det-rep-form">
                     <summary>Hacer réplica de esta respuesta</summary>
                     <form method="post" action="osce.php?t=<?= htmlspecialchars(rawurlencode($token)) ?>">
@@ -314,7 +321,9 @@ $cabeza('OSCE · ' . $o['nombre']);
         </li>
     <?php endforeach; ?>
     </ol>
-    <?php if (!$publicado): ?>
+    <?php if ($parcial): ?>
+    <p class="help help--mt">Tu resultado se va sumando a medida que entregas cada estación. Guarda este enlace.</p>
+    <?php elseif (!$publicado): ?>
     <p class="help help--mt">Tu resultado aparecerá aquí cuando el docente lo publique. Guarda este enlace o vuelve a escanear tu tarjeta.</p>
     <?php endif; ?>
 </div>
