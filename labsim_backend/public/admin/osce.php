@@ -270,6 +270,7 @@ if ($osce === null) {
                 <select name="rotacion" style="width:auto;">
                     <option value="cadena" selected>En cadena: todos parten en la 1 y entran por grupos</option>
                     <option value="vueltas">En vueltas: cada uno parte en una estación distinta</option>
+                    <option value="libre">Libre: cada uno entra a cualquier estación que no haya entregado</option>
                 </select></label>
             <label>Alumnos por estación a la vez <input type="number" name="por_turno" value="2" min="1" max="8" class="input--narrow"></label>
         </div>
@@ -418,7 +419,8 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
             <label>Rotación
                 <select name="rotacion" style="width:auto;">
                     <option value="cadena"<?= $cadena ? ' selected' : '' ?>>En cadena: todos parten en la 1 y entran por grupos</option>
-                    <option value="vueltas"<?= $cadena ? '' : ' selected' ?>>En vueltas: cada uno parte en una estación distinta</option>
+                    <option value="vueltas"<?= !$cadena && $osce['rotacion'] !== 'libre' ? ' selected' : '' ?>>En vueltas: cada uno parte en una estación distinta</option>
+                    <option value="libre"<?= $osce['rotacion'] === 'libre' ? ' selected' : '' ?>>Libre: cada uno entra a cualquier estación que no haya entregado</option>
                 </select></label>
             <label>Alumnos por estación a la vez <input type="number" name="por_turno" value="<?= (int) $osce['por_turno'] ?>" min="1" max="8" class="input--narrow"></label>
         </div>

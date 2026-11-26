@@ -295,7 +295,9 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
                     : ' · ' + (reloj.abiertos === 1 ? 'falta 1 alumno por terminar' : 'faltan ' + reloj.abiertos + ' alumnos por terminar');
             }
             $('osce-donde').textContent = fase === 'terminado' ? '' :
-                (cfg.modo === 'cadena'
+                (cfg.modo === 'libre'
+                    ? 'Libre: cada uno entra a cualquier estación que no haya entregado'
+                    : cfg.modo === 'cadena'
                     ? 'Turno ' + (reloj.slot + 1) + ' de ' + T
                     : 'Vuelta ' + (reloj.vuelta + 1) + ' de ' + cfg.vueltas + ' · Tiempo ' + (reloj.slot + 1) + ' de ' + S);
 
@@ -318,7 +320,7 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
             var ahoraV = reloj.vuelta, ahoraJ = reloj.slot;
             var sigV = ahoraV, sigJ = ahoraJ + 1;
             if (fase === 'entre_vueltas' || sigJ >= T) { sigV = ahoraV + 1; sigJ = 0; }
-            var haySig = sigV < cfg.vueltas && fase !== 'terminado';
+            var haySig = cfg.modo !== 'libre' && sigV < cfg.vueltas && fase !== 'terminado';
             $('osce-col-ahora').textContent = fase === 'estacion' ? 'Ahora' : 'Recién';
             for (var e = 0; e < S; e++) {
                 for (var c = 0; c < C; c++) {

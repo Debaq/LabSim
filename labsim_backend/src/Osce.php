@@ -529,12 +529,14 @@ final class Osce
         $pares = [];
         $abiertos = 0;
         $restante = null;
+        $libre = ($cfg['modo'] ?? '') === 'libre';
         foreach ($parts as $p) {
             foreach ($estaciones as $i => $e) {
-                if (self::turnoDe($cfg, $p, $i) !== $turno) {
+                $en = $entregas[(int) $p['id']][(int) $e['id']] ?? null;
+                if ($libre ? $en === null : self::turnoDe($cfg, $p, $i) !== $turno) {
+                    // Libre: solo lo que alguien abrió (dónde está cada uno).
                     continue;
                 }
-                $en = $entregas[(int) $p['id']][(int) $e['id']] ?? null;
                 $queda = null;
                 if ($e['tipo'] === 'descanso') {
                     $estado = 'descanso';
@@ -664,7 +666,7 @@ final class Osce
             throw new InvalidArgumentException('Circuitos: entre 1 y 6.');
         }
         $rotacion = (string) ($in['rotacion'] ?? 'cadena');
-        if (!in_array($rotacion, ['cadena', 'vueltas'], true)) {
+        if (!in_array($rotacion, ['cadena', 'vueltas', 'libre'], true)) {
             throw new InvalidArgumentException('Rotación no válida.');
         }
         $porTurno = (int) ($in['por_turno'] ?? 2);
@@ -1031,7 +1033,11 @@ final class Osce
     public static function cfgReloj(array $o, int $estaciones, int $alumnos): array
     {
         $cfg = [
-            'modo' => ($o['rotacion'] ?? 'vueltas') === 'cadena' ? 'cadena' : 'vueltas',
+            // libre: sin turnos, cada alumno entra a cualquier estación que no
+            // haya entregado (una sala real no rota cuadrada: demo 2026-11-26).
+            // Para el resto del cálculo cuenta como vueltas.
+            'modo' => ($o['rotacion'] ?? 'vueltas') === 'cadena' ? 'cadena'
+                : (($o['rotacion'] ?? '') === 'libre' ? 'libre' : 'vueltas'),
             'estaciones' => $estaciones,
             'duracion_s' => (int) $o['duracion_s'],
             'pausa_s' => (int) $o['pausa_s'],
@@ -1180,6 +1186,10 @@ final class Osce
         if ($o['estado'] !== 'en_curso' || $o['pausado_desde'] !== null) {
             return $o;
         }
+        if (($o['rotacion'] ?? '') === 'libre') {
+            // Sin turnos: nada que cambiar; lo cierra el docente.
+            return $o;
+        }
         $t = self::transcurrido($o, time());
         if ($t === null) {
             return $o;
@@ -1294,6 +1304,9 @@ final class Osce
         if ($en !== null && $en['reloj_inicio_s'] !== null) {
             return (int) $en['reloj_inicio_s'] + (int) $ctx['cfg']['duracion_s'] + self::GRACIA_S < $t
                 ? 'Se acabó tu tiempo en esta estación.' : null;
+        }
+        if (($o['rotacion'] ?? '') === 'libre') {
+            return null;
         }
         $suyo = self::turnoDe($ctx['cfg'], $p, (int) $indice);
         $turno = (int) $o['turno'];
