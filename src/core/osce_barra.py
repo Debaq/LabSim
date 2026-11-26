@@ -99,8 +99,11 @@ class VentanaCasos(QWidget):
     (con "Acepto" la primera vez) y los botones para ir y volver."""
 
     def __init__(self, barra, parent=None):
-        super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.WindowTitleHint
-                         | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        # Sin marco del sistema: el botón de minimizar que ponía el gestor de
+        # ventanas minimizaba también el equipo entero (le pasó a un alumno
+        # en la demo del 2026-11-26). Se arrastra desde cualquier parte.
+        super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint
+                         | Qt.WindowType.WindowStaysOnTopHint)
         self.setObjectName("osce_casos")
         self.setWindowTitle("Casos de la estación")
         self.barra = barra
@@ -138,6 +141,20 @@ class VentanaCasos(QWidget):
     def _ver(self, visible):
         self.txt.setVisible(visible)
         self.adjustSize()
+
+    def mousePressEvent(self, event):
+        """Sin barra de título: se mueve arrastrándola desde el fondo."""
+        if event.button() == Qt.MouseButton.LeftButton and self.windowHandle() is not None:
+            self.windowHandle().startSystemMove()
+            event.accept()
+            return
+        super().mousePressEvent(event)
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        # Si algo la minimiza igual (atajo del sistema), vuelve sola.
+        if self.isMinimized():
+            QTimer.singleShot(0, self, self.showNormal)
 
     def mostrar(self, k, n, tarea, aceptado):
         peso = tarea.get("peso")

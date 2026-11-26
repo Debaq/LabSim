@@ -580,10 +580,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 and self.isVisible() and not self.isFullScreen()):
             QTimer.singleShot(0, self.showFullScreen)
         elif (osce.activo and event.type() == QEvent.Type.WindowStateChange
-                and self.isVisible() and not (self.isMaximized() or self.isFullScreen())):
+                and (self.isMinimized() or not (self.isMaximized() or self.isFullScreen()))):
             # Estación OSCE fuera del modo laboratorio: arrastrar la barra
-            # o el doble clic la achicaban a 800×600 y el alumno quedaba con
-            # el equipo chico (2026-11-26). Vuelve a ocupar la pantalla.
+            # o el doble clic la achicaban a 800×600, y minimizar la
+            # ventanita de casos minimizaba el equipo entero (2026-11-26).
+            # Vuelve a ocupar la pantalla.
             QTimer.singleShot(0, self.showMaximized)
 
     def _update_max_icon(self):
