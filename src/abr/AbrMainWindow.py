@@ -2671,7 +2671,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """El equipo con la configuración de rutina de la prueba (la que se
         evalúa en la estación de configuración)."""
         control, tecnica = standard_setup(prueba) or ({}, {})
-        self.technical.update(tecnica)
+        # Desde los valores por defecto de la prueba: la rutina no trae el
+        # transductor ni el rechazo, y quedaban los sorteados de antes (el
+        # alumno partía en vía ósea sin poder cambiarla, 2026-11-26).
+        self.technical = dict(default_settings(prueba), **tecnica)
         self.control.set_data(dict(control))
         self._con_montaje()
         self.apply_window()
@@ -2706,9 +2709,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         conclusión) con el equipo de rutina de la prueba, cada una con su
         promedio completo y, si se pide, con su réplica al lado."""
         control, tecnica = standard_setup(prueba) or ({}, {})
-        self.technical.update(tecnica)
+        self.technical = dict(default_settings(prueba), **tecnica)
         self._con_montaje()
         self.apply_window()
+        self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
         for lado, nivel in curvas:
             for _ in range(max(1, int(replicas))):
                 self.control.set_data(dict(control, side=lado, int=nivel))

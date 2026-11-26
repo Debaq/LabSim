@@ -110,6 +110,11 @@ def test_protocolo_parte_configurado_y_se_registra():
             assert str(datos.get(k)) == str(control[k]), (k, datos.get(k), control[k])
     if 'window_ms' in tecnica:
         assert abs(float(w.technical['window_ms']) - float(tecnica['window_ms'])) < 0.01
+    # Aunque el alumno anterior (configuración) dejara el vibrador óseo.
+    w.technical['transducer'] = 'bone'
+    w.la_super(_caso(), 'osce-OTRO-222')
+    w.osce_preparar('protocolo', 'ABR', [], random.Random(5))
+    assert w.technical['transducer'] == 'insert_earphone', w.technical
 
 
 def test_en_la_estacion_la_curva_sale_al_instante():
