@@ -579,6 +579,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if (es_kiosko() and event.type() == QEvent.Type.WindowStateChange
                 and self.isVisible() and not self.isFullScreen()):
             QTimer.singleShot(0, self.showFullScreen)
+        elif (osce.activo and event.type() == QEvent.Type.WindowStateChange
+                and self.isVisible() and not (self.isMaximized() or self.isFullScreen())):
+            # Estación OSCE fuera del modo laboratorio: arrastrar la barra
+            # o el doble clic la achicaban a 800×600 y el alumno quedaba con
+            # el equipo chico (2026-11-26). Vuelve a ocupar la pantalla.
+            QTimer.singleShot(0, self.showMaximized)
 
     def _update_max_icon(self):
         """Cambia el icono de btn_max entre maximizar/restaurar según el
@@ -757,13 +763,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _osce_cerrar_salidas(self):
         """En la estación el alumno solo llega al equipo de la estación: sin
         botones de secciones ni de módulos (el alias AABR→ABR abría otro
-        equipo), sin cerrar sesión, sin configuración, sin minimizar y sin
-        el ✕ que esconde el equipo. Salir: la X, con clave de docente."""
+        equipo), sin cerrar sesión, sin configuración, sin minimizar ni
+        restaurar (la ventana no se achica ni se arrastra) y sin el ✕ que
+        esconde el equipo. Salir: la X, con clave de docente."""
         if self.layouts:
             self._clear_layout(self.layouts[0])
             self._clear_layout(self.layouts[1])
-        for boton in (self.btn_login, self.btn_configuracion, self.btn_min):
+        for boton in (self.btn_login, self.btn_configuracion, self.btn_min, self.btn_max):
             boton.setVisible(False)
+        # La barra no arrastra la ventana (arrastrarla la restauraba chica).
+        self.barra.mousePressEvent = lambda event: event.accept()
+        if not (self.isMaximized() or self.isFullScreen()):
+            self.showMaximized()
         self.btn_salir.setVisible(True)
         self.btn_salir.setToolTip("Salir de la estación (pide la clave de un docente o del admin)")
         marco = getattr(self, "marco_ventana_activa", None)
@@ -825,6 +836,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.barra_osce = None
         self.toolbar_osce = None
         osce.desactivar()
+        if not es_kiosko():
+            # Fuera del laboratorio la ventana vuelve a moverse y restaurarse.
+            self.btn_max.setVisible(True)
+            MoveWindow(self).set_movewindow()
 
     def agenda_cargada(self):
         """La agenda llegó por primera vez en esta sesión (ver Agenda)."""
