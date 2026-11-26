@@ -267,6 +267,20 @@ def test_alumno_nuevo_borra_lo_del_anterior():
     assert w.memory == {} and w.control.isEnabled()
 
 
+
+def test_alumno_nuevo_no_ve_el_informe_del_anterior():
+    """Conclusión: el alumno siguiente veía los hallazgos y la conclusión
+    que escribió el anterior (demo ETMP196, 2026-11-26)."""
+    w = AbrMainWindow(dict(ALUMNO))
+    w.la_super(_caso(), 'osce-AAA-111')
+    w.osce_preparar('conclusion', 'ABR', [('OD', 80)], random.Random(1))
+    w.report.text_edit_1.setPlainText('hallazgos de la anterior')
+    w.report.text_edit_2.setPlainText('conclusión de la anterior')
+    w.la_super(_caso(), 'osce-BBB-222')
+    w.osce_preparar('conclusion', 'ABR', [('OD', 80)], random.Random(2))
+    assert w.report.text_edit_1.toPlainText() == '' and w.report.text_edit_2.toPlainText() == ''
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

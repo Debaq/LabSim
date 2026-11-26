@@ -535,6 +535,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # stable_seed: la misma piel en cualquier proceso (core.rng).
             self.montaje_cita = appointment_id
             self._timer_montaje.stop()
+            # reset() no toca el informe escrito: los hallazgos y la
+            # conclusión del paciente anterior quedaban a la vista del
+            # siguiente (lo de esta atención vuelve con apply_restored).
+            self.report.text_edit_1.clear()
+            self.report.text_edit_2.clear()
             self.montaje.reiniciar(random.Random(stable_seed('piel', appointment_id)))
             # La app se cerró con este paciente en atención: los electrodos
             # siguen donde quedaron (ver guardar_montaje).
@@ -2533,6 +2538,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         ya llegó por la_super). El montaje viene hecho: los electrodos son
         otra estación del OSCE. Las curvas salen al instante."""
         self.osce_instantaneo = True
+        # Cada tarea parte con el informe en blanco: en la estación de
+        # conclusión el alumno nuevo veía lo que escribió el anterior
+        # (2026-11-26). Lo suyo, si vuelve a un caso, lo pone osce_restaurar.
+        self.report.text_edit_1.clear()
+        self.report.text_edit_2.clear()
         if prueba != self.test_actual:
             self.control.cb_test.setCurrentText(prueba)   # test_changed
         if prueba == 'ECochG':
