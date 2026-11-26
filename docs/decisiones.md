@@ -5,6 +5,48 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## OSCE: el alumno solo llega a lo de su estación y todo lo que toca cambia la curva (2026-11-25)
+
+Él: "las que hay que conectar son aquellas que se vean afectadas por las
+cosas que en esa estación puede tocar; aquellas que no puede tocar, no. En
+LabSim, al entrar en una estación el estudiante no puede entrar a lugares
+que no le corresponden".
+
+**Lo que toca, conectado** (medido en el equipo, no solo leído):
+- Ganancia: en los corticales ya pesaba (rango de entrada 5·10⁶/ganancia:
+  a ×150.000 la P300 pierde ~20 % más de barridos, curva más sucia). En
+  ABR y ECochG no cambia nada en ×10.000-×150.000 y así es en la clínica:
+  el EEG filtrado a 100-3000 Hz es de pocos µV y no satura. Se deja.
+- Transductor en los corticales (nuevo): el vibrador estimula por vía ósea
+  y no pasa de 55 dB (el equipo no avisa: la respuesta deja de crecer);
+  copa e inserción solo cambian el artefacto (la diferencia de latencia
+  <1 ms no se ve en respuestas de decenas o cientos de ms).
+- Polaridad en los corticales (nuevo): el artefacto del estímulo
+  (`add_transducer_artifact`) queda al inicio en rarefacción o condensación
+  y se cancela en alternada; se nota en el MLR y casi nada tras los 30 Hz
+  de los tardíos, como en un equipo real.
+- Rechazo: en el ABR, de 20 µV hacia arriba da lo mismo con el paciente
+  quieto de la estación (realista); en los corticales decide si entran los
+  parpadeos. Ventana: recorta. Ya estaban.
+- Lo que no toca en la estación (electrodos, impedancias, qué se le dice al
+  paciente) queda ideal.
+
+**Solo lo de su estación** (`AbrMainWindow.osce_accesos`,
+`VempMainWindow.osce_accesos`, `MainWindow._osce_cerrar_salidas`):
+- Ventana principal: sin botones de secciones ni módulos (el alias
+  AABR→ABR abría otro equipo), sin "Cerrar sesión" (salía del modo estación
+  sin pedir nada), sin configuración, sin minimizar, sin el ✕ que esconde
+  el equipo. La X y Alt+F4 piden usuario y contraseña de docente.
+- ABR: nunca Electrodos (deshacía el montaje) ni cambiar de prueba (ni
+  después de una captura: `AbrControl.prueba_fija`) ni sesiones anteriores.
+  Parámetros avanzados sin "Restore Defaults" (daba la rutina del
+  protocolo). Configuración: gráfico + panel + avanzados, sin Marcas.
+  Protocolo: además Marcas y Latencia. Marcaje: Marcas y Latencia, sin
+  avanzados, sin marcado automático del ECochG y sin borrar curvas.
+  Conclusión: Marcas y Conclusiones, sin borrar curvas.
+- VEMP: subtipo fijo; Análisis solo en protocolo, Informe solo en
+  conclusión; en marcaje y conclusión no se borran curvas.
+
 ## OSCE: turnos con tiempo por alumno, nombre confirmado y casos de ida y vuelta (2026-11-25)
 
 Él: "todas las estaciones al llegar te piden tu número y debes verificar tu

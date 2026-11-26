@@ -315,6 +315,9 @@ class PanelControl(QObject):
             maniobra=self.maniobra(),
         )
 
+    # En una estación OSCE el subtipo no se cambia (VempMainWindow.osce_accesos).
+    subtipo_fijo = False
+
     def habilitar(self, activo):
         """Sin caso no se toca nada: ni los mandos ni Registrar."""
         for caja in self.cajas:
@@ -322,6 +325,8 @@ class PanelControl(QObject):
         self.btn_registrar.setEnabled(activo)
         if not activo:
             self.btn_detener.setEnabled(False)
+        if self.subtipo_fijo:
+            self.cb_subtipo.setEnabled(False)
 
     def set_registrando(self, registrando, pausado=False):
         """Congela lo que define la curva mientras se promedia.
@@ -335,6 +340,8 @@ class PanelControl(QObject):
                        self.sb_int, self.sb_tasa, self.sb_promedios,
                        self.sb_rechazo, self.sb_filtro_alto, self.sb_filtro_bajo):
             widget.setDisabled(registrando or pausado)
+        if self.subtipo_fijo:
+            self.cb_subtipo.setEnabled(False)
         self.btn_detener.setEnabled(registrando or pausado)
         if registrando:
             self.btn_registrar.setText('Pausar')

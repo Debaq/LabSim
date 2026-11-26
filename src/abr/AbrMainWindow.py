@@ -283,6 +283,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         marcas_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         marcas_scroll.setWidget(marcas)
         self.panel_tabs.addTab(marcas_scroll, tr("AbrMainWindow", "Marcas"))
+        self.pagina_marcas = marcas_scroll
         tema.aplicar_estilo(self, QSS_ABR)
         # Los botones de escala no se pegan al borde de la ficha.
         self.layout_abr_frame.setContentsMargins(10, 10, 6, 6)
@@ -1838,8 +1839,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         Lo que se acepte aca entra en la proxima captura (ver test_test);
         las curvas ya tomadas no se recalculan, igual que en un equipo real.
         """
+        # En una estación OSCE no hay "Restore Defaults": dejaría el equipo
+        # en la rutina del protocolo, que es justo lo que se evalúa.
         dialog = AbrAdvanceSettings(self.technical,
-                                    self.control.cb_test.currentText(), self)
+                                    self.control.cb_test.currentText(), self,
+                                    restaurar=not getattr(self, 'osce_tipo', None))
         if dialog.exec():
             self.technical = dialog.get_data()
             self._con_montaje()
@@ -1925,6 +1929,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def ver_marcas(self, visible):
         """Muestra u oculta la ficha Marcas (el ASSR no tiene tablas)."""
+        if getattr(self, 'osce_tipo', None) == 'config_equipo':
+            visible = False   # en la estación de configuración no se marca
         if not visible:
             self.panel_tabs.setCurrentIndex(0)
         self.panel_tabs.setTabVisible(1, visible)
@@ -2543,6 +2549,45 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # Configuración y protocolo: el alumno parte con el equipo al
             # azar (en protocolo además registra y busca el umbral).
             self.osce_sortear_equipo(prueba, rng)
+        self.osce_accesos(tipo)
+
+    def osce_accesos(self, tipo):
+        """Regla del docente: en una estación el alumno solo llega a lo que
+        le corresponde a esa estación.
+
+        - Nunca: Electrodos (el montaje es otra estación y viene hecho),
+          cambiar de prueba, sesiones anteriores.
+        - Configuración: gráfico + panel + Parámetros avanzados (sin
+          "Restore Defaults"); sin Marcas, Latencia ni Conclusiones.
+        - Protocolo: además Marcas y Latencia/Intensidad (busca el umbral).
+        - Marcaje: gráfico, Marcas y Latencia; panel quieto, sin avanzados,
+          sin marcado automático y sin borrar curvas.
+        - Conclusión: gráfico, Marcas y Conclusiones; panel quieto y sin
+          borrar curvas.
+        """
+        self.osce_tipo = tipo
+        configura = tipo in ('config_equipo', 'protocolo')
+        visibles = {self.abr: True, self.montaje: False,
+                    self.lat: tipo in ('marcaje', 'protocolo'),
+                    self.conc: tipo == 'conclusion'}
+        for widget, visible in visibles.items():
+            i = self.tabWidget.indexOf(widget)
+            if i >= 0:
+                self.tabWidget.setTabVisible(i, visible)
+        self.tabWidget.setCurrentWidget(self.abr)
+        i = self.panel_tabs.indexOf(self.pagina_marcas)
+        self.panel_tabs.setTabVisible(i, tipo != 'config_equipo')
+        self.panel_tabs.setCurrentIndex(0 if configura else i)
+        self.control.prueba_fija = True
+        self.control.cb_test.setEnabled(False)
+        self.btn_avanzados.setEnabled(configura)
+        fijas = not configura
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.curves_locked = fijas
+        for tabla in (self.table_ec_r, self.table_ec_l):
+            tabla.btn_auto.setEnabled(configura)
+        for widget in (self.lbl_session, self.cb_session):
+            widget.setVisible(False)
 
     def osce_sortear_equipo(self, prueba, rng):
         """Todos los mandos al azar, nunca en el valor de rutina de la prueba
@@ -2666,6 +2711,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if panel:
             self.control.set_data(panel)
         self.verdad_curvas = dict(hecho.get('verdad') or {})
+        if getattr(self, 'osce_tipo', None):
+            self.osce_accesos(self.osce_tipo)
 
     #########EVENTS
     def hideEvent(self, event):

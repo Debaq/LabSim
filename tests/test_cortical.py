@@ -157,6 +157,34 @@ def test_a_sleeping_child_can_lose_pa_but_an_adult_does_not():
     assert napa(30, dormido, 0.05) > 0.85 * napa(30, despierto, 0.05)
 
 
+def test_el_vibrador_no_pasa_de_55_y_estimula_por_via_osea():
+    """En la estación de configuración el transductor se toca: con el
+    vibrador el equipo entrega 55 dB aunque se pidan 70 (no avisa) y el
+    registro es por vía ósea."""
+    central = {'estado': 'despierto'}
+    tec = dict(STANDARD_SETUP['CAEP']['technical'], transducer='bone_vibrator')
+    _, _, meta = _captura('CAEP', central, tecnica=tec)
+    assert meta['output_db'] == 55.0 and meta['pathway'] == 'bone_conduction', meta
+    _, _, meta = _captura('CAEP', central)
+    assert meta['output_db'] == 70.0 and meta['pathway'] == 'air_conduction'
+
+
+def test_la_polaridad_deja_o_cancela_el_artefacto_del_estimulo():
+    """La polaridad se toca en la estación: en rarefacción el artefacto del
+    estímulo queda al inicio del MLR; en alternada se cancela casi entero."""
+    central = {'estado': 'despierto'}
+    tec = dict(STANDARD_SETUP['MLR']['technical'], transducer='TDH39_headphone')
+    inicio = {}
+    for pol in ('Alternada', 'Rarefacción'):
+        proto = get_protocol('MLR')
+        control = {'stim': 'Click', 'pol': pol, 'rate': proto.rate, 'filter_down': proto.filter_low,
+                   'filter_passhigh': proto.filter_high, 'side': 'OD', 'clamp': False, 'mkg': 0, 'tarea': 'ninguna'}
+        t, y, _ = Cortical_Curve('MLR', 90, control, OIDO, central, [1.0, 4000], True,
+                                 patient={'edad': 30, 'gender': 0}, capture_id='art', technical=tec)
+        inicio[pol] = float(np.abs(np.asarray(y['Cz'])[np.asarray(t) < 1.5]).max())
+    assert inicio['Rarefacción'] > inicio['Alternada'], inicio
+
+
 def test_a_high_pass_of_30_hz_eats_pa():
     """Pregunta de la clase: por qué no 30 Hz de pasa-alto en el MLR.
 

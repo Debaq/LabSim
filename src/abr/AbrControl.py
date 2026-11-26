@@ -219,8 +219,12 @@ class AbrControl(QWidget, Ui_Abr_Config):
             if idx >= 0:
                 self.cb_tarea.setCurrentIndex(idx)
 
+    # En una estación OSCE la prueba no se cambia (AbrMainWindow.osce_accesos):
+    # terminar una captura no puede volver a habilitar el combo.
+    prueba_fija = False
+
     def disabled_all(self, value:bool=True) -> None:
-        self.cb_test.setDisabled(value)
+        self.cb_test.setDisabled(value or self.prueba_fija)
         self.cb_stim.setDisabled(value)
         self.cb_pol.setDisabled(value)
         self.sb_intencity.setDisabled(value)

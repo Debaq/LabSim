@@ -211,6 +211,11 @@ App LabSim:
     (usuario y contraseña → lista de estaciones); ventanita de casos con
     indicaciones que se aceptan e ida y vuelta entre casos (también en
     marcaje) (2026-11-25).
+15. ✅ En la estación el alumno solo llega a lo de esa estación (sin
+    cerrar sesión, sin módulos, sin Electrodos, sin cambiar de prueba, sin
+    "Restore Defaults", pestañas por tipo; salir pide clave docente). Se
+    conecta todo lo que el alumno toca: vibrador y polaridad en los
+    corticales (2026-11-25).
 
 ## Pendiente (roadmap al 2026-11-25)
 
@@ -242,12 +247,6 @@ Contenido que falta cargar (en el sistema, por estación):
   bloque Central y VEMP).
 
 Sistema:
-- Curva según la configuración (revisión 2026-11-25): la ganancia no cambia
-  nada (ni saturación ni resolución) en ABR, ECochG ni corticales; la
-  polaridad y el transductor no hacen nada en los corticales; el rechazo de
-  artefactos de 30 a 60 µV da lo mismo que el bien puesto; la ventana solo
-  recorta. Decidir si se conectan antes del 4-dic o se sacan de lo que se
-  evalúa en la estación de configuración.
 - Escribir las indicaciones de cada caso (campo nuevo de la tarea).
 - Probar el día completo de punta a punta con 17 números (sorteo, cadena,
   las 6 estaciones, panel de control, cierre automático, publicación).

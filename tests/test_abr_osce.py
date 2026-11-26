@@ -146,6 +146,42 @@ def test_volver_a_un_caso_lo_deja_como_estaba():
     assert c.technical['window_ms'] == 12.0 and c.control.isEnabled()
 
 
+def test_en_la_estacion_solo_llega_a_lo_suyo():
+    """Regla del docente: en una estación el alumno no entra a lugares que
+    no le corresponden."""
+    def visible(w, widget):
+        return w.tabWidget.isTabVisible(w.tabWidget.indexOf(widget))
+
+    w = _estacion('config_equipo')
+    assert not visible(w, w.montaje) and not visible(w, w.lat) and not visible(w, w.conc)
+    assert visible(w, w.abr)
+    assert not w.panel_tabs.isTabVisible(w.panel_tabs.indexOf(w.pagina_marcas)), "en configuración no se marca"
+    assert w.btn_avanzados.isEnabled() and not w.control.cb_test.isEnabled()
+    control, _ = standard_setup('ABR')
+    w.control.set_data(dict(control, side='OD', int=80))
+    w.control.start_capture()
+    assert not w.control.cb_test.isEnabled(), "terminar la captura no devuelve el cambio de prueba"
+    assert not w.panel_tabs.isTabVisible(w.panel_tabs.indexOf(w.pagina_marcas))
+    assert not w.graph_r.curves_locked, "en configuración puede borrar sus curvas de prueba"
+
+    m = _estacion('marcaje', [('OD', 80)])
+    assert visible(m, m.lat) and not visible(m, m.conc) and not visible(m, m.montaje)
+    assert not m.btn_avanzados.isEnabled() and m.graph_r.curves_locked
+    assert not m.table_ec_r.btn_auto.isEnabled(), "sin marcado automático en marcaje"
+
+    c = _estacion('conclusion', [('OD', 80)])
+    assert visible(c, c.conc) and not visible(c, c.lat) and c.graph_r.curves_locked
+
+
+def test_avanzados_sin_restaurar_la_rutina_en_la_estacion():
+    from abr.AbrAdvanceSettings import AbrAdvanceSettings
+    from PySide6.QtWidgets import QPushButton
+    d = AbrAdvanceSettings({}, 'ABR', None, restaurar=False)
+    assert not [b for b in d.findChildren(QPushButton) if b.text() == 'Restore Defaults']
+    d = AbrAdvanceSettings({}, 'ABR', None)
+    assert [b for b in d.findChildren(QPushButton) if b.text() == 'Restore Defaults']
+
+
 def _caso_completo():
     """Caso con ECochG y bloque Central: sirve para todas las pruebas del ABR."""
     oido = {'umbral': 15, 'type': 'normal', 'repro': True, 'repro_var': 0.3, 'desviaciones': {},

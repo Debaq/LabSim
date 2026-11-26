@@ -30,14 +30,64 @@ import time
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextBrowser, QVBoxLayout,
-                               QWidget)
+from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextBrowser,
+                               QVBoxLayout, QWidget)
 
 from core import hilos, osce
 
 CADA_RELOJ_MS = 5000
 CADA_PENDIENTES_MS = 15000
 AVISO_FIN_MS = 6000
+
+
+class DialogoSalidaDocente(QDialog):
+    """Salir de la estación: solo un docente, con su usuario y contraseña
+    (los mismos que activaron la estación; se revisan en el servidor con
+    osce.estaciones_docente y no se guardan)."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Salir de la estación OSCE")
+        col = QVBoxLayout(self)
+        col.addWidget(QLabel("Solo un docente puede cerrar la estación."))
+        self.usuario = QLineEdit()
+        self.usuario.setPlaceholderText("Usuario docente")
+        self.clave = QLineEdit()
+        self.clave.setPlaceholderText("Contraseña")
+        self.clave.setEchoMode(QLineEdit.EchoMode.Password)
+        self.clave.returnPressed.connect(self.revisar)
+        col.addWidget(self.usuario)
+        col.addWidget(self.clave)
+        self.lbl = QLabel("")
+        self.lbl.setWordWrap(True)
+        col.addWidget(self.lbl)
+        fila = QHBoxLayout()
+        self.btn_salir = QPushButton("Salir")
+        self.btn_salir.clicked.connect(self.revisar)
+        cancelar = QPushButton("Cancelar")
+        cancelar.clicked.connect(self.reject)
+        fila.addStretch(1)
+        fila.addWidget(cancelar)
+        fila.addWidget(self.btn_salir)
+        col.addLayout(fila)
+
+    def revisar(self):
+        usuario, clave = self.usuario.text().strip(), self.clave.text()
+        if not usuario or not clave:
+            return
+        self.btn_salir.setEnabled(False)
+        self.lbl.setText("Revisando…")
+        hilos.en_fondo(osce.estaciones_docente, usuario, clave, listo=self._ok, fallo=self._mal,
+                       dueno=self, nombre="osce_salida")
+
+    def _ok(self, _osces):
+        self.clave.clear()
+        self.accept()
+
+    def _mal(self, exc):
+        self.btn_salir.setEnabled(True)
+        self.clave.clear()
+        self.lbl.setText(str(exc) if isinstance(exc, osce.ErrorOsce) else "Sin conexión con el servidor.")
 
 
 class VentanaCasos(QWidget):

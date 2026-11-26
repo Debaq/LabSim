@@ -601,6 +601,8 @@ class VempMainWindow(QMainWindow):
         self._refrescar_analisis()
 
     def _borrar_curva(self, nombre):
+        if getattr(self, 'osce_tipo', None) in ('marcaje', 'conclusion'):
+            return   # las curvas de la estación son el material: no se borran
         registro = self.sesion.get(nombre)
         if registro is None:
             return
@@ -801,6 +803,23 @@ class VempMainWindow(QMainWindow):
             self.control.habilitar(False)
         else:
             self.osce_sortear(subtipo, rng)
+        self.osce_accesos(tipo)
+
+    def osce_accesos(self, tipo):
+        """Regla del docente: en una estación el alumno solo llega a lo de
+        esa estación (ver AbrMainWindow.osce_accesos). El subtipo no se
+        cambia nunca; Análisis solo en protocolo (busca el umbral), Informe
+        solo en conclusión; en marcaje y conclusión no se borran curvas."""
+        self.osce_tipo = tipo
+        self.control.subtipo_fijo = True
+        self.control.cb_subtipo.setEnabled(False)
+        for i in range(self.tabs.count()):
+            nombre = self.tabs.tabText(i)
+            visible = (nombre == 'Registro'
+                       or (nombre == 'Análisis' and tipo == 'protocolo')
+                       or (nombre == 'Informe' and tipo == 'conclusion'))
+            self.tabs.setTabVisible(i, visible)
+        self.tabs.setCurrentIndex(0)
 
     def osce_sortear(self, subtipo, rng):
         """Mandos al azar, nunca en el valor de rutina del protocolo."""
@@ -917,6 +936,8 @@ class VempMainWindow(QMainWindow):
                 spin.setValue(type(spin.value())(panel[clave]))
         if panel.get('side') in ('OD', 'OI'):
             (c.btn_od if panel['side'] == 'OD' else c.btn_oi).click()
+        if getattr(self, 'osce_tipo', None):
+            self.osce_accesos(self.osce_tipo)
 
     def hideEvent(self, evento):
         # Ventana escondida: ni el EMG de fondo ni la captura siguen

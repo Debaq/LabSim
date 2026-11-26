@@ -93,6 +93,24 @@ def test_volver_a_un_caso_lo_deja_como_estaba():
     assert a.polaridad == "Alternante" and a.tasa == 5.1, a
 
 
+def test_en_la_estacion_solo_llega_a_lo_suyo():
+    def pestanas(v):
+        return [v.tabs.tabText(i) for i in range(v.tabs.count()) if v.tabs.isTabVisible(i)]
+
+    c = _estacion("config_equipo")
+    assert pestanas(c) == ["Registro"] and not c.control.cb_subtipo.isEnabled()
+    c.control.habilitar(True)
+    c.control.set_registrando(False)
+    assert not c.control.cb_subtipo.isEnabled(), "el subtipo no se cambia en la estación"
+    assert pestanas(_estacion("protocolo")) == ["Registro", "Análisis"]
+    assert pestanas(_estacion("conclusion", curvas=[("OD", 120)])) == ["Registro", "Informe"]
+    m = _estacion("marcaje", curvas=[("OD", 120)])
+    assert pestanas(m) == ["Registro"]
+    nombre = m.osce_curvas()[0]["nombre"]
+    m._borrar_curva(nombre)
+    assert [x["nombre"] for x in m.osce_curvas()] == [nombre], "en marcaje no se borran curvas"
+
+
 def test_en_la_estacion_el_registro_sale_al_instante():
     v = _estacion("protocolo", umbral=90)
     c = v.control

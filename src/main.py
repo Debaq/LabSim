@@ -482,7 +482,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_salir.setIconSize(icon_size)
         self._update_max_icon()
 
-        self.btn_salir.clicked.connect(self.close)
+        self.btn_salir.clicked.connect(self._pedir_salir)
         self.btn_min.clicked.connect(self.showMinimized)
         self.btn_max.clicked.connect(self._toggle_max_min)
         self.btn_login.clicked.connect(self.toggle_login)
@@ -504,11 +504,31 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     # Modo laboratorio (ver core/kiosko.py)
     # -----------------------------------------------------------------
 
+    def _pedir_salir(self):
+        """La X de la barra. En una estación OSCE solo sale un docente con
+        su usuario y contraseña (el alumno no puede dejar la estación)."""
+        if osce.activo and not self._apagando and not getattr(self, "_osce_salida", False):
+            self._pedir_salida_osce()
+            return
+        self.close()
+
+    def _pedir_salida_osce(self):
+        from core.osce_barra import DialogoSalidaDocente
+        dialogo = DialogoSalidaDocente(self)
+        if dialogo.exec():
+            self._osce_salida = True
+            QTimer.singleShot(0, self, self.close)
+
     def _salida_permitida(self):
         """En el laboratorio solo sale un docente logueado: el alumno no
         puede cerrar la app. Fuera del laboratorio, siempre. Si el equipo
-        se apaga, también: el sistema no espera a un docente."""
-        if not es_kiosko() or self._apagando:
+        se apaga, también: el sistema no espera a un docente. En una
+        estación OSCE, solo con la clave de un docente (_pedir_salida_osce)."""
+        if self._apagando:
+            return True
+        if osce.activo:
+            return bool(getattr(self, "_osce_salida", False))
+        if not es_kiosko():
             return True
         return bool(self.data_login) and es_docente(self.data_login.get("permission"))
 
@@ -725,6 +745,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             if self._osce_modulo(codigo)[1] is None:
                 self._aviso("Estación OSCE", f"Este equipo no tiene el módulo {codigo}.")
                 return
+        self._osce_cerrar_salidas()
         self.barra_osce = BarraOsce(self._osce_abrir, self._osce_entrega, self._osce_cerrar, self._osce_bloquear)
         self.toolbar_osce = QToolBar("Estación OSCE", self)
         self.toolbar_osce.setMovable(False)
@@ -732,6 +753,22 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.toolbar_osce.addWidget(self.barra_osce)
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar_osce)
         self._osce_mostrar_modulo()
+
+    def _osce_cerrar_salidas(self):
+        """En la estación el alumno solo llega al equipo de la estación: sin
+        botones de secciones ni de módulos (el alias AABR→ABR abría otro
+        equipo), sin cerrar sesión, sin configuración, sin minimizar y sin
+        el ✕ que esconde el equipo. Salir: la X, con clave de docente."""
+        if self.layouts:
+            self._clear_layout(self.layouts[0])
+            self._clear_layout(self.layouts[1])
+        for boton in (self.btn_login, self.btn_configuracion, self.btn_min):
+            boton.setVisible(False)
+        self.btn_salir.setVisible(True)
+        self.btn_salir.setToolTip("Salir de la estación (pide la clave de un docente)")
+        marco = getattr(self, "marco_ventana_activa", None)
+        if marco is not None:
+            marco.setVisible(False)
 
     def _osce_mostrar_modulo(self):
         codigo, _frame = self._osce_modulo()
@@ -1746,6 +1783,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def refresh_data(self):
         self.load_sub_windows()
+        if osce.activo and getattr(self, "barra_osce", None) is not None:
+            self._osce_cerrar_salidas()   # la estación no recupera botones de módulos
+            return
         self.btns_seccion()
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
@@ -1832,7 +1872,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             nombre, Qt.TextElideMode.ElideRight, self.ANCHO_NOMBRE_ACTIVA))
         self.lbl_ventana_activa.setToolTip(nombre)
         self.btn_cerrar_activa.setToolTip(f"Cerrar {nombre}")
-        self.marco_ventana_activa.setVisible(bool(nombre))
+        # En una estación OSCE el equipo no se esconde: sin ✕.
+        self.marco_ventana_activa.setVisible(bool(nombre) and not osce.activo)
 
     def cerrar_ventana_activa(self):
         """Oculta la ventana activa, igual que su ✕: el contenido se
@@ -2086,7 +2127,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def closeEvent(self, event):
         if not self._salida_permitida():
             # Laboratorio: ni la X (que no está) ni Alt+F4 cierran la app.
+            # Estación OSCE: Alt+F4 pide la clave de un docente.
             event.ignore()
+            if osce.activo:
+                QTimer.singleShot(0, self, self._pedir_salida_osce)
             return
         if self._apagando:
             # El equipo se apaga y da pocos segundos (core/kiosko.py): todo

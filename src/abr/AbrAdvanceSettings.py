@@ -209,9 +209,11 @@ def _combo(mapping, current):
 class AbrAdvanceSettings(QDialog):
     """Parámetros del equipo, no del paciente. Modal, con Aceptar/Cancelar."""
 
-    def __init__(self, settings=None, test='ABR', parent=None):
+    def __init__(self, settings=None, test='ABR', parent=None, restaurar=True):
         super().__init__(parent)
         self.test = test
+        # Sin "Restore Defaults" en una estación OSCE (ver AbrMainWindow.osce_accesos).
+        self._con_restaurar = restaurar
         self.protocol = get_protocol(test)
         self.setWindowTitle(f"Parámetros avanzados — {self.protocol.name}")
         self._build(settings or default_settings(test))
@@ -232,9 +234,10 @@ class AbrAdvanceSettings(QDialog):
         # Creado acá y no pedido con botones.button(RestoreDefaults): PySide
         # puede devolver un wrapper viejo de otro objeto que ocupaba esa
         # dirección (ver core/configuracion.py).
-        restaurar = QPushButton("Restore Defaults")
-        restaurar.clicked.connect(self.restore_defaults)
-        botones.addButton(restaurar, QDialogButtonBox.ButtonRole.ResetRole)
+        if self._con_restaurar:
+            restaurar = QPushButton("Restore Defaults")
+            restaurar.clicked.connect(self.restore_defaults)
+            botones.addButton(restaurar, QDialogButtonBox.ButtonRole.ResetRole)
         layout.addWidget(botones)
 
     @staticmethod

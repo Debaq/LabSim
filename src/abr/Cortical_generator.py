@@ -25,7 +25,7 @@ Sin bloque `Central` en el caso no se registra nada (ver cortical.case_params).
 import numpy as np
 
 from abr import cortical
-from abr.ABR_generator import (AIR_MAX_OUTPUT_DB, PATHOLOGY_MAP, STIM_MAP,
+from abr.ABR_generator import (AIR_MAX_OUTPUT_DB, BONE_MAX_OUTPUT_DB, PATHOLOGY_MAP, STIM_MAP,
                                NO_RESPONSE_DB, _get_generator,
                                default_settings, select_population)
 from abr.protocols import get_protocol
@@ -210,8 +210,17 @@ class CorticalGenerator:
         lectura = cortical.READ_CHANNEL[test]
         oddball = test in cortical.ODDBALL_TESTS
 
-        if float(stimulus_config['int']) > AIR_MAX_OUTPUT_DB:
-            stimulus_config = dict(stimulus_config, int=AIR_MAX_OUTPUT_DB)
+        # Transductor (como en el ABR y el ECochG): el vibrador estimula por
+        # vía ósea y no pasa de BONE_MAX_OUTPUT_DB; el equipo no avisa, lo
+        # que delata el tope es que la respuesta no crece. Entre inserción y
+        # copa la diferencia de latencia (<1 ms) no se ve en respuestas de
+        # decenas o cientos de ms: queda el artefacto del estímulo.
+        transducer = technical_config.get('transducer', 'insert_earphone')
+        pathway = 'bone_conduction' if transducer == 'bone_vibrator' else 'air_conduction'
+        tope = BONE_MAX_OUTPUT_DB if pathway == 'bone_conduction' else AIR_MAX_OUTPUT_DB
+        if float(stimulus_config['int']) > tope:
+            stimulus_config = dict(stimulus_config, int=tope)
+        stimulus_config = dict(stimulus_config, pathway=pathway)
         nivel = float(stimulus_config['int'])
 
         window_ms = float(technical_config.get('window_ms')
@@ -236,7 +245,7 @@ class CorticalGenerator:
         rare_fraction = float(np.clip(rare_pct / 100.0, 0.01, 0.5))
 
         umbral = abr.case_threshold(case_config, stimulus_config,
-                                    'air_conduction', pathology)
+                                    pathway, pathology)
         sl = nivel - umbral if umbral < NO_RESPONSE_DB else -1.0
         # Los tardíos integran el estímulo en el tiempo: un burst corto
         # rinde como uno más suave (ver cortical.duration_shift_db). El MLR
@@ -337,6 +346,14 @@ class CorticalGenerator:
             return ruido * imp_factor, a * imp_factor, b * imp_factor, k
 
         red_coh = abr.mains_interference(t, sin_tierra, desbalance, rng, notch)
+        # Artefacto del estímulo (ABRGenerator.add_transducer_artifact):
+        # sigue a la polaridad y en alternada se cancela casi entero; crece
+        # con el nivel y es mayor con el vibrador y la copa. Va pegado al
+        # inicio, así que se nota en el MLR y casi nada tras el pasa-bajos
+        # de 30 Hz de los tardíos, como en un equipo real.
+        if hay_registro and not clamp:
+            red_coh = red_coh + abr.add_transducer_artifact(
+                t, transducer, nivel, stimulus_config.get('pol'))
 
         def registrar(senial, ruido):
             return {c: abr.apply_filters(senial[c] + ruido[i] + red_coh,
@@ -428,7 +445,7 @@ class CorticalGenerator:
             'contra_channel': None,
             'window_ms': window_ms,
             'transducer': technical_config.get('transducer', 'insert_earphone'),
-            'pathway': 'air_conduction',
+            'pathway': pathway,
             'output_db': nivel,
             'reference': referencia,
             'accepted_sweeps': aceptados,
