@@ -1,0 +1,19 @@
+# Tablets kiosko viejas (Android 4.1: solo TLS 1.0). Esta carpeta se sirve
+# por http:// sin redirigir a https. Un RewriteEngine propio deja sin efecto
+# las reglas de reescritura de las carpetas de arriba (entre ellas la de
+# "forzar https"), porque no hay RewriteOptions Inherit.
+# Acá no viaja ninguna clave: las tablets entran con el token de la estación.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>
+<IfModule mod_headers.c>
+    Header always unset Strict-Transport-Security
+    Header always unset Content-Security-Policy
+</IfModule>
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>

@@ -1,0 +1,49 @@
+/*
+ * Estilo de las tablets kiosko viejas (WebKit 534, 1024×600, sin GPU).
+ * Sin variables CSS, grid, flex moderno, calc(), vh/vw, sticky ni :has().
+ * La esquina superior izquierda (90×90 px) es el gesto oculto del kiosko:
+ * la barra de arriba deja ahí solo texto, nada tocable.
+ */
+* { -webkit-box-sizing: border-box; box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font: 18px/1.4 Roboto, "Droid Sans", sans-serif; color: #1f2328; background: #f7f7f7;
+       padding: 78px 14px 90px; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: rgba(93, 16, 73, 0.15); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.muted { color: #666; }
+.mono { font-family: "Droid Sans Mono", monospace; }
+
+/* Barra fija arriba: tabla para alinear sin flexbox. */
+.k-barra { position: fixed; top: 0; left: 0; right: 0; z-index: 10; height: 66px; background: #fff;
+           border-bottom: 1px solid #ddd; }
+.k-barra table { width: 100%; height: 66px; border-collapse: collapse; }
+.k-barra td { padding: 0 12px; vertical-align: middle; white-space: nowrap; }
+.k-barra .k-izq { padding-left: 14px; }
+.k-barra .k-der { text-align: right; }
+.k-tit { font-weight: bold; font-size: 17px; overflow: hidden; text-overflow: ellipsis; max-width: 380px; }
+.k-sub { font-size: 14px; color: #666; }
+.k-cuenta { font: bold 34px "Droid Sans Mono", monospace; }
+.k-cuenta small { display: block; font: 13px Roboto, sans-serif; color: #666; }
+.k-rojo { color: #b91c1c; }
+
+/* Pie fijo abajo. */
+.k-pie { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: #fff; border-top: 1px solid #ddd;
+         padding: 10px 14px; text-align: center; }
+.k-pie table { width: 100%; border-collapse: collapse; }
+.k-pie td { vertical-align: middle; }
+
+.k-btn { display: inline-block; min-height: 52px; padding: 10px 26px; font-size: 20px; font-weight: bold; border-radius: 8px;
+         border: 2px solid #5d1049; background: #5d1049; color: #fff; }
+.k-btn:active { background: #3f0a32; }
+.k-btn[disabled] { opacity: 0.5; }
+.k-btn--claro { background: #fff; color: #5d1049; }
+.k-btn--claro:active { background: #f5edf3; }
+
+.k-centro { text-align: center; padding: 18px 10px; }
+.k-centro h1 { font-size: 30px; margin: 6px 0 8px; }
+.k-numero { font: bold 40px "Droid Sans Mono", monospace; text-align: center; width: 220px; padding: 8px; border: 2px solid #bbb;
+            border-radius: 8px; background: #fff; }
+.k-error { color: #b91c1c; font-weight: bold; min-height: 26px; margin-top: 12px; }
+.k-aviso { background: #fde8e8; color: #991b1b; border-radius: 8px; padding: 10px 14px; font-weight: bold; margin: 8px 0; }
+.k-tarjeta { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 12px 0; }
+.k-espacio { display: inline-block; width: 14px; }

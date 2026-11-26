@@ -5,6 +5,51 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## OSCE: páginas aparte para las tablets kiosko viejas (2026-11-25)
+
+Las tablets del laboratorio (Lenovo IdeaTab A1000L-F con la app kiosko) traen
+el WebView de Android 4.1: WebKit 534, solo ES5, flexbox de 2009 y **solo
+TLS 1.0**. `tmeduca.org` redirige todo a https y exige TLS 1.2, así que las
+tablets no llegaban ni a cargar la página; y aunque cargaran, las páginas
+del OSCE usan `fetch`, `=>`, `??`, grid y variables CSS, que ese motor no
+entiende.
+
+Él: "no las reescribas, haz alternativas; quizás en el futuro cambio esas
+tablets". Por eso las páginas modernas (`admin/osce_evaluar.php`,
+`student/osce_estacion.php`) no se tocaron, y las de las tablets viven aparte
+en `public/kiosko/`. Si se cambian las tablets, esa carpeta se borra.
+
+- Solo las estaciones 1 (pauta del docente) y 2 (preguntas) van en tablet. En
+  el resto los docentes entran con su celular a las páginas normales.
+- `kiosko/` se sirve por **http** sin redirigir: su `.htaccess` abre un
+  `RewriteEngine` propio, que deja sin efecto la regla de "forzar https" de
+  las carpetas de arriba, y quita HSTS y CSP. Si el hosting fuerza https a
+  nivel de servidor y no por `.htaccess`, hay que dejar la excepción en el
+  panel.
+- Por http no viaja ninguna clave: la pauta entra con el **token de la
+  estación** (el mismo `tablet_token` de la tablet de preguntas), sin sesión
+  de docente. La cookie de sesión es `Secure` y por http ni siquiera se
+  mandaría. A la página solo llegan el número del alumno y el nombre que se
+  muestra en "¿Eres X?". La evaluación queda sin evaluador (`null`).
+- Misma lógica que las páginas normales: la API de preguntas, la del reloj y
+  la de imágenes son las de `api/`, incluidas desde `kiosko/api_*.php`; la
+  pauta repite la lógica de `osce_evaluar.php`.
+- Todo el JS es ES5 escrito a mano: XHR con tiempo límite propio, sin
+  `closest()`, `NodeList.forEach` ni `performance.now`. `kiosko/error.php`
+  recibe los `window.onerror` en el log de PHP, porque en esas tablets no hay
+  depuración remota. Nada tocable en la esquina superior izquierda (90×90 px),
+  que es el gesto del panel del kiosko.
+- Los enlaces (con QR para la pauta) están en la página de cada estación en
+  el admin.
+- Probado en el emulador `ideatab` (Android 4.1.2), en su navegador y en la
+  app `org.kiosko`, en vertical y en horizontal. Se probó:
+  - preguntas: rechazo "Todavía no te toca", "¿Eres Ana Pérez?", el tiempo
+    parte al confirmar, marcar, guardar y entregar (`enviada`, 1/1);
+  - pauta: sigue el reloj (turno 1 N.º 1 → turno 2 N.º 3 con "Limpia a
+    N.º 5"), "Sí, soy yo" parte el tiempo, marcar Sí/No guarda y el servidor
+    puntúa;
+  - ningún error de JS reportado.
+
 ## OSCE: el alumno solo llega a lo de su estación y todo lo que toca cambia la curva (2026-11-25)
 
 Él: "las que hay que conectar son aquellas que se vean afectadas por las

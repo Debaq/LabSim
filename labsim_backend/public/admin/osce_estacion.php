@@ -134,6 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $items = OscePauta::items($estId);
 $preguntas = $est['tipo'] === 'preguntas' ? OscePreguntas::preguntas($estId) : [];
 $urlTablet = $est['tipo'] === 'preguntas' ? Osce::urlPublica('student/osce_estacion.php?k=' . OscePreguntas::tokenTablet($estId)) : '';
+// Tablets kiosko viejas (Android 4.1, solo TLS 1.0): versión aparte en kiosko/, por http.
+$urlKiosko = '';
+if ($est['tipo'] === 'preguntas' || $est['tipo'] === 'pauta_docente') {
+    $urlKiosko = preg_replace('#^https://#', 'http://', Osce::urlPublica(
+        'kiosko/' . ($est['tipo'] === 'preguntas' ? 'preguntas' : 'pauta') . '.php?k=' . OscePreguntas::tokenTablet($estId)));
+}
 $esApp = OsceApp::esApp((string) $est['tipo']);
 $appCfg = $esApp ? OsceApp::config($est) : [];
 $appCodigo = $esApp ? OsceApp::codigoEstacion($estId) : '';
@@ -196,6 +202,19 @@ admin_header('Estación · ' . $est['titulo'], $me);
         <?php endif; ?>
     <?php endif; ?>
 </div>
+
+<?php if ($est['tipo'] === 'pauta_docente'): ?>
+<div class="card">
+    <h2>Tablet kiosko de la estación</h2>
+    <div class="row row--gap-lg row--center">
+        <?= QrSvg::svg($urlKiosko, 3) ?>
+        <div>
+            <p>Para las tablets kiosko viejas (Android 4.1): abre este enlace en la tablet y déjala en la estación. Entra sin clave, con el token de esta estación, y sigue el reloj igual que "Evaluar en esta estación". Desde un celular o un PC usa "Evaluar en esta estación".</p>
+            <p class="mono" style="word-break:break-all;"><?= htmlspecialchars($urlKiosko) ?></p>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php if ($est['tipo'] === 'pauta_docente'): ?>
 <div class="card">
@@ -542,6 +561,8 @@ admin_header('Estación · ' . $est['titulo'], $me);
         <div>
             <p>Abre este enlace en la tablet de la estación (o escanea el QR con ella) y déjala ahí. Cada alumno escribe su código; solo entra cuando el reloj dice que le toca, y la tablet entrega sola al terminar el tiempo.</p>
             <p><a href="<?= htmlspecialchars($urlTablet) ?>" target="_blank" class="mono" style="word-break:break-all;"><?= htmlspecialchars($urlTablet) ?></a></p>
+            <p class="muted">Tablets kiosko viejas (Android 4.1): usa este otro enlace, por http.<br>
+                <span class="mono" style="word-break:break-all;"><?= htmlspecialchars($urlKiosko) ?></span></p>
         </div>
     </div>
 </div>
