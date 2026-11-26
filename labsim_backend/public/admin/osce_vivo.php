@@ -99,7 +99,7 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
 .chip.entregada { border-color: #15803d; color: #fff; background: #15803d; }
 .chip.vencida { border-color: #6b7280; color: #fff; background: #6b7280; }
 .chip.ausente, .chip.descanso { border-style: dashed; color: #9ca3af; text-decoration: line-through; }
-.chip small { font-weight: 400; margin-left: 0.3rem; }
+.chip small { font: 400 0.85em system-ui, sans-serif; margin-left: 0.3rem; letter-spacing: 0; }
 .osce-ausentes { margin-top: 1rem; font-size: 0.95rem; }
 .osce-ausentes form { display: inline; margin: 0; }
 .osce-ausentes button { margin: 0.1rem; min-width: 2.6rem; }
@@ -292,7 +292,7 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
                 : (reloj.restante_s === null ? '--:--' : OsceReloj.mmss(reloj.restante_s));
             if (fase === 'estacion') {
                 $('osce-fase').textContent += reloj.restante_s === null ? ' · esperando que entren'
-                    : ' · ' + reloj.abiertos + (reloj.abiertos === 1 ? ' estación abierta' : ' estaciones abiertas');
+                    : ' · ' + (reloj.abiertos === 1 ? 'falta 1 alumno por terminar' : 'faltan ' + reloj.abiertos + ' alumnos por terminar');
             }
             $('osce-donde').textContent = fase === 'terminado' ? '' :
                 (cfg.modo === 'cadena'

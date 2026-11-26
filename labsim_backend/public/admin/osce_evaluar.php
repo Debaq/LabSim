@@ -580,17 +580,22 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
         return PARTS.filter(function (p) { return Math.floor((p.numero - 1) / K) === g; });
     }
     function pintarGrupo(lista, elegido) {
-        var clave = lista.map(function (p) { return p.id; }).join(',') + '|' + (elegido ? elegido.id : '');
+        var clave = lista.map(function (p) { return p.id + (ausente(p) ? 'a' : ''); }).join(',') + '|' + (elegido ? elegido.id : '');
         if (clave === grupoPintado) return;
         grupoPintado = clave;
         $('ev-grupo').innerHTML = lista.length > 1 ? lista.map(function (p) {
-            return '<button type="button" data-id="' + p.id + '" aria-pressed="' + (elegido && elegido.id === p.id) + '">N.º ' + p.numero + '</button>';
+            return '<button type="button" data-id="' + p.id + '" aria-pressed="' + (elegido && elegido.id === p.id) + '"'
+                + (ausente(p) ? ' disabled title="Ausente"' : '') + '>N.º ' + p.numero + (ausente(p) ? ' · ausente' : '') + '</button>';
         }).join('') : '';
     }
+    var AUSENTES = [];   // números marcados ausentes en el panel (llegan con el reloj)
+    function ausente(p) { return !!p && AUSENTES.indexOf(p.numero) >= 0; }
     function enEstacion(cfg, vuelta, slot) {
         if (CADENA) {
             var g = slot - INDICE, lista = miembros(cfg, g);
             var p = lista.length ? lista[Math.min(pos, lista.length - 1)] : null;
+            // Un ausente no se evalúa: si hay otro en la camilla, va ese.
+            if (ausente(p)) p = lista.filter(function (x) { return !ausente(x); })[0] || null;
             // Su paciente (solo en la limpieza): el de la misma posición del grupo
             // siguiente; el último grupo limpia al primero.
             var pac = null;
@@ -626,6 +631,7 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
     llenarSelector();
     OsceReloj.iniciar(URL_RELOJ, function (d, reloj, t) {
         ultimoReloj = { d: d, reloj: reloj };
+        AUSENTES = d.ausentes || [];
         var nombres = { antes: 'Aún no parte', estacion: 'En estación', cambio: 'Cambio', entre_vueltas: 'Pausa entre vueltas', terminado: 'Terminado' };
         var fase = reloj ? reloj.fase : 'antes';
         if (d.estado === 'cerrado' || d.estado === 'publicado') fase = 'terminado';

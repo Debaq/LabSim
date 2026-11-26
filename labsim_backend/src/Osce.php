@@ -1418,6 +1418,9 @@ final class Osce
             // le queda al último que entró; null si nadie ha confirmado aún.
             'reloj' => $t === null ? null : self::faseTurno($o, $cfg, $st, $t),
             'estaciones' => array_map(static fn ($e) => ['id' => (int) $e['id'], 'titulo' => $e['titulo'], 'tipo' => $e['tipo']], $estaciones),
+            // Números marcados ausentes (solo números): la tablet del docente no los ofrece.
+            'ausentes' => array_values(array_map(static fn ($p) => (int) $p['numero'],
+                array_filter($ctx['parts'], static fn ($p) => (int) ($p['ausente'] ?? 0) === 1))),
         ];
         if ($participante !== null) {
             $out['participante'] = [
