@@ -456,30 +456,9 @@ TXT;
      */
     public static function motivoNoPuede(array $o, array $est, array $p): ?string
     {
-        if ($o['estado'] === 'borrador') {
-            return 'El OSCE aún no parte.';
-        }
-        if ($o['estado'] !== 'en_curso') {
-            return 'El OSCE ya terminó.';
-        }
-        $estaciones = Osce::estaciones((int) $o['id']);
-        $indice = (int) array_search((int) $est['id'], array_map('intval', array_column($estaciones, 'id')), true);
-        $stmt = Db::get()->prepare('SELECT COUNT(*) FROM osce_participante WHERE osce_id = ?');
-        $stmt->execute([(int) $o['id']]);
-        $cfg = Osce::cfgReloj($o, count($estaciones), (int) $stmt->fetchColumn());
-        $stmt->closeCursor();
-        $t = Osce::transcurrido($o, time());
-        if ($t === null || !Osce::enVentana($cfg, $p, $indice, $t)) {
-            return 'Según el reloj, ahora no te toca esta estación. Revisa tu tarjeta.';
-        }
-        $stmt = Db::get()->prepare('SELECT estado FROM osce_entrega WHERE participante_id = ? AND estacion_id = ?');
-        $stmt->execute([(int) $p['id'], (int) $est['id']]);
-        $estado = $stmt->fetchColumn();
-        $stmt->closeCursor();
-        if ($estado === 'enviada') {
-            return 'Ya entregaste esta estación.';
-        }
-        return null;
+        // Turnos con tiempo por alumno: la regla vive en Osce (la usan la
+        // tablet, la app y la pauta docente).
+        return Osce::motivoNoToca($o, $est, $p);
     }
 
     /** Lo que ve el alumno en la tablet: preguntas sin clave, opciones barajadas, y lo que ya respondió. */
@@ -623,8 +602,10 @@ TXT;
             if (!in_array((int) $p['id'], $abiertas, true)) {
                 continue;
             }
-            $v = Osce::ventana($cfg, $p, $indice);
-            if ($o['estado'] !== 'en_curso' || $t > $v['fin_s'] + max(30, $cfg['pausa_s'])) {
+            // Su tiempo parte al confirmar el nombre (Osce::iniciarReloj); sin
+            // eso solo se cierra con el OSCE cerrado.
+            $v = Osce::ventanaReal($o, (int) $p['id'], (int) $est['id']);
+            if ($o['estado'] !== 'en_curso' || ($v !== null && $t > $v['fin_s'] + Osce::GRACIA_S)) {
                 self::guardarRespuestas((int) $est['id'], (int) $p['id'], self::respuestas((int) $est['id'], (int) $p['id']), true);
                 $cerradas++;
             }

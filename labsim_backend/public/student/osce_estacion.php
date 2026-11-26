@@ -79,6 +79,15 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
     <div class="error-grande" id="error-entrar"></div>
 </div>
 
+<div class="pantalla entrar" id="p-confirmar" hidden>
+    <h1 id="conf-numero"></h1>
+    <p style="font-size:1.4rem;">¿Eres <strong id="conf-nombre"></strong>?</p>
+    <p class="muted">Tu tiempo parte cuando confirmas.</p>
+    <button type="button" class="btn" id="conf-si">Sí, soy yo: empezar</button>
+    <button type="button" class="btn btn--ghost" id="conf-no" style="margin-left:0.6rem;">No soy yo</button>
+    <div class="error-grande" id="error-confirmar"></div>
+</div>
+
 <div class="pantalla" id="p-preguntas" hidden>
     <p id="aviso-fin" hidden style="background:#fde8e8;color:#991b1b;border-radius:0.5rem;padding:0.6rem 0.9rem;font-weight:600;margin:0.8rem 0 0;">Queda menos de 1 minuto: al llegar a cero tus respuestas se entregan solas.</p>
     <div id="preguntas"></div>
@@ -111,7 +120,7 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
         });
     }
     function mostrar(cual) {
-        ['p-entrar', 'p-preguntas', 'p-listo'].forEach(function (id) { $(id).hidden = id !== cual; });
+        ['p-entrar', 'p-confirmar', 'p-preguntas', 'p-listo'].forEach(function (id) { $(id).hidden = id !== cual; });
     }
     function post(datos) {
         var fd = new FormData();
@@ -126,13 +135,35 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
         try { localStorage.setItem(claveLocal(), JSON.stringify({ respuestas: respuestas, pendiente: pendiente })); } catch (e) {}
     }
 
-    // -- Entrar -------------------------------------------------------------
+    // -- Entrar: número, luego confirma su nombre y parte su tiempo -----------
+    var porConfirmar = null;
     $('f-entrar').addEventListener('submit', function (e) {
         e.preventDefault();
         var codigo = $('codigo').value.trim();
         if (!codigo) return;
         $('error-entrar').textContent = '';
         post({ accion: 'entrar', codigo: codigo }).then(function (d) {
+            porConfirmar = codigo;
+            $('conf-numero').textContent = 'N.º ' + d.numero;
+            $('conf-nombre').textContent = d.nombre;
+            $('error-confirmar').textContent = '';
+            $('codigo').value = '';
+            mostrar('p-confirmar');
+        }).catch(function (err) { $('error-entrar').textContent = err.message; });
+    });
+    $('conf-no').addEventListener('click', function () {
+        porConfirmar = null;
+        mostrar('p-entrar');
+        $('error-entrar').textContent = 'Revisa el número de tu tarjeta.';
+        $('codigo').focus();
+    });
+    $('conf-si').addEventListener('click', function () {
+        if (!porConfirmar) return;
+        var codigo = porConfirmar, btn = this;
+        btn.disabled = true;
+        post({ accion: 'confirmar', codigo: codigo }).then(function (d) {
+            btn.disabled = false;
+            porConfirmar = null;
             sesion = d;
             autoEntrega = false;
             respuestas = {};
@@ -144,9 +175,8 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
             pintar();
             mostrar('p-preguntas');
             $('quien').textContent = 'N.º ' + d.numero;
-            $('codigo').value = '';
             if (pendiente) aGuardar();
-        }).catch(function (err) { $('error-entrar').textContent = err.message; });
+        }).catch(function (err) { btn.disabled = false; $('error-confirmar').textContent = err.message; });
     });
 
     // -- Preguntas ------------------------------------------------------------
@@ -257,7 +287,9 @@ body { max-width: 52rem; margin: 0 auto; padding: 0 1rem 6rem; font-size: 1.1rem
             tActual = t;
             var c = $('cuenta');
             if (!sesion) {
-                c.textContent = reloj && reloj.fase === 'estacion' ? OsceReloj.mmss(reloj.restante_s) : '';
+                // Sin alumno: en el cambio, cuánto falta para que la estación reciba.
+                c.textContent = reloj && (reloj.fase === 'cambio' || reloj.fase === 'entre_vueltas') && reloj.restante_s !== null
+                    ? 'Cambio ' + OsceReloj.mmss(reloj.restante_s) : '';
                 c.classList.remove('ultimo');
                 return;
             }

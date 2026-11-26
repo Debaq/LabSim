@@ -8,16 +8,20 @@ require_once __DIR__ . '/../../src/OscePreguntas.php';
 
 /**
  * API de la app LabSim en modo "Estación OSCE" (paso 4 de
- * docs/osce_plan.md). Sin sesión: el PC se identifica con el código corto de
- * la estación y el alumno con el suyo; solo deja trabajar en la ventana de
- * tiempo del alumno en esa estación para entrar (OscePreguntas::motivoNoPuede,
- * la misma regla que la tablet de preguntas). Nunca devuelve lo esperado.
+ * docs/osce_plan.md). El PC se identifica con el código corto de la
+ * estación, que solo se entrega a un docente con su usuario y contraseña
+ * ("estaciones"); el alumno con su número. Solo deja entrar a quien le toca
+ * esa estación en el turno en curso (Osce::motivoNoToca, la misma regla que
+ * las tablets). Entrar es en dos pasos: con el número se muestra el nombre
+ * y al confirmarlo ("confirmar") parte su tiempo. Nunca devuelve lo esperado.
  *
  * Cuerpo JSON (POST):
- *   {"accion": "estacion", "estacion": "K7F-3QM"}
- *   {"accion": "entrar",   "estacion": ..., "codigo": "T24-TFJ"}
- *   {"accion": "entregar", "estacion": ..., "codigo": ..., "entrega": {...}}
- *   {"accion": "corregir", "estacion": ..., "codigo": ...}   (conclusión: IA)
+ *   {"accion": "estaciones", "usuario": ..., "clave": ...}   (docente: OSCE y estaciones de la app)
+ *   {"accion": "estacion",  "estacion": "K7F-3QM"}
+ *   {"accion": "entrar",    "estacion": ..., "codigo": "7"}       -> nombre de la tarjeta
+ *   {"accion": "confirmar", "estacion": ..., "codigo": "7"}       -> casos y su tiempo
+ *   {"accion": "entregar",  "estacion": ..., "codigo": ..., "entrega": {...}}
+ *   {"accion": "corregir",  "estacion": ..., "codigo": ...}   (conclusión: IA)
  */
 
 header('Cache-Control: no-store');
@@ -26,6 +30,25 @@ $body = json_decode((string) file_get_contents('php://input'), true);
 if (!is_array($body)) {
     $body = $_POST;
 }
+if (($body['accion'] ?? '') === 'estaciones') {
+    // El docente deja el PC como estación: con su clave (como al entrar a la
+    // app) se le listan los OSCE de sus cursos y sus estaciones de la app.
+    $usuario = trim((string) ($body['usuario'] ?? ''));
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    if ($usuario === '' || (string) ($body['clave'] ?? '') === '') {
+        Response::error('Falta usuario o contraseña.', 400);
+    }
+    if (Auth::loginBlocked($usuario, $ip)) {
+        Response::error('Demasiados intentos fallidos. Espera unos minutos.', 429);
+    }
+    $docente = OsceApp::docentePorClave($usuario, (string) $body['clave']);
+    Auth::recordLoginAttempt($usuario, $ip, $docente !== null);
+    if ($docente === null) {
+        Response::error('Usuario o contraseña de docente incorrectos.', 401);
+    }
+    Response::json(['ok' => true, 'osces' => OsceApp::estacionesDelDocente($docente)]);
+}
+
 $est = OsceApp::estacionPorCodigo((string) ($body['estacion'] ?? ''));
 $o = $est !== null ? Osce::obtener((int) $est['osce_id']) : null;
 if ($est === null || $o === null || !OsceApp::esApp((string) $est['tipo'])) {
@@ -82,11 +105,24 @@ if ($accion === 'entregar') {
     }
 }
 
-$estaciones = Osce::estaciones((int) $o['id']);
-$indice = (int) array_search((int) $est['id'], array_map('intval', array_column($estaciones, 'id')), true);
-$reloj = Osce::cfgReloj($o, count($estaciones), count(Osce::participantes((int) $o['id'])));
-
 if ($accion === 'entrar') {
+    // Primer paso: el alumno ve su nombre y confirma que es él. Aún no corre su tiempo.
+    if ($p['user_id'] === null) {
+        Response::error('Tu tarjeta aún no tiene tu nombre: escanea el QR de tu gafete o avisa al docente.', 409);
+    }
+    Response::json([
+        'ok' => true,
+        'codigo' => $p['codigo'],
+        'numero' => (int) $p['numero'],
+        'nombre' => (string) $p['display_name'],
+        'partio' => Osce::ventanaReal($o, (int) $p['id'], (int) $est['id']) !== null,
+    ]);
+}
+
+if ($accion === 'confirmar') {
+    if ($p['user_id'] === null) {
+        Response::error('Tu tarjeta aún no tiene tu nombre: avisa al docente.', 409);
+    }
     try {
         $tareas = OsceApp::tareasParaAlumno($est, (int) $p['numero']);
     } catch (InvalidArgumentException $e) {
@@ -95,7 +131,8 @@ if ($accion === 'entrar') {
     if (!$tareas) {
         Response::error('La estación no tiene paciente configurado. Avisa al docente.', 409);
     }
-    Osce::marcarEntrada((int) $p['id'], (int) $est['id']);
+    // Su tiempo parte ahora (o sigue el que ya tenía si vuelve a entrar).
+    $ventana = Osce::iniciarReloj($o, (int) $p['id'], (int) $est['id']);
     // Arriba, la primera tarea suelta (como una estación de un solo caso).
     $t0 = $tareas[0];
     Response::json([
@@ -108,7 +145,7 @@ if ($accion === 'entrar') {
         'curvas' => $t0['curvas'],
         'caso' => $t0['caso'],
         'tareas' => $tareas,
-        'ventana' => Osce::ventana($reloj, $p, $indice),
+        'ventana' => $ventana,
     ]);
 }
 

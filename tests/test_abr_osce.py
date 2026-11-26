@@ -117,6 +117,35 @@ def test_en_la_estacion_la_curva_sale_al_instante():
     assert w.verdad_curvas['R1']['visible']
 
 
+def test_volver_a_un_caso_lo_deja_como_estaba():
+    """Ir y volver entre los casos de la estación: osce_entrega al salir y
+    osce_restaurar al volver devuelven curvas, marcas, panel, equipo y verdad."""
+    w = _estacion('marcaje', [('OD', 80), ('OI', 60)])
+    v = w.verdad_curvas['R1']['waves']['V']['lat']
+    w.update_memory_from_graph_mark({'R1': {'V': [v, 0.4]}})
+    hecho = json.loads(json.dumps(w.osce_entrega()))
+    w.la_super(None, None)
+    w.la_super(_caso(), 'osce-T24-TFJ')
+    w.osce_preparar('marcaje', 'ABR', [('OD', 40)], random.Random(9))
+    w.osce_restaurar(hecho)
+    assert set(w.memory) == {'R1', 'L1'} and w.memory['R1']['int'] == 80
+    r1 = next(c for c in w.osce_entrega()['curvas'] if c['nombre'] == 'R1')
+    assert r1['marcas']['V'] == v
+    assert w.verdad_curvas['R1']['waves']['V']['lat'] == v
+
+    c = _estacion('config_equipo', semilla=3)
+    c.control.set_data({'pol': 'Alternada', 'int': 80, 'rate': 21.1})
+    c.technical['window_ms'] = 12.0
+    hecho = json.loads(json.dumps(c.osce_entrega()))
+    c.la_super(None, None)
+    c.la_super(_caso(), 'osce-T24-TFJ')
+    c.osce_preparar('config_equipo', 'ABR', [], random.Random(4))
+    c.osce_restaurar(hecho)
+    panel = c.control.get_data()
+    assert (panel['pol'], panel['int'], panel['rate']) == ('Alternada', 80, 21.1), panel
+    assert c.technical['window_ms'] == 12.0 and c.control.isEnabled()
+
+
 def _caso_completo():
     """Caso con ECochG y bloque Central: sirve para todas las pruebas del ABR."""
     oido = {'umbral': 15, 'type': 'normal', 'repro': True, 'repro_var': 0.3, 'desviaciones': {},

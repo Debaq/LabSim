@@ -401,6 +401,10 @@ admin_header('Estación · ' . $est['titulo'], $me);
             <label>Nombre de la tarea <input type="text" name="titulo" value="<?= htmlspecialchars((string) ($appCfg['titulo'] ?? (Osce::EXAMENES[$examen] ?? ''))) ?>" maxlength="80"></label>
             <label>Peso (% de la estación) <input type="text" inputmode="decimal" name="peso" value="<?= $fmt($appCfg['peso'] ?? ($nTareas ? max(1, 100 - $sumaPesos) : 100)) ?>" class="input--narrow"></label>
         </div>
+        <label style="display:block; margin-top:0.6rem;">Indicaciones para el alumno
+            <textarea name="indicaciones" rows="3" maxlength="2000" style="display:block; width:100%;"
+                placeholder="Lo que lee al abrir el caso, antes de empezar. Ej.: Lactante de 3 meses que refiere en el tamizaje. Configura el equipo para buscar el umbral de la onda V. Lanza una curva para verificar y pasa al caso siguiente."><?= htmlspecialchars((string) ($appCfg['indicaciones'] ?? '')) ?></textarea></label>
+        <p class="help">En la estación le aparecen al abrir el caso (las acepta y empieza) y las puede volver a ver desde la ventanita de los casos.</p>
         <h3 style="margin-top:0.8rem;">Pacientes (variantes de igual dificultad)</h3>
         <p class="help">Abre el equipo <strong><?= $modulo ?></strong> en <strong><?= htmlspecialchars(OsceApp::PRUEBA_DE_EXAMEN[$examen] ?? 'ABR') ?></strong>. Con 3 pacientes, al N.º 1 le toca el 1.º, al 2 el 2.º, al 3 el 3.º, al 4 de nuevo el 1.º. El paciente 1 de cada tarea le toca al mismo alumno: para un caso integrado (por ejemplo PEATC y VEMP de la misma persona) pon los pacientes en el mismo orden en las dos tareas. Una fila vacía no cuenta.
             <?= $modulo === 'VEMP' ? 'El VEMP de LabSim mide la intensidad en dB SPL (el protocolo dice "100 dB nHL"): escribe tú la intensidad esperada.' : '' ?></p>

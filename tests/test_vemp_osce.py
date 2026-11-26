@@ -68,6 +68,31 @@ def test_entrega_serializable_con_marcas():
     assert nombre in entrega["verdad"]
 
 
+def test_volver_a_un_caso_lo_deja_como_estaba():
+    v = _estacion("marcaje", curvas=[("OD", 120)])
+    nombre = v.osce_curvas()[0]["nombre"]
+    v._marcar(nombre, "p13", 13.2, 40.0)
+    hecho = json.loads(json.dumps(v.osce_entrega()))
+    v.la_super(None, None)
+    v.la_super(caso(umbral_od=100, umbral_oi=100), "osce-T24-TFJ")
+    v.osce_preparar("marcaje", protocol.CVEMP, [("OI", 90), ("OI", 100)], random.Random(5))
+    v.osce_restaurar(hecho)
+    curvas = v.osce_curvas()
+    assert [(c["side"], c["int"]) for c in curvas] == [("OD", 120)], curvas
+    assert curvas[0]["marcas"]["p13"] == 13.2
+
+    c = _estacion("config_equipo", semilla=2)
+    c.control.cb_pol.setCurrentText("Alternante")
+    c.control.sb_tasa.setValue(5.1)
+    hecho = json.loads(json.dumps(c.osce_entrega()))
+    c.la_super(None, None)
+    c.la_super(caso(umbral_od=100, umbral_oi=100), "osce-T24-TFJ")
+    c.osce_preparar("config_equipo", protocol.CVEMP, [], random.Random(8))
+    c.osce_restaurar(hecho)
+    a = c.control.ajustes()
+    assert a.polaridad == "Alternante" and a.tasa == 5.1, a
+
+
 def test_en_la_estacion_el_registro_sale_al_instante():
     v = _estacion("protocolo", umbral=90)
     c = v.control

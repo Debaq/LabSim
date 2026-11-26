@@ -8,12 +8,14 @@ require_once __DIR__ . '/../../src/OscePreguntas.php';
 /**
  * API de la tablet de una estación de preguntas del OSCE
  * (student/osce_estacion.php). Sin sesión: la tablet se identifica con el
- * token de la estación (?k=) y el alumno con su código. Solo deja trabajar
- * en la ventana de tiempo que el reloj le da a ese alumno en esa estación
- * (Osce::enVentana) y nunca devuelve la clave ni la pauta.
+ * token de la estación (?k=) y el alumno con su número. Solo deja trabajar
+ * a quien le toca la estación en el turno en curso (Osce::motivoNoToca), con
+ * su propio tiempo desde que confirma su nombre, y nunca devuelve la clave
+ * ni la pauta.
  *
  * GET  k                                  estación + token del reloj
- * POST k, accion=entrar, codigo           preguntas (barajadas) y lo ya respondido
+ * POST k, accion=entrar, codigo           nombre de la tarjeta (para confirmar)
+ * POST k, accion=confirmar, codigo        parte su tiempo: preguntas (barajadas) y lo ya respondido
  * POST k, accion=guardar, codigo, respuestas (JSON), entregar
  * POST k, accion=corregir, codigo         corrige con IA lo de desarrollo (tras entregar)
  */
@@ -64,18 +66,27 @@ if ($motivo !== null) {
     Response::error($motivo, 409);
 }
 
-$estaciones = Osce::estaciones((int) $o['id']);
-$indice = (int) array_search((int) $est['id'], array_map('intval', array_column($estaciones, 'id')), true);
-$cfg = Osce::cfgReloj($o, count($estaciones), count(Osce::participantes((int) $o['id'])));
-$ventana = Osce::ventana($cfg, $p, $indice);
-
 if ($accion === 'entrar') {
-    Osce::marcarEntrada((int) $p['id'], (int) $est['id']);
+    if ($p['user_id'] === null) {
+        Response::error('Tu tarjeta aún no tiene tu nombre: escanea el QR de tu gafete o avisa al docente.', 409);
+    }
     Response::json([
         'ok' => true,
         'codigo' => $p['codigo'],
         'numero' => (int) $p['numero'],
-        'ventana' => $ventana,
+        'nombre' => (string) $p['display_name'],
+    ]);
+}
+
+if ($accion === 'confirmar') {
+    if ($p['user_id'] === null) {
+        Response::error('Tu tarjeta aún no tiene tu nombre: avisa al docente.', 409);
+    }
+    Response::json([
+        'ok' => true,
+        'codigo' => $p['codigo'],
+        'numero' => (int) $p['numero'],
+        'ventana' => Osce::iniciarReloj($o, (int) $p['id'], (int) $est['id']),
         'preguntas' => OscePreguntas::paraAlumno($est, $p),
     ]);
 }

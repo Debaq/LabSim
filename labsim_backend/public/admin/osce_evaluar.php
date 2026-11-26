@@ -15,8 +15,13 @@ require_once __DIR__ . '/_layout.php';
  * el puntaje lo calcula el servidor con OscePauta::guardar().
  *
  * GET ?estacion=N              la página
- * GET ?estacion=N&cargar=P     JSON: lo guardado del participante P
+ * GET ?estacion=N&cargar=P     JSON: lo guardado del participante P, su nombre y su tiempo
+ * POST estacion, participante, accion=empezar, csrf_token   parte el tiempo del alumno
  * POST estacion, participante, datos (JSON), feedback, terminar, csrf_token
+ *
+ * Tiempo por alumno (2026-11-25): el alumno confirma su nombre en la tablet
+ * ("Soy yo, empezar") y ahí parten sus minutos (Osce::iniciarReloj). Si el
+ * docente marca un ítem antes, el tiempo parte igual.
  */
 
 $me = Auth::requireAdminSession();
@@ -48,6 +53,8 @@ if (isset($_GET['cargar'])) {
         'puntaje' => $c['entrega']['puntaje'] ?? null,
         'puntaje_max' => $c['entrega']['puntaje_max'] ?? null,
         'critico_fallado' => (int) ($c['entrega']['critico_fallado'] ?? 0) === 1,
+        'nombre' => (string) ($porId[$pid]['display_name'] ?? ''),
+        'ventana' => Osce::ventanaReal($osce, $pid, $estId),
     ]);
 }
 
@@ -60,10 +67,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($osce['estado'] === 'publicado') {
         Response::error('Los resultados ya se publicaron: la evaluación queda fija.', 409);
     }
+    if (($_POST['accion'] ?? '') === 'empezar') {
+        $motivo = Osce::motivoNoToca($osce, $est, $porId[$pid]);
+        if ($motivo !== null) {
+            Response::error($motivo, 409);
+        }
+        Response::json(['ok' => true, 'ventana' => Osce::iniciarReloj($osce, $pid, $estId)]);
+    }
+    // Marcar algo con el OSCE en curso cuenta como empezar (si se olvidó el botón).
+    // Solo si la estación es suya en este turno: corregir después a otro alumno no le parte un reloj.
+    $ventana = $osce['estado'] === 'en_curso' && Osce::motivoNoToca($osce, $est, $porId[$pid]) === null
+        ? Osce::iniciarReloj($osce, $pid, $estId) : Osce::ventanaReal($osce, $pid, $estId);
     $datos = json_decode((string) ($_POST['datos'] ?? '{}'), true);
     $r = OscePauta::guardar($estId, $pid, is_array($datos) ? $datos : [], (string) ($_POST['feedback'] ?? ''),
                             !empty($_POST['terminar']), (int) $me['id']);
-    Response::json(['ok' => true] + $r);
+    Response::json(['ok' => true, 'ventana' => $ventana] + $r);
 }
 
 $estaciones = Osce::estaciones($osceId);
@@ -133,6 +151,10 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
 .ev-pie { position: sticky; bottom: 0; background: var(--color-surface, #fff); border-top: 1px solid var(--color-border, #ddd);
           padding: 0.6rem 0.2rem; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; }
 .ev-guardado { font-size: 0.9rem; }
+.ev-empezar { display: flex; flex-wrap: wrap; gap: 0.8rem 1.4rem; align-items: center; justify-content: center; background: #f5edf3;
+              border: 2px solid #5d1049; border-radius: 0.7rem; padding: 1rem; margin: 0.8rem 0; font-size: 1.15rem; }
+.ev-empezar strong { font-size: 1.5rem; }
+.ev-empezar button { font-size: 1.2rem; padding: 0.7rem 1.6rem; }
 .ev-aviso { background: #fef3c7; color: #78350f; padding: 0.5rem 0.8rem; border-radius: 0.4rem; margin: 0.5rem 0; }
 </style>
 
@@ -164,6 +186,11 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
     </div>
 </div>
 
+<div class="ev-empezar" id="ev-empezar" hidden>
+    <span>¿Eres <strong id="ev-nombre"></strong>?</span>
+    <button type="button" class="btn" id="ev-btn-empezar">Sí, soy yo: empezar</button>
+    <span class="muted">Su tiempo parte al confirmar.</span>
+</div>
 <div id="ev-avisos"></div>
 <div id="ev-items"></div>
 
@@ -196,6 +223,7 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
     var estado = null;       // {items: {id: {valor, comentario}}, feedback}
     var sucio = false, guardando = false, timer = null;
     var manual = false;      // el docente eligió a mano: no seguir el reloj
+    var ventanas = {};       // participante -> {inicio_s, fin_s}: su tiempo, desde que confirmó
 
     function esc(s) {
         return String(s).replace(/[&<>"']/g, function (c) {
@@ -367,6 +395,10 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
                 if (!res.ok) throw new Error(res.d.error || 'Error');
                 var p = PARTS.filter(function (x) { return x.id === pid; })[0];
                 if (p) p.estado = res.d.estado;
+                if (res.d.ventana) {
+                    ventanas[pid] = res.d.ventana;
+                    if (actual && actual.id === pid) $('ev-empezar').hidden = true;
+                }
                 if (actual && actual.id === pid) {
                     if (!sucio) guardarLocal();
                     $('ev-guardado').textContent = res.d.estado === 'enviada' ? 'Guardado · evaluación terminada ✓' : 'Guardado ✓';
@@ -412,10 +444,14 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
             }
             $('ev-cod').textContent = 'N.º ' + p.numero;
             $('ev-guardado').textContent = 'Cargando…';
+            $('ev-empezar').hidden = true;
             fetch('osce_evaluar.php?estacion=' + EST + '&cargar=' + p.id, { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
                     if (!actual || actual.id !== p.id) return;
+                    ventanas[p.id] = d.ventana || null;
+                    $('ev-nombre').textContent = d.nombre || ('N.º ' + p.numero);
+                    $('ev-empezar').hidden = !!d.ventana || d.estado === 'enviada' || !d.nombre;
                     var local = leerLocal(p.id);
                     if (local && local.pendiente) {
                         estado = { items: normalizar(local.estado.items || {}), feedback: local.estado.feedback || '' };
@@ -485,6 +521,25 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
         if (!estado) return;
         estado.feedback = this.value;
         aGuardar();
+    });
+    $('ev-btn-empezar').addEventListener('click', function () {
+        if (!actual) return;
+        var pid = actual.id, fd = new FormData();
+        fd.append('csrf_token', CSRF);
+        fd.append('estacion', EST);
+        fd.append('participante', pid);
+        fd.append('accion', 'empezar');
+        this.disabled = true;
+        var btn = this;
+        fetch('osce_evaluar.php?estacion=' + EST, { method: 'POST', body: fd, credentials: 'same-origin' })
+            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+            .then(function (res) {
+                btn.disabled = false;
+                if (!res.ok) throw new Error(res.d.error || 'Error');
+                ventanas[pid] = res.d.ventana;
+                if (actual && actual.id === pid) $('ev-empezar').hidden = true;
+            })
+            .catch(function (e) { btn.disabled = false; $('ev-guardado').textContent = 'No se pudo empezar: ' + e.message; });
     });
     $('ev-terminar').addEventListener('click', function () {
         if (!actual) return;
@@ -569,13 +624,17 @@ admin_header('Evaluar · ' . $est['titulo'], $me);
     }
 
     llenarSelector();
-    OsceReloj.iniciar(URL_RELOJ, function (d, reloj) {
+    OsceReloj.iniciar(URL_RELOJ, function (d, reloj, t) {
         ultimoReloj = { d: d, reloj: reloj };
         var nombres = { antes: 'Aún no parte', estacion: 'En estación', cambio: 'Cambio', entre_vueltas: 'Pausa entre vueltas', terminado: 'Terminado' };
         var fase = reloj ? reloj.fase : 'antes';
         if (d.estado === 'cerrado' || d.estado === 'publicado') fase = 'terminado';
-        $('ev-reloj').style.color = reloj && fase === 'estacion' && reloj.restante_s <= 60 ? '#b91c1c' : '';
-        $('ev-reloj').innerHTML = (reloj && fase !== 'terminado' ? OsceReloj.mmss(reloj.restante_s) : '--:--')
+        // En estación manda el tiempo del alumno en pantalla (parte cuando confirma).
+        var v = actual ? ventanas[actual.id] : null, queda = null;
+        if (fase === 'estacion' && v && t !== null) queda = v.fin_s - t;
+        else if (reloj && fase !== 'estacion' && fase !== 'terminado') queda = reloj.restante_s;
+        $('ev-reloj').style.color = fase === 'estacion' && queda !== null && queda <= 60 ? '#b91c1c' : '';
+        $('ev-reloj').innerHTML = (queda !== null ? OsceReloj.mmss(queda) : (fase === 'estacion' ? 'sin partir' : '--:--'))
             + '<small>' + nombres[fase] + (d.pausado ? ' · en pausa' : '') + (reloj ? (CADENA ? ' · turno ' + (reloj.slot + 1) : ' · vuelta ' + (reloj.vuelta + 1)) : '') + '</small>';
         seguirReloj(ultimoReloj);
         if (d.estado === 'en_curso' && window.LabSimSesion && Date.now() - ultimaActividad > 60000) {

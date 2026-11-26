@@ -304,7 +304,7 @@ $cabeza('OSCE · ' . $o['nombre']);
     <h2>Tu recorrido</h2>
     <ol class="recorrido" id="recorrido">
     <?php foreach ($recorrido as $f): ?>
-        <li data-inicio="<?= (int) $f['inicio_s'] ?>" data-nombre="<?= htmlspecialchars($f['paciente'] !== null
+        <li data-inicio="<?= (int) $f['inicio_s'] ?>" data-turno="<?= (int) $f['turno'] ?>" data-estacion="<?= (int) $f['estacion']['id'] ?>" data-nombre="<?= htmlspecialchars($f['paciente'] !== null
                 ? 'Paciente en ' . $f['estacion']['titulo'] . ' (te limpia el N.º ' . (int) $f['paciente'] . ')'
                 : $f['estacion']['titulo']) ?>" data-paciente="<?= $f['paciente'] !== null ? 1 : 0 ?>">
             <span><?= $f['paciente'] !== null
@@ -333,10 +333,12 @@ $cabeza('OSCE · ' . $o['nombre']);
         return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
     }
 
-    // El estado sale de las horas del recorrido (sirve igual en vueltas y en
-    // cadena, y con el turno de paciente): dónde está ahora, a dónde va.
+    // El OSCE avanza por turnos (Osce::faseTurno): cada estación del
+    // recorrido tiene su turno; el tiempo propio en la estación parte cuando
+    // el alumno confirma su nombre (d.participante.mis trae su fin_s). Las
+    // horas son estimadas: los turnos se alargan si alguien entra tarde.
     OsceReloj.iniciar(url, function (d, reloj, t) {
-        var dur = d.cfg.duracion_s, pausa = d.cfg.pausa_s;
+        var dur = d.cfg.duracion_s;
         var t0 = null;
         if (d.inicio_real && d.estado !== 'en_curso') t0 = d.inicio_real;
         else if (t !== null) t0 = Date.now() / 1000 - t;
@@ -345,18 +347,26 @@ $cabeza('OSCE · ' . $o['nombre']);
             if (m) t0 = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]).getTime() / 1000;
         }
         var filas = Array.prototype.map.call(items, function (li) {
-            return { li: li, ini: +li.dataset.inicio, nombre: li.dataset.nombre, paciente: li.dataset.paciente === '1' };
+            return { li: li, ini: +li.dataset.inicio, turno: +li.dataset.turno, est: +li.dataset.estacion,
+                     nombre: li.dataset.nombre, paciente: li.dataset.paciente === '1' };
         });
+        var mis = (d.participante && d.participante.mis) || [];
+        function mio(f) { return mis.filter(function (x) { return x.estacion_id === f.est; })[0] || null; }
+        var turno = reloj ? reloj.turno : 0;
+        var enEstacion = reloj && reloj.fase === 'estacion';
         var termine = d.estado === 'cerrado' || d.estado === 'publicado'
-            || (t !== null && filas.length && t >= filas[filas.length - 1].ini + dur);
+            || (reloj && filas.length && turno > filas[filas.length - 1].turno);
         var actual = null, siguiente = null;
         filas.forEach(function (f) {
-            f.li.querySelector('.hora').textContent = t0 !== null ? hora(t0 + f.ini) : '';
-            var en = t !== null && t >= f.ini && t < f.ini + dur;
+            var hora0 = t0 !== null ? hora(t0 + f.ini) : '';
+            f.li.querySelector('.hora').textContent = hora0 && !termine ? '≈ ' + hora0 : '';
+            var m = mio(f);
+            var cerrada = m && (m.estado === 'entregada' || m.estado === 'vencida');
+            var en = !!reloj && f.turno === turno && enEstacion && !cerrada;
             if (en) actual = f;
-            if (t !== null && f.ini > t && siguiente === null) siguiente = f;
+            if (reloj && siguiente === null && (f.turno > turno || (f.turno === turno && !enEstacion && reloj.fase === 'antes'))) siguiente = f;
             f.li.classList.toggle('actual', !termine && en);
-            f.li.classList.toggle('hecha', termine || (t !== null && t >= f.ini + dur));
+            f.li.classList.toggle('hecha', termine || (!!reloj && (f.turno < turno || (f.turno === turno && (cerrada || !enEstacion)))));
         });
         if (!$('ahora')) return;
         var fase = '', est = '', cuenta = '';
@@ -366,16 +376,19 @@ $cabeza('OSCE · ' . $o['nombre']);
         } else if (t === null || (reloj && reloj.fase === 'antes')) {
             fase = 'Aún no parte';
             est = filas.length ? 'Primero: ' + filas[0].nombre : '';
-            cuenta = t0 !== null && filas.length ? hora(t0 + filas[0].ini) : '';
+            cuenta = t0 !== null && filas.length ? '≈ ' + hora(t0 + filas[0].ini) : '';
         } else if (actual) {
+            var m = mio(actual);
             fase = actual.paciente ? 'Ahora eres' : 'Estás en';
             est = actual.nombre;
-            cuenta = OsceReloj.mmss(actual.ini + dur - t);
+            cuenta = m && m.fin_s !== null ? OsceReloj.mmss(m.fin_s - t)
+                   : (actual.paciente ? '' : 'Escribe tu número en la estación');
         } else if (siguiente) {
-            var falta = siguiente.ini - t;
-            fase = falta <= pausa ? 'Cambio: dirígete a' : (t < filas[0].ini ? 'Espera tu turno en la sala' : 'Espera: lo próximo es');
+            var proximo = siguiente.turno === turno + 1 && !enEstacion;
+            fase = proximo ? 'Cambio: dirígete a' : (siguiente.turno === turno + 1 ? 'Al terminar este turno vas a' : 'Espera: lo próximo es');
             est = siguiente.nombre;
-            cuenta = falta <= pausa ? OsceReloj.mmss(falta) : 'en ' + OsceReloj.mmss(falta);
+            cuenta = proximo && reloj.restante_s !== null ? OsceReloj.mmss(reloj.restante_s)
+                   : 'en ' + (siguiente.turno - turno) + (siguiente.turno - turno === 1 ? ' turno' : ' turnos');
         }
         if (d.pausado) fase += ' · EN PAUSA';
         $('ahora-fase').textContent = fase;

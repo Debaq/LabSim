@@ -389,6 +389,51 @@ TXT;
         return $codigo;
     }
 
+    /**
+     * Docente (o admin) por usuario y contraseña, sin abrir sesión: solo
+     * para dejar un PC como estación. null si la clave no calza o no es docente.
+     */
+    public static function docentePorClave(string $usuario, string $clave): ?array
+    {
+        $stmt = Db::get()->prepare("SELECT * FROM users WHERE username = ? COLLATE NOCASE AND role = 'admin' AND active = 1");
+        $stmt->execute([$usuario]);
+        $row = $stmt->fetch();
+        $stmt->closeCursor();
+        if (!$row || !$row['password_hash'] || !password_verify($clave, $row['password_hash'])) {
+            return null;
+        }
+        return $row;
+    }
+
+    /**
+     * OSCE (en borrador o en curso) de los cursos del docente con sus
+     * estaciones de la app ya listas (con caso), para elegir en el PC.
+     *
+     * @return list<array{osce:string, curso:string, estado:string, estaciones:list<array{titulo:string, tipo:string, orden:int, codigo:string}>}>
+     */
+    public static function estacionesDelDocente(array $docente): array
+    {
+        $cursos = (int) $docente['permission'] === Auth::PERMISSION_ADMIN ? null : Courses::teacherCourseIds((int) $docente['id']);
+        $out = [];
+        foreach (Osce::porCurso($cursos) as $o) {
+            if (!in_array($o['estado'], ['borrador', 'en_curso'], true)) {
+                continue;
+            }
+            $lista = [];
+            foreach (Osce::estaciones((int) $o['id']) as $k => $e) {
+                if (!self::esApp((string) $e['tipo']) || self::tareas($e) === []) {
+                    continue;
+                }
+                $lista[] = ['titulo' => $e['titulo'], 'tipo' => $e['tipo'], 'orden' => $k + 1,
+                            'codigo' => self::codigoEstacion((int) $e['id'])];
+            }
+            if ($lista) {
+                $out[] = ['osce' => $o['nombre'], 'curso' => $o['curso'], 'estado' => $o['estado'], 'estaciones' => $lista];
+            }
+        }
+        return $out;
+    }
+
     public static function estacionPorCodigo(string $codigo): ?array
     {
         Osce::migrar();
@@ -704,6 +749,8 @@ TXT;
         $peso = str_replace(',', '.', (string) ($in['peso'] ?? ''));
         $t['peso'] = is_numeric($peso) && (float) $peso > 0 ? min(100.0, (float) $peso) : (float) ($tareas[$k]['peso'] ?? 100);
         $t['items'] = $items;
+        // Lo que lee el alumno al abrir el caso (y vuelve a ver desde la ventanita de casos).
+        $t['indicaciones'] = mb_substr(trim((string) ($in['indicaciones'] ?? '')), 0, 2000);
         $tareas[$k] = $t;
         self::guardarTareas($est, $tareas);
     }
@@ -833,7 +880,7 @@ TXT;
             }
             $out[] = ['n' => $k, 'titulo' => $t['titulo'], 'peso' => (float) $t['peso'], 'tipo' => $est['tipo'],
                       'examen' => $t['examen'], 'modulo' => $t['modulo'] ?? self::modulo((string) $t['examen']),
-                      'prueba' => $t['prueba'] ?? 'ABR',
+                      'prueba' => $t['prueba'] ?? 'ABR', 'indicaciones' => (string) ($t['indicaciones'] ?? ''),
                       'curvas' => in_array($est['tipo'], ['marcaje', 'conclusion'], true) ? ($t['curvas'] ?? []) : [],
                       'caso' => $caso];
         }

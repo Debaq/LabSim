@@ -1,11 +1,14 @@
 """Estación OSCE: el PC rinde una estación del OSCE (paso 4 de docs/osce_plan.md).
 
-Se entra desde la ventana de ingreso ("Estación OSCE") con el código corto de
-la estación que muestra el panel (admin/osce_estacion.php). No hay cuenta: se
-entra como el invitado (sin la API normal, ver core/invitado.py) y solo se
-habla con api/osce_app.php y api/osce_reloj.php, que no piden sesión. Cada
-alumno escribe su código; el servidor decide si le toca (reloj) y manda el
-caso; al entregar se sube la sesión del ABR (AbrMainWindow.osce_entrega).
+Se entra desde la ventana de ingreso ("Estación OSCE"): un docente escribe
+su usuario y contraseña, elige el OSCE y la estación de la lista
+(estaciones_docente) y el PC queda con el código de esa estación. La clave
+del docente no se guarda: el equipo entra como el invitado (sin la API
+normal, ver core/invitado.py) y solo habla con api/osce_app.php y
+api/osce_reloj.php, que no piden sesión. Cada alumno escribe su número, ve
+su nombre y lo confirma (entrar + confirmar): ahí parte su tiempo. El
+servidor decide si le toca (turno en curso) y manda los casos; al entregar
+se sube la sesión del equipo (AbrMainWindow.osce_entrega).
 
 Una entrega que no sale (sin red) queda en el equipo (carpeta de datos,
 osce/) y se reintenta sola: lo hecho por un alumno no se pierde aunque el
@@ -72,9 +75,20 @@ def consultar_estacion(codigo):
     return datos
 
 
+def estaciones_docente(usuario, clave):
+    """OSCE de los cursos del docente con sus estaciones de la app:
+    [{osce, curso, estado, estaciones: [{titulo, tipo, orden, codigo}]}]."""
+    return _post({"accion": "estaciones", "usuario": usuario, "clave": clave}).get("osces") or []
+
+
 def entrar(codigo_alumno):
-    """El caso y lo que hay que preparar para este alumno, si le toca."""
+    """Primer paso: el nombre de la tarjeta, para que el alumno confirme que es él."""
     return _post({"accion": "entrar", "estacion": estacion["codigo"], "codigo": normalizar(codigo_alumno)})
+
+
+def confirmar(codigo_alumno):
+    """Segundo paso: parte su tiempo; los casos y su ventana de tiempo."""
+    return _post({"accion": "confirmar", "estacion": estacion["codigo"], "codigo": normalizar(codigo_alumno)})
 
 
 def entregar(codigo_alumno, entrega):

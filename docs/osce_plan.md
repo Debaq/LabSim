@@ -116,16 +116,19 @@ Puesto sin tarea; el sistema lo agrega cuando sobran puestos en una vuelta.
 - El QR abre `student/osce.php?t=<token>` sin login: durante el OSCE muestra
   en qué estación va y cuáles completó; al final muestra puntaje por estación,
   ítems y comentarios **solo cuando el docente publica**.
-- En cada estación el alumno escribe su código (o escanea el QR en la
-  tablet) y la estación queda asociada a él.
-- Los evaluadores ven el código, no el nombre.
+- En cada estación el alumno escribe su número, ve su nombre completo y lo
+  confirma ("Sí, soy yo: empezar"): ahí parte su tiempo. Sin RUT en la base,
+  el nombre hace de verificación (2026-11-25).
 
 ## Reloj
 
-Reloj central del servidor en `admin/osce_vivo.php` (proyector): estación en
-curso, cuenta regresiva, timbre al terminar la estación y al terminar la
-pausa. Las estaciones (tablet y LabSim) leen el mismo reloj (`api/clock.php`
-ya existe) y envían lo que haya al sonar el timbre.
+Por turnos con tiempo por alumno (2026-11-25, ver `docs/decisiones.md`):
+cada alumno tiene sus minutos desde que confirma su nombre en la estación;
+el cambio (2 min) parte cuando todas las estaciones del turno cerraron
+(entregó, se le acabó el tiempo, ausente o descanso) y el panel del
+coordinador (`admin/osce_vivo.php`) dice "cambio" en voz alta. Las
+estaciones leen la fase de `api/osce_reloj.php` (`Osce::faseTurno`) y
+entregan solas al llegar a cero.
 
 ## Sin internet
 
@@ -202,6 +205,12 @@ App LabSim:
 13. ✅ 8 pacientes de latencia media y tardía en la práctica libre (casos
     167-174, fuera del libro; `scripts/practica_lmt/`). Aviso al libro en
     `libro-orl/pendientes_urgentes.md`, sin commitear allá.
+14. ✅ Turnos con tiempo por alumno (parte al confirmar el nombre), cambio
+    cuando cierran todas las estaciones con "cambio" en voz alta, ausentes
+    y "Forzar cambio" en el panel; estación activada solo por un docente
+    (usuario y contraseña → lista de estaciones); ventanita de casos con
+    indicaciones que se aceptan e ida y vuelta entre casos (también en
+    marcaje) (2026-11-25).
 
 ## Pendiente (roadmap al 2026-11-25)
 
@@ -233,6 +242,13 @@ Contenido que falta cargar (en el sistema, por estación):
   bloque Central y VEMP).
 
 Sistema:
+- Curva según la configuración (revisión 2026-11-25): la ganancia no cambia
+  nada (ni saturación ni resolución) en ABR, ECochG ni corticales; la
+  polaridad y el transductor no hacen nada en los corticales; el rechazo de
+  artefactos de 30 a 60 µV da lo mismo que el bien puesto; la ventana solo
+  recorta. Decidir si se conectan antes del 4-dic o se sacan de lo que se
+  evalúa en la estación de configuración.
+- Escribir las indicaciones de cada caso (campo nuevo de la tarea).
 - Probar el día completo de punta a punta con 17 números (sorteo, cadena,
   las 6 estaciones, panel de control, cierre automático, publicación).
 - **Imágenes de los gafetes (tradición del curso, él pidió anotarlo):** cada

@@ -725,7 +725,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             if self._osce_modulo(codigo)[1] is None:
                 self._aviso("Estación OSCE", f"Este equipo no tiene el módulo {codigo}.")
                 return
-        self.barra_osce = BarraOsce(self._osce_abrir, self._osce_entrega, self._osce_cerrar)
+        self.barra_osce = BarraOsce(self._osce_abrir, self._osce_entrega, self._osce_cerrar, self._osce_bloquear)
         self.toolbar_osce = QToolBar("Estación OSCE", self)
         self.toolbar_osce.setMovable(False)
         self.toolbar_osce.setFloatable(False)
@@ -740,9 +740,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if sub is None or sub.isHidden():
             self.activate_auto(codigo)
 
-    def _osce_abrir(self, respuesta):
-        """Una tarea del alumno: su caso al equipo de esa tarea (ABR o VEMP),
-        preparado según el tipo de estación (osce_preparar)."""
+    def _osce_abrir(self, respuesta, hecho=None):
+        """Un caso del alumno: al equipo de ese caso (ABR o VEMP), preparado
+        según el tipo de estación (osce_preparar). Con hecho (vuelve a un caso
+        que ya trabajó) queda como lo dejó (osce_restaurar)."""
         self._osce_mod_actual = respuesta.get("modulo") or (osce.estacion or {}).get("modulo") or "ABR"
         caso = respuesta["caso"]
         self.data_current = caso
@@ -753,7 +754,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         frame.obj.la_super(caso, self.data_current_key)
         frame.obj.osce_preparar(respuesta.get("tipo"), respuesta.get("prueba") or "ABR",
                                 [tuple(c) for c in respuesta.get("curvas") or []], random.Random())
+        if hecho:
+            frame.obj.osce_restaurar(hecho)
         self._osce_mostrar_modulo()
+
+    def _osce_bloquear(self, bloquear):
+        """Congela el equipo del caso abierto (indicaciones sin aceptar o
+        tiempo terminado). La barra y la ventanita de casos siguen vivas."""
+        frame = self._osce_modulo()[1]
+        if frame is not None:
+            frame.obj.setEnabled(not bloquear)
 
     def _osce_entrega(self):
         return self._osce_modulo()[1].obj.osce_entrega()

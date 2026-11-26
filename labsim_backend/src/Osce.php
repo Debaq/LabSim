@@ -15,8 +15,14 @@ declare(strict_types=1);
  * hay más vueltas, repartidas parejas (17 en 6 puestos: 6 + 6 + 5).
  *
  * Reloj: corre desde que el docente aprieta "Iniciar" (inicio_epoch) menos
- * lo que estuvo en pausa. Todas las pantallas (proyector, página del QR,
- * estaciones) calculan la fase con estadoReloj() y la misma configuración.
+ * lo que estuvo en pausa (transcurrido()). Sobre ese reloj, el OSCE avanza
+ * por TURNOS (2026-11-25, avanzar()): en cada turno cada alumno tiene su
+ * propio tiempo, que parte cuando confirma su nombre en la estación
+ * (iniciarReloj); cuando todas las estaciones del turno cerraron (entregó,
+ * se le acabó el tiempo, ausente o descanso) parte el cambio (pausa_s) y
+ * después el turno siguiente. Así todos tienen siempre su tiempo completo
+ * aunque las estaciones queden desfasadas. estadoReloj() queda como el
+ * horario ESTIMADO (sin desfases) para el armado y la página del QR.
  */
 final class Osce
 {
@@ -192,6 +198,7 @@ final class Osce
             )"
         );
         self::migrarTarjetas($pdo);
+        self::migrarTurnos($pdo);
         // Columnas que llegaron después de crear la tabla (paso 3: corrección con IA).
         $cols = array_column($pdo->query('PRAGMA table_info(osce_resultado)')->fetchAll(), 'name');
         if (!in_array('ia_puntaje', $cols, true)) {
@@ -281,6 +288,30 @@ final class Osce
         }
         $pdo->commit();
         $pdo->exec('PRAGMA foreign_keys = ON');
+    }
+
+    /**
+     * Turnos con tiempo por alumno (2026-11-25): turno en curso y desde qué
+     * segundo del reloj corre el cambio; cuándo partió el tiempo de cada
+     * alumno en cada estación; alumnos ausentes.
+     */
+    private static function migrarTurnos(PDO $pdo): void
+    {
+        $cols = array_column($pdo->query('PRAGMA table_info(osce)')->fetchAll(), 'name');
+        if (!in_array('turno', $cols, true)) {
+            $pdo->exec('ALTER TABLE osce ADD COLUMN turno INTEGER NOT NULL DEFAULT 0');
+        }
+        if (!in_array('cambio_desde_s', $cols, true)) {
+            $pdo->exec('ALTER TABLE osce ADD COLUMN cambio_desde_s INTEGER');
+        }
+        $cols = array_column($pdo->query('PRAGMA table_info(osce_entrega)')->fetchAll(), 'name');
+        if (!in_array('reloj_inicio_s', $cols, true)) {
+            $pdo->exec('ALTER TABLE osce_entrega ADD COLUMN reloj_inicio_s INTEGER');
+        }
+        $cols = array_column($pdo->query('PRAGMA table_info(osce_participante)')->fetchAll(), 'name');
+        if (!in_array('ausente', $cols, true)) {
+            $pdo->exec('ALTER TABLE osce_participante ADD COLUMN ausente INTEGER NOT NULL DEFAULT 0');
+        }
     }
 
     // -- Cálculos puros (sin base) ---------------------------------------
@@ -436,6 +467,127 @@ final class Osce
         }
         $hasta = $osce['pausado_desde'] !== null ? (int) $osce['pausado_desde'] : $ahora;
         return max(0, $hasta - (int) $osce['inicio_epoch'] - (int) $osce['pausado_acum_s']);
+    }
+
+    // -- Turnos (tiempo por alumno) ---------------------------------------
+
+    /** Segundos que se esperan las entregas automáticas tras el fin del tiempo de un alumno. */
+    public const GRACIA_S = 20;
+
+    /** Turnos del OSCE completo: en cadena, los turnos; en vueltas, vueltas × estaciones. */
+    public static function totalTurnos(array $cfg): int
+    {
+        if (($cfg['modo'] ?? 'vueltas') === 'cadena') {
+            return (int) ($cfg['turnos'] ?? 0);
+        }
+        return (int) $cfg['vueltas'] * (int) $cfg['estaciones'];
+    }
+
+    /** En qué turno (0..) le toca a un alumno la estación de índice $i. */
+    public static function turnoDe(array $cfg, array $p, int $i): int
+    {
+        $v = self::ventana($cfg, $p, $i);
+        if (($cfg['modo'] ?? 'vueltas') === 'cadena') {
+            return $v['slot'];
+        }
+        return (int) $p['vuelta'] * (int) $cfg['estaciones'] + $v['slot'];
+    }
+
+    /** Vuelta y tiempo dentro de la vuelta de un turno (lo que muestran las pantallas). */
+    public static function vueltaSlot(array $cfg, int $turno): array
+    {
+        if (($cfg['modo'] ?? 'vueltas') === 'cadena') {
+            return ['vuelta' => 0, 'slot' => $turno];
+        }
+        $S = max(1, (int) $cfg['estaciones']);
+        return ['vuelta' => intdiv($turno, $S), 'slot' => $turno % $S];
+    }
+
+    /** Largo del cambio que sigue al turno: en vueltas, al cerrar una vuelta va la pausa entre vueltas. */
+    public static function largoCambio(array $cfg, int $turno): int
+    {
+        if (($cfg['modo'] ?? 'vueltas') !== 'cadena' && ($turno + 1) % max(1, (int) $cfg['estaciones']) === 0) {
+            return max((int) $cfg['pausa_s'], (int) $cfg['pausa_vueltas_s']);
+        }
+        return (int) $cfg['pausa_s'];
+    }
+
+    /**
+     * Estado de cada alumno que tiene estación en el turno. Puro: recibe
+     * todo armado.
+     *   $estaciones  lista en orden (con 'id' y 'tipo')
+     *   $entregas    [participante_id][estacion_id] => fila de osce_entrega
+     * estado: esperando (no ha confirmado su nombre) | trabajando |
+     * entregada | vencida (se le acabó el tiempo) | ausente | descanso.
+     * Abiertos = esperando + trabajando: mientras haya uno, el turno sigue.
+     *
+     * @return array{pares: list<array>, abiertos: int, restante_s: ?int}
+     */
+    public static function estadoTurno(array $cfg, array $estaciones, array $parts, array $entregas, int $turno, int $t): array
+    {
+        $dur = (int) $cfg['duracion_s'];
+        $pares = [];
+        $abiertos = 0;
+        $restante = null;
+        foreach ($parts as $p) {
+            foreach ($estaciones as $i => $e) {
+                if (self::turnoDe($cfg, $p, $i) !== $turno) {
+                    continue;
+                }
+                $en = $entregas[(int) $p['id']][(int) $e['id']] ?? null;
+                $queda = null;
+                if ($e['tipo'] === 'descanso') {
+                    $estado = 'descanso';
+                } elseif ($en !== null && $en['estado'] === 'enviada') {
+                    $estado = 'entregada';
+                } elseif ((int) ($p['ausente'] ?? 0) === 1) {
+                    $estado = 'ausente';
+                } elseif ($en !== null && $en['reloj_inicio_s'] !== null) {
+                    $queda = (int) $en['reloj_inicio_s'] + $dur - $t;
+                    $estado = $queda + self::GRACIA_S < 0 ? 'vencida' : 'trabajando';
+                } else {
+                    $estado = 'esperando';
+                }
+                if ($estado === 'esperando' || $estado === 'trabajando') {
+                    $abiertos++;
+                }
+                if ($estado === 'trabajando') {
+                    $restante = max($restante ?? 0, max(0, $queda));
+                }
+                $pares[] = ['participante_id' => (int) $p['id'], 'numero' => (int) $p['numero'], 'indice' => $i,
+                            'estacion_id' => (int) $e['id'], 'estado' => $estado,
+                            'restante_s' => $queda === null ? null : max(0, $queda),
+                            'fin_s' => $queda === null ? null : (int) $en['reloj_inicio_s'] + $dur];
+            }
+        }
+        return ['pares' => $pares, 'abiertos' => $abiertos, 'restante_s' => $restante];
+    }
+
+    /**
+     * Fase para las pantallas, con la forma de estadoReloj() (fase, vuelta,
+     * slot, restante_s) más turno, total y cuántos siguen trabajando.
+     * En estación, restante_s es lo que le queda al último que entró (null
+     * si nadie ha confirmado todavía).
+     */
+    public static function faseTurno(array $o, array $cfg, ?array $st, ?int $t): array
+    {
+        $total = self::totalTurnos($cfg);
+        $turno = (int) ($o['turno'] ?? 0);
+        $vs = self::vueltaSlot($cfg, min($turno, max(0, $total - 1)));
+        $base = $vs + ['turno' => $turno, 'total_turnos' => $total, 'abiertos' => $st['abiertos'] ?? 0];
+        if ($t === null || $o['estado'] === 'borrador') {
+            return ['fase' => 'antes', 'restante_s' => null] + $base;
+        }
+        if ($o['estado'] !== 'en_curso' || $turno >= $total) {
+            return ['fase' => 'terminado', 'restante_s' => 0] + $base;
+        }
+        if ($o['cambio_desde_s'] !== null) {
+            $largo = self::largoCambio($cfg, $turno);
+            $entreVueltas = $largo !== (int) $cfg['pausa_s'];
+            return ['fase' => $entreVueltas ? 'entre_vueltas' : 'cambio',
+                    'restante_s' => max(0, (int) $o['cambio_desde_s'] + $largo - $t)] + $base;
+        }
+        return ['fase' => 'estacion', 'restante_s' => $st['restante_s'] ?? null] + $base;
     }
 
     // -- Base ----------------------------------------------------------
@@ -910,7 +1062,7 @@ final class Osce
             throw new InvalidArgumentException('Faltan estaciones o alumnos para iniciar.');
         }
         Db::reintentar(static function () use ($id): void {
-            Db::get()->prepare("UPDATE osce SET estado = 'en_curso', inicio_epoch = ?, pausado_desde = NULL, pausado_acum_s = 0 WHERE id = ?")
+            Db::get()->prepare("UPDATE osce SET estado = 'en_curso', inicio_epoch = ?, pausado_desde = NULL, pausado_acum_s = 0, turno = 0, cambio_desde_s = NULL WHERE id = ?")
                 ->execute([time(), $id]);
         });
     }
@@ -998,28 +1150,194 @@ final class Osce
         return $t >= $v['inicio_s'] - max(30, $cfg['pausa_s']) && $t <= $v['fin_s'] + $gracia;
     }
 
+    /** Lo que usa estadoTurno() de un OSCE: estaciones, tarjetas, configuración y entregas. */
+    public static function contexto(array $o): array
+    {
+        $estaciones = self::estaciones((int) $o['id']);
+        $parts = self::participantes((int) $o['id']);
+        $cfg = self::cfgReloj($o, count($estaciones), count($parts));
+        $stmt = Db::get()->prepare(
+            'SELECT e.* FROM osce_entrega e JOIN osce_participante p ON p.id = e.participante_id WHERE p.osce_id = ?'
+        );
+        $stmt->execute([(int) $o['id']]);
+        $entregas = [];
+        foreach ($stmt->fetchAll() as $en) {
+            $entregas[(int) $en['participante_id']][(int) $en['estacion_id']] = $en;
+        }
+        return ['estaciones' => $estaciones, 'parts' => $parts, 'cfg' => $cfg, 'entregas' => $entregas];
+    }
+
     /**
-     * Cierra solo el OSCE cuando terminó el último turno, con margen para que
-     * las tablets y los PCs alcancen a entregar solos (lo llaman las
-     * pantallas al pedir el reloj). Devuelve el OSCE como quedó.
+     * Mueve los turnos según lo que pasó (lo llaman las pantallas al pedir
+     * el reloj, cada pocos segundos): con todas las estaciones del turno
+     * cerradas parte el cambio; terminado el cambio, el turno siguiente;
+     * tras el último turno se cierra el OSCE. Cada paso es un UPDATE
+     * condicionado al estado anterior: dos pantallas a la vez no saltan
+     * dos turnos. Devuelve el OSCE como quedó.
      */
-    public static function cerrarSiTermino(array $o): array
+    public static function avanzar(array $o): array
     {
         if ($o['estado'] !== 'en_curso' || $o['pausado_desde'] !== null) {
             return $o;
         }
-        $S = count(self::estaciones((int) $o['id']));
-        $stmt = Db::get()->prepare('SELECT COUNT(*) FROM osce_participante WHERE osce_id = ?');
-        $stmt->execute([(int) $o['id']]);
-        $cfg = self::cfgReloj($o, $S, (int) $stmt->fetchColumn());
-        $stmt->closeCursor();
         $t = self::transcurrido($o, time());
-        $margen = max(60, $cfg['pausa_s']) + 60;
-        if ($t === null || $t < self::duracionTotal($cfg) + $margen) {
+        if ($t === null) {
             return $o;
         }
-        self::cerrar((int) $o['id']);
-        return self::obtener((int) $o['id']) ?? $o;
+        $ctx = self::contexto($o);
+        $total = self::totalTurnos($ctx['cfg']);
+        $pdo = Db::get();
+        for ($paso = 0; $paso < 4; $paso++) {
+            $turno = (int) $o['turno'];
+            $id = (int) $o['id'];
+            if ($turno >= $total) {
+                self::cerrar($id);
+                return self::obtener($id) ?? $o;
+            }
+            if ($o['cambio_desde_s'] !== null) {
+                if ($t < (int) $o['cambio_desde_s'] + self::largoCambio($ctx['cfg'], $turno)) {
+                    return $o;
+                }
+                Db::reintentar(static function () use ($pdo, $id, $turno): void {
+                    $pdo->prepare('UPDATE osce SET turno = turno + 1, cambio_desde_s = NULL
+                                    WHERE id = ? AND turno = ? AND cambio_desde_s IS NOT NULL')->execute([$id, $turno]);
+                });
+                $o = self::obtener($id) ?? $o;
+                continue;
+            }
+            $st = self::estadoTurno($ctx['cfg'], $ctx['estaciones'], $ctx['parts'], $ctx['entregas'], $turno, $t);
+            if ($st['abiertos'] > 0) {
+                return $o;
+            }
+            if ($turno >= $total - 1) {
+                self::cerrar($id);
+                return self::obtener($id) ?? $o;
+            }
+            // Un turno sin nadie no gasta cambio.
+            $sql = $st['pares'] === []
+                ? 'UPDATE osce SET turno = turno + 1 WHERE id = ? AND turno = ? AND cambio_desde_s IS NULL'
+                : 'UPDATE osce SET cambio_desde_s = ' . $t . ' WHERE id = ? AND turno = ? AND cambio_desde_s IS NULL';
+            Db::reintentar(static function () use ($pdo, $sql, $id, $turno): void {
+                $pdo->prepare($sql)->execute([$id, $turno]);
+            });
+            $o = self::obtener($id) ?? $o;
+        }
+        return $o;
+    }
+
+    /** Compatibilidad: las pantallas llamaban a esto al pedir el reloj. */
+    public static function cerrarSiTermino(array $o): array
+    {
+        return self::avanzar($o);
+    }
+
+    /**
+     * El coordinador da el turno por terminado aunque falte alguien (una
+     * estación que no cierra, un alumno que no llegó y no se marcó
+     * ausente): parte el cambio ya. En el último turno cierra el OSCE.
+     */
+    public static function forzarCambio(int $id): void
+    {
+        $o = self::obtener($id);
+        if ($o === null || $o['estado'] !== 'en_curso' || $o['cambio_desde_s'] !== null) {
+            return;
+        }
+        $ctx = self::contexto($o);
+        if ((int) $o['turno'] >= self::totalTurnos($ctx['cfg']) - 1) {
+            self::cerrar($id);
+            return;
+        }
+        $t = (int) self::transcurrido($o, time());
+        Db::reintentar(static function () use ($id, $t, $o): void {
+            Db::get()->prepare('UPDATE osce SET cambio_desde_s = ? WHERE id = ? AND turno = ? AND cambio_desde_s IS NULL')
+                ->execute([$t, $id, (int) $o['turno']]);
+        });
+    }
+
+    /** Marca (o desmarca) ausente a la tarjeta de ese número: sus estaciones no esperan. */
+    public static function marcarAusente(int $osceId, int $numero, bool $ausente): void
+    {
+        Db::reintentar(static function () use ($osceId, $numero, $ausente): void {
+            Db::get()->prepare('UPDATE osce_participante SET ausente = ? WHERE osce_id = ? AND numero = ?')
+                ->execute([$ausente ? 1 : 0, $osceId, $numero]);
+        });
+    }
+
+    /**
+     * ¿Puede el alumno trabajar ahora en esa estación? null si puede; si no,
+     * el motivo para mostrarle. Puede si la estación es suya en el turno en
+     * curso (no durante el cambio), o si ya partió su tiempo ahí y no se le
+     * ha acabado (se cayó el equipo y vuelve a entrar: sigue su mismo reloj).
+     */
+    public static function motivoNoToca(array $o, array $est, array $p): ?string
+    {
+        $o = self::avanzar($o);
+        if ($o['estado'] === 'borrador') {
+            return 'El OSCE aún no parte.';
+        }
+        if ($o['estado'] !== 'en_curso') {
+            return 'El OSCE ya terminó.';
+        }
+        if ((int) ($p['ausente'] ?? 0) === 1) {
+            return 'Tu número está marcado como ausente. Avisa al docente.';
+        }
+        $ctx = self::contexto($o);
+        $indice = array_search((int) $est['id'], array_map('intval', array_column($ctx['estaciones'], 'id')), true);
+        if ($indice === false) {
+            return 'Estación no encontrada.';
+        }
+        $en = $ctx['entregas'][(int) $p['id']][(int) $est['id']] ?? null;
+        if ($en !== null && $en['estado'] === 'enviada') {
+            return 'Ya entregaste esta estación.';
+        }
+        $t = (int) self::transcurrido($o, time());
+        if ($en !== null && $en['reloj_inicio_s'] !== null) {
+            return (int) $en['reloj_inicio_s'] + (int) $ctx['cfg']['duracion_s'] + self::GRACIA_S < $t
+                ? 'Se acabó tu tiempo en esta estación.' : null;
+        }
+        $suyo = self::turnoDe($ctx['cfg'], $p, (int) $indice);
+        $turno = (int) $o['turno'];
+        if ($suyo === $turno && $o['cambio_desde_s'] === null) {
+            return null;
+        }
+        if ($suyo === $turno + 1 && $o['cambio_desde_s'] !== null) {
+            $queda = max(0, (int) $o['cambio_desde_s'] + self::largoCambio($ctx['cfg'], $turno) - $t);
+            return sprintf('Estamos en el cambio: esta estación te recibe en %d:%02d.', intdiv($queda, 60), $queda % 60);
+        }
+        return $suyo > $turno ? 'Todavía no te toca esta estación. Revisa tu tarjeta.'
+                              : 'Tu turno en esta estación ya pasó. Avisa al docente.';
+    }
+
+    /**
+     * Parte el tiempo del alumno en la estación (al confirmar su nombre). Si
+     * ya había partido no lo mueve. Devuelve su ventana en segundos del reloj.
+     *
+     * @return array{inicio_s:int, fin_s:int}
+     */
+    public static function iniciarReloj(array $o, int $participanteId, int $estacionId): array
+    {
+        $t = (int) self::transcurrido($o, time());
+        Db::reintentar(static function () use ($participanteId, $estacionId, $t): void {
+            $pdo = Db::get();
+            $pdo->prepare('INSERT INTO osce_entrega (participante_id, estacion_id) VALUES (?, ?)
+                           ON CONFLICT (participante_id, estacion_id) DO NOTHING')->execute([$participanteId, $estacionId]);
+            $pdo->prepare('UPDATE osce_entrega SET reloj_inicio_s = ? WHERE participante_id = ? AND estacion_id = ? AND reloj_inicio_s IS NULL')
+                ->execute([$t, $participanteId, $estacionId]);
+        });
+        return self::ventanaReal($o, $participanteId, $estacionId) ?? ['inicio_s' => $t, 'fin_s' => $t + (int) $o['duracion_s']];
+    }
+
+    /** Ventana real del alumno en la estación (desde que confirmó), o null si no ha partido. */
+    public static function ventanaReal(array $o, int $participanteId, int $estacionId): ?array
+    {
+        $stmt = Db::get()->prepare('SELECT reloj_inicio_s FROM osce_entrega WHERE participante_id = ? AND estacion_id = ?');
+        $stmt->execute([$participanteId, $estacionId]);
+        $ini = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        if ($ini === false || $ini === null) {
+            return null;
+        }
+        return ['inicio_s' => (int) $ini, 'fin_s' => (int) $ini + (int) $o['duracion_s']];
     }
 
     /**
@@ -1065,7 +1383,7 @@ final class Osce
         }
         Db::reintentar(static function () use ($id): void {
             Db::get()->prepare(
-                "UPDATE osce SET estado = 'borrador', inicio_epoch = NULL, pausado_desde = NULL, pausado_acum_s = 0 WHERE id = ?"
+                "UPDATE osce SET estado = 'borrador', inicio_epoch = NULL, pausado_desde = NULL, pausado_acum_s = 0, turno = 0, cambio_desde_s = NULL WHERE id = ?"
             )->execute([$id]);
         });
     }
@@ -1076,16 +1394,13 @@ final class Osce
      */
     public static function estadoPublico(array $o, ?array $participante = null): array
     {
-        $o = self::cerrarSiTermino($o);
-        $estaciones = self::estaciones((int) $o['id']);
-        $S = count($estaciones);
-        $stmt = Db::get()->prepare('SELECT COUNT(*) FROM osce_participante WHERE osce_id = ?');
-        $stmt->execute([(int) $o['id']]);
-        $n = (int) $stmt->fetchColumn();
-        $stmt->closeCursor();
-        $cfg = self::cfgReloj($o, $S, $n);
+        $o = self::avanzar($o);
+        $ctx = self::contexto($o);
+        $estaciones = $ctx['estaciones'];
+        $cfg = $ctx['cfg'];
         $ahora = time();
         $t = self::transcurrido($o, $ahora);
+        $st = $t === null ? null : self::estadoTurno($cfg, $estaciones, $ctx['parts'], $ctx['entregas'], (int) $o['turno'], $t);
         $out = [
             'nombre' => $o['nombre'],
             'estado' => $o['estado'],
@@ -1099,7 +1414,9 @@ final class Osce
             'cfg' => $cfg,
             'circuitos' => (int) $o['circuitos'],
             'total_s' => self::duracionTotal($cfg),
-            'reloj' => $t === null ? null : self::estadoReloj($cfg, $t),
+            // Fase por turnos (faseTurno): en estación, restante_s es lo que
+            // le queda al último que entró; null si nadie ha confirmado aún.
+            'reloj' => $t === null ? null : self::faseTurno($o, $cfg, $st, $t),
             'estaciones' => array_map(static fn ($e) => ['id' => (int) $e['id'], 'titulo' => $e['titulo'], 'tipo' => $e['tipo']], $estaciones),
         ];
         if ($participante !== null) {
@@ -1111,6 +1428,10 @@ final class Osce
                 'puesto' => (int) $participante['puesto'],
                 'grupo' => self::grupo((int) $participante['numero'], $cfg['por_turno']),
                 'carril' => self::carril((int) $participante['numero'], $cfg['por_turno']),
+                'ausente' => (int) ($participante['ausente'] ?? 0) === 1,
+                // Turno de cada estación (en el orden de 'estaciones') y cómo va en cada una.
+                'turnos' => array_map(static fn ($i) => self::turnoDe($cfg, $participante, $i), array_keys($estaciones)),
+                'mis' => array_values(array_filter($st['pares'] ?? [], static fn ($x) => $x['participante_id'] === (int) $participante['id'])),
             ];
         }
         return $out;
@@ -1140,7 +1461,7 @@ final class Osce
         $filas = [];
         foreach ($estaciones as $i => $e) {
             $v = self::ventana($cfg, $p, $i);
-            $filas[] = ['slot' => $v['slot'], 'estacion' => $e, 'inicio_s' => $v['inicio_s'],
+            $filas[] = ['slot' => $v['slot'], 'turno' => self::turnoDe($cfg, $p, $i), 'estacion' => $e, 'inicio_s' => $v['inicio_s'],
                         'entrega' => $entregas[(int) $e['id']] ?? null, 'paciente' => null];
         }
         if ($cfg['modo'] === 'cadena' && $S > 0) {
@@ -1148,7 +1469,7 @@ final class Osce
             $tp = self::turnoPaciente(self::grupo((int) $p['numero'], $k), $cfg['grupos']);
             $quien = $tp === null ? null : $tp * $k + self::carril((int) $p['numero'], $k) + 1;
             if ($tp !== null && $quien <= $n) {
-                $filas[] = ['slot' => $tp, 'estacion' => $estaciones[0], 'inicio_s' => self::inicioSlot($cfg, 0, $tp),
+                $filas[] = ['slot' => $tp, 'turno' => $tp, 'estacion' => $estaciones[0], 'inicio_s' => self::inicioSlot($cfg, 0, $tp),
                             'entrega' => null, 'paciente' => $quien];
             }
         }

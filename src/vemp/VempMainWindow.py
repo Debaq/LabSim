@@ -889,6 +889,35 @@ class VempMainWindow(QMainWindow):
                      'hallazgos': self.informe.hallazgos(), 'conclusion': self.informe.conclusion()},
         }
 
+    def osce_restaurar(self, hecho):
+        """Vuelve un caso de la estación como el alumno lo dejó (ver
+        AbrMainWindow.osce_restaurar): curvas con marcas, informe y mandos."""
+        if not isinstance(hecho, dict) or hecho.get('modulo') != 'VEMP' or self.caso is None:
+            return
+        if self.timer_captura.isActive():
+            self.detener()
+        self.sesion.registros.clear()
+        self._limpiar_vistas()
+        self.restore_report(hecho.get('vemp') or {})
+        panel = hecho.get('panel') or {}
+        c = self.control
+
+        def combo(cb, texto):
+            i = cb.findText(str(texto)) if texto is not None else -1
+            if i >= 0:
+                cb.setCurrentIndex(i)
+
+        combo(c.cb_transductor, panel.get('transducer'))
+        combo(c.cb_freq, panel.get('freq'))
+        combo(c.cb_pol, panel.get('pol'))
+        combo(c.cb_maniobra, panel.get('maniobra'))
+        for spin, clave in ((c.sb_int, 'int'), (c.sb_tasa, 'rate'), (c.sb_promedios, 'average'),
+                            (c.sb_filtro_alto, 'filter_passhigh'), (c.sb_filtro_bajo, 'filter_down')):
+            if panel.get(clave) is not None:
+                spin.setValue(type(spin.value())(panel[clave]))
+        if panel.get('side') in ('OD', 'OI'):
+            (c.btn_od if panel['side'] == 'OD' else c.btn_oi).click()
+
     def hideEvent(self, evento):
         # Ventana escondida: ni el EMG de fondo ni la captura siguen
         # corriendo. El registro queda donde iba y sigue al volver.

@@ -5,6 +5,64 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## OSCE: turnos con tiempo por alumno, nombre confirmado y casos de ida y vuelta (2026-11-25)
+
+Él: "todas las estaciones al llegar te piden tu número y debes verificar tu
+rut; al salir de la ventana de verificar parte el tiempo (habrá un desajuste
+entre estaciones pero está bien: todos tienen siempre 8 minutos); cuando
+todas las estaciones estén cerradas parten los 2 minutos de cambio". Y en
+la configuración: indicaciones que se aceptan, una ventanita con "siguiente
+caso", lanzar curvas para verificar, ir y venir, y al acabarse el tiempo se
+cierra.
+
+- **Reloj por turnos** (`Osce::avanzar`, `estadoTurno`, `faseTurno`): el
+  reloj del OSCE sigue corriendo desde "Iniciar" (con pausas), pero ya no
+  hay un horario fijo. En cada turno cada alumno tiene SU tiempo desde que
+  confirma su nombre (`osce_entrega.reloj_inicio_s`, `iniciarReloj`). Una
+  estación del turno está cerrada si entregó, se le acabó el tiempo (más 20 s
+  de gracia para la entrega automática), el alumno está ausente o es
+  descanso. Con todas cerradas parte el cambio (`osce.cambio_desde_s`,
+  `pausa_s`; en vueltas, al cerrar la vuelta, la pausa entre vueltas); al
+  terminar el cambio, el turno siguiente; tras el último se cierra el OSCE.
+  Lo mueven las pantallas al pedir el reloj (cada 5 s), con UPDATE
+  condicionados para que dos pantallas no salten dos turnos. Un turno sin
+  nadie no gasta cambio. Durante el cambio la estación no recibe ("te
+  recibe en m:ss"). `estadoReloj()` queda como horario estimado (armado y
+  horas "≈" de la página del QR).
+- **Sin RUT: nombre completo.** Los usuarios no tienen RUT (llegan de Moodle
+  sin él). El alumno escribe su número, la estación muestra "¿Eres Nombre
+  Apellido?" y con "Sí, soy yo: empezar" parte su tiempo (API `entrar` →
+  `confirmar`; en la tablet de preguntas igual; en la pauta docente, botón
+  "Sí, soy yo: empezar" en la tablet del docente, y marcar un ítem en su
+  turno también lo parte). Tarjeta sin dueño: no entra ("escanea el QR de tu
+  gafete o avisa al docente"). Volver a entrar no reinicia su tiempo.
+- **Panel del coordinador:** cada estación del turno con el número, su
+  estado y lo que le queda; la cuenta grande es la del último que entró. Al
+  partir el cambio dice "Cambio" en voz alta (síntesis del navegador en
+  español, tras activar "Voz y timbre en este equipo"); "Fin del OSCE" al
+  cerrar. "Forzar cambio" si una estación no cierra; ausentes con un toque
+  (sus estaciones no los esperan); "+1 min a todos" / "−1 min a todos".
+- **Activar la estación en el PC:** solo un docente. En "Estación OSCE" del
+  ingreso escribe su usuario y contraseña (api `estaciones`, con el mismo
+  límite de intentos del login; no abre sesión ni se guarda), elige el OSCE
+  y la estación de la lista y el PC queda con el código de esa estación. Se
+  reemplazó el código que había que copiar del panel: la clave del docente
+  hace de token.
+- **Casos en la app** (`core/osce_barra.py`): la barra queda con número,
+  nombre, cuenta y Entregar; los casos van en una ventanita flotante
+  (`VentanaCasos`). Al abrir un caso por primera vez muestra sus
+  indicaciones (campo nuevo de la tarea en el editor de la estación) y el
+  equipo queda bloqueado hasta "Acepto: empezar". Con "← Caso anterior" /
+  "Siguiente caso →" va y viene: lo hecho en cada caso se guarda al salir y
+  vuelve al regresar (`osce_restaurar` en ABR y VEMP: curvas, marcas, panel,
+  equipo, verdad). **También en marcaje** ("así usan el tiempo que les
+  sobra"). Al llegar a cero entrega sola, bloquea el equipo y lo cierra.
+- En la configuración el montaje viene hecho y con impedancias ideales: la
+  curva depende solo de la configuración. Revisión de qué mandos cambian la
+  curva (agente, 2026-11-25): huecos en ganancia (no hace nada), polaridad y
+  transductor en los corticales y el rechazo sobre 30 µV (igual al bien
+  puesto); quedan en el roadmap de `docs/osce_plan.md`.
+
 ## OSCE: estaciones configurables al crearlo (2026-11-25)
 
 **Qué:** LabSim tendrá OSCE (plan en `docs/osce_plan.md`). Primer uso: prueba

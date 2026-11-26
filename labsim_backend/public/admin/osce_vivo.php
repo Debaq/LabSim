@@ -10,8 +10,11 @@ require_once __DIR__ . '/_layout.php';
 /**
  * Panel de control del docente que coordina el OSCE: fase, cuenta
  * regresiva, quién debería estar en cada estación y, en vivo, si ya entró o
- * entregó (las tablets y los PCs avisan los tiempos a cada alumno; acá se ve
- * el conjunto). Los controles (iniciar, pausar, correr el reloj,
+ * entregó y cuánto le queda (las tablets y los PCs avisan los tiempos a cada
+ * alumno; acá se ve el conjunto). Por turnos: cuando todas las estaciones
+ * cerraron parte el cambio y este equipo dice "cambio" en voz alta. Si una
+ * estación no cierra, "Forzar cambio"; un alumno que no vino se marca
+ * ausente y sus estaciones no lo esperan. Los controles (iniciar, pausar, correr el reloj,
  * cerrar) mueven el reloj de todas las pantallas a la vez: el estado vive en
  * la base (Osce::iniciar/pausar/...) y cada pantalla lo lee de
  * api/osce_reloj.php.
@@ -26,8 +29,18 @@ if ($osce === null || !Courses::canAdminister((int) $osce['course_id'], $me)) {
 }
 
 if (isset($_GET['estado'])) {
-    // Quién entró y quién entregó en cada estación (lo pide el panel cada pocos segundos).
-    Response::json(['entregas' => (object) array_map(static fn ($m) => (object) $m, Osce::estadosEntregas($id))]);
+    // Quién entró y quién entregó en cada estación, y cómo va cada alumno del
+    // turno en curso (lo pide el panel cada pocos segundos).
+    $o = Osce::avanzar($osce);
+    $ctx = Osce::contexto($o);
+    $t = Osce::transcurrido($o, time());
+    $st = $t === null ? null : Osce::estadoTurno($ctx['cfg'], $ctx['estaciones'], $ctx['parts'], $ctx['entregas'], (int) $o['turno'], $t);
+    Response::json([
+        'entregas' => (object) array_map(static fn ($m) => (object) $m, Osce::estadosEntregas($id)),
+        'turno' => $st['pares'] ?? [],
+        'ausentes' => array_values(array_map(static fn ($p) => (int) $p['numero'],
+            array_filter($ctx['parts'], static fn ($p) => (int) ($p['ausente'] ?? 0) === 1))),
+    ]);
 }
 
 $error = null;
@@ -39,8 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'iniciar': Osce::iniciar($id); break;
             case 'pausar': Osce::pausar($id); break;
             case 'reanudar': Osce::reanudar($id); break;
-            case 'adelantar': Osce::ajustar($id, 60); break;
-            case 'atrasar': Osce::ajustar($id, -60); break;
+            // El reloj corre para todos: +1 min les da un minuto más a todos los que trabajan.
+            case 'mas_tiempo': Osce::ajustar($id, -60); break;
+            case 'menos_tiempo': Osce::ajustar($id, 60); break;
+            case 'forzar_cambio': Osce::forzarCambio($id); break;
+            case 'ausente': Osce::marcarAusente($id, (int) ($_POST['numero'] ?? 0), !empty($_POST['valor'])); break;
             case 'cerrar': Osce::cerrar($id); break;
             case 'borrador': Osce::volverABorrador($id); break;
             default: throw new InvalidArgumentException('Acción desconocida.');
@@ -59,6 +75,7 @@ $parts = array_map(static fn ($p) => [
     'vuelta' => (int) $p['vuelta'],
     'circuito' => (int) $p['circuito'],
     'puesto' => (int) $p['puesto'],
+    'ausente' => (int) ($p['ausente'] ?? 0) === 1,
 ], Osce::participantes($id));
 
 admin_header('Panel de control · ' . $osce['nombre'], $me);
@@ -78,6 +95,15 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
 .chip { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 1rem; margin: 0.1rem 0.15rem; font-weight: 700; border: 1.5px solid #c9c2cc; color: #6b6070; }
 .chip.en_curso { border-color: #b45309; color: #b45309; background: #fff7e6; }
 .chip.enviada { border-color: #15803d; color: #fff; background: #15803d; }
+.chip.trabajando { border-color: #b45309; color: #b45309; background: #fff7e6; }
+.chip.entregada { border-color: #15803d; color: #fff; background: #15803d; }
+.chip.vencida { border-color: #6b7280; color: #fff; background: #6b7280; }
+.chip.ausente, .chip.descanso { border-style: dashed; color: #9ca3af; text-decoration: line-through; }
+.chip small { font-weight: 400; margin-left: 0.3rem; }
+.osce-ausentes { margin-top: 1rem; font-size: 0.95rem; }
+.osce-ausentes form { display: inline; margin: 0; }
+.osce-ausentes button { margin: 0.1rem; min-width: 2.6rem; }
+.osce-ausentes button[aria-pressed="true"] { background: #6b7280; color: #fff; border-color: #6b7280; text-decoration: line-through; }
 .leyenda { font-size: 0.9rem; color: var(--color-text-muted, #666); margin-top: 0.4rem; }
 .osce-controles .btn { margin: 0; }
 .osce-vivo:fullscreen { background: var(--color-surface, #fff); padding: 2rem; overflow: auto; }
@@ -98,12 +124,13 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
             <?= $boton('iniciar', '▶ Iniciar OSCE', 'btn--sm', '¿Iniciar el OSCE? El reloj parte ahora para todos y la estructura queda fija.') ?>
         <?php elseif ($osce['estado'] === 'en_curso'): ?>
             <?= $osce['pausado_desde'] === null ? $boton('pausar', '⏸ Pausar') : $boton('reanudar', '▶ Reanudar') ?>
-            <?= $boton('atrasar', '−1 min', 'btn--sm btn--ghost') ?>
-            <?= $boton('adelantar', '+1 min', 'btn--sm btn--ghost') ?>
+            <?= $boton('menos_tiempo', '−1 min a todos', 'btn--sm btn--ghost') ?>
+            <?= $boton('mas_tiempo', '+1 min a todos', 'btn--sm btn--ghost') ?>
+            <?= $boton('forzar_cambio', 'Forzar cambio', 'btn--sm btn--secondary', '¿Dar el turno por terminado? Parte el cambio aunque alguna estación siga abierta.') ?>
             <?= $boton('cerrar', 'Cerrar OSCE', 'btn--sm btn--danger', '¿Cerrar el OSCE? El reloj se detiene para todos.') ?>
             <?= $boton('borrador', 'Volver a borrador', 'btn--sm btn--ghost', 'Solo si se inició por error: el reloj vuelve a cero. ¿Seguir?') ?>
         <?php endif; ?>
-        <button type="button" class="btn btn--sm btn--secondary" id="osce-sonido">🔇 Sonido en este equipo</button>
+        <button type="button" class="btn btn--sm btn--secondary" id="osce-sonido">🔇 Voz y timbre en este equipo</button>
         <button type="button" class="btn btn--sm btn--ghost" id="osce-pantalla">Pantalla completa</button>
     </span>
 </div>
@@ -121,6 +148,15 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
         </table>
     </div>
     <div class="leyenda" id="osce-leyenda"></div>
+    <?php if ($osce['estado'] === 'en_curso'): ?>
+    <div class="osce-ausentes">Ausentes (toca un número para marcarlo; sus estaciones no lo esperan):
+        <div id="osce-ausentes"><?php foreach ($parts as $pp): ?><form method="post"><?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="accion" value="ausente">
+            <input type="hidden" name="numero" value="<?= $pp['numero'] ?>">
+            <input type="hidden" name="valor" value="<?= $pp['ausente'] ? '' : '1' ?>">
+            <button type="submit" class="btn btn--xs btn--ghost" aria-pressed="<?= $pp['ausente'] ? 'true' : 'false' ?>"><?= $pp['numero'] ?></button></form><?php endforeach; ?></div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <script src="../js/osce_reloj.js?v=<?= admin_asset_version(__DIR__ . '/../js/osce_reloj.js') ?>"></script>
@@ -140,10 +176,24 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
     $('osce-sonido').addEventListener('click', function () {
         if (!audio) {
             audio = new (window.AudioContext || window.webkitAudioContext)();
-            this.textContent = '🔔 Timbre activo';
+            this.textContent = '🔔 Voz y timbre activos';
             pitar(1, 880, 0.15);
+            decir('Voz activa');
         }
     });
+    // "Cambio" en voz alta (síntesis del navegador, en español).
+    function decir(texto) {
+        if (!audio || !window.speechSynthesis) return;
+        var u = new SpeechSynthesisUtterance(texto);
+        var voces = window.speechSynthesis.getVoices().filter(function (v) { return /^es/i.test(v.lang); });
+        var cl = voces.filter(function (v) { return /CL|419|MX|US/i.test(v.lang); })[0] || voces[0];
+        if (cl) u.voice = cl;
+        u.lang = cl ? cl.lang : 'es-CL';
+        u.rate = 0.95;
+        u.volume = 1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+    }
     function pitar(veces, hz, largo) {
         if (!audio) return;
         for (var i = 0; i < veces; i++) {
@@ -164,11 +214,26 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
     });
 
     // En cadena: el grupo g está en la estación e en el turno g + e.
-    var ENTREGAS = {};
+    var ENTREGAS = {}, TURNO = [], TURNO_LOCAL = 0;
     function pedirEstados() {
         fetch('osce_vivo.php?id=<?= $id ?>&estado=1', { credentials: 'same-origin', cache: 'no-store' })
-            .then(function (r) { return r.json(); }).then(function (d) { ENTREGAS = d.entregas || {}; })
+            .then(function (r) { return r.json(); }).then(function (d) {
+                ENTREGAS = d.entregas || {};
+                TURNO = d.turno || [];
+                TURNO_LOCAL = performance.now();
+            })
             .catch(function () {});
+    }
+    // Alumnos del turno en curso en la estación de índice e: chip con su estado y lo que le queda.
+    var ROTULO = { esperando: 'no ha entrado', trabajando: '', entregada: '✓', vencida: 'tiempo', ausente: 'ausente', descanso: 'descanso' };
+    function ahoraEn(e) {
+        var dt = (performance.now() - TURNO_LOCAL) / 1000;
+        var lista = TURNO.filter(function (x) { return x.indice === e; });
+        if (!lista.length) return '—';
+        return lista.map(function (x) {
+            var extra = x.estado === 'trabajando' && x.restante_s !== null ? OsceReloj.mmss(Math.max(0, x.restante_s - dt)) : ROTULO[x.estado];
+            return '<span class="chip ' + x.estado + '">' + x.numero + (extra ? '<small>' + extra + '</small>' : '') + '</span>';
+        }).join('');
     }
     pedirEstados();
     setInterval(pedirEstados, 5000);
@@ -222,17 +287,25 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
             cont.dataset.fase = fase;
             cont.dataset.ultimo = fase === 'estacion' && reloj.restante_s <= 60 ? '1' : '0';
             $('osce-fase').textContent = (NOMBRE_FASE[fase] || fase) + (d.pausado ? ' · EN PAUSA' : '');
-            $('osce-cuenta').textContent = fase === 'terminado' ? '0:00' : OsceReloj.mmss(reloj.restante_s);
+            // En estación: lo que le queda al último que entró (cada alumno tiene su tiempo).
+            $('osce-cuenta').textContent = fase === 'terminado' ? '0:00'
+                : (reloj.restante_s === null ? '--:--' : OsceReloj.mmss(reloj.restante_s));
+            if (fase === 'estacion') {
+                $('osce-fase').textContent += reloj.restante_s === null ? ' · esperando que entren'
+                    : ' · ' + reloj.abiertos + (reloj.abiertos === 1 ? ' estación abierta' : ' estaciones abiertas');
+            }
             $('osce-donde').textContent = fase === 'terminado' ? '' :
                 (cfg.modo === 'cadena'
                     ? 'Turno ' + (reloj.slot + 1) + ' de ' + T
                     : 'Vuelta ' + (reloj.vuelta + 1) + ' de ' + cfg.vueltas + ' · Tiempo ' + (reloj.slot + 1) + ' de ' + S);
 
-            // Timbre: fin de estación (3 largos), empieza la siguiente (1), queda 1 minuto (2 cortos).
-            var clave = fase + ':' + reloj.vuelta + ':' + reloj.slot;
+            // Todas las estaciones cerraron: "cambio" en voz alta. Empieza el turno nuevo: un timbre.
+            var clave = fase + ':' + reloj.turno;
             if (faseAnterior !== null && clave !== faseAnterior && !d.pausado) {
                 if (fase === 'estacion') pitar(1, 880, 0.6);
-                else if (fase === 'cambio' || fase === 'entre_vueltas' || fase === 'terminado') pitar(3, 660, 0.5);
+                else if (fase === 'cambio') { pitar(1, 660, 0.4); setTimeout(function () { decir('Cambio'); }, 500); }
+                else if (fase === 'entre_vueltas') { pitar(1, 660, 0.4); setTimeout(function () { decir('Cambio. Pausa entre vueltas'); }, 500); }
+                else if (fase === 'terminado') { pitar(3, 660, 0.5); setTimeout(function () { decir('Fin del OSCE'); }, 1800); }
             }
             faseAnterior = clave;
             if (fase === 'estacion' && reloj.restante_s <= 60 && reloj.restante_s > 55 && avisoMinuto !== clave) {
@@ -250,13 +323,13 @@ admin_header('Panel de control · ' . $osce['nombre'], $me);
             for (var e = 0; e < S; e++) {
                 for (var c = 0; c < C; c++) {
                     filas += '<tr><td>' + (e + 1) + '. ' + escapar(d.estaciones[e].titulo) + (C > 1 ? ' · circuito ' + (c + 1) : '') + '</td>'
-                        + '<td class="mono">' + (fase === 'terminado' ? '—' : quien(cfg, ahoraV, ahoraJ, e, c, d.estaciones[e].id)) + '</td>'
+                        + '<td class="mono">' + (fase === 'terminado' ? '—' : (fase === 'estacion' ? ahoraEn(e) : quien(cfg, ahoraV, ahoraJ, e, c, d.estaciones[e].id))) + '</td>'
                         + '<td class="mono">' + (haySig ? quien(cfg, sigV, sigJ, e, c) : '—') + '</td></tr>';
                 }
             }
             $('osce-tabla').innerHTML = filas;
-            $('osce-leyenda').innerHTML = cfg.modo === 'cadena'
-                ? '<span class="chip">N.º</span> no ha entrado · <span class="chip en_curso">N.º</span> entró / en evaluación · <span class="chip enviada">N.º ✓</span> entregó' : '';
+            $('osce-leyenda').innerHTML = '<span class="chip esperando">N.º</span> no ha entrado · <span class="chip trabajando">N.º<small>m:ss</small></span> trabajando (le queda)'
+                + ' · <span class="chip entregada">N.º</span> entregó · <span class="chip vencida">N.º</span> se le acabó el tiempo · <span class="chip ausente">N.º</span> ausente';
             // Cadena: quiénes hacen de paciente en la limpieza y quiénes entran después.
             var sala = '';
             if (cfg.modo === 'cadena' && fase !== 'terminado') {

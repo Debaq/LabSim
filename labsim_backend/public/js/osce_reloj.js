@@ -1,12 +1,16 @@
 /*
- * Reloj del OSCE en el navegador: misma cuenta que Osce::estadoReloj() en
- * PHP (src/Osce.php). Pide el estado al servidor cada pocos segundos y
- * entremedio avanza solo con el reloj local, así la cuenta regresiva no
+ * Reloj del OSCE en el navegador. La fase la decide el servidor por turnos
+ * (Osce::faseTurno en src/Osce.php: el turno sigue mientras alguien trabaja
+ * y el cambio parte cuando todos cerraron); acá se pide cada pocos segundos
+ * y entremedio la cuenta regresiva baja sola con el reloj local, así no
  * salta aunque la red ande lenta.
  *
  * Uso: OsceReloj.iniciar(url, function (datos, reloj, t) { ... });
  *   datos = respuesta de api/osce_reloj.php, reloj = {fase, vuelta, slot,
- *   restante_s} o null si no ha partido, t = segundos de reloj corridos.
+ *   turno, total_turnos, abiertos, restante_s} o null si no ha partido
+ *   (restante_s puede ser null en estación: nadie ha confirmado aún),
+ *   t = segundos de reloj corridos (para el tiempo propio de cada alumno).
+ *   estadoReloj() queda para el horario estimado sin desfases.
  */
 (function () {
     'use strict';
@@ -41,22 +45,32 @@
     }
 
     function iniciar(url, alTic, cadaMs) {
-        var datos = null, base = 0, baseLocal = 0;
+        var datos = null, base = 0, baseLocal = 0, pidiendo = false;
         function pedir() {
+            pidiendo = true;
             fetch(url, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+                setTimeout(function () { pidiendo = false; }, 1500);
                 if (d.error) return;
                 datos = d;
                 base = d.transcurrido_s;
                 baseLocal = performance.now();
                 tic();
-            }).catch(function () { /* sin red: sigue con el reloj local */ });
+            }).catch(function () { pidiendo = false; /* sin red: sigue con el reloj local */ });
         }
         function tic() {
             if (!datos) return;
             var t = null, reloj = null;
             if (base !== null && base !== undefined) {
-                t = datos.pausado || datos.estado !== 'en_curso' ? base : base + (performance.now() - baseLocal) / 1000;
-                reloj = estadoReloj(datos.cfg, Math.floor(t));
+                var corre = !datos.pausado && datos.estado === 'en_curso';
+                var dt = corre ? (performance.now() - baseLocal) / 1000 : 0;
+                t = base + dt;
+                if (datos.reloj) {
+                    reloj = {};
+                    for (var k in datos.reloj) reloj[k] = datos.reloj[k];
+                    if (reloj.restante_s !== null && reloj.restante_s !== undefined) reloj.restante_s = Math.max(0, reloj.restante_s - dt);
+                    // Se acabó el cambio en este equipo: pedir ya el turno nuevo.
+                    if (corre && reloj.restante_s === 0 && reloj.fase !== 'estacion' && !pidiendo) pedir();
+                }
             }
             alTic(datos, reloj, t);
         }

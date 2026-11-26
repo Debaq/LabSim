@@ -3,7 +3,7 @@ import re
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QFont, QPainter
-from PySide6.QtWidgets import (QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
+from PySide6.QtWidgets import (QComboBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
                                QStackedWidget, QVBoxLayout, QWidget)
 from core import hilos, tema
 
@@ -169,27 +169,48 @@ class MainLogin(QWidget):
         return pagina
 
     def _pagina_osce(self):
-        """El PC queda como una estación del OSCE: se escribe el código de la
-        estación que muestra el panel (admin/osce_estacion.php)."""
+        """El PC queda como una estación del OSCE. Primero entra un docente
+        (usuario y contraseña, no se guardan); después elige el OSCE y la
+        estación de la lista y el equipo queda con el código de esa
+        estación (core/osce.py)."""
         pagina = QWidget()
         col = QVBoxLayout(pagina)
         col.setContentsMargins(0, 0, 0, 0)
         col.setSpacing(4)
-        fila = QHBoxLayout()
-        fila.addWidget(QLabel("Código de la estación :"))
-        self.Le_osce = QLineEdit()
-        self.Le_osce.setObjectName("Le_osce")
-        self.Le_osce.setPlaceholderText("K7F-3QM")
-        self.Le_osce.setMaxLength(9)
-        self.Le_osce.setAlignment(Qt.AlignCenter)
-        self.Le_osce.returnPressed.connect(self.entrar_osce)
-        fila.addWidget(self.Le_osce, 1)
+        # Paso 1: docente.
+        self.fila_osce_docente = QWidget()
+        fila = QHBoxLayout(self.fila_osce_docente)
+        fila.setContentsMargins(0, 0, 0, 0)
+        self.Le_osce_usuario = QLineEdit()
+        self.Le_osce_usuario.setObjectName("Le_osce_usuario")
+        self.Le_osce_usuario.setPlaceholderText("Usuario docente")
+        self.Le_osce_clave = QLineEdit()
+        self.Le_osce_clave.setObjectName("Le_osce_clave")
+        self.Le_osce_clave.setPlaceholderText("Contraseña")
+        self.Le_osce_clave.setEchoMode(QLineEdit.Password)
+        self.Le_osce_usuario.returnPressed.connect(self.buscar_estaciones_osce)
+        self.Le_osce_clave.returnPressed.connect(self.buscar_estaciones_osce)
+        self.btn_osce_buscar = QPushButton("Ver estaciones")
+        self.btn_osce_buscar.clicked.connect(self.buscar_estaciones_osce)
+        fila.addWidget(self.Le_osce_usuario, 1)
+        fila.addWidget(self.Le_osce_clave, 1)
+        fila.addWidget(self.btn_osce_buscar)
+        col.addWidget(self.fila_osce_docente)
+        # Paso 2: estación.
+        self.fila_osce_estacion = QWidget()
+        fila = QHBoxLayout(self.fila_osce_estacion)
+        fila.setContentsMargins(0, 0, 0, 0)
+        self.cb_osce = QComboBox()
+        self.cb_osce.setObjectName("cb_osce")
         self.btn_osce = QPushButton("Usar este equipo")
         self.btn_osce.clicked.connect(self.entrar_osce)
+        fila.addWidget(self.cb_osce, 1)
         fila.addWidget(self.btn_osce)
-        col.addLayout(fila)
-        self.lbl_osce = QLabel("Lo muestra el panel, en el contenido de la estación.")
+        col.addWidget(self.fila_osce_estacion)
+        self.fila_osce_estacion.setVisible(False)
+        self.lbl_osce = QLabel("Un docente deja este equipo como estación del OSCE.")
         self.lbl_osce.setObjectName("login_ayuda")
+        self.lbl_osce.setWordWrap(True)
         col.addWidget(self.lbl_osce)
         enlaces = QHBoxLayout()
         enlaces.addWidget(self._link("Volver", self.PAGINA_USUARIO))
@@ -197,31 +218,57 @@ class MainLogin(QWidget):
         col.addLayout(enlaces)
         return pagina
 
+    def buscar_estaciones_osce(self):
+        from core import osce
+        usuario = self.Le_osce_usuario.text().strip()
+        clave = self.Le_osce_clave.text()
+        if not usuario or not clave:
+            return
+        self.btn_osce_buscar.setEnabled(False)
+        self.lbl_osce.setText("Revisando…")
+        hilos.en_fondo(osce.estaciones_docente, usuario, clave, listo=self._osce_estaciones,
+                       fallo=self._osce_fallo, dueno=self, nombre="osce_estaciones")
+
+    def _osce_estaciones(self, osces):
+        self.btn_osce_buscar.setEnabled(True)
+        # La contraseña no queda en el equipo.
+        self.Le_osce_clave.clear()
+        self.cb_osce.clear()
+        for o in osces:
+            for e in o.get("estaciones") or []:
+                self.cb_osce.addItem(f"{o.get('osce', '')} · {e.get('orden')}. {e.get('titulo', '')}", e.get("codigo"))
+        if not self.cb_osce.count():
+            self.lbl_osce.setText("No hay OSCE con estaciones de la app listas (con paciente) en tus cursos.")
+            return
+        self.fila_osce_docente.setVisible(False)
+        self.fila_osce_estacion.setVisible(True)
+        self.lbl_osce.setText("Elige la estación que será este equipo.")
+
     def entrar_osce(self):
         from core import osce
-        codigo = self.Le_osce.text().strip()
+        codigo = self.cb_osce.currentData()
         if not codigo:
             return
-        self.Le_osce.setEnabled(False)
+        self.cb_osce.setEnabled(False)
         self.btn_osce.setEnabled(False)
-        self.lbl_osce.setText("Buscando la estación…")
+        self.lbl_osce.setText("Preparando la estación…")
         hilos.en_fondo(osce.consultar_estacion, codigo, listo=self._osce_lista,
                        fallo=self._osce_fallo, dueno=self, nombre="osce_estacion")
 
     def _osce_lista(self, info):
         from core import osce
-        self.Le_osce.setEnabled(True)
+        self.cb_osce.setEnabled(True)
         self.btn_osce.setEnabled(True)
         if not info.get("lista"):
             self.lbl_osce.setText("La estación aún no tiene paciente: el docente debe guardar su contenido.")
             return
-        self.lbl_osce.setText("Lo muestra el panel, en el contenido de la estación.")
+        self.lbl_osce.setText("Elige la estación que será este equipo.")
         self.data_login_signal.emit(osce.datos_login(info))
 
     def _osce_fallo(self, exc):
         from core import osce
-        self.Le_osce.setEnabled(True)
-        self.btn_osce.setEnabled(True)
+        for w in (self.btn_osce_buscar, self.cb_osce, self.btn_osce):
+            w.setEnabled(True)
         self.lbl_osce.setText(str(exc) if isinstance(exc, osce.ErrorOsce)
                               else "Sin conexión con el servidor.")
 
@@ -244,7 +291,7 @@ class MainLogin(QWidget):
         if self.paginas.currentIndex() == self.PAGINA_CODIGO:
             self.Le_codigo.setFocus()
         elif self.paginas.currentIndex() == self.PAGINA_OSCE:
-            self.Le_osce.setFocus()
+            (self.Le_osce_usuario if self.fila_osce_docente.isVisibleTo(self) else self.cb_osce).setFocus()
         else:
             self.Le_name.setFocus()
 

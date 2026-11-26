@@ -2648,6 +2648,25 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             'verdad': {nombre: v for nombre, v in self.verdad_curvas.items() if nombre in self.memory},
         }
 
+    def osce_restaurar(self, hecho):
+        """Vuelve un caso de la estación tal como el alumno lo dejó (lo que
+        devolvió osce_entrega al pasar a otro caso): curvas con sus marcas,
+        mandos del panel, equipo y la verdad de cada curva. El alumno va y
+        viene entre los casos de la estación mientras le dure el tiempo."""
+        if not isinstance(hecho, dict) or hecho.get('modulo') not in (None, 'ABR'):
+            return
+        data = hecho.get('abr') or {}
+        if self.state_capture != 'stopped':
+            self.control.stop_capture()
+        self.draw_session(data)
+        if hecho.get('equipo'):
+            self.technical = dict(hecho['equipo'])
+            self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+        panel = {k: v for k, v in (hecho.get('panel') or {}).items() if k != 'test'}
+        if panel:
+            self.control.set_data(panel)
+        self.verdad_curvas = dict(hecho.get('verdad') or {})
+
     #########EVENTS
     def hideEvent(self, event):
         # Ventana escondida: el monitor de EEG y la captura no siguen
