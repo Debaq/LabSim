@@ -44,7 +44,7 @@ if (($body['accion'] ?? '') === 'estaciones') {
     $docente = OsceApp::docentePorClave($usuario, (string) $body['clave']);
     Auth::recordLoginAttempt($usuario, $ip, $docente !== null);
     if ($docente === null) {
-        Response::error('Usuario o contraseña de docente incorrectos.', 401);
+        Response::error('Usuario o contraseña incorrectos (docente o admin).', 401);
     }
     Response::json(['ok' => true, 'osces' => OsceApp::estacionesDelDocente($docente)]);
 }

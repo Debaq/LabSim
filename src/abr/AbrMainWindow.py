@@ -2542,12 +2542,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self._con_montaje()
         self.tabWidget.setCurrentWidget(self.abr)
         if tipo in ('marcaje', 'conclusion'):
-            self.osce_registrar_curvas(prueba, curvas)
+            # Conclusión: el examen completo, como lo deja un equipo real:
+            # cada nivel con su réplica y marcado (solo se lee e informa).
+            self.osce_registrar_curvas(prueba, curvas, replicas=2 if tipo == 'conclusion' else 1)
+            if tipo == 'conclusion':
+                self.osce_premarcar()
             # Se marca (y se informa), no se registra: el equipo queda quieto.
             self.control.setEnabled(False)
+        elif tipo == 'protocolo':
+            # Protocolo: el equipo ya viene bien configurado (configurar es
+            # otra estación); el alumno registra y busca el umbral.
+            self.osce_equipo_de_rutina(prueba)
         else:
-            # Configuración y protocolo: el alumno parte con el equipo al
-            # azar (en protocolo además registra y busca el umbral).
+            # Configuración: el alumno parte con el equipo al azar.
             self.osce_sortear_equipo(prueba, rng)
         self.osce_accesos(tipo)
 
@@ -2559,11 +2566,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
           cambiar de prueba, sesiones anteriores.
         - Configuración: gráfico + panel + Parámetros avanzados (sin
           "Restore Defaults"); sin Marcas, Latencia ni Conclusiones.
-        - Protocolo: además Marcas y Latencia/Intensidad (busca el umbral).
-        - Marcaje: gráfico, Marcas y Latencia; panel quieto, sin avanzados,
-          sin marcado automático y sin borrar curvas.
-        - Conclusión: gráfico, Marcas y Conclusiones; panel quieto y sin
-          borrar curvas.
+        - Protocolo: equipo ya configurado (rutina), sin avanzados; Marcas
+          y Latencia/Intensidad (registra y busca el umbral).
+        - Marcaje: gráfico, Marcas y Latencia; panel quieto, sin avanzados
+          y sin borrar curvas (el ECochG con su "Auto" del equipo).
+        - Conclusión: gráfico y Conclusiones; panel quieto, sin borrar
+          curvas y sin marcar (ahí solo se concluye: el marcaje es otra
+          estación; pedido del docente en la demo del 2026-11-26).
         """
         self.osce_tipo = tipo
         configura = tipo in ('config_equipo', 'protocolo')
@@ -2576,16 +2585,21 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 self.tabWidget.setTabVisible(i, visible)
         self.tabWidget.setCurrentWidget(self.abr)
         i = self.panel_tabs.indexOf(self.pagina_marcas)
-        self.panel_tabs.setTabVisible(i, tipo != 'config_equipo')
-        self.panel_tabs.setCurrentIndex(0 if configura else i)
+        self.panel_tabs.setTabVisible(i, tipo not in ('config_equipo', 'conclusion'))
+        self.panel_tabs.setCurrentIndex(0 if configura or tipo == 'conclusion' else i)
         self.control.prueba_fija = True
         self.control.cb_test.setEnabled(False)
-        self.btn_avanzados.setEnabled(configura)
+        # Parámetros avanzados solo en configuración: en protocolo el
+        # equipo viene configurado.
+        self.btn_avanzados.setEnabled(tipo == 'config_equipo')
         fijas = not configura
         for grafico in (self.graph_r, self.graph_l):
             grafico.curves_locked = fijas
+            grafico.read_only = tipo == 'conclusion'
         for tabla in (self.table_ec_r, self.table_ec_l):
-            tabla.btn_auto.setEnabled(configura)
+            # El marcado automático del ECochG es del equipo: en marcaje y
+            # protocolo también (corregirlo a mano es lo que se evalúa).
+            tabla.btn_auto.setEnabled(tipo != 'conclusion')
         for widget in (self.lbl_session, self.cb_session):
             widget.setVisible(False)
 
@@ -2643,17 +2657,53 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.apply_window()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
-    def osce_registrar_curvas(self, prueba, curvas):
-        """Registra de una vez las curvas de la estación de marcaje con el
-        equipo de rutina de la prueba (cada una con su promedio completo)."""
+    def osce_equipo_de_rutina(self, prueba):
+        """El equipo con la configuración de rutina de la prueba (la que se
+        evalúa en la estación de configuración)."""
+        control, tecnica = standard_setup(prueba) or ({}, {})
+        self.technical.update(tecnica)
+        self.control.set_data(dict(control))
+        self._con_montaje()
+        self.apply_window()
+        self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+
+    def osce_premarcar(self):
+        """Conclusión: las curvas llegan marcadas (el alumno solo lee e
+        informa; marcar es otra estación). ABR con la latencia verdadera de
+        cada onda visible; ECochG con el detector del equipo y, si no
+        encuentra el complejo, con el PA/PS verdaderos."""
+        for lado, grafico in ((0, self.graph_r), (1, self.graph_l)):
+            for curva in list(grafico.data):
+                verdad = self.verdad_curvas.get(curva) or {}
+                if not verdad.get('visible'):
+                    continue
+                grafico.active_curve(curva)
+                if self.es_ecochg():
+                    self.auto_ecochg_mark(lado)
+                    if (grafico.marks.get(curva) or {}).get('PA'):
+                        continue
+                for onda, d in (verdad.get('waves') or {}).items():
+                    lat = float(d.get('lat') or 0.0)
+                    if lat <= 0:
+                        continue
+                    grafico.current_lat = lat
+                    grafico.create_marks(onda)
+                    if onda in (grafico.marks.get(curva) or {}):
+                        grafico.update_value_mark(onda, curve=curva)
+
+    def osce_registrar_curvas(self, prueba, curvas, replicas=1):
+        """Registra de una vez las curvas de la estación (marcaje o
+        conclusión) con el equipo de rutina de la prueba, cada una con su
+        promedio completo y, si se pide, con su réplica al lado."""
         control, tecnica = standard_setup(prueba) or ({}, {})
         self.technical.update(tecnica)
         self._con_montaje()
         self.apply_window()
         for lado, nivel in curvas:
-            self.control.set_data(dict(control, side=lado, int=nivel))
-            self.control.start_capture()          # capture_state('record')
-            self._capturar_de_una_vez()
+            for _ in range(max(1, int(replicas))):
+                self.control.set_data(dict(control, side=lado, int=nivel))
+                self.control.start_capture()          # capture_state('record')
+                self._capturar_de_una_vez()
 
     def osce_curvas(self):
         """Las curvas en el orden en que se registraron, con lo que el

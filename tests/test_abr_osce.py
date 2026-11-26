@@ -98,10 +98,18 @@ def test_curvas_en_orden_con_marcas_y_tecnica():
     assert curvas[0]['transducer'] == 'insert_earphone'
 
 
-def test_protocolo_parte_al_azar_y_se_registra():
+def test_protocolo_parte_configurado_y_se_registra():
+    """Protocolo: el equipo viene con la rutina de la prueba (configurar es
+    otra estación); el alumno solo registra."""
     w = _estacion('protocolo')
-    assert w.control.isEnabled()
-    assert w.control.get_data()['pol'] != 'Alternada'
+    assert w.control.isEnabled() and not w.btn_avanzados.isEnabled()
+    control, tecnica = standard_setup('ABR')
+    datos = w.control.get_data()
+    for k in ('stim', 'pol', 'filter_passhigh', 'filter_down'):
+        if k in control:
+            assert str(datos.get(k)) == str(control[k]), (k, datos.get(k), control[k])
+    if 'window_ms' in tecnica:
+        assert abs(float(w.technical['window_ms']) - float(tecnica['window_ms'])) < 0.01
 
 
 def test_en_la_estacion_la_curva_sale_al_instante():
@@ -167,10 +175,29 @@ def test_en_la_estacion_solo_llega_a_lo_suyo():
     m = _estacion('marcaje', [('OD', 80)])
     assert visible(m, m.lat) and not visible(m, m.conc) and not visible(m, m.montaje)
     assert not m.btn_avanzados.isEnabled() and m.graph_r.curves_locked
-    assert not m.table_ec_r.btn_auto.isEnabled(), "sin marcado automático en marcaje"
+    assert m.table_ec_r.btn_auto.isEnabled(), "el Auto del ECochG es del equipo: también en marcaje"
 
     c = _estacion('conclusion', [('OD', 80)])
     assert visible(c, c.conc) and not visible(c, c.lat) and c.graph_r.curves_locked
+    assert not c.panel_tabs.isTabVisible(c.panel_tabs.indexOf(c.pagina_marcas)), "en conclusión no se marca"
+    assert c.graph_r.read_only
+
+
+def test_conclusion_trae_las_curvas_marcadas():
+    """En conclusión el alumno solo lee e informa: las curvas llegan marcadas."""
+    c = _estacion('conclusion', [('OD', 80), ('OI', 60)])
+    assert len(c.graph_r.data) == 2 and len(c.graph_l.data) == 2, "cada nivel con su réplica"
+    for grafico in (c.graph_r, c.graph_l):
+        for curva in grafico.data:
+            v = c.verdad_curvas[curva]
+            marcas = grafico.marks.get(curva) or {}
+            assert v['visible'] and 'V' in marcas, (curva, v, marcas)
+            assert abs(marcas['V'][0] - v['waves']['V']['lat']) < 0.2, (marcas, v)
+    e = _marcaje('ECochG', [('OD', 90)], tipo='conclusion')
+    assert len(e.graph_r.data) == 2
+    for curva in e.graph_r.data:
+        marcas = e.graph_r.marks.get(curva) or {}
+        assert 'PA' in marcas and 'PS' in marcas, (curva, marcas)
 
 
 def test_avanzados_sin_restaurar_la_rutina_en_la_estacion():
@@ -190,10 +217,10 @@ def _caso_completo():
             'Central': {'estado': 'despierto'}}
 
 
-def _marcaje(prueba, curvas):
+def _marcaje(prueba, curvas, tipo='marcaje'):
     w = AbrMainWindow(dict(ALUMNO))
     w.la_super(_caso_completo(), 'osce-X')
-    w.osce_preparar('marcaje', prueba, list(curvas), random.Random(1))
+    w.osce_preparar(tipo, prueba, list(curvas), random.Random(1))
     return w
 
 

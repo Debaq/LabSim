@@ -49,9 +49,9 @@ class DialogoSalidaDocente(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Salir de la estación OSCE")
         col = QVBoxLayout(self)
-        col.addWidget(QLabel("Solo un docente puede cerrar la estación."))
+        col.addWidget(QLabel("Solo un docente o el administrador puede cerrar la estación."))
         self.usuario = QLineEdit()
-        self.usuario.setPlaceholderText("Usuario docente")
+        self.usuario.setPlaceholderText("Usuario (docente o admin)")
         self.clave = QLineEdit()
         self.clave.setPlaceholderText("Contraseña")
         self.clave.setEchoMode(QLineEdit.EchoMode.Password)
@@ -87,7 +87,11 @@ class DialogoSalidaDocente(QDialog):
     def _mal(self, exc):
         self.btn_salir.setEnabled(True)
         self.clave.clear()
-        self.lbl.setText(str(exc) if isinstance(exc, osce.ErrorOsce) else "Sin conexión con el servidor.")
+        # El motivo exacto (500, timeout...): con solo "sin conexión" no se
+        # supo por qué un cierre con admin falló el 2026-11-26.
+        self.lbl.setText(str(exc) if isinstance(exc, osce.ErrorOsce)
+                         else f"No se pudo revisar la clave: {exc}. Intenta de nuevo.")
+        print(f"osce: salida rechazada: {type(exc).__name__}: {exc}")
 
 
 class VentanaCasos(QWidget):

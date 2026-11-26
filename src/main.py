@@ -765,7 +765,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         for boton in (self.btn_login, self.btn_configuracion, self.btn_min):
             boton.setVisible(False)
         self.btn_salir.setVisible(True)
-        self.btn_salir.setToolTip("Salir de la estación (pide la clave de un docente)")
+        self.btn_salir.setToolTip("Salir de la estación (pide la clave de un docente o del admin)")
         marco = getattr(self, "marco_ventana_activa", None)
         if marco is not None:
             marco.setVisible(False)

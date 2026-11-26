@@ -183,7 +183,7 @@ class MainLogin(QWidget):
         fila.setContentsMargins(0, 0, 0, 0)
         self.Le_osce_usuario = QLineEdit()
         self.Le_osce_usuario.setObjectName("Le_osce_usuario")
-        self.Le_osce_usuario.setPlaceholderText("Usuario docente")
+        self.Le_osce_usuario.setPlaceholderText("Usuario (docente o admin)")
         self.Le_osce_clave = QLineEdit()
         self.Le_osce_clave.setObjectName("Le_osce_clave")
         self.Le_osce_clave.setPlaceholderText("Contraseña")
