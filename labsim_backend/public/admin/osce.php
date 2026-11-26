@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Osce.php';
 require_once __DIR__ . '/../../src/OscePauta.php';
 require_once __DIR__ . '/../../src/OsceApp.php';
+require_once __DIR__ . '/../../src/OscePreguntas.php';
 require_once __DIR__ . '/../../src/QrSvg.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
@@ -342,6 +343,8 @@ admin_header('OSCE · ' . $osce['nombre'], $me);
         <strong><?= htmlspecialchars($osce['curso']) ?></strong> ·
         <span class="tag<?= $editable ? ' tag--muted' : ' tag--warn' ?>"><?= htmlspecialchars(Osce::ESTADOS[$osce['estado']] ?? $osce['estado']) ?></span>
     </p>
+    <?php $nRep = array_reduce(OscePreguntas::replicasDelOsce($id), static fn ($c, $r) => $c + ($r['estado'] === 'pendiente' ? 1 : 0), 0); ?>
+    <p><a class="btn btn--sm btn--secondary" href="osce_replicas.php?id=<?= $id ?>">Réplicas y observaciones de los alumnos<?= $nRep > 0 ? ' (' . $nRep . ' pendientes)' : '' ?></a></p>
     <?php if ($osce['estado'] !== 'publicado'): $alEntregar = !empty($osce['resultados_al_entregar']); ?>
     <form method="post" class="row row--gap-sm row--center">
         <?= csrf_field() ?>

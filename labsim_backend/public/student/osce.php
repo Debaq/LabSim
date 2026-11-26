@@ -127,7 +127,7 @@ $parcial = !$publicado && !empty($o['resultados_al_entregar']) && in_array($o['e
 // token del QR es la identidad, y tiene que venir también en el formulario.
 $msgReplica = null;
 $errReplica = null;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $publicado && hash_equals($token, (string) ($_POST['t'] ?? ''))) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($publicado || $parcial) && hash_equals($token, (string) ($_POST['t'] ?? ''))) {
     try {
         OscePreguntas::replicar((int) $p['id'], (int) ($_POST['resultado'] ?? 0), (string) ($_POST['texto'] ?? ''));
         header('Location: osce.php?t=' . rawurlencode($token) . '&replica=1#r' . (int) ($_POST['resultado'] ?? 0));
@@ -246,6 +246,24 @@ $cabeza('OSCE · ' . $o['nombre']);
                 <span class="det-com">Esperado: <?= htmlspecialchars((string) ($ev['esperado'] ?? '—')) ?></span>
                 <?php endif; ?>
                 <?php if ($r && trim((string) $r['comentario']) !== ''): ?><div class="det-com"><strong>Docente:</strong> <?= nl2br(htmlspecialchars((string) $r['comentario'])) ?></div><?php endif; ?>
+                <?php $rep = $r ? OscePreguntas::replicaDe((int) $r['id']) : null; ?>
+                <?php if ($rep !== null): ?>
+                <div class="det-rep" id="r<?= (int) $r['id'] ?>">
+                    <strong>Tu réplica:</strong> <?= nl2br(htmlspecialchars((string) $rep['texto'])) ?><br>
+                    <?php if ($rep['estado'] === 'pendiente'): ?><span class="muted">En revisión.</span>
+                    <?php else: ?><strong><?= $rep['estado'] === 'aceptada' ? 'Aceptada' : 'No aceptada' ?>.</strong> <?= nl2br(htmlspecialchars((string) $rep['respuesta'])) ?><?php endif; ?>
+                </div>
+                <?php elseif (($publicado || $parcial) && $r && (float) ($r['puntaje'] ?? 0) < (float) $d['item']['puntaje']): ?>
+                <details class="det-rep-form" id="r<?= (int) $r['id'] ?>">
+                    <summary>Hacer réplica u observación</summary>
+                    <form method="post" action="osce.php?t=<?= htmlspecialchars(rawurlencode($token)) ?>">
+                        <input type="hidden" name="t" value="<?= htmlspecialchars($token) ?>">
+                        <input type="hidden" name="resultado" value="<?= (int) $r['id'] ?>">
+                        <textarea name="texto" rows="3" required maxlength="2000" placeholder="Explica qué observaste o por qué crees que merece otro puntaje" style="width:100%;"></textarea>
+                        <button type="submit" class="btn btn--sm">Enviar</button>
+                    </form>
+                </details>
+                <?php endif; ?>
             </li>
         <?php endforeach; ?>
         </ul>
@@ -280,7 +298,7 @@ $cabeza('OSCE · ' . $o['nombre']);
                         <?= nl2br(htmlspecialchars((string) $r['replica_respuesta'])) ?>
                     <?php endif; ?>
                 </div>
-            <?php elseif ($publicado && $r && (float) $r['puntaje'] < (float) $q['puntaje']): ?>
+            <?php elseif (($publicado || $parcial) && $r && (float) $r['puntaje'] < (float) $q['puntaje']): ?>
                 <details class="det-rep-form">
                     <summary>Hacer réplica de esta respuesta</summary>
                     <form method="post" action="osce.php?t=<?= htmlspecialchars(rawurlencode($token)) ?>">

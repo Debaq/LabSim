@@ -811,7 +811,9 @@ TXT;
             "SELECT r.id FROM osce_resultado r JOIN osce_entrega e ON e.id = r.entrega_id
                JOIN osce_estacion es ON es.id = e.estacion_id
                JOIN osce o ON o.id = es.osce_id
-              WHERE r.id = ? AND e.participante_id = ? AND es.tipo = 'preguntas' AND o.estado = 'publicado'"
+              WHERE r.id = ? AND e.participante_id = ? AND e.estado = 'enviada'
+                AND (o.estado = 'publicado'
+                     OR (o.resultados_al_entregar = 1 AND o.estado IN ('en_curso', 'cerrado')))"
         );
         $stmt->execute([$resultadoId, $participanteId]);
         $ok = $stmt->fetchColumn();
@@ -833,6 +835,62 @@ TXT;
     }
 
     /** Detalle de la estación de preguntas para la página del alumno (con sus réplicas). */
+    /** La réplica de un resultado (cualquier estación), o null. */
+    public static function replicaDe(int $resultadoId): ?array
+    {
+        $stmt = Db::get()->prepare('SELECT * FROM osce_replica WHERE resultado_id = ? ORDER BY id LIMIT 1');
+        $stmt->execute([$resultadoId]);
+        $row = $stmt->fetch();
+        $stmt->closeCursor();
+        return $row ?: null;
+    }
+
+    /**
+     * Todas las réplicas de un OSCE (preguntas y estaciones de la app), para
+     * responderlas en un solo lugar (admin/osce_replicas.php).
+     */
+    public static function replicasDelOsce(int $osceId): array
+    {
+        $stmt = Db::get()->prepare(
+            "SELECT rp.*, r.puntaje, r.item_id, r.pregunta_id, es.titulo AS estacion, es.id AS estacion_id, es.tipo,
+                    p.numero, u.display_name,
+                    COALESCE(q.enunciado, it.texto, '') AS que
+               FROM osce_replica rp
+               JOIN osce_resultado r ON r.id = rp.resultado_id
+               JOIN osce_entrega e ON e.id = r.entrega_id
+               JOIN osce_estacion es ON es.id = e.estacion_id
+               JOIN osce_participante p ON p.id = e.participante_id
+               LEFT JOIN users u ON u.id = p.user_id
+               LEFT JOIN osce_pregunta q ON q.id = r.pregunta_id
+               LEFT JOIN osce_item it ON it.id = r.item_id
+              WHERE es.osce_id = ?
+              ORDER BY rp.estado = 'pendiente' DESC, rp.id"
+        );
+        $stmt->execute([$osceId]);
+        return $stmt->fetchAll();
+    }
+
+    /** Responde réplicas del OSCE: [id => ['respuesta'=>..., 'estado'=>...]]. */
+    public static function responderReplicas(int $osceId, array $replicas): void
+    {
+        Db::reintentar(static function () use ($osceId, $replicas): void {
+            $upd = Db::get()->prepare(
+                "UPDATE osce_replica SET respuesta = ?, estado = ?,
+                        resuelta_at = CASE WHEN ? = 'pendiente' THEN NULL ELSE COALESCE(resuelta_at, CURRENT_TIMESTAMP) END
+                  WHERE id = ? AND resultado_id IN (
+                        SELECT r.id FROM osce_resultado r JOIN osce_entrega e ON e.id = r.entrega_id
+                          JOIN osce_estacion es ON es.id = e.estacion_id WHERE es.osce_id = ?)"
+            );
+            foreach ($replicas as $repId => $d) {
+                $estado = (string) ($d['estado'] ?? 'pendiente');
+                if (!in_array($estado, ['pendiente', 'aceptada', 'rechazada'], true)) {
+                    $estado = 'pendiente';
+                }
+                $upd->execute([mb_substr(trim((string) ($d['respuesta'] ?? '')), 0, 2000), $estado, $estado, (int) $repId, $osceId]);
+            }
+        });
+    }
+
     public static function detalleAlumno(int $estacionId, int $participanteId): array
     {
         $preguntas = self::preguntas($estacionId);
