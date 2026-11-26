@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ID nuevo post-auth invalida esa sesión pre-fijada.
             session_regenerate_id(true);
             $_SESSION['admin_user_id'] = $user['id'];
-            header('Location: dashboard.php');
+            header('Location: ' . Auth::paginaTrasIngresar());
             exit;
         }
     }

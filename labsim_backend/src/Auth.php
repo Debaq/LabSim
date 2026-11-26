@@ -327,12 +327,29 @@ final class Auth
         return $row;
     }
 
+    /** Página a la que ir tras ingresar (la que se pidió sin sesión) o el dashboard. */
+    public static function paginaTrasIngresar(): string
+    {
+        $volver = (string) ($_SESSION['volver'] ?? '');
+        unset($_SESSION['volver']);
+        // Solo una página de admin/ (sin rutas ni otro dominio).
+        return preg_match('/^[a-z0-9_]+\.php(\?[^\r\n]*)?$/i', $volver) && strncasecmp($volver, 'log', 3) !== 0
+            ? $volver : 'dashboard.php';
+    }
+
     /** Corta con 403 si no hay una sesión de portal admin válida. */
     public static function requireAdminSession(): array
     {
         self::startSession();
         $userId = $_SESSION['admin_user_id'] ?? null;
         if (!$userId) {
+            // Un enlace directo (osce_evaluar.php?estacion=1 en el celular del
+            // docente) vuelve a esa página después de ingresar, no al dashboard.
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
+                && strpos((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html') !== false) {
+                $qs = (string) ($_SERVER['QUERY_STRING'] ?? '');
+                $_SESSION['volver'] = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) . ($qs !== '' ? '?' . $qs : '');
+            }
             header('Location: login.php');
             exit;
         }
@@ -416,7 +433,8 @@ final class Auth
     {
         $user = self::requireAdminSession();
         if ((int) $user['permission'] !== self::PERMISSION_ADMIN) {
-            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
+                && strpos((string) ($_SERVER['HTTP_ACCEPT'] ?? ''), 'text/html') !== false) {
                 $_SESSION['aviso_portal'] = 'Esa sección es solo para el administrador. Te dejamos en tu inicio.';
                 header('Location: dashboard.php');
                 exit;
