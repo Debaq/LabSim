@@ -5,6 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseCompleteness.php';
+require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
+require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/CaseLibrary.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
@@ -263,6 +265,17 @@ $stmt = $pdo->prepare(
 );
 $stmt->execute($permissionParams);
 
+// Fotos de otoscopia elegidas de la base (fase 1): su tipo ya sirve de
+// verdad, no cuentan como "sin describir".
+$otoDeLaBase = [];
+try {
+    foreach (Db::get()->query('SELECT case_id, side FROM otoscopia_biblioteca_uso WHERE fase = 0')->fetchAll() as $u) {
+        $otoDeLaBase[$u['case_id'] . '|' . strtolower((string) $u['side'])] = true;
+    }
+} catch (PDOException $e) {
+    $otoDeLaBase = [];
+}
+
 // Lo que la fila necesita, calculado una vez: lo usan la tabla, las
 // tarjetas y los contadores.
 $fichas = [];
@@ -280,6 +293,15 @@ foreach ($stmt->fetchAll() as $c) {
     // aparezca como trabajo pendiente y no como sorpresa al intentar
     // agendarlo. Ver CaseCompleteness.
     $c['faltantes'] = CaseCompleteness::pendingTexts(is_array($data) ? $data : []);
+    // Otoscopia con foto y sin decir qué muestra: el informe del alumno no
+    // se puede evaluar (OtoscopiaTecnica). Aviso, no bloquea la agenda.
+    $c['oto_sin_describir'] = [];
+    foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoTxt) {
+        if (OtoscopiaPhoto::has((string) $c['id'], $lado, 0) && !isset($otoDeLaBase[$c['id'] . '|' . $lado])
+            && !CaseBuilder::otoscopiaHallazgos($data['Otoscopia']['hallazgos'][$lado] ?? null)['definida']) {
+            $c['oto_sin_describir'][] = $ladoTxt;
+        }
+    }
     $c['creador'] = trim((string) ($c['creador_nombre'] ?? ''));
     $c['editor'] = trim((string) ($c['editor_nombre'] ?? ''));
     $c['carpeta_id'] = $c['folder_id'] !== null && isset($folderNombre[(int) $c['folder_id']]) ? (int) $c['folder_id'] : null;
@@ -288,7 +310,8 @@ foreach ($stmt->fetchAll() as $c) {
     // juntar todos los casos que hay que completar, sin otro filtro.
     $c['busqueda'] = mb_strtolower($c['id'] . ' ' . $c['nombre_fila'] . ' ' . ($c['rut'] ?? '')
         . ' ' . $c['comentario'] . ' ' . $c['creador'] . ' ' . $c['editor'] . ' ' . $carpeta
-        . ($c['faltantes'] !== [] ? ' incompleto' : ''));
+        . ($c['faltantes'] !== [] ? ' incompleto' : '')
+        . ($c['oto_sin_describir'] !== [] ? ' otoscopia sin describir' : ''));
     unset($c['data']);
     $fichas[] = $c;
 }
@@ -417,7 +440,7 @@ admin_header('Fichas Clínicas', $me);
 
     <?php if ($modoInicio): ?>
     <div class="patients-toolbar">
-        <input type="text" id="patients-search" placeholder="Buscar en todas las fichas por nombre, rut, ID o «incompleto»..." autocomplete="off" oninput="filterPatientsTable()">
+        <input type="text" id="patients-search" placeholder="Buscar por nombre, rut, ID, «incompleto» u «otoscopia sin describir»..." autocomplete="off" oninput="filterPatientsTable()">
     </div>
 
     <div id="carpetas-inicio">
@@ -595,6 +618,9 @@ admin_header('Fichas Clínicas', $me);
                 <?php endif; ?>
                 <?php if ($c['faltantes'] !== []): ?>
                 <span class="tag tag--warn" title="<?= htmlspecialchars(implode("\n", $c['faltantes'])) ?>">incompleto</span>
+                <?php endif; ?>
+                <?php if ($c['oto_sin_describir'] !== []): ?>
+                <span class="tag tag--muted" title="Falta decir qué muestra la foto de otoscopia (<?= htmlspecialchars(implode(' y ', $c['oto_sin_describir'])) ?>) en la pestaña Otoscopia: sin eso el informe del alumno no se evalúa. No impide agendar.">otoscopía sin describir</span>
                 <?php endif; ?>
                 <?php /* Solo si está o no en agenda: la fecha/hora de la cita
                           no va acá -- un caso puede estar agendado varias veces

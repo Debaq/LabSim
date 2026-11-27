@@ -46,6 +46,59 @@ final class CaseBuilder
     // alumno según su propio avance con ese paciente: TODO, ver TODO.md.
     public const OTOSCOPIA_MAX_FASES = 20;
 
+    /**
+     * Lo que muestra la foto de otoscopia de la fase 1 (la que ven los
+     * alumnos), por oído: la verdad contra la que se compara el informe del
+     * alumno (OtoscopiaTecnica). Mismo vocabulario que el informe de la app
+     * (ReportPdfBuilder::OT_HALLAZGOS / OT_CAE), más 'toda' para un hallazgo
+     * que no se ubica en un cuadrante.
+     */
+    public const OTOSCOPIA_CUADRANTES = [
+        'anterior_superior' => 'AS', 'anterior_inferior' => 'AI', 'posterior_superior' => 'PS',
+        'posterior_inferior' => 'PI', 'pars_flaccida' => 'Pars flácida', 'toda' => 'Sin precisar',
+    ];
+    public const OTOSCOPIA_HALLAZGOS = [
+        'perforation' => 'Perforación', 'retraction' => 'Retracción', 'effusion' => 'Efusión',
+        'tympanosclerosis' => 'Timpanoesclerosis', 'cholesteatoma' => 'Colesteatoma',
+        'inflammation' => 'Inflamación', 'myringitis' => 'Miringitis', 'tube' => 'Tubo',
+    ];
+    public const OTOSCOPIA_CAE = [
+        'cae_normal' => 'Normal', 'cae_cerumen' => 'Cerumen', 'cae_edema' => 'Edema',
+        'cae_otorrhea' => 'Otorrea', 'cae_exostosis' => 'Exostosis',
+    ];
+
+    /**
+     * Normaliza lo que muestra la foto de un oído (del POST o de lo
+     * guardado, misma forma): 'normal' (atajo: CAE normal y membrana sin
+     * hallazgos), 'cae', 'cuadrantes' (cuadrante => hallazgos), 'texto'.
+     * 'definida' dice si el docente cargó algo.
+     *
+     * @return array{normal:bool, cae:list<string>, cuadrantes:array<string,list<string>>, texto:string, definida:bool}
+     */
+    public static function otoscopiaHallazgos($raw): array
+    {
+        $raw = is_array($raw) ? $raw : [];
+        $normal = !empty($raw['normal']);
+        $cae = array_values(array_intersect(array_keys(self::OTOSCOPIA_CAE), array_map('strval', (array) ($raw['cae'] ?? []))));
+        $cuadrantes = [];
+        foreach ((array) ($raw['cuadrantes'] ?? []) as $q => $lista) {
+            if (!isset(self::OTOSCOPIA_CUADRANTES[$q])) {
+                continue;
+            }
+            $h = array_values(array_intersect(array_keys(self::OTOSCOPIA_HALLAZGOS), array_map('strval', (array) $lista)));
+            if ($h) {
+                $cuadrantes[$q] = $h;
+            }
+        }
+        if ($normal) {
+            $cae = ['cae_normal'];
+            $cuadrantes = [];
+        }
+        $texto = mb_substr(trim((string) ($raw['texto'] ?? '')), 0, 1000);
+        return ['normal' => $normal, 'cae' => $cae, 'cuadrantes' => $cuadrantes, 'texto' => $texto,
+            'definida' => $normal || $cae !== [] || $cuadrantes !== [] || $texto !== ''];
+    }
+
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B', 'NR'];
 
     /**
@@ -1896,6 +1949,10 @@ final class CaseBuilder
                 static fn($f) => ['texto' => (string) (is_array($f) ? ($f['texto'] ?? '') : '')],
                 array_values($otoscopiaFases)
             ),
+            'hallazgos' => [
+                'od' => self::otoscopiaHallazgos($otoscopia['hallazgos']['od'] ?? null),
+                'oi' => self::otoscopiaHallazgos($otoscopia['hallazgos']['oi'] ?? null),
+            ],
         ];
 
         // Perfil auditivo: se relee normalizado, así un caso guardado antes

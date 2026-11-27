@@ -182,6 +182,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 64. Técnica de la logoaudiometría y de cada supraliminar (cómo se
       hacen). Cuáles correspondían ya está (T05). § Pruebas que
       correspondían y enmascaramiento en el indicador
+- [ ] 83. Otoscopía: comparar con un LLM la descripción libre del alumno
+      contra la del docente ("Lo que muestra la foto"), guardando el
+      resultado; y describir las fases 2 en adelante. § Lo que muestra la
+      foto de otoscopía, en la ficha del caso
 - [ ] 82. Otoscopía, diapasones e impedanciometría ya se evalúan por
       atención (T06-T08). Falta: sumarlos a la pestaña Avance y al PDF del
       curso (guardar su resultado como la audiometría), registrar acción por

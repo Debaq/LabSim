@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../src/CaseForm.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
 require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
+require_once __DIR__ . '/../../src/OtoscopiaTecnica.php';
 require_once __DIR__ . '/../../src/Patients.php';
 require_once __DIR__ . '/../../src/Sala.php';
 require_once __DIR__ . '/../../src/ExamenesPrevios.php';
@@ -236,6 +237,24 @@ if (isset($v['otoscopia']['fases']) && is_array($v['otoscopia']['fases'])) {
         return (string) fv($v, ['otoscopia', 'texto', (string) $n], '');
     };
 }
+
+// Lo que muestra la foto de la fase 1 (verdad de la otoscopia): misma forma
+// guardada o en el POST. Sin nada cargado y con la foto elegida de la base,
+// se sugiere lo típico de su tipo (sugiere, no bloquea: se corrige y se
+// guarda como cualquier otro dato).
+$otoscopiaHallazgosDe = static function (string $lado, string $photoCaseId) use ($v): array {
+    $h = CaseBuilder::otoscopiaHallazgos($v['otoscopia']['hallazgos'][$lado] ?? null);
+    $h['sugerido'] = null;
+    if (!$h['definida'] && OtoscopiaPhoto::has($photoCaseId, $lado, 0)) {
+        $uso = OtoscopiaBiblioteca::usoDe($photoCaseId, $lado, 0);
+        $tipico = $uso ? (OtoscopiaTecnica::TIPICO_TIPO[$uso['tipo']] ?? null) : null;
+        if ($tipico !== null) {
+            $h = CaseBuilder::otoscopiaHallazgos($tipico);
+            $h['sugerido'] = $uso['tipo'];
+        }
+    }
+    return $h;
+};
 
 // Exámenes que trae (ver ExamenesPrevios.php): al editar llegan guardados;
 // en un submit fallido, como los arrays paralelos del POST.

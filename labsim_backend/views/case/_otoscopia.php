@@ -8,13 +8,15 @@
  * correría sin la sesión de admin que valida case_create.php.
  *
  * Incluido por admin/case_create.php, que comparte su scope: este archivo
- * NO declara lo que usa. Espera del padre $otoscopiaCount, $otoscopiaTextoAt, $photoCaseId.
+ * NO declara lo que usa. Espera del padre $otoscopiaCount, $otoscopiaTextoAt, $photoCaseId,
+ * $otoscopiaHallazgosDe (lo que muestra la foto de la fase 1, por oído).
  */
 ?>
 <div class="tab-panel" data-tab="otoscopia">
 <div class="card">
     <strong>Otoscopia</strong>
     <p class="help">"Elegir de la base" trae una foto de la base de otoscopias ya orientada para ese oído (la da vuelta sola si hace falta); si después se corrige en la base, se actualiza acá. Subir otra, borrarla o espejarla a mano la deja como foto propia del caso. La misma foto de la base no puede ir en los dos oídos.</p>
+    <p class="help"><strong>Lo que muestra la foto</strong> (fase 1, la que ven los alumnos): contra esto se compara el informe de otoscopía del alumno. "Normal" marca conducto normal y membrana sin hallazgos de una vez. Sin esto cargado, el informe del alumno no se puede evaluar.</p>
     <p class="help">Una sola fase (la de por defecto) = una imagen por oído, nada más. Agregar una 2ª fase en adelante es lo que la convierte en "por fase": cada fase desde la 2ª lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Por ahora todos los alumnos ven la fase 1: la fase no avanza sola con el progreso de cada uno, así que las siguientes sirven para preparar el caso, no para mostrárselas todavía.</p>
 
     <input type="hidden" name="otoscopia[fase_count]" id="otoscopia-fase-count" value="<?= $otoscopiaCount ?>">
@@ -50,6 +52,34 @@
                     <button type="button" class="secondary otoscopia-mirror-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" title="Da vuelta la imagen de izquierda a derecha" <?= $hasOto ? '' : 'hidden' ?>>Espejar</button>
                     <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
                     <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $lado ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
+                    <?php if ($faseIdx === 0): ?>
+                    <?php $oh = $otoscopiaHallazgosDe($lado, $photoCaseId); $base = "otoscopia[hallazgos][{$lado}]"; ?>
+                    <fieldset class="oto-verdad" data-side="<?= $lado ?>">
+                        <legend>Lo que muestra la foto</legend>
+                        <?php if ($oh['sugerido'] !== null): ?>
+                        <p class="help help--xs">Sugerido por la foto de la base (<?= htmlspecialchars(OtoscopiaBiblioteca::TIPOS[$oh['sugerido']] ?? $oh['sugerido']) ?>): revísalo y guarda.</p>
+                        <?php endif; ?>
+                        <label class="oto-verdad-normal"><input type="checkbox" name="<?= $base ?>[normal]" value="1" <?= $oh['normal'] ? 'checked' : '' ?>> <strong>Normal</strong> <span class="help help--xs">(conducto normal, membrana sin hallazgos)</span></label>
+                        <div class="oto-verdad-cae"><span class="help help--xs">Conducto:</span>
+                            <?php foreach (CaseBuilder::OTOSCOPIA_CAE as $k => $label): ?>
+                            <label><input type="checkbox" name="<?= $base ?>[cae][]" value="<?= $k ?>" <?= in_array($k, $oh['cae'], true) ? 'checked' : '' ?>> <?= htmlspecialchars($label) ?></label>
+                            <?php endforeach; ?>
+                        </div>
+                        <table class="oto-verdad-tabla">
+                            <tr><th>Membrana</th><?php foreach (CaseBuilder::OTOSCOPIA_CUADRANTES as $q => $ql): ?><th title="<?= htmlspecialchars($q) ?>"><?= htmlspecialchars($ql) ?></th><?php endforeach; ?></tr>
+                            <?php foreach (CaseBuilder::OTOSCOPIA_HALLAZGOS as $hk => $hl): ?>
+                            <tr><td><?= htmlspecialchars($hl) ?></td>
+                                <?php foreach (CaseBuilder::OTOSCOPIA_CUADRANTES as $q => $ql): ?>
+                                <td><input type="checkbox" class="oto-verdad-h" name="<?= $base ?>[cuadrantes][<?= $q ?>][]" value="<?= $hk ?>" aria-label="<?= htmlspecialchars($hl . ' ' . $ql) ?>" <?= in_array($hk, $oh['cuadrantes'][$q] ?? [], true) ? 'checked' : '' ?>></td>
+                                <?php endforeach; ?>
+                            </tr>
+                            <?php endforeach; ?>
+                        </table>
+                        <label>Descripción (opcional, como la escribiría en un informe)
+                            <textarea name="<?= $base ?>[texto]" rows="2"><?= htmlspecialchars($oh['texto']) ?></textarea>
+                        </label>
+                    </fieldset>
+                    <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>

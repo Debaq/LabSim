@@ -5,6 +5,46 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Lo que muestra la foto de otoscopía, en la ficha del caso (2026-11-27)
+
+**Pedido.** Los informes de otoscopía de los alumnos tienen descripciones
+manuales y no había cómo saber si coincidían: "agrega en las fichas de los
+casos dónde ingresar esa información de las otoscopías, un selector rápido
+de normal".
+
+**Diagnóstico.** La ficha solo guardaba la foto de cada oído y un texto
+por fase (lo que pasó entremedio). De 64 oídos de casos con atenciones, 48
+tenían foto propia sin ninguna descripción, 14 sin foto y 2 con foto de la
+base (tipo y notas). Se comprobó con un hash perceptual que las fotos
+propias no son de la base (distancia mínima 36/256): no hay verdad que
+recuperar. No se le pidió a una IA que la describa: un diagnóstico que
+nadie validó no sirve para evaluar.
+
+**Decisión.**
+- Pestaña Otoscopia, fase 1 (la que ven los alumnos), por oído: bloque "Lo
+  que muestra la foto" con un botón **Normal** (conducto normal y membrana
+  sin hallazgos de una vez), el conducto, una tabla hallazgo × cuadrante
+  (mismo vocabulario que el informe de la app, más "Sin precisar") y una
+  descripción libre opcional. Se guarda en `Otoscopia.hallazgos.{od,oi}`
+  (`CaseBuilder::otoscopiaHallazgos` normaliza el POST y lo guardado).
+- Con la foto elegida de la base y nada cargado, se sugiere lo típico de su
+  tipo (`OtoscopiaTecnica::TIPICO_TIPO`), que el docente revisa y guarda.
+- `OtoscopiaTecnica` compara el informe del alumno contra eso: hallazgos de
+  membrana (en cualquier cuadrante) y del conducto, logro = coincidencias
+  sobre la unión (descuenta lo que no vio y lo que marcó de más), peso 2. El
+  alumno ve "encontró N de M"; el docente, cuadrantes y los dos textos. Sin
+  descripción cargada vale el tipo de la base, y si tampoco hay, no se
+  evalúa.
+- En Pacientes, etiqueta "otoscopía sin describir" (buscable). No entra en
+  CaseCompleteness: eso bloquea agendar y dejaría sin citar los 23 casos
+  que hoy están así.
+
+**Pendiente.** Comparar con un LLM la descripción libre del alumno contra
+la del docente (hoy solo se muestran lado a lado). Describir las fases 2 en
+adelante (hoy los alumnos ven solo la 1).
+
+**Tests.** `test_equipos_tecnica.php` (ficha de otoscopía).
+
 ## Técnica de otoscopía, diapasones e impedanciometría en la atención (2026-11-27)
 
 **Pedido.** "Impedanciometría, otoscopía y diapasones deben ser evaluados.

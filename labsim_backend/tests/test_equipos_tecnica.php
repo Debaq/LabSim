@@ -216,3 +216,29 @@ $sinRefl = eq_caso(['Reflex' => ['ipsi' => array_fill(0, 4, [130, 130]), 'contra
 $rr = eq_reglas(EquiposTecnica::evaluar(eq_logs([[20, 'z_stimulus_click', ['screen' => 'decay', 'side' => 'OD', 'mode' => 'CONTRA', 'freq' => '2000', 'dB' => 100]]]), $sinRefl)['impedanciometria']);
 t_eq(eq_busca($rr, 'donde hay reflejo'), false, 'Z: deterioro sin reflejo');
 t_eq(eq_busca($rr, 'en 500 o 1000'), false, 'Z: deterioro en 2 kHz');
+
+// ---- lo que muestra la foto (cargado por el docente en la ficha) --------------------
+$h = CaseBuilder::otoscopiaHallazgos(['normal' => '1', 'cae' => ['cae_cerumen'], 'cuadrantes' => ['posterior_inferior' => ['perforation']]]);
+t_eq([$h['cae'], $h['cuadrantes'], $h['definida']], [['cae_normal'], [], true], 'Ficha otoscopía: "Normal" deja conducto normal y sin hallazgos');
+$h = CaseBuilder::otoscopiaHallazgos(['cuadrantes' => ['posterior_inferior' => ['perforation', 'inventado'], 'otro' => ['tube']], 'cae' => ['cae_otorrhea', 'x']]);
+t_eq([$h['cuadrantes'], $h['cae']], [['posterior_inferior' => ['perforation']], ['cae_otorrhea']], 'Ficha otoscopía: solo claves conocidas');
+t_eq(CaseBuilder::otoscopiaHallazgos(null)['definida'], false, 'Ficha otoscopía: vacío = sin describir');
+$verdadCaso = eq_caso(['Otoscopia' => ['fases' => [['texto' => '']], 'hallazgos' => [
+    'od' => ['cuadrantes' => ['posterior_inferior' => ['perforation']], 'cae' => ['cae_otorrhea'], 'texto' => 'Perforación posteroinferior con otorrea'],
+    'oi' => ['normal' => true],
+]]]);
+$inf = ['od' => ['cuadrantes' => ['anterior_inferior' => ['perforation']], 'cae' => ['cae_normal'], 'observaciones' => 'perforación'],
+    'oi' => ['cae' => ['cae_normal']]];
+$sec = EquiposTecnica::evaluar($bien, $verdadCaso, ['informe_otoscopia' => $inf])['otoscopia'];
+$od = array_values(array_filter($sec['oidos']['OD'], static function ($r) { return strpos($r['texto'], 'El informe dice') === 0; }))[0];
+t_eq(round($od['logro'], 2), 0.5, 'Otoscopía: encontró la perforación y no la otorrea (1 de 2)');
+t_true(strpos($od['detalle'], 'Encontró 1 de 2') === 0, 'Otoscopía: el alumno ve cuántos encontró, no cuáles');
+t_true(strpos($od['detalle_docente'], 'Perforación (PI)') !== false && strpos($od['detalle_docente'], 'Docente: "Perforación') !== false, 'Otoscopía: el docente ve cuadrantes y textos');
+$oi = array_values(array_filter($sec['oidos']['OI'], static function ($r) { return strpos($r['texto'], 'El informe dice') === 0; }))[0];
+t_eq($oi['cumple'], true, 'Otoscopía: oído normal informado sin hallazgos');
+$inf['oi'] = ['cuadrantes' => ['toda' => ['retraction']]];
+$sec = EquiposTecnica::evaluar($bien, $verdadCaso, ['informe_otoscopia' => $inf])['otoscopia'];
+$oi = array_values(array_filter($sec['oidos']['OI'], static function ($r) { return strpos($r['texto'], 'El informe dice') === 0; }))[0];
+t_eq($oi['cumple'], false, 'Otoscopía: marcó un hallazgo en un oído normal');
+$rr = eq_reglas($sec);
+t_eq(eq_busca($rr, 'menos probablemente'), false, 'Otoscopía: con la ficha cargada, OD es el alterado y empezó por OD');

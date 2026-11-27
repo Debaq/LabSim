@@ -339,6 +339,16 @@ final class CaseForm
             $texto = $n === 0 ? '' : trim((string) self::val($v, ['otoscopia', 'texto', (string) $n], ''));
             $otoscopiaFases[] = ['texto' => $texto];
         }
+        // Lo que muestra la foto de la fase 1, por oído (verdad para
+        // evaluar el informe del alumno). Solo se guarda lo que se cargó.
+        $otoscopiaHallazgos = [];
+        foreach (['od', 'oi'] as $lado) {
+            $h = CaseBuilder::otoscopiaHallazgos($v['otoscopia']['hallazgos'][$lado] ?? null);
+            if ($h['definida']) {
+                unset($h['definida']);
+                $otoscopiaHallazgos[$lado] = $h;
+            }
+        }
 
         // ABR: una patología por oído (ver ABR_TYPE_OPTIONS) -- ya no hay
         // banco de casos compartido, cada paciente trae la suya (ver
@@ -650,7 +660,7 @@ final class CaseForm
                     'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
                     'disposicion' => (int) ($v['disposicion'] ?? 0),
                 ]),
-                'otoscopia' => ['fases' => $otoscopiaFases],
+                'otoscopia' => ['fases' => $otoscopiaFases] + ($otoscopiaHallazgos ? ['hallazgos' => $otoscopiaHallazgos] : []),
                 'perfil' => $perfil,
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi, 'autor' => $abrAutor],
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],

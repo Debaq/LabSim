@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/EquiposTecnica.php';
+require_once __DIR__ . '/CaseBuilder.php';
 
 /**
  * Técnica de la otoscopía (libro, H1): explicar, traccionar el pabellón
@@ -38,6 +39,24 @@ final class OtoscopiaTecnica
         'cerumen' => ['cae_cerumen'],
         'tubo' => ['tube'],
         'retraccion' => ['retraction'],
+    ];
+    /**
+     * Lo típico de cada tipo de la base, para sugerirlo en la ficha cuando
+     * la foto se elige de la base (el docente lo corrige): misma forma que
+     * CaseBuilder::otoscopiaHallazgos.
+     */
+    public const TIPICO_TIPO = [
+        'normal' => ['normal' => true],
+        'perforacion' => ['cuadrantes' => ['toda' => ['perforation']]],
+        'omc' => ['cuadrantes' => ['toda' => ['perforation']], 'cae' => ['cae_otorrhea']],
+        'timpanoesclerosis' => ['cuadrantes' => ['toda' => ['tympanosclerosis']]],
+        'otitis_externa' => ['cae' => ['cae_edema']],
+        'ome' => ['cuadrantes' => ['toda' => ['effusion']]],
+        'oma' => ['cuadrantes' => ['toda' => ['inflammation']]],
+        'colesteatoma' => ['cuadrantes' => ['toda' => ['cholesteatoma']]],
+        'cerumen' => ['cae' => ['cae_cerumen']],
+        'tubo' => ['cuadrantes' => ['toda' => ['tube']]],
+        'retraccion' => ['cuadrantes' => ['toda' => ['retraction']]],
     ];
     /** Lo que en el informe cuenta como "sin hallazgos". */
     private const SIN_HALLAZGO = ['cae_normal'];
@@ -138,10 +157,15 @@ final class OtoscopiaTecnica
                     : ($ultimo === null ? 'No llegó a mirar.' : 'Miró con el ' . ($ultimo === 'adulto' ? 'de adulto' : 'pediátrico') . '.'),
                 'peso' => 1,
             ];
-            // Lo informado contra lo que muestra la foto, si se sabe qué es.
-            $tipo = $tipos[strtolower(self::OIDOS[$o])] ?? null;
-            if ($tipo !== null && isset(self::HALLAZGOS_TIPO[$tipo]) && is_array($informe)) {
-                $marcados = self::marcados($informe, strtolower(self::OIDOS[$o]));
+            // Lo informado contra lo que muestra la foto: lo que cargó el
+            // docente en la ficha; si no, el tipo de la foto de la base.
+            $lado = strtolower(self::OIDOS[$o]);
+            $verdad = CaseBuilder::otoscopiaHallazgos($caso['Otoscopia']['hallazgos'][$lado] ?? null);
+            $tipo = $tipos[$lado] ?? null;
+            if (is_array($informe) && $verdad['definida'] && ($verdad['normal'] || $verdad['cae'] || $verdad['cuadrantes'])) {
+                $r[] = self::compararHallazgos($verdad, $informe, $lado);
+            } elseif ($tipo !== null && isset(self::HALLAZGOS_TIPO[$tipo]) && is_array($informe)) {
+                $marcados = self::marcados($informe, $lado);
                 $esperados = self::HALLAZGOS_TIPO[$tipo];
                 $ok = $esperados === []
                     ? array_diff($marcados, self::SIN_HALLAZGO) === []
@@ -150,8 +174,8 @@ final class OtoscopiaTecnica
                     'texto' => 'El informe dice lo que se ve en la membrana y el conducto.',
                     'cumple' => $ok,
                     'detalle' => $ok ? 'Lo informado calza con la imagen.' : 'Lo informado no calza con la imagen.',
-                    'detalle_docente' => 'Imagen: ' . str_replace('_', ' ', $tipo) . '. Informó: '
-                        . ($marcados ? implode(', ', $marcados) : 'nada marcado') . '.',
+                    'detalle_docente' => 'Imagen: ' . str_replace('_', ' ', $tipo) . ' (de la base). Informó: '
+                        . ($marcados ? implode(', ', array_map([self::class, 'etiqueta'], $marcados)) : 'nada marcado') . '.',
                     'peso' => 2,
                 ];
             }
@@ -164,13 +188,94 @@ final class OtoscopiaTecnica
         return ['hecha' => true, 'reglas' => $reglas, 'oidos' => $oidos, 'observaciones' => $obs];
     }
 
+    /**
+     * El informe de un oído contra lo que el docente dijo que muestra la
+     * foto. Se comparan los hallazgos (de membrana, en cualquier cuadrante, y
+     * del conducto, sin contar "normal"): logro = coincidencias sobre la
+     * unión, así descuenta tanto lo que no vio como lo que marcó de más. Si
+     * la foto no tiene hallazgos, cumple el que no marcó ninguno. El
+     * cuadrante y los textos van al detalle del docente.
+     */
+    public static function compararHallazgos(array $verdad, array $informe, string $lado): array
+    {
+        $esperados = self::conjunto($verdad);
+        $marcados = array_values(array_diff(self::marcados($informe, $lado), self::SIN_HALLAZGO));
+        $comunes = array_values(array_intersect($esperados, $marcados));
+        $union = array_values(array_unique(array_merge($esperados, $marcados)));
+        if ($esperados === []) {
+            $logro = $marcados === [] ? 1.0 : 0.0;
+            $detalle = $marcados === [] ? 'Sin hallazgos, como la imagen.' : 'Marcó hallazgos que la imagen no tiene.';
+        } else {
+            $logro = count($comunes) / count($union);
+            $extra = count($marcados) - count($comunes);
+            $detalle = sprintf('Encontró %d de %d hallazgo(s) de la imagen', count($comunes), count($esperados))
+                . ($extra > 0 ? " y marcó {$extra} que no está(n)" : '') . '.';
+        }
+        $doc = 'Imagen: ' . self::describir($verdad['cuadrantes'], $verdad['cae'], $verdad['normal'])
+            . '. Informó: ' . self::describir((array) ($informe[$lado]['cuadrantes'] ?? []), (array) ($informe[$lado]['cae'] ?? []), false) . '.';
+        if ($verdad['texto'] !== '' || trim((string) ($informe[$lado]['observaciones'] ?? '')) !== '') {
+            $doc .= ' Docente: "' . $verdad['texto'] . '". Alumno: "' . trim((string) ($informe[$lado]['observaciones'] ?? '')) . '".';
+        }
+        return [
+            'texto' => 'El informe dice lo que se ve en la membrana y el conducto.',
+            'cumple' => $logro >= 1.0,
+            'logro' => $logro,
+            'detalle' => $detalle,
+            'detalle_docente' => $doc,
+            'peso' => 2,
+        ];
+    }
+
+    /** Hallazgos de una verdad cargada por el docente, como lista plana. */
+    private static function conjunto(array $verdad): array
+    {
+        $out = [];
+        foreach ($verdad['cuadrantes'] as $lista) {
+            foreach ($lista as $h) {
+                $out[] = $h;
+            }
+        }
+        foreach ($verdad['cae'] as $c) {
+            $out[] = $c;
+        }
+        return array_values(array_diff(array_unique($out), self::SIN_HALLAZGO));
+    }
+
+    private static function etiqueta(string $k): string
+    {
+        return CaseBuilder::OTOSCOPIA_HALLAZGOS[$k] ?? (CaseBuilder::OTOSCOPIA_CAE[$k] ?? $k);
+    }
+
+    private static function describir(array $cuadrantes, array $cae, bool $normal): string
+    {
+        if ($normal) {
+            return 'normal';
+        }
+        $partes = [];
+        foreach ($cuadrantes as $q => $lista) {
+            foreach ((array) $lista as $h) {
+                $partes[] = self::etiqueta((string) $h) . ' (' . (CaseBuilder::OTOSCOPIA_CUADRANTES[$q] ?? $q) . ')';
+            }
+        }
+        foreach ($cae as $c) {
+            $partes[] = 'CAE ' . mb_strtolower(self::etiqueta((string) $c));
+        }
+        return $partes ? implode(', ', $partes) : 'nada marcado';
+    }
+
     /** Oído con la otoscopía alterada cuando el otro no lo está, o null. */
     public static function oidoAlterado(array $caso, array $tipos): ?int
     {
         $alt = [];
         foreach ([0, 1] as $o) {
-            $tipo = $tipos[$o === 0 ? 'od' : 'oi'] ?? null;
+            $lado = $o === 0 ? 'od' : 'oi';
+            $tipo = $tipos[$lado] ?? null;
             $nr = ($caso[$o === 0 ? 'Z_OD' : 'Z_OI'] ?? null) === 'NR';
+            // lo que cargó el docente manda sobre el tipo de la base
+            $v = CaseBuilder::otoscopiaHallazgos($caso['Otoscopia']['hallazgos'][$lado] ?? null);
+            if ($v['normal'] || $v['cae'] || $v['cuadrantes']) {
+                $tipo = self::conjunto($v) === [] ? 'normal' : 'alterado';
+            }
             $alt[$o] = $nr || ($tipo !== null && $tipo !== 'normal') ? true : ($tipo === 'normal' ? false : null);
         }
         if ($alt[0] === true && $alt[1] !== true) {

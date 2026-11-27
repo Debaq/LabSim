@@ -467,3 +467,15 @@ th.reflex-head.oi { color: var(--color-oi); }
 /* Solo el color del oído, sin la píldora de .side-tag (títulos sueltos). */
 .od-text { color: var(--color-od); }
 .oi-text { color: var(--color-oi); }
+
+/* Lo que muestra la foto (verdad de la otoscopia, fase 1) */
+.oto-verdad { text-align: left; margin-top: 0.6rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; padding: 0.4rem 0.6rem; }
+.oto-verdad legend { font-weight: 600; padding: 0 0.3rem; }
+.oto-verdad-normal { display: inline-flex; gap: 0.3rem; align-items: center; margin: 0.2rem 0 0.4rem; padding: 0.2rem 0.6rem; border: 1px solid var(--color-border, #ccc); border-radius: 999px; cursor: pointer; }
+.oto-verdad-normal:has(input:checked) { background: #e8f2e9; border-color: #2e7d32; }
+.oto-verdad-cae { display: flex; flex-wrap: wrap; gap: 0.2rem 0.7rem; align-items: center; margin-bottom: 0.3rem; font-size: 0.9em; }
+.oto-verdad-tabla { border-collapse: collapse; font-size: 0.82em; margin-bottom: 0.3rem; }
+.oto-verdad-tabla th, .oto-verdad-tabla td { padding: 0.1rem 0.35rem; text-align: center; }
+.oto-verdad-tabla td:first-child, .oto-verdad-tabla th:first-child { text-align: left; }
+.oto-verdad-tabla tr:nth-child(even) td { background: rgba(0, 0, 0, 0.03); }
+.oto-verdad textarea { width: 100%; box-sizing: border-box; }

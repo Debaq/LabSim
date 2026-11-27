@@ -490,3 +490,26 @@
 
     updateRemoveButtons();
 })();
+
+// Lo que muestra la foto (fase 1): "Normal" es un atajo -- marca el conducto
+// normal y limpia los hallazgos; marcar cualquier hallazgo o un conducto
+// alterado lo desmarca.
+(function () {
+    document.querySelectorAll('.oto-verdad').forEach(function (fs) {
+        var normal = fs.querySelector('.oto-verdad-normal input');
+        if (!normal) { return; }
+        var cae = fs.querySelectorAll('.oto-verdad-cae input');
+        var hallazgos = fs.querySelectorAll('.oto-verdad-h');
+        normal.addEventListener('change', function () {
+            if (!normal.checked) { return; }
+            hallazgos.forEach(function (c) { c.checked = false; });
+            cae.forEach(function (c) { c.checked = c.value === 'cae_normal'; });
+        });
+        hallazgos.forEach(function (c) {
+            c.addEventListener('change', function () { if (c.checked) { normal.checked = false; } });
+        });
+        cae.forEach(function (c) {
+            c.addEventListener('change', function () { if (c.checked && c.value !== 'cae_normal') { normal.checked = false; } });
+        });
+    });
+})();
