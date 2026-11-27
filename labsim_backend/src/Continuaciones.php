@@ -57,4 +57,20 @@ final class Continuaciones
         ]);
         return (int) $pdo->lastInsertId();
     }
+
+    /**
+     * El alumno fue a buscar al paciente recién despedido y reabrió la
+     * atención: la continuación que había pedido ese cierre se borra si
+     * nadie la atendió (al volver a cerrar decide de nuevo).
+     */
+    public static function anularSinAtender(PDO $pdo, int $appointmentId, int $studentId): void
+    {
+        if (!self::disponible()) {
+            return;
+        }
+        $pdo->prepare(
+            'DELETE FROM appointments WHERE continua_de = ? AND assigned_student_id = ?
+                AND NOT EXISTS (SELECT 1 FROM attendances att WHERE att.appointment_id = appointments.id)'
+        )->execute([$appointmentId, $studentId]);
+    }
 }

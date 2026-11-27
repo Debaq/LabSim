@@ -364,6 +364,62 @@ def test_turnos_se_registran_una_vez_al_dia():
         (11, "11:15", "11:45", 30), (12, "11:45", "12:30", 45), (13, "12:30", "12:45", 15), (14, "12:45", "13:45", 60)]
 
 
+def test_ir_a_buscar_al_paciente_recien_despedido():
+    """Cerrar es despedirlo; durante 5 min «Ir a buscarlo» reabre la atención."""
+    from core.base import context  # crea la QApplication
+    import main as app_main
+    import agenda.Agenda as mod
+    app = context.app
+
+    class _Yo:
+        VENTANA_BUSCAR_MIN = app_main.MainWindow.VENTANA_BUSCAR_MIN
+        plazo_ir_a_buscar = app_main.MainWindow.plazo_ir_a_buscar
+
+    yo = _Yo()
+    yo._despedidos = {"60": (datetime.now() - timedelta(minutes=2), "nota"),
+                      "61": (datetime.now() - timedelta(minutes=6), "nota")}
+    assert yo.plazo_ir_a_buscar("60") is not None
+    assert yo.plazo_ir_a_buscar("61") is None and yo.plazo_ir_a_buscar("62") is None
+
+    hoy = datetime.now().strftime("%d-%m-%y")
+    agenda = {"60": AgendaEntry(fecha=hoy, hora="09:00", nombre="Samuel", case_id="c1",
+                                atencion={"alumno": {"estado": "atendido", "nota": "x"}}),
+              "61": AgendaEntry(fecha=hoy, hora="10:00", nombre="Rosa", case_id="c2",
+                                atencion={"alumno": {"estado": "atendido", "nota": "x"}})}
+
+    class _Shedule:
+        def get(self):
+            return {"agenda_1": agenda}
+
+    buscados = []
+
+    class _Main:
+        data_login = {"user": "alumno", "permission": 444}
+        data_current_key = None
+        plazo_ir_a_buscar = yo.plazo_ir_a_buscar
+        def ir_a_buscar(self, key):
+            buscados.append(key)
+
+    mod.Shedule = _Shedule
+    ag = mod.Agenda(444, _Main())
+    tarea = ag._shedule_fetch
+    if tarea is not None:
+        assert tarea.esperar(5000)
+        for _ in range(50):
+            app.processEvents()
+            if ag._shedule_fetch is None:
+                break
+    keys = ag._visible_keys()
+    ag.tableWidget.selectRow(keys.index("60"))
+    app.processEvents()
+    assert ag.btn_atender.text() == "Ir a buscarlo" and ag.btn_atender.isEnabled()
+    ag.atender_paciente()
+    assert buscados == ["60"]
+    ag.tableWidget.selectRow(keys.index("61"))
+    app.processEvents()
+    assert ag.btn_atender.text() == "Atender" and not ag.btn_atender.isEnabled()
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

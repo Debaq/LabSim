@@ -34,6 +34,9 @@ switch ($action) {
                 estado = 'atendiendo', updated_at = CURRENT_TIMESTAMP"
         );
         $stmt->execute([$appointmentId, $user['id']]);
+        // "Ir a buscarlo": reabrir una atención recién cerrada. Si ese cierre
+        // había pedido continuación y todavía no se atendió, sobra.
+        Continuaciones::anularSinAtender($pdo, $appointmentId, (int) $user['id']);
         break;
 
     case 'atendido':

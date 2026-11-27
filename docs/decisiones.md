@@ -5,6 +5,35 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Ir a buscar al paciente recién despedido (2026-11-27)
+
+**Pedido.** "Unos 5 minutos después de que le pediste que se fuera, ir a
+buscarlo: a veces pasa que algo faltó y sales corriendo a buscar al
+paciente."
+
+**Decisión.** Cerrar la atención (guardar la evolución) es despedir al
+paciente. Durante `MainWindow.VENTANA_BUSCAR_MIN` = 5 min la fila del
+alumno muestra «Ir a buscarlo» en vez del botón apagado, y la ficha dice
+hasta qué hora. Al apretarlo (`main.ir_a_buscar`) la atención se reabre:
+'atendiendo' va por la misma cola (detrás del 'atendido', así funciona sin
+red), los informes vuelven desde el servidor como al retomar, y la nota
+escrita vuelve como borrador de la evolución para completarla. El chat
+parte de cero, como en todo retomar (reset pedagógico). Al reabrir, el
+servidor borra la continuación que hubiera pedido ese cierre si nadie la
+atendió (`Continuaciones::anularSinAtender`): al volver a cerrar se decide
+de nuevo. La evaluación OIRS no se duplica (ya salta si existe). Se
+registra `agenda_ir_a_buscar` (segundos desde el cierre).
+
+Vale para cualquier cita del alumno, con o sin duración. No para el
+docente ni para la práctica libre (ahí se repite el intento). La ventana
+se cuenta en la app: si la cierra y la vuelve a abrir, el paciente ya se
+fue. El servidor no pone tope (ya aceptaba reabrir): ponérselo rompería el
+caso sin red, donde el 'atendiendo' llega tarde.
+
+**Probado.** `tests/test_agenda_relativa.py::test_ir_a_buscar_al_paciente_recien_despedido`
+(ventana de 5 min, botón y llamada) y `anularSinAtender` con SQLite real en
+php:7.4-cli (borra la continuación sin atender, respeta la atendida).
+
 ## Agenda relativa al ingreso del alumno (2026-11-27)
 
 **Problema.** Los prácticos del curso 1 se agendaron de cinco formas en seis

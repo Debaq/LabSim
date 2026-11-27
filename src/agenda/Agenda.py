@@ -1071,6 +1071,12 @@ class Agenda(QWidget, Ui_Form):
             self._selected_row_key = None
             self._actualizar_detalle()
 
+    def _plazo_buscar(self, key):
+        if self.is_admin or self._modo_practica or key is None:
+            return None
+        plazo = getattr(self.main_window, "plazo_ir_a_buscar", None)
+        return plazo(key) if plazo is not None else None
+
     def _texto_plazo(self, user):
         limite = agenda_relativa.plazo(user, self.shedule.get("agenda_1", {}))
         if limite is None:
@@ -1086,6 +1092,12 @@ class Agenda(QWidget, Ui_Form):
     def _tic_relativa(self):
         if self.is_admin or self._modo_practica or not self.shedule:
             return
+        # "Ir a buscarlo" se apaga solo cuando el paciente ya se fue.
+        buscable = self._plazo_buscar(self._selected_row_key) is not None
+        if buscable != getattr(self, "_ultimo_buscable", False):
+            self._ultimo_buscable = buscable
+            self._on_selection_changed()
+            self._actualizar_detalle()
         claves = self._claves_relativa()
         if claves and claves != getattr(self, "_ultimas_claves_relativa", None):
             self._ultimas_claves_relativa = claves
@@ -1276,6 +1288,9 @@ class Agenda(QWidget, Ui_Form):
         elif clave == "atendido":
             paso = len(vista.PASOS)
             pista = "Atención cerrada: tu nota de evolución quedó registrada."
+            hasta = self._plazo_buscar(key)
+            if hasta is not None:
+                pista += (f" Si te faltó algo, todavía lo alcanzas: «Ir a buscarlo» hasta las {hasta:%H:%M}.")
         elif clave == "no_show":
             pista = "Quedó registrada como inasistencia del paciente."
         elif clave == "sin_fecha":
@@ -1660,6 +1675,10 @@ class Agenda(QWidget, Ui_Form):
             # o el alumno está atendiendo a otro paciente): retomar, no cerrar.
             self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(tiene_caso)
+        elif estado == "atendido" and self._plazo_buscar(key) is not None:
+            # Recién despedido: todavía se lo alcanza (main.ir_a_buscar).
+            self.btn_atender.setText("Ir a buscarlo")
+            self.btn_atender.setEnabled(tiene_caso)
         elif estado == "atendido":
             self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(False)
@@ -1732,6 +1751,10 @@ class Agenda(QWidget, Ui_Form):
             return
         if estado is None and agenda_relativa.todavia_no_llega(user):
             return   # todavía no llega: no se adelanta (el botón ya está apagado)
+        if estado == "atendido":
+            if self._plazo_buscar(self._selected_row_key) is not None:
+                self.main_window.ir_a_buscar(self._selected_row_key)
+            return
 
         if self.main_window is not None and hasattr(self.main_window, "atender_paciente"):
             self.main_window.atender_paciente(self._selected_row_key)

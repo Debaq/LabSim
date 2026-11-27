@@ -20,6 +20,7 @@ from audiometria import Acumetria, Otoscopia
 from audiometria.ventana_ot_ac import OtoscopiaAcumetriaWindow
 from audiometria.DebugMkg import DebugMkgDialog
 from auth import login as Ui_login
+from datetime import datetime, timedelta
 from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
 from core import iconos, tema
@@ -1326,7 +1327,38 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.statusbar.showMessage(f"[PRUEBA] Atención cerrada (no se guarda): {nota[:80]}")
         self._stop_cronometro()
 
-    def _atender_caso(self, key, *, es_prueba, practica=None):
+    # "Ir a buscarlo": cerrar la atención es despedir al paciente, pero
+    # durante unos minutos todavía se lo alcanza en el pasillo si faltó algo
+    # (pedido del autor, 2026-11-27). Pasado eso, ya se fue.
+    VENTANA_BUSCAR_MIN = 5
+
+    def plazo_ir_a_buscar(self, key):
+        """Hasta cuándo se puede ir a buscar al paciente recién despedido
+        (datetime), o None si ya se fue o no se despidió en esta sesión."""
+        despedido = getattr(self, "_despedidos", {}).get(str(key))
+        if despedido is None:
+            return None
+        hasta = despedido[0] + timedelta(minutes=self.VENTANA_BUSCAR_MIN)
+        return hasta if datetime.now() < hasta else None
+
+    def ir_a_buscar(self, key):
+        """Reabre la atención recién cerrada: vuelven los informes (los trae
+        el servidor, como al retomar) y la evolución trae la nota que se había
+        escrito, para completarla."""
+        if self.plazo_ir_a_buscar(key) is None or self._alumno_para_recepcion() is None:
+            return
+        cuando, nota = self._despedidos.pop(str(key))
+        usuario = respaldo_informes.usuario_de(self._logged_in_client())
+        if usuario and nota:
+            try:
+                respaldo_informes.guardar_borrador(usuario, int(key), nota)
+            except (TypeError, ValueError, OSError):
+                pass
+        LOCAL_LOG_QUEUE.push("agenda_ir_a_buscar", {
+            "appointment_id": key, "segundos": int((datetime.now() - cuando).total_seconds())})
+        self._atender_caso(key, es_prueba=False, reabrir=True)
+
+    def _atender_caso(self, key, *, es_prueba, practica=None, reabrir=False):
         """Lógica común a atender_paciente() y atender_paciente_prueba() --
         difieren solo en si se marca "atendiendo" en la agenda/backend y en
         el appointment_id que queda asociado al chat (ver docstrings de cada
@@ -1370,7 +1402,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         if not es_prueba:
             usuario = self.data_login["user"]
-            if entry_estado_por(entry, usuario) == "atendido" \
+            if not reabrir and entry_estado_por(entry, usuario) == "atendido" \
                     and (acciones_pendientes.ultimas(self._usuario_backend()).get(str(key)) or {}).get("accion") == "atendido":
                 # Cerrada sin red: reabrirla mandaría "atendiendo" detrás
                 # del cierre y el servidor la volvería a abrir.
@@ -1537,6 +1569,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         marcar_entry_atendido(entry, self.data_login["user"], nota)
         if not self._encolar_atencion(key, "atendido", entry, nota=nota, continuar=continuar):
             return self._cierre_sin_conexion("sin sesión", reanudar=actual)
+        if not es_docente(self.data_login["permission"]):
+            # Recién despedido: unos minutos para ir a buscarlo (ir_a_buscar).
+            self._despedidos = getattr(self, "_despedidos", {})
+            self._despedidos[str(key)] = (datetime.now(), nota)
         self._cierre_ya_hecho(key, avisar=False)
         if sin_red:
             self._aviso("Atención cerrada en este equipo",
