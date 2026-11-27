@@ -73,6 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $procedimiento = trim((string) ($_POST['procedimiento'] ?? '')) ?: 'Audiometría';
         $notaAdmin = trim((string) ($_POST['nota_admin'] ?? ''));
         $forceRound = ($_POST['force_round'] ?? '') === '1';
+        // Agenda relativa: minutos de atención. Vacío = cita de hora fija.
+        // Sin la columna (schema sin aplicar) no se lee ni se guarda.
+        $conDuracion = Db::tieneColumna('appointments', 'duracion_min');
+        $duracionTxt = trim((string) ($_POST['duracion_min'] ?? ''));
+        $duracionMin = ($conDuracion && $duracionTxt !== '') ? (int) $duracionTxt : null;
 
         // Identidad del paciente = del caso, no de la cita. Se fija recién al
         // primer agendamiento; si el caso ya tiene un patient_id asociado, se
@@ -107,6 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($caseId === '') {
             $error = 'Falta el caso.';
+        }
+        if ($error === null && $duracionMin !== null && ($duracionMin < 5 || $duracionMin > 240)) {
+            $error = 'La duración de la atención va de 5 a 240 minutos (vacía = hora fija).';
+        }
+        if ($error === null && $duracionMin !== null && $hora === '') {
+            $error = 'Una cita con duración necesita igual una hora: es la que ordena a los pacientes del día.';
         }
 
         // Un caso al que le falta lo que no se puede calcular (curva
@@ -166,6 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'course_id' => $courseIdEfectivo,
                 'assigned_group_id' => $assignedGroupId,
                 'assigned_student_id' => $assignedStudentId,
+                'duracion_min' => $duracionMin,
             ], $appointmentId);
             if ($choque !== null) {
                 $error = Appointments::textoChoque($pdo, $choque);
@@ -203,6 +215,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             updated_at = CURRENT_TIMESTAMP
                      WHERE id = ?'
                 )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $notaAdmin, $patientId, $courseId, $assignedStudentId, $assignedGroupId, $appointmentId]);
+                if ($conDuracion) {
+                    $pdo->prepare('UPDATE appointments SET duracion_min = ? WHERE id = ?')->execute([$duracionMin, $appointmentId]);
+                }
                 $success = 'Cita actualizada.';
                 AdminAudit::log($me, 'appointment_update', ['appointment_id' => $appointmentId, 'case_id' => $caseId]);
             } else {
@@ -210,6 +225,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, course_id, assigned_student_id, assigned_group_id, patient_id)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                 )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $caseId, $notaAdmin, $courseId, $assignedStudentId, $assignedGroupId, $patientId]);
+                if ($conDuracion && $duracionMin !== null) {
+                    $pdo->prepare('UPDATE appointments SET duracion_min = ? WHERE id = ?')->execute([$duracionMin, (int) $pdo->lastInsertId()]);
+                }
                 $success = $isNewRound ? 'Nueva ronda agendada (se conserva el historial de la anterior).' : 'Caso agendado.';
                 AdminAudit::log($me, 'appointment_schedule', ['case_id' => $caseId, 'new_round' => $isNewRound]);
             }
@@ -338,7 +356,8 @@ if ($scheduleCaseId !== null) {
     $stmt = $pdo->prepare(
         "SELECT c.id, c.data, c.updated_at,
                 a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
-                a.procedimiento, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id
+                a.procedimiento, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id"
+                . (Db::tieneColumna('appointments', 'duracion_min') ? ', a.duracion_min' : '') . "
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
              SELECT id FROM appointments WHERE case_id = c.id AND " . Practica::sinPractica() . " ORDER BY id DESC LIMIT 1
@@ -453,7 +472,8 @@ function appt_in_filter_scope(
 
 $calStmt = $pdo->prepare(
     "SELECT a.id AS appointment_id, a.case_id, a.fecha, a.hora, a.nombre, a.apellido,
-            a.course_id, a.assigned_student_id, a.assigned_group_id
+            a.course_id, a.assigned_student_id, a.assigned_group_id"
+            . (Db::tieneColumna('appointments', 'duracion_min') ? ', a.duracion_min' : '') . "
      FROM appointments a WHERE " . Practica::sinPractica('a') . ($permissionSql !== '1=1' ? " AND ({$permissionSql})" : '')
 );
 $calStmt->execute($permissionParams);
@@ -614,6 +634,12 @@ admin_header('Agendas', $me);
         <label>Hora
             <input type="time" name="hora" value="<?= $scheduleForceRound ? '' : htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
         </label>
+        <?php if (Db::tieneColumna('appointments', 'duracion_min')): ?>
+        <label>Duración de la atención (min)
+            <input type="number" name="duracion_min" min="5" max="240" step="5" value="<?= htmlspecialchars((string) ($scheduleRow['duracion_min'] ?? '')) ?>">
+        </label>
+        <p class="help">Vacía: la cita es a esa hora fija. Con duración, la hora solo ordena a los pacientes del día: cuando el alumno ingresa a la app ese día, su primer paciente queda para los 5 minutos siguientes y cada uno de los demás a continuación del anterior, sumando las duraciones en el orden de las horas. Cada paciente llega a la sala de espera en un momento al azar dentro de los 15 minutos antes de su turno, y antes de eso no se puede atender.</p>
+        <?php endif; ?>
         <?php if ($scheduleIdentityLocked): ?>
         <p style="font-size:0.85rem; margin:0.3rem 0; padding:0.4rem 0.6rem; background:var(--color-row-alt); border-radius:var(--radius-md);">
             <strong><?= htmlspecialchars(trim(($scheduleRow['nombre'] ?? '') . ' ' . ($scheduleRow['apellido'] ?? ''))) ?></strong>
@@ -924,7 +950,7 @@ admin_header('Agendas', $me);
             <a class="cal-add" href="<?= agenda_url(['new' => 1, 'fecha' => $iso, 'schedule' => null, 'appointment' => null]) ?>" title="Nueva cita el <?= htmlspecialchars($iso) ?>">+</a>
             <?php foreach ($dayAppts as $a): ?>
             <a href="<?= agenda_url(['schedule' => $a['case_id'], 'appointment' => $a['appointment_id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
-                <?= htmlspecialchars($a['hora']) ?> <?= htmlspecialchars(trim($a['nombre'] . ' ' . $a['apellido'])) ?>
+                <?= htmlspecialchars($a['hora']) ?><?= !empty($a['duracion_min']) ? ' · ' . (int) $a['duracion_min'] . "'" : '' ?> <?= htmlspecialchars(trim($a['nombre'] . ' ' . $a['apellido'])) ?>
             </a>
             <?php endforeach; ?>
         </div>

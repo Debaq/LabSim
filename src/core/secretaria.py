@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout,
 
 from core.avatar import avatar_circular_desde_bytes, avatar_iniciales
 from core.base import context
-from core import app_config_store
+from core import agenda_relativa, app_config_store
 from core.borrado import borrar_luego
 
 NOMBRE = "Karime"
@@ -101,17 +101,20 @@ def siguiente_paciente(agenda, key_actual, username):
         return None
     if getattr(actual, "practice_id", None) is not None:
         return None   # práctica libre: nadie espera en la sala
+    # Agenda relativa: solo nombra a quien ya llegó a la sala de espera, y
+    # con la hora de su turno (core/agenda_relativa.py).
     pendientes = [
         e for k, e in agenda.items()
         if k != key_actual and not e.sin_cita and e.fecha == actual.fecha and e.hora
         and getattr(e, "practice_id", None) is None
         and not e.atencion.get(username)
+        and not agenda_relativa.todavia_no_llega(e)
     ]
     if not pendientes:
         return None
-    cita = min(pendientes, key=lambda e: e.hora)
+    cita = min(pendientes, key=lambda e: agenda_relativa.hora_vista(e))
     nombre = f"{cita.nombre} {cita.apellido}".strip() or "el paciente siguiente"
-    return {"nombre": nombre, "hora": cita.hora[:5]}
+    return {"nombre": nombre, "hora": agenda_relativa.hora_vista(cita)[:5]}
 
 
 def _rellenar(plantilla, valores):

@@ -15,7 +15,7 @@ from PySide6.QtGui import QPainter, QPixmap, QTextDocument
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QTextBrowser, QVBoxLayout, QWidget
 
-from core import hoja_previa, iconos, informe_previo, invitado, rutas, tema
+from core import agenda_relativa, hoja_previa, iconos, informe_previo, invitado, rutas, tema
 
 from core.helpers import obtener_hora_real_atencion
 
@@ -636,7 +636,9 @@ def render_ficha_html(row, caso, shedule, username, is_admin, todos=False):
     nombre = f"{row.nombre} {row.apellido}".strip()
     edad = edad_de_rut(row.rut) if row.rut else None
     nacimiento = row.fecha_nac + (f" ({edad} años)" if edad and row.fecha_nac else "")
-    fecha_hora = f"{row.fecha} {row.hora}".strip()
+    # Agenda relativa: el alumno ve su turno, no la hora que ordena el día.
+    hora_cita = agenda_relativa.hora_vista(row)
+    fecha_hora = f"{row.fecha} {hora_cita}".strip()
 
     datos = (
         '<table width="100%" cellspacing="0" cellpadding="6">'
@@ -650,7 +652,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin, todos=False):
 
     hora_real = obtener_hora_real_atencion(row, username)
     if hora_real:
-        hora_agendada = QTime.fromString(row.hora, "HH:mm")
+        hora_agendada = QTime.fromString(hora_cita, "HH:mm")
         hora_inicio = QTime.fromString(hora_real, "HH:mm:ss")
         if hora_agendada.isValid() and hora_inicio.isValid():
             minutos = hora_agendada.secsTo(hora_inicio) // 60
@@ -660,7 +662,7 @@ def render_ficha_html(row, caso, shedule, username, is_admin, todos=False):
             resumen = ""
         puntualidad = (
             '<table width="100%" cellspacing="0" cellpadding="6"><tr>'
-            f'<td width="30%">{_dato("Hora agendada", row.hora)}</td>'
+            f'<td width="30%">{_dato("Hora agendada", hora_cita)}</td>'
             f'<td width="30%">{_dato("Inicio real", hora_real)}</td>'
             f'<td>{resumen}</td></tr></table>')
         partes.append(_seccion("reloj", "Puntualidad", puntualidad))

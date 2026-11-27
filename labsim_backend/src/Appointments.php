@@ -73,7 +73,7 @@ class Appointments
 
     /**
      * Primera cita que choca con la que se está por guardar, o null.
-     * $cita = ['fecha','hora','course_id','assigned_group_id','assigned_student_id'].
+     * $cita = ['fecha','hora','course_id','assigned_group_id','assigned_student_id','duracion_min'?].
      */
     public static function buscarChoque(PDO $pdo, array $cita, int $excluirId = 0): ?array
     {
@@ -82,10 +82,17 @@ class Appointments
         if ($fecha === '' || $hora === '') {
             return null; // sin agendar todavía: no ocupa horario
         }
+        // Agenda relativa: la hora de una cita con duración solo ordena el
+        // día (el horario real se calcula al ingresar el alumno), así que no
+        // ocupa esa hora ni choca con la de otra.
+        if (self::intOrNull($cita['duracion_min'] ?? null) !== null) {
+            return null;
+        }
+        $soloFijas = Db::tieneColumna('appointments', 'duracion_min') ? ' AND duracion_min IS NULL' : '';
 
         $stmt = $pdo->prepare(
             'SELECT id, nombre, apellido, case_id, course_id, assigned_group_id, assigned_student_id
-             FROM appointments WHERE fecha = ? AND hora = ? AND id != ? AND ' . Practica::sinPractica()
+             FROM appointments WHERE fecha = ? AND hora = ? AND id != ? AND ' . Practica::sinPractica() . $soloFijas
         );
         $stmt->execute([$fecha, $hora, $excluirId]);
         $candidatas = $stmt->fetchAll();

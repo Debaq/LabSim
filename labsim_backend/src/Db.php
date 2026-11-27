@@ -121,6 +121,9 @@ final class Db
         if (array_key_exists('practice_id', $row)) {
             $row['practice_id'] = $row['practice_id'] !== null ? (int) $row['practice_id'] : null;
         }
+        if (array_key_exists('duracion_min', $row)) {
+            $row['duracion_min'] = $row['duracion_min'] !== null ? (int) $row['duracion_min'] : null;
+        }
         if (array_key_exists('practice_item_id', $row)) {
             // Para la app un intento es un intento, venga de la lista vieja
             // por curso o de las carpetas: lo mira en practice_id.
@@ -1000,6 +1003,35 @@ final class Db
         self::addColumnIfMissing($pdo, 'practice_folders', 'grupo', 'TEXT');
         self::addColumnIfMissing($pdo, 'appointments', 'practice_item_id', 'INTEGER REFERENCES practice_items(id)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS idx_appointments_practice_item ON appointments (practice_item_id)');
+    }
+
+    /**
+     * Agenda relativa al ingreso del alumno (docs/decisiones.md, "Agenda
+     * relativa"): appointments.duracion_min. NULL = cita de hora fija, la de
+     * siempre. Con duración, la hora que puso el docente solo ordena el día y
+     * la app le calcula al alumno su horario desde que ingresa. La llama
+     * "Aplicar schema"; mientras no corra, nada lee ni escribe la columna
+     * (Db::tieneColumna) y todas las citas siguen de hora fija.
+     */
+    public static function migrateAgendaRelativaIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::addColumnIfMissing($pdo, 'appointments', 'duracion_min', 'INTEGER');
+        self::$columnas = [];
+    }
+
+    /** @var array<string,list<string>> columnas por tabla, leídas una vez por request */
+    private static array $columnas = [];
+
+    /** ¿La tabla ya tiene esa columna? Para escribir columnas nuevas antes de que se aplique el schema. */
+    public static function tieneColumna(string $tabla, string $columna): bool
+    {
+        if (!isset(self::$columnas[$tabla])) {
+            $stmt = self::get()->query("PRAGMA table_info({$tabla})");
+            self::$columnas[$tabla] = array_column($stmt->fetchAll(), 'name');
+            $stmt->closeCursor();
+        }
+        return in_array($columna, self::$columnas[$tabla], true);
     }
 
     public static function migrateDemoStudentIfNeeded(): void

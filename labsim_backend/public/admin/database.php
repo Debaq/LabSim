@@ -81,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'historia clínica del paciente' => static fn() => Db::migratePatientHistoriaClinicaIfNeeded(),
                 'comentario docente del paciente' => static fn() => Db::migratePatientComentarioDocenteIfNeeded(),
                 'cursos en citas' => static fn() => Db::migrateCoursesIfNeeded(),
+                'agenda relativa (duración de la cita)' => static fn() => Db::migrateAgendaRelativaIfNeeded(),
                 // Después de cursos: la columna referencia courses(id).
                 'curso por defecto de la clave LTI' => static fn() => Db::migrateLtiDefaultCourseIfNeeded(),
                 'autoría de las fichas' => static fn() => Db::migrateCaseAuthorshipIfNeeded(),

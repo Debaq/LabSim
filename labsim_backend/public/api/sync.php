@@ -107,8 +107,20 @@ $stmt->execute([$user['id']]);
 $inboxNoLeidos = (int) $stmt->fetchColumn();
 $stmt->closeCursor();
 
+// Agenda relativa: cuándo inició sesión este usuario, en UTC, una por cada
+// sesión todavía vigente (Tokens: viven N horas desde que se crean). La app
+// toma la primera que cae en el día local de hoy como su ingreso del día y
+// arma desde ahí el horario de las citas con duración (ver
+// core/agenda_relativa.py). Así el horario no cambia si reinicia la app o
+// se pasa a otro PC.
+$stmt = $pdo->prepare("SELECT created_at FROM tokens WHERE user_id = ? AND created_at > datetime('now', ?) ORDER BY created_at");
+$stmt->execute([$user['id'], Tokens::limiteSql()]);
+$ingresos = array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+$stmt->closeCursor();
+
 Response::json([
     'server_time' => (new DateTime())->format('Y-m-d H:i:s'),
+    'ingresos' => $ingresos,
     'appointment_ids' => $appointmentIds,
     'inbox_no_leidos' => $inboxNoLeidos,
     'appointments' => $appointments,

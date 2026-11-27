@@ -19,6 +19,10 @@ from core import iconos, tema
 # llama y cómo se ve cada estado: la tabla, los contadores y el panel lo leen.
 ESTADOS = {
     "por_atender": ("Por atender", "reloj", tema.ACENTO),
+    # Agenda relativa (core/agenda_relativa.py): el paciente llega a su hora.
+    "aun_no_llega": ("Aún no llega", "reloj", tema.TEXTO_SUAVE),
+    "en_espera": ("En sala de espera", "reloj", tema.ACENTO),
+    "espera_atrasada": ("Esperando, atrasado", "alerta", tema.AVISO),
     "vencida": ("Hora pasada", "alerta", tema.AVISO),
     "atendiendo": ("En atención", "atender", tema.OI),
     "atendido": ("Atendido", "check", tema.OK),
@@ -35,6 +39,9 @@ PASOS = ("Revisa la ficha", "Atiende al paciente", "Registra la evolución")
 # Qué contadores se ven en cada vista.
 CONT_AGENDA = ("por_atender", "atendiendo", "atendido", "no_show")
 CONT_PRACTICA = ("practica_nuevo", "practica_curso", "practica_hecho")
+# Los estados de la agenda relativa suman en "Por atender".
+CONTADOR_DE = {"aun_no_llega": "por_atender", "en_espera": "por_atender",
+               "espera_atrasada": "por_atender"}
 
 
 def icono_estado(clave, tam=18):

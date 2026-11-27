@@ -5,6 +5,66 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Agenda relativa al ingreso del alumno (2026-11-27)
+
+**Problema.** Los prácticos del curso 1 se agendaron de cinco formas en seis
+semanas (por grupo, por alumno, mixto) porque las rotaciones cambian cada
+semana y un alumno está en un solo grupo por curso. El 27-11 los grupos 2 y
+3 entraron a las 09:28 con citas de las 11:00 y las 14:30: la hora fija no
+representaba nada. El autor quiere realismo de box: el docente arma el día
+con el orden y la duración de cada atención, y el horario corre desde que
+entra el alumno.
+
+**Decisión (parte 1 de 4).**
+- `appointments.duracion_min` (Db::migrateAgendaRelativaIfNeeded, "Aplicar
+  schema"). NULL = hora fija, como siempre (OSCE, lo ya agendado). Con
+  duración la hora solo ordena el día. En `agenda.php` es el campo
+  "Duración de la atención (min)" (5-240); el calendario lo muestra como
+  `09:00 · 30'`. Mientras el schema no se aplique, nada lee ni escribe la
+  columna (`Db::tieneColumna`).
+- Choque de horario: una cita con duración no ocupa su hora ni choca
+  (Appointments::buscarChoque); su hora es un orden, no un horario.
+- `sync.php` manda `ingresos`: el `created_at` (UTC) de cada sesión vigente
+  del usuario. La app (`core/agenda_relativa.py`) toma la primera que cae en
+  el día local: el horario no cambia al reiniciar la app ni al cambiar de
+  PC. Sin sesión de hoy (una de anoche todavía vigente) vale la primera vez
+  que la app arma la agenda ese día.
+- Primer turno: el múltiplo de 5 min estrictamente siguiente al ingreso
+  (11:12 → 11:15), pero nunca antes de la hora que el docente puso al
+  primero: un paciente de las 14:30 no llega a las 8 porque el alumno entró
+  temprano. Los demás, uno tras otro sumando duraciones en el orden de las
+  horas (empate: id de la cita).
+- Llegada: al azar dentro de los 15 min previos al turno, con semilla
+  `crc32(alumno|cita|día)` (sin `hash()`, ver seeds): estable para ese
+  alumno, distinta entre alumnos.
+- Agenda del alumno: la columna Hora muestra su turno; estados "Aún no
+  llega" («Atender» apagado: no se adelanta), "En sala de espera" y
+  "Esperando, atrasado" (pasó el inicio del turno). Suman en "Por atender".
+  Sin «No se presentó»: en este modo el paciente siempre llega. Un timer de
+  20 s rehace la tabla si algún estado cambió con el reloj. La ficha
+  ("Cita agendada", puntualidad) y Karime usan el turno; Karime solo nombra
+  a quien ya llegó.
+- El docente ve sus horas y duraciones: a él no se le calcula nada.
+- Los turnos calculados viven solo en la app (AgendaEntry.turno_inicio/
+  turno_fin/llegada, fuera de `_appointment_fields`): nunca se empujan.
+
+**Descartado.** Recalcular desde cada login (cambiaría con un reinicio).
+Guardar el horario por alumno en el backend (otra tabla para algo que se
+deriva del ingreso). Bloquear por hora fija (el OSCE del 26-11 mostró que
+los candados por turno estorban; acá el único bloqueo es el del paciente que
+todavía no llega, que es lo real).
+
+**Siguen (TODO.md).** Parte 2: Karime anuncia llegadas, apura el turno
+atrasado y el box. Parte 3: "Me paso / Citar para terminar" con
+continuación en horario libre y plazo hasta el próximo práctico. Parte 4:
+métricas en Avance (atraso por alumno, duración real vs planificada por
+paciente).
+
+**Probado.** `tests/test_agenda_relativa.py` (turnos, múltiplo de 5, piso de
+la hora del docente, llegada estable, ingreso local, docente sin cálculo,
+nada viaja al backend, estados y botones en la tabla); tests de agenda,
+ficha, secretaria, sync y `php tests/run.php`.
+
 ## Impedanciometría: opción "perforación seca" junto a NR (2026-11-27)
 
 **Problema.** El caso 175 (otitis crónica bilateral) quedó con Z = NR en los

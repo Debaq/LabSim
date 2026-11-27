@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 82).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 85).
 
 Revisado contra el código el 2026-09-24.
 
@@ -94,6 +94,12 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
       § Rediseño de la gestión de cursos en el backend
 
 ## Funcionalidades
+
+### Agenda relativa: partes que faltan
+§ Agenda relativa al ingreso del alumno
+- [ ] 83. Karime: anuncia cada llegada, apura el turno atrasado y el box pasado del total.
+- [ ] 84. "Me paso / Citar para terminar": atención incompleta + continuación en horario libre con plazo hasta el próximo práctico; el último sin atender al cierre pasa igual.
+- [ ] 85. Avance: atraso del box por alumno, continuaciones (hechas a tiempo / vencidas) y duración real vs planificada por paciente.
 
 
 ### Otoscopia: derivación + aprobación docente + fase por alumno

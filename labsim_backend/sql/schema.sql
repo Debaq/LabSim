@@ -275,7 +275,12 @@ CREATE TABLE IF NOT EXISTS appointments (
     -- practice_items). Los de practice_id quedan como historia. Hacia la app
     -- los dos salen como practice_id (Db::castAppointment): para ella solo
     -- dice "es un intento".
-    practice_item_id INTEGER REFERENCES practice_items(id)
+    practice_item_id INTEGER REFERENCES practice_items(id),
+    -- Agenda relativa (Db::migrateAgendaRelativaIfNeeded): minutos de
+    -- atención de este paciente. NULL = cita de hora fija. Con duración, la
+    -- hora solo ordena el día: la app arma el horario del alumno desde que
+    -- ingresa, sumando las duraciones en ese orden.
+    duracion_min INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_appointments_updated ON appointments (updated_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_practice ON appointments (practice_id);

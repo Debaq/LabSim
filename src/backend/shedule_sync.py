@@ -34,6 +34,14 @@ class AgendaEntry:
     # cita que el alumno se abrió solo desde "Práctica libre". No se muestra
     # en la agenda ni cuenta como paciente en espera; ver Agenda.py.
     practice_id: int | None = None
+    # Agenda relativa (core/agenda_relativa.py): minutos de atención que puso
+    # el docente; None = cita de hora fija. turno_inicio/turno_fin/llegada
+    # los calcula la app para el alumno conectado (datetime local) y NUNCA se
+    # empujan al backend (no están en _appointment_fields).
+    duracion_min: int | None = None
+    turno_inicio: object = None
+    turno_fin: object = None
+    llegada: object = None
 
 
 def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -> dict:
@@ -56,6 +64,7 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
             case_id=appt.get("case_id") or "",
             nota_admin=appt.get("nota_admin") or "",
             practice_id=appt.get("practice_id"),
+            duracion_min=appt.get("duracion_min") or None,
         )
 
     for att in state.get("attendances", []):

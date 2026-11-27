@@ -31,6 +31,7 @@ from backend.client import BackendClient
 from core import app_config_store, invitado
 from backend.cases_sync import backend_state_to_cases, diff_and_push_cases
 from backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
+from core import agenda_relativa
 
 # Snapshot en memoria de la última foto conocida del backend, para poder
 # diffear en Shedule.set()/CasesOffline.set_cases() y empujar solo lo que
@@ -344,6 +345,8 @@ class Shedule:
         global _estado_agenda
         _estado_agenda = _indexar(state)
         data = backend_state_to_shedule(state, own_id, own_username)
+        agenda_relativa.recordar_ingresos(state.get("ingresos"))
+        agenda_relativa.aplicar(data["agenda_1"], client.user)
         con_pendientes(data, client.user)
         # deepcopy por la misma razón que en CasesOffline.get_cases():
         # self.data se muta en el sitio (nuevas citas, edición de filas)
@@ -435,6 +438,7 @@ def aplicar_delta(delta: dict):
       alumno que no está en su lista).
     """
     global _shedule_snapshot
+    agenda_relativa.recordar_ingresos(delta.get("ingresos"))
     estado = _estado_agenda
     if estado is None:
         return "completo", None
@@ -470,6 +474,7 @@ def aplicar_delta(delta: dict):
              "cases": list(estado["cases"].values()),
              "attendances": list(estado["attendances"].values())}
     data = backend_state_to_shedule(state, user.get("id"), user.get("username", ""))
+    agenda_relativa.aplicar(data["agenda_1"], user)
     con_pendientes(data, user)
     _shedule_snapshot = deepcopy(data)
     return "nuevo", data

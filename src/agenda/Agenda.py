@@ -9,6 +9,7 @@
 #################################################################
 
 import requests
+from datetime import datetime
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView, QAbstractScrollArea,
                                 QButtonGroup, QDateEdit, QFrame, QHBoxLayout, QHeaderView,
@@ -21,7 +22,7 @@ from agenda.UI.Ui_agenda import Ui_Form
 from agenda import vista
 from agenda.vista import BotonAccion, Contador, PanelDetalle
 from core import feriados as feriados_cl
-from core import hilos, iconos, invitado, respaldo_informes, tema
+from core import agenda_relativa, hilos, iconos, invitado, respaldo_informes, tema
 from core.helpers import (Shedule, aplicar_delta, estado_en_memoria, entry_estado_por, CasesOffline, debug_print,
                           es_docente, lista_practica, iniciar_practica,
                           marcar_entry_no_show,
@@ -325,6 +326,13 @@ class Agenda(QWidget, Ui_Form):
             self.btn_practica.setChecked(True)
         self.populate_shedule()
         self.refresh_async()
+        # Agenda relativa: el paciente llega y el turno se atrasa con el
+        # reloj, no con el sync. Cada 20 s se vuelve a llenar la tabla si
+        # algún estado cambió (core/agenda_relativa.py).
+        self._timer_relativa = QTimer(self)
+        self._timer_relativa.setInterval(20000)
+        self._timer_relativa.timeout.connect(self._tic_relativa)
+        self._timer_relativa.start()
 
         self.pushButton.setVisible(False)
 
@@ -996,12 +1004,16 @@ class Agenda(QWidget, Ui_Form):
             user = rows[key]
             estado = entry_estado_por(user, username)
             clave = self._clave_estado(user, estado)
-            conteo[clave] = conteo.get(clave, 0) + 1
+            cont = vista.CONTADOR_DE.get(clave, clave)
+            conteo[cont] = conteo.get(cont, 0) + 1
             tooltip = {
                 "sin_cita": "Caso sin cita: solo se puede probar, no queda registro.",
                 "sin_fecha": "Cita creada sin fecha ni hora.",
                 "vencida": "La hora de la cita ya pasó.",
             }.get(clave, "")
+            if user.turno_inicio is not None:
+                tooltip = (f"Tu turno: {user.turno_inicio:%H:%M}–{user.turno_fin:%H:%M} "
+                           f"({user.duracion_min} min)")
             # Cita agendada en feriado: se avisa en la celda de la fecha (no
             # en toda la fila). Es un error del docente al agendar, no del
             # alumno -- nadie va a atender ese día, así que tiene que saltar
@@ -1009,7 +1021,7 @@ class Agenda(QWidget, Ui_Form):
             # vista esconde el date_selector).
             feriado = self._descripcion_feriado(parse_fecha_agenda(user.fecha))
 
-            columnas = (user.fecha or "sin agendar", user.hora, user.rut, user.nombre,
+            columnas = (user.fecha or "sin agendar", agenda_relativa.hora_vista(user), user.rut, user.nombre,
                         user.apellido, user.fecha_nac, user.procedimiento)
             self._poner_fila(row_idx, key, clave, columnas, tooltip)
             if feriado:
@@ -1039,6 +1051,20 @@ class Agenda(QWidget, Ui_Form):
             self._selected_row_key = None
             self._actualizar_detalle()
 
+    def _claves_relativa(self):
+        rows = self.shedule.get("agenda_1", {})
+        username = self._current_username()
+        return tuple((k, self._clave_estado(rows[k], entry_estado_por(rows[k], username)))
+                     for k in self._visible_keys() if rows[k].turno_inicio is not None)
+
+    def _tic_relativa(self):
+        if self.is_admin or self._modo_practica or not self.shedule:
+            return
+        claves = self._claves_relativa()
+        if claves and claves != getattr(self, "_ultimas_claves_relativa", None):
+            self._ultimas_claves_relativa = claves
+            self.populate_shedule()
+
     def _clave_estado(self, user, estado):
         """Cómo se ve esta fila (ver vista.ESTADOS)."""
         if user.sin_cita:
@@ -1047,6 +1073,10 @@ class Agenda(QWidget, Ui_Form):
             return "sin_fecha"
         if estado in ("atendiendo", "atendido", "no_show"):
             return estado
+        if user.turno_inicio is not None:
+            if agenda_relativa.todavia_no_llega(user):
+                return "aun_no_llega"
+            return "espera_atrasada" if datetime.now() > user.turno_inicio else "en_espera"
         return "vencida" if self._hora_vencida(user) else "por_atender"
 
     @staticmethod
@@ -1193,6 +1223,15 @@ class Agenda(QWidget, Ui_Form):
             if clave == "vencida":
                 pista = ("La hora de la cita ya pasó. Si el paciente no llegó, marca «No se presentó»; "
                          "si sí, puedes atenderlo igual.")
+        elif clave in ("aun_no_llega", "en_espera", "espera_atrasada"):
+            paso = 0
+            turno = f"{user.turno_inicio:%H:%M} a {user.turno_fin:%H:%M}"
+            pista = {
+                "aun_no_llega": f"Tu turno con este paciente es de {turno}. Todavía no llega a la sala de espera: "
+                                "mientras, revisa su ficha.",
+                "en_espera": f"Ya está en la sala de espera; tu turno es de {turno}. Revisa su ficha y presiona «Atender».",
+                "espera_atrasada": f"Su turno era de {turno} y sigue en la sala de espera. Revisa su ficha y presiona «Atender».",
+            }[clave]
         elif clave == "atendiendo":
             paso = 2 if activa else 1
             pista = ("Cuando termines, presiona «Cerrar/Evolucionar» para escribir tu nota de evolución."
@@ -1209,7 +1248,8 @@ class Agenda(QWidget, Ui_Form):
         if self.is_admin and clave not in ("sin_cita", "sin_fecha") and not self._guardar_base:
             pista = "Modo prueba: no queda registro. " + pista
         nombre = f"{user.nombre} {user.apellido}".strip()
-        cuando = f"{user.fecha} {user.hora}".strip() if user.fecha and user.hora else None
+        cuando = (f"{user.fecha} {agenda_relativa.hora_vista(user)}".strip()
+                  if user.fecha and user.hora else None)
         datos = self._datos_paciente(user.rut, user.procedimiento, cuando)
         self.detalle.mostrar(nombre, datos, clave, pista, paso)
 
@@ -1586,6 +1626,11 @@ class Agenda(QWidget, Ui_Form):
         elif estado == "atendido":
             self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(False)
+        elif agenda_relativa.todavia_no_llega(user):
+            # Agenda relativa: el paciente todavía no llega a la sala de
+            # espera y no se lo puede adelantar.
+            self.btn_atender.setText("Atender")
+            self.btn_atender.setEnabled(False)
         else:
             self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(tiene_caso and not pendiente)
@@ -1600,7 +1645,8 @@ class Agenda(QWidget, Ui_Form):
             not pendiente and fecha_agendada.isValid() and hora_agendada.isValid()
             and QDateTime(fecha_agendada, hora_agendada) < QDateTime.currentDateTime()
         )
-        self.btn_no_show.setEnabled(hora_vencida and estado is None)
+        # En la agenda relativa el paciente siempre llega: no hay inasistencia.
+        self.btn_no_show.setEnabled(hora_vencida and estado is None and user.turno_inicio is None)
 
     def _es_atencion_activa(self, key):
         """True si `key` es el paciente que está cargado ahora mismo en los módulos."""
@@ -1646,6 +1692,8 @@ class Agenda(QWidget, Ui_Form):
         if estado == "atendiendo" and self._es_atencion_activa(self._selected_row_key):
             self._cerrar_atencion()
             return
+        if estado is None and agenda_relativa.todavia_no_llega(user):
+            return   # todavía no llega: no se adelanta (el botón ya está apagado)
 
         if self.main_window is not None and hasattr(self.main_window, "atender_paciente"):
             self.main_window.atender_paciente(self._selected_row_key)
@@ -1821,7 +1869,8 @@ class Agenda(QWidget, Ui_Form):
         if self.main_window is None or not hasattr(self.main_window, metodo):
             return
         html = render_ficha_html(row, caso, self.shedule, self._current_username(), self.is_admin)
-        cuando = f"{row.fecha} {row.hora}".strip() if row.fecha and row.hora else None
+        cuando = (f"{row.fecha} {agenda_relativa.hora_vista(row)}".strip()
+                  if row.fecha and row.hora else None)
         case_id = row.case_id
         # Sin chat (el invitado, o un curso sin el módulo) la ficha no ofrece
         # "Hablar con el paciente"
