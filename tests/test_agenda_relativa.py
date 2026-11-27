@@ -216,6 +216,137 @@ def test_karime_dice_una_vez_y_no_al_docente():
     s.detener()
 
 
+def test_pendientes_en_horario_libre_y_plazo():
+    ag = _agenda()   # práctico el 30-11 y otro el 01-12
+    ag["30"] = AgendaEntry(fecha="05-12-26", hora="09:00", nombre="Otro práctico", duracion_min=30)
+    cont = AgendaEntry(fecha=HOY, hora="12:40", nombre="Samuel", continua_de=11)
+    ag["40"] = cont
+    hoy = date(2026, 11, 30)
+    # La continuación es pendiente desde que nace; plazo: el práctico del 01-12.
+    assert ar.es_pendiente_libre(cont, "ana", hoy)
+    assert ar.plazo(cont, ag) == date(2026, 12, 1)
+    assert not ar.pendiente_vencido(cont, ag, hoy)
+    assert ar.pendiente_vencido(cont, ag, date(2026, 12, 1))
+    # Un paciente con duración sin atender pasa a pendiente al día siguiente.
+    rosa = ag["14"]
+    assert not ar.es_pendiente_libre(rosa, "ana", hoy)
+    assert ar.es_pendiente_libre(rosa, "ana", date(2026, 12, 1))
+    assert ar.plazo(rosa, ag) == date(2026, 12, 1)
+    rosa.atencion["ana"] = {"estado": "atendido"}
+    assert not ar.es_pendiente_libre(rosa, "ana", date(2026, 12, 1))
+    # Una cita fija vieja no es pendiente (sigue siendo "hora pasada").
+    assert not ar.es_pendiente_libre(ag["20"], "ana", date(2026, 12, 1))
+    # Sin próximo práctico agendado: plazo por confirmar.
+    assert ar.plazo(AgendaEntry(fecha="06-12-26", hora="10:00", continua_de=1), ag) is None
+
+
+def test_cierre_con_continuar_viaja_por_la_cola():
+    import tempfile
+    from core import acciones_pendientes as ap
+    with tempfile.TemporaryDirectory() as tmp:
+        ap._carpeta = lambda: __import__("pathlib").Path(tmp)
+
+        class _Cliente:
+            user = {"id": 7, "username": "ana"}
+            token = "t"
+            def __init__(self):
+                self.enviados = []
+            def post_attendance_action(self, cita, accion, nota=None, continuar=False):
+                self.enviados.append((cita, accion, continuar))
+
+        c = _Cliente()
+        ap.subir_informes_de = lambda cliente, cita: []
+        ap._cliente_para = lambda item, actual: c
+        ap.encolar(c, 99, "atendido", "falta la impedancia", continuar=True)
+        ap.encolar(c, 98, "atendido", "completa")
+        assert ap.vaciar() == 0
+        assert c.enviados == [(99, "atendido", True), (98, "atendido", False)], c.enviados
+
+
+def test_karime_pregunta_si_se_pasa_o_cita():
+    from core.base import context  # crea la QApplication
+    from PySide6.QtWidgets import QMdiArea, QPushButton
+    from core import secretaria as sec
+    ag = _con_turnos()
+    samuel = ag["11"]
+    samuel.atencion["ana.rojas"] = {"estado": "atendiendo"}
+    area = QMdiArea()
+    area.resize(800, 600)
+    s = sec.Secretaria(area)
+    citados = []
+    r = sec.Recepcion(s, lambda: ag, lambda: "ana.rojas", lambda: "11", lambda: 31 * 60,
+                      citar=lambda: citados.append(True))
+    r._timer.stop()
+    ahora = samuel.turno_inicio + timedelta(minutes=31)
+    for _ in range(10):
+        r.tic(ahora)
+    con_botones = [a for a in s._avisos if a.findChildren(QPushButton)]
+    assert len(con_botones) == 1
+    botones = {b.text(): b for b in con_botones[0].findChildren(QPushButton)}
+    assert set(botones) == {"Me paso", "Citar para terminar"}
+    botones["Citar para terminar"].click()
+    assert citados == [True]
+    s.detener()
+
+
+def test_evolucion_muestra_y_manda_citar_para_terminar():
+    from core.base import context  # crea la QApplication
+    import agenda.Agenda as mod
+    ev = mod.EvolucionWidget()
+    recibido = []
+    ev.set_contexto("Samuel", lambda nota: recibido.append(nota) or True, None, continuar=None)
+    assert ev.chk_continuar.isHidden()
+    ev.set_contexto("Samuel", lambda nota: recibido.append(nota) or True, None, continuar=True)
+    assert not ev.chk_continuar.isHidden() and ev.chk_continuar.isChecked()
+    ev.texto.setPlainText("Audiometría hecha; falta impedanciometría.")
+    ev._on_guardar_clicked()
+    assert recibido == ["Audiometría hecha; falta impedanciometría."]
+    assert not ev.chk_continuar.isChecked()   # la próxima nota parte sin marcar
+
+
+def test_agenda_muestra_lo_pendiente_cualquier_dia():
+    from core.base import context  # crea la QApplication
+    import agenda.Agenda as mod
+    app = context.app
+    hoy = datetime.now().date()
+    ayer = (hoy - timedelta(days=1)).strftime("%d-%m-%y")
+    manana = (hoy + timedelta(days=1)).strftime("%d-%m-%y")
+    agenda = {
+        "50": AgendaEntry(fecha=ayer, hora="09:00", nombre="Rosa", case_id="c1", duracion_min=60),
+        "51": AgendaEntry(fecha=ayer, hora="12:10", nombre="Samuel", case_id="c2", continua_de=7),
+        "52": AgendaEntry(fecha=ayer, hora="10:00", nombre="Fija vieja", case_id="c3"),
+        "53": AgendaEntry(fecha=manana, hora="09:00", nombre="Próximo", case_id="c4", duracion_min=30),
+    }
+
+    class _Shedule:
+        def get(self):
+            return {"agenda_1": agenda}
+
+    class _Main:
+        data_login = {"user": "alumno", "permission": 444}
+        data_current_key = None
+
+    mod.Shedule = _Shedule
+    ag = mod.Agenda(444, _Main())
+    tarea = ag._shedule_fetch
+    if tarea is not None:
+        assert tarea.esperar(5000)
+        for _ in range(50):
+            app.processEvents()
+            if ag._shedule_fetch is None:
+                break
+    keys = ag._visible_keys()
+    assert set(keys) == {"50", "51"}, keys      # hoy: solo lo pendiente
+    for key in keys:
+        estado = ag._clave_estado(agenda[key], None)
+        assert estado == "pendiente", (key, estado)
+        ag.tableWidget.selectRow(keys.index(key))
+        app.processEvents()
+        assert ag.btn_atender.isEnabled() and not ag.btn_no_show.isEnabled()
+        assert ag.tableWidget.item(keys.index(key), 2).text() == "libre"
+    assert manana in ag._texto_plazo(agenda["51"])
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

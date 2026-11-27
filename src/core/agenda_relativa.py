@@ -151,3 +151,48 @@ def momento_vista(entry):
 def todavia_no_llega(entry, ahora: datetime | None = None) -> bool:
     llegada = getattr(entry, "llegada", None)
     return llegada is not None and (ahora or datetime.now()) < llegada
+
+
+# ---------------------------------------------------------------------------
+# Pendientes en horario libre (parte 3): la continuación de una atención
+# incompleta (cita con continua_de, solo de ese alumno) y el paciente con
+# duración que quedó sin atender en su día. Se atienden cuando el alumno
+# quiera, con plazo hasta su próximo día de práctico: la primera fecha
+# posterior con citas con duración en SU agenda. Sin día agendado todavía,
+# el plazo es None ("fecha por confirmar") y se ubica solo cuando aparece.
+# ---------------------------------------------------------------------------
+
+def _fecha(texto):
+    try:
+        return datetime.strptime(texto, "%d-%m-%y").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def es_pendiente_libre(entry, username, hoy: date) -> bool:
+    if getattr(entry, "sin_cita", False) or getattr(entry, "practice_id", None) is not None:
+        return False
+    estado = (entry.atencion.get(username) or {}).get("estado")
+    if estado in ("atendido", "no_show"):
+        return False
+    if getattr(entry, "continua_de", None):
+        return True
+    fecha = _fecha(entry.fecha)
+    return bool(getattr(entry, "duracion_min", None)) and fecha is not None and fecha < hoy
+
+
+def plazo(entry, agenda) -> date | None:
+    """El próximo día de práctico después de la fecha de la cita: hasta ahí
+    hay para atender el pendiente."""
+    base = _fecha(entry.fecha)
+    if base is None:
+        return None
+    dias = {_fecha(e.fecha) for e in agenda.values()
+            if es_relativa(e) and not getattr(e, "continua_de", None)}
+    futuros = sorted(d for d in dias if d is not None and d > base)
+    return futuros[0] if futuros else None
+
+
+def pendiente_vencido(entry, agenda, hoy: date) -> bool:
+    limite = plazo(entry, agenda)
+    return limite is not None and hoy >= limite

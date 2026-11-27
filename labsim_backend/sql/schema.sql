@@ -280,7 +280,10 @@ CREATE TABLE IF NOT EXISTS appointments (
     -- atención de este paciente. NULL = cita de hora fija. Con duración, la
     -- hora solo ordena el día: la app arma el horario del alumno desde que
     -- ingresa, sumando las duraciones en ese orden.
-    duracion_min INTEGER
+    duracion_min INTEGER,
+    -- Continuación de una atención incompleta (Continuaciones.php): la cita
+    -- original. Solo del alumno que la pidió (assigned_student_id).
+    continua_de INTEGER REFERENCES appointments(id)
 );
 CREATE INDEX IF NOT EXISTS idx_appointments_updated ON appointments (updated_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_practice ON appointments (practice_id);

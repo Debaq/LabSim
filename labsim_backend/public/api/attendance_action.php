@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/LlmConfig.php';
 require_once __DIR__ . '/../../src/LlmChat.php';
 require_once __DIR__ . '/../../src/OirsEvaluator.php';
+require_once __DIR__ . '/../../src/Continuaciones.php';
 
 /**
  * Progreso de un alumno sobre una cita compartida (antes entry[8][username]
@@ -47,6 +48,10 @@ switch ($action) {
                 estado = 'atendido', nota = excluded.nota, updated_at = CURRENT_TIMESTAMP"
         );
         $stmt->execute([$appointmentId, $user['id'], $nota]);
+        // "Queda incompleta: citar para terminar" (Continuaciones.php).
+        if (!empty($body['continuar'])) {
+            $continuacionId = Continuaciones::crear($pdo, $appointmentId, (int) $user['id']);
+        }
 
         $stmt = $pdo->prepare('SELECT case_id, patient_id FROM appointments WHERE id = ?');
         $stmt->execute([$appointmentId]);
@@ -95,4 +100,4 @@ $attendance = $stmt->fetch();
 // Cerrada antes de responder: la evaluación OIRS escribe después, en la
 // función de cierre, y con esta lectura abierta fallaba ("database is locked").
 $stmt->closeCursor();
-Response::json(['attendance' => $attendance]);
+Response::json(['attendance' => $attendance, 'continuacion_id' => $continuacionId ?? null]);

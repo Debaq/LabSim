@@ -39,6 +39,9 @@ class AgendaEntry:
     # los calcula la app para el alumno conectado (datetime local) y NUNCA se
     # empujan al backend (no están en _appointment_fields).
     duracion_min: int | None = None
+    # Continuación de una atención incompleta: la cita original (solo la ve
+    # el alumno que la pidió). Ver core/agenda_relativa.es_pendiente_libre.
+    continua_de: int | None = None
     turno_inicio: object = None
     turno_fin: object = None
     llegada: object = None
@@ -65,6 +68,7 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
             nota_admin=appt.get("nota_admin") or "",
             practice_id=appt.get("practice_id"),
             duracion_min=appt.get("duracion_min") or None,
+            continua_de=appt.get("continua_de") or None,
         )
 
     for att in state.get("attendances", []):

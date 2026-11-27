@@ -66,7 +66,7 @@ def _escribir(clave, lista) -> None:
     tmp.replace(ruta)
 
 
-def encolar(client, appointment_id, accion, nota="") -> None:
+def encolar(client, appointment_id, accion, nota="", continuar=False) -> None:
     """Agrega una acción de `client` (su usuario y su token) a la cola."""
     user = dict(client.user or {})
     clave = _clave(user)
@@ -75,6 +75,7 @@ def encolar(client, appointment_id, accion, nota="") -> None:
     with _archivo_lock:
         lista = _leer(clave)
         lista.append({"appointment_id": int(appointment_id), "accion": accion, "nota": nota or "",
+                      "continuar": bool(continuar),
                       "cuando": datetime.now().isoformat(timespec="seconds"),
                       "token": client.token, "user": user})
         _escribir(clave, lista)
@@ -168,7 +169,8 @@ def _vaciar_usuario(clave, actual) -> int:
                 rechazados = subir_informes_de(cliente, cita)
                 if rechazados:
                     print(f"atención: informes de la cita {cita} rechazados al cerrar: {rechazados}")
-            cliente.post_attendance_action(cita, item["accion"], nota=item.get("nota") or None)
+            extra = {"continuar": True} if item.get("continuar") else {}
+            cliente.post_attendance_action(cita, item["accion"], nota=item.get("nota") or None, **extra)
         except Exception as exc:  # noqa: BLE001 -- se decide si esperar o botar
             estado = getattr(getattr(exc, "response", None), "status_code", None)
             if es_de_red(exc) or estado == 401 or not isinstance(exc, requests.RequestException):

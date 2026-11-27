@@ -121,6 +121,9 @@ final class Db
         if (array_key_exists('practice_id', $row)) {
             $row['practice_id'] = $row['practice_id'] !== null ? (int) $row['practice_id'] : null;
         }
+        if (array_key_exists('continua_de', $row)) {
+            $row['continua_de'] = $row['continua_de'] !== null ? (int) $row['continua_de'] : null;
+        }
         if (array_key_exists('duracion_min', $row)) {
             $row['duracion_min'] = $row['duracion_min'] !== null ? (int) $row['duracion_min'] : null;
         }
@@ -1017,6 +1020,8 @@ final class Db
     {
         $pdo = self::get();
         self::addColumnIfMissing($pdo, 'appointments', 'duracion_min', 'INTEGER');
+        // Continuación de una atención incompleta (Continuaciones.php).
+        self::addColumnIfMissing($pdo, 'appointments', 'continua_de', 'INTEGER REFERENCES appointments(id)');
         self::$columnas = [];
     }
 

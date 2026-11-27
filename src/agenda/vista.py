@@ -23,6 +23,9 @@ ESTADOS = {
     "aun_no_llega": ("Aún no llega", "reloj", tema.TEXTO_SUAVE),
     "en_espera": ("En sala de espera", "reloj", tema.ACENTO),
     "espera_atrasada": ("Esperando, atrasado", "alerta", tema.AVISO),
+    # Horario libre: continuación o paciente con duración que quedó sin atender.
+    "pendiente": ("Pendiente, horario libre", "calendario_vacio", tema.ACENTO),
+    "pendiente_vencido": ("Pendiente, fuera de plazo", "alerta", tema.ALERTA),
     "vencida": ("Hora pasada", "alerta", tema.AVISO),
     "atendiendo": ("En atención", "atender", tema.OI),
     "atendido": ("Atendido", "check", tema.OK),
@@ -41,7 +44,8 @@ CONT_AGENDA = ("por_atender", "atendiendo", "atendido", "no_show")
 CONT_PRACTICA = ("practica_nuevo", "practica_curso", "practica_hecho")
 # Los estados de la agenda relativa suman en "Por atender".
 CONTADOR_DE = {"aun_no_llega": "por_atender", "en_espera": "por_atender",
-               "espera_atrasada": "por_atender"}
+               "espera_atrasada": "por_atender", "pendiente": "por_atender",
+               "pendiente_vencido": "por_atender"}
 
 
 def icono_estado(clave, tam=18):

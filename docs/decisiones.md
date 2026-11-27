@@ -70,15 +70,46 @@ la cola de avisos viejos. Las frases están en
 Umbrales fijos en código: hoy nadie pidió cambiarlos y abrir más campos en
 el panel sería configurar por configurar.
 
-**Siguen (TODO.md).** Parte 3: "Me paso / Citar para terminar" con
-continuación en horario libre y plazo hasta el próximo práctico. Parte 4:
+**Parte 3 (continuación en horario libre).** El autor: "si se terminó el
+tiempo y no terminaste sueles poder pasarte o reagendarlo para terminar;
+eso lo decide el profesional en el box"; el paciente que espera rara vez se
+va, se atiende; el atraso no puede arrastrarse al práctico siguiente.
+- La evolución trae la casilla "Queda incompleta: citar para terminar"
+  (solo en atenciones reales del alumno). Marcada, el cierre ('atendido'
+  con `continuar`, por la misma cola de acciones: funciona sin red) crea en
+  el servidor una cita nueva SOLO para ese alumno (Continuaciones.php,
+  `appointments.continua_de`): mismo caso y paciente, hora fija, fecha y
+  hora del cierre. Idempotente (la cola puede reenviar).
+- Karime pregunta la primera vez que la atención pasa su duración, con
+  botones «Me paso» (o nada: el aviso se va a los 45 s) y «Citar para
+  terminar», que abre la evolución con la casilla marcada.
+- Lo pendiente en horario libre se ve en la agenda del alumno CUALQUIER día
+  hasta que lo atiende, con Hora "libre": la continuación desde que nace y
+  el paciente con duración que no atendió en su día desde el día siguiente
+  (no se crea nada: la cita "todo el curso" sigue ahí y la atención es por
+  alumno). Estados "Pendiente, horario libre" y "Pendiente, fuera de plazo";
+  se puede atender igual fuera de plazo. Sin «No se presentó».
+- Plazo: el próximo día de práctico del alumno, la primera fecha posterior
+  con citas con duración en SU agenda; no se guarda, se deriva
+  (`agenda_relativa.plazo`), así se ubica solo cuando el docente agenda el
+  día siguiente. Vence ese día.
+- Los intentos de práctica libre no se continúan (se repiten).
+Limitación conocida: la continuación es una atención nueva; los módulos no
+traen precargado lo que el alumno midió en la primera. Lo que quedó hecho
+está en su nota de evolución y en la historia del paciente, y el ABR muestra
+las sesiones anteriores (solo lectura).
+
+**Siguen (TODO.md).** Parte 4:
 métricas en Avance (atraso por alumno, duración real vs planificada por
 paciente).
 
 **Probado.** `tests/test_agenda_relativa.py` (turnos, múltiplo de 5, piso de
 la hora del docente, llegada estable, ingreso local, docente sin cálculo,
 nada viaja al backend, estados y botones en la tabla); tests de agenda,
-ficha, secretaria, sync y `php tests/run.php`.
+ficha, secretaria, sync y `php tests/run.php`. Parte 3: plazos y pendientes,
+`continuar` por la cola, pregunta de Karime con botones, casilla de la
+evolución, pendientes en la tabla; `Continuaciones::crear` probado con
+SQLite real en php:7.4-cli (idempotente, una por alumno, hora de Chile).
 
 ## Impedanciometría: opción "perforación seca" junto a NR (2026-11-27)
 

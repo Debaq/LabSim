@@ -24,7 +24,7 @@ import random
 
 from PySide6.QtCore import QEasingCurve, QEvent, QObject, QPropertyAnimation, Qt, QTimer
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout,
-                               QLabel, QToolButton, QVBoxLayout)
+                               QLabel, QPushButton, QToolButton, QVBoxLayout)
 
 from core.avatar import avatar_circular_desde_bytes, avatar_iniciales
 from core.base import context
@@ -37,6 +37,7 @@ NOMBRE = "Karime"
 FOTO = "img/karime.jpg"
 CONFIG_KEY = "secretaria.avisos"
 DURACION_MS = 9000
+DURACION_PREGUNTA_MS = 45000
 FADE_MS = 350
 MARGEN = 16
 SEPARACION = 8
@@ -247,8 +248,12 @@ class AvisoSecretaria(QFrame):
     encima de todas las subventanas aunque el alumno active otra mientras
     está a la vista. Se cierra solo o con la ✕."""
 
-    def __init__(self, area, texto, al_cerrar):
+    def __init__(self, area, texto, al_cerrar, acciones=None):
+        """acciones: [(rótulo, función o None)]: botones bajo el texto (la
+        pregunta "¿Te pasas o lo citamos para terminar?"). Cada botón llama
+        a su función y cierra el aviso."""
         super().__init__(area)
+        self._con_acciones = bool(acciones)
         self._al_cerrar = al_cerrar
         self._cerrando = False
         self.setObjectName("aviso_secretaria")
@@ -262,6 +267,9 @@ class AvisoSecretaria(QFrame):
             #aviso_secretaria QLabel { background: transparent; border: none; color: #1f2933; }
             #aviso_titulo { font-weight: bold; }
             #aviso_cerrar { border: none; background: transparent; color: #6b7785; }
+            #aviso_accion { border: 1px solid #c9d3e0; border-radius: 4px; padding: 3px 10px;
+                            background: #f5f7fa; color: #1f2933; }
+            #aviso_accion:hover { background: #e8edf3; }
         """)
 
         avatar = QLabel(self)
@@ -284,6 +292,17 @@ class AvisoSecretaria(QFrame):
         textos.setSpacing(2)
         textos.addWidget(titulo)
         textos.addWidget(cuerpo)
+        if acciones:
+            botones = QHBoxLayout()
+            botones.setSpacing(6)
+            botones.addStretch(1)
+            for rotulo, funcion in acciones:
+                boton = QPushButton(rotulo, self)
+                boton.setObjectName("aviso_accion")
+                boton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                boton.clicked.connect(lambda _=False, f=funcion: self._elegir(f))
+                botones.addWidget(boton)
+            textos.addLayout(botones)
 
         fila = QHBoxLayout(self)
         fila.setContentsMargins(10, 10, 6, 10)
@@ -311,7 +330,13 @@ class AvisoSecretaria(QFrame):
         self._anim.setStartValue(0.0)
         self._anim.setEndValue(1.0)
         self._anim.start()
-        self._vida.start(DURACION_MS)
+        # Una pregunta espera más: si no contesta, es "me paso".
+        self._vida.start(DURACION_PREGUNTA_MS if self._con_acciones else DURACION_MS)
+
+    def _elegir(self, funcion):
+        self.cerrar()
+        if funcion is not None:
+            funcion()
 
     def cerrar(self):
         if self._cerrando:
@@ -375,8 +400,8 @@ class Secretaria(QObject):
         for aviso in list(self._avisos):
             aviso.cerrar()
 
-    def avisar(self, texto):
-        aviso = AvisoSecretaria(self._area, texto, self._quitar)
+    def avisar(self, texto, acciones=None):
+        aviso = AvisoSecretaria(self._area, texto, self._quitar, acciones)
         self._avisos.append(aviso)
         self._ubicar()
         aviso.mostrar()
@@ -411,9 +436,12 @@ class Recepcion(QObject):
     docente no recibe estos avisos), activa() -> key de la atención abierta
     y segundos() -> segundos de esa atención."""
 
-    def __init__(self, secretaria, agenda, usuario, activa, segundos):
+    def __init__(self, secretaria, agenda, usuario, activa, segundos, citar=None):
         super().__init__(secretaria)
         self._secretaria = secretaria
+        # citar(): abre la evolución con "citar para terminar" marcado. La
+        # primera vez que la atención se pasa de su duración, Karime pregunta.
+        self._citar = citar
         self._fuentes = (agenda, usuario, activa, segundos)
         self._dichos = set()
         self._ultimos = {}
@@ -441,6 +469,11 @@ class Recepcion(QObject):
             frases = config_agenda(app_config_store.get(CONFIG_AGENDA_KEY))[tipo]
             texto = texto_agenda(frases, valores, evitar=self._ultimos.get(tipo))
             self._ultimos[tipo] = texto
-            self._secretaria.avisar(texto)
+            acciones = None
+            if tipo == "pasado" and clave[-1] == 0 and self._citar is not None:
+                if "?" not in texto:
+                    texto += " ¿Te pasas o lo citamos para terminar?"
+                acciones = [("Me paso", None), ("Citar para terminar", self._citar)]
+            self._secretaria.avisar(texto, acciones)
             return texto
         return None

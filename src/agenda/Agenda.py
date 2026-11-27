@@ -201,6 +201,14 @@ class EvolucionWidget(QWidget):
         self.texto.setPlaceholderText("Describe la evolución del paciente...")
         layout.addWidget(self.texto, 1)
 
+        # Agenda relativa (parte 3): el profesional decide en el box si se
+        # pasa o cita al paciente para terminar otro día. Marcada, el cierre
+        # crea una continuación en horario libre (Continuaciones.php).
+        self.chk_continuar = QCheckBox(
+            "Queda incompleta: citar para terminar (escribe arriba qué quedó hecho y qué falta)", self)
+        self.chk_continuar.setVisible(False)
+        layout.addWidget(self.chk_continuar)
+
         pie = QHBoxLayout()
         ayuda = QLabel("Lo que escribes se guarda como borrador en este equipo mientras trabajas.")
         ayuda.setProperty("role", "hint")
@@ -223,11 +231,15 @@ class EvolucionWidget(QWidget):
         self._timer_borrador.timeout.connect(self.guardar_borrador)
         self.texto.textChanged.connect(self._timer_borrador.start)
 
-    def set_contexto(self, nombre_paciente, on_guardar, borrador=None):
+    def set_contexto(self, nombre_paciente, on_guardar, borrador=None, continuar=None):
         """`borrador`: (usuario, appointment_id) de una atención real. Lo
         escrito antes para esa misma atención vuelve, aunque la ventana se
-        haya cerrado, se haya cerrado sesión o la app se haya caído."""
+        haya cerrado, se haya cerrado sesión o la app se haya caído.
+        `continuar`: None oculta "citar para terminar" (prueba, práctica
+        libre); True/False la muestra marcada o no."""
         self.guardar_borrador()   # lo pendiente del contexto anterior
+        self.chk_continuar.setVisible(continuar is not None)
+        self.chk_continuar.setChecked(bool(continuar))
         mismo = borrador is not None and borrador == self._borrador
         self.lbl_paciente.setText(nombre_paciente)
         self._on_guardar = on_guardar
@@ -261,6 +273,7 @@ class EvolucionWidget(QWidget):
             return
         if self._borrador is not None:
             respaldo_informes.borrar_borrador(*self._borrador)
+        self.chk_continuar.setChecked(False)
         self.texto.blockSignals(True)
         self.texto.clear()
         self.texto.blockSignals(False)
@@ -976,7 +989,11 @@ class Agenda(QWidget, Ui_Form):
             keys = [k for k, v in rows.items() if v.fecha and v.hora and v.practice_id is None]
             if not self._ver_todas:
                 fecha_sel = self.date_selector.date().toString("dd-MM-yy")
-                keys = [k for k in keys if rows[k].fecha == fecha_sel]
+                # Lo pendiente en horario libre se ve cualquier día hasta que
+                # se atiende (core/agenda_relativa.es_pendiente_libre).
+                username, hoy = self._current_username(), datetime.now().date()
+                keys = [k for k in keys if rows[k].fecha == fecha_sel
+                        or agenda_relativa.es_pendiente_libre(rows[k], username, hoy)]
 
         if self._filtro_texto:
             texto = self._filtro_texto
@@ -1014,6 +1031,8 @@ class Agenda(QWidget, Ui_Form):
             if user.turno_inicio is not None:
                 tooltip = (f"Tu turno: {user.turno_inicio:%H:%M}–{user.turno_fin:%H:%M} "
                            f"({user.duracion_min} min)")
+            if clave in ("pendiente", "pendiente_vencido"):
+                tooltip = self._texto_plazo(user)
             # Cita agendada en feriado: se avisa en la celda de la fecha (no
             # en toda la fila). Es un error del docente al agendar, no del
             # alumno -- nadie va a atender ese día, así que tiene que saltar
@@ -1021,7 +1040,8 @@ class Agenda(QWidget, Ui_Form):
             # vista esconde el date_selector).
             feriado = self._descripcion_feriado(parse_fecha_agenda(user.fecha))
 
-            columnas = (user.fecha or "sin agendar", agenda_relativa.hora_vista(user), user.rut, user.nombre,
+            hora_col = "libre" if clave in ("pendiente", "pendiente_vencido") else agenda_relativa.hora_vista(user)
+            columnas = (user.fecha or "sin agendar", hora_col, user.rut, user.nombre,
                         user.apellido, user.fecha_nac, user.procedimiento)
             self._poner_fila(row_idx, key, clave, columnas, tooltip)
             if feriado:
@@ -1051,6 +1071,12 @@ class Agenda(QWidget, Ui_Form):
             self._selected_row_key = None
             self._actualizar_detalle()
 
+    def _texto_plazo(self, user):
+        limite = agenda_relativa.plazo(user, self.shedule.get("agenda_1", {}))
+        if limite is None:
+            return "Plazo: tu próximo práctico, que todavía no está agendado."
+        return f"Plazo: antes de tu práctico del {limite:%d-%m-%y}."
+
     def _claves_relativa(self):
         rows = self.shedule.get("agenda_1", {})
         username = self._current_username()
@@ -1073,6 +1099,10 @@ class Agenda(QWidget, Ui_Form):
             return "sin_fecha"
         if estado in ("atendiendo", "atendido", "no_show"):
             return estado
+        if not self.is_admin and agenda_relativa.es_pendiente_libre(user, self._current_username(),
+                                                                    datetime.now().date()):
+            vencido = agenda_relativa.pendiente_vencido(user, self.shedule.get("agenda_1", {}), datetime.now().date())
+            return "pendiente_vencido" if vencido else "pendiente"
         if user.turno_inicio is not None:
             if agenda_relativa.todavia_no_llega(user):
                 return "aun_no_llega"
@@ -1232,6 +1262,13 @@ class Agenda(QWidget, Ui_Form):
                 "en_espera": f"Ya está en la sala de espera; tu turno es de {turno}. Revisa su ficha y presiona «Atender».",
                 "espera_atrasada": f"Su turno era de {turno} y sigue en la sala de espera. Revisa su ficha y presiona «Atender».",
             }[clave]
+        elif clave in ("pendiente", "pendiente_vencido"):
+            paso = 0
+            que = "Continuación de una atención que quedó incompleta" if user.continua_de \
+                else "Paciente que quedó sin atender en su día"
+            pista = f"{que}: se atiende en horario libre. {self._texto_plazo(user)}"
+            if clave == "pendiente_vencido":
+                pista += " Igual puedes atenderlo; queda registrado fuera de plazo."
         elif clave == "atendiendo":
             paso = 2 if activa else 1
             pista = ("Cuando termines, presiona «Cerrar/Evolucionar» para escribir tu nota de evolución."
@@ -1646,7 +1683,8 @@ class Agenda(QWidget, Ui_Form):
             and QDateTime(fecha_agendada, hora_agendada) < QDateTime.currentDateTime()
         )
         # En la agenda relativa el paciente siempre llega: no hay inasistencia.
-        self.btn_no_show.setEnabled(hora_vencida and estado is None and user.turno_inicio is None)
+        self.btn_no_show.setEnabled(hora_vencida and estado is None and user.turno_inicio is None
+                                    and not user.continua_de and not user.duracion_min)
 
     def _es_atencion_activa(self, key):
         """True si `key` es el paciente que está cargado ahora mismo en los módulos."""
@@ -1698,20 +1736,34 @@ class Agenda(QWidget, Ui_Form):
         if self.main_window is not None and hasattr(self.main_window, "atender_paciente"):
             self.main_window.atender_paciente(self._selected_row_key)
 
-    def _cerrar_atencion(self):
+    def citar_para_terminar(self, key):
+        """Karime ("Citar para terminar"): abre la evolución de la atención
+        abierta `key` con la casilla de continuación marcada."""
+        if key not in self.shedule.get("agenda_1", {}):
+            return
+        self._citar_para_terminar = True
+        self._cerrar_atencion(key)
+
+    def _cerrar_atencion(self, key=None):
         """Abre la subventana MDI de evolución; al guardar, cierra la
         atención real (ver main.abrir_evolucion / main.cerrar_atencion)."""
         if self.main_window is None or not hasattr(self.main_window, "abrir_evolucion"):
             return
 
-        user = self.shedule["agenda_1"][self._selected_row_key]
+        key = key or self._selected_row_key
+        user = self.shedule["agenda_1"][key]
         nombre = f"{user.nombre} {user.apellido}".strip()
-        key = self._selected_row_key
+
+        evolucion = getattr(getattr(self.main_window, "subw", {}).get("EVOLUCION"), "obj", None)
 
         def _guardar(nota):
-            return self.main_window.cerrar_atencion(key, nota)
+            continuar = bool(evolucion is not None and evolucion.chk_continuar.isVisible()
+                             and evolucion.chk_continuar.isChecked())
+            return self.main_window.cerrar_atencion(key, nota, continuar=continuar)
 
-        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar, key)
+        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar, key,
+                                         continuar=bool(getattr(self, "_citar_para_terminar", False)))
+        self._citar_para_terminar = False
 
     def _cerrar_atencion_prueba(self):
         """Admin/profe: misma subventana de evolución, pero sin marcar

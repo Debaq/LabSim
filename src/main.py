@@ -611,7 +611,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # atención pasada de su duración y box pasado de su bloque.
         self.recepcion = Recepcion(self.secretaria, self._agenda_para_recepcion, self._alumno_para_recepcion,
                                    lambda: self.data_current_key,
-                                   lambda: getattr(self, "cronometro_segundos", 0))
+                                   lambda: getattr(self, "cronometro_segundos", 0),
+                                   citar=self.citar_para_terminar)
 
     def _agenda_para_recepcion(self):
         agenda = getattr(getattr(self, "subw", {}).get("AGENDA"), "obj", None)
@@ -1449,11 +1450,21 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         style_dialog(dlg)
         dlg.exec()
 
-    def cerrar_atencion(self, key, nota):
-        """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
+    def cerrar_atencion(self, key, nota, continuar=False):
+        """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante.
+        continuar: "Queda incompleta: citar para terminar" (Continuaciones.php)."""
         if es_docente(self.data_login["permission"]):
             return  # admin/docente usan cerrar_atencion_prueba() o cerrar_atencion_base()
-        return self._cerrar_atencion_real(key, nota)
+        return self._cerrar_atencion_real(key, nota, continuar=continuar)
+
+    def citar_para_terminar(self):
+        """Karime ofreció citar al paciente para terminar: abre la evolución
+        de la atención abierta con la casilla de continuación marcada."""
+        key = self.data_current_key
+        agenda = getattr(getattr(self, "subw", {}).get("AGENDA"), "obj", None)
+        if key is None or agenda is None or self._alumno_para_recepcion() is None:
+            return
+        agenda.citar_para_terminar(key)
 
     def cerrar_atencion_base(self, key, nota):
         """Contraparte de atender_paciente_base(): cierra de verdad (estado
@@ -1462,7 +1473,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return  # esta variante es solo para admin/docente
         return self._cerrar_atencion_real(key, nota)
 
-    def _cerrar_atencion_real(self, key, nota):
+    def _cerrar_atencion_real(self, key, nota, continuar=False):
         """Lógica común a cerrar_atencion() (alumno) y cerrar_atencion_base()
         (docente en modo "guardar base").
 
@@ -1524,7 +1535,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 return self._cierre_sin_conexion(", ".join(rechazados), reanudar=actual)
 
         marcar_entry_atendido(entry, self.data_login["user"], nota)
-        if not self._encolar_atencion(key, "atendido", entry, nota=nota):
+        if not self._encolar_atencion(key, "atendido", entry, nota=nota, continuar=continuar):
             return self._cierre_sin_conexion("sin sesión", reanudar=actual)
         self._cierre_ya_hecho(key, avisar=False)
         if sin_red:
@@ -1535,7 +1546,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                         "siguiente paciente.", QMessageBox.Icon.Information)
         return True
 
-    def _encolar_atencion(self, key, accion, entry, nota=""):
+    def _encolar_atencion(self, key, accion, entry, nota="", continuar=False):
         """Pone "atendiendo"/"atendido" en la cola (acciones_pendientes) y
         trata de enviarla ya, en segundo plano. False si no hay sesión a
         nombre de quién guardarla."""
@@ -1543,7 +1554,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if client is None:
             return False
         try:
-            acciones_pendientes.encolar(client, int(key), accion, nota)
+            acciones_pendientes.encolar(client, int(key), accion, nota, continuar=continuar)
         except (TypeError, ValueError, RuntimeError, OSError) as exc:
             print(f"atención: no se pudo encolar {accion} de {key}: {exc}")
             return False
@@ -2136,7 +2147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.activate_auto("PREVIO")
         frame.lbl_title.setText(f"{examen} del paciente")
 
-    def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None):
+    def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None, continuar=None):
         """Abre (o trae al frente) la subventana MDI de evolución, reapuntada
         al paciente/callback indicado (ver Agenda._cerrar_atencion y
         Agenda._cerrar_atencion_prueba). Con `appointment_id` (atención
@@ -2146,7 +2157,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             usuario = respaldo_informes.usuario_de(self._logged_in_client())
             if usuario:
                 borrador = (usuario, appointment_id)
-        self.subw["EVOLUCION"].obj.set_contexto(nombre_paciente, on_guardar, borrador)
+        self.subw["EVOLUCION"].obj.set_contexto(nombre_paciente, on_guardar, borrador,
+                                                continuar=continuar if appointment_id is not None else None)
         self.activate_auto("EVOLUCION")
 
     def abrir_chat_paciente(self):

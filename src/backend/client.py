@@ -406,10 +406,15 @@ class BackendClient:
     def delete_appointment(self, appointment_id: int) -> dict:
         return self._post("/api/appointment_delete.php", {"id": appointment_id})
 
-    def post_attendance_action(self, appointment_id: int, action: str, nota: str | None = None) -> dict:
+    def post_attendance_action(self, appointment_id: int, action: str, nota: str | None = None,
+                               continuar: bool = False) -> dict:
         body = {"id": appointment_id, "action": action}
         if nota is not None:
             body["nota"] = nota
+        if continuar:
+            # "Queda incompleta: citar para terminar": el servidor crea la
+            # continuación en el mismo cierre (Continuaciones.php).
+            body["continuar"] = True
         # Cerrar ('atendido') dispara la evaluación OIRS del lado del
         # servidor; con 10 s el cliente cortaba antes de la respuesta y
         # creía que no se había cerrado.
