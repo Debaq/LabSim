@@ -5,6 +5,51 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Técnica de otoscopía, diapasones e impedanciometría en la atención (2026-11-27)
+
+**Pedido.** "Impedanciometría, otoscopía y diapasones deben ser evaluados.
+Ojo que no todas las evaluaciones se les hace todo."
+
+**Decisión.** `EquiposTecnica` evalúa los tres equipos sobre los registros
+de la atención (z_, ot_, ac_), con la técnica del libro (H1, H2, H7;
+Bibliografia::TECNICAS T06-T08). Se muestran en la ficha de la atención del
+docente y del alumno, con la misma vista y el mismo puntaje ponderado que la
+audiometría.
+
+- **No todo se pide siempre.** Un equipo se evalúa solo si se usó con el
+  paciente. En la impedanciometría, cada prueba (timpanograma, reflejos
+  ipsi, reflejos contra, deterioro, trompa) se evalúa si se hizo en algún
+  oído, y entonces se pide completa en los oídos realizables; si no se hizo,
+  es advertencia. Sin informe de otoscopía, advertencia.
+- **Orden entre equipos.** Otoscopía antes de la sonda y del diapasón: si se
+  hizo después, descuenta; si no se hizo en la atención, advertencia (puede
+  venir hecha).
+- **Un error, un descuento.** La sonda en un oído NR ya es falta grave y no
+  se cuenta acá. En los reflejos, el paso (de 5 en 5 mientras no responde,
+  ×1) y llegar al umbral (a 5 dB, o hasta 100 dB si no hay reflejo, ×2)
+  son reglas separadas. Una medición que el equipo bloqueó por falta de
+  sello no cuenta como hecha.
+- **Lo que la app no tenía no se exige.** Instrucciones de la Z desde el
+  31-10-2026 (`EquiposTecnica::Z_INSTRUCCIONES_DESDE`); otoscopio y
+  diapasones desde el 06-11-2026 (`OTOSCOPIO_DESDE`).
+- **Verdad.** Reflejos, ETF y NR del caso; Rinne y Weber del caso en 512 Hz
+  (lo que contesta el paciente); tracción correcta y edad vienen en el
+  payload de la app. Lo informado de la otoscopía solo se compara cuando la
+  foto viene de la biblioteca (`otoscopia_biblioteca.tipo`): hoy, pocos
+  casos.
+
+**Con los datos del curso ETMP176** (120 atenciones con Z, 36 con
+otoscopio, 34 con diapasones): lo que más falla es el Weber primero (casi
+todos parten por el Rinne), subir de 5 en 5 en los reflejos (saltan de 10),
+explicar antes de empezar y la tracción del pabellón.
+
+**Descartado.** El tope de 105 dB HL del reflejo: el dial de la app está en
+dB SPL hasta 120 y la conversión depende de la frecuencia. La distancia de
+las ramas al conducto en el Rinne: `distancia_mm` es al sitio del pabellón,
+no a la entrada del conducto.
+
+**Tests.** `test_equipos_tecnica.php`.
+
 ## Estadísticas de la audiometría del curso y recomendaciones (2026-11-27)
 
 **Pedido.** Indicadores de cómo van los alumnos del curso (se hizo primero un

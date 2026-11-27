@@ -182,14 +182,12 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 64. Técnica de la logoaudiometría y de cada supraliminar (cómo se
       hacen). Cuáles correspondían ya está (T05). § Pruebas que
       correspondían y enmascaramiento en el indicador
-- [ ] 82. "Pruebas que correspondían" en los otros equipos, sobre lo que ya
-      registran: otoscopía antes de Z y audiometría; tapón oclusivo o
-      perforación → timpanometría no realizable / 'B perforación' y ETF
-      de membrana perforada; decay de reflejo solo con reflejo presente y
-      sospecha retrococlear; menor de 3 años → EOA/ABR en vez de
-      audiometría; ABR con enmascaramiento contralateral en la asimétrica.
-      Qué entra lo decide él. § Pruebas que correspondían y
-      enmascaramiento en el indicador
+- [ ] 82. Otoscopía, diapasones e impedanciometría ya se evalúan por
+      atención (T06-T08). Falta: sumarlos a la pestaña Avance y al PDF del
+      curso (guardar su resultado como la audiometría), registrar acción por
+      acción EOA, potenciales y VEMP en la app (hoy solo queda el informe
+      final) y, con eso, sus indicadores. § Técnica de otoscopía, diapasones
+      e impedanciometría en la atención
 - [ ] 80. Indicador del deterioro tonal: con `audio_deterioro_tonal` (qué
       prueba dedujo el motor, oído, frecuencia, `inicio_sl`) decir "hizo
       Carhart en OD 1000 Hz partiendo en el umbral" y revisar el cronómetro

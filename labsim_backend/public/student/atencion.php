@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../src/HistoriaClinica.php';
 require_once __DIR__ . '/../../src/Oirs.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
+require_once __DIR__ . '/../../src/EquiposTecnica.php';
 require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
 require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 
@@ -244,6 +245,17 @@ student_header($paciente, $me);
 <div class="card" id="tecnica">
     <h2>Pasos de la técnica de audiometría</h2>
     <?php AudiometriaTecnicaVista::render($tecnica, false); ?>
+</div>
+<?php endif; ?>
+
+<?php $equipos = EquiposTecnica::paraAtencion($appointmentId, (int) $me['id']); ?>
+<?php if (array_filter($equipos)): ?>
+<div class="card" id="tecnica-equipos">
+    <h2>Pasos de la otoscopía, los diapasones y la impedanciometría</h2>
+    <p class="help">Solo de los equipos que usaste con el paciente.</p>
+    <?php foreach (EquiposTecnica::EQUIPOS as $k => $titulo): ?>
+    <?php if ($equipos[$k] !== null) { AudiometriaTecnicaVista::seccion($titulo, $equipos[$k], false); } ?>
+    <?php endforeach; ?>
 </div>
 <?php endif; ?>
 

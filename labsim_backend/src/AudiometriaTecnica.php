@@ -1166,7 +1166,7 @@ final class AudiometriaTecnica
      * estímulos de 1-2 s...) traen su propio logro; las demás logran 1 o 0
      * según 'cumple'.
      */
-    private static function ponderar(array $seccion): array
+    public static function ponderar(array $seccion): array
     {
         $poner = static function (array $reglas): array {
             foreach ($reglas as &$r) {

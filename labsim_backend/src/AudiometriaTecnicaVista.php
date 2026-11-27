@@ -64,7 +64,7 @@ final class AudiometriaTecnicaVista
     }
 
     /** Una sección plegada: el título trae el porcentaje; adentro, el detalle. */
-    private static function seccion(string $titulo, array $s, bool $docente): void
+    public static function seccion(string $titulo, array $s, bool $docente): void
     {
         $p = $s['puntaje'];
         $pendientes = $p['total'] - $p['cumple'];

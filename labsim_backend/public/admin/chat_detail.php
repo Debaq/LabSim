@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../views/indicadores/faltas_graves.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
+require_once __DIR__ . '/../../src/EquiposTecnica.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 
 $me = Auth::requireAdminSession();
@@ -292,6 +293,17 @@ if ($attendance) {
     <h3>Técnica de audiometría</h3>
     <p class="help">Comparada con las técnicas T00-T02 de la <a href="bibliografia.php#tecnicas">Bibliografía</a>, con los valores del curso. El alumno ve lo mismo en su atención, sin los umbrales del paciente.</p>
     <?php AudiometriaTecnicaVista::render($tecnica, true); ?>
+</div>
+<?php endif; ?>
+
+<?php $equipos = EquiposTecnica::paraAtencion($appointmentId, $studentId); ?>
+<?php if (array_filter($equipos)): ?>
+<div class="card section-panel" id="tecnica-equipos">
+    <h3>Técnica de otoscopía, diapasones e impedanciometría</h3>
+    <p class="help">Solo los equipos que el alumno usó con el paciente: no hacer un examen no descuenta. Técnica de los capítulos H1, H2 y H7 del libro; lo que no se hizo de un examen ya empezado sí cuenta. El alumno ve lo mismo, sin los valores del paciente.</p>
+    <?php foreach (EquiposTecnica::EQUIPOS as $k => $titulo): ?>
+    <?php if ($equipos[$k] !== null) { AudiometriaTecnicaVista::seccion($titulo, $equipos[$k], true); } ?>
+    <?php endforeach; ?>
 </div>
 <?php endif; ?>
 
