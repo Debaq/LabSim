@@ -1456,6 +1456,17 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "edad": edad, "procedimiento": procedimiento, "appointment_id": appointment_id,
             "trae": [examen for examen, _ in examenes_que_trae(entry, self.data_current, todos=True)],
         }
+        # Desde aquí la app registra la ficha (ficha_ver, ficha_visible,
+        # ficha_previo): con 'registra' el backend sabe que puede evaluar si
+        # se revisó la ficha (FichaTecnica); en las atenciones de antes no.
+        if appointment_id is not None:
+            agenda_w = self.subw.get("AGENDA") if self.subw else None
+            ids = getattr(agenda_w.obj, "_ficha_ids", None) if agenda_w is not None else None
+            LOCAL_LOG_QUEUE.push("atencion_inicio", {
+                "appointment_id": appointment_id, "case_id": case_id,
+                "trae": self.paciente_actual["trae"], "registra": ["ficha"],
+                "ficha_abierta": bool(self.ficha_abierta() and ids and str(ids.get("case_id")) == str(case_id)),
+            })
 
         if es_prueba:
             self.statusbar.showMessage(f"[PRUEBA] Caso cargado: {nombre or case_id} (no se guarda atención)")
@@ -1805,6 +1816,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # cuando se cierra con su ✕.
         self.subw["FICHA"].visibility_changed.connect(
             lambda _visible: self.subw["AGENDA"].obj.pintar_boton_ficha())
+        self.subw["FICHA"].visibility_changed.connect(self._registrar_ficha_visible)
         self._hydrate_modules()
         for attr in self._ATTRS_EXAMEN:
             if getattr(self, attr, None) is not None:
@@ -2168,10 +2180,25 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if agenda is not None and self.ficha_abierta():
             agenda.obj._seguir_con_la_ficha()
 
+    def _ids_ficha(self):
+        """(appointment_id, case_id) de la ficha que muestra la agenda."""
+        agenda = self.subw.get("AGENDA") if self.subw else None
+        return dict(getattr(agenda.obj, "_ficha_ids", None) or {}) if agenda is not None else {}
+
+    def _registrar_ficha_visible(self, visible):
+        """La ficha se mostró o se cerró (también con su ✕): cuánto rato
+        estuvo a la vista sale de estas filas (FichaTecnica)."""
+        ids = self._ids_ficha()
+        if ids:
+            LOCAL_LOG_QUEUE.push("ficha_visible", dict(ids, visible=bool(visible)))
+
     def abrir_previo(self, ruta, examen="Examen"):
         """La hoja de un examen previo del paciente (ver core.ficha.HojaPrevia)."""
         if "PREVIO" not in self.apps:
             return
+        ids = self._ids_ficha()
+        if ids:
+            LOCAL_LOG_QUEUE.push("ficha_previo", dict(ids, examen=examen, archivo=os.path.basename(str(ruta))))
         frame = self.subw["PREVIO"]
         frame.obj.set_hoja(ruta)
         if self._subventana_visible("PREVIO"):

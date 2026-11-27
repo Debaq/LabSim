@@ -7,6 +7,7 @@ require_once __DIR__ . '/OtoscopiaTecnica.php';
 require_once __DIR__ . '/AcumetriaTecnica.php';
 require_once __DIR__ . '/ImpedanciometriaTecnica.php';
 require_once __DIR__ . '/EntrevistaTecnica.php';
+require_once __DIR__ . '/FichaTecnica.php';
 
 /**
  * Técnica de la atención fuera del audiómetro: la entrevista (chat con el
@@ -32,6 +33,7 @@ final class EquiposTecnica
     public const OTOSCOPIO_DESDE = '2026-11-06';
 
     public const EQUIPOS = [
+        'ficha' => 'Ficha del paciente',
         'entrevista' => 'Entrevista',
         'otoscopia' => 'Otoscopía',
         'acumetria' => 'Diapasones',
@@ -52,8 +54,11 @@ final class EquiposTecnica
         $logs = array_values(array_filter($logs, static function ($l) {
             return ($l['payload']['con_paciente'] ?? true) !== false;
         }));
+        $ficha = FichaTecnica::evaluar($logs, $caso);
         $out = [
-            'entrevista' => EntrevistaTecnica::evaluar($extra['chat'] ?? [], $caso, (bool) ($extra['anamnesis_completa'] ?? true)),
+            'ficha' => $ficha,
+            'entrevista' => EntrevistaTecnica::evaluar($extra['chat'] ?? [], $caso, (bool) ($extra['anamnesis_completa'] ?? true),
+                (bool) ($ficha['revisada'] ?? false)),
             'otoscopia' => OtoscopiaTecnica::evaluar($logs, $caso, $extra['informe_otoscopia'] ?? null, $extra['tipos_otoscopia'] ?? []),
             'acumetria' => AcumetriaTecnica::evaluar($logs, $caso, $extra['informe_otoscopia'] ?? null),
             'impedanciometria' => ImpedanciometriaTecnica::evaluar($logs, $caso),
@@ -86,12 +91,13 @@ final class EquiposTecnica
         $stmt->closeCursor();
         $caso = $cita && $cita['data'] ? json_decode((string) $cita['data'], true) : null;
         if (!is_array($caso)) {
-            return ['entrevista' => null, 'otoscopia' => null, 'acumetria' => null, 'impedanciometria' => null];
+            return ['ficha' => null, 'entrevista' => null, 'otoscopia' => null, 'acumetria' => null, 'impedanciometria' => null];
         }
 
         $stmt = $pdo->prepare(
             "SELECT client_ts, action, payload FROM action_logs WHERE user_id = ?
-                AND (action LIKE 'z\\_%' ESCAPE '\\' OR action LIKE 'ot\\_%' ESCAPE '\\' OR action LIKE 'ac\\_%' ESCAPE '\\')
+                AND (action LIKE 'z\\_%' ESCAPE '\\' OR action LIKE 'ot\\_%' ESCAPE '\\' OR action LIKE 'ac\\_%' ESCAPE '\\'
+                     OR action LIKE 'ficha\\_%' ESCAPE '\\' OR action = 'atencion_inicio')
               ORDER BY id"
         );
         $stmt->execute([$studentId]);

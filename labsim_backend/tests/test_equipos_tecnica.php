@@ -288,3 +288,36 @@ $sec = EquiposTecnica::evaluar([], eq_caso(['edad' => 1]), ['chat' => $ana])['en
 t_eq(array_keys($sec['temas']), EntrevistaTecnica::NINO, 'Anamnesis: en el niño, la lista del niño');
 $sec = EquiposTecnica::evaluar([], eq_caso(), ['chat' => $ana, 'anamnesis_completa' => false])['entrevista'];
 t_eq(array_keys($sec['temas']), ['acufeno'], 'Anamnesis: curso que no la evalúa completa, solo el acúfeno');
+
+// ---- revisión de la ficha --------------------------------------------------------------
+$inicio = ['appointment_id' => 5, 'case_id' => 1, 'trae' => ['Audiometría', 'Impedanciometría'], 'registra' => ['ficha'], 'ficha_abierta' => false];
+$conFicha = eq_logs([
+    [0, 'ficha_ver', ['abrir' => true]],
+    [0, 'ficha_visible', ['visible' => true]],
+    [40, 'ficha_previo', ['examen' => 'Audiometría', 'archivo' => 'x.pdf']],
+    [90, 'ficha_visible', ['visible' => false]],
+    [100, 'atencion_inicio', $inicio],
+]);
+$sec = EquiposTecnica::evaluar($conFicha, eq_caso())['ficha'];
+$rr = eq_reglas($sec);
+t_eq(eq_busca($rr, 'antes de empezar'), true, 'Ficha: la revisó antes de empezar');
+t_eq(eq_busca($rr, 'exámenes que trae'), false, 'Ficha: abrió 1 de los 2 exámenes que trae');
+t_true(strpos($sec['reglas'][0]['detalle_docente'], '1 min') !== false || strpos($sec['reglas'][0]['detalle_docente'], '90 s') !== false, 'Ficha: el docente ve cuánto rato estuvo a la vista');
+$sinFicha = eq_logs([[100, 'atencion_inicio', $inicio], [500, 'ficha_ver', ['abrir' => true]]]);
+t_eq(eq_busca(eq_reglas(EquiposTecnica::evaluar($sinFicha, eq_caso())['ficha']), 'antes de empezar'), false, 'Ficha: la abrió recién después de empezar');
+t_eq(EquiposTecnica::evaluar(eq_logs([[20, 'z_stimulus_click', $click('tymp', 'OD')]]), eq_caso())['ficha'], null, 'Ficha: app anterior (sin atencion_inicio), no se evalúa');
+// Lo que la ficha ya dice cuenta en la entrevista si se revisó
+$lactante = eq_caso(['edad' => 0.5, 'nacimiento' => ['parto' => 'cesarea', 'semanas' => 38]]);
+$chatMama = [['role' => 'user', 'content' => 'Hola, ¿qué la trae con su bebé?'], ['role' => 'assistant', 'content' => 'No pasó la prueba de audición.']];
+$sec = EquiposTecnica::evaluar($conFicha, $lactante, ['chat' => $chatMama])['entrevista'];
+$peri = array_values(array_filter($sec['reglas'], static function ($r) { return strpos($r['texto'], 'Embarazo') === 0; }))[0];
+t_eq([$peri['cumple'], $peri['detalle']], [true, 'Lo leyó en la ficha.'], 'Entrevista: el parto está en la ficha y la revisó');
+$sec = EquiposTecnica::evaluar($sinFicha, $lactante, ['chat' => $chatMama])['entrevista'];
+$peri = array_values(array_filter($sec['reglas'], static function ($r) { return strpos($r['texto'], 'Embarazo') === 0; }))[0];
+t_eq($peri['cumple'], true, 'Entrevista: la abrió después, pero la revisó: cuenta lo que dice');
+$sec = EquiposTecnica::evaluar([], $lactante, ['chat' => $chatMama])['entrevista'];
+$peri = array_values(array_filter($sec['reglas'], static function ($r) { return strpos($r['texto'], 'Embarazo') === 0; }))[0];
+t_eq($peri['cumple'], false, 'Entrevista: sin revisar la ficha ni preguntar, no cuenta');
+$hc = eq_caso(['historia_clinica' => 'Paciente con otitis a repetición en la infancia. Usa audífono desde 2020.']);
+t_eq(EntrevistaTecnica::enFicha($hc, 'otologicos'), true, 'Ficha: la historia clínica trae antecedentes otológicos');
+t_eq(EntrevistaTecnica::enFicha($hc, 'farmacos'), false, 'Ficha: no trae fármacos');

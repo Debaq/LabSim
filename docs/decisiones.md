@@ -5,6 +5,37 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Revisión de la ficha del paciente (2026-11-27)
+
+**Pedido.** "A los lactantes se les hace a la mamá, a la ficha; no sé cómo
+cazar lo de la revisión y análisis de la ficha."
+
+**Diagnóstico.** La entrevista a la mamá ya entraba: el chat guarda las
+respuestas del acompañante ("Madre de Borja (Madre)") y las preguntas del
+alumno cuentan igual. La ficha, en cambio, no dejaba ningún rastro: la app
+no registraba abrirla, cerrarla ni mirar los exámenes que trae el paciente.
+
+**Decisión.**
+- App: `atencion_inicio` al abrir la atención (con lo que trae el paciente,
+  si la ficha ya estaba abierta y `registra: ['ficha']`), `ficha_ver` cada
+  vez que la agenda muestra la ficha de un paciente (`abrir` si el alumno
+  apretó "Ver ficha"), `ficha_visible` al abrir o cerrar la subventana y
+  `ficha_previo` al abrir un examen que trae.
+- Backend: `FichaTecnica`, sección "Ficha del paciente": "Se revisa la ficha
+  antes de empezar" (vista hasta 2 min después de abrir la atención, ×2) y
+  "Se abren los exámenes que trae" (proporción, ×2); el docente ve cuánto
+  rato estuvo a la vista. Sin `atencion_inicio` con `registra` la app era
+  anterior y no se evalúa: no hay datos hacia atrás.
+- Entrevista: lo que la ficha ya dice cuenta como cubierto si la ficha se
+  revisó ("Lo leyó en la ficha"): los datos del nacimiento en el lactante
+  y los temas que aparezcan en la historia clínica escrita por el docente.
+
+**Pendiente.** El análisis de lo leído (si lo usó en la conclusión o la
+evolución) no se mide: haría falta leer la evolución del alumno contra la
+ficha, probablemente con un LLM.
+
+**Tests.** `test_equipos_tecnica.php` (ficha).
+
 ## Entrevista: ¿preguntó por el acúfeno? (2026-11-27)
 
 **Pedido.** "¿Cómo capturamos cuando le preguntas si tiene tinnitus? Si les

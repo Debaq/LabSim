@@ -19,6 +19,11 @@ final class Metrics
     public const NO_SON_DEL_ALUMNO = ['audio_respuesta', 'audio_caso_cargado'];
 
     private const ACTION_LABELS = [
+        // Atención y ficha (FichaTecnica)
+        'atencion_inicio' => 'Empieza la atención',
+        'ficha_ver' => 'Muestra la ficha del paciente',
+        'ficha_visible' => 'Abre o cierra la ficha',
+        'ficha_previo' => 'Abre un examen que trae el paciente',
         // Audiómetro
         'audio_intensity_change' => 'Cambio de intensidad (dB)',
         'audio_freq_change' => 'Cambio de frecuencia (Hz)',

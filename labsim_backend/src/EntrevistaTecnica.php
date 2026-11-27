@@ -71,7 +71,7 @@ final class EntrevistaTecnica
      * $mensajes: el chat de UNA atención en orden ('role' user | assistant,
      * 'content').
      */
-    public static function evaluar(array $mensajes, array $caso, bool $completa = true): ?array
+    public static function evaluar(array $mensajes, array $caso, bool $completa = true, bool $fichaRevisada = false): ?array
     {
         if (!array_filter($mensajes, static function ($m) { return ($m['role'] ?? '') === 'user'; })) {
             return null;
@@ -86,7 +86,9 @@ final class EntrevistaTecnica
         $cubiertos = [];
         foreach ($temas as $tema) {
             [$pregunta, $respuesta, $contado] = self::buscar($mensajes, $tema);
-            $cubierto = $pregunta !== null || $contado !== null;
+            // Lo que la ficha ya dice no hace falta preguntarlo, si se leyó.
+            $enFicha = $pregunta === null && $contado === null && $fichaRevisada && self::enFicha($caso, $tema);
+            $cubierto = $pregunta !== null || $contado !== null || $enFicha;
             $cubiertos[$tema] = $cubierto;
             $doc = $pregunta !== null
                 ? 'Preguntó: "' . self::corto($pregunta) . '"' . ($respuesta !== null ? ' — Respondió: "' . self::corto($respuesta) . '"' : '')
@@ -97,8 +99,8 @@ final class EntrevistaTecnica
             $reglas[] = [
                 'texto' => self::TEMAS[$tema][0],
                 'cumple' => $cubierto,
-                'detalle' => $pregunta !== null ? 'Lo preguntó.' : ($contado !== null ? 'Lo contó el paciente.'
-                    : ($tema === 'acufeno' ? 'No se le preguntó: sin eso no se sabe si corresponde la tinnitumetría.' : 'No se preguntó.')),
+                'detalle' => $pregunta !== null ? 'Lo preguntó.' : ($contado !== null ? 'Lo contó el paciente.' : ($enFicha ? 'Lo leyó en la ficha.'
+                    : ($tema === 'acufeno' ? 'No se le preguntó: sin eso no se sabe si corresponde la tinnitumetría.' : 'No se preguntó.'))),
                 'detalle_docente' => trim($doc),
                 'peso' => $tema === 'acufeno' ? 2 : 1,
             ];
@@ -106,6 +108,21 @@ final class EntrevistaTecnica
         return ['hecha' => true, 'reglas' => $reglas, 'oidos' => [], 'observaciones' => [],
             'temas' => $cubiertos, 'nino' => $nino,
             'acufeno' => ['pregunto' => $cubiertos['acufeno'] ?? null, 'paciente_tiene' => $tieneAcufeno]];
+    }
+
+    /**
+     * Si la ficha del paciente ya trae ese tema: los datos del nacimiento
+     * (lactante) o la historia clínica escrita por el docente.
+     */
+    public static function enFicha(array $caso, string $tema): bool
+    {
+        if ($tema === 'perinatal' && is_array($caso['nacimiento'] ?? null) && $caso['nacimiento'] !== []) {
+            return true;
+        }
+        $hc = $caso['historia_clinica'] ?? '';
+        $texto = is_array($hc) ? json_encode($hc, JSON_UNESCAPED_UNICODE) : (string) $hc;
+        return $texto !== '' && (bool) preg_match(self::TEMAS[$tema][1], $texto)
+            && !(isset(self::EXCLUIR[$tema]) && preg_match(self::EXCLUIR[$tema], $texto));
     }
 
     /** Si un mensaje del alumno pregunta por ese tema (y no es la instrucción de un examen). */

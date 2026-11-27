@@ -1953,6 +1953,19 @@ class Agenda(QWidget, Ui_Form):
         args = (html, (lambda: self._abrir_chat_paciente(row, case_id, appointment_key)) if con_chat else None,
                 (f"{row.nombre} {row.apellido}".strip(), self._datos_paciente(row.rut, row.procedimiento, cuando)))
         getattr(self.main_window, metodo)(*args)
+        # Qué ficha está a la vista, para el registro (main._ids_ficha):
+        # ficha_ver cada vez que se muestra la de un paciente (abrir = el
+        # alumno apretó "Ver ficha"; si no, la ficha siguió la selección).
+        try:
+            cita = int(appointment_key)
+        except (TypeError, ValueError):
+            cita = None
+        self._ficha_ids = {"appointment_id": cita, "case_id": case_id}
+        try:
+            from backend.log_queue import get_log_queue
+            get_log_queue().push("ficha_ver", dict(self._ficha_ids, abrir=bool(abrir)))
+        except Exception as exc:  # noqa: BLE001 -- sin registro la ficha se ve igual
+            print(f"Agenda: no se pudo registrar la ficha: {exc}")
 
     def _seguir_con_la_ficha(self):
         """Con la ficha abierta, la ficha sigue al paciente que se elige en la
