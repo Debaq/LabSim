@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/AudiometriaPaciente.php';
 require_once __DIR__ . '/AudiometriaRegistro.php';
 require_once __DIR__ . '/AudiometriaTinnitus.php';
+require_once __DIR__ . '/AudiometriaPertinencia.php';
 require_once __DIR__ . '/AppConfig.php';
 require_once __DIR__ . '/CourseParams.php';
 
@@ -12,7 +13,8 @@ require_once __DIR__ . '/CourseParams.php';
  * Indicadores de técnica de la audiometría: compara lo que hizo el alumno
  * (AudiometriaRegistro) con las técnicas de la Bibliografía
  * (Bibliografia::TECNICAS): T00 orden de las pruebas, T01 umbrales aéreos,
- * T02 umbrales óseos, T03 tinnitumetría (AudiometriaTinnitus).
+ * T02 umbrales óseos, T03 tinnitumetría (AudiometriaTinnitus), T04
+ * enmascaramiento y T05 pruebas que correspondían (AudiometriaPertinencia).
  *
  * Cada regla dice qué pide la técnica ('texto'), si se cumplió ('cumple':
  * true, false o null cuando no se puede evaluar) y qué pasó ('detalle').
@@ -67,6 +69,9 @@ final class AudiometriaTecnica
 
     private const OIDOS = ['OD', 'OI'];
 
+    /** Secciones del resultado, en el orden en que se muestran y suman. */
+    public const SECCIONES = ['orden', 'pertinencia', 'aereos', 'oseos', 'enmascaramiento', 'tinnitus'];
+
     /** Parámetros del curso sobre los defaults (CourseParams 'audiometria.tecnica'). */
     public static function parametros(?int $courseId): array
     {
@@ -108,7 +113,9 @@ final class AudiometriaTecnica
     // 4: tinnitumetría (T03) como sección propia (2026-11-06).
     // 5: inhibición residual con su paso inicial ("solo escuche el mío"),
     // +15 dB y una octava abajo (2026-11-13).
-    public const CACHE_VERSION = 5;
+    // 6: enmascaramiento (T04) y pruebas que correspondían (T05) como
+    // secciones propias (2026-11-27).
+    public const CACHE_VERSION = 6;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null
@@ -315,9 +322,16 @@ final class AudiometriaTecnica
             'oseos' => self::via('oseos', $registro, $paciente, $params['oseos']),
             // T03; null si no hubo acúfeno ni tinnitumetría
             'tinnitus' => null,
+            // T04; null si ningún umbral pedía ruido ni se usó
+            'enmascaramiento' => null,
+            // T05; null si no hubo nada que exigir ni advertir
+            'pertinencia' => null,
         ];
         $out['tinnitus'] = AudiometriaTinnitus::evaluar($registro['tinnitus'] ?? [], $caso, $out['aereos']['umbrales'] ?? []);
-        foreach (['orden', 'aereos', 'oseos', 'tinnitus'] as $k) {
+        $out['enmascaramiento'] = self::enmascaramiento($out['aereos']['umbrales'], $out['oseos']['umbrales'], $paciente);
+        $out['pertinencia'] = AudiometriaPertinencia::evaluar($registro, $caso, (int) $params['aereos']['oido_sano'],
+            $out['aereos']['hecha']);
+        foreach (self::SECCIONES as $k) {
             if ($out[$k] === null) {
                 continue;
             }
@@ -326,8 +340,9 @@ final class AudiometriaTecnica
                 $out[$k]['puntaje_oidos'][$oido] = self::sumar([['reglas' => $reglas]]);
             }
         }
-        $out['puntaje'] = self::sumar(array_values(array_filter(
-            [$out['orden'], $out['aereos'], $out['oseos'], $out['tinnitus']])));
+        $out['puntaje'] = self::sumar(array_values(array_filter(array_map(static function ($k) use ($out) {
+            return $out[$k];
+        }, self::SECCIONES))));
         return $out;
     }
 
@@ -655,6 +670,12 @@ final class AudiometriaTecnica
             $real = $idx === false ? null : $paciente->umbralReal($via === 'aereos' ? 'aerea' : 'osea', $idx, $oido);
             $sombra = $idx === false ? null : $paciente->umbralSinRuido($via === 'aereos' ? 'aerea' : 'osea', $idx, $oido);
             $est = $b['umbral'];
+            $ruido = null;
+            foreach ($b['pres'] as $x) {
+                if ($x['ruido'] !== null) {
+                    $ruido = $x['ruido'];
+                }
+            }
             if ($real === null) {
                 $estado = 'sin dato';
             } elseif ($est === null && $b['sin_respuesta']) {
@@ -679,11 +700,103 @@ final class AudiometriaTecnica
                 'real' => $real,
                 'sombra' => $sombra,
                 'con_ruido' => $b['con_ruido'],
+                'ruido' => $ruido,
                 'sin_respuesta' => $b['sin_respuesta'],
                 'estado' => $estado,
             ];
         }
         return $filas;
+    }
+
+    // ---- T04: enmascaramiento -------------------------------------------------
+
+    /**
+     * Dónde correspondía enmascarar y si el ruido quedó en la meseta, sobre
+     * el último umbral de cada oído y frecuencia (la repetición de 1 kHz
+     * manda sobre la primera vez).
+     *
+     * Pedía ruido donde sin él el oído responde por cruce (la sombra queda
+     * más de 5 dB bajo el umbral real): es la misma cuenta del motor
+     * (AudiometriaPaciente::rangoEnmascaramiento), así que coincide con la
+     * regla que usa el alumno (estímulo menos AI llega a la ósea del otro
+     * oído). Con ruido en el otro oído y el umbral que corresponde, el
+     * nivel estuvo bien. Si no corresponde, se dice si quedó bajo el mínimo
+     * (sigue cruzando) o sobre el máximo (tapa el oído estudiado). Ruido
+     * donde el tono no cruza ni de cerca es advertencia.
+     */
+    private static function enmascaramiento(array $aereos, array $oseos, AudiometriaPaciente $paciente): ?array
+    {
+        $reglas = [];
+        $obs = [];
+        foreach (['aerea' => $aereos, 'osea' => $oseos] as $via => $porOido) {
+            $nombre = $via === 'aerea' ? 'Vía aérea' : 'Vía ósea';
+            $pedia = $faltan = $fuera = $fueraDoc = $sobra = [];
+            $conRuido = 0;
+            foreach ($porOido as $oidoTxt => $filas) {
+                $o = array_search($oidoTxt, self::OIDOS, true);
+                $ultimas = [];
+                foreach ($filas as $fila) {
+                    $ultimas[$fila['freq']] = $fila;
+                }
+                foreach ($ultimas as $hz => $fila) {
+                    $f = array_search($hz, AudiometriaPaciente::FRECUENCIAS, true);
+                    if ($o === false || $f === false || $fila['real'] === null || $fila['sombra'] === null) {
+                        continue;
+                    }
+                    $etiqueta = $oidoTxt . ' ' . self::hz($hz);
+                    $ruido = $fila['ruido'] ?? null;
+                    $enmascaro = $ruido !== null && $ruido['oido'] === 1 - $o;
+                    if ($fila['sombra'] < $fila['real'] - 5) {
+                        $pedia[] = $etiqueta;
+                        if (!$enmascaro) {
+                            $faltan[] = $etiqueta;
+                            continue;
+                        }
+                        $conRuido++;
+                        if ($fila['estado'] === 'coincide') {
+                            continue;
+                        }
+                        $stim = array_search($ruido['stim'], AudiometriaPaciente::ESTIMULOS, true);
+                        $ce = AudiometriaPaciente::CE_TONAL[$stim === false ? 3 : $stim] ?? 0;
+                        $m = $paciente->rangoEnmascaramiento($via, (int) $f, (int) $o, 1 - (int) $o, $ce);
+                        if ($ruido['int'] < $m['minimo']) {
+                            $fuera[] = $etiqueta . ' (bajo el mínimo: el tono siguió cruzando)';
+                        } elseif ($ruido['int'] > $m['maximo']) {
+                            $fuera[] = $etiqueta . ' (sobre el máximo: el ruido tapó también el oído estudiado)';
+                        } else {
+                            continue;
+                        }
+                        $fueraDoc[] = sprintf('%s: ruido %d dB, meseta %d a %d dB', $etiqueta, $ruido['int'], $m['minimo'], $m['maximo']);
+                    } elseif ($enmascaro) {
+                        $m = $paciente->rangoEnmascaramiento($via, (int) $f, (int) $o, 1 - (int) $o);
+                        if ($m['cruce'] > $fila['real'] + 5) {
+                            $sobra[] = $etiqueta;
+                        }
+                    }
+                }
+            }
+            if ($pedia) {
+                $reglas[] = [
+                    'texto' => $nombre . ': se enmascara donde el tono cruza al otro oído.',
+                    'cumple' => $faltan === [],
+                    'detalle' => $faltan === []
+                        ? 'Enmascaró en ' . self::lista($pedia) . '.'
+                        : 'Faltó enmascarar en ' . self::lista($faltan) . ': ese umbral puede ser del otro oído.',
+                ];
+            }
+            if ($conRuido > 0) {
+                $reglas[] = [
+                    'texto' => $nombre . ': el ruido queda entre el mínimo y el máximo.',
+                    'cumple' => $fuera === [],
+                    'detalle' => $fuera === [] ? 'El ruido quedó en la meseta.' : 'Fuera de la meseta en ' . self::lista($fuera) . '.',
+                    'detalle_docente' => implode('; ', $fueraDoc),
+                ];
+            }
+            if ($sobra) {
+                $obs[] = $nombre . ': enmascaró en ' . self::lista($sobra) . ', donde el tono no cruzaba: no hacía falta.';
+            }
+        }
+        return $reglas === [] && $obs === [] ? null : ['reglas' => $reglas, 'observaciones' => $obs];
     }
 
     /**

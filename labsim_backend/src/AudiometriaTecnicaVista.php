@@ -25,6 +25,16 @@ final class AudiometriaTecnicaVista
         'sin dato' => ['—', ''],
     ];
 
+    /** Título de cada sección, en el orden de AudiometriaTecnica::SECCIONES. */
+    private const TITULOS = [
+        'orden' => 'Orden de las pruebas',
+        'pertinencia' => 'Pruebas que correspondían',
+        'aereos' => 'Umbrales aéreos',
+        'oseos' => 'Umbrales óseos',
+        'enmascaramiento' => 'Enmascaramiento',
+        'tinnitus' => 'Tinnitumetría',
+    ];
+
     public static function render(array $res, bool $docente): void
     {
         $p = $res['puntaje'];
@@ -40,20 +50,16 @@ final class AudiometriaTecnicaVista
         <p class="help" style="opacity:0.8;">Atención registrada antes de la versión actual del audiómetro: lo que oyó el paciente se recalculó y la duración de los estímulos no se puede medir.</p>
         <?php endif; ?>
         <?php
-        $secciones = [];
-        if ($res['orden']['reglas'] || $res['orden']['observaciones']) {
-            $secciones['orden'] = 'Orden de las pruebas';
-        }
-        foreach (['aereos' => 'Umbrales aéreos', 'oseos' => 'Umbrales óseos'] as $via => $titulo) {
-            if ($res[$via]['hecha'] || $res[$via]['reglas']) {
-                $secciones[$via] = $titulo;
+        foreach (self::TITULOS as $k => $titulo) {
+            $s = $res[$k] ?? null;
+            if ($s === null) {
+                continue;
             }
-        }
-        if (!empty($res['tinnitus'])) {
-            $secciones['tinnitus'] = 'Tinnitumetría';
-        }
-        foreach ($secciones as $k => $titulo) {
-            self::seccion($titulo, $res[$k], $docente);
+            $hay = $k === 'aereos' || $k === 'oseos' ? ($s['hecha'] || $s['reglas'])
+                : ($s['reglas'] || $s['observaciones']);
+            if ($hay) {
+                self::seccion($titulo, $s, $docente);
+            }
         }
     }
 
@@ -138,7 +144,10 @@ final class AudiometriaTecnicaVista
         <li style="margin:0.25rem 0; font-size:0.9em; display:flex; gap:0.5rem; align-items:baseline;">
             <span title="<?= htmlspecialchars($etiqueta) ?>" style="color:<?= $color ?>; font-weight:700; min-width:1rem; text-align:center;"><?= $marca ?></span>
             <span><?= htmlspecialchars($r['texto']) ?>
-                <span style="opacity:0.75;"><?= htmlspecialchars($r['detalle']) ?></span></span>
+                <span style="opacity:0.75;"><?= htmlspecialchars($r['detalle']) ?></span>
+                <?php if ($docente && !empty($r['detalle_docente'])): ?>
+                <span style="opacity:0.6; font-size:0.9em;">(<?= htmlspecialchars($r['detalle_docente']) ?>)</span>
+                <?php endif; ?></span>
         </li>
         <?php
     }

@@ -221,7 +221,13 @@ t_eq(array_unique(array_column($res['oseos']['umbrales']['OI'], 'estado')), ['so
 t_eq($res['oseos']['observaciones'], [], 'Técnica: ósea solo en el oído que la necesita, sin observaciones');
 t_eq($res['orden']['hechas'], ['Umbrales aéreos', 'Umbrales óseos'], 'Técnica: pruebas reconocidas');
 t_eq($res['orden']['reglas'][0]['cumple'], true, 'Técnica: aéreos antes que óseos');
-t_true($res['puntaje']['total'] > 15 && $res['puntaje']['cumple'] === $res['puntaje']['total'] - 1, 'Técnica: puntaje (todo menos la sombra ósea)');
+$tecnica = AudiometriaTecnica::sumar([$res['orden'], $res['aereos'], $res['oseos']]);
+t_true($tecnica['total'] > 15 && $tecnica['cumple'] === $tecnica['total'] - 1, 'Técnica: puntaje (todo menos la sombra ósea)');
+// El examen de prueba no hace logo ni adaptación (OI 20 dB peor, sensorioneural)
+// y deja la ósea de OI sin enmascarar: lo dicen las secciones T04 y T05.
+t_eq(array_column($res['pertinencia']['reglas'], 'cumple'), [false, false], 'Técnica: sin logo ni adaptación en una asimétrica');
+t_eq(array_column($res['enmascaramiento']['reglas'], 'cumple'), [false], 'Técnica: la sombra ósea es enmascaramiento que faltó');
+t_eq($res['puntaje']['cumple'], $res['puntaje']['total'] - 4, 'Técnica: puntaje total con las secciones nuevas');
 
 // --- El mismo examen en registro viejo: se reconstruye ---------------------
 $viejo = new AtExaminador(false);

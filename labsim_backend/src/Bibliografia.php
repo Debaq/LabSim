@@ -589,6 +589,41 @@ final class Bibliografia
             ],
             'nota' => 'Técnica tal como la enseña el docente (libro, H06). No hay norma ISO para la acufenometría. La literatura mide la inhibición residual con el mismo ruido del NME, centrado en el acúfeno, a NME + 10 dB; aquí va una octava abajo, 15 dB sobre el nivel en que ese mismo estímulo tapa el acúfeno (docs/observaciones_tecnicas.md).',
         ],
+        'T04' => [
+            'titulo' => 'Enmascaramiento tonal: cuándo y con cuánto',
+            'resumen' => 'Se enmascara donde el tono cruza al otro oído, con el ruido entre el mínimo y el máximo.',
+            'pasos' => [
+                'Vía aérea: se enmascara cuando el estímulo menos la atenuación interaural llega a la vía ósea del otro oído.',
+                'Vía ósea: se enmascara cuando la vía ósea del otro oído es mejor (la atenuación interaural ósea es 0).',
+                'El ruido va al oído que no se estudia.',
+                'El ruido queda entre el mínimo (bajo él, el tono sigue cruzando) y el máximo (sobre él, el ruido tapa también el oído estudiado).',
+                'Enmascarar donde el tono no cruza no es un error, pero no hacía falta.',
+            ],
+            'usa' => [
+                'Indicador "Enmascaramiento" de la atención (AudiometriaTecnica), que ven el docente y el alumno: el mínimo y el máximo son los mismos del motor (CaseMasking).',
+            ],
+            'fuentes' => [],
+            'nota' => 'Solo cuándo enmascarar y si el ruido quedó en la meseta. El nivel inicial del ruido y la búsqueda de la meseta paso a paso quedan pendientes.',
+        ],
+        'T05' => [
+            'titulo' => 'Pruebas que corresponden según el audiograma',
+            'resumen' => 'Cada prueba se elige por lo que muestran los umbrales: algunas siempre, otras solo con un requisito.',
+            'pasos' => [
+                'Toda audiometría lleva logoaudiometría, salvo una pérdida profunda en los dos oídos (promedio de 90 dB o más).',
+                'Con una pérdida sensorioneural asimétrica (15 dB o más en dos frecuencias seguidas de 500 a 4000 Hz) se busca adaptación: Carhart, Rosemberg o STAT.',
+                'Con una pérdida unilateral que no calza con el resto del examen se hace el Stenger.',
+                'Fowler: en una frecuencia con un oído normal y el otro al menos 20 dB peor. En una pérdida simétrica no hay oído de referencia.',
+                'Reger: en el mismo oído, una frecuencia normal y otra entre 20 y 40 dB peor.',
+                'Stenger: en una frecuencia con al menos 20 dB de diferencia entre oídos.',
+                'SISI y las pruebas de adaptación solo aportan donde hay pérdida sensorioneural: en un oído normal o con una conductiva no hacen falta.',
+                'Umbrales óseos solo en los oídos con la vía aérea alterada (T02) y tinnitumetría solo con acúfeno no pulsátil (T03).',
+            ],
+            'usa' => [
+                'Indicador "Pruebas que correspondían" de la atención (AudiometriaPertinencia), que ven el docente y el alumno. Lo indicado que falta y lo hecho sin su requisito descuentan; lo hecho sin necesidad es advertencia.',
+            ],
+            'fuentes' => [],
+            'nota' => 'El audiograma que manda es el que da el paciente, el que ve el alumno. Los cortes (20 dB de normalidad, 15 dB de gap y de asimetría, 20 a 40 dB del Reger) están en docs/decisiones.md, "Pruebas que correspondían".',
+        ],
     ];
 
     /**

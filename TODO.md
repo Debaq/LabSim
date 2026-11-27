@@ -176,9 +176,20 @@ gap significativo. § Parámetros de audiometría configurables por curso
 
 ### Audiometría: leer el examen desde el registro
 § Audiometría: leer el examen del alumno desde el registro
-- [ ] 62. Enmascaramiento como regla de la técnica (cuándo enmascarar,
-      nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
-- [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T04+).
+- [ ] 62. Enmascaramiento: nivel inicial del ruido y búsqueda de la meseta
+      paso a paso. Cuándo enmascarar y si el ruido quedó en la meseta ya
+      están (T04). § Pruebas que correspondían y enmascaramiento en el indicador
+- [ ] 64. Técnica de la logoaudiometría y de cada supraliminar (cómo se
+      hacen). Cuáles correspondían ya está (T05). § Pruebas que
+      correspondían y enmascaramiento en el indicador
+- [ ] 82. "Pruebas que correspondían" en los otros equipos, sobre lo que ya
+      registran: otoscopía antes de Z y audiometría; tapón oclusivo o
+      perforación → timpanometría no realizable / 'B perforación' y ETF
+      de membrana perforada; decay de reflejo solo con reflejo presente y
+      sospecha retrococlear; menor de 3 años → EOA/ABR en vez de
+      audiometría; ABR con enmascaramiento contralateral en la asimétrica.
+      Qué entra lo decide él. § Pruebas que correspondían y
+      enmascaramiento en el indicador
 - [ ] 80. Indicador del deterioro tonal: con `audio_deterioro_tonal` (qué
       prueba dedujo el motor, oído, frecuencia, `inicio_sl`) decir "hizo
       Carhart en OD 1000 Hz partiendo en el umbral" y revisar el cronómetro

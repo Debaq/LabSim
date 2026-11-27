@@ -5,6 +5,73 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Pruebas que correspondían y enmascaramiento en el indicador (2026-11-27)
+
+**Pedido.** Revisar qué indicadores se evalúan en las atenciones, expandirlos
+y ordenarlos: el indicador ya sabía que la tinnitumetría no correspondía en
+un paciente sin acúfeno, y como esa deben existir otras situaciones.
+
+**Inventario antes del cambio.** En la atención solo se evaluaba el
+audiómetro: T00 orden de las pruebas, T01 umbrales aéreos, T02 umbrales
+óseos (exigidos solo en los oídos con la vía aérea alterada; en un oído
+sano es advertencia) y T03 tinnitumetría (sin acúfeno es advertencia;
+pulsátil se deriva; con acúfeno y sin tinnitumetría descuenta). Los demás
+equipos registran todo en `action_logs` pero solo entran en el uso de
+equipos (`AlumnoIndicadores::usoEquipos`).
+
+**Decisión.** Dos secciones nuevas en `AudiometriaTecnica::evaluar`, en este
+orden (`AudiometriaTecnica::SECCIONES`): orden, **pruebas que
+correspondían** (T05, `AudiometriaPertinencia`), aéreos, óseos,
+**enmascaramiento** (T04) y tinnitumetría. Las dos suman al puntaje y a
+"pasos difíciles" / avance del curso como las demás. `CACHE_VERSION` = 6.
+
+Tres pesos, según qué tan grave es:
+- **Indicada y no hecha → regla.** Logoaudiometría en toda audiometría
+  (salvo promedio ≥ 90 dB en los dos oídos, donde no da resultado);
+  prueba de adaptación (Carhart, Rosemberg o STAT) con una sensorioneural
+  asimétrica; Stenger en el caso marcado con pérdida no orgánica en un
+  solo oído.
+- **Hecha sin el requisito que la hace válida → regla**, porque el
+  resultado no se puede interpretar: Fowler sin un oído normal y el otro
+  ≥ 20 dB peor en esa frecuencia (en una simétrica no hay oído de
+  referencia); Reger sin una frecuencia normal y otra 20-40 dB peor en el
+  mismo oído (los requisitos de TODO 81); Stenger con menos de 20 dB entre
+  oídos (el motor ya lo dice: "el Stenger necesita asimetría").
+- **Hecha sin necesidad → advertencia**, como los óseos en un oído sano:
+  SISI, deterioro tonal, Rosemberg bilateral y STAT en un oído/frecuencia
+  sin componente sensorioneural; logo en una profunda bilateral;
+  enmascarar donde el tono no cruzaba.
+
+Cortes: normal = el `oido_sano` del curso (20 dB HL); componente
+sensorioneural = aéreo sobre el corte y (óseo sobre el corte o gap < 15
+dB); asimetría = el mismo oído ≥ 15 dB peor en dos frecuencias seguidas de
+500 a 4000 Hz con componente sensorioneural ahí. En el caso Stenger no se
+pide adaptación: la asimetría es fingida.
+
+Enmascaramiento (parte de TODO 62): sobre el último umbral de cada oído y
+frecuencia. Pedía ruido donde sin él el oído responde por cruce (sombra
+más de 5 dB bajo el real: la misma cuenta del motor, que coincide con la
+regla clásica). Regla 1: hubo ruido en el otro oído. Regla 2 (solo si
+hubo ruido donde se pedía): con el umbral que corresponde el ruido estuvo
+bien; si no, se dice si quedó bajo el mínimo o sobre el máximo
+(`rangoEnmascaramiento`, con el CE del ruido usado).
+
+El audiograma que manda es el que da el paciente (`Aerea_mkg`), el que ve
+el alumno. Los detalles que lee el alumno nombran oído y frecuencia, nunca
+umbrales; los números van en `detalle_docente`, que solo pinta la vista
+del docente.
+
+**Descartado.** Exigir supraliminares en toda sensorioneural (en una
+simétrica el SISI sirve, pero no hay un dato clínico que lo vuelva
+obligatorio; quedó como libre). Asimetría por diferencia de promedios: una
+caída de 15 dB en un solo tramo agudo (la típica del neurinoma) se pierde
+en el promedio. Usar la verdad del caso Stenger (umbral verdadero) para
+los requisitos: el alumno solo ve lo que el paciente da.
+
+**Tests.** `labsim_backend/tests/test_audiometria_pertinencia.php`; el
+examen modelo de `test_audiometria_tecnica.php` ahora también falla logo,
+adaptación y la ósea sin enmascarar.
+
 ## Ir a buscar al paciente recién despedido (2026-11-27)
 
 **Pedido.** "Unos 5 minutos después de que le pediste que se fuera, ir a
