@@ -163,6 +163,46 @@ def test_karime_umbrales():
     assert [sec._umbral("pasado", m) for m in (-1, 0, 9, 10, 25)] == [None, 0, 0, 10, 20]
 
 
+def test_karime_minutos_por_curso():
+    from core import secretaria as sec
+    curso = {"umbrales": {"atrasado": {"primero": 10, "segundo": 0, "cada": 0},
+                          "pasado": {"primero": 5, "cada": 5}, "box": {"cada": "roto"}}}
+    u = sec.config_minutos(curso)
+    assert u["atrasado"] == ((10.0,), 0.0)          # segundo menor = sin segundo
+    assert u["pasado"] == ((5.0,), 5.0)
+    assert u["box"] == ((0.0,), 10.0)               # valor roto = el de la app
+    # cada 0: después del último no se repite (misma clave, no se vuelve a decir)
+    assert [sec._umbral("atrasado", m, u) for m in (9, 10, 50, 300)] == [None, 10, 10, 10]
+    # Con el primer aviso de atención pasada a los 5 min, la pregunta va ahí.
+    from core.base import context  # crea la QApplication
+    from PySide6.QtWidgets import QMdiArea, QPushButton
+    ag = _con_turnos()
+    ag["11"].atencion["ana.rojas"] = {"estado": "atendiendo"}
+    area = QMdiArea()
+    s = sec.Secretaria(area)
+    original = sec.app_config_store.get
+    sec.app_config_store.get = lambda clave: curso if clave == sec.CONFIG_MINUTOS_KEY else original(clave)
+    try:
+        _pregunta_al_primer_aviso(sec, s, ag)
+    finally:
+        sec.app_config_store.get = original
+        s.detener()
+
+
+def _pregunta_al_primer_aviso(sec, s, ag):
+    from PySide6.QtWidgets import QPushButton
+    r = sec.Recepcion(s, lambda: ag, lambda: "ana.rojas", lambda: "11", lambda: 33 * 60, citar=lambda: None)
+    r._timer.stop()
+    ahora = ag["11"].turno_inicio + timedelta(minutes=33)
+    for _ in range(10):
+        r.tic(ahora)
+    assert not any(a.findChildren(QPushButton) for a in s._avisos)    # 33 min = 3 pasado: todavía no
+    r._fuentes = (lambda: ag, lambda: "ana.rojas", lambda: "11", lambda: 36 * 60)
+    for _ in range(10):
+        r.tic(ahora)
+    assert sum(1 for a in s._avisos if a.findChildren(QPushButton)) == 1
+
+
 def test_karime_eventos_en_orden():
     from core import secretaria as sec
     ag = _con_turnos()

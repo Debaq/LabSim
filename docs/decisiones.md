@@ -96,8 +96,12 @@ la cola de avisos viejos. Las frases están en
 `resources/json/secretaria_agenda.json` y se editan por curso
 (CourseParams `secretaria.agenda`, espejo verificado por
 `tests/test_course_params.php`). El docente no recibe estos avisos.
-Umbrales fijos en código: hoy nadie pidió cambiarlos y abrir más campos en
-el panel sería configurar por configurar.
+Los minutos también son por curso (pedido del autor, mismo día):
+CourseParams `secretaria.agenda_minutos` = `resources/json/secretaria_agenda_minutos.json`,
+por aviso "primero", "segundo" (igual o menor que el primero = sin
+segundo) y "cada" (0 = no se repite); `secretaria.config_minutos`. La
+pregunta «Me paso / Citar para terminar» va en el PRIMER aviso de atención
+pasada, sea cual sea su minuto.
 
 **Parte 3 (continuación en horario libre).** El autor: "si se terminó el
 tiempo y no terminaste sueles poder pasarte o reagendarlo para terminar;

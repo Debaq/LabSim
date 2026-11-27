@@ -47,6 +47,7 @@ final class CourseParams
         'normative_data.vemp' => 'resources/vemp/normative_data.json (adult_female, 500Hz)',
         'secretaria.avisos' => 'resources/json/secretaria_avisos.json',
         'secretaria.agenda' => 'resources/json/secretaria_agenda.json',
+        'secretaria.agenda_minutos' => 'resources/json/secretaria_agenda_minutos.json',
     ];
 
     public static function all(): array
@@ -210,9 +211,10 @@ final class CourseParams
                 'title' => 'Avisos de la secretaria en la agenda con duración',
                 'help' => 'Solo en las citas con duración (agenda relativa al ingreso del alumno). Karime dice una cosa por vez, cada 20 segundos como máximo, y no repite lo ya dicho. '
                     . '"Llegada": una vez por paciente, cuando llega a la sala de espera; puede llevar {nombre} y {hora} (su turno). '
-                    . '"Turno atrasado": a los 5 y 15 minutos de pasado el inicio del turno sin atenderlo, y después cada 15; {nombre}, {hora} y {minutos} (de atraso). '
-                    . '"Atención pasada": al cumplirse la duración de la atención abierta y después cada 10 minutos; {nombre} y {minutos} (la duración). '
-                    . '"Box": al terminar el bloque del alumno (fin del último turno) si sigue atendiendo o le quedan pacientes, y después cada 10 minutos; {hora} (fin del bloque). '
+                    . '"Turno atrasado": cuando pasa el inicio del turno sin atenderlo; {nombre}, {hora} y {minutos} (de atraso). '
+                    . '"Atención pasada": cuando la atención abierta pasa su duración (en el primero pregunta "¿Te pasas o lo citamos para terminar?"); {nombre} y {minutos} (la duración). '
+                    . '"Box": cuando termina el bloque del alumno (fin del último turno) si sigue atendiendo o le quedan pacientes; {hora} (fin del bloque). '
+                    . 'Cuándo sale cada uno se configura en "Minutos de los avisos de la secretaria en la agenda con duración". '
                     . 'Cada aviso sortea una frase (una por línea) y no repite la anterior. Una frase que pide un dato que no hay se salta. Si se borran todas las líneas, vuelven las de la app.',
                 'layout' => 'stack',
                 'groups' => [
@@ -271,6 +273,30 @@ final class CourseParams
                                 'Tu hora de box terminó a las {hora}; avísame cuando lo dejes libre.',
                             ],
                         ],
+                    ],
+                ],
+            ],
+            // Cuándo dice Karime cada aviso de la agenda relativa (core/
+            // secretaria.py: config_minutos).
+            'secretaria.agenda_minutos' => [
+                'module' => 'AGENDA',
+                'title' => 'Minutos de los avisos de la secretaria en la agenda con duración',
+                'help' => 'Solo en las citas con duración. Minutos desde el inicio del turno sin atenderlo (Turno atrasado), desde que la atención abierta cumple su duración (Atención pasada; 0 = justo al cumplirla) y desde el fin del bloque del alumno (Box). '
+                    . '"Primero" es el primer aviso; "Segundo", otro más (igual o menor que el primero = sin segundo); "Cada", cada cuántos minutos se repite después del último (0 = no se repite). '
+                    . 'Si el alumno abre la app tarde, Karime dice solo el último aviso que corresponde, no la cola de los anteriores. Las frases se editan en "Avisos de la secretaria en la agenda con duración".',
+                'groups' => [
+                    'umbrales' => ['label' => 'Avisos', 'rows' => ['atrasado' => 'Turno atrasado', 'pasado' => 'Atención pasada de su duración', 'box' => 'Box pasado del bloque']],
+                ],
+                'fields' => [
+                    'primero' => ['label' => 'Primero (min)', 'step' => 1, 'min' => 0, 'max' => 240],
+                    'segundo' => ['label' => 'Segundo (min)', 'step' => 1, 'min' => 0, 'max' => 240],
+                    'cada' => ['label' => 'Cada (min)', 'step' => 1, 'min' => 0, 'max' => 240],
+                ],
+                'defaults' => [
+                    'umbrales' => [
+                        'atrasado' => ['primero' => 5, 'segundo' => 15, 'cada' => 15],
+                        'pasado' => ['primero' => 0, 'segundo' => 0, 'cada' => 10],
+                        'box' => ['primero' => 0, 'segundo' => 0, 'cada' => 10],
                     ],
                 ],
             ],

@@ -156,11 +156,14 @@ def texto_aviso(aviso, minutos, siguiente, rng=random, evitar=None):
 # ---------------------------------------------------------------------------
 CONFIG_AGENDA_KEY = "secretaria.agenda"
 TIPOS_AGENDA = ("llegada", "atrasado", "pasado", "box")
-# Umbrales en minutos (desde el inicio del turno, desde que se cumple la
-# duración, desde el fin del bloque). Después del último se repite cada
-# tanto. Solo se dice el umbral más alto cruzado: quien abre la app tarde no
-# recibe la cola entera de avisos viejos.
-UMBRALES = {"atrasado": ((5, 15), 15), "pasado": ((0,), 10), "box": ((0,), 10)}
+# Minutos de cada aviso (desde el inicio del turno, desde que se cumple la
+# duración, desde el fin del bloque): primero, segundo y cada cuánto se
+# repite después; configurables por curso (CourseParams
+# "secretaria.agenda_minutos", default en secretaria_agenda_minutos.json).
+# Solo se dice el umbral más alto cruzado: quien abre la app tarde no recibe
+# la cola entera de avisos viejos.
+CONFIG_MINUTOS_KEY = "secretaria.agenda_minutos"
+TIPOS_CON_MINUTOS = ("atrasado", "pasado", "box")
 TIC_AGENDA_MS = 20_000
 
 
@@ -183,12 +186,33 @@ def config_agenda(override=None):
     return config
 
 
-def _umbral(tipo, minutos):
+def config_minutos(override=None):
+    """{tipo: (umbrales fijos ordenados, cada)}: los de la app con los del
+    curso encima (override = {"umbrales": {tipo: {"primero", "segundo",
+    "cada"}}}). Un segundo igual o menor al primero no suma otro aviso;
+    cada 0 = no se repite después del último."""
+    with open(context.get_resource("json/secretaria_agenda_minutos.json"), encoding="utf-8") as archivo:
+        defaults = json.load(archivo)["umbrales"]
+    propios = (override or {}).get("umbrales") or {}
+    config = {}
+    for tipo in TIPOS_CON_MINUTOS:
+        valores = {}
+        for campo in ("primero", "segundo", "cada"):
+            try:
+                valores[campo] = max(0.0, float((propios.get(tipo) or {}).get(campo, defaults[tipo][campo])))
+            except (TypeError, ValueError):
+                valores[campo] = float(defaults[tipo][campo])
+        fijos = sorted({valores["primero"], max(valores["primero"], valores["segundo"])})
+        config[tipo] = (tuple(fijos), valores["cada"])
+    return config
+
+
+def _umbral(tipo, minutos, umbrales=None):
     """El umbral más alto cruzado con `minutos`, o None si no cruzó ninguno."""
-    fijos, cada = UMBRALES[tipo]
+    fijos, cada = (umbrales or config_minutos())[tipo]
     if minutos < fijos[0]:
         return None
-    if minutos < fijos[-1] + cada:
+    if cada <= 0 or minutos < fijos[-1] + cada:
         return max(u for u in fijos if u <= minutos)
     return fijos[-1] + int((minutos - fijos[-1]) // cada) * cada
 
@@ -197,13 +221,14 @@ def _estado(entry, username):
     return (entry.atencion.get(username) or {}).get("estado")
 
 
-def eventos_agenda(agenda, username, ahora, key_activa=None, segundos_atencion=0.0):
+def eventos_agenda(agenda, username, ahora, key_activa=None, segundos_atencion=0.0, umbrales=None):
     """Lo que Karime tendría para decir ahora, en orden de prioridad:
     [(clave_unica, tipo, valores)]. Quien llama descarta las claves ya
     dichas. Solo mira las citas con turno calculado (agenda relativa)."""
     turnos = [(k, e) for k, e in agenda.items() if getattr(e, "turno_inicio", None) is not None]
     if not turnos:
         return []
+    umbrales = umbrales or config_minutos()
     eventos = []
 
     def nombre(e):
@@ -218,11 +243,11 @@ def eventos_agenda(agenda, username, ahora, key_activa=None, segundos_atencion=0
     activa = agenda.get(key_activa) if key_activa is not None else None
     activa_relativa = activa is not None and getattr(activa, "turno_inicio", None) is not None
     if ahora >= fin_box and (pendientes or activa_relativa):
-        u = _umbral("box", (ahora - fin_box).total_seconds() / 60)
+        u = _umbral("box", (ahora - fin_box).total_seconds() / 60, umbrales)
         eventos.append((("box", u), "box", {"hora": f"{fin_box:%H:%M}"}))
 
     if activa_relativa and activa.duracion_min:
-        u = _umbral("pasado", segundos_atencion / 60 - activa.duracion_min)
+        u = _umbral("pasado", segundos_atencion / 60 - activa.duracion_min, umbrales)
         if u is not None:
             eventos.append((("pasado", key_activa, u), "pasado",
                             {"nombre": nombre(activa), "minutos": int(activa.duracion_min)}))
@@ -231,7 +256,7 @@ def eventos_agenda(agenda, username, ahora, key_activa=None, segundos_atencion=0
         if k == key_activa:
             continue
         tarde = (ahora - e.turno_inicio).total_seconds() / 60
-        u = _umbral("atrasado", tarde)
+        u = _umbral("atrasado", tarde, umbrales)
         if u is not None:
             eventos.append((("atrasado", k, u), "atrasado",
                             {"nombre": nombre(e), "hora": f"{e.turno_inicio:%H:%M}", "minutos": int(tarde)}))
@@ -461,7 +486,8 @@ class Recepcion(QObject):
         if not username:
             return None
         agenda = agenda_de() or {}
-        eventos = eventos_agenda(agenda, username, ahora or datetime.now(), activa_de(), segundos_de())
+        umbrales = config_minutos(app_config_store.get(CONFIG_MINUTOS_KEY))
+        eventos = eventos_agenda(agenda, username, ahora or datetime.now(), activa_de(), segundos_de(), umbrales)
         for clave, tipo, valores in eventos:
             if clave in self._dichos:
                 continue
@@ -470,7 +496,8 @@ class Recepcion(QObject):
             texto = texto_agenda(frases, valores, evitar=self._ultimos.get(tipo))
             self._ultimos[tipo] = texto
             acciones = None
-            if tipo == "pasado" and clave[-1] == 0 and self._citar is not None:
+            # La pregunta va en el PRIMER aviso de atención pasada.
+            if tipo == "pasado" and clave[-1] == umbrales["pasado"][0][0] and self._citar is not None:
                 if "?" not in texto:
                     texto += " ¿Te pasas o lo citamos para terminar?"
                 acciones = [("Me paso", None), ("Citar para terminar", self._citar)]
