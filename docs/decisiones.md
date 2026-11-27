@@ -99,9 +99,18 @@ traen precargado lo que el alumno midió en la primera. Lo que quedó hecho
 está en su nota de evolución y en la historia del paciente, y el ABR muestra
 las sesiones anteriores (solo lectura).
 
-**Siguen (TODO.md).** Parte 4:
-métricas en Avance (atraso por alumno, duración real vs planificada por
-paciente).
+**Parte 4 (Avance).** La app registra una vez al día los turnos que
+calculó (`action_logs` 'agenda_turnos': fecha, ingreso y por cita inicio,
+fin, llegada y duración; core/agenda_relativa.aplicar). Avance del curso
+(AgendaAvance.php, tarjeta "Agenda con duración" en views/course/_avance.php)
+muestra por alumno: días, atraso al iniciar (inicio real menos inicio del
+turno, mediana), box pasado (cierre de la última atención del día menos fin
+del bloque, mediana por día, 0 si a tiempo) y el horario libre (a tiempo,
+fuera de plazo, vencido, abierto); por paciente (caso + duración):
+planificado, real (mediana) y cuántas se pasaron. Sin el registro de turnos
+de un día no hay atraso ni box de ese día (no se reconstruye: el ingreso
+real ya no se puede saber). La lectura de action_logs va por el índice
+(user_id, client_ts) desde el primer día con citas con duración del curso.
 
 **Probado.** `tests/test_agenda_relativa.py` (turnos, múltiplo de 5, piso de
 la hora del docente, llegada estable, ingreso local, docente sin cálculo,
@@ -110,6 +119,10 @@ ficha, secretaria, sync y `php tests/run.php`. Parte 3: plazos y pendientes,
 `continuar` por la cola, pregunta de Karime con botones, casilla de la
 evolución, pendientes en la tabla; `Continuaciones::crear` probado con
 SQLite real en php:7.4-cli (idempotente, una por alumno, hora de Chile).
+Parte 4: `tests/test_agenda_avance.php` (plazo, estado del pendiente, hora
+local) y `porCurso` con un curso armado en SQLite (php:7.4-cli): atraso,
+box, pendientes y duraciones dan lo esperado. La tarjeta no se miró
+renderizada.
 
 ## Impedanciometría: opción "perforación seca" junto a NR (2026-11-27)
 

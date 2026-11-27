@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/CourseParams.php';
 require_once __DIR__ . '/../../src/CourseAdmin.php';
 require_once __DIR__ . '/../../src/CourseOverview.php';
 require_once __DIR__ . '/../../src/CourseAvance.php';
+require_once __DIR__ . '/../../src/AgendaAvance.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
@@ -117,6 +118,7 @@ if ($detailId !== null) {
             $avanceSemanas = CourseAvance::porSemana($avanceAlumnos, $courseId);
             $pasosCurso = array_slice(CourseAvance::pasosDelCurso($avanceAlumnos), 0, 6);
             $necesitan = CourseAvance::necesitanAtencion($avanceAlumnos, date('Y-m-d'));
+            $agendaAvance = AgendaAvance::porCurso($courseId, array_map(static fn(array $a): string => $a['nombre'], $avanceAlumnos));
             break;
 
         case 'personas':

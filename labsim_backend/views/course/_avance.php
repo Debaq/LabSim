@@ -6,7 +6,7 @@
  * por semana y la tabla de alumnos. Cálculo en CourseAvance.
  *
  * Espera: $courseId, $objetivos, $faltaSchema, $avanceAlumnos,
- *         $avanceSemanas, $pasosCurso, $necesitan.
+ *         $avanceSemanas, $pasosCurso, $necesitan, $agendaAvance.
  */
 $indicadores = CourseAvance::indicadores();
 $nAlumnos = count($avanceAlumnos);
@@ -223,6 +223,46 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
         <?php endif; ?>
     </div>
 </div>
+
+<?php if (!empty($agendaAvance['hay'])): ?>
+<div class="card">
+    <strong>Agenda con duración</strong>
+    <p class="help help--xs">Solo citas con duración. <strong>Atraso al iniciar</strong>: hora en que el alumno abrió la atención menos el inicio de su turno (mediana; negativo = antes). <strong>Box pasado</strong>: cuánto después del fin de su bloque cerró su última atención de cada día (mediana; 0 = terminó a tiempo). Sin el registro de turnos de la app de ese día no hay atraso ni box. <strong>Horario libre</strong>: lo que dejó para después (continuaciones que pidió y pacientes que no atendió en su día) y cómo terminó: a tiempo (antes de su práctico siguiente), fuera de plazo, vencido sin atender o abierto todavía.</p>
+    <div class="table-wrap">
+    <table class="grid-table">
+        <tr><th>Alumno</th><th>Días</th><th>Atraso al iniciar</th><th>Box pasado</th><th>Libre a tiempo</th><th>Fuera de plazo</th><th>Vencidos</th><th>Abiertos</th></tr>
+        <?php foreach ($agendaAvance['alumnos'] as $uid => $g): ?>
+        <tr>
+            <td><a href="student.php?id=<?= (int) $uid ?>"><?= htmlspecialchars($g['nombre']) ?></a></td>
+            <td><?= (int) $g['dias'] ?></td>
+            <td><?= $g['atraso_min'] === null ? '—' : (int) $g['atraso_min'] . ' min' ?></td>
+            <td><?= $g['box_min'] === null ? '—' : (int) $g['box_min'] . ' min' ?></td>
+            <td><?= (int) $g['libre']['a_tiempo'] ?></td>
+            <td><?= (int) $g['libre']['fuera_de_plazo'] ?: '' ?></td>
+            <td><?= $g['libre']['vencido'] ? '<span class="tag tag--warn">' . (int) $g['libre']['vencido'] . '</span>' : '' ?></td>
+            <td><?= (int) $g['libre']['abierto'] ?: '' ?></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+    </div>
+    <?php if ($agendaAvance['pacientes']): ?>
+    <p class="help help--xs" style="margin-top:0.8rem;">Por paciente: la duración que se le dio contra lo que realmente duraron las atenciones cerradas (mediana). Si casi todos se pasan, la duración está corta para lo que pide el caso.</p>
+    <div class="table-wrap">
+    <table class="grid-table">
+        <tr><th>Paciente</th><th>Planificado</th><th>Real</th><th>Se pasaron</th></tr>
+        <?php foreach ($agendaAvance['pacientes'] as $p): ?>
+        <tr>
+            <td><?= htmlspecialchars($p['nombre']) ?></td>
+            <td><?= (int) $p['duracion_min'] ?> min</td>
+            <td><?= $p['real_min'] === null ? '—' : (int) $p['real_min'] . ' min' ?></td>
+            <td><?= $p['n'] ? (int) $p['pasados'] . ' de ' . (int) $p['n'] : '—' ?></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+    </div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
 
 <?php if ($avanceSemanas): ?>
 <div class="card">

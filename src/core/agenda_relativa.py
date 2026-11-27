@@ -120,14 +120,55 @@ def calcular(agenda: dict, username: str, ingreso: datetime, fecha_txt: str):
         inicio = entry.turno_fin
 
 
-def aplicar(agenda: dict, user: dict | None, ahora: datetime | None = None):
+_registrados: set = set()   # (usuario, fecha) ya registrados en esta sesión de la app
+
+
+def payload_turnos(agenda: dict, ingreso: datetime, fecha_txt: str) -> dict | None:
+    """Lo que se registra (action_logs 'agenda_turnos') para que el backend
+    mida atraso y box en Avance (CourseAvance/AgendaAvance.php)."""
+    turnos = []
+    for key, e in agenda.items():
+        if getattr(e, "turno_inicio", None) is None:
+            continue
+        try:
+            cita = int(key)
+        except ValueError:
+            continue
+        turnos.append({"appointment_id": cita, "inicio": f"{e.turno_inicio:%H:%M}",
+                       "fin": f"{e.turno_fin:%H:%M}", "llegada": f"{e.llegada:%H:%M:%S}",
+                       "duracion_min": int(e.duracion_min)})
+    if not turnos:
+        return None
+    turnos.sort(key=lambda t: t["inicio"])
+    return {"fecha": fecha_txt, "ingreso": ingreso.strftime("%Y-%m-%d %H:%M:%S"), "turnos": turnos}
+
+
+def aplicar(agenda: dict, user: dict | None, ahora: datetime | None = None, registrar=None):
     """Calcula los turnos de hoy para el alumno conectado. El docente ve las
-    horas que él puso: a él no se le calcula nada."""
+    horas que él puso: a él no se le calcula nada. La primera vez del día
+    (en esta sesión de la app) los registra con `registrar(accion, payload)`
+    -- por defecto la cola de logs; el backend usa el primero de cada día."""
     user = user or {}
     if user.get("role") == "admin":
         return
     ahora = ahora or datetime.now()
-    calcular(agenda, user.get("username", ""), _ingreso(ahora), ahora.strftime("%d-%m-%y"))
+    fecha_txt = ahora.strftime("%d-%m-%y")
+    ingreso = _ingreso(ahora)
+    username = user.get("username", "")
+    calcular(agenda, username, ingreso, fecha_txt)
+    if (username, fecha_txt) in _registrados:
+        return
+    payload = payload_turnos(agenda, ingreso, fecha_txt)
+    if payload is None:
+        return
+    _registrados.add((username, fecha_txt))
+    if registrar is None:
+        from backend.log_queue import get_log_queue
+        registrar = get_log_queue().push
+    try:
+        registrar("agenda_turnos", payload)
+    except Exception as exc:  # noqa: BLE001 -- un registro no puede romper la agenda
+        print(f"agenda relativa: no se pudo registrar los turnos: {exc}")
 
 
 def hora_vista(entry) -> str:

@@ -95,10 +95,6 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 
 ## Funcionalidades
 
-### Agenda relativa: partes que faltan
-§ Agenda relativa al ingreso del alumno
-- [ ] 85. Avance: atraso del box por alumno, continuaciones (hechas a tiempo / vencidas) y duración real vs planificada por paciente.
-
 
 ### Otoscopia: derivación + aprobación docente + fase por alumno
 Hoy todo alumno ve la fase 1 (`FASE_FIJA = 0` en `Otoscopia.py`).

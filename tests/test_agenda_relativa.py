@@ -347,6 +347,23 @@ def test_agenda_muestra_lo_pendiente_cualquier_dia():
     assert manana in ag._texto_plazo(agenda["51"])
 
 
+def test_turnos_se_registran_una_vez_al_dia():
+    ag = _agenda()
+    registros = []
+    ar._ingresos_utc = []
+    ar._ingreso_local.clear()
+    ar._registrados.clear()
+    ahora = datetime(2026, 11, 30, 11, 12)
+    usuario = {"role": "student", "username": "ana.rojas"}
+    ar.aplicar(ag, usuario, ahora, registrar=lambda a, p: registros.append((a, p)))
+    ar.aplicar(ag, usuario, ahora + timedelta(minutes=5), registrar=lambda a, p: registros.append((a, p)))
+    assert len(registros) == 1 and registros[0][0] == "agenda_turnos"
+    p = registros[0][1]
+    assert p["fecha"] == HOY and p["ingreso"] == "2026-11-30 11:12:00"
+    assert [(t["appointment_id"], t["inicio"], t["fin"], t["duracion_min"]) for t in p["turnos"]] == [
+        (11, "11:15", "11:45", 30), (12, "11:45", "12:30", 45), (13, "12:30", "12:45", 15), (14, "12:45", "13:45", 60)]
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):
