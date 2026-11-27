@@ -5,6 +5,27 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Entrevista: ¿preguntó por el acúfeno? (2026-11-27)
+
+**Pedido.** "¿Cómo capturamos cuando le preguntas si tiene tinnitus? Si les
+dice que no, solo el chat tiene ese indicador."
+
+**Decisión.** `EntrevistaTecnica` lee el chat de la atención
+(llm_chat_logs) y evalúa "Se pregunta por el acúfeno" (peso 2), en la
+sección "Entrevista" de la ficha de la atención (docente y alumno). Se
+reconoce por palabras (acúfeno, tinnitus, pito, pitido, zumbido, silbido,
+ruido en el oído o la cabeza) en un mensaje del alumno que no sea la
+instrucción de un examen ("van a sonar unos pitidos", "levante la mano",
+"le voy a poner una gomita"). Contra el chat de ETMP176: 154 preguntas
+reconocidas, las 11 instrucciones fuera; 124 de 142 atenciones preguntaron.
+El docente ve si el paciente tiene acúfeno, la pregunta y lo que respondió.
+
+**Descartado.** Clasificar la entrevista con un LLM: para una sola pregunta
+las palabras alcanzan y no cuestan; un LLM conviene si después se mide la
+anamnesis completa (motivo, evolución, fármacos, ruido, vértigo...).
+
+**Tests.** `test_equipos_tecnica.php` (entrevista).
+
 ## Lo que muestra la foto de otoscopía, en la ficha del caso (2026-11-27)
 
 **Pedido.** Los informes de otoscopía de los alumnos tienen descripciones

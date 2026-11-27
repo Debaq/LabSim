@@ -6,10 +6,11 @@ require_once __DIR__ . '/AudiometriaTecnica.php';
 require_once __DIR__ . '/OtoscopiaTecnica.php';
 require_once __DIR__ . '/AcumetriaTecnica.php';
 require_once __DIR__ . '/ImpedanciometriaTecnica.php';
+require_once __DIR__ . '/EntrevistaTecnica.php';
 
 /**
- * Técnica de los equipos de la atención fuera del audiómetro: otoscopio
- * (ot_), diapasones (ac_) e impedanciómetro (z_). Cada uno se evalúa SOLO si
+ * Técnica de la atención fuera del audiómetro: la entrevista (chat con el
+ * paciente), otoscopio (ot_), diapasones (ac_) e impedanciómetro (z_). Cada uno se evalúa SOLO si
  * el alumno lo usó con el paciente: no todas las atenciones piden todos los
  * exámenes, así que no hacer uno no descuenta. Lo que sí se mira es que lo
  * que se hizo, se haga bien, y el orden entre equipos (otoscopía antes de la
@@ -31,6 +32,7 @@ final class EquiposTecnica
     public const OTOSCOPIO_DESDE = '2026-11-06';
 
     public const EQUIPOS = [
+        'entrevista' => 'Entrevista',
         'otoscopia' => 'Otoscopía',
         'acumetria' => 'Diapasones',
         'impedanciometria' => 'Impedanciometría',
@@ -40,9 +42,10 @@ final class EquiposTecnica
      * Evalúa los tres equipos sobre las filas de action_logs de UNA atención
      * (payload decodificado, en orden). $extra: 'informe_otoscopia' (data del
      * informe OTOSCOPIA o null) y 'tipos_otoscopia' (['od' => tipo de la
-     * biblioteca de otoscopías o null, 'oi' => ...]).
+     * biblioteca de otoscopías o null, 'oi' => ...]) y 'chat' (mensajes
+     * del chat con el paciente, para la entrevista).
      *
-     * @return array{otoscopia:?array, acumetria:?array, impedanciometria:?array}
+     * @return array{entrevista:?array, otoscopia:?array, acumetria:?array, impedanciometria:?array}
      */
     public static function evaluar(array $logs, array $caso, array $extra = []): array
     {
@@ -50,6 +53,7 @@ final class EquiposTecnica
             return ($l['payload']['con_paciente'] ?? true) !== false;
         }));
         $out = [
+            'entrevista' => EntrevistaTecnica::evaluar($extra['chat'] ?? [], $caso),
             'otoscopia' => OtoscopiaTecnica::evaluar($logs, $caso, $extra['informe_otoscopia'] ?? null, $extra['tipos_otoscopia'] ?? []),
             'acumetria' => AcumetriaTecnica::evaluar($logs, $caso, $extra['informe_otoscopia'] ?? null),
             'impedanciometria' => ImpedanciometriaTecnica::evaluar($logs, $caso),
@@ -82,7 +86,7 @@ final class EquiposTecnica
         $stmt->closeCursor();
         $caso = $cita && $cita['data'] ? json_decode((string) $cita['data'], true) : null;
         if (!is_array($caso)) {
-            return ['otoscopia' => null, 'acumetria' => null, 'impedanciometria' => null];
+            return ['entrevista' => null, 'otoscopia' => null, 'acumetria' => null, 'impedanciometria' => null];
         }
 
         $stmt = $pdo->prepare(
@@ -128,7 +132,16 @@ final class EquiposTecnica
         } catch (PDOException $e) {
             $tipos = [];
         }
-        return self::evaluar($logs, $caso, ['informe_otoscopia' => is_array($informe) ? $informe : null, 'tipos_otoscopia' => $tipos]);
+        $chat = [];
+        try {
+            $stmt = $pdo->prepare('SELECT role, content FROM llm_chat_logs WHERE appointment_id = ? AND student_id = ? ORDER BY id');
+            $stmt->execute([$appointmentId, $studentId]);
+            $chat = $stmt->fetchAll();
+            $stmt->closeCursor();
+        } catch (PDOException $e) {
+            $chat = [];
+        }
+        return self::evaluar($logs, $caso, ['informe_otoscopia' => is_array($informe) ? $informe : null, 'tipos_otoscopia' => $tipos, 'chat' => $chat]);
     }
 
     // ---- ayudas comunes ------------------------------------------------------

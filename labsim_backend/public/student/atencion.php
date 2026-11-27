@@ -251,8 +251,8 @@ student_header($paciente, $me);
 <?php $equipos = EquiposTecnica::paraAtencion($appointmentId, (int) $me['id']); ?>
 <?php if (array_filter($equipos)): ?>
 <div class="card" id="tecnica-equipos">
-    <h2>Pasos de la otoscopía, los diapasones y la impedanciometría</h2>
-    <p class="help">Solo de los equipos que usaste con el paciente.</p>
+    <h2>Pasos de la entrevista, la otoscopía, los diapasones y la impedanciometría</h2>
+    <p class="help">Solo de lo que hiciste con el paciente.</p>
     <?php foreach (EquiposTecnica::EQUIPOS as $k => $titulo): ?>
     <?php if ($equipos[$k] !== null) { AudiometriaTecnicaVista::seccion($titulo, $equipos[$k], false); } ?>
     <?php endforeach; ?>

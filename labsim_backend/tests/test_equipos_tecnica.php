@@ -242,3 +242,18 @@ $oi = array_values(array_filter($sec['oidos']['OI'], static function ($r) { retu
 t_eq($oi['cumple'], false, 'Otoscopía: marcó un hallazgo en un oído normal');
 $rr = eq_reglas($sec);
 t_eq(eq_busca($rr, 'menos probablemente'), false, 'Otoscopía: con la ficha cargada, OD es el alterado y empezó por OD');
+
+// ---- entrevista: ¿preguntó por el acúfeno? -----------------------------------------------
+t_eq(EntrevistaTecnica::preguntaAcufeno('¿Ha sentido algún pitido o zumbido en los oídos?'), true, 'Entrevista: pregunta por pitido o zumbido');
+t_eq(EntrevistaTecnica::preguntaAcufeno('ese silbido, es en ambos oidos?'), true, 'Entrevista: pregunta por el silbido que contó');
+t_eq(EntrevistaTecnica::preguntaAcufeno('ahora van a sonar unos pitidos, usted no tiene que moverse'), false, 'Entrevista: la instrucción de la audiometría no es una pregunta');
+t_eq(EntrevistaTecnica::preguntaAcufeno('le voy a colocar una gomita en el oido y va a escuchar pititos'), false, 'Entrevista: la instrucción de la Z tampoco');
+t_eq(EntrevistaTecnica::preguntaAcufeno('¿Desde cuándo oye menos?'), false, 'Entrevista: otra pregunta no cuenta');
+$chat = [['role' => 'user', 'content' => 'Buenos días, ¿qué lo trae?'], ['role' => 'assistant', 'content' => 'Oigo menos.'],
+    ['role' => 'user', 'content' => '¿Tiene zumbidos?'], ['role' => 'assistant', 'content' => 'Sí, en el derecho.']];
+$sec = EquiposTecnica::evaluar([], eq_caso(['Tinnitus' => ['presente' => true]]), ['chat' => $chat])['entrevista'];
+t_eq($sec['reglas'][0]['cumple'], true, 'Entrevista: preguntó');
+t_true(strpos($sec['reglas'][0]['detalle_docente'], 'Respondió: "Sí, en el derecho."') !== false, 'Entrevista: el docente ve la respuesta');
+$sec = EquiposTecnica::evaluar([], eq_caso(), ['chat' => array_slice($chat, 0, 2)])['entrevista'];
+t_eq($sec['reglas'][0]['cumple'], false, 'Entrevista: no preguntó');
+t_eq(EquiposTecnica::evaluar([], eq_caso())['entrevista'], null, 'Entrevista: sin chat no se evalúa');

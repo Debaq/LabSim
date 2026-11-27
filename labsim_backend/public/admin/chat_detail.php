@@ -299,7 +299,7 @@ if ($attendance) {
 <?php $equipos = EquiposTecnica::paraAtencion($appointmentId, $studentId); ?>
 <?php if (array_filter($equipos)): ?>
 <div class="card section-panel" id="tecnica-equipos">
-    <h3>Técnica de otoscopía, diapasones e impedanciometría</h3>
+    <h3>Entrevista, otoscopía, diapasones e impedanciometría</h3>
     <p class="help">Solo los equipos que el alumno usó con el paciente: no hacer un examen no descuenta. Técnica de los capítulos H1, H2 y H7 del libro; lo que no se hizo de un examen ya empezado sí cuenta. El alumno ve lo mismo, sin los valores del paciente.</p>
     <?php foreach (EquiposTecnica::EQUIPOS as $k => $titulo): ?>
     <?php if ($equipos[$k] !== null) { AudiometriaTecnicaVista::seccion($titulo, $equipos[$k], true); } ?>
