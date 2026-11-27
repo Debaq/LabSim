@@ -20,11 +20,25 @@ instrucción de un examen ("van a sonar unos pitidos", "levante la mano",
 reconocidas, las 11 instrucciones fuera; 124 de 142 atenciones preguntaron.
 El docente ve si el paciente tiene acúfeno, la pregunta y lo que respondió.
 
-**Descartado.** Clasificar la entrevista con un LLM: para una sola pregunta
-las palabras alcanzan y no cuestan; un LLM conviene si después se mide la
-anamnesis completa (motivo, evolución, fármacos, ruido, vértigo...).
+**Ampliado el mismo día a la anamnesis completa** ("lo que se pregunta en la
+anamnesis también son indicadores"). Lista del libro (H1; T09 en la
+Bibliografía): motivo, evolución, lado, acúfeno (×2), vértigo, dolor,
+secreción, plenitud, antecedentes otológicos y mórbidos, fármacos, ruido y
+familia; en el menor de 6 años, embarazo/parto/tamizaje, lenguaje, otitis y
+familia. Un tema cuenta si el alumno lo preguntó o si el paciente lo contó
+sin pregunta (el dato se obtuvo). Las palabras de cada tema se ajustaron
+leyendo el chat real (p. ej. "no duele" al explicar un examen no es
+preguntar por dolor; "¿usted es la mamá?" no es antecedente familiar).
+En ETMP176 lo menos preguntado: vértigo (7 %), plenitud (7 %), fármacos
+(15 %), antecedentes otológicos (24 %). En ETMP196 casi no hay anamnesis
+(lactantes, exámenes puntuales): parámetro de curso "Entrevista con el
+paciente" (`entrevista.anamnesis`, completa 1/0) para dejar solo el acúfeno.
 
-**Tests.** `test_equipos_tecnica.php` (entrevista).
+**Descartado.** Clasificar con un LLM: las palabras, probadas contra 2.312
+mensajes reales, alcanzan, no cuestan y se pueden revisar; un LLM queda
+para si aparecen temas que las palabras no separan.
+
+**Tests.** `test_equipos_tecnica.php` (entrevista y anamnesis).
 
 ## Lo que muestra la foto de otoscopía, en la ficha del caso (2026-11-27)
 

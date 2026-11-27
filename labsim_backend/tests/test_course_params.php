@@ -160,7 +160,7 @@ t_eq(
     'displayValue() texto: una frase por línea en el textarea'
 );
 t_eq(CourseParams::displayValue($secDef, null, 'avisos', 'aviso_1', 'min'), '20', 'displayValue(): minutos default');
-t_eq(array_keys(CourseParams::forModules(['AGENDA'])), ['secretaria.avisos', 'secretaria.agenda', 'secretaria.agenda_minutos'], 'forModules(): curso con Agenda ve los avisos de la secretaria (los tres)');
+t_eq(array_keys(CourseParams::forModules(['AGENDA'])), ['secretaria.avisos', 'secretaria.agenda', 'secretaria.agenda_minutos', 'entrevista.anamnesis'], 'forModules(): curso con Agenda ve los avisos de la secretaria (los tres) y la entrevista');
 
 // --- parse(): lo que queda igual al default NO se guarda -------------------
 $vempDef = $defs['normative_data.vemp'];

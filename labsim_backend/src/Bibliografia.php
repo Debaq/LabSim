@@ -650,6 +650,19 @@ final class Bibliografia
             'fuentes' => [],
             'nota' => 'Meter la sonda en un oído no realizable es falta grave (FaltasGraves) y no se cuenta de nuevo aquí. Las instrucciones se exigen desde el 31-10-2026 y la otoscopía previa desde el 06-11-2026, cuando llegaron a la app.',
         ],
+        'T09' => [
+            'titulo' => 'Anamnesis (entrevista con el paciente)',
+            'resumen' => 'Libro, H1. Se lee del chat: qué temas cubrió el alumno, preguntando o porque el paciente lo contó.',
+            'pasos' => [
+                'Motivo de consulta, desde cuándo y cómo empezó, un oído o los dos.',
+                'Síntomas: acúfeno (pesa el doble: decide la tinnitumetría), vértigo, dolor, secreción, plenitud.',
+                'Antecedentes otológicos (otitis, perforaciones, cirugías, audífonos, exámenes anteriores), mórbidos, fármacos, ruido y familia.',
+                'En el menor de 6 años: embarazo, parto y tamizaje; lenguaje y conducta auditiva; otitis; familia.',
+            ],
+            'usa' => ['Sección "Entrevista" de la técnica de la atención (EntrevistaTecnica), que ven el docente y el alumno. Por curso se puede dejar solo el acúfeno (parámetro "Entrevista con el paciente").'],
+            'fuentes' => [],
+            'nota' => 'Se reconoce por palabras en el chat, probadas contra 2.312 mensajes reales de ETMP176 y ETMP196; no cuenta la instrucción de un examen.',
+        ],
         'T05' => [
             'titulo' => 'Pruebas que corresponden según el audiograma',
             'resumen' => 'Cada prueba se elige por lo que muestran los umbrales: algunas siempre, otras solo con un requisito.',

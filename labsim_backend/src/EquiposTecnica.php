@@ -53,7 +53,7 @@ final class EquiposTecnica
             return ($l['payload']['con_paciente'] ?? true) !== false;
         }));
         $out = [
-            'entrevista' => EntrevistaTecnica::evaluar($extra['chat'] ?? [], $caso),
+            'entrevista' => EntrevistaTecnica::evaluar($extra['chat'] ?? [], $caso, (bool) ($extra['anamnesis_completa'] ?? true)),
             'otoscopia' => OtoscopiaTecnica::evaluar($logs, $caso, $extra['informe_otoscopia'] ?? null, $extra['tipos_otoscopia'] ?? []),
             'acumetria' => AcumetriaTecnica::evaluar($logs, $caso, $extra['informe_otoscopia'] ?? null),
             'impedanciometria' => ImpedanciometriaTecnica::evaluar($logs, $caso),
@@ -76,7 +76,7 @@ final class EquiposTecnica
     {
         $pdo = Db::get();
         $stmt = $pdo->prepare(
-            "SELECT a.case_id, c.data, att.id AS attendance_id FROM appointments a
+            "SELECT a.case_id, a.course_id, c.data, att.id AS attendance_id FROM appointments a
                LEFT JOIN cases c ON c.id = a.case_id
                LEFT JOIN attendances att ON att.appointment_id = a.id AND att.student_id = ?
               WHERE a.id = ?"
@@ -141,7 +141,15 @@ final class EquiposTecnica
         } catch (PDOException $e) {
             $chat = [];
         }
-        return self::evaluar($logs, $caso, ['informe_otoscopia' => is_array($informe) ? $informe : null, 'tipos_otoscopia' => $tipos, 'chat' => $chat]);
+        $completa = true;
+        try {
+            $cfg = AppConfig::getEffective('entrevista.anamnesis', $cita['course_id'] !== null ? (int) $cita['course_id'] : null);
+            $completa = (float) ($cfg['anamnesis']['general']['completa'] ?? 1) >= 1;
+        } catch (Throwable $e) {
+            $completa = true;
+        }
+        return self::evaluar($logs, $caso, ['informe_otoscopia' => is_array($informe) ? $informe : null, 'tipos_otoscopia' => $tipos,
+            'chat' => $chat, 'anamnesis_completa' => $completa]);
     }
 
     // ---- ayudas comunes ------------------------------------------------------

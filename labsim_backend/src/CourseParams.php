@@ -300,6 +300,23 @@ final class CourseParams
                     ],
                 ],
             ],
+            // Entrevista (EntrevistaTecnica): si se evalúa la anamnesis
+            // completa o solo la pregunta por el acúfeno. Hay cursos donde la
+            // anamnesis no es lo que se evalúa (electrofisiología).
+            'entrevista.anamnesis' => [
+                'module' => 'AGENDA',
+                'title' => 'Entrevista con el paciente (indicadores)',
+                'help' => 'En la ficha de cada atención se revisa qué temas de la anamnesis cubrió el alumno en el chat (motivo, evolución, lado, '
+                    . 'acúfeno, vértigo, dolor, secreción, plenitud, antecedentes otológicos y mórbidos, fármacos, ruido y familia; en el niño, '
+                    . 'embarazo y parto, tamizaje, lenguaje, otitis y familia). Con 0 se revisa solo si preguntó por el acúfeno. No cambia al paciente.',
+                'groups' => [
+                    'anamnesis' => ['label' => 'Anamnesis', 'rows' => ['general' => 'Todas las atenciones']],
+                ],
+                'fields' => [
+                    'completa' => ['label' => 'Evaluar la anamnesis completa (1 = sí, 0 = solo el acúfeno)', 'step' => 1, 'min' => 0, 'max' => 1],
+                ],
+                'defaults' => ['anamnesis' => ['general' => ['completa' => 1]]],
+            ],
             // Técnica de umbrales (Bibliografia::TECNICAS T01/T02): con qué
             // se compara lo que hizo el alumno en AudiometriaTecnica. Solo lo
             // lee el backend; el audiómetro no cambia con estos números.

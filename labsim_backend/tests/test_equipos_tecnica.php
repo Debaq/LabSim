@@ -251,9 +251,40 @@ t_eq(EntrevistaTecnica::preguntaAcufeno('le voy a colocar una gomita en el oido 
 t_eq(EntrevistaTecnica::preguntaAcufeno('¿Desde cuándo oye menos?'), false, 'Entrevista: otra pregunta no cuenta');
 $chat = [['role' => 'user', 'content' => 'Buenos días, ¿qué lo trae?'], ['role' => 'assistant', 'content' => 'Oigo menos.'],
     ['role' => 'user', 'content' => '¿Tiene zumbidos?'], ['role' => 'assistant', 'content' => 'Sí, en el derecho.']];
+$acuf = static function (?array $sec): ?array {
+    foreach ($sec['reglas'] ?? [] as $r) {
+        if (strpos($r['texto'], 'Acúfeno') === 0) {
+            return $r;
+        }
+    }
+    return null;
+};
 $sec = EquiposTecnica::evaluar([], eq_caso(['Tinnitus' => ['presente' => true]]), ['chat' => $chat])['entrevista'];
-t_eq($sec['reglas'][0]['cumple'], true, 'Entrevista: preguntó');
-t_true(strpos($sec['reglas'][0]['detalle_docente'], 'Respondió: "Sí, en el derecho."') !== false, 'Entrevista: el docente ve la respuesta');
+t_eq($acuf($sec)['cumple'], true, 'Entrevista: preguntó');
+t_eq($acuf($sec)['peso'], 2, 'Entrevista: el acúfeno pesa el doble');
+t_true(strpos($acuf($sec)['detalle_docente'], 'Respondió: "Sí, en el derecho."') !== false, 'Entrevista: el docente ve la respuesta');
 $sec = EquiposTecnica::evaluar([], eq_caso(), ['chat' => array_slice($chat, 0, 2)])['entrevista'];
-t_eq($sec['reglas'][0]['cumple'], false, 'Entrevista: no preguntó');
+t_eq($acuf($sec)['cumple'], false, 'Entrevista: no preguntó');
 t_eq(EquiposTecnica::evaluar([], eq_caso())['entrevista'], null, 'Entrevista: sin chat no se evalúa');
+
+// ---- anamnesis completa ---------------------------------------------------------------
+$ana = [
+    ['role' => 'user', 'content' => 'Buenos días, ¿qué lo trae por aquí?'], ['role' => 'assistant', 'content' => 'Oigo menos del derecho y me duele un poco.'],
+    ['role' => 'user', 'content' => '¿Desde cuándo?'], ['role' => 'assistant', 'content' => 'Hace un mes.'],
+    ['role' => 'user', 'content' => '¿Tiene alguna enfermedad crónica como diabetes?'], ['role' => 'assistant', 'content' => 'No.'],
+    ['role' => 'user', 'content' => 'ahora le voy a colocar los audífonos y va a escuchar pitidos'], ['role' => 'assistant', 'content' => 'Ya.'],
+];
+$sec = EquiposTecnica::evaluar([], eq_caso(), ['chat' => $ana])['entrevista'];
+t_eq(count($sec['reglas']), count(EntrevistaTecnica::ADULTO), 'Anamnesis: la lista del adulto');
+t_eq([$sec['temas']['motivo'], $sec['temas']['evolucion'], $sec['temas']['morbidos'], $sec['temas']['acufeno']], [true, true, true, false],
+    'Anamnesis: motivo, evolución y mórbidos; la instrucción con pitidos no cuenta como pregunta por el acúfeno');
+t_eq($sec['temas']['otalgia'], true, 'Anamnesis: el dolor lo contó el paciente');
+$detOtalgia = array_values(array_filter($sec['reglas'], static function ($r) { return strpos($r['texto'], 'Dolor') === 0; }))[0]['detalle'];
+t_eq($detOtalgia, 'Lo contó el paciente.', 'Anamnesis: dice que lo contó el paciente');
+t_eq(EntrevistaTecnica::pregunta('otalgia', 'los electrodos no duelen, no se preocupe'), false, 'Anamnesis: "no duele" al explicar no es preguntar por dolor');
+t_eq(EntrevistaTecnica::pregunta('familiares', '¿Usted es la mamá de Camila?'), false, 'Anamnesis: identificar a la mamá no es antecedente familiar');
+t_eq(EntrevistaTecnica::pregunta('familiares', '¿En su familia hay alguien con problemas de audición?'), true, 'Anamnesis: antecedente familiar');
+$sec = EquiposTecnica::evaluar([], eq_caso(['edad' => 1]), ['chat' => $ana])['entrevista'];
+t_eq(array_keys($sec['temas']), EntrevistaTecnica::NINO, 'Anamnesis: en el niño, la lista del niño');
+$sec = EquiposTecnica::evaluar([], eq_caso(), ['chat' => $ana, 'anamnesis_completa' => false])['entrevista'];
+t_eq(array_keys($sec['temas']), ['acufeno'], 'Anamnesis: curso que no la evalúa completa, solo el acúfeno');
