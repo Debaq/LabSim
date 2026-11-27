@@ -227,3 +227,7 @@ a.curso-card:hover, a.curso-card:focus-visible { transform: translateY(-2px); bo
 .avance-tabla .col-objetivo { text-align: center; width: 4rem; }
 .avance-tabla .obj-si { color: var(--color-success-text); font-weight: 700; background: var(--color-success-bg); }
 .avance-tabla .obj-no { color: var(--color-danger); font-weight: 700; }
+
+/* Audiometría del curso (CursoEstadisticas) */
+.est-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+ol.recomendaciones { padding-left: 1.3rem; margin: 0.3rem 0 0; }

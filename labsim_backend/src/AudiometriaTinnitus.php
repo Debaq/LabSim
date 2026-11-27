@@ -82,6 +82,13 @@ final class AudiometriaTinnitus
             }
         }
 
+        // Sin la verdad del acúfeno en el registro, la app de esa atención
+        // era anterior a la tinnitumetría (llegó el 13-11-2026): si no la
+        // hizo, no se le puede exigir algo que el equipo no tenía.
+        if ($verdad === null && !$hecha) {
+            return null;
+        }
+
         $reglas = [];
         $obs = [];
         if (!$presente) {

@@ -206,7 +206,8 @@ final class CourseAvance
 
         $stmt = $pdo->prepare(
             "SELECT att.id AS attendance_id, att.student_id, att.estado, att.hora_real, att.updated_at,
-                    a.id AS appointment_id, " . Practica::marca('a') . " AS practice_id
+                    a.id AS appointment_id, a.fecha AS cita_fecha, a.nombre AS pac_nombre, a.apellido AS pac_apellido,
+                    a.case_id, " . Practica::marca('a') . " AS practice_id
                FROM attendances att JOIN appointments a ON a.id = att.appointment_id
               WHERE a.course_id = ? AND att.student_id IN ({$ph})
               ORDER BY att.updated_at"
@@ -283,6 +284,13 @@ final class CourseAvance
             }
             $tec = $tecnicas[$uid][$ap] ?? null;
             if ($tec !== null) {
+                // de qué cita es, para las estadísticas por mes y por paciente (CursoEstadisticas)
+                $tec['_cita'] = [
+                    'fecha' => self::fechaCita((string) $a['cita_fecha']) ?? substr((string) $a['updated_at'], 0, 10),
+                    'paciente' => trim($a['pac_nombre'] . ' ' . $a['pac_apellido']),
+                    'case_id' => (string) $a['case_id'],
+                    'practica' => $practica,
+                ];
                 if ($tec['puntaje']['pct'] !== null) {
                     $alumnos[$uid]['tecnicas'][] = $tec;
                     $alumnos[$uid]['serie'][] = [substr((string) $a['updated_at'], 0, 10), (int) $tec['puntaje']['pct']];
@@ -301,6 +309,15 @@ final class CourseAvance
         }
         unset($al);
         return $alumnos;
+    }
+
+    /** 'dd-MM-yy' de la agenda -> 'Y-m-d'; null si no es una fecha. */
+    public static function fechaCita(string $f): ?string
+    {
+        if (!preg_match('/^(\d{2})-(\d{2})-(\d{2})$/', $f, $m)) {
+            return null;
+        }
+        return checkdate((int) $m[2], (int) $m[1], 2000 + (int) $m[3]) ? "20{$m[3]}-{$m[2]}-{$m[1]}" : null;
     }
 
     /** [appointment_id][student_id] => n */

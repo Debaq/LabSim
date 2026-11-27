@@ -366,3 +366,15 @@ t_eq($sec['reglas'][0]['cumple'], false, 'T03 pulsátil: no se iguala');
 
 $sec = tin_evaluar(tin_examen([], null), tin_caso())['tinnitus'];
 t_true(tin_regla($sec, 'Los sonidos de comparación')['cumple'] === true, 'T03 sin verdad en el registro: oído desde la ficha');
+
+// App anterior a la tinnitumetría (sin la verdad en el registro) y sin hacerla: no se exige
+$soloTonos = static function (?array $verdad): array {
+    $x = new TinExaminador($verdad);
+    $x->decir('colocar_fonos');
+    $x->prender(0, true);
+    $x->mano(true);
+    $x->prender(0, false, 1.5);
+    return $x->logs;
+};
+t_eq(tin_evaluar($soloTonos(null), tin_caso())['tinnitus'], null, 'T03: la app de esa atención no tenía tinnitumetría, no se exige');
+t_eq(tin_regla(tin_evaluar($soloTonos(tin_verdad()), tin_caso())['tinnitus'], 'Con acúfeno')['cumple'], false, 'T03: con la verdad en el registro y sin hacerla, sí se exige');

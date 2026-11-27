@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/CourseParams.php';
 require_once __DIR__ . '/../../src/CourseAdmin.php';
 require_once __DIR__ . '/../../src/CourseOverview.php';
 require_once __DIR__ . '/../../src/CourseAvance.php';
+require_once __DIR__ . '/../../src/CursoEstadisticas.php';
 require_once __DIR__ . '/../../src/AgendaAvance.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
@@ -118,6 +119,22 @@ if ($detailId !== null) {
             $avanceSemanas = CourseAvance::porSemana($avanceAlumnos, $courseId);
             $pasosCurso = array_slice(CourseAvance::pasosDelCurso($avanceAlumnos), 0, 6);
             $necesitan = CourseAvance::necesitanAtencion($avanceAlumnos, date('Y-m-d'));
+            // Estadísticas de la audiometría (sin la práctica libre): las
+            // mismas del informe PDF del curso. Lo que piden mirar se suma a
+            // "Necesitan atención".
+            $estadisticas = CursoEstadisticas::calcular(array_map(static function (array $a): array {
+                $a['tecnicas'] = array_values(array_filter($a['tecnicas'], static fn(array $t): bool => empty($t['_cita']['practica'])));
+                return $a;
+            }, $avanceAlumnos));
+            foreach ($estadisticas['mirar'] as $uid => $m) {
+                foreach ($m['motivos'] as $motivo) {
+                    if (strpos($motivo, 'logro bajo el del curso') !== false || strpos($motivo, 'viene bajando') !== false) {
+                        continue;  // ya lo dicen "técnica bajo 60 %" y "técnica bajando"
+                    }
+                    $necesitan[$uid]['nombre'] = $m['nombre'];
+                    $necesitan[$uid]['motivos'][] = $motivo;
+                }
+            }
             $agendaAvance = AgendaAvance::porCurso($courseId, array_map(static fn(array $a): string => $a['nombre'], $avanceAlumnos));
             break;
 

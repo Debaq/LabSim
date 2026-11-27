@@ -6,7 +6,8 @@
  * por semana y la tabla de alumnos. Cálculo en CourseAvance.
  *
  * Espera: $courseId, $objetivos, $faltaSchema, $avanceAlumnos,
- *         $avanceSemanas, $pasosCurso, $necesitan, $agendaAvance.
+ *         $avanceSemanas, $pasosCurso, $necesitan, $agendaAvance,
+ *         $estadisticas (CursoEstadisticas::calcular).
  */
 $indicadores = CourseAvance::indicadores();
 $nAlumnos = count($avanceAlumnos);
@@ -223,6 +224,108 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
         <?php endif; ?>
     </div>
 </div>
+
+<?php if (!empty($estadisticas['n'])): ?>
+<?php
+$ek = $estadisticas['kpis'];
+$secT = ['orden' => 'Orden', 'pertinencia' => 'Pertinencia', 'aereos' => 'Aéreos', 'oseos' => 'Óseos', 'enmascaramiento' => 'Enmasc.', 'tinnitus' => 'Tinnit.'];
+$pctCelda = static function (?int $v): string {
+    return '<td class="est-num" style="color:' . AudiometriaTecnicaVista::color($v) . ';">' . htmlspecialchars(AudiometriaTecnicaVista::pct($v)) . '</td>';
+};
+$fraccion = static function (array $f): string {
+    return $f[1] > 0 ? (int) $f[0] . '/' . (int) $f[1] : '—';
+};
+$meses = ['01' => 'enero', '02' => 'febrero', '03' => 'marzo', '04' => 'abril', '05' => 'mayo', '06' => 'junio', '07' => 'julio',
+    '08' => 'agosto', '09' => 'septiembre', '10' => 'octubre', '11' => 'noviembre', '12' => 'diciembre'];
+?>
+<div class="card">
+    <strong>Audiometría del curso</strong>
+    <p class="help help--xs"><?= (int) $estadisticas['n'] ?> audiometrías de prácticos (sin práctica libre). Logro ponderado: cada paso pesa según su gravedad y descuenta en proporción a cuánto se falló.</p>
+    <div class="kpis-curso">
+        <div class="kpi-c"><div class="kpi-c-valor" style="color:<?= AudiometriaTecnicaVista::color($ek['logro']) ?>;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($ek['logro'])) ?></div><div class="kpi-c-nombre">Logro de la técnica</div></div>
+        <div class="kpi-c"><div class="kpi-c-valor"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($ek['a_5db'])) ?></div><div class="kpi-c-nombre">Umbrales aéreos a ±5 dB del real</div></div>
+        <div class="kpi-c"><div class="kpi-c-valor"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($ek['verificacion'])) ?></div><div class="kpi-c-nombre">Frecuencias cerradas con 2 de 3</div></div>
+        <div class="kpi-c"><div class="kpi-c-valor"><?= $ek['duracion_mediana'] === null ? '—' : htmlspecialchars(number_format($ek['duracion_mediana'], 2, ',', '')) . ' s' ?></div><div class="kpi-c-nombre">Duración típica del estímulo<?= $ek['bajo_1s'] !== null ? ' (' . (int) $ek['bajo_1s'] . ' % bajo 1 s)' : '' ?></div></div>
+    </div>
+
+    <?php if ($estadisticas['recomendaciones']): ?>
+    <div style="margin-top:0.8rem;"><strong>Recomendaciones para los docentes</strong></div>
+    <p class="help help--xs">Salen de los datos: cada una aparece cuando el curso queda bajo su corte (verificar 2 de 3 bajo <?= CursoEstadisticas::CORTES['verificacion'] ?> %, óseos tomados bajo <?= CursoEstadisticas::CORTES['oseos'] ?> %, enmascaramiento bajo <?= CursoEstadisticas::CORTES['enmascaramiento'] ?> %, adaptación bajo <?= CursoEstadisticas::CORTES['adaptacion'] ?> %, estímulo bajo 1 s, orden bajo <?= CursoEstadisticas::CORTES['orden'] ?> %, tinnitumetría bajo <?= CursoEstadisticas::CORTES['tinnitus'] ?> %).</p>
+    <ol class="recomendaciones">
+        <?php foreach ($estadisticas['recomendaciones'] as $r): ?>
+        <li style="margin:0 0 0.6rem;">
+            <strong><?= htmlspecialchars($r['titulo']) ?>.</strong> <?= htmlspecialchars($r['evidencia']) ?>
+            <div><strong>Qué hacer:</strong> <?= htmlspecialchars($r['accion']) ?></div>
+            <?php if ($r['alumnos']): ?>
+            <div class="help help--xs">Mirar en particular<?= $r['alumnos_motivo'] !== '' ? ' (' . htmlspecialchars($r['alumnos_motivo']) . ')' : '' ?>:
+                <?php foreach ($r['alumnos'] as $n): ?><span class="tag tag--muted"><?= htmlspecialchars($n) ?></span> <?php endforeach; ?></div>
+            <?php endif; ?>
+        </li>
+        <?php endforeach; ?>
+    </ol>
+    <?php endif; ?>
+
+    <details style="margin-top:0.6rem;">
+        <summary><strong>Por alumno</strong> <span class="help help--xs">conductas clave</span></summary>
+        <p class="help help--xs">2 de 3: frecuencias aéreas verificadas. ±5 dB: umbrales aéreos (verificados o no) cerca del real. Óseos, adaptación: hechas sobre las atenciones que las pedían. Enmasc.: parte de los umbrales que pedían ruido y lo tuvieron. Tend.: segunda mitad de sus atenciones menos la primera.</p>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><th>Alumno</th><th class="est-num">Atenc.</th><th class="est-num">Logro</th><th class="est-num">Tend.</th><th class="est-num">2 de 3</th><th class="est-num">±5 dB</th><th class="est-num">Estímulo</th><th class="est-num">Óseos</th><th class="est-num">Adapt.</th><th class="est-num">Enmasc.</th><th class="est-num">Logo</th></tr>
+            <?php foreach ($estadisticas['alumnos'] as $uid => $a): ?>
+            <tr>
+                <td><a href="student.php?id=<?= (int) $uid ?>"><?= htmlspecialchars($a['nombre']) ?></a></td>
+                <td class="est-num"><?= (int) $a['n'] ?></td>
+                <?= $pctCelda($a['logro']) ?>
+                <td class="est-num"<?= $a['tendencia'] !== null && $a['tendencia'] <= -10 ? ' style="color:#c0392b;"' : '' ?>><?= $a['tendencia'] === null ? '—' : sprintf('%+d', $a['tendencia']) ?></td>
+                <td class="est-num"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($a['verificacion'])) ?></td>
+                <td class="est-num"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($a['a_5db'])) ?></td>
+                <td class="est-num nowrap"><?= $a['duracion_mediana'] === null ? '—' : htmlspecialchars(number_format($a['duracion_mediana'], 2, ',', '')) . ' s' ?></td>
+                <td class="est-num"><?= $fraccion($a['oseos']) ?></td>
+                <td class="est-num"><?= $fraccion($a['adaptacion']) ?></td>
+                <td class="est-num"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($a['enmascaramiento'])) ?></td>
+                <td class="est-num"><?= $fraccion($a['logo']) ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+        </div>
+    </details>
+
+    <details style="margin-top:0.4rem;">
+        <summary><strong>Por paciente</strong> <span class="help help--xs">qué caso costó más</span></summary>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><th>Fecha</th><th>Paciente</th><th class="est-num">Atenc.</th><th class="est-num">Logro</th><?php foreach ($secT as $t): ?><th class="est-num"><?= $t ?></th><?php endforeach; ?></tr>
+            <?php foreach ($estadisticas['pacientes'] as $p): ?>
+            <tr>
+                <td class="nowrap"><?= htmlspecialchars(CursoEstadisticas::fechaCorta($p['fecha'])) ?></td>
+                <td><?= htmlspecialchars((string) $p['paciente']) ?></td>
+                <td class="est-num"><?= (int) $p['n'] ?></td>
+                <?= $pctCelda($p['logro']) ?>
+                <?php foreach (array_keys($secT) as $k): ?><?= $pctCelda($p['secciones'][$k] ?? null) ?><?php endforeach; ?>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+        </div>
+    </details>
+
+    <details style="margin-top:0.4rem;">
+        <summary><strong>Por mes</strong></summary>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><th>Mes</th><th class="est-num">Atenc.</th><th class="est-num">Logro</th><?php foreach ($secT as $t): ?><th class="est-num"><?= $t ?></th><?php endforeach; ?></tr>
+            <?php foreach ($estadisticas['meses'] as $mes => $m): ?>
+            <tr>
+                <td><?= htmlspecialchars(ucfirst($meses[substr((string) $mes, 5, 2)] ?? (string) $mes)) ?> <?= htmlspecialchars(substr((string) $mes, 0, 4)) ?></td>
+                <td class="est-num"><?= (int) $m['n'] ?></td>
+                <?= $pctCelda($m['logro']) ?>
+                <?php foreach (array_keys($secT) as $k): ?><?= $pctCelda($m['secciones'][$k] ?? null) ?><?php endforeach; ?>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+        </div>
+    </details>
+</div>
+<?php endif; ?>
 
 <?php if (!empty($agendaAvance['hay'])): ?>
 <div class="card">

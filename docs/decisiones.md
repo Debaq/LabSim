@@ -5,6 +5,46 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Estadísticas de la audiometría del curso y recomendaciones (2026-11-27)
+
+**Pedido.** Indicadores de cómo van los alumnos del curso (se hizo primero un
+PDF con los datos de prod), "faltan recomendaciones para los docentes" y
+"continuemos con las estadísticas en el sistema".
+
+**Decisión.**
+- `AudiometriaTecnica::evaluar` agrega `'resumen'`: conductas de la
+  atención en números (frecuencias verificadas, umbrales a ±5 dB, duración
+  de los tonos, óseos pedidos/hechos, logo, adaptación, Stenger, parte de
+  lo que pedía ruido que lo tuvo, supraliminares hechas). Va guardado en
+  `audiometria_tecnica_cache` (`CACHE_VERSION` 9), así las estadísticas no
+  releen `action_logs`.
+- `CursoEstadisticas` (sin base) calcula, desde lo que arma
+  `CourseAvance::porAlumno` (cada técnica con `_cita`: fecha de la agenda,
+  paciente, caso, si es práctica): cifras del curso, por mes, por
+  paciente, por alumno, a quién mirar y recomendaciones. La pestaña Avance
+  lo muestra en la tarjeta "Audiometría del curso" (solo prácticos, sin
+  práctica libre) y los motivos de "a quién mirar" se suman a "Necesitan
+  atención". El PDF del curso (`~/Escritorio/indicadores_etmp176`, fuera
+  del repo) usa la misma clase.
+- Recomendaciones: aparecen solas cuando el curso queda bajo un corte
+  (`CursoEstadisticas::CORTES`), cada una con la cifra que la respalda, qué
+  hacer y a quiénes mirar. Son pocas y fijas (verificación, óseos,
+  enmascaramiento, adaptación, duración del estímulo, orden,
+  tinnitumetría, seguimiento individual): el docente decide qué hacer con
+  ellas.
+- "Logro más bajo" solo marca a los dos últimos si quedan 10 puntos o más
+  bajo el promedio del curso: si todos van bien, el último no está mal.
+- Tinnitumetría: si el registro no trae la verdad del acúfeno, la app de esa
+  atención era anterior a la prueba (se usó por primera vez el 13-11-2026)
+  y no se exige.
+
+**Descartado.** Calcular las estadísticas leyendo los registros del curso
+en cada visita (eran 11 s con 70 mil filas; ver memoria de Avance). Textos
+de recomendación editables por curso: todavía no hay pedido.
+
+**Tests.** `test_curso_estadisticas.php`, `test_audiometria_tinnitus.php`
+(app sin tinnitumetría).
+
 ## Puntaje ponderado: cada error una vez, según su peso (2026-11-27)
 
 **Pedido.** "Hacerlo porcentual, que unas cosas importen más que otras: así

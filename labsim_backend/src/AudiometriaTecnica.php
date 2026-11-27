@@ -121,7 +121,9 @@ final class AudiometriaTecnica
     // juzga por el nivel más bajo con respuesta, la sombra queda para T04 y
     // cumple con el 90 % a ±5 dB (2026-11-27).
     // 8: puntaje ponderado y proporcional (PESOS, 'logro') (2026-11-27).
-    public const CACHE_VERSION = 8;
+    // 9: 'resumen' de conductas para CursoEstadisticas; tinnitumetría no
+    // exigida si la app de la atención no la tenía (2026-11-27).
+    public const CACHE_VERSION = 9;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null
@@ -354,7 +356,72 @@ final class AudiometriaTecnica
         $out['puntaje'] = self::sumar(array_values(array_filter(array_map(static function ($k) use ($out) {
             return $out[$k];
         }, self::SECCIONES))));
+        $out['resumen'] = self::resumen($registro, $out);
         return $out;
+    }
+
+    /**
+     * Conductas de la atención en números, para las estadísticas del curso
+     * (CursoEstadisticas) sin volver a leer el registro: se guardan con el
+     * resultado en audiometria_tecnica_cache.
+     *
+     * - frecuencias / verificadas: umbrales aéreos (el último de cada oído y
+     *   frecuencia) y cuántos cerró con 2 de 3 o 3 de 5.
+     * - medibles / a_5db: los que tienen nivel (verificado o, si no, el más
+     *   bajo con respuesta) y cuántos quedaron a 5 dB o menos del real.
+     * - estimulos / bajo_1s / duracion_mediana: duración de los tonos de
+     *   umbral (solo registros con milisegundos).
+     * - oseos_pedidos / oseos_hechos; logo, adaptacion, stenger (true/false
+     *   si correspondía, null si no); enmascaramiento_aerea / _osea: parte de
+     *   los umbrales que pedían ruido y lo tuvieron (null si ninguno lo pedía).
+     */
+    private static function resumen(array $registro, array $out): array
+    {
+        $frec = $verif = $med = $ok5 = 0;
+        foreach ($out['aereos']['umbrales'] as $filas) {
+            $ult = [];
+            foreach ($filas as $f) {
+                $ult[$f['freq']] = $f;
+            }
+            foreach ($ult as $f) {
+                $frec++;
+                $verif += $f['estado'] !== 'sin verificar' ? 1 : 0;
+                $nivel = $f['estimado'] ?? $f['aprox'];
+                if ($nivel !== null && $f['real'] !== null && $f['real'] < 130) {
+                    $med++;
+                    $ok5 += abs($nivel - $f['real']) <= 5 ? 1 : 0;
+                }
+            }
+        }
+        $dur = [];
+        foreach ($registro['presentaciones'] as $x) {
+            if ($x['duracion'] !== null && ($x['prueba'] === 'aereos' || $x['prueba'] === 'oseos')) {
+                $dur[] = (float) $x['duracion'];
+            }
+        }
+        sort($dur);
+        $regla = static function (?array $sec, string $frag, bool $logro = false) {
+            foreach ($sec['reglas'] ?? [] as $r) {
+                if (strpos($r['texto'], $frag) !== false) {
+                    return $logro ? ($r['logro'] ?? null) : $r['cumple'];
+                }
+            }
+            return null;
+        };
+        return [
+            'frecuencias' => $frec, 'verificadas' => $verif, 'medibles' => $med, 'a_5db' => $ok5,
+            'estimulos' => count($dur),
+            'bajo_1s' => count(array_filter($dur, static function ($d) { return $d < 1.0; })),
+            'duracion_mediana' => $dur ? $dur[intdiv(count($dur), 2)] : null,
+            'oseos_pedidos' => ($out['oseos']['requeridos'] ?? []) !== [],
+            'oseos_hechos' => (bool) $out['oseos']['hecha'],
+            'logo' => $regla($out['pertinencia'], 'logoaudiometría'),
+            'adaptacion' => $regla($out['pertinencia'], 'se busca adaptación'),
+            'stenger' => $regla($out['pertinencia'], 'se hace el Stenger'),
+            'enmascaramiento_aerea' => $regla($out['enmascaramiento'], 'Vía aérea: se enmascara', true),
+            'enmascaramiento_osea' => $regla($out['enmascaramiento'], 'Vía ósea: se enmascara', true),
+            'supra' => $out['pertinencia']['hechas'] ?? [],
+        ];
     }
 
     // ---- T00: orden ---------------------------------------------------------
@@ -412,7 +479,8 @@ final class AudiometriaTecnica
             }));
         }
 
-        $res = ['hecha' => $pres !== [], 'reglas' => [], 'oidos' => [], 'umbrales' => [], 'observaciones' => []];
+        $res = ['hecha' => $pres !== [], 'reglas' => [], 'oidos' => [], 'umbrales' => [], 'observaciones' => [],
+            'requeridos' => array_map(static function ($o) { return self::OIDOS[$o]; }, $requeridos)];
         if ($pres === []) {
             if ($via === 'aereos' || $requeridos !== []) {
                 $res['reglas'][] = [
