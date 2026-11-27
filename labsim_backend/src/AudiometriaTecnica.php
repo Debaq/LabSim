@@ -66,6 +66,8 @@ final class AudiometriaTecnica
     private const OSEA_IDX = [1, 2, 3, 4, 5, 6];
     /** Parte mínima de los estímulos dentro de la duración pedida. */
     private const DURACION_PCT = 0.8;
+    /** Parte mínima de los umbrales a 5 dB o menos del real. */
+    private const EXACTITUD_PCT = 0.9;
 
     private const OIDOS = ['OD', 'OI'];
 
@@ -115,7 +117,11 @@ final class AudiometriaTecnica
     // +15 dB y una octava abajo (2026-11-13).
     // 6: enmascaramiento (T04) y pruebas que correspondían (T05) como
     // secciones propias (2026-11-27).
-    public const CACHE_VERSION = 6;
+    // 7: "los umbrales corresponden" mide solo puntería: sin verificar se
+    // juzga por el nivel más bajo con respuesta, la sombra queda para T04 y
+    // cumple con el 90 % a ±5 dB (2026-11-27).
+    // 8: puntaje ponderado y proporcional (PESOS, 'logro') (2026-11-27).
+    public const CACHE_VERSION = 8;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null
@@ -332,6 +338,11 @@ final class AudiometriaTecnica
         $out['pertinencia'] = AudiometriaPertinencia::evaluar($registro, $caso, (int) $params['aereos']['oido_sano'],
             $out['aereos']['hecha']);
         foreach (self::SECCIONES as $k) {
+            if ($out[$k] !== null) {
+                $out[$k] = self::ponderar($out[$k]);
+            }
+        }
+        foreach (self::SECCIONES as $k) {
             if ($out[$k] === null) {
                 continue;
             }
@@ -504,6 +515,7 @@ final class AudiometriaTecnica
             $res['reglas'][] = [
                 'texto' => sprintf('Cada estímulo dura entre %s y %s segundos.', self::num($p['dur_min']), self::num($p['dur_max'])),
                 'cumple' => $medidos === 0 ? null : $bien >= self::DURACION_PCT * $medidos,
+                'logro' => $medidos === 0 ? null : $bien / $medidos,
                 'detalle' => sprintf('%d de %d estímulos en ese rango; %d más cortos y %d más largos.', $bien, $medidos, $cortos, $largos),
             ];
         }
@@ -532,19 +544,36 @@ final class AudiometriaTecnica
             $res['umbrales'][self::OIDOS[$o]] = self::umbrales($propios, $via, $o, $paciente);
         }
 
-        $coinciden = $total = 0;
+        // Puntería: cada error cuenta una sola vez. La verificación (2 de 3)
+        // tiene su propia regla, así que un umbral sin verificar se juzga por
+        // el nivel más bajo al que respondió; la curva sombra la cuenta
+        // Enmascaramiento (T04) y acá no entra.
+        $bien = $total = $sombras = 0;
         foreach ($res['umbrales'] as $filas) {
             foreach ($filas as $f) {
+                $nivel = $f['estado'] === 'sin verificar' ? $f['aprox'] : $f['estimado'];
+                $esSombra = $f['estado'] === 'sombra'
+                    || ($f['estado'] === 'sin verificar' && $nivel !== null && !$f['con_ruido'] && $f['sombra'] !== null
+                        && $f['sombra'] < $f['real'] - 5 && abs($nivel - $f['sombra']) <= 5);
+                if ($esSombra) {
+                    $sombras++;
+                    continue;
+                }
+                if ($f['estado'] === 'sin dato' || ($f['estado'] === 'sin verificar' && $nivel === null)) {
+                    continue;
+                }
                 $total++;
-                if ($f['estado'] === 'coincide') {
-                    $coinciden++;
+                if ($f['estado'] === 'coincide' || ($f['estado'] === 'sin verificar' && abs($nivel - $f['real']) <= 5)) {
+                    $bien++;
                 }
             }
         }
         $res['reglas'][] = [
             'texto' => 'Los umbrales obtenidos corresponden a la audición del paciente.',
-            'cumple' => $total === 0 ? null : $coinciden === $total,
-            'detalle' => "{$coinciden} de {$total} umbrales.",
+            'cumple' => $total === 0 ? null : $bien >= self::EXACTITUD_PCT * $total,
+            'logro' => $total === 0 ? null : $bien / $total,
+            'detalle' => sprintf('%d de %d umbrales a 5 dB o menos (hace falta el %d %%).', $bien, $total, (int) round(100 * self::EXACTITUD_PCT))
+                . ($sombras > 0 ? " {$sombras} en curva sombra: los cuenta el enmascaramiento." : ''),
         ];
         return $res;
     }
@@ -583,11 +612,14 @@ final class AudiometriaTecnica
         $reglas[] = [
             'texto' => sprintf('Cada frecuencia nueva parte %d dB sobre el umbral de la anterior.', (int) $p['sobre_anterior']),
             'cumple' => $evaluadas === 0 ? null : $mal === [],
+            'logro' => $evaluadas === 0 ? null : ($evaluadas - count($mal)) / $evaluadas,
             'detalle' => $mal === [] ? ($evaluadas === 0 ? 'Ninguna frecuencia tenía el umbral anterior verificado.' : 'Así fue en las ' . $evaluadas . ' frecuencias.') : implode('; ', $mal) . '.',
         ];
 
         $desvios = [];
+        $limpios = 0;
         foreach ($bloques as $b) {
+            $limpios += $b['desvios'] === [] ? 1 : 0;
             foreach ($b['desvios'] as $d) {
                 $desvios[] = $d;
             }
@@ -596,6 +628,7 @@ final class AudiometriaTecnica
             'texto' => sprintf('Familiarización subiendo de %d en %d dB hasta la primera respuesta; después, bajar %d dB tras responder y subir %d dB tras no responder.',
                 (int) $p['paso_familiarizacion'], (int) $p['paso_familiarizacion'], (int) $p['paso_bajada'], (int) $p['paso_subida']),
             'cumple' => $desvios === [],
+            'logro' => $limpios / count($bloques),
             'detalle' => $desvios === [] ? 'Sin desvíos.' : implode(' ', array_slice($desvios, 0, 8)) . (count($desvios) > 8 ? ' (y ' . (count($desvios) - 8) . ' más)' : ''),
         ];
 
@@ -608,7 +641,10 @@ final class AudiometriaTecnica
         $reglas[] = [
             'texto' => 'Se verifica el umbral con 2 de 3 o 3 de 5 respuestas subiendo antes de cambiar de frecuencia.',
             'cumple' => $abiertos === [],
-            'detalle' => $abiertos === [] ? 'Se verificó en todas las frecuencias.' : 'Cambió de frecuencia sin verificar 2 de 3 ni 3 de 5 en: ' . implode(', ', array_unique($abiertos)) . '.',
+            'logro' => (count($bloques) - count($abiertos)) / count($bloques),
+            'detalle' => $abiertos === [] ? 'Se verificó en todas las frecuencias.'
+                : sprintf('Verificó %d de %d. Cambió de frecuencia sin verificar 2 de 3 ni 3 de 5 en: %s.',
+                    count($bloques) - count($abiertos), count($bloques), implode(', ', array_unique($abiertos))),
         ];
 
         // El orden mira la primera vez que tomó cada frecuencia: las
@@ -779,6 +815,7 @@ final class AudiometriaTecnica
                 $reglas[] = [
                     'texto' => $nombre . ': se enmascara donde el tono cruza al otro oído.',
                     'cumple' => $faltan === [],
+                    'logro' => (count($pedia) - count($faltan)) / count($pedia),
                     'detalle' => $faltan === []
                         ? 'Enmascaró en ' . self::lista($pedia) . '.'
                         : 'Faltó enmascarar en ' . self::lista($faltan) . ': ese umbral puede ser del otro oído.',
@@ -788,6 +825,7 @@ final class AudiometriaTecnica
                 $reglas[] = [
                     'texto' => $nombre . ': el ruido queda entre el mínimo y el máximo.',
                     'cumple' => $fuera === [],
+                    'logro' => ($conRuido - count($fuera)) / $conRuido,
                     'detalle' => $fuera === [] ? 'El ruido quedó en la meseta.' : 'Fuera de la meseta en ' . self::lista($fuera) . '.',
                     'detalle_docente' => implode('; ', $fueraDoc),
                 ];
@@ -1020,13 +1058,76 @@ final class AudiometriaTecnica
     }
 
     /**
-     * Suma de reglas evaluables y cumplidas de varias secciones, con el
-     * porcentaje de logro (null si no hubo nada evaluable). Cada regla pesa
-     * lo mismo.
+     * Peso de cada paso según qué tan grave es fallarlo: lo que deja un
+     * umbral sin valor (no verificarlo, no enmascarar donde cruza, uno que
+     * no corresponde, una prueba que faltó) pesa el triple que un detalle de
+     * procedimiento. Se busca por fragmento del texto de la regla; lo que no
+     * está pesa 1. Ver docs/decisiones.md, "Puntaje ponderado".
+     */
+    public const PESOS = [
+        'Se verifica el umbral con 2 de 3' => 3,
+        'corresponden a la audición del paciente' => 3,
+        'se enmascara donde el tono cruza' => 3,
+        'Se toman los umbrales' => 3,
+        'Familiarización subiendo' => 2,
+        'el ruido queda entre el mínimo y el máximo' => 2,
+        'Toda audiometría lleva logoaudiometría' => 2,
+        'se busca adaptación' => 2,
+        'se hace el Stenger' => 2,
+        'El Fowler se hace' => 2,
+        'El Reger compara' => 2,
+        'El Stenger se hace en una frecuencia' => 2,
+        'Con acúfeno el día del examen' => 2,
+        'Un acúfeno pulsátil' => 2,
+    ];
+
+    /** Peso de una regla por su texto (PESOS), 1 si no figura. */
+    public static function peso(string $texto): int
+    {
+        foreach (self::PESOS as $frag => $peso) {
+            if (strpos($texto, $frag) !== false) {
+                return $peso;
+            }
+        }
+        return 1;
+    }
+
+    /**
+     * Pone 'peso' y 'logro' (0 a 1) en cada regla de la sección. Las reglas
+     * que miden una proporción (frecuencias verificadas, umbrales a ±5 dB,
+     * estímulos de 1-2 s...) traen su propio logro; las demás logran 1 o 0
+     * según 'cumple'.
+     */
+    private static function ponderar(array $seccion): array
+    {
+        $poner = static function (array $reglas): array {
+            foreach ($reglas as &$r) {
+                $r['peso'] = $r['peso'] ?? self::peso((string) $r['texto']);
+                if (!array_key_exists('logro', $r) || ($r['logro'] === null && $r['cumple'] !== null)) {
+                    $r['logro'] = $r['cumple'] === null ? null : ($r['cumple'] ? 1.0 : 0.0);
+                }
+            }
+            unset($r);
+            return $reglas;
+        };
+        $seccion['reglas'] = $poner($seccion['reglas'] ?? []);
+        foreach ($seccion['oidos'] ?? [] as $o => $reglas) {
+            $seccion['oidos'][$o] = $poner($reglas);
+        }
+        return $seccion;
+    }
+
+    /**
+     * Puntaje de varias secciones. 'pct' es el logro ponderado: suma de
+     * peso × logro sobre la suma de pesos de las reglas evaluables (null si
+     * no hubo ninguna). Así un error cuenta una sola vez, en proporción a
+     * cuánto se falló y con el peso del paso. 'cumple' y 'total' cuentan
+     * pasos cumplidos del todo y evaluables.
      */
     public static function sumar(array $secciones): array
     {
         $cumple = $total = 0;
+        $logrado = $pesos = 0.0;
         foreach ($secciones as $s) {
             $listas = [$s['reglas'] ?? []];
             foreach ($s['oidos'] ?? [] as $r) {
@@ -1041,10 +1142,14 @@ final class AudiometriaTecnica
                     if ($r['cumple']) {
                         $cumple++;
                     }
+                    $peso = (float) ($r['peso'] ?? self::peso((string) $r['texto']));
+                    $logro = $r['logro'] ?? ($r['cumple'] ? 1.0 : 0.0);
+                    $pesos += $peso;
+                    $logrado += $peso * max(0.0, min(1.0, (float) $logro));
                 }
             }
         }
-        return ['cumple' => $cumple, 'total' => $total, 'pct' => $total > 0 ? (int) round(100 * $cumple / $total) : null];
+        return ['cumple' => $cumple, 'total' => $total, 'pct' => $pesos > 0 ? (int) round(100 * $logrado / $pesos) : null];
     }
 
     public static function hz(int $hz): string

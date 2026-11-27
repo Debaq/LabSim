@@ -207,3 +207,25 @@ t_eq($apEval($sim, ap_registro($sim))['enmascaramiento'], null, 'Enmascaramiento
 // Las secciones nuevas suman al puntaje total
 $r = $apEval($sim, ap_registro($sim));
 t_eq($r['puntaje'], AudiometriaTecnica::sumar(array_values(array_filter([$r['orden'], $r['pertinencia'], $r['aereos'], $r['oseos'], $r['enmascaramiento'], $r['tinnitus']]))), 'Puntaje: suma todas las secciones');
+
+// --- Puntería: sin verificar no se castiga dos veces ---------------------------------------
+$sinVerificar = static function (int $oido, int $hz, int $u): array {
+    $out = [];
+    foreach ([[10, true], [0, true], [-10, false], [-5, false], [0, true]] as [$d, $oyo]) {
+        $out[] = ap_pres('aereos', $oido, $hz, $u + $d, $oyo, 'colocar_fonos');
+    }
+    return $out;
+};
+$r = $apEval($sim, ['reconstruido' => false, 'con_ms' => true, 'pruebas' => [[1.0, 'aereos'], [9.0, 'logo']], 'tinnitus' => [],
+    'presentaciones' => array_merge($sinVerificar(0, 1000, 40), $sinVerificar(0, 2000, 40), $sinVerificar(1, 1000, 40), $sinVerificar(1, 2000, 40))]);
+$rr = ap_reglas($r['aereos']);
+t_eq($rr['Los umbrales obtenidos corresponden a la audición del paciente.'], true, 'Puntería: en el nivel exacto aunque no verificó');
+$oidosR = [];
+foreach ($r['aereos']['oidos'] as $o => $lista) {
+    foreach ($lista as $x) {
+        if (strpos($x['texto'], '2 de 3') !== false) {
+            $oidosR[$o] = $x['cumple'];
+        }
+    }
+}
+t_eq($oidosR, ['OD' => false, 'OI' => false], 'Puntería: la falta de verificación la cuenta solo su propia regla');

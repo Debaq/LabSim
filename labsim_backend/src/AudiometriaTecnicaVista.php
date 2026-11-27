@@ -43,7 +43,7 @@ final class AudiometriaTecnicaVista
             <span style="font-size:1.8em; font-weight:700; color:<?= self::color($p['pct']) ?>;"><?= self::pct($p['pct']) ?></span>
             <span style="flex:1; min-width:8rem;">
                 <?php self::barra($p['pct']); ?>
-                <span style="font-size:0.85em; opacity:0.8;">Logro de la técnica: <?= (int) $p['cumple'] ?> de <?= (int) $p['total'] ?> pasos.</span>
+                <span style="font-size:0.85em; opacity:0.8;">Logro de la técnica, con cada paso según su peso y cuánto se cumplió: <?= (int) $p['cumple'] ?> de <?= (int) $p['total'] ?> pasos completos.</span>
             </span>
         </div>
         <?php if ($res['reconstruido']): ?>
@@ -144,6 +144,8 @@ final class AudiometriaTecnicaVista
         <li style="margin:0.25rem 0; font-size:0.9em; display:flex; gap:0.5rem; align-items:baseline;">
             <span title="<?= htmlspecialchars($etiqueta) ?>" style="color:<?= $color ?>; font-weight:700; min-width:1rem; text-align:center;"><?= $marca ?></span>
             <span><?= htmlspecialchars($r['texto']) ?>
+                <?php if (($r['peso'] ?? 1) > 1): ?><span title="Pesa <?= (int) $r['peso'] ?> veces lo que un paso común" style="font-size:0.8em; font-weight:600; opacity:0.7;">×<?= (int) $r['peso'] ?></span><?php endif; ?>
+                <?php if (isset($r['logro']) && $r['logro'] !== null && $r['logro'] > 0 && $r['logro'] < 1): ?><span style="font-size:0.85em; color:<?= self::color((int) round(100 * $r['logro'])) ?>; font-weight:600;"><?= (int) round(100 * $r['logro']) ?> %</span><?php endif; ?>
                 <span style="opacity:0.75;"><?= htmlspecialchars($r['detalle']) ?></span>
                 <?php if ($docente && !empty($r['detalle_docente'])): ?>
                 <span style="opacity:0.6; font-size:0.9em;">(<?= htmlspecialchars($r['detalle_docente']) ?>)</span>

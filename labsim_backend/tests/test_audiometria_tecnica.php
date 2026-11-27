@@ -206,9 +206,10 @@ foreach (at_reglas($res['aereos']) as $texto => $cumple) {
     t_eq($cumple, true, "Técnica perfecta (aéreos): {$texto}");
 }
 foreach (at_reglas($res['oseos']) as $texto => $cumple) {
-    // la ósea del OI sin enmascarar da la sombra del OD (10 dB): eso es
-    // del enmascaramiento, que la T02 todavía no evalúa
+    // la ósea del OI sin enmascarar da la sombra del OD (10 dB): la cuenta
+    // el enmascaramiento (T04), así que la puntería no tiene nada que juzgar
     if (strpos($texto, 'corresponden a la audición') !== false) {
+        t_eq($cumple, null, 'Técnica: la sombra no se castiga dos veces (queda para el enmascaramiento)');
         continue;
     }
     t_eq($cumple, true, "Técnica perfecta (óseos): {$texto}");
@@ -222,12 +223,12 @@ t_eq($res['oseos']['observaciones'], [], 'Técnica: ósea solo en el oído que l
 t_eq($res['orden']['hechas'], ['Umbrales aéreos', 'Umbrales óseos'], 'Técnica: pruebas reconocidas');
 t_eq($res['orden']['reglas'][0]['cumple'], true, 'Técnica: aéreos antes que óseos');
 $tecnica = AudiometriaTecnica::sumar([$res['orden'], $res['aereos'], $res['oseos']]);
-t_true($tecnica['total'] > 15 && $tecnica['cumple'] === $tecnica['total'] - 1, 'Técnica: puntaje (todo menos la sombra ósea)');
+t_true($tecnica['total'] > 15 && $tecnica['cumple'] === $tecnica['total'], 'Técnica: puntaje (la sombra ósea no descuenta en T02)');
 // El examen de prueba no hace logo ni adaptación (OI 20 dB peor, sensorioneural)
 // y deja la ósea de OI sin enmascarar: lo dicen las secciones T04 y T05.
 t_eq(array_column($res['pertinencia']['reglas'], 'cumple'), [false, false], 'Técnica: sin logo ni adaptación en una asimétrica');
 t_eq(array_column($res['enmascaramiento']['reglas'], 'cumple'), [false], 'Técnica: la sombra ósea es enmascaramiento que faltó');
-t_eq($res['puntaje']['cumple'], $res['puntaje']['total'] - 4, 'Técnica: puntaje total con las secciones nuevas');
+t_eq($res['puntaje']['cumple'], $res['puntaje']['total'] - 3, 'Técnica: puntaje total con las secciones nuevas');
 
 // --- El mismo examen en registro viejo: se reconstruye ---------------------
 $viejo = new AtExaminador(false);
@@ -442,7 +443,17 @@ if (is_file($cfg)) {
 
 // --- Porcentaje de logro ---------------------------------------------------
 $p = $res['puntaje'];
-t_eq($p['pct'], (int) round(100 * $p['cumple'] / $p['total']), 'Logro: el porcentaje sale de pasos cumplidos sobre evaluables');
+t_true($p['pct'] < (int) round(100 * $p['cumple'] / $p['total']), 'Logro: ponderado, los pasos graves que fallan pesan más que contar pasos');
+// peso 3 a medias (logro 1/3) + peso 1 cumplido + uno no evaluable:
+// (3 × 1/3 + 1 × 1) / (3 + 1) = 50 %
+$sum = AudiometriaTecnica::sumar([['reglas' => [
+    ['texto' => 'Se verifica el umbral con 2 de 3 o 3 de 5 respuestas subiendo antes de cambiar de frecuencia.', 'cumple' => false, 'logro' => 1 / 3],
+    ['texto' => 'Orden de frecuencias: 1 kHz.', 'cumple' => true],
+    ['texto' => 'Cada frecuencia nueva parte 10 dB sobre el umbral de la anterior.', 'cumple' => null, 'logro' => null],
+]]]);
+t_eq($sum, ['cumple' => 1, 'total' => 2, 'pct' => 50], 'Logro: peso × proporción, sin contar lo no evaluable');
+t_eq(AudiometriaTecnica::peso('Se verifica el umbral con 2 de 3 o 3 de 5 respuestas subiendo antes de cambiar de frecuencia.'), 3, 'Peso: verificar el umbral es grave');
+t_eq(AudiometriaTecnica::peso('Se parte por el oído mejor.'), 1, 'Peso: un detalle de procedimiento pesa 1');
 t_eq($res['aereos']['puntaje']['pct'], 100, 'Logro: examen aéreo al pie de la letra = 100 %');
 t_eq(array_keys($res['aereos']['puntaje_oidos']), ['OD', 'OI'], 'Logro: también por oído');
 t_eq(AudiometriaTecnica::sumar([['reglas' => []]])['pct'], null, 'Logro: sin pasos evaluables no hay porcentaje');

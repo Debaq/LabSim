@@ -128,6 +128,7 @@ final class AudiometriaPertinencia
         if (isset($hechas['Fowler'])) {
             $malas = [];
             $numeros = [];
+            $nFreqs = count(self::freqsDe($hechas['Fowler']));
             foreach (array_keys(self::freqsDe($hechas['Fowler'])) as $hz) {
                 $f = self::idx($hz);
                 if ($f === null) {
@@ -142,6 +143,7 @@ final class AudiometriaPertinencia
             $reglas[] = [
                 'texto' => sprintf('El Fowler se hace en una frecuencia con un oído normal y el otro al menos %d dB peor.', self::DIFERENCIA_DB),
                 'cumple' => $malas === [],
+                'logro' => $nFreqs ? ($nFreqs - count($malas)) / $nFreqs : null,
                 'detalle' => $malas === [] ? 'Las frecuencias elegidas lo cumplen.'
                     : 'No lo cumple en ' . self::lista($malas) . ': ahí el balance no tiene un oído de referencia.',
                 'detalle_docente' => implode('; ', $numeros),
@@ -188,6 +190,7 @@ final class AudiometriaPertinencia
         if (isset($hechas['Stenger'])) {
             $malas = [];
             $numeros = [];
+            $nFreqs = count(self::freqsDe($hechas['Stenger']));
             foreach (array_keys(self::freqsDe($hechas['Stenger'])) as $hz) {
                 $f = self::idx($hz);
                 if ($f === null) {
@@ -202,6 +205,7 @@ final class AudiometriaPertinencia
             $reglas[] = [
                 'texto' => sprintf('El Stenger se hace en una frecuencia con al menos %d dB de diferencia entre oídos.', self::DIFERENCIA_DB),
                 'cumple' => $malas === [],
+                'logro' => $nFreqs ? ($nFreqs - count($malas)) / $nFreqs : null,
                 'detalle' => $malas === [] ? 'Las frecuencias elegidas lo cumplen.'
                     : 'No lo cumple en ' . self::lista($malas) . ': con oídos parejos el Stenger no dice nada.',
                 'detalle_docente' => implode('; ', $numeros),

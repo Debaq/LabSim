@@ -5,6 +5,43 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Puntaje ponderado: cada error una vez, según su peso (2026-11-27)
+
+**Pedido.** "Hacerlo porcentual, que unas cosas importen más que otras: así
+el castigo es una sola vez pero grave, por ejemplo cuando estadísticamente no
+verificaron el umbral."
+
+**Decisión.** Cada regla trae `peso` y `logro` (0 a 1). El porcentaje de una
+sección o de la atención es Σ peso × logro / Σ peso de las reglas
+evaluables (`AudiometriaTecnica::sumar`). `cumple`/`total` siguen contando
+pasos completos (la vista dice "X de Y pasos completos"; los pasos difíciles
+y el avance del curso no cambian).
+
+- **Logro proporcional** donde la regla mide una proporción: verificar 2 de
+  3 (frecuencias verificadas / tomadas), puntería (umbrales a ±5 dB),
+  duración (estímulos de 1-2 s), pasos de 10/5 dB (frecuencias sin desvío),
+  partir 10 dB sobre el anterior, enmascarar donde cruza, ruido en la
+  meseta, frecuencias válidas del Fowler y del Stenger. El ✓ sigue usando
+  el corte de antes (90 % puntería, 80 % duración, todo en lo demás).
+- **Pesos** (`AudiometriaTecnica::PESOS`, por fragmento del texto): ×3 lo
+  que deja un umbral sin valor (verificar 2 de 3, umbrales que
+  corresponden, enmascarar donde cruza, tomar los umbrales); ×2 pasos de
+  10/5 dB, ruido en la meseta, pruebas indicadas (logo, adaptación,
+  Stenger, tinnitumetría, derivar el pulsátil) y requisitos de
+  Fowler/Reger/Stenger; ×1 el resto (orden, nivel de partida, duración,
+  repetir 1 kHz, oído por donde parte...).
+- La vista muestra "×N" junto a los pasos que pesan más y el % logrado en
+  los que quedaron a medias.
+
+**Descartado.** Pesos por curso en CourseParams: todavía no hay un segundo
+criterio contra qué ajustarlos; si el docente los quiere mover se agregan.
+Dejar todo o nada con pesos: un alumno que verificó 17 de 18 frecuencias
+quedaría igual que uno que no verificó ninguna.
+
+`CACHE_VERSION` 8: lo guardado se recalcula solo. Tests en
+`test_audiometria_tecnica.php` ("Logro: peso × proporción…") y
+`test_audiometria_pertinencia.php` ("Puntería…").
+
 ## Pruebas que correspondían y enmascaramiento en el indicador (2026-11-27)
 
 **Pedido.** Revisar qué indicadores se evalúan en las atenciones, expandirlos
@@ -71,6 +108,18 @@ los requisitos: el alumno solo ve lo que el paciente da.
 **Tests.** `labsim_backend/tests/test_audiometria_pertinencia.php`; el
 examen modelo de `test_audiometria_tecnica.php` ahora también falla logo,
 adaptación y la ósea sin enmascarar.
+
+**Un error, un descuento (mismo día).** Con los datos del curso ETMP176 la
+regla "los umbrales obtenidos corresponden a la audición del paciente" fallaba
+en 133 de 133 atenciones aunque el 91 % de los umbrales aéreos estaba a ±5 dB:
+exigía que TODOS estuvieran verificados con 2 de 3 (eso ya lo cuenta "Se
+verifica el umbral…") y contaba la curva sombra (que ahora cuenta
+Enmascaramiento). Desde `CACHE_VERSION` 7 mide solo puntería: un umbral sin
+verificar se juzga por el nivel más bajo con respuesta, la sombra no entra
+(el detalle dice cuántas hubo) y cumple con el 90 % a ±5 dB
+(`EXACTITUD_PCT`). En el curso pasa de 0 a 93 de 133 atenciones. Quedan como
+todo o nada "ningún desvío de paso" y "80 % de estímulos de 1-2 s": no
+castigan dos veces, pero tampoco separan a un alumno de otro.
 
 ## Ir a buscar al paciente recién despedido (2026-11-27)
 
