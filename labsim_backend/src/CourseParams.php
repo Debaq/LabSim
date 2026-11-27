@@ -46,6 +46,7 @@ final class CourseParams
     public const SOURCES = [
         'normative_data.vemp' => 'resources/vemp/normative_data.json (adult_female, 500Hz)',
         'secretaria.avisos' => 'resources/json/secretaria_avisos.json',
+        'secretaria.agenda' => 'resources/json/secretaria_agenda.json',
     ];
 
     public static function all(): array
@@ -197,6 +198,77 @@ final class CourseParams
                                 'Ya son {minutos} minutos de atención. Hay que liberar el box.',
                                 'Van {minutos} minutos. Me pidieron avisarte que cierres ahora.',
                                 'Ya es mucho rato, {minutos} minutos. Por favor ve despidiendo al paciente.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            // Karime en la agenda relativa (citas con duración, ver
+            // core/secretaria.py: eventos_agenda): sigue el horario del alumno.
+            'secretaria.agenda' => [
+                'module' => 'AGENDA',
+                'title' => 'Avisos de la secretaria en la agenda con duración',
+                'help' => 'Solo en las citas con duración (agenda relativa al ingreso del alumno). Karime dice una cosa por vez, cada 20 segundos como máximo, y no repite lo ya dicho. '
+                    . '"Llegada": una vez por paciente, cuando llega a la sala de espera; puede llevar {nombre} y {hora} (su turno). '
+                    . '"Turno atrasado": a los 5 y 15 minutos de pasado el inicio del turno sin atenderlo, y después cada 15; {nombre}, {hora} y {minutos} (de atraso). '
+                    . '"Atención pasada": al cumplirse la duración de la atención abierta y después cada 10 minutos; {nombre} y {minutos} (la duración). '
+                    . '"Box": al terminar el bloque del alumno (fin del último turno) si sigue atendiendo o le quedan pacientes, y después cada 10 minutos; {hora} (fin del bloque). '
+                    . 'Cada aviso sortea una frase (una por línea) y no repite la anterior. Una frase que pide un dato que no hay se salta. Si se borran todas las líneas, vuelven las de la app.',
+                'layout' => 'stack',
+                'groups' => [
+                    'avisos' => ['label' => 'Avisos', 'rows' => ['llegada' => 'Llegada', 'atrasado' => 'Turno atrasado', 'pasado' => 'Atención pasada de su duración', 'box' => 'Box pasado del bloque']],
+                ],
+                'fields' => [
+                    'textos' => ['label' => 'Frases (una por línea)', 'type' => 'lines', 'max_lines' => 60, 'max_len' => 300],
+                ],
+                'defaults' => [
+                    'avisos' => [
+                        'llegada' => [
+                            'textos' => [
+                                'Te aviso que llegó {nombre}, su hora es a las {hora}. Está en la sala de espera.',
+                                'Llegó {nombre} para las {hora}. Ya le tomé los datos, queda esperando afuera.',
+                                'Permiso: {nombre} ya está en la sala de espera. Tiene hora a las {hora}.',
+                                '{nombre} acaba de llegar, viene para las {hora}.',
+                                'Hola, ya llegó {nombre}, hora de las {hora}. Le pedí que tomara asiento.',
+                                'Aviso rápido: {nombre} está en recepción, su atención es a las {hora}.',
+                                'Te cuento que {nombre} llegó un poquito antes de su hora de las {hora}.',
+                                'Ya está aquí {nombre}, para las {hora}. Tú me avisas.',
+                            ],
+                        ],
+                        'atrasado' => [
+                            'textos' => [
+                                '{nombre} sigue en la sala de espera. Su hora era a las {hora}.',
+                                'Disculpa, {nombre} me preguntó si falta mucho. Tenía hora a las {hora}.',
+                                'Oye, {nombre} ya lleva {minutos} minutos esperando después de su hora.',
+                                '{nombre} tenía hora a las {hora} y sigue afuera. ¿Lo haces pasar?',
+                                'Perdona que insista: {nombre} lleva {minutos} minutos de atraso en la sala.',
+                                '{nombre} se está impacientando, su hora era a las {hora}.',
+                                'Te aviso que {nombre} sigue esperando, ya van {minutos} minutos desde su hora.',
+                                '¿Cómo vas? {nombre} está esperando desde las {hora}.',
+                            ],
+                        ],
+                        'pasado' => [
+                            'textos' => [
+                                'Ya se cumplieron los {minutos} minutos de la atención de {nombre}.',
+                                'Te aviso que la hora de {nombre} era de {minutos} minutos y ya se pasó.',
+                                'Permiso, solo para el tiempo: los {minutos} minutos de {nombre} ya terminaron.',
+                                '¿Te falta mucho con {nombre}? Su atención era de {minutos} minutos.',
+                                'La atención de {nombre} ya pasó sus {minutos} minutos; afuera hay gente esperando.',
+                                'Disculpa, ya te pasaste de los {minutos} minutos con {nombre}.',
+                                'Recuerda que lo de {nombre} era de {minutos} minutos. ¿Lo terminas o lo citamos para otro día?',
+                                'Van más de {minutos} minutos con {nombre}. Avísame cómo seguimos.',
+                            ],
+                        ],
+                        'box' => [
+                            'textos' => [
+                                'El box era tuyo hasta las {hora} y lo necesito para las otras atenciones.',
+                                'Disculpa, ya son más de las {hora}: tengo gente esperando el box.',
+                                'Te recuerdo que tu bloque de box terminaba a las {hora}. ¿Cuánto te falta?',
+                                'Necesito el box, tu horario era hasta las {hora}.',
+                                'Perdona que insista, el box tenía reserva desde las {hora}.',
+                                'Ya pasaron las {hora}. ¿Me desocupas el box pronto?',
+                                'Hay otra atención esperando el box desde las {hora}.',
+                                'Tu hora de box terminó a las {hora}; avísame cuando lo dejes libre.',
                             ],
                         ],
                     ],

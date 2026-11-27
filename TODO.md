@@ -97,7 +97,6 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 
 ### Agenda relativa: partes que faltan
 § Agenda relativa al ingreso del alumno
-- [ ] 83. Karime: anuncia cada llegada, apura el turno atrasado y el box pasado del total.
 - [ ] 84. "Me paso / Citar para terminar": atención incompleta + continuación en horario libre con plazo hasta el próximo práctico; el último sin atender al cierre pasa igual.
 - [ ] 85. Avance: atraso del box por alumno, continuaciones (hechas a tiempo / vencidas) y duración real vs planificada por paciente.
 

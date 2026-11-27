@@ -150,6 +150,72 @@ def test_agenda_del_alumno_espera_la_llegada():
     assert col_hora == agenda["3"].turno_inicio.strftime("%H:%M"), col_hora
 
 
+def _con_turnos(ingreso=datetime(2026, 11, 30, 11, 12)):
+    ag = _agenda()
+    ar.calcular(ag, "ana.rojas", ingreso, HOY)
+    return ag
+
+
+def test_karime_umbrales():
+    from core import secretaria as sec
+    assert sec._umbral("atrasado", 4.9) is None
+    assert [sec._umbral("atrasado", m) for m in (5, 14, 15, 29, 30, 46)] == [5, 5, 15, 15, 30, 45]
+    assert [sec._umbral("pasado", m) for m in (-1, 0, 9, 10, 25)] == [None, 0, 0, 10, 20]
+
+
+def test_karime_eventos_en_orden():
+    from core import secretaria as sec
+    ag = _con_turnos()
+    samuel, ana = ag["11"], ag["12"]
+    # Antes de que llegue nadie: nada.
+    assert sec.eventos_agenda(ag, "ana.rojas", samuel.llegada - timedelta(minutes=1)) == []
+    # Samuel llegó: se anuncia.
+    ev = sec.eventos_agenda(ag, "ana.rojas", samuel.llegada)
+    assert [e[1] for e in ev] == ["llegada"] and ev[0][2]["nombre"] == "Samuel"
+    # 20 min pasado su turno sin atenderlo: llegada + atrasado (umbral 15).
+    ev = sec.eventos_agenda(ag, "ana.rojas", samuel.turno_inicio + timedelta(minutes=20))
+    claves = [e[0] for e in ev]
+    assert ("atrasado", "11", 15) in claves and claves[0] == ("llegada", "11")
+    # Atendiendo a Samuel 35 min (duración 30): se pasó; Ana espera y se anuncia.
+    samuel.atencion["ana.rojas"] = {"estado": "atendiendo"}
+    ahora = samuel.turno_inicio + timedelta(minutes=35)
+    ev = sec.eventos_agenda(ag, "ana.rojas", ahora, key_activa="11", segundos_atencion=35 * 60)
+    tipos = [e[1] for e in ev]
+    assert "pasado" in tipos and tipos.index("llegada") < tipos.index("pasado")
+    assert not any(e[0][:2] == ("atrasado", "11") for e in ev)
+    # Pasado el bloque con Rosa sin atender: el box.
+    fin = ag["14"].turno_fin
+    ev = sec.eventos_agenda(ag, "ana.rojas", fin + timedelta(minutes=12))
+    assert (("box", 10), "box", {"hora": fin.strftime("%H:%M")}) in ev
+
+
+def test_karime_dice_una_vez_y_no_al_docente():
+    from core.base import context  # crea la QApplication
+    from PySide6.QtWidgets import QMdiArea
+    from core import secretaria as sec
+    ag = _con_turnos()
+    area = QMdiArea()
+    area.resize(800, 600)
+    s = sec.Secretaria(area)
+    usuario = {"u": "ana.rojas"}
+    r = sec.Recepcion(s, lambda: ag, lambda: usuario["u"], lambda: None, lambda: 0)
+    r._timer.stop()
+    ahora = ag["12"].llegada + timedelta(seconds=1)   # llegaron Samuel y Ana
+    dichos = []
+    while (texto := r.tic(ahora)) is not None:
+        dichos.append(texto)
+    assert "Samuel" in dichos[0] and "Ana" in dichos[1], dichos
+    # Lo que queda (el turno de Samuel atrasado) se dice una vez y se acaba.
+    assert len(dichos) == len(sec.eventos_agenda(ag, "ana.rojas", ahora)), dichos
+    usuario["u"] = None
+    r.reiniciar()
+    assert r.tic(ahora) is None
+    # Una cita con duración no programa los avisos por minutos.
+    s.iniciar(None, relativa=True)
+    assert s._timers == []
+    s.detener()
+
+
 if __name__ == "__main__":
     for nombre, fn in list(globals().items()):
         if nombre.startswith("test_") and callable(fn):

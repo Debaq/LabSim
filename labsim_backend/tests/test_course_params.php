@@ -86,6 +86,27 @@ if ($secretaria === null) {
     }
 }
 
+// --- Secretaria en la agenda relativa: frases ------------------------------
+$secAgenda = cp_json($raizCliente . '/resources/json/secretaria_agenda.json');
+if ($secAgenda === null) {
+    t_true(true, 'Secretaria agenda: sin resources/json/secretaria_agenda.json a mano -- comparación omitida');
+} else {
+    t_eq(
+        array_keys($defs['secretaria.agenda']['defaults']['avisos']),
+        array_keys($secAgenda['avisos']),
+        'Secretaria agenda: mismos avisos en CourseParams y secretaria_agenda.json'
+    );
+    foreach ($defs['secretaria.agenda']['defaults']['avisos'] as $aviso => $campos) {
+        t_eq($campos['textos'], $secAgenda['avisos'][$aviso]['textos'] ?? null,
+            "Secretaria agenda {$aviso}: frases de CourseParams vs secretaria_agenda.json");
+    }
+}
+$formAgenda = [];
+foreach ($defs['secretaria.agenda']['defaults']['avisos'] as $aviso => $campos) {
+    $formAgenda['avisos'][$aviso] = ['textos' => implode("\r\n", $campos['textos'])];
+}
+t_eq(CourseParams::parse('secretaria.agenda', $formAgenda), [], 'parse() agenda: guardar sin tocar no crea override');
+
 // --- Campos de texto (frases de la secretaria) ------------------------------
 $secDef = $defs['secretaria.avisos'];
 $formSinTocar = [];
@@ -126,7 +147,7 @@ t_eq(
     'displayValue() texto: una frase por línea en el textarea'
 );
 t_eq(CourseParams::displayValue($secDef, null, 'avisos', 'aviso_1', 'min'), '20', 'displayValue(): minutos default');
-t_eq(array_keys(CourseParams::forModules(['AGENDA'])), ['secretaria.avisos'], 'forModules(): curso con Agenda ve los avisos de la secretaria');
+t_eq(array_keys(CourseParams::forModules(['AGENDA'])), ['secretaria.avisos', 'secretaria.agenda'], 'forModules(): curso con Agenda ve los avisos de la secretaria (los dos)');
 
 // --- parse(): lo que queda igual al default NO se guarda -------------------
 $vempDef = $defs['normative_data.vemp'];

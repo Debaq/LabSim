@@ -147,6 +147,101 @@ def texto_aviso(aviso, minutos, siguiente, rng=random, evitar=None):
     return rng.choice(candidatos)
 
 
+# ---------------------------------------------------------------------------
+# Agenda relativa (core/agenda_relativa.py): Karime sigue el horario del
+# alumno, no los minutos desde "Atender". Anuncia cada llegada, apura al que
+# deja esperar a un paciente pasado su turno, al que se pasa de la duración
+# de la atención y al que se queda en el box después de su bloque.
+# ---------------------------------------------------------------------------
+CONFIG_AGENDA_KEY = "secretaria.agenda"
+TIPOS_AGENDA = ("llegada", "atrasado", "pasado", "box")
+# Umbrales en minutos (desde el inicio del turno, desde que se cumple la
+# duración, desde el fin del bloque). Después del último se repite cada
+# tanto. Solo se dice el umbral más alto cruzado: quien abre la app tarde no
+# recibe la cola entera de avisos viejos.
+UMBRALES = {"atrasado": ((5, 15), 15), "pasado": ((0,), 10), "box": ((0,), 10)}
+TIC_AGENDA_MS = 20_000
+
+
+def _defaults_agenda():
+    with open(context.get_resource("json/secretaria_agenda.json"), encoding="utf-8") as archivo:
+        return json.load(archivo)["avisos"]
+
+
+def config_agenda(override=None):
+    """{tipo: [frases]}: las de la app con las del curso encima (override =
+    {"avisos": {tipo: {"textos": [...]}}}, como lo guarda CourseParams)."""
+    defaults = _defaults_agenda()
+    propios = (override or {}).get("avisos") or {}
+    config = {}
+    for tipo in TIPOS_AGENDA:
+        textos = (propios.get(tipo) or {}).get("textos")
+        if isinstance(textos, list):
+            textos = [t.strip() for t in textos if isinstance(t, str) and t.strip()]
+        config[tipo] = textos or defaults[tipo]["textos"]
+    return config
+
+
+def _umbral(tipo, minutos):
+    """El umbral más alto cruzado con `minutos`, o None si no cruzó ninguno."""
+    fijos, cada = UMBRALES[tipo]
+    if minutos < fijos[0]:
+        return None
+    if minutos < fijos[-1] + cada:
+        return max(u for u in fijos if u <= minutos)
+    return fijos[-1] + int((minutos - fijos[-1]) // cada) * cada
+
+
+def _estado(entry, username):
+    return (entry.atencion.get(username) or {}).get("estado")
+
+
+def eventos_agenda(agenda, username, ahora, key_activa=None, segundos_atencion=0.0):
+    """Lo que Karime tendría para decir ahora, en orden de prioridad:
+    [(clave_unica, tipo, valores)]. Quien llama descarta las claves ya
+    dichas. Solo mira las citas con turno calculado (agenda relativa)."""
+    turnos = [(k, e) for k, e in agenda.items() if getattr(e, "turno_inicio", None) is not None]
+    if not turnos:
+        return []
+    eventos = []
+
+    def nombre(e):
+        return f"{e.nombre} {e.apellido}".strip() or "tu paciente"
+
+    pendientes = [(k, e) for k, e in turnos if _estado(e, username) not in ("atendiendo", "atendido", "no_show")]
+    for k, e in sorted(pendientes, key=lambda par: par[1].llegada):
+        if e.llegada <= ahora:
+            eventos.append((("llegada", k), "llegada", {"nombre": nombre(e), "hora": f"{e.turno_inicio:%H:%M}"}))
+
+    fin_box = max(e.turno_fin for _, e in turnos)
+    activa = agenda.get(key_activa) if key_activa is not None else None
+    activa_relativa = activa is not None and getattr(activa, "turno_inicio", None) is not None
+    if ahora >= fin_box and (pendientes or activa_relativa):
+        u = _umbral("box", (ahora - fin_box).total_seconds() / 60)
+        eventos.append((("box", u), "box", {"hora": f"{fin_box:%H:%M}"}))
+
+    if activa_relativa and activa.duracion_min:
+        u = _umbral("pasado", segundos_atencion / 60 - activa.duracion_min)
+        if u is not None:
+            eventos.append((("pasado", key_activa, u), "pasado",
+                            {"nombre": nombre(activa), "minutos": int(activa.duracion_min)}))
+
+    for k, e in sorted(pendientes, key=lambda par: par[1].turno_inicio):
+        if k == key_activa:
+            continue
+        tarde = (ahora - e.turno_inicio).total_seconds() / 60
+        u = _umbral("atrasado", tarde)
+        if u is not None:
+            eventos.append((("atrasado", k, u), "atrasado",
+                            {"nombre": nombre(e), "hora": f"{e.turno_inicio:%H:%M}", "minutos": int(tarde)}))
+    return eventos
+
+
+def texto_agenda(frases, valores, rng=random, evitar=None):
+    textos = [t for t in (_rellenar(f, valores) for f in frases) if t] or ["Te aviso desde recepción."]
+    return rng.choice([t for t in textos if t != evitar] or textos)
+
+
 class AvisoSecretaria(QFrame):
     """Un aviso flotante. Hijo del QMdiArea (no del viewport): así queda
     encima de todas las subventanas aunque el alumno active otra mientras
@@ -250,9 +345,13 @@ class Secretaria(QObject):
         self._ultimos = {}
         area.installEventFilter(self)
 
-    def iniciar(self, siguiente):
-        """siguiente: {"nombre", "hora"} de siguiente_paciente(), o None."""
+    def iniciar(self, siguiente, relativa=False):
+        """siguiente: {"nombre", "hora"} de siguiente_paciente(), o None.
+        relativa: la cita es de la agenda relativa; esos avisos los dice
+        Recepcion según el horario, no por minutos desde "Atender"."""
         self.detener()
+        if relativa:
+            return
         for indice, aviso in enumerate(config_avisos(app_config_store.get(CONFIG_KEY))):
             if aviso["min"] <= 0:
                 continue
@@ -302,3 +401,46 @@ class Secretaria(QObject):
         if obj is self._area and event.type() == QEvent.Type.Resize and self._avisos:
             self._ubicar()
         return False
+
+
+class Recepcion(QObject):
+    """Karime mirando la agenda relativa del alumno (ver eventos_agenda).
+    Cada TIC_AGENDA_MS dice a lo más una cosa nueva; lo ya dicho no se
+    repite en esta sesión de la app. Las funciones de `fuentes` las pone
+    main: agenda() -> dict de AgendaEntry, usuario() -> username o None (el
+    docente no recibe estos avisos), activa() -> key de la atención abierta
+    y segundos() -> segundos de esa atención."""
+
+    def __init__(self, secretaria, agenda, usuario, activa, segundos):
+        super().__init__(secretaria)
+        self._secretaria = secretaria
+        self._fuentes = (agenda, usuario, activa, segundos)
+        self._dichos = set()
+        self._ultimos = {}
+        self._timer = QTimer(self)
+        self._timer.setInterval(TIC_AGENDA_MS)
+        self._timer.timeout.connect(self.tic)
+        self._timer.start()
+
+    def reiniciar(self):
+        """Al cambiar de sesión: lo dicho era de otro alumno."""
+        self._dichos.clear()
+
+    def tic(self, ahora=None):
+        from datetime import datetime
+        agenda_de, usuario_de, activa_de, segundos_de = self._fuentes
+        username = usuario_de()
+        if not username:
+            return None
+        agenda = agenda_de() or {}
+        eventos = eventos_agenda(agenda, username, ahora or datetime.now(), activa_de(), segundos_de())
+        for clave, tipo, valores in eventos:
+            if clave in self._dichos:
+                continue
+            self._dichos.add(clave)
+            frases = config_agenda(app_config_store.get(CONFIG_AGENDA_KEY))[tipo]
+            texto = texto_agenda(frases, valores, evitar=self._ultimos.get(tipo))
+            self._ultimos[tipo] = texto
+            self._secretaria.avisar(texto)
+            return texto
+        return None

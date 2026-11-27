@@ -54,8 +54,23 @@ deriva del ingreso). Bloquear por hora fija (el OSCE del 26-11 mostró que
 los candados por turno estorban; acá el único bloqueo es el del paciente que
 todavía no llega, que es lo real).
 
-**Siguen (TODO.md).** Parte 2: Karime anuncia llegadas, apura el turno
-atrasado y el box. Parte 3: "Me paso / Citar para terminar" con
+**Parte 2 (Karime).** En las citas con duración Karime sigue el horario,
+no los minutos desde "Atender" (`Secretaria.iniciar(relativa=True)` no
+programa esos avisos). `Recepcion` (core/secretaria.py) mira la agenda cada
+20 s y dice a lo más UNA cosa nueva por vez, sin repetir lo dicho en la
+sesión (`eventos_agenda`, pura). Prioridad: llegadas (una por paciente),
+box, atención pasada, turnos atrasados. Umbrales: turno atrasado a los 5 y
+15 min y luego cada 15; atención pasada al cumplir la duración y cada 10;
+box al fin del último turno (si sigue atendiendo o le quedan pacientes) y
+cada 10. Solo el umbral más alto cruzado: quien abre la app tarde no recibe
+la cola de avisos viejos. Las frases están en
+`resources/json/secretaria_agenda.json` y se editan por curso
+(CourseParams `secretaria.agenda`, espejo verificado por
+`tests/test_course_params.php`). El docente no recibe estos avisos.
+Umbrales fijos en código: hoy nadie pidió cambiarlos y abrir más campos en
+el panel sería configurar por configurar.
+
+**Siguen (TODO.md).** Parte 3: "Me paso / Citar para terminar" con
 continuación en horario libre y plazo hasta el próximo práctico. Parte 4:
 métricas en Avance (atraso por alumno, duración real vs planificada por
 paciente).

@@ -29,7 +29,7 @@ from core import app_config_store
 from core import equipo
 from core import report_autosave
 from core.report_autosave import ReportAutosave, subir_pendientes
-from core.secretaria import Secretaria, siguiente_paciente
+from core.secretaria import Recepcion, Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
 from core import mouse_zurdo, configuracion, hilos, registro, respaldo_informes, tiempos
@@ -607,6 +607,21 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # Karime: avisos de la secretaria durante la atención (ver
         # core/secretaria.py), se programan junto con el cronómetro.
         self.secretaria = Secretaria(self.mdi_area)
+        # Y la recepción de la agenda relativa: llegadas, turnos atrasados,
+        # atención pasada de su duración y box pasado de su bloque.
+        self.recepcion = Recepcion(self.secretaria, self._agenda_para_recepcion, self._alumno_para_recepcion,
+                                   lambda: self.data_current_key,
+                                   lambda: getattr(self, "cronometro_segundos", 0))
+
+    def _agenda_para_recepcion(self):
+        agenda = getattr(getattr(self, "subw", {}).get("AGENDA"), "obj", None)
+        return (getattr(agenda, "shedule", None) or {}).get("agenda_1") or {}
+
+    def _alumno_para_recepcion(self):
+        """El alumno conectado; None con el docente, sin sesión o sin cuenta."""
+        if invitado.activo or not getattr(self, "data_login", None) or es_docente(self.data_login.get("permission")):
+            return None
+        return self.data_login.get("user")
 
     def create_variables(self):
         """Crea las variables necesarias para el funcionamiento del programa"""
@@ -1215,6 +1230,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Limpia el cronómetro (logout)"""
         self.cronometro_timer.stop()
         self.secretaria.detener()
+        self.recepcion.reiniciar()
         self.cronometro_segundos = 0
         self.lbl_cronometro.setText("")
 
@@ -1418,7 +1434,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # al backend y no se puede repetir en el hilo de la UI cuando salta
         # cada aviso. Mientras dure esta atención no se puede abrir otra
         # (ver _otra_atencion_abierta), así que el siguiente no cambia.
-        self.secretaria.iniciar(siguiente_paciente(agenda, key, self.data_login["user"]))
+        entrada = agenda.get(key) if isinstance(agenda, dict) else None
+        self.secretaria.iniciar(siguiente_paciente(agenda, key, self.data_login["user"]),
+                                relativa=getattr(entrada, "turno_inicio", None) is not None)
 
     def _atender_sin_conexion(self, detalle):
         """Abrir una atención necesita al servidor (el caso, marcar
