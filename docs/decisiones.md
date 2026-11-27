@@ -5,6 +5,46 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Impedanciometría: opción "perforación seca" junto a NR (2026-11-27)
+
+**Problema.** El caso 175 (otitis crónica bilateral) quedó con Z = NR en los
+dos oídos y un alumno se llevó la falta grave `z_no_realizable` (27-11, cita
+178) por meter la sonda. Era una perforación seca: esa sí se mide (curva B
+con volumen muy alto, porque la sonda suma el conducto y la caja) y es
+justamente el oído al que se le hace la ETF de membrana perforada. El
+simulador ya lo soportaba (Z = B + volumen del conducto 'alto' + ETF
+Permeable/No permeable), pero repartido en tres campos: en el selector de Z
+la única opción "de perforación" que se veía era NR, rotulada "no va la
+sonda".
+
+**Decisión.**
+- El selector de Z del editor tiene una segunda opción con valor `B`:
+  "B · perforación seca (volumen alto: conducto + oído medio)"
+  (`CaseBuilder::Z_PERFORACION_SECA_LABEL`). No es un valor nuevo: la ficha
+  sigue guardando `Z_OD = 'B'` y la membrana la declaran el volumen y la
+  ETF. Ningún consumidor (app, PDF, gráficos, motor del libro, avisos)
+  cambia.
+- `public/js/case/perforacion-seca.js` mantiene los tres campos de acuerdo:
+  elegir la perforación seca pone volumen alto y, si la ETF era de membrana
+  íntegra, Permeable; dejarla por otra curva (salvo NR) vuelve el volumen a
+  normal y la ETF a Disfunción tubaria (B común) o Normal; con Z = B la
+  opción visible sigue al volumen (lo que escribe el generador o el docente
+  a mano).
+- NR se rotula por causa: "no realizable (otorrea, otitis externa, cuerpo
+  extraño, atresia)", y el help de la ficha dice que meter la sonda ahí es
+  falta grave y que la perforación seca se mide.
+
+**Descartado.** Un valor guardado nuevo ('Bp'): obliga a tocar Z.py,
+z_generator, CaseCharts, CaseSheetPdf, reflex-pattern, tympanogram,
+AnamnesisDraft y el motor del libro para decir lo mismo que B + volumen
+alto ya dice. Solo rerotular NR: no resuelve que el docente no encuentre la
+combinación de tres campos.
+
+**Probado.** `php tests/run.php` (7964 asserts) y la vista renderizada con
+el JS en chromium headless: carga B+alto como perforación seca, elegirla
+fija volumen/ETF, salir a A los devuelve, NR no los toca, el generador y el
+volumen a mano resincronizan.
+
 ## OSCE: páginas aparte para las tablets kiosko viejas (2026-11-25)
 
 Las tablets del laboratorio (Lenovo IdeaTab A1000L-F con la app kiosko) traen

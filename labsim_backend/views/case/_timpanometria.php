@@ -91,19 +91,29 @@
 <div class="audiometria-fields">
 <div class="card">
     <strong>Timpanometría (Z)</strong>
-    <p class="help">La letra de Jerger es la de la sonda de <strong>226 Hz</strong>. En el lactante esa sonda dibuja el pico de la pared del conducto y tapa un oído medio ocupado, por eso el equipo trae también la de <strong>1000 Hz</strong>, que no da letra sino positivo o negativo. Derivado la saca de la curva de 226 Hz; ponerla a mano es para el caso que NECESITA un resultado concreto y no puede quedar librado al sorteo. <strong>NR</strong> deja ese oído sin impedanciometría: el equipo no mide ahí (ni timpanograma, ni reflejos con la sonda en ese oído o estimulados por él, ni decay, ni ETF) y la ficha lo informa como no realizable.</p>
+    <p class="help">La letra de Jerger es la de la sonda de <strong>226 Hz</strong>. En el lactante esa sonda dibuja el pico de la pared del conducto y tapa un oído medio ocupado, por eso el equipo trae también la de <strong>1000 Hz</strong>, que no da letra sino positivo o negativo. Derivado la saca de la curva de 226 Hz; ponerla a mano es para el caso que NECESITA un resultado concreto y no puede quedar librado al sorteo. <strong>NR</strong> deja ese oído sin impedanciometría: el equipo no mide ahí (ni timpanograma, ni reflejos con la sonda en ese oído o estimulados por él, ni decay, ni ETF), la ficha lo informa como no realizable y meter la sonda o el fono contra en ese oído es falta grave del alumno. Es para lo que no debe entrar al conducto: otorrea activa, otitis externa, cuerpo extraño, atresia. <strong>B · perforación seca</strong> es una perforación sin secreción, que SÍ se mide: curva plana con volumen alto (la sonda suma el conducto y el oído medio) y la ETF de membrana perforada; elegirla pone el volumen en alto y la ETF en Permeable si no era de membrana perforada.</p>
     <div class="two-col">
         <label>Z OD
             <select id="z_od" name="z_od">
-                <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
-                <option value="<?= $opt ?>" <?= ($v['z_od'] ?? 'A') === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_LABELS[$opt] ?? $opt) ?></option>
+                <?php $zSel = (string) ($v['z_od'] ?? 'A');
+                $zPerf = $zSel === 'B' && ($v['volumen_cae_od'] ?? 'normal') === 'alto';
+                foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= $zSel === $opt && !$zPerf ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_LABELS[$opt] ?? $opt) ?></option>
+                <?php if ($opt === 'B'): ?>
+                <option value="B" data-perforada="1" <?= $zPerf ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_PERFORACION_SECA_LABEL) ?></option>
+                <?php endif; ?>
                 <?php endforeach; ?>
             </select>
         </label>
         <label>Z OI
             <select id="z_oi" name="z_oi">
-                <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
-                <option value="<?= $opt ?>" <?= ($v['z_oi'] ?? 'A') === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_LABELS[$opt] ?? $opt) ?></option>
+                <?php $zSel = (string) ($v['z_oi'] ?? 'A');
+                $zPerf = $zSel === 'B' && ($v['volumen_cae_oi'] ?? 'normal') === 'alto';
+                foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= $zSel === $opt && !$zPerf ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_LABELS[$opt] ?? $opt) ?></option>
+                <?php if ($opt === 'B'): ?>
+                <option value="B" data-perforada="1" <?= $zPerf ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::Z_PERFORACION_SECA_LABEL) ?></option>
+                <?php endif; ?>
                 <?php endforeach; ?>
             </select>
         </label>

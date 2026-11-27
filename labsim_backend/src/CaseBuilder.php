@@ -57,11 +57,25 @@ final class CaseBuilder
      * En ese oído tampoco entra el auricular del estímulo contralateral:
      * no hay reflejos con sonda ahí ni estimulados por ahí. El equipo de
      * la app no mide en ese oído (ver Z.py, oido_no_realizable).
+     * Una perforación SECA no es NR: se mide (B con volumen alto, y es el
+     * oído al que se le hace la ETF de membrana perforada). Lo que la
+     * vuelve NR es la otorrea activa.
      */
     public const Z_NO_REALIZABLE = 'NR';
     public const Z_LABELS = [
-        'NR' => 'NR · no realizable (no va la sonda)',
+        'NR' => 'NR · no realizable (otorrea, otitis externa, cuerpo extraño, atresia)',
     ];
+
+    /**
+     * Segunda opción con valor 'B' en el selector de Z del editor: la
+     * perforación seca. No es un valor guardado aparte -- la ficha sigue
+     * guardando Z = 'B' y la membrana la declaran el volumen del conducto
+     * ('alto') y la ETF (Permeable / No permeable), como siempre. La opción
+     * existe para que el docente la encuentre en el mismo lugar donde está
+     * NR y no marque NR una perforación que sí se mide
+     * (public/js/case/perforacion-seca.js la mantiene en sincronía).
+     */
+    public const Z_PERFORACION_SECA_LABEL = 'B · perforación seca (volumen alto: conducto + oído medio)';
 
     /**
      * Timpanograma de ALTA FRECUENCIA (sonda de 1000 Hz), el del lactante.

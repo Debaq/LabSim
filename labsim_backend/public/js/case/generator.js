@@ -512,6 +512,8 @@
         // clave, el normal para la edad.
         var vol = document.querySelector('select[name="volumen_cae_' + lado + '"]');
         if (vol) { vol.value = esc.volumen_cae || 'normal'; }
+        // Con B + volumen alto el selector muestra "perforación seca".
+        if (window.sincronizarPerforacion) { window.sincronizarPerforacion(lado); }
 
         var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
         if (cce) { cce.value = Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5; }

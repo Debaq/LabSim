@@ -99,7 +99,10 @@
                 (conTexto ? conTexto + ' con descripción escrita' : 'sin describir');
         },
         timpanometria: function () {
-            return 'Curva ' + porOido(function (lado) { return valor('z_' + lado); }) +
+            return 'Curva ' + porOido(function (lado) {
+                var z = campo('z_' + lado), opt = z && z.options ? z.options[z.selectedIndex] : null;
+                return opt && opt.dataset.perforada ? 'B (perforación seca)' : valor('z_' + lado);
+            }) +
                 ' — trompa ' + porOido(function (lado) { return etiqueta('etf_' + lado); });
         },
         abr: function () {

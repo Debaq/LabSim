@@ -488,6 +488,7 @@ admin_add_js('case/audiogram.js');
 admin_add_js('case/logogram.js');
 admin_add_js('case/tympanogram.js');
 admin_add_js('case/reflex-pattern.js');
+admin_add_js('case/perforacion-seca.js');
 admin_add_js('case/live-preview.js');
 admin_add_js('case/acumetria.js');
 admin_add_js('case/fowler.js');
